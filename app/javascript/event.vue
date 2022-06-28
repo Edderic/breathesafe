@@ -198,7 +198,6 @@
 
 <script>
 // Have a VueX store that maintains state across components
-import Event from './event';
 import { useEventStore } from './stores/event_store';
 import { useMainStore } from './stores/main_store';
 import { mapStores, mapActions } from 'pinia'
