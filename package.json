@@ -4,6 +4,7 @@
     "vite-plugin-ruby": "^3.0.9"
   },
   "dependencies": {
+    "@fawmi/vue-google-maps": "^0.9.72",
     "@vitejs/plugin-vue": "^2.3.3",
     "pinia": "^2.0.14",
     "vue": "^3.2.37"
