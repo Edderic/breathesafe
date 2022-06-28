@@ -510,6 +510,11 @@ vue-demi@*:
   resolved "https://registry.yarnpkg.com/vue-demi/-/vue-demi-0.13.1.tgz#7604904c88be338418a10abbc94d5b8caa14cb8c"
   integrity sha512-xmkJ56koG3ptpLnpgmIzk9/4nFf4CqduSJbUM0OdPoU87NwRuZ6x49OLhjSa/fC15fV+5CbEnrxU4oyE022svg==
 
+vue3-geolocation@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/vue3-geolocation/-/vue3-geolocation-1.0.0.tgz#fc1c758e8d5fa84e4bdc8cc631fd8ea636faf6ae"
+  integrity sha512-6zZkFH0aRVwmY7z7YkaA4riLy5sI6dRW1NiMZMI8NtjcFxC39UF4c9huxVnpN3yQSJYAsHAWzqIc75RdNBujnQ==
+
 vue@^3.2.37:
   version "3.2.37"
   resolved "https://registry.yarnpkg.com/vue/-/vue-3.2.37.tgz#da220ccb618d78579d25b06c7c21498ca4e5452e"
