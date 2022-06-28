@@ -200,7 +200,7 @@
 // Have a VueX store that maintains state across components
 import { useEventStore } from './stores/event_store';
 import { useMainStore } from './stores/main_store';
-import { mapStores, mapActions } from 'pinia'
+import { mapState, mapActions } from 'pinia'
 
 export default {
   name: 'App',
@@ -208,7 +208,36 @@ export default {
     Event
   },
   computed: {
-    ...mapStores(useEventStore)
+    ...mapState(
+        useEventStore,
+        [
+          'roomName',
+          'roomLength',
+          'roomHeight',
+          'roomWidth',
+          'duration',
+          'numberOfPeople',
+          'carbonDioxideSteadyState',
+          'carbonDioxideAmbient',
+          'carbonDioxideMeasurementDevice',
+          'systemOfMeasurement',
+          'lengthMeasurementType',
+          'airDeliveryRateMeasurementType',
+          'airDeliveryRate',
+          'singlePassFiltrationEfficiency',
+          'percentOfPeopleWithElastomerics',
+          'percentOfPeopleWithN95s',
+          'percentOfPeopleWithClothSurgicalMasks',
+          'percentOfPeopleWithNoMasks',
+          'eventPrivacy',
+          'infectorActivityTypeMapping',
+          'infectorActivity',
+          'susceptibleActivities',
+          'susceptibleActivity',
+          'susceptibleAgeGroup',
+          'susceptibleAgeGroups'
+        ]
+    )
   },
   created() { },
   data() {
