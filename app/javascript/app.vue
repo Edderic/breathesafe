@@ -16,7 +16,7 @@
 // Have a VueX store that maintains state across components
 import Event from './event.vue';
 import { useMainStore } from './stores/main_store';
-import { mapState, mapStores } from 'pinia'
+import { mapWritableState, mapStores } from 'pinia'
 
 export default {
   name: 'App',
@@ -25,7 +25,7 @@ export default {
   },
   computed: {
     ...mapStores(useMainStore),
-    ...mapState(useMainStore, ['center', 'zoom'])
+    ...mapWritableState(useMainStore, ['center', 'zoom'])
 
   },
   created() {
