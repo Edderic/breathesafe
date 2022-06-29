@@ -23,6 +23,30 @@ export const useEventStore = defineStore('events', {
     percentOfPeopleWithClothSurgicalMasks: "",
     percentOfPeopleWithNoMasks: "",
     eventPrivacy: 'public',
+    activityGroups: [
+    ],
+    carbonDioxideActivities: {
+      "Calisthenics—light effort": 2.8,
+      "Calisthenics—moderate effort": 3.8,
+      "Calisthenics—vigorous effort": 8.0,
+      "Child care": 2.5, // 2 - 3
+      "Cleaning, sweeping—moderate effort": 3.8,
+      "Custodial work—light": 2.3,
+      "Dancing—aerobic, general": 7.3,
+      "Dancing—general": 7.8,
+      "Health club exercise classes—general": 5.0,
+      "Kitchen activity—moderate effort": 3.3,
+      "Lying or sitting quietly": 1.0,
+      "Sitting reading, writing, typing": 1.3,
+      "Sitting at sporting event as spectator": 1.5,
+      "Sitting tasks, light effort (e.g, office work)": 1.5,
+      "Sitting quietly in religious service": 1.3,
+      "Sleeping": 0.95,
+      "Standing quietly": 1.3,
+      "Standing tasks, light effort (e.g, store clerk, filing)": 3.0,
+      "Walking, less than 2 mph, level surface, very slow": 2.0,
+      "Walking, 2.8 mph to 3.2 mph, level surface, moderate pace": 3.5,
+    },
     infectorActivityTypeMapping: {
       "Unknown": 'NA',
       "Resting – Oral breathing": 1,
@@ -39,6 +63,15 @@ export const useEventStore = defineStore('events', {
       "Heavy exercise – Loudly speaking": 204,
     },
     infectorActivity: "Unknown",
+    maskTypes: [
+      'None',
+      'Cloth / Surgical',
+      'N95 - unfitted',
+      'N95 - fitted',
+      'Elastomeric N95',
+      'Elastomeric N99',
+      'Elastomeric P100'
+    ],
     susceptibleActivities: [
       "Unknown",
       "Sleep or Nap",
@@ -49,7 +82,7 @@ export const useEventStore = defineStore('events', {
     ],
     susceptibleActivity: "Unknown",
     susceptibleAgeGroup: "Unknown",
-    susceptibleAgeGroups: [
+    ageGroups: [
       "Unknown",
       "Birth to <1",
       "1 to <2",
@@ -67,8 +100,13 @@ export const useEventStore = defineStore('events', {
       ">= 81",
     ],
   }),
+  getters: {
+    findActivityGroup: (state) => {
+      return (activityGroupId) => state.activityGroups.find((ag) => ag.id == activityGroupId)
+    },
+  },
   actions: {
     save() {
-    }
+    },
   }
 });

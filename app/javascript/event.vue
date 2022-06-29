@@ -32,13 +32,6 @@
 
 
     <div class='container'>
-      <label>Number of people</label>
-      <input
-        :value="numberOfPeople"
-        @change="setNumberOfPeople">
-    </div>
-
-    <div class='container'>
       <label>Duration</label>
 
       <select :value='duration' @change='setDuration'>
@@ -136,57 +129,47 @@
     </div>
 
     <div class='container'>
-      <label class='subsection'>Masking</label>
-      <div class='container'>
-        <label>Percent of people with no masks</label>
-        <input
-          :value="percentOfPeopleWithNoMasks"
-          @change="setPercentOfPeopleWithNoMasks">
-      </div>
+      <label class='subsection'>Activity Groups</label>
+      <button @click='addActivityGrouping'>+</button>
+      <div class='container border-showing' v-for='activityGroup in activityGroups' :key=activityGroup.id>
 
-      <div class='container'>
-        <label>Percent of people with cloth/surgical masks</label>
-        <input
-          :value="percentOfPeopleWithClothSurgicalMasks"
-          @change="setPercentOfPeopleWithClothSurgicalMasks">
-      </div>
+        <div class='container'>
+          <label>Number of people</label>
+          <input
+            :value="activityGroup['numberOfPeople']"
+            @change="setNumberOfPeople($event, activityGroup.id)">
+        </div>
 
-      <div class='container'>
-        <label>Percent of people with N95s</label>
-        <input
-          :value="percentOfPeopleWithN95s"
-          @change="setPercentOfPeopleWithN95s">
-      </div>
+        <div class='container'>
+          <label>Aerosol generation</label>
+          <select :value='activityGroup["aerosolGenerationActivity"]' @change='setAerosolGenerationActivity($event, activityGroup.id)'>
+            <option v-for='(value, infectorActivityType, index) in infectorActivityTypeMapping'>{{ infectorActivityType }}</option>
+          </select>
+        </div>
 
-      <div class='container'>
-        <label>Percent of people with elastomerics</label>
-        <input
-          :value="percentOfPeopleWithElastomerics"
-          @change="setPercentOfPeopleWithElastomerics">
-      </div>
-    </div>
+        <div class='container'>
+          <label>CO2 generation</label>
+          <select :value='activityGroup["carbonDioxideGenerationActivity"]' @change='setCarbonDioxideGenerationActivity($event, activityGroup.id)'>
+            <option v-for='(value, carbonDioxideActivity, index) in carbonDioxideActivities'>{{ carbonDioxideActivity }}</option>
+          </select>
+        </div>
 
-    <div class='container'>
-      <label class='subsection'>Activity</label>
-      <div class='container'>
-        <label>What best describes what others are doing?</label>
-        <select :value='infectorActivity' @change='setInfectorActivity'>
-          <option v-for='(value, infectorActivityType, index) in infectorActivityTypeMapping'>{{ infectorActivityType }}</option>
-        </select>
-      </div>
+        <div class='container'>
+          <label>Age group</label>
+          <select :value='activityGroup["ageGroup"]' @change='setAgeGroup($event, activityGroup.id)'>
+            <option v-for='s in ageGroups'>{{ s }}</option>
+          </select>
+        </div>
 
-      <div class='container'>
-        <label>What best describes what you were doing?</label>
-        <select :value='susceptibleActivity' @change='setSusceptibleActivity'>
-          <option v-for='susceptibleActivityType in susceptibleActivities'>{{ susceptibleActivityType }}</option>
-        </select>
-      </div>
+        <div class='container'>
+          <label>Mask Type</label>
+          <select :value='activityGroup["maskType"]' @change='setMaskType($event, activityGroup.id)'>
+            <option v-for='m in maskTypes'>{{ m }}</option>
+          </select>
+        </div>
 
-      <div class='container'>
-        <label>Susceptible age group</label>
-        <select :value='susceptibleAgeGroup' @change='setSusceptibleAgeGroup'>
-          <option v-for='s in susceptibleAgeGroups'>{{ s }}</option>
-        </select>
+        <div class='container'>
+        </div>
       </div>
     </div>
 
@@ -200,7 +183,7 @@
 // Have a VueX store that maintains state across components
 import { useEventStore } from './stores/event_store';
 import { useMainStore } from './stores/main_store';
-import { mapState, mapActions } from 'pinia'
+import { mapWritableState, mapState, mapActions } from 'pinia'
 
 export default {
   name: 'App',
@@ -208,7 +191,7 @@ export default {
     Event
   },
   computed: {
-    ...mapState(
+    ...mapWritableState(
         useEventStore,
         [
           'roomName',
@@ -225,17 +208,16 @@ export default {
           'airDeliveryRateMeasurementType',
           'airDeliveryRate',
           'singlePassFiltrationEfficiency',
-          'percentOfPeopleWithElastomerics',
-          'percentOfPeopleWithN95s',
-          'percentOfPeopleWithClothSurgicalMasks',
-          'percentOfPeopleWithNoMasks',
+          'maskTypes',
           'eventPrivacy',
           'infectorActivityTypeMapping',
           'infectorActivity',
           'susceptibleActivities',
           'susceptibleActivity',
-          'susceptibleAgeGroup',
-          'susceptibleAgeGroups'
+          'susceptibleAgeGroups',
+          'carbonDioxideActivities',
+          'activityGroups',
+          'ageGroups'
         ]
     )
   },
@@ -247,6 +229,23 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['setPlace']),
+    ...mapState(useEventStore, ['findActivityGroup']),
+    addActivityGrouping() {
+      this.activityGroups.push({
+        'id': this.generateUUID(),
+        'aerosolGenerationActivity': "",
+        'carbonDioxideGenerationActivity': "",
+        'ageGroup': "",
+        'maskType': "",
+        'numberOfPeople': ""
+      })
+    },
+    generateUUID() {
+        // https://stackoverflow.com/questions/105034/how-to-create-guid-uuid
+        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+          (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+    },
     save() {
       // TODO: call save on the Event store? send data to backend.
     },
@@ -280,29 +279,25 @@ export default {
     setCarbonDioxideSteadyState(event) {
       this.carbonDioxideSteadyState = event.target.value;
     },
-    setInfectorActivity(event) {
-      this.infectorActivity = event.target.value;
+    setAerosolGenerationActivity(event, id) {
+      let activityGroup = this.findActivityGroup()(id);
+      activityGroup['aerosolGenerationActivity'] = event.target.value;
     },
-    setSusceptibleActivity(event) {
-      this.susceptibleActivity = event.target.value;
+    setCarbonDioxideGenerationActivity(event, id) {
+      let activityGroup = this.findActivityGroup()(id);
+      activityGroup['carbonDioxideGenerationActivity'] = event.target.value;
     },
-    setSusceptibleAgeGroup(event) {
-      this.susceptibleAgeGroup = event.target.value;
+    setAgeGroup(event, id) {
+      let activityGroup = this.findActivityGroup()(id);
+      activityGroup['ageGroup'] = event.target.value;
     },
-    setNumberOfPeople(event) {
-      this.numberOfPeople = event.target.value;
+    setMaskType(event, id) {
+      let activityGroup = this.findActivityGroup()(id);
+      activityGroup['maskType'] = event.target.value;
     },
-    setPercentOfPeopleWithElastomerics(event) {
-      this.percentOfPeopleWithElastomerics = event.target.value;
-    },
-    setPercentOfPeopleWithN95s(event) {
-      this.percentOfPeopleWithN95s = event.target.value;
-    },
-    setPercentOfPeopleWithClothSurgicalMasks(event) {
-      this.percentOfPeopleWithClothSurgicalMasks = event.target.value;
-    },
-    setPercentOfPeopleWithNoMasks(event) {
-      this.percentOfPeopleWithNoMasks = event.target.value;
+    setNumberOfPeople(event, id) {
+      let activityGroup = this.findActivityGroup()(id);
+      activityGroup['numberOfPeople'] = event.target.value;
     },
     setSystemOfMeasurement(event) {
       this.systemOfMeasurement = event.target.value;

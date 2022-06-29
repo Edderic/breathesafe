@@ -16,20 +16,20 @@
 // Have a VueX store that maintains state across components
 import Event from './event.vue';
 import { useMainStore } from './stores/main_store';
-import { mapStores } from 'pinia'
+import { mapState, mapStores } from 'pinia'
 
 export default {
   name: 'App',
-  setup () {
-    const mainStore = useMainStore()
-  },
   components: {
     Event
   },
   computed: {
-    ...mapStores(useMainStore)
+    ...mapStores(useMainStore),
+    ...mapState(useMainStore, ['center', 'zoom'])
+
   },
   created() {
+    // TODO: modify the store
     this.$getLocation()
       .then((coordinates) => {
         this.center = { lat: coordinates.lat, lng: coordinates.lng };
@@ -40,10 +40,6 @@ export default {
       });
   },
   data() {
-    return {
-      center: {lat: 51.093048, lng: 6.842120},
-      zoom: 7,
-    }
   },
   methods: {
     save() {
