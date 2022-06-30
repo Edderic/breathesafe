@@ -11,7 +11,8 @@
       >
       </GMapMap>
 
-      <Event/>
+      <Event v-if='focusTab == "event"'/>
+      <Events v-if='focusTab == "events"'/>
     </div>
   </div>
 </template>
@@ -20,17 +21,20 @@
 // Have a VueX store that maintains state across components
 import Event from './event.vue';
 import NavBar from './navbar.vue';
+import Events from './events.vue';
 import { useMainStore } from './stores/main_store';
-import { mapWritableState, mapStores } from 'pinia'
+import { mapWritableState, mapState, mapStores } from 'pinia'
 
 export default {
   name: 'App',
   components: {
     Event,
+    Events,
     NavBar
   },
   computed: {
     ...mapStores(useMainStore),
+    ...mapState(useMainStore, ["focusTab"]),
     ...mapWritableState(useMainStore, ['center', 'zoom'])
 
   },

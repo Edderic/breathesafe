@@ -4,6 +4,7 @@ import VueGoogleMaps from 'vue-google-maps';
 import Vue3Geolocation from 'vue3-geolocation';
 import App from './app';
 import { useEventStore } from './stores/event_store.js';
+import { useEventsStore } from './stores/events_store.js';
 import { useMainStore } from './stores/main_store.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -21,5 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }).use(pinia).use(Vue3Geolocation).mount('#app')
 
   const mainStore = useMainStore();
-  const eventsStore = useEventStore();
+  const eventStore = useEventStore();
+  const eventsStore = useEventsStore();
 });

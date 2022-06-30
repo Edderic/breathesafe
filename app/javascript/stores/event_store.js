@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia'
+import { useEventStores } from './event_stores.js'
 
 // useStore could be anything like useUser, useCart
 // the first argument is a unique id of the store across your application
-export const useEventStore = defineStore('events', {
+export const useEventStore = defineStore('event', {
   state: () => ({
     placeData: {
       'placeId': "",

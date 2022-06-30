@@ -184,6 +184,7 @@
 <script>
 // Have a VueX store that maintains state across components
 import { useEventStore } from './stores/event_store';
+import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { mapWritableState, mapState, mapActions } from 'pinia'
 
@@ -193,6 +194,12 @@ export default {
     Event
   },
   computed: {
+    ...mapWritableState(
+        useMainStore,
+        [
+          'focusTab',
+        ]
+    ),
     ...mapWritableState(
         useEventStore,
         [
@@ -212,7 +219,7 @@ export default {
           'lengthMeasurementType',
           'maskTypes',
           'numberOfPeople',
-          'placeId',
+          'placeData',
           'roomHeight',
           'roomLength',
           'roomName',
@@ -232,9 +239,11 @@ export default {
     }
   },
   methods: {
-    ...mapActions(useMainStore, ['setGMapsPlace']),
+    ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab']),
     ...mapActions(useEventStore, ['removeActivityGroup']),
+    ...mapActions(useEventStores, ['addEvent']),
     ...mapState(useEventStore, ['findActivityGroup']),
+    ...mapWritableState(useMainStore, ['focusTab']),
     addActivityGrouping() {
       this.activityGroups.unshift({
         'id': this.generateUUID(),
@@ -244,6 +253,34 @@ export default {
         'maskType': "",
         'numberOfPeople': ""
       })
+    },
+    cancel() {
+      this.focusTab = 'events'
+    },
+    save() {
+      let toSave = {
+          'activityGroups': this.activityGroups,
+          'airDeliveryRate': this.airDeliveryRate,
+          'airDeliveryRateMeasurementType': this.airDeliveryRateMeasurementType,
+          'carbonDioxideActivities': this.carbonDioxideActivities,
+          'carbonDioxideAmbient': this.carbonDioxideAmbient,
+          'carbonDioxideMeasurementDevice': this.carbonDioxideMeasurementDevice,
+          'carbonDioxideSteadyState': this.carbonDioxideSteadyState,
+          'duration': this.duration,
+          'eventPrivacy': this.eventPrivacy,
+          'lengthMeasurementType': this.lengthMeasurementType,
+          'maskTypes': this.maskTypes,
+          'numberOfPeople': this.numberOfPeople,
+          'placeData': this.placeData,
+          'roomHeight': this.roomHeight,
+          'roomLength': this.roomLength,
+          'roomName': this.roomName,
+          'roomWidth': this.roomWidth,
+          'singlePassFiltrationEfficiency': this.singlePassFiltrationEfficiency,
+      }
+
+      this.addEvent(toSave)
+      this.focusTab = 'events'
     },
     generateUUID() {
         // https://stackoverflow.com/questions/105034/how-to-create-guid-uuid
@@ -257,9 +294,6 @@ export default {
       );
 
       this.activityGroups.splice(activityGroupIndex, 1);
-    },
-    save() {
-      // TODO: call save on the Event store? send data to backend.
     },
     setPlace(place) {
       console.log(place)
