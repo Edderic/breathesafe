@@ -13,21 +13,25 @@
 
       <Event v-if='focusTab == "event"'/>
       <Events v-if='focusTab == "events"'/>
+      <Profile v-if='focusTab == "profile"'/>
     </div>
   </div>
 </template>
 
 <script>
 // Have a VueX store that maintains state across components
+import Profile from './profile.vue';
 import Event from './event.vue';
 import NavBar from './navbar.vue';
 import Events from './events.vue';
 import { useMainStore } from './stores/main_store';
+import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapStores } from 'pinia'
 
 export default {
   name: 'App',
   components: {
+    Profile,
     Event,
     Events,
     NavBar

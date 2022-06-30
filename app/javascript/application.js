@@ -6,6 +6,7 @@ import App from './app';
 import { useEventStore } from './stores/event_store.js';
 import { useEventsStore } from './stores/events_store.js';
 import { useMainStore } from './stores/main_store.js';
+import { useProfileStore } from './stores/profile_store.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const app = createApp(App);
@@ -24,4 +25,5 @@ document.addEventListener('DOMContentLoaded', () => {
   const mainStore = useMainStore();
   const eventStore = useEventStore();
   const eventsStore = useEventsStore();
+  const profileStore = useProfileStore();
 });
