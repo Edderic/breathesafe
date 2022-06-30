@@ -235,7 +235,7 @@ export default {
     ...mapActions(useEventStore, ['removeActivityGroup']),
     ...mapState(useEventStore, ['findActivityGroup']),
     addActivityGrouping() {
-      this.activityGroups.push({
+      this.activityGroups.unshift({
         'id': this.generateUUID(),
         'aerosolGenerationActivity': "",
         'carbonDioxideGenerationActivity': "",
