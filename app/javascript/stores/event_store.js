@@ -4,7 +4,14 @@ import { defineStore } from 'pinia'
 // the first argument is a unique id of the store across your application
 export const useEventStore = defineStore('events', {
   state: () => ({
-    placeId: "",
+    placeData: {
+      'placeId': "",
+      'formattedAddress': "",
+      'center': {
+        'lat': 0,
+        'lng': 0
+      }
+    },
     roomName: "",
     roomLength: "",
     roomHeight: "",

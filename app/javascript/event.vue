@@ -262,9 +262,18 @@ export default {
     },
     setPlace(place) {
       console.log(place)
-      this.placeId = place.place_id
-      this.formattedAddress = place.formatted_address
-      this.setGMapsPlace(place)
+      const loc = place.geometry.location;
+
+      this.placeData = {
+        'placeId': place.place_id,
+        'formattedAddress': place.formatted_address,
+        'center': {
+          'lat': loc.lat(),
+          'lng': loc.lng()
+        }
+      }
+
+      this.setGMapsPlace(this.placeData.center)
     },
     setDuration(event) {
       this.duration = event.target.value;
