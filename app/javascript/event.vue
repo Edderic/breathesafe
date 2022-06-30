@@ -195,30 +195,32 @@ export default {
     ...mapWritableState(
         useEventStore,
         [
-          'roomName',
-          'roomLength',
-          'roomHeight',
-          'roomWidth',
-          'duration',
-          'numberOfPeople',
-          'carbonDioxideSteadyState',
+          'activityGroups',
+          'ageGroups',
+          'airDeliveryRate',
+          'airDeliveryRateMeasurementType',
+          'carbonDioxideActivities',
           'carbonDioxideAmbient',
           'carbonDioxideMeasurementDevice',
-          'systemOfMeasurement',
-          'lengthMeasurementType',
-          'airDeliveryRateMeasurementType',
-          'airDeliveryRate',
-          'singlePassFiltrationEfficiency',
-          'maskTypes',
+          'carbonDioxideSteadyState',
+          'duration',
           'eventPrivacy',
-          'infectorActivityTypeMapping',
+          'formattedAddress',
           'infectorActivity',
+          'infectorActivityTypeMapping',
+          'lengthMeasurementType',
+          'maskTypes',
+          'numberOfPeople',
+          'placeId',
+          'roomHeight',
+          'roomLength',
+          'roomName',
+          'roomWidth',
+          'singlePassFiltrationEfficiency',
           'susceptibleActivities',
           'susceptibleActivity',
           'susceptibleAgeGroups',
-          'carbonDioxideActivities',
-          'activityGroups',
-          'ageGroups'
+          'systemOfMeasurement',
         ]
     )
   },
@@ -228,13 +230,8 @@ export default {
       center: {lat: 51.093048, lng: 6.842120},
     }
   },
-  setup() {
-    const useEvStore = useEventStore()
-
-    return { useEvStore }
-  },
   methods: {
-    ...mapActions(useMainStore, ['setPlace']),
+    ...mapActions(useMainStore, ['setGMapsPlace']),
     ...mapActions(useEventStore, ['removeActivityGroup']),
     ...mapState(useEventStore, ['findActivityGroup']),
     addActivityGrouping() {
@@ -262,6 +259,12 @@ export default {
     },
     save() {
       // TODO: call save on the Event store? send data to backend.
+    },
+    setPlace(place) {
+      console.log(place)
+      this.placeId = place.place_id
+      this.formattedAddress = place.formatted_address
+      this.setGMapsPlace(place)
     },
     setDuration(event) {
       this.duration = event.target.value;

@@ -4,6 +4,7 @@ import { defineStore } from 'pinia'
 // the first argument is a unique id of the store across your application
 export const useEventStore = defineStore('events', {
   state: () => ({
+    placeId: "",
     roomName: "",
     roomLength: "",
     roomHeight: "",
@@ -18,13 +19,9 @@ export const useEventStore = defineStore('events', {
     airDeliveryRateMeasurementType: 'cubic feet per minute',
     airDeliveryRate: "",
     singlePassFiltrationEfficiency: "",
-    percentOfPeopleWithElastomerics: "",
-    percentOfPeopleWithN95s: "",
-    percentOfPeopleWithClothSurgicalMasks: "",
-    percentOfPeopleWithNoMasks: "",
     eventPrivacy: 'public',
-    activityGroups: [
-    ],
+    activityGroups: [],
+    formattedAddress: "",
     carbonDioxideActivities: {
       "Calisthenics—light effort": 2.8,
       "Calisthenics—moderate effort": 3.8,

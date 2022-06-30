@@ -8,7 +8,7 @@ export const useMainStore = defineStore('main', {
     zoom: 7,
   }),
   actions: {
-    setPlace(place) {
+    setGMapsPlace(place) {
       const loc = place.geometry.location;
       this.center = { lat: loc.lat(), lng: loc.lng() };
       this.zoom = 15;
