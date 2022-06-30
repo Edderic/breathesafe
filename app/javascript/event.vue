@@ -175,6 +175,7 @@
     </div>
 
     <div class='container centered'>
+      <button class='normal-padded' @click='cancel'>Cancel</button>
       <button class='normal-padded' @click='save'>Save</button>
     </div>
   </div>

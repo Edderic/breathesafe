@@ -1,27 +1,33 @@
 <template>
-  <div class='main'>
-    <GMapMap
-        :center="center"
-        :zoom="zoom"
-        map-type-id="terrain"
-        style="width: 50vw; height: 500px"
-    >
-    </GMapMap>
+  <div class='column'>
+    <NavBar></NavBar>
 
-    <Event/>
+    <div class='row'>
+      <GMapMap
+          :center="center"
+          :zoom="zoom"
+          map-type-id="terrain"
+          style="width: 50vw; height: 500px"
+      >
+      </GMapMap>
+
+      <Event/>
+    </div>
   </div>
 </template>
 
 <script>
 // Have a VueX store that maintains state across components
 import Event from './event.vue';
+import NavBar from './navbar.vue';
 import { useMainStore } from './stores/main_store';
 import { mapWritableState, mapStores } from 'pinia'
 
 export default {
   name: 'App',
   components: {
-    Event
+    Event,
+    NavBar
   },
   computed: {
     ...mapStores(useMainStore),
@@ -57,7 +63,7 @@ export default {
 
 
 <style scoped>
-  .main {
+  .row {
     display: flex;
     flex-direction: row;
   }
@@ -81,6 +87,11 @@ export default {
   .centered {
     display: flex;
     justify-content: center;
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
   }
 
   button {
