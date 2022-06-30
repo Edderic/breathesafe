@@ -107,6 +107,6 @@ export const useEventStore = defineStore('events', {
   },
   actions: {
     save() {
-    },
+    }
   }
 });

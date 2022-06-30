@@ -168,7 +168,8 @@
           </select>
         </div>
 
-        <div class='container'>
+        <div class='container centered'>
+          <button class='normal-padded' @click='removeActivityGroup(activityGroup.id)'>Remove</button>
         </div>
       </div>
     </div>
@@ -227,8 +228,14 @@ export default {
       center: {lat: 51.093048, lng: 6.842120},
     }
   },
+  setup() {
+    const useEvStore = useEventStore()
+
+    return { useEvStore }
+  },
   methods: {
     ...mapActions(useMainStore, ['setPlace']),
+    ...mapActions(useEventStore, ['removeActivityGroup']),
     ...mapState(useEventStore, ['findActivityGroup']),
     addActivityGrouping() {
       this.activityGroups.push({
@@ -245,6 +252,13 @@ export default {
         return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
           (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
         );
+    },
+    removeActivityGroup(id) {
+      const activityGroupIndex = this.activityGroups.findIndex(
+        (activityGroup) => activityGroup.id == id
+      );
+
+      this.activityGroups.splice(activityGroupIndex, 1);
     },
     save() {
       // TODO: call save on the Event store? send data to backend.
