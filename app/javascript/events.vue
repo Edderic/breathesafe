@@ -32,12 +32,6 @@ export default {
           'events'
         ]
     ),
-    ...mapActions(
-        useMainStore,
-        [
-          'setFocusTab'
-        ]
-    ),
     ...mapWritableState(
         useMainStore,
         [
@@ -49,7 +43,12 @@ export default {
   data() {
   },
   methods: {
-
+    ...mapActions(
+        useMainStore,
+        [
+          'setFocusTab'
+        ]
+    ),
     newEvent() {
       this.setFocusTab('event')
     }

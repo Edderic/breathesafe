@@ -51,12 +51,12 @@ import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia'
 
 export default {
-  name: 'App',
+  name: 'Profile',
   components: {
     Event
   },
   computed: {
-    ...mapWritableState(
+    ...mapState(
         useProfileStore,
         [
           'carbonDioxideMonitors',
@@ -71,6 +71,7 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['setFocusTab']),
+    ...mapActions(useProfileStore, ['setSystemOfMeasurement']),
   },
 }
 

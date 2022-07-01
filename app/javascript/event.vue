@@ -22,16 +22,6 @@
     </div>
 
     <div class='container'>
-      <label>System of Measurement</label>
-
-      <select :value='systemOfMeasurement' @change='setSystemOfMeasurement'>
-        <option>imperial</option>
-        <option>metric</option>
-      </select>
-    </div>
-
-
-    <div class='container'>
       <label>Duration</label>
 
       <select :value='duration' @change='setDuration'>
@@ -186,6 +176,7 @@
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
+import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia'
 
 export default {
@@ -200,13 +191,19 @@ export default {
           'focusTab',
         ]
     ),
+    ...mapState(
+        useProfileStore,
+        [
+          'lengthMeasurementType',
+          'airDeliveryRateMeasurementType',
+        ]
+    ),
     ...mapWritableState(
         useEventStore,
         [
           'activityGroups',
           'ageGroups',
           'airDeliveryRate',
-          'airDeliveryRateMeasurementType',
           'carbonDioxideActivities',
           'carbonDioxideAmbient',
           'carbonDioxideMeasurementDevice',
@@ -216,7 +213,6 @@ export default {
           'formattedAddress',
           'infectorActivity',
           'infectorActivityTypeMapping',
-          'lengthMeasurementType',
           'maskTypes',
           'numberOfPeople',
           'placeData',
@@ -228,7 +224,6 @@ export default {
           'susceptibleActivities',
           'susceptibleActivity',
           'susceptibleAgeGroups',
-          'systemOfMeasurement',
         ]
     )
   },
@@ -359,16 +354,6 @@ export default {
     setNumberOfPeople(event, id) {
       let activityGroup = this.findActivityGroup()(id);
       activityGroup['numberOfPeople'] = event.target.value;
-    },
-    setSystemOfMeasurement(event) {
-      this.systemOfMeasurement = event.target.value;
-      if (this.systemOfMeasurement == 'imperial') {
-        this.lengthMeasurementType = 'feet';
-        this.airDeliveryRateMeasurementType = 'cubic feet per minute';
-      } else {
-        this.lengthMeasurementType = 'meters';
-        this.airDeliveryRateMeasurementType = 'cubic meters per minute';
-      }
     },
   },
 }
