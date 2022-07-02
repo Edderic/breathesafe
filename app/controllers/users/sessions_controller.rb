@@ -30,7 +30,7 @@ class Users::SessionsController < DeviseController
     respond_to do |format|
       format.json do
         render json: {
-          isSignedIn: signed_out
+          updateSignedIn: signed_out
         }.to_json
       end
     end

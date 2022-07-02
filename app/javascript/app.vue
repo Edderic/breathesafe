@@ -14,6 +14,8 @@
       <Event v-if='focusTab == "event"'/>
       <Events v-if='focusTab == "events"'/>
       <Profile v-if='focusTab == "profile"'/>
+      <Registration v-if='!signedIn && focusTab == "register"'/>
+      <SignIn v-if='!signedIn && focusTab == "signIn"'/>
     </div>
   </div>
 </template>
