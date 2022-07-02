@@ -24,21 +24,27 @@
 // Have a VueX store that maintains state across components
 import Event from './event.vue';
 import Events from './events.vue';
+import NavBar from './navbar.vue';
+import Profile from './profile.vue';
+import Registration from './registration.vue';
+import SignIn from './sign_in.vue';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
-import { mapWritableState, mapState, mapStores } from 'pinia'
+import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
 
 export default {
   name: 'App',
   components: {
-    Profile,
     Event,
     Events,
-    NavBar
+    NavBar,
+    Profile,
+    Registration,
+    SignIn
   },
   computed: {
     ...mapStores(useMainStore),
-    ...mapState(useMainStore, ["focusTab"]),
+    ...mapState(useMainStore, ["focusTab", "signedIn"]),
     ...mapWritableState(useMainStore, ['center', 'zoom'])
 
   },
@@ -56,6 +62,7 @@ export default {
   data() {
   },
   methods: {
+    ...mapActions(useMainStore, ['updateSignedIn']),
     save() {
       // send data to backend.
     },
