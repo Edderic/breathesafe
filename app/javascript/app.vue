@@ -2,7 +2,7 @@
   <div class='column'>
     <NavBar></NavBar>
 
-    <div class='row'>
+    <div class='row body'>
       <GMapMap
           :center="center"
           :zoom="zoom"
@@ -90,6 +90,10 @@ export default {
   }
   .subsection {
     font-weight: bold;
+  }
+  .body {
+    position: absolute;
+    top: 4.2em;
   }
   .wide {
     flex-direction: column;

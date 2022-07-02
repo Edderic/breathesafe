@@ -1,5 +1,5 @@
 <template>
-  <div class='row spaced-between main'>
+  <div class='row spaced-between main fixed-nav-bar'>
     <h2 class='side-padding'>Breathesafe 😷</h2>
 
     <div class='vertical-centered'>
@@ -96,5 +96,16 @@ export default {
   .vertical-centered {
     display: flex;
     justify-content: center;
+  }
+
+  .fixed-nav-bar {
+     position: fixed;
+     top: 0;
+     left: 0;
+     z-index: 9999;
+     width: 100%;
+     height: 50px;
+     background-color: white;
+     padding-bottom: 1em;
   }
 </style>
