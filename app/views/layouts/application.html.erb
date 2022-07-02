@@ -8,7 +8,6 @@
 
     <%= Gon::Base.render_data %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <script>window.process = { env: { NODE_ENV: window.gon.NODE_ENV } }</script>
     <%= vite_client_tag %>
     <%= vite_javascript_tag 'application' %>
     <!--
