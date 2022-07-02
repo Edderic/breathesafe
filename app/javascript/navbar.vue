@@ -7,6 +7,7 @@
       <a class='clickable side-padding' href="#events" @click="navToEvents" v-if=signedIn>Events</a>
       <a class='clickable side-padding' href="#profile" @click="navToProfile" v-if=signedIn>Profile</a>
       <a class='clickable side-padding' href="#register" @click="navToRegister" v-if=!signedIn>Register</a>
+      <a class='clickable side-padding' href="#register" @click="navToSignIn" v-if=!signedIn>Sign in</a>
       <a class='clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
     </div>
   </div>
@@ -33,7 +34,6 @@ export default {
   data() {
   },
   methods: {
-    ...mapActions(useMainStore, ['isSignedIn']),
     navToEvents() {
       this.focusTab = 'events'
     },
@@ -42,6 +42,9 @@ export default {
     },
     navToRegister() {
       this.focusTab = 'register'
+    },
+    navToSignIn() {
+      this.focusTab = 'signIn'
     },
     async signOut() {
       let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
@@ -52,6 +55,7 @@ export default {
         console.log(response)
         if (response.status == 204) {
           this.setFocusTab('events');
+          this.updateSignedIn();
         }
 
         // whatever you want
