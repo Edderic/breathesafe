@@ -11,7 +11,7 @@ export const useMainStore = defineStore('main', {
     signedIn: false
   }),
   actions: {
-    async isSignedIn() {
+    async updateSignedIn() {
       let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
       axios.defaults.headers.common['X-CSRF-Token'] = token
       axios.defaults.headers.common['Accept'] = 'application/json'
@@ -19,15 +19,13 @@ export const useMainStore = defineStore('main', {
       await axios.get(
         `/registrations/is_signed_in.json`
       ).then((response) => {
-        signedIn = response.data.isSignedIn
+        this.signedIn = response.data.updateSignedIn
 
       }).
         catch((blah) => {
          console.log('Fail', blah);
           // TODO: display error
         });
-
-      console.log(signedIn)
     },
     setGMapsPlace(center) {
       this.center = center
