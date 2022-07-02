@@ -13,6 +13,7 @@ export const useEventStore = defineStore('event', {
         'lng': 0
       }
     },
+    portableAirCleaningNotes: "",
     roomName: "",
     roomLength: "",
     roomHeight: "",
@@ -104,6 +105,12 @@ export const useEventStore = defineStore('event', {
       "71 to <81",
       ">= 81",
     ],
+    rapidTestResults: [
+      "Unknown",
+      "Negative",
+      "Positive"
+    ],
+    ventilationNotes: ""
   }),
   getters: {
     findActivityGroup: (state) => {
