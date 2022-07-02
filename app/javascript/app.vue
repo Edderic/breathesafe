@@ -58,8 +58,11 @@ export default {
       .catch((error) => {
         console.log(error);
       });
+
+    this.updateSignedIn();
   },
   data() {
+    return {}
   },
   methods: {
     ...mapActions(useMainStore, ['updateSignedIn']),

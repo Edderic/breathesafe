@@ -1,5 +1,4 @@
 class RegistrationsController < Devise::RegistrationsController
-  skip_before_action :require_no_authentication
 
   clear_respond_to
   respond_to :json
