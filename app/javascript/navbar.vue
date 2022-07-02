@@ -4,16 +4,19 @@
 
     <div class='vertical-centered'>
       <a class='clickable side-padding' href="#recommendations">Recommendations</a>
-      <a class='clickable side-padding' href="#events" @click="navToEvents">Events</a>
-      <a class='clickable side-padding' href="#events" @click="navToProfile">Profile</a>
+      <a class='clickable side-padding' href="#events" @click="navToEvents" v-if=signedIn>Events</a>
+      <a class='clickable side-padding' href="#profile" @click="navToProfile" v-if=signedIn>Profile</a>
+      <a class='clickable side-padding' href="#register" @click="navToRegister" v-if=!signedIn>Register</a>
+      <a class='clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
     </div>
   </div>
 </template>
 
 <script>
 // Have a VueX store that maintains state across components
+import axios from 'axios'
 import { useMainStore } from './stores/main_store';
-import { mapWritableState, mapStores } from 'pinia'
+import { mapActions, mapState, mapWritableState, mapStores } from 'pinia'
 
 export default {
   name: 'NavBar',
@@ -22,19 +25,41 @@ export default {
   },
   computed: {
     ...mapStores(useMainStore),
+    ...mapState(useMainStore, ['signedIn']),
     ...mapWritableState(useMainStore, ['focusTab'])
-
   },
   created() {
   },
   data() {
   },
   methods: {
+    ...mapActions(useMainStore, ['isSignedIn']),
     navToEvents() {
       this.focusTab = 'events'
     },
     navToProfile() {
       this.focusTab = 'profile'
+    },
+    navToRegister() {
+      this.focusTab = 'register'
+    },
+    async signOut() {
+      let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
+      axios.defaults.headers.common['X-CSRF-Token'] = token
+      axios.defaults.headers.common['Accept'] = 'application/json'
+      await axios.delete('/users/log_out')
+      .then(response => {
+        console.log(response)
+        if (response.status == 204) {
+          this.setFocusTab('events');
+        }
+
+        // whatever you want
+      })
+      .catch(error => {
+        console.log(error)
+        // whatever you want
+      })
     }
   },
 }
