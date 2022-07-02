@@ -92,6 +92,11 @@
           :value="singlePassFiltrationEfficiency"
           @change="setSinglePassFiltrationEfficiency">
       </div>
+
+      <div class='container wide'>
+        <label class='textarea-label'>Notes</label>
+        <textarea type="textarea" rows=5 columns=80  @change='setPortableAirCleaningNotes'>{{ portableAirCleaningNotes }}</textarea>
+      </div>
     </div>
 
     <div class='container'>
@@ -115,6 +120,11 @@
         <input
           :value="carbonDioxideSteadyState"
           @change="setCarbonDioxideSteadyState">
+      </div>
+
+      <div class='container wide'>
+        <label class='textarea-label'>Notes</label>
+        <textarea type="textarea" rows=5 columns=80  @change='setVentilationNotes'>{{ ventilationNotes }}</textarea>
       </div>
     </div>
 
@@ -155,6 +165,13 @@
           <label>Mask Type</label>
           <select :value='activityGroup["maskType"]' @change='setMaskType($event, activityGroup.id)'>
             <option v-for='m in maskTypes'>{{ m }}</option>
+          </select>
+        </div>
+
+        <div class='container'>
+          <label>Rapid test results</label>
+          <select :value='activityGroup["rapidTestResult"]' @change='setRapidTestResult($event, activityGroup.id)'>
+            <option v-for='r in rapidTestResults'>{{ r }}</option>
           </select>
         </div>
 
@@ -216,6 +233,9 @@ export default {
           'maskTypes',
           'numberOfPeople',
           'placeData',
+          'portableAirCleaningNotes',
+          'rapidTestResult',
+          'rapidTestResults',
           'roomHeight',
           'roomLength',
           'roomName',
@@ -224,6 +244,7 @@ export default {
           'susceptibleActivities',
           'susceptibleActivity',
           'susceptibleAgeGroups',
+          'ventilationNotes'
         ]
     )
   },
@@ -246,7 +267,8 @@ export default {
         'carbonDioxideGenerationActivity': "",
         'ageGroup': "",
         'maskType': "",
-        'numberOfPeople': ""
+        'numberOfPeople': "",
+        'rapidTestResult': 'Unknown'
       })
     },
     cancel() {
@@ -267,6 +289,8 @@ export default {
           'maskTypes': this.maskTypes,
           'numberOfPeople': this.numberOfPeople,
           'placeData': this.placeData,
+          'portableAirCleaningNotes': this.portableAirCleaningNotes,
+          'rapidTestResult': this.rapidTestResult,
           'roomHeight': this.roomHeight,
           'roomLength': this.roomLength,
           'roomName': this.roomName,
@@ -355,6 +379,18 @@ export default {
       let activityGroup = this.findActivityGroup()(id);
       activityGroup['numberOfPeople'] = event.target.value;
     },
+    setPortableAirCleaningNotes(event) {
+      this.portableAirCleaningNotes = event.target.value;
+    },
+
+    setVentilationNotes(event) {
+      this.ventilationNotes = event.target.value;
+    },
+
+    setRapidTestResult(event, id) {
+      let activityGroup = this.findActivityGroup()(id);
+      activityGroup['rapidTestResult'] = event.target.value;
+    },
   },
 }
 
@@ -374,8 +410,23 @@ export default {
   .subsection {
     font-weight: bold;
   }
+
   .wide {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .row {
+    display: flex;
     flex-direction: column;
+  }
+
+  .textarea-label {
+    padding-top: 0;
+  }
+
+  textarea {
+    width: 30em;
   }
 
   .border-showing {
