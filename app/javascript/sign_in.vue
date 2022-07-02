@@ -19,7 +19,9 @@
       <input
         :value="password"
         type="password"
-        @change="setPassword">
+        @change="setPassword"
+        @keyup.enter.stop="signIn"
+      >
     </div>
 
     <div class='container'>
