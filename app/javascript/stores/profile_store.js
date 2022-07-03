@@ -7,7 +7,12 @@ export const useProfileStore = defineStore('profile', {
     lengthMeasurementType: "feet",
     airDeliveryRateMeasurementType: 'cubic feet per minute',
     systemOfMeasurement: "imperial",
-    carbonDioxideMonitors: []
+    carbonDioxideMonitors: [
+      {
+        'name': "",
+        'serial': ""
+      }
+    ]
   }),
   getters: {
   },
