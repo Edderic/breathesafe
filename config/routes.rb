@@ -1,5 +1,4 @@
 Rails.application.routes.draw do
-  get 'users/create'
   devise_for :users, {
     registrations: 'registrations',
     sessions: 'users/sessions'
