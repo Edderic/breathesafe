@@ -44,6 +44,7 @@
 <script>
 // Have a VueX store that maintains state across components
 import { useEventStore } from './stores/event_store';
+import { generateUUID } from './misc';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
