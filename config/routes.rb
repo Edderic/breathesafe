@@ -9,6 +9,7 @@ Rails.application.routes.draw do
 
   devise_scope :user do
     get 'registrations/is_signed_in', to: 'registrations#is_signed_in'
+    post 'users/log_in', to: 'users/sessions#create'
     delete 'users/log_out', to: 'users/sessions#destroy'
   end
 
