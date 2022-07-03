@@ -89,8 +89,7 @@
       <div class='container'>
         <label>Air delivery rate ({{ airDeliveryRateMeasurementType }})</label>
         <input
-          :value="airDeliveryRate"
-          @change="setAirDeliveryRate">
+          v-model="airDeliveryRate">
       </div>
 
       <div class='container'>
