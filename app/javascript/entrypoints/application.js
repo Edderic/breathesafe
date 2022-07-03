@@ -30,6 +30,7 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import VueGoogleMaps from '@fawmi/vue-google-maps';
 import Vue3Geolocation from 'vue3-geolocation';
+
 import App from '../app.vue';
 import { useEventStore } from '../stores/event_store.js';
 import { useMainStore } from '../stores/main_store.js';
@@ -46,7 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
           libraries: 'places'
       },
   // }).use(pinia).use(Vue3Geolocation).mount('#app')
-  }).use(pinia).use(Vue3Geolocation).mount('#app')
+  })
+    .use(pinia).use(Vue3Geolocation).mount('#app')
 
   const mainStore = useMainStore();
   const eventsStore = useEventStore();
