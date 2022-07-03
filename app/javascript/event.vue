@@ -446,6 +446,10 @@ export default {
     justify-content: center;
   }
 
+  .wider-input {
+    width: 30em;
+  }
+
   button {
     padding: 1em 3em;
   }
