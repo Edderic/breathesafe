@@ -16,27 +16,26 @@
 
     <div class='container'>
       <label class='subsection'>CO2 Monitors</label>
-      <div v-for='carbonDioxideMonitor in carbonDioxideMonitors'>
+      <button @click='newCO2monitor'>+</button>
+      <div class='border-showing' v-for='carbonDioxideMonitor in carbonDioxideMonitors' :key=carbonDioxideMonitor.id>
         <div class='container'>
-          <label>Brand</label>
+          <label>Name</label>
           <input
-            :value="carbonDioxideMonitor['brand']"
-            @change="setCarbonDioxideMonitorBrand">
+            :value="carbonDioxideMonitor['name']"
+            @change="setCarbonDioxideMonitorName($event, carbonDioxideMonitor['id'])">
         </div>
 
         <div class='container'>
-          <label>Model ({{ lengthMeasurementType }})</label>
+          <label>Serial</label>
           <input
-            :value="roomWidth"
-            @change="setRoomWidth">
+            :value="carbonDioxideMonitor['serial']"
+            @change='setCarbonDioxideMonitorSerial($event, carbonDioxideMonitor["id"])'>
         </div>
 
         <div class='container'>
-          <label>Height ({{ lengthMeasurementType }})</label>
-          <input
-            :value="roomHeight"
-            @change="setRoomHeight">
+          <button @click='removeCO2Monitor($event, carbonDioxideMonitor["id"])'>Remove</button>
         </div>
+
       </div>
     </div>
   </div>
