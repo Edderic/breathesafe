@@ -77,6 +77,39 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['setFocusTab']),
     ...mapActions(useProfileStore, ['setSystemOfMeasurement']),
+    newCO2monitor() {
+      let uuid = generateUUID()
+      this.carbonDioxideMonitors.unshift({
+        'name': '',
+        'serial': '',
+        'id': uuid
+      })
+      console.log(this.carbonDioxideMonitors)
+    },
+    removeCO2Monitor(id) {
+      const carbonDioxideMonitorId = this.carbonDioxideMonitors.findIndex(
+        (carbonDioxideMonitor) => carbonDioxideMonitor.id == id
+      );
+
+      this.carbonDioxideMonitors.splice(carbonDioxideMonitorId, 1);
+      console.log(this.carbonDioxideMonitors)
+    },
+    setCarbonDioxideMonitorName(event, id) {
+      const carbonDioxideMonitor = this.carbonDioxideMonitors.find(
+        (carbonDioxideMonitor) => carbonDioxideMonitor.id == id
+      );
+
+      carbonDioxideMonitor['name'] = event.target.value;
+      console.log(this.carbonDioxideMonitors)
+    },
+    setCarbonDioxideMonitorSerial(event, id) {
+      const carbonDioxideMonitor = this.carbonDioxideMonitors.find(
+        (carbonDioxideMonitor) => carbonDioxideMonitor.id == id
+      );
+
+      carbonDioxideMonitor['serial'] = event.target.value;
+      console.log(this.carbonDioxideMonitors)
+    }
   },
 }
 
