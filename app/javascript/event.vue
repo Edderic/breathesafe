@@ -22,6 +22,13 @@
     </div>
 
     <div class='container'>
+      <label>Start time</label>
+      <input class='wider-input'
+        v-model="startDateTime"
+      >
+    </div>
+
+    <div class='container'>
       <label>Duration</label>
 
       <select :value='duration' @change='setDuration'>
@@ -241,6 +248,7 @@ export default {
           'roomName',
           'roomWidth',
           'singlePassFiltrationEfficiency',
+          'startDateTime',
           'susceptibleActivities',
           'susceptibleActivity',
           'susceptibleAgeGroups',

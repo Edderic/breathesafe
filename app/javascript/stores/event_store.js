@@ -110,7 +110,8 @@ export const useEventStore = defineStore('event', {
       "Negative",
       "Positive"
     ],
-    ventilationNotes: ""
+    ventilationNotes: "",
+    startDateTime: new Date()
   }),
   getters: {
     findActivityGroup: (state) => {
