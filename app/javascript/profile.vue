@@ -59,8 +59,13 @@ export default {
     ...mapState(
         useProfileStore,
         [
-          'carbonDioxideMonitors',
           'systemOfMeasurement'
+        ]
+    ),
+    ...mapWritableState(
+        useProfileStore,
+        [
+          'carbonDioxideMonitors',
         ]
     )
   },
