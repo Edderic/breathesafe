@@ -109,9 +109,10 @@
       <label class='subsection'>Ventilation</label>
       <div class='container'>
         <label>CO2 Measurement Device</label>
-        <input
-          :value="carbonDioxideMeasurementDevice"
-          @change="setCarbonDioxideMeasurementDevice">
+
+        <select :value='carbonDioxideMeasurementDeviceName' @change='setCarbonDioxideMonitor'>
+          <option v-for='carbonDioxideMonitor in carbonDioxideMonitors'>{{ carbonDioxideMonitor['name'] }}</option>
+        </select>
       </div>
 
       <div class='container'>
@@ -229,7 +230,8 @@ export default {
           'airDeliveryRate',
           'carbonDioxideActivities',
           'carbonDioxideAmbient',
-          'carbonDioxideMeasurementDevice',
+          'carbonDioxideMeasurementDeviceName',
+          'carbonDioxideMeasurementDeviceId',
           'carbonDioxideSteadyState',
           'duration',
           'eventPrivacy',
@@ -253,6 +255,12 @@ export default {
           'susceptibleAgeGroups',
           'ventilationNotes'
         ]
+    ),
+    ...mapState(
+      useProfileStore,
+      [
+          'carbonDioxideMonitors',
+      ]
     )
   },
   created() { },
@@ -266,7 +274,6 @@ export default {
     ...mapActions(useEventStore, ['removeActivityGroup']),
     ...mapActions(useEventStores, ['addEvent']),
     ...mapState(useEventStore, ['findActivityGroup']),
-    ...mapWritableState(useMainStore, ['focusTab']),
     addActivityGrouping() {
       this.activityGroups.unshift({
         'id': this.generateUUID(),
@@ -360,8 +367,12 @@ export default {
     setCarbonDioxideAmbient(event) {
       this.carbonDioxideAmbient = event.target.value;
     },
-    setCarbonDioxideMeasurementDevice(event) {
-      this.carbonDioxideMeasurementDevice = event.target.value;
+    setCarbonDioxideMonitor(event) {
+      let val = event.target.value;
+      this.carbonDioxideMeasurementDeviceName = val
+
+      let found = this.carbonDioxideMonitors.find((m) => m.name == val)
+      this.carbonDioxideMeasurementDeviceId = found.id
     },
     setCarbonDioxideSteadyState(event) {
       this.carbonDioxideSteadyState = event.target.value;
