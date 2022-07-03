@@ -53,7 +53,7 @@ export default {
       await axios.delete('/users/log_out')
       .then(response => {
         console.log(response)
-        if (response.status == 204) {
+        if (response.status == 204 || response.status == 200) {
           this.setFocusTab('events');
           this.updateSignedIn();
         }
