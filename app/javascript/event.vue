@@ -184,6 +184,7 @@
 
         <div class='container centered'>
           <button class='normal-padded' @click='removeActivityGroup(activityGroup.id)'>Remove</button>
+          <button class='normal-padded' @click='cloneActivityGroup(activityGroup.id)'>Clone</button>
         </div>
       </div>
     </div>
@@ -320,6 +321,21 @@ export default {
         return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
           (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
         );
+    },
+    cloneActivityGroup(id) {
+      const activityGroup = this.activityGroups.find(
+        (activityGroup) => activityGroup.id == id
+      );
+
+      this.activityGroups.push({
+        'id': this.generateUUID(),
+        'aerosolGenerationActivity': activityGroup['aerosolGenerationActivity'],
+        'carbonDioxideGenerationActivity': activityGroup['carbonDioxideGenerationActivity'],
+        'ageGroup': activityGroup['ageGroup'],
+        'maskType': activityGroup['maskType'],
+        'numberOfPeople': activityGroup['numberOfPeople'],
+        'rapidTestResult': activityGroup['rapidTestResult']
+      });
     },
     removeActivityGroup(id) {
       const activityGroupIndex = this.activityGroups.findIndex(
