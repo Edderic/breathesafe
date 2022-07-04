@@ -231,8 +231,9 @@ export default {
           'airDeliveryRate',
           'carbonDioxideActivities',
           'carbonDioxideAmbient',
+          'carbonDioxideMeasurementDeviceModel',
           'carbonDioxideMeasurementDeviceName',
-          'carbonDioxideMeasurementDeviceId',
+          'carbonDioxideMeasurementDeviceSerial',
           'carbonDioxideSteadyState',
           'duration',
           'eventPrivacy',
@@ -289,20 +290,20 @@ export default {
     cancel() {
       this.focusTab = 'events'
     },
-    save() {
+    async save() {
       let toSave = {
           'activityGroups': this.activityGroups,
           'airDeliveryRate': this.airDeliveryRate,
           'airDeliveryRateMeasurementType': this.airDeliveryRateMeasurementType,
-          'carbonDioxideActivities': this.carbonDioxideActivities,
           'carbonDioxideAmbient': this.carbonDioxideAmbient,
-          'carbonDioxideMeasurementDevice': this.carbonDioxideMeasurementDevice,
+          'carbonDioxideMeasurementDeviceName': this.carbonDioxideMeasurementDeviceName,
+          'carbonDioxideMeasurementDeviceModel': this.carbonDioxideMeasurementDeviceModel,
+          'carbonDioxideMeasurementDeviceSerial': this.carbonDioxideMeasurementDeviceSerial,
           'carbonDioxideSteadyState': this.carbonDioxideSteadyState,
+          'startDateTime': this.startDateTime,
           'duration': this.duration,
           'eventPrivacy': this.eventPrivacy,
           'lengthMeasurementType': this.lengthMeasurementType,
-          'maskTypes': this.maskTypes,
-          'numberOfPeople': this.numberOfPeople,
           'placeData': this.placeData,
           'portableAirCleaningNotes': this.portableAirCleaningNotes,
           'rapidTestResult': this.rapidTestResult,
@@ -388,7 +389,8 @@ export default {
       this.carbonDioxideMeasurementDeviceName = val
 
       let found = this.carbonDioxideMonitors.find((m) => m.name == val)
-      this.carbonDioxideMeasurementDeviceId = found.id
+      this.carbonDioxideMeasurementDeviceSerial = found.serial
+      this.carbonDioxideMeasurementDeviceModel = found.model
     },
     setCarbonDioxideSteadyState(event) {
       this.carbonDioxideSteadyState = event.target.value;

@@ -19,6 +19,13 @@
       <button @click='newCO2monitor'>+</button>
       <div class='border-showing' v-for='carbonDioxideMonitor in carbonDioxideMonitors' :key=carbonDioxideMonitor.id>
         <div class='container'>
+          <label>Model</label>
+          <input
+            :value="carbonDioxideMonitor['model']"
+            @change="setCarbonDioxideMonitorModel($event, carbonDioxideMonitor['id'])">
+        </div>
+
+        <div class='container'>
           <label>Name</label>
           <input
             :value="carbonDioxideMonitor['name']"
@@ -92,6 +99,14 @@ export default {
       );
 
       this.carbonDioxideMonitors.splice(carbonDioxideMonitorId, 1);
+      console.log(this.carbonDioxideMonitors)
+    },
+    setCarbonDioxideMonitorModel(event, id) {
+      const carbonDioxideMonitor = this.carbonDioxideMonitors.find(
+        (carbonDioxideMonitor) => carbonDioxideMonitor.id == id
+      );
+
+      carbonDioxideMonitor['model'] = event.target.value;
       console.log(this.carbonDioxideMonitors)
     },
     setCarbonDioxideMonitorName(event, id) {

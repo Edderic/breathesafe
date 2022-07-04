@@ -10,7 +10,8 @@ export const useProfileStore = defineStore('profile', {
     carbonDioxideMonitors: [
       {
         'name': "",
-        'serial': ""
+        'serial': "",
+        'model': ""
       }
     ]
   }),
