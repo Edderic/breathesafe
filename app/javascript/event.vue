@@ -314,6 +314,23 @@ export default {
           'singlePassFiltrationEfficiency': this.singlePassFiltrationEfficiency,
       }
 
+      let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
+      axios.defaults.headers.common['X-CSRF-Token'] = token
+      axios.defaults.headers.common['Accept'] = 'application/json'
+      await axios.post('/events', toSave)
+      .then(response => {
+        console.log(response)
+        if (response.status == 204 || response.status == 200) {
+          this.events.unshift(event);
+        }
+
+        // whatever you want
+      })
+      .catch(error => {
+        console.log(error)
+        // whatever you want
+      })
+
       this.addEvent(toSave)
       this.focusTab = 'events'
     },
