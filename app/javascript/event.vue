@@ -86,22 +86,30 @@
 
     <div class='container'>
       <label class='subsection'>Portable Air Cleaning</label>
-      <div class='container'>
-        <label>Air delivery rate ({{ airDeliveryRateMeasurementType }})</label>
-        <input
-          v-model="airDeliveryRate">
-      </div>
+      <button @click='addPortableAirCleaner'>+</button>
+      <div class='container border-showing' v-for='portableAirCleaner in portableAirCleaners' :key=portableAirCleaner.id>
+        <div class='container'>
+          <label>Air delivery rate ({{ airDeliveryRateMeasurementType }})</label>
+          <input
+            :value="portableAirCleaner['airDeliveryRate']"
+            @change="setPortableAirCleaningDeviceAirDeliveryRate($event, portableAirCleaner.id)">
+        </div>
 
-      <div class='container'>
-        <label>Single-pass filtration efficiency (dimensionless)</label>
-        <input
-          :value="singlePassFiltrationEfficiency"
-          @change="setSinglePassFiltrationEfficiency">
-      </div>
+        <div class='container'>
+          <label>Single-pass filtration efficiency (dimensionless)</label>
+          <input
+            :value="portableAirCleaner['singlePassFiltrationEfficiency']"
+            @change="setPortableAirCleaningDeviceSinglePassFiltrationEfficiency($event, portableAirCleaner.id)">
+        </div>
 
-      <div class='container wide'>
-        <label class='textarea-label'>Notes</label>
-        <textarea type="textarea" rows=5 columns=80  @change='setPortableAirCleaningNotes'>{{ portableAirCleaningNotes }}</textarea>
+        <div class='container wide'>
+          <label class='textarea-label'>Notes</label>
+          <textarea type="textarea" rows=5 columns=80  @change='setPortableAirCleaningNotes($event, portableAirCleaner.id)'>{{ portableAirCleaner['notes'] }}</textarea>
+        </div>
+
+        <div class='container centered'>
+          <button class='normal-padded' @click='removeAirCleaner(portableAirCleaner.id)'>Remove</button>
+        </div>
       </div>
     </div>
 
@@ -228,7 +236,6 @@ export default {
         [
           'activityGroups',
           'ageGroups',
-          'airDeliveryRate',
           'carbonDioxideActivities',
           'carbonDioxideAmbient',
           'carbonDioxideMeasurementDeviceModel',
