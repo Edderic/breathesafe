@@ -1,4 +1,5 @@
 class EventsController < ApplicationController
+  # TODO: Might want to rename this to index?
   def new
     respond_to do |format|
       format.html do
