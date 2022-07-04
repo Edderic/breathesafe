@@ -81,6 +81,7 @@ export const useEventStore = defineStore('event', {
       'Elastomeric N99',
       'Elastomeric P100'
     ],
+    portableAirCleaners: [],
     susceptibleActivities: [
       "Unknown",
       "Sleep or Nap",
@@ -119,6 +120,9 @@ export const useEventStore = defineStore('event', {
   getters: {
     findActivityGroup: (state) => {
       return (activityGroupId) => state.activityGroups.find((ag) => ag.id == activityGroupId)
+    },
+    findPortableAirCleaningDevice: (state) => {
+      return (portableAirCleanerId) => state.portableAirCleaners.find((p) => p.id == portableAirCleanerId)
     },
   },
   actions: {

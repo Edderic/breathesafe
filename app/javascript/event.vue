@@ -250,7 +250,7 @@ export default {
           'maskTypes',
           'numberOfPeople',
           'placeData',
-          'portableAirCleaningNotes',
+          'portableAirCleaners',
           'rapidTestResult',
           'rapidTestResults',
           'roomHeight',
@@ -280,9 +280,8 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab']),
-    ...mapActions(useEventStore, ['removeActivityGroup']),
     ...mapActions(useEventStores, ['addEvent']),
-    ...mapState(useEventStore, ['findActivityGroup']),
+    ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
     addActivityGrouping() {
       this.activityGroups.unshift({
         'id': this.generateUUID(),
@@ -294,13 +293,20 @@ export default {
         'rapidTestResult': 'Unknown'
       })
     },
+    addPortableAirCleaner() {
+      this.portableAirCleaners.unshift({
+        'id': this.generateUUID(),
+        'singlePassFiltrationEfficiency': "",
+        'airDeliveryRate': "",
+        'airDeliveryRateMeasurementType': "",
+      })
+    },
     cancel() {
       this.focusTab = 'events'
     },
     async save() {
       let toSave = {
           'activityGroups': this.activityGroups,
-          'airDeliveryRate': this.airDeliveryRate,
           'airDeliveryRateMeasurementType': this.airDeliveryRateMeasurementType,
           'carbonDioxideAmbient': this.carbonDioxideAmbient,
           'carbonDioxideMeasurementDeviceName': this.carbonDioxideMeasurementDeviceName,
@@ -312,7 +318,6 @@ export default {
           'eventPrivacy': this.eventPrivacy,
           'lengthMeasurementType': this.lengthMeasurementType,
           'placeData': this.placeData,
-          'portableAirCleaningNotes': this.portableAirCleaningNotes,
           'rapidTestResult': this.rapidTestResult,
           'roomHeight': this.roomHeight,
           'roomLength': this.roomLength,
@@ -368,6 +373,13 @@ export default {
       );
 
       this.activityGroups.splice(activityGroupIndex, 1);
+    },
+    removeAirCleaner(id) {
+      const index = this.portableAirCleaners.findIndex(
+        (airCleaner) => airCleaner.id == id
+      );
+
+      this.portableAirCleaners.splice(index, 1);
     },
     setPlace(place) {
       console.log(place)
@@ -439,8 +451,9 @@ export default {
       let activityGroup = this.findActivityGroup()(id);
       activityGroup['numberOfPeople'] = event.target.value;
     },
-    setPortableAirCleaningNotes(event) {
-      this.portableAirCleaningNotes = event.target.value;
+    setPortableAirCleaningNotes(event, id) {
+      let portableAirCleaner = this.findPortableAirCleaningDevice()(id);
+      portableAirCleaner['notes'] = event.target.value;
     },
 
     setVentilationNotes(event) {
@@ -451,6 +464,14 @@ export default {
       let activityGroup = this.findActivityGroup()(id);
       activityGroup['rapidTestResult'] = event.target.value;
     },
+    setPortableAirCleaningDeviceAirDeliveryRate(event, id) {
+      let portableAirCleaner = this.findPortableAirCleaningDevice()(id);
+      portableAirCleaner['airDeliveryRate'] = event.target.value;
+    },
+    setPortableAirCleaningDeviceSinglePassFiltrationEfficiency(event, id) {
+      let portableAirCleaner = this.findPortableAirCleaningDevice()(id);
+      portableAirCleaner['singlePassFiltrationEfficiency'] = event.target.value;
+    }
   },
 }
 
