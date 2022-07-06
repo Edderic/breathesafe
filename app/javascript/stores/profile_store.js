@@ -20,9 +20,10 @@ export const useProfileStore = defineStore('profile', {
   }),
   getters: {
     ...mapState(useMainStore, ['currentUser']),
-    ...mapWritableState(useMainStore, ['message'])
+    ...mapWritableState(useMainStore, ['message']),
   },
   actions: {
+    ...mapActions(useEventStore, ['updateRoomDimensionsMeters']),
     ...mapActions(useMainStore, ['getCurrentUser']),
     async setSystemOfMeasurement(event) {
       this.getCurrentUser()

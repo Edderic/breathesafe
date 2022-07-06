@@ -32,7 +32,7 @@
 // Have a VueX store that maintains state across components
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
-import { mapActions } from 'pinia';
+import { mapWritableState, mapActions } from 'pinia';
 import axios from 'axios';
 
 export default {
@@ -40,7 +40,7 @@ export default {
   components: {
   },
   computed: {
-
+    ...mapWritableState(useMainStore, ['message', 'focusTab'])
   },
   created() { },
   data() {
@@ -70,7 +70,8 @@ export default {
       .then(response => {
         console.log(response)
         if (response.status == 201) {
-          this.setFocusTab('confirmation');
+          this.focusTab = 'confirmation';
+          this.message = `Sent a confirmation email to ${this.email}. Please check.`
         }
 
         // whatever you want

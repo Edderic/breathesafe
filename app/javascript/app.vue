@@ -15,6 +15,7 @@
       <Events v-if='focusTab == "events"'/>
       <Profile v-if='focusTab == "profile"'/>
       <Registration v-if='!signedIn && focusTab == "register"'/>
+      <Confirmation v-if='!signedIn && focusTab == "confirmation"'/>
       <SignIn v-if='!signedIn && focusTab == "signIn"'/>
     </div>
   </div>
@@ -27,6 +28,7 @@ import Events from './events.vue';
 import NavBar from './navbar.vue';
 import Profile from './profile.vue';
 import Registration from './registration.vue';
+import Confirmation from './confirmation.vue';
 import SignIn from './sign_in.vue';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
@@ -35,6 +37,7 @@ import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
 export default {
   name: 'App',
   components: {
+    Confirmation,
     Event,
     Events,
     NavBar,
