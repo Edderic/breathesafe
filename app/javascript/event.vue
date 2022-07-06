@@ -210,7 +210,7 @@ import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
-import { mapWritableState, mapState, mapActions } from 'pinia'
+import { mapWritableState, mapState, mapActions } from 'pinia';
 
 export default {
   name: 'App',
