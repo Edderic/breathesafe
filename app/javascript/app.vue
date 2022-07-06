@@ -11,7 +11,7 @@
       >
       </GMapMap>
 
-      <Event v-if='focusTab == "event"'/>
+      <Event v-if='focusTab == "event" && signedIn'/>
       <Events v-if='focusTab == "events"'/>
       <Profile v-if='focusTab == "profile"'/>
       <Registration v-if='!signedIn && focusTab == "register"'/>
