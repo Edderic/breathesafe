@@ -51,7 +51,7 @@
         >
           <button
             @click='removeCO2Monitor(carbonDioxideMonitor["id"])'
-            v-if="carbonDioxideMonitor.status == 'editable' && !allBlank(carbonDioxideMonitor)"
+            v-if="carbonDioxideMonitor.status == 'editable' && hasBeenSaved(carbonDioxideMonitor['id'])"
           >Remove</button>
           <button @click='cancelEditing(carbonDioxideMonitor["id"])'>Cancel</button>
           <button @click='saveCO2Monitor(carbonDioxideMonitor["id"])' :disabled="!validCO2Monitor(carbonDioxideMonitor)">Save</button>
@@ -136,8 +136,12 @@ export default {
         'serial': '',
         'model': '',
         'id': uuid,
-        'status': 'editable'
+        'status': 'editable',
       })
+    },
+    hasBeenSaved(id) {
+      // id is integer in the backend
+      return parseInt(id) == id
     },
     editCO2Monitor(id) {
       const carbonDioxideMonitor = this.carbonDioxideMonitors.find(
