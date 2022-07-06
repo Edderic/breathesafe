@@ -46,10 +46,22 @@
             @change='setCarbonDioxideMonitorSerial($event, carbonDioxideMonitor["id"])'>
         </div>
 
-        <div class='container'>
-          <button @click='removeCO2Monitor($event, carbonDioxideMonitor["id"])'>Remove</button>
+        <div class='container centered'
+            v-if="carbonDioxideMonitor.status == 'editable'"
+        >
+          <button
+            @click='removeCO2Monitor(carbonDioxideMonitor["id"])'
+            v-if="carbonDioxideMonitor.status == 'editable'"
+          >Remove</button>
+          <button @click='cancelEditing(carbonDioxideMonitor["id"])'>Cancel</button>
+          <button @click='saveCO2Monitor(carbonDioxideMonitor["id"])' :disabled="!validCO2Monitor(carbonDioxideMonitor)">Save</button>
         </div>
 
+        <div class='container centered'
+            v-if="carbonDioxideMonitor.status == 'saved'"
+        >
+          <button @click='editCO2Monitor(carbonDioxideMonitor["id"])'>Edit</button>
+        </div>
       </div>
     </div>
   </div>
