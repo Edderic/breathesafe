@@ -11,11 +11,11 @@
       >
       </GMapMap>
 
-      <Event v-if='focusTab == "event" && currentUser'/>
+      <Event v-if='focusTab == "event" && signedIn'/>
       <Events v-if='focusTab == "events"'/>
       <Profile v-if='focusTab == "profile"'/>
-      <Registration v-if='!currentUser && focusTab == "register"'/>
-      <SignIn v-if='!currentUser && focusTab == "signIn"'/>
+      <Registration v-if='!signedIn && focusTab == "register"'/>
+      <SignIn v-if='!signedIn && focusTab == "signIn"'/>
     </div>
   </div>
 </template>
@@ -44,7 +44,7 @@ export default {
   },
   computed: {
     ...mapStores(useMainStore),
-    ...mapState(useMainStore, ["focusTab", "currentUser"]),
+    ...mapState(useMainStore, ["focusTab", "signedIn"]),
     ...mapWritableState(useMainStore, ['center', 'zoom'])
 
   },

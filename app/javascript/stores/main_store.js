@@ -20,12 +20,15 @@ export const useMainStore = defineStore('main', {
       await axios.get('/users/get_current_user.json')
         .then(response => {
           this.currentUser = response.data.currentUser;
+          this.signedIn = !!response.data.currentUser;
+          console.log('this.signedIn', this.signedIn)
           // whatever you want
         })
         .catch(error => {
           console.log(error)
-          this.message = "Could not get current user."
-          this.currentUser = undefined
+          this.message = "Could not get current user.";
+          this.currentUser = undefined;
+          this.signedIn = false;
           // whatever you want
         })
 

@@ -71,9 +71,9 @@
 // Have a VueX store that maintains state across components
 import axios from 'axios';
 import { useEventStore } from './stores/event_store';
+import { useMainStore } from './stores/main_store';
 import { generateUUID, setupCSRF } from './misc';
 import { useEventStores } from './stores/event_stores';
-import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia'
 
@@ -83,6 +83,12 @@ export default {
     Event
   },
   computed: {
+    ...mapWritableState(
+        useMainStore,
+        [
+          'currentUser'
+        ]
+    ),
     ...mapState(
         useProfileStore,
         [
@@ -106,7 +112,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(useMainStore, ['setFocusTab']),
+    ...mapActions(useMainStore, ['setFocusTab', 'getCurrentUser']),
     ...mapActions(useProfileStore, ['setSystemOfMeasurement']),
     validCO2Monitor(monitor) {
       return !!monitor["model"] && !!monitor["name"] && !!monitor["serial"]
@@ -230,18 +236,7 @@ export default {
     async load() {
       setupCSRF();
 
-      await axios.get('/users/get_current_user.json')
-        .then(response => {
-          this.currentUser = response.data.currentUser;
-
-          // whatever you want
-        })
-        .catch(error => {
-          console.log(error)
-          this.message = "Could not get current user."
-          // whatever you want
-        })
-
+      this.getCurrentUser();
       await axios.get(`/users/${this.currentUser.id}/carbon_dioxide_monitors.json`)
         .then(response => {
           const monitors = response.data.carbonDioxideMonitors;

@@ -52,7 +52,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(useMainStore, ['setFocusTab', 'updateSignedIn']),
+    ...mapActions(useMainStore, ['setFocusTab', 'getCurrentUser']),
     setEmail(event) {
       this.email = event.target.value;
     },
@@ -72,7 +72,7 @@ export default {
       .then(response => {
         if (response.status == 201) {
           this.setFocusTab('events');
-          this.updateSignedIn();
+          this.getCurrentUser();
         }
 
         // whatever you want

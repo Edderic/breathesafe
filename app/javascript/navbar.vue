@@ -34,6 +34,7 @@ export default {
   data() {
   },
   methods: {
+    ...mapActions(useMainStore, ['getCurrentUser']),
     navToEvents() {
       this.focusTab = 'events'
     },
@@ -54,8 +55,8 @@ export default {
       .then(response => {
         console.log(response)
         if (response.status == 204 || response.status == 200) {
-          this.setFocusTab('events');
-          this.updateSignedIn();
+          this.focusTab = 'events';
+          this.getCurrentUser();
         }
 
         // whatever you want
