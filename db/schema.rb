@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_07_04_151352) do
+ActiveRecord::Schema[7.0].define(version: 2022_07_06_181747) do
   create_table "carbon_dioxide_monitors", force: :cascade do |t|
     t.string "name"
     t.string "model"
@@ -44,6 +44,14 @@ ActiveRecord::Schema[7.0].define(version: 2022_07_04_151352) do
     t.datetime "updated_at", null: false
     t.index ["address"], name: "index_events_on_address"
     t.index ["author_id"], name: "index_events_on_author_id"
+  end
+
+  create_table "profiles", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "measurement_system", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_profiles_on_user_id"
   end
 
   create_table "user_carbon_dioxide_monitors", force: :cascade do |t|
@@ -81,5 +89,6 @@ ActiveRecord::Schema[7.0].define(version: 2022_07_04_151352) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  add_foreign_key "profiles", "users"
   add_foreign_key "user_carbon_dioxide_monitors", "users"
 end
