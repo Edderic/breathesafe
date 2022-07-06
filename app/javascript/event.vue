@@ -318,33 +318,33 @@ export default {
           'eventPrivacy': this.eventPrivacy,
           'lengthMeasurementType': this.lengthMeasurementType,
           'placeData': this.placeData,
+          'portableAirCleaners': this.portableAirCleaners,
           'rapidTestResult': this.rapidTestResult,
           'roomHeight': this.roomHeight,
           'roomLength': this.roomLength,
           'roomName': this.roomName,
           'roomWidth': this.roomWidth,
-          'singlePassFiltrationEfficiency': this.singlePassFiltrationEfficiency,
       }
 
       let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
       axios.defaults.headers.common['X-CSRF-Token'] = token
       axios.defaults.headers.common['Accept'] = 'application/json'
       await axios.post('/events', toSave)
-      .then(response => {
-        console.log(response)
-        if (response.status == 204 || response.status == 200) {
-          this.events.unshift(event);
-        }
+        .then(response => {
+          console.log(response)
+          if (response.status == 204 || response.status == 200) {
+            this.events.unshift(event);
+            this.addEvent(toSave)
+            this.focusTab = 'events'
+          }
 
-        // whatever you want
-      })
-      .catch(error => {
-        console.log(error)
-        // whatever you want
-      })
+          // whatever you want
+        })
+        .catch(error => {
+          console.log(error)
+          // whatever you want
+        })
 
-      this.addEvent(toSave)
-      this.focusTab = 'events'
     },
     generateUUID() {
         // https://stackoverflow.com/questions/105034/how-to-create-guid-uuid
