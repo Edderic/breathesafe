@@ -69,6 +69,7 @@
 
 <script>
 // Have a VueX store that maintains state across components
+import axios from 'axios';
 import { useEventStore } from './stores/event_store';
 import { generateUUID } from './misc';
 import { useEventStores } from './stores/event_stores';
@@ -95,30 +96,82 @@ export default {
         ]
     )
   },
-  created() { },
+  // TODO: pull data from profiles for given current_user
+  created() {
+    this.load()
+  },
   data() {
     return {
+      message: ""
     }
   },
   methods: {
     ...mapActions(useMainStore, ['setFocusTab']),
     ...mapActions(useProfileStore, ['setSystemOfMeasurement']),
+    validCO2Monitor(monitor) {
+      return !!monitor["model"] && !!monitor["name"] && !!monitor["serial"]
+    },
+    cancelEditing(id) {
+      let carbonDioxideMonitor = this.carbonDioxideMonitors.find(
+        (carbonDioxideMonitor) => carbonDioxideMonitor.id == id
+      );
+
+      carbonDioxideMonitor['status'] = 'saved'
+    },
     newCO2monitor() {
       let uuid = generateUUID()
       this.carbonDioxideMonitors.unshift({
         'name': '',
         'serial': '',
-        'id': uuid
+        'id': uuid,
+        'status': 'editable'
       })
-      console.log(this.carbonDioxideMonitors)
     },
-    removeCO2Monitor(id) {
-      const carbonDioxideMonitorId = this.carbonDioxideMonitors.findIndex(
+    editCO2Monitor(id) {
+      const carbonDioxideMonitor = this.carbonDioxideMonitors.find(
         (carbonDioxideMonitor) => carbonDioxideMonitor.id == id
       );
 
-      this.carbonDioxideMonitors.splice(carbonDioxideMonitorId, 1);
-      console.log(this.carbonDioxideMonitors)
+      carbonDioxideMonitor['status'] = 'editable'
+    },
+    async saveCO2Monitor(id) {
+      let carbonDioxideMonitor = this.carbonDioxideMonitors.find(
+        (carbonDioxideMonitor) => carbonDioxideMonitor.id == id
+      );
+
+      let toSave = {
+          'carbonDioxideMonitor': {
+            'name': carbonDioxideMonitor.name,
+            'serial': carbonDioxideMonitor.serial,
+            'model': carbonDioxideMonitor.model,
+          },
+      }
+
+      let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
+      axios.defaults.headers.common['X-CSRF-Token'] = token
+      axios.defaults.headers.common['Accept'] = 'application/json'
+
+      await axios.post(`/users/${this.currentUser.id}/carbon_dioxide_monitors.json`, toSave)
+        .then(response => {
+          console.log(response)
+          if (response.status == 204 || response.status == 200) {
+            this.message = response.data.message
+            carbonDioxideMonitor['status'] = 'saved'
+          }
+        })
+        .catch(error => {
+          console.log(error)
+            this.message = "Something went wrong with saving."
+          // whatever you want
+        })
+      this.carbonDioxideMonitors.splice(carbonDioxideMonitorIndex, 1);
+    },
+    removeCO2Monitor(id) {
+      const carbonDioxideMonitorIndex = this.carbonDioxideMonitors.findIndex(
+        (carbonDioxideMonitor) => carbonDioxideMonitor.id == id
+      );
+
+      this.carbonDioxideMonitors.splice(carbonDioxideMonitorIndex, 1);
     },
     setCarbonDioxideMonitorModel(event, id) {
       const carbonDioxideMonitor = this.carbonDioxideMonitors.find(
@@ -126,7 +179,6 @@ export default {
       );
 
       carbonDioxideMonitor['model'] = event.target.value;
-      console.log(this.carbonDioxideMonitors)
     },
     setCarbonDioxideMonitorName(event, id) {
       const carbonDioxideMonitor = this.carbonDioxideMonitors.find(
@@ -134,7 +186,6 @@ export default {
       );
 
       carbonDioxideMonitor['name'] = event.target.value;
-      console.log(this.carbonDioxideMonitors)
     },
     setCarbonDioxideMonitorSerial(event, id) {
       const carbonDioxideMonitor = this.carbonDioxideMonitors.find(
@@ -142,8 +193,40 @@ export default {
       );
 
       carbonDioxideMonitor['serial'] = event.target.value;
-      console.log(this.carbonDioxideMonitors)
-    }
+    },
+    async load() {
+      let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
+      axios.defaults.headers.common['X-CSRF-Token'] = token
+      axios.defaults.headers.common['Accept'] = 'application/json'
+
+      await axios.get('/users/get_current_user.json')
+        .then(response => {
+          this.currentUser = response.data.currentUser;
+
+          // whatever you want
+        })
+        .catch(error => {
+          console.log(error)
+          this.message = "Could not get current user."
+          // whatever you want
+        })
+
+      await axios.get(`/users/${this.currentUser.id}/carbon_dioxide_monitors.json`)
+        .then(response => {
+          const monitors = response.data.carbonDioxideMonitors;
+          for (let monitor of monitors) {
+            monitor['status'] = 'saved'
+          }
+          this.carbonDioxideMonitors = monitors
+
+          // whatever you want
+        })
+        .catch(error => {
+          console.log(error)
+          this.message = "Failed to load carbon dioxide monitors."
+          // whatever you want
+        })
+    },
   },
 }
 
