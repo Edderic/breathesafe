@@ -10,7 +10,51 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_07_01_094840) do
+ActiveRecord::Schema[7.0].define(version: 2022_07_04_151352) do
+  create_table "carbon_dioxide_monitors", force: :cascade do |t|
+    t.string "name"
+    t.string "model"
+    t.string "serial"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["serial"], name: "index_carbon_dioxide_monitors_on_serial"
+  end
+
+  create_table "events", force: :cascade do |t|
+    t.string "address"
+    t.string "room_name"
+    t.float "room_length_meters"
+    t.float "room_width_meters"
+    t.float "room_height_meters"
+    t.float "place_lat"
+    t.float "place_long"
+    t.datetime "start_datetime"
+    t.integer "duration_hours"
+    t.boolean "private"
+    t.text "portable_air_cleaners"
+    t.string "ventilation_co2_name"
+    t.string "ventilation_co2_serial"
+    t.string "ventilation_co2_model"
+    t.integer "ventilation_co2_steady_state_ppm"
+    t.integer "ventilation_co2_ambient_ppm"
+    t.text "ventilation_notes"
+    t.text "activity_groups"
+    t.integer "author_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["address"], name: "index_events_on_address"
+    t.index ["author_id"], name: "index_events_on_author_id"
+  end
+
+  create_table "user_carbon_dioxide_monitors", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "serial", null: false
+    t.string "model", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_user_carbon_dioxide_monitors_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -37,4 +81,5 @@ ActiveRecord::Schema[7.0].define(version: 2022_07_01_094840) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  add_foreign_key "user_carbon_dioxide_monitors", "users"
 end
