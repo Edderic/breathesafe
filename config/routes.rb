@@ -4,7 +4,6 @@ Rails.application.routes.draw do
     sessions: 'users/sessions'
   }
 
-
   root to: 'events#new'
 
   devise_scope :user do
@@ -15,11 +14,12 @@ Rails.application.routes.draw do
   end
 
   post 'events', to: 'events#create'
-  get 'profiles', to: 'profiles#index'
+  get 'profiles', to: 'users/profiles#index'
 
   post 'users/:user_id/carbon_dioxide_monitors', to: 'users/carbon_dioxide_monitors#create_or_update'
   get 'users/:user_id/carbon_dioxide_monitors', to: 'users/carbon_dioxide_monitors#index'
   delete 'users/:user_id/carbon_dioxide_monitors/:carbon_dioxide_monitor_id', to: 'users/carbon_dioxide_monitors#delete'
+  post 'users/:user_id/profiles', to: 'users/profiles#create_or_update'
 
 
 
