@@ -14,6 +14,14 @@ Rails.application.routes.draw do
     get 'users/get_current_user', to: 'users/sessions#get_current_user'
   end
 
+  post 'events', to: 'events#create'
+  get 'profiles', to: 'profiles#index'
+
+  post 'users/:user_id/carbon_dioxide_monitors', to: 'users/carbon_dioxide_monitors#create_or_update'
+  get 'users/:user_id/carbon_dioxide_monitors', to: 'users/carbon_dioxide_monitors#index'
+
+
+
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
