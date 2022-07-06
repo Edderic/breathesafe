@@ -19,6 +19,7 @@ Rails.application.routes.draw do
 
   post 'users/:user_id/carbon_dioxide_monitors', to: 'users/carbon_dioxide_monitors#create_or_update'
   get 'users/:user_id/carbon_dioxide_monitors', to: 'users/carbon_dioxide_monitors#index'
+  delete 'users/:user_id/carbon_dioxide_monitors/:carbon_dioxide_monitor_id', to: 'users/carbon_dioxide_monitors#delete'
 
 
 

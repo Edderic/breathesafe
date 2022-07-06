@@ -182,12 +182,33 @@ export default {
         })
       this.carbonDioxideMonitors.splice(carbonDioxideMonitorIndex, 1);
     },
-    removeCO2Monitor(id) {
+    async removeCO2Monitor(id) {
       const carbonDioxideMonitorIndex = this.carbonDioxideMonitors.findIndex(
         (carbonDioxideMonitor) => carbonDioxideMonitor.id == id
       );
 
-      this.carbonDioxideMonitors.splice(carbonDioxideMonitorIndex, 1);
+      const carbonDioxideMonitor = this.carbonDioxideMonitors.find(
+        (cm) => cm.id == id
+      );
+
+      let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
+      axios.defaults.headers.common['X-CSRF-Token'] = token
+      axios.defaults.headers.common['Accept'] = 'application/json'
+
+      await axios.delete(`/users/${this.currentUser.id}/carbon_dioxide_monitors/${carbonDioxideMonitor.id}.json`)
+        .then(response => {
+          console.log(response)
+          if (response.status == 204 || response.status == 200) {
+            this.message = response.data.message
+            this.carbonDioxideMonitors.splice(carbonDioxideMonitorIndex, 1);
+
+          }
+        })
+        .catch(error => {
+          console.log(error)
+            this.message = "Something went wrong with saving."
+          // whatever you want
+        })
     },
     setCarbonDioxideMonitorModel(event, id) {
       const carbonDioxideMonitor = this.carbonDioxideMonitors.find(
