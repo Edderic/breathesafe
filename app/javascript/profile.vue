@@ -5,6 +5,10 @@
       <h2>Profile</h2>
     </div>
 
+    <div class='container centered'>
+      <h3>{{ message }}</h3>
+    </div>
+
     <div class='container'>
       <label>System of Measurement</label>
 
