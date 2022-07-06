@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { defineStore } from 'pinia'
+import { setupCSRF } from '../misc'
 
 // TODO: use the last location that the user was in, as the default
 // the first argument is a unique id of the store across your application
@@ -8,24 +9,26 @@ export const useMainStore = defineStore('main', {
     center: {lat: 51.093048, lng: 6.842120},
     zoom: 7,
     focusTab: 'events',
-    signedIn: false
+    signedIn: false,
+    currentUser: undefined,
+    message: ''
   }),
   actions: {
-    async updateSignedIn() {
-      let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
-      axios.defaults.headers.common['X-CSRF-Token'] = token
-      axios.defaults.headers.common['Accept'] = 'application/json'
+    async getCurrentUser() {
+      setupCSRF()
 
-      await axios.get(
-        `/registrations/is_signed_in.json`
-      ).then((response) => {
-        this.signedIn = response.data.updateSignedIn
+      await axios.get('/users/get_current_user.json')
+        .then(response => {
+          this.currentUser = response.data.currentUser;
+          // whatever you want
+        })
+        .catch(error => {
+          console.log(error)
+          this.message = "Could not get current user."
+          this.currentUser = undefined
+          // whatever you want
+        })
 
-      }).
-        catch((blah) => {
-         console.log('Fail', blah);
-          // TODO: display error
-        });
     },
     setGMapsPlace(center) {
       this.center = center
