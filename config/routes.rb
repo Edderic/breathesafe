@@ -11,6 +11,7 @@ Rails.application.routes.draw do
     get 'registrations/is_signed_in', to: 'registrations#is_signed_in'
     post 'users/log_in', to: 'users/sessions#create'
     delete 'users/log_out', to: 'users/sessions#destroy'
+    get 'users/get_current_user', to: 'users/sessions#get_current_user'
   end
 
 
