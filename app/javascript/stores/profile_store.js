@@ -1,6 +1,7 @@
 import { mapActions, mapState, mapWritableState, defineStore } from 'pinia'
 import axios from 'axios'
 import { useMainStore } from './main_store'
+import { useEventStore } from './event_store'
 
 // useStore could be anything like useUser, useCart
 // the first argument is a unique id of the store across your application
@@ -47,11 +48,13 @@ export const useProfileStore = defineStore('profile', {
               this.lengthMeasurementType = 'meters';
               this.airDeliveryRateMeasurementType = 'cubic meters per minute';
             }
+
+            this.updateRoomDimensionsMeters()
           }
         })
         .catch(error => {
           console.log(error)
-            mainStore.setMessage(response.data.message)
+            mainStore.setMessage(error)
           // whatever you want
         })
 

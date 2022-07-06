@@ -211,6 +211,7 @@ import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia';
+import { feetToMeters } from  './misc';
 
 export default {
   name: 'App',
@@ -257,6 +258,10 @@ export default {
           'roomLength',
           'roomName',
           'roomWidth',
+          'roomHeightMeters',
+          'roomLengthMeters',
+          'roomWidthMeters',
+          'roomName',
           'singlePassFiltrationEfficiency',
           'startDateTime',
           'susceptibleActivities',
@@ -318,10 +323,11 @@ export default {
           'eventPrivacy': this.eventPrivacy,
           'lengthMeasurementType': this.lengthMeasurementType,
           'placeData': this.placeData,
-          'portableAirCleaners': this.portableAirCleaners,
+          'portableAirCleaners': this.portableAirCleaners, // TODO: each one should have an air delivery rate in cubic meters per hour
           'rapidTestResult': this.rapidTestResult,
-          'roomHeight': this.roomHeight,
-          'roomLength': this.roomLength,
+          'roomWidthMeters': this.roomWidthMeters,
+          'roomHeightMeters': this.roomHeightMeters,
+          'roomLengthMeters': this.roomLengthMeters,
           'roomName': this.roomName,
           'roomWidth': this.roomWidth,
       }
@@ -407,12 +413,15 @@ export default {
     },
     setRoomLength(event) {
       this.roomLength = event.target.value;
+      this.roomLengthMeters = feetToMeters(this.lengthMeasurementType, event.target.value)
     },
     setRoomWidth(event) {
       this.roomWidth = event.target.value;
+      this.roomWidthMeters = feetToMeters(this.lengthMeasurementType, event.target.value)
     },
     setRoomHeight(event) {
       this.roomHeight = event.target.value;
+      this.roomHeightMeters = feetToMeters(this.lengthMeasurementType, event.target.value)
     },
     setSinglePassFiltrationEfficiency(event) {
       this.singlePassFiltrationEfficiency = event.target.value;

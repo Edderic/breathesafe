@@ -1,5 +1,13 @@
 import axios from 'axios';
 
+export function feetToMeters(measurement_type, num) {
+  if (measurement_type == 'feet') {
+    return num / 3.048
+  } else {
+    return num
+  }
+}
+
 export function setupCSRF() {
     let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
     axios.defaults.headers.common['X-CSRF-Token'] = token

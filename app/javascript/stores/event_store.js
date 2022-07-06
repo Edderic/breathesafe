@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useEventStores } from './event_stores.js'
+import { feetToMeters } from '../misc'
 
 // useStore could be anything like useUser, useCart
 // the first argument is a unique id of the store across your application
@@ -18,6 +19,9 @@ export const useEventStore = defineStore('event', {
     roomLength: "",
     roomHeight: "",
     roomWidth: "",
+    roomWidthMeters: "",
+    roomLengthMeters: "",
+    roomHeightMeters: "",
     duration: "",
     numberOfPeople: '',
     carbonDioxideSteadyState: '',
@@ -127,6 +131,11 @@ export const useEventStore = defineStore('event', {
   },
   actions: {
     save() {
+    },
+    updateRoomDimensionsMeters() {
+      this.roomLengthMeters = feetToMeters(this.lengthMeasurementType, this.roomLength)
+      this.roomWidthMeters = feetToMeters(this.lengthMeasurementType, this.roomWidth)
+      this.roomHeightMeters = feetToMeters(this.lengthMeasurementType, this.roomHeight)
     }
   }
 });
