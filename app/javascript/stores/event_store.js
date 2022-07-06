@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useEventStores } from './event_stores.js'
-import { feetToMeters } from '../misc'
+import { cubicFeetPerMinuteTocubicMetersPerHour, feetToMeters, generateUUID } from '../misc'
 
 // useStore could be anything like useUser, useCart
 // the first argument is a unique id of the store across your application
@@ -14,7 +14,6 @@ export const useEventStore = defineStore('event', {
         'lng': 0
       }
     },
-    portableAirCleaningNotes: "",
     roomName: "",
     roomLength: "",
     roomHeight: "",
@@ -32,7 +31,6 @@ export const useEventStore = defineStore('event', {
     carbonDioxideMonitors: [],
     systemOfMeasurement: 'imperial',
     lengthMeasurementType: 'feet',
-    airDeliveryRateMeasurementType: 'cubic feet per minute',
     airDeliveryRate: "",
     singlePassFiltrationEfficiency: "",
     eventPrivacy: 'public',
@@ -132,10 +130,26 @@ export const useEventStore = defineStore('event', {
   actions: {
     save() {
     },
+    addPortableAirCleaner() {
+      this.portableAirCleaners.unshift({
+        'id': generateUUID(),
+        'singlePassFiltrationEfficiency': "",
+        'airDeliveryRate': "",
+        'airDeliveryRateCubicMetersPerHour': "",
+      })
+    },
     updateRoomDimensionsMeters() {
       this.roomLengthMeters = feetToMeters(this.lengthMeasurementType, this.roomLength)
       this.roomWidthMeters = feetToMeters(this.lengthMeasurementType, this.roomWidth)
       this.roomHeightMeters = feetToMeters(this.lengthMeasurementType, this.roomHeight)
+    },
+    setCubicMetersPerHour() {
+      for (let portableAirCleaner of this.portableAirCleaners) {
+        portableAirCleaner['airDeliveryRateCubicMetersPerHour'] = cubicFeetPerMinuteTocubicMetersPerHour(
+          this.airDeliveryRateMeasurementType,
+          portableAirCleaner['airDeliveryRate']
+        );
+      }
     }
   }
 });

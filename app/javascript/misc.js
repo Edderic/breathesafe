@@ -8,6 +8,14 @@ export function feetToMeters(measurement_type, num) {
   }
 }
 
+export function cubicFeetPerMinuteTocubicMetersPerHour(measurement_type, num) {
+  if (measurement_type == 'cubic feet per minute') {
+    return num * 60 / (3.048)**3
+  } else {
+    return num
+  }
+}
+
 export function setupCSRF() {
     let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
     axios.defaults.headers.common['X-CSRF-Token'] = token

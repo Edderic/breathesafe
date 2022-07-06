@@ -211,7 +211,7 @@ import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia';
-import { feetToMeters } from  './misc';
+import { cubicFeetPerMinuteTocubicMetersPerHour, feetToMeters } from  './misc';
 
 export default {
   name: 'App',
@@ -230,6 +230,7 @@ export default {
         [
           'lengthMeasurementType',
           'airDeliveryRateMeasurementType',
+          'carbonDioxideMonitors',
         ]
     ),
     ...mapWritableState(
@@ -270,12 +271,6 @@ export default {
           'ventilationNotes'
         ]
     ),
-    ...mapState(
-      useProfileStore,
-      [
-          'carbonDioxideMonitors',
-      ]
-    )
   },
   created() { },
   data() {
@@ -286,6 +281,7 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab']),
     ...mapActions(useEventStores, ['addEvent']),
+    ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
     addActivityGrouping() {
       this.activityGroups.unshift({
@@ -296,14 +292,6 @@ export default {
         'maskType': "",
         'numberOfPeople': "",
         'rapidTestResult': 'Unknown'
-      })
-    },
-    addPortableAirCleaner() {
-      this.portableAirCleaners.unshift({
-        'id': this.generateUUID(),
-        'singlePassFiltrationEfficiency': "",
-        'airDeliveryRate': "",
-        'airDeliveryRateMeasurementType': "",
       })
     },
     cancel() {
@@ -476,11 +464,15 @@ export default {
     setPortableAirCleaningDeviceAirDeliveryRate(event, id) {
       let portableAirCleaner = this.findPortableAirCleaningDevice()(id);
       portableAirCleaner['airDeliveryRate'] = event.target.value;
+      portableAirCleaner['airDeliveryRateCubicMetersPerHour'] = cubicFeetPerMinuteTocubicMetersPerHour(
+        this.airDeliveryRateMeasurementType,
+        event.target.value
+      );
     },
     setPortableAirCleaningDeviceSinglePassFiltrationEfficiency(event, id) {
       let portableAirCleaner = this.findPortableAirCleaningDevice()(id);
       portableAirCleaner['singlePassFiltrationEfficiency'] = event.target.value;
-    }
+    },
   },
 }
 

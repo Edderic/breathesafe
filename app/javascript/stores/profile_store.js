@@ -23,7 +23,6 @@ export const useProfileStore = defineStore('profile', {
     ...mapWritableState(useMainStore, ['message']),
   },
   actions: {
-    ...mapActions(useEventStore, ['updateRoomDimensionsMeters']),
     ...mapActions(useMainStore, ['getCurrentUser']),
     async setSystemOfMeasurement(event) {
       this.getCurrentUser()
@@ -33,6 +32,7 @@ export const useProfileStore = defineStore('profile', {
       }
 
       const mainStore = useMainStore()
+      const eventStore = useEventStore()
 
       await axios.post(`/users/${this.currentUser.id}/profiles.json`, toSave)
         .then(response => {
@@ -47,15 +47,15 @@ export const useProfileStore = defineStore('profile', {
               this.airDeliveryRateMeasurementType = 'cubic feet per minute';
             } else {
               this.lengthMeasurementType = 'meters';
-              this.airDeliveryRateMeasurementType = 'cubic meters per minute';
+              this.airDeliveryRateMeasurementType = 'cubic meters per hour';
             }
 
-            this.updateRoomDimensionsMeters()
+            eventStore.updateRoomDimensionsMeters()
+            eventStore.setCubicMetersPerHour()
           }
         })
         .catch(error => {
-          console.log(error)
-            mainStore.setMessage(error)
+          mainStore.setMessage(error)
           // whatever you want
         })
 
