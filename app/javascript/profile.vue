@@ -86,19 +86,15 @@ export default {
     ...mapWritableState(
         useMainStore,
         [
-          'currentUser'
-        ]
-    ),
-    ...mapState(
-        useProfileStore,
-        [
-          'systemOfMeasurement'
+          'currentUser',
+          'message'
         ]
     ),
     ...mapWritableState(
         useProfileStore,
         [
           'carbonDioxideMonitors',
+          'systemOfMeasurement'
         ]
     )
   },
@@ -108,7 +104,6 @@ export default {
   },
   data() {
     return {
-      message: ""
     }
   },
   methods: {
@@ -237,6 +232,7 @@ export default {
       setupCSRF();
 
       this.getCurrentUser();
+      this.loadProfile();
       await axios.get(`/users/${this.currentUser.id}/carbon_dioxide_monitors.json`)
         .then(response => {
           const monitors = response.data.carbonDioxideMonitors;
@@ -253,6 +249,33 @@ export default {
           // whatever you want
         })
     },
+    async loadProfile() {
+      setupCSRF();
+
+      let toSave = {
+        'profile': {
+          'measurement_system': this.systemOfMeasurement
+        }
+      }
+
+      await axios.post(
+        `/users/${this.currentUser.id}/profiles.json`,
+        toSave
+      )
+        .then(response => {
+          let data = response.data
+
+          this.message = data.message
+          this.systemOfMeasurement = data.systemOfMeasurement
+
+          // whatever you want
+        })
+        .catch(error => {
+          console.log(error)
+          this.message = "Failed to load profile."
+          // whatever you want
+        })
+    }
   },
 }
 

@@ -14,6 +14,9 @@ export const useMainStore = defineStore('main', {
     message: ''
   }),
   actions: {
+    setMessage(message) {
+      this.message = message
+    },
     async getCurrentUser() {
       setupCSRF()
 
