@@ -71,7 +71,7 @@
 // Have a VueX store that maintains state across components
 import axios from 'axios';
 import { useEventStore } from './stores/event_store';
-import { generateUUID } from './misc';
+import { generateUUID, setupCSRF } from './misc';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
@@ -163,9 +163,7 @@ export default {
           },
       }
 
-      let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
-      axios.defaults.headers.common['X-CSRF-Token'] = token
-      axios.defaults.headers.common['Accept'] = 'application/json'
+      setupCSRF();
 
       await axios.post(`/users/${this.currentUser.id}/carbon_dioxide_monitors.json`, toSave)
         .then(response => {
@@ -191,9 +189,7 @@ export default {
         (cm) => cm.id == id
       );
 
-      let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
-      axios.defaults.headers.common['X-CSRF-Token'] = token
-      axios.defaults.headers.common['Accept'] = 'application/json'
+      setupCSRF();
 
       await axios.delete(`/users/${this.currentUser.id}/carbon_dioxide_monitors/${carbonDioxideMonitor.id}.json`)
         .then(response => {
