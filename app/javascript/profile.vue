@@ -26,7 +26,7 @@
           <label>Model</label>
           <input
             :value="carbonDioxideMonitor['model']"
-            :disabled="carbonDioxideMonitor.status == 'saved'"
+            :disabled="carbonDioxideMonitor.status == 'display'"
             @change="setCarbonDioxideMonitorModel($event, carbonDioxideMonitor['id'])">
         </div>
 
@@ -34,7 +34,7 @@
           <label>Name</label>
           <input
             :value="carbonDioxideMonitor['name']"
-            :disabled="carbonDioxideMonitor.status == 'saved'"
+            :disabled="carbonDioxideMonitor.status == 'display'"
             @change="setCarbonDioxideMonitorName($event, carbonDioxideMonitor['id'])">
         </div>
 
@@ -42,7 +42,7 @@
           <label>Serial</label>
           <input
             :value="carbonDioxideMonitor['serial']"
-            :disabled="carbonDioxideMonitor.status == 'saved'"
+            :disabled="carbonDioxideMonitor.status == 'display'"
             @change='setCarbonDioxideMonitorSerial($event, carbonDioxideMonitor["id"])'>
         </div>
 
@@ -51,14 +51,14 @@
         >
           <button
             @click='removeCO2Monitor(carbonDioxideMonitor["id"])'
-            v-if="carbonDioxideMonitor.status == 'editable'"
+            v-if="carbonDioxideMonitor.status == 'editable' && !allBlank(carbonDioxideMonitor)"
           >Remove</button>
           <button @click='cancelEditing(carbonDioxideMonitor["id"])'>Cancel</button>
           <button @click='saveCO2Monitor(carbonDioxideMonitor["id"])' :disabled="!validCO2Monitor(carbonDioxideMonitor)">Save</button>
         </div>
 
         <div class='container centered'
-            v-if="carbonDioxideMonitor.status == 'saved'"
+            v-if="carbonDioxideMonitor.status == 'display'"
         >
           <button @click='editCO2Monitor(carbonDioxideMonitor["id"])'>Edit</button>
         </div>
@@ -111,18 +111,30 @@ export default {
     validCO2Monitor(monitor) {
       return !!monitor["model"] && !!monitor["name"] && !!monitor["serial"]
     },
+    allBlank(monitor) {
+      return !monitor["model"] && !monitor["name"] && !monitor["serial"]
+    },
     cancelEditing(id) {
       let carbonDioxideMonitor = this.carbonDioxideMonitors.find(
         (carbonDioxideMonitor) => carbonDioxideMonitor.id == id
       );
 
-      carbonDioxideMonitor['status'] = 'saved'
+      if (this.allBlank(carbonDioxideMonitor)) {
+        let index = this.carbonDioxideMonitors.findIndex(
+          (carbonDioxideMonitor) => carbonDioxideMonitor.id == id
+        );
+
+        this.carbonDioxideMonitors.splice(index, 1);
+      }
+
+      carbonDioxideMonitor['status'] = 'display'
     },
     newCO2monitor() {
       let uuid = generateUUID()
       this.carbonDioxideMonitors.unshift({
         'name': '',
         'serial': '',
+        'model': '',
         'id': uuid,
         'status': 'editable'
       })
@@ -156,7 +168,7 @@ export default {
           console.log(response)
           if (response.status == 204 || response.status == 200) {
             this.message = response.data.message
-            carbonDioxideMonitor['status'] = 'saved'
+            carbonDioxideMonitor['status'] = 'display'
           }
         })
         .catch(error => {
@@ -215,7 +227,7 @@ export default {
         .then(response => {
           const monitors = response.data.carbonDioxideMonitors;
           for (let monitor of monitors) {
-            monitor['status'] = 'saved'
+            monitor['status'] = 'display'
           }
           this.carbonDioxideMonitors = monitors
 
