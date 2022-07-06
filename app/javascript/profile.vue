@@ -26,6 +26,7 @@
           <label>Model</label>
           <input
             :value="carbonDioxideMonitor['model']"
+            :disabled="carbonDioxideMonitor.status == 'saved'"
             @change="setCarbonDioxideMonitorModel($event, carbonDioxideMonitor['id'])">
         </div>
 
@@ -33,6 +34,7 @@
           <label>Name</label>
           <input
             :value="carbonDioxideMonitor['name']"
+            :disabled="carbonDioxideMonitor.status == 'saved'"
             @change="setCarbonDioxideMonitorName($event, carbonDioxideMonitor['id'])">
         </div>
 
@@ -40,6 +42,7 @@
           <label>Serial</label>
           <input
             :value="carbonDioxideMonitor['serial']"
+            :disabled="carbonDioxideMonitor.status == 'saved'"
             @change='setCarbonDioxideMonitorSerial($event, carbonDioxideMonitor["id"])'>
         </div>
 
