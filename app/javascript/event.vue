@@ -197,6 +197,30 @@
       </div>
     </div>
 
+
+    <div class='container'>
+      <label class='subsection'>Occupancy over time</label>
+
+      <div class='container wide'>
+        <label class='textarea-label'>Unparsed HTML</label>
+        <textarea type="textarea" rows=5 columns=80  @change='parseOccupancyData'>{{ occupancy.unparsedOccupancyData }}</textarea>
+      </div>
+
+      <div class='container wide'>
+        <label class='textarea-label'>Parsed</label>
+        <table>
+          <tr>
+            <th></th>
+            <th v-for='hour in hours'>{{ hour }}</th>
+          </tr>
+          <tr v-for='(value, p, index) in occupancy.parsed'>
+            <td>{{ p }}</td>
+            <td v-for="(obj,x,y) in value">{{ obj['occupancy_percent'] }}</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
     <div class='container centered'>
       <button class='normal-padded' @click='cancel'>Cancel</button>
       <button class='normal-padded' @click='save'>Save</button>
@@ -211,7 +235,7 @@ import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia';
-import { cubicFeetPerMinuteTocubicMetersPerHour, feetToMeters } from  './misc';
+import { cubicFeetPerMinuteTocubicMetersPerHour, daysToIndexDict, feetToMeters, indexToHour } from  './misc';
 
 export default {
   name: 'App',
@@ -276,6 +300,31 @@ export default {
   data() {
     return {
       center: {lat: 51.093048, lng: 6.842120},
+      occupancy: {
+        unparsedOccupancyData: "",
+        parsed: {
+        }
+      },
+      hours: [
+        '6 AM',
+        '7 AM',
+        '8 AM',
+        '9 AM',
+        '10 AM',
+        '11 AM',
+        '12 PM',
+        '1 PM',
+        '2 PM',
+        '3 PM',
+        '4 PM',
+        '5 PM',
+        '6 PM',
+        '7 PM',
+        '8 PM',
+        '9 PM',
+        '10 PM',
+        '11 PM',
+      ]
     }
   },
   methods: {
@@ -296,6 +345,85 @@ export default {
     },
     cancel() {
       this.focusTab = 'events'
+    },
+    parseOccupancyData(event) {
+      const occupancyRegex = /\w*\s?\d*\%\s*busy\s*\w*\s*\d*\s*[A-Z]*/g
+      const closedDaysRegex = /(?<=Closed )\w+/g
+      const percentRegex = /(\d+)(?=\% busy)/g
+      const hourRegex = /(?<=at )(\d+ \w{2})/g
+      const usuallyRegex = /(?<=usually )(\d+)(?=% busy)/
+      const currentlyRegex = /Currently/
+
+      const matches = event.target.value.match(occupancyRegex)
+      const closedDays = event.target.value.match(closedDaysRegex) || []
+
+      let closedIndices = []
+      for (let closedDay of closedDays) {
+        closedIndices.push(daysToIndexDict[closedDay])
+      }
+
+      let offset = 0
+      const numberOfHours = 18
+      const maxHours = 7 * numberOfHours
+
+      let dictionary = {
+        'Sundays': {},
+        'Mondays': {},
+        'Tuesdays': {},
+        'Wednesdays': {},
+        'Thursdays': {},
+        'Fridays': {},
+        'Saturdays': {},
+      }
+
+      console.log(matches)
+
+      for (const day in daysToIndexDict) {
+        let dayIndex = daysToIndexDict[day]
+
+        if (closedIndices.includes(dayIndex)) {
+          continue
+        }
+
+        let percentVal;
+        let hourVal;
+        let indexToRemove;
+
+        for (let h = 0; h < matches.length; h++) {
+          if (matches[h].match(currentlyRegex)) {
+            indexToRemove = h
+          }
+        }
+
+        if (indexToRemove) {
+          matches.splice(indexToRemove, 1)
+        }
+
+        let regex;
+
+        for (let h = 0; h < numberOfHours; h++) {
+          let overall_index = h + dayIndex * numberOfHours;
+          if (!matches[overall_index]) {
+            debugger
+          }
+          if (matches[overall_index].match(usuallyRegex)) {
+            regex = usuallyRegex;
+          } else {
+            regex = percentRegex;
+          }
+
+          percentVal = matches[overall_index].match(regex)[0]
+          hourVal = indexToHour(h)
+
+          dictionary[day][h] = {
+            'occupancy_percent': percentVal,
+            'hour': hourVal
+          }
+        }
+      }
+
+      this.occupancy.parsed = dictionary
+      console.log(dictionary)
     },
     async save() {
       let toSave = {
@@ -526,5 +654,9 @@ export default {
 
   button {
     padding: 1em 3em;
+  }
+
+  table {
+    text-align: center;
   }
 </style>

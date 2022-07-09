@@ -28,3 +28,36 @@ export function generateUUID() {
       (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
 }
+
+export function indexToHour(index) {
+  return [
+    '6 AM',
+    '7 AM',
+    '8 AM',
+    '9 AM',
+    '10 AM',
+    '11 AM',
+    '12 PM',
+    '1 PM',
+    '2 PM',
+    '3 PM',
+    '4 PM',
+    '5 PM',
+    '6 PM',
+    '7 PM',
+    '8 PM',
+    '9 PM',
+    '10 PM',
+    '11 PM',
+  ][index]
+}
+
+export const daysToIndexDict = {
+  'Sundays': 0,
+  'Mondays': 1,
+  'Tuesdays': 2,
+  'Wednesdays': 3,
+  'Thursdays': 4,
+  'Fridays': 5,
+  'Saturdays': 6,
+}
