@@ -215,7 +215,14 @@
           </tr>
           <tr v-for='(value, p, index) in occupancy.parsed'>
             <td>{{ p }}</td>
-            <td v-for="(obj,x,y) in value">{{ obj['occupancy_percent'] }}</td>
+            <ColoredCell
+              v-for='(obj, x, y) in value'
+              :key='p + "-" + index'
+              :value="obj['occupancy_percent']"
+              :colorInterpolationScheme="colorInterpolationScheme"
+              :maxVal=100
+              class="availability-cell"
+            />
           </tr>
         </table>
       </div>
@@ -230,6 +237,7 @@
 
 <script>
 // Have a VueX store that maintains state across components
+import ColoredCell from './colored_cell.vue';
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
@@ -240,6 +248,7 @@ import { cubicFeetPerMinuteTocubicMetersPerHour, daysToIndexDict, feetToMeters, 
 export default {
   name: 'App',
   components: {
+    ColoredCell,
     Event
   },
   computed: {
@@ -300,6 +309,43 @@ export default {
   data() {
     return {
       center: {lat: 51.093048, lng: 6.842120},
+      colorInterpolationScheme: [
+        {
+          name: 'green',
+          r: 87,
+          g: 195,
+          b: 40
+        },
+        {
+          name: 'yellow',
+          r: 255,
+          g: 233,
+          b: 56
+        },
+        {
+          name: 'yellowOrange',
+          r: 254,
+          g: 160,
+          b: 8
+        },
+        {
+          name: 'orangeRed',
+          r: 240,
+          g: 90,
+          b: 0
+        },
+        {
+          name: 'red',
+          r: 219,
+          g: 21,
+          b: 0
+        },
+        { name: 'darkRed',
+          r: 174,
+          g: 17,
+          b: 0
+        },
+      ],
       occupancy: {
         unparsedOccupancyData: "",
         parsed: {
