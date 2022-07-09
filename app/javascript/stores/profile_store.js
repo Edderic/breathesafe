@@ -2,6 +2,7 @@ import { mapActions, mapState, mapWritableState, defineStore } from 'pinia'
 import axios from 'axios'
 import { useMainStore } from './main_store'
 import { useEventStore } from './event_store'
+import { generateUUID, setupCSRF } from '../misc';
 
 // useStore could be anything like useUser, useCart
 // the first argument is a unique id of the store across your application
@@ -24,6 +25,52 @@ export const useProfileStore = defineStore('profile', {
   },
   actions: {
     ...mapActions(useMainStore, ['getCurrentUser']),
+    async loadProfile() {
+      setupCSRF();
+
+      let toSave = {
+        'profile': {
+          'measurement_system': this.systemOfMeasurement
+        }
+      }
+
+      await axios.post(
+        `/users/${this.currentUser.id}/profiles.json`,
+        toSave
+      )
+        .then(response => {
+          let data = response.data
+
+          this.message = data.message
+          this.systemOfMeasurement = data.systemOfMeasurement
+
+          // whatever you want
+        })
+        .catch(error => {
+          console.log(error)
+          this.message = "Failed to load profile."
+          // whatever you want
+        })
+    },
+    async loadCO2Monitors() {
+      setupCSRF();
+
+      await axios.get(`/users/${this.currentUser.id}/carbon_dioxide_monitors.json`)
+        .then(response => {
+          const monitors = response.data.carbonDioxideMonitors;
+          for (let monitor of monitors) {
+            monitor['status'] = 'display'
+          }
+          this.carbonDioxideMonitors = monitors
+
+          // whatever you want
+        })
+        .catch(error => {
+          console.log(error)
+          this.message = "Failed to load carbon dioxide monitors."
+          // whatever you want
+        })
+    },
     async setSystemOfMeasurement(event) {
       this.getCurrentUser()
 
@@ -58,7 +105,6 @@ export const useProfileStore = defineStore('profile', {
           mainStore.setMessage(error)
           // whatever you want
         })
-
     }
   }
 });

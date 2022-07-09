@@ -100,7 +100,9 @@ export default {
   },
   // TODO: pull data from profiles for given current_user
   created() {
-    this.load()
+    this.getCurrentUser()
+    this.loadProfile()
+    this.loadCO2Monitors()
   },
   data() {
     return {
@@ -108,7 +110,7 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['setFocusTab', 'getCurrentUser']),
-    ...mapActions(useProfileStore, ['setSystemOfMeasurement']),
+    ...mapActions(useProfileStore, ['setSystemOfMeasurement', 'loadProfile', 'loadCO2Monitors']),
     validCO2Monitor(monitor) {
       return !!monitor["model"] && !!monitor["name"] && !!monitor["serial"]
     },
@@ -228,54 +230,6 @@ export default {
 
       carbonDioxideMonitor['serial'] = event.target.value;
     },
-    async load() {
-      setupCSRF();
-
-      this.getCurrentUser();
-      this.loadProfile();
-      await axios.get(`/users/${this.currentUser.id}/carbon_dioxide_monitors.json`)
-        .then(response => {
-          const monitors = response.data.carbonDioxideMonitors;
-          for (let monitor of monitors) {
-            monitor['status'] = 'display'
-          }
-          this.carbonDioxideMonitors = monitors
-
-          // whatever you want
-        })
-        .catch(error => {
-          console.log(error)
-          this.message = "Failed to load carbon dioxide monitors."
-          // whatever you want
-        })
-    },
-    async loadProfile() {
-      setupCSRF();
-
-      let toSave = {
-        'profile': {
-          'measurement_system': this.systemOfMeasurement
-        }
-      }
-
-      await axios.post(
-        `/users/${this.currentUser.id}/profiles.json`,
-        toSave
-      )
-        .then(response => {
-          let data = response.data
-
-          this.message = data.message
-          this.systemOfMeasurement = data.systemOfMeasurement
-
-          // whatever you want
-        })
-        .catch(error => {
-          console.log(error)
-          this.message = "Failed to load profile."
-          // whatever you want
-        })
-    }
   },
 }
 

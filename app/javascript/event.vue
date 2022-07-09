@@ -305,7 +305,12 @@ export default {
         ]
     ),
   },
-  created() { },
+  created() {
+    // TODO: fire and forget. Make asynchronous.
+    this.getCurrentUser()
+    this.loadProfile()
+    this.loadCO2Monitors()
+  },
   data() {
     return {
       center: {lat: 51.093048, lng: 6.842120},
@@ -374,7 +379,8 @@ export default {
     }
   },
   methods: {
-    ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab']),
+    ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
+    ...mapActions(useProfileStore, ['loadCO2Monitors', 'loadProfile']),
     ...mapActions(useEventStores, ['addEvent']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
