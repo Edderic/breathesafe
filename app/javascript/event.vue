@@ -208,7 +208,7 @@
 
       <div class='container wide'>
         <label class='textarea-label'>Parsed</label>
-        <table>
+        <table v-if='occupancy.unparsedOccupancyData != ""'>
           <tr>
             <th></th>
             <th v-for='hour in hours'>{{ hour }}</th>
