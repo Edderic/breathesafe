@@ -318,6 +318,12 @@ export default {
           'ventilationNotes'
         ]
     ),
+    ...mapWritableState(
+        useEventStores,
+        [
+          'events'
+        ]
+    ),
   },
   async created() {
     // TODO: fire and forget. Make asynchronous.
