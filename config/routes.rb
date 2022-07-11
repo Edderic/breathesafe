@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   end
 
   post 'events', to: 'events#create'
+  get 'events', to: 'events#index'
   get 'profiles', to: 'users/profiles#index'
 
   post 'users/:user_id/carbon_dioxide_monitors', to: 'users/carbon_dioxide_monitors#create_or_update'

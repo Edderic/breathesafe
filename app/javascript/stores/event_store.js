@@ -7,8 +7,8 @@ import { cubicFeetPerMinuteTocubicMetersPerHour, feetToMeters, generateUUID } fr
 export const useEventStore = defineStore('event', {
   state: () => ({
     placeData: {
-      'placeId': "",
-      'formattedAddress': "",
+      'place_id': "",
+      'formatted_address': "",
       'center': {
         'lat': 0,
         'lng': 0
@@ -20,22 +20,20 @@ export const useEventStore = defineStore('event', {
     roomWidth: "",
     roomWidthMeters: "",
     roomLengthMeters: "",
-    roomHeightMeters: "",
+    roomLength: "",
     duration: "",
-    numberOfPeople: '',
-    carbonDioxideSteadyState: '',
-    carbonDioxideAmbient: '420',
-    carbonDioxideMeasurementDeviceSerial: '',
-    carbonDioxideMeasurementDeviceName: '',
-    carbonDioxideMeasurementDeviceModel: '',
+    ventilationCO2AmbientPPM: 420,
+    ventilationCO2SteadyStatePPM: '',
+    ventilationCO2MeasurementDeviceName: '',
+    ventilationCO2MeasurementDeviceModel: '',
+    ventilationCO2MeasurementDeviceSerial: '',
     carbonDioxideMonitors: [],
     systemOfMeasurement: 'imperial',
     lengthMeasurementType: 'feet',
     airDeliveryRate: "",
     singlePassFiltrationEfficiency: "",
-    eventPrivacy: 'public',
+    private: 'public',
     activityGroups: [],
-    formattedAddress: "",
     carbonDioxideActivities: {
       "Calisthenics—light effort": 2.8,
       "Calisthenics—moderate effort": 3.8,
@@ -117,7 +115,7 @@ export const useEventStore = defineStore('event', {
       "Positive"
     ],
     ventilationNotes: "",
-    startDateTime: new Date()
+    startDatetime: new Date()
   }),
   getters: {
     findActivityGroup: (state) => {
@@ -128,8 +126,6 @@ export const useEventStore = defineStore('event', {
     },
   },
   actions: {
-    save() {
-    },
     addPortableAirCleaner() {
       this.portableAirCleaners.unshift({
         'id': generateUUID(),

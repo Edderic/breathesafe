@@ -24,7 +24,7 @@
     <div class='container'>
       <label>Start time</label>
       <input class='wider-input'
-        v-model="startDateTime"
+        v-model="startDatetime"
       >
     </div>
 
@@ -53,7 +53,7 @@
 
     <div class='container'>
       <label>Make this information private</label>
-      <select :value='eventPrivacy' @change='setEventPrivacy'>
+      <select :value='private' @change='setEventPrivacy'>
         <option>public</option>
         <option>private</option>
       </select>
@@ -81,6 +81,13 @@
         <input
           :value="roomHeight"
           @change="setRoomHeight">
+      </div>
+
+      <div class='container'>
+        <label>Usable Volume Factor (dimension-less)</label>
+        <input
+          v-model="room_usable_volume_factor"
+        >
       </div>
     </div>
 
@@ -118,7 +125,7 @@
       <div class='container'>
         <label>CO2 Measurement Device</label>
 
-        <select :value='carbonDioxideMeasurementDeviceName' @change='setCarbonDioxideMonitor'>
+        <select :value='ventilationCO2MeasurementDeviceName' @change='setCarbonDioxideMonitor'>
           <option v-for='carbonDioxideMonitor in carbonDioxideMonitors'>{{ carbonDioxideMonitor['name'] }}</option>
         </select>
       </div>
@@ -126,14 +133,14 @@
       <div class='container'>
         <label>CO2 Ambient (parts per million)</label>
         <input
-          :value="carbonDioxideAmbient"
+          :value="ventilationCO2AmbientPPM"
           @change="setCarbonDioxideAmbient">
       </div>
 
       <div class='container'>
         <label>CO2 Steady State (parts per million)</label>
         <input
-          :value="carbonDioxideSteadyState"
+          :value="ventilation_co2_steady_state_ppm"
           @change="setCarbonDioxideSteadyState">
       </div>
 
@@ -237,13 +244,14 @@
 
 <script>
 // Have a VueX store that maintains state across components
+import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia';
-import { cubicFeetPerMinuteTocubicMetersPerHour, daysToIndexDict, feetToMeters, indexToHour } from  './misc';
+import { setupCSRF, cubicFeetPerMinuteTocubicMetersPerHour, daysToIndexDict, feetToMeters, indexToHour } from  './misc';
 
 export default {
   name: 'App',
@@ -252,6 +260,12 @@ export default {
     Event
   },
   computed: {
+    ...mapState(
+        useMainStore,
+        [
+          'currentUser',
+        ]
+    ),
     ...mapWritableState(
         useMainStore,
         [
@@ -272,14 +286,14 @@ export default {
           'activityGroups',
           'ageGroups',
           'carbonDioxideActivities',
-          'carbonDioxideAmbient',
-          'carbonDioxideMeasurementDeviceModel',
-          'carbonDioxideMeasurementDeviceName',
-          'carbonDioxideMeasurementDeviceSerial',
-          'carbonDioxideSteadyState',
+          'ventilationCO2AmbientPPM',
+          'ventilationCO2MeasurementDeviceModel',
+          'ventilationCO2MeasurementDeviceName',
+          'ventilationCO2MeasurementDeviceSerial',
+          'ventilation_co2_steady_state_ppm',
           'duration',
-          'eventPrivacy',
-          'formattedAddress',
+          'private',
+          'formatted_address',
           'infectorActivity',
           'infectorActivityTypeMapping',
           'maskTypes',
@@ -297,7 +311,7 @@ export default {
           'roomWidthMeters',
           'roomName',
           'singlePassFiltrationEfficiency',
-          'startDateTime',
+          'startDatetime',
           'susceptibleActivities',
           'susceptibleActivity',
           'susceptibleAgeGroups',
@@ -305,9 +319,9 @@ export default {
         ]
     ),
   },
-  created() {
+  async created() {
     // TODO: fire and forget. Make asynchronous.
-    this.getCurrentUser()
+    await this.getCurrentUser()
     this.loadProfile()
     this.loadCO2Monitors()
   },
@@ -375,7 +389,8 @@ export default {
         '9 PM',
         '10 PM',
         '11 PM',
-      ]
+      ],
+      room_usable_volume_factor: 0.8
     }
   },
   methods: {
@@ -399,6 +414,7 @@ export default {
       this.focusTab = 'events'
     },
     parseOccupancyData(event) {
+      this.occupancy.unparsedOccupancyData = event.target.value
       const occupancyRegex = /\w*\s?\d*\%\s*busy\s*\w*\s*\d*\s*[A-Z]*/g
       const closedDaysRegex = /(?<=Closed )\w+/g
       const percentRegex = /(\d+)(?=\% busy)/g
@@ -479,34 +495,36 @@ export default {
     },
     async save() {
       let toSave = {
-          'activityGroups': this.activityGroups,
-          'airDeliveryRateMeasurementType': this.airDeliveryRateMeasurementType,
-          'carbonDioxideAmbient': this.carbonDioxideAmbient,
-          'carbonDioxideMeasurementDeviceName': this.carbonDioxideMeasurementDeviceName,
-          'carbonDioxideMeasurementDeviceModel': this.carbonDioxideMeasurementDeviceModel,
-          'carbonDioxideMeasurementDeviceSerial': this.carbonDioxideMeasurementDeviceSerial,
-          'carbonDioxideSteadyState': this.carbonDioxideSteadyState,
-          'startDateTime': this.startDateTime,
-          'duration': this.duration,
-          'eventPrivacy': this.eventPrivacy,
-          'lengthMeasurementType': this.lengthMeasurementType,
-          'placeData': this.placeData,
-          'portableAirCleaners': this.portableAirCleaners, // TODO: each one should have an air delivery rate in cubic meters per hour
-          'rapidTestResult': this.rapidTestResult,
-          'roomWidthMeters': this.roomWidthMeters,
-          'roomHeightMeters': this.roomHeightMeters,
-          'roomLengthMeters': this.roomLengthMeters,
-          'roomName': this.roomName,
-          'roomWidth': this.roomWidth,
+          'event': {
+            'author_id': this.currentUser.id,
+            'activity_groups': this.activityGroups,
+            'ventilation_co2_ambient_ppm': this.ventilationCO2AmbientPPM,
+            'ventilation_co2_measurement_device_name': this.ventilationCO2MeasurementDeviceName,
+            'ventilation_co2_measurement_device_model': this.ventilationCO2MeasurementDeviceModel,
+            'ventilation_co2_measurement_device_serial': this.ventilationCO2MeasurementDeviceSerial,
+            'ventilation_co2_steady_state_ppm': this.ventilation_co2_steady_state_ppm,
+            'ventilation_notes': this.ventilationNotes,
+            'start_datetime': this.startDatetime,
+            'duration': this.duration,
+            'private': this.private,
+            'place_data': this.placeData,
+            'occupancy': {
+              'parsed': this.occupancy.parsed
+            },
+            'portable_air_cleaners': this.portableAirCleaners,
+            'room_width_meters': this.roomWidthMeters,
+            'room_height_meters': this.roomHeightMeters,
+            'room_length_meters': this.roomLengthMeters,
+            'room_name': this.roomName,
+            'room_usable_volume_factor': this.room_usable_volume_factor
+        }
       }
 
-      let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
-      axios.defaults.headers.common['X-CSRF-Token'] = token
-      axios.defaults.headers.common['Accept'] = 'application/json'
+      setupCSRF()
       await axios.post('/events', toSave)
         .then(response => {
           console.log(response)
-          if (response.status == 204 || response.status == 200) {
+          if (response.status == 201 || response.status == 200) {
             this.events.unshift(event);
             this.addEvent(toSave)
             this.focusTab = 'events'
@@ -560,12 +578,15 @@ export default {
       const loc = place.geometry.location;
 
       this.placeData = {
-        'placeId': place.place_id,
-        'formattedAddress': place.formatted_address,
+        'place_id': place.place_id,
+        'formatted_address': place.formatted_address,
         'center': {
           'lat': loc.lat(),
           'lng': loc.lng()
-        }
+        },
+        'types': place.types,
+        'website': place.website,
+        'opening_hours': place.opening_hours,
       }
 
       this.setGMapsPlace(this.placeData.center)
@@ -574,7 +595,7 @@ export default {
       this.duration = event.target.value;
     },
     setEventPrivacy(event) {
-      this.eventPrivacy = event.target.value;
+      this.private = event.target.value;
     },
     setRoomName(event) {
       this.roomName = event.target.value;
@@ -595,18 +616,18 @@ export default {
       this.singlePassFiltrationEfficiency = event.target.value;
     },
     setCarbonDioxideAmbient(event) {
-      this.carbonDioxideAmbient = event.target.value;
+      this.ventilationCO2AmbientPPM = event.target.value;
     },
     setCarbonDioxideMonitor(event) {
       let val = event.target.value;
-      this.carbonDioxideMeasurementDeviceName = val
+      this.ventilationCO2MeasurementDeviceName = val
 
       let found = this.carbonDioxideMonitors.find((m) => m.name == val)
-      this.carbonDioxideMeasurementDeviceSerial = found.serial
-      this.carbonDioxideMeasurementDeviceModel = found.model
+      this.ventilationCO2MeasurementDeviceSerial = found.serial
+      this.ventilationCO2MeasurementDeviceModel = found.model
     },
     setCarbonDioxideSteadyState(event) {
-      this.carbonDioxideSteadyState = event.target.value;
+      this.ventilation_co2_steady_state_ppm = event.target.value;
     },
     setAerosolGenerationActivity(event, id) {
       let activityGroup = this.findActivityGroup()(id);

@@ -11,6 +11,9 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[7.0].define(version: 2022_07_06_181747) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "carbon_dioxide_monitors", force: :cascade do |t|
     t.string "name"
     t.string "model"
@@ -21,33 +24,32 @@ ActiveRecord::Schema[7.0].define(version: 2022_07_06_181747) do
   end
 
   create_table "events", force: :cascade do |t|
-    t.string "address"
-    t.string "room_name"
-    t.float "room_length_meters"
+    t.jsonb "portable_air_cleaners"
     t.float "room_width_meters"
+    t.float "room_length_meters"
     t.float "room_height_meters"
-    t.float "place_lat"
-    t.float "place_long"
-    t.datetime "start_datetime"
-    t.integer "duration_hours"
-    t.boolean "private"
-    t.text "portable_air_cleaners"
-    t.string "ventilation_co2_name"
-    t.string "ventilation_co2_serial"
-    t.string "ventilation_co2_model"
-    t.integer "ventilation_co2_steady_state_ppm"
-    t.integer "ventilation_co2_ambient_ppm"
+    t.string "room_name"
+    t.float "room_usable_volume_factor"
+    t.jsonb "place_data"
+    t.jsonb "activity_groups"
+    t.float "ventilation_co2_ambient_ppm"
+    t.string "ventilation_co2_measurement_device_name"
+    t.string "ventilation_co2_measurement_device_model"
+    t.string "ventilation_co2_measurement_device_serial"
+    t.float "ventilation_co2_steady_state_ppm"
     t.text "ventilation_notes"
-    t.text "activity_groups"
-    t.integer "author_id"
+    t.datetime "start_datetime"
+    t.string "duration"
+    t.boolean "private"
+    t.integer "author_id", null: false
+    t.jsonb "occupancy"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["address"], name: "index_events_on_address"
     t.index ["author_id"], name: "index_events_on_author_id"
   end
 
   create_table "profiles", force: :cascade do |t|
-    t.integer "user_id", null: false
+    t.bigint "user_id", null: false
     t.string "measurement_system", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -55,7 +57,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_07_06_181747) do
   end
 
   create_table "user_carbon_dioxide_monitors", force: :cascade do |t|
-    t.integer "user_id", null: false
+    t.bigint "user_id", null: false
     t.string "serial", null: false
     t.string "model", null: false
     t.datetime "created_at", null: false

@@ -17,6 +17,7 @@
 // Have a VueX store that maintains state across components
 import axios from 'axios'
 import { useMainStore } from './stores/main_store';
+import { useEventStores } from './stores/event_stores';
 import { mapActions, mapState, mapWritableState, mapStores } from 'pinia'
 
 export default {
@@ -32,11 +33,14 @@ export default {
   created() {
   },
   data() {
+    return {}
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
+    ...mapActions(useEventStores, { 'load': 'loadEvents' }),
     navToEvents() {
       this.focusTab = 'events'
+      this.loadEvents()
     },
     navToProfile() {
       this.focusTab = 'profile'

@@ -27,6 +27,7 @@ export const useProfileStore = defineStore('profile', {
     ...mapActions(useMainStore, ['getCurrentUser']),
     async loadProfile() {
       setupCSRF();
+      await this.getCurrentUser()
 
       let toSave = {
         'profile': {

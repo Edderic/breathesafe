@@ -5,6 +5,10 @@
       <h2>Sign in</h2>
     </div>
 
+    <div class='container centered'>
+      <h3>{{ message }}</h3>
+    </div>
+
     <div class='container'>
       <label>Email</label>
 
@@ -48,7 +52,8 @@ export default {
   data() {
     return {
       name: "",
-      password: ""
+      password: "",
+      message: ""
     }
   },
   methods: {
@@ -79,6 +84,7 @@ export default {
       })
       .catch(error => {
         console.log(error)
+        this.message = "Error with logging in."
         // whatever you want
       })
     }

@@ -6,9 +6,9 @@
         <th>Address</th>
         <th>Room</th>
       </tr>
-      <tr v-for="ev in events">
-        <td>{{ev.placeData.formattedAddress}}</td>
-        <td>{{ev.roomName}}</td>
+      <tr v-for="ev in events" :key="ev.id">
+        <td>{{ev.place_data.formatted_address}}</td>
+        <td>{{ev.room_name}}</td>
       </tr>
     </table>
   </div>
@@ -16,6 +16,7 @@
 
 <script>
 // Have a VueX store that maintains state across components
+import axios from 'axios';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { mapWritableState, mapState, mapActions } from 'pinia'
@@ -39,7 +40,9 @@ export default {
         ]
     )
   },
-  created() { },
+  created() {
+    this.load()
+  },
   data() {
   },
   methods: {
@@ -49,9 +52,15 @@ export default {
           'setFocusTab'
         ]
     ),
+    ...mapActions(
+        useEventStores,
+        [
+          'load'
+        ]
+    ),
     newEvent() {
       this.setFocusTab('event')
-    }
+    },
   },
 }
 </script>
