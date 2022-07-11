@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_07_06_181747) do
+ActiveRecord::Schema[7.0].define(version: 2022_07_11_021908) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,7 +40,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_07_06_181747) do
     t.text "ventilation_notes"
     t.datetime "start_datetime"
     t.string "duration"
-    t.boolean "private"
+    t.string "private"
     t.integer "author_id", null: false
     t.jsonb "occupancy"
     t.datetime "created_at", null: false
