@@ -259,7 +259,10 @@ import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia';
-import { setupCSRF, cubicFeetPerMinuteTocubicMetersPerHour, daysToIndexDict, feetToMeters, indexToHour } from  './misc';
+import {
+   setupCSRF, cubicFeetPerMinuteTocubicMetersPerHour, daysToIndexDict,
+   feetToMeters, indexToHour, computeVentilationACH, computePortableACH
+} from  './misc';
 
 export default {
   name: 'App',
