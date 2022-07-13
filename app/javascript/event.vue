@@ -86,7 +86,7 @@
       <div class='container'>
         <label>Usable Volume Factor (dimension-less)</label>
         <input
-          v-model="room_usable_volume_factor"
+          v-model="roomUsableVolumeFactor"
         >
       </div>
     </div>
@@ -140,7 +140,7 @@
       <div class='container'>
         <label>CO2 Steady State (parts per million)</label>
         <input
-          :value="ventilation_co2_steady_state_ppm"
+          :value="ventilationCO2SteadyStatePPM"
           @change="setCarbonDioxideSteadyState">
       </div>
 
