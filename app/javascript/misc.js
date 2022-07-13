@@ -29,14 +29,17 @@ export function interpolateColor(colors, ratio) {
   }
 
 export function carbonDioxideGenerationRate(met, man, age) {
-  /*
+  /*  Meant for extrapolating CO2 generation rate given met, sex, and age
+   *
    *  Params:
    *    met: a number
    *      Higher met, higher CO2 breathed out
    *    man: boolean
-   *      Man or not
+   *      True if man, False, otherwise.
    *    age: string
    *      Age groups
+   *  Returns:
+   *    CO2 generation rate (L/s)
    */
   const dict = [
     {
