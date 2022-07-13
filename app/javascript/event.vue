@@ -163,6 +163,14 @@
         </div>
 
         <div class='container'>
+          <label>Sex</label>
+          <select :value='activityGroup["sex"]' @change='setSex($event, activityGroup.id)'>
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+        </div>
+
+        <div class='container'>
           <label>Aerosol generation</label>
           <select :value='activityGroup["aerosolGenerationActivity"]' @change='setAerosolGenerationActivity($event, activityGroup.id)'>
             <option v-for='(value, infectorActivityType, index) in infectorActivityTypeMapping'>{{ infectorActivityType }}</option>
