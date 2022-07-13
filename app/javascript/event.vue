@@ -411,7 +411,7 @@ export default {
         '10 PM',
         '11 PM',
       ],
-      room_usable_volume_factor: 0.8
+      roomUsableVolumeFactor: 0.8
     }
   },
   methods: {
