@@ -28,6 +28,53 @@ export function interpolateColor(colors, ratio) {
     }
   }
 
+export function carbonDioxideGenerationRate(met, man, age) {
+  /*
+   *  Params:
+   *    met: a number
+   *      Higher met, higher CO2 breathed out
+   *    man: boolean
+   *      Man or not
+   *    age: string
+   *      Age groups
+   */
+  const dict = [
+    {
+      '1 to <3': {'coef': 0.00279, 'intercept': -0.000017},
+      '11 to <16': {'coef': 0.002713, 'intercept': -0.000015},
+      '16 to <21': {'coef': 0.002698, 'intercept': -0.000014},
+      '21 to <30': {'coef': 0.002688, 'intercept': -0.000013},
+      '3 to <6': {'coef': 0.002774, 'intercept': -0.000016},
+      '30 to <40': {'coef': 0.002696, 'intercept': -0.000014},
+      '40 to <50': {'coef': 0.002693, 'intercept': -0.000012},
+      '50 to <60': {'coef': 0.002694, 'intercept': -0.000014},
+      '6 to <11': {'coef': 0.002749, 'intercept': -0.000015},
+      '60 to <70': {'coef': 0.002716, 'intercept': -0.000014},
+      '70 to <80': {'coef': 0.002722, 'intercept': -0.000015},
+      '<1': {'coef': 0.002813, 'intercept': -0.000015},
+      '>=80': {'coef': 0.002729, 'intercept': -0.000015}
+    },
+    {
+      '1 to <3': {'coef': 0.001459, 'intercept': 0.000055},
+      '11 to <16': {'coef': 0.003397, 'intercept': 0.00001},
+      '16 to <21': {'coef': 0.00376, 'intercept': -0.000012},
+      '21 to <30': {'coef': 0.004014, 'intercept': -0.000043},
+      '3 to <6': {'coef': 0.001878, 'intercept': 0.000019},
+      '30 to <40': {'coef': 0.00381, 'intercept': -0.000029},
+      '40 to <50': {'coef': 0.003891, 'intercept': -0.000064},
+      '50 to <60': {'coef': 0.003863, 'intercept': -0.000022},
+      '6 to <11': {'coef': 0.0025, 'intercept': 0.0},
+      '60 to <70': {'coef': 0.003323, 'intercept': -0.000028},
+      '70 to <80': {'coef': 0.003177, 'intercept': -0.000003},
+      '<1': {'coef': 0.000897, 'intercept': 0.00001},
+      '>=80': {'coef': 0.003, 'intercept': 0.0}
+    }
+  ]
+
+  const model = dict[man][age]
+
+  return model['coef'] * met + model['intercept']
+}
 
 export function feetToMeters(measurement_type, num) {
   if (measurement_type == 'feet') {
