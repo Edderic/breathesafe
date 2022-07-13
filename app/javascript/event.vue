@@ -301,7 +301,7 @@ export default {
           'ventilationCO2MeasurementDeviceModel',
           'ventilationCO2MeasurementDeviceName',
           'ventilationCO2MeasurementDeviceSerial',
-          'ventilation_co2_steady_state_ppm',
+          'ventilationCO2SteadyStatePPM',
           'duration',
           'private',
           'formatted_address',
@@ -345,6 +345,9 @@ export default {
   data() {
     return {
       center: {lat: 51.093048, lng: 6.842120},
+      ventilationACH: 0.0,
+      portableACH: 0.0,
+      totalACH: 0.0,
       colorInterpolationScheme: [
         {
           name: 'green',
@@ -385,7 +388,8 @@ export default {
       occupancy: {
         unparsedOccupancyData: "",
         parsed: {
-        }
+        },
+        maximumOccupancy: 0
       },
       hours: [
         '6 AM',
