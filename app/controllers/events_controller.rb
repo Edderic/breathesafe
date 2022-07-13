@@ -82,7 +82,8 @@ class EventsController < ApplicationController
       ],
       place_data: {},
       occupancy: {
-        parsed: {}
+        parsed: {},
+        maximum_occupancy: {}
       }
     )
   end
