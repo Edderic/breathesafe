@@ -426,6 +426,7 @@ export default {
         'aerosolGenerationActivity': "",
         'carbonDioxideGenerationActivity': "",
         'ageGroup': "",
+        'sex': "",
         'maskType': "",
         'numberOfPeople': "",
         'rapidTestResult': 'Unknown'
