@@ -12,6 +12,9 @@ export const useEventStores = defineStore('events', {
   getters: {
   },
   actions: {
+    addEvent(event) {
+      this.events.push(event)
+    },
     load() {
       setupCSRF()
       axios.get('/events')
