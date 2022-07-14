@@ -5,10 +5,12 @@
       <tr>
         <th>Address</th>
         <th>Room</th>
+        <th>Total ACH</th>
       </tr>
       <tr v-for="ev in events" :key="ev.id">
         <td>{{ev.place_data.formatted_address}}</td>
         <td>{{ev.room_name}}</td>
+        <td>{{Math.round(ev.total_ach * 10) / 10}}</td>
       </tr>
     </table>
   </div>
