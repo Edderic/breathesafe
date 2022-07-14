@@ -689,7 +689,7 @@ export default {
       this.ventilationCO2MeasurementDeviceModel = found.model
     },
     setCarbonDioxideSteadyState(event) {
-      this.ventilation_co2_steady_state_ppm = event.target.value;
+      this.ventilationCO2SteadyStatePPM = event.target.value;
     },
     setAerosolGenerationActivity(event, id) {
       let activityGroup = this.findActivityGroup()(id);
