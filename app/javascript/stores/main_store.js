@@ -7,6 +7,7 @@ import { setupCSRF } from '../misc'
 export const useMainStore = defineStore('main', {
   state: () => ({
     center: {lat: 51.093048, lng: 6.842120},
+    markers: [],
     zoom: 7,
     focusTab: 'events',
     signedIn: false,
@@ -14,6 +15,9 @@ export const useMainStore = defineStore('main', {
     message: ''
   }),
   actions: {
+    setMarkers(markers) {
+      this.markers = markers
+    },
     setMessage(message) {
       this.message = message
     },

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { useMainStore } from './main_store'
 import axios from 'axios'
 import { deepSnakeToCamel, setupCSRF } from  '../misc'
 
@@ -24,6 +25,15 @@ export const useEventStores = defineStore('events', {
           if (response.status == 200) {
             let camelized = deepSnakeToCamel(response.data.events)
             this.events = camelized
+            let markers = []
+
+            for (let event of this.events) {
+              let center = event.placeData.center
+              markers.push({'center': center})
+            }
+
+            const mainStore = useMainStore()
+            mainStore.setMarkers(markers)
           }
 
           // whatever you want

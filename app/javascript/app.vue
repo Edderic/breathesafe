@@ -9,6 +9,16 @@
           map-type-id="terrain"
           style="width: 50vw; height: 500px"
       >
+        <GMapCluster>
+          <GMapMarker
+              :key="index"
+              v-for="(m, index) in markers"
+              :position="m.center"
+              :clickable="true"
+              :draggable="true"
+              @click="center=m.center"
+          />
+        </GMapCluster>
       </GMapMap>
 
       <Event v-if='focusTab == "event" && signedIn'/>
@@ -47,7 +57,7 @@ export default {
   },
   computed: {
     ...mapStores(useMainStore),
-    ...mapState(useMainStore, ["focusTab", "signedIn"]),
+    ...mapState(useMainStore, ["focusTab", "signedIn", "markers"]),
     ...mapWritableState(useMainStore, ['center', 'zoom'])
 
   },
