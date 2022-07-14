@@ -26,6 +26,38 @@ export function interpolateColor(colors, ratio) {
       return `rgb(${parseInt(red)}, ${parseInt(green)}, ${parseInt(blue)})`;
     }
   }
+}
+
+const snakeToCamel = str =>
+  str.toLowerCase().replace(/([-_][a-z])/g, group =>
+    group
+      .toUpperCase()
+      .replace('-', '')
+      .replace('_', '')
+  );
+
+export function deepSnakeToCamel(obj) {
+  /*
+   * Useful for converting nested objects / arrays. Ruby convention is to use
+   * snake_case while Javascript convention is to use camelCase. This should be
+   * used when converting data from the Rails backend into Javascript.
+   */
+  let new_obj;
+
+  if (Array.isArray(obj)) {
+    new_obj = []
+  } else if (typeof(obj) == 'object') {
+    new_obj = {}
+  } else {
+    return obj
+  }
+
+  for (let o in obj) {
+    new_obj[snakeToCamel(o)] = deepSnakeToCamel(obj[o])
+  }
+
+  return new_obj
+}
 
 export function computeVentilationACH(
   activityGroups,

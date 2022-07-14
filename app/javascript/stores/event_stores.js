@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { setupCSRF } from  '../misc'
+import { deepSnakeToCamel, setupCSRF } from  '../misc'
 
 
 // useStore could be anything like useUser, useCart
@@ -13,7 +13,8 @@ export const useEventStores = defineStore('events', {
   },
   actions: {
     addEvent(event) {
-      this.events.push(event)
+      let camelized = deepSnakeToCamel(event)
+      this.events.push(camelized)
     },
     load() {
       setupCSRF()
@@ -21,7 +22,8 @@ export const useEventStores = defineStore('events', {
         .then(response => {
           console.log(response)
           if (response.status == 200) {
-            this.events = response.data.events
+            let camelized = deepSnakeToCamel(response.data.events)
+            this.events = camelized
           }
 
           // whatever you want
