@@ -523,6 +523,29 @@ export default {
       console.log(dictionary)
     },
     async save() {
+      this.roomUsableVolumeCubicMeters = parseFloat(this.roomWidthMeters)
+        * parseFloat(this.roomHeightMeters)
+        * parseFloat(this.roomLengthMeters)
+        * parseFloat(this.roomUsableVolumeFactor)
+
+      this.ventilationACH = computeVentilationACH(
+        this.activityGroups,
+        this.ventilationCO2AmbientPPM,
+        this.ventilationCO2SteadyStatePPM,
+        this.roomUsableVolumeCubicMeters
+      )
+
+      this.portableACH = computePortableACH(
+        this.portableAirCleaners,
+        this.roomUsableVolumeCubicMeters
+      )
+
+      this.totalACH = this.portableACH + this.ventilationACH
+
+      // TODO: compute portable air cleaners ACH
+      // update controller
+      // update database schema
+
       let toSave = {
           'event': {
             'author_id': this.currentUser.id,
