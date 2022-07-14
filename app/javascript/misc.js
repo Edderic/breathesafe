@@ -28,7 +28,94 @@ export function interpolateColor(colors, ratio) {
     }
   }
 
-export function carbonDioxideGenerationRate(met, man, age) {
+export function computeVentilationACH(
+  activityGroups,
+  ambientPPM,
+  steadyStatePPM,
+  volumeCubicMeters
+) {
+  /*
+   * (steadyStatePPM - ambientPPM) / 1_000_000
+   *   = totalCO2 Emitted (m3 / h) / [V (m3) ACH (1 / h) ]
+   *
+   *        1_000_000 * totalCO2 Emitted (L / s) * 3600 s / h * 1 m3 / 1000 L
+   *  ACH = -------------------------------------
+   *          (steadyStatePPM - ambientPPM) * V
+   *
+   *        1_000_000 * totalCO2 Emitted (L / h) * 3.6 * 1 m3 / L
+   *  ACH = -------------------------------------
+   *          (steadyStatePPM - ambientPPM) * V
+   *
+   *        1_000_000 * totalCO2 Emitted (m3 / h) * 3.6
+   *  ACH = -------------------------------------
+   *          (steadyStatePPM - ambientPPM) * V
+   *
+   *        3.6 * 10^6 * totalCO2 Emitted (m3 / h)
+   *  ACH = -------------------------------------
+   *          (steadyStatePPM - ambientPPM) * V
+   *
+   *
+   */
+
+  let total = 0
+
+  for (let activityGroup of activityGroups) {
+    let met = getMetFromCO2GenerationActivity(activityGroup['carbonDioxideGenerationActivity'])
+    let co2GenerationRate = getCO2GenerationRate(met, activityGroup['sex'] == 'Male', activityGroup['ageGroup'])
+    total += co2GenerationRate * parseInt(activityGroup['numberOfPeople'])
+  }
+
+  const numerator = total * 3.6 * 1000000
+  // 36 * 10^5
+  // divided by 60
+  // 6 x 10^4
+  const denominator = (parseInt(steadyStatePPM) - parseInt(ambientPPM)) * volumeCubicMeters
+
+  const ach = numerator / denominator
+
+  return ach
+}
+
+export function computePortableACH(
+  portableAirCleaners,
+  roomUsableVolumeCubicMeters
+) {
+  let total = 0.0
+  for (let portableAirCleaner of portableAirCleaners) {
+    total += parseFloat(portableAirCleaner['airDeliveryRateCubicMetersPerHour']) / parseFloat(roomUsableVolumeCubicMeters)
+  }
+
+  return total
+}
+
+function getMetFromCO2GenerationActivity(activity) {
+  const mapping = {
+      "Calisthenics—light effort": 2.8,
+      "Calisthenics—moderate effort": 3.8,
+      "Calisthenics—vigorous effort": 8.0,
+      "Child care": 2.5, // 2 - 3
+      "Cleaning, sweeping—moderate effort": 3.8,
+      "Custodial work—light": 2.3,
+      "Dancing—aerobic, general": 7.3,
+      "Dancing—general": 7.8,
+      "Health club exercise classes—general": 5.0,
+      "Kitchen activity—moderate effort": 3.3,
+      "Lying or sitting quietly": 1.0,
+      "Sitting reading, writing, typing": 1.3,
+      "Sitting at sporting event as spectator": 1.5,
+      "Sitting tasks, light effort (e.g, office work)": 1.5,
+      "Sitting quietly in religious service": 1.3,
+      "Sleeping": 0.95,
+      "Standing quietly": 1.3,
+      "Standing tasks, light effort (e.g, store clerk, filing)": 3.0,
+      "Walking, less than 2 mph, level surface, very slow": 2.0,
+      "Walking, 2.8 mph to 3.2 mph, level surface, moderate pace": 3.5,
+  }
+
+  return mapping[activity]
+}
+
+function getCO2GenerationRate(met, man, age) {
   /*  Meant for extrapolating CO2 generation rate given met, sex, and age
    *
    *  Params:
