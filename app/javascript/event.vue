@@ -616,6 +616,7 @@ export default {
         'carbonDioxideGenerationActivity': activityGroup['carbonDioxideGenerationActivity'],
         'ageGroup': activityGroup['ageGroup'],
         'maskType': activityGroup['maskType'],
+        'sex': activityGroup['sex'],
         'numberOfPeople': activityGroup['numberOfPeople'],
         'rapidTestResult': activityGroup['rapidTestResult']
       });
