@@ -550,25 +550,30 @@ export default {
           'event': {
             'author_id': this.currentUser.id,
             'activity_groups': this.activityGroups,
+            'ventilation_ach': this.ventilationACH,
             'ventilation_co2_ambient_ppm': this.ventilationCO2AmbientPPM,
             'ventilation_co2_measurement_device_name': this.ventilationCO2MeasurementDeviceName,
             'ventilation_co2_measurement_device_model': this.ventilationCO2MeasurementDeviceModel,
             'ventilation_co2_measurement_device_serial': this.ventilationCO2MeasurementDeviceSerial,
-            'ventilation_co2_steady_state_ppm': this.ventilation_co2_steady_state_ppm,
+            'ventilation_co2_steady_state_ppm': this.ventilationCO2SteadyStatePPM,
             'ventilation_notes': this.ventilationNotes,
             'start_datetime': this.startDatetime,
             'duration': this.duration,
             'private': this.private,
             'place_data': this.placeData,
             'occupancy': {
-              'parsed': this.occupancy.parsed
+              'parsed': this.occupancy.parsed,
+              'maximum_occupancy': this.occupancy.maximumOccupancy
             },
             'portable_air_cleaners': this.portableAirCleaners,
+            'portable_ach': this.portableACH,
+            'total_ach': this.totalACH,
             'room_width_meters': this.roomWidthMeters,
             'room_height_meters': this.roomHeightMeters,
             'room_length_meters': this.roomLengthMeters,
+            'room_usable_volume_cubic_meters': this.roomUsableVolumeCubicMeters,
             'room_name': this.roomName,
-            'room_usable_volume_factor': this.room_usable_volume_factor
+            'room_usable_volume_factor': this.roomUsableVolumeFactor
         }
       }
 
