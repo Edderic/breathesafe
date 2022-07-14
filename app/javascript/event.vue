@@ -601,6 +601,10 @@ export default {
           (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
         );
     },
+    setSex(event, id) {
+      let activityGroup = this.findActivityGroup()(id)
+      activityGroup['sex'] = event.target.value
+    },
     cloneActivityGroup(id) {
       const activityGroup = this.activityGroups.find(
         (activityGroup) => activityGroup.id == id
