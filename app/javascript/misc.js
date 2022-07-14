@@ -161,7 +161,7 @@ function getCO2GenerationRate(met, man, age) {
     }
   ]
 
-  const model = dict[man][age]
+  const model = dict[man * 1][age]
 
   return model['coef'] * met + model['intercept']
 }
