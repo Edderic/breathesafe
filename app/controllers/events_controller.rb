@@ -73,10 +73,12 @@ class EventsController < ApplicationController
         :ageGroup,
         :maskType,
         :numberOfPeople,
-        :rapidTestResult
+        :rapidTestResult,
+        :sex
       ],
       portable_air_cleaners: [
-        :airDeliveryRate,
+        :id,
+        :airDeliveryRateCubicMetersPerHour,
         :singlePassFiltrationEfficiency,
         :notes
       ],
