@@ -2,29 +2,28 @@ import axios from 'axios';
 
 // Assumes there are at least two colors
 export function interpolateColor(colors, ratio) {
-    if (colors.length < 2) {
-      throw "Oops. Number of colors expected by interpolateColor is at least 2";
+  if (colors.length < 2) {
+    throw "Oops. Number of colors expected by interpolateColor is at least 2";
+  }
+
+  const colorLenMin1 = colors.length - 1;
+
+  for(let i=0; i< colorLenMin1; i++) {
+    if (ratio > 0.99) {
+      let lastColor = colors[colors.length-1] ;
+      return `rgb(${lastColor.r}, ${lastColor.g}, ${lastColor.b})`;
     }
 
-    const colorLenMin1 = colors.length - 1;
+    if (ratio < (i+1)/colorLenMin1 && ratio >= (i) / colorLenMin1) {
+      let distanceToPrevColor = ratio - i / colorLenMin1;
+      let prevColor = colors[i];
+      let currColor = colors[i+1];
 
-    for(let i=0; i< colorLenMin1; i++) {
-      if (ratio > 0.99) {
-        let lastColor = colors[colors.length-1] ;
-        return `rgb(${lastColor.r}, ${lastColor.g}, ${lastColor.b})`;
-      }
+      let red = prevColor.r + (currColor.r - prevColor.r) * distanceToPrevColor * colorLenMin1;
+      let green = prevColor.g + (currColor.g - prevColor.g) * distanceToPrevColor * colorLenMin1;
+      let blue = prevColor.b + (currColor.b - prevColor.b) * distanceToPrevColor * colorLenMin1;
 
-      if (ratio < (i+1)/colorLenMin1 && ratio >= (i) / colorLenMin1) {
-        let distanceToPrevColor = ratio - i / colorLenMin1;
-        let prevColor = colors[i];
-        let currColor = colors[i+1];
-
-        let red = prevColor.r + (currColor.r - prevColor.r) * distanceToPrevColor * colorLenMin1;
-        let green = prevColor.g + (currColor.g - prevColor.g) * distanceToPrevColor * colorLenMin1;
-        let blue = prevColor.b + (currColor.b - prevColor.b) * distanceToPrevColor * colorLenMin1;
-
-        return `rgb(${parseInt(red)}, ${parseInt(green)}, ${parseInt(blue)})`;
-      }
+      return `rgb(${parseInt(red)}, ${parseInt(green)}, ${parseInt(blue)})`;
     }
   }
 
