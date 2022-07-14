@@ -214,7 +214,14 @@
 
 
     <div class='container'>
-      <label class='subsection'>Occupancy over time</label>
+      <label class='subsection'>Occupancy</label>
+
+      <div class='container'>
+        <label class='textarea-label'>Max occupancy</label>
+        <input
+          v-model="occupancy.maximumOccupancy"
+        >
+      </div>
 
       <div class='container wide'>
         <label class='textarea-label'>Unparsed HTML</label>
