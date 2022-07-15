@@ -28,6 +28,83 @@ export function interpolateColor(colors, ratio) {
   }
 }
 
+export function parseOccupancyHTML(value) {
+  const occupancyRegex = /\w*\s?\d*\%\s*busy\s*\w*\s*\d*\s*[A-Z]*/g
+  const closedDaysRegex = /(?<=Closed )\w+/g
+  const percentRegex = /(\d+)(?=\% busy)/g
+  const hourRegex = /(?<=at )(\d+ \w{2})/g
+  const usuallyRegex = /(?<=usually )(\d+)(?=% busy)/
+  const currentlyRegex = /Currently/
+
+  const matches = value.match(occupancyRegex)
+  const closedDays = value.match(closedDaysRegex) || []
+
+  let closedIndices = []
+  for (let closedDay of closedDays) {
+    closedIndices.push(daysToIndexDict[closedDay])
+  }
+
+  let offset = 0
+  const numberOfHours = 18
+  const maxHours = 7 * numberOfHours
+
+  let dictionary = {
+    'Sundays': {},
+    'Mondays': {},
+    'Tuesdays': {},
+    'Wednesdays': {},
+    'Thursdays': {},
+    'Fridays': {},
+    'Saturdays': {},
+  }
+
+  console.log(matches)
+
+  for (const day in daysToIndexDict) {
+    let dayIndex = daysToIndexDict[day]
+
+    if (closedIndices.includes(dayIndex)) {
+      continue
+    }
+
+    let percentVal;
+    let hourVal;
+    let indexToRemove;
+
+    for (let h = 0; h < matches.length; h++) {
+      if (matches[h].match(currentlyRegex)) {
+        indexToRemove = h
+      }
+    }
+
+    if (indexToRemove) {
+      matches.splice(indexToRemove, 1)
+    }
+
+    let regex;
+
+    for (let h = 0; h < numberOfHours; h++) {
+      let overall_index = h + dayIndex * numberOfHours;
+      if (!matches[overall_index]) {
+        debugger
+      }
+      if (matches[overall_index].match(usuallyRegex)) {
+        regex = usuallyRegex;
+      } else {
+        regex = percentRegex;
+      }
+
+      percentVal = matches[overall_index].match(regex)[0]
+      hourVal = indexToHour(h)
+
+      dictionary[day][h] = {
+        'occupancy_percent': percentVal,
+        'hour': hourVal
+      }
+    }
+  }
+}
+
 export function getWeekdayText(placeData) {
   if (!placeData.openingHours) {
     return ["N/A"]
