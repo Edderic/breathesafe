@@ -28,6 +28,14 @@ export function interpolateColor(colors, ratio) {
   }
 }
 
+export function getWeekdayText(placeData) {
+  if (!placeData.openingHours) {
+    return ["N/A"]
+  } else {
+    return placeData.openingHours.weekdayText
+  }
+}
+
 const snakeToCamel = str =>
   str.toLowerCase().replace(/([-_][a-z])/g, group =>
     group
