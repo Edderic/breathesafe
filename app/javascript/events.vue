@@ -92,4 +92,21 @@ export default {
   button {
     padding: 1em 3em;
   }
+
+  .tag {
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .horizontally-center {
+    display: flex;
+    justify-content: center;
+  }
+
+  .margined {
+    margin: 1em;
+  }
 </style>
