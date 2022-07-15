@@ -320,6 +320,7 @@ export default {
           'roomHeightMeters',
           'roomLengthMeters',
           'roomWidthMeters',
+          'roomUsableVolumeFactor',
           'singlePassFiltrationEfficiency',
           'startDatetime',
           'susceptibleActivities',
