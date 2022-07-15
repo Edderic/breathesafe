@@ -30,7 +30,7 @@
         </div>
       </div>
       <div class='col'>
-        <ShowEvent v-if='focusTab == "events" && signedIn'/>
+        <ShowMeasurementSet v-if='focusTab == "events" && signedIn'/>
         <Event v-if='focusTab == "event" && signedIn'/>
         <Profile v-if='focusTab == "profile"'/>
         <Registration v-if='!signedIn && focusTab == "register"'/>
@@ -50,7 +50,7 @@ import Profile from './profile.vue';
 import Registration from './registration.vue';
 import Confirmation from './confirmation.vue';
 import SignIn from './sign_in.vue';
-import ShowEvent from './show_event.vue';
+import ShowMeasurementSet from './show_measurement_set.vue';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
 import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
@@ -64,7 +64,7 @@ export default {
     NavBar,
     Profile,
     Registration,
-    ShowEvent,
+    ShowMeasurementSet,
     SignIn
   },
   computed: {
