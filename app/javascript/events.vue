@@ -6,14 +6,22 @@
     </div>
     <table>
       <tr>
-        <th>Address</th>
         <th>Room</th>
+        <th>Address</th>
         <th>Total ACH</th>
+        <th>Types</th>
+        <th>Open Hours</th>
       </tr>
       <tr v-for="ev in events" :key="ev.id">
-        <td>{{ev.placeData.formattedAddress}}</td>
         <td>{{ev.roomName}}</td>
+        <td>{{ev.placeData.formattedAddress}}</td>
         <td>{{Math.round(ev.totalAch * 10) / 10}}</td>
+        <td>
+          <div class='tag' v-for="t in ev.placeData.types">{{ t }}</div>
+        </td>
+        <td>
+          <div class='tag' v-for="t in getOpenHours(ev.placeData)">{{ t }}</div>
+        </td>
       </tr>
     </table>
   </div>
