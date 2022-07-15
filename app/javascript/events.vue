@@ -12,7 +12,7 @@
         <th>Types</th>
         <th>Open Hours</th>
       </tr>
-      <tr v-for="ev in displayables" :key="ev.id">
+      <tr class='clickable' v-for="ev in displayables" :key="ev.id">
         <td>{{ev.roomName}}</td>
         <td>{{ev.placeData.formattedAddress}}</td>
         <td>{{Math.round(ev.totalAch * 10) / 10}}</td>
@@ -91,6 +91,10 @@ export default {
 </script>
 
 <style scoped>
+  tr:hover.clickable {
+    background-color: #e6e6e6;
+    cursor: pointer;
+  }
   td {
     padding: 1em;
   }
