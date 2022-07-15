@@ -20,6 +20,16 @@ export const useMainStore = defineStore('main', {
       let eventStores = useEventStores()
 
       let event = eventStores.events.find((ev) => { return ev.id == id })
+
+      for (let ev of eventStores.events) {
+        if (ev.id == event.id) {
+          event.clicked = true
+        } else {
+          ev.clicked = false
+        }
+      }
+
+
       this.center = event.placeData.center
     },
     setMarkers(markers) {

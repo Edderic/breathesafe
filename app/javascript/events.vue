@@ -12,7 +12,7 @@
         <th>Types</th>
         <th>Open Hours</th>
       </tr>
-      <tr class='clickable' v-for="ev in displayables" :key="ev.id" @click="focusEvent(ev.id)">
+      <tr class='clickable' :class='{ clicked: ev.clicked }' v-for="ev in displayables" :key="ev.id" @click="focusEvent(ev.id)">
         <td>{{ev.roomName}}</td>
         <td>{{ev.placeData.formattedAddress}}</td>
         <td>{{Math.round(ev.totalAch * 10) / 10}}</td>
@@ -93,8 +93,11 @@ export default {
 
 <style scoped>
   tr:hover.clickable {
-    background-color: #e6e6e6;
+    background-color: #efefef;
     cursor: pointer;
+  }
+  .clicked {
+    background-color: #e6e6e6;
   }
   td {
     padding: 1em;

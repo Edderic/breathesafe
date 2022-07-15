@@ -31,6 +31,7 @@ export const useEventStores = defineStore('events', {
 
             for (let event of this.events) {
               let center = event.placeData.center
+              event.clicked = false
               markers.push({'center': center})
             }
 
