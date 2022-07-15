@@ -122,13 +122,18 @@ export function getWeekdayText(placeData) {
   }
 }
 
-const snakeToCamel = str =>
-  str.toLowerCase().replace(/([-_][a-z])/g, group =>
+function snakeToCamel(str) {
+  if (!str.match("_")) {
+    return str
+  }
+
+  return str.toLowerCase().replace(/([-_][a-z])/g, group =>
     group
       .toUpperCase()
       .replace('-', '')
       .replace('_', '')
   );
+}
 
 export function deepSnakeToCamel(obj) {
   /*
