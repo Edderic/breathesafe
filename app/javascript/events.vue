@@ -32,6 +32,7 @@
 import axios from 'axios';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
+import { getWeekdayText } from './misc'
 import { mapWritableState, mapState, mapActions } from 'pinia'
 
 export default {
@@ -57,8 +58,14 @@ export default {
     this.load()
   },
   data() {
+    return {
+      'search': ""
+    }
   },
   methods: {
+    getOpenHours(x) {
+      return getWeekdayText(x)
+    },
     ...mapActions(
         useMainStore,
         [
