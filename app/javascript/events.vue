@@ -1,6 +1,9 @@
 <template>
-  <div>
-    <button @click='newEvent'>Add New Event</button>
+  <div class='col'>
+    <div class='row horizontally-center'>
+      <input class='margined' v-model="search" placeholder="Search for events">
+      <button class='margined' @click='newEvent'>Add New Event</button>
+    </div>
     <table>
       <tr>
         <th>Address</th>
