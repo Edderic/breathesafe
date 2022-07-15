@@ -8,7 +8,8 @@ import { deepSnakeToCamel, setupCSRF } from  '../misc'
 // the first argument is a unique id of the store across your application
 export const useEventStores = defineStore('events', {
   state: () => ({
-    events: []
+    events: [],
+    displayables: []
   }),
   getters: {
   },
@@ -25,6 +26,7 @@ export const useEventStores = defineStore('events', {
           if (response.status == 200) {
             let camelized = deepSnakeToCamel(response.data.events)
             this.events = camelized
+            this.displayables = camelized
             let markers = []
 
             for (let event of this.events) {

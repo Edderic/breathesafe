@@ -1,7 +1,7 @@
 <template>
   <div class='col'>
     <div class='row horizontally-center'>
-      <input class='margined' v-model="search" placeholder="Search for events">
+      <input class='margined' @change="updateSearch" placeholder="Search for events">
       <button class='margined' @click='newEvent'>Add New Event</button>
     </div>
     <table>
@@ -12,7 +12,7 @@
         <th>Types</th>
         <th>Open Hours</th>
       </tr>
-      <tr v-for="ev in events" :key="ev.id">
+      <tr v-for="ev in displayables" :key="ev.id">
         <td>{{ev.roomName}}</td>
         <td>{{ev.placeData.formattedAddress}}</td>
         <td>{{Math.round(ev.totalAch * 10) / 10}}</td>
@@ -32,7 +32,7 @@
 import axios from 'axios';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
-import { getWeekdayText } from './misc'
+import { filterEvents, getWeekdayText } from './misc'
 import { mapWritableState, mapState, mapActions } from 'pinia'
 
 export default {
@@ -44,7 +44,8 @@ export default {
     ...mapWritableState(
         useEventStores,
         [
-          'events'
+          'events',
+          'displayables'
         ]
     ),
     ...mapWritableState(
@@ -81,6 +82,10 @@ export default {
     newEvent() {
       this.setFocusTab('event')
     },
+    updateSearch(event) {
+      this.search = event.target.value
+      this.displayables = filterEvents(this.search, this.events)
+    }
   },
 }
 </script>

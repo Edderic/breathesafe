@@ -1,5 +1,17 @@
 import axios from 'axios';
 
+export function filterEvents(search, events) {
+  let collection = []
+  const lowercasedSearch = search.toLowerCase()
+
+  for (let event of events) {
+    if (event.roomName.toLowerCase().match(search)) {
+      collection.push(event)
+    }
+  }
+
+  return collection
+}
 // Assumes there are at least two colors
 export function interpolateColor(colors, ratio) {
   if (colors.length < 2) {
