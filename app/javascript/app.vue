@@ -2,31 +2,36 @@
   <div class='column'>
     <NavBar></NavBar>
 
-    <div class='row body'>
-      <GMapMap
-          :center="center"
-          :zoom="zoom"
-          map-type-id="terrain"
-          style="width: 50vw; height: 500px"
-      >
-        <GMapCluster>
-          <GMapMarker
-              :key="index"
-              v-for="(m, index) in markers"
-              :position="m.center"
-              :clickable="true"
-              :draggable="true"
-              @click="center=m.center"
-          />
-        </GMapCluster>
-      </GMapMap>
+    <div class='col body'>
+      <div class='row'>
+        <GMapMap
+            :center="center"
+            :zoom="zoom"
+            map-type-id="terrain"
+            style="width: 50vw; height: 500px"
+        >
+          <GMapCluster>
+            <GMapMarker
+                :key="index"
+                v-for="(m, index) in markers"
+                :position="m.center"
+                :clickable="true"
+                :draggable="true"
+                @click="center=m.center"
+            />
+          </GMapCluster>
+        </GMapMap>
 
-      <Event v-if='focusTab == "event" && signedIn'/>
-      <Events v-if='focusTab == "events"'/>
-      <Profile v-if='focusTab == "profile"'/>
-      <Registration v-if='!signedIn && focusTab == "register"'/>
-      <Confirmation v-if='!signedIn && focusTab == "confirmation"'/>
-      <SignIn v-if='!signedIn && focusTab == "signIn"'/>
+        <Event v-if='focusTab == "event" && signedIn'/>
+        <Profile v-if='focusTab == "profile"'/>
+        <Registration v-if='!signedIn && focusTab == "register"'/>
+        <Confirmation v-if='!signedIn && focusTab == "confirmation"'/>
+        <SignIn v-if='!signedIn && focusTab == "signIn"'/>
+      </div>
+
+      <div>
+        <Events v-if='focusTab == "events"'/>
+      </div>
     </div>
   </div>
 </template>
