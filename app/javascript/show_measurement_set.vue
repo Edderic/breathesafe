@@ -337,9 +337,6 @@ export default {
   },
   async created() {
     // TODO: fire and forget. Make asynchronous.
-    await this.getCurrentUser()
-    this.loadProfile()
-    this.loadCO2Monitors()
   },
   data() {
     return {
