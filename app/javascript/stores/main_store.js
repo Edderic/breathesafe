@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useEventStores } from './event_stores'
+import { useShowMeasurementSetStore } from './show_measurement_set_store'
 import { defineStore } from 'pinia'
 import { setupCSRF } from '../misc'
 
@@ -21,6 +22,7 @@ export const useMainStore = defineStore('main', {
 
       let event = eventStores.events.find((ev) => { return ev.id == id })
 
+      // indicate that the event was selected
       for (let ev of eventStores.events) {
         if (ev.id == event.id) {
           event.clicked = true
@@ -29,8 +31,11 @@ export const useMainStore = defineStore('main', {
         }
       }
 
-
+      // update Google Maps to center at the location of the event
       this.center = event.placeData.center
+
+      let showMeasurementSetStore = useShowMeasurementSetStore()
+      showMeasurementSetStore.setMeasurementSet(event)
     },
     setMarkers(markers) {
       this.markers = markers

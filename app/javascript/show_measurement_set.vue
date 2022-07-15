@@ -256,6 +256,7 @@ import ColoredCell from './colored_cell.vue';
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
+import { useShowMeasurementSetStore } from './stores/show_measurement_set_store';
 import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia';
 import {
@@ -291,9 +292,9 @@ export default {
         ]
     ),
     ...mapWritableState(
-        useEventStore,
+        useShowMeasurementSetStore,
         [
-          'activityGroups',
+          'roomName',
           'ageGroups',
           'carbonDioxideActivities',
           'ventilationCO2AmbientPPM',
@@ -308,18 +309,17 @@ export default {
           'infectorActivityTypeMapping',
           'maskTypes',
           'numberOfPeople',
+          'occupancy',
           'placeData',
           'portableAirCleaners',
           'rapidTestResult',
           'rapidTestResults',
           'roomHeight',
           'roomLength',
-          'roomName',
           'roomWidth',
           'roomHeightMeters',
           'roomLengthMeters',
           'roomWidthMeters',
-          'roomName',
           'singlePassFiltrationEfficiency',
           'startDatetime',
           'susceptibleActivities',
@@ -384,12 +384,6 @@ export default {
           b: 0
         },
       ],
-      occupancy: {
-        unparsedOccupancyData: "",
-        parsed: {
-        },
-        maximumOccupancy: 0
-      },
       hours: [
         '6 AM',
         '7 AM',

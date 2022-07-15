@@ -27,6 +27,7 @@ export const useEventStores = defineStore('events', {
             let camelized = deepSnakeToCamel(response.data.events)
             this.events = camelized
             this.displayables = camelized
+
             let markers = []
 
             for (let event of this.events) {
