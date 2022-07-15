@@ -97,9 +97,6 @@ export function parseOccupancyHTML(value) {
 
     for (let h = 0; h < numberOfHours; h++) {
       let overall_index = h + dayIndex * numberOfHours;
-      if (!matches[overall_index]) {
-        debugger
-      }
       if (matches[overall_index].match(usuallyRegex)) {
         regex = usuallyRegex;
       } else {
