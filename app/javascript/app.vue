@@ -2,35 +2,40 @@
   <div class='column'>
     <NavBar></NavBar>
 
-    <div class='col body'>
-      <div class='row'>
-        <GMapMap
-            :center="center"
-            :zoom="zoom"
-            map-type-id="terrain"
-            style="width: 50vw; height: 500px"
-        >
-          <GMapCluster>
-            <GMapMarker
-                :key="index"
-                v-for="(m, index) in markers"
-                :position="m.center"
-                :clickable="true"
-                :draggable="true"
-                @click="center=m.center"
-            />
-          </GMapCluster>
-        </GMapMap>
+    <div class='body row'>
+      <div class='col'>
+        <div class='row'>
+          <GMapMap
+              :center="center"
+              :zoom="zoom"
+              map-type-id="terrain"
+              style="width: 50vw; height: 500px"
+          >
+            <GMapCluster>
+              <GMapMarker
+                  :key="index"
+                  v-for="(m, index) in markers"
+                  :position="m.center"
+                  :clickable="true"
+                  :draggable="true"
+                  @click="center=m.center"
+              />
+            </GMapCluster>
+          </GMapMap>
 
+        </div>
+
+        <div>
+          <Events v-if='focusTab == "events"'/>
+        </div>
+      </div>
+      <div class='col'>
+        <ShowEvent v-if='focusTab == "events" && signedIn'/>
         <Event v-if='focusTab == "event" && signedIn'/>
         <Profile v-if='focusTab == "profile"'/>
         <Registration v-if='!signedIn && focusTab == "register"'/>
         <Confirmation v-if='!signedIn && focusTab == "confirmation"'/>
         <SignIn v-if='!signedIn && focusTab == "signIn"'/>
-      </div>
-
-      <div>
-        <Events v-if='focusTab == "events"'/>
       </div>
     </div>
   </div>
@@ -45,6 +50,7 @@ import Profile from './profile.vue';
 import Registration from './registration.vue';
 import Confirmation from './confirmation.vue';
 import SignIn from './sign_in.vue';
+import ShowEvent from './show_event.vue';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
 import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
@@ -58,6 +64,7 @@ export default {
     NavBar,
     Profile,
     Registration,
+    ShowEvent,
     SignIn
   },
   computed: {
