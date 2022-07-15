@@ -12,7 +12,7 @@
         <th>Types</th>
         <th>Open Hours</th>
       </tr>
-      <tr class='clickable' v-for="ev in displayables" :key="ev.id">
+      <tr class='clickable' v-for="ev in displayables" :key="ev.id" @click="focusEvent(ev.id)">
         <td>{{ev.roomName}}</td>
         <td>{{ev.placeData.formattedAddress}}</td>
         <td>{{Math.round(ev.totalAch * 10) / 10}}</td>
@@ -51,7 +51,7 @@ export default {
     ...mapWritableState(
         useMainStore,
         [
-          'focusTab'
+          'focusTab',
         ]
     )
   },
@@ -70,7 +70,8 @@ export default {
     ...mapActions(
         useMainStore,
         [
-          'setFocusTab'
+          'setFocusTab',
+          'focusEvent'
         ]
     ),
     ...mapActions(

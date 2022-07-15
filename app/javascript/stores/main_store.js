@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useEventStores } from './event_stores'
 import { defineStore } from 'pinia'
 import { setupCSRF } from '../misc'
 
@@ -15,6 +16,12 @@ export const useMainStore = defineStore('main', {
     message: ''
   }),
   actions: {
+    focusEvent(id) {
+      let eventStores = useEventStores()
+
+      let event = eventStores.events.find((ev) => { return ev.id == id })
+      this.center = event.placeData.center
+    },
     setMarkers(markers) {
       this.markers = markers
     },
