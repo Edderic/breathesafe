@@ -45,7 +45,7 @@ export const useMainStore = defineStore('main', {
       this.zoom = 15;
     },
     setFocusTab(tabToFocus) {
-      this.focusTab = 'event'
+      this.focusTab = tabToFocus
     }
   }
 });
