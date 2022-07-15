@@ -8,6 +8,7 @@
     <div class='container'>
       <label>Room name</label>
       <input
+        class='wider-input'
         :value="roomName"
         disabled
       >
@@ -16,6 +17,7 @@
     <div class='container'>
       <label>Address</label>
       <input
+        class='wider-input'
         :value="placeData.formattedAddress"
         disabled
       >
