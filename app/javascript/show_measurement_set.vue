@@ -62,6 +62,39 @@
       </select>
     </div>
 
+    <div class='container'>
+      <label class='subsection'>Occupancy</label>
+
+      <div class='container'>
+        <label class='textarea-label'>Max occupancy</label>
+        <input
+          disabled
+          :value="occupancy.maximumOccupancy"
+        >
+      </div>
+
+      <div class='container wide'>
+        <label class='textarea-label'>Parsed</label>
+        <table>
+          <tr>
+            <th></th>
+            <th v-for='hour in hours'>{{ hour }}</th>
+          </tr>
+          <tr v-for='(value, p, index) in occupancy.parsed'>
+            <td>{{ p }}</td>
+            <ColoredCell
+              v-for='(obj, x, y) in value'
+              :key='p + "-" + index'
+              :value="obj['occupancyPercent']"
+              :colorInterpolationScheme="colorInterpolationScheme"
+              :maxVal=100
+              class="availability-cell"
+            />
+          </tr>
+        </table>
+      </div>
+
+    </div>
 
     <div class='container'>
       <label class='subsection'>Room Dimensions</label>
@@ -209,39 +242,6 @@
     </div>
 
 
-    <div class='container'>
-      <label class='subsection'>Occupancy</label>
-
-      <div class='container'>
-        <label class='textarea-label'>Max occupancy</label>
-        <input
-          disabled
-          v-model="occupancy.maximumOccupancy"
-        >
-      </div>
-
-      <div class='container wide'>
-        <label class='textarea-label'>Parsed</label>
-        <table v-if='occupancy.unparsedOccupancyData != ""'>
-          <tr>
-            <th></th>
-            <th v-for='hour in hours'>{{ hour }}</th>
-          </tr>
-          <tr v-for='(value, p, index) in occupancy.parsed'>
-            <td>{{ p }}</td>
-            <ColoredCell
-              v-for='(obj, x, y) in value'
-              :key='p + "-" + index'
-              :value="obj['occupancy_percent']"
-              :colorInterpolationScheme="colorInterpolationScheme"
-              :maxVal=100
-              class="availability-cell"
-            />
-          </tr>
-        </table>
-      </div>
-
-    </div>
     <div class='container centered'>
       <button disabled class='normal-padded' @click='cancel'>Cancel</button>
       <button disabled class='normal-padded' @click='save'>Save</button>
