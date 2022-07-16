@@ -260,8 +260,14 @@ import { useShowMeasurementSetStore } from './stores/show_measurement_set_store'
 import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia';
 import {
-   setupCSRF, cubicFeetPerMinuteTocubicMetersPerHour, daysToIndexDict,
-   feetToMeters, indexToHour, computeVentilationACH, computePortableACH
+  computePortableACH,
+  computeVentilationACH,
+  convertLengthBasedOnMeasurementType,
+  cubicFeetPerMinuteTocubicMetersPerHour,
+  daysToIndexDict,
+  feetToMeters,
+  indexToHour,
+  setupCSRF
 } from  './misc';
 
 export default {
