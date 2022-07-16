@@ -295,6 +295,7 @@ export default {
           'lengthMeasurementType',
           'airDeliveryRateMeasurementType',
           'carbonDioxideMonitors',
+          'measurementUnits'
         ]
     ),
     ...mapWritableState(
@@ -320,9 +321,6 @@ export default {
           'portableAirCleaners',
           'rapidTestResult',
           'rapidTestResults',
-          'roomHeight',
-          'roomLength',
-          'roomWidth',
           'roomHeightMeters',
           'roomLengthMeters',
           'roomWidthMeters',
@@ -341,6 +339,32 @@ export default {
           'events'
         ]
     ),
+    roomLength() {
+      const profileStore = useProfileStore()
+      return convertLengthBasedOnMeasurementType(
+        this.roomLengthMeters,
+        'meters',
+        profileStore.measurementUnits.lengthMeasurementType
+      )
+    },
+    roomWidth() {
+      const profileStore = useProfileStore()
+
+      return convertLengthBasedOnMeasurementType(
+        this.roomWidthMeters,
+        'meters',
+        profileStore.measurementUnits.lengthMeasurementType
+      )
+    },
+    roomHeight() {
+      const profileStore = useProfileStore()
+
+      return convertLengthBasedOnMeasurementType(
+        this.roomHeightMeters,
+        'meters',
+        profileStore.measurementUnits.lengthMeasurementType
+      )
+    },
   },
   async created() {
     // TODO: fire and forget. Make asynchronous.
