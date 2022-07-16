@@ -437,8 +437,8 @@ export default {
 
       this.ventilationACH = computeVentilationACH(
         this.activityGroups,
-        this.ventilationCO2AmbientPPM,
-        this.ventilationCO2SteadyStatePPM,
+        this.ventilationCo2AmbientPpm,
+        this.ventilationCo2SteadyStatePpm,
         this.roomUsableVolumeCubicMeters
       )
 
@@ -458,11 +458,11 @@ export default {
             'author_id': this.currentUser.id,
             'activity_groups': this.activityGroups,
             'ventilation_ach': this.ventilationACH,
-            'ventilation_co2_ambient_ppm': this.ventilationCO2AmbientPPM,
-            'ventilation_co2_measurement_device_name': this.ventilationCO2MeasurementDeviceName,
-            'ventilation_co2_measurement_device_model': this.ventilationCO2MeasurementDeviceModel,
-            'ventilation_co2_measurement_device_serial': this.ventilationCO2MeasurementDeviceSerial,
-            'ventilation_co2_steady_state_ppm': this.ventilationCO2SteadyStatePPM,
+            'ventilation_co2_ambient_ppm': this.ventilationCo2AmbientPpm,
+            'ventilation_co2_measurement_device_name': this.ventilationCo2MeasurementDeviceName,
+            'ventilation_co2_measurement_device_model': this.ventilationCo2MeasurementDeviceModel,
+            'ventilation_co2_measurement_device_serial': this.ventilationCo2MeasurementDeviceSerial,
+            'ventilation_co2_steady_state_ppm': this.ventilationCo2SteadyStatePpm,
             'ventilation_notes': this.ventilationNotes,
             'start_datetime': this.startDatetime,
             'duration': this.duration,
@@ -585,18 +585,18 @@ export default {
       this.singlePassFiltrationEfficiency = event.target.value;
     },
     setCarbonDioxideAmbient(event) {
-      this.ventilationCO2AmbientPPM = event.target.value;
+      this.ventilationCo2AmbientPpm = event.target.value;
     },
     setCarbonDioxideMonitor(event) {
       let val = event.target.value;
-      this.ventilationCO2MeasurementDeviceName = val
+      this.ventilationCo2MeasurementDeviceName = val
 
       let found = this.carbonDioxideMonitors.find((m) => m.name == val)
-      this.ventilationCO2MeasurementDeviceSerial = found.serial
-      this.ventilationCO2MeasurementDeviceModel = found.model
+      this.ventilationCo2MeasurementDeviceSerial = found.serial
+      this.ventilationCo2MeasurementDeviceModel = found.model
     },
     setCarbonDioxideSteadyState(event) {
-      this.ventilationCO2SteadyStatePPM = event.target.value;
+      this.ventilationCo2SteadyStatePpm = event.target.value;
     },
     setAerosolGenerationActivity(event, id) {
       let activityGroup = this.findActivityGroup()(id);

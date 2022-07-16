@@ -8,9 +8,11 @@ import { generateUUID, setupCSRF } from '../misc';
 // the first argument is a unique id of the store across your application
 export const useProfileStore = defineStore('profile', {
   state: () => ({
+    currentUser: undefined,
+    profileLoaded: false,
     lengthMeasurementType: "feet",
     airDeliveryRateMeasurementType: 'cubic feet per minute',
-    systemOfMeasurement: "",
+    systemOfMeasurement: "imperial",
     carbonDioxideMonitors: [
       {
         'name': "",
