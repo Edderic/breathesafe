@@ -310,6 +310,21 @@ export function convertLengthBasedOnMeasurementType(
   }
 }
 
+export function convertCubicMetersPerHour(
+  from_num,
+  to_unit
+) {
+  /*
+   * m3 / h * 1h / 60 min * ft3 / m3
+   */
+  if (to_unit == "cubic feet per minute") {
+    return from_num / 60 *
+      convertLengthBasedOnMeasurementType(1, 'meters', 'feet') ** 3
+  } else if (to_unit == 'cubic meters per hour') {
+    return from_num
+  }
+}
+
 export function getMeasurementUnits(systemOfMeasurement) {
   let lengthMeasurementType
   let airDeliveryRateMeasurementType

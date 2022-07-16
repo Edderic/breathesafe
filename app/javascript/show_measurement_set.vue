@@ -135,9 +135,9 @@
       <label class='subsection'>Portable Air Cleaning</label>
       <div class='container border-showing' v-for='portableAirCleaner in portableAirCleaners' :key=portableAirCleaner.id>
         <div class='container'>
-          <label>Air delivery rate ({{ airDeliveryRateMeasurementType }})</label>
+          <label>Air delivery rate ({{ measurementUnits.airDeliveryRateMeasurementType }})</label>
           <input
-            :value="portableAirCleaner['airDeliveryRate']"
+            :value="airDeliveryRate(portableAirCleaner['airDeliveryRateCubicMetersPerHour'])"
             disabled>
         </div>
 
@@ -262,6 +262,7 @@ import { mapWritableState, mapState, mapActions } from 'pinia';
 import {
   computePortableACH,
   computeVentilationACH,
+  convertCubicMetersPerHour,
   convertLengthBasedOnMeasurementType,
   cubicFeetPerMinuteTocubicMetersPerHour,
   daysToIndexDict,
@@ -367,6 +368,8 @@ export default {
     },
   },
   async created() {
+    // TODO: handle scenario where person is not logged in
+    // await this.loadProfile()
     // TODO: fire and forget. Make asynchronous.
   },
   data() {
@@ -531,6 +534,10 @@ export default {
           // whatever you want
         })
 
+    },
+    airDeliveryRate(num) {
+      // TODO: add the variable that stands for the unit
+      return convertCubicMetersPerHour(num, this.measurementUnits.airDeliveryRateMeasurementType)
     },
     generateUUID() {
         // https://stackoverflow.com/questions/105034/how-to-create-guid-uuid
