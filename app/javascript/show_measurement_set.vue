@@ -99,7 +99,7 @@
     <div class='container'>
       <label class='subsection'>Room Dimensions</label>
       <div class='container'>
-        <label>Length ({{ lengthMeasurementType }})</label>
+        <label>Length ({{ measurementUnits.lengthMeasurementType }})</label>
         <input
           :value="roomLength"
           disabled
@@ -107,7 +107,7 @@
       </div>
 
       <div class='container'>
-        <label>Width ({{ lengthMeasurementType }})</label>
+        <label>Width ({{ measurementUnits.lengthMeasurementType }})</label>
         <input
           :value="roomWidth"
           disabled
@@ -115,7 +115,7 @@
       </div>
 
       <div class='container'>
-        <label>Height ({{ lengthMeasurementType }})</label>
+        <label>Height ({{ measurementUnits.lengthMeasurementType }})</label>
         <input
           :value="roomHeight"
           disabled
