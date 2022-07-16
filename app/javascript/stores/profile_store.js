@@ -99,14 +99,8 @@ export const useProfileStore = defineStore('profile', {
           if (response.status == 200) {
             mainStore.setMessage(response.data.message)
             this.systemOfMeasurement = event.target.value;
-
-            if (this.systemOfMeasurement == 'imperial') {
-              this.lengthMeasurementType = 'feet';
-              this.airDeliveryRateMeasurementType = 'cubic feet per minute';
-            } else {
-              this.lengthMeasurementType = 'meters';
-              this.airDeliveryRateMeasurementType = 'cubic meters per hour';
-            }
+            this.measurementUnits = getMeasurementUnits(this.systemOfMeasurement)
+            showMeasurementSetStore.displayMeasurementsTailoredToUser()
 
             eventStore.updateRoomDimensionsMeters()
             eventStore.setCubicMetersPerHour()
