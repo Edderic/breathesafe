@@ -3,16 +3,17 @@ import axios from 'axios'
 import { useMainStore } from './main_store'
 import { useShowMeasurementSetStore } from './show_measurement_set_store'
 import { useEventStore } from './event_store'
-import { generateUUID, setupCSRF } from '../misc';
+import { generateUUID, getMeasurementUnits, setupCSRF } from '../misc';
 
 // useStore could be anything like useUser, useCart
 // the first argument is a unique id of the store across your application
 export const useProfileStore = defineStore('profile', {
   state: () => ({
     currentUser: undefined,
-    profileLoaded: false,
-    lengthMeasurementType: "feet",
-    airDeliveryRateMeasurementType: 'cubic feet per minute',
+    measurementUnits: {
+      'lengthMeasurementType': "feet",
+      'airDeliveryRateMeasurementType': 'cubic feet per minute',
+    },
     systemOfMeasurement: "imperial",
     carbonDioxideMonitors: [
       {
