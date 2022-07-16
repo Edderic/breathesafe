@@ -24,14 +24,15 @@ export const useProfileStore = defineStore('profile', {
     ]
   }),
   getters: {
-    ...mapState(useMainStore, ['currentUser']),
-    ...mapWritableState(useMainStore, ['message']),
+    // ...mapState(useMainStore, ['currentUser']),
+    // ...mapWritableState(useMainStore, ['message']),
   },
   actions: {
-    ...mapActions(useMainStore, ['getCurrentUser']),
     async loadProfile() {
       setupCSRF();
-      await this.getCurrentUser()
+
+      let mainStore = useMainStore()
+      let currentUser = mainStore.currentUser
 
       let toSave = {
         'profile': {
@@ -40,7 +41,7 @@ export const useProfileStore = defineStore('profile', {
       }
 
       await axios.post(
-        `/users/${this.currentUser.id}/profiles.json`,
+        `/users/${currentUser.id}/profiles.json`,
         toSave
       )
         .then(response => {
@@ -48,11 +49,11 @@ export const useProfileStore = defineStore('profile', {
 
           this.message = data.message
           this.systemOfMeasurement = data.systemOfMeasurement
+          this.measurementUnits = getMeasurementUnits(this.systemOfMeasurement)
 
           // whatever you want
         })
         .catch(error => {
-          console.log(error)
           this.message = "Failed to load profile."
           // whatever you want
         })
@@ -60,7 +61,10 @@ export const useProfileStore = defineStore('profile', {
     async loadCO2Monitors() {
       setupCSRF();
 
-      await axios.get(`/users/${this.currentUser.id}/carbon_dioxide_monitors.json`)
+      let mainStore = useMainStore()
+      let currentUser = mainStore.currentUser
+
+      await axios.get(`/users/${currentUser.id}/carbon_dioxide_monitors.json`)
         .then(response => {
           const monitors = response.data.carbonDioxideMonitors;
           for (let monitor of monitors) {
@@ -77,16 +81,18 @@ export const useProfileStore = defineStore('profile', {
         })
     },
     async setSystemOfMeasurement(event) {
-      this.getCurrentUser()
+      let mainStore = useMainStore()
+      let currentUser = mainStore.currentUser
+
+      const showMeasurementSetStore = useShowMeasurementSetStore()
 
       let toSave = {
         'measurement_system': event.target.value
       }
 
-      const mainStore = useMainStore()
       const eventStore = useEventStore()
 
-      await axios.post(`/users/${this.currentUser.id}/profiles.json`, toSave)
+      await axios.post(`/users/${currentUser.id}/profiles.json`, toSave)
         .then(response => {
           console.log(response)
 
