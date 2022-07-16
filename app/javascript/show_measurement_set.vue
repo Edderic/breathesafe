@@ -160,7 +160,7 @@
       <div class='container'>
         <label>CO2 Measurement Device</label>
 
-        <select disabled :value='ventilationCO2MeasurementDeviceName' @change='setCarbonDioxideMonitor'>
+        <select disabled :value='ventilationCo2MeasurementDeviceName' @change='setCarbonDioxideMonitor'>
           <option v-for='carbonDioxideMonitor in carbonDioxideMonitors'>{{ carbonDioxideMonitor['name'] }}</option>
         </select>
       </div>
@@ -168,14 +168,14 @@
       <div class='container'>
         <label>CO2 Ambient (parts per million)</label>
         <input
-          :value="ventilationCO2AmbientPPM"
+          :value="ventilationCo2AmbientPpm"
           disabled>
       </div>
 
       <div class='container'>
         <label>CO2 Steady State (parts per million)</label>
         <input
-          :value="ventilationCO2SteadyStatePPM"
+          :value="ventilationCo2SteadyStatePpm"
           disabled>
       </div>
 
@@ -297,11 +297,11 @@ export default {
           'roomName',
           'ageGroups',
           'carbonDioxideActivities',
-          'ventilationCO2AmbientPPM',
-          'ventilationCO2MeasurementDeviceModel',
-          'ventilationCO2MeasurementDeviceName',
-          'ventilationCO2MeasurementDeviceSerial',
-          'ventilationCO2SteadyStatePPM',
+          'ventilationCo2AmbientPpm',
+          'ventilationCo2MeasurementDeviceModel',
+          'ventilationCo2MeasurementDeviceName',
+          'ventilationCo2MeasurementDeviceSerial',
+          'ventilationCo2SteadyStatePpm',
           'duration',
           'private',
           'formatted_address',
