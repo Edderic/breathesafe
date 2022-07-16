@@ -296,6 +296,38 @@ function getCO2GenerationRate(met, man, age) {
   return model['coef'] * met + model['intercept']
 }
 
+export function convertLengthBasedOnMeasurementType(
+  from_num,
+  from_measurement_type,
+  to_measurement_type,
+) {
+  if (from_measurement_type == to_measurement_type) {
+    return from_num
+  } else if (from_measurement_type == 'feet' && to_measurement_type == 'meters'){
+    return from_num / 3.048
+  } else if (from_measurement_type == 'meters' && to_measurement_type == 'feet'){
+    return  from_num * 3.28084
+  }
+}
+
+export function getMeasurementUnits(systemOfMeasurement) {
+  let lengthMeasurementType
+  let airDeliveryRateMeasurementType
+
+  if (systemOfMeasurement == 'imperial') {
+    lengthMeasurementType = 'feet';
+    airDeliveryRateMeasurementType = 'cubic feet per minute';
+  } else {
+    lengthMeasurementType = 'meters';
+    airDeliveryRateMeasurementType = 'cubic meters per hour';
+  }
+
+  return {
+    'lengthMeasurementType': lengthMeasurementType,
+    'airDeliveryRateMeasurementType': airDeliveryRateMeasurementType
+  }
+}
+
 export function feetToMeters(measurement_type, num) {
   if (measurement_type == 'feet') {
     return num / 3.048
