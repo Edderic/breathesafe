@@ -406,7 +406,7 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
-    ...mapActions(useProfileStore, ['loadCO2Monitors', 'loadProfile']),
+    ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useEventStores, ['addEvent']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
