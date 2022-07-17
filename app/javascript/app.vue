@@ -30,7 +30,8 @@
         </div>
       </div>
       <div class='col'>
-        <ShowMeasurementSet v-if='focusTab == "events" && signedIn'/>
+        <Tabs v-if='focusTab == "events"'/>
+        <ShowMeasurementSet v-if='focusTab == "events" && focusSubTab == "Measures"'/>
         <Event v-if='focusTab == "event" && signedIn'/>
         <Profile v-if='focusTab == "profile"'/>
         <Registration v-if='!signedIn && focusTab == "register"'/>
@@ -51,6 +52,7 @@ import Registration from './registration.vue';
 import Confirmation from './confirmation.vue';
 import SignIn from './sign_in.vue';
 import ShowMeasurementSet from './show_measurement_set.vue';
+import Tabs from './tabs.vue';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
 import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
@@ -65,11 +67,12 @@ export default {
     Profile,
     Registration,
     ShowMeasurementSet,
-    SignIn
+    SignIn,
+    Tabs
   },
   computed: {
     ...mapStores(useMainStore),
-    ...mapState(useMainStore, ["focusTab", "signedIn", "markers"]),
+    ...mapState(useMainStore, ["focusTab", "focusSubTab", "signedIn", "markers"]),
     ...mapWritableState(useMainStore, ['center', 'zoom'])
 
   },
