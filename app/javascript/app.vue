@@ -31,6 +31,7 @@
       </div>
       <div class='col'>
         <Tabs v-if='focusTab == "events"'/>
+        <Prevalence v-if='focusTab == "events" && focusSubTab == "Prevalence"'/>
         <ShowMeasurementSet v-if='focusTab == "events" && focusSubTab == "Measures"'/>
         <Event v-if='focusTab == "event" && signedIn'/>
         <Profile v-if='focusTab == "profile"'/>
@@ -48,6 +49,7 @@ import Event from './event.vue';
 import Events from './events.vue';
 import NavBar from './navbar.vue';
 import Profile from './profile.vue';
+import Prevalence from './prevalence.vue';
 import Registration from './registration.vue';
 import Confirmation from './confirmation.vue';
 import SignIn from './sign_in.vue';
@@ -65,6 +67,7 @@ export default {
     Events,
     NavBar,
     Profile,
+    Prevalence,
     Registration,
     ShowMeasurementSet,
     SignIn,
