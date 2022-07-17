@@ -302,6 +302,7 @@ export default {
         useShowMeasurementSetStore,
         [
           'roomName',
+          'activityGroups',
           'ageGroups',
           'carbonDioxideActivities',
           'ventilationCo2AmbientPpm',
@@ -317,6 +318,7 @@ export default {
           'maskTypes',
           'numberOfPeople',
           'occupancy',
+          'maximumOccupancy',
           'placeData',
           'portableAirCleaners',
           'rapidTestResult',
