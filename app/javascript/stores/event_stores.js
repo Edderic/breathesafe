@@ -22,7 +22,7 @@ export const useEventStores = defineStore('events', {
           if (response.status == 200) {
             let camelized = deepSnakeToCamel(response.data.events)
             this.events = camelized
-            this.displayables = camelized
+            this.displayables = this.events
 
             let markers = []
 
