@@ -266,7 +266,6 @@ import {
   convertLengthBasedOnMeasurementType,
   cubicFeetPerMinuteTocubicMetersPerHour,
   daysToIndexDict,
-  feetToMeters,
   indexToHour,
   setupCSRF
 } from  './misc';
@@ -605,18 +604,6 @@ export default {
     },
     setRoomName(event) {
       this.roomName = event.target.value;
-    },
-    setRoomLength(event) {
-      this.roomLength = event.target.value;
-      this.roomLengthMeters = feetToMeters(this.lengthMeasurementType, event.target.value)
-    },
-    setRoomWidth(event) {
-      this.roomWidth = event.target.value;
-      this.roomWidthMeters = feetToMeters(this.lengthMeasurementType, event.target.value)
-    },
-    setRoomHeight(event) {
-      this.roomHeight = event.target.value;
-      this.roomHeightMeters = feetToMeters(this.lengthMeasurementType, event.target.value)
     },
     setSinglePassFiltrationEfficiency(event) {
       this.singlePassFiltrationEfficiency = event.target.value;

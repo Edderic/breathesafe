@@ -112,6 +112,8 @@ export function parseOccupancyHTML(value) {
       }
     }
   }
+
+  return dictionary
 }
 
 export function getWeekdayText(placeData) {
@@ -302,11 +304,11 @@ export function convertLengthBasedOnMeasurementType(
   to_measurement_type,
 ) {
   if (from_measurement_type == to_measurement_type) {
-    return from_num
+    return parseFloat(from_num)
   } else if (from_measurement_type == 'feet' && to_measurement_type == 'meters'){
-    return from_num / 3.048
+    return parseFloat(from_num) * 0.3048
   } else if (from_measurement_type == 'meters' && to_measurement_type == 'feet'){
-    return  from_num * 3.28084
+    return parseFloat(from_num) * 3.28084
   }
 }
 
@@ -343,6 +345,7 @@ export function getMeasurementUnits(systemOfMeasurement) {
   }
 }
 
+// TODO: replace this with convertLengthBasedOnMeasurementType
 export function feetToMeters(measurement_type, num) {
   if (measurement_type == 'feet') {
     return num / 3.048

@@ -102,7 +102,7 @@ export const useProfileStore = defineStore('profile', {
             this.measurementUnits = getMeasurementUnits(this.systemOfMeasurement)
             showMeasurementSetStore.displayMeasurementsTailoredToUser()
 
-            eventStore.updateRoomDimensionsMeters()
+            eventStore.updateRoomDimensionsMeters(this.measurementUnits)
             eventStore.setCubicMetersPerHour()
           }
         })

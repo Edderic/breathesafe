@@ -20,6 +20,7 @@ export const useEventStore = defineStore('event', {
     roomWidth: "",
     roomWidthMeters: "",
     roomLengthMeters: "",
+    roomHeightMeters: "",
     roomLength: "",
     duration: "",
     ventilationCO2AmbientPPM: 420,
@@ -132,10 +133,22 @@ export const useEventStore = defineStore('event', {
         'airDeliveryRateCubicMetersPerHour': "",
       })
     },
-    updateRoomDimensionsMeters() {
-      this.roomLengthMeters = feetToMeters(this.lengthMeasurementType, this.roomLength)
-      this.roomWidthMeters = feetToMeters(this.lengthMeasurementType, this.roomWidth)
-      this.roomHeightMeters = feetToMeters(this.lengthMeasurementType, this.roomHeight)
+    updateRoomDimensionsMeters(measurementUnits) {
+      this.roomLengthMeters = convertLengthBasedOnMeasurementType(
+        this.roomLength,
+        measurementUnits.lengthMeasurementType,
+        'meters'
+      )
+      this.roomWidthMeters = convertLengthBasedOnMeasurementType(
+        this.roomWidth,
+        measurementUnits.lengthMeasurementType,
+        'meters'
+      )
+      this.roomHeightMeters = convertLengthBasedOnMeasurementType(
+        this.roomHeight,
+        measurementUnits.lengthMeasurementType,
+        'meters'
+      )
     },
     setCubicMetersPerHour() {
       for (let portableAirCleaner of this.portableAirCleaners) {

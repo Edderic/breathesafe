@@ -63,21 +63,21 @@
     <div class='container'>
       <label class='subsection'>Room Dimensions</label>
       <div class='container'>
-        <label>Length ({{ lengthMeasurementType }})</label>
+        <label>Length ({{ measurementUnits.lengthMeasurementType }})</label>
         <input
           :value="roomLength"
           @change="setRoomLength">
       </div>
 
       <div class='container'>
-        <label>Width ({{ lengthMeasurementType }})</label>
+        <label>Width ({{ measurementUnits.lengthMeasurementType }})</label>
         <input
           :value="roomWidth"
           @change="setRoomWidth">
       </div>
 
       <div class='container'>
-        <label>Height ({{ lengthMeasurementType }})</label>
+        <label>Height ({{ measurementUnits.lengthMeasurementType }})</label>
         <input
           :value="roomHeight"
           @change="setRoomHeight">
@@ -268,7 +268,8 @@ import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia';
 import {
    setupCSRF, cubicFeetPerMinuteTocubicMetersPerHour, daysToIndexDict,
-   feetToMeters, indexToHour, computeVentilationACH, computePortableACH
+   convertLengthBasedOnMeasurementType, indexToHour, computeVentilationACH, computePortableACH,
+   parseOccupancyHTML
 } from  './misc';
 
 export default {
@@ -293,8 +294,7 @@ export default {
     ...mapState(
         useProfileStore,
         [
-          'lengthMeasurementType',
-          'airDeliveryRateMeasurementType',
+          'measurementUnits',
           'carbonDioxideMonitors',
         ]
     ),
@@ -444,7 +444,7 @@ export default {
     },
     parseOccupancyData(event) {
       this.occupancy.unparsedOccupancyData = event.target.value
-      this.occupancy.parsed = parseOccupancyHTML(this.occupancy)
+      this.occupancy.parsed = parseOccupancyHTML(this.occupancy.unparsedOccupancyData)
     },
     async save() {
       this.roomUsableVolumeCubicMeters = parseFloat(this.roomWidthMeters)
@@ -502,6 +502,7 @@ export default {
       }
 
       setupCSRF()
+
       await axios.post('/events', toSave)
         .then(response => {
           console.log(response)
@@ -517,7 +518,6 @@ export default {
           console.log(error)
           // whatever you want
         })
-
     },
     generateUUID() {
         // https://stackoverflow.com/questions/105034/how-to-create-guid-uuid
@@ -588,15 +588,27 @@ export default {
     },
     setRoomLength(event) {
       this.roomLength = event.target.value;
-      this.roomLengthMeters = feetToMeters(this.lengthMeasurementType, event.target.value)
+      this.roomLengthMeters = convertLengthBasedOnMeasurementType(
+        event.target.value,
+        this.measurementUnits.lengthMeasurementType,
+        'meters'
+      )
     },
     setRoomWidth(event) {
       this.roomWidth = event.target.value;
-      this.roomWidthMeters = feetToMeters(this.lengthMeasurementType, event.target.value)
+      this.roomWidthMeters = convertLengthBasedOnMeasurementType(
+        event.target.value,
+        this.measurementUnits.lengthMeasurementType,
+        'meters'
+      )
     },
     setRoomHeight(event) {
       this.roomHeight = event.target.value;
-      this.roomHeightMeters = feetToMeters(this.lengthMeasurementType, event.target.value)
+      this.roomHeightMeters = convertLengthBasedOnMeasurementType(
+        event.target.value,
+        this.measurementUnits.lengthMeasurementType,
+        'meters'
+      )
     },
     setSinglePassFiltrationEfficiency(event) {
       this.singlePassFiltrationEfficiency = event.target.value;
