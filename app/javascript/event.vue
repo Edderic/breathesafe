@@ -665,7 +665,7 @@ export default {
       let portableAirCleaner = this.findPortableAirCleaningDevice()(id);
       portableAirCleaner['airDeliveryRate'] = event.target.value;
       portableAirCleaner['airDeliveryRateCubicMetersPerHour'] = cubicFeetPerMinuteTocubicMetersPerHour(
-        this.airDeliveryRateMeasurementType,
+        this.measurementUnits.airDeliveryRateMeasurementType,
         event.target.value
       );
     },
