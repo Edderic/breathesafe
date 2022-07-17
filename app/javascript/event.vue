@@ -96,7 +96,7 @@
       <button @click='addPortableAirCleaner'>+</button>
       <div class='container border-showing' v-for='portableAirCleaner in portableAirCleaners' :key=portableAirCleaner.id>
         <div class='container'>
-          <label>Air delivery rate ({{ airDeliveryRateMeasurementType }})</label>
+          <label>Air delivery rate ({{ measurementUnits.airDeliveryRateMeasurementType }})</label>
           <input
             :value="portableAirCleaner['airDeliveryRate']"
             @change="setPortableAirCleaningDeviceAirDeliveryRate($event, portableAirCleaner.id)">
