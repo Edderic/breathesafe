@@ -424,7 +424,7 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useProfileStore, ['loadCO2Monitors', 'loadProfile']),
-    ...mapActions(useEventStores, ['addEvent']),
+    ...mapActions(useEventStores, ['load']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
     addActivityGrouping() {
@@ -507,8 +507,8 @@ export default {
         .then(response => {
           console.log(response)
           if (response.status == 201 || response.status == 200) {
-            this.addEvent(toSave)
-            this.focusTab = 'events'
+            this.load()
+            this.setFocusTab('events')
           }
 
           // whatever you want
@@ -518,6 +518,7 @@ export default {
           this.message = "Something went wrong."
           // whatever you want
         })
+
     },
     generateUUID() {
         // https://stackoverflow.com/questions/105034/how-to-create-guid-uuid
