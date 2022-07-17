@@ -160,9 +160,7 @@
       <div class='container'>
         <label>CO2 Measurement Device</label>
 
-        <select disabled :value='ventilationCo2MeasurementDeviceName' @change='setCarbonDioxideMonitor'>
-          <option v-for='carbonDioxideMonitor in carbonDioxideMonitors'>{{ carbonDioxideMonitor['name'] }}</option>
-        </select>
+        <input :value='ventilationCo2MeasurementDeviceName' disabled>
       </div>
 
       <div class='container'>
