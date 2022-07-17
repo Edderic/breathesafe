@@ -462,8 +462,10 @@ export default {
       this.occupancy.parsed = parseOccupancyHTML(this.occupancy)
     },
     airDeliveryRate(num) {
-      // TODO: add the variable that stands for the unit
-      return convertCubicMetersPerHour(num, this.measurementUnits.airDeliveryRateMeasurementType)
+      return convertCubicMetersPerHour(
+        num,
+        this.measurementUnits.airDeliveryRateMeasurementType
+      )
     },
     generateUUID() {
         // https://stackoverflow.com/questions/105034/how-to-create-guid-uuid

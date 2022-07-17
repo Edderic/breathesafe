@@ -1,5 +1,8 @@
 import axios from 'axios';
 
+const CUBIC_FEET_PER_CUBIC_METER = 35.3147
+const FEET_PER_METER = 3.28084
+
 export function filterEvents(search, events) {
   let collection = []
   const lowercasedSearch = search.toLowerCase()
@@ -306,9 +309,9 @@ export function convertLengthBasedOnMeasurementType(
   if (from_measurement_type == to_measurement_type) {
     return parseFloat(from_num)
   } else if (from_measurement_type == 'feet' && to_measurement_type == 'meters'){
-    return parseFloat(from_num) * 0.3048
+    return parseFloat(from_num) / FEET_PER_METER
   } else if (from_measurement_type == 'meters' && to_measurement_type == 'feet'){
-    return parseFloat(from_num) * 3.28084
+    return parseFloat(from_num) * FEET_PER_METER
   }
 }
 
@@ -356,9 +359,11 @@ export function feetToMeters(measurement_type, num) {
 
 export function cubicFeetPerMinuteTocubicMetersPerHour(measurement_type, num) {
   if (measurement_type == 'cubic feet per minute') {
-    return num * 60 / (3.048)**3
+    return parseFloat(num) * 60 / CUBIC_FEET_PER_CUBIC_METER
+  } else if (measurement_type == 'cubic meters per hour') {
+    return parseFloat(num)
   } else {
-    return num
+    throw `measurement_type ${measurement_type} not recognized.`
   }
 }
 
