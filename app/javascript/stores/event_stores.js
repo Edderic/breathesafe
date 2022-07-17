@@ -14,10 +14,6 @@ export const useEventStores = defineStore('events', {
   getters: {
   },
   actions: {
-    addEvent(event) {
-      let camelized = deepSnakeToCamel(event)
-      this.events.push(camelized)
-    },
     load() {
       setupCSRF()
       axios.get('/events')
