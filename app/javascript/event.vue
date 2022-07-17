@@ -507,7 +507,6 @@ export default {
         .then(response => {
           console.log(response)
           if (response.status == 201 || response.status == 200) {
-            this.events.unshift(event);
             this.addEvent(toSave)
             this.focusTab = 'events'
           }
