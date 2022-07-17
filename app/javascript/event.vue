@@ -515,6 +515,7 @@ export default {
         })
         .catch(error => {
           console.log(error)
+          this.message = "Something went wrong."
           // whatever you want
         })
     },

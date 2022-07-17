@@ -69,7 +69,7 @@
         <label class='textarea-label'>Max occupancy</label>
         <input
           disabled
-          :value="occupancy.maximumOccupancy"
+          :value="maximumOccupancy"
         >
       </div>
 
