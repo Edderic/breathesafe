@@ -219,7 +219,7 @@
       <div class='container'>
         <label class='textarea-label'>Max occupancy</label>
         <input
-          v-model="occupancy.maximumOccupancy"
+          v-model="maximumOccupancy"
         >
       </div>
 
@@ -396,8 +396,8 @@ export default {
         unparsedOccupancyData: "",
         parsed: {
         },
-        maximumOccupancy: 0
       },
+      maximumOccupancy: 0,
       hours: [
         '6 AM',
         '7 AM',
@@ -487,8 +487,8 @@ export default {
             'place_data': this.placeData,
             'occupancy': {
               'parsed': this.occupancy.parsed,
-              'maximum_occupancy': this.occupancy.maximumOccupancy
             },
+            'maximum_occupancy': this.maximumOccupancy,
             'portable_air_cleaners': this.portableAirCleaners,
             'portable_ach': this.portableACH,
             'total_ach': this.totalACH,

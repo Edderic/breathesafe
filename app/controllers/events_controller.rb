@@ -66,6 +66,7 @@ class EventsController < ApplicationController
       :start_datetime,
       :duration,
       :private,
+      :maximum_occupancy,
       activity_groups: [
         :id,
         :aerosolGenerationActivity,
@@ -85,8 +86,7 @@ class EventsController < ApplicationController
       place_data: {},
       occupancy: {
         parsed: {},
-        maximum_occupancy: {}
-      }
+      },
     )
   end
 end
