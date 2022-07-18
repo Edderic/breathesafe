@@ -8,21 +8,11 @@
       <tr>
         <th>Room</th>
         <th>Address</th>
-        <th>Total ACH</th>
+        <th>Risk</th>
         <th>Types</th>
         <th>Open Hours</th>
       </tr>
-      <tr class='clickable' :class='{ clicked: ev.clicked }' v-for="ev in displayables" :key="ev.id" @click="focusEvent(ev.id)">
-        <td>{{ev.roomName}}</td>
-        <td>{{ev.placeData.formattedAddress}}</td>
-        <td>{{Math.round(ev.totalAch * 10) / 10}}</td>
-        <td>
-          <div class='tag' v-for="t in ev.placeData.types">{{ t }}</div>
-        </td>
-        <td>
-          <div class='tag' v-for="t in getOpenHours(ev.placeData)">{{ t }}</div>
-        </td>
-      </tr>
+      <MeasurementsRow v-for="ev in displayables" :key="ev.id" :measurements="ev" />
     </table>
   </div>
 </template>
@@ -30,15 +20,17 @@
 <script>
 // Have a VueX store that maintains state across components
 import axios from 'axios';
+import MeasurementsRow from './measurements_row.vue';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { filterEvents, getWeekdayText } from './misc'
 import { mapWritableState, mapState, mapActions } from 'pinia'
 
 export default {
-  name: 'App',
+  name: 'Events',
   components: {
-    Event
+    Event,
+    MeasurementsRow
   },
   computed: {
     ...mapWritableState(
