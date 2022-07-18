@@ -3,6 +3,123 @@ import axios from 'axios';
 const CUBIC_FEET_PER_CUBIC_METER = 35.3147
 const FEET_PER_METER = 3.28084
 
+const infectorActivityTypeMapping = {
+  "Resting – Oral breathing": 1,
+  "Resting – Speaking": 4.7,
+  "Resting – Loudly speaking": 30.3,
+  "Standing – Oral breathing": 1.2,
+  "Standing – Speaking": 5.7,
+  "Standing – Loudly speaking": 32.6,
+  "Light exercise – Oral breathing": 2.8,
+  "Light exercise – Speaking": 13.2,
+  "Light exercise – Loudly speaking": 85,
+  "Heavy exercise – Oral breathing": 6.8,
+  "Heavy exercise – Speaking": 31.6,
+  "Heavy exercise – Loudly speaking": 204,
+}
+
+export function sampleComputeRisk(
+  numSamples,
+  activityGroups,
+  occupancy,
+  flowRate,
+  quanta,
+  susceptibleMaskPenentrationFactor,
+  susceptibleAgeGroup,
+  probaRandomSampleOfOneIsInfectious
+) {
+  let totalPeople = getTotalNumberOfPeopleinActivityGroups(activityGroups)
+  let peopleBehaviors = generatePeopleBehaviors(
+    activityGroups,
+    occupancy,
+    totalPeople,
+    susceptibleAgeGroup
+  )
+
+  let infectionCount = 0
+
+  for (let i = 0; i < numSamples; i++) {
+    // pick a susceptible behavior
+    const susceptibleIndex = Math.floor(Math.random() * peopleBehaviors.length)
+    const susceptible = peopleBehaviors[susceptibleIndex]
+
+    let totalInfectorQuantaPerHour = computeTotalInfectorQuantaPerHour(
+      peopleBehaviors,
+      probaRandomSampleOfOneIsInfectious
+    )
+
+    let risk = computeRisk(
+      flowRate,
+      quanta,
+      totalInfectorQuantaPerHour,
+      susceptible['inhalationFactor'],
+      susceptibleMaskPenentrationFactor
+    )
+
+    if (Math.random() < risk) {
+      infectionCount += 1
+    }
+  }
+
+  return parseFloat(infectionCount) / numSamples
+}
+
+function getTotalNumberOfPeopleinActivityGroups(activityGroups) {
+  let totalPeople = 0
+  for (let activityGroup of activityGroups) {
+    totalPeople += parseInt(activityGroup.numberOfPeople)
+  }
+
+  return totalPeople
+}
+
+function computeTotalInfectorQuantaPerHour(peopleBehaviors, probaRandomSampleOfOneIsInfectious) {
+  let totalInfectorQuantaPerHour = 0.0
+
+  for (let peopleBehavior of peopleBehaviors) {
+    let infectorAgeGroup = peopleBehavior['ageGroup']
+
+    if (Math.random() < probaRandomSampleOfOneIsInfectious) {
+      totalInfectorQuantaPerHour += peopleBehavior['aerosolGenerationActivityFactor']
+        * peopleBehavior['maskPenetrationFactor']
+    }
+  }
+
+  return totalInfectorQuantaPerHour
+}
+
+function generatePeopleBehaviors(
+  activityGroups,
+  occupancy,
+  totalPeople,
+  susceptibleAgeGroup
+) {
+  // generate an array of behaviors where each item represents an individual
+  let peopleBehaviors = []
+
+  for (let activityGroup of activityGroups) {
+    let numPeopleActivityGroup = parseInt(
+      occupancy * parseFloat(activityGroup['numberOfPeople']) / totalPeople
+    )
+
+    for (let i = 0; i < numPeopleActivityGroup; i++) {
+      peopleBehaviors.push({
+        'aerosolGenerationActivityFactor': infectorActivityTypeMapping[
+          activityGroup['aerosolGenerationActivity']
+        ],
+        'maskPenetrationFactor': maskToFactor[activityGroup['maskType']],
+        'inhalationFactor': susceptibleBreathingActivityToFactor[
+          co2ActivityToSusceptibleBreathingActivity[
+            activityGroup['carbonDioxideGenerationActivity']
+          ]
+        ][susceptibleAgeGroup]['mean cubic meters per hour']
+      })
+    }
+  }
+
+  return peopleBehaviors
+}
+
 export function filterEvents(search, events) {
   let collection = []
   const lowercasedSearch = search.toLowerCase()
@@ -223,6 +340,238 @@ export function computePortableACH(
   return total
 }
 
+
+const maskToFactor = {
+  'None': 1.0,
+  'Cloth / Surgical': 0.4,
+  'N95 - unfitted': 0.1,
+  'N95 - fitted': 0.07,
+  'Elastomeric N95': 0.05,
+  'Elastomeric N99': 0.01,
+  'Elastomeric P100': 0.001
+}
+
+export const maskToPenetrationFactor = maskToFactor
+
+
+export const co2ActivityToSusceptibleBreathingActivity = {
+  "Calisthenics—light effort": "Light Intensity",
+  "Calisthenics—moderate effort": "Moderate Intensity",
+  "Calisthenics—vigorous effort": "High Intensity",
+  "Child care": "Sedentary / Passive", // 2 - 3
+  "Cleaning, sweeping—moderate effort": "Light Intensity",
+  "Custodial work—light": "Light Intensity",
+  "Dancing—aerobic, general": "High Intensity",
+  "Dancing—general": "High Intensity",
+  "Health club exercise classes—general": "Moderate Intensity",
+  "Kitchen activity—moderate effort": "Light Intensity",
+  "Lying or sitting quietly": "Sedentary / Passive",
+  "Sitting reading, writing, typing": "Sedentary / Passive",
+  "Sitting at sporting event as spectator": "Sedentary / Passive",
+  "Sitting tasks, light effort (e.g, office work)": "Sedentary / Passive",
+  "Sitting quietly in religious service": "Sedentary / Passive",
+  "Sleeping": "Sleep or Nap",
+  "Standing quietly": "Sedentary / Passive",
+  "Standing tasks, light effort (e.g, store clerk, filing)": "Sedentary / Passive",
+  "Walking, less than 2 mph, level surface, very slow": "Light Intensity",
+  "Walking, 2.8 mph to 3.2 mph, level surface, moderate pace": "Light Intensity",
+}
+
+// Uses age groups taken from the Harvard Healthy Buildings website instead of
+// the original, which had more
+export const susceptibleBreathingActivityToFactor = {
+  "Sleep or Nap": {
+    "1 to <3": {
+      "mean cubic meters per hour": 0.276,
+    },
+    "3 to <6": {
+      "mean cubic meters per hour": 0.258,
+    },
+    "6 to <11": {
+      "mean cubic meters per hour": 0.27,
+    },
+    "11 to <16": {
+      "mean cubic meters per hour": 0.3,
+    },
+    "16 to <21": {
+      "mean cubic meters per hour": 0.294,
+    },
+    "21 to <30": {
+      "mean cubic meters per hour": 0.258,
+    },
+    "30 to <40": {
+      "mean cubic meters per hour": 0.276,
+    },
+    "40 to <50": {
+      "mean cubic meters per hour": 0.3,
+    },
+    "50 to <60": {
+      "mean cubic meters per hour": 0.312,
+    },
+    "60 to <70": {
+      "mean cubic meters per hour": 0.318,
+    },
+    "70 to <80": {
+      "mean cubic meters per hour": 0.318,
+    },
+    ">= 80": {
+      "mean cubic meters per hour": 0.312,
+    },
+  },
+  "Sedentary / Passive": {
+    "1 to <3": {
+      "mean cubic meters per hour": 0.27,
+    },
+    "3 to <6": {
+      "mean cubic meters per hour": 0.282,
+    },
+    "6 to <11": {
+      "mean cubic meters per hour": 0.324,
+    },
+    "11 to <16": {
+      "mean cubic meters per hour": 0.318,
+    },
+    "16 to <21": {
+      "mean cubic meters per hour": 0.318,
+    },
+    "21 to <30": {
+      "mean cubic meters per hour": 0.252,
+    },
+    "30 to <40": {
+      "mean cubic meters per hour": 0.258,
+    },
+    "40 to <50": {
+      "mean cubic meters per hour": 0.288,
+    },
+    "50 to <60": {
+      "mean cubic meters per hour": 0.3,
+    },
+    "60 to <70": {
+      "mean cubic meters per hour": 0.294,
+    },
+    "70 to <80": {
+      "mean cubic meters per hour": 0.3,
+    },
+    ">= 80": {
+      "mean cubic meters per hour": 0.294,
+    },
+  },
+  "Light Intensity": {
+    "1 to <3": {
+      "mean cubic meters per hour": 0.72,
+    },
+    "3 to <6": {
+      "mean cubic meters per hour": 0.66,
+    },
+    "6 to <11": {
+      "mean cubic meters per hour": 0.66,
+    },
+    "11 to <16": {
+      "mean cubic meters per hour": 0.78,
+    },
+    "16 to <21": {
+      "mean cubic meters per hour": 0.72,
+    },
+    "21 to <30": {
+      "mean cubic meters per hour": 0.72,
+    },
+    "30 to <40": {
+      "mean cubic meters per hour": 0.72,
+    },
+    "40 to <50": {
+      "mean cubic meters per hour": 0.78,
+    },
+    "50 to <60": {
+      "mean cubic meters per hour": 0.78,
+    },
+    "60 to <70": {
+      "mean cubic meters per hour": 0.72,
+    },
+    "70 to <80": {
+      "mean cubic meters per hour": 0.72,
+    },
+    ">= 80": {
+      "mean cubic meters per hour": 0.72,
+    },
+  },
+  "Moderate Intensity": {
+    "1 to <3": {
+      "mean cubic meters per hour": 1.26,
+    },
+    "3 to <6": {
+      "mean cubic meters per hour": 1.26,
+    },
+    "6 to <11": {
+      "mean cubic meters per hour": 1.32,
+    },
+    "11 to <16": {
+      "mean cubic meters per hour": 1.5,
+    },
+    "16 to <21": {
+      "mean cubic meters per hour": 1.56,
+    },
+    "21 to <30": {
+      "mean cubic meters per hour": 1.56,
+    },
+    "30 to <40": {
+      "mean cubic meters per hour": 1.62,
+    },
+    "40 to <50": {
+      "mean cubic meters per hour": 1.68,
+    },
+    "50 to <60": {
+      "mean cubic meters per hour": 1.74,
+    },
+    "60 to <70": {
+      "mean cubic meters per hour": 1.56,
+    },
+    "70 to <80": {
+      "mean cubic meters per hour": 1.5,
+    },
+    ">= 80": {
+      "mean cubic meters per hour": 1.5,
+    },
+  },
+  "High Intensity": {
+    "1 to <3": {
+      "mean cubic meters per hour": 2.28,
+    },
+    "3 to <6": {
+      "mean cubic meters per hour": 2.22,
+    },
+    "6 to <11": {
+      "mean cubic meters per hour": 2.52,
+    },
+    "11 to <16": {
+      "mean cubic meters per hour": 2.94,
+    },
+    "16 to <21": {
+      "mean cubic meters per hour": 2.94,
+    },
+    "21 to <30": {
+      "mean cubic meters per hour": 3.0,
+    },
+    "30 to <40": {
+      "mean cubic meters per hour": 2.94,
+    },
+    "40 to <50": {
+      "mean cubic meters per hour": 3.12,
+    },
+    "50 to <60": {
+      "mean cubic meters per hour": 3.18,
+    },
+    "60 to <70": {
+      "mean cubic meters per hour": 2.82,
+    },
+    "70 to <80": {
+      "mean cubic meters per hour": 2.82,
+    },
+    ">= 80": {
+      "mean cubic meters per hour": 2.88,
+    },
+  }
+}
+
 function getMetFromCO2GenerationActivity(activity) {
   const mapping = {
       "Calisthenics—light effort": 2.8,
@@ -411,4 +760,26 @@ export const daysToIndexDict = {
   'Thursdays': 4,
   'Fridays': 5,
   'Saturdays': 6,
+}
+
+export function computeRisk(
+  flowRate,
+  quanta,
+  infectorSpecificTerm,
+  susceptibleInhalationFactor,
+  susceptibleMaskPenentrationFactor
+) {
+
+    const denominator = flowRate
+
+    const duration = 1.0 // h
+
+
+    const susceptibleSpecificTerm = susceptibleInhalationFactor
+      * susceptibleMaskPenentrationFactor
+
+    const numerator = quanta * infectorSpecificTerm
+      * susceptibleSpecificTerm * duration
+
+    return 1 - Math.exp(- numerator / denominator)
 }

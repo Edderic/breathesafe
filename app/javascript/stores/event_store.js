@@ -58,7 +58,6 @@ export const useEventStore = defineStore('event', {
       "Walking, 2.8 mph to 3.2 mph, level surface, moderate pace": 3.5,
     },
     infectorActivityTypeMapping: {
-      "Unknown": 'NA',
       "Resting – Oral breathing": 1,
       "Resting – Speaking": 4.7,
       "Resting – Loudly speaking": 30.3,
@@ -84,7 +83,6 @@ export const useEventStore = defineStore('event', {
     ],
     portableAirCleaners: [],
     susceptibleActivities: [
-      "Unknown",
       "Sleep or Nap",
       "Sedentary / Passive",
       "Light Intensity",
@@ -94,7 +92,6 @@ export const useEventStore = defineStore('event', {
     susceptibleActivity: "Unknown",
     susceptibleAgeGroup: "Unknown",
     ageGroups: [
-      "Unknown",
       "1 to <3",
       "3 to <6",
       "6 to <11",

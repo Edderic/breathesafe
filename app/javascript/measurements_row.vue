@@ -2,7 +2,7 @@
   <tr @click="focusEvent(this.measurements.id)" class='clickable' :class='{ clicked: this.measurements.clicked }'>
     <td>{{this.measurements.roomName}}</td>
     <td>{{this.measurements.placeData.formattedAddress}}</td>
-    <td>{{Math.round(this.measurements.totalAch * 10) / 10}}</td>
+    <td>{{risk}}</td>
     <td>
       <div class='tag' v-for="t in this.measurements.placeData.types">{{ t }}</div>
     </td>
@@ -16,15 +16,56 @@
 // Have a VueX store that maintains state across components
 import axios from 'axios';
 import { useEventStores } from './stores/event_stores';
+import { useEventStore } from './stores/event_store';
 import { useMainStore } from './stores/main_store';
+import { usePrevalenceStore } from './stores/prevalence_store';
 import { filterEvents, getWeekdayText } from './misc'
 import { mapWritableState, mapState, mapActions } from 'pinia'
+import { sampleComputeRisk, maskToPenetrationFactor } from './misc'
 
 export default {
   name: 'MeasurementsRow',
   components: {
   },
   computed: {
+    ...mapState(usePrevalenceStore, ['numPositivesLastSevenDays', 'numPopulation', 'uncountedFactor']),
+    ...mapState(useEventStore, ['infectorActivityTypeMapping']),
+    risk: function() {
+      const probaRandomSampleOfOneIsInfectious = this.numPositivesLastSevenDays
+        * this.uncountedFactor / this.numPopulation || 0.001
+
+      const flowRate = this.measurements.roomUsableVolumeCubicMeters * this.measurements.totalAch
+      const susceptibleAgeGroup = '30 to <40' // TODO:
+      const susceptibleMaskType = 'None'
+      const susceptibleMaskPenentrationFactor = maskToPenetrationFactor[susceptibleMaskType]
+
+      const basicInfectionQuanta = 18.6
+      const variantMultiplier = 3.33
+      const quanta = basicInfectionQuanta * variantMultiplier
+
+      // TODO: randomly pick from the set of activity groups. Let's say there
+      // are two activity groups, one with 10 people who are doing X and 5
+      // people doing Y.
+      // Activity Factor for Y should be sampled about 5 out of 15 times?
+      const activityGroups = this.measurements.activityGroups
+      const occupancyFactor = 1.0 // ideally, would change based on time and day
+      const maximumOccupancy = this.measurements.maximumOccupancy
+
+
+      let occupancy = parseFloat(maximumOccupancy) * occupancyFactor
+      const numSamples = 1000000
+
+      return sampleComputeRisk(
+        numSamples,
+        activityGroups,
+        occupancy,
+        flowRate,
+        quanta,
+        susceptibleMaskPenentrationFactor,
+        susceptibleAgeGroup,
+        probaRandomSampleOfOneIsInfectious
+      )
+    }
   },
   data() {
     return {
