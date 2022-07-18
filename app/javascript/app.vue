@@ -33,7 +33,7 @@
         <Tabs v-if='focusTab == "events"'/>
         <Prevalence v-if='focusTab == "events" && focusSubTab == "Prevalence"'/>
         <ShowMeasurementSet v-if='focusTab == "events" && focusSubTab == "Measures"'/>
-        <Event v-if='focusTab == "event" && signedIn'/>
+        <AddMeasurements v-if='focusTab == "event" && signedIn'/>
         <Profile v-if='focusTab == "profile"'/>
         <Registration v-if='!signedIn && focusTab == "register"'/>
         <Confirmation v-if='!signedIn && focusTab == "confirmation"'/>
@@ -45,7 +45,7 @@
 
 <script>
 // Have a VueX store that maintains state across components
-import Event from './event.vue';
+import AddMeasurements from './add_measurements.vue';
 import Events from './events.vue';
 import NavBar from './navbar.vue';
 import Profile from './profile.vue';
@@ -62,8 +62,8 @@ import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
 export default {
   name: 'App',
   components: {
+    AddMeasurements,
     Confirmation,
-    Event,
     Events,
     NavBar,
     Profile,

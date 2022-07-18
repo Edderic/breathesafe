@@ -1,8 +1,7 @@
 <template>
-  <div class='wide border-showing'>
-
+  <div class='border-showing'>
     <div class='container centered'>
-      <h2>Add Event</h2>
+      <h2>Add Measurements</h2>
     </div>
     <div class='container'>
       <label>Google Search</label>
