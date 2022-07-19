@@ -8,8 +8,8 @@ import { setupCSRF } from '../misc'
 // the first argument is a unique id of the store across your application
 export const usePrevalenceStore = defineStore('prevalence', {
   state: () => ({
-    numPositivesLastSevenDays: 0,
-    numPopulation: 0,
+    numPositivesLastSevenDays: 100,
+    numPopulation: 1000,
     uncountedFactor: 10,
   }),
   actions: {
