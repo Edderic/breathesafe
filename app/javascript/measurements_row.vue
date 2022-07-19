@@ -28,7 +28,7 @@ export default {
   components: {
   },
   computed: {
-    ...mapState(usePrevalenceStore, ['numPositivesLastSevenDays', 'numPopulation', 'uncountedFactor']),
+    ...mapState(usePrevalenceStore, ['numPositivesLastSevenDays', 'numPopulation', 'uncountedFactor', 'maskType']),
     ...mapState(useEventStore, ['infectorActivityTypeMapping']),
     risk: function() {
       const probaRandomSampleOfOneIsInfectious = this.numPositivesLastSevenDays
@@ -36,7 +36,7 @@ export default {
 
       const flowRate = this.measurements.roomUsableVolumeCubicMeters * this.measurements.totalAch
       const susceptibleAgeGroup = '30 to <40' // TODO:
-      const susceptibleMaskType = 'None'
+      const susceptibleMaskType = this.maskType
       const susceptibleMaskPenentrationFactor = maskToPenetrationFactor[susceptibleMaskType]
 
       const basicInfectionQuanta = 18.6
