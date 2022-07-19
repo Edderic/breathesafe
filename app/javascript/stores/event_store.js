@@ -29,7 +29,6 @@ export const useEventStore = defineStore('event', {
     ventilationCO2MeasurementDeviceModel: '',
     ventilationCO2MeasurementDeviceSerial: '',
     carbonDioxideMonitors: [],
-    systemOfMeasurement: 'imperial',
     lengthMeasurementType: 'feet',
     airDeliveryRate: "",
     singlePassFiltrationEfficiency: "",
