@@ -91,12 +91,14 @@ export default {
       });
 
     this.getCurrentUser();
+    this.loadProfile()
   },
   data() {
     return {}
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
+    ...mapActions(useProfileStore, ['loadProfile']),
     save() {
       // send data to backend.
     },

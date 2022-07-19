@@ -101,7 +101,6 @@ export default {
   // TODO: pull data from profiles for given current_user
   created() {
     this.getCurrentUser()
-    this.loadProfile()
     this.loadCO2Monitors()
   },
   data() {
