@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useEventStores } from './event_stores.js'
-import { cubicFeetPerMinuteTocubicMetersPerHour, feetToMeters, generateUUID } from '../misc'
+import { convertLengthBasedOnMeasurementType, cubicFeetPerMinuteTocubicMetersPerHour, feetToMeters, generateUUID } from '../misc'
 
 // useStore could be anything like useUser, useCart
 // the first argument is a unique id of the store across your application
