@@ -1,6 +1,7 @@
 import { mapActions, mapState, mapWritableState, defineStore } from 'pinia'
 import axios from 'axios'
 import { useMainStore } from './main_store'
+import { usePrevalenceStore } from './prevalence_store'
 import { useShowMeasurementSetStore } from './show_measurement_set_store'
 import { useEventStore } from './event_store'
 import { generateUUID, getMeasurementUnits, setupCSRF } from '../misc';
