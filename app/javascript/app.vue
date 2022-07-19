@@ -34,7 +34,7 @@
         <Prevalence v-if='focusTab == "events" && focusSubTab == "Prevalence"'/>
         <ShowMeasurementSet v-if='focusTab == "events" && focusSubTab == "Measures"'/>
         <AddMeasurements v-if='focusTab == "event" && signedIn'/>
-        <Profile v-if='focusTab == "profile"'/>
+        <Profile v-if='focusTab == "profile" && signedIn'/>
         <Registration v-if='!signedIn && focusTab == "register"'/>
         <Confirmation v-if='!signedIn && focusTab == "confirmation"'/>
         <SignIn v-if='!signedIn && focusTab == "signIn"'/>
