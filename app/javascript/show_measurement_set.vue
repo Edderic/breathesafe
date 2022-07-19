@@ -435,7 +435,6 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
-    ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
     addActivityGrouping() {
