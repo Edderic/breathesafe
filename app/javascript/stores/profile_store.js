@@ -50,6 +50,7 @@ export const useProfileStore = defineStore('profile', {
             prevalenceStore.numPositivesLastSevenDays = profile.num_positive_cases_last_seven_days
             prevalenceStore.numPopulation = profile.num_people_population
             prevalenceStore.uncountedFactor = profile.uncounted_cases_multiplier
+            prevalenceStore.maskType = profile.mask_type
 
             this.message = data.message
             this.systemOfMeasurement = profile.measurement_system
@@ -80,6 +81,7 @@ export const useProfileStore = defineStore('profile', {
           'uncounted_cases_multiplier': prevalenceStore.uncountedFactor,
           'num_people_population': prevalenceStore.numPopulation,
           'num_positive_cases_last_seven_days': prevalenceStore.numPositivesLastSevenDays,
+          'mask_type': prevalenceStore.maskType
         }
       }
 
@@ -94,6 +96,7 @@ export const useProfileStore = defineStore('profile', {
           prevalenceStore.numPositivesLastSevenDays = profile.num_positive_cases_last_seven_days
           prevalenceStore.numPopulation = profile.num_people_population
           prevalenceStore.uncountedFactor = profile.uncounted_cases_multiplier
+          prevalenceStore.maskType = profile.mask_type
 
           this.message = data.message
           this.systemOfMeasurement = profile.systemOfMeasurement
@@ -119,6 +122,7 @@ export const useProfileStore = defineStore('profile', {
           'uncounted_cases_multiplier': prevalenceStore.uncountedFactor,
           'num_people_population': prevalenceStore.numPopulation,
           'num_positive_cases_last_seven_days': prevalenceStore.numPositivesLastSevenDays,
+          'mask_type': prevalenceStore.maskType
         }
       }
 
@@ -133,6 +137,7 @@ export const useProfileStore = defineStore('profile', {
           prevalenceStore.numPositivesLastSevenDays = profile.num_positive_cases_last_seven_days
           prevalenceStore.numPopulation = profile.num_people_population
           prevalenceStore.uncountedFactor = profile.uncounted_cases_multiplier
+          prevalenceStore.maskType = profile.mask_type
 
           this.message = data.message
           this.systemOfMeasurement = profile.systemOfMeasurement

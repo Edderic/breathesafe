@@ -18,6 +18,8 @@ const infectorActivityTypeMapping = {
   "Heavy exercise – Loudly speaking": 204,
 }
 
+
+
 export function sampleComputeRisk(
   numSamples,
   activityGroups,
@@ -339,7 +341,6 @@ export function computePortableACH(
 
   return total
 }
-
 
 const maskToFactor = {
   'None': 1.0,

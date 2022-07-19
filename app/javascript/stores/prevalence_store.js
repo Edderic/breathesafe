@@ -11,6 +11,7 @@ export const usePrevalenceStore = defineStore('prevalence', {
     numPositivesLastSevenDays: 100,
     numPopulation: 1000,
     uncountedFactor: 10,
+    maskType: "None"
   }),
   actions: {
 

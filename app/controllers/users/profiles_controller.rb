@@ -87,7 +87,8 @@ class Users::ProfilesController < ApplicationController
       "measurement_system",
       "num_people_population",
       "num_positive_cases_last_seven_days",
-      "uncounted_cases_multiplier"
+      "uncounted_cases_multiplier",
+      "mask_type"
     )
   end
 end

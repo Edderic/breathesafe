@@ -2,19 +2,19 @@
   <div class='container'>
     <label>Number of positive cases last seven days</label>
     <input
-      :value="numPositivesLastSevenDays" @change=setNumPositivesLastSevenDays>
+      :value="numPositivesLastSevenDays" @change='setNumPositivesLastSevenDays'>
   </div>
 
   <div class='container'>
     <label>Number of people in the population</label>
     <input
-      :value="numPopulation" @change=setNumPopulation>
+      :value="numPopulation" @change='setNumPopulation'>
   </div>
 
   <div class='container'>
     <label>Multiplier to account for Uncounted Cases</label>
     <input
-      :value="uncountedFactor" @change=setUncountedFactor>
+      :value="uncountedFactor" @change='setUncountedFactor'>
   </div>
 
   <div class='container'>
@@ -22,12 +22,21 @@
     <input disabled
       :value="probabilityInfectious">
   </div>
+
+  <div class='container'>
+    <label>Mask Type</label>
+    <select :value='maskType' @change='setMaskType'>
+      <option v-for='m in maskValues'>{{ m }}</option>
+    </select>
+  </div>
+
 </template>
 
 <script>
 import { useMainStore } from './stores/main_store'
 import { usePrevalenceStore } from './stores/prevalence_store';
 import { useProfileStore } from './stores/profile_store';
+import { maskToPenetrationFactor } from './misc'
 import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
 
 export default {
@@ -36,15 +45,22 @@ export default {
   },
   computed: {
     ...mapState(useMainStore, ["focusSubTab"]),
-    ...mapWritableState(usePrevalenceStore, ['numPositivesLastSevenDays', 'numPopulation', 'uncountedFactor']),
+    ...mapWritableState(usePrevalenceStore, ['numPositivesLastSevenDays', 'numPopulation', 'uncountedFactor', 'maskType']),
     ...mapWritableState(useMainStore, ['center', 'zoom']),
     probabilityInfectious() {
       return parseFloat(this.numPositivesLastSevenDays)
         * parseFloat(this.uncountedFactor) / parseFloat(this.numPopulation)
+    },
+    maskValues() {
+      let values = []
+      for (let mask in maskToPenetrationFactor) {
+        values.push(mask)
+      }
+
+      return values
     }
   },
   created() {
-    useProfileStore
   },
   data() {
     return {}
@@ -63,6 +79,10 @@ export default {
       this.numPositivesLastSevenDays = e.target.value
       this.updateProfile()
     },
+    setMaskType(e) {
+      this.maskType = e.target.value
+      this.updateProfile()
+    }
   },
 }
 </script>

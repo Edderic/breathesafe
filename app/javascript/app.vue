@@ -79,7 +79,7 @@ export default {
     ...mapWritableState(useMainStore, ['center', 'zoom'])
 
   },
-  created() {
+  async created() {
     // TODO: modify the store
     this.$getLocation()
       .then((coordinates) => {
@@ -90,7 +90,7 @@ export default {
         console.log(error);
       });
 
-    this.getCurrentUser();
+    await this.getCurrentUser();
     this.loadProfile()
   },
   data() {
