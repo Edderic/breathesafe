@@ -13,7 +13,6 @@ export const useEventStore = defineStore('events', {
     carbonDioxideSteadyState: '',
     carbonDioxideAmbient: '420',
     carbonDioxideMeasurementDevice: '',
-    systemOfMeasurement: 'imperial',
     lengthMeasurementType: 'feet',
     airDeliveryRateMeasurementType: 'cubic feet per minute',
     airDeliveryRate: "",
