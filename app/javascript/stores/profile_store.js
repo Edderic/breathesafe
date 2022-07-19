@@ -33,23 +33,72 @@ export const useProfileStore = defineStore('profile', {
       setupCSRF();
 
       let mainStore = useMainStore()
+      let prevalenceStore = usePrevalenceStore()
+      let currentUser = mainStore.currentUser
+
+      let hasProfile = false
+
+      await axios.get(
+        `/users/${currentUser.id}/profile.json`,
+      )
+        .then(response => {
+          let data = response.data
+          if (response.data.profile) {
+            hasProfile = true
+
+            prevalenceStore.numPositivesLastSevenDays = data.num_positive_cases_last_seven_days
+            prevalenceStore.numPopulation = data.num_people_population
+            prevalenceStore.uncountedFactor = data.uncounted_cases_multiplier
+
+            this.message = data.message
+            let profile = data.profile
+            this.systemOfMeasurement = profile.measurement_system
+            debugger
+            this.measurementUnits = getMeasurementUnits(profile.measurement_system)
+          }
+
+          // whatever you want
+        })
+        .catch(error => {
+          this.message = "Failed to load profile."
+          // whatever you want
+        })
+
+      if (!hasProfile) {
+        await this.createProfile()
+      }
+    },
+    async createProfile() {
+      setupCSRF();
+
+      let mainStore = useMainStore()
+      let prevalenceStore = usePrevalenceStore()
       let currentUser = mainStore.currentUser
 
       let toSave = {
         'profile': {
-          'measurement_system': this.systemOfMeasurement
+          'measurement_system': this.systemOfMeasurement,
+          'uncounted_cases_multiplier': prevalenceStore.uncountedFactor,
+          'num_people_population': prevalenceStore.numPopulation,
+          'num_positive_cases_last_seven_days': prevalenceStore.numPositivesLastSevenDays,
         }
       }
 
       await axios.post(
-        `/users/${currentUser.id}/profiles.json`,
+        `/users/${currentUser.id}/profile.json`,
         toSave
       )
         .then(response => {
           let data = response.data
+          let profile = data.profile
+
+          prevalenceStore.numPositivesLastSevenDays = profile.num_positive_cases_last_seven_days
+          prevalenceStore.numPopulation = profile.num_people_population
+          prevalenceStore.uncountedFactor = profile.uncounted_cases_multiplier
 
           this.message = data.message
-          this.systemOfMeasurement = data.systemOfMeasurement
+          this.systemOfMeasurement = profile.systemOfMeasurement
+          debugger
           this.measurementUnits = getMeasurementUnits(this.systemOfMeasurement)
 
           // whatever you want
@@ -59,6 +108,46 @@ export const useProfileStore = defineStore('profile', {
           // whatever you want
         })
     },
+    async updateProfile() {
+      setupCSRF();
+
+      let mainStore = useMainStore()
+      let prevalenceStore = usePrevalenceStore()
+      let currentUser = mainStore.currentUser
+
+      let toSave = {
+        'profile': {
+          'measurement_system': this.systemOfMeasurement,
+          'uncounted_cases_multiplier': prevalenceStore.uncountedFactor,
+          'num_people_population': prevalenceStore.numPopulation,
+          'num_positive_cases_last_seven_days': prevalenceStore.numPositivesLastSevenDays,
+        }
+      }
+
+      await axios.put(
+        `/users/${currentUser.id}/profile.json`,
+        toSave
+      )
+        .then(response => {
+          let data = response.data
+
+          prevalenceStore.numPositivesLastSevenDays = data.num_positive_cases_last_seven_days
+          prevalenceStore.numPopulation = data.num_people_population
+          prevalenceStore.uncountedFactor = data.uncounted_cases_multiplier
+
+          this.message = data.message
+          this.systemOfMeasurement = data.profile.systemOfMeasurement
+          debugger
+          this.measurementUnits = getMeasurementUnits(this.systemOfMeasurement)
+
+          // whatever you want
+        })
+        .catch(error => {
+          this.message = "Failed to load profile."
+          // whatever you want
+        })
+    },
+
     async loadCO2Monitors() {
       setupCSRF();
 
@@ -93,7 +182,7 @@ export const useProfileStore = defineStore('profile', {
 
       const eventStore = useEventStore()
 
-      await axios.post(`/users/${currentUser.id}/profiles.json`, toSave)
+      await axios.put(`/users/${currentUser.id}/profile.json`, toSave)
         .then(response => {
           console.log(response)
 
