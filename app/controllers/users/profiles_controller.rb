@@ -11,13 +11,50 @@ class Users::ProfilesController < ApplicationController
     end
   end
 
-  def create_or_update
-    if profile_data['measurement_system'].blank?
-      measurement_system = 'imperial'
+  def show
+    profile = current_user.profile
+
+    to_render = {
+      profile: profile,
+      message: ""
+    }
+
+    respond_to do |format|
+      format.json do
+        render json: to_render.to_json, status: 200
+      end
+    end
+  end
+
+  def create
+    if unauthorized?
+      status = 401
+      message = "Unauthorized."
     else
-      measurement_system = profile_data['measurement_system']
+      profile = Profile.create(user: current_user, measurement_system: measurement_system)
+
+      if profile
+        status = 201
+        message = ""
+      else
+        status = 422
+        message = "Profile creation failed."
+      end
     end
 
+    to_render = {
+      profile: profile,
+      message: message
+    }
+
+    respond_to do |format|
+      format.json do
+        render json: to_render.to_json, status: status
+      end
+    end
+  end
+
+  def update
     if unauthorized?
       status = 401
       message = "Unauthorized."
@@ -25,25 +62,15 @@ class Users::ProfilesController < ApplicationController
       profile = current_user.profile
       status = 200
 
-      if profile
-        if profile.measurement_system == profile_data['measurement_system']
-          message = ""
-        elsif profile.update(user: current_user, measurement_system: measurement_system)
-          message = "Successfully updated measurement system to #{measurement_system}."
-        else
-          message = ""
-        end
+      if profile.update(profile_data)
+        message = "Successfully updated."
       else
-        profile = Profile.create(user: current_user, measurement_system: measurement_system)
-
-        unless profile
-          message = "Failed to create profile."
-        end
+        message = "Did not update."
       end
     end
 
     to_render = {
-      systemOfMeasurement: measurement_system,
+      profile: profile,
       message: message
     }
 
@@ -55,6 +82,12 @@ class Users::ProfilesController < ApplicationController
   end
 
   def profile_data
-    params.require(:profile).permit("measurement_system")
+    params.require(:profile).permit(
+      "user_id",
+      "measurement_system",
+      "num_people_population",
+      "num_positive_cases_last_seven_days",
+      "uncounted_cases_multiplier"
+    )
   end
 end
