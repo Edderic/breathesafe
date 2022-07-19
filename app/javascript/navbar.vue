@@ -37,10 +37,10 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
-    ...mapActions(useEventStores, { 'load': 'loadEvents' }),
+    ...mapActions(useEventStores, [ 'load']),
     navToEvents() {
       this.focusTab = 'events'
-      this.loadEvents()
+      this.load()
     },
     navToProfile() {
       this.focusTab = 'profile'
