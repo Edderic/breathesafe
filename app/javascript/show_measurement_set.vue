@@ -367,9 +367,6 @@ export default {
     },
   },
   async created() {
-    // TODO: handle scenario where person is not logged in
-    // await this.loadProfile()
-    // TODO: fire and forget. Make asynchronous.
   },
   data() {
     return {
