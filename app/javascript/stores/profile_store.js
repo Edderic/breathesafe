@@ -53,7 +53,6 @@ export const useProfileStore = defineStore('profile', {
             this.message = data.message
             let profile = data.profile
             this.systemOfMeasurement = profile.measurement_system
-            debugger
             this.measurementUnits = getMeasurementUnits(profile.measurement_system)
           }
 
@@ -98,7 +97,6 @@ export const useProfileStore = defineStore('profile', {
 
           this.message = data.message
           this.systemOfMeasurement = profile.systemOfMeasurement
-          debugger
           this.measurementUnits = getMeasurementUnits(this.systemOfMeasurement)
 
           // whatever you want
@@ -137,7 +135,6 @@ export const useProfileStore = defineStore('profile', {
 
           this.message = data.message
           this.systemOfMeasurement = data.profile.systemOfMeasurement
-          debugger
           this.measurementUnits = getMeasurementUnits(this.systemOfMeasurement)
 
           // whatever you want
