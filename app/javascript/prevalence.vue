@@ -2,19 +2,19 @@
   <div class='container'>
     <label>Number of positive cases last seven days</label>
     <input
-      v-model="numPositivesLastSevenDays">
+      :value="numPositivesLastSevenDays" @change=setNumPositivesLastSevenDays>
   </div>
 
   <div class='container'>
     <label>Number of people in the population</label>
     <input
-      v-model="numPopulation">
+      :value="numPopulation" @change=setNumPopulation>
   </div>
 
   <div class='container'>
     <label>Multiplier to account for Uncounted Cases</label>
     <input
-      v-model="uncountedFactor">
+      :value="uncountedFactor" @change=setUncountedFactor>
   </div>
 
   <div class='container'>
@@ -27,6 +27,7 @@
 <script>
 import { useMainStore } from './stores/main_store'
 import { usePrevalenceStore } from './stores/prevalence_store';
+import { useProfileStore } from './stores/profile_store';
 import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
 
 export default {
@@ -43,11 +44,25 @@ export default {
     }
   },
   created() {
+    useProfileStore
   },
   data() {
     return {}
   },
   methods: {
+    ...mapActions(useProfileStore, ['updateProfile']),
+    setNumPopulation(e) {
+      this.numPopulation = e.target.value
+      this.updateProfile()
+    },
+    setUncountedFactor(e) {
+      this.uncountedFactor = e.target.value
+      this.updateProfile()
+    },
+    setNumPositivesLastSevenDays(e) {
+      this.numPositivesLastSevenDays = e.target.value
+      this.updateProfile()
+    },
   },
 }
 </script>

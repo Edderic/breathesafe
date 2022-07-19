@@ -46,12 +46,12 @@ export const useProfileStore = defineStore('profile', {
           if (response.data.profile) {
             hasProfile = true
 
-            prevalenceStore.numPositivesLastSevenDays = data.num_positive_cases_last_seven_days
-            prevalenceStore.numPopulation = data.num_people_population
-            prevalenceStore.uncountedFactor = data.uncounted_cases_multiplier
+            let profile = data.profile
+            prevalenceStore.numPositivesLastSevenDays = profile.num_positive_cases_last_seven_days
+            prevalenceStore.numPopulation = profile.num_people_population
+            prevalenceStore.uncountedFactor = profile.uncounted_cases_multiplier
 
             this.message = data.message
-            let profile = data.profile
             this.systemOfMeasurement = profile.measurement_system
             this.measurementUnits = getMeasurementUnits(profile.measurement_system)
           }
@@ -129,12 +129,13 @@ export const useProfileStore = defineStore('profile', {
         .then(response => {
           let data = response.data
 
-          prevalenceStore.numPositivesLastSevenDays = data.num_positive_cases_last_seven_days
-          prevalenceStore.numPopulation = data.num_people_population
-          prevalenceStore.uncountedFactor = data.uncounted_cases_multiplier
+          let profile = data.profile
+          prevalenceStore.numPositivesLastSevenDays = profile.num_positive_cases_last_seven_days
+          prevalenceStore.numPopulation = profile.num_people_population
+          prevalenceStore.uncountedFactor = profile.uncounted_cases_multiplier
 
           this.message = data.message
-          this.systemOfMeasurement = data.profile.systemOfMeasurement
+          this.systemOfMeasurement = profile.systemOfMeasurement
           this.measurementUnits = getMeasurementUnits(this.systemOfMeasurement)
 
           // whatever you want
