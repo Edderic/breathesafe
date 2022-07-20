@@ -2,7 +2,12 @@
   <tr @click="focusEvent(this.measurements.id)" class='clickable' :class='{ clicked: this.measurements.clicked }'>
     <td>{{this.measurements.roomName}}</td>
     <td>{{this.measurements.placeData.formattedAddress}}</td>
-    <td>{{risk}}</td>
+    <ColoredCell
+      :colorScheme="colorInterpolationScheme"
+      :maxVal=1
+      :value='risk'
+      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
+    />
     <td>
       <div class='tag' v-for="t in this.measurements.placeData.types">{{ t }}</div>
     </td>
@@ -15,6 +20,7 @@
 <script>
 // Have a VueX store that maintains state across components
 import axios from 'axios';
+import ColoredCell from './colored_cell.vue';
 import { useEventStores } from './stores/event_stores';
 import { useEventStore } from './stores/event_store';
 import { useMainStore } from './stores/main_store';
@@ -26,10 +32,111 @@ import { sampleComputeRisk, maskToPenetrationFactor } from './misc'
 export default {
   name: 'MeasurementsRow',
   components: {
+    ColoredCell
   },
   computed: {
     ...mapState(usePrevalenceStore, ['numPositivesLastSevenDays', 'numPopulation', 'uncountedFactor', 'maskType']),
     ...mapState(useEventStore, ['infectorActivityTypeMapping']),
+    colorInterpolationScheme() {
+      return [
+        {
+          'lowerBound': 0.1,
+          'upperBound': 0.999999,
+          'lowerColor': {
+            name: 'red',
+            r: 219,
+            g: 21,
+            b: 0
+          },
+          'upperColor': {
+            name: 'darkRed',
+            r: 174,
+            g: 17,
+            b: 0
+          },
+        },
+        {
+          'lowerBound': 0.01,
+          'upperBound': 0.1,
+          'lowerColor': {
+            name: 'orangeRed',
+            r: 240,
+            g: 90,
+            b: 0
+          },
+          'upperColor': {
+            name: 'red',
+            r: 219,
+            g: 21,
+            b: 0
+          },
+        },
+        {
+          'lowerBound': 0.001,
+          'upperBound': 0.01,
+          'lowerColor': {
+            name: 'yellowOrange',
+            r: 254,
+            g: 160,
+            b: 8
+          },
+          'upperColor': {
+            name: 'orangeRed',
+            r: 240,
+            g: 90,
+            b: 0
+          },
+        },
+        {
+          'lowerBound': 0.0001,
+          'upperBound': 0.001,
+          'lowerColor': {
+            name: 'yellow',
+            r: 255,
+            g: 233,
+            b: 56
+          },
+          'upperColor': {
+            name: 'yellowOrange',
+            r: 254,
+            g: 160,
+            b: 8
+          },
+        },
+        {
+          'lowerBound': 0.00001,
+          'upperBound': 0.0001,
+          'upperColor': {
+            name: 'yellow',
+            r: 255,
+            g: 233,
+            b: 56
+          },
+          'lowerColor': {
+            name: 'green',
+            r: 87,
+            g: 195,
+            b: 40
+          },
+        },
+        {
+          'lowerBound': -0.000001,
+          'upperBound': 0.00001,
+          'upperColor': {
+            name: 'green',
+            r: 87,
+            g: 195,
+            b: 40
+          },
+          'lowerColor': {
+            name: 'dark green',
+            r: 11,
+            g: 161,
+            b: 3
+          },
+        },
+      ]
+    },
     risk: function() {
       const probaRandomSampleOfOneIsInfectious = this.numPositivesLastSevenDays
         * this.uncountedFactor / this.numPopulation || 0.001

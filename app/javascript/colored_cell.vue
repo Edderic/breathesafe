@@ -9,23 +9,33 @@
 </template>
 
 <script>
-  import { interpolateColor } from './misc';
+  import { interpolateRgb } from './misc';
 
   export default {
     computed: {
       ratio() {
-        return this.value / this.maxVal;
+        return this.value / parseFloat(this.maxVal);
       },
       cellColor() {
-        return interpolateColor(this.colorInterpolationScheme, this.ratio);
+        for (let obj of this.colorScheme) {
+          if (obj['lowerBound'] <= this.ratio && this.ratio < obj['upperBound']) {
+            return interpolateRgb(
+              obj['lowerColor'],
+              obj['upperColor'],
+              obj['lowerBound'],
+              this.ratio,
+              obj['upperBound']
+            )
+          }
+        }
       },
     },
     methods: {
     },
     props: [
       'value',
-      'colorInterpolationScheme',
-      'maxVal'
+      'maxVal',
+      'colorScheme'
     ]
   }
 </script>
