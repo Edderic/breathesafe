@@ -1,28 +1,6 @@
 <template>
   <div class='wide border-showing'>
 
-    <div class='container centered'>
-      <h2>Measurements</h2>
-    </div>
-
-    <div class='container'>
-      <label>Room name</label>
-      <input
-        class='wider-input'
-        :value="roomName"
-        disabled
-      >
-    </div>
-
-    <div class='container'>
-      <label>Address</label>
-      <input
-        class='wider-input'
-        :value="placeData.formattedAddress"
-        disabled
-      >
-    </div>
-
     <div class='container'>
       <label>Start time</label>
       <input class='wider-input'
