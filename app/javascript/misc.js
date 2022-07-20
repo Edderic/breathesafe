@@ -182,7 +182,7 @@ export function interpolateRgb(prevColor, nextColor, prevVal, currVal, nextVal) 
 
 
 export function parseOccupancyHTML(value) {
-  const occupancyRegex = /\w*\s?\d*\%\s*busy\s*\w*\s*\d*\s*[A-Z]*/g
+  const occupancyRegex = /\w+\s?\d*\%\s*busy\s*\w*\s*\d*\s*[A-Z]*/g
   const closedDaysRegex = /(?<=Closed )\w+/g
   const percentRegex = /(\d+)(?=\% busy)/g
   const hourRegex = /(?<=at )(\d+ \w{2})/g
@@ -213,10 +213,13 @@ export function parseOccupancyHTML(value) {
 
   console.log(matches)
 
+  let numDaysSkipped = 0;
+
   for (const day in daysToIndexDict) {
     let dayIndex = daysToIndexDict[day]
 
     if (closedIndices.includes(dayIndex)) {
+      numDaysSkipped += 1
       continue
     }
 
@@ -237,7 +240,7 @@ export function parseOccupancyHTML(value) {
     let regex;
 
     for (let h = 0; h < numberOfHours; h++) {
-      let overall_index = h + dayIndex * numberOfHours;
+      let overall_index = h + (dayIndex - numDaysSkipped) * numberOfHours;
       if (matches[overall_index].match(usuallyRegex)) {
         regex = usuallyRegex;
       } else {

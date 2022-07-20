@@ -240,7 +240,7 @@
               v-for='(obj, x, y) in value'
               :key='p + "-" + index'
               :value="obj['occupancy_percent']"
-              :colorInterpolationScheme="colorInterpolationScheme"
+              :colorScheme="colorInterpolationScheme"
               :maxVal=100
               class="availability-cell"
             />
@@ -356,39 +356,100 @@ export default {
       totalACH: 0.0,
       colorInterpolationScheme: [
         {
-          name: 'green',
-          r: 87,
-          g: 195,
-          b: 40
+          'lowerBound': -0.00001,
+          'upperBound': 1 / 6,
+          'lowerColor': {
+            name: 'dark green',
+            r: 11,
+            g: 161,
+            b: 3
+          },
+          'upperColor': {
+            name: 'green',
+            r: 87,
+            g: 195,
+            b: 40
+          },
         },
         {
-          name: 'yellow',
-          r: 255,
-          g: 233,
-          b: 56
+          'lowerBound': 1 / 6,
+          'upperBound': 2 / 6,
+          'lowerColor': {
+            name: 'green',
+            r: 87,
+            g: 195,
+            b: 40
+          },
+          'upperColor': {
+            name: 'yellow',
+            r: 255,
+            g: 233,
+            b: 56
+          },
         },
         {
-          name: 'yellowOrange',
-          r: 254,
-          g: 160,
-          b: 8
+          'lowerBound': 2 / 6,
+          'upperBound': 3 / 6,
+          'lowerColor': {
+            name: 'yellow',
+            r: 255,
+            g: 233,
+            b: 56
+          },
+          'upperColor': {
+            name: 'yellowOrange',
+            r: 254,
+            g: 160,
+            b: 8
+          },
         },
         {
-          name: 'orangeRed',
-          r: 240,
-          g: 90,
-          b: 0
+          'lowerBound': 3 / 6,
+          'upperBound': 4 / 6,
+          'lowerColor': {
+            name: 'yellowOrange',
+            r: 254,
+            g: 160,
+            b: 8
+          },
+          'upperColor': {
+            name: 'orangeRed',
+            r: 240,
+            g: 90,
+            b: 0
+          },
         },
         {
-          name: 'red',
-          r: 219,
-          g: 21,
-          b: 0
+          'lowerBound': 4 / 6,
+          'upperBound': 5 / 6,
+          'lowerColor': {
+            name: 'orangeRed',
+            r: 240,
+            g: 90,
+            b: 0
+          },
+          'upperColor': {
+            name: 'red',
+            r: 219,
+            g: 21,
+            b: 0
+          },
         },
-        { name: 'darkRed',
-          r: 174,
-          g: 17,
-          b: 0
+        {
+          'lowerBound': 5 / 6,
+          'upperBound': 1.01,
+          'lowerColor': {
+            name: 'red',
+            r: 219,
+            g: 21,
+            b: 0
+          },
+          'upperColor': {
+            name: 'darkRed',
+            r: 174,
+            g: 17,
+            b: 0
+          }
         },
       ],
       occupancy: {
