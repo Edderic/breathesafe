@@ -162,6 +162,25 @@ export function interpolateColor(colors, ratio) {
   }
 }
 
+export function interpolateRgb(prevColor, nextColor, prevVal, currVal, nextVal) {
+  let distanceFromPrevToNextVal = Math.abs(
+    (nextVal - prevVal)
+  )
+
+  let distanceFromCurrToNext = Math.abs(
+    (currVal - nextVal)
+  )
+
+  let multiplier = distanceFromCurrToNext / distanceFromPrevToNextVal
+
+  let red = nextColor.r + (prevColor.r - nextColor.r) * multiplier
+  let green = nextColor.g + (prevColor.g - nextColor.g) * multiplier
+  let blue = nextColor.b + (prevColor.b - nextColor.b) * multiplier
+
+  return `rgb(${parseInt(red)}, ${parseInt(green)}, ${parseInt(blue)})`;
+}
+
+
 export function parseOccupancyHTML(value) {
   const occupancyRegex = /\w*\s?\d*\%\s*busy\s*\w*\s*\d*\s*[A-Z]*/g
   const closedDaysRegex = /(?<=Closed )\w+/g
