@@ -75,10 +75,10 @@ export default {
           'lowerBound': 0.001,
           'upperBound': 0.01,
           'lowerColor': {
-            name: 'yellowOrange',
-            r: 254,
-            g: 160,
-            b: 8
+            name: 'yellow',
+            r: 255,
+            g: 233,
+            b: 56
           },
           'upperColor': {
             name: 'orangeRed',
@@ -90,22 +90,6 @@ export default {
         {
           'lowerBound': 0.0001,
           'upperBound': 0.001,
-          'lowerColor': {
-            name: 'yellow',
-            r: 255,
-            g: 233,
-            b: 56
-          },
-          'upperColor': {
-            name: 'yellowOrange',
-            r: 254,
-            g: 160,
-            b: 8
-          },
-        },
-        {
-          'lowerBound': 0.00001,
-          'upperBound': 0.0001,
           'upperColor': {
             name: 'yellow',
             r: 255,
@@ -121,7 +105,7 @@ export default {
         },
         {
           'lowerBound': -0.000001,
-          'upperBound': 0.00001,
+          'upperBound': 0.0001,
           'upperColor': {
             name: 'green',
             r: 87,
