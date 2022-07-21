@@ -211,6 +211,7 @@ import {
   convertLengthBasedOnMeasurementType,
   cubicFeetPerMinuteTocubicMetersPerHour,
   daysToIndexDict,
+  hourToIndex,
   indexToHour,
   setupCSRF
 } from  './misc';
@@ -286,6 +287,57 @@ export default {
           'events'
         ]
     ),
+
+    hours() {
+      let minimumHour;
+      let minimumIndex = 23;
+      let maximumHour = '11 PM';
+      let maximumIndex = 0;
+
+      if (!this.occupancy.parsed['Mondays']) {
+        return []
+      }
+
+      let maxHours = '11 PM'
+
+      for (let day in this.occupancy.parsed) {
+        let hs = this.occupancy.parsed[day]
+
+        for (let h in hs) {
+          let object = hs[h]
+
+          if (minimumIndex >= hourToIndex[ object['hour'] ]) {
+            minimumIndex = hourToIndex[ object['hour'] ]
+            minimumHour = object['hour']
+          }
+
+          if (maximumIndex <= hourToIndex[ object['hour']]) {
+            maximumIndex = hourToIndex[object['hour']]
+            maximumHour = object['hour']
+          }
+        }
+      }
+
+      let collect = false
+      let collection = []
+
+      for (let hour in hourToIndex) {
+        if (hour == minimumHour) {
+          collect = true
+        }
+
+        if (collect) {
+          collection.push(hour)
+        }
+
+        if (hour == maximumHour) {
+          collect = false
+        }
+      }
+
+      return collection
+    },
+
     roomLength() {
       const profileStore = useProfileStore()
       return convertLengthBasedOnMeasurementType(
@@ -418,26 +470,6 @@ export default {
             b: 0
           }
         },
-      ],
-      hours: [
-        '6 AM',
-        '7 AM',
-        '8 AM',
-        '9 AM',
-        '10 AM',
-        '11 AM',
-        '12 PM',
-        '1 PM',
-        '2 PM',
-        '3 PM',
-        '4 PM',
-        '5 PM',
-        '6 PM',
-        '7 PM',
-        '8 PM',
-        '9 PM',
-        '10 PM',
-        '11 PM',
       ],
     }
   },
