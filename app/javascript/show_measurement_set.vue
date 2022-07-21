@@ -27,11 +27,11 @@
             <th></th>
             <th v-for='hour in hours'>{{ hour }}</th>
           </tr>
-          <tr v-for='(value, p, index) in occupancy.parsed'>
-            <td>{{ p }}</td>
+          <tr v-for="day in ['Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays', 'Sundays']">
+            <td>{{day}}</td>
             <ColoredCell
-              v-for='(obj, x, y) in value'
-              :key='p + "-" + index'
+              v-for='(obj, x, y) in this.occupancy.parsed[day]'
+              :key='x + "-" + y'
               :value="obj['occupancyPercent']"
               :colorScheme="colorInterpolationScheme"
               :maxVal=100
