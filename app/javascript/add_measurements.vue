@@ -254,7 +254,7 @@ import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia';
 import {
    setupCSRF, cubicFeetPerMinuteTocubicMetersPerHour, daysToIndexDict,
-   convertLengthBasedOnMeasurementType, indexToHour, computeVentilationACH, computePortableACH,
+   convertLengthBasedOnMeasurementType, computeVentilationACH, computePortableACH,
    parseOccupancyHTML
 } from  './misc';
 
