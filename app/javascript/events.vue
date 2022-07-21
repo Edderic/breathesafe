@@ -8,8 +8,8 @@
       <tr>
         <th>Room</th>
         <th>Address</th>
-        <th>Risk</th>
-        <th>Types</th>
+        <th>Conditional risk</th>
+        <th>Measurements taken on</th>
         <th>Open Hours</th>
       </tr>
       <MeasurementsRow v-for="ev in displayables" :key="ev.id" :measurements="ev" />
@@ -113,5 +113,8 @@ export default {
 
   .margined {
     margin: 1em;
+  }
+  th {
+    padding: 1em;
   }
 </style>

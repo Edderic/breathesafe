@@ -9,7 +9,7 @@
       :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
     />
     <td>
-      <div class='tag' v-for="t in this.measurements.placeData.types">{{ t }}</div>
+      {{ startDatetimeParsed }}
     </td>
     <td>
       <div class='tag' v-for="t in getOpenHours(this.measurements.placeData)">{{ t }}</div>
@@ -25,6 +25,7 @@ import { useEventStores } from './stores/event_stores';
 import { useEventStore } from './stores/event_store';
 import { useMainStore } from './stores/main_store';
 import { usePrevalenceStore } from './stores/prevalence_store';
+import { useShowMeasurementSetStore } from './stores/show_measurement_set_store';
 import { filterEvents, getWeekdayText } from './misc'
 import { mapWritableState, mapState, mapActions } from 'pinia'
 import { sampleComputeRisk, maskToPenetrationFactor } from './misc'
@@ -37,6 +38,43 @@ export default {
   computed: {
     ...mapState(usePrevalenceStore, ['numPositivesLastSevenDays', 'numPopulation', 'uncountedFactor', 'maskType']),
     ...mapState(useEventStore, ['infectorActivityTypeMapping']),
+    ...mapState(
+        useShowMeasurementSetStore,
+        [
+          'roomName',
+          'activityGroups',
+          'ageGroups',
+          'carbonDioxideActivities',
+          'ventilationCo2AmbientPpm',
+          'ventilationCo2MeasurementDeviceModel',
+          'ventilationCo2MeasurementDeviceName',
+          'ventilationCo2MeasurementDeviceSerial',
+          'ventilationCo2SteadyStatePpm',
+          'duration',
+          'private',
+          'formatted_address',
+          'infectorActivity',
+          'infectorActivityTypeMapping',
+          'maskTypes',
+          'numberOfPeople',
+          'occupancy',
+          'maximumOccupancy',
+          'placeData',
+          'portableAirCleaners',
+          'rapidTestResult',
+          'rapidTestResults',
+          'roomHeightMeters',
+          'roomLengthMeters',
+          'roomWidthMeters',
+          'roomUsableVolumeFactor',
+          'singlePassFiltrationEfficiency',
+          'startDatetime',
+          'susceptibleActivities',
+          'susceptibleActivity',
+          'susceptibleAgeGroups',
+          'ventilationNotes'
+        ]
+    ),
     colorInterpolationScheme() {
       return [
         {
@@ -156,7 +194,12 @@ export default {
         susceptibleAgeGroup,
         probaRandomSampleOfOneIsInfectious
       )
-    }
+    },
+    startDatetimeParsed() {
+      let dt = new Date(this.measurements.startDatetime)
+      let options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+      return `${dt.toLocaleDateString(undefined, options)} ${dt.toLocaleTimeString()}`
+    },
   },
   data() {
     return {
