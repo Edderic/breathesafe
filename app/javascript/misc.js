@@ -18,6 +18,32 @@ const infectorActivityTypeMapping = {
   "Heavy exercise – Loudly speaking": 204,
 }
 
+export const hourToIndex = {
+  '1 AM': 0,
+  '2 AM': 1,
+  '3 AM': 2,
+  '4 AM': 3,
+  '5 AM': 4,
+  '6 AM': 5,
+  '7 AM': 6,
+  '8 AM': 7,
+  '9 AM': 8,
+  '10 AM': 9,
+  '11 AM': 10,
+  '12 PM': 11,
+  '1 PM': 12,
+  '2 PM': 13,
+  '3 PM': 14,
+  '4 PM': 15,
+  '5 PM': 16,
+  '6 PM': 17,
+  '7 PM': 18,
+  '8 PM': 19,
+  '9 PM': 20,
+  '10 PM': 21,
+  '11 PM': 22,
+  '12 AM': 23,
+}
 
 
 export function sampleComputeRisk(
