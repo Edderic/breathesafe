@@ -7,9 +7,9 @@
     <tr v-for="day in ['Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays', 'Sundays']">
       <td>{{day}}</td>
       <ColoredCell
-        v-for='(obj, x, y) in dayHours[day]'
-        :key='x + "-" + y'
-        :value="obj['occupancyPercent']"
+        v-for='hour in hours'
+        :key='day + "-" + hour'
+        :value="val(day, hour)"
         :colorScheme="colorInterpolationScheme"
         :maxVal=100
         class="availability-cell"
@@ -46,19 +46,18 @@ export default {
       let maxHours = '11 PM'
 
       for (let day in this.dayHours) {
+
         let hs = this.dayHours[day]
 
         for (let h in hs) {
-          let object = hs[h]
-
-          if (minimumIndex >= hourToIndex[ object['hour'] ]) {
-            minimumIndex = hourToIndex[ object['hour'] ]
-            minimumHour = object['hour']
+          if (minimumIndex >= hourToIndex[h]) {
+            minimumIndex = hourToIndex[h]
+            minimumHour = h
           }
 
-          if (maximumIndex <= hourToIndex[ object['hour']]) {
-            maximumIndex = hourToIndex[object['hour']]
-            maximumHour = object['hour']
+          if (maximumIndex <= hourToIndex[h]) {
+            maximumIndex = hourToIndex[h]
+            maximumHour = h
           }
         }
       }
@@ -188,6 +187,13 @@ export default {
     }
   },
   methods: {
+    val(day, hour) {
+      if (!!this.dayHours[day][hour]) {
+        return this.dayHours[day][hour]['occupancyPercent']
+      } else {
+        return 0
+      }
+    },
   },
   props: {
     dayHours: Object
