@@ -197,9 +197,6 @@ import {
   convertCubicMetersPerHour,
   convertLengthBasedOnMeasurementType,
   cubicFeetPerMinuteTocubicMetersPerHour,
-  daysToIndexDict,
-  hourToIndex,
-  indexToHour,
   setupCSRF
 } from  './misc';
 
