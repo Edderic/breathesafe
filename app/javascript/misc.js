@@ -46,6 +46,64 @@ export const hourToIndex = {
 }
 
 
+function findWorstCaseInhalationFactor(activityGroups, susceptibleAgeGroup) {
+  let inhalationFactor = 0
+  let val;
+
+  for (let activityGroup of activityGroups) {
+    val = susceptibleBreathingActivityToFactor[
+      co2ActivityToSusceptibleBreathingActivity[
+        activityGroup['carbonDioxideGenerationActivity']
+      ]
+    ][susceptibleAgeGroup]['mean cubic meters per hour']
+
+    inhalationFactor = Math.max(val, inhalationFactor)
+  }
+
+  return inhalationFactor
+}
+
+export function simplifiedRisk(
+  activityGroups,
+  occupancy,
+  flowRate,
+  quanta,
+  susceptibleMaskPenentrationFactor,
+  susceptibleAgeGroup,
+  probaRandomSampleOfOneIsInfectious
+) {
+  let total = 0.0
+
+  let susceptibleInhalationFactor = findWorstCaseInhalationFactor(
+    activityGroups,
+    susceptibleAgeGroup
+  )
+  let infectorSpecificTerm = 1.0
+
+  for (let activityGroup of activityGroups) {
+    let numberOfPeople = parseInt(activityGroup['numberOfPeople'])
+    let probaAtLeastOneInfectious = 1.0 - (1.0 - probaRandomSampleOfOneIsInfectious) ** numberOfPeople
+    let aerosolGenerationActivityFactor = infectorActivityTypeMapping[
+      activityGroup['aerosolGenerationActivity']
+    ]
+    let maskPenetrationFactor = maskToFactor[activityGroup['maskType']]
+
+    infectorSpecificTerm = maskPenetrationFactor * aerosolGenerationActivityFactor
+
+    // What inhalation factor should we choose?
+    // Pick the worst one?
+    total += computeRisk(
+      flowRate,
+      quanta,
+      infectorSpecificTerm,
+      susceptibleInhalationFactor,
+      susceptibleMaskPenentrationFactor
+    ) * probaAtLeastOneInfectious
+  }
+
+  return total
+}
+
 export function sampleComputeRisk(
   numSamples,
   activityGroups,

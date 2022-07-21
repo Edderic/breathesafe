@@ -28,7 +28,7 @@ import { usePrevalenceStore } from './stores/prevalence_store';
 import { useShowMeasurementSetStore } from './stores/show_measurement_set_store';
 import { filterEvents, getWeekdayText } from './misc'
 import { mapWritableState, mapState, mapActions } from 'pinia'
-import { sampleComputeRisk, maskToPenetrationFactor } from './misc'
+import { sampleComputeRisk, simplifiedRisk, maskToPenetrationFactor } from './misc'
 
 export default {
   name: 'MeasurementsRow',
@@ -162,7 +162,6 @@ export default {
     risk: function() {
       const probaRandomSampleOfOneIsInfectious = this.numPositivesLastSevenDays
         * this.uncountedFactor / this.numPopulation || 0.001
-
       const flowRate = this.measurements.roomUsableVolumeCubicMeters * this.measurements.totalAch
       const susceptibleAgeGroup = '30 to <40' // TODO:
       const susceptibleMaskType = this.maskType
@@ -184,8 +183,7 @@ export default {
       let occupancy = parseFloat(maximumOccupancy) * occupancyFactor
       const numSamples = 1000000
 
-      return sampleComputeRisk(
-        numSamples,
+      let risk = simplifiedRisk(
         activityGroups,
         occupancy,
         flowRate,
@@ -194,6 +192,9 @@ export default {
         susceptibleAgeGroup,
         probaRandomSampleOfOneIsInfectious
       )
+
+      let digitsFactor = 1000000
+      return Math.round(risk * digitsFactor) / digitsFactor
     },
     startDatetimeParsed() {
       let dt = new Date(this.measurements.startDatetime)
