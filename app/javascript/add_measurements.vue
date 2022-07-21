@@ -229,23 +229,9 @@
 
       <div class='container wide'>
         <label class='textarea-label'>Parsed</label>
-        <table v-if='occupancy.unparsedOccupancyData != ""'>
-          <tr>
-            <th></th>
-            <th v-for='hour in hours'>{{ hour }}</th>
-          </tr>
-          <tr v-for='(value, p, index) in occupancy.parsed'>
-            <td>{{ p }}</td>
-            <ColoredCell
-              v-for='(obj, x, y) in value'
-              :key='p + "-" + index'
-              :value="obj['occupancy_percent']"
-              :colorScheme="colorInterpolationScheme"
-              :maxVal=100
-              class="availability-cell"
-            />
-          </tr>
-        </table>
+        <DayHourHeatmap
+          :dayHours="occupancy.parsed"
+        />
       </div>
 
     </div>
@@ -260,6 +246,7 @@
 // Have a VueX store that maintains state across components
 import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
+import DayHourHeatmap from './day_hour_heatmap.vue';
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
@@ -275,6 +262,7 @@ export default {
   name: 'App',
   components: {
     ColoredCell,
+    DayHourHeatmap,
     Event
   },
   computed: {
@@ -354,130 +342,12 @@ export default {
       ventilationACH: 0.0,
       portableACH: 0.0,
       totalACH: 0.0,
-      colorInterpolationScheme: [
-        {
-          'lowerBound': -0.00001,
-          'upperBound': 1 / 6,
-          'lowerColor': {
-            name: 'dark green',
-            r: 11,
-            g: 161,
-            b: 3
-          },
-          'upperColor': {
-            name: 'green',
-            r: 87,
-            g: 195,
-            b: 40
-          },
-        },
-        {
-          'lowerBound': 1 / 6,
-          'upperBound': 2 / 6,
-          'lowerColor': {
-            name: 'green',
-            r: 87,
-            g: 195,
-            b: 40
-          },
-          'upperColor': {
-            name: 'yellow',
-            r: 255,
-            g: 233,
-            b: 56
-          },
-        },
-        {
-          'lowerBound': 2 / 6,
-          'upperBound': 3 / 6,
-          'lowerColor': {
-            name: 'yellow',
-            r: 255,
-            g: 233,
-            b: 56
-          },
-          'upperColor': {
-            name: 'yellowOrange',
-            r: 254,
-            g: 160,
-            b: 8
-          },
-        },
-        {
-          'lowerBound': 3 / 6,
-          'upperBound': 4 / 6,
-          'lowerColor': {
-            name: 'yellowOrange',
-            r: 254,
-            g: 160,
-            b: 8
-          },
-          'upperColor': {
-            name: 'orangeRed',
-            r: 240,
-            g: 90,
-            b: 0
-          },
-        },
-        {
-          'lowerBound': 4 / 6,
-          'upperBound': 5 / 6,
-          'lowerColor': {
-            name: 'orangeRed',
-            r: 240,
-            g: 90,
-            b: 0
-          },
-          'upperColor': {
-            name: 'red',
-            r: 219,
-            g: 21,
-            b: 0
-          },
-        },
-        {
-          'lowerBound': 5 / 6,
-          'upperBound': 1.01,
-          'lowerColor': {
-            name: 'red',
-            r: 219,
-            g: 21,
-            b: 0
-          },
-          'upperColor': {
-            name: 'darkRed',
-            r: 174,
-            g: 17,
-            b: 0
-          }
-        },
-      ],
       occupancy: {
         unparsedOccupancyData: "",
         parsed: {
         },
       },
       maximumOccupancy: 0,
-      hours: [
-        '6 AM',
-        '7 AM',
-        '8 AM',
-        '9 AM',
-        '10 AM',
-        '11 AM',
-        '12 PM',
-        '1 PM',
-        '2 PM',
-        '3 PM',
-        '4 PM',
-        '5 PM',
-        '6 PM',
-        '7 PM',
-        '8 PM',
-        '9 PM',
-        '10 PM',
-        '11 PM',
-      ],
       roomUsableVolumeFactor: 0.8
     }
   },
