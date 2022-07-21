@@ -2,37 +2,6 @@
   <div class='wide border-showing'>
 
     <div class='container'>
-      <label>Start time</label>
-      <input class='wider-input'
-        v-model="startDatetime"
-        disabled
-      >
-    </div>
-
-    <div class='container'>
-      <label>Duration</label>
-
-      <select :value='duration' disabled>
-        <option>1 minute</option>
-        <option>5 minutes</option>
-        <option>10 minutes</option>
-        <option>15 minutes</option>
-        <option>30 minutes</option>
-        <option>45 minutes</option>
-        <option>1 hour</option>
-        <option>1.25 hours</option>
-        <option>1.5 hours</option>
-        <option>2 hours</option>
-        <option>3 hours</option>
-        <option>4 hours</option>
-        <option>5 hours</option>
-        <option>6 hours</option>
-        <option>7 hours</option>
-        <option>8 hours</option>
-      </select>
-    </div>
-
-    <div class='container'>
       <label>Make this information private</label>
       <select :value='private' disabled>
         <option>public</option>
