@@ -274,11 +274,16 @@ export function parseOccupancyHTML(value) {
       }
 
       percentVal = matches[overall_index].match(regex)[0]
-      hourVal = indexToHour(h)
+      if (matches[overall_index].match(/\d+ [A|P]M/)) {
+        hourVal = matches[overall_index].match(/\d+ [A|P]M/)[0]
+      } else {
+        // We've encountered a "usually block"
+        let newIndex = hourToIndex[hourVal] + 1
+        hourVal = indexToHour[newIndex]
+      }
 
-      dictionary[day][h] = {
-        'occupancy_percent': percentVal,
-        'hour': hourVal
+      dictionary[day][hourVal] = {
+        'occupancyPercent': percentVal,
       }
     }
   }
@@ -778,28 +783,33 @@ export function generateUUID() {
     );
 }
 
-export function indexToHour(index) {
-  return [
-    '6 AM',
-    '7 AM',
-    '8 AM',
-    '9 AM',
-    '10 AM',
-    '11 AM',
-    '12 PM',
-    '1 PM',
-    '2 PM',
-    '3 PM',
-    '4 PM',
-    '5 PM',
-    '6 PM',
-    '7 PM',
-    '8 PM',
-    '9 PM',
-    '10 PM',
-    '11 PM',
-  ][index]
-}
+const indexToHour = [
+  '1 AM',
+  '2 AM',
+  '3 AM',
+  '4 AM',
+  '5 AM',
+  '6 AM',
+  '7 AM',
+  '8 AM',
+  '9 AM',
+  '10 AM',
+  '11 AM',
+  '12 PM',
+  '1 PM',
+  '2 PM',
+  '3 PM',
+  '4 PM',
+  '5 PM',
+  '6 PM',
+  '7 PM',
+  '8 PM',
+  '9 PM',
+  '10 PM',
+  '11 PM',
+  '12 AM',
+]
+
 
 export const daysToIndexDict = {
   'Sundays': 0,
