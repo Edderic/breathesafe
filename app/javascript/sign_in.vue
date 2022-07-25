@@ -58,6 +58,7 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['setFocusTab', 'getCurrentUser']),
+    ...mapActions(useProfileStore, ['loadProfile']),
     setEmail(event) {
       this.email = event.target.value;
     },
@@ -87,6 +88,8 @@ export default {
         this.message = "Error with logging in."
         // whatever you want
       })
+
+      await this.loadProfile()
     }
   },
 }

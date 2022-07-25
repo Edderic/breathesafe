@@ -33,10 +33,23 @@ export const useProfileStore = defineStore('profile', {
       setupCSRF();
 
       let mainStore = useMainStore()
+      await mainStore.getCurrentUser();
       let prevalenceStore = usePrevalenceStore()
       let currentUser = mainStore.currentUser
-
       let hasProfile = false
+
+      if (!currentUser) {
+        prevalenceStore.numPositivesLastSevenDays = 300000
+        prevalenceStore.numPopulation = 60000000
+        prevalenceStore.uncountedFactor = 10
+        prevalenceStore.maskType = "None"
+
+        this.message = "No current user found. Using defaults."
+        this.systemOfMeasurement = "imperial"
+        this.measurementUnits = getMeasurementUnits(this.systemOfMeasurement)
+
+        return ""
+      }
 
       await axios.get(
         `/users/${currentUser.id}/profile.json`,
