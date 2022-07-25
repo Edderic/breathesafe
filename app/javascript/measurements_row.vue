@@ -161,7 +161,7 @@ export default {
     },
     risk: function() {
       const probaRandomSampleOfOneIsInfectious = this.numPositivesLastSevenDays
-        * this.uncountedFactor / this.numPopulation || 0.001
+        * this.uncountedFactor / this.numPopulation
       const flowRate = this.measurements.roomUsableVolumeCubicMeters * this.measurements.totalAch
       const susceptibleAgeGroup = '30 to <40' // TODO:
       const susceptibleMaskType = this.maskType
