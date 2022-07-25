@@ -85,6 +85,7 @@ class Users::ProfilesController < ApplicationController
     params.require(:profile).permit(
       "user_id",
       "measurement_system",
+      "event_display_risk_time",
       "num_people_population",
       "num_positive_cases_last_seven_days",
       "uncounted_cases_multiplier",
