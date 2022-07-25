@@ -8,7 +8,7 @@
       <tr>
         <th>Room</th>
         <th>Address</th>
-        <th>Conditional risk</th>
+        <th>Risk</th>
         <th>Measurements taken on</th>
         <th>Open Hours</th>
       </tr>
