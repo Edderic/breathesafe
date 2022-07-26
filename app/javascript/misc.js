@@ -54,10 +54,8 @@ export function findCurrentOccupancy(maxOccupancy, date, parsed) {
   const day = DAYS[date.getDay()]
   const hour = indexToHour[date.getHours()]
 
-  for (let i in parsed[day]) {
-    if (parsed[day][i]['hour'] == hour) {
-      return Math.round(parseFloat(parsed[day][i]['occupancyPercent']) / 100.0  * maxOccupancy)
-    }
+  if (parsed[day] && parsed[day][hour] && parsed[day][hour]['occupancyPercent']) {
+    return Math.round(parseFloat(parsed[day][hour]['occupancyPercent']) / 100.0  * maxOccupancy)
   }
 
   return 0

@@ -184,6 +184,7 @@ export default {
       let date = new Date()
       let occupancy;
       if (this.eventDisplayRiskTime == "At this hour") {
+
         occupancy = findCurrentOccupancy(maximumOccupancy, date, this.measurements.occupancy.parsed)
       } else {
         occupancy = maximumOccupancy
@@ -191,7 +192,6 @@ export default {
       // let occupancy = parseFloat(maximumOccupancy) * occupancyFactor
       const numSamples = 1000000
 
-      console.log("occupancy", occupancy);
       let risk = simplifiedRisk(
         activityGroups,
         occupancy,
