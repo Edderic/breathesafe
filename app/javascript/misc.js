@@ -2,6 +2,10 @@ import axios from 'axios';
 
 const CUBIC_FEET_PER_CUBIC_METER = 35.3147
 const FEET_PER_METER = 3.28084
+const DAYS = [
+  'Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays',
+  'Fridays', 'Saturdays'
+]
 
 const infectorActivityTypeMapping = {
   "Resting – Oral breathing": 1,
@@ -46,6 +50,19 @@ export const hourToIndex = {
 }
 
 
+export function findCurrentOccupancy(maxOccupancy, date, parsed) {
+  const day = DAYS[date.getDay()]
+  const hour = indexToHour[date.getHours()]
+
+  for (let i in parsed[day]) {
+    if (parsed[day][i]['hour'] == hour) {
+      return Math.round(parseFloat(parsed[day][i]['occupancyPercent']) / 100.0  * maxOccupancy)
+    }
+  }
+
+  return 0
+}
+
 function findWorstCaseInhalationFactor(activityGroups, susceptibleAgeGroup) {
   let inhalationFactor = 0
   let val;
@@ -80,9 +97,12 @@ export function simplifiedRisk(
   )
   let infectorSpecificTerm = 1.0
 
+  let totalPeople = getTotalNumberOfPeopleinActivityGroups(activityGroups)
+
   for (let activityGroup of activityGroups) {
-    let numberOfPeople = parseInt(activityGroup['numberOfPeople'])
+    let numberOfPeople = Math.round(parseFloat(activityGroup['numberOfPeople']) / totalPeople * occupancy)
     let probaAtLeastOneInfectious = 1.0 - (1.0 - probaRandomSampleOfOneIsInfectious) ** numberOfPeople
+
     let aerosolGenerationActivityFactor = infectorActivityTypeMapping[
       activityGroup['aerosolGenerationActivity']
     ]
@@ -842,6 +862,7 @@ export function generateUUID() {
 }
 
 const indexToHour = [
+  '12 AM',
   '1 AM',
   '2 AM',
   '3 AM',
@@ -865,7 +886,6 @@ const indexToHour = [
   '9 PM',
   '10 PM',
   '11 PM',
-  '12 AM',
 ]
 
 

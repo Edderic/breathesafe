@@ -25,8 +25,9 @@ import { useEventStores } from './stores/event_stores';
 import { useEventStore } from './stores/event_store';
 import { useMainStore } from './stores/main_store';
 import { usePrevalenceStore } from './stores/prevalence_store';
+import { useProfileStore } from './stores/profile_store';
 import { useShowMeasurementSetStore } from './stores/show_measurement_set_store';
-import { filterEvents, getWeekdayText } from './misc'
+import { findCurrentOccupancy, filterEvents, getWeekdayText } from './misc'
 import { mapWritableState, mapState, mapActions } from 'pinia'
 import { sampleComputeRisk, simplifiedRisk, maskToPenetrationFactor } from './misc'
 
@@ -36,6 +37,7 @@ export default {
     ColoredCell
   },
   computed: {
+    ...mapState(useProfileStore, ['eventDisplayRiskTime']),
     ...mapState(usePrevalenceStore, ['numPositivesLastSevenDays', 'numPopulation', 'uncountedFactor', 'maskType']),
     ...mapState(useEventStore, ['infectorActivityTypeMapping']),
     ...mapState(
@@ -179,10 +181,17 @@ export default {
       const occupancyFactor = 1.0 // ideally, would change based on time and day
       const maximumOccupancy = this.measurements.maximumOccupancy
 
-
-      let occupancy = parseFloat(maximumOccupancy) * occupancyFactor
+      let date = new Date()
+      let occupancy;
+      if (this.eventDisplayRiskTime == "At this hour") {
+        occupancy = findCurrentOccupancy(maximumOccupancy, date, this.measurements.occupancy.parsed)
+      } else {
+        occupancy = maximumOccupancy
+      }
+      // let occupancy = parseFloat(maximumOccupancy) * occupancyFactor
       const numSamples = 1000000
 
+      console.log("occupancy", occupancy);
       let risk = simplifiedRisk(
         activityGroups,
         occupancy,

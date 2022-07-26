@@ -2,6 +2,10 @@
   <div class='col'>
     <div class='row horizontally-center'>
       <input class='margined' @change="updateSearch" placeholder="Search for events">
+      <select class='margined' :value='eventDisplayRiskTime' @change='setDisplayRiskTime'>
+        <option>At this hour</option>
+        <option>At max occupancy</option>
+      </select>
       <button class='margined' @click='newEvent'>Add New Event</button>
     </div>
     <table>
@@ -21,6 +25,7 @@
 // Have a VueX store that maintains state across components
 import axios from 'axios';
 import MeasurementsRow from './measurements_row.vue';
+import { useProfileStore } from './stores/profile_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { filterEvents, getWeekdayText } from './misc'
@@ -33,6 +38,12 @@ export default {
     MeasurementsRow
   },
   computed: {
+    ...mapWritableState(
+        useProfileStore,
+        [
+          'eventDisplayRiskTime',
+        ]
+    ),
     ...mapWritableState(
         useEventStores,
         [
@@ -56,6 +67,10 @@ export default {
     }
   },
   methods: {
+    setDisplayRiskTime(e) {
+      this.eventDisplayRiskTime = e.target.value
+      this.updateProfile()
+    },
     getOpenHours(x) {
       return getWeekdayText(x)
     },
@@ -70,6 +85,12 @@ export default {
         useEventStores,
         [
           'load'
+        ]
+    ),
+    ...mapActions(
+        useProfileStore,
+        [
+          'updateProfile'
         ]
     ),
     newEvent() {

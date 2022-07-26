@@ -22,7 +22,8 @@ export const useProfileStore = defineStore('profile', {
         'serial': "",
         'model': ""
       }
-    ]
+    ],
+    'eventDisplayRiskTime': "At max occupancy"
   }),
   getters: {
     // ...mapState(useMainStore, ['currentUser']),
@@ -43,6 +44,7 @@ export const useProfileStore = defineStore('profile', {
         prevalenceStore.numPopulation = 60000000
         prevalenceStore.uncountedFactor = 10
         prevalenceStore.maskType = "None"
+        prevalenceStore.eventDisplayRiskTime = this.eventDisplayRiskTime
 
         this.message = "No current user found. Using defaults."
         this.systemOfMeasurement = "imperial"
@@ -64,6 +66,7 @@ export const useProfileStore = defineStore('profile', {
             prevalenceStore.numPopulation = profile.num_people_population
             prevalenceStore.uncountedFactor = profile.uncounted_cases_multiplier
             prevalenceStore.maskType = profile.mask_type
+            prevalenceStore.eventDisplayRiskTime = profile.event_display_risk_time
 
             this.message = data.message
             this.systemOfMeasurement = profile.measurement_system
@@ -94,7 +97,8 @@ export const useProfileStore = defineStore('profile', {
           'uncounted_cases_multiplier': prevalenceStore.uncountedFactor,
           'num_people_population': prevalenceStore.numPopulation,
           'num_positive_cases_last_seven_days': prevalenceStore.numPositivesLastSevenDays,
-          'mask_type': prevalenceStore.maskType
+          'mask_type': prevalenceStore.maskType,
+          'event_display_risk_time': this.eventDisplayRiskTime
         }
       }
 
@@ -112,8 +116,9 @@ export const useProfileStore = defineStore('profile', {
           prevalenceStore.maskType = profile.mask_type
 
           this.message = data.message
-          this.systemOfMeasurement = profile.systemOfMeasurement
+          this.systemOfMeasurement = profile.system_of_measurement
           this.measurementUnits = getMeasurementUnits(this.systemOfMeasurement)
+          this.eventDisplayRiskTime = profile.event_display_risk_time
 
           // whatever you want
         })
@@ -135,7 +140,8 @@ export const useProfileStore = defineStore('profile', {
           'uncounted_cases_multiplier': prevalenceStore.uncountedFactor,
           'num_people_population': prevalenceStore.numPopulation,
           'num_positive_cases_last_seven_days': prevalenceStore.numPositivesLastSevenDays,
-          'mask_type': prevalenceStore.maskType
+          'mask_type': prevalenceStore.maskType,
+          'event_display_risk_time': this.eventDisplayRiskTime
         }
       }
 
@@ -153,8 +159,9 @@ export const useProfileStore = defineStore('profile', {
           prevalenceStore.maskType = profile.mask_type
 
           this.message = data.message
-          this.systemOfMeasurement = profile.systemOfMeasurement
+          this.systemOfMeasurement = profile.system_of_measurement
           this.measurementUnits = getMeasurementUnits(this.systemOfMeasurement)
+          this.eventDisplayRiskTime = profile.event_display_risk_time
 
           // whatever you want
         })
