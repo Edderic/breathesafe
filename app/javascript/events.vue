@@ -8,16 +8,19 @@
       </select>
       <button class='margined' @click='newEvent'>Add New Event</button>
     </div>
-    <table>
-      <tr>
-        <th>Room</th>
-        <th>Address</th>
-        <th>Risk</th>
-        <th>Measurements taken on</th>
-        <th>Open Hours</th>
-      </tr>
-      <MeasurementsRow v-for="ev in displayables" :key="ev.id" :measurements="ev" />
-    </table>
+
+    <div class='scrollable'>
+      <table>
+        <tr>
+          <th>Room</th>
+          <th>Address</th>
+          <th>Risk</th>
+          <th>Measurements taken on</th>
+          <th>Open Hours</th>
+        </tr>
+        <MeasurementsRow v-for="ev in displayables" :key="ev.id" :measurements="ev" />
+      </table>
+    </div>
   </div>
 </template>
 
@@ -137,5 +140,10 @@ export default {
   }
   th {
     padding: 1em;
+  }
+
+  .scrollable {
+    overflow-y: scroll;
+    height: 100%;
   }
 </style>
