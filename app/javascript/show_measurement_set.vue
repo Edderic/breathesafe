@@ -1,5 +1,5 @@
 <template>
-  <div class='wide border-showing'>
+  <div class='wide border-showing scrollable'>
 
     <div class='container'>
       <label>Make this information private</label>
@@ -525,5 +525,10 @@ export default {
 
   table {
     text-align: center;
+  }
+
+  .scrollable {
+    overflow-y: scroll;
+    height: 72em;
   }
 </style>

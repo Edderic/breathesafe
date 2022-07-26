@@ -144,6 +144,6 @@ export default {
 
   .scrollable {
     overflow-y: scroll;
-    height: 100%;
+    height: 40em;
   }
 </style>
