@@ -299,7 +299,9 @@ export function filterEvents(search, events) {
         typeFound = true
       }
     }
-    if (event.roomName.toLowerCase().match(search) || typeFound) {
+    if (event.roomName.toLowerCase().match(lowercasedSearch)
+      || typeFound
+      || event.placeData.formattedAddress.toLowerCase().match(lowercasedSearch)) {
       collection.push(event)
     }
   }
