@@ -289,9 +289,17 @@ function generatePeopleBehaviors(
 export function filterEvents(search, events) {
   let collection = []
   const lowercasedSearch = search.toLowerCase()
+  let typeFound
 
   for (let event of events) {
-    if (event.roomName.toLowerCase().match(search)) {
+    typeFound = false
+
+    for (let type of event.placeData.types) {
+      if (type.match(search)) {
+        typeFound = true
+      }
+    }
+    if (event.roomName.toLowerCase().match(search) || typeFound) {
       collection.push(event)
     }
   }
