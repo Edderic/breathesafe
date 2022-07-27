@@ -5,7 +5,7 @@
     <ColoredCell
       :colorScheme="colorInterpolationScheme"
       :maxVal=1
-      :value='risk'
+      :value='measurements.risk'
       :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
     />
     <td>
@@ -161,50 +161,6 @@ export default {
         },
       ]
     },
-    risk: function() {
-      const probaRandomSampleOfOneIsInfectious = this.numPositivesLastSevenDays
-        * this.uncountedFactor / this.numPopulation
-      const flowRate = this.measurements.roomUsableVolumeCubicMeters * this.measurements.totalAch
-      const susceptibleAgeGroup = '30 to <40' // TODO:
-      const susceptibleMaskType = this.maskType
-      const susceptibleMaskPenentrationFactor = maskToPenetrationFactor[susceptibleMaskType]
-
-      const basicInfectionQuanta = 18.6
-      const variantMultiplier = 3.33
-      const quanta = basicInfectionQuanta * variantMultiplier
-
-      // TODO: randomly pick from the set of activity groups. Let's say there
-      // are two activity groups, one with 10 people who are doing X and 5
-      // people doing Y.
-      // Activity Factor for Y should be sampled about 5 out of 15 times?
-      const activityGroups = this.measurements.activityGroups
-      const occupancyFactor = 1.0 // ideally, would change based on time and day
-      const maximumOccupancy = this.measurements.maximumOccupancy
-
-      let date = new Date()
-      let occupancy;
-      if (this.eventDisplayRiskTime == "At this hour") {
-
-        occupancy = findCurrentOccupancy(maximumOccupancy, date, this.measurements.occupancy.parsed)
-      } else {
-        occupancy = maximumOccupancy
-      }
-      // let occupancy = parseFloat(maximumOccupancy) * occupancyFactor
-      const numSamples = 1000000
-
-      let risk = simplifiedRisk(
-        activityGroups,
-        occupancy,
-        flowRate,
-        quanta,
-        susceptibleMaskPenentrationFactor,
-        susceptibleAgeGroup,
-        probaRandomSampleOfOneIsInfectious
-      )
-
-      let digitsFactor = 1000000
-      return Math.round(risk * digitsFactor) / digitsFactor
-    },
     startDatetimeParsed() {
       let dt = new Date(this.measurements.startDatetime)
       let options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
@@ -216,7 +172,7 @@ export default {
     }
   },
   props: {
-    measurements: Object
+    measurements: Object,
   },
   methods: {
     getOpenHours(x) {

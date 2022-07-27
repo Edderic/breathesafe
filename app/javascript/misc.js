@@ -50,6 +50,68 @@ export const hourToIndex = {
 }
 
 
+export function computeRiskWithVariableOccupancy(
+  event,
+  probaRandomSampleOfOneIsInfectious,
+  flowRate,
+  roomUsableVolumeCubicMeters,
+  susceptibleMaskType,
+  eventDisplayRiskTime
+) {
+  // const probaRandomSampleOfOneIsInfectious = this.numPositivesLastSevenDays
+    // * this.uncountedFactor / this.numPopulation
+  // const flowRate = this.measurements.roomUsableVolumeCubicMeters * this.measurements.totalAch
+  const susceptibleAgeGroup = '30 to <40' // TODO:
+  const susceptibleMaskPenentrationFactor = maskToPenetrationFactor[susceptibleMaskType]
+
+  const basicInfectionQuanta = 18.6
+  const variantMultiplier = 3.33
+  const quanta = basicInfectionQuanta * variantMultiplier
+
+  // TODO: randomly pick from the set of activity groups. Let's say there
+  // are two activity groups, one with 10 people who are doing X and 5
+  // people doing Y.
+  // Activity Factor for Y should be sampled about 5 out of 15 times?
+  const activityGroups = event.activityGroups
+  const maximumOccupancy = event.maximumOccupancy
+
+  let date = new Date()
+  let occupancy;
+  if (eventDisplayRiskTime == "At this hour") {
+    occupancy = findCurrentOccupancy(maximumOccupancy, date, event.occupancy.parsed)
+  } else {
+    occupancy = maximumOccupancy
+  }
+
+  const numSamples = 1000000
+
+  let r = simplifiedRisk(
+    activityGroups,
+    occupancy,
+    flowRate,
+    quanta,
+    susceptibleMaskPenentrationFactor,
+    susceptibleAgeGroup,
+    probaRandomSampleOfOneIsInfectious
+  )
+
+  let digitsFactor = 1000000
+
+  return Math.round(r * digitsFactor) / digitsFactor
+}
+
+
+// export function computeRisk(maxOccupancy, date, parsed) {
+  // const day = DAYS[date.getDay()]
+  // const hour = indexToHour[date.getHours()]
+//
+  // if (parsed[day] && parsed[day][hour] && parsed[day][hour]['occupancyPercent']) {
+    // return Math.round(parseFloat(parsed[day][hour]['occupancyPercent']) / 100.0  * maxOccupancy)
+  // }
+//
+  // return 0
+// }
+//
 export function findCurrentOccupancy(maxOccupancy, date, parsed) {
   const day = DAYS[date.getDay()]
   const hour = indexToHour[date.getHours()]

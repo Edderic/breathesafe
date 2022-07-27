@@ -34,6 +34,7 @@
 
 <script>
 import { useMainStore } from './stores/main_store'
+import { useEventStores } from './stores/event_stores'
 import { usePrevalenceStore } from './stores/prevalence_store';
 import { useProfileStore } from './stores/profile_store';
 import { maskToPenetrationFactor } from './misc'
@@ -67,21 +68,26 @@ export default {
   },
   methods: {
     ...mapActions(useProfileStore, ['updateProfile']),
+    ...mapActions(useEventStores, ['computeRiskAll']),
     setNumPopulation(e) {
       this.numPopulation = e.target.value
       this.updateProfile()
+      this.computeRiskAll()
     },
     setUncountedFactor(e) {
       this.uncountedFactor = e.target.value
       this.updateProfile()
+      this.computeRiskAll()
     },
     setNumPositivesLastSevenDays(e) {
       this.numPositivesLastSevenDays = e.target.value
       this.updateProfile()
+      this.computeRiskAll()
     },
     setMaskType(e) {
       this.maskType = e.target.value
       this.updateProfile()
+      this.computeRiskAll()
     }
   },
 }

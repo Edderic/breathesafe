@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 import { useMainStore } from './main_store'
+import { useProfileStore } from './profile_store'
+import { usePrevalenceStore } from './prevalence_store'
 import axios from 'axios'
-import { deepSnakeToCamel, setupCSRF } from  '../misc'
+import { computeRiskWithVariableOccupancy, deepSnakeToCamel, setupCSRF } from  '../misc'
 
 
 // useStore could be anything like useUser, useCart
@@ -14,8 +16,11 @@ export const useEventStores = defineStore('events', {
   getters: {
   },
   actions: {
-    load() {
+    async load() {
       setupCSRF()
+
+      const profileStore = useProfileStore()
+
       axios.get('/events')
         .then(response => {
           console.log(response)
@@ -32,6 +37,7 @@ export const useEventStores = defineStore('events', {
               markers.push({'center': center})
             }
 
+
             const mainStore = useMainStore()
             mainStore.setMarkers(markers)
           }
@@ -42,6 +48,45 @@ export const useEventStores = defineStore('events', {
           console.log(error)
           // whatever you want
         })
+
+        await profileStore.loadProfile()
+        this.computeRiskAll()
+    },
+
+    computeRiskAll() {
+      const prevalenceStore = usePrevalenceStore()
+      const profileStore = useProfileStore()
+
+      const probaRandomSampleOfOneIsInfectious = prevalenceStore.numPositivesLastSevenDays
+        * prevalenceStore.uncountedFactor / prevalenceStore.numPopulation
+
+      const susceptibleMaskType = prevalenceStore.maskType
+
+      for (let event of this.events) {
+        const flowRate = event.roomUsableVolumeCubicMeters * event.totalAch
+
+        event['risk'] = computeRiskWithVariableOccupancy(
+          event,
+          probaRandomSampleOfOneIsInfectious,
+          flowRate,
+          event.roomUsableVolumeCubicMeters,
+          susceptibleMaskType,
+          profileStore.eventDisplayRiskTime
+        )
+      }
+
+      for (let event of this.displayables) {
+        const flowRate = event.roomUsableVolumeCubicMeters * event.totalAch
+
+        event['risk'] = computeRiskWithVariableOccupancy(
+          event,
+          probaRandomSampleOfOneIsInfectious,
+          flowRate,
+          event.roomUsableVolumeCubicMeters,
+          susceptibleMaskType,
+          profileStore.eventDisplayRiskTime
+        )
+      }
     }
   }
 });

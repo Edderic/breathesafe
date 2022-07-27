@@ -14,11 +14,11 @@
         <tr>
           <th>Room</th>
           <th>Address</th>
-          <th>Risk</th>
+          <th class='clickable' @click='sortByRisk'>Risk</th>
           <th>Measurements taken on</th>
           <th>Open Hours</th>
         </tr>
-        <MeasurementsRow v-for="ev in displayables" :key="ev.id" :measurements="ev" />
+        <MeasurementsRow v-for="ev in displayables" :key="ev.id" :measurements="ev"/>
       </table>
     </div>
   </div>
@@ -62,6 +62,8 @@ export default {
     )
   },
   created() {
+  },
+  mounted() {
     this.load()
   },
   data() {
@@ -73,6 +75,7 @@ export default {
     setDisplayRiskTime(e) {
       this.eventDisplayRiskTime = e.target.value
       this.updateProfile()
+      this.computeRiskAll()
     },
     getOpenHours(x) {
       return getWeekdayText(x)
@@ -87,7 +90,8 @@ export default {
     ...mapActions(
         useEventStores,
         [
-          'load'
+          'load',
+          'computeRiskAll'
         ]
     ),
     ...mapActions(
@@ -102,6 +106,11 @@ export default {
     updateSearch(event) {
       this.search = event.target.value
       this.displayables = filterEvents(this.search, this.events)
+    },
+
+    sortByRisk() {
+      this.computeRiskAll()
+      this.displayables = this.displayables.sort((a, b) => a.risk - b.risk)
     }
   },
 }
