@@ -14,7 +14,7 @@
         <tr>
           <th>Room</th>
           <th>Address</th>
-          <th class='clickable' @click='sortByRisk'>Risk</th>
+          <th class='clickable' @click='sortByRisk'>Risk ({{this.sortRiskArrow}})</th>
           <th>Measurements taken on</th>
           <th>Open Hours</th>
         </tr>
@@ -59,7 +59,17 @@ export default {
         [
           'focusTab',
         ]
-    )
+    ),
+    sortRiskArrow() {
+      if (this.sortRisk == 'Ascending') {
+        return "↑"
+      } else if (this.sortRisk == "Descending") {
+        return "↓"
+      }
+      else {
+        return "⇵"
+      }
+    }
   },
   created() {
   },
@@ -68,7 +78,8 @@ export default {
   },
   data() {
     return {
-      'search': ""
+      'search': "",
+      'sortRisk': "None"
     }
   },
   methods: {
@@ -110,7 +121,13 @@ export default {
 
     sortByRisk() {
       this.computeRiskAll()
-      this.displayables = this.displayables.sort((a, b) => a.risk - b.risk)
+      if (this.sortRisk == "None" || this.sortRisk == "Descending") {
+        this.displayables = this.displayables.sort((a, b) => a.risk - b.risk)
+        this.sortRisk = "Ascending"
+      } else if (this.sortRisk == "Ascending") {
+        this.displayables = this.displayables.sort((a, b) => b.risk - a.risk)
+        this.sortRisk = "Descending"
+      }
     }
   },
 }
