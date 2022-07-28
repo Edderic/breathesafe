@@ -28,6 +28,15 @@
             )
           }
         }
+
+        let obj = this.colorScheme[this.colorScheme.length-1]
+        return interpolateRgb(
+          obj['lowerColor'],
+          obj['upperColor'],
+          obj['lowerBound'],
+          obj['upperBound'],
+          obj['upperBound']
+        )
       },
     },
     methods: {
