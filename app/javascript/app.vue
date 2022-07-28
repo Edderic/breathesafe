@@ -159,4 +159,8 @@ export default {
   button {
     padding: 1em 3em;
   }
+
+  .width {
+    width: 50vw;
+  }
 </style>
