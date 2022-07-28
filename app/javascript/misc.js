@@ -937,7 +937,6 @@ export function generateUUID() {
 }
 
 const indexToHour = [
-  '12 AM',
   '1 AM',
   '2 AM',
   '3 AM',
@@ -961,6 +960,7 @@ const indexToHour = [
   '9 PM',
   '10 PM',
   '11 PM',
+  '12 AM',
 ]
 
 
