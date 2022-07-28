@@ -57,7 +57,7 @@
     <div class='centered'>
       <table>
         <tr>
-          <th>Total Flow Rate</th>
+          <th>Clean Air Delivery Rate</th>
           <th></th>
           <th>Usable Room Volume</th>
           <th></th>
