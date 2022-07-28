@@ -2,6 +2,10 @@
   <div class='space-around border-showing'>
     <div class='container centered'>
       <button :class='{ focused: isFocused("Prevalence") }' @click='setFocus("Prevalence")'>Prevalence</button>
+    </div>
+
+    <div class='container centered'>
+      <button :class='{ focused: isFocused("Analytics") }' @click='setFocus("Analytics")'>Analytics</button>
       <button :class='{ focused: isFocused("Measures") }' @click='setFocus("Measures")'>Measures</button>
       <button :class='{ focused: isFocused("Google Maps Info") }' @click='setFocus("Google Maps Info")'>Google Maps Info</button>
     </div>
