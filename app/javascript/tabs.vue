@@ -1,5 +1,5 @@
 <template>
-  <div class='wide border-showing'>
+  <div class='space-around border-showing'>
     <div class='container centered'>
       <button :class='{ focused: isFocused("Prevalence") }' @click='setFocus("Prevalence")'>Prevalence</button>
       <button :class='{ focused: isFocused("Measures") }' @click='setFocus("Measures")'>Measures</button>
