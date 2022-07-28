@@ -29,7 +29,6 @@ import { useProfileStore } from './stores/profile_store';
 import { useShowMeasurementSetStore } from './stores/show_measurement_set_store';
 import { findCurrentOccupancy, filterEvents, getWeekdayText } from './misc'
 import { mapWritableState, mapState, mapActions } from 'pinia'
-import { sampleComputeRisk, simplifiedRisk, maskToPenetrationFactor } from './misc'
 
 export default {
   name: 'MeasurementsRow',
