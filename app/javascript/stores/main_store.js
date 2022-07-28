@@ -12,7 +12,7 @@ export const useMainStore = defineStore('main', {
     markers: [],
     zoom: 7,
     focusTab: 'events',
-    focusSubTab: "Measures",
+    focusSubTab: "Analytics",
     signedIn: false,
     currentUser: undefined,
     message: ''
