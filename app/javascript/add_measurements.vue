@@ -259,7 +259,7 @@ import {
 } from  './misc';
 
 export default {
-  name: 'App',
+  name: 'AddMeasurements',
   components: {
     ColoredCell,
     DayHourHeatmap,
