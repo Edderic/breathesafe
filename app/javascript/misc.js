@@ -308,6 +308,11 @@ export function filterEvents(search, events) {
 
   return collection
 }
+
+export function round(val, numDigits) {
+  const factor = 10**numDigits
+  return Math.round(val * factor) / factor
+}
 // Assumes there are at least two colors
 export function interpolateColor(colors, ratio) {
   if (colors.length < 2) {
