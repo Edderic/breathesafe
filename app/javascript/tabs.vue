@@ -57,8 +57,9 @@ export default {
   .subsection {
     font-weight: bold;
   }
-  .wide {
-    flex-direction: column;
+  .space-around {
+    display: flex;
+    justify-content: space-around;
   }
 
   .border-showing {
@@ -71,7 +72,7 @@ export default {
   }
 
   button {
-    padding: 1em 3em;
+    padding: 1em 2em;
   }
 
   .focused {
