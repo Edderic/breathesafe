@@ -28,6 +28,7 @@ export const useShowMeasurementSetStore = defineStore('showMeasurementSet', {
     roomLengthMeters: 0,
     roomHeightMeters: 0,
     roomUsableVolumeFactor: "",
+    roomUsableVolumeCubicMeters: 0,
     occupancy: {
       parsed: {},
     },
@@ -91,6 +92,7 @@ export const useShowMeasurementSetStore = defineStore('showMeasurementSet', {
       'Elastomeric P100'
     ],
     portableAirCleaners: [],
+    portableAch: 0,
     susceptibleActivities: [
       "Unknown",
       "Sleep or Nap",
@@ -122,7 +124,9 @@ export const useShowMeasurementSetStore = defineStore('showMeasurementSet', {
       "Positive"
     ],
     ventilationNotes: "",
-    startDatetime: new Date()
+    startDatetime: new Date(),
+    totalAch: 0,
+    ventilationAch: 0,
   }),
   getters: {
     findActivityGroup: (state) => {
@@ -154,6 +158,10 @@ export const useShowMeasurementSetStore = defineStore('showMeasurementSet', {
       this.ventilationCo2MeasurementDeviceName = measurementSet.ventilationCo2MeasurementDeviceName
       this.ventilationCo2MeasurementDeviceSerial = measurementSet.ventilationCo2MeasurementDeviceSerial
       this.ventilationCo2SteadyStatePpm = measurementSet.ventilationCo2SteadyStatePpm
+      this.totalAch = measurementSet.totalAch
+      this.ventilationAch = measurementSet.ventilationAch
+      this.portableAch = measurementSet.portableAch
+      this.roomUsableVolumeCubicMeters = measurementSet.roomUsableVolumeCubicMeters
     },
 
     displayMeasurementsTailoredToUser() {
