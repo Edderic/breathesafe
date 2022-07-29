@@ -106,6 +106,14 @@
             :value='totalAchRounded'
             :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
           />
+          <td v-if="systemOfMeasurement == 'imperial'">/</td>
+          <ColoredCell
+            v-if="systemOfMeasurement == 'imperial'"
+            :colorScheme="colorInterpolationSchemeTotalAch"
+            :maxVal=1
+            :value='60'
+            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em', 'background-color': 'grey' }"
+          />
         </tr>
       </table>
     </div>
