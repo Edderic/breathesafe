@@ -11,8 +11,7 @@
         >
       </div>
 
-      <div class='container wide'>
-        <label class='textarea-label'>Parsed</label>
+      <div class='container wide centered'>
         <DayHourHeatmap
           :dayHours="occupancy.parsed"
         />
@@ -23,11 +22,20 @@
     <div class='centered'>
       <table>
         <tr>
-          <th>Total ACH</th>
+          <th class='col centered'>
+            <span>Total ACH</span>
+            <span class='font-light'>(1 / h)</span>
+          </th>
           <th></th>
-          <th>Ventilation ACH</th>
+          <th class='col centered'>
+            <span>Ventilation ACH</span>
+            <span class='font-light'>(1 / h)</span>
+          </th>
           <th></th>
-          <th>Portable ACH</th>
+          <th class='col centered'>
+            <span>Portable ACH</span>
+            <span class='font-light'>(1 / h)</span>
+          </th>
         </tr>
         <tr>
           <ColoredCell
@@ -57,11 +65,25 @@
     <div class='centered'>
       <table>
         <tr>
-          <th>Clean Air Delivery Rate</th>
+          <th class='col centered'>
+            <span>Clean Air Delivery Rate</span>
+            <span class='font-light'>({{this.measurementUnits.airDeliveryRateMeasurementTypeShort}})</span>
+          </th>
           <th></th>
-          <th>Usable Room Volume</th>
+          <th class='col centered'>
+            <span>Unoccupied Room Volume</span>
+            <span class='font-light'>({{this.measurementUnits.cubicLengthShort}})</span>
+          </th>
           <th></th>
-          <th>Total ACH</th>
+          <th class='col centered'>
+            <span>Total ACH</span>
+            <span class='font-light'>(1 / h)</span>
+          </th>
+          <th v-if="systemOfMeasurement == 'imperial'"></th>
+          <th class='col centered' v-if="systemOfMeasurement == 'imperial'">
+            <span></span>
+            <span class='font-light'>(min / h)</span>
+          </th>
         </tr>
         <tr>
           <ColoredCell
