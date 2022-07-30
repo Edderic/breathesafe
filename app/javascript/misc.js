@@ -892,20 +892,28 @@ export function convertCubicMetersPerHour(
 }
 
 export function getMeasurementUnits(systemOfMeasurement) {
-  let lengthMeasurementType
-  let airDeliveryRateMeasurementType
+  let lengthMeasurementType;
+  let airDeliveryRateMeasurementType;
+  let airDeliveryRateMeasurementTypeShort;
+  let cubicLengthShort;
 
   if (systemOfMeasurement == 'imperial') {
     lengthMeasurementType = 'feet';
     airDeliveryRateMeasurementType = 'cubic feet per minute';
+    airDeliveryRateMeasurementTypeShort = 'ft³ / min';
+    cubicLengthShort = 'ft³'
   } else {
     lengthMeasurementType = 'meters';
     airDeliveryRateMeasurementType = 'cubic meters per hour';
+    airDeliveryRateMeasurementTypeShort = 'm³ / h';
+    cubicLengthShort = 'm³'
   }
 
   return {
     'lengthMeasurementType': lengthMeasurementType,
-    'airDeliveryRateMeasurementType': airDeliveryRateMeasurementType
+    'airDeliveryRateMeasurementType': airDeliveryRateMeasurementType,
+    'airDeliveryRateMeasurementTypeShort': airDeliveryRateMeasurementTypeShort,
+    'cubicLengthShort': cubicLengthShort
   }
 }
 
