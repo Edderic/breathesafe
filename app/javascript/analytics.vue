@@ -21,6 +21,19 @@
         />
       </div>
     </div>
+    <div class='container'>
+      <label class='subsection'>Rapid Testing</label>
+      <div class='container'>
+        <span>If, at max occupancy, everyone did rapid testing beforehand, and all got negative results, the probability that at least one person is infectious is
+            <ColoredCell
+              :colorScheme="riskColorScheme"
+              :maxVal=1
+              :value='riskEncounteringInfectiousAllNegRapid'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+            />.
+        </span>
+      </div>
+    </div>
 
     <div class='centered'>
       <table>
@@ -191,7 +204,7 @@ import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import { colorSchemeFall, assignBoundsToColorScheme, riskColorInterpolationScheme } from './colors.js';
-import { riskOfEncounteringInfectious } from './risk.js';
+import { riskOfEncounteringInfectious, riskIndividualIsNotInfGivenNegRapidTest } from './risk.js';
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
@@ -292,7 +305,17 @@ export default {
           'events'
         ]
     ),
+    riskEncounteringInfectiousAllNegRapid() {
+      const testSpecificity = 0.999
+      const testSensitivity = 0.97
 
+      const value =  1 - riskIndividualIsNotInfGivenNegRapidTest(
+          testSpecificity,
+          testSensitivity,
+          this.riskOfOne
+        ) ** this.maximumOccupancy
+      return round(value, 6)
+    },
     heatmapShowable() {
       return !!this.occupancy.parsed['Mondays']
     },
