@@ -466,6 +466,7 @@ export default {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
+    ...mapState(useProfileStore, ['measurementUnits']),
     addActivityGrouping() {
       this.activityGroups.unshift({
         'id': this.generateUUID(),
