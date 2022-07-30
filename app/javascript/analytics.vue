@@ -304,7 +304,7 @@ export default {
       return [
         {
           'lowerBound': 0,
-          'upperBound': 1,
+          'upperBound': 2,
           'upperColor': {
             name: 'red',
             r: 219,
@@ -319,8 +319,8 @@ export default {
           },
         },
         {
-          'lowerBound': 1,
-          'upperBound': 2,
+          'lowerBound': 2,
+          'upperBound': 4,
           'upperColor': {
             name: 'orangeRed',
             r: 240,
@@ -335,8 +335,8 @@ export default {
           },
         },
         {
-          'lowerBound': 2,
-          'upperBound': 4,
+          'lowerBound': 4,
+          'upperBound': 8,
           'upperColor': {
             name: 'yellow',
             r: 255,
@@ -351,8 +351,8 @@ export default {
           },
         },
         {
-          'lowerBound': 4,
-          'upperBound': 8,
+          'lowerBound': 8,
+          'upperBound': 16,
           'lowerColor': {
             name: 'yellow',
             r: 255,
@@ -367,7 +367,7 @@ export default {
           },
         },
         {
-          'lowerBound': 8,
+          'lowerBound': 16,
           'upperBound': 100,
           'lowerColor': {
             name: 'green',
