@@ -14,6 +14,8 @@ export const useProfileStore = defineStore('profile', {
     measurementUnits: {
       'lengthMeasurementType': "feet",
       'airDeliveryRateMeasurementType': 'cubic feet per minute',
+      'airDeliveryRateMeasurementTypeShort': 'ft³ / h',
+      'cubicLengthShort': 'ft³',
     },
     systemOfMeasurement: "imperial",
     carbonDioxideMonitors: [
