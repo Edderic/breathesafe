@@ -28,6 +28,7 @@ import { usePrevalenceStore } from './stores/prevalence_store';
 import { useProfileStore } from './stores/profile_store';
 import { useShowMeasurementSetStore } from './stores/show_measurement_set_store';
 import { findCurrentOccupancy, filterEvents, getWeekdayText } from './misc'
+import { riskColorInterpolationScheme } from './colors.js'
 import { mapWritableState, mapState, mapActions } from 'pinia'
 
 export default {
@@ -77,88 +78,7 @@ export default {
         ]
     ),
     colorInterpolationScheme() {
-      return [
-        {
-          'lowerBound': 0.1,
-          'upperBound': 0.999999,
-          'lowerColor': {
-            name: 'red',
-            r: 219,
-            g: 21,
-            b: 0
-          },
-          'upperColor': {
-            name: 'darkRed',
-            r: 174,
-            g: 17,
-            b: 0
-          },
-        },
-        {
-          'lowerBound': 0.01,
-          'upperBound': 0.1,
-          'lowerColor': {
-            name: 'orangeRed',
-            r: 240,
-            g: 90,
-            b: 0
-          },
-          'upperColor': {
-            name: 'red',
-            r: 219,
-            g: 21,
-            b: 0
-          },
-        },
-        {
-          'lowerBound': 0.001,
-          'upperBound': 0.01,
-          'lowerColor': {
-            name: 'yellow',
-            r: 255,
-            g: 233,
-            b: 56
-          },
-          'upperColor': {
-            name: 'orangeRed',
-            r: 240,
-            g: 90,
-            b: 0
-          },
-        },
-        {
-          'lowerBound': 0.0001,
-          'upperBound': 0.001,
-          'upperColor': {
-            name: 'yellow',
-            r: 255,
-            g: 233,
-            b: 56
-          },
-          'lowerColor': {
-            name: 'green',
-            r: 87,
-            g: 195,
-            b: 40
-          },
-        },
-        {
-          'lowerBound': -0.000001,
-          'upperBound': 0.0001,
-          'upperColor': {
-            name: 'green',
-            r: 87,
-            g: 195,
-            b: 40
-          },
-          'lowerColor': {
-            name: 'dark green',
-            r: 11,
-            g: 161,
-            b: 3
-          },
-        },
-      ]
+      return riskColorInterpolationScheme
     },
     startDatetimeParsed() {
       let dt = new Date(this.measurements.startDatetime)
