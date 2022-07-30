@@ -291,7 +291,15 @@ export default {
           'events'
         ]
     ),
-
+    riskOfOneRounded() {
+      return round(this.riskOfOne, 6)
+    },
+    maxOccupancyEncounterRisk() {
+      return round(riskOfEncounteringInfectious(this.riskOfOne, this.maximumOccupancy), 6)
+    },
+    riskColorScheme() {
+      return riskColorInterpolationScheme
+    },
     colorInterpolationSchemeTotalAch() {
       return [
         {
