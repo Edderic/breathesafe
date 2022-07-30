@@ -189,11 +189,14 @@
 import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
 import DayHourHeatmap from './day_hour_heatmap.vue';
+import { colorSchemeFall, assignBoundsToColorScheme, riskColorInterpolationScheme } from './colors.js';
+import { riskOfEncounteringInfectious } from './risk.js';
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { useShowMeasurementSetStore } from './stores/show_measurement_set_store';
 import { useProfileStore } from './stores/profile_store';
+import { usePrevalenceStore } from './stores/prevalence_store';
 import { mapWritableState, mapState, mapActions } from 'pinia';
 import {
   computePortableACH,
