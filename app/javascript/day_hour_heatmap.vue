@@ -1,5 +1,5 @@
 <template>
-  <table>
+  <table v-if='showable'>
     <tr>
       <th></th>
       <th v-for='hour in hours'>{{ hour }}</th>
@@ -33,6 +33,9 @@ export default {
     Event
   },
   computed: {
+    showable() {
+      return !!this.dayHours['Mondays']
+    },
     hours() {
       let minimumHour;
       let minimumIndex = 23;
