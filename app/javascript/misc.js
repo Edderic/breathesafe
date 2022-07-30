@@ -65,8 +65,9 @@ export function computeRiskWithVariableOccupancy(
   const susceptibleMaskPenentrationFactor = maskToPenetrationFactor[susceptibleMaskType]
 
   const basicInfectionQuanta = 18.6
-  const variantMultiplier = 3.33
+  const variantMultiplier = 3.3
   const quanta = basicInfectionQuanta * variantMultiplier
+  const duration = 1
 
   // TODO: randomly pick from the set of activity groups. Let's say there
   // are two activity groups, one with 10 people who are doing X and 5
@@ -92,7 +93,8 @@ export function computeRiskWithVariableOccupancy(
     quanta,
     susceptibleMaskPenentrationFactor,
     susceptibleAgeGroup,
-    probaRandomSampleOfOneIsInfectious
+    probaRandomSampleOfOneIsInfectious,
+    duration
   )
 
   let digitsFactor = 1000000
@@ -147,7 +149,8 @@ export function simplifiedRisk(
   quanta,
   susceptibleMaskPenentrationFactor,
   susceptibleAgeGroup,
-  probaRandomSampleOfOneIsInfectious
+  probaRandomSampleOfOneIsInfectious,
+  duration
 ) {
   let total = 0.0
 
@@ -177,7 +180,8 @@ export function simplifiedRisk(
       quanta,
       infectorSpecificTerm,
       susceptibleInhalationFactor,
-      susceptibleMaskPenentrationFactor
+      susceptibleMaskPenentrationFactor,
+      duration
     ) * probaAtLeastOneInfectious
   }
 
@@ -219,7 +223,8 @@ export function sampleComputeRisk(
       quanta,
       totalInfectorQuantaPerHour,
       susceptible['inhalationFactor'],
-      susceptibleMaskPenentrationFactor
+      susceptibleMaskPenentrationFactor,
+      1
     )
 
     if (Math.random() < risk) {
