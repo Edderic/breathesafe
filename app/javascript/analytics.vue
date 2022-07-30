@@ -688,7 +688,7 @@ export default {
 
   .col {
     display: flex;
-    flex-directior: column;
+    flex-direction: column;
   }
 
   .margined {
