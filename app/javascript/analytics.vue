@@ -24,7 +24,7 @@
     <div class='container'>
       <label class='subsection'>Rapid Testing</label>
       <div class='container'>
-        <span>If, at max occupancy, everyone did rapid testing beforehand, and all got negative results, the probability that at least one person is infectious is
+        <span>If, at max occupancy, everyone did rapid testing beforehand, and all got negative results, the probability that at least one person is infectious drops down to
             <ColoredCell
               :colorScheme="riskColorScheme"
               :maxVal=1
