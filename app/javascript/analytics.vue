@@ -19,7 +19,6 @@
           :dayHours="occupancy.parsed"
         />
       </div>
-
     </div>
 
     <div class='centered'>
