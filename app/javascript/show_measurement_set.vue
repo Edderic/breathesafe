@@ -19,14 +19,6 @@
           :value="maximumOccupancy"
         >
       </div>
-
-      <div class='container wide'>
-        <label class='textarea-label'>Parsed</label>
-        <DayHourHeatmap
-          :dayHours="occupancy.parsed"
-        />
-      </div>
-
     </div>
 
     <div class='container'>

@@ -992,13 +992,11 @@ export function computeRisk(
   quanta,
   infectorSpecificTerm,
   susceptibleInhalationFactor,
-  susceptibleMaskPenentrationFactor
+  susceptibleMaskPenentrationFactor,
+  duration
 ) {
 
     const denominator = flowRate
-
-    const duration = 1.0 // h
-
 
     const susceptibleSpecificTerm = susceptibleInhalationFactor
       * susceptibleMaskPenentrationFactor
