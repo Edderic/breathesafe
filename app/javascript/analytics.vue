@@ -4,7 +4,7 @@
       <label class='subsection'>Occupancy</label>
 
       <div class='container'>
-      <span>Assuming a COVID infectious prevalence rate of {{this.riskOfOneRounded}}, and that the room is at max occupancy ~{{maximumOccupancy}}, the probability of encountering an infector in the room is
+      <span>Assuming a COVID infectious prevalence rate of {{this.riskOfOneRounded}}, and that the room is at max occupancy ~{{maximumOccupancy}}, the probability of having at least one infector in the room is
           <ColoredCell
             :colorScheme="riskColorScheme"
             :maxVal=1
