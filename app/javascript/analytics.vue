@@ -698,4 +698,8 @@ export default {
   th {
     padding: 1em;
   }
+
+  .font-light {
+    font-weight: 400;
+  }
 </style>
