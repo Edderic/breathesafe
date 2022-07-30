@@ -4,11 +4,14 @@
       <label class='subsection'>Occupancy</label>
 
       <div class='container'>
-        <label class='textarea-label'>Max occupancy</label>
-        <input
-          disabled
-          :value="maximumOccupancy"
-        >
+      <span>Assuming a COVID infectious prevalence rate of {{this.riskOfOneRounded}}, and that the room is at max occupancy ~{{maximumOccupancy}}, the probability of encountering an infector in the room is
+          <ColoredCell
+            :colorScheme="riskColorScheme"
+            :maxVal=1
+            :value='maxOccupancyEncounterRisk'
+            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+          />.
+      </span>
       </div>
 
       <div class='container wide centered'>
