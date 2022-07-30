@@ -14,7 +14,8 @@
       </span>
       </div>
 
-      <div class='container wide centered'>
+      <div class='container col centered' v-if="heatmapShowable">
+        <h4 :style="{'margin-bottom': 0}">Popular Times at {{this.roomName}}</h4>
         <DayHourHeatmap
           :dayHours="occupancy.parsed"
         />
@@ -291,6 +292,10 @@ export default {
           'events'
         ]
     ),
+
+    heatmapShowable() {
+      return !!this.occupancy.parsed['Mondays']
+    },
     riskOfOneRounded() {
       return round(this.riskOfOne, 6)
     },
@@ -666,6 +671,7 @@ export default {
   .centered {
     display: flex;
     justify-content: center;
+    align-items: center;
   }
 
   .wider-input {
