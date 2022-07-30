@@ -229,12 +229,19 @@ export default {
         ]
     ),
     ...mapState(
+        usePrevalenceStore,
+        [
+          'riskOfOne',
+        ]
+    ),
+    ...mapState(
         useProfileStore,
         [
           'lengthMeasurementType',
           'airDeliveryRateMeasurementType',
           'carbonDioxideMonitors',
-          'measurementUnits'
+          'measurementUnits',
+          'systemOfMeasurement'
         ]
     ),
     ...mapWritableState(
