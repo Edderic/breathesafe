@@ -13,6 +13,11 @@ export const usePrevalenceStore = defineStore('prevalence', {
     uncountedFactor: 10,
     maskType: "None"
   }),
+  getters: {
+    riskOfOne: function() {
+      return this.numPositivesLastSevenDays / this.numPopulation * this.uncountedFactor
+    }
+  },
   actions: {
 
   }
