@@ -435,7 +435,12 @@ export default {
       return round(this.roomUsableVolumeCubicMeters, 1)
     },
     totalFlowRateRounded() {
-      return round(this.roomUsableVolumeCubicMeters * this.totalAch, 1)
+      if (this.systemOfMeasurement == 'metric') {
+        // m3 / h
+        return round(this.roomUsableVolumeCubicMeters * this.totalAch, 1)
+      } else {
+        return round(this.roomUsableVolumeCubicMeters * this.totalAch / 60 * 35.3147, 1)
+      }
     },
     portableAchRounded() {
       return round(this.portableAch, 1)
