@@ -154,6 +154,29 @@ export const riskColorInterpolationScheme = [
   },
 ]
 
+export const infectedPeopleColorBounds = [
+  {
+    'lowerBound': 4 / 5,
+    'upperBound': 1,
+  },
+  {
+    'lowerBound': 3 / 5,
+    'upperBound': 4 / 5,
+  },
+  {
+    'lowerBound': 2 / 5,
+    'upperBound': 3 / 5
+  },
+  {
+    'lowerBound': 1 / 5,
+    'upperBound': 2 / 5,
+  },
+  {
+    'lowerBound': 0 / 5,
+    'upperBound': 1 / 5,
+  },
+]
+
 export function assignBoundsToColorScheme(scheme, cutoffs) {
   let colorScheme = JSON.parse(JSON.stringify(scheme))
 

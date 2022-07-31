@@ -29,7 +29,7 @@
           }
         }
 
-        let obj = this.colorScheme[this.colorScheme.length-1]
+        let obj = this.colorScheme[this.closestColorIndex]
         return interpolateRgb(
           obj['lowerColor'],
           obj['upperColor'],
@@ -38,6 +38,22 @@
           obj['upperBound']
         )
       },
+      closestColorIndex() {
+        let closestIndex = 0
+        let bestValue = 0
+        let index = 0
+
+        for (let obj of this.colorScheme) {
+          if (Math.abs(obj['upperBound'] - this.ratio) < Math.abs(bestValue - this.ratio)) {
+            bestValue = obj['upperBound']
+            closestIndex = index
+          }
+
+          index += 1
+        }
+
+        return closestIndex
+      }
     },
     methods: {
     },

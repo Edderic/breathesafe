@@ -52,7 +52,13 @@
               :maxVal=1
               :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible'
               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-            />
+            />. On average,
+          <ColoredCell
+              :colorScheme="averageInfectedPeopleInterpolationScheme"
+              :maxVal=1
+              :value='averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptible'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+          /> susceptibles would be infected.
      </div>
       <div class='centered'>
         <table>
@@ -169,7 +175,13 @@
             :maxVal=1
             :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWith1CRBox'
             :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-          />
+        />. On average,
+        <ColoredCell
+            :colorScheme="averageInfectedPeopleInterpolationScheme"
+            :maxVal=1
+            :value='averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWith1CRBox'
+            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+        /> susceptibles would be infected.
      </div>
   </div>
 </template>
@@ -179,7 +191,7 @@
 import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
 import DayHourHeatmap from './day_hour_heatmap.vue';
-import { colorSchemeFall, assignBoundsToColorScheme, riskColorInterpolationScheme } from './colors.js';
+import { colorSchemeFall, assignBoundsToColorScheme, riskColorInterpolationScheme, infectedPeopleColorBounds } from './colors.js';
 import { findRiskiestPotentialInfector, riskOfEncounteringInfectious, riskIndividualIsNotInfGivenNegRapidTest } from './risk.js';
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
@@ -327,6 +339,12 @@ export default {
         duration
       ), 6)
     },
+    averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptible() {
+      return round(this.maximumOccupancy * this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible, 1)
+    },
+    averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWith1CRBox() {
+      return round(this.maximumOccupancy * this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWith1CRBox, 1)
+    },
     riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWith1CRBox() {
       const riskiestActivityGroup = {
         'numberOfPeople': 1,
@@ -392,6 +410,10 @@ export default {
     },
     riskColorScheme() {
       return riskColorInterpolationScheme
+    },
+    averageInfectedPeopleInterpolationScheme() {
+      const copy = JSON.parse(JSON.stringify(riskColorInterpolationScheme))
+      return assignBoundsToColorScheme(copy, infectedPeopleColorBounds)
     },
     colorInterpolationSchemeTotalAch() {
       return [
