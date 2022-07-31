@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const CUBIC_FEET_PER_CUBIC_METER = 35.3147
+const CUBIC_METER_PER_CUBIC_FEET = 1 / CUBIC_FEET_PER_CUBIC_METER
 const FEET_PER_METER = 3.28084
 const DAYS = [
   'Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays',
@@ -941,6 +942,17 @@ export function cubicFeetPerMinuteTocubicMetersPerHour(measurement_type, num) {
     throw `measurement_type ${measurement_type} not recognized.`
   }
 }
+
+export function displayCADR(systemOfMeasurement, cubicMetersPerHour) {
+  if (systemOfMeasurement == 'imperial') {
+    return parseFloat(cubicMetersPerHour) / 60 * CUBIC_FEET_PER_CUBIC_METER
+  } else if (systemOfMeasurement == 'metric') {
+    return parseFloat(cubicMetersPerHour)
+  } else {
+    throw `measurement_type ${measurement_type} not recognized.`
+  }
+}
+
 
 export function setupCSRF() {
     let token = document.getElementsByName('csrf-token')[0].getAttribute('content')

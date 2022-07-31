@@ -154,6 +154,23 @@
       </table>
     </div>
 
+    <div class='container'>
+      <span>If one was to add 1 Corsi-Rosenthal box air cleaner, that improves the clean air delivery rate (CADR)</span> to
+
+      <ColoredCell
+      :colorScheme="colorInterpolationSchemeRoomVolume"
+      :maxVal=1
+      :value='totalFlowRatePlusExtraPacRounded'
+        :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+      />
+{{ this.measurementUnits.airDeliveryRateMeasurementTypeShort }}, bringing down the infection risk to
+       <ColoredCell
+            :colorScheme="riskColorScheme"
+            :maxVal=1
+            :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWith1CRBox'
+            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+          />
+     </div>
   </div>
 </template>
 
@@ -177,6 +194,7 @@ import {
   convertCubicMetersPerHour,
   convertLengthBasedOnMeasurementType,
   cubicFeetPerMinuteTocubicMetersPerHour,
+  displayCADR,
   findWorstCaseInhFactor,
   setupCSRF,
   simplifiedRisk,
@@ -283,6 +301,49 @@ export default {
 
       const occupancy = 1
       const flowRate = this.totalFlowRateCubicMetersPerHour
+
+      // TODO: consolidate this information in one place
+      const basicInfectionQuanta = 18.6
+      const variantMultiplier = 3.3
+      const quanta = basicInfectionQuanta * variantMultiplier
+      const susceptibleAgeGroup = '30 to <40'
+      const susceptibleMaskPenentrationFactor = 1
+      const susceptibleInhalationFactor = findWorstCaseInhFactor(
+        this.activityGroups,
+        susceptibleAgeGroup
+      )
+      const infectorSpecificTerm = 1.0
+      const probaRandomSampleOfOneIsInfectious = 1.0
+      const duration = 1 // hour
+
+      return round(simplifiedRisk(
+        [riskiestActivityGroup],
+        occupancy,
+        flowRate,
+        quanta,
+        susceptibleMaskPenentrationFactor,
+        susceptibleAgeGroup,
+        probaRandomSampleOfOneIsInfectious,
+        duration
+      ), 6)
+    },
+    riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWith1CRBox() {
+      const riskiestActivityGroup = {
+        'numberOfPeople': 1,
+        'aerosolGenerationActivity': this.riskiestPotentialInfector['aerosolGenerationActivity'],
+        'carbonDioxideGenerationActivity': this.riskiestPotentialInfector['carbonDioxideGenerationActivity'],
+        'maskType': 'None'
+      }
+
+      if (!this.riskiestPotentialInfector['aerosolGenerationActivity'])  {
+        return 0
+      }
+
+      const occupancy = 1
+      const flowRate = this.totalFlowRateCubicMetersPerHour + cubicFeetPerMinuteTocubicMetersPerHour(
+        'cubic feet per minute',
+        600
+      )
 
       // TODO: consolidate this information in one place
       const basicInfectionQuanta = 18.6
@@ -469,13 +530,18 @@ export default {
     totalFlowRateCubicMetersPerHour() {
       return this.roomUsableVolumeCubicMeters * this.totalAch
     },
+    totalFlowRate() {
+      return displayCADR(this.systemOfMeasurement, this.totalFlowRateCubicMetersPerHour)
+    },
     totalFlowRateRounded() {
-      if (this.systemOfMeasurement == 'metric') {
-        // m3 / h
-        return round(this.totalFlowRateCubicMetersPerHour, 1)
-      } else {
-        return round(this.totalFlowRateCubicMetersPerHour / 60 * 35.3147, 1)
-      }
+      return round(this.totalFlowRate, 1)
+    },
+    totalFlowRatePlusExtraPacRounded() {
+      const newCADRcubicMetersPerHour = this.totalFlowRateCubicMetersPerHour + cubicFeetPerMinuteTocubicMetersPerHour(
+        'cubic feet per minute', 600
+      )
+
+      return round(displayCADR(this.systemOfMeasurement, newCADRcubicMetersPerHour), 1)
     },
     portableAchRounded() {
       return round(this.portableAch, 1)
