@@ -39,7 +39,7 @@
     <div class='container'>
       <label class='subsection'>Clean Air Delivery Rate</label>
       <div class='container'>
-        <span>What happens if there's an infectious individual present and no one is masked? How robust is the environment in preventing transmission? With a clean air delivery rate of
+        <span>What happens if there's an infectious individual present at max occupancy and no one is masked? How robust is the environment in preventing transmission? With a clean air delivery rate of
             <ColoredCell
             :colorScheme="colorInterpolationSchemeRoomVolume"
             :maxVal=1
