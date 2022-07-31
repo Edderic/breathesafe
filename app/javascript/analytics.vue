@@ -148,73 +148,12 @@
             :colorScheme="colorInterpolationSchemeTotalAch"
             :maxVal=1
             :value='60'
-            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em', 'background-color': 'grey' }"
+            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em', 'background-color': 'grey'}"
           />
         </tr>
       </table>
     </div>
 
-    <div class='container'>
-      <label class='subsection'>Activity Groups</label>
-      <div class='container border-showing' v-for='activityGroup in activityGroups' :key=activityGroup.id>
-
-        <div class='container'>
-          <label>Number of people</label>
-          <input
-            :value="activityGroup['numberOfPeople']"
-            disabled>
-        </div>
-
-        <div class='container'>
-          <label>Sex</label>
-          <select :value='activityGroup["sex"]' disabled>
-            <option>Male</option>
-            <option>Female</option>
-          </select>
-        </div>
-
-        <div class='container'>
-          <label>Aerosol generation</label>
-          <select :value='activityGroup["aerosolGenerationActivity"]' disabled>
-            <option v-for='(value, infectorActivityType, index) in infectorActivityTypeMapping'>{{ infectorActivityType }}</option>
-          </select>
-        </div>
-
-        <div class='container'>
-          <label>CO2 generation</label>
-          <select :value='activityGroup["carbonDioxideGenerationActivity"]' disabled>
-            <option v-for='(value, carbonDioxideActivity, index) in carbonDioxideActivities'>{{ carbonDioxideActivity }}</option>
-          </select>
-        </div>
-
-        <div class='container'>
-          <label>Age group</label>
-          <select :value='activityGroup["ageGroup"]' disabled>
-            <option v-for='s in ageGroups'>{{ s }}</option>
-          </select>
-        </div>
-
-        <div class='container'>
-          <label>Mask Type</label>
-          <select :value='activityGroup["maskType"]' disabled>
-            <option v-for='m in maskTypes'>{{ m }}</option>
-          </select>
-        </div>
-
-        <div class='container'>
-          <label>Rapid test results</label>
-          <select :value='activityGroup["rapidTestResult"]' disabled>
-            <option v-for='r in rapidTestResults'>{{ r }}</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-
-    <div class='container centered'>
-      <button disabled class='normal-padded' @click='cancel'>Cancel</button>
-      <button disabled class='normal-padded' @click='save'>Save</button>
-    </div>
   </div>
 </template>
 
