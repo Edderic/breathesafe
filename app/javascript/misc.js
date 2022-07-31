@@ -948,9 +948,10 @@ export function displayCADR(systemOfMeasurement, cubicMetersPerHour) {
     return parseFloat(cubicMetersPerHour) / 60 * CUBIC_FEET_PER_CUBIC_METER
   } else if (systemOfMeasurement == 'metric') {
     return parseFloat(cubicMetersPerHour)
-  } else {
-    throw `measurement_type ${measurement_type} not recognized.`
   }
+  // else {
+    // throw `measurement_type ${measurement_type} not recognized.`
+  // }
 }
 
 
