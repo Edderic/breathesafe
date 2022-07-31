@@ -46,7 +46,7 @@
             :value='totalFlowRateRounded'
               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
             />
-        </span> {{ this.measurementUnits.airDeliveryRateMeasurementTypeShort }}, assuming the infector is {{ this.riskiestPotentialInfector['aerosolGenerationActivity'] }}, the risk of transmission is
+        </span> {{ this.measurementUnits.airDeliveryRateMeasurementTypeShort }}, assuming the infector is {{ this.riskiestPotentialInfector['aerosolGenerationActivity'] }}, the risk of long-range airborne transmission is
           <ColoredCell
               :colorScheme="riskColorScheme"
               :maxVal=1
@@ -169,7 +169,7 @@
       :value='totalFlowRatePlusExtraPacRounded'
         :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
       />
-{{ this.measurementUnits.airDeliveryRateMeasurementTypeShort }}, bringing down the infection risk to
+{{ this.measurementUnits.airDeliveryRateMeasurementTypeShort }}, bringing down the long-range airborne transmission risk to
        <ColoredCell
             :colorScheme="riskColorScheme"
             :maxVal=1
