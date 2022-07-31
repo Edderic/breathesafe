@@ -21,6 +21,7 @@
         />
       </div>
     </div>
+
     <div class='container'>
       <label class='subsection'>Rapid Testing</label>
       <div class='container'>
@@ -35,47 +36,66 @@
       </div>
     </div>
 
-    <div class='centered'>
-      <table>
-        <tr>
-          <th class='col centered'>
-            <span>Total ACH</span>
-            <span class='font-light'>(1 / h)</span>
-          </th>
-          <th></th>
-          <th class='col centered'>
-            <span>Ventilation ACH</span>
-            <span class='font-light'>(1 / h)</span>
-          </th>
-          <th></th>
-          <th class='col centered'>
-            <span>Portable ACH</span>
-            <span class='font-light'>(1 / h)</span>
-          </th>
-        </tr>
-        <tr>
-          <ColoredCell
-            :colorScheme="colorInterpolationSchemeTotalAch"
+    <div class='container'>
+      <label class='subsection'>Clean Air Delivery Rate</label>
+      <div class='container'>
+        <span>What happens if there's an infectious individual present and no one is masked? How robust is the environment in preventing transmission? With a clean air delivery rate of
+            <ColoredCell
+            :colorScheme="colorInterpolationSchemeRoomVolume"
             :maxVal=1
-            :value='totalAchRounded'
-            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
-          />
-          <td>=</td>
+            :value='totalFlowRateRounded'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+            />
+        </span> {{ this.measurementUnits.airDeliveryRateMeasurementTypeShort }}, assuming the infector is {{ this.riskiestPotentialInfector['aerosolGenerationActivity'] }}, the risk of transmission is
           <ColoredCell
-            :colorScheme="colorInterpolationSchemeTotalAch"
-            :maxVal=1
-            :value='ventilationAchRounded'
-            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
-          />
-          <td>+</td>
-          <ColoredCell
-            :colorScheme="colorInterpolationSchemeTotalAch"
-            :maxVal=1
-            :value='portableAchRounded'
-            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
-          />
-        </tr>
-      </table>
+              :colorScheme="riskColorScheme"
+              :maxVal=1
+              :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+            />
+     </div>
+      <div class='centered'>
+        <table>
+          <tr>
+            <th class='col centered'>
+              <span>Total ACH</span>
+              <span class='font-light'>(1 / h)</span>
+            </th>
+            <th></th>
+            <th class='col centered'>
+              <span>Ventilation ACH</span>
+              <span class='font-light'>(1 / h)</span>
+            </th>
+            <th></th>
+            <th class='col centered'>
+              <span>Portable ACH</span>
+              <span class='font-light'>(1 / h)</span>
+            </th>
+          </tr>
+          <tr>
+            <ColoredCell
+              :colorScheme="colorInterpolationSchemeTotalAch"
+              :maxVal=1
+              :value='totalAchRounded'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+            />
+            <td>=</td>
+            <ColoredCell
+              :colorScheme="colorInterpolationSchemeTotalAch"
+              :maxVal=1
+              :value='ventilationAchRounded'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+            />
+            <td>+</td>
+            <ColoredCell
+              :colorScheme="colorInterpolationSchemeTotalAch"
+              :maxVal=1
+              :value='portableAchRounded'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+            />
+          </tr>
+        </table>
+      </div>
     </div>
 
     <div class='centered'>
