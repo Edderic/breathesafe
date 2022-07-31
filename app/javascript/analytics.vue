@@ -266,6 +266,49 @@ export default {
           'events'
         ]
     ),
+    riskiestPotentialInfector() {
+      return findRiskiestPotentialInfector(this.activityGroups)
+    },
+    riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible() {
+      const riskiestActivityGroup = {
+        'numberOfPeople': 1,
+        'aerosolGenerationActivity': this.riskiestPotentialInfector['aerosolGenerationActivity'],
+        'carbonDioxideGenerationActivity': this.riskiestPotentialInfector['carbonDioxideGenerationActivity'],
+        'maskType': 'None'
+      }
+
+      if (!this.riskiestPotentialInfector['aerosolGenerationActivity'])  {
+        return 0
+      }
+
+      const occupancy = 1
+      const flowRate = this.totalFlowRateCubicMetersPerHour
+
+      // TODO: consolidate this information in one place
+      const basicInfectionQuanta = 18.6
+      const variantMultiplier = 3.3
+      const quanta = basicInfectionQuanta * variantMultiplier
+      const susceptibleAgeGroup = '30 to <40'
+      const susceptibleMaskPenentrationFactor = 1
+      const susceptibleInhalationFactor = findWorstCaseInhFactor(
+        this.activityGroups,
+        susceptibleAgeGroup
+      )
+      const infectorSpecificTerm = 1.0
+      const probaRandomSampleOfOneIsInfectious = 1.0
+      const duration = 1 // hour
+
+      return round(simplifiedRisk(
+        [riskiestActivityGroup],
+        occupancy,
+        flowRate,
+        quanta,
+        susceptibleMaskPenentrationFactor,
+        susceptibleAgeGroup,
+        probaRandomSampleOfOneIsInfectious,
+        duration
+      ), 6)
+    },
     riskEncounteringInfectiousAllNegRapid() {
       const testSpecificity = 0.999
       const testSensitivity = 0.97
