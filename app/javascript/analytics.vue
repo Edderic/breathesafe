@@ -163,7 +163,7 @@ import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import { colorSchemeFall, assignBoundsToColorScheme, riskColorInterpolationScheme } from './colors.js';
-import { riskOfEncounteringInfectious, riskIndividualIsNotInfGivenNegRapidTest } from './risk.js';
+import { findRiskiestPotentialInfector, riskOfEncounteringInfectious, riskIndividualIsNotInfGivenNegRapidTest } from './risk.js';
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
@@ -177,7 +177,9 @@ import {
   convertCubicMetersPerHour,
   convertLengthBasedOnMeasurementType,
   cubicFeetPerMinuteTocubicMetersPerHour,
+  findWorstCaseInhFactor,
   setupCSRF,
+  simplifiedRisk,
   round
 } from  './misc';
 
