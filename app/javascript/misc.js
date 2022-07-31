@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+const INCHES_PER_FOOT = 12
 const CUBIC_FEET_PER_CUBIC_METER = 35.3147
 const CUBIC_METER_PER_CUBIC_FEET = 1 / CUBIC_FEET_PER_CUBIC_METER
 const FEET_PER_METER = 3.28084
@@ -880,6 +881,8 @@ export function convertLengthBasedOnMeasurementType(
     return parseFloat(from_num) / FEET_PER_METER
   } else if (from_measurement_type == 'meters' && to_measurement_type == 'feet'){
     return parseFloat(from_num) * FEET_PER_METER
+  } else if (from_measurement_type == 'inches' && to_measurement_type == 'meters') {
+    return parseFloat(from_num) / INCHES_PER_FOOT / FEET_PER_METER
   }
 }
 

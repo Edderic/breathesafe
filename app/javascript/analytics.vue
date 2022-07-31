@@ -161,7 +161,7 @@
     </div>
 
     <div class='container'>
-      <span>If one was to add 1 Corsi-Rosenthal box air cleaner, that improves the clean air delivery rate (CADR)</span> to
+      <span>Adding {{ this.numSuggestedAirCleaners }} {{ this.airCleanerSuggestion.plural }} would improve the clean air delivery rate (CADR)</span> to
 
       <ColoredCell
       :colorScheme="colorInterpolationSchemeRoomVolume"
@@ -173,13 +173,13 @@
        <ColoredCell
             :colorScheme="riskColorScheme"
             :maxVal=1
-            :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWith1CRBox'
+            :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners'
             :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
         />. On average,
         <ColoredCell
             :colorScheme="averageInfectedPeopleInterpolationScheme"
             :maxVal=1
-            :value='averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWith1CRBox'
+            :value='averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners'
             :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
         /> susceptibles would be infected.
      </div>
@@ -191,8 +191,10 @@
 import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
 import DayHourHeatmap from './day_hour_heatmap.vue';
+import { airCleaners } from './air_cleaners.js';
 import { colorSchemeFall, assignBoundsToColorScheme, riskColorInterpolationScheme, infectedPeopleColorBounds } from './colors.js';
 import { findRiskiestPotentialInfector, riskOfEncounteringInfectious, riskIndividualIsNotInfGivenNegRapidTest } from './risk.js';
+import { computeAmountOfPortableAirCleanersThatCanFit } from './measurement_units.js';
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
@@ -342,10 +344,10 @@ export default {
     averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptible() {
       return round(this.maximumOccupancy * this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible, 1)
     },
-    averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWith1CRBox() {
-      return round(this.maximumOccupancy * this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWith1CRBox, 1)
+    averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners() {
+      return round(this.maximumOccupancy * this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners, 1)
     },
-    riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWith1CRBox() {
+    riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners() {
       const riskiestActivityGroup = {
         'numberOfPeople': 1,
         'aerosolGenerationActivity': this.riskiestPotentialInfector['aerosolGenerationActivity'],
@@ -358,10 +360,7 @@ export default {
       }
 
       const occupancy = 1
-      const flowRate = this.totalFlowRateCubicMetersPerHour + cubicFeetPerMinuteTocubicMetersPerHour(
-        'cubic feet per minute',
-        600
-      )
+      const flowRate = this.totalFlowRateCubicMetersPerHour + this.numSuggestedAirCleaners * this.airCleanerSuggestion.cubicMetersPerHour
 
       // TODO: consolidate this information in one place
       const basicInfectionQuanta = 18.6
@@ -520,6 +519,12 @@ export default {
     colorInterpolationSchemeRoomVolume() {
       return assignBoundsToColorScheme(colorSchemeFall, this.cutoffsVolume)
     },
+    numSuggestedAirCleaners() {
+      return computeAmountOfPortableAirCleanersThatCanFit(
+        this.roomLengthMeters * this.roomWidthMeters,
+        this.airCleanerSuggestion.areaInSquareMeters
+      )
+    },
     roomLength() {
       const profileStore = useProfileStore()
       return convertLengthBasedOnMeasurementType(
@@ -558,10 +563,13 @@ export default {
     totalFlowRateRounded() {
       return round(this.totalFlowRate, 1)
     },
+    airCleanerSuggestion() {
+      return airCleaners.find((ac) => ac.singular == 'Corsi-Rosenthal box')
+    },
     totalFlowRatePlusExtraPacRounded() {
-      const newCADRcubicMetersPerHour = this.totalFlowRateCubicMetersPerHour + cubicFeetPerMinuteTocubicMetersPerHour(
-        'cubic feet per minute', 600
-      )
+      // TODO: could pull from risk.js airCleaners instead
+
+      const newCADRcubicMetersPerHour = this.totalFlowRateCubicMetersPerHour + this.airCleanerSuggestion.cubicMetersPerHour * this.numSuggestedAirCleaners
 
       return round(displayCADR(this.systemOfMeasurement, newCADRcubicMetersPerHour), 1)
     },
@@ -744,7 +752,7 @@ export default {
       let portableAirCleaner = this.findPortableAirCleaningDevice()(id);
       portableAirCleaner['singlePassFiltrationEfficiency'] = event.target.value;
     },
-  },
+  }
 }
 
 </script>
