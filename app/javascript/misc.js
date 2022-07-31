@@ -22,6 +22,8 @@ const infectorActivityTypeMapping = {
   "Heavy exercise – Loudly speaking": 204,
 }
 
+export const infectorActivityTypes = infectorActivityTypeMapping
+
 export const hourToIndex = {
   '1 AM': 0,
   '2 AM': 1,
@@ -140,6 +142,10 @@ function findWorstCaseInhalationFactor(activityGroups, susceptibleAgeGroup) {
   }
 
   return inhalationFactor
+}
+
+export function findWorstCaseInhFactor(activityGroups, susceptibleAgeGroup) {
+  return findWorstCaseInhalationFactor(activityGroups, susceptibleAgeGroup)
 }
 
 export function simplifiedRisk(

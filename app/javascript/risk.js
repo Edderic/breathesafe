@@ -1,3 +1,5 @@
+import { infectorActivityTypes } from './misc.js'
+
 export function riskOfEncounteringInfectious(probaInfectious, numPeople) {
   /*
    * Parameters:
@@ -42,5 +44,28 @@ export function riskIndividualIsNotInfGivenNegRapidTest(
   return specNotInf / (
     specNotInf + falseNegativeRate  * priorIndivInfectious
   );
+}
+
+export function findRiskiestPotentialInfector(activityGroups) {
+  let maxExhalationFactor = 0;
+  let maxExhalationActivity;
+  let carbonDioxideGenerationActivity;
+  let tmp_val = 0;
+
+  for (let activityGroup of activityGroups) {
+    tmp_val = infectorActivityTypes[activityGroup['aerosolGenerationActivity']]
+
+    if (tmp_val > maxExhalationFactor) {
+      maxExhalationActivity = activityGroup['aerosolGenerationActivity']
+      maxExhalationFactor = tmp_val
+      carbonDioxideGenerationActivity = activityGroup['carbonDioxideGenerationActivity']
+    }
+  }
+
+  return {
+    'aerosolGenerationActivityFactor': maxExhalationFactor,
+    'aerosolGenerationActivity': maxExhalationActivity,
+    'carbonDioxideGenerationActivity': carbonDioxideGenerationActivity
+  }
 }
 
