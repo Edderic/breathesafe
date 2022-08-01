@@ -181,7 +181,7 @@
             :maxVal=1
             :value='averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners'
             :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-        /> susceptibles would be infected.
+        /> susceptibles would be infected. Initial cost of adding {{ this.numSuggestedAirCleaners }} {{ this.airCleanerSuggestion.plural }} is ${{ this.airCleanerSuggestion.initialCostDollars * this.numSuggestedAirCleaners}}, with a recurring cost of ${{ this.airCleanerSuggestion.recurringCost * this.numSuggestedAirCleaners }} every {{this.airCleanerSuggestion.recurringCostDuration}}.
      </div>
   </div>
 </template>
