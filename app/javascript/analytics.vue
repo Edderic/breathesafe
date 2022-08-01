@@ -161,28 +161,39 @@
     </div>
 
     <div class='container'>
-      <span>Adding {{ this.numSuggestedAirCleaners }} {{ this.airCleanerSuggestion.plural }} would improve the clean air delivery rate (CADR)</span> to
+      <div class='container'>
+        <span>Adding {{ this.numSuggestedAirCleaners }} {{ this.airCleanerSuggestion.plural }} would improve the clean air delivery rate (CADR)</span> to
 
-      <ColoredCell
-      :colorScheme="colorInterpolationSchemeRoomVolume"
-      :maxVal=1
-      :value='totalFlowRatePlusExtraPacRounded'
-        :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-      />
-{{ this.measurementUnits.airDeliveryRateMeasurementTypeShort }}, bringing down the long-range airborne transmission risk to
-       <ColoredCell
-            :colorScheme="riskColorScheme"
-            :maxVal=1
-            :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners'
-            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-        />. On average,
         <ColoredCell
-            :colorScheme="averageInfectedPeopleInterpolationScheme"
-            :maxVal=1
-            :value='averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners'
-            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-        /> susceptibles would be infected. Initial cost of adding {{ this.numSuggestedAirCleaners }} {{ this.airCleanerSuggestion.plural }} is ${{ this.airCleanerSuggestion.initialCostDollars * this.numSuggestedAirCleaners}}, with a recurring cost of ${{ this.airCleanerSuggestion.recurringCost * this.numSuggestedAirCleaners }} every {{this.airCleanerSuggestion.recurringCostDuration}}.
+        :colorScheme="colorInterpolationSchemeRoomVolume"
+        :maxVal=1
+        :value='totalFlowRatePlusExtraPacRounded'
+          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+        />
+  {{ this.measurementUnits.airDeliveryRateMeasurementTypeShort }}, bringing down the long-range airborne transmission risk to
+         <ColoredCell
+              :colorScheme="riskColorScheme"
+              :maxVal=1
+              :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+          />. On average,
+          <ColoredCell
+              :colorScheme="averageInfectedPeopleInterpolationScheme"
+              :maxVal=1
+              :value='averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+          /> susceptibles would be infected. Initial cost of adding {{ this.numSuggestedAirCleaners }} {{ this.airCleanerSuggestion.plural }} is ${{ this.airCleanerSuggestion.initialCostDollars * this.numSuggestedAirCleaners}}, with a recurring cost of ${{ this.airCleanerSuggestion.recurringCost * this.numSuggestedAirCleaners }} every {{this.airCleanerSuggestion.recurringCostDuration}}.
+       </div>
      </div>
+    <div class='container'>
+      <label class='subsection'>Masking</label>
+      <div class='centered'>
+        <HorizontalStackedBar
+          :values="maskingValues"
+          :colors="maskingColors"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -191,7 +202,9 @@
 import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
 import DayHourHeatmap from './day_hour_heatmap.vue';
+import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import { airCleaners } from './air_cleaners.js';
+import BarGraph from './bar_graph.vue';
 import { colorSchemeFall, assignBoundsToColorScheme, riskColorInterpolationScheme, infectedPeopleColorBounds } from './colors.js';
 import { findRiskiestPotentialInfector, riskOfEncounteringInfectious, riskIndividualIsNotInfGivenNegRapidTest } from './risk.js';
 import { convertVolume, computeAmountOfPortableAirCleanersThatCanFit } from './measurement_units.js';
@@ -210,17 +223,21 @@ import {
   cubicFeetPerMinuteTocubicMetersPerHour,
   displayCADR,
   findWorstCaseInhFactor,
+  maskToPenetrationFactor,
   setupCSRF,
   simplifiedRisk,
-  round
+  round,
+
 } from  './misc';
 
 export default {
   name: 'App',
   components: {
+    BarGraph,
     ColoredCell,
     DayHourHeatmap,
-    Event
+    Event,
+    HorizontalStackedBar
   },
   computed: {
     ...mapState(
@@ -298,6 +315,41 @@ export default {
           'events'
         ]
     ),
+    maskingValues() {
+      let key;
+      let color;
+
+      let dict = {}
+      for (let p in maskToPenetrationFactor) {
+        dict[p] = 0
+      }
+
+      for (let ag of this.activityGroups) {
+        dict[ag.maskType] += parseFloat(ag.numberOfPeople)
+      }
+
+      return dict
+    },
+    maskingColors() {
+      let index = 0
+      let key = 'lowerColor'
+      let colors = []
+      let color;
+
+      for (let colorPair of colorSchemeFall) {
+        color = colorPair[key]
+
+        colors.push(
+          `rgb(${color.r}, ${color.g}, ${color.b})`
+        )
+      }
+
+
+      color = colorSchemeFall[index]['upperColor']
+      colors.push(`rgb(${color.r}, ${color.g}, ${color.b})`)
+
+      return colors
+    },
     riskiestPotentialInfector() {
       return findRiskiestPotentialInfector(this.activityGroups)
     },

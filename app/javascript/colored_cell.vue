@@ -3,7 +3,7 @@
     :style="{ backgroundColor: cellColor }"
   >
     <slot>
-      {{ value / maxVal }}
+      {{ display }}
     </slot>
   </td>
 </template>
@@ -13,6 +13,13 @@
 
   export default {
     computed: {
+      display() {
+        if (!!this.text) {
+          return this.text
+        } else {
+          return this.ratio
+        }
+      },
       ratio() {
         return this.value / parseFloat(this.maxVal);
       },
@@ -59,6 +66,7 @@
     },
     props: [
       'value',
+      'text',
       'maxVal',
       'colorScheme'
     ]

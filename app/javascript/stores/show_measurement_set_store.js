@@ -86,7 +86,6 @@ export const useShowMeasurementSetStore = defineStore('showMeasurementSet', {
       'None',
       'Cloth / Surgical',
       'N95 - unfitted',
-      'N95 - fitted',
       'Elastomeric N95',
       'Elastomeric N99',
       'Elastomeric P100'

@@ -565,7 +565,6 @@ const maskToFactor = {
   'None': 1.0,
   'Cloth / Surgical': 0.4,
   'N95 - unfitted': 0.1,
-  'N95 - fitted': 0.07,
   'Elastomeric N95': 0.05,
   'Elastomeric N99': 0.01,
   'Elastomeric P100': 0.001
