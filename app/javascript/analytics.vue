@@ -194,7 +194,7 @@ import DayHourHeatmap from './day_hour_heatmap.vue';
 import { airCleaners } from './air_cleaners.js';
 import { colorSchemeFall, assignBoundsToColorScheme, riskColorInterpolationScheme, infectedPeopleColorBounds } from './colors.js';
 import { findRiskiestPotentialInfector, riskOfEncounteringInfectious, riskIndividualIsNotInfGivenNegRapidTest } from './risk.js';
-import { computeAmountOfPortableAirCleanersThatCanFit } from './measurement_units.js';
+import { convertVolume, computeAmountOfPortableAirCleanersThatCanFit } from './measurement_units.js';
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
@@ -552,7 +552,16 @@ export default {
       )
     },
     roomUsableVolumeRounded() {
-      return round(this.roomUsableVolumeCubicMeters, 1)
+
+      const profileStore = useProfileStore()
+      return round(
+        convertVolume(
+          this.roomUsableVolumeCubicMeters,
+          'meters',
+          profileStore.measurementUnits.lengthMeasurementType
+        ),
+        1
+      )
     },
     totalFlowRateCubicMetersPerHour() {
       return this.roomUsableVolumeCubicMeters * this.totalAch
