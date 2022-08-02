@@ -52,7 +52,7 @@ export default {
 
   .bar {
     color: white;
-    text-shadow: '1px 1px 2px black';
+    text-shadow: 1px 1px 2px black;
     font-weight: bold;
     padding: 1em;
   }
