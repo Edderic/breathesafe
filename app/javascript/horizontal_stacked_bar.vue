@@ -47,14 +47,14 @@ export default {
 
 <style scoped>
   td {
-    height: 2em;
+    height: 1em;
   }
 
   .bar {
     color: white;
-    padding: 1em;
     text-shadow: '1px 1px 2px black';
     font-weight: bold;
+    padding: 1em;
   }
 
   .v-ticks {
