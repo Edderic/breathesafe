@@ -1,6 +1,83 @@
 <template>
   <div class='col border-showing scrollable'>
     <div class='container'>
+      <label class='subsection'>Summary of Recommendations for {{this.roomName}}</label>
+      <div class='centered'>
+        <table>
+          <tr>
+            <th>Investments</th>
+            <th>Transmission Risk Given 1 Infector Present</th>
+            <th>Relative Risk Reduction</th>
+            <th>Risk Remaining</th>
+            <th>Initial Cost</th>
+            <th>Recurring Cost</th>
+          </tr>
+          <tr>
+            <td>Add {{ this.numSuggestedAirCleaners }}
+                <a :href="airCleanerSuggestion.website">{{this.airCleanerSuggestion.plural}}</a>
+            </td>
+
+            <ColoredCell
+                :colorScheme="riskColorScheme"
+                :maxVal=1
+                :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+            />
+
+
+            <ColoredCell
+                :colorScheme="reducedRiskColorScheme"
+                :maxVal=1
+                :value='reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleaners'
+                :text='reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersText'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+            />
+
+            <ColoredCell
+                :colorScheme="riskColorScheme"
+                :maxVal=1
+                :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+            />
+            <td>~${{ this.airCleanerSuggestion.initialCostDollars * this.numSuggestedAirCleaners }}</td>
+            <td>~${{ this.airCleanerSuggestion.recurringCost * this.numSuggestedAirCleaners }} every {{ this.airCleanerSuggestion.recurringCostDuration}}</td>
+          </tr>
+          <tr>
+            <td>Add {{ this.numSuggestedAirCleaners }}
+                <a :href="airCleanerSuggestion.website">{{this.airCleanerSuggestion.plural}}</a> and use {{this.maskSuggestion.name}} for all.
+            </td>
+
+            <ColoredCell
+                :colorScheme="riskColorScheme"
+                :maxVal=1
+                :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+            />
+
+
+            <ColoredCell
+                :colorScheme="reducedRiskColorScheme"
+                :maxVal=1
+                :value='reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersAndMasks'
+                :text='reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersAndMasksText'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+            />
+
+            <ColoredCell
+                :colorScheme="riskColorScheme"
+                :maxVal=1
+                :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleanersAndMasks'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+            />
+            <td>~${{ this.airCleanerSuggestion.initialCostDollars * this.numSuggestedAirCleaners }} + ~${{ this.maskSuggestion.initialCostUSD }} per person</td>
+            <td>~${{ this.airCleanerSuggestion.recurringCost * this.numSuggestedAirCleaners }} every {{ this.airCleanerSuggestion.recurringCostDuration}} + ~${{ this.maskSuggestion.recurringCostUSD }} per person per {{ this.maskSuggestion.recurringCostDuration}}</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+
+    <div class='container'>
       <label class='subsection'>Occupancy</label>
 
       <div class='container'>
@@ -19,20 +96,6 @@
         <DayHourHeatmap
           :dayHours="occupancy.parsed"
         />
-      </div>
-    </div>
-
-    <div class='container'>
-      <label class='subsection'>Rapid Testing</label>
-      <div class='container'>
-        <span>If, at max occupancy, everyone did rapid testing beforehand, and all got negative results, the probability that at least one person is infectious drops down to
-            <ColoredCell
-              :colorScheme="riskColorScheme"
-              :maxVal=1
-              :value='riskEncounteringInfectiousAllNegRapid'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-            />.
-        </span>
       </div>
     </div>
 
@@ -162,7 +225,7 @@
 
     <div class='container'>
       <div class='container'>
-        <span>Adding {{ this.numSuggestedAirCleaners }} {{ this.airCleanerSuggestion.plural }} would improve the clean air delivery rate (CADR)</span> to
+        <span>Adding {{ this.numSuggestedAirCleaners }} <a :href="airCleanerSuggestion.website">{{this.airCleanerSuggestion.plural}}</a> would improve the clean air delivery rate (CADR)</span> to
 
         <ColoredCell
         :colorScheme="colorInterpolationSchemeRoomVolume"
@@ -182,7 +245,14 @@
               :maxVal=1
               :value='averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners'
               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-          /> susceptibles would be infected. Initial cost of adding {{ this.numSuggestedAirCleaners }} {{ this.airCleanerSuggestion.plural }} is ${{ this.airCleanerSuggestion.initialCostDollars * this.numSuggestedAirCleaners}}, with a recurring cost of ${{ this.airCleanerSuggestion.recurringCost * this.numSuggestedAirCleaners }} every {{this.airCleanerSuggestion.recurringCostDuration}}.
+          /> susceptibles would be infected. Initial cost of adding {{ this.numSuggestedAirCleaners }} <a :href="airCleanerSuggestion.website">{{this.airCleanerSuggestion.plural}}</a> is ${{ this.airCleanerSuggestion.initialCostDollars * this.numSuggestedAirCleaners}}, with a recurring cost of ${{ this.airCleanerSuggestion.recurringCost * this.numSuggestedAirCleaners }} every {{this.airCleanerSuggestion.recurringCostDuration}}. Compared to the no-mask scenario, this investment will reduce risk by
+          <ColoredCell
+              :colorScheme="reducedRiskColorScheme"
+              :maxVal=1
+              :value='reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleaners'
+              :text='reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersText'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+          />
        </div>
      </div>
     <div class='container'>
@@ -193,7 +263,31 @@
           :colors="maskingColors"
         />
       </div>
+      <div class='container'>
+        <span>If everyone in the room wore {{this.maskSuggestion['type']}} masks such as the <a :href="maskSuggestion['website']">{{ this.maskSuggestion['name']}}</a> on top of {{ this.numSuggestedAirCleaners }} {{ this.airCleanerSuggestion.plural }} for air cleaning, long-range transmission risk goes down </span> to
+        <ColoredCell
+          :colorScheme="riskColorScheme"
+          :maxVal=1
+          :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleanersAndMasks'
+          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+        />. The cost of <a :href="maskSuggestion['website']">{{ this.maskSuggestion['name']}}</a> is ${{ this.maskSuggestion['initialCostUSD']}} per person, with a recurring cost of ${{ this.maskSuggestion['recurringCostUSD']}} every {{ this.maskSuggestion['recurringCostDuration']}} per person.
+      </div>
     </div>
+
+    <div class='container'>
+      <label class='subsection'>Rapid Testing</label>
+      <div class='container'>
+        <span>If, at max occupancy, everyone did rapid testing beforehand, and all got negative results, the probability that at least one person is infectious drops down to
+            <ColoredCell
+              :colorScheme="riskColorScheme"
+              :maxVal=1
+              :value='riskEncounteringInfectiousAllNegRapid'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+            />.
+        </span>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -205,9 +299,10 @@ import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import { airCleaners } from './air_cleaners.js';
 import BarGraph from './bar_graph.vue';
-import { colorSchemeFall, assignBoundsToColorScheme, riskColorInterpolationScheme, infectedPeopleColorBounds } from './colors.js';
+import { colorSchemeFall, colorPaletteFall, assignBoundsToColorScheme, riskColorInterpolationScheme, infectedPeopleColorBounds, convertColorListToCutpoints, generateEvenSpacedBounds } from './colors.js';
 import { findRiskiestPotentialInfector, riskOfEncounteringInfectious, riskIndividualIsNotInfGivenNegRapidTest } from './risk.js';
 import { convertVolume, computeAmountOfPortableAirCleanersThatCanFit } from './measurement_units.js';
+import { MASKS } from './masks.js';
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
@@ -345,10 +440,62 @@ export default {
       }
 
 
-      color = colorSchemeFall[index]['upperColor']
+      color = colorSchemeFall[colorSchemeFall.length - 1]['upperColor']
       colors.push(`rgb(${color.r}, ${color.g}, ${color.b})`)
 
       return colors
+    },
+    reducedRiskColorScheme() {
+      const minimum = 0
+      const maximum = 1
+      const numObjects = 2
+      const evenSpacedBounds = generateEvenSpacedBounds(minimum, maximum, numObjects)
+
+      const scheme = convertColorListToCutpoints(
+        [colorPaletteFall[3], colorPaletteFall[4], colorPaletteFall[5]]
+      )
+      // const reducedRiskColorBounds = infectedPeopleColorBounds.reverse()
+
+      return assignBoundsToColorScheme(scheme, evenSpacedBounds)
+    },
+    reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleaners() {
+      const result = (
+        this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible
+        - this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners
+      ) / this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible
+
+      return result
+    },
+    reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersAndMasks() {
+      const result = (
+        this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible
+        - this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleanersAndMasks
+      ) / this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible
+
+      return result
+    },
+    reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersAndMasksText() {
+      return `${round(this.reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersAndMasks * 100, 4)}%`
+    },
+    reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersText() {
+      return `${round(this.reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleaners * 100, 1)}%`
+    },
+
+    absoluteReducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleaners() {
+      const result = (
+        this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible
+        - this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners
+      )
+
+      return round(result, 6)
+    },
+    absoluteReducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersAndMasks() {
+      const result = (
+        this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible
+        - this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleanersAndMasks
+      )
+
+      return round(result, 6)
     },
     riskiestPotentialInfector() {
       return findRiskiestPotentialInfector(this.activityGroups)
@@ -365,7 +512,10 @@ export default {
         return 0
       }
 
+      // 1 infector
       const occupancy = 1
+      const probaRandomSampleOfOneIsInfectious = 1.0
+
       const flowRate = this.totalFlowRateCubicMetersPerHour
 
       // TODO: consolidate this information in one place
@@ -378,8 +528,6 @@ export default {
         this.activityGroups,
         susceptibleAgeGroup
       )
-      const infectorSpecificTerm = 1.0
-      const probaRandomSampleOfOneIsInfectious = 1.0
       const duration = 1 // hour
 
       return round(simplifiedRisk(
@@ -424,7 +572,6 @@ export default {
         this.activityGroups,
         susceptibleAgeGroup
       )
-      const infectorSpecificTerm = 1.0
       const probaRandomSampleOfOneIsInfectious = 1.0
       const duration = 1 // hour
 
@@ -438,6 +585,59 @@ export default {
         probaRandomSampleOfOneIsInfectious,
         duration
       ), 6)
+    },
+    riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleanersAndMasks() {
+      const riskiestActivityGroup = {
+        'numberOfPeople': 1,
+        'aerosolGenerationActivity': this.riskiestPotentialInfector['aerosolGenerationActivity'],
+        'carbonDioxideGenerationActivity': this.riskiestPotentialInfector['carbonDioxideGenerationActivity'],
+        'maskType': this.maskSuggestion['filtrationType']
+      }
+
+      if (!this.riskiestPotentialInfector['aerosolGenerationActivity'])  {
+        return 0
+      }
+
+      const occupancy = 1
+      const flowRate = this.totalFlowRateCubicMetersPerHour + this.numSuggestedAirCleaners * this.airCleanerSuggestion.cubicMetersPerHour
+
+      // TODO: consolidate this information in one place
+      const basicInfectionQuanta = 18.6
+      const variantMultiplier = 3.3
+      const quanta = basicInfectionQuanta * variantMultiplier
+      const susceptibleAgeGroup = '30 to <40'
+      const susceptibleMaskPenentrationFactor = maskToPenetrationFactor[
+        this.maskSuggestion['filtrationType']
+      ]
+
+      const susceptibleInhalationFactor = findWorstCaseInhFactor(
+        this.activityGroups,
+        susceptibleAgeGroup
+      )
+      const probaRandomSampleOfOneIsInfectious = 1.0
+      const duration = 1 // hour
+
+      return round(simplifiedRisk(
+        [riskiestActivityGroup],
+        occupancy,
+        flowRate,
+        quanta,
+        susceptibleMaskPenentrationFactor,
+        susceptibleAgeGroup,
+        probaRandomSampleOfOneIsInfectious,
+        duration
+      ), 6)
+    },
+    riskEncounteringInfectiousAllNegRapid() {
+      const testSpecificity = 0.999
+      const testSensitivity = 0.97
+
+      const value =  1 - riskIndividualIsNotInfGivenNegRapidTest(
+          testSpecificity,
+          testSensitivity,
+          this.riskOfOne
+        ) ** this.maximumOccupancy
+      return round(value, 6)
     },
     riskEncounteringInfectiousAllNegRapid() {
       const testSpecificity = 0.999
@@ -576,6 +776,9 @@ export default {
         this.roomLengthMeters * this.roomWidthMeters,
         this.airCleanerSuggestion.areaInSquareMeters
       )
+    },
+    maskSuggestion() {
+      return MASKS[0]
     },
     roomLength() {
       const profileStore = useProfileStore()
@@ -894,5 +1097,9 @@ export default {
 
   .font-light {
     font-weight: 400;
+  }
+
+  td {
+    padding: 1em;
   }
 </style>

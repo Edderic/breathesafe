@@ -1,3 +1,42 @@
+export const colorPaletteFall = [
+  {
+    name: 'darkRed',
+    r: 174,
+    g: 17,
+    b: 0
+  },
+  {
+    name: 'red',
+    r: 219,
+    g: 21,
+    b: 0
+  },
+  {
+    name: 'orangeRed',
+    r: 240,
+    g: 90,
+    b: 0
+  },
+  {
+    name: 'yellow',
+    r: 255,
+    g: 233,
+    b: 56
+  },
+  {
+    name: 'green',
+    r: 87,
+    g: 195,
+    b: 40
+  },
+  {
+    name: 'dark green',
+    r: 11,
+    g: 161,
+    b: 3
+  }
+]
+
 export const colorSchemeFall = [
   {
     'upperColor': {
@@ -187,4 +226,36 @@ export function assignBoundsToColorScheme(scheme, cutoffs) {
   }
 
   return colorScheme
+}
+
+export function convertColorListToCutpoints(colorList) {
+  let collection = []
+
+  for (let i = 0; i < colorList.length - 1; i++) {
+    collection.push({
+      'lowerColor': colorList[i],
+      'upperColor': colorList[i + 1]
+    })
+  }
+
+  return collection
+}
+
+export function generateEvenSpacedBounds(min, max, numObjects) {
+  let curr = min
+  let prev;
+  let increment = (max - min) / numObjects
+  const collection = []
+
+  while (curr < max) {
+    prev = curr
+    curr += increment
+
+    collection.push({
+      'lowerBound': prev,
+      'upperBound': curr
+    })
+  }
+
+  return collection
 }
