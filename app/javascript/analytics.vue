@@ -6,7 +6,7 @@
         <table>
           <tr>
             <th>Investments</th>
-            <th>Transmission Risk Given 1 Infector Present</th>
+            <th>Transmission Risk Given 1 Infector Present, at Max Occupancy ({{this.maximumOccupancy}})</th>
             <th>Relative Risk Reduction</th>
             <th>Risk Remaining</th>
             <th>Initial Cost</th>
@@ -78,50 +78,9 @@
     </div>
 
     <div class='container'>
-      <label class='subsection'>Occupancy</label>
-
-      <div class='container'>
-      <span>Assuming a COVID infectious prevalence rate of {{this.riskOfOneRounded}}, and that the room is at max occupancy ~{{maximumOccupancy}}, the probability of having at least one infector in the room is
-          <ColoredCell
-            :colorScheme="riskColorScheme"
-            :maxVal=1
-            :value='maxOccupancyEncounterRisk'
-            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-          />.
-      </span>
-      </div>
-
-      <div class='container col centered' v-if="heatmapShowable">
-        <h4 :style="{'margin-bottom': 0}">Popular Times at {{this.roomName}}</h4>
-        <DayHourHeatmap
-          :dayHours="occupancy.parsed"
-        />
-      </div>
-    </div>
-
-    <div class='container'>
       <label class='subsection'>Clean Air Delivery Rate</label>
       <div class='container'>
-        <span>What happens if there's an infectious individual present at max occupancy and no one is masked? How robust is the environment in preventing transmission? With a clean air delivery rate of
-            <ColoredCell
-            :colorScheme="colorInterpolationSchemeRoomVolume"
-            :maxVal=1
-            :value='totalFlowRateRounded'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-            />
-        </span> {{ this.measurementUnits.airDeliveryRateMeasurementTypeShort }}, assuming the infector is {{ this.riskiestPotentialInfector['aerosolGenerationActivity'] }}, the risk of long-range airborne transmission is
-          <ColoredCell
-              :colorScheme="riskColorScheme"
-              :maxVal=1
-              :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-            />. On average,
-          <ColoredCell
-              :colorScheme="averageInfectedPeopleInterpolationScheme"
-              :maxVal=1
-              :value='averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptible'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-          /> susceptibles would be infected.
+        <span>What happens if there's an infectious individual present at max occupancy and no one is masked? How robust is the environment in preventing transmission?</span>
      </div>
       <div class='centered'>
         <table>
@@ -222,6 +181,33 @@
         </tr>
       </table>
     </div>
+    <div class='container'>
+      <div class='container'>
+        <span>
+          With a clean air delivery rate of
+              <ColoredCell
+              :colorScheme="colorInterpolationSchemeRoomVolume"
+              :maxVal=1
+              :value='totalFlowRateRounded'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+              />
+         {{ this.measurementUnits.airDeliveryRateMeasurementTypeShort }}, assuming the infector is {{ this.riskiestPotentialInfector['aerosolGenerationActivity'] }}, the risk of long-range airborne transmission is
+            <ColoredCell
+                :colorScheme="riskColorScheme"
+                :maxVal=1
+                :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+              />. On average,
+            <ColoredCell
+                :colorScheme="averageInfectedPeopleInterpolationScheme"
+                :maxVal=1
+                :value='averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptible'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+            /> susceptibles would be infected.
+        </span>
+      </div>
+    </div>
+
 
     <div class='container'>
       <div class='container'>
@@ -285,6 +271,28 @@
               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
             />.
         </span>
+      </div>
+    </div>
+
+    <div class='container'>
+      <label class='subsection'>Occupancy</label>
+
+      <div class='container'>
+      <span>Assuming a COVID infectious prevalence rate of {{this.riskOfOneRounded}}, and that the room is at max occupancy ~{{maximumOccupancy}}, the probability of having at least one infector in the room is
+          <ColoredCell
+            :colorScheme="riskColorScheme"
+            :maxVal=1
+            :value='maxOccupancyEncounterRisk'
+            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+          />.
+      </span>
+      </div>
+
+      <div class='container col centered' v-if="heatmapShowable">
+        <h4 :style="{'margin-bottom': 0}">Popular Times at {{this.roomName}}</h4>
+        <DayHourHeatmap
+          :dayHours="occupancy.parsed"
+        />
       </div>
     </div>
 
