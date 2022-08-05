@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { useEventStores } from './event_stores'
 import { useShowMeasurementSetStore } from './show_measurement_set_store'
+import { useAnalyticsStore } from './analytics_store'
 import { defineStore } from 'pinia'
 import { setupCSRF } from '../misc'
+import { MASKS, Mask  } from '../masks.js'
 
 // TODO: use the last location that the user was in, as the default
 // the first argument is a unique id of the store across your application
@@ -35,8 +37,10 @@ export const useMainStore = defineStore('main', {
       // update Google Maps to center at the location of the event
       this.center = event.placeData.center
 
-      let showMeasurementSetStore = useShowMeasurementSetStore()
+      const showMeasurementSetStore = useShowMeasurementSetStore()
+      const analyticsStore = useAnalyticsStore()
       showMeasurementSetStore.setMeasurementSet(event)
+      analyticsStore.load(event)
     },
     setMarkers(markers) {
       this.markers = markers

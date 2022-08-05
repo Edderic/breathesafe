@@ -243,7 +243,7 @@ export function convertColorListToCutpoints(colorList) {
 
 export function generateEvenSpacedBounds(min, max, numObjects) {
   let curr = min
-  let prev;
+  let prev
   let increment = (max - min) / numObjects
   const collection = []
 

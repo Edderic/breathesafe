@@ -50,6 +50,7 @@ export function findRiskiestPotentialInfector(activityGroups) {
   let maxExhalationFactor = 0;
   let maxExhalationActivity;
   let carbonDioxideGenerationActivity;
+  let maskType;
   let tmp_val = 0;
 
   for (let activityGroup of activityGroups) {
@@ -59,13 +60,19 @@ export function findRiskiestPotentialInfector(activityGroups) {
       maxExhalationActivity = activityGroup['aerosolGenerationActivity']
       maxExhalationFactor = tmp_val
       carbonDioxideGenerationActivity = activityGroup['carbonDioxideGenerationActivity']
+      maskType = activityGroup['maskType']
     }
   }
 
   return {
     'aerosolGenerationActivityFactor': maxExhalationFactor,
     'aerosolGenerationActivity': maxExhalationActivity,
-    'carbonDioxideGenerationActivity': carbonDioxideGenerationActivity
+    'carbonDioxideGenerationActivity': carbonDioxideGenerationActivity,
+    'maskType': maskType
   }
+}
+
+export function reducedRisk(from, to) {
+  return (from - to) / from
 }
 

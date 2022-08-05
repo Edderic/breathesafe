@@ -6,21 +6,21 @@
         <table>
           <tr>
             <th>Investments</th>
-            <th>Transmission Risk Given 1 Infector Present, at Max Occupancy ({{this.maximumOccupancy}})</th>
+            <th>Risk Before Intervention</th>
             <th>Relative Risk Reduction</th>
             <th>Risk Remaining</th>
             <th>Initial Cost</th>
             <th>Recurring Cost</th>
           </tr>
-          <tr>
-            <td>Add {{ this.numSuggestedAirCleaners }}
-                <a :href="airCleanerSuggestion.website">{{this.airCleanerSuggestion.plural}}</a>
+          <tr v-for='intervention in interventions'>
+            <td>
+                <a :href="obj.website" v-for='obj in intervention.websitesAndText()'>{{obj.text}}</a>
             </td>
 
             <ColoredCell
                 :colorScheme="riskColorScheme"
                 :maxVal=1
-                :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible'
+                :value='nullIntervention.computeRiskRounded()'
                 :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
             />
 
@@ -28,49 +28,19 @@
             <ColoredCell
                 :colorScheme="reducedRiskColorScheme"
                 :maxVal=1
-                :value='reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleaners'
-                :text='reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersText'
+                :value='reduceRisk(nullIntervention.computeRisk(), intervention.computeRisk())'
+                :text='roundOutRisk(nullIntervention.computeRisk(), intervention.computeRisk())'
                 :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
             />
 
             <ColoredCell
                 :colorScheme="riskColorScheme"
                 :maxVal=1
-                :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners'
+                :value='intervention.computeRiskRounded()'
                 :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
             />
-            <td>~${{ this.airCleanerSuggestion.initialCostDollars * this.numSuggestedAirCleaners }}</td>
-            <td>~${{ this.airCleanerSuggestion.recurringCost * this.numSuggestedAirCleaners }} every {{ this.airCleanerSuggestion.recurringCostDuration}}</td>
-          </tr>
-          <tr>
-            <td>Add {{ this.numSuggestedAirCleaners }}
-                <a :href="airCleanerSuggestion.website">{{this.airCleanerSuggestion.plural}}</a> and use {{this.maskSuggestion.name}} for all.
-            </td>
-
-            <ColoredCell
-                :colorScheme="riskColorScheme"
-                :maxVal=1
-                :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
-            />
-
-
-            <ColoredCell
-                :colorScheme="reducedRiskColorScheme"
-                :maxVal=1
-                :value='reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersAndMasks'
-                :text='reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersAndMasksText'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
-            />
-
-            <ColoredCell
-                :colorScheme="riskColorScheme"
-                :maxVal=1
-                :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleanersAndMasks'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
-            />
-            <td>~${{ this.airCleanerSuggestion.initialCostDollars * this.numSuggestedAirCleaners }} + ~${{ this.maskSuggestion.initialCostUSD }} per person</td>
-            <td>~${{ this.airCleanerSuggestion.recurringCost * this.numSuggestedAirCleaners }} every {{ this.airCleanerSuggestion.recurringCostDuration}} + ~${{ this.maskSuggestion.recurringCostUSD }} per person per {{ this.maskSuggestion.recurringCostDuration}}</td>
+            <td>~${{ intervention.initialCostText() }}</td>
+            <td>~${{ intervention.recurringCostText() }}</td>
           </tr>
         </table>
       </div>
@@ -231,7 +201,7 @@
               :maxVal=1
               :value='averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners'
               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-          /> susceptibles would be infected. Initial cost of adding {{ this.numSuggestedAirCleaners }} <a :href="airCleanerSuggestion.website">{{this.airCleanerSuggestion.plural}}</a> is ${{ this.airCleanerSuggestion.initialCostDollars * this.numSuggestedAirCleaners}}, with a recurring cost of ${{ this.airCleanerSuggestion.recurringCost * this.numSuggestedAirCleaners }} every {{this.airCleanerSuggestion.recurringCostDuration}}. Compared to the no-mask scenario, this investment will reduce risk by
+          /> susceptibles would be infected. Initial cost of adding {{ this.numSuggestedAirCleaners }} <a :href="airCleanerSuggestion.website">{{this.airCleanerSuggestion.plural}}</a> is ${{ this.airCleanerSuggestion.initialCostUSD * this.numSuggestedAirCleaners}}, with a recurring cost of ${{ this.airCleanerSuggestion.recurringCostUSD * this.numSuggestedAirCleaners }} every {{this.airCleanerSuggestion.recurringCostDuration}}. Compared to the no-mask scenario, this investment will reduce risk by
           <ColoredCell
               :colorScheme="reducedRiskColorScheme"
               :maxVal=1
@@ -308,8 +278,9 @@ import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import { airCleaners } from './air_cleaners.js';
 import BarGraph from './bar_graph.vue';
 import { colorSchemeFall, colorPaletteFall, assignBoundsToColorScheme, riskColorInterpolationScheme, infectedPeopleColorBounds, convertColorListToCutpoints, generateEvenSpacedBounds } from './colors.js';
-import { findRiskiestPotentialInfector, riskOfEncounteringInfectious, riskIndividualIsNotInfGivenNegRapidTest } from './risk.js';
+import { findRiskiestPotentialInfector, riskOfEncounteringInfectious, riskIndividualIsNotInfGivenNegRapidTest, reducedRisk } from './risk.js';
 import { convertVolume, computeAmountOfPortableAirCleanersThatCanFit } from './measurement_units.js';
+import { useAnalyticsStore } from './stores/analytics_store'
 import { MASKS } from './masks.js';
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
@@ -347,6 +318,13 @@ export default {
         useMainStore,
         [
           'currentUser',
+        ]
+    ),
+    ...mapState(
+        useAnalyticsStore,
+        [
+          'interventions',
+          'nullIntervention'
         ]
     ),
     ...mapWritableState(
@@ -788,32 +766,6 @@ export default {
     maskSuggestion() {
       return MASKS[0]
     },
-    roomLength() {
-      const profileStore = useProfileStore()
-      return convertLengthBasedOnMeasurementType(
-        this.roomLengthMeters,
-        'meters',
-        profileStore.measurementUnits.lengthMeasurementType
-      )
-    },
-    roomWidth() {
-      const profileStore = useProfileStore()
-
-      return convertLengthBasedOnMeasurementType(
-        this.roomWidthMeters,
-        'meters',
-        profileStore.measurementUnits.lengthMeasurementType
-      )
-    },
-    roomHeight() {
-      const profileStore = useProfileStore()
-
-      return convertLengthBasedOnMeasurementType(
-        this.roomHeightMeters,
-        'meters',
-        profileStore.measurementUnits.lengthMeasurementType
-      )
-    },
     roomUsableVolumeRounded() {
 
       const profileStore = useProfileStore()
@@ -870,160 +822,15 @@ export default {
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
     ...mapState(useProfileStore, ['measurementUnits']),
-    addActivityGrouping() {
-      this.activityGroups.unshift({
-        'id': this.generateUUID(),
-        'aerosolGenerationActivity': "",
-        'carbonDioxideGenerationActivity': "",
-        'ageGroup': "",
-        'sex': "",
-        'maskType': "",
-        'numberOfPeople': "",
-        'rapidTestResult': 'Unknown'
-      })
+    reduceRisk(before, after) {
+      return reducedRisk(before, after)
     },
-    cancel() {
-      this.focusTab = 'events'
+    roundOut(someValue, numRound) {
+      return round(someValue, numRound)
     },
-    parseOccupancyData(event) {
-      this.occupancy.unparsedOccupancyData = event.target.value
-      this.occupancy.parsed = parseOccupancyHTML(this.occupancy)
-    },
-    airDeliveryRate(num) {
-      return convertCubicMetersPerHour(
-        num,
-        this.measurementUnits.airDeliveryRateMeasurementType
-      )
-    },
-    generateUUID() {
-        // https://stackoverflow.com/questions/105034/how-to-create-guid-uuid
-        return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-          (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-        );
-    },
-    setSex(event, id) {
-      let activityGroup = this.findActivityGroup()(id)
-      activityGroup['sex'] = event.target.value
-    },
-    cloneActivityGroup(id) {
-      const activityGroup = this.activityGroups.find(
-        (activityGroup) => activityGroup.id == id
-      );
-
-      this.activityGroups.push({
-        'id': this.generateUUID(),
-        'aerosolGenerationActivity': activityGroup['aerosolGenerationActivity'],
-        'carbonDioxideGenerationActivity': activityGroup['carbonDioxideGenerationActivity'],
-        'ageGroup': activityGroup['ageGroup'],
-        'maskType': activityGroup['maskType'],
-        'sex': activityGroup['sex'],
-        'numberOfPeople': activityGroup['numberOfPeople'],
-        'rapidTestResult': activityGroup['rapidTestResult']
-      });
-    },
-    removeActivityGroup(id) {
-      const activityGroupIndex = this.activityGroups.findIndex(
-        (activityGroup) => activityGroup.id == id
-      );
-
-      this.activityGroups.splice(activityGroupIndex, 1);
-    },
-    removeAirCleaner(id) {
-      const index = this.portableAirCleaners.findIndex(
-        (airCleaner) => airCleaner.id == id
-      );
-
-      this.portableAirCleaners.splice(index, 1);
-    },
-    setPlace(place) {
-      console.log(place)
-      const loc = place.geometry.location;
-
-      this.placeData = {
-        'place_id': place.place_id,
-        'formatted_address': place.formatted_address,
-        'center': {
-          'lat': loc.lat(),
-          'lng': loc.lng()
-        },
-        'types': place.types,
-        'website': place.website,
-        'opening_hours': place.opening_hours,
-      }
-
-      this.setGMapsPlace(this.placeData.center)
-    },
-    setDuration(event) {
-      this.duration = event.target.value;
-    },
-    setEventPrivacy(event) {
-      this.private = event.target.value;
-    },
-    setRoomName(event) {
-      this.roomName = event.target.value;
-    },
-    setSinglePassFiltrationEfficiency(event) {
-      this.singlePassFiltrationEfficiency = event.target.value;
-    },
-    setCarbonDioxideAmbient(event) {
-      this.ventilationCo2AmbientPpm = event.target.value;
-    },
-    setCarbonDioxideMonitor(event) {
-      let val = event.target.value;
-      this.ventilationCo2MeasurementDeviceName = val
-
-      let found = this.carbonDioxideMonitors.find((m) => m.name == val)
-      this.ventilationCo2MeasurementDeviceSerial = found.serial
-      this.ventilationCo2MeasurementDeviceModel = found.model
-    },
-    setCarbonDioxideSteadyState(event) {
-      this.ventilationCo2SteadyStatePpm = event.target.value;
-    },
-    setAerosolGenerationActivity(event, id) {
-      let activityGroup = this.findActivityGroup()(id);
-      activityGroup['aerosolGenerationActivity'] = event.target.value;
-    },
-    setCarbonDioxideGenerationActivity(event, id) {
-      let activityGroup = this.findActivityGroup()(id);
-      activityGroup['carbonDioxideGenerationActivity'] = event.target.value;
-    },
-    setAgeGroup(event, id) {
-      let activityGroup = this.findActivityGroup()(id);
-      activityGroup['ageGroup'] = event.target.value;
-    },
-    setMaskType(event, id) {
-      let activityGroup = this.findActivityGroup()(id);
-      activityGroup['maskType'] = event.target.value;
-    },
-    setNumberOfPeople(event, id) {
-      let activityGroup = this.findActivityGroup()(id);
-      activityGroup['numberOfPeople'] = event.target.value;
-    },
-    setPortableAirCleaningNotes(event, id) {
-      let portableAirCleaner = this.findPortableAirCleaningDevice()(id);
-      portableAirCleaner['notes'] = event.target.value;
-    },
-
-    setVentilationNotes(event) {
-      this.ventilationNotes = event.target.value;
-    },
-
-    setRapidTestResult(event, id) {
-      let activityGroup = this.findActivityGroup()(id);
-      activityGroup['rapidTestResult'] = event.target.value;
-    },
-    setPortableAirCleaningDeviceAirDeliveryRate(event, id) {
-      let portableAirCleaner = this.findPortableAirCleaningDevice()(id);
-      portableAirCleaner['airDeliveryRate'] = event.target.value;
-      portableAirCleaner['airDeliveryRateCubicMetersPerHour'] = cubicFeetPerMinuteTocubicMetersPerHour(
-        this.airDeliveryRateMeasurementType,
-        event.target.value
-      );
-    },
-    setPortableAirCleaningDeviceSinglePassFiltrationEfficiency(event, id) {
-      let portableAirCleaner = this.findPortableAirCleaningDevice()(id);
-      portableAirCleaner['singlePassFiltrationEfficiency'] = event.target.value;
-    },
+    roundOutRisk(riskA, riskB) {
+      return `${round(reducedRisk(riskA, riskB) * 100, 4)}%`
+    }
   }
 }
 
