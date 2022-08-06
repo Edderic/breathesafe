@@ -47,7 +47,7 @@
           </tr>
         </table>
         <div class='container'>
-          <span>Risk Before Intervention is the long-range airborne transmission risk between the riskiest infector possible, given the data, and a susceptible in the intervention regime. In this instance, the riskiest mask (i.e. the mask with the worst fit and filtration efficiency) recorded is <ColoredCell
+          <span><span class='highlight bold'>Risk Before Intervention</span> is the long-range airborne transmission risk between the riskiest infector possible, given the data, and a susceptible in the intervention regime. In this instance, the riskiest mask (i.e. the mask with the worst fit and filtration efficiency) recorded is <ColoredCell
                 :colorScheme="riskiestMaskColorScheme"
                 :maxVal=1
                 :value='riskiestMask["maskPenetrationFactor"]'
@@ -976,4 +976,10 @@ export default {
   span {
     line-height: 2em;
   }
+
+  .highlight {
+    font-style: italic;
+    font-weight: bold;
+  }
+
 </style>
