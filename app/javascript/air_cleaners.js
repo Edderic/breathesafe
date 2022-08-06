@@ -1,4 +1,5 @@
 import { cubicFeetPerMinuteTocubicMetersPerHour, convertLengthBasedOnMeasurementType } from './misc.js'
+import { convertVolume, computeAmountOfPortableAirCleanersThatCanFit } from './measurement_units.js';
 
 export const airCleaners = [
   {
@@ -28,6 +29,7 @@ export class AirCleaner {
     this.recurringCostDuration = device.recurringCostDuration
     this.recurringCostDetails = device.recurringCostDetails
     this.ws = device.website
+    this.areaInSquareMeters = device.areaInSquareMeters
   }
 
   applicable() {
@@ -44,7 +46,19 @@ export class AirCleaner {
   }
 
   numFixtures() {
-    return 2
+    let amountA = computeAmountOfPortableAirCleanersThatCanFit(
+      this.event.roomLengthMeters * this.event.roomWidthMeters,
+      this.areaInSquareMeters
+    )
+
+    // find the amount of portable ACH. Only recommend up to 100 more
+    const remainingAch = 100 - this.event.portableAch
+
+    let amountB = this.volumeOfRoomCubicMeters * remainingAch / this.cubicMetersPerHour
+
+    let amountC = 100 - this.event.portableAirCleaners.length
+
+    return Math.min(amountA, amountB, amountC)
   }
 
   initialCost() {
