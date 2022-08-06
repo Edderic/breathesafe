@@ -16,9 +16,9 @@ export const MASKS = [
 ]
 
 export class Mask {
-  constructor(mask, numMasks) {
+  constructor(mask, numDevices) {
     this.filtrationType = mask.filtrationType
-    this.numMasks = numMasks
+    this.numDev = numDevices
     this.type = 'mask'
     this.maskType = mask.filtrationType
     this.mask = mask
@@ -40,12 +40,16 @@ export class Mask {
     return 0
   }
 
+  numDevices() {
+    return this.numDev
+  }
+
   filtrationEfficiency() {
     return this.mask.filtrationEfficiency
   }
 
   initialCost() {
-    return round(this.initialCostUSD * this.numMasks, 2)
+    return round(this.initialCostUSD * this.numDevices(), 2)
   }
 
   initialCostText() {
@@ -65,7 +69,7 @@ export class Mask {
   }
 
   recurringCost() {
-    return this.recurringCostUSD * this.numMasks
+    return this.recurringCostUSD * this.numDevices()
   }
 
   recurringCostText() {

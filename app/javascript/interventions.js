@@ -94,6 +94,16 @@ export class Intervention {
     return result
   }
 
+  numDevices() {
+    let count = 0
+
+    for (let intervention of this.interventions) {
+      count += intervention.numDevices()
+    }
+
+    return count
+  }
+
   computeRiskRounded() {
     return round(this.computeRisk(), 6)
   }

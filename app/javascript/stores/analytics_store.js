@@ -30,6 +30,18 @@ export const useAnalyticsStore = defineStore('analytics', {
         new Intervention(
           event,
           [
+            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[0], event)
+          ]
+        ),
+        new Intervention(
+          event,
+          [
+            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[1], event)
+          ]
+        ),
+        new Intervention(
+          event,
+          [
             new Mask(MASKS[0], 3)
           ]
         ),

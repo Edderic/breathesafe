@@ -37,15 +37,15 @@ export class AirCleaner {
   }
 
   amountText() {
-    return `${this.numFixtures()} ${this.plural}`
+    return `${this.numDevices()} ${this.plural}`
   }
 
   computeACH() {
-    const ach = this.numFixtures() * this.cubicMetersPerHour / this.volumeOfRoomCubicMeters
+    const ach = this.numDevices() * this.cubicMetersPerHour / this.volumeOfRoomCubicMeters
     return ach
   }
 
-  numFixtures() {
+  numDevices() {
     let amountA = computeAmountOfPortableAirCleanersThatCanFit(
       this.event.roomLengthMeters * this.event.roomWidthMeters,
       this.areaInSquareMeters
@@ -62,7 +62,7 @@ export class AirCleaner {
   }
 
   initialCost() {
-    return this.numFixtures() * this.initCost
+    return this.numDevices() * this.initCost
   }
 
   initialCostText() {
@@ -81,7 +81,7 @@ export class AirCleaner {
     return true
   }
   recurringCost() {
-    return this.numFixtures() * this.recurringCostUSD
+    return this.numDevices() * this.recurringCostUSD
   }
 
   recurringCostText() {

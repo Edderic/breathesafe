@@ -13,11 +13,12 @@
             <th>Recurring Cost</th>
           </tr>
           <tr v-for='intervention in interventions'>
-            <td>
+            <td v-if='intervention.numDevices() > 0'>
                 <a :href="obj.website" v-for='obj in intervention.websitesAndText()'>{{obj.text}}</a>
             </td>
 
             <ColoredCell
+                v-if='intervention.numDevices() > 0'
                 :colorScheme="riskColorScheme"
                 :maxVal=1
                 :value='nullIntervention.computeRiskRounded()'
@@ -26,6 +27,7 @@
 
 
             <ColoredCell
+                v-if='intervention.numDevices() > 0'
                 :colorScheme="reducedRiskColorScheme"
                 :maxVal=1
                 :value='reduceRisk(nullIntervention.computeRisk(), intervention.computeRisk())'
@@ -34,13 +36,14 @@
             />
 
             <ColoredCell
+                v-if='intervention.numDevices() > 0'
                 :colorScheme="riskColorScheme"
                 :maxVal=1
                 :value='intervention.computeRiskRounded()'
                 :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
             />
-            <td>~${{ intervention.initialCostText() }}</td>
-            <td>~${{ intervention.recurringCostText() }}</td>
+            <td v-if='intervention.numDevices() > 0' >~${{ intervention.initialCostText() }}</td>
+            <td v-if='intervention.numDevices() > 0' >~${{ intervention.recurringCostText() }}</td>
           </tr>
         </table>
       </div>
