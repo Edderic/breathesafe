@@ -2,27 +2,29 @@ import { convertLengthBasedOnMeasurementType, round } from './misc.js'
 
 export const UPPER_ROOM_GERMICIDAL_UV = [
   {
-    'name': 'Upper Room Germicidal UV (Louvered)',
-    'singular': 'Upper Room Germicidal UV (Louvered) Fixture',
-    'plural': 'Upper Room Germicidal UV (Louvered) Fixtures',
+    'name': 'Upper Room Germicidal UV (600mW, Louvered)',
+    'singular': 'Upper Room Germicidal UV Fixture (600mW, Louvered)',
+    'plural': 'Upper Room Germicidal UV Fixtures (600mW, Louvered)',
     'initialCostUSD': 500,
     'recurringCostUSD': 50.00,
     'recurringCostDuration': 'year',
     'recurringCostDetails': 'to replace bulbs',
     'heightLowerBoundMeters': 2.4384,
+    'numDeviceFactor': 1,
     'mW': 600,
     'website': 'https://www.cdc.gov/coronavirus/2019-ncov/community/ventilation/uvgi.html',
     'type': 'Upper Room Germicidal UV',
   },
   {
-    'name': 'Upper Room Germicidal UV (Open)',
-    'singular': 'Upper Room Germicidal UV (Open) Fixture',
-    'plural': 'Upper Room Germicidal UV (Open) Fixtures',
+    'name': 'Upper Room Germicidal UV (6.25W, Open)',
+    'singular': 'Upper Room Germicidal UV Fixture (6.25W, Open)',
+    'plural': 'Upper Room Germicidal UV Fixtures (6.25W, Open)',
     'initialCostUSD': 500,
     'recurringCostUSD': 50.00,
     'recurringCostDuration': 'year',
     'recurringCostDetails': 'to replace bulbs',
     'heightLowerBoundMeters': 4.4384,
+    'numDeviceFactor': 0.5,
     'mW': 6250,
     'website': 'https://www.cdc.gov/coronavirus/2019-ncov/community/ventilation/uvgi.html',
     'type': 'Upper Room Germicidal UV',
@@ -84,7 +86,7 @@ export class UpperRoomGermicidalUV {
       500,
       'feet',
       'meters'
-    ) * 3
+    ) * 3 * this.device.numDeviceFactor
 
     return round(val, 0)
   }
@@ -94,7 +96,7 @@ export class UpperRoomGermicidalUV {
   }
 
   recurringCostText() {
-    return `${this.recurringCost()} every ${this.recurringCostDuration} ${this.recurringCostDetails}. `
+    return `${this.recurringCost()} every ${this.device.recurringCostDuration} ${this.device.recurringCostDetails}. `
   }
 
   website() {

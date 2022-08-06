@@ -1,4 +1,4 @@
-import { cubicFeetPerMinuteTocubicMetersPerHour, infectorActivityTypes } from './misc.js'
+import { cubicFeetPerMinuteTocubicMetersPerHour, infectorActivityTypes, maskToPenetrationFactor } from './misc.js'
 
 export function riskOfEncounteringInfectious(probaInfectious, numPeople) {
   /*
@@ -71,6 +71,29 @@ export function findRiskiestPotentialInfector(activityGroups) {
     'maskType': maskType
   }
 }
+
+
+export function findRiskiestMask(activityGroups) {
+  let riskiestMaskPenetrationFactor = 0;
+  let riskiestMask;
+  let tmp_val;
+
+  for (let activityGroup of activityGroups) {
+    tmp_val = maskToPenetrationFactor[activityGroup['maskType']]
+
+    if (tmp_val > riskiestMaskPenetrationFactor) {
+      riskiestMask = activityGroup['maskType']
+      riskiestMaskPenetrationFactor = tmp_val
+    }
+  }
+
+  return {
+    'maskToPenetrationFactor': riskiestMaskPenetrationFactor,
+    'maskType': riskiestMask
+  }
+}
+
+
 
 export function reducedRisk(from, to) {
   return (from - to) / from

@@ -1,4 +1,8 @@
-import { findRiskiestPotentialInfector, riskOfEncounteringInfectious, riskIndividualIsNotInfGivenNegRapidTest } from './risk.js';
+import {
+  findRiskiestPotentialInfector,
+  riskOfEncounteringInfectious,
+  findRiskiestMask,
+  riskIndividualIsNotInfGivenNegRapidTest } from './risk.js';
 import {
   computePortableACH,
   computeVentilationACH,
@@ -24,12 +28,13 @@ export class Intervention {
     this.ventilationAch = event.ventilationAch
     this.roomUsableVolumeCubicMeters = event.roomUsableVolumeCubicMeters
     this.activityGroups = event.activityGroups
+    this.riskiestMask = findRiskiestMask(this.activityGroups)
     this.riskiestPotentialInfector = findRiskiestPotentialInfector(this.activityGroups)
     this.riskiestActivityGroup = {
       'numberOfPeople': 1,
       'aerosolGenerationActivity': this.riskiestPotentialInfector['aerosolGenerationActivity'],
       'carbonDioxideGenerationActivity': this.riskiestPotentialInfector['carbonDioxideGenerationActivity'],
-      'maskType': this.riskiestPotentialInfector['maskType']
+      'maskType': this.riskiestMask['maskType']
     }
   }
 
