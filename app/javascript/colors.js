@@ -1,3 +1,5 @@
+import { infectorActivityTypes } from './misc.js'
+
 export const colorPaletteFall = [
   {
     name: 'darkRed',
@@ -190,6 +192,25 @@ export const riskColorInterpolationScheme = [
       g: 161,
       b: 3
     },
+  },
+]
+
+export const AEROSOL_GENERATION_BOUNDS = [
+  {
+    'lowerBound': infectorActivityTypes['Resting – Oral breathing'],
+    'upperBound': infectorActivityTypes['Standing – Speaking'],
+  },
+  {
+    'lowerBound': infectorActivityTypes['Standing – Speaking'],
+    'upperBound': infectorActivityTypes['Light exercise – Speaking']
+  },
+  {
+    'lowerBound': infectorActivityTypes['Light exercise – Speaking'],
+    'upperBound': infectorActivityTypes['Heavy Exercise – Speaking']
+  },
+  {
+    'lowerBound': infectorActivityTypes['Heavy Exercise – Speaking'],
+    'upperBound': infectorActivityTypes['Heavy Exercise – Loudly Speaking']
   },
 ]
 

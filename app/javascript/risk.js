@@ -88,7 +88,7 @@ export function findRiskiestMask(activityGroups) {
   }
 
   return {
-    'maskToPenetrationFactor': riskiestMaskPenetrationFactor,
+    'maskPenetrationFactor': riskiestMaskPenetrationFactor,
     'maskType': riskiestMask
   }
 }

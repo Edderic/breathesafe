@@ -2,7 +2,7 @@
   <div class='col border-showing scrollable'>
     <div class='container'>
       <label class='subsection'>Summary of Recommendations for {{this.roomName}}</label>
-      <div class='centered'>
+      <div class='centered col'>
         <table>
           <tr>
             <th>Investments</th>
@@ -46,6 +46,24 @@
             <td v-if='intervention.numDevices() > 0' >~${{ intervention.recurringCostText() }}</td>
           </tr>
         </table>
+        <div class='container'>
+          <span>Risk Before Intervention is the long-range airborne transmission risk between the riskiest infector possible, given the data, and a susceptible in the intervention regime. In this instance, the riskiest mask (i.e. the mask with the worst fit and filtration efficiency) recorded is <ColoredCell
+                :colorScheme="riskiestMaskColorScheme"
+                :maxVal=1
+                :value='riskiestMask["maskPenetrationFactor"]'
+                :text='riskiestMask["maskType"]'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+            />
+           and the riskiest aerosol generation activity is <ColoredCell
+                :colorScheme="riskiestAerosolGenerationActivityScheme"
+                :maxVal=1
+                :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
+                :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+            />, so we assume that the infector is taking these actions.
+            </span>
+        </div>
+
       </div>
     </div>
 
@@ -279,9 +297,22 @@ import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import { airCleaners } from './air_cleaners.js';
 import BarGraph from './bar_graph.vue';
-import { colorSchemeFall, colorPaletteFall, assignBoundsToColorScheme, riskColorInterpolationScheme, infectedPeopleColorBounds, convertColorListToCutpoints, generateEvenSpacedBounds } from './colors.js';
-import { findRiskiestPotentialInfector, riskOfEncounteringInfectious, riskIndividualIsNotInfGivenNegRapidTest, reducedRisk } from './risk.js';
-import { convertVolume, computeAmountOfPortableAirCleanersThatCanFit } from './measurement_units.js';
+import {
+  AEROSOL_GENERATION_BOUNDS,
+  colorSchemeFall,
+  colorPaletteFall,
+  assignBoundsToColorScheme,
+  riskColorInterpolationScheme,
+  infectedPeopleColorBounds,
+  convertColorListToCutpoints,
+  generateEvenSpacedBounds } from './colors.js';
+import {
+  findRiskiestMask,
+  findRiskiestPotentialInfector,
+  riskOfEncounteringInfectious,
+  riskIndividualIsNotInfGivenNegRapidTest,
+  reducedRisk } from './risk.js';
+ import { convertVolume, computeAmountOfPortableAirCleanersThatCanFit } from './measurement_units.js';
 import { useAnalyticsStore } from './stores/analytics_store'
 import { MASKS } from './masks.js';
 import { useEventStore } from './stores/event_store';
@@ -299,6 +330,7 @@ import {
   cubicFeetPerMinuteTocubicMetersPerHour,
   displayCADR,
   findWorstCaseInhFactor,
+  infectorActivityTypes,
   maskToPenetrationFactor,
   setupCSRF,
   simplifiedRisk,
@@ -487,6 +519,24 @@ export default {
     },
     riskiestPotentialInfector() {
       return findRiskiestPotentialInfector(this.activityGroups)
+    },
+    riskiestMask() {
+      return findRiskiestMask(this.activityGroups)
+    },
+    riskiestAerosolGenerationActivityScheme() {
+      const copy = [
+        colorPaletteFall[4],
+        colorPaletteFall[3],
+        colorPaletteFall[2],
+        colorPaletteFall[1],
+        colorPaletteFall[0]]
+          const cutPoints = convertColorListToCutpoints(copy)
+      return assignBoundsToColorScheme(cutPoints, AEROSOL_GENERATION_BOUNDS)
+    },
+    riskiestMaskColorScheme() {
+      const copy = JSON.parse(JSON.stringify(colorPaletteFall))
+      const cutPoints = convertColorListToCutpoints(copy)
+      return assignBoundsToColorScheme(cutPoints, infectedPeopleColorBounds)
     },
     riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible() {
       const riskiestActivityGroup = {
@@ -824,6 +874,9 @@ export default {
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
     ...mapState(useProfileStore, ['measurementUnits']),
+    aerosolActivityToFactor(key) {
+      return infectorActivityTypes[key]
+    },
     reduceRisk(before, after) {
       return reducedRisk(before, after)
     },
@@ -918,5 +971,9 @@ export default {
 
   td {
     padding: 1em;
+  }
+
+  span {
+    line-height: 2em;
   }
 </style>
