@@ -2,7 +2,7 @@ import { round } from './misc.js'
 
 export const MASKS = [
   {
-    'name': 'Flo Mask Pro w/ Pro Filter',
+    'name': 'Elastomeric Mask (Flo Mask Pro w/ Pro Filter)',
     'filtrationEfficiency': 0.99,
     'initialCostUSD': 90,
     'recurringCostUSD': 60,
@@ -27,7 +27,7 @@ export const MASKS = [
     'interventionType': 'mask'
   },
   {
-    'name': 'N95 Mask',
+    'name': 'N95 Mask (3M Aura)',
     'filtrationEfficiency': 0.95,
     'initialCostUSD': 30,
     'recurringCostUSD': 30,
