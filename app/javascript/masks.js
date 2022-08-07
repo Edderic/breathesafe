@@ -5,9 +5,12 @@ export const MASKS = [
     'name': 'Elastomeric Mask (Flo Mask Pro w/ Pro Filter)',
     'filtrationEfficiency': 0.99,
     'initialCostUSD': 90,
+    'initialDurationYears': 0.144, // 5 Pro filters = 5 weeks, 5 Everyday = 2.5 weeks = 7.5 weeks. 7.5 weeks / 52 weeks = 0.144 years,
     'recurringCostUSD': 60,
     'recurringCostDuration': 'year',
     'recurringCostDetails': 'for filters',
+    'recurringCostPerYearUSD': 60,
+    'rucurringDurationYears': 1,
     'website': 'https://flomask.com/collections/flo-mask-for-adults',
     'type': 'tight-fitting, elastomeric',
     'filtrationType': 'Elastomeric N99',
@@ -18,9 +21,12 @@ export const MASKS = [
     'name': 'Surgical Mask',
     'filtrationEfficiency': 0.5,
     'initialCostUSD': 30,
+    'initialDurationYears': 1, // Assuming 1 mask / week
     'recurringCostUSD': 30,
     'recurringCostDuration': 'year',
+    'recurringDurationYears': 1,
     'recurringCostDetails': 'for a pack of 50',
+    'recurringCostPerYearUSD': 30,
     'website': 'https://www.armbrustusa.com/collections/medical-face-masks-made-in-austin-tx/products/usa-made-surgical-masks-1',
     'type': 'leaky, surgical mask',
     'filtrationType': 'Cloth / Surgical',
@@ -30,9 +36,12 @@ export const MASKS = [
     'name': 'N95 Mask (3M Aura)',
     'filtrationEfficiency': 0.95,
     'initialCostUSD': 30,
+    'initialDurationYears': 2 / 5, // Assuming 1 mask / week
     'recurringCostUSD': 30,
     'recurringCostDuration': '20 weeks',
     'recurringCostDetails': 'for a pack of 20',
+    'recurringDurationYears': 2 / 5, // Assuming 1 mask / week
+    'recurringCostPerYearUSD': 30 * 5 / 2,
     'website': 'https://www.projectn95.org/products/3m-company-n95-respirator-mask-9205-aura',
     'type': 'leaky, surgical mask',
     'filtrationType': 'N95 - unfitted',
@@ -52,6 +61,7 @@ export class Mask {
     this.recurringCostUSD = mask.recurringCostUSD
     this.recurringCostDetails = mask.recurringCostDetails
     this.recurringCostDuration = mask.recurringCostDuration
+    this.device = mask
   }
   applicable() {
     return true
@@ -63,6 +73,10 @@ export class Mask {
 
   computeACH() {
     return 0
+  }
+
+  costInYears(years) {
+    return this.numDevices() * (this.device.initialCostUSD + years * this.device.recurringCostPerYearUSD)
   }
 
   numDevices() {

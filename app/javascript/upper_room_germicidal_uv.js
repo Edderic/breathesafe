@@ -6,9 +6,12 @@ export const UPPER_ROOM_GERMICIDAL_UV = [
     'singular': 'Upper Room Germicidal UV Fixture (600mW, Louvered)',
     'plural': 'Upper Room Germicidal UV Fixtures (600mW, Louvered)',
     'initialCostUSD': 500,
+    'initialDurationYears': 1,
     'recurringCostUSD': 50.00,
     'recurringCostDuration': 'year',
     'recurringCostDetails': 'to replace bulbs',
+    'recurringCostPerYearUSD': 50,
+    'recurringDurationYears': 1,
     'heightLowerBoundMeters': 2.4384,
     'numDeviceFactor': 1,
     'mW': 600,
@@ -20,9 +23,12 @@ export const UPPER_ROOM_GERMICIDAL_UV = [
     'singular': 'Upper Room Germicidal UV Fixture (600mW, Louvered)',
     'plural': 'Upper Room Germicidal UV Fixtures (600mW, Louvered)',
     'initialCostUSD': 500,
+    'initialDurationYears': 1,
     'recurringCostUSD': 50.00,
     'recurringCostDuration': 'year',
     'recurringCostDetails': 'to replace bulbs',
+    'recurringDurationYears': 1,
+    'recurringCostPerYearUSD': 50,
     'heightLowerBoundMeters': 2.4384,
     'numDeviceFactor': 3,
     'mW': 600,
@@ -34,9 +40,12 @@ export const UPPER_ROOM_GERMICIDAL_UV = [
     'singular': 'Upper Room Germicidal UV Fixture (6.25W, Open)',
     'plural': 'Upper Room Germicidal UV Fixtures (6.25W, Open)',
     'initialCostUSD': 500,
+    'initialDurationYears': 1,
     'recurringCostUSD': 50.00,
+    'recurringCostPerYearUSD': 50.00,
     'recurringCostDuration': 'year',
     'recurringCostDetails': 'to replace bulbs',
+    'recurringDurationYears': 1,
     'heightLowerBoundMeters': 4.4384,
     'numDeviceFactor': 0.5,
     'mW': 6250,
@@ -61,6 +70,10 @@ export class UpperRoomGermicidalUV {
 
   applicable() {
     return this.event.roomHeightMeters >= this.device.heightLowerBoundMeters
+  }
+
+  costInYears(years) {
+    return this.numDevices() * (this.device.initialCostUSD + years * this.device.recurringCostPerYearUSD)
   }
 
   isUpperUV() {

@@ -16,6 +16,7 @@
             <th>Risk Remaining</th>
             <th>Initial Cost</th>
             <th>Recurring Cost</th>
+            <th>Total Cost in 5 years</th>
           </tr>
           <tr v-for='intervention in interventions'>
             <td v-if='intervention.numDevices() > 0'>
@@ -49,6 +50,7 @@
             />
             <td v-if='intervention.numDevices() > 0' >~${{ intervention.initialCostText() }}</td>
             <td v-if='intervention.numDevices() > 0' >~${{ intervention.recurringCostText() }}</td>
+            <td v-if='intervention.numDevices() > 0' >~${{ intervention.costInYears(5) }}</td>
           </tr>
         </table>
         <div class='container'>

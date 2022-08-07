@@ -112,6 +112,16 @@ export class Intervention {
     return count
   }
 
+  costInYears(numYears) {
+    let cost = 0
+
+    for (let intervention of this.interventions) {
+      cost += intervention.costInYears(numYears)
+    }
+
+    return cost
+  }
+
   computeRiskRounded() {
     return round(this.computeRisk(), 6)
   }

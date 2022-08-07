@@ -10,9 +10,12 @@ export const airCleaners = [
     'areaInSquareMeters': convertLengthBasedOnMeasurementType(20, 'inches', 'meters')
         * convertLengthBasedOnMeasurementType(20, 'inches', 'meters'),
     'initialCostUSD': 65,
+    'initialDurationYears': 0.5,  // 6 months to replace filters
     'recurringCostUSD': 50,
     'recurringCostDuration': '6 months',
     'recurringCostDetails': 'to replace filters',
+    'recurringCostPerYearUSD': 100,
+    'recurringDurationYears': 0.5,  // 6 months to replace filters
     'website': "https://aghealth.ucdavis.edu/news/corsi-rosenthal-box-diy-box-fan-air-filter-covid-19-and-wildfire-smoke"
   }
 ]
@@ -30,6 +33,7 @@ export class AirCleaner {
     this.recurringCostDetails = device.recurringCostDetails
     this.ws = device.website
     this.areaInSquareMeters = device.areaInSquareMeters
+    this.device = device
   }
 
   applicable() {
@@ -43,6 +47,10 @@ export class AirCleaner {
   computeACH() {
     const ach = this.numDevices() * this.cubicMetersPerHour / this.volumeOfRoomCubicMeters
     return ach
+  }
+
+  costInYears(years) {
+    return this.numDevices() * (this.device.initialCostUSD + years * this.device.recurringCostPerYearUSD)
   }
 
   numDevices() {
