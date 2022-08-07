@@ -39,9 +39,13 @@ export class Intervention {
     }
 
     this.id = generateUUID()
+    this.risk = undefined
   }
 
   computeRisk() {
+    if (this.risk) {
+      return this.risk
+    }
 
     let totalAch = this.event.totalAch
     if (!totalAch) {
@@ -99,7 +103,8 @@ export class Intervention {
       duration
     )
 
-    return result
+    this.risk = result
+    return this.risk
   }
 
   numDevices() {
