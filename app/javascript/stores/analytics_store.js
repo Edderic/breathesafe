@@ -42,17 +42,37 @@ export const useAnalyticsStore = defineStore('analytics', {
         new Intervention(
           event,
           [
+            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[2], event)
+          ]
+        ),
+        new Intervention(
+          event,
+          [
             new Mask(MASKS[0], 3)
           ]
         ),
         new Intervention(
           event,
           [
-            new Mask(MASKS[0], 3),
+            new Mask(MASKS[1], 3)
+          ]
+        ),
+        new Intervention(
+          event,
+          [
+            new Mask(MASKS[2], 3)
+          ]
+        ),
+        new Intervention(
+          event,
+          [
+            new Mask(MASKS[2], 3),
             new AirCleaner(airCleaners[0], event)
           ]
-        )
+        ),
       ]
+
+      this.interventions = this.interventions.sort((a, b) => a.computeRisk() - b.computeRisk())
     }
   }
 });

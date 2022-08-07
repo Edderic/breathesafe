@@ -4,13 +4,38 @@ export const MASKS = [
   {
     'name': 'Flo Mask Pro w/ Pro Filter',
     'filtrationEfficiency': 0.99,
-    'initialCostUSD': 89.99,
-    'recurringCostUSD': 59.99,
+    'initialCostUSD': 90,
+    'recurringCostUSD': 60,
     'recurringCostDuration': 'year',
     'recurringCostDetails': 'for filters',
     'website': 'https://flomask.com/collections/flo-mask-for-adults',
     'type': 'tight-fitting, elastomeric',
     'filtrationType': 'Elastomeric N99',
+    'interventionType': 'mask'
+  },
+
+  {
+    'name': 'Surgical Mask',
+    'filtrationEfficiency': 0.5,
+    'initialCostUSD': 30,
+    'recurringCostUSD': 30,
+    'recurringCostDuration': 'year',
+    'recurringCostDetails': 'for a pack of 50',
+    'website': 'https://www.armbrustusa.com/collections/medical-face-masks-made-in-austin-tx/products/usa-made-surgical-masks-1',
+    'type': 'leaky, surgical mask',
+    'filtrationType': 'Cloth / Surgical',
+    'interventionType': 'mask'
+  },
+  {
+    'name': 'N95 Mask',
+    'filtrationEfficiency': 0.95,
+    'initialCostUSD': 30,
+    'recurringCostUSD': 30,
+    'recurringCostDuration': '20 weeks',
+    'recurringCostDetails': 'for a pack of 20',
+    'website': 'https://www.projectn95.org/products/3m-company-n95-respirator-mask-9205-aura',
+    'type': 'leaky, surgical mask',
+    'filtrationType': 'N95 - unfitted',
     'interventionType': 'mask'
   }
 ]
@@ -53,7 +78,7 @@ export class Mask {
   }
 
   initialCostText() {
-    return `${this.initialCost()} for ${this.amountText()}`
+    return `${this.initialCost()} for ${this.maskName}`
   }
 
   isUpperUV() {
@@ -73,7 +98,7 @@ export class Mask {
   }
 
   recurringCostText() {
-    return `${this.recurringCost()} every ${this.recurringCostDetails}. `
+    return `${this.recurringCost()} every ${this.recurringCostDuration} ${this.recurringCostDetails}. `
   }
 
   website() {

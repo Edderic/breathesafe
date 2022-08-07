@@ -563,7 +563,7 @@ export function computePortableACH(
 
 const maskToFactor = {
   'None': 1.0,
-  'Cloth / Surgical': 0.4,
+  'Cloth / Surgical': 0.5,
   'N95 - unfitted': 0.1,
   'Elastomeric N95': 0.05,
   'Elastomeric N99': 0.01,
