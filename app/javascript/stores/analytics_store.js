@@ -12,62 +12,71 @@ import { useShowMeasurementSetStore } from './show_measurement_set_store';
 export const useAnalyticsStore = defineStore('analytics', {
   state: () => ({
     nullIntervention: "",
-    interventions: []
+    interventions: [],
+    numPeopleToInvestIn: 5,
+    event: "",
   }),
   actions: {
     load(event) {
-      this.nullIntervention = new Intervention(event, [])
+      this.event = event
+      this.reload()
+    },
+    setNumPeopleToInvestIn(num) {
+      this.numPeopleToInvestIn = num
+    },
+    reload() {
+      this.nullIntervention = new Intervention(this.event, [])
 
       // TODO: find the number of people that could upgrade to a mask
       this.interventions = [
         this.nullIntervention,
         new Intervention(
-          event,
+          this.event,
           [
-            new AirCleaner(airCleaners[0], event)
+            new AirCleaner(airCleaners[0], this.event)
           ]
         ),
         new Intervention(
-          event,
+          this.event,
           [
-            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[0], event)
+            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[0], this.event)
           ]
         ),
         new Intervention(
-          event,
+          this.event,
           [
-            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[1], event)
+            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[1], this.event)
           ]
         ),
         new Intervention(
-          event,
+          this.event,
           [
-            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[2], event)
+            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[2], this.event)
           ]
         ),
         new Intervention(
-          event,
+          this.event,
           [
-            new Mask(MASKS[0], 3)
+            new Mask(MASKS[0], this.numPeopleToInvestIn)
           ]
         ),
         new Intervention(
-          event,
+          this.event,
           [
-            new Mask(MASKS[1], 3)
+            new Mask(MASKS[1], this.numPeopleToInvestIn)
           ]
         ),
         new Intervention(
-          event,
+          this.event,
           [
-            new Mask(MASKS[2], 3)
+            new Mask(MASKS[2], this.numPeopleToInvestIn)
           ]
         ),
         new Intervention(
-          event,
+          this.event,
           [
-            new Mask(MASKS[2], 3),
-            new AirCleaner(airCleaners[0], event)
+            new Mask(MASKS[2], this.numPeopleToInvestIn),
+            new AirCleaner(airCleaners[0], this.event)
           ]
         ),
       ]

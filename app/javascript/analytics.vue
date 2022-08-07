@@ -3,6 +3,11 @@
     <div class='container'>
       <label class='subsection'>Summary of Recommendations for {{this.roomName}}</label>
       <div class='centered col'>
+        <div class='container'>
+          <label>Number of people to invest in (e.g. employees)</label>
+          <input :value='numPeopleToInvestIn' @change='setNumPeople'>
+        </div>
+
         <table>
           <tr>
             <th>Investments</th>
@@ -384,6 +389,12 @@ export default {
         ]
     ),
     ...mapWritableState(
+      useAnalyticsStore,
+      [
+        'numPeopleToInvestIn'
+      ]
+    ),
+    ...mapWritableState(
         useShowMeasurementSetStore,
         [
           'roomName',
@@ -422,12 +433,6 @@ export default {
           'ventilationAch',
           'portableAch',
           'totalAch'
-        ]
-    ),
-    ...mapWritableState(
-        useEventStores,
-        [
-          'events'
         ]
     ),
     maskingValues() {
@@ -870,6 +875,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(useAnalyticsStore, ['reload', 'setNumPeopleToInvestIn']),
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
@@ -885,6 +891,10 @@ export default {
     },
     roundOutRisk(riskA, riskB) {
       return `${round(reducedRisk(riskA, riskB) * 100, 4)}%`
+    },
+    setNumPeople(event) {
+      this.setNumPeopleToInvestIn(parseInt(event.target.value))
+      this.reload()
     }
   }
 }

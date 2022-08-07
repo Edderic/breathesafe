@@ -11,6 +11,7 @@ import {
   cubicFeetPerMinuteTocubicMetersPerHour,
   displayCADR,
   findWorstCaseInhFactor,
+  generateUUID,
   maskToPenetrationFactor,
   setupCSRF,
   simplifiedRisk,
@@ -36,6 +37,8 @@ export class Intervention {
       'carbonDioxideGenerationActivity': this.riskiestPotentialInfector['carbonDioxideGenerationActivity'],
       'maskType': this.riskiestMask['maskType']
     }
+
+    this.id = generateUUID()
   }
 
   computeRisk() {
