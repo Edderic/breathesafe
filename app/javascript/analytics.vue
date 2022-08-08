@@ -7,32 +7,32 @@
           <label>Number of people to invest in (e.g. employees)</label>
           <input :value='numPeopleToInvestIn' @change='setNumPeople'>
         </div>
+        <div class='container row'>
+          <label>Risk Pre-Intervention</label>
+          <ColoredCell
+              v-if="nullIntervention"
+              :colorScheme="riskColorScheme"
+              :maxVal=1
+              :value='nullIntervention.computeRiskRounded()'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+          />
+        </div>
 
         <table>
           <tr>
             <th>Investments</th>
-            <th>Risk Before Intervention</th>
             <th>Relative Risk Reduction</th>
             <th>Risk Remaining</th>
             <th>Initial Cost</th>
             <th>Recurring Cost</th>
-            <th>Total Cost in 5 years</th>
+            <th>Total Cost in 10 years</th>
             <th>Num Events to Guaranteed Infection</th>
-            <th>Benefit / Cost in 5 years</th>
+            <th>Benefit / Cost in 10 years</th>
           </tr>
           <tr v-for='intervention in interventions'>
             <td v-if='intervention.numDevices() > 0'>
                 <a :href="obj.website" v-for='obj in intervention.websitesAndText()'>{{obj.text}}</a>
             </td>
-
-            <ColoredCell
-                v-if='intervention.numDevices() > 0'
-                :colorScheme="riskColorScheme"
-                :maxVal=1
-                :value='nullIntervention.computeRiskRounded()'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
-            />
-
 
             <ColoredCell
                 v-if='intervention.numDevices() > 0'
@@ -52,10 +52,10 @@
             />
             <td v-if='intervention.numDevices() > 0' >~${{ intervention.initialCostText() }}</td>
             <td v-if='intervention.numDevices() > 0' >~${{ intervention.recurringCostText() }}</td>
-            <td v-if='intervention.numDevices() > 0' >~${{ intervention.costInYears(5) }}</td>
+            <td v-if='intervention.numDevices() > 0' >~${{ intervention.costInYears(10) }}</td>
             <td v-if='intervention.numDevices() > 0' >{{roundOut(intervention.numEventsToInfectionWithCertainty(), 0)}}</td>
             <td v-if='intervention.numDevices() > 0' >
-              {{ roundOut((intervention.numEventsToInfectionWithCertainty() - this.nullIntervention.numEventsToInfectionWithCertainty()) / intervention.costInYears(5), 2 )}}
+              {{ roundOut((intervention.numEventsToInfectionWithCertainty() - this.nullIntervention.numEventsToInfectionWithCertainty()) / intervention.costInYears(10), 2 )}}
             </td>
           </tr>
         </table>
@@ -887,7 +887,6 @@ export default {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
-    ...mapState(useProfileStore, ['measurementUnits']),
     aerosolActivityToFactor(key) {
       return infectorActivityTypes[key]
     },

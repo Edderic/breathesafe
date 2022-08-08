@@ -96,6 +96,16 @@ export class Intervention {
     this.numEventsToEnsureInfection = undefined
   }
 
+  computeACH() {
+    let total = this.totalAch
+
+    for (let intervention of this.interventions) {
+      total += intervention.computeACH()
+    }
+
+    return total
+  }
+
   computeRisk() {
     if (this.risk) {
       return this.risk
@@ -126,6 +136,8 @@ export class Intervention {
 
       totalAch += intervention.computeACH()
     }
+
+    this.totalAchWithIntervention = totalAch
 
     if (!this.riskiestPotentialInfector['aerosolGenerationActivity'])  {
       return 0

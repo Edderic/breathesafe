@@ -15,7 +15,10 @@ function costBenefit(risk) {
 // the first argument is a unique id of the store across your application
 export const useAnalyticsStore = defineStore('analytics', {
   state: () => ({
-    nullIntervention: "",
+    nullIntervention: new Intervention({
+      activityGroups: [],
+      totalAch: 0.1
+    }, []),
     interventions: [],
     numPeopleToInvestIn: 5,
     event: "",
