@@ -19,6 +19,59 @@ import {
 
 } from  './misc';
 
+function binarySearch(low, high, funcStuff, target) {
+  /*
+   * Parameters:
+   *  high: 0 - 1000000
+   *  target: 0.99
+   */
+  funcStuff['args']['amount'] = low
+  let lowVal = funcStuff['func'](funcStuff['args'])
+
+  funcStuff['args']['amount'] = high
+  let highVal = funcStuff['func'](funcStuff['args'])
+
+  let middle = low + (high - low) / 2
+  funcStuff['args']['amount'] = low + (high - low) / 2
+  let middleVal = funcStuff['func'](funcStuff['args'])
+
+  if (Math.abs(low - high) <= 1) {
+    return middle
+  }
+
+
+  // case 1:
+  // |                   x         |
+  // A                             B
+  //
+  // case 2:
+  // |    |   x
+  // A    B
+
+  // case 3:
+  //          x  |                 |
+  //             A                 B
+  // overshoot
+  //
+  //
+  // case 1:
+  // |                   x         |
+  // A                             B
+  if (middleVal < target) {
+    return binarySearch(middle, high, funcStuff, target)
+  }
+  else {
+    // case 1:
+    // |        x                    |
+    // A                             B
+    return binarySearch(low, middle, funcStuff, target)
+  }
+}
+
+function probability_getting_infected_at_least_once(args) {
+  return 1 - (1- args.probability) ** args.amount
+}
+
 export class Intervention {
   constructor(event, interventions) {
     this.interventions = interventions
@@ -40,6 +93,7 @@ export class Intervention {
 
     this.id = generateUUID()
     this.risk = undefined
+    this.numEventsToEnsureInfection = undefined
   }
 
   computeRisk() {
@@ -105,6 +159,29 @@ export class Intervention {
 
     this.risk = result
     return this.risk
+  }
+  numEventsToInfectionWithCertainty() {
+    if (this.numEventsToEnsureInfection) {
+      return this.numEventsToEnsureInfection
+    }
+
+    let lowerBound = 0
+    let upperBound = 5000000
+    let target = 0.99
+
+    this.numEventsToEnsureInfection = binarySearch(
+      lowerBound,
+      upperBound,
+      {
+        'func': probability_getting_infected_at_least_once,
+        'args': {
+          probability: this.computeRisk()
+        }
+      },
+      target,
+    )
+
+    return this.numEventsToEnsureInfection
   }
 
   numDevices() {

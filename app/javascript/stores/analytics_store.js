@@ -7,6 +7,10 @@ import { Intervention } from '../interventions.js'
 import { useShowMeasurementSetStore } from './show_measurement_set_store';
 
 
+function costBenefit(risk) {
+
+}
+
 // TODO: use the last location that the user was in, as the default
 // the first argument is a unique id of the store across your application
 export const useAnalyticsStore = defineStore('analytics', {
@@ -28,7 +32,7 @@ export const useAnalyticsStore = defineStore('analytics', {
       this.nullIntervention = new Intervention(this.event, [])
 
       // TODO: find the number of people that could upgrade to a mask
-      this.interventions = [
+      let interventions = [
         this.nullIntervention,
         new Intervention(
           this.event,
@@ -75,13 +79,26 @@ export const useAnalyticsStore = defineStore('analytics', {
         new Intervention(
           this.event,
           [
+            new Mask(MASKS[3], this.numPeopleToInvestIn)
+          ]
+        ),
+        new Intervention(
+          this.event,
+          [
             new Mask(MASKS[2], this.numPeopleToInvestIn),
             new AirCleaner(airCleaners[0], this.event)
           ]
         ),
       ]
 
-      this.interventions = this.interventions.sort((a, b) => a.computeRisk() - b.computeRisk())
+      this.interventions = interventions.sort(
+          function(a, b) {
+            return (
+              (b.numEventsToInfectionWithCertainty()) / b.costInYears(5) -
+              (a.numEventsToInfectionWithCertainty()) / a.costInYears(5)
+            )
+          }.bind(this)
+      )
     }
   }
 });

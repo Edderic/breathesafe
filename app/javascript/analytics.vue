@@ -17,6 +17,7 @@
             <th>Initial Cost</th>
             <th>Recurring Cost</th>
             <th>Total Cost in 5 years</th>
+            <th>Num Events to Guaranteed Infection</th>
             <th>Benefit / Cost in 5 years</th>
           </tr>
           <tr v-for='intervention in interventions'>
@@ -52,7 +53,10 @@
             <td v-if='intervention.numDevices() > 0' >~${{ intervention.initialCostText() }}</td>
             <td v-if='intervention.numDevices() > 0' >~${{ intervention.recurringCostText() }}</td>
             <td v-if='intervention.numDevices() > 0' >~${{ intervention.costInYears(5) }}</td>
-            <td v-if='intervention.numDevices() > 0' >{{ roundOut( reduceRisk(nullIntervention.computeRisk(), intervention.computeRisk()) / intervention.costInYears(5), 5 )}}</td>
+            <td v-if='intervention.numDevices() > 0' >{{roundOut(intervention.numEventsToInfectionWithCertainty(), 0)}}</td>
+            <td v-if='intervention.numDevices() > 0' >
+              {{ roundOut((intervention.numEventsToInfectionWithCertainty() - this.nullIntervention.numEventsToInfectionWithCertainty()) / intervention.costInYears(5), 2 )}}
+            </td>
           </tr>
         </table>
         <div class='container'>

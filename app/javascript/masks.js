@@ -43,8 +43,23 @@ export const MASKS = [
     'recurringDurationYears': 2 / 5, // Assuming 1 mask / week
     'recurringCostPerYearUSD': 30 * 5 / 2,
     'website': 'https://www.projectn95.org/products/3m-company-n95-respirator-mask-9205-aura',
-    'type': 'leaky, surgical mask',
+    'type': 'disposable N95 mask',
     'filtrationType': 'N95 - unfitted',
+    'interventionType': 'mask'
+  },
+  {
+    'name': 'Elastomeric Mask (GVS Elipse P100)',
+    'filtrationEfficiency': 0.9997,
+    'initialCostUSD': 26,
+    'initialDurationYears': 0.5, // Every 6 months
+    'recurringCostUSD': 12,
+    'recurringCostDuration': '6 months',
+    'recurringCostDetails': 'for 2 filters',
+    'recurringDurationYears': 2, // Every 6 months
+    'recurringCostPerYearUSD': 24,
+    'website': 'https://www.gvs.com/en/catalog/elipse-p100-with-source-control-niosh-respirator',
+    'type': 'tight-fitting, P100 mask',
+    'filtrationType': 'Elastomeric P100',
     'interventionType': 'mask'
   }
 ]
