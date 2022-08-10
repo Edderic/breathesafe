@@ -762,6 +762,9 @@ export default {
       const cutPoints = convertColorListToCutpoints(copy)
       return assignBoundsToColorScheme(cutPoints, infectedPeopleColorBounds)
     },
+    worstCaseInhalation() {
+      return findWorstCaseInhFactor(this.activityGroups)
+    },
     riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible() {
       const riskiestActivityGroup = {
         'numberOfPeople': 1,
