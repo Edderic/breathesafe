@@ -162,8 +162,53 @@
         </p>
 
         <div class='container row'>
-          <label>Risk Pre-Intervention</label>
-          <ColoredCell
+          <table>
+            <tr>
+              <th></th>
+              <th>1 hour</th>
+              <th>8 hours</th>
+              <th>40 hours</th>
+              <th>80 hours</th>
+              <th>99%</th>
+            </tr>
+
+            <tr>
+              <th>Risk</th>
+              <ColoredCell
+                  v-if="nullIntervention"
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='nullIntervention.computeRiskRounded()'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+              />
+              <ColoredCell
+                  v-if="nullIntervention"
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**8, 6)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+              />
+              <ColoredCell
+                  v-if="nullIntervention"
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**40, 6)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+              />
+              <ColoredCell
+                  v-if="nullIntervention"
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**80, 6)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+              />
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class='container'>
+          <span>Based on this risk of <ColoredCell
               v-if="nullIntervention"
               :colorScheme="riskColorScheme"
               :maxVal=1
