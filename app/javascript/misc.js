@@ -363,18 +363,36 @@ export function findCurrentOccupancy(maxOccupancy, date, parsed) {
 function findWorstCaseInhalationFactor(activityGroups, susceptibleAgeGroup) {
   let inhalationFactor = 0
   let val;
+  let ageGroup = 0
+  let activity = ""
+  let tmpActivity = ""
 
   for (let activityGroup of activityGroups) {
+    if (!susceptibleAgeGroup) {
+      susceptibleAgeGroup = activityGroup['ageGroup']
+    }
+
+    tmpActivity = co2ActivityToSusceptibleBreathingActivity[
+      activityGroup['carbonDioxideGenerationActivity']
+    ]
+
     val = susceptibleBreathingActivityToFactor[
-      co2ActivityToSusceptibleBreathingActivity[
-        activityGroup['carbonDioxideGenerationActivity']
-      ]
+      tmpActivity
     ][susceptibleAgeGroup]['mean cubic meters per hour']
 
+    if (val > inhalationFactor) {
+      ageGroup = susceptibleAgeGroup
+      inhalationFactor = val
+      activity = tmpActivity
+    }
     inhalationFactor = Math.max(val, inhalationFactor)
   }
 
-  return inhalationFactor
+  return {
+    'inhalationFactor': inhalationFactor,
+    'inhalationActivity': activity,
+    'ageGroup': ageGroup
+  }
 }
 
 export function findWorstCaseInhFactor(activityGroups, susceptibleAgeGroup) {
