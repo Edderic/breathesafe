@@ -214,7 +214,21 @@
               :maxVal=1
               :value='nullIntervention.computeRiskRounded()'
               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-          />
+          />, it would be very surprising if after <ColoredCell
+              v-if="nullIntervention"
+              :colorScheme="riskColorScheme"
+              :maxVal=1
+              :value='roundOut(nullIntervention.durationToLikelyInfection(), 1)'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+          /> hours of exposure with an infector, a susceptible doesn't get infected.
+
+          </span>
+        </div>
+      </div>
+      <div>
+        <div class='container'>
+          <label>Number of people to invest in (e.g. employees)</label>
+          <input :value='numPeopleToInvestIn' @change='setNumPeople'>
         </div>
 
         <table>
