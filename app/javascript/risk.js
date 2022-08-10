@@ -1,4 +1,4 @@
-import { cubicFeetPerMinuteTocubicMetersPerHour, infectorActivityTypes, maskToPenetrationFactor } from './misc.js'
+import { infectorActivityTypes, maskToPenetrationFactor } from './misc.js'
 
 export function riskOfEncounteringInfectious(probaInfectious, numPeople) {
   /*
