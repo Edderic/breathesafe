@@ -649,7 +649,7 @@ export default {
       const evenSpacedBounds = generateEvenSpacedBounds(minimum, maximum, numObjects)
 
       const scheme = convertColorListToCutpoints(
-        colorPaletteFall.reverse()
+        JSON.parse(JSON.stringify(colorPaletteFall)).reverse()
       )
 
       return assignBoundsToColorScheme(scheme, evenSpacedBounds)
