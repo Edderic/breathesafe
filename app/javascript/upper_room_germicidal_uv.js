@@ -17,6 +17,7 @@ export const UPPER_ROOM_GERMICIDAL_UV = [
     'mW': 600,
     'website': 'https://www.cdc.gov/coronavirus/2019-ncov/community/ventilation/uvgi.html',
     'type': 'Upper Room Germicidal UV',
+    'imgLink': 'https://uvresources.com/wp-content/uploads/2020/06/UVR-GLO150-Hero-Side-Angle-1.jpg'
   },
   {
     'name': 'Upper Room Germicidal UV (600mW, Louvered)',
@@ -34,6 +35,7 @@ export const UPPER_ROOM_GERMICIDAL_UV = [
     'mW': 600,
     'website': 'https://www.cdc.gov/coronavirus/2019-ncov/community/ventilation/uvgi.html',
     'type': 'Upper Room Germicidal UV',
+    'imgLink': 'https://uvresources.com/wp-content/uploads/2020/06/UVR-GLO150-Hero-Side-Angle-1.jpg'
   },
   {
     'name': 'Upper Room Germicidal UV (6.25W, Open)',
@@ -51,6 +53,7 @@ export const UPPER_ROOM_GERMICIDAL_UV = [
     'mW': 6250,
     'website': 'https://www.cdc.gov/coronavirus/2019-ncov/community/ventilation/uvgi.html',
     'type': 'Upper Room Germicidal UV',
+    'imgLink': 'https://www.esmagazine.com/ext/resources/2022/02/17/UV-Resources-GLO-2900-OF-UR-UVC-Fixture_angle-04-1-scaled.jpg?1645111471'
   },
 ]
 
@@ -102,6 +105,10 @@ export class UpperRoomGermicidalUV {
 
   initialCostText() {
     return `${round(this.initialCost(), 2)} for ${this.amountText()} `
+  }
+
+  imgLink() {
+    return this.device.imgLink
   }
 
   numDevices() {
