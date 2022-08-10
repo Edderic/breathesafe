@@ -1135,6 +1135,7 @@ export default {
   }
   .subsection {
     font-weight: bold;
+    margin-left: 1em;
   }
 
   .wide {
@@ -1213,4 +1214,19 @@ export default {
     font-weight: bold;
   }
 
+  img {
+    width: 4em;
+  }
+
+  p {
+    line-height: 2em;
+  }
+
+  li {
+    line-height: 2em;
+  }
+
+  .bold {
+    font-weight: bold;
+  }
 </style>
