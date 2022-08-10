@@ -130,6 +130,37 @@
             recorded (e.g. loudly talking).
           </p>
         </div>
+
+        <h4>Exhalation & Inhalation</h4>
+
+        <p>
+          <span>The riskiest mask recorded for this measurement is <ColoredCell
+                :colorScheme="riskiestMaskColorScheme"
+                :maxVal=1
+                :value='riskiestMask["maskPenetrationFactor"]'
+                :text='riskiestMask["maskType"]'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+            />
+           and the riskiest aerosol generation activity is <ColoredCell
+                :colorScheme="riskiestAerosolGenerationActivityScheme"
+                :maxVal=1
+                :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
+                :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+            />.
+          </span>
+
+
+          <span>People breathing in are <ColoredCell
+                :colorScheme="inhalationActivityScheme"
+                :maxVal=1
+                :value='worstCaseInhalation["inhalationFactor"]'
+                :text='worstCaseInhalation["inhalationActivity"]'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+            />
+          </span>
+        </p>
+
         <div class='container row'>
           <label>Risk Pre-Intervention</label>
           <ColoredCell
