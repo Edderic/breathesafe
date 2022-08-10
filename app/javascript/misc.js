@@ -1,6 +1,7 @@
+// esversion: 6
 import axios from 'axios';
 
-const INCHES_PER_FOOT = 12
+const INCHES_PER_FOOT = 12;
 const CUBIC_FEET_PER_CUBIC_METER = 35.3147
 const CUBIC_METER_PER_CUBIC_FEET = 1 / CUBIC_FEET_PER_CUBIC_METER
 const FEET_PER_METER = 3.28084
@@ -22,6 +23,236 @@ const infectorActivityTypeMapping = {
   "Heavy exercise – Oral breathing": 6.8,
   "Heavy exercise – Speaking": 31.6,
   "Heavy exercise – Loudly speaking": 204,
+}
+
+const maskToFactor = {
+  'None': 1.0,
+  'Cloth / Surgical': 0.5,
+  'N95 - unfitted': 0.1,
+  'Elastomeric N95': 0.05,
+  'Elastomeric N99': 0.01,
+  'Elastomeric P100': 0.001
+}
+
+export const maskToPenetrationFactor = maskToFactor
+
+
+export const co2ActivityToSusceptibleBreathingActivity = {
+  "Calisthenics—light effort": "Light Intensity",
+  "Calisthenics—moderate effort": "Moderate Intensity",
+  "Calisthenics—vigorous effort": "High Intensity",
+  "Child care": "Sedentary / Passive", // 2 - 3
+  "Cleaning, sweeping—moderate effort": "Light Intensity",
+  "Custodial work—light": "Light Intensity",
+  "Dancing—aerobic, general": "High Intensity",
+  "Dancing—general": "High Intensity",
+  "Health club exercise classes—general": "Moderate Intensity",
+  "Kitchen activity—moderate effort": "Light Intensity",
+  "Lying or sitting quietly": "Sedentary / Passive",
+  "Sitting reading, writing, typing": "Sedentary / Passive",
+  "Sitting at sporting event as spectator": "Sedentary / Passive",
+  "Sitting tasks, light effort (e.g, office work)": "Sedentary / Passive",
+  "Sitting quietly in religious service": "Sedentary / Passive",
+  "Sleeping": "Sleep or Nap",
+  "Standing quietly": "Sedentary / Passive",
+  "Standing tasks, light effort (e.g, store clerk, filing)": "Sedentary / Passive",
+  "Walking, less than 2 mph, level surface, very slow": "Light Intensity",
+  "Walking, 2.8 mph to 3.2 mph, level surface, moderate pace": "Light Intensity",
+}
+
+// Uses age groups taken from the Harvard Healthy Buildings website instead of
+// the original, which had more
+export const susceptibleBreathingActivityToFactor = {
+  "Sleep or Nap": {
+    "1 to <3": {
+      "mean cubic meters per hour": 0.276,
+    },
+    "3 to <6": {
+      "mean cubic meters per hour": 0.258,
+    },
+    "6 to <11": {
+      "mean cubic meters per hour": 0.27,
+    },
+    "11 to <16": {
+      "mean cubic meters per hour": 0.3,
+    },
+    "16 to <21": {
+      "mean cubic meters per hour": 0.294,
+    },
+    "21 to <30": {
+      "mean cubic meters per hour": 0.258,
+    },
+    "30 to <40": {
+      "mean cubic meters per hour": 0.276,
+    },
+    "40 to <50": {
+      "mean cubic meters per hour": 0.3,
+    },
+    "50 to <60": {
+      "mean cubic meters per hour": 0.312,
+    },
+    "60 to <70": {
+      "mean cubic meters per hour": 0.318,
+    },
+    "70 to <80": {
+      "mean cubic meters per hour": 0.318,
+    },
+    ">= 80": {
+      "mean cubic meters per hour": 0.312,
+    },
+  },
+  "Sedentary / Passive": {
+    "1 to <3": {
+      "mean cubic meters per hour": 0.27,
+    },
+    "3 to <6": {
+      "mean cubic meters per hour": 0.282,
+    },
+    "6 to <11": {
+      "mean cubic meters per hour": 0.324,
+    },
+    "11 to <16": {
+      "mean cubic meters per hour": 0.318,
+    },
+    "16 to <21": {
+      "mean cubic meters per hour": 0.318,
+    },
+    "21 to <30": {
+      "mean cubic meters per hour": 0.252,
+    },
+    "30 to <40": {
+      "mean cubic meters per hour": 0.258,
+    },
+    "40 to <50": {
+      "mean cubic meters per hour": 0.288,
+    },
+    "50 to <60": {
+      "mean cubic meters per hour": 0.3,
+    },
+    "60 to <70": {
+      "mean cubic meters per hour": 0.294,
+    },
+    "70 to <80": {
+      "mean cubic meters per hour": 0.3,
+    },
+    ">= 80": {
+      "mean cubic meters per hour": 0.294,
+    },
+  },
+  "Light Intensity": {
+    "1 to <3": {
+      "mean cubic meters per hour": 0.72,
+    },
+    "3 to <6": {
+      "mean cubic meters per hour": 0.66,
+    },
+    "6 to <11": {
+      "mean cubic meters per hour": 0.66,
+    },
+    "11 to <16": {
+      "mean cubic meters per hour": 0.78,
+    },
+    "16 to <21": {
+      "mean cubic meters per hour": 0.72,
+    },
+    "21 to <30": {
+      "mean cubic meters per hour": 0.72,
+    },
+    "30 to <40": {
+      "mean cubic meters per hour": 0.72,
+    },
+    "40 to <50": {
+      "mean cubic meters per hour": 0.78,
+    },
+    "50 to <60": {
+      "mean cubic meters per hour": 0.78,
+    },
+    "60 to <70": {
+      "mean cubic meters per hour": 0.72,
+    },
+    "70 to <80": {
+      "mean cubic meters per hour": 0.72,
+    },
+    ">= 80": {
+      "mean cubic meters per hour": 0.72,
+    },
+  },
+  "Moderate Intensity": {
+    "1 to <3": {
+      "mean cubic meters per hour": 1.26,
+    },
+    "3 to <6": {
+      "mean cubic meters per hour": 1.26,
+    },
+    "6 to <11": {
+      "mean cubic meters per hour": 1.32,
+    },
+    "11 to <16": {
+      "mean cubic meters per hour": 1.5,
+    },
+    "16 to <21": {
+      "mean cubic meters per hour": 1.56,
+    },
+    "21 to <30": {
+      "mean cubic meters per hour": 1.56,
+    },
+    "30 to <40": {
+      "mean cubic meters per hour": 1.62,
+    },
+    "40 to <50": {
+      "mean cubic meters per hour": 1.68,
+    },
+    "50 to <60": {
+      "mean cubic meters per hour": 1.74,
+    },
+    "60 to <70": {
+      "mean cubic meters per hour": 1.56,
+    },
+    "70 to <80": {
+      "mean cubic meters per hour": 1.5,
+    },
+    ">= 80": {
+      "mean cubic meters per hour": 1.5,
+    },
+  },
+  "High Intensity": {
+    "1 to <3": {
+      "mean cubic meters per hour": 2.28,
+    },
+    "3 to <6": {
+      "mean cubic meters per hour": 2.22,
+    },
+    "6 to <11": {
+      "mean cubic meters per hour": 2.52,
+    },
+    "11 to <16": {
+      "mean cubic meters per hour": 2.94,
+    },
+    "16 to <21": {
+      "mean cubic meters per hour": 2.94,
+    },
+    "21 to <30": {
+      "mean cubic meters per hour": 3.0,
+    },
+    "30 to <40": {
+      "mean cubic meters per hour": 2.94,
+    },
+    "40 to <50": {
+      "mean cubic meters per hour": 3.12,
+    },
+    "50 to <60": {
+      "mean cubic meters per hour": 3.18,
+    },
+    "60 to <70": {
+      "mean cubic meters per hour": 2.82,
+    },
+    "70 to <80": {
+      "mean cubic meters per hour": 2.82,
+    },
+    ">= 80": {
+      "mean cubic meters per hour": 2.88,
+    },
+  }
 }
 
 export const infectorActivityTypes = infectorActivityTypeMapping
