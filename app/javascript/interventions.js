@@ -19,20 +19,23 @@ import {
 
 } from  './misc';
 
-function binarySearch(low, high, funcStuff, target) {
+function binarySearch(low, high, funcStuff, target, key) {
   /*
    * Parameters:
    *  high: 0 - 1000000
    *  target: 0.99
    */
-  funcStuff['args']['amount'] = low
+  if (!key) {
+    key = 'amount'
+  }
+  funcStuff['args'][key] = low
   let lowVal = funcStuff['func'](funcStuff['args'])
 
-  funcStuff['args']['amount'] = high
+  funcStuff['args'][key] = high
   let highVal = funcStuff['func'](funcStuff['args'])
 
   let middle = low + (high - low) / 2
-  funcStuff['args']['amount'] = low + (high - low) / 2
+  funcStuff['args'][key] = low + (high - low) / 2
   let middleVal = funcStuff['func'](funcStuff['args'])
 
   if (Math.abs(low - high) <= 1) {
@@ -58,13 +61,13 @@ function binarySearch(low, high, funcStuff, target) {
   // |                   x         |
   // A                             B
   if (middleVal < target) {
-    return binarySearch(middle, high, funcStuff, target)
+    return binarySearch(middle, high, funcStuff, target, key)
   }
   else {
     // case 1:
     // |        x                    |
     // A                             B
-    return binarySearch(low, middle, funcStuff, target)
+    return binarySearch(low, middle, funcStuff, target, key)
   }
 }
 
