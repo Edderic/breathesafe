@@ -275,24 +275,6 @@
             </td>
           </tr>
         </table>
-        <div class='container'>
-          <span><span class='highlight bold'>Risk Before Intervention</span> assumes that the infector is the riskiest infector in the measurement. By that, we assume that this individual has the riskiest mask (i.e. the mask with the worst fit and filtration efficiency) along with the riskiest aerosol generation activity. The riskiest mask recorded for this measurement is <ColoredCell
-                :colorScheme="riskiestMaskColorScheme"
-                :maxVal=1
-                :value='riskiestMask["maskPenetrationFactor"]'
-                :text='riskiestMask["maskType"]'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
-            />
-           and the riskiest aerosol generation activity is <ColoredCell
-                :colorScheme="riskiestAerosolGenerationActivityScheme"
-                :maxVal=1
-                :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
-                :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
-            />.
-            </span>
-        </div>
-
       </div>
     </div>
 
