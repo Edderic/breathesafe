@@ -16,7 +16,8 @@ export const airCleaners = [
     'recurringCostDetails': 'to replace filters',
     'recurringCostPerYearUSD': 100,
     'recurringDurationYears': 0.5,  // 6 months to replace filters
-    'website': "https://aghealth.ucdavis.edu/news/corsi-rosenthal-box-diy-box-fan-air-filter-covid-19-and-wildfire-smoke"
+    'website': "https://aghealth.ucdavis.edu/news/corsi-rosenthal-box-diy-box-fan-air-filter-covid-19-and-wildfire-smoke",
+    'imgLink': "https://www.texairfilters.com/wp-content/uploads/image-12.png"
   }
 ]
 
@@ -83,6 +84,10 @@ export class AirCleaner {
 
   isMask() {
     return false
+  }
+
+  imgLink() {
+    return this.device.imgLink
   }
 
   isFiltrationAirCleaner() {
