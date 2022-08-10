@@ -244,7 +244,10 @@
           </tr>
           <tr v-for='intervention in interventions'>
             <td v-if='intervention.numDevices() > 0'>
-                <a :href="obj.website" v-for='obj in intervention.websitesAndText()'>{{obj.text}}</a>
+                <div v-for='obj in intervention.websitesAndText()' class='col centered container'>
+                  <img :src="obj.imgLink">
+                  <a :href="obj.website" >{{obj.text}}</a>
+                </div>
             </td>
 
             <ColoredCell
@@ -268,7 +271,7 @@
             <td v-if='intervention.numDevices() > 0' >~${{ intervention.costInYears(10) }}</td>
             <td v-if='intervention.numDevices() > 0' >{{roundOut(intervention.numEventsToInfectionWithCertainty(), 0)}}</td>
             <td v-if='intervention.numDevices() > 0' >
-              {{ roundOut((intervention.numEventsToInfectionWithCertainty() - this.nullIntervention.numEventsToInfectionWithCertainty()) / intervention.costInYears(10), 2 )}}
+              {{ roundOut((intervention.numEventsToInfectionWithCertainty()) / intervention.costInYears(10), 2 )}}
             </td>
           </tr>
         </table>
