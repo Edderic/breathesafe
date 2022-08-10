@@ -346,7 +346,8 @@ export class Intervention {
       tmp.push(
         {
           website: intervention.website(),
-          text: intervention.amountText()
+          text: intervention.amountText(),
+          imgLink: intervention.imgLink()
         }
       )
     }
