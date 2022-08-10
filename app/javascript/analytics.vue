@@ -641,6 +641,19 @@ export default {
           'totalAch'
         ]
     ),
+    inhalationActivityScheme() {
+      colorPaletteFall
+      const minimum = 0.258
+      const maximum = 3
+      const numObjects = 6
+      const evenSpacedBounds = generateEvenSpacedBounds(minimum, maximum, numObjects)
+
+      const scheme = convertColorListToCutpoints(
+        colorPaletteFall.reverse()
+      )
+
+      return assignBoundsToColorScheme(scheme, evenSpacedBounds)
+    },
     maskingValues() {
       let key;
       let color;
