@@ -436,7 +436,7 @@ export function simplifiedRisk(
       flowRate,
       quanta,
       infectorSpecificTerm,
-      susceptibleInhalationFactor,
+      susceptibleInhalationFactor['inhalationFactor'],
       susceptibleMaskPenentrationFactor,
       duration
     ) * probaAtLeastOneInfectious
