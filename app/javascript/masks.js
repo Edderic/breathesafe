@@ -14,7 +14,8 @@ export const MASKS = [
     'website': 'https://flomask.com/collections/flo-mask-for-adults',
     'type': 'tight-fitting, elastomeric',
     'filtrationType': 'Elastomeric N99',
-    'interventionType': 'mask'
+    'interventionType': 'mask',
+    'imgLink': "https://cdn.shopify.com/s/files/1/0405/0154/3079/products/RB0A6673_28402bc4-206b-4a64-92f7-e591c70a1e64_900x.jpg?v=1647932779"
   },
 
   {
@@ -30,7 +31,8 @@ export const MASKS = [
     'website': 'https://www.armbrustusa.com/collections/medical-face-masks-made-in-austin-tx/products/usa-made-surgical-masks-1',
     'type': 'leaky, surgical mask',
     'filtrationType': 'Cloth / Surgical',
-    'interventionType': 'mask'
+    'interventionType': 'mask',
+    'imgLink': 'https://cdn.shopify.com/s/files/1/0384/4145/1653/products/Single-Mask-Front-Denim-USA-Made-Surgical-Masks-sw_700x.jpg?v=1618508031'
   },
   {
     'name': 'N95 Mask (3M Aura)',
@@ -45,7 +47,8 @@ export const MASKS = [
     'website': 'https://www.projectn95.org/products/3m-company-n95-respirator-mask-9205-aura',
     'type': 'disposable N95 mask',
     'filtrationType': 'N95 - unfitted',
-    'interventionType': 'mask'
+    'interventionType': 'mask',
+    'imgLink': 'https://m.media-amazon.com/images/I/51IBeI2RK+L._AC_UL640_FMwebp_QL65_.jpg'
   },
   {
     'name': 'Elastomeric Mask (GVS Elipse P100)',
@@ -60,7 +63,8 @@ export const MASKS = [
     'website': 'https://www.gvs.com/en/catalog/elipse-p100-with-source-control-niosh-respirator',
     'type': 'tight-fitting, P100 mask',
     'filtrationType': 'Elastomeric P100',
-    'interventionType': 'mask'
+    'interventionType': 'mask',
+    'imgLink': "https://m.media-amazon.com/images/I/817OKYFIPDS._SX522_.jpg"
   }
 ]
 
@@ -120,6 +124,10 @@ export class Mask {
 
   isFiltrationAirCleaner() {
     return false
+  }
+
+  imgLink() {
+    return this.device.imgLink
   }
 
   recurringCost() {
