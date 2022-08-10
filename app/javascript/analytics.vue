@@ -1,7 +1,7 @@
 <template>
   <div class='col border-showing scrollable'>
     <div class='container'>
-      <label class='subsection'>Summary of Recommendations for {{this.roomName}}</label>
+      <h3 class='subsection'>Summary of Recommendations for {{this.roomName}}</h3>
       <div class='centered col'>
         <div class='container'>
           <label>Number of people to invest in (e.g. employees)</label>
