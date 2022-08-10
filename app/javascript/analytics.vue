@@ -4,8 +4,131 @@
       <h3 class='subsection'>Summary of Recommendations for {{this.roomName}}</h3>
       <div class='centered col'>
         <div class='container'>
-          <label>Number of people to invest in (e.g. employees)</label>
-          <input :value='numPeopleToInvestIn' @change='setNumPeople'>
+          <h4>Introduction</h4>
+          <p>
+            While vaccines prevent deaths and hospitalizations to a great degree, they by themselves are not so great at
+            <a href="https://www.nejm.org/doi/full/10.1056/NEJMoa2119451">
+            preventing symptomatic infections
+            </a>
+            and
+            <a href="https://www.nature.com/articles/d41586-022-01453-0#:~:text=The%20researchers%20found%20that%20vaccination,found%20much%20higher%20protection%20rates."
+            >
+            long COVID
+            </a>.
+            As of August 2022, it is estimated that
+            <a
+            href="https://www.npr.org/2022/07/31/1114375163/long-covid-longhaulers-disability-labor-ada"
+            >
+            4 million employees in the U.S. are out of work due to long-COVID.
+            </a>
+
+            Decreasing the risk of transmission will decrease the
+            likelihood of contracting COVID, and therefore,
+            <a href="https://www.science.org/content/article/what-causes-long-covid-three-leading-theories"
+            >
+            long-COVID</a>.
+
+            Doing so will also make spaces become more
+            accessible to
+            <a href="https://www.theatlantic.com/health/archive/2022/02/covid-pandemic-immunocompromised-risk-vaccines/622094/"
+            >the millions of immunocompromised people in the U.S.</a>
+            We need a "vaccines-plus" strategy, not just a "vaccines-only" strategy, using non-pharmaceutical interventions such as cleaning the air, masking, and rapid testing.
+
+            Investing in infrastructure to clean the air will make the spaces
+            we inhabit <a href="https://www.science.org/doi/10.1126/science.abd9149">be
+            more resilient not just to COVID-19, but also to other respiratory viruses</a>.
+          </p>
+          <h4>Risk Assessment</h4>
+          <p>The model used here is a variant of
+          <a href="https://pubs.acs.org/doi/full/10.1021/acs.est.1c06531">
+          Peng et.al.'s Practical Indicators for Risk of Airborne Transmission in Shared Indoor Environments and Their Application to COVID-19 Outbreaks
+          </a>. We assume that an infector is present as it allows us to test the resiliency of environmental
+            and behavioral interventions in decreasing the risk
+            of transmission of respiratory viruses.
+          </p>
+          <p>
+          Put simply, the risk of transmission is proportional to the generation rate of
+          infectious aerosols from infector(s) and is inversely related to the removal rate of said
+          aerosols. The faster the generation rate of infectious aerosols from infectors,
+          the higher the risk. On the other hand, the faster the rate of air cleaning in
+          the air, the lower the risk.
+          </p>
+          <h4>Risky behaviors and environments</h4>
+          <p>Actions that increase risk:
+            <ul>
+              <li>
+              infector not wearing a mask with high filtration efficiency. N95
+              and Elastomeric masks block a lot more particles of aerosols that contain the
+              virus than cloth and surgical.
+              </li>
+              <li>
+              aerosol activity. Singing produces more aerosols than talking,
+              which in turn produces more aerosols than oral breathing.
+              </li>
+              <li>
+              exercise. Exercise encourages more exhalation. If there's an
+              infector doing exercise, they will generate more respiratory particles in the
+              air more so than someone who is at rest.
+              </li>
+              <li>inherent infectiousness of the virus. Alpha &lt; Delta &lt; Omicron. </li>
+            </ul>
+
+          </p>
+          <h4>Safer behaviors and environments</h4>
+            <p>
+            In contrast, cleaning the air efficiently and quickly lowers the
+            probability of infection. Air is cleaner when:
+
+            <ul>
+              <li>
+              air is filtered through masking.
+              If an infector is wearing a tight-fitting mask with a high
+              filtration efficiency (e.g. N95 and Elastomeric masks), then there are less
+              infectious particles in the air for susceptibles to breathe in.
+              Likewise, if susceptibles are wearing such masks, they can significantly reduce
+              their inhalation dose.
+               </li>
+              <li>
+              HEPA or MERV 13 filtration with powerful fans are used. Portable
+              air cleaning technologies like the DIY Corsi-Rosenthal box or commercial ones
+              with comparable or higher clean air delivery rates (CADR) could quickly remove
+              particles from the air that contain the virus.
+              </li>
+              <li>
+              ventilation is increased. Increasing the amount of air exchanged
+              from outside to inside (e.g. by opening windows) discourages build up of
+              infectious aerosols in a room.
+              </li>
+              <li>
+              Irradiation technologies are put in place to deactivate the virus while
+              in the air (e.g. Upper-room UV).
+              </li>
+              <li>
+              susceptibles inhale more slowly (e.g. through resting instead of
+              doing heavy exercise while an infector is present). The less breaths a
+              susceptible takes, the less infectious dose one can receive.
+              </li>
+            </ul>
+          </p>
+
+          <p>
+              We assume that the air is well-mixed (i.e. COVID particles are
+              spread evenly throughout the space) and that people are far apart
+              (6 ft or more). If people are far apart, then they are less likely to breathe
+              in a jet of aerosols from an infector, and increases the effectiveness of
+              the environment (e.g. air cleaning through ventilation, filtration, deactivation).
+              <span class='bold'>
+                If this assumption does not hold in practice for this space, then the estimates of risk can be thought of as lower-bound risks.
+              </span>
+          </p>
+          <p>
+
+            The assessments below assume that an infector is present and is
+            doing the riskiest recorded behaviors. For example, the model assumes that the
+            infector is wearing the riskiest mask (i.e. the mask with the worst fit and
+            filtration efficiency) and is also doing the riskiest aerosol generation activity
+            recorded (e.g. loudly talking).
+          </p>
         </div>
         <div class='container row'>
           <label>Risk Pre-Intervention</label>
