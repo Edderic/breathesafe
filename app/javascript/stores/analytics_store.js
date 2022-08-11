@@ -105,6 +105,14 @@ export const useAnalyticsStore = defineStore('analytics', {
             new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[0], this.event)
           ]
         ),
+        new Intervention(
+          this.event,
+          [
+            new Mask(MASKS[2], this.numPeopleToInvestIn),
+            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[0], this.event),
+            new AirCleaner(airCleaners[0], this.event)
+          ]
+        ),
       ]
 
       this.interventions = interventions.sort(
