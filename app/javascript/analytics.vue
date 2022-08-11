@@ -510,9 +510,17 @@
                 :value='intervention.computeRiskRounded(40)'
                 :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
             />
-            <td v-if='intervention.applicable()' >~${{ intervention.initialCostText() }}</td>
-            <td v-if='intervention.applicable()' >~${{ intervention.recurringCostText() }}</td>
-            <td v-if='intervention.applicable()' >~${{ intervention.costInYears(10) }}</td>
+            <td v-if='intervention.applicable()' >
+              <div v-for='interv in intervention.interventions' class='padded'>
+                {{ interv.initialCostText() }}
+              </div>
+            </td>
+            <td v-if='intervention.applicable()' >
+              <div v-for='interv in intervention.interventions' class='padded'>
+                {{ interv.recurringCostText() }}
+              </div>
+            </td>
+            <td v-if='intervention.applicable()' >${{ intervention.costInYears(10) }}</td>
             <td v-if='intervention.applicable()' >
               {{ roundOut((intervention.numEventsToInfectionWithCertainty()) / intervention.costInYears(10), 2 )}}
             </td>
@@ -1252,6 +1260,10 @@ export default {
 
   .margined {
     margin: 2em;
+  }
+
+  .padded {
+    padding: 1em;
   }
 
   th {

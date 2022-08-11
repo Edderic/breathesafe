@@ -101,7 +101,7 @@ export class Intervention {
 
   applicable() {
     for (let intervention of this.interventions) {
-      if (!intervention.applicable() || intervention.numDevices() < 0) {
+      if (!intervention.applicable() || intervention.numDevices() <= 0) {
         return false
       }
     }

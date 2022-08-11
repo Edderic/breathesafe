@@ -5,6 +5,7 @@ export const UPPER_ROOM_GERMICIDAL_UV = [
     'name': 'Upper Room Germicidal UV (600mW, Louvered)',
     'singular': 'Upper Room Germicidal UV Fixture (600mW, Louvered)',
     'plural': 'Upper Room Germicidal UV Fixtures (600mW, Louvered)',
+    'shortName': 'Upper Room UV (600mW)',
     'initialCostUSD': 500,
     'initialDurationYears': 1,
     'recurringCostUSD': 50.00,
@@ -23,6 +24,7 @@ export const UPPER_ROOM_GERMICIDAL_UV = [
     'name': 'Upper Room Germicidal UV (600mW, Louvered)',
     'singular': 'Upper Room Germicidal UV Fixture (600mW, Louvered)',
     'plural': 'Upper Room Germicidal UV Fixtures (600mW, Louvered)',
+    'shortName': 'Upper Room UV (600mW)',
     'initialCostUSD': 500,
     'initialDurationYears': 1,
     'recurringCostUSD': 50.00,
@@ -41,6 +43,7 @@ export const UPPER_ROOM_GERMICIDAL_UV = [
     'name': 'Upper Room Germicidal UV (6.25W, Open)',
     'singular': 'Upper Room Germicidal UV Fixture (6.25W, Open)',
     'plural': 'Upper Room Germicidal UV Fixtures (6.25W, Open)',
+    'shortName': 'Upper Room UV (6.25W)',
     'initialCostUSD': 500,
     'initialDurationYears': 1,
     'recurringCostUSD': 50.00,
@@ -69,6 +72,7 @@ export class UpperRoomGermicidalUV {
     this.recurringCostUSD = device.recurringCostUSD
     this.recurringCostDetails = device.recurringCostDetails
     this.ws = device.website
+    this.shortName = device.shortName
   }
 
   applicable() {
@@ -104,7 +108,7 @@ export class UpperRoomGermicidalUV {
   }
 
   initialCostText() {
-    return `${round(this.initialCost(), 2)} for ${this.amountText()} `
+    return `${this.shortName}: $${round(this.initialCost(), 2)} `
   }
 
   imgLink() {
@@ -130,7 +134,7 @@ export class UpperRoomGermicidalUV {
   }
 
   recurringCostText() {
-    return `${this.recurringCost()} every ${this.device.recurringCostDuration} ${this.device.recurringCostDetails}. `
+    return `${this.shortName}: $${this.recurringCost()} every ${this.device.recurringCostDuration} ${this.device.recurringCostDetails}. `
   }
 
   website() {

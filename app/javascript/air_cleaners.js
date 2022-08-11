@@ -6,6 +6,7 @@ export const airCleaners = [
     'type': 'airCleaner',
     'singular': 'Corsi-Rosenthal box',
     'plural': 'Corsi-Rosenthal boxes',
+    'shortName': 'CR boxes',
     'cubicMetersPerHour': cubicFeetPerMinuteTocubicMetersPerHour('cubic feet per minute', 600),
     'areaInSquareMeters': convertLengthBasedOnMeasurementType(20, 'inches', 'meters')
         * convertLengthBasedOnMeasurementType(20, 'inches', 'meters'),
@@ -35,6 +36,7 @@ export class AirCleaner {
     this.ws = device.website
     this.areaInSquareMeters = device.areaInSquareMeters
     this.device = device
+    this.shortName = this.device.shortName
   }
 
   applicable() {
@@ -42,7 +44,7 @@ export class AirCleaner {
   }
 
   amountText() {
-    return `${this.numDevices()} ${this.plural}`
+    return `${this.numDevices()} ${this.shortName}`
   }
 
   computeACH() {
@@ -75,7 +77,7 @@ export class AirCleaner {
   }
 
   initialCostText() {
-    return `${this.initialCost()} for ${this.amountText()} `
+    return `${this.shortName}: $${this.initialCost()} `
   }
 
   isUpperUV() {
@@ -98,7 +100,7 @@ export class AirCleaner {
   }
 
   recurringCostText() {
-    return `${this.recurringCost()} every ${this.recurringCostDuration} ${this.recurringCostDetails}. `
+    return `${this.shortName}: $${this.recurringCost()} / ${this.recurringCostDuration} ${this.recurringCostDetails}. `
   }
 
   website() {
