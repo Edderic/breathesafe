@@ -440,6 +440,29 @@
         </p>
 
         <h4>Interventions</h4>
+        <p>
+        An intervention in the list below is either some sort of mask, air cleaning
+        device, or a combination of both. The short-term and longer-term
+        probabilities of transmission are displayed. Let's consider the 40-hour
+        risk. One can interpret it as follows:
+        <ol>
+          <li>A susceptible is with an infector in this room for 40 hours straight.</li>
+          <li>A susceptible has been with an infector in this room for 40
+              events total, with each event spanning an hour.
+          </li>
+          <li>A susceptible has been with an infector in this room for 5
+              events total, with each event spanning 8 hours.
+         </li>
+        </ol>
+
+        The last interpretation is useful for workers who have to work on-site.
+        This is the risk of working a 40-hour work week, conditional on an infector
+        (asymptomatic or not) being present.
+        </p>
+        <p>
+        The <span class='bold'>Total Cost in 10 years</span> is the estimate which is given by
+        <span class='italic'>Initial Cost x Recurring Cost / year  x 10 years</span>.
+        </p>
         <div class='container centered'>
           <label>Number of people to invest in (e.g. employees)</label>
           <input :value='numPeopleToInvestIn' @change='setNumPeople'>
@@ -1266,5 +1289,8 @@ export default {
 
   .bold {
     font-weight: bold;
+  }
+  .italic {
+    font-style: italic;
   }
 </style>
