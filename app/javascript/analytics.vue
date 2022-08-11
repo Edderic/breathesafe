@@ -440,7 +440,7 @@
         </p>
 
         <h4>Interventions</h4>
-        <div class='container'>
+        <div class='container centered'>
           <label>Number of people to invest in (e.g. employees)</label>
           <input :value='numPeopleToInvestIn' @change='setNumPeople'>
         </div>
