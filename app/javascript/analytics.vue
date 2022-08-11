@@ -461,10 +461,17 @@
         </p>
         <p>
         The <span class='bold'>Total Cost in 10 years</span> is the estimate which is given by
-        <span class='italic'>Initial Cost x Recurring Cost / year  x 10 years</span>.
+        <span class='italic'>Initial Cost + Recurring Cost / year  x 10 years</span>.
+        </p>
+        <p>
+        The <span class='bold'>Benefit / Cost</span> is comprised of the number
+        of hours it takes to infect with high certainty (99%), divided by the <span
+        class='italic'>Total Cost in 10 years</span>. The higher it is, the more bang
+        for the buck.
+
         </p>
         <div class='container centered'>
-          <label>Number of people to invest in (e.g. employees)</label>
+          <label class='bold'>Number of people to invest in (e.g. employees)</label>
           <input :value='numPeopleToInvestIn' @change='setNumPeople'>
         </div>
 
@@ -477,7 +484,7 @@
             <th>Initial Cost</th>
             <th>Recurring Cost</th>
             <th>Total Cost in 10 years</th>
-            <th>Benefit / Cost in 10 years</th>
+            <th>Benefit / Cost</th>
           </tr>
           <tr v-for='intervention in interventions'>
             <td v-if='intervention.applicable()'>
