@@ -88,8 +88,22 @@ export const useAnalyticsStore = defineStore('analytics', {
         new Intervention(
           this.event,
           [
+            new Mask(MASKS[0], this.numPeopleToInvestIn),
+            new AirCleaner(airCleaners[0], this.event)
+          ]
+        ),
+        new Intervention(
+          this.event,
+          [
             new Mask(MASKS[2], this.numPeopleToInvestIn),
             new AirCleaner(airCleaners[0], this.event)
+          ]
+        ),
+        new Intervention(
+          this.event,
+          [
+            new Mask(MASKS[2], this.numPeopleToInvestIn),
+            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[0], this.event)
           ]
         ),
       ]
@@ -97,8 +111,8 @@ export const useAnalyticsStore = defineStore('analytics', {
       this.interventions = interventions.sort(
           function(a, b) {
             return (
-              (b.numEventsToInfectionWithCertainty()) / b.costInYears(5) -
-              (a.numEventsToInfectionWithCertainty()) / a.costInYears(5)
+              (b.numEventsToInfectionWithCertainty()) / b.costInYears(10) -
+              (a.numEventsToInfectionWithCertainty()) / a.costInYears(10)
             )
           }.bind(this)
       )
