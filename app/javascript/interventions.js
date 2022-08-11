@@ -109,9 +109,9 @@ export class Intervention {
     return total
   }
 
-  computeRisk() {
-    if (this.risk) {
-      return this.risk
+  computeRisk(duration) {
+    if (!duration) {
+      duration = 1
     }
 
     let totalAch = this.event.totalAch
@@ -140,8 +140,6 @@ export class Intervention {
       totalAch += intervention.computeACH()
     }
 
-    this.totalAchWithIntervention = totalAch
-
     if (!this.riskiestPotentialInfector['aerosolGenerationActivity'])  {
       return 0
     }
@@ -159,7 +157,6 @@ export class Intervention {
       susceptibleAgeGroup
     )
     const probaRandomSampleOfOneIsInfectious = 1.0
-    const duration = 1 // hour
 
     let result = simplifiedRisk(
       [riskiestActivityGroup],
@@ -172,8 +169,7 @@ export class Intervention {
       duration
     )
 
-    this.risk = result
-    return this.risk
+    return result
   }
 
   durationToLikelyInfection() {
@@ -305,8 +301,8 @@ export class Intervention {
     return cost
   }
 
-  computeRiskRounded() {
-    return round(this.computeRisk(), 6)
+  computeRiskRounded(duration) {
+    return round(this.computeRisk(duration), 6)
   }
 
   amountText() {

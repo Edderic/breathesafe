@@ -448,12 +448,12 @@
         <table>
           <tr>
             <th>Investments</th>
-            <th>Relative Risk Reduction</th>
-            <th>Risk Remaining</th>
+            <th>1-hour Risk</th>
+            <th>8-hour Risk</th>
+            <th>40-hour Risk</th>
             <th>Initial Cost</th>
             <th>Recurring Cost</th>
             <th>Total Cost in 10 years</th>
-            <th>Num Events to Guaranteed Infection</th>
             <th>Benefit / Cost in 10 years</th>
           </tr>
           <tr v-for='intervention in interventions'>
@@ -466,10 +466,9 @@
 
             <ColoredCell
                 v-if='intervention.numDevices() > 0'
-                :colorScheme="reducedRiskColorScheme"
+                :colorScheme="riskColorScheme"
                 :maxVal=1
-                :value='reduceRisk(nullIntervention.computeRisk(), intervention.computeRisk())'
-                :text='roundOutRisk(nullIntervention.computeRisk(), intervention.computeRisk())'
+                :value='intervention.computeRiskRounded(1)'
                 :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
             />
 
@@ -477,13 +476,20 @@
                 v-if='intervention.numDevices() > 0'
                 :colorScheme="riskColorScheme"
                 :maxVal=1
-                :value='intervention.computeRiskRounded()'
+                :value='intervention.computeRiskRounded(8)'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+            />
+
+            <ColoredCell
+                v-if='intervention.numDevices() > 0'
+                :colorScheme="riskColorScheme"
+                :maxVal=1
+                :value='intervention.computeRiskRounded(40)'
                 :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
             />
             <td v-if='intervention.numDevices() > 0' >~${{ intervention.initialCostText() }}</td>
             <td v-if='intervention.numDevices() > 0' >~${{ intervention.recurringCostText() }}</td>
             <td v-if='intervention.numDevices() > 0' >~${{ intervention.costInYears(10) }}</td>
-            <td v-if='intervention.numDevices() > 0' >{{roundOut(intervention.numEventsToInfectionWithCertainty(), 0)}}</td>
             <td v-if='intervention.numDevices() > 0' >
               {{ roundOut((intervention.numEventsToInfectionWithCertainty()) / intervention.costInYears(10), 2 )}}
             </td>
