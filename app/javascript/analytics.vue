@@ -1,7 +1,7 @@
 <template>
   <div class='col border-showing scrollable'>
     <div class='container'>
-      <h3 class='subsection'>Summary of Recommendations for {{this.roomName}}</h3>
+      <h3 class='subsection'>Analysis & Recommendations for {{this.roomName}}</h3>
       <div class='centered col'>
         <div class='container'>
           <h4>Introduction</h4>
@@ -38,7 +38,9 @@
             we inhabit <a href="https://www.science.org/doi/10.1126/science.abd9149">be
             more resilient not just to COVID-19, but also to other respiratory viruses</a>.
           </p>
-          <h4>Risk Assessment</h4>
+          <p>In the interventions section below, there are many proven ways to decrease the risk of contracting COVID-19 and other airborne viruses. One would be able to see the interventions to clean the air. I introduce a metric for cost benefit </p>
+          <h4>Modeling</h4>
+
           <p>The model used here is a variant of
           <a href="https://pubs.acs.org/doi/full/10.1021/acs.est.1c06531">
           Peng et.al.'s Practical Indicators for Risk of Airborne Transmission in Shared Indoor Environments and Their Application to COVID-19 Outbreaks
@@ -129,103 +131,315 @@
             filtration efficiency) and is also doing the riskiest aerosol generation activity
             recorded (e.g. loudly talking).
           </p>
-        </div>
 
-        <h4>Exhalation & Inhalation</h4>
+          <h4>Risk Assessment</h4>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th></th>
+                <th>1 hour</th>
+                <th>8 hours</th>
+                <th>40 hours</th>
+                <th>80 hours</th>
+              </tr>
 
-        <p>
-          <span>The riskiest mask recorded for this measurement is <ColoredCell
-                :colorScheme="riskiestMaskColorScheme"
-                :maxVal=1
-                :value='riskiestMask["maskPenetrationFactor"]'
-                :text='riskiestMask["maskType"]'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
-            />
-           and the riskiest aerosol generation activity is <ColoredCell
-                :colorScheme="riskiestAerosolGenerationActivityScheme"
-                :maxVal=1
-                :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
-                :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
-            />.
-          </span>
+              <tr>
+                <th>Risk</th>
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="riskColorScheme"
+                    :maxVal=1
+                    :value='nullIntervention.computeRiskRounded()'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="riskColorScheme"
+                    :maxVal=1
+                    :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**8, 6)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="riskColorScheme"
+                    :maxVal=1
+                    :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**40, 6)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="riskColorScheme"
+                    :maxVal=1
+                    :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**80, 6)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+              </tr>
+              <tr>
+                <th>Average # of Susceptibles Infected under Max Occupancy</th>
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="averageInfectedPeopleInterpolationScheme"
+                    :maxVal=1
+                    :text='roundOut(this.maximumOccupancy * nullIntervention.computeRiskRounded(), 1)'
+                    :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="averageInfectedPeopleInterpolationScheme"
+                    :maxVal=1
+                    :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**8), 1)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="averageInfectedPeopleInterpolationScheme"
+                    :maxVal=1
+                    :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**40), 1)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="averageInfectedPeopleInterpolationScheme"
+                    :maxVal=1
+                    :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**80), 1)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+              </tr>
+            </table>
+          </div>
 
-
-          <span>People breathing in are <ColoredCell
-                :colorScheme="inhalationActivityScheme"
-                :maxVal=1
-                :value='worstCaseInhalation["inhalationFactor"]'
-                :text='worstCaseInhalation["inhalationActivity"]'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
-            />
-          </span>
-        </p>
-
-        <div class='container row'>
-          <table>
-            <tr>
-              <th></th>
-              <th>1 hour</th>
-              <th>8 hours</th>
-              <th>40 hours</th>
-              <th>80 hours</th>
-              <th>99%</th>
-            </tr>
-
-            <tr>
-              <th>Risk</th>
-              <ColoredCell
+          <p>
+            <span>
+              In 1 hour, a susceptible's risk is <ColoredCell
                   v-if="nullIntervention"
                   :colorScheme="riskColorScheme"
                   :maxVal=1
                   :value='nullIntervention.computeRiskRounded()'
                   :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
               />
-              <ColoredCell
-                  v-if="nullIntervention"
-                  :colorScheme="riskColorScheme"
+            </span>, and if we repeat this many times under this assumption,
+            <span>
+            we should find on average that
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="averageInfectedPeopleInterpolationScheme"
+                    :maxVal=1
+                    :text='roundOut(this.maximumOccupancy * nullIntervention.computeRiskRounded(), 1)'
+                    :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+            </span> susceptibles would get infected.
+            <span> In 8 hours of exposure, the risk jumps to <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="riskColorScheme"
+                    :maxVal=1
+                    :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**8, 6)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+            </span>. Assuming max occupancy (with the same susceptibles staying throughout),
+            <span>
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="averageInfectedPeopleInterpolationScheme"
+                    :maxVal=1
+                    :text='roundOut(this.maximumOccupancy * (1 - (1-nullIntervention.computeRiskRounded())**8), 1)'
+                    :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+            </span> susceptibles would get infected, on average.
+            <span>
+              It would be very surprising if in <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="riskColorScheme"
+                    :maxVal=1
+                    :value='roundOut(nullIntervention.durationToLikelyInfection(), 1)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                /> hours of exposure, a susceptible doesn't get infected (99% probability).
+            </span>
+          </p>
+
+          <h4>Behaviors</h4>
+
+          <p>
+            <span>
+            The riskiest aerosol generation activity is <ColoredCell
+                  :colorScheme="riskiestAerosolGenerationActivityScheme"
                   :maxVal=1
-                  :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**8, 6)'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                  :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
+                  :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+              /> so we assume that the infector in the risk calculations above is doing this.
+            </span>
+
+
+            <span>The worst case inhalation activity is <ColoredCell
+                  :colorScheme="inhalationActivityScheme"
+                  :maxVal=1
+                  :value='worstCaseInhalation["inhalationFactor"]'
+                  :text='worstCaseInhalation["inhalationActivity"]'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+              /> so we assume that susceptibles in the risk calculations above are doing this.
+            </span>
+
+            Choosing activities where an infector is quiet and at rest, along
+            with susceptibles being at rest, could decrease the risk of
+            airborne transmission.
+          </p>
+        </div>
+
+      </div>
+
+      <div class='container'>
+        <h4>Masking</h4>
+        <div class='centered'>
+          <HorizontalStackedBar
+            :values="maskingValues"
+            :colors="maskingColors"
+          />
+        </div>
+
+        <p>The riskiest mask recorded for this measurement is <span><ColoredCell
+              :colorScheme="riskiestMaskColorScheme"
+              :maxVal=1
+              :value='riskiestMask["maskPenetrationFactor"]'
+              :text='riskiestMask["maskType"]'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+          /></span>, so susceptibles are assumed to be wearing these (unless specified otherwise in the Interventions section).
+         </p>
+
+        <h4>Clean Air Delivery Rate</h4>
+
+        <p>
+          Air Changes per Hour (ACH) tells us how much clean air is generated
+          relative to the volume of the room. If a device outputs 5 ACH, that means it
+          produces clean air that is 5 times the volume of the room in an hour.  Total
+          ACH for a room can be computed by summing up the ACH of different types (e.g.
+          ventilation, filtration, upper-room germicidal UV).
+        </p>
+      </div>
+
+
+      <div class='container'>
+        <div class='centered'>
+          <table>
+            <tr>
+              <th class='col centered'>
+                <span>Total ACH</span>
+                <span class='font-light'>(1 / h)</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Ventilation ACH</span>
+                <span class='font-light'>(1 / h)</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Portable ACH</span>
+                <span class='font-light'>(1 / h)</span>
+              </th>
+            </tr>
+            <tr>
+              <ColoredCell
+                :colorScheme="colorInterpolationSchemeTotalAch"
+                :maxVal=1
+                :value='totalAchRounded'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
               />
+              <td>=</td>
               <ColoredCell
-                  v-if="nullIntervention"
-                  :colorScheme="riskColorScheme"
-                  :maxVal=1
-                  :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**40, 6)'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                :colorScheme="colorInterpolationSchemeTotalAch"
+                :maxVal=1
+                :value='ventilationAchRounded'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
               />
+              <td>+</td>
               <ColoredCell
-                  v-if="nullIntervention"
-                  :colorScheme="riskColorScheme"
-                  :maxVal=1
-                  :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**80, 6)'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                :colorScheme="colorInterpolationSchemeTotalAch"
+                :maxVal=1
+                :value='portableAchRounded'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
               />
             </tr>
           </table>
         </div>
       </div>
-      <div>
-        <div class='container'>
-          <span>Based on this risk of <ColoredCell
-              v-if="nullIntervention"
-              :colorScheme="riskColorScheme"
-              :maxVal=1
-              :value='nullIntervention.computeRiskRounded()'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-          />, it would be very surprising if after <ColoredCell
-              v-if="nullIntervention"
-              :colorScheme="riskColorScheme"
-              :maxVal=1
-              :value='roundOut(nullIntervention.durationToLikelyInfection(), 1)'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-          /> hours of exposure with an infector, a susceptible doesn't get infected.
 
-          </span>
-        </div>
+      <div class='centered'>
+        <table>
+          <tr>
+            <th class='col centered'>
+              <span>Clean Air Delivery Rate</span>
+              <span class='font-light'>({{this.measurementUnits.airDeliveryRateMeasurementTypeShort}})</span>
+            </th>
+            <th></th>
+            <th class='col centered'>
+              <span>Unoccupied Room Volume</span>
+              <span class='font-light'>({{this.measurementUnits.cubicLengthShort}})</span>
+            </th>
+            <th></th>
+            <th class='col centered'>
+              <span>Total ACH</span>
+              <span class='font-light'>(1 / h)</span>
+            </th>
+            <th v-if="systemOfMeasurement == 'imperial'"></th>
+            <th class='col centered' v-if="systemOfMeasurement == 'imperial'">
+              <span></span>
+              <span class='font-light'>(min / h)</span>
+            </th>
+          </tr>
+          <tr>
+            <ColoredCell
+              :colorScheme="colorInterpolationSchemeRoomVolume"
+              :maxVal=1
+              :value='totalFlowRateRounded'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+            />
+            <td>=</td>
+            <ColoredCell
+              :colorScheme="colorInterpolationSchemeRoomVolume"
+              :maxVal=1
+              :value='roomUsableVolumeRounded'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+            />
+            <td>x</td>
+            <ColoredCell
+              :colorScheme="colorInterpolationSchemeTotalAch"
+              :maxVal=1
+              :value='totalAchRounded'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+            />
+            <td v-if="systemOfMeasurement == 'imperial'">/</td>
+            <ColoredCell
+              v-if="systemOfMeasurement == 'imperial'"
+              :colorScheme="colorInterpolationSchemeTotalAch"
+              :maxVal=1
+              :value='60'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em', 'background-color': 'grey'}"
+            />
+          </tr>
+        </table>
       </div>
-      <div>
+
+      <div class='container'>
+        <p>
+        A combination of larger rooms along with high ACH can reduce the risk
+        of contracting COVID-19 and other airborne viruses. The product of the two
+        gives us the Clean Air Delivery Rate (CADR). The higher, the safer the
+        environment.
+        </p>
+
+        <p>
+          <span>If everyone in the room wore {{this.maskSuggestion['type']}} masks such as the <a :href="maskSuggestion['website']">{{ this.maskSuggestion['name']}}</a> on top of {{ this.numSuggestedAirCleaners }} {{ this.airCleanerSuggestion.plural }} for air cleaning, long-range transmission risk goes down </span> to
+          <ColoredCell
+            :colorScheme="riskColorScheme"
+            :maxVal=1
+            :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleanersAndMasks'
+            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+          />. The cost of <a :href="maskSuggestion['website']">{{ this.maskSuggestion['name']}}</a> is ${{ this.maskSuggestion['initialCostUSD']}} per person, with a recurring cost of ${{ this.maskSuggestion['recurringCostUSD']}} every {{ this.maskSuggestion['recurringCostDuration']}} per person.
+        </p>
+
+        <h4>Interventions</h4>
         <div class='container'>
           <label>Number of people to invest in (e.g. employees)</label>
           <input :value='numPeopleToInvestIn' @change='setNumPeople'>
@@ -275,204 +489,21 @@
             </td>
           </tr>
         </table>
-      </div>
-    </div>
 
-    <div class='container'>
-      <label class='subsection'>Clean Air Delivery Rate</label>
-      <div class='container'>
-        <span>What happens if there's an infectious individual present at max occupancy and no one is masked? How robust is the environment in preventing transmission?</span>
-     </div>
-      <div class='centered'>
-        <table>
-          <tr>
-            <th class='col centered'>
-              <span>Total ACH</span>
-              <span class='font-light'>(1 / h)</span>
-            </th>
-            <th></th>
-            <th class='col centered'>
-              <span>Ventilation ACH</span>
-              <span class='font-light'>(1 / h)</span>
-            </th>
-            <th></th>
-            <th class='col centered'>
-              <span>Portable ACH</span>
-              <span class='font-light'>(1 / h)</span>
-            </th>
-          </tr>
-          <tr>
-            <ColoredCell
-              :colorScheme="colorInterpolationSchemeTotalAch"
-              :maxVal=1
-              :value='totalAchRounded'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
-            />
-            <td>=</td>
-            <ColoredCell
-              :colorScheme="colorInterpolationSchemeTotalAch"
-              :maxVal=1
-              :value='ventilationAchRounded'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
-            />
-            <td>+</td>
-            <ColoredCell
-              :colorScheme="colorInterpolationSchemeTotalAch"
-              :maxVal=1
-              :value='portableAchRounded'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
-            />
-          </tr>
-        </table>
-      </div>
-    </div>
+        <h4>Rapid Testing</h4>
 
-    <div class='centered'>
-      <table>
-        <tr>
-          <th class='col centered'>
-            <span>Clean Air Delivery Rate</span>
-            <span class='font-light'>({{this.measurementUnits.airDeliveryRateMeasurementTypeShort}})</span>
-          </th>
-          <th></th>
-          <th class='col centered'>
-            <span>Unoccupied Room Volume</span>
-            <span class='font-light'>({{this.measurementUnits.cubicLengthShort}})</span>
-          </th>
-          <th></th>
-          <th class='col centered'>
-            <span>Total ACH</span>
-            <span class='font-light'>(1 / h)</span>
-          </th>
-          <th v-if="systemOfMeasurement == 'imperial'"></th>
-          <th class='col centered' v-if="systemOfMeasurement == 'imperial'">
-            <span></span>
-            <span class='font-light'>(min / h)</span>
-          </th>
-        </tr>
-        <tr>
-          <ColoredCell
-            :colorScheme="colorInterpolationSchemeRoomVolume"
-            :maxVal=1
-            :value='totalFlowRateRounded'
-            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
-          />
-          <td>=</td>
-          <ColoredCell
-            :colorScheme="colorInterpolationSchemeRoomVolume"
-            :maxVal=1
-            :value='roomUsableVolumeRounded'
-            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
-          />
-          <td>x</td>
-          <ColoredCell
-            :colorScheme="colorInterpolationSchemeTotalAch"
-            :maxVal=1
-            :value='totalAchRounded'
-            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
-          />
-          <td v-if="systemOfMeasurement == 'imperial'">/</td>
-          <ColoredCell
-            v-if="systemOfMeasurement == 'imperial'"
-            :colorScheme="colorInterpolationSchemeTotalAch"
-            :maxVal=1
-            :value='60'
-            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em', 'background-color': 'grey'}"
-          />
-        </tr>
-      </table>
-    </div>
-    <div class='container'>
-      <div class='container'>
-        <span>
-          With a clean air delivery rate of
+        <p>
+          <span>If, at max occupancy, everyone did rapid testing beforehand, and all got negative results, the probability that at least one person is infectious drops down to
               <ColoredCell
-              :colorScheme="colorInterpolationSchemeRoomVolume"
-              :maxVal=1
-              :value='totalFlowRateRounded'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-              />
-         {{ this.measurementUnits.airDeliveryRateMeasurementTypeShort }}, assuming the infector is {{ this.riskiestPotentialInfector['aerosolGenerationActivity'] }}, the risk of long-range airborne transmission is
-            <ColoredCell
                 :colorScheme="riskColorScheme"
                 :maxVal=1
-                :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible'
+                :value='riskEncounteringInfectiousAllNegRapid'
                 :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-              />. On average,
-            <ColoredCell
-                :colorScheme="averageInfectedPeopleInterpolationScheme"
-                :maxVal=1
-                :value='averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptible'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-            /> susceptibles would be infected.
-        </span>
+              />.
+          </span>
+        </p>
       </div>
-    </div>
 
-
-    <div class='container'>
-      <div class='container'>
-        <span>Adding {{ this.numSuggestedAirCleaners }} <a :href="airCleanerSuggestion.website">{{this.airCleanerSuggestion.plural}}</a> would improve the clean air delivery rate (CADR)</span> to
-
-        <ColoredCell
-        :colorScheme="colorInterpolationSchemeRoomVolume"
-        :maxVal=1
-        :value='totalFlowRatePlusExtraPacRounded'
-          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-        />
-  {{ this.measurementUnits.airDeliveryRateMeasurementTypeShort }}, bringing down the long-range airborne transmission risk to
-         <ColoredCell
-              :colorScheme="riskColorScheme"
-              :maxVal=1
-              :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-          />. On average,
-          <ColoredCell
-              :colorScheme="averageInfectedPeopleInterpolationScheme"
-              :maxVal=1
-              :value='averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-          /> susceptibles would be infected. Initial cost of adding {{ this.numSuggestedAirCleaners }} <a :href="airCleanerSuggestion.website">{{this.airCleanerSuggestion.plural}}</a> is ${{ this.airCleanerSuggestion.initialCostUSD * this.numSuggestedAirCleaners}}, with a recurring cost of ${{ this.airCleanerSuggestion.recurringCostUSD * this.numSuggestedAirCleaners }} every {{this.airCleanerSuggestion.recurringCostDuration}}. Compared to the no-mask scenario, this investment will reduce risk by
-          <ColoredCell
-              :colorScheme="reducedRiskColorScheme"
-              :maxVal=1
-              :value='reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleaners'
-              :text='reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersText'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-          />
-       </div>
-     </div>
-    <div class='container'>
-      <label class='subsection'>Masking</label>
-      <div class='centered'>
-        <HorizontalStackedBar
-          :values="maskingValues"
-          :colors="maskingColors"
-        />
-      </div>
-      <div class='container'>
-        <span>If everyone in the room wore {{this.maskSuggestion['type']}} masks such as the <a :href="maskSuggestion['website']">{{ this.maskSuggestion['name']}}</a> on top of {{ this.numSuggestedAirCleaners }} {{ this.airCleanerSuggestion.plural }} for air cleaning, long-range transmission risk goes down </span> to
-        <ColoredCell
-          :colorScheme="riskColorScheme"
-          :maxVal=1
-          :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleanersAndMasks'
-          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-        />. The cost of <a :href="maskSuggestion['website']">{{ this.maskSuggestion['name']}}</a> is ${{ this.maskSuggestion['initialCostUSD']}} per person, with a recurring cost of ${{ this.maskSuggestion['recurringCostUSD']}} every {{ this.maskSuggestion['recurringCostDuration']}} per person.
-      </div>
-    </div>
-
-    <div class='container'>
-      <label class='subsection'>Rapid Testing</label>
-      <div class='container'>
-        <span>If, at max occupancy, everyone did rapid testing beforehand, and all got negative results, the probability that at least one person is infectious drops down to
-            <ColoredCell
-              :colorScheme="riskColorScheme"
-              :maxVal=1
-              :value='riskEncounteringInfectiousAllNegRapid'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-            />.
-        </span>
-      </div>
     </div>
 
     <div class='container'>
@@ -1134,6 +1165,7 @@ export default {
     padding: 1em;
   }
   .subsection {
+    text-align: center;
     font-weight: bold;
     margin-left: 1em;
   }
