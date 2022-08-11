@@ -36,7 +36,6 @@ export const useAnalyticsStore = defineStore('analytics', {
 
       // TODO: find the number of people that could upgrade to a mask
       let interventions = [
-        this.nullIntervention,
         new Intervention(
           this.event,
           [

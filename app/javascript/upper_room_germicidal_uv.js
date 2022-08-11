@@ -72,7 +72,7 @@ export class UpperRoomGermicidalUV {
   }
 
   applicable() {
-    return this.event.roomHeightMeters >= this.device.heightLowerBoundMeters
+    return (this.event.roomHeightMeters >= this.device.heightLowerBoundMeters)
   }
 
   costInYears(years) {

@@ -99,6 +99,16 @@ export class Intervention {
     this.numEventsToEnsureInfection = undefined
   }
 
+  applicable() {
+    for (let intervention of this.interventions) {
+      if (!intervention.applicable() || intervention.numDevices() < 0) {
+        return false
+      }
+    }
+
+    return true
+  }
+
   computeACH() {
     let total = this.totalAch
 

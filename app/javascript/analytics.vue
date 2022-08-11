@@ -457,7 +457,7 @@
             <th>Benefit / Cost in 10 years</th>
           </tr>
           <tr v-for='intervention in interventions'>
-            <td v-if='intervention.numDevices() > 0'>
+            <td v-if='intervention.applicable()'>
                 <div v-for='obj in intervention.websitesAndText()' class='col centered container'>
                   <img :src="obj.imgLink">
                   <a :href="obj.website" >{{obj.text}}</a>
@@ -465,7 +465,7 @@
             </td>
 
             <ColoredCell
-                v-if='intervention.numDevices() > 0'
+                v-if='intervention.applicable()'
                 :colorScheme="riskColorScheme"
                 :maxVal=1
                 :value='intervention.computeRiskRounded(1)'
@@ -473,7 +473,7 @@
             />
 
             <ColoredCell
-                v-if='intervention.numDevices() > 0'
+                v-if='intervention.applicable()'
                 :colorScheme="riskColorScheme"
                 :maxVal=1
                 :value='intervention.computeRiskRounded(8)'
@@ -481,16 +481,16 @@
             />
 
             <ColoredCell
-                v-if='intervention.numDevices() > 0'
+                v-if='intervention.applicable()'
                 :colorScheme="riskColorScheme"
                 :maxVal=1
                 :value='intervention.computeRiskRounded(40)'
                 :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
             />
-            <td v-if='intervention.numDevices() > 0' >~${{ intervention.initialCostText() }}</td>
-            <td v-if='intervention.numDevices() > 0' >~${{ intervention.recurringCostText() }}</td>
-            <td v-if='intervention.numDevices() > 0' >~${{ intervention.costInYears(10) }}</td>
-            <td v-if='intervention.numDevices() > 0' >
+            <td v-if='intervention.applicable()' >~${{ intervention.initialCostText() }}</td>
+            <td v-if='intervention.applicable()' >~${{ intervention.recurringCostText() }}</td>
+            <td v-if='intervention.applicable()' >~${{ intervention.costInYears(10) }}</td>
+            <td v-if='intervention.applicable()' >
               {{ roundOut((intervention.numEventsToInfectionWithCertainty()) / intervention.costInYears(10), 2 )}}
             </td>
           </tr>
