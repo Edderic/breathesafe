@@ -719,7 +719,7 @@
               <ColoredCell
                 :colorScheme="colorInterpolationSchemeRoomVolume"
                 :maxVal=1
-                :value='totalFlowRateRounded'
+                :value='roundOut(computeTotalFlowRate(roomUsableVolumeCubicMeters *  selectedIntervention.computeACH()), 1)'
                 :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
               />
               <td>=</td>
@@ -733,7 +733,7 @@
               <ColoredCell
                 :colorScheme="colorInterpolationSchemeTotalAch"
                 :maxVal=1
-                :value='totalAchRounded'
+                :value='roundOut(selectedIntervention.computeACH(), 1)'
                 :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
               />
               <td v-if="systemOfMeasurement == 'imperial'">/</td>
@@ -1407,6 +1407,15 @@ export default {
     setNumPeople(event) {
       this.setNumPeopleToInvestIn(parseInt(event.target.value))
       this.reload()
+    },
+    computeTotalFlowRateCubicMetersPerHour(totalACH) {
+      return this.roomUsableVolumeCubicMeters * totalACH
+    },
+    computeTotalFlowRate(totalFlowRateCubicMetersPerHour) {
+      return displayCADR(this.systemOfMeasurement, totalFlowRateCubicMetersPerHour)
+    },
+    totalFlowRateRounded() {
+      return round(this.totalFlowRate, 1)
     },
   }
 }
