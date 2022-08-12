@@ -349,28 +349,28 @@
                 :colorScheme="colorInterpolationSchemeTotalAch"
                 :maxVal=1
                 :value='totalAchRounded'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                class='color-cell'
               />
               <td>=</td>
               <ColoredCell
                 :colorScheme="colorInterpolationSchemeTotalAch"
                 :maxVal=1
                 :value='ventilationAchRounded'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                class='color-cell'
               />
               <td>+</td>
               <ColoredCell
                 :colorScheme="colorInterpolationSchemeTotalAch"
                 :maxVal=1
                 :value='portableAchRounded'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                class='color-cell'
               />
               <td>+</td>
               <ColoredCell
                 :colorScheme="colorInterpolationSchemeTotalAch"
                 :maxVal=1
                 :value='0'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                class='color-cell'
               />
             </tr>
           </table>
@@ -405,21 +405,21 @@
               :colorScheme="colorInterpolationSchemeRoomVolume"
               :maxVal=1
               :value='totalFlowRateRounded'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+              class='color-cell'
             />
             <td>=</td>
             <ColoredCell
               :colorScheme="colorInterpolationSchemeRoomVolume"
               :maxVal=1
               :value='roomUsableVolumeRounded'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                class='color-cell'
             />
             <td>x</td>
             <ColoredCell
               :colorScheme="colorInterpolationSchemeTotalAch"
               :maxVal=1
               :value='totalAchRounded'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+              class='color-cell'
             />
             <td v-if="systemOfMeasurement == 'imperial'">/</td>
             <ColoredCell
@@ -427,7 +427,8 @@
               :colorScheme="colorInterpolationSchemeTotalAch"
               :maxVal=1
               :value='60'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em', 'background-color': 'grey'}"
+              class='color-cell'
+              style='background-color: grey'
             />
           </tr>
         </table>
@@ -596,7 +597,7 @@
                   :colorScheme="riskColorScheme"
                   :maxVal=1
                   :value='intervention.computeRiskRounded(1)'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+                  class='color-cell'
               />
 
               <ColoredCell
@@ -604,7 +605,7 @@
                   :colorScheme="riskColorScheme"
                   :maxVal=1
                   :value='intervention.computeRiskRounded(8)'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+                  class='color-cell'
               />
 
               <ColoredCell
@@ -612,7 +613,7 @@
                   :colorScheme="riskColorScheme"
                   :maxVal=1
                   :value='intervention.computeRiskRounded(40)'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+                  class='color-cell'
               />
               <td v-if='intervention.applicable()' >
                 <div v-for='interv in intervention.interventions' class='padded'>
@@ -664,28 +665,28 @@
                   :colorScheme="colorInterpolationSchemeTotalAch"
                   :maxVal=1
                   :value='roundOut(this.selectedIntervention.computeACH(), 1)'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                  class='color-cell'
                 />
                 <td>=</td>
                 <ColoredCell
                   :colorScheme="colorInterpolationSchemeTotalAch"
                   :maxVal=1
                   :value='roundOut(this.selectedIntervention.computeVentilationACH(), 1)'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                  class='color-cell'
                 />
                 <td>+</td>
                 <ColoredCell
                   :colorScheme="colorInterpolationSchemeTotalAch"
                   :maxVal=1
                   :value='roundOut(this.selectedIntervention.computeAirCleanerACH(), 1)'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                  class='color-cell'
                 />
                 <td>+</td>
                 <ColoredCell
                   :colorScheme="colorInterpolationSchemeTotalAch"
                   :maxVal=1
                   :value='roundOut(this.selectedIntervention.computeUVACH(), 1)'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                  class='color-cell'
                 />
               </tr>
             </table>
@@ -697,52 +698,39 @@
             <tr>
               <th class='col centered'>
                 <span>Clean Air Delivery Rate</span>
-                <span class='font-light'>({{this.measurementUnits.airDeliveryRateMeasurementTypeShort}})</span>
+                <span class='font-light'>(m³ / h)</span>
               </th>
               <th></th>
               <th class='col centered'>
                 <span>Unoccupied Room Volume</span>
-                <span class='font-light'>({{this.measurementUnits.cubicLengthShort}})</span>
+                <span class='font-light'>(m³)</span>
               </th>
               <th></th>
               <th class='col centered'>
                 <span>Total ACH</span>
                 <span class='font-light'>(1 / h)</span>
               </th>
-              <th v-if="systemOfMeasurement == 'imperial'"></th>
-              <th class='col centered' v-if="systemOfMeasurement == 'imperial'">
-                <span></span>
-                <span class='font-light'>(min / h)</span>
-              </th>
             </tr>
             <tr>
               <ColoredCell
-                :colorScheme="colorInterpolationSchemeRoomVolume"
+                :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
                 :maxVal=1
                 :value='roundOut(computeTotalFlowRate(roomUsableVolumeCubicMeters *  selectedIntervention.computeACH()), 1)'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                class='color-cell'
               />
               <td>=</td>
               <ColoredCell
-                :colorScheme="colorInterpolationSchemeRoomVolume"
+                :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
                 :maxVal=1
-                :value='roomUsableVolumeRounded'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                :value='roundOut(roomUsableVolumeCubicMeters, 1)'
+                class='color-cell'
               />
               <td>x</td>
               <ColoredCell
                 :colorScheme="colorInterpolationSchemeTotalAch"
                 :maxVal=1
                 :value='roundOut(selectedIntervention.computeACH(), 1)'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
-              />
-              <td v-if="systemOfMeasurement == 'imperial'">/</td>
-              <ColoredCell
-                v-if="systemOfMeasurement == 'imperial'"
-                :colorScheme="colorInterpolationSchemeTotalAch"
-                :maxVal=1
-                :value='60'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em', 'background-color': 'grey'}"
+                class='color-cell'
               />
             </tr>
           </table>
@@ -779,30 +767,42 @@
               </th>
             </tr>
             <tr>
-              <td class='col centered'>
-                {{ roundOut(infectorProductWithIntervention, 1) }}
-              </td>
+              <ColoredCell
+                v-if="nullIntervention"
+                :colorScheme="averageInfectedPeopleInterpolationScheme"
+                :maxVal=1
+                :value='roundOut(infectorProductWithIntervention, 1)'
+                class='color-cell'
+              />
               <td>=</td>
-              <td class='col centered'>
-                18.6
-              </td>
+              <ColoredCell
+                v-if="nullIntervention"
+                :colorScheme="averageInfectedPeopleInterpolationScheme"
+                :maxVal=1
+                :value=18.6
+                class='color-cell'
+              />
               <td>x</td>
-              <td class='col centered'>
-                3.3
-              </td>
+              <ColoredCell
+                v-if="nullIntervention"
+                :colorScheme="averageInfectedPeopleInterpolationScheme"
+                :maxVal=1
+                :value=3.3
+                class='color-cell'
+              />
               <td>x</td>
               <ColoredCell
                   :colorScheme="riskiestAerosolGenerationActivityScheme"
                   :maxVal=1
                   :value='roundOut(aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"]), 1)'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+                class='color-cell'
               />
               <td>x</td>
               <ColoredCell
                 :colorScheme="riskiestMaskColorScheme"
                 :maxVal=1
                 :value='selectedIntervention.computeSusceptibleMask()["maskPenetrationFactor"]'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+                class='color-cell'
               />
             </tr>
           </table>
@@ -832,16 +832,20 @@
               </th>
             </tr>
             <tr>
-              <td class='col centered'>
-                {{ roundOut(susceptibleProductWithIntervention, 3) }}
-              </td>
+              <ColoredCell
+                v-if="nullIntervention"
+                :colorScheme="averageInfectedPeopleInterpolationScheme"
+                :maxVal=1
+                :value='roundOut(susceptibleProductWithIntervention, 3)'
+                class='color-cell'
+              />
 
               <td>=</td>
               <ColoredCell
                 :colorScheme="riskiestMaskColorScheme"
                 :maxVal=1
                 :value='selectedIntervention.computeSusceptibleMask()["maskPenetrationFactor"]'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em' }"
+                class='color-cell'
               />
 
               <td>x</td>
@@ -849,7 +853,7 @@
                   :colorScheme="inhalationActivityScheme"
                   :maxVal=1
                   :value='worstCaseInhalation["inhalationFactor"]'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em' }"
+                class='color-cell'
               />
             </tr>
 
@@ -889,16 +893,24 @@
                 :colorScheme="riskColorScheme"
                 :maxVal=1
                 :value='roundOut(intermediateProductWithIntervention, 6)'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+                class='color-cell'
               />
               <td>=</td>
-              <td class='col centered'>
-                {{ roundOut(infectorProductWithIntervention, 1) }}
-              </td>
+              <ColoredCell
+                v-if="nullIntervention"
+                :colorScheme="averageInfectedPeopleInterpolationScheme"
+                :maxVal=1
+                :value='roundOut(infectorProductWithIntervention, 1)'
+                class='color-cell'
+              />
               <td>x</td>
-              <td class='col centered'>
-                {{ roundOut(susceptibleProductWithIntervention, 3) }}
-              </td>
+              <ColoredCell
+                v-if="nullIntervention"
+                :colorScheme="averageInfectedPeopleInterpolationScheme"
+                :maxVal=1
+                :value='roundOut(susceptibleProductWithIntervention, 3)'
+                class='color-cell'
+              />
               <td>x</td>
               <td class='col centered'>
                 40
@@ -908,7 +920,7 @@
                 :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
                 :maxVal=1
                 :value='roundOut(computeTotalFlowRate(roomUsableVolumeCubicMeters *  selectedIntervention.computeACH()), 1)'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                class='color-cell'
               />
             </tr>
           </table>
@@ -941,7 +953,7 @@
                 :colorScheme="riskColorScheme"
                 :maxVal=1
                 :value='this.selectedIntervention.computeRiskRounded(40)'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+                class='color-cell'
               />
               <td>=</td>
               <td class='col centered'>
@@ -960,7 +972,7 @@
                 :colorScheme="riskColorScheme"
                 :maxVal=1
                 :value='roundOut(intermediateProductWithIntervention, 6)'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+                class='color-cell'
               />
             </tr>
           </table>
@@ -1805,5 +1817,12 @@ export default {
 
   .clicked {
     background-color: #e6e6e6;
+  }
+
+  .color-cell {
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+    padding: 1em;
   }
 </style>
