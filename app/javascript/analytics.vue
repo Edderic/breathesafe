@@ -99,7 +99,7 @@
               <li>
               ventilation is increased. Increasing the amount of air exchanged
               from outside to inside (e.g. by opening windows) discourages build up of
-              infectious aerosols in a room.
+              infectious aerosols in a room. Outdoors generally have high ventilation rates.
               </li>
               <li>
               Irradiation technologies are put in place to deactivate the virus while
@@ -469,70 +469,156 @@
         class='italic'>Total Cost in 10 years</span>. The higher it is, the more bang
         for the buck.
 
+        One could modify the <span class='bold'>number of people to invest
+        in</span> to see how the return of investment changes. Costs of
+        interventions that use masks scale with the number of people. On the
+        other hand, costs of interventions that only use portable air cleaners
+        or upper room germicidal UV don't, and scale more with the volume or
+        square footage of the room.
+
         </p>
+
+        <div class='centered'>
+          <table>
+            <tr>
+              <th></th>
+              <th>1 hour</th>
+              <th>8 hours</th>
+              <th>40 hours</th>
+              <th>80 hours</th>
+            </tr>
+
+            <tr>
+              <th>Risk</th>
+              <ColoredCell
+                  v-if="nullIntervention"
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='nullIntervention.computeRiskRounded()'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+              />
+              <ColoredCell
+                  v-if="nullIntervention"
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**8, 6)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+              />
+              <ColoredCell
+                  v-if="nullIntervention"
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**40, 6)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+              />
+              <ColoredCell
+                  v-if="nullIntervention"
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**80, 6)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+              />
+            </tr>
+            <tr>
+              <th>Average # of Susceptibles Infected under Max Occupancy</th>
+              <ColoredCell
+                  v-if="nullIntervention"
+                  :colorScheme="averageInfectedPeopleInterpolationScheme"
+                  :maxVal=1
+                  :text='roundOut(this.maximumOccupancy * nullIntervention.computeRiskRounded(), 1)'
+                  :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+              />
+              <ColoredCell
+                  v-if="nullIntervention"
+                  :colorScheme="averageInfectedPeopleInterpolationScheme"
+                  :maxVal=1
+                  :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**8), 1)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+              />
+              <ColoredCell
+                  v-if="nullIntervention"
+                  :colorScheme="averageInfectedPeopleInterpolationScheme"
+                  :maxVal=1
+                  :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**40), 1)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+              />
+              <ColoredCell
+                  v-if="nullIntervention"
+                  :colorScheme="averageInfectedPeopleInterpolationScheme"
+                  :maxVal=1
+                  :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**80), 1)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+              />
+            </tr>
+          </table>
+        </div>
+
         <div class='container centered'>
           <label class='bold'>Number of people to invest in (e.g. employees)</label>
           <input :value='numPeopleToInvestIn' @change='setNumPeople'>
         </div>
 
-        <table>
-          <tr>
-            <th>Investments</th>
-            <th>1-hour Risk</th>
-            <th>8-hour Risk</th>
-            <th>40-hour Risk</th>
-            <th>Initial Cost</th>
-            <th>Recurring Cost</th>
-            <th>Total Cost in 10 years</th>
-            <th>Benefit / Cost</th>
-          </tr>
-          <tr v-for='intervention in interventions'>
-            <td v-if='intervention.applicable()'>
-                <div v-for='obj in intervention.websitesAndText()' class='col centered container'>
-                  <img :src="obj.imgLink">
-                  <a :href="obj.website" >{{obj.text}}</a>
+        <div class='scroll-table'>
+          <table>
+            <tr>
+              <th>Investments</th>
+              <th>1-hour Risk</th>
+              <th>8-hour Risk</th>
+              <th>40-hour Risk</th>
+              <th>Initial Cost</th>
+              <th>Recurring Cost</th>
+              <th>Total Cost in 10 years</th>
+              <th>Benefit / Cost</th>
+            </tr>
+            <tr v-for='intervention in interventions'>
+              <td v-if='intervention.applicable()'>
+                  <div v-for='obj in intervention.websitesAndText()' class='col centered container'>
+                    <img :src="obj.imgLink">
+                    <a :href="obj.website" >{{obj.text}}</a>
+                  </div>
+              </td>
+
+              <ColoredCell
+                  v-if='intervention.applicable()'
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='intervention.computeRiskRounded(1)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+              />
+
+              <ColoredCell
+                  v-if='intervention.applicable()'
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='intervention.computeRiskRounded(8)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+              />
+
+              <ColoredCell
+                  v-if='intervention.applicable()'
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='intervention.computeRiskRounded(40)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+              />
+              <td v-if='intervention.applicable()' >
+                <div v-for='interv in intervention.interventions' class='padded'>
+                  {{ interv.initialCostText() }}
                 </div>
-            </td>
-
-            <ColoredCell
-                v-if='intervention.applicable()'
-                :colorScheme="riskColorScheme"
-                :maxVal=1
-                :value='intervention.computeRiskRounded(1)'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
-            />
-
-            <ColoredCell
-                v-if='intervention.applicable()'
-                :colorScheme="riskColorScheme"
-                :maxVal=1
-                :value='intervention.computeRiskRounded(8)'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
-            />
-
-            <ColoredCell
-                v-if='intervention.applicable()'
-                :colorScheme="riskColorScheme"
-                :maxVal=1
-                :value='intervention.computeRiskRounded(40)'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
-            />
-            <td v-if='intervention.applicable()' >
-              <div v-for='interv in intervention.interventions' class='padded'>
-                {{ interv.initialCostText() }}
-              </div>
-            </td>
-            <td v-if='intervention.applicable()' >
-              <div v-for='interv in intervention.interventions' class='padded'>
-                {{ interv.recurringCostText() }}
-              </div>
-            </td>
-            <td v-if='intervention.applicable()' >${{ intervention.costInYears(10) }}</td>
-            <td v-if='intervention.applicable()' >
-              {{ roundOut((intervention.numEventsToInfectionWithCertainty()) / intervention.costInYears(10), 2 )}}
-            </td>
-          </tr>
-        </table>
+              </td>
+              <td v-if='intervention.applicable()' >
+                <div v-for='interv in intervention.interventions' class='padded'>
+                  {{ interv.recurringCostText() }}
+                </div>
+              </td>
+              <td v-if='intervention.applicable()' >${{ intervention.costInYears(10) }}</td>
+              <td v-if='intervention.applicable()' >
+                {{ roundOut((intervention.numEventsToInfectionWithCertainty()) / intervention.costInYears(10), 2 )}}
+              </td>
+            </tr>
+          </table>
+        </div>
 
         <h4>Rapid Testing</h4>
 
@@ -1259,6 +1345,13 @@ export default {
     overflow-y: scroll;
     height: 72em;
   }
+
+  .scroll-table {
+    height: 40em;
+
+    overflow-y: scroll;
+  }
+
 
   .col {
     display: flex;
