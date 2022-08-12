@@ -762,12 +762,14 @@
               </th>
               <th></th>
               <th class='col centered'>
-                <span>Variant Multiplier for BA.2</span>
+                <span>Variant Factor</span>
+                <span class='font-light italic'>BA-2</span>
                 <span class='font-light'>(dimension-less)</span>
               </th>
               <th></th>
               <th class='col centered'>
-                <span>Infector Exhalation Factor</span>
+                <span>Infector Exhalation Factor: </span>
+                <span class='font-light italic'>{{riskiestPotentialInfector["aerosolGenerationActivity"]}}</span>
                 <span class='font-light'>(dimensionless)</span>
               </th>
               <th></th>
@@ -778,7 +780,7 @@
             </tr>
             <tr>
               <td class='col centered'>
-                blah
+                {{ roundOut(infectorProductWithIntervention, 1) }}
               </td>
               <td>=</td>
               <td class='col centered'>
@@ -789,9 +791,12 @@
                 3.3
               </td>
               <td>x</td>
-              <td class='col centered'>
-                blah
-              </td>
+              <ColoredCell
+                  :colorScheme="riskiestAerosolGenerationActivityScheme"
+                  :maxVal=1
+                  :value='roundOut(aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"]), 1)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+              />
               <td>x</td>
               <ColoredCell
                 :colorScheme="riskiestMaskColorScheme"
@@ -1141,6 +1146,13 @@ export default {
           'totalAch'
         ]
     ),
+    infectorProductWithIntervention() {
+      return 18.6 * 3.3 * this.aerosolActivityToFactor(
+        this.riskiestPotentialInfector["aerosolGenerationActivity"]
+      ) * this.selectedIntervention.computeSusceptibleMask()[
+        "maskPenetrationFactor"
+      ]
+    },
     inhalationActivityScheme() {
       colorPaletteFall
       const minimum = 0.258
