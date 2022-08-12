@@ -239,6 +239,23 @@ export class Intervention {
     return this.durToLikelyInfection
   }
 
+  computeSusceptibleMask() {
+    for (let intervention of this.interventions) {
+      if (intervention.isMask()) {
+        // susceptible and infector wear the same mask
+        return {
+          maskType: intervention.maskType,
+          maskPenetrationFactor: maskToPenetrationFactor[intervention.maskType]
+        }
+      }
+    }
+
+    return {
+      maskType: this.riskiestActivityGroup.maskType,
+      maskPenetrationFactor: maskToPenetrationFactor[this.riskiestActivityGroup.maskType]
+    }
+  }
+
   computeInfection(args) {
     if (!args.duration) {
       args.duration = 1 // hour

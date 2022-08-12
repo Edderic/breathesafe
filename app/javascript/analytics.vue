@@ -747,6 +747,215 @@
             </tr>
           </table>
         </div>
+
+        <div class='centered'>
+          <table>
+            <tr>
+              <th class='col centered'>
+                <span>Infector Product</span>
+                <span class='font-light'>(Quanta / h)</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Original Strain</span>
+                <span class='font-light'>(Quanta / h)</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Variant Multiplier for BA.2</span>
+                <span class='font-light'>(dimension-less)</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Infector Exhalation Factor</span>
+                <span class='font-light'>(dimensionless)</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Infector Masking Penetration Factor</span>
+                <span class='font-light'>(dimensionless)</span>
+              </th>
+            </tr>
+            <tr>
+              <td class='col centered'>
+                blah
+              </td>
+              <td>=</td>
+              <td class='col centered'>
+                blah
+              </td>
+              <td>x</td>
+              <td class='col centered'>
+                blah
+              </td>
+              <td>x</td>
+              <td class='col centered'>
+                blah
+              </td>
+              <td>x</td>
+              <ColoredCell
+                :colorScheme="riskiestMaskColorScheme"
+                :maxVal=1
+                :value='selectedIntervention.computeSusceptibleMask()["maskPenetrationFactor"]'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+              />
+            </tr>
+          </table>
+        </div>
+
+        <div class='centered'>
+          <table>
+            <tr>
+              <th class='col centered'>
+                <span>Susceptible Product</span>
+                <span class='font-light'>(m³ / h)</span>
+              </th>
+
+              <th></th>
+              <th class='col centered'>
+                <span>Susceptible Masking Penetration Factor</span>
+                <span class='font-light'>(dimensionless)</span>
+              </th>
+
+              <th></th>
+              <th class='col centered'>
+                <span>Susceptible Breathing Rate</span>
+                <span class='font-light'>(m³ / h)</span>
+              </th>
+
+              <th></th>
+              <th class='col centered'>
+                <span>Susceptible Inhalation Activity Factor</span>
+                <span class='font-light'>(dimensionless)</span>
+              </th>
+            </tr>
+            <tr>
+              <td class='col centered'>
+                <span>Susceptible Product</span>
+                <span class='font-light'>(m³ / h)</span>
+              </td>
+
+              <td>=</td>
+              <ColoredCell
+                :colorScheme="riskiestMaskColorScheme"
+                :maxVal=1
+                :value='selectedIntervention.computeSusceptibleMask()["maskPenetrationFactor"]'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+              />
+
+              <td>x</td>
+              <td class='col centered'>
+                <span>Susceptible Breatding Rate</span>
+                <span class='font-light'>({{this.measurementUnits.airDeliveryRateMeasurementTypeShort}})</span>
+              </td>
+
+              <td>x</td>
+              <td class='col centered'>
+                <span>Susceptible Inhalation Activity Factor</span>
+                <span class='font-light'>(dimensionless)</span>
+              </td>
+            </tr>
+
+          </table>
+        </div>
+
+        <div class='centered'>
+          <table>
+            <tr>
+              <th class='col centered'>
+                <span>Intermediate Factor</span>
+                <span class='font-light'>(Quanta)</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Infector Product</span>
+                <span class='font-light'>(Quanta / h)</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Susceptible Factor</span>
+                <span class='font-light'>(m³ / h)</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Duration</span>
+                <span class='font-light'>(h)</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Clean Air Delivery Rate</span>
+                <span class='font-light'>(m³ / h)</span>
+              </th>
+            </tr>
+            <tr>
+              <td class='col centered'>
+                blah
+              </td>
+              <td>=</td>
+              <td class='col centered'>
+                blah
+              </td>
+              <td>x</td>
+              <td class='col centered'>
+                blah
+              </td>
+              <td>x</td>
+              <td class='col centered'>
+                blah
+              </td>
+              <td>/</td>
+              <td class='col centered'>
+                blah
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <div class='centered'>
+          <table>
+            <tr>
+              <th class='col centered'>
+                <span>Risk in 80 hours</span>
+                <span class='font-light'>(Probability)</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+              </th>
+              <th></th>
+              <th class='col centered'>
+              </th>
+              <th></th>
+              <th class='col centered'>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Intermediate Factor</span>
+                <span class='font-light'>(Quanta)</span>
+              </th>
+            </tr>
+            <tr>
+              <td class='col centered'>
+                blah
+              </td>
+              <td>=</td>
+              <td class='col centered'>
+                1
+              </td>
+              <td>-</td>
+              <td class='col centered'>
+                1
+              </td>
+              <td>/</td>
+              <td class='col centered'>
+                exp
+              </td>
+              <td>^</td>
+              <td class='col centered'>
+                blah
+              </td>
+            </tr>
+          </table>
+        </div>
         <h4>Rapid Testing</h4>
 
         <p>
