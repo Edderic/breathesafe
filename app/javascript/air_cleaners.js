@@ -52,6 +52,17 @@ export class AirCleaner {
     return ach
   }
 
+  computeFiltrationAirCleanerACH() {
+    return this.computeACH()
+  }
+
+  computeUVACH() {
+    return 0
+  }
+
+  computeVentilationACH() {
+    return 0
+  }
   costInYears(years) {
     return this.numDevices() * (this.device.initialCostUSD + years * this.device.recurringCostPerYearUSD)
   }

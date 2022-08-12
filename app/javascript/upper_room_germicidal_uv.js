@@ -83,6 +83,18 @@ export class UpperRoomGermicidalUV {
     return this.numDevices() * (this.device.initialCostUSD + years * this.device.recurringCostPerYearUSD)
   }
 
+  computeVentilationACH() {
+    return 0
+  }
+
+  computeFiltrationAirCleanerACH() {
+    return 0
+  }
+
+  computeUVACH() {
+    return this.computeACH()
+  }
+
   isUpperUV() {
     return true
   }

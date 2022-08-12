@@ -85,6 +85,7 @@ export class Intervention {
     this.ventilationAch = event.ventilationAch
     this.roomUsableVolumeCubicMeters = event.roomUsableVolumeCubicMeters
     this.activityGroups = event.activityGroups
+    this.selected = false
     this.riskiestMask = findRiskiestMask(this.activityGroups)
     this.riskiestPotentialInfector = findRiskiestPotentialInfector(this.activityGroups)
     this.riskiestActivityGroup = {
@@ -109,6 +110,14 @@ export class Intervention {
     return true
   }
 
+  select() {
+    this.selected = true
+  }
+
+  unselect() {
+    this.selected = false
+  }
+
   computeACH() {
     let total = this.totalAch
 
@@ -117,6 +126,31 @@ export class Intervention {
     }
 
     return total
+  }
+
+  computeAirCleanerACH() {
+    let total = this.portableAch
+
+    for (let intervention of this.interventions) {
+      total += intervention.computeFiltrationAirCleanerACH()
+    }
+
+    return total
+  }
+
+  computeUVACH() {
+    // TODO: add UV ACH
+    let total = this.uvAch || 0
+
+    for (let intervention of this.interventions) {
+      total += intervention.computeUVACH()
+    }
+
+    return total
+  }
+
+  computeVentilationACH() {
+    return this.ventilationAch
   }
 
   computeRisk(duration) {

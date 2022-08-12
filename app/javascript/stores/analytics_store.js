@@ -20,6 +20,10 @@ export const useAnalyticsStore = defineStore('analytics', {
       totalAch: 0.1
     }, []),
     interventions: [],
+    selectedIntervention: new Intervention({
+      activityGroups: [],
+      totalAch: 0.1
+    }, []),
     numPeopleToInvestIn: 5,
     event: "",
   }),
@@ -27,6 +31,17 @@ export const useAnalyticsStore = defineStore('analytics', {
     load(event) {
       this.event = event
       this.reload()
+    },
+    selectIntervention(id) {
+      let intervention = this.interventions.find((interv) => { return interv.id == id })
+      this.selectedIntervention = intervention
+      for (let interv of this.interventions) {
+        if (intervention.id == interv.id) {
+          interv.select()
+        } else {
+          interv.unselect()
+        }
+      }
     },
     setNumPeopleToInvestIn(num) {
       this.numPeopleToInvestIn = num

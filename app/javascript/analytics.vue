@@ -338,6 +338,11 @@
                 <span>Portable ACH</span>
                 <span class='font-light'>(1 / h)</span>
               </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Upper-Room UV ACH</span>
+                <span class='font-light'>(1 / h)</span>
+              </th>
             </tr>
             <tr>
               <ColoredCell
@@ -358,6 +363,13 @@
                 :colorScheme="colorInterpolationSchemeTotalAch"
                 :maxVal=1
                 :value='portableAchRounded'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+              />
+              <td>+</td>
+              <ColoredCell
+                :colorScheme="colorInterpolationSchemeTotalAch"
+                :maxVal=1
+                :value='0'
                 :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
               />
             </tr>
@@ -571,7 +583,7 @@
               <th>Total Cost in 10 years</th>
               <th>Benefit / Cost</th>
             </tr>
-            <tr v-for='intervention in interventions'>
+            <tr v-for='intervention in interventions' @click='selectIntervention(intervention.id)' :class='{ clicked: intervention.selected }'>
               <td v-if='intervention.applicable()'>
                   <div v-for='obj in intervention.websitesAndText()' class='col centered container'>
                     <img :src="obj.imgLink">
@@ -620,6 +632,121 @@
           </table>
         </div>
 
+        <h4>Computational Details</h4>
+        <p>Click on an intervention to see how risks are calculated.</p>
+
+        <div class='container'>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th class='col centered'>
+                  <span>Total ACH</span>
+                  <span class='font-light'>(1 / h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Ventilation ACH</span>
+                  <span class='font-light'>(1 / h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Portable ACH</span>
+                  <span class='font-light'>(1 / h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Upper-Room UV ACH</span>
+                  <span class='font-light'>(1 / h)</span>
+                </th>
+              </tr>
+              <tr>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.computeACH(), 1)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                />
+                <td>=</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.computeVentilationACH(), 1)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                />
+                <td>+</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.computeAirCleanerACH(), 1)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                />
+                <td>+</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.computeUVACH(), 1)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+                />
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class='centered'>
+          <table>
+            <tr>
+              <th class='col centered'>
+                <span>Clean Air Delivery Rate</span>
+                <span class='font-light'>({{this.measurementUnits.airDeliveryRateMeasurementTypeShort}})</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Unoccupied Room Volume</span>
+                <span class='font-light'>({{this.measurementUnits.cubicLengthShort}})</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Total ACH</span>
+                <span class='font-light'>(1 / h)</span>
+              </th>
+              <th v-if="systemOfMeasurement == 'imperial'"></th>
+              <th class='col centered' v-if="systemOfMeasurement == 'imperial'">
+                <span></span>
+                <span class='font-light'>(min / h)</span>
+              </th>
+            </tr>
+            <tr>
+              <ColoredCell
+                :colorScheme="colorInterpolationSchemeRoomVolume"
+                :maxVal=1
+                :value='totalFlowRateRounded'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+              />
+              <td>=</td>
+              <ColoredCell
+                :colorScheme="colorInterpolationSchemeRoomVolume"
+                :maxVal=1
+                :value='roomUsableVolumeRounded'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+              />
+              <td>x</td>
+              <ColoredCell
+                :colorScheme="colorInterpolationSchemeTotalAch"
+                :maxVal=1
+                :value='totalAchRounded'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+              />
+              <td v-if="systemOfMeasurement == 'imperial'">/</td>
+              <ColoredCell
+                v-if="systemOfMeasurement == 'imperial'"
+                :colorScheme="colorInterpolationSchemeTotalAch"
+                :maxVal=1
+                :value='60'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em', 'background-color': 'grey'}"
+              />
+            </tr>
+          </table>
+        </div>
         <h4>Rapid Testing</h4>
 
         <p>
@@ -632,6 +759,8 @@
               />.
           </span>
         </p>
+
+
       </div>
 
     </div>
@@ -730,7 +859,8 @@ export default {
         useAnalyticsStore,
         [
           'interventions',
-          'nullIntervention'
+          'nullIntervention',
+          'selectedIntervention'
         ]
     ),
     ...mapWritableState(
@@ -1258,7 +1388,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(useAnalyticsStore, ['reload', 'setNumPeopleToInvestIn']),
+    ...mapActions(useAnalyticsStore, ['reload', 'setNumPeopleToInvestIn', 'selectIntervention']),
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
@@ -1277,7 +1407,7 @@ export default {
     setNumPeople(event) {
       this.setNumPeopleToInvestIn(parseInt(event.target.value))
       this.reload()
-    }
+    },
   }
 }
 
@@ -1404,5 +1534,9 @@ export default {
   }
   .italic {
     font-style: italic;
+  }
+
+  .clicked {
+    background-color: #e6e6e6;
   }
 </style>
