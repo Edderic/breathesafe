@@ -782,11 +782,11 @@
               </td>
               <td>=</td>
               <td class='col centered'>
-                blah
+                18.6
               </td>
               <td>x</td>
               <td class='col centered'>
-                blah
+                3.3
               </td>
               <td>x</td>
               <td class='col centered'>
