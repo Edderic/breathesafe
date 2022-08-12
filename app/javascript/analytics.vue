@@ -885,9 +885,12 @@
               </th>
             </tr>
             <tr>
-              <td class='col centered'>
-                blah
-              </td>
+              <ColoredCell
+                :colorScheme="riskColorScheme"
+                :maxVal=1
+                :value='roundOut(intermediateProductWithIntervention, 6)'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+              />
               <td>=</td>
               <td class='col centered'>
                 {{ roundOut(infectorProductWithIntervention, 1) }}
@@ -901,9 +904,12 @@
                 40
               </td>
               <td>/</td>
-              <td class='col centered'>
-                blah
-              </td>
+              <ColoredCell
+                :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                :maxVal=1
+                :value='roundOut(computeTotalFlowRate(roomUsableVolumeCubicMeters *  selectedIntervention.computeACH()), 1)'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '2em' }"
+              />
             </tr>
           </table>
         </div>
@@ -912,7 +918,7 @@
           <table>
             <tr>
               <th class='col centered'>
-                <span>Risk in 80 hours</span>
+                <span>Risk in 40 hours</span>
                 <span class='font-light'>(Probability)</span>
               </th>
               <th></th>
@@ -931,9 +937,12 @@
               </th>
             </tr>
             <tr>
-              <td class='col centered'>
-                blah
-              </td>
+              <ColoredCell
+                :colorScheme="riskColorScheme"
+                :maxVal=1
+                :value='this.selectedIntervention.computeRiskRounded(40)'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+              />
               <td>=</td>
               <td class='col centered'>
                 1
@@ -947,9 +956,12 @@
                 exp
               </td>
               <td>^</td>
-              <td class='col centered'>
-                blah
-              </td>
+              <ColoredCell
+                :colorScheme="riskColorScheme"
+                :maxVal=1
+                :value='roundOut(intermediateProductWithIntervention, 6)'
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+              />
             </tr>
           </table>
         </div>
@@ -1138,6 +1150,17 @@ export default {
           'totalAch'
         ]
     ),
+    durationWithIntervention() {
+      return 40
+    },
+    intermediateProductWithIntervention() {
+      let cadr = this.computeTotalFlowRate(
+        this.roomUsableVolumeCubicMeters *
+        this.selectedIntervention.computeACH())
+
+      return this.infectorProductWithIntervention * this.susceptibleProductWithIntervention
+         * this.durationWithIntervention / cadr
+    },
     infectorProductWithIntervention() {
       return 18.6 * 3.3 * this.aerosolActivityToFactor(
         this.riskiestPotentialInfector["aerosolGenerationActivity"]
@@ -1537,8 +1560,26 @@ export default {
 
       return collection
     },
+    cutoffsMetricVolume() {
+      let factor = 500 // cubic meters per hour
+      let collection = []
+
+      for (let i = 0; i < colorSchemeFall.length; i++) {
+        collection.push(
+          {
+            'lowerBound': (i) * factor,
+            'upperBound': (i + 1) * factor,
+          }
+        )
+      }
+
+      return collection
+    },
     colorInterpolationSchemeRoomVolume() {
       return assignBoundsToColorScheme(colorSchemeFall, this.cutoffsVolume)
+    },
+    colorInterpolationSchemeRoomVolumeMetric() {
+      return assignBoundsToColorScheme(colorSchemeFall, this.cutoffsMetricVolume)
     },
     numSuggestedAirCleaners() {
       return computeAmountOfPortableAirCleanersThatCanFit(
@@ -1629,7 +1670,7 @@ export default {
       return this.roomUsableVolumeCubicMeters * totalACH
     },
     computeTotalFlowRate(totalFlowRateCubicMetersPerHour) {
-      return displayCADR(this.systemOfMeasurement, totalFlowRateCubicMetersPerHour)
+      return displayCADR('metric', totalFlowRateCubicMetersPerHour)
     },
     totalFlowRateRounded() {
       return round(this.totalFlowRate, 1)
