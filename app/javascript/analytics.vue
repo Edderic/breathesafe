@@ -825,19 +825,15 @@
               <th></th>
               <th class='col centered'>
                 <span>Susceptible Breathing Rate</span>
+                <span class='font-light italic'>
+                  {{worstCaseInhalation["inhalationActivity"]}}
+                </span>
                 <span class='font-light'>(m³ / h)</span>
-              </th>
-
-              <th></th>
-              <th class='col centered'>
-                <span>Susceptible Inhalation Activity Factor</span>
-                <span class='font-light'>(dimensionless)</span>
               </th>
             </tr>
             <tr>
               <td class='col centered'>
-                <span>Susceptible Product</span>
-                <span class='font-light'>(m³ / h)</span>
+                {{ roundOut(susceptibleProductWithIntervention, 3) }}
               </td>
 
               <td>=</td>
@@ -845,20 +841,16 @@
                 :colorScheme="riskiestMaskColorScheme"
                 :maxVal=1
                 :value='selectedIntervention.computeSusceptibleMask()["maskPenetrationFactor"]'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em' }"
               />
 
               <td>x</td>
-              <td class='col centered'>
-                <span>Susceptible Breatding Rate</span>
-                <span class='font-light'>({{this.measurementUnits.airDeliveryRateMeasurementTypeShort}})</span>
-              </td>
-
-              <td>x</td>
-              <td class='col centered'>
-                <span>Susceptible Inhalation Activity Factor</span>
-                <span class='font-light'>(dimensionless)</span>
-              </td>
+              <ColoredCell
+                  :colorScheme="inhalationActivityScheme"
+                  :maxVal=1
+                  :value='worstCaseInhalation["inhalationFactor"]'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em' }"
+              />
             </tr>
 
           </table>
@@ -878,7 +870,7 @@
               </th>
               <th></th>
               <th class='col centered'>
-                <span>Susceptible Factor</span>
+                <span>Susceptible Product</span>
                 <span class='font-light'>(m³ / h)</span>
               </th>
               <th></th>
@@ -898,15 +890,15 @@
               </td>
               <td>=</td>
               <td class='col centered'>
-                blah
+                {{ roundOut(infectorProductWithIntervention, 1) }}
               </td>
               <td>x</td>
               <td class='col centered'>
-                blah
+                {{ roundOut(susceptibleProductWithIntervention, 3) }}
               </td>
               <td>x</td>
               <td class='col centered'>
-                blah
+                40
               </td>
               <td>/</td>
               <td class='col centered'>
@@ -1593,6 +1585,10 @@ export default {
     },
     totalAchRounded() {
       return round(this.totalAch, 1)
+    },
+    susceptibleProductWithIntervention() {
+      return this.selectedIntervention.computeSusceptibleMask()["maskPenetrationFactor"]
+        * this.worstCaseInhalation["inhalationFactor"]
     },
     ventilationAchRounded() {
       return round(this.ventilationAch, 1)
