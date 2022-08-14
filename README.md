@@ -3,6 +3,37 @@
 This README would normally document whatever steps are necessary to get the
 application up and running.
 
+## Install RVM
+- [RVM](https://rvm.io/)
+
+## Install Ruby
+`rvm install 3.0.0`
+
+## Install Postgresql
+`brew services start postgresql`
+
+### On Mac
+
+`brew install postgresql`
+
+## Install Gems
+`bundle install`
+
+## Install Node
+https://nodejs.org/en/
+
+## Install NPM
+`sudo npm install -g npm`
+
+## Install Yarn
+`npm install --global yarn`
+
+
+## Run postgresql service
+`brew services start postgresql`
+
+
+
 Things you may want to cover:
 
 * Ruby version
