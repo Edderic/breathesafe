@@ -750,6 +750,22 @@ export function deepSnakeToCamel(obj) {
   return new_obj
 }
 
+function emissionRate(activityGroups) {
+  let total = 0
+
+  for (let activityGroup of activityGroups) {
+    let met = getMetFromCO2GenerationActivity(activityGroup['carbonDioxideGenerationActivity'])
+    let co2GenerationRate = getCO2GenerationRate(met, activityGroup['sex'] == 'Male', activityGroup['ageGroup'])
+    total += co2GenerationRate * parseInt(activityGroup['numberOfPeople'])
+  }
+
+  return total
+}
+
+export function computeCO2EmissionRate(activityGroups) {
+  return emissionRate(activityGroups)
+}
+
 export function computeVentilationACH(
   activityGroups,
   ambientPPM,
@@ -779,13 +795,7 @@ export function computeVentilationACH(
    *
    */
 
-  let total = 0
-
-  for (let activityGroup of activityGroups) {
-    let met = getMetFromCO2GenerationActivity(activityGroup['carbonDioxideGenerationActivity'])
-    let co2GenerationRate = getCO2GenerationRate(met, activityGroup['sex'] == 'Male', activityGroup['ageGroup'])
-    total += co2GenerationRate * parseInt(activityGroup['numberOfPeople'])
-  }
+  let total = emissionRate(activityGroups)
 
   const numerator = total * 3.6 * 1000000
   // 36 * 10^5

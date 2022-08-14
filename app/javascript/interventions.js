@@ -4,6 +4,7 @@ import {
   findRiskiestMask,
   riskIndividualIsNotInfGivenNegRapidTest } from './risk.js';
 import {
+  computeCO2EmissionRate,
   computePortableACH,
   computeVentilationACH,
   convertCubicMetersPerHour,
@@ -239,6 +240,10 @@ export class Intervention {
     return this.durToLikelyInfection
   }
 
+  computeEmissionRate() {
+    return computeCO2EmissionRate(this.activityGroups)
+  }
+
   computeSusceptibleMask() {
     for (let intervention of this.interventions) {
       if (intervention.isMask()) {
@@ -394,6 +399,22 @@ export class Intervention {
     }
 
     return tmp
+  }
+
+  steadyStateCO2Reading() {
+    return this.event.ventilationCo2SteadyStatePpm
+  }
+
+  ambientCO2Reading() {
+    return this.event.ventilationCo2AmbientPpm
+  }
+
+  co2DiffReading() {
+    return this.steadyStateCO2Reading() - this.ambientCO2Reading()
+  }
+
+  ventilationDenominator() {
+    return this.event.roomUsableVolumeCubicMeters * this.co2DiffReading()
   }
 
   websitesAndText() {

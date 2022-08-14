@@ -633,103 +633,121 @@
           </table>
         </div>
 
-        <h4>Computational Details</h4>
+        <h3>Computational Details</h3>
         <p>Click on an intervention to see how risks are calculated.</p>
 
-        <div class='container'>
-          <div class='centered'>
-            <table>
-              <tr>
-                <th class='col centered'>
-                  <span>Total ACH</span>
-                  <span class='font-light'>(1 / h)</span>
-                </th>
-                <th></th>
-                <th class='col centered'>
-                  <span>Ventilation ACH</span>
-                  <span class='font-light'>(1 / h)</span>
-                </th>
-                <th></th>
-                <th class='col centered'>
-                  <span>Portable ACH</span>
-                  <span class='font-light'>(1 / h)</span>
-                </th>
-                <th></th>
-                <th class='col centered'>
-                  <span>Upper-Room UV ACH</span>
-                  <span class='font-light'>(1 / h)</span>
-                </th>
-              </tr>
-              <tr>
-                <ColoredCell
-                  :colorScheme="colorInterpolationSchemeTotalAch"
-                  :maxVal=1
-                  :value='roundOut(this.selectedIntervention.computeACH(), 1)'
-                  class='color-cell'
-                />
-                <td>=</td>
-                <ColoredCell
-                  :colorScheme="colorInterpolationSchemeTotalAch"
-                  :maxVal=1
-                  :value='roundOut(this.selectedIntervention.computeVentilationACH(), 1)'
-                  class='color-cell'
-                />
-                <td>+</td>
-                <ColoredCell
-                  :colorScheme="colorInterpolationSchemeTotalAch"
-                  :maxVal=1
-                  :value='roundOut(this.selectedIntervention.computeAirCleanerACH(), 1)'
-                  class='color-cell'
-                />
-                <td>+</td>
-                <ColoredCell
-                  :colorScheme="colorInterpolationSchemeTotalAch"
-                  :maxVal=1
-                  :value='roundOut(this.selectedIntervention.computeUVACH(), 1)'
-                  class='color-cell'
-                />
-              </tr>
-            </table>
-          </div>
+        <div class='centered'>
+          <table>
+            <tr>
+              <th class='col centered'>
+                <span>Risk in 40 hours</span>
+                <span class='font-light'>(Probability)</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+              </th>
+              <th></th>
+              <th class='col centered'>
+              </th>
+              <th></th>
+              <th class='col centered'>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Intermediate Factor</span>
+                <span class='font-light'>(Quanta)</span>
+              </th>
+            </tr>
+            <tr>
+              <ColoredCell
+                :colorScheme="riskColorScheme"
+                :maxVal=1
+                :value='this.selectedIntervention.computeRiskRounded(40)'
+                class='color-cell'
+              />
+              <td>=</td>
+              <td class='col centered'>
+                1
+              </td>
+              <td>-</td>
+              <td class='col centered'>
+                1
+              </td>
+              <td>/</td>
+              <td class='col centered'>
+                exp
+              </td>
+              <td>^</td>
+              <ColoredCell
+                :colorScheme="riskColorScheme"
+                :maxVal=1
+                :value='roundOut(intermediateProductWithIntervention, 6)'
+                class='color-cell'
+              />
+            </tr>
+          </table>
         </div>
 
         <div class='centered'>
           <table>
             <tr>
               <th class='col centered'>
-                <span>Clean Air Delivery Rate</span>
+                <span>Intermediate Factor</span>
+                <span class='font-light'>(Quanta)</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Infector Product</span>
+                <span class='font-light'>(Quanta / h)</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Susceptible Product</span>
                 <span class='font-light'>(m³ / h)</span>
               </th>
               <th></th>
               <th class='col centered'>
-                <span>Unoccupied Room Volume</span>
-                <span class='font-light'>(m³)</span>
+                <span>Duration</span>
+                <span class='font-light'>(h)</span>
               </th>
               <th></th>
               <th class='col centered'>
-                <span>Total ACH</span>
-                <span class='font-light'>(1 / h)</span>
+                <span>Clean Air Delivery Rate</span>
+                <span class='font-light'>(m³ / h)</span>
               </th>
             </tr>
             <tr>
               <ColoredCell
-                :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                :colorScheme="riskColorScheme"
                 :maxVal=1
-                :value='roundOut(computeTotalFlowRate(roomUsableVolumeCubicMeters *  selectedIntervention.computeACH()), 1)'
+                :value='roundOut(intermediateProductWithIntervention, 6)'
                 class='color-cell'
               />
               <td>=</td>
               <ColoredCell
-                :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                v-if="nullIntervention"
+                :colorScheme="averageInfectedPeopleInterpolationScheme"
                 :maxVal=1
-                :value='roundOut(roomUsableVolumeCubicMeters, 1)'
+                :value='roundOut(infectorProductWithIntervention, 1)'
                 class='color-cell'
               />
               <td>x</td>
               <ColoredCell
-                :colorScheme="colorInterpolationSchemeTotalAch"
+                v-if="nullIntervention"
+                :colorScheme="averageInfectedPeopleInterpolationScheme"
                 :maxVal=1
-                :value='roundOut(selectedIntervention.computeACH(), 1)'
+                :value='roundOut(susceptibleProductWithIntervention, 3)'
+                class='color-cell'
+              />
+              <td>x</td>
+              <td class='col centered'>
+                40
+              </td>
+              <td>/</td>
+              <ColoredCell
+                :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                :maxVal=1
+                :value='roundOut(computeTotalFlowRate(roomUsableVolumeCubicMeters *  selectedIntervention.computeACH()), 1)'
                 class='color-cell'
               />
             </tr>
@@ -864,119 +882,285 @@
           <table>
             <tr>
               <th class='col centered'>
-                <span>Intermediate Factor</span>
-                <span class='font-light'>(Quanta)</span>
-              </th>
-              <th></th>
-              <th class='col centered'>
-                <span>Infector Product</span>
-                <span class='font-light'>(Quanta / h)</span>
-              </th>
-              <th></th>
-              <th class='col centered'>
-                <span>Susceptible Product</span>
-                <span class='font-light'>(m³ / h)</span>
-              </th>
-              <th></th>
-              <th class='col centered'>
-                <span>Duration</span>
-                <span class='font-light'>(h)</span>
-              </th>
-              <th></th>
-              <th class='col centered'>
                 <span>Clean Air Delivery Rate</span>
                 <span class='font-light'>(m³ / h)</span>
               </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Unoccupied Room Volume</span>
+                <span class='font-light'>(m³)</span>
+              </th>
+              <th></th>
+              <th class='col centered'>
+                <span>Total ACH</span>
+                <span class='font-light'>(1 / h)</span>
+              </th>
             </tr>
             <tr>
-              <ColoredCell
-                :colorScheme="riskColorScheme"
-                :maxVal=1
-                :value='roundOut(intermediateProductWithIntervention, 6)'
-                class='color-cell'
-              />
-              <td>=</td>
-              <ColoredCell
-                v-if="nullIntervention"
-                :colorScheme="averageInfectedPeopleInterpolationScheme"
-                :maxVal=1
-                :value='roundOut(infectorProductWithIntervention, 1)'
-                class='color-cell'
-              />
-              <td>x</td>
-              <ColoredCell
-                v-if="nullIntervention"
-                :colorScheme="averageInfectedPeopleInterpolationScheme"
-                :maxVal=1
-                :value='roundOut(susceptibleProductWithIntervention, 3)'
-                class='color-cell'
-              />
-              <td>x</td>
-              <td class='col centered'>
-                40
-              </td>
-              <td>/</td>
               <ColoredCell
                 :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
                 :maxVal=1
                 :value='roundOut(computeTotalFlowRate(roomUsableVolumeCubicMeters *  selectedIntervention.computeACH()), 1)'
                 class='color-cell'
               />
+              <td>=</td>
+              <ColoredCell
+                :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                :maxVal=1
+                :value='roundOut(roomUsableVolumeCubicMeters, 1)'
+                class='color-cell'
+              />
+              <td>x</td>
+              <ColoredCell
+                :colorScheme="colorInterpolationSchemeTotalAch"
+                :maxVal=1
+                :value='roundOut(selectedIntervention.computeACH(), 1)'
+                class='color-cell'
+              />
             </tr>
           </table>
         </div>
 
-        <div class='centered'>
-          <table>
-            <tr>
-              <th class='col centered'>
-                <span>Risk in 40 hours</span>
-                <span class='font-light'>(Probability)</span>
-              </th>
-              <th></th>
-              <th class='col centered'>
-              </th>
-              <th></th>
-              <th class='col centered'>
-              </th>
-              <th></th>
-              <th class='col centered'>
-              </th>
-              <th></th>
-              <th class='col centered'>
-                <span>Intermediate Factor</span>
-                <span class='font-light'>(Quanta)</span>
-              </th>
-            </tr>
-            <tr>
-              <ColoredCell
-                :colorScheme="riskColorScheme"
-                :maxVal=1
-                :value='this.selectedIntervention.computeRiskRounded(40)'
-                class='color-cell'
-              />
-              <td>=</td>
-              <td class='col centered'>
-                1
-              </td>
-              <td>-</td>
-              <td class='col centered'>
-                1
-              </td>
-              <td>/</td>
-              <td class='col centered'>
-                exp
-              </td>
-              <td>^</td>
-              <ColoredCell
-                :colorScheme="riskColorScheme"
-                :maxVal=1
-                :value='roundOut(intermediateProductWithIntervention, 6)'
-                class='color-cell'
-              />
-            </tr>
-          </table>
+        <div class='container'>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th class='col centered'>
+                  <span>Total ACH</span>
+                  <span class='font-light'>(1 / h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Ventilation ACH</span>
+                  <span class='font-light'>(1 / h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Portable ACH</span>
+                  <span class='font-light'>(1 / h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Upper-Room UV ACH</span>
+                  <span class='font-light'>(1 / h)</span>
+                </th>
+              </tr>
+              <tr>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.computeACH(), 1)'
+                  class='color-cell'
+                />
+                <td>=</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.computeVentilationACH(), 1)'
+                  class='color-cell'
+                />
+                <td>+</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.computeAirCleanerACH(), 1)'
+                  class='color-cell'
+                />
+                <td>+</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.computeUVACH(), 1)'
+                  class='color-cell'
+                />
+              </tr>
+            </table>
+          </div>
         </div>
+
+        <h4>Ventilation ACH</h4>
+
+        <div class='container'>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th class='col centered'>
+                  <span>Ventilation ACH</span>
+                  <span class='font-light'>(1 / h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span></span>
+                  <span class='font-light'>(m³ x s) / (h x L)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Total CO2 Emission Rate</span>
+                  <span class='font-light'>(L / s)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span></span>
+                  <span class='font-light'>(ppm)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Denominator</span>
+                  <span class='font-light'>(m³ ppm)</span>
+                </th>
+              </tr>
+              <tr>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.computeVentilationACH(), 1)'
+                  class='color-cell'
+                />
+                <td>=</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='3.6'
+                  class='color-cell'
+                  style='background-color: grey;'
+                />
+                <td>x</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.computeEmissionRate(), 3)'
+                  class='color-cell'
+                />
+                <td>x</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='1000000'
+                  class='color-cell'
+                  style='background-color: grey;'
+                />
+                <td>/</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.ventilationDenominator(), 1)'
+                  class='color-cell'
+                />
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class='container'>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th class='col centered'>
+                  <span></span>
+                  <span class='font-light'>(m³ x s) / (h x L)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span></span>
+                  <span class='font-light'>(m³ / L)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span></span>
+                  <span class='font-light'>(s / h)</span>
+                </th>
+              </tr>
+              <tr>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='3.6'
+                  class='color-cell'
+                  style='background-color: grey;'
+                />
+                <td>=</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='0.001'
+                  class='color-cell'
+                  style='background-color: grey;'
+                />
+                <td>x</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='3600'
+                  class='color-cell'
+                  style='background-color: grey;'
+                />
+              </tr>
+            </table>
+
+          </div>
+        </div>
+
+        <div class='container'>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th class='col centered'>
+                  <span>Denominator</span>
+                  <span class='font-light'>(m³ ppm)</span>
+                </th>
+                <th></th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Steady State CO2</span>
+                  <span class='font-light'>(ppm)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Ambient CO2</span>
+                  <span class='font-light'>(ppm)</span>
+                </th>
+                <th></th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Room Usable Volume</span>
+                  <span class='font-light'>(m³)</span>
+                </th>
+              </tr>
+              <tr>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.ventilationDenominator(), 1)'
+                  class='color-cell'
+                />
+                <td>=</td>
+                <td>(</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.steadyStateCO2Reading(), 0)'
+                  class='color-cell'
+                />
+                <td>-</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.ambientCO2Reading(), 0)'
+                  class='color-cell'
+                />
+                <td>)</td>
+                <td>x</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                  :maxVal=1
+                  :value='roundOut(roomUsableVolumeCubicMeters, 1)'
+                  class='color-cell'
+                />
+              </tr>
+            </table>
+          </div>
+        </div>
+
         <h4>Rapid Testing</h4>
 
         <p>
@@ -1825,4 +2009,5 @@ export default {
     text-shadow: 1px 1px 2px black;
     padding: 1em;
   }
+
 </style>
