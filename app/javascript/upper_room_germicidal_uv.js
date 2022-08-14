@@ -14,7 +14,7 @@ export const UPPER_ROOM_GERMICIDAL_UV = [
     'recurringCostPerYearUSD': 50,
     'recurringDurationYears': 1,
     'heightLowerBoundMeters': 2.4384,
-    'numDeviceFactor': 1,
+    'numDeviceFactor': 3,
     'mW': 600,
     'website': 'https://www.cdc.gov/coronavirus/2019-ncov/community/ventilation/uvgi.html',
     'type': 'Upper Room Germicidal UV',
@@ -33,7 +33,7 @@ export const UPPER_ROOM_GERMICIDAL_UV = [
     'recurringDurationYears': 1,
     'recurringCostPerYearUSD': 50,
     'heightLowerBoundMeters': 2.4384,
-    'numDeviceFactor': 3,
+    'numDeviceFactor': 6,
     'mW': 600,
     'website': 'https://www.cdc.gov/coronavirus/2019-ncov/community/ventilation/uvgi.html',
     'type': 'Upper Room Germicidal UV',
@@ -52,7 +52,7 @@ export const UPPER_ROOM_GERMICIDAL_UV = [
     'recurringCostDetails': 'to replace bulbs',
     'recurringDurationYears': 1,
     'heightLowerBoundMeters': 4.4384,
-    'numDeviceFactor': 0.5,
+    'numDeviceFactor': 1.5,
     'mW': 6250,
     'website': 'https://www.cdc.gov/coronavirus/2019-ncov/community/ventilation/uvgi.html',
     'type': 'Upper Room Germicidal UV',
@@ -136,9 +136,13 @@ export class UpperRoomGermicidalUV {
       500,
       'feet',
       'meters'
-    ) * 3 * this.device.numDeviceFactor
+    ) * this.device.numDeviceFactor
 
     return round(val, 0)
+  }
+
+  numDeviceFactor() {
+    return this.device.numDeviceFactor
   }
 
   recurringCost() {

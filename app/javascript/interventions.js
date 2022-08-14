@@ -323,6 +323,27 @@ export class Intervention {
 
   }
 
+  findUVDevices() {
+    for (let intervention of this.interventions) {
+      if (intervention.isUpperUV()) {
+        // susceptible and infector wear the same mask
+        return intervention
+      }
+    }
+
+    return {
+      numDevices() {
+        return 0
+      },
+
+      numDeviceFactor() {
+        return 0
+      },
+
+      mW: 0,
+    }
+  }
+
   numEventsToInfectionWithCertainty() {
     if (this.numEventsToEnsureInfection) {
       return this.numEventsToEnsureInfection

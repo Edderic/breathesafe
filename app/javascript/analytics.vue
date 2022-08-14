@@ -781,6 +781,9 @@
               <th></th>
               <th class='col centered'>
                 <span>Infector Masking Penetration Factor</span>
+                <span class='font-light italic'>
+                  {{selectedIntervention.computeSusceptibleMask()['maskType']}}
+                </span>
                 <span class='font-light'>(dimensionless)</span>
               </th>
             </tr>
@@ -837,6 +840,9 @@
               <th></th>
               <th class='col centered'>
                 <span>Susceptible Masking Penetration Factor</span>
+                <span class='font-light italic'>
+                  {{selectedIntervention.computeSusceptibleMask()['maskType']}}
+                </span>
                 <span class='font-light'>(dimensionless)</span>
               </th>
 
@@ -1122,7 +1128,7 @@
                 <th></th>
                 <th></th>
                 <th class='col centered'>
-                  <span>Room Usable Volume</span>
+                  <span>Volume Occupied by Air</span>
                   <span class='font-light'>(m³)</span>
                 </th>
               </tr>
@@ -1248,6 +1254,197 @@
 
         <p><span class='bold'>Exhalation Activity CO2</span> values were calculated using regression on data referenced <a href="https://forhealth.org/tools/co2-calculator/">here</a>.</p>
 
+        <h4>Upper-Room Germicidal UV ACH</h4>
+
+        <div class='container'>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th class='col centered'>
+                  <span>Upper-Room Germicidal UV ACH</span>
+                  <span class='font-light'>(1 / h)</span>
+                </th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Number of Devices</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Power</span>
+                  <span class='font-light'>(mW)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Volume Occupied by Air</span>
+                  <span class='font-light'>(m³)</span>
+                </th>
+              </tr>
+
+              <tr>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.computeUVACH(), 1)'
+                  class='color-cell'
+                />
+                <td>=</td>
+                <td>2</td>
+                <td>x</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.findUVDevices().numDevices(), 0)'
+                  class='color-cell'
+                />
+                <td>x</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.findUVDevices().mW, 0)'
+                  class='color-cell'
+                />
+                <td>/</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                  :maxVal=1
+                  :value='roundOut(roomUsableVolumeCubicMeters, 1)'
+                  class='color-cell'
+                />
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <p>
+        I got the idea of how to estimate Upper-Room UV ACH from <a href="https://twitter.com/joeyfox85/status/1512230529424371712?s=20&t=Fsswbo2rLsUPZqrsGyI0IQ">Joey Fox</a>.
+        To figure out how many fixtures are needed, one can use the
+          <a href="To figure out how many fixtures are needed, one can use the">
+          CDC's guidelines. See the Installation and Maintenance section for more details:
+          </a>
+        </p>
+        <p class='quote'>A typical room with 500 square feet (ft2) of floor space will generally require two to three UV fixtures.</p>
+
+        <div class='container'>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th class='col centered'>
+                  <span>Number of Devices</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Room Length</span>
+                  <span class='font-light'>(m)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Room Width</span>
+                  <span class='font-light'>(m)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Square Meters</span>
+                  <span class='font-light'>(m²)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Factor</span>
+                  <span class='font-light'>(dimension-less)</span>
+                </th>
+              </tr>
+
+              <tr>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.findUVDevices().numDevices(), 1)'
+                  class='color-cell'
+                />
+                <td>=</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                  :maxVal=1
+                  :value='roundOut(this.roomLengthMeters, 0)'
+                  class='color-cell'
+                />
+                <td>x</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                  :maxVal=1
+                  :value='roundOut(this.roomWidthMeters, 0)'
+                  class='color-cell'
+                />
+                <td>/</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                  :maxVal=1
+                  :value='46.4515'
+                  class='color-cell'
+                  style='background-color: grey;'
+                />
+                <td>x</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                  :maxVal=1
+                  :value='this.selectedIntervention.findUVDevices().numDeviceFactor()'
+                  class='color-cell'
+                  style='background-color: grey;'
+                />
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class='container'>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th class='col centered'>
+                  <span>Square Meters</span>
+                  <span class='font-light'>(m²)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Square Feet</span>
+                  <span class='font-light'>(ft²)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span></span>
+                  <span class='font-light'>(m² / ft²)</span>
+                </th>
+              </tr>
+
+              <tr>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                  :maxVal=1
+                  :value='46.4515'
+                  class='color-cell'
+                  style='background-color: grey;'
+                />
+                <td>=</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                  :maxVal=1
+                  :value='500'
+                  class='color-cell'
+                  style='background-color: grey;'
+                />
+                <td>x</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                  :maxVal=1
+                  :value='0.092903'
+                  class='color-cell'
+                  style='background-color: grey;'
+                />
+              </tr>
+            </table>
+          </div>
+        </div>
         <h4>Rapid Testing</h4>
 
         <p>
@@ -2105,6 +2302,11 @@ export default {
     color: white;
     text-shadow: 1px 1px 2px black;
     padding: 1em;
+  }
+
+  .quote {
+    font-style: italic;
+    padding-left: 2em;
   }
 
 </style>
