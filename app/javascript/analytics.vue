@@ -4,6 +4,140 @@
       <h3 class='subsection'>Analysis & Recommendations for {{this.roomName}}</h3>
       <div class='centered col'>
         <div class='container'>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th></th>
+                <th>1 hour</th>
+                <th>8 hours</th>
+                <th>40 hours</th>
+                <th>80 hours</th>
+              </tr>
+
+              <tr>
+                <th>Risk</th>
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="riskColorScheme"
+                    :maxVal=1
+                    :value='nullIntervention.computeRiskRounded()'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="riskColorScheme"
+                    :maxVal=1
+                    :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**8, 6)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="riskColorScheme"
+                    :maxVal=1
+                    :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**40, 6)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="riskColorScheme"
+                    :maxVal=1
+                    :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**80, 6)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+              </tr>
+              <tr>
+                <th>Average # of Susceptibles Infected under Max Occupancy</th>
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="averageInfectedPeopleInterpolationScheme"
+                    :maxVal=1
+                    :text='roundOut(this.maximumOccupancy * nullIntervention.computeRiskRounded(), 1)'
+                    :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="averageInfectedPeopleInterpolationScheme"
+                    :maxVal=1
+                    :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**8), 1)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="averageInfectedPeopleInterpolationScheme"
+                    :maxVal=1
+                    :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**40), 1)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="averageInfectedPeopleInterpolationScheme"
+                    :maxVal=1
+                    :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**80), 1)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+              </tr>
+            </table>
+          </div>
+
+          <p>
+            The estimated maximum occupancy for this space is ~{{maximumOccupancy}}. To see how resilient this environment is in preventing outbreaks, let's assume there is one infector in this space.
+            <span>
+              In 1 hour, a susceptible's risk is <ColoredCell
+                  v-if="nullIntervention"
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='nullIntervention.computeRiskRounded()'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+              />
+            </span>, and if we repeat this many times under this assumption,
+            <span>
+            we should find on average that
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="averageInfectedPeopleInterpolationScheme"
+                    :maxVal=1
+                    :text='roundOut(this.maximumOccupancy * nullIntervention.computeRiskRounded(), 1)'
+                    :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+            </span> susceptibles would get infected.
+            <span> In 8 hours of exposure, the risk jumps to <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="riskColorScheme"
+                    :maxVal=1
+                    :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**8, 6)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+            </span>, and
+            <span>
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="averageInfectedPeopleInterpolationScheme"
+                    :maxVal=1
+                    :text='roundOut(this.maximumOccupancy * (1 - (1-nullIntervention.computeRiskRounded())**8), 1)'
+                    :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />
+            </span> susceptibles would get infected, on average. Likewise,
+<span>
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="averageInfectedPeopleInterpolationScheme"
+                    :maxVal=1
+                    :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**40), 1)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                /> and
+                <ColoredCell
+                    v-if="nullIntervention"
+                    :colorScheme="averageInfectedPeopleInterpolationScheme"
+                    :maxVal=1
+                    :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**80), 1)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                />, on average, would get infected under 40 and 80 hours of exposure with an infector in this environment.
+</span>
+          </p>
+
           <h4>Introduction</h4>
           <p>
             While vaccines prevent deaths and hospitalizations to a great degree, they by themselves are not so great at
@@ -130,133 +264,6 @@
             infector is wearing the riskiest mask (i.e. the mask with the worst fit and
             filtration efficiency) and is also doing the riskiest aerosol generation activity
             recorded (e.g. loudly talking).
-          </p>
-
-          <h4>Risk Assessment</h4>
-          <div class='centered'>
-            <table>
-              <tr>
-                <th></th>
-                <th>1 hour</th>
-                <th>8 hours</th>
-                <th>40 hours</th>
-                <th>80 hours</th>
-              </tr>
-
-              <tr>
-                <th>Risk</th>
-                <ColoredCell
-                    v-if="nullIntervention"
-                    :colorScheme="riskColorScheme"
-                    :maxVal=1
-                    :value='nullIntervention.computeRiskRounded()'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                />
-                <ColoredCell
-                    v-if="nullIntervention"
-                    :colorScheme="riskColorScheme"
-                    :maxVal=1
-                    :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**8, 6)'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                />
-                <ColoredCell
-                    v-if="nullIntervention"
-                    :colorScheme="riskColorScheme"
-                    :maxVal=1
-                    :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**40, 6)'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                />
-                <ColoredCell
-                    v-if="nullIntervention"
-                    :colorScheme="riskColorScheme"
-                    :maxVal=1
-                    :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**80, 6)'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                />
-              </tr>
-              <tr>
-                <th>Average # of Susceptibles Infected under Max Occupancy</th>
-                <ColoredCell
-                    v-if="nullIntervention"
-                    :colorScheme="averageInfectedPeopleInterpolationScheme"
-                    :maxVal=1
-                    :text='roundOut(this.maximumOccupancy * nullIntervention.computeRiskRounded(), 1)'
-                    :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                />
-                <ColoredCell
-                    v-if="nullIntervention"
-                    :colorScheme="averageInfectedPeopleInterpolationScheme"
-                    :maxVal=1
-                    :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**8), 1)'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                />
-                <ColoredCell
-                    v-if="nullIntervention"
-                    :colorScheme="averageInfectedPeopleInterpolationScheme"
-                    :maxVal=1
-                    :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**40), 1)'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                />
-                <ColoredCell
-                    v-if="nullIntervention"
-                    :colorScheme="averageInfectedPeopleInterpolationScheme"
-                    :maxVal=1
-                    :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**80), 1)'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                />
-              </tr>
-            </table>
-          </div>
-
-          <p>
-            <span>
-              In 1 hour, a susceptible's risk is <ColoredCell
-                  v-if="nullIntervention"
-                  :colorScheme="riskColorScheme"
-                  :maxVal=1
-                  :value='nullIntervention.computeRiskRounded()'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-              />
-            </span>, and if we repeat this many times under this assumption,
-            <span>
-            we should find on average that
-                <ColoredCell
-                    v-if="nullIntervention"
-                    :colorScheme="averageInfectedPeopleInterpolationScheme"
-                    :maxVal=1
-                    :text='roundOut(this.maximumOccupancy * nullIntervention.computeRiskRounded(), 1)'
-                    :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                />
-            </span> susceptibles would get infected.
-            <span> In 8 hours of exposure, the risk jumps to <ColoredCell
-                    v-if="nullIntervention"
-                    :colorScheme="riskColorScheme"
-                    :maxVal=1
-                    :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**8, 6)'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                />
-            </span>. Assuming max occupancy (with the same susceptibles staying throughout),
-            <span>
-                <ColoredCell
-                    v-if="nullIntervention"
-                    :colorScheme="averageInfectedPeopleInterpolationScheme"
-                    :maxVal=1
-                    :text='roundOut(this.maximumOccupancy * (1 - (1-nullIntervention.computeRiskRounded())**8), 1)'
-                    :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                />
-            </span> susceptibles would get infected, on average.
-            <span>
-              It would be very surprising if in <ColoredCell
-                    v-if="nullIntervention"
-                    :colorScheme="riskColorScheme"
-                    :maxVal=1
-                    :value='roundOut(nullIntervention.durationToLikelyInfection(), 1)'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                /> hours of exposure, a susceptible doesn't get infected (99% probability).
-            </span>
           </p>
 
           <h4>Behaviors</h4>
