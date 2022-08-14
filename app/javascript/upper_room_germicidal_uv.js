@@ -132,11 +132,17 @@ export class UpperRoomGermicidalUV {
       return 0
     }
 
-    const val = this.event.roomLengthMeters * this.event.roomWidthMeters / convertLengthBasedOnMeasurementType(
+    let once = convertLengthBasedOnMeasurementType(
       500,
       'feet',
       'meters'
-    ) * this.device.numDeviceFactor
+    )
+    const val = this.event.roomLengthMeters * this.event.roomWidthMeters /
+      convertLengthBasedOnMeasurementType(
+        once,
+        'feet',
+        'meters'
+      ) * this.device.numDeviceFactor
 
     return round(val, 0)
   }
