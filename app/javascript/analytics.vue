@@ -1161,6 +1161,93 @@
           </div>
         </div>
 
+        <div class='container'>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th class='col centered'>
+                  <span>Total CO2 Emission Rate</span>
+                  <span class='font-light'>(L / s)</span>
+                </th>
+
+                <th></th>
+
+                <th class='col centered'>
+                  <span>Exhalation Activity CO2</span>
+                  <span class='font-light'>(L / s)</span>
+                </th>
+
+                <th></th>
+
+                <th class='col centered'>
+                  <span>Num People</span>
+                </th>
+
+                <th></th>
+
+                <th class='col centered'>
+                  <span>Activity</span>
+                </th>
+
+                <th></th>
+
+                <th class='col centered'>
+                  <span>Sex</span>
+                </th>
+
+                <th></th>
+
+                <th class='col centered'>
+                  <span>Age Group</span>
+                </th>
+              </tr>
+              <tr v-for='(activityGroup, i) in activityGroups'>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.computeEmissionRate(), 3)'
+                  class='color-cell'
+                  v-if='i == 0'
+                />
+                <td v-else></td>
+
+                <td v-if='i == 0'>=</td>
+                <td v-else>+</td>
+
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(co2Rate(activityGroup), 6)'
+                  class='color-cell'
+                />
+
+                <td>x</td>
+
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='activityGroup.numberOfPeople'
+                  class='color-cell'
+                  style='background-color: grey'
+                />
+                <td></td>
+
+                <td>{{activityGroup.carbonDioxideGenerationActivity}}</td>
+
+                <td></td>
+
+                <td>{{activityGroup.sex}}</td>
+
+                <td></td>
+
+                <td>{{activityGroup.ageGroup}}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <p><span class='bold'>Exhalation Activity CO2</span> values were calculated using regression on data referenced <a href="https://forhealth.org/tools/co2-calculator/">here</a>.</p>
+
         <h4>Rapid Testing</h4>
 
         <p>
@@ -1238,6 +1325,7 @@ import { useProfileStore } from './stores/profile_store';
 import { usePrevalenceStore } from './stores/prevalence_store';
 import { mapWritableState, mapState, mapActions } from 'pinia';
 import {
+  CO2_TO_MET,
   computePortableACH,
   computeVentilationACH,
   convertCubicMetersPerHour,
@@ -1245,6 +1333,7 @@ import {
   cubicFeetPerMinuteTocubicMetersPerHour,
   displayCADR,
   findWorstCaseInhFactor,
+  getCO2Rate,
   infectorActivityTypes,
   maskToPenetrationFactor,
   setupCSRF,
@@ -1848,6 +1937,14 @@ export default {
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
     aerosolActivityToFactor(key) {
       return infectorActivityTypes[key]
+    },
+    co2Rate(activityGroup) {
+      let blah = getCO2Rate(
+        CO2_TO_MET[activityGroup.carbonDioxideGenerationActivity],
+        activityGroup["sex"] == "Male",
+        activityGroup["ageGroup"]
+      )
+      return blah
     },
     reduceRisk(before, after) {
       return reducedRisk(before, after)

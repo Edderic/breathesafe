@@ -820,31 +820,39 @@ export function computePortableACH(
   return total
 }
 
+const co2ToMet = {
+    "Calisthenics—light effort": 2.8,
+    "Calisthenics—moderate effort": 3.8,
+    "Calisthenics—vigorous effort": 8.0,
+    "Child care": 2.5, // 2 - 3
+    "Cleaning, sweeping—moderate effort": 3.8,
+    "Custodial work—light": 2.3,
+    "Dancing—aerobic, general": 7.3,
+    "Dancing—general": 7.8,
+    "Health club exercise classes—general": 5.0,
+    "Kitchen activity—moderate effort": 3.3,
+    "Lying or sitting quietly": 1.0,
+    "Sitting reading, writing, typing": 1.3,
+    "Sitting at sporting event as spectator": 1.5,
+    "Sitting tasks, light effort (e.g, office work)": 1.5,
+    "Sitting quietly in religious service": 1.3,
+    "Sleeping": 0.95,
+    "Standing quietly": 1.3,
+    "Standing tasks, light effort (e.g, store clerk, filing)": 3.0,
+    "Walking, less than 2 mph, level surface, very slow": 2.0,
+    "Walking, 2.8 mph to 3.2 mph, level surface, moderate pace": 3.5,
+}
+
+export const CO2_TO_MET = co2ToMet;
+
 function getMetFromCO2GenerationActivity(activity) {
-  const mapping = {
-      "Calisthenics—light effort": 2.8,
-      "Calisthenics—moderate effort": 3.8,
-      "Calisthenics—vigorous effort": 8.0,
-      "Child care": 2.5, // 2 - 3
-      "Cleaning, sweeping—moderate effort": 3.8,
-      "Custodial work—light": 2.3,
-      "Dancing—aerobic, general": 7.3,
-      "Dancing—general": 7.8,
-      "Health club exercise classes—general": 5.0,
-      "Kitchen activity—moderate effort": 3.3,
-      "Lying or sitting quietly": 1.0,
-      "Sitting reading, writing, typing": 1.3,
-      "Sitting at sporting event as spectator": 1.5,
-      "Sitting tasks, light effort (e.g, office work)": 1.5,
-      "Sitting quietly in religious service": 1.3,
-      "Sleeping": 0.95,
-      "Standing quietly": 1.3,
-      "Standing tasks, light effort (e.g, store clerk, filing)": 3.0,
-      "Walking, less than 2 mph, level surface, very slow": 2.0,
-      "Walking, 2.8 mph to 3.2 mph, level surface, moderate pace": 3.5,
-  }
+  const mapping = co2ToMet
 
   return mapping[activity]
+}
+
+export function getCO2Rate(met, man, age) {
+  return getCO2GenerationRate(met, man, age)
 }
 
 function getCO2GenerationRate(met, man, age) {
