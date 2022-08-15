@@ -2309,8 +2309,8 @@ export default {
 
   .centered {
     display: flex;
-    justify-content: center;
     align-items: center;
+    overflow-x: scroll;
   }
 
   .wider-input {

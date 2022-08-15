@@ -33,8 +33,7 @@ export default {
   },
   methods: {
     width: function(v) {
-       console.log(`${round(parseFloat(v) / this.normalizer * 50, 0) + 1}em`)
-       return `${round(parseFloat(v) / this.normalizer * 50, 0) + 1}em`
+       return `${round(parseFloat(v) / this.normalizer * 30, 0) + 1}em`
     },
     color: function(i) {
        console.log(this.colors[i])
