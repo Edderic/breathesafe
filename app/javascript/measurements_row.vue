@@ -1,5 +1,5 @@
 <template>
-  <tr @click="focusEvent(this.measurements.id)" class='clickable' :class='{ clicked: this.measurements.clicked }'>
+  <tr @click="centerMapTo(this.measurements.id)" class='clickable' :class='{ clicked: this.measurements.clicked }'>
     <td>{{this.measurements.roomName}}</td>
     <td>{{this.measurements.placeData.formattedAddress}}</td>
     <ColoredCell
@@ -12,7 +12,7 @@
       {{ startDatetimeParsed }}
     </td>
     <td>
-      <div class='tag' v-for="t in getOpenHours(this.measurements.placeData)">{{ t }}</div>
+      <div class='tag' @click="showAnalysis(this.measurements.id)">See Analysis</div>
     </td>
   </tr>
 </template>
@@ -100,7 +100,8 @@ export default {
     ...mapActions(
         useMainStore,
         [
-          'focusEvent'
+          'centerMapTo',
+          'showAnalysis'
         ]
     ),
   },
