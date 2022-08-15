@@ -77,7 +77,7 @@ export default {
       })
       .then(response => {
         if (response.status == 201) {
-          this.setFocusTab('events');
+          this.setFocusTab('maps');
           this.getCurrentUser();
         }
 
