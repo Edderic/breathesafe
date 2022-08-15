@@ -2310,7 +2310,6 @@ export default {
   .centered {
     display: flex;
     align-items: center;
-    overflow-x: scroll;
   }
 
   .wider-input {
@@ -2410,5 +2409,12 @@ export default {
   div {
     scroll-behavior: smooth;
   }
+
+  @media (max-width: 840em) {
+    .centered {
+      overflow-x: auto;
+    }
+  }
+
 
 </style>
