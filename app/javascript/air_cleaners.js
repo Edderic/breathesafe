@@ -104,7 +104,7 @@ export class AirCleaner {
   }
 
   recurringCostText() {
-    return `${this.shortName}: $${this.recurringCost()} / ${this.recurringCostDuration} ${this.recurringCostDetails}. `
+    return `${this.shortName}: $${this.device.recurringCostPerYearUSD * this.numDevices()} ${this.recurringCostDetails}. `
   }
 
   singularName() {
