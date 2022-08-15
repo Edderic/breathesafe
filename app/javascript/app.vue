@@ -25,7 +25,7 @@
         </div>
 
         <div>
-          <Events v-if='focusTab == "maps"'/>
+          <Events v-show='focusTab == "maps"'/>
         </div>
       </div>
       <Tabs v-if='focusTab == "events"'/>
