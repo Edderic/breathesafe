@@ -3,7 +3,6 @@
     <h2 class='side-padding'>Breathesafe 😷</h2>
 
     <div class='vertical-centered'>
-      <a class='clickable side-padding' href="#recommendations">Recommendations</a>
       <a class='clickable side-padding' href="#events" @click="navToEvents" v-if=signedIn>Events</a>
       <a class='clickable side-padding' href="#profile" @click="navToProfile" v-if=signedIn>Profile</a>
       <a class='clickable side-padding' href="#register" @click="navToRegister" v-if=!signedIn>Register</a>
@@ -39,7 +38,7 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useEventStores, [ 'load']),
     navToEvents() {
-      this.focusTab = 'events'
+      this.focusTab = 'maps'
       this.load()
     },
     navToProfile() {
