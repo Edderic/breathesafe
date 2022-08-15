@@ -31,7 +31,7 @@
       <div class='col width'>
         <Tabs v-if='focusTab == "events"'/>
         <Prevalence v-if='focusTab == "events" && focusSubTab == "Prevalence"'/>
-        <Analytics v-if='focusTab == "events" && focusSubTab == "Analytics"'/>
+        <Analytics v-if='focusTab == "Analytics"'/>
         <ShowMeasurementSet v-if='focusTab == "events" && focusSubTab == "Measures"'/>
         <AddMeasurements v-if='focusTab == "event" && signedIn'/>
         <Profile v-if='focusTab == "profile" && signedIn'/>
@@ -153,6 +153,7 @@ export default {
   .column {
     display: flex;
     flex-direction: column;
+    align-items: center;
   }
 
   button {
@@ -160,6 +161,12 @@ export default {
   }
 
   .width {
-    width: 50vw;
+    max-width: 70em;
+  }
+
+  @media (max-width: 70em) {
+    .width {
+      width: 100vw;
+    }
   }
 </style>

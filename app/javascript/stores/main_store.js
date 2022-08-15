@@ -44,6 +44,7 @@ export const useMainStore = defineStore('main', {
       const analyticsStore = useAnalyticsStore()
       showMeasurementSetStore.setMeasurementSet(event)
       analyticsStore.load(event)
+      this.focusTab = 'Analytics'
     },
     setMarkers(markers) {
       this.markers = markers
