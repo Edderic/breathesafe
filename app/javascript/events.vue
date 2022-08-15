@@ -186,17 +186,7 @@ export default {
     }
   }
 
-  @media (max-height: 800px) {
-    .scrollable {
-      height: 50vw;
-    }
-  }
-  @media (max-height: 500px) {
-    .scrollable {
-      height: 30vw;
-    }
-  }
-  @media (max-height: 400px) {
+  @media ((max-height: 670px) and (orientation: landscape)) {
     .scrollable {
       height: 20vw;
     }

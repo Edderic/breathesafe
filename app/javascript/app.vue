@@ -190,4 +190,13 @@ export default {
       height: 25vw;
     }
   }
+
+
+  @media ((max-height: 670px) and (orientation: landscape)) {
+    .map {
+      height: 15vw;
+    }
+  }
+
+
 </style>
