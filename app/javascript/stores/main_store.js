@@ -13,7 +13,7 @@ export const useMainStore = defineStore('main', {
     center: {lat: 51.093048, lng: 6.842120},
     markers: [],
     zoom: 7,
-    focusTab: 'events',
+    focusTab: 'maps',
     focusSubTab: "Analytics",
     signedIn: false,
     currentUser: undefined,

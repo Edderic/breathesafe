@@ -3,13 +3,13 @@
     <NavBar></NavBar>
 
     <div class='body row'>
-      <div class='col'>
+      <div class='col' v-show="focusTab == 'maps'">
         <div class='row'>
           <GMapMap
               :center="center"
               :zoom="zoom"
               map-type-id="terrain"
-              style="width: 50vw; height: 500px"
+              style="width: 100vw; height: 500px"
           >
             <GMapCluster>
               <GMapMarker
@@ -22,11 +22,10 @@
               />
             </GMapCluster>
           </GMapMap>
-
         </div>
 
         <div>
-          <Events v-if='focusTab == "events"'/>
+          <Events v-if='focusTab == "maps"'/>
         </div>
       </div>
       <div class='col width'>

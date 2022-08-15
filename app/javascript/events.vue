@@ -1,5 +1,5 @@
 <template>
-  <div class='col width'>
+  <div class='col'>
     <div class='row horizontally-center'>
       <input class='margined' @change="updateSearch" placeholder="Search for events">
       <select class='margined' :value='eventDisplayRiskTime' @change='setDisplayRiskTime'>
@@ -154,6 +154,7 @@ export default {
   .col {
     display: flex;
     flex-direction: column;
+    align-items: center;
   }
 
   .horizontally-center {
@@ -171,9 +172,5 @@ export default {
   .scrollable {
     overflow-y: scroll;
     height: 40em;
-  }
-
-  .width {
-    width: 50vw;
   }
 </style>
