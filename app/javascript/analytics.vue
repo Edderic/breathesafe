@@ -134,8 +134,8 @@
                     :maxVal=1
                     :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**80), 1)'
                     :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                />, on average, would get infected under 40 and 80 hours of exposure with an infector in this environment.
-</span>
+                />, on average, would get infected under 40 and 80 hours of exposure with an infector in this environment. Skip to the
+<a href="#interventions">interventions</a> section to understand actions you can take to make this environment safer for everyone.</span>
           </p>
 
           <h4>Introduction</h4>
@@ -459,7 +459,10 @@
           />. The cost of <a :href="maskSuggestion['website']">{{ this.maskSuggestion['name']}}</a> is ${{ this.maskSuggestion['initialCostUSD']}} per person, with a recurring cost of ${{ this.maskSuggestion['recurringCostUSD']}} every {{ this.maskSuggestion['recurringCostDuration']}} per person.
         </p>
 
-        <h4>Interventions</h4>
+        <br id='interventions'>
+        <br>
+
+        <h3 >Interventions</h3>
         <p>
         An intervention in the list below is either some sort of mask, air cleaning
         device, or a combination of both. The short-term and longer-term
@@ -976,7 +979,7 @@
                 <ColoredCell
                   :colorScheme="colorInterpolationSchemeTotalAch"
                   :maxVal=1
-                  :value='roundOut(this.selectedIntervention.computeAirCleanerACH(), 1)'
+                  :value='roundOut(this.selectedIntervention.computePortableAirCleanerACH(), 1)'
                   class='color-cell'
                 />
                 <td>+</td>
@@ -1452,6 +1455,94 @@
             </table>
           </div>
         </div>
+
+        <h4>Portable Air Cleaner ACH</h4>
+
+        <div class='container'>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th class='col centered'>
+                  <span>Portable Air Cleaner ACH</span>
+                  <span class='font-light'>(1 / h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Number of Devices</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Clean Air Delivery Rate</span>
+                  <span class='font-light'>(m³ / h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Volume Occupied by Air</span>
+                  <span class='font-light'>(m³)</span>
+                </th>
+              </tr>
+
+              <tr>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.computePortableAirCleanerACH(), 1)'
+                  class='color-cell'
+                />
+                <td>=</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                    :value='roundOut(this.selectedIntervention.findPortableAirCleaners().numDevices(), 0)'
+                  class='color-cell'
+                />
+                <td>x</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.findPortableAirCleaners().cubicMetersPerHour, 0)'
+                  class='color-cell'
+                />
+                <td>/</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                  :maxVal=1
+                  :value='roundOut(roomUsableVolumeCubicMeters, 1)'
+                  class='color-cell'
+                />
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class='container'>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th class='col centered'>
+                  <span>Clean Air Delivery Rate</span>
+                  <span class='font-light'>(m³ / h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Description</span>
+                </th>
+              </tr>
+
+              <tr>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                  :maxVal=1
+                  :value='roundOut(this.selectedIntervention.findPortableAirCleaners().cubicMetersPerHour, 0)'
+                  class='color-cell'
+                />
+                <td></td>
+                <td>{{selectedIntervention.findPortableAirCleaners().singularName()}}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
         <h4>Rapid Testing</h4>
 
         <p>
@@ -2101,7 +2192,7 @@ export default {
       return round(this.totalFlowRate, 1)
     },
     airCleanerSuggestion() {
-      return airCleaners.find((ac) => ac.singular == 'Corsi-Rosenthal box')
+      return airCleaners.find((ac) => ac.singular == 'Corsi-Rosenthal box (Max Speed)')
     },
     totalFlowRatePlusExtraPacRounded() {
       // TODO: could pull from risk.js airCleaners instead
@@ -2314,6 +2405,10 @@ export default {
   .quote {
     font-style: italic;
     padding-left: 2em;
+  }
+
+  div {
+    scroll-behavior: smooth;
   }
 
 </style>

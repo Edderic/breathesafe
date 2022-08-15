@@ -129,7 +129,7 @@ export class Intervention {
     return total
   }
 
-  computeAirCleanerACH() {
+  computePortableAirCleanerACH() {
     let total = this.portableAch
 
     for (let intervention of this.interventions) {
@@ -341,6 +341,32 @@ export class Intervention {
       },
 
       mW: 0,
+    }
+  }
+
+  findPortableAirCleaners() {
+    for (let intervention of this.interventions) {
+      if (intervention.isFiltrationAirCleaner()) {
+        // susceptible and infector wear the same mask
+        return intervention
+      }
+    }
+
+    return {
+      cubicMetersPerHour: 0,
+      numDevices() {
+        return 0
+      },
+
+      numDeviceFactor() {
+        return 0
+      },
+
+      mW: 0,
+
+      singularName() {
+        return "None"
+      }
     }
   }
 

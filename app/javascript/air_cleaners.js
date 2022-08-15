@@ -4,8 +4,8 @@ import { convertVolume, computeAmountOfPortableAirCleanersThatCanFit } from './m
 export const airCleaners = [
   {
     'type': 'airCleaner',
-    'singular': 'Corsi-Rosenthal box',
-    'plural': 'Corsi-Rosenthal boxes',
+    'singular': 'Corsi-Rosenthal box (Max Speed)',
+    'plural': 'Corsi-Rosenthal boxes (Max Speed)',
     'shortName': 'CR boxes',
     'cubicMetersPerHour': cubicFeetPerMinuteTocubicMetersPerHour('cubic feet per minute', 600),
     'areaInSquareMeters': convertLengthBasedOnMeasurementType(20, 'inches', 'meters')
@@ -71,16 +71,9 @@ export class AirCleaner {
     let amountA = computeAmountOfPortableAirCleanersThatCanFit(
       this.event.roomLengthMeters * this.event.roomWidthMeters,
       this.areaInSquareMeters
-    )
+    ) - this.event.portableAirCleaners.length
 
-    // find the amount of portable ACH. Only recommend up to 100 more
-    const remainingAch = 100 - this.event.portableAch
-
-    let amountB = this.volumeOfRoomCubicMeters * remainingAch / this.cubicMetersPerHour
-
-    let amountC = 100 - this.event.portableAirCleaners.length
-
-    return Math.min(amountA, amountB, amountC)
+    return amountA
   }
 
   initialCost() {
@@ -112,6 +105,10 @@ export class AirCleaner {
 
   recurringCostText() {
     return `${this.shortName}: $${this.recurringCost()} / ${this.recurringCostDuration} ${this.recurringCostDetails}. `
+  }
+
+  singularName() {
+    return this.device.singular;
   }
 
   website() {
