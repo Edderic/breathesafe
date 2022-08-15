@@ -8,7 +8,7 @@
       <GMapAutocomplete
            placeholder="This is a placeholder"
            @place_changed="setPlace"
-          style='width: 15vw;'
+          style='width: 20em;'
         >
       </GMapAutocomplete>
     </div>

@@ -9,7 +9,7 @@
               :center="center"
               :zoom="zoom"
               map-type-id="terrain"
-              style="width: 100vw; height: 500px"
+              class='map'
           >
             <GMapCluster>
               <GMapMarker
@@ -165,6 +165,29 @@ export default {
   @media (max-width: 70em) {
     .width {
       width: 100vw;
+    }
+  }
+
+  .map {
+    width: 100vw;
+    height: 60vw;
+  }
+
+  @media (max-width: 840em) {
+    .map {
+      height: 30vw;
+    }
+  }
+
+  @media ((max-height: 1200px) and (orientation: landscape)) {
+    .map {
+      height: 25vw;
+    }
+  }
+
+  @media ((max-height: 1180px) and (orientation: portrait)) {
+    .map {
+      height: 25vw;
     }
   }
 </style>

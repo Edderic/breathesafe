@@ -171,6 +171,34 @@ export default {
 
   .scrollable {
     overflow-y: scroll;
-    height: 40em;
+    height: 60vw;
+  }
+
+  @media ((max-height: 1200px) and (orientation: landscape)) {
+    .scrollable {
+      height: 30vw;
+    }
+  }
+
+  @media ((max-height: 1180px) and (orientation: portrait)) {
+    .scrollable {
+      height: 100vw;
+    }
+  }
+
+  @media (max-height: 800px) {
+    .scrollable {
+      height: 50vw;
+    }
+  }
+  @media (max-height: 500px) {
+    .scrollable {
+      height: 30vw;
+    }
+  }
+  @media (max-height: 400px) {
+    .scrollable {
+      height: 20vw;
+    }
   }
 </style>
