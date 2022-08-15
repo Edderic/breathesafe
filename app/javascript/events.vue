@@ -14,9 +14,9 @@
         <tr>
           <th>Room</th>
           <th>Address</th>
-          <th class='clickable' @click='sortByRisk'>Risk ({{this.sortRiskArrow}})</th>
-          <th>Measurements taken on</th>
-          <th>Open Hours</th>
+          <th class='clickable' @click='sortByRisk'>Marginal Risk ({{this.sortRiskArrow}})</th>
+          <th>Conditional Risk</th>
+          <th>Show Analysis</th>
         </tr>
         <MeasurementsRow v-for="ev in displayables" :key="ev.id" :measurements="ev"/>
       </table>

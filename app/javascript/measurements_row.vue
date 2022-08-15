@@ -8,11 +8,14 @@
       :value='measurements.risk'
       :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
     />
+    <ColoredCell
+      :colorScheme="colorInterpolationScheme"
+      :maxVal=1
+      :value='roundOut(nullIntervention.computeRisk(1), 6)'
+      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
+    />
     <td>
-      {{ startDatetimeParsed }}
-    </td>
-    <td>
-      <div class='tag' @click="showAnalysis(this.measurements.id)">See Analysis</div>
+      <div class='tag' @click="showAnalysis(this.measurements.id)">Show Analysis</div>
     </td>
   </tr>
 </template>
@@ -21,13 +24,14 @@
 // Have a VueX store that maintains state across components
 import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
+import { Intervention } from './interventions.js';
 import { useEventStores } from './stores/event_stores';
 import { useEventStore } from './stores/event_store';
 import { useMainStore } from './stores/main_store';
 import { usePrevalenceStore } from './stores/prevalence_store';
 import { useProfileStore } from './stores/profile_store';
 import { useShowMeasurementSetStore } from './stores/show_measurement_set_store';
-import { findCurrentOccupancy, filterEvents, getWeekdayText } from './misc'
+import { findCurrentOccupancy, filterEvents, getWeekdayText, round } from './misc'
 import { riskColorInterpolationScheme } from './colors.js'
 import { mapWritableState, mapState, mapActions } from 'pinia'
 
@@ -85,6 +89,12 @@ export default {
       let options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
       return `${dt.toLocaleDateString(undefined, options)} ${dt.toLocaleTimeString()}`
     },
+    nullIntervention() {
+      return new Intervention(
+        this.measurements,
+        []
+      )
+    }
   },
   data() {
     return {
@@ -104,6 +114,9 @@ export default {
           'showAnalysis'
         ]
     ),
+    roundOut(x, digits) {
+      return round(x, digits)
+    }
   },
 }
 </script>
