@@ -28,17 +28,15 @@
           <Events v-if='focusTab == "maps"'/>
         </div>
       </div>
-      <div class='col width'>
-        <Tabs v-if='focusTab == "events"'/>
-        <Prevalence v-if='focusTab == "events" && focusSubTab == "Prevalence"'/>
-        <Analytics v-if='focusTab == "Analytics"'/>
-        <ShowMeasurementSet v-if='focusTab == "events" && focusSubTab == "Measures"'/>
-        <AddMeasurements v-if='focusTab == "event" && signedIn'/>
-        <Profile v-if='focusTab == "profile" && signedIn'/>
-        <Registration v-if='!signedIn && focusTab == "register"'/>
-        <Confirmation v-if='!signedIn && focusTab == "confirmation"'/>
-        <SignIn v-if='!signedIn && focusTab == "signIn"'/>
-      </div>
+      <Tabs v-if='focusTab == "events"'/>
+      <Prevalence v-if='focusTab == "events" && focusSubTab == "Prevalence"'/>
+      <Analytics class='width' v-if='focusTab == "Analytics"'/>
+      <ShowMeasurementSet v-if='focusTab == "events" && focusSubTab == "Measures"'/>
+      <AddMeasurements v-if='focusTab == "event" && signedIn'/>
+      <Profile v-if='focusTab == "profile" && signedIn'/>
+      <Registration v-if='!signedIn && focusTab == "register"'/>
+      <Confirmation v-if='!signedIn && focusTab == "confirmation"'/>
+      <SignIn v-if='!signedIn && focusTab == "signIn"'/>
     </div>
   </div>
 </template>

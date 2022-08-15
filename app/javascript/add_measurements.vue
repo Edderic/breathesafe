@@ -370,7 +370,8 @@ export default {
       })
     },
     cancel() {
-      this.focusTab = 'events'
+      // TODO: clear out data for Add New Event
+      this.focusTab = 'maps'
     },
     parseOccupancyData(event) {
       this.occupancy.unparsedOccupancyData = event.target.value
