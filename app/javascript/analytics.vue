@@ -484,7 +484,7 @@
         </p>
         <p>
         The <span class='bold'>Total Cost in 10 years</span> is the estimate which is given by
-        <span class='italic'>Initial Cost + Recurring Cost / year  x 10 years</span>.
+        <span class='italic'>Initial Cost + Yearly Recurring Cost x 10 years</span>.
         </p>
         <p>
         The <span class='bold'>Benefit / Cost</span> is comprised of the number
@@ -590,7 +590,7 @@
               <th>8-hour Risk</th>
               <th>40-hour Risk</th>
               <th>Initial Cost</th>
-              <th>Recurring Cost</th>
+              <th>Yearly Recurring Cost</th>
               <th>Total Cost in 10 years</th>
               <th>Benefit / Cost</th>
             </tr>

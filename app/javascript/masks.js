@@ -152,7 +152,7 @@ export class Mask {
   }
 
   recurringCostText() {
-    return `${this.shortName}: $${this.device.recurringCostPerYearUSD * this.numDevices()} ${this.recurringCostDetails}. `
+    return `${this.shortName}: $${this.device.recurringCostPerYearUSD * this.numDevices()} for ${this.numDevices()} people. `
   }
 
   website() {
