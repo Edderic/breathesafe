@@ -29,7 +29,7 @@ console.log('Visit the guide for more information: ', 'https://vite-ruby.netlify
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import VueGoogleMaps from '@fawmi/vue-google-maps';
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router';
 import Vue3Geolocation from 'vue3-geolocation';
 
 import App from '../app.vue';
