@@ -7,10 +7,6 @@ import { Intervention } from '../interventions.js'
 import { useShowMeasurementSetStore } from './show_measurement_set_store';
 
 
-function costBenefit(risk) {
-
-}
-
 // TODO: use the last location that the user was in, as the default
 // the first argument is a unique id of the store across your application
 export const useAnalyticsStore = defineStore('analytics', {
