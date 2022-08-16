@@ -1,7 +1,7 @@
 <template>
-  <tr @click="centerMapTo(this.measurements.id)" class='clickable' :class='{ clicked: this.measurements.clicked }'>
-    <td>{{this.measurements.roomName}}</td>
-    <td>{{this.measurements.placeData.formattedAddress}}</td>
+  <tr class='clickable' :class='{ clicked: this.measurements.clicked }'>
+    <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.roomName}}</td>
+    <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.placeData.formattedAddress}}</td>
     <ColoredCell
       :colorScheme="colorInterpolationScheme"
       :maxVal=1
@@ -15,7 +15,7 @@
       :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
     />
     <td>
-      <div class='tag' @click="showAnalysis(this.measurements.id)">Show Analysis</div>
+      <router-link :to='link' @click="showAnalysis(this.measurements.id)">Show Analysis</router-link>
     </td>
   </tr>
 </template>
@@ -83,6 +83,9 @@ export default {
     ),
     colorInterpolationScheme() {
       return riskColorInterpolationScheme
+    },
+    link() {
+      return `/analytics/${this.measurements.id}`
     },
     startDatetimeParsed() {
       let dt = new Date(this.measurements.startDatetime)
