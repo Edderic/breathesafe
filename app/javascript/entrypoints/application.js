@@ -37,20 +37,20 @@ import { useEventStore } from '../stores/event_store.js';
 import { useMainStore } from '../stores/main_store.js';
 import MapEvents from '../map_events.vue'
 import Analytics from '../analytics.vue'
+import Home from '../home.vue'
+import About from '../about.vue'
 
 document.addEventListener('DOMContentLoaded', () => {
-  const app = createApp(App);
   const pinia = createPinia();
   // 1. Define route components.
   // These can be imported from other files
-  const About = { template: '<div>About</div>' }
 
   // 2. Define some routes
   // Each route should map to a component.
   // We'll talk about nested routes later.
   const routes = [
-    { path: '/', component: MapEvents },
-    { path: '/analytics/:id', component: Analytics },
+    { path: '/', component: Home },
+    { path: '/about', component: About },
   ]
 
   // 3. Create the router instance and pass the `routes` option
@@ -62,22 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
     routes, // short for `routes: routes`
   })
 
+  // 5. Create and mount the root instance.
+  const app = createApp(App)
   // Make sure to _use_ the router instance to make the
   // whole app router-aware.
+  app.use(router).use(pinia)
 
-  // A store could be good for Manipulating the Google Maps component via a
-  // search component contained in another.
-
-  app.use(VueGoogleMaps, {
-      load: {
-          key: window.gon.GOOGLE_MAPS_API_KEY,
-          libraries: 'places'
-      },
-  // }).use(pinia).use(Vue3Geolocation).mount('#app')
-  })
-    .use(pinia).use(Vue3Geolocation).use(router).mount('#app')
+  app.mount('#app')
 
 
-  const mainStore = useMainStore();
-  const eventsStore = useEventStore();
 });
