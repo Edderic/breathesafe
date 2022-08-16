@@ -1638,7 +1638,7 @@ import {
 } from  './misc';
 
 export default {
-  name: 'App',
+  name: 'Analytics',
   components: {
     BarGraph,
     ColoredCell,
