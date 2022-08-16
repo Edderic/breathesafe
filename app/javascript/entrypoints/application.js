@@ -29,15 +29,42 @@ console.log('Visit the guide for more information: ', 'https://vite-ruby.netlify
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import VueGoogleMaps from '@fawmi/vue-google-maps';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import Vue3Geolocation from 'vue3-geolocation';
 
 import App from '../app.vue';
 import { useEventStore } from '../stores/event_store.js';
 import { useMainStore } from '../stores/main_store.js';
+import MapEvents from '../map_events.vue'
+import Analytics from '../analytics.vue'
 
 document.addEventListener('DOMContentLoaded', () => {
   const app = createApp(App);
   const pinia = createPinia();
+  // 1. Define route components.
+  // These can be imported from other files
+  const About = { template: '<div>About</div>' }
+
+  // 2. Define some routes
+  // Each route should map to a component.
+  // We'll talk about nested routes later.
+  const routes = [
+    { path: '/', component: MapEvents },
+    { path: '/analytics/:id', component: Analytics },
+  ]
+
+  // 3. Create the router instance and pass the `routes` option
+  // You can pass in additional options here, but let's
+  // keep it simple for now.
+  const router = createRouter({
+    // 4. Provide the history implementation to use. We are using the hash history for simplicity here.
+    history: createWebHashHistory(),
+    routes, // short for `routes: routes`
+  })
+
+  // Make sure to _use_ the router instance to make the
+  // whole app router-aware.
+
   // A store could be good for Manipulating the Google Maps component via a
   // search component contained in another.
 
@@ -48,7 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
       },
   // }).use(pinia).use(Vue3Geolocation).mount('#app')
   })
-    .use(pinia).use(Vue3Geolocation).mount('#app')
+    .use(pinia).use(Vue3Geolocation).use(router).mount('#app')
+
 
   const mainStore = useMainStore();
   const eventsStore = useEventStore();

@@ -2,42 +2,8 @@
   <div class='column'>
     <NavBar></NavBar>
 
-    <div class='body row'>
-      <div class='col' v-show="focusTab == 'maps'">
-        <div class='row'>
-          <GMapMap
-              :center="center"
-              :zoom="zoom"
-              map-type-id="terrain"
-              class='map'
-          >
-            <GMapCluster>
-              <GMapMarker
-                  :key="index"
-                  v-for="(m, index) in markers"
-                  :position="m.center"
-                  :clickable="true"
-                  :draggable="true"
-                  @click="center=m.center"
-              />
-            </GMapCluster>
-          </GMapMap>
-        </div>
+    <router-view></router-view>
 
-        <div>
-          <Events v-show='focusTab == "maps"'/>
-        </div>
-      </div>
-      <Tabs v-if='focusTab == "events"'/>
-      <Prevalence v-if='focusTab == "events" && focusSubTab == "Prevalence"'/>
-      <Analytics class='width' v-if='focusTab == "Analytics"'/>
-      <ShowMeasurementSet v-if='focusTab == "events" && focusSubTab == "Measures"'/>
-      <AddMeasurements v-if='focusTab == "event" && signedIn'/>
-      <Profile v-if='focusTab == "profile" && signedIn'/>
-      <Registration v-if='!signedIn && focusTab == "register"'/>
-      <Confirmation v-if='!signedIn && focusTab == "confirmation"'/>
-      <SignIn v-if='!signedIn && focusTab == "signIn"'/>
-    </div>
   </div>
 </template>
 
