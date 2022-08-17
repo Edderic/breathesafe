@@ -1,6 +1,9 @@
 <template>
   <div class='row'>
     <div class='col border-showing left-pane'>
+      <router-link :to="`/analytics/${this.$route.params.id}#risk-assessment`" class='link-h1'>
+        Risk Assessment
+      </router-link>
       <router-link :to="`/analytics/${this.$route.params.id}#overview`" class='link-h1'>
         Overview
       </router-link>
@@ -44,8 +47,12 @@
         Portable Air Cleaner ACH
       </router-link>
     </div>
+
     <div class='col border-showing right-pane'>
       <div class='container'>
+        <br id='risk-assessment'>
+        <br>
+        <br>
         <h3 class='subsection'>Analysis & Recommendations for {{this.roomName}}</h3>
         <div class='centered col'>
           <div class='container'>
