@@ -2215,7 +2215,14 @@ export default {
       return round(this.ventilationAch, 1)
     }
   },
-  async created() {
+  created() {
+    this.$watch(
+      () => this.$route.params,
+      (toParams, previousParams) => {
+        this.showAnalysis(toParams.id)
+        // react to route changes...
+      }
+    )
   },
   data() {
     return {
