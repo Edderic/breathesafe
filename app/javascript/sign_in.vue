@@ -37,7 +37,7 @@
 // Have a VueX store that maintains state across components
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
-import { mapActions } from 'pinia';
+import { mapActions, mapWritableState } from 'pinia';
 import axios from 'axios';
 
 export default {
@@ -45,7 +45,7 @@ export default {
   components: {
   },
   computed: {
-
+    ...mapWritableState(useMainStore, ['message'])
   },
   created() { },
   data() {
@@ -53,7 +53,6 @@ export default {
       name: "",
       email: "",
       password: "",
-      message: ""
     }
   },
   methods: {
