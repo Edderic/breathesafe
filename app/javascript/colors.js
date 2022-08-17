@@ -280,3 +280,43 @@ export function generateEvenSpacedBounds(min, max, numObjects) {
 
   return collection
 }
+
+closestColorIndex(colorScheme, value) {
+  let closestIndex = 0
+  let bestValue = 0
+  let index = 0
+
+  for (let obj of colorScheme) {
+    if (Math.abs(obj['upperBound'] - value) < Math.abs(bestValue - value)) {
+      bestValue = obj['upperBound']
+      closestIndex = index
+    }
+
+    index += 1
+  }
+
+  return closestIndex
+}
+
+export function getColor(colorScheme, value) {
+  for (let obj of colorScheme) {
+    if (obj['lowerBound'] <= value && value < obj['upperBound']) {
+      return interpolateRgb(
+        obj['lowerColor'],
+        obj['upperColor'],
+        obj['lowerBound'],
+        value,
+        obj['upperBound']
+      )
+    }
+  }
+
+  let obj = colorScheme[closestColorIndex(colorScheme, value)]
+  return interpolateRgb(
+    obj['lowerColor'],
+    obj['upperColor'],
+    obj['lowerBound'],
+    obj['upperBound'],
+    obj['upperBound']
+  )
+}
