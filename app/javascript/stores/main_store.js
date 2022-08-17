@@ -36,13 +36,10 @@ export const useMainStore = defineStore('main', {
       // update Google Maps to center at the location of the event
       this.center = event.placeData.center
     },
-    showAnalysis(id) {
+    async showAnalysis(id) {
       let eventStores = useEventStores()
-      let event = eventStores.events.find((ev) => { return ev.id == id })
-
-      const showMeasurementSetStore = useShowMeasurementSetStore()
       const analyticsStore = useAnalyticsStore()
-      showMeasurementSetStore.setMeasurementSet(event)
+      let event = await eventStores.findOrLoad(id);
       analyticsStore.load(event)
     },
     setMarkers(markers) {
