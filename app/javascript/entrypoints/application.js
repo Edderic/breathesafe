@@ -66,6 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // 4. Provide the history implementation to use. We are using the hash history for simplicity here.
     history: createWebHashHistory(),
     routes, // short for `routes: routes`
+    scrollBehavior(to, from, savedPosition) {
+      if (to.hash) {
+        return { el: to.hash, behavior: 'smooth' };
+      }
+      return { x: 0, y: 0 };
+    }
   })
 
   // Make sure to _use_ the router instance to make the

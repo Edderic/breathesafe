@@ -135,7 +135,8 @@
                     :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**80), 1)'
                     :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
                 />, on average, would get infected under 40 and 80 hours of exposure with an infector in this environment. Skip to the
-<a href="#interventions">interventions</a> section to understand actions you can take to make this environment safer for everyone.</span>
+<span @click.native='scrollFix($event, "interventions")'>interventions</span>
+ section to understand actions you can take to make this environment safer for everyone.</span>
           </p>
 
           <h4>Introduction</h4>
@@ -461,8 +462,9 @@
 
         <br id='interventions'>
         <br>
+        <br>
 
-        <h3 >Interventions</h3>
+        <h3>Interventions</h3>
         <p>
         An intervention in the list below is either some sort of mask, air cleaning
         device, or a combination of both. The short-term and longer-term
@@ -2237,6 +2239,10 @@ export default {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser', 'showAnalysis']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
+    scrollFix(event, hashbang) {
+      let element_to_scroll_to = document.getElementById(hashbang);
+      element_to_scroll_to.scrollIntoView();
+    },
     aerosolActivityToFactor(key) {
       return infectorActivityTypes[key]
     },
