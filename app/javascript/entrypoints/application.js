@@ -32,12 +32,13 @@ import VueGoogleMaps from '@fawmi/vue-google-maps';
 import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router';
 import Vue3Geolocation from 'vue3-geolocation';
 
+import Analytics from '../analytics.vue'
 import App from '../app.vue';
+import MapEvents from '../map_events.vue'
+import Profile from '../profile.vue'
+import SignIn from '../sign_in.vue'
 import { useEventStore } from '../stores/event_store.js';
 import { useMainStore } from '../stores/main_store.js';
-import MapEvents from '../map_events.vue'
-import Analytics from '../analytics.vue'
-import SignIn from '../sign_in.vue'
 
 document.addEventListener('DOMContentLoaded', () => {
   const app = createApp(App);
@@ -53,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/', component: MapEvents },
     { path: '/analytics/:id', component: Analytics },
     { path: '/signin', component: SignIn },
+    { path: '/profile', component: Profile },
   ]
 
   // 3. Create the router instance and pass the `routes` option

@@ -4,7 +4,7 @@
 
     <div class='vertical-centered'>
       <router-link class='clickable side-padding' to='/'>Events</router-link>
-      <a class='clickable side-padding' href="#profile" @click="navToProfile" v-if=signedIn>Profile</a>
+      <router-link class='clickable side-padding' to='/profile' v-if='signedIn'>Profile</router-link>
       <a class='clickable side-padding' href="#register" @click="navToRegister" v-if=!signedIn>Register</a>
       <router-link class='clickable side-padding' to='/signin' v-if=!signedIn>Sign in</router-link>
       <a class='clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
@@ -37,13 +37,6 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useEventStores, [ 'load']),
-    navToEvents() {
-      this.focusTab = 'maps'
-      this.load()
-    },
-    navToProfile() {
-      this.focusTab = 'profile'
-    },
     navToRegister() {
       this.focusTab = 'register'
     },
