@@ -68,9 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
     routes, // short for `routes: routes`
     scrollBehavior(to, from, savedPosition) {
       if (to.hash) {
-        return { el: to.hash, behavior: 'smooth' };
+
+        let element_to_scroll_to = document.getElementById(to.hash.slice(1));
+        element_to_scroll_to.scrollIntoView();
       }
-      return { x: 0, y: 0 };
     }
   })
 

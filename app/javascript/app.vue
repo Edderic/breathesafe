@@ -149,7 +149,7 @@ export default {
   .router-view-container {
     display: flex;
     justify-content: center;
-    padding-top: 7em;
+    padding-top: 4.2em;
   }
 
 </style>
