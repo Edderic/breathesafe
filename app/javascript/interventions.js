@@ -161,9 +161,9 @@ export class Intervention {
 
     let totalAch = this.event.totalAch
     if (!totalAch) {
-      debugger
-
+      throw 'No ACH data'
     }
+
     let uvAch = 0
     let ventilationAch = 0
     let portableAch = 0
@@ -268,7 +268,7 @@ export class Intervention {
 
     let totalAch = this.event.totalAch
     if (!totalAch) {
-      debugger
+      throw "No ACH data"
 
     }
     let uvAch = 0
