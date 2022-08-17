@@ -70,8 +70,10 @@ export default {
       .then(response => {
         console.log(response)
         if (response.status == 201) {
-          this.focusTab = 'confirmation';
           this.message = `Sent a confirmation email to ${this.email}. Please check.`
+          this.$router.push({
+            path: '/signin'
+          })
         }
 
         // whatever you want
