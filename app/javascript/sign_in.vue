@@ -1,6 +1,5 @@
 <template>
-  <div class='wide border-showing'>
-
+  <form class='wide border-showing' action="">
     <div class='container centered'>
       <h2>Sign in</h2>
     </div>
@@ -31,7 +30,7 @@
     <div class='container'>
       <button @click="signIn">Sign In</button>
     </div>
-  </div>
+  </form>
 </template>
 
 <script>
@@ -52,6 +51,7 @@ export default {
   data() {
     return {
       name: "",
+      email: "",
       password: "",
       message: ""
     }
@@ -77,7 +77,9 @@ export default {
       })
       .then(response => {
         if (response.status == 201) {
-          this.setFocusTab('maps');
+          this.$router.push({
+            path: '/'
+          });
           this.getCurrentUser();
         }
 
