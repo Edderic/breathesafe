@@ -53,6 +53,18 @@ export const useEventStores = defineStore('events', {
         this.computeRiskAll()
     },
 
+    async findOrLoad(id) {
+      // TODO: maybe create a Rails route to find a specific analytics to load?
+      let event = this.events.find((ev) => { return ev.id == parseInt(id) })
+
+      if (!event) {
+        await this.load()
+        event = this.events.find((ev) => { return ev.id == parseInt(id) })
+      }
+
+      return event
+    },
+
     computeRiskAll() {
       const prevalenceStore = usePrevalenceStore()
       const profileStore = useProfileStore()
