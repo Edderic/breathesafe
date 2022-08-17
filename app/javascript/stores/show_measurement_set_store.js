@@ -137,8 +137,6 @@ export const useShowMeasurementSetStore = defineStore('showMeasurementSet', {
   },
   actions: {
     setMeasurementSet(measurementSet) {
-      let profileStore = useProfileStore()
-
       this.roomName = measurementSet.roomName
       this.placeData = measurementSet.placeData
       this.startDatetime = measurementSet.startDatetime
