@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (to.hash) {
 
         let element_to_scroll_to = document.getElementById(to.hash.slice(1));
-        element_to_scroll_to.scrollIntoView();
+        element_to_scroll_to.scrollIntoView({behavior: 'smooth'});
       }
     }
   })
