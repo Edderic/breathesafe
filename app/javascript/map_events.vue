@@ -119,7 +119,7 @@ export default {
       }
 
       let element_to_scroll_to = document.getElementById(`measurements-${displayable.id}`);
-      element_to_scroll_to.scrollIntoView();
+      element_to_scroll_to.scrollIntoView({behavior: 'smooth'});
     },
     save() {
       // send data to backend.
