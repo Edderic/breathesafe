@@ -11,17 +11,7 @@
 
 <script>
 // Have a VueX store that maintains state across components
-import Analytics from './analytics.vue';
-import AddMeasurements from './add_measurements.vue';
-import Events from './events.vue';
 import NavBar from './navbar.vue';
-import Profile from './profile.vue';
-import Prevalence from './prevalence.vue';
-import Registration from './registration.vue';
-import Confirmation from './confirmation.vue';
-import SignIn from './sign_in.vue';
-import ShowMeasurementSet from './show_measurement_set.vue';
-import Tabs from './tabs.vue';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
 import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
@@ -29,17 +19,7 @@ import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
 export default {
   name: 'App',
   components: {
-    Analytics,
-    AddMeasurements,
-    Confirmation,
-    Events,
     NavBar,
-    Profile,
-    Prevalence,
-    Registration,
-    ShowMeasurementSet,
-    SignIn,
-    Tabs
   },
   computed: {
     ...mapStores(useMainStore),
