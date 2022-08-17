@@ -6,7 +6,7 @@
       <a class='clickable side-padding' href="#events" @click="navToEvents" v-if=signedIn>Events</a>
       <a class='clickable side-padding' href="#profile" @click="navToProfile" v-if=signedIn>Profile</a>
       <a class='clickable side-padding' href="#register" @click="navToRegister" v-if=!signedIn>Register</a>
-      <a class='clickable side-padding' href="#register" @click="navToSignIn" v-if=!signedIn>Sign in</a>
+      <router-link class='clickable side-padding' to='/signin' v-if=!signedIn>Sign in</router-link>
       <a class='clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
     </div>
   </div>

@@ -37,6 +37,7 @@ import { useEventStore } from '../stores/event_store.js';
 import { useMainStore } from '../stores/main_store.js';
 import MapEvents from '../map_events.vue'
 import Analytics from '../analytics.vue'
+import SignIn from '../sign_in.vue'
 
 document.addEventListener('DOMContentLoaded', () => {
   const app = createApp(App);
@@ -51,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const routes = [
     { path: '/', component: MapEvents },
     { path: '/analytics/:id', component: Analytics },
+    { path: '/signin', component: SignIn },
   ]
 
   // 3. Create the router instance and pass the `routes` option
