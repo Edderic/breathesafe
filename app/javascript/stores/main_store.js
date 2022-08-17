@@ -39,7 +39,9 @@ export const useMainStore = defineStore('main', {
     async showAnalysis(id) {
       let eventStores = useEventStores()
       const analyticsStore = useAnalyticsStore()
+      const showMeasurementSetStore = useShowMeasurementSetStore()
       let event = await eventStores.findOrLoad(id);
+      showMeasurementSetStore.setMeasurementSet(event)
       analyticsStore.load(event)
     },
     setMarkers(markers) {
