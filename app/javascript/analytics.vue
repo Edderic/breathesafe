@@ -1,7 +1,10 @@
 <template>
   <div class='row'>
-    <div class='col border-showing scrollable left-pane'>
-      <router-link :to="`/analytics/${this.$route.params.id}#introduction`" class='link-h1'>
+    <div class='col border-showing left-pane'>
+      <router-link :to="`/analytics/${this.$route.params.id}#overview`" class='link-h1'>
+        Overview
+      </router-link>
+      <router-link :to="`/analytics/${this.$route.params.id}#introduction`" class='link-h2'>
         Introduction
       </router-link>
       <router-link :to="`/analytics/${this.$route.params.id}#modeling`" class='link-h2'>
@@ -13,8 +16,35 @@
       <router-link :to="`/analytics/${this.$route.params.id}#safer-behaviors-and-environments`" class='link-h2'>
         Safer Behaviors and Environments
       </router-link>
+      <router-link :to="`/analytics/${this.$route.params.id}#measurements`" class='link-h1'>
+        Measurements
+      </router-link>
+      <router-link :to="`/analytics/${this.$route.params.id}#behaviors`" class='link-h2'>
+        Behaviors
+      </router-link>
+      <router-link :to="`/analytics/${this.$route.params.id}#masking`" class='link-h2'>
+        Masking
+      </router-link>
+      <router-link :to="`/analytics/${this.$route.params.id}#clean-air-delivery-rate`" class='link-h2'>
+        Clean Air Delivery Rate (CADR)
+      </router-link>
+      <router-link :to="`/analytics/${this.$route.params.id}#interventions`" class='link-h1'>
+        Interventions
+      </router-link>
+      <router-link :to="`/analytics/${this.$route.params.id}#computational-details`" class='link-h1'>
+        Computational Details
+      </router-link>
+      <router-link :to="`/analytics/${this.$route.params.id}#details-ventilation-ach`" class='link-h2'>
+        Ventilation ACH
+      </router-link>
+      <router-link :to="`/analytics/${this.$route.params.id}#details-upper-room-germicidal-uv-ach`" class='link-h2'>
+        Upper-Room Germicidal UV ACH
+      </router-link>
+      <router-link :to="`/analytics/${this.$route.params.id}#details-portable-air-cleaner-ach`" class='link-h2'>
+        Portable Air Cleaner ACH
+      </router-link>
     </div>
-    <div class='col border-showing scrollable right-pane'>
+    <div class='col border-showing right-pane'>
       <div class='container'>
         <h3 class='subsection'>Analysis & Recommendations for {{this.roomName}}</h3>
         <div class='centered col'>
@@ -156,6 +186,12 @@
   </router-link>
    section to understand actions you can take to make this environment safer for everyone.</span>
             </p>
+
+
+            <br id='overview'>
+            <br>
+            <br>
+            <h3>Overview</h3>
 
             <br id='introduction'>
             <br>
@@ -300,6 +336,14 @@
               recorded (e.g. loudly talking).
             </p>
 
+            <br id='measurements'>
+            <br>
+            <br>
+            <h3>Measurements</h3>
+
+            <br id='behaviors'>
+            <br>
+            <br>
             <h4>Behaviors</h4>
 
             <p>
@@ -332,6 +376,9 @@
         </div>
 
         <div class='container'>
+          <br id='masking'>
+          <br>
+          <br>
           <h4>Masking</h4>
           <div class='centered'>
             <HorizontalStackedBar
@@ -349,6 +396,9 @@
             /></span>, so susceptibles are assumed to be wearing these (unless specified otherwise in the Interventions section).
            </p>
 
+          <br id='clean-air-delivery-rate'>
+          <br>
+          <br>
           <h4>Clean Air Delivery Rate</h4>
 
           <p>
@@ -678,6 +728,10 @@
             </table>
           </div>
 
+
+          <br id='computational-details'>
+          <br>
+          <br>
           <h3>Computational Details</h3>
           <p>Click on an intervention to see how risks are calculated.</p>
 
@@ -1029,6 +1083,10 @@
             </div>
           </div>
 
+
+          <br id='details-ventilation-ach'>
+          <br>
+          <br>
           <h4>Ventilation ACH</h4>
 
           <div class='container'>
@@ -1299,6 +1357,10 @@
 
           <p><span class='bold'>Exhalation Activity CO2</span> values were calculated using regression on data referenced <a href="https://forhealth.org/tools/co2-calculator/">here</a>.</p>
 
+
+          <br id='details-upper-room-germicidal-uv-ach'>
+          <br>
+          <br>
           <h4>Upper-Room Germicidal UV ACH</h4>
 
           <div class='container'>
@@ -1491,6 +1553,10 @@
             </div>
           </div>
 
+
+          <br id='details-portable-air-cleaner-ach'>
+          <br>
+          <br>
           <h4>Portable Air Cleaner ACH</h4>
 
           <div class='container'>
@@ -2471,7 +2537,6 @@ export default {
     width: 70vw;
     height: auto;
     margin-left: 20rem;
-    overflow-y: scroll;
   }
 
   .link-h1 {
