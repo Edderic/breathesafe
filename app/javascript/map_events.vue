@@ -41,6 +41,7 @@
                   width: 90,
                 },
               ]"
+            zoomOnClick='true'
           >
             <GMapMarker
                 :key="index"
