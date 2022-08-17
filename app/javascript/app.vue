@@ -2,7 +2,9 @@
   <div class='column'>
     <NavBar></NavBar>
 
-    <router-view></router-view>
+    <div class='router-view-container'>
+      <router-view></router-view>
+    </div>
 
   </div>
 </template>
@@ -164,5 +166,10 @@ export default {
     }
   }
 
+  .router-view-container {
+    display: flex;
+    justify-content: center;
+    padding-top: 7em;
+  }
 
 </style>
