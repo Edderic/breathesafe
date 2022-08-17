@@ -3,7 +3,7 @@
     <h2 class='side-padding'>Breathesafe 😷</h2>
 
     <div class='vertical-centered'>
-      <a class='clickable side-padding' href="#events" @click="navToEvents" v-if=signedIn>Events</a>
+      <router-link class='clickable side-padding' to='/'>Events</router-link>
       <a class='clickable side-padding' href="#profile" @click="navToProfile" v-if=signedIn>Profile</a>
       <a class='clickable side-padding' href="#register" @click="navToRegister" v-if=!signedIn>Register</a>
       <router-link class='clickable side-padding' to='/signin' v-if=!signedIn>Sign in</router-link>
@@ -58,8 +58,10 @@ export default {
       .then(response => {
         console.log(response)
         if (response.status == 204 || response.status == 200) {
-          this.focusTab = 'events';
           this.getCurrentUser();
+          this.$router.push({
+            path: '/'
+          });
         }
 
         // whatever you want
