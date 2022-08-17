@@ -2234,7 +2234,7 @@ export default {
   },
   methods: {
     ...mapActions(useAnalyticsStore, ['reload', 'setNumPeopleToInvestIn', 'selectIntervention']),
-    ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
+    ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser', 'showAnalysis']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
     aerosolActivityToFactor(key) {
