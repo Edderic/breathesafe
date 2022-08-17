@@ -44,18 +44,18 @@
           >
             <GMapMarker
                 :key="index"
-                v-for="(m, index) in markers"
-                :position="m.center"
+                v-for="(m, index) in displayables"
+                :position="m.placeData.center"
                 :clickable="true"
-                :draggable="true"
-                @click="center=m.center"
+                :draggable="false"
+                @click="this.clickMarker(m)"
             />
           </GMapCluster>
         </GMapMap>
       </div>
 
       <div>
-        <Events v-show='focusTab == "maps"'/>
+        <Events/>
       </div>
     </div>
   </div>
@@ -64,6 +64,7 @@
 <script>
 // Have a VueX store that maintains state across components
 import Events from './events.vue';
+import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
 import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
@@ -76,7 +77,13 @@ export default {
   computed: {
     ...mapStores(useMainStore),
     ...mapState(useMainStore, ["focusTab", "focusSubTab", "signedIn", "markers"]),
-    ...mapWritableState(useMainStore, ['center', 'zoom'])
+    ...mapWritableState(useMainStore, ['center', 'zoom']),
+    ...mapWritableState(
+        useEventStores,
+        [
+          'displayables'
+        ]
+    ),
 
   },
   async created() {
@@ -101,6 +108,19 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile']),
+    clickMarker(displayable) {
+      this.center = displayable.placeData.center
+      for (let d of this.displayables) {
+        if (d == displayable) {
+          d.clicked = true
+        } else {
+          d.clicked = false
+        }
+      }
+
+      let element_to_scroll_to = document.getElementById(`measurements-${displayable.id}`);
+      element_to_scroll_to.scrollIntoView();
+    },
     save() {
       // send data to backend.
     },

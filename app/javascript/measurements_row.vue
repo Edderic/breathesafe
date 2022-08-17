@@ -1,5 +1,5 @@
 <template>
-  <tr class='clickable' :class='{ clicked: this.measurements.clicked }'>
+  <tr class='clickable' :class='{ clicked: this.measurements.clicked }' :id='`measurements-${this.measurements.id}`'>
     <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.roomName}}</td>
     <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.placeData.formattedAddress}}</td>
     <ColoredCell
