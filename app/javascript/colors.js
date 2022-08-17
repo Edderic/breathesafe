@@ -281,7 +281,7 @@ export function generateEvenSpacedBounds(min, max, numObjects) {
   return collection
 }
 
-closestColorIndex(colorScheme, value) {
+function closestColorIndex(colorScheme, value) {
   let closestIndex = 0
   let bestValue = 0
   let index = 0
