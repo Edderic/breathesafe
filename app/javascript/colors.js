@@ -118,12 +118,14 @@ export const riskColorInterpolationScheme = [
     'upperBound': 0.999999,
     'lowerColor': {
       name: 'red',
+      letterGrade: 'e',
       r: 219,
       g: 21,
       b: 0
     },
     'upperColor': {
       name: 'darkRed',
+      letterGrade: 'f',
       r: 174,
       g: 17,
       b: 0
@@ -134,12 +136,14 @@ export const riskColorInterpolationScheme = [
     'upperBound': 0.1,
     'lowerColor': {
       name: 'orangeRed',
+      letterGrade: 'd',
       r: 240,
       g: 90,
       b: 0
     },
     'upperColor': {
       name: 'red',
+      letterGrade: 'e',
       r: 219,
       g: 21,
       b: 0
@@ -150,12 +154,14 @@ export const riskColorInterpolationScheme = [
     'upperBound': 0.01,
     'lowerColor': {
       name: 'yellow',
+      letterGrade: 'c',
       r: 255,
       g: 233,
       b: 56
     },
     'upperColor': {
       name: 'orangeRed',
+      letterGrade: 'e',
       r: 240,
       g: 90,
       b: 0
@@ -166,12 +172,14 @@ export const riskColorInterpolationScheme = [
     'upperBound': 0.001,
     'upperColor': {
       name: 'yellow',
+      letterGrade: 'c',
       r: 255,
       g: 233,
       b: 56
     },
     'lowerColor': {
       name: 'green',
+      letterGrade: 'b',
       r: 87,
       g: 195,
       b: 40
@@ -182,12 +190,14 @@ export const riskColorInterpolationScheme = [
     'upperBound': 0.0001,
     'upperColor': {
       name: 'green',
+      letterGrade: 'b',
       r: 87,
       g: 195,
       b: 40
     },
     'lowerColor': {
       name: 'dark green',
+      letterGrade: 'a',
       r: 11,
       g: 161,
       b: 3
@@ -281,6 +291,24 @@ export function generateEvenSpacedBounds(min, max, numObjects) {
   return collection
 }
 
+export function interpolateRgb(prevColor, nextColor, prevVal, currVal, nextVal) {
+  let distanceFromPrevToNextVal = Math.abs(
+    (nextVal - prevVal)
+  )
+
+  let distanceFromCurrToNext = Math.abs(
+    (currVal - nextVal)
+  )
+
+  let multiplier = distanceFromCurrToNext / distanceFromPrevToNextVal
+
+  let red = nextColor.r + (prevColor.r - nextColor.r) * multiplier
+  let green = nextColor.g + (prevColor.g - nextColor.g) * multiplier
+  let blue = nextColor.b + (prevColor.b - nextColor.b) * multiplier
+
+  return `rgb(${parseInt(red)}, ${parseInt(green)}, ${parseInt(blue)})`;
+}
+
 function closestColorIndex(colorScheme, value) {
   let closestIndex = 0
   let bestValue = 0
@@ -296,6 +324,22 @@ function closestColorIndex(colorScheme, value) {
   }
 
   return closestIndex
+}
+
+export function binColor(colorScheme, value) {
+  for (let obj of colorScheme) {
+    if (obj['lowerBound'] <= value && value < obj['upperBound']) {
+
+      if (Math.abs(obj['upperBound'] - value) < Math.abs(obj['lowerBound'] - value)) {
+        return obj['upperColor']
+      }
+
+      return obj['lowerColor']
+    }
+  }
+
+  let obj = colorScheme[closestColorIndex(colorScheme, value)]
+  return obj['upperColor']
 }
 
 export function getColor(colorScheme, value) {

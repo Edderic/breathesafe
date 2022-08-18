@@ -1,6 +1,6 @@
 <template>
   <div class='body row'>
-    <div class='col' v-show="focusTab == 'maps'">
+    <div class='col'>
       <div class='row'>
         <GMapMap
             :center="center"
@@ -41,7 +41,7 @@
                   width: 90,
                 },
               ]"
-            zoomOnClick='true'
+            :zoomOnClick='true'
           >
             <GMapMarker
                 :key="index"
@@ -49,6 +49,7 @@
                 :position="m.placeData.center"
                 :clickable="true"
                 :draggable="false"
+                :icon="gradeLetter(m)"
                 @click="this.clickMarker(m)"
             />
           </GMapCluster>
@@ -65,6 +66,7 @@
 <script>
 // Have a VueX store that maintains state across components
 import Events from './events.vue';
+import { binColor, getColor, riskColorInterpolationScheme } from './colors';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
@@ -85,7 +87,9 @@ export default {
           'displayables'
         ]
     ),
-
+    riskColorScheme() {
+      return riskColorInterpolationScheme
+    }
   },
   async created() {
     // TODO: modify the store
@@ -121,6 +125,10 @@ export default {
 
       let element_to_scroll_to = document.getElementById(`measurements-${displayable.id}`);
       element_to_scroll_to.scrollIntoView({behavior: 'smooth'});
+    },
+    gradeLetter(marker) {
+      let color = binColor(riskColorInterpolationScheme, marker.risk)
+      return `https://breathesafe.s3.us-east-2.amazonaws.com/images/circle-${color.letterGrade}.svg`
     },
     save() {
       // send data to backend.

@@ -9,8 +9,7 @@
 </template>
 
 <script>
-  import { interpolateRgb } from './misc';
-  import { getColor } from './colors';
+  import { getColor, interpolateRgb } from './colors';
 
   export default {
     computed: {
