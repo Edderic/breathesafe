@@ -191,7 +191,7 @@ export default {
 
   .map {
     width: 100vw;
-    height: 30vh;
+    height: 32vh;
   }
 
 
