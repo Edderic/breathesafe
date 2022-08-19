@@ -55,6 +55,8 @@
               proceed with computing the probability that someone from that group is
               infectious, and multiplying that with the conditional probability "if someone
               were infectious from this group, what's the chance of transmission?"
+              We add these products to get the overall risk of transmission, taking into account
+              the uncertainty of an infector being present.
           </p>
 
           <br id='one-hr-risk-with-infector'>
@@ -63,38 +65,28 @@
           <h3>What is the 1-hr Risk w/ Infector?</h3>
 
           <p class='bold italic'>
-              This risk assumes that there is one infector in the room. This is
-              useful in making environments more resilient to transmission of
-              airborne respiratory illnessses.
+              This risk assumes that there is one infector in the room.
           </p>
 
           <p>
-              For this risk, we look at the riskiest mask type found in the
-              measurement. We pair that with the riskiest infector aerosol
-              exhalation activity (e.g. singing vs. at rest), along with the
-              riskiest susceptible inhalation activity (e.g. at rest vs. heavy
-              exercise). We assume that the riskiest behaviors are being done.
-              We then compute, for 1 hour, what is the probability of transmitting
-              SARS-CoV-2.
+              Unlike the <span class='italic'>1-hr Risk</span>, this metric
+              does not take occupancy into account. This metric considers
+              environment parameters and worst-case behaviors only.
           </p>
 
           <p>
-              Assuming that there is one infector present is useful in times
-              when you expect that there's high transmission going on, and that
-              the case rates are severely under-estimated.
-          </p>
+              For this risk, we go through the different activity profiles that
+              were recorded at the time of measurement.
 
-          <p>
-              Likewise, it's also useful in terms of creating environments that
-              are more robust to airborne transmission of diseases.
-              Asymptomatic spreaders exist. Likewise, symptomatic individuals might
-              misdiagnose their symptoms. They might actually have COVID but
-              don't think they do. By assuming that an infector exists, we can then explore
-              interventions that could decrease that risk (e.g. filtration through
-              Corsi-Rosenthal boxes, deactivation of viruses through Upper-Room Germicidal
-              UV, Far UV, and removal of contaminants through improving ventilation).
+              Some people are riskier than others. We go through the recorded
+              activities for this place. We pick the worst case exhalation activity for an
+              infector (e.g. loudly speaking during heavy exercise vs. oral
+              breathing at rest), along with the riskiest susceptible inhalation activity
+              (e.g. at rest vs. heavy exercise).  We assume that the riskiest behaviors are
+              being done. We then compute, for 1 hour, what is the probability of
+              transmitting SARS-CoV-2, assuming that the infector stays in the
+              room for an hour.
           </p>
-
         </div>
       </div>
     </div>
