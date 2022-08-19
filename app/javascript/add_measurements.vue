@@ -371,7 +371,7 @@ export default {
     },
     cancel() {
       // TODO: clear out data for Add New Event
-      this.focusTab = 'maps'
+      this.$router.go(-1)
     },
     parseOccupancyData(event) {
       this.occupancy.unparsedOccupancyData = event.target.value
