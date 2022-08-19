@@ -14,10 +14,10 @@ export const colorPaletteFall = [
     b: 0
   },
   {
-    name: 'orangeRed',
-    r: 240,
-    g: 90,
-    b: 0
+    name: 'orange',
+    r: 245,
+    g: 150,
+    b: 2
   },
   {
     name: 'yellow',
@@ -56,10 +56,10 @@ export const colorSchemeFall = [
   },
   {
     'upperColor': {
-      name: 'orangeRed',
-      r: 240,
-      g: 90,
-      b: 0
+      name: 'orange',
+      r: 245,
+      g: 150,
+      b: 2
     },
     'lowerColor': {
       name: 'red',
@@ -76,10 +76,10 @@ export const colorSchemeFall = [
       b: 56
     },
     'lowerColor': {
-      name: 'orangeRed',
-      r: 240,
-      g: 90,
-      b: 0
+      name: 'orange',
+      r: 245,
+      g: 150,
+      b: 2
     },
   },
   {
@@ -135,11 +135,11 @@ export const riskColorInterpolationScheme = [
     'lowerBound': 0.01,
     'upperBound': 0.1,
     'lowerColor': {
-      name: 'orangeRed',
       letterGrade: 'd',
-      r: 240,
-      g: 90,
-      b: 0
+      name: 'orange',
+      r: 245,
+      g: 150,
+      b: 2
     },
     'upperColor': {
       name: 'red',
@@ -160,16 +160,23 @@ export const riskColorInterpolationScheme = [
       b: 56
     },
     'upperColor': {
-      name: 'orangeRed',
-      letterGrade: 'e',
-      r: 240,
-      g: 90,
-      b: 0
+      letterGrade: 'd',
+      name: 'orange',
+      r: 245,
+      g: 150,
+      b: 2
     },
   },
   {
     'lowerBound': 0.0001,
     'upperBound': 0.001,
+    'lowerColor': {
+      name: 'green',
+      letterGrade: 'b',
+      r: 87,
+      g: 195,
+      b: 40
+    },
     'upperColor': {
       name: 'yellow',
       letterGrade: 'c',
@@ -177,30 +184,23 @@ export const riskColorInterpolationScheme = [
       g: 233,
       b: 56
     },
-    'lowerColor': {
-      name: 'green',
-      letterGrade: 'b',
-      r: 87,
-      g: 195,
-      b: 40
-    },
   },
   {
     'lowerBound': -0.000001,
     'upperBound': 0.0001,
-    'upperColor': {
-      name: 'green',
-      letterGrade: 'b',
-      r: 87,
-      g: 195,
-      b: 40
-    },
     'lowerColor': {
-      name: 'dark green',
-      letterGrade: 'a',
+      name: 'green',
+      letterGrade: 'd',
       r: 11,
       g: 161,
       b: 3
+    },
+    'upperColor': {
+      name: 'dark green',
+      letterGrade: 'a',
+      r: 87,
+      g: 195,
+      b: 40
     },
   },
 ]
