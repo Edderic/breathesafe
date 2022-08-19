@@ -10,6 +10,9 @@
       <router-link to="/faqs#one-hr-risk-with-infector" class='link-h2'>
         What is the 1-hr Risk w/ Infector?
       </router-link>
+      <router-link to="/faqs#one-hr-risk-low-but-one-hr-risk-with-infector-high" class='link-h2'>
+        What does it mean if the 1-hr Risk is quite low, but the 1-hr Risk w/ Infector is quite high?
+      </router-link>
     </div>
 
     <div class='col border-showing right-pane'>
@@ -86,6 +89,18 @@
               being done. We then compute, for 1 hour, what is the probability of
               transmitting SARS-CoV-2, assuming that the infector stays in the
               room for an hour.
+          </p>
+
+          <br id='one-hr-risk-low-but-one-hr-risk-with-infector-high'>
+          <br>
+          <br>
+          <h3>What does it mean if the 1-hr Risk is quite low, but the 1-hr Risk w/ Infector is quite high?</h3>
+
+          <p>
+              This means that the environmental protections and individuals'
+              behaviors are not good enough, hence the 1-hr Risk w/ Infector being high.
+              However, if the prevalence rate of SARS-CoV-2 is low, and if the room has a low
+              maximum occupancy, one could still get a low 1-hr Risk score.
           </p>
         </div>
       </div>

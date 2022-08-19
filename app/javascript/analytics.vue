@@ -186,12 +186,11 @@
                       :maxVal=1
                       :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**80), 1)'
                       :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                  />, on average, would get infected under 40 and 80 hours of exposure with an infector in this environment. Skip to the
-  <span @click.native='scrollFix($event, "interventions")'>interventions</span>
+                  />, on average, would get infected under 40 and 80 hours of exposure with an infector in this environment. Browse the
   <router-link :to="`/analytics/${this.$route.params.id}#interventions`">
     interventions
   </router-link>
-   section to understand actions you can take to make this environment safer for everyone.</span>
+   section to understand what actions you can take to make this environment safer for everyone.</span>
             </p>
 
 
@@ -238,7 +237,7 @@
               we inhabit <a href="https://www.science.org/doi/10.1126/science.abd9149">be
               more resilient not just to COVID-19, but also to other respiratory viruses</a>.
             </p>
-            <p>In the interventions section below, there are many proven ways to decrease the risk of contracting COVID-19 and other airborne viruses. One would be able to see the interventions to clean the air. I introduce a metric for cost benefit </p>
+
             <br id='modeling'>
             <br>
             <br>
