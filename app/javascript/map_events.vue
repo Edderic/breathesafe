@@ -189,44 +189,9 @@ export default {
     padding: 1em 3em;
   }
 
-  .width {
-    max-width: 70em;
-  }
-
-  @media (max-width: 70em) {
-    .width {
-      width: 100vw;
-    }
-  }
-
   .map {
     width: 100vw;
-    height: 60vw;
-  }
-
-  @media (max-width: 840em) {
-    .map {
-      height: 30vw;
-    }
-  }
-
-  @media ((max-height: 1200px) and (orientation: landscape)) {
-    .map {
-      height: 25vw;
-    }
-  }
-
-  @media ((max-height: 1180px) and (orientation: portrait)) {
-    .map {
-      height: 25vw;
-    }
-  }
-
-
-  @media ((max-height: 670px) and (orientation: landscape)) {
-    .map {
-      height: 15vw;
-    }
+    height: 30vh;
   }
 
 
