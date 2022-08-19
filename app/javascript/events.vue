@@ -6,7 +6,7 @@
         <option>At this hour</option>
         <option>At max occupancy</option>
       </select>
-      <button class='margined' @click='newEvent'>Add New Event</button>
+      <router-link class='margined button' to="/events/new">Add New Event</router-link>
     </div>
 
     <div class='scrollable'>
@@ -156,7 +156,7 @@ export default {
   td {
     padding: 1em;
   }
-  button {
+  .button {
     padding: 1em 3em;
   }
 

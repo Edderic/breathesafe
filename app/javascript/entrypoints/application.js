@@ -34,6 +34,7 @@ import Vue3Geolocation from 'vue3-geolocation';
 
 import Analytics from '../analytics.vue'
 import App from '../app.vue';
+import AddMeasurements from '../add_measurements.vue';
 import FAQs from '../faqs.vue';
 import MapEvents from '../map_events.vue'
 import Profile from '../profile.vue'
@@ -56,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/', component: MapEvents },
     { path: '/analytics/:id', component: Analytics },
     { path: '/signin', component: SignIn },
+    { path: '/events/new', component: AddMeasurements },
     { path: '/profile', component: Profile },
     { path: '/register', component: Registration },
     { path: '/faqs', component: FAQs },
