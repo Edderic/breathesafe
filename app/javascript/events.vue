@@ -14,8 +14,11 @@
         <tr>
           <th>Room</th>
           <th>Address</th>
-          <th class='clickable' @click='sortByRisk'>1-hr Risk ({{this.sortRiskArrow}})</th>
-          <th>1-hr Risk w/ 1 Infector</th>
+          <th class='clickable' @click='sortByRisk'
+          >1-hr Risk ({{this.sortRiskArrow}})</th>
+          <th
+            title="This risk assumes that there is an infector is in the room."
+          >1-hr Risk w/ 1 Infector</th>
           <th>Show Analysis</th>
         </tr>
         <MeasurementsRow v-for="ev in displayables" :key="ev.id" :measurements="ev"/>

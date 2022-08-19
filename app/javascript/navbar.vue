@@ -3,6 +3,7 @@
     <h2 class='side-padding'>Breathesafe 😷</h2>
 
     <div class='vertical-centered'>
+      <router-link class='clickable side-padding' to='/faqs'>FAQs</router-link>
       <router-link class='clickable side-padding' to='/'>Events</router-link>
       <router-link class='clickable side-padding' to='/profile' v-if='signedIn'>Profile</router-link>
       <router-link class='clickable side-padding' to='/register' v-if=!signedIn>Register</router-link>

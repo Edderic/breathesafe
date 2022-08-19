@@ -34,6 +34,7 @@ import Vue3Geolocation from 'vue3-geolocation';
 
 import Analytics from '../analytics.vue'
 import App from '../app.vue';
+import FAQs from '../faqs.vue';
 import MapEvents from '../map_events.vue'
 import Profile from '../profile.vue'
 import Registration from '../registration.vue'
@@ -57,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/signin', component: SignIn },
     { path: '/profile', component: Profile },
     { path: '/register', component: Registration },
+    { path: '/faqs', component: FAQs },
   ]
 
   // 3. Create the router instance and pass the `routes` option
