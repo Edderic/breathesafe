@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_08_20_121954) do
+ActiveRecord::Schema[7.0].define(version: 2022_08_20_225239) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -80,6 +80,9 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_20_121954) do
     t.float "uncounted_cases_multiplier"
     t.string "mask_type"
     t.string "event_display_risk_time"
+    t.string "first_name"
+    t.string "last_name"
+    t.float "heightMeters"
     t.index ["user_id"], name: "index_profiles_on_user_id"
   end
 
