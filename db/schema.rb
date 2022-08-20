@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_08_20_011338) do
+ActiveRecord::Schema[7.0].define(version: 2022_08_20_121954) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -63,6 +63,13 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_20_011338) do
     t.index ["author_id"], name: "index_events_on_author_id"
   end
 
+  create_table "population_states", force: :cascade do |t|
+    t.integer "population"
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "profiles", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "measurement_system", null: false
@@ -74,6 +81,13 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_20_011338) do
     t.string "mask_type"
     t.string "event_display_risk_time"
     t.index ["user_id"], name: "index_profiles_on_user_id"
+  end
+
+  create_table "states", force: :cascade do |t|
+    t.string "full_name"
+    t.string "code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "user_carbon_dioxide_monitors", force: :cascade do |t|
