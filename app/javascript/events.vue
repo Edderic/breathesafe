@@ -81,33 +81,19 @@ export default {
       return sortArrow(this.$route.query['sort-how'], this.$route.query.sort == 'risk-infector')
     }
   },
-  created() {
+  async created() {
+    await this.load()
+    this.sortByParams()
+
     this.$watch(
       () => this.$route.query,
       (toQuery, previousQuery) => {
-        if (this.$route.query.sort == 'risk' && this.$route.query['sort-how'] == 'ascending') {
-          this.displayables = this.displayables.sort((a, b) => a.risk - b.risk)
-        }
-
-        else if (this.$route.query.sort == 'risk' && this.$route.query['sort-how'] == 'descending') {
-          this.displayables = this.displayables.sort((a, b) => b.risk - a.risk)
-        }
-        else if (this.$route.query.sort == 'risk-infector' && this.$route.query['sort-how'] == 'ascending') {
-          this.displayables = this.displayables.sort(
-              (a, b) => new Intervention(a, []).computeRisk() - new Intervention(b, []).computeRisk()
-              )
-        }
-        else if (this.$route.query.sort == 'risk-infector' && this.$route.query['sort-how'] == 'descending') {
-          this.displayables = this.displayables.sort(
-              (a, b) => new Intervention(b, []).computeRisk() - new Intervention(a, []).computeRisk()
-              )
-        }
+        this.sortByParams()
         // react to route changes...
       }
     )
   },
   mounted() {
-    this.load()
   },
   data() {
     return {
@@ -201,6 +187,26 @@ export default {
               'sort-how': 'descending'
             }
           }
+        )
+      }
+    },
+
+    sortByParams() {
+      if (this.$route.query.sort == 'risk' && this.$route.query['sort-how'] == 'ascending') {
+        this.displayables = this.displayables.sort((a, b) => a.risk - b.risk)
+      }
+
+      else if (this.$route.query.sort == 'risk' && this.$route.query['sort-how'] == 'descending') {
+        this.displayables = this.displayables.sort((a, b) => b.risk - a.risk)
+      }
+      else if (this.$route.query.sort == 'risk-infector' && this.$route.query['sort-how'] == 'ascending') {
+        this.displayables = this.displayables.sort(
+          (a, b) => new Intervention(a, []).computeRisk() - new Intervention(b, []).computeRisk()
+        )
+      }
+      else if (this.$route.query.sort == 'risk-infector' && this.$route.query['sort-how'] == 'descending') {
+        this.displayables = this.displayables.sort(
+          (a, b) => new Intervention(b, []).computeRisk() - new Intervention(a, []).computeRisk()
         )
       }
     }
