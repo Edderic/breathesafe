@@ -22,7 +22,8 @@
           </th>
           <th
             title="This risk assumes that there is an infector is in the room."
-          >1-hr Risk w/ 1 Infector
+            @click='sortByInfectorRisk'
+          >1-hr Risk w/ 1 Infector ({{this.sortRiskInfectorArrow}})
 
           <router-link to='/faqs#one-hr-risk-with-infector'>
           (?)
@@ -40,10 +41,11 @@
 // Have a VueX store that maintains state across components
 import axios from 'axios';
 import MeasurementsRow from './measurements_row.vue';
+import { Intervention } from './interventions.js';
 import { useProfileStore } from './stores/profile_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
-import { filterEvents, getWeekdayText } from './misc'
+import { filterEvents, getWeekdayText, sortArrow } from './misc'
 import { mapWritableState, mapState, mapActions } from 'pinia'
 
 export default {
@@ -73,14 +75,10 @@ export default {
         ]
     ),
     sortRiskArrow() {
-      if (this.sortRisk == 'Ascending') {
-        return "↑"
-      } else if (this.sortRisk == "Descending") {
-        return "↓"
-      }
-      else {
-        return "⇵"
-      }
+      return sortArrow(this.sortRisk)
+    },
+    sortRiskInfectorArrow() {
+      return sortArrow(this.sortRiskInfector)
     }
   },
   created() {
@@ -91,7 +89,8 @@ export default {
   data() {
     return {
       'search': "",
-      'sortRisk': "None"
+      'sortRisk': "None",
+      'sortRiskInfector': "None",
     }
   },
   methods: {
@@ -140,6 +139,21 @@ export default {
         this.displayables = this.displayables.sort((a, b) => b.risk - a.risk)
         this.sortRisk = "Descending"
       }
+      this.sortRiskInfector = "None"
+    },
+    sortByInfectorRisk() {
+      this.computeRiskAll()
+      if (this.sortRiskInfector == "None" || this.sortRiskInfector == "Descending") {
+        this.displayables = this.displayables.sort(
+(a, b) => new Intervention(a, []).computeRisk() - new Intervention(b, []).computeRisk())
+        this.sortRiskInfector = "Ascending"
+      } else if (this.sortRiskInfector == "Ascending") {
+        this.displayables = this.displayables.sort(
+(a, b) => new Intervention(b, []).computeRisk() - new Intervention(a, []).computeRisk())
+
+        this.sortRiskInfector = "Descending"
+      }
+      this.sortRisk = "None"
     }
   },
 }

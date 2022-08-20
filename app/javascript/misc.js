@@ -1,4 +1,5 @@
 // esversion: 6
+
 import axios from 'axios';
 
 const INCHES_PER_FOOT = 12;
@@ -282,6 +283,17 @@ export const hourToIndex = {
   '10 PM': 21,
   '11 PM': 22,
   '12 AM': 23,
+}
+
+export function sortArrow(value) {
+  if (value == 'Ascending') {
+    return "↑"
+  } else if (value == "Descending") {
+    return "↓"
+  }
+  else {
+    return "⇵"
+  }
 }
 
 export function computeRiskWithVariableOccupancy(
