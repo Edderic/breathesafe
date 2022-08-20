@@ -9,7 +9,7 @@ class Event < ApplicationRecord
       # )
 #
     # end
-    Event.connection.exec_query(
+    events = Event.connection.exec_query(
       <<-SQL
         select events_with_state.*, num_cases_last_seven_days, population_states.population, num_cases_last_seven_days::float / population_states.population as naive_prevalence from (
           select events.*, array_to_string(regexp_matches(place_data->>'formatted_address', '[A-Z]{2}'), ';') as state_short_name
@@ -38,5 +38,17 @@ class Event < ApplicationRecord
         )
       SQL
     )
+
+    self.json_parse(events)
+  end
+
+  def self.json_parse(events)
+    events.map do |ev|
+      ["place_data", "activity_groups", "occupancy", "portable_air_cleaners"].each do |col|
+        ev[col] = JSON.parse(ev[col])
+      end
+
+      ev
+    end
   end
 end
