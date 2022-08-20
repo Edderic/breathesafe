@@ -69,13 +69,14 @@ export const useEventStores = defineStore('events', {
       const prevalenceStore = usePrevalenceStore()
       const profileStore = useProfileStore()
 
-      const probaRandomSampleOfOneIsInfectious = prevalenceStore.numPositivesLastSevenDays
-        * prevalenceStore.uncountedFactor / prevalenceStore.numPopulation
-
       const susceptibleMaskType = prevalenceStore.maskType
+      const ascertainmentBiasMitigator = 10
+      let probaRandomSampleOfOneIsInfectious;
 
       for (let event of this.events) {
         const flowRate = event.roomUsableVolumeCubicMeters * event.totalAch
+
+        probaRandomSampleOfOneIsInfectious = event['naivePrevalence'] * ascertainmentBiasMitigator
 
         event['risk'] = computeRiskWithVariableOccupancy(
           event,
@@ -89,6 +90,8 @@ export const useEventStores = defineStore('events', {
 
       for (let event of this.displayables) {
         const flowRate = event.roomUsableVolumeCubicMeters * event.totalAch
+
+        probaRandomSampleOfOneIsInfectious = event['naivePrevalence'] * ascertainmentBiasMitigator
 
         event['risk'] = computeRiskWithVariableOccupancy(
           event,
