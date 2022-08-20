@@ -75,10 +75,10 @@ export default {
         ]
     ),
     sortRiskArrow() {
-      return sortArrow(this.sortRisk)
+      return sortArrow(this.$route.query['sort-how'], this.$route.query.sort == 'risk')
     },
     sortRiskInfectorArrow() {
-      return sortArrow(this.sortRiskInfector)
+      return sortArrow(this.$route.query['sort-how'], this.$route.query.sort == 'risk-infector')
     }
   },
   created() {
@@ -132,28 +132,65 @@ export default {
 
     sortByRisk() {
       this.computeRiskAll()
-      if (this.sortRisk == "None" || this.sortRisk == "Descending") {
+      if (!this.$route.query.sort || this.$route.query.sort != 'risk' || this.$route.query['sort-how'] == "descending" && this.$route.query.sort == 'risk') {
         this.displayables = this.displayables.sort((a, b) => a.risk - b.risk)
-        this.sortRisk = "Ascending"
-      } else if (this.sortRisk == "Ascending") {
+        this.$router.push(
+          {
+            name: 'MapEvents',
+            query: {
+              'sort': 'risk',
+              'sort-how': 'ascending'
+            }
+          }
+        )
+      } else if (this.$route.query.sort == "risk" && this.$route.query['sort-how'] == 'ascending') {
         this.displayables = this.displayables.sort((a, b) => b.risk - a.risk)
         this.sortRisk = "Descending"
+
+        this.$router.push(
+          {
+            name: 'MapEvents',
+            query: {
+              'sort': 'risk',
+              'sort-how': 'descending'
+            }
+          }
+        )
       }
-      this.sortRiskInfector = "None"
     },
     sortByInfectorRisk() {
       this.computeRiskAll()
-      if (this.sortRiskInfector == "None" || this.sortRiskInfector == "Descending") {
+      if (!this.$route.query.sort ||
+          this.$route.query.sort != "risk-infector" ||
+
+          (this.$route.query.sort == "risk-infector"
+          && this.$route.query['sort-how'] == "descending")
+         ) {
         this.displayables = this.displayables.sort(
 (a, b) => new Intervention(a, []).computeRisk() - new Intervention(b, []).computeRisk())
-        this.sortRiskInfector = "Ascending"
-      } else if (this.sortRiskInfector == "Ascending") {
+        this.$router.push(
+          {
+            name: 'MapEvents',
+            query: {
+              'sort': 'risk-infector',
+              'sort-how': 'ascending'
+            }
+          }
+        )
+      } else if (this.$route.query.sort == "risk-infector" && this.$route.query['sort-how'] == "ascending") {
         this.displayables = this.displayables.sort(
 (a, b) => new Intervention(b, []).computeRisk() - new Intervention(a, []).computeRisk())
 
-        this.sortRiskInfector = "Descending"
+        this.$router.push(
+          {
+            name: 'MapEvents',
+            query: {
+              'sort': 'risk-infector',
+              'sort-how': 'descending'
+            }
+          }
+        )
       }
-      this.sortRisk = "None"
     }
   },
 }

@@ -285,10 +285,13 @@ export const hourToIndex = {
   '12 AM': 23,
 }
 
-export function sortArrow(value) {
-  if (value == 'Ascending') {
+export function sortArrow(value, applicable) {
+  if (!applicable) {
+    return "⇵"
+  }
+  else if (value == 'ascending') {
     return "↑"
-  } else if (value == "Descending") {
+  } else if (value == "descending") {
     return "↓"
   }
   else {
