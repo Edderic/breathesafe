@@ -15,6 +15,7 @@ class EventsController < ApplicationController
   end
 
   def index
+    CovidCasesUpdater.new.update
     # TODO: if current user is nil, only show events that are public
     events = Event.can_be_accessed_by(current_user)
 
