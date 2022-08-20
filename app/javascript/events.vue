@@ -82,6 +82,29 @@ export default {
     }
   },
   created() {
+    this.$watch(
+      () => this.$route.query,
+      (toQuery, previousQuery) => {
+        if (this.$route.query.sort == 'risk' && this.$route.query['sort-how'] == 'ascending') {
+          this.displayables = this.displayables.sort((a, b) => a.risk - b.risk)
+        }
+
+        else if (this.$route.query.sort == 'risk' && this.$route.query['sort-how'] == 'descending') {
+          this.displayables = this.displayables.sort((a, b) => a.risk - b.risk)
+        }
+        else if (this.$route.query.sort == 'risk-infector' && this.$route.query['sort-how'] == 'ascending') {
+          this.displayables = this.displayables.sort(
+              (a, b) => new Intervention(a, []).computeRisk() - new Intervention(b, []).computeRisk()
+              )
+        }
+        else if (this.$route.query.sort == 'risk-infector' && this.$route.query['sort-how'] == 'descending') {
+          this.displayables = this.displayables.sort(
+              (a, b) => new Intervention(b, []).computeRisk() - new Intervention(a, []).computeRisk()
+              )
+        }
+        // react to route changes...
+      }
+    )
   },
   mounted() {
     this.load()
@@ -89,8 +112,6 @@ export default {
   data() {
     return {
       'search': "",
-      'sortRisk': "None",
-      'sortRiskInfector': "None",
     }
   },
   methods: {
@@ -145,7 +166,6 @@ export default {
         )
       } else if (this.$route.query.sort == "risk" && this.$route.query['sort-how'] == 'ascending') {
         this.displayables = this.displayables.sort((a, b) => b.risk - a.risk)
-        this.sortRisk = "Descending"
 
         this.$router.push(
           {
