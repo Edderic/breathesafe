@@ -438,8 +438,10 @@ export default {
         .then(response => {
           console.log(response)
           if (response.status == 201 || response.status == 200) {
+            // TODO: could make this more efficient by just adding the event
+            // directly to the store?
             this.load()
-            this.setFocusTab('events')
+            this.$router.push({ path: '/'})
           }
 
           // whatever you want
