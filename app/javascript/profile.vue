@@ -10,6 +10,19 @@
     </div>
 
     <div class='container'>
+      <label>First name</label>
+      <input v-model='firstName'>
+    </div>
+    <div class='container'>
+      <label>Last name</label>
+      <input v-model='height'>
+    </div>
+    <div class='container'>
+      <label>Height ({{ measurementUnits.lengthMeasurementType }})</label>
+      <input v-model='height'>
+    </div>
+
+    <div class='container'>
       <label>System of Measurement</label>
 
       <select :value='systemOfMeasurement' @change='setSystemOfMeasurement'>
@@ -99,8 +112,8 @@ export default {
     )
   },
   // TODO: pull data from profiles for given current_user
-  created() {
-    this.getCurrentUser()
+  async created() {
+    await this.getCurrentUser()
     this.loadCO2Monitors()
   },
   data() {
