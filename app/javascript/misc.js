@@ -284,7 +284,6 @@ export const hourToIndex = {
   '12 AM': 23,
 }
 
-
 export function computeRiskWithVariableOccupancy(
   event,
   probaRandomSampleOfOneIsInfectious,
