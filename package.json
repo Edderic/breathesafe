@@ -1,7 +1,7 @@
 {
   "devDependencies": {
-    "vite": "^2.9.1",
-    "vite-plugin-ruby": "^3.0.9"
+    "vite": "^3.0.0",
+    "vite-plugin-ruby": "^3.1.0"
   },
   "dependencies": {
     "@fawmi/vue-google-maps": "^0.9.72",
