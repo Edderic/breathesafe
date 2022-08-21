@@ -82,7 +82,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_20_225239) do
     t.string "event_display_risk_time"
     t.string "first_name"
     t.string "last_name"
-    t.float "heightMeters"
+    t.float "height_meters"
     t.index ["user_id"], name: "index_profiles_on_user_id"
   end
 

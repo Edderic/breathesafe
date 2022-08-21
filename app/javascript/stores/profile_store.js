@@ -11,6 +11,9 @@ import { generateUUID, getMeasurementUnits, setupCSRF } from '../misc';
 export const useProfileStore = defineStore('profile', {
   state: () => ({
     currentUser: undefined,
+    firstName: "",
+    lastName: "",
+    heightMeters: "",
     measurementUnits: {
       'lengthMeasurementType': "feet",
       'airDeliveryRateMeasurementType': 'cubic feet per minute',
@@ -25,7 +28,8 @@ export const useProfileStore = defineStore('profile', {
         'model': ""
       }
     ],
-    'eventDisplayRiskTime': "At max occupancy"
+    'eventDisplayRiskTime': "At max occupancy",
+    status: 'saved'
   }),
   getters: {
     // ...mapState(useMainStore, ['currentUser']),
@@ -70,6 +74,9 @@ export const useProfileStore = defineStore('profile', {
             prevalenceStore.maskType = profile.mask_type
             prevalenceStore.eventDisplayRiskTime = profile.event_display_risk_time
 
+            this.heightMeters = profile.height_meters
+            this.firstName = profile.first_name
+            this.lastName = profile.last_name
             this.message = data.message
             this.systemOfMeasurement = profile.measurement_system
             this.measurementUnits = getMeasurementUnits(profile.measurement_system)
@@ -95,6 +102,9 @@ export const useProfileStore = defineStore('profile', {
 
       let toSave = {
         'profile': {
+          'first_name': this.firstName,
+          'last_name': this.lastName,
+          'height_meters': this.heightMeters,
           'measurement_system': this.systemOfMeasurement,
           'uncounted_cases_multiplier': prevalenceStore.uncountedFactor,
           'num_people_population': prevalenceStore.numPopulation,
@@ -109,19 +119,7 @@ export const useProfileStore = defineStore('profile', {
         toSave
       )
         .then(response => {
-          let data = response.data
-          let profile = data.profile
-
-          prevalenceStore.numPositivesLastSevenDays = profile.num_positive_cases_last_seven_days
-          prevalenceStore.numPopulation = profile.num_people_population
-          prevalenceStore.uncountedFactor = profile.uncounted_cases_multiplier
-          prevalenceStore.maskType = profile.mask_type
-
           this.message = data.message
-          this.systemOfMeasurement = profile.system_of_measurement
-          this.measurementUnits = getMeasurementUnits(this.systemOfMeasurement)
-          this.eventDisplayRiskTime = profile.event_display_risk_time
-
           // whatever you want
         })
         .catch(error => {
@@ -143,7 +141,10 @@ export const useProfileStore = defineStore('profile', {
           'num_people_population': prevalenceStore.numPopulation,
           'num_positive_cases_last_seven_days': prevalenceStore.numPositivesLastSevenDays,
           'mask_type': prevalenceStore.maskType,
-          'event_display_risk_time': this.eventDisplayRiskTime
+          'event_display_risk_time': this.eventDisplayRiskTime,
+          'first_name': this.firstName,
+          'last_name': this.lastName,
+          'height_meters': this.heightMeters,
         }
       }
 
@@ -152,20 +153,8 @@ export const useProfileStore = defineStore('profile', {
         toSave
       )
         .then(response => {
-          let data = response.data
-
-          let profile = data.profile
-          prevalenceStore.numPositivesLastSevenDays = profile.num_positive_cases_last_seven_days
-          prevalenceStore.numPopulation = profile.num_people_population
-          prevalenceStore.uncountedFactor = profile.uncounted_cases_multiplier
-          prevalenceStore.maskType = profile.mask_type
-
-          this.message = data.message
-          this.systemOfMeasurement = profile.system_of_measurement
-          this.measurementUnits = getMeasurementUnits(this.systemOfMeasurement)
-          this.eventDisplayRiskTime = profile.event_display_risk_time
-
-          // whatever you want
+          this.message = response.data.message
+          this.status = 'saved'
         })
         .catch(error => {
           this.message = "Failed to load profile."

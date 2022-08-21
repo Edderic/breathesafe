@@ -83,13 +83,16 @@ class Users::ProfilesController < ApplicationController
 
   def profile_data
     params.require(:profile).permit(
-      "user_id",
-      "measurement_system",
       "event_display_risk_time",
+      "height_meters",
+      "first_name",
+      "last_name",
+      "mask_type",
+      "measurement_system",
       "num_people_population",
       "num_positive_cases_last_seven_days",
       "uncounted_cases_multiplier",
-      "mask_type"
+      "user_id",
     )
   end
 end

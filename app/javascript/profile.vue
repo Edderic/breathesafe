@@ -11,15 +11,20 @@
 
     <div class='container'>
       <label>First name</label>
-      <input v-model='firstName'>
+      <input :value='firstName' @change='updateFirstName' :disabled="this.status == 'saved'">
     </div>
     <div class='container'>
       <label>Last name</label>
-      <input v-model='height'>
+      <input :value='lastName' @change='updateLastName' :disabled="this.status == 'saved'">
     </div>
     <div class='container'>
       <label>Height ({{ measurementUnits.lengthMeasurementType }})</label>
-      <input v-model='height'>
+      <input :value='height' @change='updateHeightMeters' :disabled="this.status == 'saved'">
+    </div>
+
+    <div class='container centered'>
+      <button @click='save' v-if='this.status == "edit"'>Save</button>
+      <button @click='editProfile' v-if='this.status == "saved"'>Edit</button>
     </div>
 
     <div class='container'>
@@ -85,7 +90,7 @@
 import axios from 'axios';
 import { useEventStore } from './stores/event_store';
 import { useMainStore } from './stores/main_store';
-import { generateUUID, setupCSRF } from './misc';
+import { convertLengthBasedOnMeasurementType, generateUUID, setupCSRF } from './misc';
 import { useEventStores } from './stores/event_stores';
 import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia'
@@ -103,18 +108,36 @@ export default {
           'message'
         ]
     ),
+    ...mapState(
+        useProfileStore,
+        [
+          'measurementUnits'
+        ]
+    ),
     ...mapWritableState(
         useProfileStore,
         [
           'carbonDioxideMonitors',
-          'systemOfMeasurement'
+          'systemOfMeasurement',
+          'heightMeters',
+          'firstName',
+          'lastName',
+          'status'
         ]
-    )
+    ),
+    height() {
+      return convertLengthBasedOnMeasurementType(
+        this.heightMeters,
+        'meters',
+        this.measurementUnits.lengthMeasurementType
+      )
+    }
   },
   // TODO: pull data from profiles for given current_user
   async created() {
     await this.getCurrentUser()
     this.loadCO2Monitors()
+    this.loadProfile()
   },
   data() {
     return {
@@ -122,7 +145,7 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['setFocusTab', 'getCurrentUser']),
-    ...mapActions(useProfileStore, ['setSystemOfMeasurement', 'loadProfile', 'loadCO2Monitors']),
+    ...mapActions(useProfileStore, ['setSystemOfMeasurement', 'loadProfile', 'loadCO2Monitors', 'updateProfile']),
     validCO2Monitor(monitor) {
       return !!monitor["model"] && !!monitor["name"] && !!monitor["serial"]
     },
@@ -221,6 +244,9 @@ export default {
           // whatever you want
         })
     },
+    save() {
+      this.updateProfile()
+    },
     setCarbonDioxideMonitorModel(event, id) {
       const carbonDioxideMonitor = this.carbonDioxideMonitors.find(
         (carbonDioxideMonitor) => carbonDioxideMonitor.id == id
@@ -242,6 +268,22 @@ export default {
 
       carbonDioxideMonitor['serial'] = event.target.value;
     },
+    updateHeightMeters(event) {
+      this.heightMeters = convertLengthBasedOnMeasurementType(
+        event.target.value,
+        this.measurementUnits.lengthMeasurementType,
+        'meters'
+      )
+    },
+    updateFirstName(event) {
+      this.firstName = event.target.value
+    },
+    updateLastName(event) {
+      this.lastName = event.target.value
+    },
+    editProfile(event) {
+      this.status = 'edit'
+    }
   },
 }
 
