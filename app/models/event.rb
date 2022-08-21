@@ -54,7 +54,9 @@ class Event < ApplicationRecord
   end
 
   def self.query_for_user(user)
-    if user
+    if user && user.admin?
+      ""
+    elsif user && !user.admin?
       "where events_with_state.author_id = #{user.id} or private = 'public'"
     else
       "where events_with_state.private = 'public'"
