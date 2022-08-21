@@ -31,6 +31,7 @@ class Users::ProfilesController < ApplicationController
       status = 401
       message = "Unauthorized."
     else
+      measurement_system = "imperial"
       profile = Profile.create(user: current_user, measurement_system: measurement_system)
 
       if profile
