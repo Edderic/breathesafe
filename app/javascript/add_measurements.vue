@@ -64,7 +64,7 @@
       <button :class="{ selected: this.useOwnHeight }" @click='setUseOwnHeight(true)'>Use own height to estimate</button>
       <button :class="{ selected: !this.useOwnHeight }" @click='setUseOwnHeight(false)'>Input Directly</button>
 
-      <div class='container' v-if="this.useOwnHeight">
+      <div v-if="this.useOwnHeight">
         <div class='container'>
           <label>How many times can you fit your height into the <span class='bold'>length</span> of the room?</label>
           <input
@@ -87,7 +87,7 @@
         </div>
       </div>
 
-      <div class='container' v-if="!this.useOwnHeight">
+      <div v-if="!this.useOwnHeight">
         <div class='container'>
           <label>Length ({{ measurementUnits.lengthMeasurementType }})</label>
           <input
