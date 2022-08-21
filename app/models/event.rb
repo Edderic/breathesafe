@@ -11,7 +11,7 @@ class Event < ApplicationRecord
     # end
     events = Event.connection.exec_query(
       <<-SQL
-        select events_with_state.*, num_cases_last_seven_days, population_states.population, num_cases_last_seven_days::float / population_states.population as naive_prevalence from (
+        select events_with_state.*, num_cases_last_seven_days, population_states.population, num_cases_last_seven_days::float / population_states.population as naive_prevalence, profiles.user_id, profiles.first_name, profiles.last_name from (
           select events.*, array_to_string(regexp_matches(place_data->>'formatted_address', '[A-Z]{2}'), ';') as state_short_name
           from events
         ) as events_with_state
@@ -36,7 +36,10 @@ class Event < ApplicationRecord
         left join population_states on (
           population_states.name = states.full_name
         )
-        #{self.query_for_user(user)}
+        left join profiles on (
+          events_with_state.author_id = profiles.id
+        )
+        #{self.where_clause(user)}
       SQL
     )
 
@@ -53,7 +56,7 @@ class Event < ApplicationRecord
     end
   end
 
-  def self.query_for_user(user)
+  def self.where_clause(user)
     if user && user.admin?
       ""
     elsif user && !user.admin?

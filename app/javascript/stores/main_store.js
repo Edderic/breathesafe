@@ -19,6 +19,15 @@ export const useMainStore = defineStore('main', {
     currentUser: undefined,
     message: ''
   }),
+  getters: {
+    isAdmin(state) {
+      if (!state.currentUser) {
+        return false
+      }
+
+      return state.currentUser.admin
+    }
+  },
   actions: {
     centerMapTo(id) {
       let eventStores = useEventStores()

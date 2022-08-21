@@ -35,6 +35,7 @@
           </router-link>
           </th>
           <th>Show Analysis</th>
+          <th v-if="admin">User Id</th>
         </tr>
         <MeasurementsRow v-for="ev in displayables" :key="ev.id" :measurements="ev"/>
       </table>
@@ -79,6 +80,16 @@ export default {
           'focusTab',
         ]
     ),
+    ...mapState(
+        useMainStore,
+        [
+          'isAdmin',
+        ]
+    ),
+    adminView() {
+      return this.isAdmin() && this.$route.query.admin-view == 'true'
+
+    },
     sortRiskArrow() {
       return sortArrow(this.$route.query['sort-how'], this.$route.query.sort == 'risk')
     },
