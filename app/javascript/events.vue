@@ -14,16 +14,21 @@
         <tr>
           <th>Room</th>
           <th>Address</th>
-          <th class='clickable' @click='sortByRisk'
-          >1-hr Risk ({{this.sortRiskArrow}})
+          <th class='clickable'>
+          <span @click='sortByRisk'>
+            1-hr Risk ({{this.sortRiskArrow}})
+          </span>
           <router-link to='/faqs#one-hr-risk'>
           (?)
           </router-link>
           </th>
           <th
             title="This risk assumes that there is an infector is in the room."
-            @click='sortByInfectorRisk'
-          >1-hr Risk w/ 1 Infector ({{this.sortRiskInfectorArrow}})
+            class='clickable'
+          >
+          <span @click='sortByInfectorRisk'>
+            1-hr Risk w/ 1 Infector ({{this.sortRiskInfectorArrow}})
+          </span>
 
           <router-link to='/faqs#one-hr-risk-with-infector'>
           (?)
@@ -162,10 +167,8 @@ export default {
       }
     },
     sortByInfectorRisk() {
-      this.computeRiskAll()
       if (!this.$route.query.sort ||
           this.$route.query.sort != "risk-infector" ||
-
           (this.$route.query.sort == "risk-infector"
           && this.$route.query['sort-how'] == "descending")
          ) {
