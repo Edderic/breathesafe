@@ -1,7 +1,15 @@
 <template>
-  <div class='border-showing'>
+  <div class='border-showing' id='message'>
     <div class='container centered'>
       <h2>Add Measurements</h2>
+    </div>
+    <div class='container'>
+
+      <div class='container bold' v-for='message in messages'>
+        {{ message }}
+      </div>
+      <br>
+
     </div>
     <div class='container'>
       <label>Google Search</label>
@@ -377,6 +385,7 @@ export default {
         },
       },
       maximumOccupancy: 0,
+      messages: [],
       roomUsableVolumeFactor: 0.8,
       useOwnHeight: true,
       personHeightToRoomHeight: undefined,
@@ -411,6 +420,52 @@ export default {
       this.occupancy.parsed = parseOccupancyHTML(this.occupancy.unparsedOccupancyData)
     },
     async save() {
+      this.messages = []
+
+      if (!this.placeData || !this.placeData.place_id) {
+        this.messages.push("Error: Google Maps data missing. Please use the Google Search to search for the place of interest.")
+      }
+      if (this.activityGroups.length == 0) {
+        this.messages.push("Error: Please fill out activities done by people so we can compute clean air delivery rate through ventilation.")
+      }
+
+      if (!this.ventilationCO2SteadyStatePPM) {
+        this.messages.push("Error: Please fill out CO2 steady state so we can compute clean air delivery rate of ventilation.")
+      }
+
+      if (!this.ventilationCO2AmbientPPM) {
+        this.messages.push("Error: Please fill out CO2 ambient so we can compute clean air delivery rate of ventilation.")
+      }
+
+      if (this.maximumOccupancy == 0) {
+        this.messages.push("Error: maximum occupancy of a room cannot be 0.")
+      }
+      if (!this.roomName) {
+        this.messages.push("Error: Room name cannot be blank.\n ")
+      }
+
+      if (!this.startDatetime) {
+        this.messages.push("Error: Start time cannot be blank.\n ")
+      }
+
+      if (!this.roomHeightMeters) {
+        this.messages.push("Error: Room height cannot be blank.\n ")
+      }
+
+      if (!this.roomLengthMeters) {
+        this.messages.push("Error: Room length cannot be blank.\n ")
+      }
+
+      if (!this.roomWidthMeters) {
+        this.messages.push("Error: Room width cannot be blank.\n ")
+      }
+
+      if (this.messages.length > 0) {
+        let element_to_scroll_to = document.getElementById('message');
+        element_to_scroll_to.scrollIntoView();
+        return
+      }
+
       this.roomUsableVolumeCubicMeters = parseFloat(this.roomWidthMeters)
         * parseFloat(this.roomHeightMeters)
         * parseFloat(this.roomLengthMeters)
