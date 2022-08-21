@@ -69,7 +69,9 @@ export const useEventStores = defineStore('events', {
       const prevalenceStore = usePrevalenceStore()
       const profileStore = useProfileStore()
 
-      const susceptibleMaskType = prevalenceStore.maskType
+      //prevalenceStore.maskType  const susceptibleMaskType = prevalenceStore.maskType
+      // TODO: make this a query parameter using router
+      const susceptibleMaskType = "None"
       const ascertainmentBiasMitigator = 10
       let probaRandomSampleOfOneIsInfectious;
 
