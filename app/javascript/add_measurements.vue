@@ -61,25 +61,53 @@
 
     <div class='container'>
       <label class='subsection'>Room Dimensions</label>
-      <div class='container'>
-        <label>Length ({{ measurementUnits.lengthMeasurementType }})</label>
-        <input
-          :value="roomLength"
-          @change="setRoomLength">
+      <button :class="{ selected: this.useOwnHeight }" @click='setUseOwnHeight(true)'>Use own height to estimate</button>
+      <button :class="{ selected: !this.useOwnHeight }" @click='setUseOwnHeight(false)'>Input Directly</button>
+
+      <div class='container' v-if="this.useOwnHeight">
+        <div class='container'>
+          <label>How many times can you fit your height into the <span class='bold'>length</span> of the room?</label>
+          <input
+            :value="personHeightToRoomLength"
+            @change="setPersonHeightToRoomLength">
+        </div>
+
+        <div class='container'>
+          <label>How many times can you fit your height into the <span class='bold'>height</span> of the room?</label>
+          <input
+            :value="personHeightToRoomHeight"
+            @change="setPersonHeightToRoomHeight">
+        </div>
+
+        <div class='container'>
+          <label>How many times can you fit your height into the <span class='bold'>width</span> of the room?</label>
+          <input
+            :value="personHeightToRoomWidth"
+            @change="setPersonHeightToRoomWidth">
+        </div>
       </div>
 
-      <div class='container'>
-        <label>Width ({{ measurementUnits.lengthMeasurementType }})</label>
-        <input
-          :value="roomWidth"
-          @change="setRoomWidth">
-      </div>
+      <div class='container' v-if="!this.useOwnHeight">
+        <div class='container'>
+          <label>Length ({{ measurementUnits.lengthMeasurementType }})</label>
+          <input
+            :value="roomLength"
+            @change="setRoomLength">
+        </div>
 
-      <div class='container'>
-        <label>Height ({{ measurementUnits.lengthMeasurementType }})</label>
-        <input
-          :value="roomHeight"
-          @change="setRoomHeight">
+        <div class='container'>
+          <label>Width ({{ measurementUnits.lengthMeasurementType }})</label>
+          <input
+            :value="roomWidth"
+            @change="setRoomWidth">
+        </div>
+
+        <div class='container'>
+          <label>Height ({{ measurementUnits.lengthMeasurementType }})</label>
+          <input
+            :value="roomHeight"
+            @change="setRoomHeight">
+        </div>
       </div>
 
       <div class='container'>
@@ -283,6 +311,7 @@ export default {
         [
           'measurementUnits',
           'carbonDioxideMonitors',
+          'heightMeters'
         ]
     ),
     ...mapWritableState(
@@ -348,7 +377,11 @@ export default {
         },
       },
       maximumOccupancy: 0,
-      roomUsableVolumeFactor: 0.8
+      roomUsableVolumeFactor: 0.8,
+      useOwnHeight: true,
+      personHeightToRoomHeight: undefined,
+      personHeightToRoomWidth: undefined,
+      personHeightToRoomLength: undefined,
     }
   },
   methods: {
@@ -606,6 +639,34 @@ export default {
       let portableAirCleaner = this.findPortableAirCleaningDevice()(id);
       portableAirCleaner['singlePassFiltrationEfficiency'] = event.target.value;
     },
+    setUseOwnHeight(value) {
+      this.useOwnHeight = value
+    },
+    setPersonHeightToRoomWidth(event) {
+      this.roomWidthMeters = convertLengthBasedOnMeasurementType(
+        event.target.value * this.heightMeters,
+        'meters',
+        'meters'
+      )
+      this.personHeightToRoomWidth = event.target.value
+    },
+    setPersonHeightToRoomHeight(event) {
+      this.roomHeightMeters = convertLengthBasedOnMeasurementType(
+        event.target.value * this.heightMeters,
+        'meters',
+        'meters'
+      )
+      this.personHeightToRoomHeight = event.target.value
+    },
+    setPersonHeightToRoomLength(event) {
+      this.roomLengthMeters = convertLengthBasedOnMeasurementType(
+        event.target.value * this.heightMeters,
+        this.measurementUnits.lengthMeasurementType,
+        'meters',
+        'meters'
+      )
+      this.personHeightToRoomLength = event.target.value
+    },
   },
 }
 
@@ -663,5 +724,13 @@ export default {
 
   table {
     text-align: center;
+  }
+
+  .bold {
+    font-weight: bold;
+  }
+
+  .selected {
+    background-color: #e6e6e6;
   }
 </style>
