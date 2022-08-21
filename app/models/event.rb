@@ -36,6 +36,7 @@ class Event < ApplicationRecord
         left join population_states on (
           population_states.name = states.full_name
         )
+        #{self.query_for_user(user)}
       SQL
     )
 
@@ -49,6 +50,14 @@ class Event < ApplicationRecord
       end
 
       ev
+    end
+  end
+
+  def self.query_for_user(user)
+    if user
+      "where events_with_state.author_id = #{user.id} or private = 'public'"
+    else
+      "where events_with_state.private = 'public'"
     end
   end
 end
