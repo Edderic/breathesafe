@@ -11,7 +11,8 @@ class Event < ApplicationRecord
     # end
     events = Event.connection.exec_query(
       <<-SQL
-        select events_with_state.*, num_cases_last_seven_days, population_states.population, num_cases_last_seven_days::float / population_states.population as naive_prevalence, profiles.user_id, profiles.first_name, profiles.last_name from (
+        select events_with_state.*, num_cases_last_seven_days, population_states.population, num_cases_last_seven_days::float / population_states.population as naive_prevalence, profiles.user_id, profiles.first_name, profiles.last_name, authors.admin
+        from (
           select events.*, array_to_string(regexp_matches(place_data->>'formatted_address', '[A-Z]{2}'), ';') as state_short_name
           from events
         ) as events_with_state
@@ -37,7 +38,10 @@ class Event < ApplicationRecord
           population_states.name = states.full_name
         )
         left join profiles on (
-          events_with_state.author_id = profiles.id
+          events_with_state.author_id = profiles.user_id
+        )
+        left join users as authors on (
+          events_with_state.author_id = authors.id
         )
         #{self.where_clause(user)}
       SQL
@@ -56,13 +60,19 @@ class Event < ApplicationRecord
     end
   end
 
-  def self.where_clause(user)
-    if user && user.admin?
+  def self.where_clause(current_user)
+    if current_user && current_user.admin?
       ""
-    elsif user && !user.admin?
-      "where events_with_state.author_id = #{user.id} or private = 'public'"
+    elsif current_user && !current_user.admin?
+      # Only show if the current user is the author OR
+      # Event has been approved by an admin and the privacy setting is set to public
+      # Or the author is an admin
+      "where events_with_state.author_id = #{current_user.id} or (events_with_state.approved_by_id is not null or authors.admin = true) and events_with_state.private = 'public'"
     else
-      "where events_with_state.private = 'public'"
+      # If not logged in
+      # Show only those that have been approved by an admin and public
+      # OR Show only those that have been authored by an admin and public
+      "where (events_with_state.approved_by_id is not null or authors.admin = true) and events_with_state.private = 'public'"
     end
   end
 end
