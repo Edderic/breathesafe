@@ -11,7 +11,7 @@ class Event < ApplicationRecord
     # end
     events = Event.connection.exec_query(
       <<-SQL
-        select events_with_state.*, num_cases_last_seven_days, population_states.population, num_cases_last_seven_days::float / population_states.population as naive_prevalence, profiles.user_id, profiles.first_name, profiles.last_name, authors.admin
+        select events_with_state.*, num_cases_last_seven_days, population_states.population, num_cases_last_seven_days::float / population_states.population as naive_prevalence, profiles.user_id, profiles.first_name, profiles.last_name, authors.admin as authored_by_admin
         from (
           select events.*, array_to_string(regexp_matches(place_data->>'formatted_address', '[A-Z]{2}'), ';') as state_short_name
           from events
