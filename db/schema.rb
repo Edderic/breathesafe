@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_08_21_191633) do
+ActiveRecord::Schema[7.0].define(version: 2022_08_21_205437) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -60,6 +60,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_08_21_191633) do
     t.float "room_usable_volume_cubic_meters"
     t.float "total_ach"
     t.integer "maximum_occupancy"
+    t.integer "approved_by_id"
     t.index ["author_id"], name: "index_events_on_author_id"
   end
 
