@@ -28,6 +28,25 @@ class EventsController < ApplicationController
     end
   end
 
+  def approve
+    if !current_user or !current_user.admin?
+      status = :unprocessable_entity
+    else
+      if Event.find(params['id']).update(approved_by_id: current_user.id)
+        status = 201
+      else
+        status = :unprocessable_entity
+      end
+    end
+
+    respond_to do |format|
+      format.json do
+        render json: {
+        }.to_json, status: status
+      end
+    end
+  end
+
   def create
     event = Event.create(event_data)
 
