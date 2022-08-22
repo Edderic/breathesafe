@@ -35,7 +35,8 @@
           </router-link>
           </th>
           <th>Show Analysis</th>
-          <th v-if="admin">User Id</th>
+          <th v-if="adminView">User ID</th>
+          <th v-if="adminView">Approve</th>
         </tr>
         <MeasurementsRow v-for="ev in displayables" :key="ev.id" :measurements="ev"/>
       </table>
