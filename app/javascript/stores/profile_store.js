@@ -167,6 +167,9 @@ export const useProfileStore = defineStore('profile', {
 
       let mainStore = useMainStore()
       let currentUser = mainStore.currentUser
+      if (!currentUser) {
+        return
+      }
 
       await axios.get(`/users/${currentUser.id}/carbon_dioxide_monitors.json`)
         .then(response => {
