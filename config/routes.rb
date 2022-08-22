@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   end
 
   post 'events', to: 'events#create'
+  post 'events/:id/approve', to: 'events#approve'
   get 'events', to: 'events#index'
   get 'profiles', to: 'users/profiles#index'
 
