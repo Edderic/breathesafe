@@ -40,7 +40,7 @@ import { useMainStore } from './stores/main_store';
 import { usePrevalenceStore } from './stores/prevalence_store';
 import { useProfileStore } from './stores/profile_store';
 import { useShowMeasurementSetStore } from './stores/show_measurement_set_store';
-import { findCurrentOccupancy, filterEvents, getWeekdayText, round } from './misc'
+import { findCurrentOccupancy, filterEvents, getWeekdayText, round, setupCSRF } from './misc'
 import { riskColorInterpolationScheme } from './colors.js'
 import { mapWritableState, mapState, mapActions } from 'pinia'
 
@@ -53,6 +53,7 @@ export default {
     ...mapState(useProfileStore, ['eventDisplayRiskTime']),
     ...mapState(usePrevalenceStore, ['numPositivesLastSevenDays', 'numPopulation', 'uncountedFactor', 'maskType']),
     ...mapState(useEventStore, ['infectorActivityTypeMapping']),
+    ...mapState(useMainStore, ['isAdmin']),
     ...mapState(
         useShowMeasurementSetStore,
         [
@@ -90,6 +91,12 @@ export default {
           'ventilationNotes'
         ]
     ),
+    adminView() {
+      return this.isAdmin && this.$route.query['admin-view'] == 'true'
+    },
+    approvable() {
+      return this.measurements.private == 'public' && (!this.measurements.approvedById && !this.measurements.authoredByAdmin)
+    },
     colorInterpolationScheme() {
       return riskColorInterpolationScheme
     },
@@ -116,6 +123,28 @@ export default {
     measurements: Object,
   },
   methods: {
+    async approve() {
+      setupCSRF();
+
+      await axios.post(
+        `/events/${this.measurements.id}/approve.json`
+      )
+        .then(response => {
+          this.message = data.message
+          this.$router.push({
+            name: 'MapEvents',
+            query: {
+              'admin-view': true
+            }
+          })
+
+          // whatever you want
+        })
+        .catch(error => {
+          this.message = "Failed to load profile."
+          // whatever you want
+        })
+    },
     getOpenHours(x) {
       return getWeekdayText(x)
     },
