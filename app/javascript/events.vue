@@ -88,8 +88,7 @@ export default {
         ]
     ),
     adminView() {
-      return this.isAdmin() && this.$route.query.admin-view == 'true'
-
+      return this.isAdmin && this.$route.query['admin-view'] == 'true'
     },
     sortRiskArrow() {
       return sortArrow(this.$route.query['sort-how'], this.$route.query.sort == 'risk')
