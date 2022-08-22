@@ -89,21 +89,6 @@ export const useEventStores = defineStore('events', {
           profileStore.eventDisplayRiskTime
         )
       }
-
-      for (let event of this.displayables) {
-        const flowRate = event.roomUsableVolumeCubicMeters * event.totalAch
-
-        probaRandomSampleOfOneIsInfectious = event['naivePrevalence'] * ascertainmentBiasMitigator
-
-        event['risk'] = computeRiskWithVariableOccupancy(
-          event,
-          probaRandomSampleOfOneIsInfectious,
-          flowRate,
-          event.roomUsableVolumeCubicMeters,
-          susceptibleMaskType,
-          profileStore.eventDisplayRiskTime
-        )
-      }
     }
   }
 });
