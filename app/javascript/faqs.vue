@@ -4,6 +4,12 @@
       <router-link to="/faqs#faqs" class='link-h1'>
         Frequently Asked Questions
       </router-link>
+      <router-link to="/faqs#data-contribution" class='link-h1'>
+        How do I contribute data?
+      </router-link>
+      <router-link to="/faqs#risk-metrics" class='link-h1'>
+        Risk Metrics
+      </router-link>
       <router-link to="/faqs#one-hr-risk" class='link-h2'>
         What is the 1-hr Risk?
       </router-link>
@@ -22,6 +28,57 @@
           <br>
           <br>
           <h3 class='subsection'>Frequently Asked Questions</h3>
+
+          <br id='data-contribution'>
+          <br>
+          <br>
+          <h3>How do I contribute data?</h3>
+
+          <p>
+          If you haven't signed up, please do. You will be sent a confirmation email. After
+          clicking on the confirmation email, you'll be sent to the Profile page. You can
+          add your CO2 monitor(s) in the Profile page. They must be one of the
+          following NDIR devices:
+          </p>
+
+          <div class='centered'>
+
+            <table>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Cost</th>
+              </tr>
+              <tr v-for='carbonDioxideMonitor in carbonDioxideMonitors'>
+                <td>
+                <a :href="carbonDioxideMonitor.website">
+                  <img :src="carbonDioxideMonitor.imageLink" :alt="`Image of ${carbonDioxideMonitor.name}`" class='icon-img'>
+                </a>
+                </td>
+                <td>
+                <a :href="carbonDioxideMonitor.website">
+                  {{ carbonDioxideMonitor.name }}
+                </a>
+                </td>
+                <td>
+                  {{ carbonDioxideMonitor.estimatedCost }}
+                </td>
+              </tr>
+            </table>
+
+
+
+          </div>
+
+          <p>
+          Once you add in one of your models through the Profile, you can
+          then go to <router-link to='/'>Events</router-link> and click on the
+          <router-link to='/events/new#top'>Add New Event</router-link> link.
+          </p>
+          <br id='risk-metrics'>
+          <br>
+          <br>
+          <h3 class='subsection'>Risk Metrics</h3>
 
           <br id='one-hr-risk'>
           <br>
@@ -108,6 +165,20 @@
   </div>
 </template>
 
+<script>
+import { CARBON_DIOXIDE_MONITORS } from './carbon_dioxide_monitors.js'
+
+export default {
+  name: 'FAQs',
+  computed: {
+    carbonDioxideMonitors() {
+      return CARBON_DIOXIDE_MONITORS
+    }
+  }
+}
+
+</script>
+
 <style scoped>
   .main {
     display: flex;
@@ -150,6 +221,7 @@
   .centered {
     display: flex;
     align-items: center;
+    justify-content: center;
   }
 
   .wider-input {
@@ -271,6 +343,10 @@
     margin-top: 1em;
   }
 
+  .icon-img {
+    width: 10rem;
+    height: 10rem
+  }
   .link-h2 {
     margin-left: 3em;
     margin-top: 1em;
