@@ -17,6 +17,15 @@
     <td>
       <router-link :to='link' @click="showAnalysis(this.measurements.id)">Show Analysis</router-link>
     </td>
+    <td v-if='adminView'>{{ measurements.authorId }}</td>
+    <td v-if='adminView && approvable'>
+      <button @click='approve'>
+        Approve
+      </button>
+    </td>
+    <td v-if='adminView && !approvable'>
+      Approved
+    </td>
   </tr>
 </template>
 
