@@ -1,5 +1,8 @@
 <template>
   <div class='border-showing' id='message'>
+    <br id='top'>
+    <br>
+    <br>
     <div class='container centered'>
       <h2>Add Measurements</h2>
     </div>
