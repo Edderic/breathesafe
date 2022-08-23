@@ -18,8 +18,21 @@
       <input :value='lastName' @change='updateLastName' :disabled="this.status == 'saved'">
     </div>
     <div class='container'>
-      <label>Height ({{ measurementUnits.lengthMeasurementType }})</label>
-      <input :value='height' @change='updateHeightMeters' :disabled="this.status == 'saved'">
+      <div class='row'>
+        <label>Height ({{ measurementUnits.lengthMeasurementType }})</label>
+        <div class='circle'
+          @click='toggle("showWhyHeight")'>?
+        </div>
+        <input :value='height' @change='updateHeightMeters' :disabled="this.status == 'saved'">
+      </div>
+      <p v-show="showWhyHeight">
+        We need the room volume to assess risk. You could enter the length,
+        width, and height of the room in terms of feet or meters. However, it's
+        unlikely that you'll be carrying measuring tape with you everywhere you
+        go. Instead, you could use your height as a reference to estimate the
+        dimensions of the room.  When you add a measurement, for example, you will be
+        asked how many times you can fit your height into the room's width.
+      </p>
     </div>
 
     <div class='container centered'>
@@ -145,6 +158,7 @@ export default {
   },
   data() {
     return {
+      showWhyHeight: false
     }
   },
   methods: {
@@ -248,6 +262,9 @@ export default {
           // whatever you want
         })
     },
+    toggle(variable) {
+      this[variable] = !this[variable]
+    },
     save() {
       this.updateProfile()
     },
@@ -294,6 +311,12 @@ export default {
 </script>
 
 <style scoped>
+  .row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+  }
   .main {
     display: flex;
     flex-direction: row;
@@ -323,4 +346,24 @@ export default {
   button {
     padding: 1em 3em;
   }
+
+  p {
+    padding: 1em;
+    width: 20rem;
+  }
+
+  .circle {
+    text-align: center;
+    background-color: #ccc;
+    width: 1.5em;
+    height: 1.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 100%;
+    margin-right: 0.5em;
+    cursor: help;
+
+  }
+
 </style>
