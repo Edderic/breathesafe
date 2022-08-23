@@ -55,12 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // We'll talk about nested routes later.
   const routes = [
     { path: '/', component: MapEvents, name: 'MapEvents' },
-    { path: '/analytics/:id', component: Analytics },
-    { path: '/signin', component: SignIn },
-    { path: '/events/new', component: AddMeasurements },
-    { path: '/profile', component: Profile },
-    { path: '/register', component: Registration },
-    { path: '/faqs', component: FAQs },
+    { path: '/analytics/:id', component: Analytics, name: 'Analytics' },
+    { path: '/signin', component: SignIn, name: 'SignIn' },
+    { path: '/events/new', component: AddMeasurements, name: 'AddMeasurements' },
+    { path: '/profile', component: Profile, name: 'Profile' },
+    { path: '/register', component: Registration, name: 'Registration' },
+    { path: '/faqs', component: FAQs, name: 'FAQs' },
   ]
 
   // 3. Create the router instance and pass the `routes` option
