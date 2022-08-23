@@ -6,7 +6,7 @@
         <option>At this hour</option>
         <option>At max occupancy</option>
       </select>
-      <router-link class='margined button' to="/events/new">Add New Event</router-link>
+      <router-link class='margined button' to="/events/new" v-if='signedIn'>Add New Event</router-link>
     </div>
 
     <div class='scrollable'>
@@ -79,6 +79,7 @@ export default {
         useMainStore,
         [
           'focusTab',
+          'signedIn'
         ]
     ),
     ...mapState(
