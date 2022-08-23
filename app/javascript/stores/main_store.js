@@ -53,9 +53,6 @@ export const useMainStore = defineStore('main', {
       showMeasurementSetStore.setMeasurementSet(event)
       analyticsStore.load(event)
     },
-    setMarkers(markers) {
-      this.markers = markers
-    },
     setMessage(message) {
       this.message = message
     },

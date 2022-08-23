@@ -19,38 +19,33 @@ export const useEventStores = defineStore('events', {
     async load() {
       setupCSRF()
 
+      const mainStore = useMainStore()
       const profileStore = useProfileStore()
 
-      axios.get('/events')
+      await mainStore.getCurrentUser();
+      await profileStore.loadProfile()
+
+      let success = true
+      await axios.get('/events')
         .then(response => {
           console.log(response)
           if (response.status == 200) {
             let camelized = deepSnakeToCamel(response.data.events)
             this.events = camelized
             this.displayables = this.events
-
-            let markers = []
-
-            for (let event of this.events) {
-              let center = event.placeData.center
-              event.clicked = false
-              markers.push({'center': center})
-            }
-
-
-            const mainStore = useMainStore()
-            mainStore.setMarkers(markers)
           }
 
           // whatever you want
         })
         .catch(error => {
           console.log(error)
+          success = false
           // whatever you want
         })
 
-        await profileStore.loadProfile()
+      if (success) {
         this.computeRiskAll()
+      }
     },
 
     async findOrLoad(id) {

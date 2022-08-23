@@ -104,8 +104,7 @@ export default {
 
     // TODO: handle case where no one is signed in
 
-    await this.getCurrentUser();
-    this.loadProfile()
+    await this.load();
   },
   data() {
     return {}
@@ -113,6 +112,7 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile']),
+    ...mapActions(useEventStores, ['load']),
     clickMarker(displayable) {
       this.center = displayable.placeData.center
       for (let d of this.displayables) {

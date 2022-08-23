@@ -99,7 +99,6 @@ export default {
     }
   },
   async created() {
-    await this.load()
     this.sortByParams()
 
     this.$watch(
