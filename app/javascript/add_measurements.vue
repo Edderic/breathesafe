@@ -525,14 +525,14 @@ export default {
 
       setupCSRF()
 
+      let successful = false
       await axios.post('/events', toSave)
         .then(response => {
           console.log(response)
           if (response.status == 201 || response.status == 200) {
             // TODO: could make this more efficient by just adding the event
             // directly to the store?
-            this.load()
-            this.$router.push({ path: '/'})
+            successful = true
           }
 
           // whatever you want
@@ -543,6 +543,18 @@ export default {
           // whatever you want
         })
 
+      if (successful) {
+        await this.load()
+        // if admin and private - don't alert
+        // if admin and public - don't alert
+        // if not admin and public - alert
+        // if not admin and private - don't alert
+
+        if (this.private != 'private' && !this.currentUser.admin) {
+          alert('Thanks for submitting. Your measurements will be reviewed by an administrator in the next few days. It will only be visible to you until that happens.')
+        }
+        this.$router.push({ path: '/'})
+      }
     },
     generateUUID() {
         // https://stackoverflow.com/questions/105034/how-to-create-guid-uuid
