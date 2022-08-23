@@ -6,7 +6,7 @@
         <option>At this hour</option>
         <option>At max occupancy</option>
       </select>
-      <router-link class='margined button' to="/events/new" v-if='signedIn'>Add New Event</router-link>
+      <router-link class='margined' to="/events/new" v-if='signedIn'>Add New Event</router-link>
     </div>
 
     <div class='scrollable'>
@@ -240,12 +240,6 @@ export default {
   td {
     padding: 1em;
   }
-  .button {
-    padding: 1em 3em;
-  }
-
-  .tag {
-  }
 
   .col {
     display: flex;
@@ -259,6 +253,7 @@ export default {
   }
 
   .margined {
+    padding: 1em;
     margin: 1em;
   }
   th {
