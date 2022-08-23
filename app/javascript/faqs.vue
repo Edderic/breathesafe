@@ -36,8 +36,9 @@
 
           <p>
           If you haven't signed up, please do. You will be sent a confirmation email. After
-          clicking on the confirmation email, you'll be sent to the Profile page. You can
-          add your CO2 monitor(s) in the Profile page. They must be one of the
+          clicking on the confirmation email, you'll be sent to the
+          <router-link to="/profile">Profile</router-link> page. You
+          can add your CO2 monitor(s) in the Profile page. They must be one of the
           following NDIR devices:
           </p>
 
