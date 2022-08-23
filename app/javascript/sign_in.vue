@@ -68,6 +68,8 @@ export default {
       let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
       axios.defaults.headers.common['X-CSRF-Token'] = token
       axios.defaults.headers.common['Accept'] = 'application/json'
+      let success = false
+
       await axios.post('/users/log_in', {
         user: {
           email: this.email,
@@ -76,10 +78,7 @@ export default {
       })
       .then(response => {
         if (response.status == 201) {
-          this.$router.push({
-            path: '/'
-          });
-          this.getCurrentUser();
+          success = true
         }
 
         // whatever you want
@@ -90,7 +89,12 @@ export default {
         // whatever you want
       })
 
+      await this.getCurrentUser();
       await this.loadProfile()
+
+      this.$router.push({
+        name: 'MapEvents'
+      });
     }
   },
 }
