@@ -138,6 +138,10 @@ export default {
     await this.getCurrentUser()
     this.loadCO2Monitors()
     this.loadProfile()
+
+    if (!this.currentUser) {
+      this.$router.push({ name: 'SignIn', query: {'attempt-name': 'Profile'} })
+    }
   },
   data() {
     return {

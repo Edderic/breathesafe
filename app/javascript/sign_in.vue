@@ -92,9 +92,16 @@ export default {
       await this.getCurrentUser();
       await this.loadProfile()
 
-      this.$router.push({
-        name: 'MapEvents'
-      });
+      if (this.$route.query && this.$route.query['attempt-name']) {
+        this.$router.push({
+          name: this.$route.query['attempt-name']
+        });
+      }
+      else {
+        this.$router.push({
+          name: 'MapEvents'
+        });
+      }
     }
   },
 }
