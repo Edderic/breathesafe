@@ -48,12 +48,16 @@ class EventsController < ApplicationController
   end
 
   def create
-    event = Event.create(event_data)
-
-    if event
-      status = 201
-    else
+    if !current_user
       status = :unprocessable_entity
+    else
+      event = Event.create(event_data)
+
+      if event
+        status = 201
+      else
+        status = :unprocessable_entity
+      end
     end
 
     respond_to do |format|
