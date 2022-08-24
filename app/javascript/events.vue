@@ -14,29 +14,40 @@
         <tr>
           <th>Room</th>
           <th>Address</th>
-          <th class='clickable'>
-          <span @click='sortByRisk'>
-            1-hr Risk ({{this.sortRiskArrow}})
-          </span>
-          <router-link to='/faqs#one-hr-risk'>
-          (?)
-          </router-link>
+          <th class='clickable col justify-space-between'>
+            1-hr Risk
           </th>
-          <th
-            title="This risk assumes that there is an infector is in the room."
-            class='clickable'
-          >
-          <span @click='sortByInfectorRisk'>
-            1-hr Risk w/ 1 Infector ({{this.sortRiskInfectorArrow}})
-          </span>
-
-          <router-link to='/faqs#one-hr-risk-with-infector'>
-          (?)
-          </router-link>
+          <th>
+            1-hr Risk w/ 1 Infector
           </th>
           <th>Show Analysis</th>
           <th v-if="adminView">User ID</th>
           <th v-if="adminView">Approve</th>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>
+            <div class='row horizontally-center' >
+              <span :style="circleCSS" @click='sortByRisk'>
+                {{this.sortRiskArrow}}
+              </span>
+              <router-link :style="circleCSS" to='/faqs#one-hr-risk'>
+                ?
+              </router-link>
+            </div>
+          </td>
+          <td>
+            <div class='row horizontally-center'>
+              <span :style="circleCSS" @click='sortByInfectorRisk'>{{this.sortRiskInfectorArrow}}</span>
+
+              <router-link :style="circleCSS" to='/faqs#one-hr-risk-with-infector'
+              title="This risk assumes that there is an infector is in the room."
+              >
+              ?
+              </router-link>
+            </div>
+          </td>
         </tr>
         <MeasurementsRow v-for="ev in displayables" :key="ev.id" :measurements="ev"/>
       </table>
@@ -48,6 +59,7 @@
 // Have a VueX store that maintains state across components
 import axios from 'axios';
 import MeasurementsRow from './measurements_row.vue';
+import { toggleCSS } from './colors.js'
 import { Intervention } from './interventions.js';
 import { useProfileStore } from './stores/profile_store';
 import { useEventStores } from './stores/event_stores';
@@ -88,6 +100,11 @@ export default {
           'isAdmin',
         ]
     ),
+    circleCSS() {
+      let css = JSON.parse(JSON.stringify(toggleCSS))
+      css['cursor'] = 'pointer'
+      return css
+    },
     adminView() {
       return this.isAdmin && this.$route.query['admin-view'] == 'true'
     },
@@ -238,6 +255,8 @@ export default {
   }
   td {
     padding: 1em;
+    text-align: center;
+    vertical-align: center;
   }
 
   .col {
@@ -256,12 +275,37 @@ export default {
     margin: 1em;
   }
   th {
-    padding: 1em;
+    padding-top: 1em;
+    padding-left: 1em;
+    padding-right: 1em;
   }
 
   .scrollable {
     overflow-y: scroll;
     height: 50vh;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .justify-space-between {
+    display: flex;
+    justify-items: space-between;
+    align-items: center;
+  }
+
+  .centered {
+
+  }
+
+  .table-header-title {
   }
 
 </style>

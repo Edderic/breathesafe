@@ -1,5 +1,18 @@
 import { infectorActivityTypes } from './misc.js'
 
+export const toggleCSS = {
+  'text-align': 'center',
+  'background-color': '#ccc',
+  'width': '1.5em',
+  'height': '1.5em',
+  'display': 'flex',
+  'align-items': 'center',
+  'justify-content': 'center',
+  'border-radius': '100%',
+  'margin-right': '0.5em',
+  'cursor': 'help',
+}
+
 export const colorPaletteFall = [
   {
     name: 'darkRed',

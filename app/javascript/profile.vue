@@ -20,7 +20,7 @@
     <div class='container'>
       <div class='row'>
         <label>Height ({{ measurementUnits.lengthMeasurementType }})</label>
-        <div class='circle'
+        <div :style='circle'
           @click='toggle("showWhyHeight")'>?
         </div>
         <input :value='height' @change='updateHeightMeters' :disabled="this.status == 'saved'">
@@ -107,6 +107,7 @@ import { convertLengthBasedOnMeasurementType, generateUUID, setupCSRF } from './
 import { useEventStores } from './stores/event_stores';
 import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia'
+import { toggleCSS } from './colors.js'
 
 export default {
   name: 'Profile',
@@ -158,7 +159,8 @@ export default {
   },
   data() {
     return {
-      showWhyHeight: false
+      showWhyHeight: false,
+      circle: toggleCSS
     }
   },
   methods: {
@@ -352,18 +354,5 @@ export default {
     width: 20rem;
   }
 
-  .circle {
-    text-align: center;
-    background-color: #ccc;
-    width: 1.5em;
-    height: 1.5em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 100%;
-    margin-right: 0.5em;
-    cursor: help;
-
-  }
 
 </style>
