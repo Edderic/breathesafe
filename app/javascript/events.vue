@@ -12,6 +12,7 @@
     <div class='scrollable'>
       <table>
         <tr>
+          <th></th>
           <th>Room</th>
           <th>Address</th>
           <th class='clickable col justify-space-between'>
@@ -25,6 +26,7 @@
           <th v-if="adminView">Approve</th>
         </tr>
         <tr>
+          <td></td>
           <td></td>
           <td></td>
           <td>

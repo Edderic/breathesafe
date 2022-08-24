@@ -1,5 +1,6 @@
 <template>
   <tr class='clickable' :class='{ clicked: this.measurements.clicked }' :id='`measurements-${this.measurements.id}`'>
+    <td class='emojis' :style="circleCSS">{{emojis}}</td>
     <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.roomName}}</td>
     <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.placeData.formattedAddress}}</td>
     <ColoredCell
@@ -34,6 +35,8 @@
 import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
 import { Intervention } from './interventions.js';
+import { ICONS } from './icons.js';
+import { toggleCSS } from './colors.js';
 import { useEventStores } from './stores/event_stores';
 import { useEventStore } from './stores/event_store';
 import { useMainStore } from './stores/main_store';
@@ -97,8 +100,27 @@ export default {
     approvable() {
       return this.measurements.private == 'public' && (!this.measurements.approvedById && !this.measurements.authoredByAdmin)
     },
+    circleCSS() {
+      let copy = JSON.parse(JSON.stringify(toggleCSS))
+      copy['margin-top'] = '0.5em'
+      copy['margin-bottom'] = '0.5em'
+      copy['margin-right'] = '0.5em'
+      copy['margin-left'] = '0.5em'
+      copy['width'] = '0.5em'
+      copy['height'] = '0.5em'
+      copy['background-color'] = '#ddd'
+      return copy
+    },
+
     colorInterpolationScheme() {
       return riskColorInterpolationScheme
+    },
+    emojis() {
+      for (let obj of this.measurements.placeData.types) {
+        if (ICONS[obj]) {
+          return ICONS[obj]
+        }
+      }
     },
     link() {
       return `/analytics/${this.measurements.id}`
@@ -192,5 +214,9 @@ export default {
 
   .margined {
     margin: 1em;
+  }
+
+  .emojis {
+    font-size: xx-large;
   }
 </style>
