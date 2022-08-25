@@ -74,7 +74,11 @@ export default {
         }
 
         if (collect) {
-          collection.push(hour)
+          let maybePrefixedWithBlankSpace = hour
+          if (hour.length == 4) {
+            maybePrefixedWithBlankSpace = "0"  + hour
+          }
+          collection.push(maybePrefixedWithBlankSpace)
         }
 
         if (hour == maximumHour) {
@@ -191,8 +195,15 @@ export default {
   },
   methods: {
     val(day, hour) {
-      if (!!this.dayHours[day][hour]) {
-        return this.dayHours[day][hour]['occupancyPercent']
+
+      let noPrefixHour = hour
+
+      if (hour[0] == '0') {
+        noPrefixHour = hour.split('').splice(1).join('')
+      }
+
+      if (!!this.dayHours[day][noPrefixHour]) {
+        return this.dayHours[day][noPrefixHour]['occupancyPercent']
       } else {
         return 0
       }
