@@ -245,6 +245,10 @@ export default {
     padding-top: 0;
   }
 
+  th, tr {
+    font-size: smaller;
+  }
+
   textarea {
     width: 30em;
   }
