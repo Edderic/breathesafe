@@ -67,6 +67,7 @@
 // Have a VueX store that maintains state across components
 import Events from './events.vue';
 import { binColor, getColor, riskColorInterpolationScheme } from './colors';
+import { getPlaceType } from './icons';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
@@ -128,7 +129,10 @@ export default {
     },
     gradeLetter(marker) {
       let color = binColor(riskColorInterpolationScheme, marker.risk)
-      return `https://breathesafe.s3.us-east-2.amazonaws.com/images/circle-${color.letterGrade}.svg`
+
+      const placeType = getPlaceType(marker.placeData.types)
+
+      return `https://breathesafe.s3.us-east-2.amazonaws.com/images/generated/${placeType}--${color.letterGrade}.svg`
     },
     save() {
       // send data to backend.

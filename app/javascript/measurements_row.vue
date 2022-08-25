@@ -35,7 +35,7 @@
 import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
 import { Intervention } from './interventions.js';
-import { ICONS } from './icons.js';
+import { getPlaceIcon } from './icons.js';
 import { toggleCSS } from './colors.js';
 import { useEventStores } from './stores/event_stores';
 import { useEventStore } from './stores/event_store';
@@ -116,11 +116,8 @@ export default {
       return riskColorInterpolationScheme
     },
     emojis() {
-      for (let obj of this.measurements.placeData.types) {
-        if (ICONS[obj]) {
-          return ICONS[obj]
-        }
-      }
+      let types = this.measurements.placeData.types
+      return getPlaceIcon(types)
     },
     link() {
       return `/analytics/${this.measurements.id}`
