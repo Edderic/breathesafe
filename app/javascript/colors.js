@@ -131,14 +131,14 @@ export const riskColorInterpolationScheme = [
     'upperBound': 0.999999,
     'lowerColor': {
       name: 'red',
-      letterGrade: 'e',
+      letterGrade: 'E',
       r: 219,
       g: 21,
       b: 0
     },
     'upperColor': {
       name: 'darkRed',
-      letterGrade: 'f',
+      letterGrade: 'F',
       r: 174,
       g: 17,
       b: 0
@@ -148,7 +148,7 @@ export const riskColorInterpolationScheme = [
     'lowerBound': 0.01,
     'upperBound': 0.1,
     'lowerColor': {
-      letterGrade: 'd',
+      letterGrade: 'D',
       name: 'orange',
       r: 245,
       g: 150,
@@ -156,7 +156,7 @@ export const riskColorInterpolationScheme = [
     },
     'upperColor': {
       name: 'red',
-      letterGrade: 'e',
+      letterGrade: 'E',
       r: 219,
       g: 21,
       b: 0
@@ -167,13 +167,13 @@ export const riskColorInterpolationScheme = [
     'upperBound': 0.01,
     'lowerColor': {
       name: 'yellow',
-      letterGrade: 'c',
+      letterGrade: 'C',
       r: 255,
       g: 233,
       b: 56
     },
     'upperColor': {
-      letterGrade: 'd',
+      letterGrade: 'D',
       name: 'orange',
       r: 245,
       g: 150,
@@ -185,14 +185,14 @@ export const riskColorInterpolationScheme = [
     'upperBound': 0.001,
     'lowerColor': {
       name: 'green',
-      letterGrade: 'b',
+      letterGrade: 'B',
       r: 87,
       g: 195,
       b: 40
     },
     'upperColor': {
       name: 'yellow',
-      letterGrade: 'c',
+      letterGrade: 'C',
       r: 255,
       g: 233,
       b: 56
@@ -203,14 +203,14 @@ export const riskColorInterpolationScheme = [
     'upperBound': 0.0001,
     'lowerColor': {
       name: 'green',
-      letterGrade: 'd',
+      letterGrade: 'D',
       r: 11,
       g: 161,
       b: 3
     },
     'upperColor': {
       name: 'dark green',
-      letterGrade: 'a',
+      letterGrade: 'A',
       r: 87,
       g: 195,
       b: 40
