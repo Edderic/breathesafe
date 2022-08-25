@@ -56,10 +56,21 @@
                 :closeclick="true"
                 @closeclick="openMarker(null)"
                 :opened="openedMarkerID === m.id"
+                :options="{
+                       pixelOffset: {
+                         width: 10, height: 0
+                       },
+                       maxWidth: 700,
+                }"
               >
               <div>{{ m.roomName }}</div>
               <div>{{ m.placeData.formattedAddress }} </div>
               <a v-if="m.placeData.website" :href="m.placeData.website">{{ m.placeData.website }}</a>
+
+                <div class='centered'><span>Occupancy Data</span></div>
+                <DayHourHeatmap
+                  :dayHours="m.occupancy.parsed"
+                />
               </GMapInfoWindow>
             </GMapMarker>
           </GMapCluster>
@@ -75,6 +86,7 @@
 
 <script>
 // Have a VueX store that maintains state across components
+import DayHourHeatmap from './day_hour_heatmap.vue';
 import Events from './events.vue';
 import { binColor, getColor, riskColorInterpolationScheme } from './colors';
 import { getPlaceType } from './icons';
