@@ -98,12 +98,13 @@ import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
 export default {
   name: 'MapEvents',
   components: {
+    DayHourHeatmap,
     Events,
   },
   computed: {
     ...mapStores(useMainStore),
     ...mapState(useMainStore, ["focusTab", "focusSubTab", "signedIn", "markers"]),
-    ...mapWritableState(useMainStore, ['center', 'zoom']),
+    ...mapWritableState(useMainStore, ['center', 'zoom', 'openedMarkerID']),
     ...mapWritableState(
         useEventStores,
         [
@@ -131,7 +132,6 @@ export default {
   },
   data() {
     return {
-      openedMarkerID: null
     }
   },
   methods: {
