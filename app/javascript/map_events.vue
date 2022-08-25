@@ -148,15 +148,6 @@ export default {
     openMarker(id) {
       this.openedMarkerID = id
     },
-    save() {
-      // send data to backend.
-    },
-    setPlace(place) {
-      console.log(place);
-      const loc = place.geometry.location;
-      this.center = { lat: loc.lat(), lng: loc.lng() };
-      this.zoom = 15;
-    },
   },
 }
 </script>
