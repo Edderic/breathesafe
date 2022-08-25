@@ -1,4 +1,4 @@
-export const ICONS = {
+const icons = {
   'accounting': '🧾',
   'airport': '✈️',
   'amusement_park': '🎢',
@@ -97,4 +97,22 @@ export const ICONS = {
   'university': '🎓',
   'veterinary_care': '🐕',
   'zoo': '🦁',
+}
+
+export const ICONS = icons;
+
+export function getPlaceIcon(types) {
+  for (let obj of types) {
+    if (icons[obj]) {
+      return icons[obj]
+    }
+  }
+}
+
+export function getPlaceType(types) {
+  for (let obj of types) {
+    if (icons[obj]) {
+      return obj
+    }
+  }
 }
