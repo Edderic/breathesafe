@@ -11,6 +11,7 @@ import { MASKS, Mask  } from '../masks.js'
 export const useMainStore = defineStore('main', {
   state: () => ({
     center: {lat: 51.093048, lng: 6.842120},
+    openedMarkerId: null,
     markers: [],
     zoom: 7,
     focusTab: 'maps',
