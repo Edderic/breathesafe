@@ -138,21 +138,6 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useEventStores, ['load']),
-    clickMarker(displayable) {
-      this.center = displayable.placeData.center
-      this.openedMarkerID = displayable.id
-
-      for (let d of this.displayables) {
-        if (d == displayable) {
-          d.clicked = true
-        } else {
-          d.clicked = false
-        }
-      }
-
-      let element_to_scroll_to = document.getElementById(`measurements-${displayable.id}`);
-      element_to_scroll_to.scrollIntoView({behavior: 'smooth'});
-    },
     gradeLetter(marker) {
       let color = binColor(riskColorInterpolationScheme, marker.risk)
 
