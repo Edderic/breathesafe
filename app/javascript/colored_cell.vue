@@ -14,7 +14,7 @@
   export default {
     computed: {
       display() {
-        if (!!this.text) {
+        if (this.text == "" || !!this.text) {
           return this.text
         } else {
           return this.ratio
