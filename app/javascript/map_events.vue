@@ -51,7 +51,17 @@
                 :draggable="false"
                 :icon="gradeLetter(m)"
                 @click="this.clickMarker(m)"
-            />
+            >
+              <GMapInfoWindow
+                :closeclick="true"
+                @closeclick="openMarker(null)"
+                :opened="openedMarkerID === m.id"
+              >
+              <div>{{ m.roomName }}</div>
+              <div>{{ m.placeData.formattedAddress }} </div>
+              <a v-if="m.placeData.website" :href="m.placeData.website">{{ m.placeData.website }}</a>
+              </GMapInfoWindow>
+            </GMapMarker>
           </GMapCluster>
         </GMapMap>
       </div>
@@ -108,7 +118,9 @@ export default {
     await this.load();
   },
   data() {
-    return {}
+    return {
+      openedMarkerID: null
+    }
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
@@ -116,6 +128,8 @@ export default {
     ...mapActions(useEventStores, ['load']),
     clickMarker(displayable) {
       this.center = displayable.placeData.center
+      this.openedMarkerID = displayable.id
+
       for (let d of this.displayables) {
         if (d == displayable) {
           d.clicked = true
@@ -133,6 +147,9 @@ export default {
       const placeType = getPlaceType(marker.placeData.types)
 
       return `https://breathesafe.s3.us-east-2.amazonaws.com/images/generated/${placeType}--${color.letterGrade}.svg`
+    },
+    openMarker(id) {
+      this.openedMarkerID = id
     },
     save() {
       // send data to backend.
