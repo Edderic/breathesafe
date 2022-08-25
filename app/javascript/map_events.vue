@@ -50,7 +50,7 @@
                 :clickable="true"
                 :draggable="false"
                 :icon="gradeLetter(m)"
-                @click="this.clickMarker(m)"
+                @click="openMarker(m.id)"
             >
               <GMapInfoWindow
                 :closeclick="true"
