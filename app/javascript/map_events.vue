@@ -65,11 +65,11 @@
               >
                 <div class='row'>
                   <div class='col absolute space-between icon-col'>
-                    <div :class='{"icon": true, "clicked": isClicked("information")}' @click='clickIcon("information")'>ℹ️ </div>
-                    <div :class='{"icon": true, "clicked": isClicked("risk")}' @click='clickIcon("risk")'>⚠️ </div>
-                    <div :class='{"icon": true, "clicked": isClicked("CADR")}' @click='clickIcon("CADR")'>💨</div>
-                    <div :class='{"icon": true, "clicked": isClicked("masking")}' @click='clickIcon("masking")'>😷</div>
-                    <div :class='{"icon": true, "clicked": isClicked("occupancy")}' @click='clickIcon("occupancy")'>🕤</div>
+                    <div :class='{"icon": true, "clicked": isClicked("information")}' @click='clickIcon("information", m.id)'>ℹ️ </div>
+                    <div :class='{"icon": true, "clicked": isClicked("risk")}' @click='clickIcon("risk", m.id)'>⚠️ </div>
+                    <div :class='{"icon": true, "clicked": isClicked("CADR")}' @click='clickIcon("CADR", m.id)'>💨</div>
+                    <div :class='{"icon": true, "clicked": isClicked("masking")}' @click='clickIcon("masking", m.id)'>😷</div>
+                    <div :class='{"icon": true, "clicked": isClicked("occupancy")}' @click='clickIcon("occupancy", m.id)'>🕤</div>
                   </div>
                   <div class='col scrollable'>
                     <div>{{ m.roomName }}</div>
