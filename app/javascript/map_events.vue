@@ -92,7 +92,24 @@
                     <br>
                     <br>
                     <br>
-                    <h4 :id='`CADR-${m.id}`'>Clean Air Delivery Rate (CADR)</h4>
+
+                    <div class='centered'>
+                      <TotalACHTable
+                        :id='`CADR-${m.id}`'
+                        :measurementUnits='measurementUnits'
+                        :systemOfMeasurement='systemOfMeasurement'
+                        :portableAch='m.portableAch'
+                        :ventilationAch='m.ventilationAch'
+                        :uvAch=0
+                        :roomUsableVolumeCubicMeters='m.roomUsableVolumeCubicMeters'
+                      />
+                    </div>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
                     <div :id='`masking-${m.id}`' class='centered'>
                       <HorizontalStackedBar
                         :values="maskingValues(m)"
@@ -129,6 +146,7 @@ import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import Events from './events.vue';
 import RiskTable from './risk_table.vue';
+import TotalACHTable from './total_ach_table.vue';
 import { binColor, getColor, riskColorInterpolationScheme } from './colors';
 import { getPlaceType } from './icons';
 import { useEventStores } from './stores/event_stores';
@@ -142,10 +160,12 @@ export default {
     DayHourHeatmap,
     Events,
     HorizontalStackedBar,
-    RiskTable
+    RiskTable,
+    TotalACHTable
   },
   computed: {
     ...mapStores(useMainStore),
+    ...mapState(useProfileStore, ["measurementUnits", 'systemOfMeasurement']),
     ...mapState(useMainStore, ["focusTab", "focusSubTab", "signedIn", "markers"]),
     ...mapWritableState(useMainStore, ['center', 'zoom', 'openedMarkerID']),
     ...mapWritableState(

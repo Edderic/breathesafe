@@ -350,116 +350,18 @@
 
         <div class='container'>
           <div class='centered'>
-            <table>
-              <tr>
-                <th class='col centered'>
-                  <span>Total ACH</span>
-                  <span class='font-light'>(1 / h)</span>
-                </th>
-                <th></th>
-                <th class='col centered'>
-                  <span>Ventilation ACH</span>
-                  <span class='font-light'>(1 / h)</span>
-                </th>
-                <th></th>
-                <th class='col centered'>
-                  <span>Portable ACH</span>
-                  <span class='font-light'>(1 / h)</span>
-                </th>
-                <th></th>
-                <th class='col centered'>
-                  <span>Upper-Room UV ACH</span>
-                  <span class='font-light'>(1 / h)</span>
-                </th>
-              </tr>
-              <tr>
-                <ColoredCell
-                  :colorScheme="colorInterpolationSchemeTotalAch"
-                  :maxVal=1
-                  :value='totalAchRounded'
-                  class='color-cell'
-                />
-                <td>=</td>
-                <ColoredCell
-                  :colorScheme="colorInterpolationSchemeTotalAch"
-                  :maxVal=1
-                  :value='ventilationAchRounded'
-                  class='color-cell'
-                />
-                <td>+</td>
-                <ColoredCell
-                  :colorScheme="colorInterpolationSchemeTotalAch"
-                  :maxVal=1
-                  :value='portableAchRounded'
-                  class='color-cell'
-                />
-                <td>+</td>
-                <ColoredCell
-                  :colorScheme="colorInterpolationSchemeTotalAch"
-                  :maxVal=1
-                  :value='0'
-                  class='color-cell'
-                />
-              </tr>
-            </table>
+            <CleanAirDeliveryRateTable
+            />
           </div>
         </div>
 
         <div class='centered'>
-          <table>
-            <tr>
-              <th class='col centered'>
-                <span>Clean Air Delivery Rate</span>
-                <span class='font-light'>({{this.measurementUnits.airDeliveryRateMeasurementTypeShort}})</span>
-              </th>
-              <th></th>
-              <th class='col centered'>
-                <span>Unoccupied Room Volume</span>
-                <span class='font-light'>({{this.measurementUnits.cubicLengthShort}})</span>
-              </th>
-              <th></th>
-              <th class='col centered'>
-                <span>Total ACH</span>
-                <span class='font-light'>(1 / h)</span>
-              </th>
-              <th v-if="systemOfMeasurement == 'imperial'"></th>
-              <th class='col centered' v-if="systemOfMeasurement == 'imperial'">
-                <span></span>
-                <span class='font-light'>(min / h)</span>
-              </th>
-            </tr>
-            <tr>
-              <ColoredCell
-                :colorScheme="colorInterpolationSchemeRoomVolume"
-                :maxVal=1
-                :value='totalFlowRateRounded'
-                class='color-cell'
-              />
-              <td>=</td>
-              <ColoredCell
-                :colorScheme="colorInterpolationSchemeRoomVolume"
-                :maxVal=1
-                :value='roomUsableVolumeRounded'
-                  class='color-cell'
-              />
-              <td>x</td>
-              <ColoredCell
-                :colorScheme="colorInterpolationSchemeTotalAch"
-                :maxVal=1
-                :value='totalAchRounded'
-                class='color-cell'
-              />
-              <td v-if="systemOfMeasurement == 'imperial'">/</td>
-              <ColoredCell
-                v-if="systemOfMeasurement == 'imperial'"
-                :colorScheme="colorInterpolationSchemeTotalAch"
-                :maxVal=1
-                :value='60'
-                class='color-cell'
-                style='background-color: grey'
-              />
-            </tr>
-          </table>
+          <TotalACHTable
+            :measurementUnits='measurementUnits'
+            :systemOfMeasurement='systemOfMeasurement'
+            :totalFlowRate='totalFlowRate'
+            :roomUsableVolume='roomUsableVolume'
+          />
         </div>
 
         <div class='container'>
@@ -2179,16 +2081,13 @@ export default {
     maskSuggestion() {
       return MASKS[0]
     },
-    roomUsableVolumeRounded() {
-
+    roomUsableVolume() {
       const profileStore = useProfileStore()
-      return round(
-        convertVolume(
-          this.roomUsableVolumeCubicMeters,
-          'meters',
-          profileStore.measurementUnits.lengthMeasurementType
-        ),
-        1
+
+      return convertVolume(
+        this.roomUsableVolumeCubicMeters,
+        'meters',
+        profileStore.measurementUnits.lengthMeasurementType
       )
     },
     totalFlowRateCubicMetersPerHour() {
@@ -2196,9 +2095,6 @@ export default {
     },
     totalFlowRate() {
       return displayCADR(this.systemOfMeasurement, this.totalFlowRateCubicMetersPerHour)
-    },
-    totalFlowRateRounded() {
-      return round(this.totalFlowRate, 1)
     },
     airCleanerSuggestion() {
       return airCleaners.find((ac) => ac.singular == 'Corsi-Rosenthal box (Max Speed)')
@@ -2279,9 +2175,6 @@ export default {
     },
     computeTotalFlowRate(totalFlowRateCubicMetersPerHour) {
       return displayCADR('metric', totalFlowRateCubicMetersPerHour)
-    },
-    totalFlowRateRounded() {
-      return round(this.totalFlowRate, 1)
     },
   }
 }
