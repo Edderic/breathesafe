@@ -75,7 +75,23 @@
                     <div :id='`information-${m.id}`'>{{ m.roomName }}</div>
                     <div>{{ m.placeData.formattedAddress }} </div>
                     <a v-if="m.placeData.website" :href="m.placeData.website">{{ m.placeData.website }}</a>
-                    <h4 :id='`risk-${m.id}`'>Risk</h4>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+
+                    <RiskTable
+                      :id='`risk-${m.id}`'
+                      :intervention="createIntervention(m)"
+                      :maximumOccupancy="m.maximumOccupancy"
+                    />
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
                     <h4 :id='`CADR-${m.id}`'>Clean Air Delivery Rate (CADR)</h4>
                     <div :id='`masking-${m.id}`' class='centered'>
                       <HorizontalStackedBar
@@ -108,9 +124,11 @@
 <script>
 // Have a VueX store that maintains state across components
 import { MaskingBarChart } from './masks.js';
+import { Intervention } from './interventions.js';
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import Events from './events.vue';
+import RiskTable from './risk_table.vue';
 import { binColor, getColor, riskColorInterpolationScheme } from './colors';
 import { getPlaceType } from './icons';
 import { useEventStores } from './stores/event_stores';
@@ -123,7 +141,8 @@ export default {
   components: {
     DayHourHeatmap,
     Events,
-    HorizontalStackedBar
+    HorizontalStackedBar,
+    RiskTable
   },
   computed: {
     ...mapStores(useMainStore),
@@ -163,7 +182,9 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useEventStores, ['load']),
-
+    createIntervention(m) {
+      return new Intervention(m, [])
+    },
     isClicked(value) {
       return this.$route.query['iconFocus'] == value
     },
