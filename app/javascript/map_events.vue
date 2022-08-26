@@ -72,7 +72,7 @@
                     <div :class='{"icon": true, "clicked": isClicked("occupancy")}' @click='clickIcon("occupancy", m.id)'>🕤</div>
                   </div>
                   <div class='col scrollable'>
-                    <div>{{ m.roomName }}</div>
+                    <div :id='`information-${m.id}`'>{{ m.roomName }}</div>
                     <div>{{ m.placeData.formattedAddress }} </div>
                     <a v-if="m.placeData.website" :href="m.placeData.website">{{ m.placeData.website }}</a>
 
