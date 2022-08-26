@@ -3,18 +3,24 @@
     <td class='emojis' :style="circleCSS">{{emojis}}</td>
     <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.roomName}}</td>
     <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.placeData.formattedAddress}}</td>
-    <ColoredCell
-      :colorScheme="colorInterpolationScheme"
-      :maxVal=1
-      :value='measurements.risk'
-      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
-    />
-    <ColoredCell
-      :colorScheme="colorInterpolationScheme"
-      :maxVal=1
-      :value='roundOut(nullIntervention.computeRisk(1), 6)'
-      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
-    />
+    <td class='containing-cell'>
+      <ColoredCell
+        class='risk-score'
+        :colorScheme="colorInterpolationScheme"
+        :maxVal=1
+        :value='measurements.risk'
+        :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
+      />
+    </td>
+    <td class='containing-cell'>
+      <ColoredCell
+        class='risk-score'
+        :colorScheme="colorInterpolationScheme"
+        :maxVal=1
+        :value='roundOut(nullIntervention.computeRisk(1), 6)'
+        :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
+      />
+    </td>
     <td>
       <router-link :to='link' @click="showAnalysis(this.measurements.id)">Show Analysis</router-link>
     </td>
@@ -191,6 +197,12 @@ export default {
   }
   td {
     padding: 1em;
+    text-align: center;
+    margin: auto;
+    vertical-align: middle;
+  }
+  td.containing-cell {
+    width: 7em;
   }
   button {
     padding: 1em 3em;
@@ -216,5 +228,11 @@ export default {
   .emojis {
     font-size: xx-large;
     text-shadow: 1px 1px 2px black;
+  }
+
+  .risk-score {
+    border-radius: 100%;
+    width: 5em;
+    height: 5em;
   }
 </style>
