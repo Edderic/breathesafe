@@ -57,79 +57,10 @@
         <div class='centered col'>
           <div class='container'>
             <div class='centered'>
-              <table>
-                <tr>
-                  <th></th>
-                  <th>1 hour</th>
-                  <th>8 hours</th>
-                  <th>40 hours</th>
-                  <th>80 hours</th>
-                </tr>
-
-                <tr>
-                  <th>Risk</th>
-                  <ColoredCell
-                      v-if="nullIntervention"
-                      :colorScheme="riskColorScheme"
-                      :maxVal=1
-                      :value='nullIntervention.computeRiskRounded()'
-                      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                  />
-                  <ColoredCell
-                      v-if="nullIntervention"
-                      :colorScheme="riskColorScheme"
-                      :maxVal=1
-                      :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**8, 6)'
-                      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                  />
-                  <ColoredCell
-                      v-if="nullIntervention"
-                      :colorScheme="riskColorScheme"
-                      :maxVal=1
-                      :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**40, 6)'
-                      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                  />
-                  <ColoredCell
-                      v-if="nullIntervention"
-                      :colorScheme="riskColorScheme"
-                      :maxVal=1
-                      :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**80, 6)'
-                      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                  />
-                </tr>
-                <tr>
-                  <th>Average # of Susceptibles Infected under Max Occupancy</th>
-                  <ColoredCell
-                      v-if="nullIntervention"
-                      :colorScheme="averageInfectedPeopleInterpolationScheme"
-                      :maxVal=1
-                      :text='roundOut(this.maximumOccupancy * nullIntervention.computeRiskRounded(), 1)'
-                      :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
-                      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                  />
-                  <ColoredCell
-                      v-if="nullIntervention"
-                      :colorScheme="averageInfectedPeopleInterpolationScheme"
-                      :maxVal=1
-                      :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**8), 1)'
-                      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                  />
-                  <ColoredCell
-                      v-if="nullIntervention"
-                      :colorScheme="averageInfectedPeopleInterpolationScheme"
-                      :maxVal=1
-                      :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**40), 1)'
-                      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                  />
-                  <ColoredCell
-                      v-if="nullIntervention"
-                      :colorScheme="averageInfectedPeopleInterpolationScheme"
-                      :maxVal=1
-                      :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**80), 1)'
-                      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
-                  />
-                </tr>
-              </table>
+              <RiskTable
+                :intervention="nullIntervention"
+                :maximumOccupancy='maximumOccupancy'
+              />
             </div>
 
             <p>
@@ -1700,6 +1631,7 @@ import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
+import RiskTable from './risk_table.vue';
 import { airCleaners } from './air_cleaners.js';
 import BarGraph from './bar_graph.vue';
 import {
@@ -1752,7 +1684,8 @@ export default {
     ColoredCell,
     DayHourHeatmap,
     Event,
-    HorizontalStackedBar
+    HorizontalStackedBar,
+    RiskTable
   },
   computed: {
     ...mapState(
