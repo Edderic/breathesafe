@@ -1,9 +1,9 @@
 <template>
   <table>
     <tr v-for='(v, key, z) in values'>
-      <td class='v-ticks'>{{key}}</td>
+      <td class='v-ticks' :style='{ "padding-top": verticalPadding, "padding-bottom": verticalPadding}'>{{key}}</td>
       <td>
-      <div class='bar' :style='{"background-color": this.color(z), "width": this.width(v)}'>{{v}}</div>
+      <div class='bar' :style='{"background-color": this.color(z), "width": this.width(v), "padding-top": verticalPadding, "padding-bottom": verticalPadding }'>{{v}}</div>
       </td>
     </tr>
   </table>
@@ -23,20 +23,21 @@ export default {
       for (let v in this.values) {
         sum += parseFloat(this.values[v])
       }
-      console.log("this.values", this.values);
       return sum
     }
   },
   props: {
     'values': Object,
-    'colors': Array
+    'colors': Array,
+    'verticalPadding': {
+      default: '1em'
+    }
   },
   methods: {
     width: function(v) {
        return `${round(parseFloat(v) / this.normalizer * 30, 0) + 1}em`
     },
     color: function(i) {
-       console.log(this.colors[i])
       return this.colors[i]
     }
   }
