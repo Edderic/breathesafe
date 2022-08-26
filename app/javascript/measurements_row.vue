@@ -215,5 +215,6 @@ export default {
 
   .emojis {
     font-size: xx-large;
+    text-shadow: 1px 1px 2px black;
   }
 </style>
