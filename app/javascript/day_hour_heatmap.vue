@@ -12,7 +12,6 @@
         :value="val(day, hour)"
         :colorScheme="colorInterpolationScheme"
         :maxVal=100
-        class="availability-cell"
       />
     </tr>
   </table>

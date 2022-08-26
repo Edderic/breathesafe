@@ -211,7 +211,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
   .font-light {
     font-weight: 400;
   }
