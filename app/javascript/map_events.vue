@@ -63,14 +63,25 @@
                        maxWidth: 700,
                 }"
               >
-              <div>{{ m.roomName }}</div>
-              <div>{{ m.placeData.formattedAddress }} </div>
-              <a v-if="m.placeData.website" :href="m.placeData.website">{{ m.placeData.website }}</a>
+                <div class='row'>
+                  <div class='col absolute space-between icon-col'>
+                    <div :class='{"icon": true, "clicked": isClicked("information")}' @click='clickIcon("information")'>ℹ️ </div>
+                    <div :class='{"icon": true, "clicked": isClicked("risk")}' @click='clickIcon("risk")'>⚠️ </div>
+                    <div :class='{"icon": true, "clicked": isClicked("CADR")}' @click='clickIcon("CADR")'>💨</div>
+                    <div :class='{"icon": true, "clicked": isClicked("masking")}' @click='clickIcon("masking")'>😷</div>
+                    <div :class='{"icon": true, "clicked": isClicked("occupancy")}' @click='clickIcon("occupancy")'>🕤</div>
+                  </div>
+                  <div class='col scrollable'>
+                    <div>{{ m.roomName }}</div>
+                    <div>{{ m.placeData.formattedAddress }} </div>
+                    <a v-if="m.placeData.website" :href="m.placeData.website">{{ m.placeData.website }}</a>
 
-                <div class='centered'><span>Occupancy Data</span></div>
-                <DayHourHeatmap
-                  :dayHours="m.occupancy.parsed"
-                />
+                    <div class='centered'><span>Occupancy Data</span></div>
+                    <DayHourHeatmap
+                      :dayHours="m.occupancy.parsed"
+                    />
+                  </div>
+                </div>
               </GMapInfoWindow>
             </GMapMarker>
           </GMapCluster>
@@ -132,12 +143,20 @@ export default {
   },
   data() {
     return {
+      iconClicked: null
     }
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useEventStores, ['load']),
+
+    isClicked(value) {
+      return this.iconClicked === value
+    },
+    clickIcon(value) {
+      this.iconClicked = value
+    },
     gradeLetter(marker) {
       let color = binColor(riskColorInterpolationScheme, marker.risk)
 
@@ -203,5 +222,40 @@ export default {
     height: 32vh;
   }
 
+  .icon {
+    font-size: large;
+    padding-top: 0.125em;
+    padding-bottom: 0.125em;
+    padding-right: 0.25em;
+    padding-left: 0.25em;
+    text-shadow: 1px 1px 2px black;
+  }
+
+  .icon:hover {
+    background-color: #efefef;
+  }
+
+  .icon.clicked {
+    background-color: #e6e6e6;
+  }
+
+  .absolute {
+    position: absolute;
+  }
+
+  .icon-col {
+    background-color: #ccc;
+    padding-right: 0.25em;
+    padding-left: 0.25em;
+    height: 9rem;
+  }
+
+  .space-between {
+    display: flex;
+    justify-content: space-between;
+  }
+  .scrollable {
+    margin-left: 3em;
+  }
 
 </style>
