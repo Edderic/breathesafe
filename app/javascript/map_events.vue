@@ -86,8 +86,8 @@
                     </div>
                     <br>
 
-                    <div class='centered'><span>Occupancy Data</span></div>
                     <DayHourHeatmap
+                      :id='`occupancy-${m.id}`'
                       :dayHours="m.occupancy.parsed"
                     />
                   </div>
