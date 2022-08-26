@@ -75,6 +75,16 @@
                     <div :id='`information-${m.id}`'>{{ m.roomName }}</div>
                     <div>{{ m.placeData.formattedAddress }} </div>
                     <a v-if="m.placeData.website" :href="m.placeData.website">{{ m.placeData.website }}</a>
+                    <h4 :id='`risk-${m.id}`'>Risk</h4>
+                    <h4 :id='`CADR-${m.id}`'>Clean Air Delivery Rate (CADR)</h4>
+                    <div :id='`masking-${m.id}`' class='centered'>
+                      <HorizontalStackedBar
+                        :values="maskingValues(m)"
+                        :colors="maskingColors(m)"
+                        verticalPadding='0.20em'
+                      />
+                    </div>
+                    <br>
 
                     <div class='centered'><span>Occupancy Data</span></div>
                     <DayHourHeatmap
