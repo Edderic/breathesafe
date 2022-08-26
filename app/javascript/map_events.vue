@@ -107,7 +107,9 @@
 
 <script>
 // Have a VueX store that maintains state across components
+import { MaskingBarChart } from './masks.js';
 import DayHourHeatmap from './day_hour_heatmap.vue';
+import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import Events from './events.vue';
 import { binColor, getColor, riskColorInterpolationScheme } from './colors';
 import { getPlaceType } from './icons';
@@ -121,6 +123,7 @@ export default {
   components: {
     DayHourHeatmap,
     Events,
+    HorizontalStackedBar
   },
   computed: {
     ...mapStores(useMainStore),
@@ -134,7 +137,7 @@ export default {
     ),
     riskColorScheme() {
       return riskColorInterpolationScheme
-    }
+    },
   },
   async created() {
     // TODO: modify the store
@@ -162,10 +165,19 @@ export default {
     ...mapActions(useEventStores, ['load']),
 
     isClicked(value) {
-      return this.iconClicked === value
+      return this.$route.query['iconFocus'] == value
     },
-    clickIcon(value) {
-      this.iconClicked = value
+    clickIcon(value, id) {
+      let prevQuery = JSON.parse(JSON.stringify(this.$route.query))
+      prevQuery['iconFocus'] = value
+
+      this.$router.push({
+        name: 'MapEvents',
+        query: prevQuery
+      })
+
+      let element_to_scroll_to = document.getElementById(`${value}-${id}`);
+      element_to_scroll_to.scrollIntoView();
     },
     gradeLetter(marker) {
       let color = binColor(riskColorInterpolationScheme, marker.risk)
@@ -173,6 +185,12 @@ export default {
       const placeType = getPlaceType(marker.placeData.types)
 
       return `https://breathesafe.s3.us-east-2.amazonaws.com/images/generated/${placeType}--${color.letterGrade}.svg`
+    },
+    maskingValues(m) {
+      return new MaskingBarChart(m.activityGroups).maskingValues()
+    },
+    maskingColors(m) {
+      return new MaskingBarChart(m.activityGroups).maskingColors()
     },
     openMarker(id) {
       this.openedMarkerID = id
