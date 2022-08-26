@@ -388,8 +388,8 @@
           <h4>Masking</h4>
           <div class='centered'>
             <HorizontalStackedBar
-              :values="maskingValues"
-              :colors="maskingColors"
+              :values="maskingBarChart.maskingValues()"
+              :colors="maskingBarChart.maskingColors()"
             />
           </div>
 
@@ -1719,7 +1719,7 @@ import {
   reducedRisk } from './risk.js';
  import { convertVolume, computeAmountOfPortableAirCleanersThatCanFit } from './measurement_units.js';
 import { useAnalyticsStore } from './stores/analytics_store'
-import { MASKS } from './masks.js';
+import { MASKS, MaskingBarChart } from './masks.js';
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
@@ -1869,40 +1869,8 @@ export default {
 
       return assignBoundsToColorScheme(scheme, evenSpacedBounds)
     },
-    maskingValues() {
-      let key;
-      let color;
-
-      let dict = {}
-      for (let p in maskToPenetrationFactor) {
-        dict[p] = 0
-      }
-
-      for (let ag of this.activityGroups) {
-        dict[ag.maskType] += parseFloat(ag.numberOfPeople)
-      }
-
-      return dict
-    },
-    maskingColors() {
-      let index = 0
-      let key = 'lowerColor'
-      let colors = []
-      let color;
-
-      for (let colorPair of colorSchemeFall) {
-        color = colorPair[key]
-
-        colors.push(
-          `rgb(${color.r}, ${color.g}, ${color.b})`
-        )
-      }
-
-
-      color = colorSchemeFall[colorSchemeFall.length - 1]['upperColor']
-      colors.push(`rgb(${color.r}, ${color.g}, ${color.b})`)
-
-      return colors
+    maskingBarChart() {
+      return new MaskingBarChart(this.activityGroups)
     },
     reducedRiskColorScheme() {
       const minimum = 0

@@ -1,4 +1,11 @@
+import {
+  colorSchemeFall
+} from './colors.js';
 import { round } from './misc.js'
+
+import {
+  maskToPenetrationFactor
+} from  './misc';
 
 export const MASKS = [
   {
@@ -157,5 +164,48 @@ export class Mask {
 
   website() {
     return this.mask.website
+  }
+}
+
+export class MaskingBarChart {
+  constructor(activityGroups) {
+    this.activityGroups = activityGroups
+  }
+
+  maskingValues() {
+    let key;
+    let color;
+
+    let dict = {}
+    for (let p in maskToPenetrationFactor) {
+      dict[p] = 0
+    }
+
+    for (let ag of this.activityGroups) {
+      dict[ag.maskType] += parseFloat(ag.numberOfPeople)
+    }
+
+    return dict
+  }
+
+  maskingColors() {
+    let index = 0
+    let key = 'lowerColor'
+    let colors = []
+    let color;
+
+    for (let colorPair of colorSchemeFall) {
+      color = colorPair[key]
+
+      colors.push(
+        `rgb(${color.r}, ${color.g}, ${color.b})`
+      )
+    }
+
+
+    color = colorSchemeFall[colorSchemeFall.length - 1]['upperColor']
+    colors.push(`rgb(${color.r}, ${color.g}, ${color.b})`)
+
+    return colors
   }
 }
