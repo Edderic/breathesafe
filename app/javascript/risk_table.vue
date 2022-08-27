@@ -10,66 +10,82 @@
 
     <tr>
       <th>Risk w/ 1 infector</th>
+      <td>
       <ColoredCell
           v-if="intervention"
           :colorScheme="riskColorScheme"
           :maxVal=1
           :value='intervention.computeRiskRounded()'
-          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+          :style="styleProps"
       />
+      </td>
+      <td>
       <ColoredCell
           v-if="intervention"
           :colorScheme="riskColorScheme"
           :maxVal=1
           :value='roundOut(1 - (1-intervention.computeRiskRounded())**8, 6)'
-          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+          :style="styleProps"
       />
+      </td>
+      <td>
       <ColoredCell
           v-if="intervention"
           :colorScheme="riskColorScheme"
           :maxVal=1
           :value='roundOut(1 - (1-intervention.computeRiskRounded())**40, 6)'
-          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+          :style="styleProps"
       />
+      </td>
+      <td>
       <ColoredCell
           v-if="intervention"
           :colorScheme="riskColorScheme"
           :maxVal=1
           :value='roundOut(1 - (1-intervention.computeRiskRounded())**80, 6)'
-          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+          :style="styleProps"
       />
+      </td>
     </tr>
     <tr>
       <th>Average # of Susceptibles Infected under Max Occupancy</th>
+      <td>
       <ColoredCell
           v-if="intervention"
           :colorScheme="averageInfectedPeopleInterpolationScheme"
           :maxVal=1
           :text='roundOut(this.maximumOccupancy * intervention.computeRiskRounded(), 1)'
           :value='this.maximumOccupancy * intervention.computeRiskRounded()'
-          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+          :style="styleProps"
       />
+      </td>
+      <td>
       <ColoredCell
           v-if="intervention"
           :colorScheme="averageInfectedPeopleInterpolationScheme"
           :maxVal=1
           :value='roundOut(this.maximumOccupancy* (1 - (1-intervention.computeRiskRounded())**8), 1)'
-          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+          :style="styleProps"
       />
+      </td>
+      <td>
       <ColoredCell
           v-if="intervention"
           :colorScheme="averageInfectedPeopleInterpolationScheme"
           :maxVal=1
           :value='roundOut(this.maximumOccupancy* (1 - (1-intervention.computeRiskRounded())**40), 1)'
-          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+          :style="styleProps"
       />
+      </td>
+      <td>
       <ColoredCell
           v-if="intervention"
           :colorScheme="averageInfectedPeopleInterpolationScheme"
           :maxVal=1
           :value='roundOut(this.maximumOccupancy* (1 - (1-intervention.computeRiskRounded())**80), 1)'
-          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+          :style="styleProps"
       />
+      </td>
     </tr>
   </table>
 </template>
@@ -95,6 +111,14 @@ export default {
 
   },
   computed: {
+    styleProps() {
+      return {
+          'font-weight': 'bold',
+          'color': 'white',
+          'text-shadow': '1px 1px 2px black',
+          'padding': '1em'
+        }
+    },
     averageInfectedPeopleInterpolationScheme() {
       const copy = JSON.parse(JSON.stringify(riskColorInterpolationScheme))
       return assignBoundsToColorScheme(copy, infectedPeopleColorBounds)
@@ -105,7 +129,13 @@ export default {
   },
   props: {
     intervention: Object,
-    maximumOccupancy: Number
+    maximumOccupancy: Number,
   }
 }
 </script>
+
+<style scoped>
+  table {
+    border-spacing: 0;
+  }
+</style>
