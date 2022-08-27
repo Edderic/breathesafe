@@ -6,13 +6,14 @@
     </tr>
     <tr v-for="day in ['Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays', 'Sundays']">
       <td>{{day}}</td>
-      <ColoredCell
-        v-for='hour in hours'
-        :key='day + "-" + hour'
-        :value="val(day, hour)"
-        :colorScheme="colorInterpolationScheme"
-        :maxVal=100
-      />
+      <td v-for='hour in hours'>
+        <ColoredCell
+          :key='day + "-" + hour'
+          :value="val(day, hour)"
+          :colorScheme="colorInterpolationScheme"
+          :maxVal=100
+        />
+      </td>
     </tr>
   </table>
 </template>
@@ -271,5 +272,6 @@ export default {
 
   table {
     text-align: center;
+    border-spacing: 0;
   }
 </style>
