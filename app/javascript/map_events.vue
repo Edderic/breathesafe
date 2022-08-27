@@ -49,7 +49,7 @@
                 :position="m.placeData.center"
                 :clickable="true"
                 :draggable="false"
-                :icon="gradeLetter(m)"
+                :icon="icon(m)"
                 @click="openMarker(m.id)"
             >
               <GMapInfoWindow
@@ -147,7 +147,7 @@ import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import Events from './events.vue';
 import RiskTable from './risk_table.vue';
 import TotalACHTable from './total_ach_table.vue';
-import { binColor, getColor, riskColorInterpolationScheme } from './colors';
+import { binValue, getColor, riskColorInterpolationScheme } from './colors';
 import { getPlaceType } from './icons';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
@@ -220,12 +220,15 @@ export default {
       let element_to_scroll_to = document.getElementById(`${value}-${id}`);
       element_to_scroll_to.scrollIntoView();
     },
-    gradeLetter(marker) {
-      let color = binColor(riskColorInterpolationScheme, marker.risk)
+    icon(marker) {
+      let color = binValue(riskColorInterpolationScheme, marker.risk || 0)
 
       const placeType = getPlaceType(marker.placeData.types)
 
       return `https://breathesafe.s3.us-east-2.amazonaws.com/images/generated/${placeType}--${color.letterGrade}.svg`
+    },
+    gradeLetter(marker) {
+      return binValue(riskColorInterpolationScheme, marker.risk)['upperColor']['letterGrade']
     },
     maskingValues(m) {
       return new MaskingBarChart(m.activityGroups).maskingValues()

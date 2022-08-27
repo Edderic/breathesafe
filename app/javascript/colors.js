@@ -339,7 +339,7 @@ function closestColorIndex(colorScheme, value) {
   return closestIndex
 }
 
-export function binColor(colorScheme, value) {
+export function binValue(colorScheme, value) {
   for (let obj of colorScheme) {
     if (obj['lowerBound'] <= value && value < obj['upperBound']) {
 

@@ -9,6 +9,7 @@
         :colorScheme="colorInterpolationScheme"
         :maxVal=1
         :value='measurements.risk'
+        :text='gradeLetter(this.measurements.risk)'
         :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
       />
     </td>
@@ -18,6 +19,7 @@
         :colorScheme="colorInterpolationScheme"
         :maxVal=1
         :value='roundOut(nullIntervention.computeRisk(1), 6)'
+        :text='gradeLetter(nullIntervention.computeRisk(1))'
         :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
       />
     </td>
@@ -42,7 +44,7 @@ import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
 import { Intervention } from './interventions.js';
 import { getPlaceIcon } from './icons.js';
-import { toggleCSS } from './colors.js';
+import { binValue, toggleCSS } from './colors.js';
 import { useEventStores } from './stores/event_stores';
 import { useEventStore } from './stores/event_store';
 import { useMainStore } from './stores/main_store';
@@ -173,6 +175,9 @@ export default {
     getOpenHours(x) {
       return getWeekdayText(x)
     },
+    gradeLetter(risk) {
+      return binValue(riskColorInterpolationScheme, risk)['letterGrade']
+    },
     ...mapActions(
         useMainStore,
         [
@@ -232,7 +237,7 @@ export default {
 
   .risk-score {
     border-radius: 100%;
-    width: 5em;
-    height: 5em;
+    width: 2em;
+    height: 2em;
   }
 </style>
