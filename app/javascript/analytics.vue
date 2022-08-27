@@ -71,7 +71,7 @@
                     :colorScheme="riskColorScheme"
                     :maxVal=1
                     :value='nullIntervention.computeRiskRounded()'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                    :style="inlineCellCSS"
                 />
               </span>, and if we repeat this many times under this assumption,
               <span>
@@ -82,7 +82,7 @@
                       :maxVal=1
                       :text='roundOut(this.maximumOccupancy * nullIntervention.computeRiskRounded(), 1)'
                       :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
-                      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                      :style="inlineCellCSS"
                   />
               </span> susceptibles would get infected.
               <span> In 8 hours of exposure, the risk jumps to <ColoredCell
@@ -90,7 +90,7 @@
                       :colorScheme="riskColorScheme"
                       :maxVal=1
                       :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**8, 6)'
-                      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                      :style="inlineCellCSS"
                   />
               </span>, and
               <span>
@@ -100,7 +100,7 @@
                       :maxVal=1
                       :text='roundOut(this.maximumOccupancy * (1 - (1-nullIntervention.computeRiskRounded())**8), 1)'
                       :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
-                      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                      :style="inlineCellCSS"
                   />
               </span> susceptibles would get infected, on average. Likewise,
   <span>
@@ -109,14 +109,14 @@
                       :colorScheme="averageInfectedPeopleInterpolationScheme"
                       :maxVal=1
                       :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**40), 1)'
-                      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                      :style="inlineCellCSS"
                   /> and
                   <ColoredCell
                       v-if="nullIntervention"
                       :colorScheme="averageInfectedPeopleInterpolationScheme"
                       :maxVal=1
                       :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**80), 1)'
-                      :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
+                      :style="inlineCellCSS"
                   />, on average, would get infected under 40 and 80 hours of exposure with an infector in this environment. Browse the
   <router-link :to="`/analytics/${this.$route.params.id}#interventions`">
     interventions
@@ -290,7 +290,7 @@
                     :maxVal=1
                     :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
                     :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+                    :style="inlineCellCSS"
                 /> so we assume that the infector in the risk calculations above is doing this.
               </span>
 
@@ -300,7 +300,7 @@
                     :maxVal=1
                     :value='worstCaseInhalation["inhalationFactor"]'
                     :text='worstCaseInhalation["inhalationActivity"]'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+                    :style="inlineCellCSS"
                 /> so we assume that susceptibles in the risk calculations above are doing this.
               </span>
 
@@ -329,7 +329,7 @@
                 :maxVal=1
                 :value='riskiestMask["maskPenetrationFactor"]'
                 :text='riskiestMask["maskType"]'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em' }"
+                :style="inlineCellCSS"
             /></span>, so susceptibles are assumed to be wearing these (unless specified otherwise in the Interventions section).
            </p>
 
@@ -361,7 +361,11 @@
             :systemOfMeasurement='systemOfMeasurement'
             :totalFlowRate='totalFlowRate'
             :roomUsableVolume='roomUsableVolume'
-          />
+            :portableAch='nullIntervention.computePortableAirCleanerACH()'
+            :ventilationAch='nullIntervention.computeVentilationACH()'
+            :uvAch='nullIntervention.computeUVACH()'
+            :cellCSS='cellCSS'
+            />
         </div>
 
         <div class='container'>
@@ -378,7 +382,7 @@
               :colorScheme="riskColorScheme"
               :maxVal=1
               :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleanersAndMasks'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+              :style="inlineCellCSS"
             />. The cost of <a :href="maskSuggestion['website']">{{ this.maskSuggestion['name']}}</a> is ${{ this.maskSuggestion['initialCostUSD']}} per person, with a recurring cost of ${{ this.maskSuggestion['recurringCostUSD']}} every {{ this.maskSuggestion['recurringCostDuration']}} per person.
           </p>
 
@@ -1534,6 +1538,7 @@ import ColoredCell from './colored_cell.vue';
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import RiskTable from './risk_table.vue';
+import TotalACHTable from './total_ach_table.vue';
 import { airCleaners } from './air_cleaners.js';
 import BarGraph from './bar_graph.vue';
 import {
@@ -1587,7 +1592,8 @@ export default {
     DayHourHeatmap,
     Event,
     HorizontalStackedBar,
-    RiskTable
+    RiskTable,
+    TotalACHTable
   },
   computed: {
     ...mapState(
@@ -1673,6 +1679,12 @@ export default {
           'totalAch'
         ]
     ),
+    cellCSS() {
+      return {
+        'padding-top': '1em',
+        'padding-bottom': '1em',
+      }
+    },
     durationWithIntervention() {
       return 40
     },
@@ -2121,6 +2133,8 @@ export default {
     }
   },
   created() {
+    this.showAnalysis(this.$route.params.id)
+
     this.$watch(
       () => this.$route.params,
       (toParams, previousParams) => {
@@ -2135,6 +2149,15 @@ export default {
       ventilationACH: 0.0,
       portableACH: 0.0,
       totalACH: 0.0,
+      inlineCellCSS: {
+        'display': 'inline-block',
+        'font-weight': 'bold',
+        'color': 'white',
+        'text-shadow': '1px 1px 2px black',
+        'padding': '1em',
+        'margin': '0.5em',
+        'text-align': 'center'
+      }
     }
   },
   methods: {
@@ -2223,6 +2246,7 @@ export default {
   .centered {
     display: flex;
     align-items: center;
+    justify-content: center;
   }
 
   .wider-input {

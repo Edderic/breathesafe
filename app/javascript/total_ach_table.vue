@@ -29,7 +29,7 @@
         :colorScheme="colorInterpolationSchemeTotalAch"
         :maxVal=1
         :value='totalAchRounded'
-        class='color-cell'
+        :style='cellCSSMerged'
       />
       </td>
       <td class='operator'>=</td>
@@ -38,7 +38,7 @@
         :colorScheme="colorInterpolationSchemeTotalAch"
         :maxVal=1
         :value='ventilationAchRounded'
-        class='color-cell'
+        :style='cellCSSMerged'
       />
       </td>
       <td class='operator'>+</td>
@@ -47,7 +47,7 @@
         :colorScheme="colorInterpolationSchemeTotalAch"
         :maxVal=1
         :value='portableAchRounded'
-        class='color-cell'
+        :style='cellCSSMerged'
       />
       </td>
       <td class='operator'>+</td>
@@ -55,8 +55,8 @@
       <ColoredCell
         :colorScheme="colorInterpolationSchemeTotalAch"
         :maxVal=1
-        :value='0'
-        class='color-cell'
+        :value='uvAchRounded'
+        :style='cellCSSMerged'
       />
       </td>
     </tr>
@@ -82,6 +82,7 @@ export default {
     ColoredCell
   },
   props: {
+    cellCSS: Object,
     measurementUnits: Object,
     systemOfMeasurement: String,
     portableAch: Number,
@@ -177,11 +178,25 @@ export default {
         },
       ]
     },
+    cellCSSMerged() {
+      let def = {
+        'font-weight': 'bold',
+        'color': 'white',
+        'text-shadow': '1px 1px 2px black',
+        'text-align': 'center',
+      }
+
+      // return Object.assign(this.cellCSS, default)
+      return Object.assign(def, this.cellCSS)
+    },
     portableAchRounded() {
       return round(this.portableAch, 1)
     },
     ventilationAchRounded() {
       return round(this.ventilationAch, 1)
+    },
+    uvAchRounded() {
+      return round(this.uvAch, 1)
     },
     roomUsableVolumeRounded() {
       return round(
@@ -229,12 +244,7 @@ export default {
     flex-direction: column;
   }
 
-  .color-cell {
-    font-weight: bold;
-    color: white;
-    text-shadow: 1px 1px 2px black;
-    text-align: center;
-  }
+
 
   td {
     padding-top: 0.5em;
