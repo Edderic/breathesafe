@@ -24,33 +24,41 @@
       </th>
     </tr>
     <tr>
+      <td>
       <ColoredCell
         :colorScheme="colorInterpolationSchemeTotalAch"
         :maxVal=1
         :value='totalAchRounded'
         class='color-cell'
       />
+      </td>
       <td class='operator'>=</td>
+      <td>
       <ColoredCell
         :colorScheme="colorInterpolationSchemeTotalAch"
         :maxVal=1
         :value='ventilationAchRounded'
         class='color-cell'
       />
+      </td>
       <td class='operator'>+</td>
+      <td>
       <ColoredCell
         :colorScheme="colorInterpolationSchemeTotalAch"
         :maxVal=1
         :value='portableAchRounded'
         class='color-cell'
       />
+      </td>
       <td class='operator'>+</td>
+      <td>
       <ColoredCell
         :colorScheme="colorInterpolationSchemeTotalAch"
         :maxVal=1
         :value='0'
         class='color-cell'
       />
+      </td>
     </tr>
   </table>
 </template>
