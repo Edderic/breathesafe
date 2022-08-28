@@ -274,4 +274,8 @@ export default {
     text-align: center;
     border-spacing: 0;
   }
+
+  td {
+    padding: 0;
+  }
 </style>
