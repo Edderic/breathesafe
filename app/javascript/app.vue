@@ -23,23 +23,8 @@ export default {
   },
   computed: {
     ...mapStores(useMainStore),
-    ...mapState(useMainStore, ["focusTab", "focusSubTab", "signedIn", "markers"]),
     ...mapWritableState(useMainStore, ['center', 'zoom'])
 
-  },
-  async created() {
-    // TODO: modify the store
-    this.$getLocation()
-      .then((coordinates) => {
-        this.center = { lat: coordinates.lat, lng: coordinates.lng };
-        this.zoom = 15;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-
-    await this.getCurrentUser();
-    this.loadProfile()
   },
   data() {
     return {}

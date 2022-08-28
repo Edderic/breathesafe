@@ -125,6 +125,108 @@ export const colorSchemeFall = [
   },
 ]
 
+export function cutoffsVolume(measurementUnits) {
+  let factor = 500 // cubic meters per hour
+  let collection = []
+
+  if (measurementUnits['airDeliveryRateMeasurementType'] == 'cubic feet per minute') {
+    factor = factor / 60 * 35.3147 // cubic feet per minute
+  }
+  for (let i = 0; i < colorSchemeFall.length; i++) {
+    collection.push(
+      {
+        'lowerBound': (i) * factor,
+        'upperBound': (i + 1) * factor,
+      }
+    )
+  }
+
+  return collection
+}
+
+export const colorInterpolationSchemeAch = [
+{
+  'lowerBound': 0,
+  'upperBound': 2,
+  'upperColor': {
+    name: 'red',
+    r: 219,
+    g: 21,
+    b: 0
+  },
+  'lowerColor': {
+    name: 'darkRed',
+    r: 174,
+    g: 17,
+    b: 0
+  },
+},
+  {
+    'lowerBound': 2,
+    'upperBound': 4,
+    'upperColor': {
+      name: 'orangeRed',
+      r: 240,
+      g: 90,
+      b: 0
+    },
+    'lowerColor': {
+      name: 'red',
+      r: 219,
+      g: 21,
+      b: 0
+    },
+  },
+  {
+    'lowerBound': 4,
+    'upperBound': 8,
+    'upperColor': {
+      name: 'yellow',
+      r: 255,
+      g: 233,
+      b: 56
+    },
+    'lowerColor': {
+      name: 'orangeRed',
+      r: 240,
+      g: 90,
+      b: 0
+    },
+  },
+  {
+    'lowerBound': 8,
+    'upperBound': 16,
+    'lowerColor': {
+      name: 'yellow',
+      r: 255,
+      g: 233,
+      b: 56
+    },
+    'upperColor': {
+      name: 'green',
+      r: 87,
+      g: 195,
+      b: 40
+    },
+  },
+  {
+    'lowerBound': 16,
+    'upperBound': 100,
+    'lowerColor': {
+      name: 'green',
+      r: 87,
+      g: 195,
+      b: 40
+    },
+    'upperColor': {
+      name: 'dark green',
+      r: 11,
+      g: 161,
+      b: 3
+    },
+  },
+]
+
 export const riskColorInterpolationScheme = [
   {
     'lowerBound': 0.1,

@@ -351,6 +351,12 @@
         <div class='container'>
           <div class='centered'>
             <CleanAirDeliveryRateTable
+              :measurementUnits='measurementUnits'
+              :systemOfMeasurement='systemOfMeasurement'
+              :totalAch='nullIntervention.computePortableAirCleanerACH() + nullIntervention.computeVentilationACH() + nullIntervention.computeUVACH()'
+              :totalFlowRate='totalFlowRate'
+              :roomUsableVolume='roomUsableVolume'
+              :cellCSS='cellCSS'
             />
           </div>
         </div>
@@ -441,6 +447,7 @@
 
               <tr>
                 <th>Risk</th>
+                <td>
                 <ColoredCell
                     v-if="nullIntervention"
                     :colorScheme="riskColorScheme"
@@ -448,6 +455,8 @@
                     :value='nullIntervention.computeRiskRounded()'
                     :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
                 />
+                </td>
+                <td>
                 <ColoredCell
                     v-if="nullIntervention"
                     :colorScheme="riskColorScheme"
@@ -455,6 +464,8 @@
                     :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**8, 6)'
                     :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
                 />
+                </td>
+                <td>
                 <ColoredCell
                     v-if="nullIntervention"
                     :colorScheme="riskColorScheme"
@@ -462,6 +473,8 @@
                     :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**40, 6)'
                     :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
                 />
+                </td>
+                <td>
                 <ColoredCell
                     v-if="nullIntervention"
                     :colorScheme="riskColorScheme"
@@ -469,9 +482,11 @@
                     :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**80, 6)'
                     :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
                 />
+                </td>
               </tr>
               <tr>
                 <th>Average # of Susceptibles Infected under Max Occupancy</th>
+                <td>
                 <ColoredCell
                     v-if="nullIntervention"
                     :colorScheme="averageInfectedPeopleInterpolationScheme"
@@ -480,6 +495,8 @@
                     :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
                     :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
                 />
+                </td>
+                <td>
                 <ColoredCell
                     v-if="nullIntervention"
                     :colorScheme="averageInfectedPeopleInterpolationScheme"
@@ -487,6 +504,8 @@
                     :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**8), 1)'
                     :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
                 />
+                </td>
+                <td>
                 <ColoredCell
                     v-if="nullIntervention"
                     :colorScheme="averageInfectedPeopleInterpolationScheme"
@@ -494,6 +513,8 @@
                     :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**40), 1)'
                     :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
                 />
+                </td>
+                <td>
                 <ColoredCell
                     v-if="nullIntervention"
                     :colorScheme="averageInfectedPeopleInterpolationScheme"
@@ -501,6 +522,7 @@
                     :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**80), 1)'
                     :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em'}"
                 />
+                </td>
               </tr>
             </table>
           </div>
@@ -530,6 +552,7 @@
                     </div>
                 </td>
 
+                <td>
                 <ColoredCell
                     v-if='intervention.applicable()'
                     :colorScheme="riskColorScheme"
@@ -537,7 +560,9 @@
                     :value='intervention.computeRiskRounded(1)'
                     class='color-cell'
                 />
+                </td>
 
+                <td>
                 <ColoredCell
                     v-if='intervention.applicable()'
                     :colorScheme="riskColorScheme"
@@ -545,7 +570,8 @@
                     :value='intervention.computeRiskRounded(8)'
                     class='color-cell'
                 />
-
+                </td>
+                <td>
                 <ColoredCell
                     v-if='intervention.applicable()'
                     :colorScheme="riskColorScheme"
@@ -553,6 +579,7 @@
                     :value='intervention.computeRiskRounded(40)'
                     class='color-cell'
                 />
+                </td>
                 <td v-if='intervention.applicable()' >
                   <div v-for='interv in intervention.interventions' class='padded'>
                     {{ interv.initialCostText() }}
@@ -1535,6 +1562,7 @@
 // Have a VueX store that maintains state across components
 import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
+import CleanAirDeliveryRateTable from './clean_air_delivery_rate_table.vue'
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import RiskTable from './risk_table.vue';
@@ -1589,6 +1617,7 @@ export default {
   components: {
     BarGraph,
     ColoredCell,
+    CleanAirDeliveryRateTable,
     DayHourHeatmap,
     Event,
     HorizontalStackedBar,
@@ -2045,6 +2074,7 @@ export default {
         },
       ]
     },
+    // TODO: delete this
     cutoffsVolume() {
       let factor = 500 // cubic meters per hour
       let collection = []
