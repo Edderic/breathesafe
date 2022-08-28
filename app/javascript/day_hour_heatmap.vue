@@ -18,7 +18,7 @@
   </table>
 </template>
 
-<script>
+<script scoped>
 // Have a VueX store that maintains state across components
 import ColoredCell from './colored_cell.vue';
 import { mapWritableState, mapState, mapActions } from 'pinia';
