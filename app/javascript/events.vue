@@ -215,31 +215,39 @@ export default {
       )
     },
     sortByInfectorRisk() {
-      if (!this.$route.query.sort ||
-          this.$route.query.sort != "risk-infector" ||
-          (this.$route.query.sort == "risk-infector"
-          && this.$route.query['sort-how'] == "descending")
-         ) {
-        this.$router.push(
-          {
-            name: 'MapEvents',
-            query: {
-              'sort': 'risk-infector',
-              'sort-how': 'ascending'
-            }
-          }
-        )
-      } else if (this.$route.query.sort == "risk-infector" && this.$route.query['sort-how'] == "ascending") {
-        this.$router.push(
-          {
-            name: 'MapEvents',
-            query: {
-              'sort': 'risk-infector',
-              'sort-how': 'descending'
-            }
-          }
-        )
+      // this one is not dependent on occupancy. We're assuming that there's one person sick
+
+      let copy = JSON.parse(JSON.stringify(this.$route.query))
+      let newQuery;
+
+      if (this.$route.query.sort != 'risk-infector') {
+        newQuery = {
+          'sort': 'risk-infector',
+          'sort-how': 'ascending'
+        }
       }
+
+      else if (this.$route.query['sort-how'] == "descending" && this.$route.query.sort == 'risk-infector') {
+        newQuery = {
+          'sort': 'risk-infector',
+          'sort-how': 'ascending'
+        }
+      }
+
+      else if (this.$route.query['sort-how'] == 'ascending' && this.$route.query.sort == "risk-infector") {
+        newQuery = {
+          'sort': 'risk-infector',
+          'sort-how': 'descending'
+        }
+      }
+
+      Object.assign(copy, newQuery)
+      this.$router.push(
+        {
+          name: 'MapEvents',
+          query: copy
+        }
+      )
     },
 
     sortByParams() {
