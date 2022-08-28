@@ -203,8 +203,6 @@ export default {
       });
 
     // TODO: handle case where no one is signed in
-
-    await this.load();
   },
   data() {
     return {

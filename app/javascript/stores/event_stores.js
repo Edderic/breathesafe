@@ -42,10 +42,6 @@ export const useEventStores = defineStore('events', {
           success = false
           // whatever you want
         })
-
-      if (success) {
-        this.computeRiskAll()
-      }
     },
 
     async findOrLoad(id) {

@@ -116,14 +116,17 @@ export default {
   },
   async created() {
     this.eventDisplayRiskTime = this.$route.query['eventDisplayRiskTime'] || 'At max occupancy'
+    await this.load();
     this.computeRiskAll(this.eventDisplayRiskTime)
     this.sortByParams()
+
 
     this.$watch(
       () => this.$route.query,
       (toQuery, previousQuery) => {
         if (toQuery['eventDisplayRiskTime'] != previousQuery['eventDisplayRiskTime']) {
           this.computeRiskAll(toQuery['eventDisplayRiskTime'])
+          this.eventDisplayRiskTime = toQuery['eventDisplayRiskTime']
         }
         this.sortByParams()
         // react to route changes...
@@ -141,17 +144,17 @@ export default {
   methods: {
     setDisplayRiskTime(e) {
       this.eventDisplayRiskTime = e.target.value
+      let oldQuery = JSON.parse(JSON.stringify(this.$route.query))
 
       let newQuery = {
         eventDisplayRiskTime: this.eventDisplayRiskTime
       }
 
-      Object.assign(newQuery, this.$route.query)
-      this.computeRiskAll(this.eventDisplayRiskTime)
+      Object.assign(oldQuery, newQuery)
 
       this.$router.push({
         name: 'MapEvents',
-        query: newQuery
+        query: oldQuery
       })
     },
     getOpenHours(x) {
