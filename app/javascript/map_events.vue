@@ -126,11 +126,16 @@
                       />
                     </div>
                     <br>
+                    <br>
+                    <br>
 
                     <DayHourHeatmap
                       :id='`occupancy-${m.id}`'
                       :dayHours="m.occupancy.parsed"
                     />
+                    <br>
+                    <br>
+                    <br>
                   </div>
                 </div>
               </GMapInfoWindow>
