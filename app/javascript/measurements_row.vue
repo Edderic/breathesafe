@@ -200,6 +200,8 @@ export default {
     text-align: center;
     margin: auto;
     vertical-align: middle;
+    border-top: 1px solid #e6e6e6;
+    border-bottom: 1px solid #e6e6e6;
   }
   td.containing-cell {
     width: 7em;
