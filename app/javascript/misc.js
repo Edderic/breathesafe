@@ -329,7 +329,17 @@ export function computeRiskWithVariableOccupancy(
   let occupancy;
   if (eventDisplayRiskTime == "At this hour") {
     occupancy = findCurrentOccupancy(maximumOccupancy, date, event.occupancy.parsed)
-  } else {
+  }
+  else if (eventDisplayRiskTime == "At 25% occupancy") {
+    occupancy = Math.ceil(0.25 * maximumOccupancy)
+  }
+  else if (eventDisplayRiskTime == "At 50% occupancy") {
+    occupancy = Math.ceil(0.5 * maximumOccupancy)
+  }
+  else if (eventDisplayRiskTime == "At 75% occupancy") {
+    occupancy = Math.ceil(0.75 * maximumOccupancy)
+  }
+  else {
     occupancy = maximumOccupancy
   }
 

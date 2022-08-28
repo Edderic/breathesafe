@@ -4,6 +4,9 @@
       <input class='margined' @change="updateSearch" placeholder="Search for events">
       <select class='margined' :value='eventDisplayRiskTime' @change='setDisplayRiskTime'>
         <option>At this hour</option>
+        <option>At 25% occupancy</option>
+        <option>At 50% occupancy</option>
+        <option>At 75% occupancy</option>
         <option>At max occupancy</option>
       </select>
       <router-link class='margined button' to="/events/new" v-if='signedIn'>Create</router-link>
@@ -77,12 +80,6 @@ export default {
   },
   computed: {
     ...mapWritableState(
-        useProfileStore,
-        [
-          'eventDisplayRiskTime',
-        ]
-    ),
-    ...mapWritableState(
         useEventStores,
         [
           'events',
@@ -118,11 +115,16 @@ export default {
     }
   },
   async created() {
+    this.eventDisplayRiskTime = this.$route.query['eventDisplayRiskTime'] || 'At max occupancy'
+    this.computeRiskAll(this.eventDisplayRiskTime)
     this.sortByParams()
 
     this.$watch(
       () => this.$route.query,
       (toQuery, previousQuery) => {
+        if (toQuery['eventDisplayRiskTime'] != previousQuery['eventDisplayRiskTime']) {
+          this.computeRiskAll(toQuery['eventDisplayRiskTime'])
+        }
         this.sortByParams()
         // react to route changes...
       }
@@ -133,13 +135,24 @@ export default {
   data() {
     return {
       'search': "",
+      'eventDisplayRiskTime': 'At max occupancy'
     }
   },
   methods: {
     setDisplayRiskTime(e) {
       this.eventDisplayRiskTime = e.target.value
-      this.updateProfile()
-      this.computeRiskAll()
+
+      let newQuery = {
+        eventDisplayRiskTime: this.eventDisplayRiskTime
+      }
+
+      Object.assign(newQuery, this.$route.query)
+      this.computeRiskAll(this.eventDisplayRiskTime)
+
+      this.$router.push({
+        name: 'MapEvents',
+        query: newQuery
+      })
     },
     getOpenHours(x) {
       return getWeekdayText(x)
@@ -158,12 +171,6 @@ export default {
           'computeRiskAll'
         ]
     ),
-    ...mapActions(
-        useProfileStore,
-        [
-          'updateProfile'
-        ]
-    ),
     newEvent() {
       this.setFocusTab('event')
     },
@@ -173,28 +180,39 @@ export default {
     },
 
     sortByRisk() {
-      this.computeRiskAll()
-      if (!this.$route.query.sort || this.$route.query.sort != 'risk' || this.$route.query['sort-how'] == "descending" && this.$route.query.sort == 'risk') {
-        this.$router.push(
-          {
-            name: 'MapEvents',
-            query: {
-              'sort': 'risk',
-              'sort-how': 'ascending'
-            }
-          }
-        )
-      } else if (this.$route.query.sort == "risk" && this.$route.query['sort-how'] == 'ascending') {
-        this.$router.push(
-          {
-            name: 'MapEvents',
-            query: {
-              'sort': 'risk',
-              'sort-how': 'descending'
-            }
-          }
-        )
+      this.computeRiskAll(this.eventDisplayRiskTime)
+
+      let copy = JSON.parse(JSON.stringify(this.$route.query))
+      let newQuery;
+
+      if (!this.$route.query.sort || this.$route.query.sort != 'risk') {
+        newQuery = {
+          'sort': 'risk',
+          'sort-how': 'ascending'
+        }
       }
+
+      else if (this.$route.query['sort-how'] == "descending" && this.$route.query.sort == 'risk') {
+        newQuery = {
+          'sort': 'risk',
+          'sort-how': 'ascending'
+        }
+
+      } else if (this.$route.query['sort-how'] == 'ascending' && this.$route.query.sort == "risk") {
+        newQuery = {
+          'sort': 'risk',
+          'sort-how': 'descending'
+        }
+
+      }
+
+      Object.assign(copy, newQuery)
+      this.$router.push(
+        {
+          name: 'MapEvents',
+          query: copy
+        }
+      )
     },
     sortByInfectorRisk() {
       if (!this.$route.query.sort ||

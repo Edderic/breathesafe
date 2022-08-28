@@ -11,7 +11,7 @@ import { computeRiskWithVariableOccupancy, deepSnakeToCamel, setupCSRF } from  '
 export const useEventStores = defineStore('events', {
   state: () => ({
     events: [],
-    displayables: []
+    displayables: [],
   }),
   getters: {
   },
@@ -60,15 +60,21 @@ export const useEventStores = defineStore('events', {
       return event
     },
 
-    computeRiskAll() {
+    computeRiskAll(eventDisplayRiskTime) {
       const prevalenceStore = usePrevalenceStore()
-      const profileStore = useProfileStore()
-
       //prevalenceStore.maskType  const susceptibleMaskType = prevalenceStore.maskType
       // TODO: make this a query parameter using router
       const susceptibleMaskType = "None"
       const ascertainmentBiasMitigator = 10
       let probaRandomSampleOfOneIsInfectious;
+
+      let riskTime;
+
+      if (eventDisplayRiskTime) {
+        riskTime = eventDisplayRiskTime
+      } else {
+        riskTime = 'At max occupancy'
+      }
 
       for (let event of this.events) {
         const flowRate = event.roomUsableVolumeCubicMeters * event.totalAch
@@ -81,7 +87,7 @@ export const useEventStores = defineStore('events', {
           flowRate,
           event.roomUsableVolumeCubicMeters,
           susceptibleMaskType,
-          profileStore.eventDisplayRiskTime
+          riskTime
         )
       }
     }
