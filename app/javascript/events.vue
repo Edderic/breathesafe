@@ -1,12 +1,12 @@
 <template>
   <div class='col'>
-    <div class='row horizontally-center'>
+    <div class='row horizontally-center controls'>
       <input class='margined' @change="updateSearch" placeholder="Search for events">
       <select class='margined' :value='eventDisplayRiskTime' @change='setDisplayRiskTime'>
         <option>At this hour</option>
         <option>At max occupancy</option>
       </select>
-      <router-link class='margined' to="/events/new" v-if='signedIn'>Add New Event</router-link>
+      <router-link class='margined button' to="/events/new" v-if='signedIn'>+</router-link>
     </div>
 
     <div class='scrollable'>
@@ -273,8 +273,11 @@ export default {
   }
 
   .margined {
-    padding: 1em;
-    margin: 1em;
+    display: flex;
+    justify-content: center;
+    width: 13em;
+    padding: 0.5em;
+    margin: 0 1em;
   }
   th {
     padding-top: 1em;
@@ -310,4 +313,18 @@ export default {
   .table-header-title {
   }
 
+  .controls {
+    padding: 1em 100%;
+    background-color: #eee;
+  }
+
+  .button {
+    color: white;
+    border: 1px solid black;
+    font-weight: bold;
+    border-radius: 2%;
+    background-color: #aaa;
+    text-shadow: 1px 1px 2px black;
+    text-decoration: none;
+  }
 </style>
