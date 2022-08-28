@@ -185,6 +185,8 @@ export default {
           'displayables'
         ]
     ),
+    cellCSS(){
+    },
     riskColorScheme() {
       return riskColorInterpolationScheme
     },
