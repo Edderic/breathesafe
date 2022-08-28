@@ -104,6 +104,14 @@
                         :roomUsableVolumeCubicMeters='m.roomUsableVolumeCubicMeters'
                       />
                     </div>
+                    <div class='centered'>
+                      <CleanAirDeliveryRateTable
+                        :measurementUnits='measurementUnits'
+                        :systemOfMeasurement='systemOfMeasurement'
+                        :intervention='nullIntervention(m)'
+                        :cellCSS='cellCSS'
+                      />
+                    </div>
                     <br>
                     <br>
                     <br>
@@ -140,8 +148,10 @@
 
 <script>
 // Have a VueX store that maintains state across components
+import { displayCADR } from './misc.js';
 import { MaskingBarChart } from './masks.js';
 import { Intervention } from './interventions.js';
+import CleanAirDeliveryRateTable from './clean_air_delivery_rate_table.vue';
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import Events from './events.vue';
@@ -157,6 +167,7 @@ import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
 export default {
   name: 'MapEvents',
   components: {
+    CleanAirDeliveryRateTable,
     DayHourHeatmap,
     Events,
     HorizontalStackedBar,
@@ -239,6 +250,9 @@ export default {
     openMarker(id) {
       this.openedMarkerID = id
     },
+    nullIntervention(m) {
+      return new Intervention(m, [])
+    }
   },
 }
 </script>

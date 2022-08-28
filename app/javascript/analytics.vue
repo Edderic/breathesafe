@@ -353,9 +353,7 @@
             <CleanAirDeliveryRateTable
               :measurementUnits='measurementUnits'
               :systemOfMeasurement='systemOfMeasurement'
-              :totalAch='nullIntervention.computePortableAirCleanerACH() + nullIntervention.computeVentilationACH() + nullIntervention.computeUVACH()'
-              :totalFlowRate='totalFlowRate'
-              :roomUsableVolume='roomUsableVolume'
+              :intervention='nullIntervention'
               :cellCSS='cellCSS'
             />
           </div>
