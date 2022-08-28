@@ -1,6 +1,10 @@
 <template>
   <tr class='clickable' :class='{ clicked: this.measurements.clicked }' :id='`measurements-${this.measurements.id}`'>
-    <td class='emojis' :style="circleCSS">{{emojis}}</td>
+    <td>
+      <div class='emojis'>
+      {{emojis}}
+      </div>
+    </td>
     <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.roomName}}</td>
     <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.placeData.formattedAddress}}</td>
     <td class='containing-cell'>
@@ -46,7 +50,7 @@ import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
 import { Intervention } from './interventions.js';
 import { getPlaceIcon } from './icons.js';
-import { binValue, toggleCSS } from './colors.js';
+import { binValue } from './colors.js';
 import { useEventStores } from './stores/event_stores';
 import { useEventStore } from './stores/event_store';
 import { useMainStore } from './stores/main_store';
@@ -109,17 +113,6 @@ export default {
     },
     approvable() {
       return this.measurements.private == 'public' && (!this.measurements.approvedById && !this.measurements.authoredByAdmin)
-    },
-    circleCSS() {
-      let copy = JSON.parse(JSON.stringify(toggleCSS))
-      copy['margin-top'] = '0.5em'
-      copy['margin-bottom'] = '0.5em'
-      copy['margin-right'] = '0.5em'
-      copy['margin-left'] = '0.5em'
-      copy['width'] = '0.5em'
-      copy['height'] = '0.5em'
-      copy['background-color'] = '#ddd'
-      return copy
     },
 
     colorInterpolationScheme() {
