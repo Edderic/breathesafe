@@ -16,6 +16,7 @@
         :text='gradeLetter(this.measurements.risk)'
         :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
         :title='roundOut(measurements.risk, 6)'
+        :exception='{ "text": "NA", "value": 0, color: {r: 200, g: 200, b: 200}}'
       />
     </td>
     <td class='containing-cell'>
