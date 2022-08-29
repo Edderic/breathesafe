@@ -376,7 +376,7 @@ export const infectedPeopleColorBounds = [
   },
 ]
 
-export function assignBoundsToColorScheme(scheme, cutoffs) {
+function assignBoundsToScheme(scheme, cutoffs) {
   let colorScheme = JSON.parse(JSON.stringify(scheme))
 
   for (let i = 0; i < colorScheme.length; i++) {
@@ -387,8 +387,11 @@ export function assignBoundsToColorScheme(scheme, cutoffs) {
 
   return colorScheme
 }
+export function assignBoundsToColorScheme(scheme, cutoffs) {
+  return assignBoundsToScheme(scheme, cutoffs)
+}
 
-export function convertColorListToCutpoints(colorList) {
+function convColorListToCutpoints(colorList) {
   let collection = []
 
   for (let i = 0; i < colorList.length - 1; i++) {
