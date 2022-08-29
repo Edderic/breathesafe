@@ -106,7 +106,7 @@
                     </div>
                     <AchToDuration
                       :intervention='nullIntervention(m)'
-                      :containerCSS='{ "line-height": "1em" }'
+                      :containerCSS='{ "line-height": "1.5em" }'
                     />
                     <br>
                     <br>
