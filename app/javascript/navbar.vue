@@ -1,6 +1,6 @@
 <template>
   <div class='row spaced-between main fixed-nav-bar'>
-    <h2 class='side-padding'>Breathesafe 😷</h2>
+    <h2 class='side-padding'>😷 Breathesafe</h2>
 
     <div class='vertical-centered'>
       <router-link class='clickable side-padding' to='/faqs'>FAQs</router-link>
