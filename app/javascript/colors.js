@@ -13,7 +13,7 @@ export const toggleCSS = {
   'cursor': 'help',
 }
 
-export const colorPaletteFall = [
+const paletteFall = [
   {
     name: 'darkRed',
     r: 174,
@@ -51,6 +51,7 @@ export const colorPaletteFall = [
     b: 3
   }
 ]
+export const colorPaletteFall = paletteFall
 
 export const colorSchemeFall = [
   {
