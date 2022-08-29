@@ -126,6 +126,19 @@ export const colorSchemeFall = [
   },
 ]
 
+export function minutesToRemovalScheme() {
+  const minimum = 0
+  const maximum = 120
+  const numObjects = 6
+  const evenSpacedBounds = genEvenSpacedBounds(minimum, maximum, numObjects)
+
+  const scheme = convColorListToCutpoints(
+    JSON.parse(JSON.stringify(paletteFall)).reverse()
+  )
+
+  return assignBoundsToScheme(scheme, evenSpacedBounds)
+}
+
 export function cutoffsVolume(measurementUnits) {
   let factor = 500 // cubic meters per hour
   let collection = []
