@@ -404,7 +404,11 @@ function convColorListToCutpoints(colorList) {
   return collection
 }
 
-export function generateEvenSpacedBounds(min, max, numObjects) {
+export function convertColorListToCutpoints(colorList) {
+  return convColorListToCutpoints(colorList)
+}
+
+function genEvenSpacedBounds(min, max, numObjects) {
   let curr = min
   let prev
   let increment = (max - min) / numObjects
