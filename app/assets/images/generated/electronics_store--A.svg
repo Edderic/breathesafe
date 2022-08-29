@@ -1,0 +1,10 @@
+
+    <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" width="30px" height="30px">
+      <circle cx="40" cy="40" r="40" fill="rgb(11, 161, 3)"/>
+      <text x="50%" y="30%" text-anchor="middle" fill="#EEE" dy=".4em" style="text-shadow: 1px 1px 2px black;">
+        <tspan x="48%" dy="0.65em" style="&#10; font-size: xxx-large;&#10;" >
+            🎚 
+        </tspan>
+      </text>
+    </svg>
+    
