@@ -17,14 +17,11 @@
         if (this.text == "" || !!this.text) {
           return this.text
         } else {
-          return this.ratio
+          return this.value
         }
       },
-      ratio() {
-        return this.value / parseFloat(this.maxVal);
-      },
       cellColor() {
-        return getColor(this.colorScheme, this.ratio)
+        return getColor(this.colorScheme, this.value)
       },
     },
     methods: {
@@ -32,7 +29,6 @@
     props: [
       'value',
       'text',
-      'maxVal',
       'colorScheme'
     ]
   }
