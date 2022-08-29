@@ -74,7 +74,7 @@
                   <div class='col scrollable'>
                     <div :id='`information-${m.id}`'>{{ m.roomName }}</div>
                     <div>{{ m.placeData.formattedAddress }} </div>
-                    <a v-if="m.placeData.website" :href="m.placeData.website">{{ m.placeData.website }}</a>
+                    <a v-if="m.placeData.website" :href="m.placeData.website">website</a>
                     <br>
                     <br>
                     <br>
@@ -105,6 +105,12 @@
                       />
                     </div>
                     <div class='centered'>
+                      <AchToDuration
+                        :intervention='nullIntervention(m)'
+                      />
+                    </div>
+                    <br>
+                    <div class='centered'>
                       <CleanAirDeliveryRateTable
                         :measurementUnits='measurementUnits'
                         :systemOfMeasurement='systemOfMeasurement'
@@ -112,13 +118,6 @@
                         :cellCSS='cellCSS'
                       />
                     </div>
-                    <br>
-                    <div class='centered'>
-                      <AchToDuration
-                        :intervention='nullIntervention(m)'
-                      />
-                    </div>
-                    <br>
                     <br>
                     <br>
                     <br>

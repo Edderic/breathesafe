@@ -1,7 +1,7 @@
 <template>
 
   <div class='container'>
-    With
+    Imagine an infectious person exhaling 1 breath. With
       <ColoredCell
         :colorScheme="colorInterpolationSchemeTotalAch"
         :maxVal=1
@@ -13,7 +13,7 @@
         :maxVal=1
         :value='durationMinutesToRemove(0.99)'
         :style='cellCSSMerged'
-      /> minutes to remove 99% of the virus from the air, after everyone has left the room.
+      /> minutes to remove 99% of the virus from the air from that 1 breath. The higher the ACH, the faster the rate of removal of airborne pathogens, and the safer it is for everyone.
   </div>
 
 </template>
