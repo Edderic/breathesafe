@@ -128,7 +128,7 @@
                       <HorizontalStackedBar
                         :values="maskingValues(m)"
                         :colors="maskingColors(m)"
-                        verticalPadding='0.20em'
+                        verticalPadding='0'
                       />
                     </div>
                     <br>
