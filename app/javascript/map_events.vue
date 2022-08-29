@@ -110,13 +110,20 @@
                       />
                     </div>
                     <br>
-                    <div class='centered'>
+                    <div class='centered col'>
                       <CleanAirDeliveryRateTable
                         :measurementUnits='measurementUnits'
                         :systemOfMeasurement='systemOfMeasurement'
                         :intervention='nullIntervention(m)'
                         :cellCSS='cellCSS'
                       />
+
+                      <p>However, ACH does not tell the whole story. A very
+                      small room could still have high ACH but not a lot of clean air being
+                      delivered. The clean air delivery rate is what counts the most. It is a product
+                      of ACH and the room volume. The bigger the ACH and the room volume, the
+                      better.
+                      </p>
                     </div>
                     <br>
                     <br>
@@ -354,6 +361,10 @@ export default {
   }
   .scrollable {
     margin-left: 3em;
+  }
+
+  p {
+    padding: 1em;
   }
 
 </style>
