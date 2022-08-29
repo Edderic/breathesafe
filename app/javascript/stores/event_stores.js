@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { Mask, MASKS } from '../masks.js'
 import { useMainStore } from './main_store'
 import { useProfileStore } from './profile_store'
 import { usePrevalenceStore } from './prevalence_store'
@@ -12,6 +13,7 @@ export const useEventStores = defineStore('events', {
   state: () => ({
     events: [],
     displayables: [],
+    masks: [],
   }),
   getters: {
   },
@@ -42,6 +44,14 @@ export const useEventStores = defineStore('events', {
           success = false
           // whatever you want
         })
+
+      // Load masks
+      let masks = []
+      for (let mask of MASKS) {
+        masks.push(new Mask(mask, 1))
+      }
+
+      this.masks = masks
     },
 
     async findOrLoad(id) {
@@ -56,11 +66,11 @@ export const useEventStores = defineStore('events', {
       return event
     },
 
-    computeRiskAll(eventDisplayRiskTime) {
+    computeRiskAll(eventDisplayRiskTime, selectedMask) {
       const prevalenceStore = usePrevalenceStore()
       //prevalenceStore.maskType  const susceptibleMaskType = prevalenceStore.maskType
       // TODO: make this a query parameter using router
-      const susceptibleMaskType = "None"
+      const susceptibleMaskType = selectedMask.filtrationType
       const ascertainmentBiasMitigator = 10
       let probaRandomSampleOfOneIsInfectious;
 
@@ -86,6 +96,6 @@ export const useEventStores = defineStore('events', {
           riskTime
         )
       }
-    }
+    },
   }
 });

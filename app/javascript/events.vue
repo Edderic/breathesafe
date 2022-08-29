@@ -9,6 +9,10 @@
         <option>At 75% occupancy</option>
         <option>At max occupancy</option>
       </select>
+
+      <select :value='maskType' @change='setMaskType'>
+        <option v-for='m in masks'>{{ m.maskName }}</option>
+      </select>
       <router-link class='margined button' to="/events/new" v-if='signedIn'>Create</router-link>
     </div>
 
@@ -64,6 +68,7 @@
 // Have a VueX store that maintains state across components
 import axios from 'axios';
 import MeasurementsRow from './measurements_row.vue';
+import { Mask, MASKS } from './masks.js'
 import { toggleCSS } from './colors.js'
 import { Intervention } from './interventions.js';
 import { useProfileStore } from './stores/profile_store';
@@ -83,7 +88,8 @@ export default {
         useEventStores,
         [
           'events',
-          'displayables'
+          'displayables',
+          'masks'
         ]
     ),
     ...mapWritableState(
@@ -117,7 +123,7 @@ export default {
   async created() {
     this.eventDisplayRiskTime = this.$route.query['eventDisplayRiskTime'] || 'At max occupancy'
     await this.load();
-    this.computeRiskAll(this.eventDisplayRiskTime)
+    this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
     this.sortByParams()
 
 
@@ -125,7 +131,7 @@ export default {
       () => this.$route.query,
       (toQuery, previousQuery) => {
         if (toQuery['eventDisplayRiskTime'] != previousQuery['eventDisplayRiskTime']) {
-          this.computeRiskAll(toQuery['eventDisplayRiskTime'])
+          this.computeRiskAll(toQuery['eventDisplayRiskTime'], this.selectedMask)
           this.eventDisplayRiskTime = toQuery['eventDisplayRiskTime']
         }
         this.sortByParams()
@@ -138,6 +144,7 @@ export default {
   data() {
     return {
       'search': "",
+      'selectedMask': new Mask(MASKS[0], 1),
       'eventDisplayRiskTime': 'At max occupancy'
     }
   },
@@ -182,8 +189,15 @@ export default {
       this.displayables = filterEvents(this.search, this.events)
     },
 
+    setMaskType(event) {
+      let name = event.target.value
+      let mask = this.masks.find((m) => m.maskName == name)
+      this.selectedMask = mask
+      this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
+    },
+
     sortByRisk() {
-      this.computeRiskAll(this.eventDisplayRiskTime)
+      this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
 
       let copy = JSON.parse(JSON.stringify(this.$route.query))
       let newQuery;

@@ -20,6 +20,7 @@ import {
 
 } from  './misc';
 
+
 function binarySearch(low, high, funcStuff, target, key) {
   /*
    * Parameters:

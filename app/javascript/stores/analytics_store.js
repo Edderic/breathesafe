@@ -5,6 +5,7 @@ import { airCleaners, AirCleaner } from '../air_cleaners.js'
 import { UpperRoomGermicidalUV, UPPER_ROOM_GERMICIDAL_UV } from '../upper_room_germicidal_uv.js'
 import { Intervention } from '../interventions.js'
 import { useShowMeasurementSetStore } from './show_measurement_set_store';
+import { getSampleInterventions } from '../sample_interventions.js'
 
 
 // TODO: use the last location that the user was in, as the default
@@ -46,85 +47,7 @@ export const useAnalyticsStore = defineStore('analytics', {
       this.nullIntervention = new Intervention(this.event, [])
 
       // TODO: find the number of people that could upgrade to a mask
-      let interventions = [
-        new Intervention(
-          this.event,
-          [
-            new AirCleaner(airCleaners[0], this.event)
-          ]
-        ),
-        new Intervention(
-          this.event,
-          [
-            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[0], this.event)
-          ]
-        ),
-        new Intervention(
-          this.event,
-          [
-            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[1], this.event)
-          ]
-        ),
-        new Intervention(
-          this.event,
-          [
-            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[2], this.event)
-          ]
-        ),
-        new Intervention(
-          this.event,
-          [
-            new Mask(MASKS[0], this.numPeopleToInvestIn)
-          ]
-        ),
-        new Intervention(
-          this.event,
-          [
-            new Mask(MASKS[1], this.numPeopleToInvestIn)
-          ]
-        ),
-        new Intervention(
-          this.event,
-          [
-            new Mask(MASKS[2], this.numPeopleToInvestIn)
-          ]
-        ),
-        new Intervention(
-          this.event,
-          [
-            new Mask(MASKS[3], this.numPeopleToInvestIn)
-          ]
-        ),
-        new Intervention(
-          this.event,
-          [
-            new Mask(MASKS[0], this.numPeopleToInvestIn),
-            new AirCleaner(airCleaners[0], this.event)
-          ]
-        ),
-        new Intervention(
-          this.event,
-          [
-            new Mask(MASKS[2], this.numPeopleToInvestIn),
-            new AirCleaner(airCleaners[0], this.event)
-          ]
-        ),
-        new Intervention(
-          this.event,
-          [
-            new Mask(MASKS[2], this.numPeopleToInvestIn),
-            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[0], this.event)
-          ]
-        ),
-        new Intervention(
-          this.event,
-          [
-            new Mask(MASKS[2], this.numPeopleToInvestIn),
-            new UpperRoomGermicidalUV(UPPER_ROOM_GERMICIDAL_UV[0], this.event),
-            new AirCleaner(airCleaners[0], this.event)
-          ]
-        ),
-      ]
+      let interventions = getSampleInterventions(this.event, this.numPeopleToInvestIn)
 
       this.interventions = interventions.sort(
           function(a, b) {
