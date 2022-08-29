@@ -467,6 +467,15 @@ function closestColorIndex(colorScheme, value) {
 }
 
 export function binValue(colorScheme, value) {
+  if (value == 0) {
+    return {
+      letterGrade: 'NA',
+      r: 20,
+      g: 20,
+      b: 20,
+    }
+  }
+
   for (let obj of colorScheme) {
     if (obj['lowerBound'] <= value && value < obj['upperBound']) {
 
