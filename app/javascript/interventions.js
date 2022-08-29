@@ -72,6 +72,10 @@ function binarySearch(low, high, funcStuff, target, key) {
   }
 }
 
+export function binSearch(middle, high, funcStuff, target, key) {
+  return binarySearch(middle, high, funcStuff, target, key)
+}
+
 function probability_getting_infected_at_least_once(args) {
   return 1 - (1- args.probability) ** args.amount
 }

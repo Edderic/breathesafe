@@ -427,6 +427,10 @@ function genEvenSpacedBounds(min, max, numObjects) {
   return collection
 }
 
+export function generateEvenSpacedBounds(min, max, numObjects) {
+  return genEvenSpacedBounds(min, max, numObjects)
+}
+
 export function interpolateRgb(prevColor, nextColor, prevVal, currVal, nextVal) {
   let distanceFromPrevToNextVal = Math.abs(
     (nextVal - prevVal)
