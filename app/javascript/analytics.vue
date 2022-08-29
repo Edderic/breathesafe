@@ -1731,7 +1731,6 @@ export default {
       ]
     },
     inhalationActivityScheme() {
-      colorPaletteFall
       const minimum = 0.258
       const maximum = 3
       const numObjects = 6
