@@ -89,7 +89,8 @@ export default {
         [
           'events',
           'displayables',
-          'masks'
+          'masks',
+          'selectedMask'
         ]
     ),
     ...mapWritableState(
@@ -152,7 +153,6 @@ export default {
   data() {
     return {
       'search': "",
-      'selectedMask': new Mask(MASKS[0], 1),
       'eventDisplayRiskTime': 'At max occupancy'
     }
   },

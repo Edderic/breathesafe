@@ -14,6 +14,7 @@ export const useEventStores = defineStore('events', {
     events: [],
     displayables: [],
     masks: [],
+    selectedMask: new Mask(MASKS[0], 1),
   }),
   getters: {
   },

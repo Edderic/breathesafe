@@ -71,6 +71,7 @@ export default {
     ...mapState(useProfileStore, ['eventDisplayRiskTime']),
     ...mapState(usePrevalenceStore, ['numPositivesLastSevenDays', 'numPopulation', 'uncountedFactor', 'maskType']),
     ...mapState(useEventStore, ['infectorActivityTypeMapping']),
+    ...mapState(useEventStores, ['selectedMask']),
     ...mapState(useMainStore, ['isAdmin']),
     ...mapState(
         useShowMeasurementSetStore,
@@ -134,7 +135,9 @@ export default {
     nullIntervention() {
       return new Intervention(
         this.measurements,
-        []
+        [
+          this.selectedMask
+        ]
       )
     }
   },
