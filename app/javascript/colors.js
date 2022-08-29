@@ -318,18 +318,18 @@ export const riskColorInterpolationScheme = [
     'lowerBound': -0.000001,
     'upperBound': 0.0001,
     'lowerColor': {
-      name: 'green',
-      letterGrade: 'B',
-      r: 11,
-      g: 161,
-      b: 3
-    },
-    'upperColor': {
       name: 'dark green',
       letterGrade: 'A',
       r: 87,
       g: 195,
       b: 40
+    },
+    'upperColor': {
+      name: 'green',
+      letterGrade: 'B',
+      r: 11,
+      g: 161,
+      b: 3
     },
   },
 ]
