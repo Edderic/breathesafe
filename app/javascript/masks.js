@@ -9,6 +9,23 @@ import {
 
 export const MASKS = [
   {
+    'name': 'No mask',
+    'shortName': 'No mask',
+    'filtrationEfficiency': 0,
+    'initialCostUSD': 0,
+    'initialDurationYears': 0,
+    'recurringCostUSD': 0,
+    'recurringCostDuration': '',
+    'recurringCostDetails': '',
+    'recurringCostPerYearUSD': 0,
+    'rucurringDurationYears': 0,
+    'website': '',
+    'type': 'No mask',
+    'filtrationType': 'None',
+    'interventionType': 'mask',
+    'imgLink': ""
+  },
+  {
     'name': 'Elastomeric Mask (Flo Mask Pro w/ Pro Filter)',
     'shortName': 'Flo Mask Pro',
     'filtrationEfficiency': 0.99,
