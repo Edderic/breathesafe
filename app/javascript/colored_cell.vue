@@ -14,23 +14,30 @@
   export default {
     computed: {
       display() {
-        if (this.text == "" || !!this.text) {
+        if (this.exception && this.exception.value == this.value) {
+          return this.exception.text
+        } else if (this.text == "" || !!this.text) {
           return this.text
         } else {
           return this.value
         }
       },
       cellColor() {
+        if (this.exception && this.exception.value == this.value) {
+          const color = this.exception.color
+          return `rgb(${color.r}, ${color.g}, ${color.b})`
+        }
         return getColor(this.colorScheme, this.value)
       },
     },
     methods: {
     },
-    props: [
-      'value',
-      'text',
-      'colorScheme'
-    ]
+    props: {
+      'value': Number,
+      'text': String,
+      'colorScheme': Object,
+      'exception': Object
+    }
   }
 </script>
 
