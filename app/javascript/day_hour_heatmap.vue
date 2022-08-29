@@ -9,9 +9,8 @@
       <td v-for='hour in hours'>
         <ColoredCell
           :key='day + "-" + hour'
-          :value="val(day, hour)"
+          :value="val(day, hour) / 100"
           :colorScheme="colorInterpolationScheme"
-          :maxVal=100
         />
       </td>
     </tr>
