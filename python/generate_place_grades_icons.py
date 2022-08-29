@@ -43,6 +43,13 @@ colorPaletteFall = [
     'g': 161,
     'b': 3,
     'letterGrade': 'A'
+  },
+  {
+    'name': 'grey',
+    'r': 200,
+    'g': 200,
+    'b': 200,
+    'letterGrade': 'NA'
   }
 ]
 
@@ -151,8 +158,8 @@ def generate_svg(color, iconString):
     return f'''
     <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" width="30px" height="30px">
       <circle cx="40" cy="40" r="40" fill="{color}"/>
-      <text x="50%" y="30%" text-anchor="middle" fill="#EEE" dy=".4em">
-        <tspan x="50%" dy="0.65em" style="&#10;    font-size: xxx-large;&#10;">
+      <text x="50%" y="30%" text-anchor="middle" fill="#EEE" dy=".4em" style="text-shadow: 1px 1px 2px black;">
+        <tspan x="48%" dy="0.65em" style="&#10; font-size: xxx-large;&#10;" >
             {iconString}
         </tspan>
       </text>
