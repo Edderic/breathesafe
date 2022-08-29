@@ -113,6 +113,12 @@
                       />
                     </div>
                     <br>
+                    <div class='centered'>
+                      <AchToDuration
+                        :intervention='nullIntervention(m)'
+                      />
+                    </div>
+                    <br>
                     <br>
                     <br>
                     <br>
