@@ -168,6 +168,7 @@ import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import Events from './events.vue';
 import RiskTable from './risk_table.vue';
 import TotalACHTable from './total_ach_table.vue';
+import AchToDuration from './ach_to_duration.vue';
 import { binValue, getColor, riskColorInterpolationScheme } from './colors';
 import { getPlaceType } from './icons';
 import { useEventStores } from './stores/event_stores';
@@ -183,7 +184,8 @@ export default {
     Events,
     HorizontalStackedBar,
     RiskTable,
-    TotalACHTable
+    TotalACHTable,
+    AchToDuration
   },
   computed: {
     ...mapStores(useMainStore),
