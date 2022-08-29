@@ -104,11 +104,11 @@
                         :roomUsableVolumeCubicMeters='m.roomUsableVolumeCubicMeters'
                       />
                     </div>
-                    <div class='centered'>
-                      <AchToDuration
-                        :intervention='nullIntervention(m)'
-                      />
-                    </div>
+                    <AchToDuration
+                      :intervention='nullIntervention(m)'
+                      :containerCSS='{ "line-height": "1em" }'
+                    />
+                    <br>
                     <br>
                     <div class='centered col'>
                       <CleanAirDeliveryRateTable

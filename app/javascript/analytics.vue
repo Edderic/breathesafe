@@ -28,6 +28,9 @@
       <router-link :to="`/analytics/${this.$route.params.id}#masking`" class='link-h2'>
         Masking
       </router-link>
+      <router-link :to="`/analytics/${this.$route.params.id}#total-ach`" class='link-h2'>
+        Total ACH
+      </router-link>
       <router-link :to="`/analytics/${this.$route.params.id}#clean-air-delivery-rate`" class='link-h2'>
         Clean Air Delivery Rate (CADR)
       </router-link>
@@ -333,11 +336,10 @@
             /></span>, so susceptibles are assumed to be wearing these (unless specified otherwise in the Interventions section).
            </p>
 
-          <br id='clean-air-delivery-rate'>
+          <br id='masking'>
           <br>
           <br>
-          <h4>Clean Air Delivery Rate</h4>
-
+          <h4>Masking</h4>
           <p>
             Air Changes per Hour (ACH) tells us how much clean air is generated
             relative to the volume of the room. If a device outputs 5 ACH, that means it
@@ -345,20 +347,11 @@
             ACH for a room can be computed by summing up the ACH of different types (e.g.
             ventilation, filtration, upper-room germicidal UV).
           </p>
-        </div>
 
-
-        <div class='container'>
-          <div class='centered'>
-            <CleanAirDeliveryRateTable
-              :measurementUnits='measurementUnits'
-              :systemOfMeasurement='systemOfMeasurement'
-              :intervention='nullIntervention'
-              :cellCSS='cellCSS'
-            />
-          </div>
-        </div>
-
+        <br id='total-ach'>
+        <br>
+        <br>
+        <h4>Total ACH</h4>
         <div class='centered'>
           <TotalACHTable
             :measurementUnits='measurementUnits'
@@ -372,7 +365,29 @@
             />
         </div>
 
+        <div class='centered'>
+        <AchToDuration
+          :intervention='nullIntervention'
+        />
+        </div>
+
+
+        <br id='clean-air-delivery-rate'>
+        <br>
+        <br>
+        <h4>Clean Air Delivery Rate</h4>
+
         <div class='container'>
+          <div class='centered'>
+            <CleanAirDeliveryRateTable
+              :measurementUnits='measurementUnits'
+              :systemOfMeasurement='systemOfMeasurement'
+              :intervention='nullIntervention'
+              :cellCSS='cellCSS'
+            />
+          </div>
+        </div>
+
           <p>
           A combination of larger rooms along with high ACH can reduce the risk
           of contracting COVID-19 and other airborne viruses. The product of the two
@@ -1576,13 +1591,14 @@ import {
   infectedPeopleColorBounds,
   convertColorListToCutpoints,
   generateEvenSpacedBounds } from './colors.js';
+import AchToDuration from './ach_to_duration.vue'
 import {
   findRiskiestMask,
   findRiskiestPotentialInfector,
   riskOfEncounteringInfectious,
   riskIndividualIsNotInfGivenNegRapidTest,
   reducedRisk } from './risk.js';
- import { convertVolume, computeAmountOfPortableAirCleanersThatCanFit } from './measurement_units.js';
+import { convertVolume, computeAmountOfPortableAirCleanersThatCanFit } from './measurement_units.js';
 import { useAnalyticsStore } from './stores/analytics_store'
 import { MASKS, MaskingBarChart } from './masks.js';
 import { useEventStore } from './stores/event_store';
@@ -1613,6 +1629,7 @@ import {
 export default {
   name: 'Analytics',
   components: {
+    AchToDuration,
     BarGraph,
     ColoredCell,
     CleanAirDeliveryRateTable,

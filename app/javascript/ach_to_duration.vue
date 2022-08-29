@@ -1,6 +1,6 @@
 <template>
 
-  <div class='container'>
+  <div :style='containerCSSMerged'>
     Imagine an infectious person exhaling 1 breath. With
       <ColoredCell
         :colorScheme="colorInterpolationSchemeTotalAch"
@@ -53,6 +53,13 @@ export default {
       // return Object.assign(this.cellCSS, default)
       return Object.assign(def, this.cellCSS)
     },
+    containerCSSMerged() {
+      let css = {
+        'line-height': '2em',
+      }
+      Object.assign(css, this.containerCSS)
+      return css
+    },
     ach() {
       return this.intervention.computeACH()
     },
@@ -72,7 +79,12 @@ export default {
     }
   },
   props: {
-    cellCSS: Object,
+    cellCSS: {
+      default: {}
+    },
+    containerCSS: {
+      default: {},
+    },
     intervention: Object,
   }
 }
@@ -96,8 +108,7 @@ export default {
     padding-right: 0.5em;
   }
 
-  container {
-    width: 80%;
+  .container {
 
   }
 </style>
