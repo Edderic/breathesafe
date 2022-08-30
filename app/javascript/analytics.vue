@@ -60,6 +60,8 @@
         <br>
         <br>
         <h3 class='subsection'>Analysis & Recommendations for {{this.roomName}}</h3>
+        <h4 class='subsection'>Measurements taken by {{this.event.firstName}} {{this.event.lastName}}</h4>
+        <h4 class='subsection'>on {{datetimeInWords}}</h4>
         <div class='centered col'>
           <div class='container'>
             <div class='centered'>
@@ -1493,6 +1495,7 @@ import RiskTable from './risk_table.vue';
 import TotalACHTable from './total_ach_table.vue';
 import { airCleaners } from './air_cleaners.js';
 import BarGraph from './bar_graph.vue';
+import { datetimeEnglish } from './date.js'
 import {
   AEROSOL_GENERATION_BOUNDS,
   colorSchemeFall,
@@ -1562,7 +1565,8 @@ export default {
         [
           'interventions',
           'nullIntervention',
-          'selectedIntervention'
+          'selectedIntervention',
+          'event'
         ]
     ),
     ...mapWritableState(
@@ -1639,6 +1643,9 @@ export default {
         'padding-top': '1em',
         'padding-bottom': '1em',
       }
+    },
+    datetimeInWords() {
+      return datetimeEnglish(this.startDatetime)
     },
     durationWithIntervention() {
       return 40

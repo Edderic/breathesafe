@@ -127,11 +127,6 @@ export default {
     link() {
       return `/analytics/${this.measurements.id}`
     },
-    startDatetimeParsed() {
-      let dt = new Date(this.measurements.startDatetime)
-      let options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
-      return `${dt.toLocaleDateString(undefined, options)} ${dt.toLocaleTimeString()}`
-    },
     nullIntervention() {
       return new Intervention(
         this.measurements,
