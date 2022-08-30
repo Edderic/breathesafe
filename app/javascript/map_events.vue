@@ -81,12 +81,19 @@
                     <br>
                     <br>
                     <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
 
                     <RiskTable
                       :id='`risk-${m.id}`'
                       :intervention="createIntervention(m)"
                       :maximumOccupancy="m.maximumOccupancy"
                     />
+                    <br>
+                    <br>
                     <br>
                     <br>
                     <br>
@@ -110,6 +117,9 @@
                     />
                     <br>
                     <br>
+                    <br>
+                    <br>
+                    <br>
                     <div class='centered col'>
                       <CleanAirDeliveryRateTable
                         :measurementUnits='measurementUnits'
@@ -130,6 +140,9 @@
                     <br>
                     <br>
                     <br>
+                    <br>
+                    <br>
+                    <br>
                     <div :id='`masking-${m.id}`' class='centered'>
                       <HorizontalStackedBar
                         :values="maskingValues(m)"
@@ -137,6 +150,10 @@
                         verticalPadding='0'
                       />
                     </div>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
                     <br>
                     <br>
                     <br>
@@ -197,6 +214,7 @@ export default {
     ...mapStores(useMainStore),
     ...mapState(useProfileStore, ["measurementUnits", 'systemOfMeasurement']),
     ...mapState(useMainStore, ["focusTab", "focusSubTab", "signedIn", "markers"]),
+    ...mapState(useEventStores, ["selectedMask"]),
     ...mapWritableState(useMainStore, ['center', 'zoom', 'openedMarkerID']),
     ...mapWritableState(
         useEventStores,
@@ -233,7 +251,7 @@ export default {
     ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useEventStores, ['load']),
     createIntervention(m) {
-      return new Intervention(m, [])
+      return new Intervention(m, [this.selectedMask])
     },
     isClicked(value) {
       return this.$route.query['iconFocus'] == value
