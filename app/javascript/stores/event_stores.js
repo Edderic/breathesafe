@@ -15,6 +15,7 @@ export const useEventStores = defineStore('events', {
     displayables: [],
     masks: [],
     selectedMask: new Mask(MASKS[0], 1),
+    numWays: 1,
   }),
   getters: {
   },
@@ -49,7 +50,8 @@ export const useEventStores = defineStore('events', {
       // Load masks
       let masks = []
       for (let mask of MASKS) {
-        masks.push(new Mask(mask, 1))
+        masks.push(new Mask(mask, 1, 1))
+        masks.push(new Mask(mask, 1, 2))
       }
 
       this.masks = masks
@@ -67,7 +69,20 @@ export const useEventStores = defineStore('events', {
       return event
     },
 
-    computeRiskAll(eventDisplayRiskTime, selectedMask) {
+    computeRiskAll(eventDisplayRiskTime, selectedMask, numWays) {
+      /*
+       * Parameters:
+       *   eventDisplayRiskTime: String
+       *     e.g. "At max occupancy", "At 75% occupancy", ... "At this hour"
+       *
+       *   selectedMask: Mask object
+       *
+       *   numWays: Number
+       *     Whether or not the mask is applied one way or both ways.
+       *     1 is for 1-way masking
+       *     2 is for 2-way masking.
+       *       i.e. Assumes everyone will be wearing the selectedMask
+       */
       const prevalenceStore = usePrevalenceStore()
       //prevalenceStore.maskType  const susceptibleMaskType = prevalenceStore.maskType
       // TODO: make this a query parameter using router
@@ -94,7 +109,8 @@ export const useEventStores = defineStore('events', {
           flowRate,
           event.roomUsableVolumeCubicMeters,
           susceptibleMaskType,
-          riskTime
+          riskTime,
+          numWays
         )
       }
     },

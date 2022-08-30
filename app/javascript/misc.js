@@ -305,7 +305,8 @@ export function computeRiskWithVariableOccupancy(
   flowRate,
   roomUsableVolumeCubicMeters,
   susceptibleMaskType,
-  eventDisplayRiskTime
+  eventDisplayRiskTime,
+  numWays
 ) {
   // const probaRandomSampleOfOneIsInfectious = this.numPositivesLastSevenDays
     // * this.uncountedFactor / this.numPopulation
@@ -322,7 +323,14 @@ export function computeRiskWithVariableOccupancy(
   // are two activity groups, one with 10 people who are doing X and 5
   // people doing Y.
   // Activity Factor for Y should be sampled about 5 out of 15 times?
-  const activityGroups = event.activityGroups
+  let activityGroups = JSON.parse(JSON.stringify(event.activityGroups))
+  if (numWays == 2) {
+    // two-way masking.
+    for (let activityGroup of activityGroups) {
+      activityGroup['maskType'] = susceptibleMaskType
+    }
+  }
+
   const maximumOccupancy = event.maximumOccupancy
 
   let date = new Date()

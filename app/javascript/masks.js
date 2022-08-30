@@ -25,23 +25,6 @@ export const MASKS = [
     'interventionType': 'mask',
     'imgLink': ""
   },
-  {
-    'name': 'Elastomeric Mask (Flo Mask Pro w/ Pro Filter)',
-    'shortName': 'Flo Mask Pro',
-    'filtrationEfficiency': 0.99,
-    'initialCostUSD': 90,
-    'initialDurationYears': 0.144, // 5 Pro filters = 5 weeks, 5 Everyday = 2.5 weeks = 7.5 weeks. 7.5 weeks / 52 weeks = 0.144 years,
-    'recurringCostUSD': 60,
-    'recurringCostDuration': 'year',
-    'recurringCostDetails': 'for Pro filters',
-    'recurringCostPerYearUSD': 60,
-    'rucurringDurationYears': 1,
-    'website': 'https://flomask.com/collections/flo-mask-for-adults',
-    'type': 'tight-fitting, elastomeric',
-    'filtrationType': 'Elastomeric N99',
-    'interventionType': 'mask',
-    'imgLink': "https://cdn.shopify.com/s/files/1/0405/0154/3079/products/RB0A6673_28402bc4-206b-4a64-92f7-e591c70a1e64_900x.jpg?v=1647932779"
-  },
 
   {
     'name': 'Surgical Mask',
@@ -78,6 +61,23 @@ export const MASKS = [
     'imgLink': 'https://m.media-amazon.com/images/I/51IBeI2RK+L._AC_UL640_FMwebp_QL65_.jpg'
   },
   {
+    'name': 'Elastomeric Mask (Flo Mask Pro w/ Pro Filter)',
+    'shortName': 'Flo Mask Pro',
+    'filtrationEfficiency': 0.99,
+    'initialCostUSD': 90,
+    'initialDurationYears': 0.144, // 5 Pro filters = 5 weeks, 5 Everyday = 2.5 weeks = 7.5 weeks. 7.5 weeks / 52 weeks = 0.144 years,
+    'recurringCostUSD': 60,
+    'recurringCostDuration': 'year',
+    'recurringCostDetails': 'for Pro filters',
+    'recurringCostPerYearUSD': 60,
+    'rucurringDurationYears': 1,
+    'website': 'https://flomask.com/collections/flo-mask-for-adults',
+    'type': 'tight-fitting, elastomeric',
+    'filtrationType': 'Elastomeric N99',
+    'interventionType': 'mask',
+    'imgLink': "https://cdn.shopify.com/s/files/1/0405/0154/3079/products/RB0A6673_28402bc4-206b-4a64-92f7-e591c70a1e64_900x.jpg?v=1647932779"
+  },
+  {
     'name': 'Elastomeric Mask (GVS Elipse P100)',
     'shortName': 'GVS Elipse P100',
     'filtrationEfficiency': 0.9997,
@@ -97,7 +97,13 @@ export const MASKS = [
 ]
 
 export class Mask {
-  constructor(mask, numDevices) {
+  constructor(mask, numDevices, numWays) {
+    if (!numWays) {
+      this.numWays = 1
+    } else {
+      this.numWays = numWays
+    }
+
     this.filtrationType = mask.filtrationType
     this.numDev = numDevices
     this.type = 'mask'

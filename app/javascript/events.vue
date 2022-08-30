@@ -10,8 +10,8 @@
         <option>At max occupancy</option>
       </select>
 
-      <select class='margined' :value='selectedMask.maskName' @change='setMaskType'>
-        <option v-for='m in masks'>{{ m.maskName }}</option>
+      <select class='margined' :value='`${numWays}-way ${selectedMask.maskName}`' @change='setMaskType'>
+        <option v-for='m in masks'>{{ m.numWays }}-way {{ m.maskName }}</option>
       </select>
       <router-link class='margined button' to="/events/new" v-if='signedIn'>Create</router-link>
     </div>
@@ -90,6 +90,7 @@ export default {
           'events',
           'displayables',
           'masks',
+          'numWays',
           'selectedMask'
         ]
     ),
@@ -127,6 +128,7 @@ export default {
 
     if (this.$route.query['mask']) {
       this.selectedMask = this.findMask(this.$route.query['mask'])
+      this.numWays = this.$route.query['numWays']
     }
 
     this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
@@ -136,13 +138,15 @@ export default {
       () => this.$route.query,
       (toQuery, previousQuery) => {
         if (toQuery['eventDisplayRiskTime'] != previousQuery['eventDisplayRiskTime']) {
-          this.computeRiskAll(toQuery['eventDisplayRiskTime'], this.selectedMask)
           this.eventDisplayRiskTime = toQuery['eventDisplayRiskTime']
         }
-        else if (toQuery['mask'] != previousQuery['mask']) {
+        if (toQuery['mask'] != previousQuery['mask']) {
           this.selectedMask = this.findMask(toQuery['mask'])
-          this.computeRiskAll(toQuery['eventDisplayRiskTime'], this.selectedMask)
         }
+        if (toQuery['numWays'] != previousQuery['numWays']) {
+          this.numWays = toQuery['numWays']
+        }
+        this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask, this.numWays)
         this.sortByParams()
         // react to route changes...
       }
@@ -202,11 +206,16 @@ export default {
     },
 
     setMaskType(event) {
-      let name = event.target.value
+      let val = event.target.value
       let query = JSON.parse(JSON.stringify(this.$route.query))
+      const re = /\d{1}(?=-way)/;
+      const nameRegex = /(?<=-way ).+/
+      let numWays = val.match(re)[0]
+      let name = val.match(nameRegex)[0]
 
       Object.assign(query, {
-        mask: name
+        mask: name,
+        numWays: numWays
       })
 
       this.$router.push({
