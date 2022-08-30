@@ -3,9 +3,9 @@
     <tr>
       <th></th>
       <th>1 hour</th>
+      <th>4 hours</th>
       <th>8 hours</th>
       <th>40 hours</th>
-      <th>80 hours</th>
     </tr>
 
     <tr>
@@ -16,6 +16,15 @@
           :colorScheme="riskColorScheme"
           :maxVal=1
           :value='intervention.computeRiskRounded()'
+          :style="styleProps"
+      />
+      </td>
+      <td>
+      <ColoredCell
+          v-if="intervention"
+          :colorScheme="riskColorScheme"
+          :maxVal=1
+          :value='roundOut(1 - (1-intervention.computeRiskRounded())**4, 6)'
           :style="styleProps"
       />
       </td>
@@ -37,15 +46,6 @@
           :style="styleProps"
       />
       </td>
-      <td>
-      <ColoredCell
-          v-if="intervention"
-          :colorScheme="riskColorScheme"
-          :maxVal=1
-          :value='roundOut(1 - (1-intervention.computeRiskRounded())**80, 6)'
-          :style="styleProps"
-      />
-      </td>
     </tr>
     <tr>
       <th>Average # of Susceptibles Infected under Max Occupancy</th>
@@ -64,6 +64,15 @@
           v-if="intervention"
           :colorScheme="averageInfectedPeopleInterpolationScheme"
           :maxVal=1
+          :value='roundOut(this.maximumOccupancy* (1 - (1-intervention.computeRiskRounded())**4), 1)'
+          :style="styleProps"
+      />
+      </td>
+      <td>
+      <ColoredCell
+          v-if="intervention"
+          :colorScheme="averageInfectedPeopleInterpolationScheme"
+          :maxVal=1
           :value='roundOut(this.maximumOccupancy* (1 - (1-intervention.computeRiskRounded())**8), 1)'
           :style="styleProps"
       />
@@ -74,15 +83,6 @@
           :colorScheme="averageInfectedPeopleInterpolationScheme"
           :maxVal=1
           :value='roundOut(this.maximumOccupancy* (1 - (1-intervention.computeRiskRounded())**40), 1)'
-          :style="styleProps"
-      />
-      </td>
-      <td>
-      <ColoredCell
-          v-if="intervention"
-          :colorScheme="averageInfectedPeopleInterpolationScheme"
-          :maxVal=1
-          :value='roundOut(this.maximumOccupancy* (1 - (1-intervention.computeRiskRounded())**80), 1)'
           :style="styleProps"
       />
       </td>
