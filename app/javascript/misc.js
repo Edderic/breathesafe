@@ -364,9 +364,7 @@ export function computeRiskWithVariableOccupancy(
     duration
   )
 
-  let digitsFactor = 1000000
-
-  return Math.round(r * digitsFactor) / digitsFactor
+  return r
 }
 
 
