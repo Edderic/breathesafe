@@ -60,6 +60,7 @@
         <br>
         <br>
         <h3 class='subsection'>Analysis & Recommendations for {{this.roomName}}</h3>
+        <h4 class='subsection'>{{this.event.placeData.formattedAddress}}</h4>
         <h4 class='subsection'>Measurements taken by {{this.event.firstName}} {{this.event.lastName}}</h4>
         <h4 class='subsection'>on {{datetimeInWords}}</h4>
         <div class='centered col'>
