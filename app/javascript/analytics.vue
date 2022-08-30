@@ -28,6 +28,9 @@
       <router-link :to="`/analytics/${this.$route.params.id}#masking`" class='link-h2'>
         Masking
       </router-link>
+      <router-link :to="`/analytics/${this.$route.params.id}#air-changes-per-hour`" class='link-h2'>
+        Air Changes per Hour (ACH)
+      </router-link>
       <router-link :to="`/analytics/${this.$route.params.id}#total-ach`" class='link-h2'>
         Total ACH
       </router-link>
@@ -336,10 +339,10 @@
             /></span>, so susceptibles are assumed to be wearing these (unless specified otherwise in the Interventions section).
            </p>
 
-          <br id='masking'>
+          <br id='air-changes-per-hour'>
           <br>
           <br>
-          <h4>Masking</h4>
+          <h4>Air Changes per Hour (ACH)</h4>
           <p>
             Air Changes per Hour (ACH) tells us how much clean air is generated
             relative to the volume of the room. If a device outputs 5 ACH, that means it
