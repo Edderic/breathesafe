@@ -15,7 +15,6 @@ export const useEventStores = defineStore('events', {
     displayables: [],
     masks: [],
     selectedMask: new Mask(MASKS[0], 1),
-    numWays: 1,
   }),
   getters: {
   },
@@ -69,7 +68,7 @@ export const useEventStores = defineStore('events', {
       return event
     },
 
-    computeRiskAll(eventDisplayRiskTime, selectedMask, numWays) {
+    computeRiskAll(eventDisplayRiskTime, selectedMask) {
       /*
        * Parameters:
        *   eventDisplayRiskTime: String
@@ -77,12 +76,15 @@ export const useEventStores = defineStore('events', {
        *
        *   selectedMask: Mask object
        *
-       *   numWays: Number
-       *     Whether or not the mask is applied one way or both ways.
-       *     1 is for 1-way masking
-       *     2 is for 2-way masking.
-       *       i.e. Assumes everyone will be wearing the selectedMask
        */
+
+      // numWays: Number
+      //   Whether or not the mask is applied one way or both ways.
+      //   1 is for 1-way masking
+      //   2 is for 2-way masking.
+      //     i.e. Assumes everyone will be wearing the selectedMask
+      const numWays = selectedMask.numWays
+
       const prevalenceStore = usePrevalenceStore()
       //prevalenceStore.maskType  const susceptibleMaskType = prevalenceStore.maskType
       // TODO: make this a query parameter using router

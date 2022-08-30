@@ -179,7 +179,9 @@ export class Intervention {
     for (let intervention of this.interventions) {
       if (intervention.isMask()) {
         // susceptible and infector wear the same mask
-        riskiestActivityGroup['maskType'] = intervention.maskType
+        if (intervention.numWays == 2) {
+          riskiestActivityGroup['maskType'] = intervention.maskType
+        }
         susceptibleMaskPenentrationFactor = maskToPenetrationFactor[intervention.maskType]
       } else if (intervention.isFiltrationAirCleaner()) {
         portableAch += intervention.computeACH()

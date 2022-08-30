@@ -10,7 +10,7 @@
         <option>At max occupancy</option>
       </select>
 
-      <select class='margined' :value='`${numWays}-way ${selectedMask.maskName}`' @change='setMaskType'>
+      <select class='margined' :value='`${selectedMask.numWays}-way ${selectedMask.maskName}`' @change='setMaskType'>
         <option v-for='m in masks'>{{ m.numWays }}-way {{ m.maskName }}</option>
       </select>
       <router-link class='margined button' to="/events/new" v-if='signedIn'>Create</router-link>
@@ -127,8 +127,10 @@ export default {
     await this.load();
 
     if (this.$route.query['mask']) {
-      this.selectedMask = this.findMask(this.$route.query['mask'])
-      this.numWays = this.$route.query['numWays']
+      this.selectedMask = this.findMask(
+          this.$route.query['mask'],
+          this.$route.query['numWays']
+      )
     }
 
     this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
@@ -140,13 +142,13 @@ export default {
         if (toQuery['eventDisplayRiskTime'] != previousQuery['eventDisplayRiskTime']) {
           this.eventDisplayRiskTime = toQuery['eventDisplayRiskTime']
         }
-        if (toQuery['mask'] != previousQuery['mask']) {
-          this.selectedMask = this.findMask(toQuery['mask'])
+        if (toQuery['mask'] != previousQuery['mask'] || toQuery['numWays'] != previousQuery['numWays']) {
+          this.selectedMask = this.findMask(
+            toQuery['mask'],
+            toQuery['numWays'],
+          )
         }
-        if (toQuery['numWays'] != previousQuery['numWays']) {
-          this.numWays = toQuery['numWays']
-        }
-        this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask, this.numWays)
+        this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
         this.sortByParams()
         // react to route changes...
       }
@@ -201,8 +203,8 @@ export default {
       this.displayables = filterEvents(this.search, this.events)
     },
 
-    findMask(name) {
-      return this.masks.find((m) => m.maskName == name)
+    findMask(name, numWays) {
+      return this.masks.find((m) => m.maskName == name && m.numWays == numWays)
     },
 
     setMaskType(event) {
