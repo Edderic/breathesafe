@@ -1,32 +1,3 @@
-class RandomPerson {
-  /*
-   * Meant to be instantiated hourly to simulate random people coming into a
-   * store, for example
-   */
-  constructor(risk) {
-    this.risk = risk
-  }
-
-  isInfectious(dateIndex) {
-    return Math.random() < this.risk
-  }
-
-  isAbsent(dateIndex, day, hourIndex) {
-    return false
-  }
-
-  isNotPresent(dateIndex, day, hourIndex) {
-    return false
-  }
-
-  lostWages() {
-    return 0
-  }
-  updateAbsenceHoursCount(dateIndex, day, hourIndex) {
-    // do nothing
-  }
-}
-
 class Employee {
   /*
    * Parameters
@@ -134,39 +105,38 @@ class Employee {
     return this.absenceHoursCount * this.hourlyRate
   }
 
-  sampleInfection(people, dateIndex, day, hourIndex) {
+  sampleInfection(dateIndex, day, hourIndex, risk) {
+    /*
+     * If none of the employees are exposed
+     */
     // TODO: build in scenario where one can get sick?
-    if (!this.hasBeenInfected && !this.isInfectious(dateIndex)
-        &&!this.isNotPresent(dateIndex, day, hourIndex)) {
+    if (this.hasBeenInfected || this.isInfectious(dateIndex)
+        ||!this.isNotPresent(dateIndex, day, hourIndex))
+    {
+      return
+    }
 
-      for (let otherEmployee in people) {
-        if (otherEmployee.isInfectious(dateIndex)
-          && !otherEmployee.isNotPresent(dateIndex, day, hourIndex)
-        ) {
+    if (Math.random() < this.risk) {
+      // They'll be infectious 2 days from now until some date
+      const latencyDays = 2
+      const absenceStartDays = 4
 
-          if (Math.random() < this.risk) {
-            const latencyDays = 2
-            const absenceStartDays = 4
+      for (let i = latencyDays; i < this.maxInfectiousDays + latencyDays; i++) {
+        try {
+          this.infectionList[dateIndex + i] = 1
+        } catch {
+          return
+          // do nothing. Handle the index out of bounds error.
+        }
+      }
 
-            for (let i = latencyDays; i < this.maxInfectiousDays + latencyDays; i++) {
-              try {
-                this.infectionList[dateIndex + i] = 1
-              } catch {
-                return
-                // do nothing. Handle the index out of bounds error.
-              }
-            }
-
-            // Update absence list
-            for (let i = absenceStartDays; i < absenceStartDays + this.numDaysAbsent; i++) {
-              try {
-                this.absenceList[dateIndex + i] = 1
-              } catch {
-                return
-                // do nothing. Handle the index out of bounds error.
-              }
-            }
-          }
+      // They'll be absent 4 days from now until some date
+      for (let i = absenceStartDays; i < absenceStartDays + this.numDaysAbsent; i++) {
+        try {
+          this.absenceList[dateIndex + i] = 1
+        } catch {
+          return
+          // do nothing. Handle the index out of bounds error.
         }
       }
     }
@@ -228,21 +198,34 @@ export class CostComputer {
       for (let h = 0; i < 24; i++) {
         let availablePeople = []
 
+        // TODO: given the number of people here, we can compute the
+        // probability that someone is infectious at this hour
         // build the customer list
-        const numberOfCustomers = getNumberOfCustomers(day, h)
-        let customers = buildRandomCustomers(numberOfCustomers)
+        const numCustomers = getNumberOfCustomers(day, h)
+        // Why not just compute P(transmission | duration=1h, numCustomers)
+
+        // If we have the number of people we can compute
+
+        let customerRisk = getProbabilityThatSomeoneIsInfectious(numCustomers)
+
+        let exposureRisk = customerRisk
 
         for (let p = 0; p < this.employees.length; p++) {
+          if (p.isInfectious() && !p.isNotPresent()) {
+            exposureRisk = 1
+          }
+        }
 
-          // combine customers and employees
-          let otherPeople = this.getPeopleOtherThan(p).concat(customers)
-          person.sampleInfection(otherPeople, i, day, h)
-
-          person.updateAbsenceHoursCount(i, day, h)
+        for (let p in this.employees) {
+          p.sampleInfection(i, day, h, this.risk * exposureRisk)
+          p.updateAbsenceHoursCount(i, day, h)
         }
       }
-
     }
+  }
+
+  getProbabilityThatSomeoneIsInfectious(numberOfPeople) {
+    return 1 - (1 - this.prevalence)**numberOfPeople
   }
 
   getNumberOfCustomers(day, hour) {
@@ -261,16 +244,6 @@ export class CostComputer {
     }
 
     return Math.ceil(occupancy - workingEmployees.length)
-  }
-
-  buildRandomCustomers(numberOfCustomers) {
-    let customers = []
-
-    for (let j = 0; j < numberOfCustomers; j++) {
-      customers.push(new RandomPerson(this.hourlyRisk))
-    }
-
-    return customers
   }
 
   getPeopleOtherThan(otherEmployee) {
