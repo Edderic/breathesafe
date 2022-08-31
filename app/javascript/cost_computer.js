@@ -116,7 +116,7 @@ class Employee {
       return
     }
 
-    if (Math.random() < this.risk) {
+    if (Math.random() < risk) {
       // They'll be infectious 2 days from now until some date
       const latencyDays = 2
       const absenceStartDays = 4
