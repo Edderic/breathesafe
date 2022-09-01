@@ -10,6 +10,9 @@
       <router-link :to="`/analytics/${this.$route.params.id}#introduction`" class='link-h2'>
         Introduction
       </router-link>
+      <router-link :to="`/analytics/${this.$route.params.id}#how-to-improve-indoor-air-quality`" class='link-h2'>
+        How to Improve Indoor Air Quality
+      </router-link>
       <router-link :to="`/analytics/${this.$route.params.id}#modeling`" class='link-h2'>
         Modeling
       </router-link>
@@ -177,6 +180,14 @@
               we inhabit <a href="https://www.science.org/doi/10.1126/science.abd9149">be
               more resilient not just to COVID-19, but also to other respiratory viruses</a>.
             </p>
+
+            <br>
+            <br>
+
+            <div id='how-to-improve-indoor-air-quality' class='centered'>
+              <iframe width="560" height="315" src="https://www.youtube.com/embed/djnie-h6Bn8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+
 
             <br id='modeling'>
             <br>
