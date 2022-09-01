@@ -31,6 +31,7 @@ import { createPinia } from 'pinia';
 import VueGoogleMaps from '@fawmi/vue-google-maps';
 import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router';
 import Vue3Geolocation from 'vue3-geolocation';
+import VueWorker from 'vue-worker';
 
 import Analytics from '../analytics.vue'
 import App from '../app.vue';
@@ -92,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
       },
   // }).use(pinia).use(Vue3Geolocation).mount('#app')
   })
-    .use(pinia).use(Vue3Geolocation).use(router).mount('#app')
+    .use(VueWorker).use(pinia).use(Vue3Geolocation).use(router).mount('#app')
 
 
   const mainStore = useMainStore();
