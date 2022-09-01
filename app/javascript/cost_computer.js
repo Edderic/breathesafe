@@ -1,7 +1,19 @@
-class Employee {
+import { DAYS, indexToHour, hourToIndex } from './misc.js'
+import { Intervention } from './interventions.js'
+import { Mask, MASKS } from './masks.js'
+
+export class Employee {
   /*
    * Parameters
-   *   interventions:
+   *   mask:
+   *     If mask, then at the compute risk stage, check to see if they have a
+   *     When assessing the risk of getting infected for a particular employee,
+   *       - From random people (e.g. customers),
+   *         - check to see what mask they have
+   *       - Check to see what mask this employee is wearing
+   *
+   *     Could also use the computeRiskWithVariableOccupancy?
+   *
    *     has methods
    *       - computeRisk(duration)
    *
@@ -26,7 +38,7 @@ class Employee {
    *
    *   hourlyRate: Number
    */
-  constructor(interventions, numDaysInEpoch, schedule, hourlyRate) {
+  constructor(mask, numDaysInEpoch, schedule, hourlyRate) {
     this.infectedCountDays = 0
 
     this.infectionList = []
@@ -40,8 +52,7 @@ class Employee {
     this.numDaysInEpoch = numDaysInEpoch
 
 
-    this.interventions = interventions
-    this.workHoursPerDay = workHoursPerDay
+    this.mask = mask
     this.schedule = schedule
 
     this.absenceHoursCount = 0
@@ -52,8 +63,6 @@ class Employee {
     this.maxInfectiousDays = 8
     this.numDaysAbsent = 5
     this.hourlyRate = hourlyRate
-
-    this.risk = this.interventions.computeRisk(1)
 
   }
 
@@ -85,12 +94,8 @@ class Employee {
      *  infectious        X  X  I  I  I  I  I  I  I  X  X  X  X  X
      *  absent            N  N  N  N  A  A  A  A  A  N  N  N  N  N
      */
-    if (
-      !this.isWorkingHours(day, hourIndex)
+    return !this.isWorkingHours(day, hourIndex)
       || this.isAbsent(dateIndex, day, hourIndex)
-    ) {
-      return true
-    }
   }
 
   isWorkingHours(day, hourIndex) {
@@ -102,19 +107,45 @@ class Employee {
      * Meant to be called after one simulation.
      */
 
-    return this.absenceHoursCount * this.hourlyRate
+    let hours = 0
+
+    for (let i = 0; i < this.absenceList.length; i++) {
+      if (this.absenceList[i] == 0) {
+        continue
+      }
+
+      let day = DAYS[i % 7]
+
+      for (let hour in this.schedule[day]) {
+        hours += this.schedule[day][hour]
+      }
+    }
+
+    return hours * this.hourlyRate
   }
 
-  sampleInfection(dateIndex, day, hourIndex, risk) {
+  sampleInfection(
+    dateIndex,
+    day,
+    hourIndex,
+    infectorPresence,
+    infectorMask,
+    environmentalInterventions,
+    event
+  ) {
     /*
      * If none of the employees are exposed
      */
     // TODO: build in scenario where one can get sick?
     if (this.hasBeenInfected || this.isInfectious(dateIndex)
-        ||!this.isNotPresent(dateIndex, day, hourIndex))
+        ||this.isNotPresent(dateIndex, day, hourIndex))
     {
       return
     }
+
+    let risk = new Intervention(
+      event, environmentalInterventions, this.mask, infectorMask
+    ).computeRisk(1)
 
     if (Math.random() < risk) {
       // They'll be infectious 2 days from now until some date
@@ -125,7 +156,6 @@ class Employee {
         try {
           this.infectionList[dateIndex + i] = 1
         } catch {
-          return
           // do nothing. Handle the index out of bounds error.
         }
       }
@@ -135,21 +165,14 @@ class Employee {
         try {
           this.absenceList[dateIndex + i] = 1
         } catch {
-          return
           // do nothing. Handle the index out of bounds error.
         }
       }
+
+      this.hasBeenInfected = 1
     }
   }
 
-  updateAbsenceHoursCount(dateIndex, day, hourIndex) {
-    /*
-     * If absent, update absence hours count by 1
-     */
-    if (this.isAbsent(dateIndex, day, hourIndex)) {
-      this.absenceHoursCount += 1
-    }
-  }
 }
 
 export class CostComputer {
@@ -171,19 +194,28 @@ export class CostComputer {
    *   employees: Array[Object]
    *
    */
-  constructor(interventions, dayHourOccupancy, employees, prevalence, numDaysInEpoch, maxOccupancy) {
+  constructor(
+    event,
+    interventions,
+    dayHourOccupancy,
+    employees,
+    prevalence,
+    numDaysInEpoch,
+    customerMask
+  ) {
+    this.event = event
     this.employees = employees
-    this.maxOccupancy = maxOccupancy
+    this.maxOccupancy = event.maximumOccupancy
     this.interventions = interventions
     this.dayHourOccupancy = dayHourOccupancy
     this.prevalence = prevalence
+    this.customerMask = customerMask
     if (!numDaysInEpoch) {
       this.numDaysInEpoch = 120
     } else {
       this.numDaysInEpoch = numDaysInEpoch
     }
 
-    this.hourlyRisk = this.interventions.computeRisk(1)
   }
 
   compute() {
@@ -194,68 +226,101 @@ export class CostComputer {
     for (let i = 0; i < this.numDaysInEpoch; i++) {
       let day = this.getDay(i)
 
-      // loop through hours
-      for (let h = 0; i < 24; i++) {
-        let availablePeople = []
+      // TODO: Trigger infection event outside of work.
+      // Employees can also get infected outside of work.
 
+      // loop through hours
+      for (let h in hourToIndex) {
         // TODO: given the number of people here, we can compute the
         // probability that someone is infectious at this hour
         // build the customer list
-        const numCustomers = getNumberOfCustomers(day, h)
+        const numCustomers = this.getNumberOfCustomers(i, day, h)
         // Why not just compute P(transmission | duration=1h, numCustomers)
 
         // If we have the number of people we can compute
 
-        let customerRisk = getProbabilityThatSomeoneIsInfectious(numCustomers)
+        let probaCustomerIsInfectious = this.getProbabilityThatSomeoneIsInfectious(
+          numCustomers
+        )
 
-        let exposureRisk = customerRisk
+        for (let p of this.employees) {
+          // employees could get exposed to infectious customers
+          p.sampleInfection(
+            i,
+            day,
+            h,
+            probaCustomerIsInfectious,
+            this.customerMask,
+            this.interventions,
+            this.event
+          )
 
-        for (let p = 0; p < this.employees.length; p++) {
-          if (p.isInfectious() && !p.isNotPresent()) {
-            exposureRisk = 1
+          if (p.isInfectious(i) && !p.isNotPresent(i, day, h)) {
+
+            for (let j of this.employees) {
+              j.sampleInfection(
+                i,
+                day,
+                h,
+                1, // probability that other employee is infectious
+                p.mask,
+                this.interventions,
+                this.event
+              )
+
+            }
           }
-        }
-
-        for (let p in this.employees) {
-          p.sampleInfection(i, day, h, this.risk * exposureRisk)
-          p.updateAbsenceHoursCount(i, day, h)
         }
       }
     }
+  }
+
+  buildCustomers(numCustomers) {
+    let list = []
+    for (let i = 0; i < numCustomers; i++) {
+      list.push()
+    }
+  }
+
+  getLostWages() {
+    let summation = 0
+    for (let p of this.employees) {
+      summation += p.lostWages()
+    }
+
+    return summation
   }
 
   getProbabilityThatSomeoneIsInfectious(numberOfPeople) {
     return 1 - (1 - this.prevalence)**numberOfPeople
   }
 
-  getNumberOfCustomers(day, hour) {
+  getNumberOfCustomers(dateIndex, day, hour) {
     /*
      * Use the occupancy data.
      *
      */
-    let occupancy = this.dayHourOccupancy[day][hour] * maxOccupancy
+    let occ = 0
+    if (
+      day in this.dayHourOccupancy
+      && hour in this.dayHourOccupancy[day]
+      && 'occupancyPercent' in this.dayHourOccupancy[day][hour]
+    ) {
+
+     occ = parseFloat(this.dayHourOccupancy[day][hour]['occupancyPercent']) / 100
+    }
+
+    let occupancy = occ * this.maxOccupancy
 
     let workingEmployees = []
 
-    for (let e in this.employees) {
-      if (!e.isNotPresent()) {
+    for (let e of this.employees) {
+      if (!e.isNotPresent(dateIndex, day, hour)) {
         workingEmployees.push(e)
       }
     }
 
-    return Math.ceil(occupancy - workingEmployees.length)
-  }
-
-  getPeopleOtherThan(otherEmployee) {
-    let collection = []
-
-    for (let p in this.people) {
-      if (p != otherEmployee) {
-        collection.push(p)
-      }
-    }
-
-    return collection
+    return Math.max(Math.ceil(occupancy - workingEmployees.length), 0)
   }
 
   getDay(dateIndex) {

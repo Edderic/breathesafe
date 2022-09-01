@@ -6,7 +6,7 @@ const INCHES_PER_FOOT = 12;
 const CUBIC_FEET_PER_CUBIC_METER = 35.3147
 const CUBIC_METER_PER_CUBIC_FEET = 1 / CUBIC_FEET_PER_CUBIC_METER
 const FEET_PER_METER = 3.28084
-const DAYS = [
+export const DAYS = [
   'Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays',
   'Fridays', 'Saturdays'
 ]
@@ -1019,7 +1019,7 @@ export function generateUUID() {
     );
 }
 
-const indexToHour = [
+export const indexToHour = [
   '1 AM',
   '2 AM',
   '3 AM',

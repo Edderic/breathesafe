@@ -3,6 +3,7 @@ import {
   riskOfEncounteringInfectious,
   findRiskiestMask,
   riskIndividualIsNotInfGivenNegRapidTest } from './risk.js';
+import { MASKS, Mask } from './masks.js'
 import {
   computeCO2EmissionRate,
   computePortableACH,
@@ -82,8 +83,19 @@ function probability_getting_infected_at_least_once(args) {
 }
 
 export class Intervention {
-  constructor(event, interventions) {
-    this.interventions = interventions
+  constructor(event, environmentalInterventions, mask1, mask2) {
+    this.environmentalInterventions = environmentalInterventions
+    this.mask1 = mask1
+    this.mask2 = mask2
+
+    if (!this.mask1) {
+      this.mask1 = new Mask(MASKS[0], 1)
+    }
+
+    if (!this.mask2) {
+      this.mask2 = new Mask(MASKS[0], 1)
+    }
+
     this.event = event
     this.portableAch = event.portableAch
     this.uvAch = event.uvAch
@@ -107,7 +119,7 @@ export class Intervention {
   }
 
   applicable() {
-    for (let intervention of this.interventions) {
+    for (let intervention of this.environmentalInterventions) {
       if (!intervention.applicable() || intervention.numDevices() <= 0) {
         return false
       }
@@ -127,7 +139,7 @@ export class Intervention {
   computeACH() {
     let total = this.totalAch
 
-    for (let intervention of this.interventions) {
+    for (let intervention of this.environmentalInterventions) {
       total += intervention.computeACH()
     }
 
@@ -137,7 +149,7 @@ export class Intervention {
   computePortableAirCleanerACH() {
     let total = this.portableAch
 
-    for (let intervention of this.interventions) {
+    for (let intervention of this.environmentalInterventions) {
       total += intervention.computeFiltrationAirCleanerACH()
     }
 
@@ -148,7 +160,7 @@ export class Intervention {
     // TODO: add UV ACH
     let total = this.uvAch || 0
 
-    for (let intervention of this.interventions) {
+    for (let intervention of this.environmentalInterventions) {
       total += intervention.computeUVACH()
     }
 
@@ -174,16 +186,13 @@ export class Intervention {
     let portableAch = 0
     let riskiestActivityGroup = JSON.parse(JSON.stringify(this.riskiestActivityGroup))
     // When there are no interventions, default to the maskType of the riskiest potential infector
-    let susceptibleMaskPenentrationFactor = maskToPenetrationFactor[riskiestActivityGroup.maskType]
+    let susceptibleMaskPenentrationFactor = maskToPenetrationFactor[this.mask1.maskType]
+    // susceptible and infector wear the same mask
+    riskiestActivityGroup['maskType'] = this.mask2.maskType
 
-    for (let intervention of this.interventions) {
-      if (intervention.isMask()) {
-        // susceptible and infector wear the same mask
-        if (intervention.numWays == 2) {
-          riskiestActivityGroup['maskType'] = intervention.maskType
-        }
-        susceptibleMaskPenentrationFactor = maskToPenetrationFactor[intervention.maskType]
-      } else if (intervention.isFiltrationAirCleaner()) {
+    for (let intervention of this.environmentalInterventions) {
+
+      if (intervention.isFiltrationAirCleaner()) {
         portableAch += intervention.computeACH()
       } else if (intervention.isUpperUV()) {
         uvAch += intervention.computeACH()
@@ -252,7 +261,7 @@ export class Intervention {
   }
 
   computeSusceptibleMask() {
-    for (let intervention of this.interventions) {
+    for (let intervention of this.environmentalInterventions) {
       if (intervention.isMask()) {
         // susceptible and infector wear the same mask
         return {
@@ -285,7 +294,7 @@ export class Intervention {
     // When there are no interventions, default to the maskType of the riskiest potential infector
     let susceptibleMaskPenentrationFactor = maskToPenetrationFactor[riskiestActivityGroup.maskType]
 
-    for (let intervention of this.interventions) {
+    for (let intervention of this.environmentalInterventions) {
       if (intervention.isMask()) {
         // susceptible and infector wear the same mask
         riskiestActivityGroup['maskType'] = intervention.maskType
@@ -331,7 +340,7 @@ export class Intervention {
   }
 
   findUVDevices() {
-    for (let intervention of this.interventions) {
+    for (let intervention of this.environmentalInterventions) {
       if (intervention.isUpperUV()) {
         // susceptible and infector wear the same mask
         return intervention
@@ -352,7 +361,7 @@ export class Intervention {
   }
 
   findPortableAirCleaners() {
-    for (let intervention of this.interventions) {
+    for (let intervention of this.environmentalInterventions) {
       if (intervention.isFiltrationAirCleaner()) {
         // susceptible and infector wear the same mask
         return intervention
@@ -404,7 +413,7 @@ export class Intervention {
   numDevices() {
     let count = 0
 
-    for (let intervention of this.interventions) {
+    for (let intervention of this.environmentalInterventions) {
       count += intervention.numDevices()
     }
 
@@ -414,7 +423,7 @@ export class Intervention {
   costInYears(numYears) {
     let cost = 0
 
-    for (let intervention of this.interventions) {
+    for (let intervention of this.environmentalInterventions) {
       cost += intervention.costInYears(numYears)
     }
 
@@ -428,7 +437,7 @@ export class Intervention {
   amountText() {
     let tmp = ""
 
-    for (let intervention of this.interventions) {
+    for (let intervention of this.environmentalInterventions) {
       tmp += `${intervention.amountText()} `
     }
 
@@ -438,7 +447,7 @@ export class Intervention {
   initialCostText() {
     let tmp = ""
 
-    for (let intervention of this.interventions) {
+    for (let intervention of this.environmentalInterventions) {
       tmp += `${intervention.initialCostText()} `
     }
 
@@ -448,7 +457,7 @@ export class Intervention {
   recurringCostText() {
     let tmp = ""
 
-    for (let intervention of this.interventions) {
+    for (let intervention of this.environmentalInterventions) {
       tmp += `${intervention.recurringCostText()} `
     }
 
@@ -474,7 +483,7 @@ export class Intervention {
   websitesAndText() {
     let tmp = []
 
-    for (let intervention of this.interventions) {
+    for (let intervention of this.environmentalInterventions) {
       tmp.push(
         {
           website: intervention.website(),
