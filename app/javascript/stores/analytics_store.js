@@ -104,7 +104,7 @@ export const useAnalyticsStore = defineStore('analytics', {
       ]
       let schedule = this.generateSchedule(workingDays, workingHours)
 
-      let mask1 = new Mask(MASKS[3], 1)
+      let mask1 = new Mask(MASKS[0], 1)
       const numEmployees = 5
 
       const prevalence = 0.001
@@ -114,36 +114,80 @@ export const useAnalyticsStore = defineStore('analytics', {
       let customerMask = new Mask(MASKS[3], 1)
       let costs = []
 
-      for (let i = 0; i< numExperiments; i++) {
+      let computeLostWages = function(
+        args
+      ) {
         let employees = []
 
         for (let i = 0; i < numEmployees; i++) {
           employees.push(
             new Employee(
-              mask1,
-              numDaysInEpoch,
-              schedule,
-              hourlyRate
+              args.employeeMask,
+              args.numDaysInEpoch,
+              args.schedule,
+              args.hourlyRate
             )
           )
         }
         const computer = new CostComputer(
-          this.event,
-          environmentalInterventions,
-          occupancy,
-          employees,
-          prevalence,
-          numDaysInEpoch,
-          customerMask
+          args.event,
+          args.environmentalInterventions,
+          args.occupancy,
+          args.employees,
+          args.prevalence,
+          args.numDaysInEpoch,
+          args.customerMask
         )
 
         computer.compute()
-        let lostWages = computer.getLostWages()
-        costs.push(lostWages)
-        totalCost += lostWages
+        return {
+          id: args.id,
+          lostWages: computer.getLostWages()
+        }
       }
 
-      let aveCost = totalCost / numExperiments
+      let actions = []
+
+      actions.push(
+        {
+          message: 'computeLostWages',
+          func: computeLostWages
+        }
+      )
+
+      let summation = 0
+      let worker1 = this.$worker.create(actions)
+      let worker2 = this.$worker.create(actions)
+
+      let batchFunc = async function(worker, hourlyRate, schedule, occupancy, prevalence, numDaysInEpoch, customerMask, employeeMask, numSims) {
+        let dictionary = {}
+
+        for (let i = 0; i < numSims; i++) {
+          worker.postMessage('computeLostWages', {
+            id: i,
+            hourlyRate: hourlyRate,
+            schedule: schedule,
+            occupancy: occupancy,
+            prevalence: prevalence,
+            numDaysInEpoch: numDaysInEpoch,
+            customerMask: customerMask,
+            employeeMask: employeeMask
+          }).then((args) => dictionary[args.id] = args.lostWages).catch(console.error)
+        }
+
+        let summation = 0
+        for (let i = 0; i < numSims; i++) {
+          summation += dictionary[i]
+        }
+
+        return summation
+      }
+
+      let result = batchFunc(worker1, hourlyRate, schedule, occupancy, prevalence, numDaysInEpoch, customerMask, employeeMask, 20)
+        + batchFunc(worker2, hourlyRate, schedule, occupancy, prevalence, numDaysInEpoch, customerMask, employeeMask, 20)
+
+      debugger
+      let aveCost = args / numExperiments
 
       console.log("aveCost", aveCost);
       console.log("costs", costs);
