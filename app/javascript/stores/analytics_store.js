@@ -7,7 +7,6 @@ import { UpperRoomGermicidalUV, UPPER_ROOM_GERMICIDAL_UV } from '../upper_room_g
 import { Intervention } from '../interventions.js'
 import { useShowMeasurementSetStore } from './show_measurement_set_store';
 import { getSampleInterventions } from '../sample_interventions.js'
-import { CostComputer, Employee } from '../cost_computer.js'
 
 
 // TODO: use the last location that the user was in, as the default
@@ -23,6 +22,29 @@ export const useAnalyticsStore = defineStore('analytics', {
       activityGroups: [],
       totalAch: 0.1
     }, []),
+    workers: [
+      // Takes 10 seconds on macbook pro
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js'),
+      new Worker('worker.js')
+    ],
     numPeopleToInvestIn: 5,
     event: "",
   }),
@@ -30,6 +52,8 @@ export const useAnalyticsStore = defineStore('analytics', {
     load(event) {
       this.event = event
       this.reload()
+    },
+    computeLostWages() {
     },
     generateSchedule(workingDays, workingHours) {
       if (!workingHours) {
@@ -104,103 +128,67 @@ export const useAnalyticsStore = defineStore('analytics', {
       ]
       let schedule = this.generateSchedule(workingDays, workingHours)
 
-      let mask1 = new Mask(MASKS[0], 1)
       const numEmployees = 5
 
       const prevalence = 0.001
 
       let totalCost = 0
-      let numExperiments = 100
-      let customerMask = new Mask(MASKS[3], 1)
+      // TODO: change the masks based on the selection
+      let customerMask = MASKS[0]
       let costs = []
 
-      let computeLostWages = function(
-        args
-      ) {
-        let employees = []
-
-        for (let i = 0; i < numEmployees; i++) {
-          employees.push(
-            new Employee(
-              args.employeeMask,
-              args.numDaysInEpoch,
-              args.schedule,
-              args.hourlyRate
-            )
-          )
-        }
-        const computer = new CostComputer(
-          args.event,
-          args.environmentalInterventions,
-          args.occupancy,
-          args.employees,
-          args.prevalence,
-          args.numDaysInEpoch,
-          args.customerMask
-        )
-
-        computer.compute()
-        return {
-          id: args.id,
-          lostWages: computer.getLostWages()
-        }
-      }
-
-      let actions = []
-
-      actions.push(
-        {
-          message: 'computeLostWages',
-          func: computeLostWages
-        }
-      )
-
       let summation = 0
-      let worker1 = new Worker('worker.js')
-      worker1.onmessage = (e) => {
-        console.log(`Message received from worker: ${e.data}`);
-      }
-      worker1.postMessage([1, 2])
+      let dict1 = {}
+      let dict2 = {}
 
-      // debugger
-      // let worker2 = this.$worker.create(actions)
-//
-      // let batchFunc = async function(worker, hourlyRate, schedule, occupancy, prevalence, numDaysInEpoch, customerMask, employeeMask, numSims) {
-        // let dictionary = {}
-//
-        // for (let i = 0; i < numSims; i++) {
-          // worker.postMessage('computeLostWages', {
-            // id: i,
-            // hourlyRate: hourlyRate,
-            // schedule: schedule,
-            // occupancy: occupancy,
-            // prevalence: prevalence,
-            // numDaysInEpoch: numDaysInEpoch,
-            // customerMask: customerMask,
-            // employeeMask: employeeMask
-          // }).then((args) => dictionary[args.id] = args.lostWages).catch(console.error)
-        // }
-//
-        // let summation = 0
-        // for (let i = 0; i < numSims; i++) {
-          // summation += dictionary[i]
-        // }
-//
-        // return summation
-      // }
-//
-      // let result = batchFunc(worker1, hourlyRate, schedule, occupancy, prevalence, numDaysInEpoch, customerMask, employeeMask, 20)
-        // + batchFunc(worker2, hourlyRate, schedule, occupancy, prevalence, numDaysInEpoch, customerMask, employeeMask, 20)
-//
-      // debugger
-      // let aveCost = args / numExperiments
-//
-      // console.log("aveCost", aveCost);
-      // console.log("costs", costs);
-//
-      // return aveCost
-      let aveCost = 1
-      return aveCost
+      let numSims = 5
+      let total = []
+      let processed = []
+
+      for (let i = 0; i < this.workers.length; i++) {
+        total.push(0)
+        processed.push(0)
+      }
+
+      for (let i = 0; i < this.workers.length; i++) {
+        this.workers[i].onmessage = (e) => {
+          let dict1 = JSON.parse(e.data)
+          processed[i] = 1
+
+          for (let key in dict1) {
+            total[i] += dict1[key]
+          }
+
+          // If all the workers have finished
+          if (processed.reduce(
+            (previousValue, currentValue) => previousValue + currentValue,
+            0
+          ) == this.workers.length) {
+            let aveCost = total.reduce(
+              (previousValue, currentValue) => previousValue + currentValue,
+              0
+            ) / (this.workers.length * numSims)
+
+            console.log("aveCost", aveCost);
+
+            return aveCost
+          }
+        }
+
+        this.workers[i].postMessage(JSON.stringify({
+          event: this.event,
+          numSims: numSims,
+          numEmployees: numEmployees,
+          hourlyRate: hourlyRate,
+          environmentalInterventions: environmentalInterventions,
+          schedule: schedule,
+          occupancy: occupancy,
+          prevalence: prevalence,
+          numDaysInEpoch: numDaysInEpoch,
+          customerMask: customerMask,
+          employeeMask: customerMask
+        }))
+      }
     },
     selectIntervention(id) {
       let intervention = this.interventions.find((interv) => { return interv.id == id })
