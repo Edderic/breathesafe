@@ -138,12 +138,9 @@ export const useAnalyticsStore = defineStore('analytics', {
 
       let totalCost = 0
       // TODO: change the masks based on the selection
-      let customerMask = MASKS[0]
+      let customerMask = interventions.mask1.mask
+      let employeeMask = interventions.mask2.mask
       let costs = []
-
-      let summation = 0
-      let dict1 = {}
-      let dict2 = {}
 
       let numSims = 5
       let total = []
@@ -190,7 +187,7 @@ export const useAnalyticsStore = defineStore('analytics', {
           prevalence: prevalence,
           numDaysInEpoch: numDaysInEpoch,
           customerMask: customerMask,
-          employeeMask: customerMask
+          employeeMask: employeeMask
         }))
       }
     },
