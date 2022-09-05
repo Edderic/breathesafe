@@ -5,6 +5,15 @@ function computeLostWages(
   args
 ) {
   let dict = {}
+  let environmentalInterventions = []
+
+  for (let interv in args.environmentalInterventions) {
+    if (interv.type == 'airCleaner') {
+      environmentalInterventions.push(new AirCleaner(interv, event))
+    } else if (interv.type == 'Upper Room Germicidal UV') {
+      environmentalInterventions.push(new UpperRoomGermicidalUV(interv, event))
+    }
+  }
 
   for (let j = 0; j < args.numSims; j++) {
     let employees = []
