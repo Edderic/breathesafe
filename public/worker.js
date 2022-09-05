@@ -1,5 +1,5 @@
 // import {CostComputer, Employee} from '../app/assets/javascripts/cost_computer.js'
-importScripts('cost_computer.js')
+importScripts('cost_computer1.js')
 
 function computeLostWages(
   args
