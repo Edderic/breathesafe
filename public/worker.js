@@ -35,10 +35,11 @@ function computeLostWages(
       employees,
       args.prevalence,
       args.numDaysInEpoch,
-      new Mask(args.employeeMask, 1),
+      new Mask(args.customerMask, 1),
     )
 
     computer.compute()
+
     dict[j] = computer.getLostWages()
   }
 
