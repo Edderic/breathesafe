@@ -30,7 +30,7 @@ function computeLostWages(
     }
     const computer = new CostComputer(
       args.event,
-      args.environmentalInterventions,
+      environmentalInterventions,
       args.occupancy,
       employees,
       args.prevalence,
