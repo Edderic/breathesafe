@@ -104,7 +104,11 @@ export const useAnalyticsStore = defineStore('analytics', {
 
       return dict
     },
-    cost(environmentalInterventions) {
+    cost(interventions) {
+      const environmentalInterventions = interventions.environmentalInterventions
+      const mask1 = interventions.mask1
+      const mask2 = interventions.mask2
+
       const numDaysInEpoch = 120
       const occupancy = this.event.occupancy.parsed
       const hourlyRate = 15.00
