@@ -43,7 +43,7 @@ export const useAnalyticsStore = defineStore('analytics', {
       new Worker('worker.js'),
       new Worker('worker.js'),
       new Worker('worker.js'),
-      new Worker('worker.js')
+      new Worker('worker.js'),
     ],
     numPeopleToInvestIn: 5,
     event: "",
