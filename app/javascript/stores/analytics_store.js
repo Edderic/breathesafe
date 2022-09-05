@@ -201,7 +201,7 @@ export const useAnalyticsStore = defineStore('analytics', {
           interv.unselect()
         }
       }
-      console.log("this.cost(intervention)", this.cost(intervention.environmentalInterventions));
+      this.cost(intervention)
     },
     setNumPeopleToInvestIn(num) {
       this.numPeopleToInvestIn = num
