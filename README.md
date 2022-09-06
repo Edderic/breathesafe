@@ -1,7 +1,7 @@
 # README
 
 This README would normally document whatever steps are necessary to get the
-application up and running.
+application up and running on Mac OS
 
 # Ask Edderic for your AWS credentials
 AWS credentials will help us programmatically dump databases and import them.
@@ -19,11 +19,10 @@ export BREATHESAFE_DEV="<working directory to your breathesafe app>"
 `rvm install 3.1.2`
 
 ## Install Postgresql
-`brew services start postgresql`
-
-### On Mac
-
 `brew install postgresql`
+
+## Run postgresql service
+`brew services start postgresql`
 
 ## Install Gems
 `bundle install`
@@ -34,7 +33,7 @@ https://nodejs.org/en/
 ## Install NPM
 `sudo npm install -g npm`
 
-## Install Yarn
+## Install [Yarn](https://engineering.fb.com/2016/10/11/web/yarn-a-new-package-manager-for-javascript/)
 `npm install --global yarn`
 
 
