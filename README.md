@@ -7,7 +7,7 @@ application up and running.
 - [RVM](https://rvm.io/)
 
 ## Install Ruby
-`rvm install 3.0.0`
+`rvm install 3.1.2`
 
 ## Install Postgresql
 `brew services start postgresql`
