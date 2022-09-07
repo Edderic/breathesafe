@@ -34,6 +34,10 @@ https://nodejs.org/en/
 
 
 
+# Creating a server on Heroku
+```
+heroku buildpacks:set heroku/ruby
+```
 Things you may want to cover:
 
 * Ruby version
