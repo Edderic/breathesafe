@@ -18,33 +18,56 @@ export BREATHESAFE_DEV="<working directory to your breathesafe app>"
 ## Install Ruby
 `rvm install 3.1.2`
 
+RVM suggests running the following:
+`source /Users/richhu/.rvm/scripts/rvm`
+
 ## Install Postgresql
 `brew install postgresql`
 
 ## Run postgresql service
 `brew services start postgresql`
 
+## Stop postgresql service (not necessary)
+`brew services stop postgresql`
+
 ## Install Gems
+`gem install bundler`
 `bundle install`
 
 ## Install Node
 https://nodejs.org/en/
 
-## Install NPM
+## Install NPM (optional)
 `sudo npm install -g npm`
 
 ## Install [Yarn](https://engineering.fb.com/2016/10/11/web/yarn-a-new-package-manager-for-javascript/)
 `npm install --global yarn`
 
+<<<<<<< HEAD
 
 ## Run postgresql service
 `brew services start postgresql`
+=======
+## Install Yarn without NPM:
+`cd ~ && brew install yarn`
+
+Go to your local cloned breathsafe directory and type:
+`yarn install`
+
+## Start Rails
+`rails s`
+
+## Create DB
+`rails db:create`
+
+## Run DB migration files (breathsafe separates DDL and DML so this is just DDL)
+`rails db:migrate`
+>>>>>>> 2e576aa (README Updates)
 
 # Creating a server on Heroku
 ```
 heroku buildpacks:set heroku/ruby
 ```
-
 ## Also add nodejs so that npm can be used
 `heroku buildpacks:add --index 1 heroku/nodejs`
 
