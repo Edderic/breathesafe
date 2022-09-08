@@ -38,6 +38,10 @@ https://nodejs.org/en/
 ```
 heroku buildpacks:set heroku/ruby
 ```
+
+## Also add nodejs so that npm can be used
+`heroku buildpacks:add --index 1 heroku/nodejs`
+
 Things you may want to cover:
 
 * Ruby version
