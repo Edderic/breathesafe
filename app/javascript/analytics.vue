@@ -1506,7 +1506,6 @@ import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import RiskTable from './risk_table.vue';
 import TotalACHTable from './total_ach_table.vue';
 import { airCleaners } from './air_cleaners.js';
-import BarGraph from './bar_graph.vue';
 import { datetimeEnglish } from './date.js'
 import {
   AEROSOL_GENERATION_BOUNDS,
@@ -1556,7 +1555,6 @@ export default {
   name: 'Analytics',
   components: {
     AchToDuration,
-    BarGraph,
     ColoredCell,
     CleanAirDeliveryRateTable,
     DayHourHeatmap,
