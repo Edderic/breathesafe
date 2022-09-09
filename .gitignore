@@ -44,3 +44,6 @@ node_modules
 
 # Secrets
 .env
+
+# Mac-specific
+*.DS_Store
