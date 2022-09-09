@@ -64,6 +64,9 @@ Go to your local cloned breathsafe directory and type:
 `rails db:migrate`
 >>>>>>> 2e576aa (README Updates)
 
+## Access postgres db via psql
+`psql -d breathesafe_development`
+
 # Creating a server on Heroku
 ```
 heroku buildpacks:set heroku/ruby
@@ -71,6 +74,7 @@ heroku buildpacks:set heroku/ruby
 ## Also add nodejs so that npm can be used
 `heroku buildpacks:add --index 1 heroku/nodejs`
 
+<<<<<<< HEAD
 # Dumping data from local to Production
 [Heroku](https://devcenter.heroku.com/articles/heroku-postgres-import-export)
 [Stackoverflow](https://stackoverflow.com/questions/59670645/heroku-importing-from-s3-failing/65797543#65797543)
@@ -112,6 +116,8 @@ Below will produce new images under `$BREATHESAFE_DEV/app/assets/images/generate
 
 Then we can sync to S3:
 `aws s3 sync $BREATHESAFE_DEV/app/assets/images/generated $BREATHESAFE_PROD_S3/images/generated --profile breathesafe-edderic`
+=======
+>>>>>>> 5f72eff (added note for seeing postgres tables via psql)
 
 Things you may want to cover:
 
