@@ -1,6 +1,9 @@
 <template>
   <div class='row spaced-between main fixed-nav-bar'>
-    <h2 class='side-padding'>😷 Breathesafe</h2>
+    <div class='left row vertical-centered'>
+      <span class='logo'>😷</span>
+      <h2 class='title'>Breathesafe</h2>
+    </div>
 
     <div class='vertical-centered'>
       <router-link class='clickable side-padding' to='/faqs'>FAQs</router-link>
@@ -110,5 +113,15 @@ export default {
      width: 100%;
      height: 50px;
      background-color: white;
+  }
+
+  .logo {
+    font-size: 3em;
+    margin-left: 0.25em;
+  }
+  .title {
+    margin-left: 0.5em;
+  }
+  .left {
   }
 </style>
