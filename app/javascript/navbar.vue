@@ -9,6 +9,7 @@
       <router-link class='clickable side-padding' to='/register' v-if=!signedIn>Register</router-link>
       <router-link class='clickable side-padding' to='/signin' v-if=!signedIn>Sign in</router-link>
       <a class='clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
+      <Accordion/>
     </div>
   </div>
 </template>
@@ -16,6 +17,7 @@
 <script>
 // Have a VueX store that maintains state across components
 import axios from 'axios'
+import Accordion from './accordion.vue'
 import { useMainStore } from './stores/main_store';
 import { useEventStores } from './stores/event_stores';
 import { mapActions, mapState, mapWritableState, mapStores } from 'pinia'
@@ -23,6 +25,7 @@ import { mapActions, mapState, mapWritableState, mapStores } from 'pinia'
 export default {
   name: 'NavBar',
   components: {
+    Accordion,
     Event
   },
   computed: {
@@ -96,6 +99,7 @@ export default {
   .vertical-centered {
     display: flex;
     justify-content: center;
+    align-items: center;
   }
 
   .fixed-nav-bar {
@@ -106,6 +110,5 @@ export default {
      width: 100%;
      height: 50px;
      background-color: white;
-     padding-bottom: 1em;
   }
 </style>
