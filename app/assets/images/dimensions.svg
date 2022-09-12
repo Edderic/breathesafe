@@ -1,0 +1,19 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='2em' width='2em'>
+  <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
+  <path d="M 31 20 l -5 13 h 25 l 3 -13 z m -5 13 v 20 h 25 v -20 m 0 20 l 3 -13.5 l 0 -19" fill="transparent" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
+  <text x="34" y="59">L</text>
+  <text x="12" y="38">H</text>
+  <text x="57" y="44">W</text>
+
+  <style><![CDATA[
+    text{
+      dominant-baseline: hanging;
+font: 10px Verdana, Helvetica, Arial, sans-serif;
+font-weight: bold;
+    }
+  ]]></style>
+
+</svg>
+
+
