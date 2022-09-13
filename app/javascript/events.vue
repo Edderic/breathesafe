@@ -1,6 +1,6 @@
 <template>
 <div class='col'>
-    <div class='row horizontally-center controls'>
+    <div class='middle-controls horizontally-center controls'>
       <input class='margined' @change="updateSearch" placeholder="Search for events">
       <select class='margined' :value='eventDisplayRiskTime' @change='setDisplayRiskTime'>
         <option>At this hour</option>
@@ -25,10 +25,10 @@
           <th class='clickable col justify-space-between'>
             1-hr Risk
           </th>
-          <th>
+          <th class='desktop'>
             1-hr Risk w/ 1 Infector
           </th>
-          <th>Show Analysis</th>
+          <th class='desktop'>Show Analysis</th>
           <th v-if="adminView">User ID</th>
           <th v-if="adminView">Approve</th>
         </tr>
@@ -36,7 +36,7 @@
           <td></td>
           <td></td>
           <td></td>
-          <td>
+          <td class='desktop'>
             <div class='row horizontally-center' >
               <span :style="circleCSS" @click='sortByRisk'>
                 {{this.sortRiskArrow}}
@@ -364,7 +364,6 @@ export default {
 
   .row {
     display: flex;
-    flex-direction: row;
   }
 
   .col {
@@ -401,5 +400,27 @@ export default {
     text-shadow: 1px 1px 2px black;
     box-shadow: 1px 1px 2px black;
     text-decoration: none;
+  }
+
+  @media (max-width: 800px) {
+    .middle-controls {
+      display: flex;
+      flex-direction: column;
+    }
+    .controls {
+      width: auto;
+    }
+    .desktop {
+      display: none;
+    }
+  }
+  @media (min-width: 800px) {
+    .middle-controls {
+      display: flex;
+      flex-direction: row;
+    }
+    .desktop {
+      display: table-cell;
+    }
   }
 </style>

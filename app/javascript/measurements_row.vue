@@ -19,7 +19,7 @@
         :exception='{ "text": "NA", "value": 0, color: {r: 200, g: 200, b: 200}}'
       />
     </td>
-    <td class='containing-cell'>
+    <td class='containing-cell desktop'>
       <ColoredCell
         class='risk-score'
         :colorScheme="colorInterpolationScheme"
@@ -30,7 +30,7 @@
         :title='roundOut(nullIntervention.computeRisk(1), 6)'
       />
     </td>
-    <td>
+    <td class='desktop'>
       <router-link :to='link' @click="showAnalysis(this.measurements.id)">Show Analysis</router-link>
     </td>
     <td v-if='adminView'>{{ measurements.authorId }}</td>
@@ -235,5 +235,27 @@ export default {
     border-radius: 100%;
     width: 2em;
     height: 2em;
+  }
+
+  @media (max-width: 800px) {
+    .middle-controls {
+      display: flex;
+      flex-direction: column;
+    }
+    .controls {
+      width: auto;
+    }
+    .desktop {
+      display: none;
+    }
+  }
+  @media (min-width: 800px) {
+    .middle-controls {
+      display: flex;
+      flex-direction: row;
+    }
+    .desktop {
+      display: table-cell;
+    }
   }
 </style>
