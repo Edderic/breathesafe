@@ -251,8 +251,8 @@ GEM
 
 PLATFORMS
   x86_64-darwin-20
-  x86_64-linux
   x86_64-darwin-21
+  x86_64-linux
 
 DEPENDENCIES
   activerecord-copy (~> 1.1.0)
