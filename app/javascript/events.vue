@@ -209,11 +209,9 @@ export default {
 
     setMaskType(event) {
       let val = event.target.value
+      let numWays = val.split('-way ')[0]
+      let name = val.split('-way -')[1]
       let query = JSON.parse(JSON.stringify(this.$route.query))
-      const re = /\d{1}(?=-way)/;
-      const nameRegex = /(?<=-way ).+/
-      let numWays = val.match(re)[0]
-      let name = val.match(nameRegex)[0]
 
       Object.assign(query, {
         mask: name,
@@ -224,6 +222,7 @@ export default {
         name: 'MapEvents',
         query: query
       })
+
     },
 
     sortByRisk() {
