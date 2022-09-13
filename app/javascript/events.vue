@@ -210,7 +210,7 @@ export default {
     setMaskType(event) {
       let val = event.target.value
       let numWays = val.split('-way ')[0]
-      let name = val.split('-way -')[1]
+      let name = val.split('-way ')[1]
       let query = JSON.parse(JSON.stringify(this.$route.query))
 
       Object.assign(query, {
