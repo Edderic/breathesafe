@@ -13,11 +13,12 @@
         <router-link class='desktop clickable side-padding' to='/register' v-if=!signedIn>Register</router-link>
         <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn>Sign in</router-link>
         <a class='desktop clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
-        <Accordion class='mobile'/>
+
+        <Accordion class='mobile' @click='toggleMobileCol'/>
       </div>
 
     </div>
-    <div class='col'>
+    <div class='mobile-col' v-if="showMobile">
       <router-link class='mobile-row clickable side-padding' to='/faqs'>FAQs</router-link>
       <router-link class='mobile-row clickable side-padding' to='/'>Events</router-link>
       <router-link class='mobile-row clickable side-padding' to='/profile' v-if='signedIn'>Profile</router-link>
@@ -50,7 +51,9 @@ export default {
   created() {
   },
   data() {
-    return {}
+    return {
+      showMobile: false
+    }
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
@@ -81,6 +84,10 @@ export default {
         console.log(error)
         // whatever you want
       })
+    },
+
+    toggleMobileCol() {
+      this.showMobile = !this.showMobile
     }
   },
 }
@@ -174,6 +181,9 @@ export default {
       display: inline-block;
     }
     .mobile {
+      display: none;
+    }
+    .mobile-col {
       display: none;
     }
   }
