@@ -1,18 +1,29 @@
 <template>
-  <div class='row spaced-between main fixed-nav-bar'>
-    <div class='left row vertical-centered'>
-      <span class='logo'>😷</span>
-      <h2 class='title'>Breathesafe</h2>
-    </div>
+  <div class='col'>
+    <div class='row spaced-between main fixed-nav-bar'>
+      <div class='left row vertical-centered'>
+        <span class='logo'>😷</span>
+        <h2 class='title'>Breathesafe</h2>
+      </div>
 
-    <div class='vertical-centered'>
-      <router-link class='desktop clickable side-padding' to='/faqs'>FAQs</router-link>
-      <router-link class='desktop clickable side-padding' to='/'>Events</router-link>
-      <router-link class='desktop clickable side-padding' to='/profile' v-if='signedIn'>Profile</router-link>
-      <router-link class='desktop clickable side-padding' to='/register' v-if=!signedIn>Register</router-link>
-      <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn>Sign in</router-link>
-      <a class='desktop clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
-      <Accordion class='mobile'/>
+      <div class='vertical-centered'>
+        <router-link class='desktop clickable side-padding' to='/faqs'>FAQs</router-link>
+        <router-link class='desktop clickable side-padding' to='/'>Events</router-link>
+        <router-link class='desktop clickable side-padding' to='/profile' v-if='signedIn'>Profile</router-link>
+        <router-link class='desktop clickable side-padding' to='/register' v-if=!signedIn>Register</router-link>
+        <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn>Sign in</router-link>
+        <a class='desktop clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
+        <Accordion class='mobile'/>
+      </div>
+
+    </div>
+    <div class='col'>
+      <router-link class='mobile-row clickable side-padding' to='/faqs'>FAQs</router-link>
+      <router-link class='mobile-row clickable side-padding' to='/'>Events</router-link>
+      <router-link class='mobile-row clickable side-padding' to='/profile' v-if='signedIn'>Profile</router-link>
+      <router-link class='mobile-row clickable side-padding' to='/register' v-if=!signedIn>Register</router-link>
+      <router-link class='mobile-row clickable side-padding' to='/signin' v-if=!signedIn>Sign in</router-link>
+      <a class='mobile-row clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
     </div>
   </div>
 </template>
@@ -86,6 +97,11 @@ export default {
     flex-direction: row;
   }
 
+  .col {
+    display: flex;
+    flex-direction: column;
+  }
+
   .main {
     border-bottom: 1px solid grey;
   }
@@ -125,12 +141,31 @@ export default {
   .left {
   }
 
+  .mobile-row {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .mobile-row:hover {
+    background-color: #efefef;
+    cursor: pointer;
+  }
+
   @media (max-width: 800px) {
     .desktop {
       display: none;
     }
     .mobile {
       display: inline-block;
+    }
+    .col {
+      display: flex;
+      z-index: 999;
+      flex-direction: column;
+      width: 100vw;
+      background-color: white;
+      position: fixed;
+      top: 3em;
     }
   }
 
