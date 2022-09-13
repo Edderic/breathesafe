@@ -6,13 +6,13 @@
     </div>
 
     <div class='vertical-centered'>
-      <router-link class='clickable side-padding' to='/faqs'>FAQs</router-link>
-      <router-link class='clickable side-padding' to='/'>Events</router-link>
-      <router-link class='clickable side-padding' to='/profile' v-if='signedIn'>Profile</router-link>
-      <router-link class='clickable side-padding' to='/register' v-if=!signedIn>Register</router-link>
-      <router-link class='clickable side-padding' to='/signin' v-if=!signedIn>Sign in</router-link>
-      <a class='clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
-      <Accordion/>
+      <router-link class='desktop clickable side-padding' to='/faqs'>FAQs</router-link>
+      <router-link class='desktop clickable side-padding' to='/'>Events</router-link>
+      <router-link class='desktop clickable side-padding' to='/profile' v-if='signedIn'>Profile</router-link>
+      <router-link class='desktop clickable side-padding' to='/register' v-if=!signedIn>Register</router-link>
+      <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn>Sign in</router-link>
+      <a class='desktop clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
+      <Accordion class='mobile'/>
     </div>
   </div>
 </template>
@@ -123,5 +123,23 @@ export default {
     margin-left: 0.5em;
   }
   .left {
+  }
+
+  @media (max-width: 800px) {
+    .desktop {
+      display: none;
+    }
+    .mobile {
+      display: inline-block;
+    }
+  }
+
+  @media (min-width: 800px) {
+    .desktop {
+      display: inline-block;
+    }
+    .mobile {
+      display: none;
+    }
   }
 </style>
