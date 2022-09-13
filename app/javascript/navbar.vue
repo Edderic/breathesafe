@@ -18,7 +18,7 @@
       </div>
 
     </div>
-    <div class='mobile-col' v-if="showMobile">
+    <div class='mobile-col' v-if="showMobile()">
       <router-link class='mobile-row clickable side-padding' to='/faqs'>FAQs</router-link>
       <router-link class='mobile-row clickable side-padding' to='/'>Events</router-link>
       <router-link class='mobile-row clickable side-padding' to='/profile' v-if='signedIn'>Profile</router-link>
@@ -46,13 +46,12 @@ export default {
   computed: {
     ...mapStores(useMainStore),
     ...mapState(useMainStore, ['signedIn']),
-    ...mapWritableState(useMainStore, ['focusTab'])
+    ...mapWritableState(useMainStore, ['focusTab']),
   },
   created() {
   },
   data() {
     return {
-      showMobile: false
     }
   },
   methods: {
@@ -85,9 +84,24 @@ export default {
         // whatever you want
       })
     },
+    showMobile() {
+      return !!this.$route.query['showNavLinks']
+    },
 
     toggleMobileCol() {
-      this.showMobile = !this.showMobile
+      let query = JSON.parse(JSON.stringify(this.$route.query))
+
+      if (query['showNavLinks'] && query['showNavLinks'] == 'true') {
+        delete query['showNavLinks']
+      } else {
+        Object.assign(query, { showNavLinks: true })
+      }
+
+      this.$router.push({
+        params: this.$route.params,
+        query: query,
+        hash: this.$route.hash
+      })
     }
   },
 }
