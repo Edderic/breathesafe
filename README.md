@@ -7,10 +7,40 @@ application up and running on Mac OS.
 AWS credentials will help us programmatically dump databases and import them.
 
 # Environment Variables
+
+## .zshrc
+Put these in your `~/.zshrc` file.
+
 ```zsh
+export BREATHESAFE_STAG_S3='s3://breathesafe-staging'
 export BREATHESAFE_PROD_S3="s3://breathesafe"
 export BREATHESAFE_DEV="<working directory to your breathesafe app>"
+export BREATHESAFE_DEV_S3='s3://breathesafe-development'
 ```
+
+Afterwards, run `source ~/.zshrc` in your terminal.
+
+## .env
+This is the place used by the `dotenv` gem of our app to pick up environment
+variables for development. Note that `.env` is git-ignored. Here are the
+variables that should be in there.
+
+```
+GOOGLE_MAPS_API_KEY=abcdefg
+NODE_ENV=development
+S3_HTTPS='https://breathesafe-development.s3.us-east-2.amazonaws.com'
+```
+
+Note that S3 is what is being used by `app/javascript/map_events.vue` to
+host the SVG images for Google Maps custom markers.
+
+After making changes to `.env`, you'll want to find the process that is running
+the rails server (i.e. the process that is currently running `rails s`). In
+other words, terminate the process that is running `rails s`, run `source
+~/.zshrc` for changing to take effect for said process, and then run `rails s`
+again.
+
+# Installation
 
 ## Install RVM
 - [RVM](https://rvm.io/)
@@ -83,10 +113,6 @@ heroku pg:backups:download --app breathesafe
 pg_restore --verbose --clean --no-acl --no-owner -h localhost -d breathesafe_development latest.dump
 ```
 
-## Sync
-`aws s3 sync $BREATHESAFE_DEV/data $BREATHESAFE_PROD_S3/data`
-[Upload here](https://s3.console.aws.amazon.com/s3/buckets/breathesafe?prefix=database/&region=us-east-2)
-
 ## Sign the URL
 `aws s3 presign s3://breathesafe/data/dumps/mydb.dump`
 
@@ -109,6 +135,22 @@ Below will produce new images under `$BREATHESAFE_DEV/app/assets/images/generate
 
 Then we can sync to S3:
 `aws s3 sync $BREATHESAFE_DEV/app/assets/images/generated $BREATHESAFE_PROD_S3/images/generated --profile breathesafe-edderic`
+# Sync
+
+Right now, we host a bunch of Google Maps custom markers in S3. So when we make
+changes to those SVGs, they should be pushed to staging and production.
+
+### Copy local data folder to production S3
+`aws s3 sync $BREATHESAFE_DEV/data $BREATHESAFE_PROD_S3/data`
+[Upload here](https://s3.console.aws.amazon.com/s3/buckets/breathesafe?prefix=database/&region=us-east-2)
+
+### Copy local data folder to staging S3
+`aws s3 sync $BREATHESAFE_DEV/data $BREATHESAFE_STAG_S3/data`
+[Upload here](https://s3.console.aws.amazon.com/s3/buckets/breathesafe-staging?prefix=database/&region=us-east-2)
+
+### Copy local data folder to development S3
+`aws s3 sync $BREATHESAFE_DEV/data $BREATHESAFE_DEV_S3/data`
+[Upload here](https://s3.console.aws.amazon.com/s3/buckets/breathesafe-staging?prefix=database/&region=us-east-2)
 
 Things you may want to cover:
 
