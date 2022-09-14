@@ -53,8 +53,16 @@ heroku buildpacks:set heroku/ruby
 [Heroku](https://devcenter.heroku.com/articles/heroku-postgres-import-export)
 [Stackoverflow](https://stackoverflow.com/questions/59670645/heroku-importing-from-s3-failing/65797543#65797543)
 
-## Dump Development database
+## Dump Development database so that it can be copied
 `pg_dump -Fc --no-acl --no-owner -h localhost breathesafe_development > $BREATHESAFE_DEV/data/dumps/mydb.dump`
+
+## Restore database dump
+```bash
+heroku pg:backups:capture --app breathesafe
+heroku pg:backups:download --app breathesafe
+
+pg_restore --verbose --clean --no-acl --no-owner -h localhost -d breathesafe_development latest.dump
+```
 
 ## Sync
 `aws s3 sync $BREATHESAFE_DEV/data $BREATHESAFE_PROD_S3/data`
