@@ -78,6 +78,18 @@ e.g.
 
 `heroku pg:backups:restore 'https://breathesafe.s3.us-east-1.amazonaws.com/data/dumps/mydb.dump\?X-Amz-Algorithm\=AWS4-HMAC-SHA256\&X-Amz-Credential\=AKIAYQOGK2G6J2YHH7OC%2F20220909%2Fus-east-1%2Fs3%2Faws4_request\&X-Amz-Date\=20220909T112256' DATABASE_URL --app breathesafe`
 
+# How to use multiple AWS accounts from the command line
+
+This [link](https://stackoverflow.com/questions/593334/how-to-use-multiple-aws-accounts-from-the-command-line#:~:text=You%20can%20work%20with%20two,region%2C%20so%20have%20them%20ready.&text=You%20can%20then%20switch%20between,the%20profile%20on%20the%20command.) talks about how to set a profile so that you could let AWS know which profile you want to use, e.g. `--profile some-profile` when running a command.
+
+
+# Updating icons
+
+Below will produce new images under `$BREATHESAFE_DEV/app/assets/images/generated`:
+`python python/generate_place_grades_icons.py`
+
+Then we can sync to S3:
+`aws s3 sync $BREATHESAFE_DEV/app/assets/images/generated $BREATHESAFE_PROD_S3/images/generated --profile breathesafe-edderic`
 
 Things you may want to cover:
 
