@@ -148,7 +148,14 @@ This [link](https://stackoverflow.com/questions/593334/how-to-use-multiple-aws-a
 Below will produce new images under `$BREATHESAFE_DEV/app/assets/images/generated`:
 `python python/generate_place_grades_icons.py`
 
-Then we can sync to S3:
+## Pushing icons to S3 Production
+
+Note that we're using `--profile` here. See the "How to use multiple AWS
+accounts from the command line" section above to understand what it is doing.
+
+After making sure that `$BREATHESAFE_DEV/app/assets/images/generated` has SVGs,
+in the earlier step, we can sync to S3:
+
 `aws s3 sync $BREATHESAFE_DEV/app/assets/images/generated $BREATHESAFE_PROD_S3/images/generated --profile breathesafe-edderic`
 # Sync
 
@@ -217,6 +224,12 @@ git push breathesafe-prod staging:main
 ```
 
 Edderic: It looks like we could use the "Promote to Production" in the Heroku Pipelines section. Not sure yet, since I haven't used it directly.
+
+## Pushing icons to S3 Development
+`aws s3 sync $BREATHESAFE_DEV/app/assets/images/generated $BREATHESAFE_DEV_S3/images/generated --profile breathesafe-edderic`
+
+## Pushing icons to S3 Staging
+`aws s3 sync $BREATHESAFE_DEV/app/assets/images/generated $BREATHESAFE_STAG_S3/images/generated --profile breathesafe-edderic`
 
 Things you may want to cover:
 
