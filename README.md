@@ -152,6 +152,57 @@ changes to those SVGs, they should be pushed to staging and production.
 `aws s3 sync $BREATHESAFE_DEV/data $BREATHESAFE_DEV_S3/data`
 [Upload here](https://s3.console.aws.amazon.com/s3/buckets/breathesafe-staging?prefix=database/&region=us-east-2)
 
+# Add remote heroku repos
+
+Add Heroku staging repo so we can push or fetch to it:
+
+```
+git remote add breathesafe-stag https://git.heroku.com/breathesafe-staging.git`
+```
+
+Add Heroku production repo so we can push or fetch to it:
+
+```
+git remote add breathesafe-prod https://git.heroku.com/breathesafe-staging.git`
+```
+
+# Development-to-Production Process
+
+## Making changes to a branch, then merging it to the development branch
+- Make a branch.
+- Make changes and commit them to that branch
+- Create a pull request. Specify that the base branch be `development`.
+- Wait for someone else to review your code.
+- Reviewer makes suggestions.
+- Assuming the reviewer accepts the pull request, you can then hit `Rebase and merge`.
+
+- `git fetch`
+- `git checkout staging`
+
+## Pushing to the staging branch
+- Make the staging branch have the commits of `origin/development`:
+  ```
+  git rebase origin/development
+  ```
+
+- Push staging to github (implicitly):
+  ```
+  git push
+  ```
+
+- Push to the Heroku staging repository, `git push breathesafe-stag staging:main` so that one's local `staging` branch is pushed to the `main` branch.
+
+- Visit the staging site and see if the changes made didn't break anything.
+
+## Push to the production branch
+
+Assuming nothing broke, and everything looks expected:
+```
+git push breathesafe-prod staging:main
+```
+
+Edderic: It looks like we could use the "Promote to Production" in the Heroku Pipelines section. Not sure yet, since I haven't used it directly.
+
 Things you may want to cover:
 
 * Ruby version
