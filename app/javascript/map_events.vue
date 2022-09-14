@@ -273,7 +273,7 @@ export default {
 
       const placeType = getPlaceType(marker.placeData.types)
 
-      return `https://breathesafe.s3.us-east-2.amazonaws.com/images/generated/${placeType}--${color.letterGrade}.svg`
+      return `${window.gon.S3_HTTPS}/images/generated/${placeType}--${color.letterGrade}.svg`
     },
     gradeLetter(marker) {
       return binValue(riskColorInterpolationScheme, marker.risk)['upperColor']['letterGrade']
