@@ -1,7 +1,7 @@
 # README
 
 This README would normally document whatever steps are necessary to get the
-application up and running on Mac OS
+application up and running on Mac OS.
 
 # Ask Edderic for your AWS credentials
 AWS credentials will help us programmatically dump databases and import them.
