@@ -238,6 +238,10 @@ export default {
     height: 2em;
   }
 
+  a {
+    text-decoration: none;
+  }
+
   @media (max-width: 800px) {
     .middle-controls {
       display: flex;
