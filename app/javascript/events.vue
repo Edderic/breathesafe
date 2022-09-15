@@ -28,7 +28,6 @@
           <th class='desktop'>
             1-hr Risk w/ 1 Infector
           </th>
-          <th class='desktop'>Show Analysis</th>
           <th v-if="adminView">User ID</th>
           <th v-if="adminView">Approve</th>
         </tr>
