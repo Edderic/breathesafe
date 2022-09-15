@@ -2,25 +2,25 @@
   <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
 
   <g>
-    <path d='m 6 29 l 20 30 l 30 -20 l -20 -30 z' stroke='black' fill='transparent' stroke-linejoin='round'/>
+    <path d='m 4 29 l 20 30 l 30 -20 l -20 -30 z' stroke='black' fill='transparent' stroke-linejoin='round'/>
     <g transform="rotate(-32, 20, 25)">
-      <circle cx="25.5" cy="27" r="5" fill="red" />
-      <path d='m 29 29 c 3 0 -5 -2 -12 5 v 8 c 0 3 3 5 4 4 v 8 h 4 v -8 h 1 v 8 h 4 v -8 c 2 -1 3 -2 4 -3 v -8 c 0 -3 -3 -3 -5 -5 z' fill='red'/>
+      <circle cx="23" cy="27" r="5" fill="red" />
+      <path d='m 27 29 c 3 0 -5 -2 -12 5 v 8 c 0 3 3 5 4 4 v 8 h 4 v -8 h 1 v 8 h 4 v -8 c 2 -1 3 -2 4 -3 v -8 c 0 -3 -3 -3 -5 -5 z' fill='red'/>
     </g>
   </g>
-  <g transform="translate(27, -16) skewX(9) skewY(23) scale(0.78)">
-    <path d='m 6 29 l 20 30 l 30 -20 l -20 -30 z' stroke='black' fill='transparent' stroke-linejoin='round'/>
+  <g transform="translate(28, -10) skewX(12) skewY(40) scale(0.6)">
+    <path d='m 4 29 l 20 30 l 30 -20 l -20 -30 z' stroke='black' fill='transparent' stroke-linejoin='round'/>
     <g transform="rotate(-32, 20, 25)">
-      <circle cx="25.5" cy="27" r="5" fill="green" />
-      <path d='m 29 29 c 3 0 -5 -2 -12 5 v 8 c 0 3 3 5 4 4 v 8 h 4 v -8 h 1 v 8 h 4 v -8 c 2 -1 3 -2 4 -3 v -8 c 0 -3 -3 -3 -5 -5 z' fill='green'/>
+      <circle cx="23" cy="27" r="5" fill="green" />
+      <path d='m 27 29 c 3 0 -5 -2 -12 5 v 8 c 0 3 3 5 4 4 v 8 h 4 v -8 h 1 v 8 h 4 v -8 c 2 -1 3 -2 4 -3 v -8 c 0 -3 -3 -3 -5 -5 z' fill='green'/>
     </g>
   </g>
 
-  <g transform="translate(88, 20) skewX(-63) skewY(23) scale(0.55)">
+  <g transform="translate(87, 20) skewX(-63) skewY(23) scale(0.55)">
     <path d='M 6 29 l 20 30 l 30 -20 l -20 -30 z' stroke='black' fill='transparent' stroke-linejoin='round'/>
     <g transform="rotate(-32, 20, 25)">
-      <circle cx="25.5" cy="27" r="5" fill="green" />
-      <path d='m 29 29 c 3 0 -5 -2 -12 5 v 8 c 0 3 3 5 4 4 v 8 h 4 v -8 h 1 v 8 h 4 v -8 c 2 -1 3 -2 4 -3 v -8 c 0 -3 -3 -3 -5 -5 z' fill='green'/>
+      <circle cx="23" cy="27" r="5" fill="green" />
+      <path d='m 27 29 c 3 0 -5 -2 -12 5 v 8 c 0 3 3 5 4 4 v 8 h 4 v -8 h 1 v 8 h 4 v -8 c 2 -1 3 -2 4 -3 v -8 c 0 -3 -3 -3 -5 -5 z' fill='green'/>
     </g>
   </g>
 
