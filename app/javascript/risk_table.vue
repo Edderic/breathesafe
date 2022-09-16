@@ -2,60 +2,18 @@
   <table>
     <tr>
       <th></th>
-      <th>1 hour</th>
-      <th>4 hours</th>
-      <th>8 hours</th>
-      <th>40 hours</th>
+      <th class='header'>Risk w/ 1 infector</th>
+      <th class='header'>Average # of Susceptibles Infected under Max Occupancy</th>
     </tr>
 
-    <tr>
-      <th>Risk w/ 1 infector</th>
+    <tr v-for='h in [1, 4, 8, 40]'>
+      <th>{{h}} hour</th>
       <td>
       <ColoredCell
           v-if="intervention"
           :colorScheme="riskColorScheme"
           :maxVal=1
-          :value='intervention.computeRiskRounded()'
-          :style="styleProps"
-      />
-      </td>
-      <td>
-      <ColoredCell
-          v-if="intervention"
-          :colorScheme="riskColorScheme"
-          :maxVal=1
-          :value='roundOut(1 - (1-intervention.computeRiskRounded())**4, 6)'
-          :style="styleProps"
-      />
-      </td>
-      <td>
-      <ColoredCell
-          v-if="intervention"
-          :colorScheme="riskColorScheme"
-          :maxVal=1
-          :value='roundOut(1 - (1-intervention.computeRiskRounded())**8, 6)'
-          :style="styleProps"
-      />
-      </td>
-      <td>
-      <ColoredCell
-          v-if="intervention"
-          :colorScheme="riskColorScheme"
-          :maxVal=1
-          :value='roundOut(1 - (1-intervention.computeRiskRounded())**40, 6)'
-          :style="styleProps"
-      />
-      </td>
-    </tr>
-    <tr>
-      <th>Average # of Susceptibles Infected under Max Occupancy</th>
-      <td>
-      <ColoredCell
-          v-if="intervention"
-          :colorScheme="averageInfectedPeopleInterpolationScheme"
-          :maxVal=1
-          :text='roundOut(this.maximumOccupancy * intervention.computeRiskRounded(), 1)'
-          :value='this.maximumOccupancy * intervention.computeRiskRounded()'
+          :value='roundOut(1 - (1-intervention.computeRiskRounded())**h, 6)'
           :style="styleProps"
       />
       </td>
@@ -64,25 +22,7 @@
           v-if="intervention"
           :colorScheme="averageInfectedPeopleInterpolationScheme"
           :maxVal=1
-          :value='roundOut(this.maximumOccupancy* (1 - (1-intervention.computeRiskRounded())**4), 1)'
-          :style="styleProps"
-      />
-      </td>
-      <td>
-      <ColoredCell
-          v-if="intervention"
-          :colorScheme="averageInfectedPeopleInterpolationScheme"
-          :maxVal=1
-          :value='roundOut(this.maximumOccupancy* (1 - (1-intervention.computeRiskRounded())**8), 1)'
-          :style="styleProps"
-      />
-      </td>
-      <td>
-      <ColoredCell
-          v-if="intervention"
-          :colorScheme="averageInfectedPeopleInterpolationScheme"
-          :maxVal=1
-          :value='roundOut(this.maximumOccupancy* (1 - (1-intervention.computeRiskRounded())**40), 1)'
+          :value='roundOut(this.maximumOccupancy* (1 - (1-intervention.computeRiskRounded())**h), 1)'
           :style="styleProps"
       />
       </td>
@@ -137,5 +77,9 @@ export default {
 <style scoped>
   table {
     border-spacing: 0;
+  }
+  th {
+    padding: 1em;
+    width: 4em;
   }
 </style>
