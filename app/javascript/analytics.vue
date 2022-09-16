@@ -2390,4 +2390,9 @@ export default {
     }
   }
 
+  .icon-bar {
+    position: fixed;
+    background-color: white;
+  }
+
 </style>
