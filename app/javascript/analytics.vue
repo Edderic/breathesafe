@@ -1525,6 +1525,9 @@ import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import RiskTable from './risk_table.vue';
 import TotalACHTable from './total_ach_table.vue';
+import VentIcon from './vent_icon.vue';
+import PacIcon from './pac_icon.vue';
+import RiskIcon from './risk_icon.vue';
 import { airCleaners } from './air_cleaners.js';
 import { datetimeEnglish } from './date.js'
 import {
@@ -1580,8 +1583,11 @@ export default {
     DayHourHeatmap,
     Event,
     HorizontalStackedBar,
+    PacIcon,
+    RiskIcon,
     RiskTable,
-    TotalACHTable
+    TotalACHTable,
+    VentIcon
   },
   computed: {
     ...mapState(
