@@ -1,60 +1,21 @@
 <template>
-  <div class='row'>
-    <div class='col border-showing left-pane'>
-      <router-link :to="`/analytics/${this.$route.params.id}#risk-assessment`" class='link-h1'>
-        Risk Assessment
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#overview`" class='link-h1'>
-        Overview
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#introduction`" class='link-h2'>
-        Introduction
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#how-to-improve-indoor-air-quality`" class='link-h2'>
-        How to Improve Indoor Air Quality
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#modeling`" class='link-h2'>
-        Modeling
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#risky-behaviors-and-environments`" class='link-h2'>
-        Risky Behaviors and Environments
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#safer-behaviors-and-environments`" class='link-h2'>
-        Safer Behaviors and Environments
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#measurements`" class='link-h1'>
-        Measurements
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#behaviors`" class='link-h2'>
-        Behaviors
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#masking`" class='link-h2'>
-        Masking
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#air-changes-per-hour`" class='link-h2'>
-        Air Changes per Hour (ACH)
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#total-ach`" class='link-h2'>
-        Total ACH
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#clean-air-delivery-rate`" class='link-h2'>
-        Clean Air Delivery Rate (CADR)
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#interventions`" class='link-h1'>
-        Interventions
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#computational-details`" class='link-h1'>
-        Computational Details
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#details-ventilation-ach`" class='link-h2'>
-        Ventilation ACH
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#details-upper-room-germicidal-uv-ach`" class='link-h2'>
-        Upper-Room Germicidal UV ACH
-      </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#details-portable-air-cleaner-ach`" class='link-h2'>
-        Portable Air Cleaner ACH
-      </router-link>
+
+  <div class='col'>
+    <div class='row icon-bar'>
+      <VentIcon
+        height='6em'
+        width='6em'
+      />
+
+      <PacIcon
+        height='6em'
+        width='6em'
+      />
+
+      <RiskIcon
+        height='6em'
+        width='6em'
+      />
     </div>
 
     <div class='col border-showing right-pane'>
