@@ -1,57 +1,46 @@
 <template>
-  <div>
+  <div class='centered column'>
     <table>
       <tr>
-        <th></th>
-        <th class='header'>Risk w/ 1 infector</th>
-        <th class='header'>Average # of Susceptibles Infected under Max Occupancy</th>
-      </tr>
-
-      <tr v-for='h in [1, 4, 8, 40]' @click='click(roundOut(this.maximumOccupancy* (1 - (1-intervention.computeRiskRounded())**h), 1))'>
-        <th>{{h}} hour</th>
+        <th>Duration</th>
         <td>
+          <select @change='setDuration'>
+            <option :value="i" v-for='(v, i) in hoursToSelect'>{{v}}</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th>Risk</th>
+
         <ColoredCell
             v-if="intervention"
             :colorScheme="riskColorScheme"
             :maxVal=1
-            :value='roundOut(1 - (1-intervention.computeRiskRounded())**h, 6)'
+            :value='roundOut(1 - (1-intervention.computeRiskRounded())**selectedHour, 6)'
             :style="styleProps"
         />
-        </td>
-        <td>
-        <ColoredCell
-            v-if="intervention"
-            :colorScheme="averageInfectedPeopleInterpolationScheme"
-            :maxVal=1
-            :value='roundOut(this.maximumOccupancy* (1 - (1-intervention.computeRiskRounded())**h), 1)'
-            :style="styleProps"
-        />
-        </td>
-      </tr>
+        </tr>
     </table>
+
     <div
       class='people'
      >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="#000000"
-        viewBox="13 22 13 33"
-        height='2em'
-        width='1em'
-        v-for="index in 200"
-        :key="index"
-      >
-        <g>
-          <circle cx="19" cy="27" r="5" fill="red" />
-          <path d='m 23 29 c 3 0 -5 -2 -12 5 v 8 c 0 3 3 5 4 4 v 8 h 4 v -8 h 1 v 8 h 4 v -8 c 2 -1 3 -2 4 -3 v -8 c 0 -3 -3 -3 -5 -5 z' fill='red'/>
-        </g>
-      </svg>
+      <PersonIcon
+        backgroundColor='red'
+        :amount='numInfected'
+      />
+      <PersonIcon
+        backgroundColor='green'
+        :amount='maximumOccupancy - numInfected'
+      />
     </div>
   </div>
 </template>
 
 <script>
 import ColoredCell from './colored_cell.vue'
+import PersonIcon from './person_icon.vue'
+
 import { round } from './misc.js'
 import {
   assignBoundsToColorScheme,
@@ -62,20 +51,31 @@ import {
 export default {
   name: 'RiskTable',
   components: {
-    ColoredCell
+    ColoredCell,
+    PersonIcon
   },
   data() {
-    numInfected: 100
+    return {
+      numInfected: round(this.maximumOccupancy * (1 - (1-this.intervention.computeRiskRounded())), 0),
+      selectedHour: 1,
+      hoursToSelect: [
+        '1 hour',
+        '4 hours',
+        '8 hours',
+        '40 hours',
+      ]
+    }
   },
   methods: {
     roundOut(someValue, numRound) {
       return round(someValue, numRound)
     },
 
-    click(numInfected) {
-      this.numInfected = round(numInfected, 1)
-    },
-
+    setDuration(event) {
+      this.selectedHour = this.hoursToSelect[event.target.value].split(' ')[0]
+      this.risk = (1 - (1-this.intervention.computeRiskRounded())**this.selectedHour)
+      this.numInfected = round(this.maximumOccupancy * this.risk, 0)
+    }
   },
   computed: {
     styleProps() {
@@ -103,7 +103,7 @@ export default {
 
 <style scoped>
   table {
-    border-spacing: 0;
+    padding: 1em;
   }
   th {
     padding: 1em;
@@ -113,4 +113,21 @@ export default {
   .people {
     width: 22em;
   }
+
+  .centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: row;
+  }
+
 </style>
