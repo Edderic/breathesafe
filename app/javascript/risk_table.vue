@@ -10,29 +10,46 @@
         </td>
       </tr>
       <tr>
-        <th>Risk</th>
+        <th>Individual risk given 1 infector</th>
 
-        <ColoredCell
+        <td>
+          <ColoredCell
             v-if="intervention"
             :colorScheme="riskColorScheme"
             :maxVal=1
             :value='roundOut(1 - (1-intervention.computeRiskRounded())**selectedHour, 6)'
             :style="styleProps"
-        />
-        </tr>
+            />
+        </td>
+      </tr>
     </table>
-
     <div
-      class='people'
+      class='people centered column'
      >
-      <PersonIcon
-        backgroundColor='red'
-        :amount='numInfected'
-      />
-      <PersonIcon
-        backgroundColor='green'
-        :amount='maximumOccupancy - numInfected'
-      />
+
+      <div class='centered column'>
+        <span>On average, assuming max occupancy, and that there is one infector in the room, the number of people that would be infected is
+
+            <ColoredCell
+                v-if="intervention"
+                :colorScheme="riskColorScheme"
+                :maxVal=1
+                :value='roundOut(maximumOccupancy * (1 - (1-intervention.computeRiskRounded())**selectedHour), 1)'
+                class='inline'
+                :style="styleProps"
+            />:
+        </span>
+      </div>
+      <div class='people-icons'>
+        <PersonIcon
+          backgroundColor='red'
+          :amount='numInfected'
+        />
+        <PersonIcon
+          backgroundColor='green'
+          :amount='maximumOccupancy - numInfected'
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -114,6 +131,11 @@ export default {
     width: 22em;
   }
 
+  .people-icons {
+    padding-top: 1em;
+    padding-bottom: 1em;
+  }
+
   .centered {
     display: flex;
     align-items: center;
@@ -128,6 +150,10 @@ export default {
   .row {
     display: flex;
     flex-direction: row;
+  }
+
+  .inline {
+    display: inline-block;
   }
 
 </style>
