@@ -28,7 +28,7 @@
      >
 
       <div class='centered column'>
-        <span>On average, assuming max occupancy, and that there is one infector in the room, the number of people that would be infected is
+        <span>On average, assuming max occupancy (~{{maximumOccupancy}}), and that there is one infector in the room, and that everyone stays there for {{selectedHour}} hour(s), the number of people that would be infected is
 
             <ColoredCell
                 v-if="intervention"
