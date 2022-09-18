@@ -136,6 +136,13 @@ export class Intervention {
     this.selected = false
   }
 
+  computeCleanAirDeliveryRate(systemOfMeasurement) {
+    return displayCADR(
+      systemOfMeasurement,
+      this.roomUsableVolumeCubicMeters * this.computeACH()
+    )
+  }
+
   computeACH() {
     let total = this.totalAch
 
