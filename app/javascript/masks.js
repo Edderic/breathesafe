@@ -195,6 +195,22 @@ export class MaskingBarChart {
     this.activityGroups = activityGroups
   }
 
+  fractionOfSubparMasks() {
+    let values = this.maskingValues()
+    const subpar = values['None'] + values['Cloth / Surgical']
+
+    let total = 0
+    for (let k in values) {
+      total += values[k]
+    }
+
+    return subpar / total
+  }
+
+  isStrength(cutoff) {
+    return this.fractionOfSubparMasks() < cutoff
+  }
+
   maskingValues() {
     let key;
     let color;
