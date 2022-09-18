@@ -23,20 +23,8 @@
         <router-link :to="`/analytics/${this.$route.params.id}#risk-assessment`" class='link-h1'>
           Risk Assessment
         </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#overview`" class='link-h1'>
-          Overview
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#introduction`" class='link-h2'>
-          Introduction
-        </router-link>
         <router-link :to="`/analytics/${this.$route.params.id}#measurements`" class='link-h1'>
           Measurements
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#behaviors`" class='link-h2'>
-          Behaviors
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#masking`" class='link-h2'>
-          Masking
         </router-link>
         <router-link :to="`/analytics/${this.$route.params.id}#air-changes-per-hour`" class='link-h2'>
           Air Changes per Hour (ACH)
@@ -46,6 +34,19 @@
         </router-link>
         <router-link :to="`/analytics/${this.$route.params.id}#clean-air-delivery-rate`" class='link-h2'>
           Clean Air Delivery Rate (CADR)
+        </router-link>
+        <router-link :to="`/analytics/${this.$route.params.id}#behaviors`" class='link-h1'>
+          Behaviors
+        </router-link>
+        <router-link :to="`/analytics/${this.$route.params.id}#inhalation`" class='link-h2'>
+          Inhalation
+        </router-link>
+        <router-link :to="`/analytics/${this.$route.params.id}#exhalation`" class='link-h2'>
+          Exhalation
+        </router-link>
+
+        <router-link :to="`/analytics/${this.$route.params.id}#masking`" class='link-h2'>
+          Masking
         </router-link>
         <router-link :to="`/analytics/${this.$route.params.id}#interventions`" class='link-h1'>
           Interventions
@@ -83,72 +84,6 @@
               </div>
 
               <p>
-                The estimated maximum occupancy for this space is ~{{maximumOccupancy}}. To see how resilient this environment is in preventing outbreaks, let's assume there is one infector in this space.
-                <span>
-                  In 1 hour, a susceptible's risk is <ColoredCell
-                      v-if="nullIntervention"
-                      :colorScheme="riskColorScheme"
-                      :maxVal=1
-                      :value='nullIntervention.computeRiskRounded()'
-                      :style="inlineCellCSS"
-                  />
-                </span>, and if we repeat this many times under this assumption,
-                <span>
-                we should find on average that
-                    <ColoredCell
-                        v-if="nullIntervention"
-                        :colorScheme="averageInfectedPeopleInterpolationScheme"
-                        :maxVal=1
-                        :text='roundOut(this.maximumOccupancy * nullIntervention.computeRiskRounded(), 1)'
-                        :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
-                        :style="inlineCellCSS"
-                    />
-                </span> susceptibles would get infected.
-                <span> In 8 hours of exposure, the risk jumps to <ColoredCell
-                        v-if="nullIntervention"
-                        :colorScheme="riskColorScheme"
-                        :maxVal=1
-                        :value='roundOut(1 - (1-nullIntervention.computeRiskRounded())**8, 6)'
-                        :style="inlineCellCSS"
-                    />
-                </span>, and
-                <span>
-                    <ColoredCell
-                        v-if="nullIntervention"
-                        :colorScheme="averageInfectedPeopleInterpolationScheme"
-                        :maxVal=1
-                        :text='roundOut(this.maximumOccupancy * (1 - (1-nullIntervention.computeRiskRounded())**8), 1)'
-                        :value='this.maximumOccupancy * nullIntervention.computeRiskRounded()'
-                        :style="inlineCellCSS"
-                    />
-                </span> susceptibles would get infected, on average. Likewise,
-    <span>
-                    <ColoredCell
-                        v-if="nullIntervention"
-                        :colorScheme="averageInfectedPeopleInterpolationScheme"
-                        :maxVal=1
-                        :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**40), 1)'
-                        :style="inlineCellCSS"
-                    /> and
-                    <ColoredCell
-                        v-if="nullIntervention"
-                        :colorScheme="averageInfectedPeopleInterpolationScheme"
-                        :maxVal=1
-                        :value='roundOut(this.maximumOccupancy* (1 - (1-nullIntervention.computeRiskRounded())**80), 1)'
-                        :style="inlineCellCSS"
-                    />, on average, would get infected under 40 and 80 hours of exposure with an infector in this environment. Browse the
-    <router-link :to="`/analytics/${this.$route.params.id}#interventions`">
-      interventions
-    </router-link>
-     section to understand what actions you can take to make this environment safer for everyone.</span>
-              </p>
-
-
-              <br id='overview'>
-              <br>
-              <br>
-
-              <p>
 
                 The assessments below assume that an infector is present and is
                 doing the riskiest recorded behaviors. For example, the model assumes that the
@@ -162,72 +97,176 @@
               <br>
               <h3>Measurements</h3>
 
-              <br id='behaviors'>
-              <br>
-              <br>
-              <h4>Behaviors</h4>
 
-              <p>
-                <span>
-                The riskiest aerosol generation activity is <ColoredCell
-                      :colorScheme="riskiestAerosolGenerationActivityScheme"
-                      :maxVal=1
-                      :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
-                      :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
-                      :style="inlineCellCSS"
-                  /> so we assume that the infector in the risk calculations above is doing this.
-                </span>
+          <br id='strengths'>
+          <br>
+          <br>
+          <h4>Strengths</h4>
+          <ul>
+            <li v-if="nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) > 1000">
+
+              <span class='italic bold'>
+                <router-link :to="`/analytics/${this.$route.params.id}#clean-air-delivery-rate`">
+                  Clean Air Delivery Rate (CADR):
+                </router-link>
+              </span>&nbsp;&nbsp;
 
 
-                <span>The worst case inhalation activity is <ColoredCell
-                      :colorScheme="inhalationActivityScheme"
-                      :maxVal=1
-                      :value='worstCaseInhalation["inhalationFactor"]'
-                      :text='worstCaseInhalation["inhalationActivity"]'
-                      :style="inlineCellCSS"
-                  /> so we assume that susceptibles in the risk calculations above are doing this.
-                </span>
+            People are getting
 
-                Choosing activities where an infector is quiet and at rest, along
-                with susceptibles being at rest, could decrease the risk of
-                airborne transmission.
-              </p>
-            </div>
+            <ColoredCell
+              :colorScheme="colorInterpolationSchemeRoomVolume"
+              :maxVal=1
+              :value='roundOut(nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement), 0)'
+              :style='cellCSSMerged'
+            />
 
-          </div>
+            {{ measurementUnits.airDeliveryRateMeasurementType }} of clean air.
+            </li>
 
-          <div class='container'>
-            <br id='masking'>
-            <br>
-            <br>
-            <h4>Masking</h4>
-            <div class='centered'>
-              <HorizontalStackedBar
-                :values="maskingBarChart.maskingValues()"
-                :colors="maskingBarChart.maskingColors()"
+
+
+            <li v-if='maskingBarChart.isStrength(0.2)'>
+            <span class='italic bold'>
+              <router-link :to="`/analytics/${this.$route.params.id}#masking`" class='link-h2'>
+                Masking
+              </router-link>
+            </span>&nbsp;&nbsp;
+
+            <ColoredCell
+              :colorScheme="reducedRiskColorScheme"
+              :maxVal=1
+              :value='roundOut(maskingBarChart.fractionOfSubparMasks(), 2)'
+              :style='cellCSSMerged'
+            />
+            </li>
+
+            <li v-if='exhalationActivityIsStrength'>
+              <span class='italic bold'>
+                <router-link :to="`/analytics/${this.$route.params.id}#exhalation`">
+                  Exhalation activity:
+                </router-link>
+              </span>&nbsp;&nbsp;
+
+
+              <span>
+              The riskiest aerosol generation activity is <ColoredCell
+                    :colorScheme="riskiestAerosolGenerationActivityScheme"
+                    :maxVal=1
+                    :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
+                    :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
+                    :style="inlineCellCSS"
+                />.
+              </span>
+            </li>
+
+            <li v-if='inhalationActivityIsStrength'>
+              <span class='italic bold'>
+                <router-link :to="`/analytics/${this.$route.params.id}#inhalation`">
+                  Inhalation activity:
+                </router-link>
+              </span>&nbsp;&nbsp;
+
+              <span>The worst case inhalation activity is <ColoredCell
+                    :colorScheme="inhalationActivityScheme"
+                    :maxVal=1
+                    :value='worstCaseInhalation["inhalationFactor"]'
+                    :text='worstCaseInhalation["inhalationActivity"]'
+                    :style="inlineCellCSS"
+                />.
+              </span>
+            </li>
+
+            <li v-if='maskingBarChart.isStrength(0.2)'>
+            <span class='italic bold'>
+              <router-link :to="`/analytics/${this.$route.params.id}#masking`" class='link-h2'>
+                Masking
+              </router-link>
+            </span>&nbsp;&nbsp;
+            </li>
+          </ul>
+
+          <h4>Room for Improvement</h4>
+          <ul>
+            <li v-if="nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) <= 1000">
+              <span class='italic bold'>
+                <router-link :to="`/analytics/${this.$route.params.id}#clean-air-delivery-rate`">
+                  Clean Air Delivery Rate (CADR):
+                </router-link>
+              </span>&nbsp;&nbsp;
+
+              <ColoredCell
+                :colorScheme="colorInterpolationSchemeRoomVolume"
+                :maxVal=1
+                :value='roundOut(nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement), 0)'
+                :style='cellCSSMerged'
               />
-            </div>
+            </li>
 
-            <p>The riskiest mask recorded for this measurement is <span><ColoredCell
-                  :colorScheme="riskiestMaskColorScheme"
-                  :maxVal=1
-                  :value='riskiestMask["maskPenetrationFactor"]'
-                  :text='riskiestMask["maskType"]'
-                  :style="inlineCellCSS"
-              /></span>, so susceptibles are assumed to be wearing these (unless specified otherwise in the Interventions section).
-             </p>
+            <li v-if='!maskingBarChart.isStrength(0.2)'>
+            <span class='italic bold'>
+              <router-link :to="`/analytics/${this.$route.params.id}#masking`">
+                Masking:
+              </router-link>
+            </span> &nbsp;&nbsp; <ColoredCell
+              :colorScheme="reducedRiskColorScheme"
+              :maxVal=1
+              :text='roundOut(maskingBarChart.fractionOfSubparMasks() * 100, 2)'
+              :value='roundOut(maskingBarChart.fractionOfSubparMasks(), 2)'
+              :style='cellCSSMerged'
+            /> percent of people were wearing subpar masks. Switching to better-fitting, high filtration efficiency masks such as N95s or elastomeric respirators is a very cost-effective way to decrease risk.
+            </li>
 
-            <br id='air-changes-per-hour'>
-            <br>
-            <br>
-            <h4>Air Changes per Hour (ACH)</h4>
-            <p>
-              Air Changes per Hour (ACH) tells us how much clean air is generated
-              relative to the volume of the room. If a device outputs 5 ACH, that means it
-              produces clean air that is 5 times the volume of the room in an hour.  Total
-              ACH for a room can be computed by summing up the ACH of different types (e.g.
-              ventilation, filtration, upper-room germicidal UV).
-            </p>
+            <li v-if='!exhalationActivityIsStrength'>
+              <span class='italic bold'>
+                <router-link :to="`/analytics/${this.$route.params.id}#exhalation`">
+                  Exhalation activity:
+                </router-link>
+              </span>&nbsp;&nbsp;
+
+
+              <span>
+              The riskiest aerosol generation activity is <ColoredCell
+                    :colorScheme="riskiestAerosolGenerationActivityScheme"
+                    :maxVal=1
+                    :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
+                    :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
+                    :style="inlineCellCSS"
+                />.
+              </span>
+            </li>
+
+            <li v-if='!inhalationActivityIsStrength'>
+              <span class='italic bold'>
+                <router-link :to="`/analytics/${this.$route.params.id}#inhalation`">
+                  Inhalation activity:
+                </router-link>
+              </span>&nbsp;&nbsp;
+
+              <span>The worst case inhalation activity is <ColoredCell
+                    :colorScheme="inhalationActivityScheme"
+                    :maxVal=1
+                    :value='worstCaseInhalation["inhalationFactor"]'
+                    :text='worstCaseInhalation["inhalationActivity"]'
+                    :style="inlineCellCSS"
+                />.
+              </span>
+            </li>
+
+
+          </ul>
+
+          <br id='air-changes-per-hour'>
+          <br>
+          <br>
+          <h4>Air Changes per Hour (ACH)</h4>
+          <p>
+            Air Changes per Hour (ACH) tells us how much clean air is generated
+            relative to the volume of the room. If a device outputs 5 ACH, that means it
+            produces clean air that is 5 times the volume of the room in an hour.  Total
+            ACH for a room can be computed by summing up the ACH of different types (e.g.
+            ventilation, filtration, upper-room germicidal UV).
+          </p>
 
           <br id='total-ach'>
           <br>
@@ -272,19 +311,77 @@
             <p>
             A combination of larger rooms along with high ACH can reduce the risk
             of contracting COVID-19 and other airborne viruses. The product of the two
-            gives us the Clean Air Delivery Rate (CADR). The higher, the safer the
-            environment.
+            gives us the Clean Air Delivery Rate (CADR). The higher it is,
+            relative to the production rate of contaminants such as airborne
+            viruses like that of COVID-19, the safer the environment.
             </p>
 
-            <p>
-              <span>If everyone in the room wore {{this.maskSuggestion['type']}} masks such as the <a :href="maskSuggestion['website']">{{ this.maskSuggestion['name']}}</a> on top of {{ this.numSuggestedAirCleaners }} {{ this.airCleanerSuggestion.plural }} for air cleaning, long-range transmission risk goes down </span> to
-              <ColoredCell
-                :colorScheme="riskColorScheme"
+              <br id='behaviors'>
+              <br>
+              <br>
+              <h4>Behaviors</h4>
+
+              <br id='inhalation'>
+              <br>
+              <br>
+              <h4>Inhalation</h4>
+
+              <br id='exhalation'>
+              <br>
+              <br>
+              <h4>Exhalation</h4>
+
+              <span>
+              The riskiest aerosol generation activity is <ColoredCell
+                    :colorScheme="riskiestAerosolGenerationActivityScheme"
+                    :maxVal=1
+                    :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
+                    :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
+                    :style="inlineCellCSS"
+                />.
+              </span>
+              <p>
+                Activities that people partake in can affect the probability of
+                transmission of COVID and other respiratory viruses. Activities
+                where the infector is doing lots of exhalation and vocalization (e.g. loudly
+                talking during heavy exercise) could drastically increase the
+                risk of transmission. Likewise, doing activities where
+                susceptibles are inhaling more air in shorter time increases their risk of
+                getting COVID.
+
+              </p>
+              <p>
+
+              </p>
+              <p>
+                Choosing activities where an infector is quiet and at rest, along
+                with susceptibles being at rest, could decrease the risk of
+                airborne transmission.
+              </p>
+            </div>
+
+          </div>
+
+          <div class='container'>
+          <br id='masking'>
+          <br>
+          <br>
+          <h4>Masking</h4>
+          <div class='centered'>
+            <HorizontalStackedBar
+              :values="maskingBarChart.maskingValues()"
+              :colors="maskingBarChart.maskingColors()"
+            />
+          </div>
+
+          <p>The riskiest mask recorded for this measurement is <span><ColoredCell
+                :colorScheme="riskiestMaskColorScheme"
                 :maxVal=1
-                :value='riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleanersAndMasks'
+                :value='riskiestMask["maskPenetrationFactor"]'
+                :text='riskiestMask["maskType"]'
                 :style="inlineCellCSS"
-              />. The cost of <a :href="maskSuggestion['website']">{{ this.maskSuggestion['name']}}</a> is ${{ this.maskSuggestion['initialCostUSD']}} per person, with a recurring cost of ${{ this.maskSuggestion['recurringCostUSD']}} every {{ this.maskSuggestion['recurringCostDuration']}} per person.
-            </p>
+            /></span>, so susceptibles are assumed to be wearing these (unless specified otherwise in the Interventions section).
+           </p>
 
             <br id='interventions'>
             <br>
@@ -1415,6 +1512,7 @@ import {
   maskToPenetrationFactor,
   setupCSRF,
   simplifiedRisk,
+  susceptibleBreathingActivityToFactor
   round,
 
 } from  './misc';
@@ -1519,6 +1617,18 @@ export default {
           'totalAch'
         ]
     ),
+    cellCSSMerged() {
+      let def = {
+        'font-weight': 'bold',
+        'color': 'white',
+        'text-shadow': '1px 1px 2px black',
+        'text-align': 'center',
+        'display': 'inline-block',
+        'padding': '1em'
+      }
+
+      return Object.assign(def, this.cellCSS)
+    },
     cellCSS() {
       return {
         'padding-top': '1em',
@@ -1530,6 +1640,14 @@ export default {
     },
     durationWithIntervention() {
       return 40
+    },
+    inhalationActivityIsStrength() {
+      return this.worstCaseInhalation['inhalationFactor'] <= susceptibleBreathingActivityToFactor['Sedentary / Passive']['30 to 40']
+    },
+
+    exhalationActivityIsStrength() {
+      return aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])
+        <= infectorActivityTypeMapping["Standing – Speaking"]
     },
     intermediateProductWithIntervention() {
       let cadr = this.computeTotalFlowRate(
@@ -1564,13 +1682,12 @@ export default {
     reducedRiskColorScheme() {
       const minimum = 0
       const maximum = 1
-      const numObjects = 2
+      const numObjects = 6
       const evenSpacedBounds = generateEvenSpacedBounds(minimum, maximum, numObjects)
 
       const scheme = convertColorListToCutpoints(
-        [colorPaletteFall[3], colorPaletteFall[4], colorPaletteFall[5]]
+        JSON.parse(JSON.stringify(colorPaletteFall)).reverse()
       )
-      // const reducedRiskColorBounds = infectedPeopleColorBounds.reverse()
 
       return assignBoundsToColorScheme(scheme, evenSpacedBounds)
     },
@@ -2238,6 +2355,14 @@ export default {
   .icon-bar {
     position: fixed;
     background-color: white;
+  }
+
+  .italic {
+    font-style: italic;
+  }
+
+  .bold {
+    font-weight: bold;
   }
 
 </style>
