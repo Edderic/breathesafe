@@ -1,19 +1,24 @@
 <template>
 
   <div :style='containerCSSMerged'>
-    Imagine an infectious person exhaling 1 breath. With
+    Imagine an infectious person stays at this room and then leaves. With
       <ColoredCell
         :colorScheme="colorInterpolationSchemeTotalAch"
         :maxVal=1
         :value='totalAchRounded'
         :style='cellCSSMerged'
       />
-      ACH, it takes <ColoredCell
-        :colorScheme="removalScheme"
-        :maxVal=1
-        :value='durationMinutesToRemove(0.99)'
-        :style='cellCSSMerged'
-      /> minutes to remove 99% of the virus from the air from that 1 breath. The higher the ACH, the faster the rate of removal of airborne pathogens, and the safer it is for everyone.
+      ACH,
+      <span class='highlight'>
+        it takes <ColoredCell
+          :colorScheme="removalScheme"
+          :maxVal=1
+          :value='durationMinutesToRemove(0.99)'
+          :style='cellCSSMerged'
+        /> minutes to remove 99% of the virus that have been exhaled by the infector.
+      </span>
+
+      <span>Increasing total ACH, whether done by added ventilation, portable air cleaning, or upper room germicidal ultra violet irradiation,  the faster the rate of removal of airborne pathogens, and the safer it is for everyone.</span>
   </div>
 
 </template>
@@ -106,6 +111,10 @@ export default {
     padding-bottom: 0.5em;
     padding-left: 0.5em;
     padding-right: 0.5em;
+  }
+
+  .highlight {
+    font-weight: bold;
   }
 
   .container {
