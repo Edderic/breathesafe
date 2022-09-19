@@ -229,7 +229,7 @@
 
 
               <span>
-              The riskiest aerosol generation activity is <ColoredCell
+              The riskiest aerosol generation activity recorded during this measurement was <ColoredCell
                     :colorScheme="riskiestAerosolGenerationActivityScheme"
                     :maxVal=1
                     :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
@@ -246,7 +246,7 @@
                 </router-link>
               </span>&nbsp;&nbsp;
 
-              <span>The worst case inhalation activity is <ColoredCell
+              <span>The worst case inhalation activity was <ColoredCell
                     :colorScheme="inhalationActivityScheme"
                     :maxVal=1
                     :value='worstCaseInhalation["inhalationFactor"]'
