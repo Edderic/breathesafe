@@ -259,6 +259,32 @@
 
           </ul>
 
+
+
+          <br id='clean-air-delivery-rate'>
+          <br>
+          <br>
+          <h4>Clean Air Delivery Rate</h4>
+
+          <div class='container'>
+            <div class='centered'>
+              <CleanAirDeliveryRateTable
+                :measurementUnits='measurementUnits'
+                :systemOfMeasurement='systemOfMeasurement'
+                :intervention='nullIntervention'
+                :cellCSS='cellCSS'
+              />
+            </div>
+          </div>
+
+          <p>
+          A combination of larger rooms along with high ACH can reduce the risk
+          of contracting COVID-19 and other airborne viruses. The product of the two
+          gives us the Clean Air Delivery Rate (CADR). The higher it is,
+          relative to the production rate of contaminants such as airborne
+          viruses like that of COVID-19, the safer the environment.
+          </p>
+
           <br id='air-changes-per-hour'>
           <br>
           <br>
@@ -293,31 +319,6 @@
             :intervention='nullIntervention'
           />
           </div>
-
-
-          <br id='clean-air-delivery-rate'>
-          <br>
-          <br>
-          <h4>Clean Air Delivery Rate</h4>
-
-          <div class='container'>
-            <div class='centered'>
-              <CleanAirDeliveryRateTable
-                :measurementUnits='measurementUnits'
-                :systemOfMeasurement='systemOfMeasurement'
-                :intervention='nullIntervention'
-                :cellCSS='cellCSS'
-              />
-            </div>
-          </div>
-
-            <p>
-            A combination of larger rooms along with high ACH can reduce the risk
-            of contracting COVID-19 and other airborne viruses. The product of the two
-            gives us the Clean Air Delivery Rate (CADR). The higher it is,
-            relative to the production rate of contaminants such as airborne
-            viruses like that of COVID-19, the safer the environment.
-            </p>
 
               <br id='behaviors'>
               <br>
