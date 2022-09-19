@@ -18,8 +18,12 @@
         /> minutes to remove 99% of the virus that have been exhaled by the infector.
       </span>
 
-      <span>Increasing total ACH, whether done by added ventilation, portable air cleaning, or upper room germicidal ultra violet irradiation,  the faster the rate of removal of airborne pathogens, and the safer it is for everyone.</span>
-  </div>
+      <span>Increasing total ACH, whether done by added ventilation, portable
+      air cleaning, or upper room germicidal ultra violet irradiation, the faster
+      the rate of removal of airborne pathogens, and the safer it is for
+      everyone.
+      </span>
+    </div>
 
 </template>
 
