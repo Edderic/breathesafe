@@ -336,7 +336,7 @@
               <h4>Exhalation</h4>
 
               <span>
-              The riskiest aerosol generation activity is <ColoredCell
+              The riskiest aerosol generation activity recorded for a person in this measurement is <ColoredCell
                     :colorScheme="riskiestAerosolGenerationActivityScheme"
                     :maxVal=1
                     :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
