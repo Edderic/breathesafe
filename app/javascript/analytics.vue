@@ -1646,12 +1646,16 @@ export default {
       return 40
     },
     inhalationActivityIsStrength() {
-      return this.worstCaseInhalation['inhalationFactor'] <= susceptibleBreathingActivityToFactor['Sedentary / Passive']['30 to 40']
+      // highest range for Sedentary / Sedentary passive is 6 to <11
+      return this.worstCaseInhalation['inhalationFactor']
+        <= susceptibleBreathingActivityToFactor['Sedentary / Passive']['6 to <11'][
+          'mean cubic meters per hour'
+        ]
     },
 
     exhalationActivityIsStrength() {
-      return aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])
-        <= infectorActivityTypeMapping["Standing – Speaking"]
+      return this.aerosolActivityToFactor(this.riskiestPotentialInfector["aerosolGenerationActivity"])
+        <= this.infectorActivityTypeMapping["Standing – Speaking"]
     },
     intermediateProductWithIntervention() {
       let cadr = this.computeTotalFlowRate(
