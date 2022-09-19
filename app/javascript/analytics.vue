@@ -1516,8 +1516,8 @@ import {
   maskToPenetrationFactor,
   setupCSRF,
   simplifiedRisk,
-  susceptibleBreathingActivityToFactor
-  round,
+  susceptibleBreathingActivityToFactor,
+  round
 
 } from  './misc';
 
