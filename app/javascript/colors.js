@@ -345,11 +345,11 @@ export const AEROSOL_GENERATION_BOUNDS = [
   },
   {
     'lowerBound': infectorActivityTypes['Light exercise – Speaking'],
-    'upperBound': infectorActivityTypes['Heavy Exercise – Speaking']
+    'upperBound': infectorActivityTypes['Heavy exercise – Speaking']
   },
   {
-    'lowerBound': infectorActivityTypes['Heavy Exercise – Speaking'],
-    'upperBound': infectorActivityTypes['Heavy Exercise – Loudly Speaking']
+    'lowerBound': infectorActivityTypes['Heavy exercise – Speaking'],
+    'upperBound': infectorActivityTypes['Heavy exercise – Loudly speaking']
   },
 ]
 
