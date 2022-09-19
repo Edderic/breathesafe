@@ -150,7 +150,7 @@
 
 
               <span>
-              The riskiest aerosol generation activity is <ColoredCell
+              The riskiest aerosol generation activity recorded during this measurement is <ColoredCell
                     :colorScheme="riskiestAerosolGenerationActivityScheme"
                     :maxVal=1
                     :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
