@@ -200,7 +200,10 @@
                 :maxVal=1
                 :value='roundOut(nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement), 0)'
                 :style='cellCSSMerged'
-              />
+              /> {{ measurementUnits.airDeliveryRateMeasurementType }} of clean
+              air. One can invest in ventilation, filtration, and/or upper-room UV
+              technologies to increase the amount of clean air delivered, which
+              will dilute the inhaled dose of contaminants such as SARS-CoV-2.
             </li>
 
             <li v-if='!maskingBarChart.isStrength(0.2)'>
