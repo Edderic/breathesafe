@@ -363,6 +363,39 @@
                   </tr>
                 </table>
               </div>
+
+              <p>
+                For example, <ColoredCell
+                    :colorScheme="riskiestAerosolGenerationActivityScheme"
+                    :maxVal=1
+                    :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
+                    :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
+                    :style="inlineCellCSS"
+                /> maps to <ColoredCell
+                    :colorScheme="riskiestAerosolGenerationActivityScheme"
+                    :maxVal=1
+                    :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
+                    :style="inlineCellCSS"
+                />. By comparison to <ColoredCell
+                    :colorScheme="riskiestAerosolGenerationActivityScheme"
+                    :maxVal=1
+                    :value='aerosolActivityToFactor("Heavy exercise – Loudly speaking")'
+                    text='Heavy Exercise - Loudly Speaking'
+                    :style="inlineCellCSS"
+                />, which maps to <ColoredCell
+                    :colorScheme="riskiestAerosolGenerationActivityScheme"
+                    :maxVal=1
+                    :value='aerosolActivityToFactor("Heavy exercise – Loudly speaking")'
+                    :style="inlineCellCSS"
+                />. Switching to the latter from the former  essentially
+                increases the risk of transmission by a factor of <ColoredCell
+                    :colorScheme="riskiestAerosolGenerationActivityScheme"
+                    :maxVal=1
+                    :value='roundOut(aerosolActivityToFactor("Heavy exercise – Loudly speaking") / aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"]), 1)'
+                    :style="inlineCellCSS"
+                /> (assuming the risk was low to begin with).
+              </p>
+
               <p>
                 Activities that people partake in can affect the probability of
                 transmission of COVID and other respiratory viruses. Activities
@@ -1770,7 +1803,7 @@ export default {
         colorPaletteFall[2],
         colorPaletteFall[1],
         colorPaletteFall[0]]
-          const cutPoints = convertColorListToCutpoints(copy)
+      const cutPoints = convertColorListToCutpoints(copy)
       return assignBoundsToColorScheme(cutPoints, AEROSOL_GENERATION_BOUNDS)
     },
     riskiestMaskColorScheme() {
