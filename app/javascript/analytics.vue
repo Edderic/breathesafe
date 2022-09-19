@@ -342,8 +342,27 @@
                     :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
                     :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
                     :style="inlineCellCSS"
-                />.
+                />. Here's a table to contextualize how good or bad it is. In this model, it essentially maps into a factor, where higher leads to more risk.
               </span>
+              <div class='centered'>
+                <table>
+                  <tr>
+                    <th>Infector Activity</th>
+                    <th>Factor</th>
+                  </tr>
+                  <tr v-for='(value, key) in infectorActivities'>
+                    <td class='table-td'>{{key}}</td>
+                    <td class='table-td'>
+                    <ColoredCell
+                      :colorScheme="riskiestAerosolGenerationActivityScheme"
+                      :maxVal=1
+                      :value='value'
+                      :style="tableColoredCell"
+                    />
+                    </td>
+                  </tr>
+                </table>
+              </div>
               <p>
                 Activities that people partake in can affect the probability of
                 transmission of COVID and other respiratory viruses. Activities
@@ -2117,6 +2136,14 @@ export default {
       ventilationACH: 0.0,
       portableACH: 0.0,
       totalACH: 0.0,
+      tableColoredCell: {
+        'color': 'white',
+        'font-weight': 'bold',
+        'text-shadow': '1px 1px 2px black',
+        'padding-top': '0.5em',
+        'padding-bottom': '0.5em',
+      },
+      infectorActivities: infectorActivityTypes,
       inlineCellCSS: {
         'display': 'inline-block',
         'font-weight': 'bold',
@@ -2373,4 +2400,7 @@ export default {
     font-weight: bold;
   }
 
+  .table-td {
+    padding: 0 0.5em;
+  }
 </style>
