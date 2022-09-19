@@ -112,19 +112,19 @@
               </span>&nbsp;&nbsp;
 
 
-            People are getting
+              Assuming that the air is well-mixed (i.e. infector's air
+              particles are distributed evenly throughout the space (i.e. via fans),
+              people are getting
 
-            <ColoredCell
-              :colorScheme="colorInterpolationSchemeRoomVolume"
-              :maxVal=1
-              :value='roundOut(nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement), 0)'
-              :style='cellCSSMerged'
-            />
+              <ColoredCell
+                :colorScheme="colorInterpolationSchemeRoomVolume"
+                :maxVal=1
+                :value='roundOut(nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement), 0)'
+                :style='cellCSSMerged'
+              />
 
             {{ measurementUnits.airDeliveryRateMeasurementType }} of clean air.
             </li>
-
-
 
             <li v-if='maskingBarChart.isStrength(0.2)'>
             <span class='italic bold'>
