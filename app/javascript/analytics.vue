@@ -23,8 +23,17 @@
         <router-link :to="`/analytics/${this.$route.params.id}#risk-assessment`" class='link-h1'>
           Risk Assessment
         </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#measurements`" class='link-h1'>
-          Measurements
+        <router-link :to="`/analytics/${this.$route.params.id}#overview`" class='link-h1'>
+          Overview
+        </router-link>
+        <router-link :to="`/analytics/${this.$route.params.id}#strengths`" class='link-h2'>
+          Strengths
+        </router-link>
+        <router-link :to="`/analytics/${this.$route.params.id}#room-for-improvement`" class='link-h2'>
+          Room for Improvement
+        </router-link>
+        <router-link :to="`/analytics/${this.$route.params.id}#details`" class='link-h1'>
+          Details
         </router-link>
         <router-link :to="`/analytics/${this.$route.params.id}#clean-air-delivery-rate`" class='link-h2'>
           Clean Air Delivery Rate (CADR)
@@ -35,7 +44,7 @@
         <router-link :to="`/analytics/${this.$route.params.id}#total-ach`" class='link-h2'>
           Total ACH
         </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#behaviors`" class='link-h1'>
+        <router-link :to="`/analytics/${this.$route.params.id}#behaviors`" class='link-h2'>
           Behaviors
         </router-link>
         <router-link :to="`/analytics/${this.$route.params.id}#inhalation`" class='link-h2'>
@@ -92,10 +101,10 @@
                 recorded (e.g. loudly talking).
               </p>
 
-              <br id='measurements'>
+              <br id='overview'>
               <br>
               <br>
-              <h3>Measurements</h3>
+              <h3>Overview</h3>
 
 
           <br id='strengths'>
@@ -186,6 +195,9 @@
             </li>
           </ul>
 
+          <br id='room-for-improvement'>
+          <br>
+          <br>
           <h4>Room for Improvement</h4>
           <ul>
             <li v-if="nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) <= 1000">
@@ -261,6 +273,12 @@
 
 
 
+          <br id='details'>
+          <br>
+          <br>
+          <h3>Details</h3>
+
+
           <br id='clean-air-delivery-rate'>
           <br>
           <br>
@@ -323,7 +341,26 @@
           <br id='behaviors'>
           <br>
           <br>
-          <h4>Behaviors</h4>
+          <h3>Behaviors</h3>
+
+          <p>
+            Activities that people partake in can affect the probability of
+            transmission of COVID and other respiratory viruses. Activities
+            where the infector is doing lots of exhalation and vocalization (e.g. loudly
+            talking during heavy exercise) could drastically increase the
+            risk of transmission. Likewise, doing activities where
+            susceptibles are inhaling more air in shorter time increases their risk of
+            getting COVID.
+
+          </p>
+          <p>
+
+          </p>
+          <p>
+            Choosing activities where an infector is quiet and at rest, along
+            with susceptibles being at rest, could decrease the risk of
+            airborne transmission.
+          </p>
 
           <br id='inhalation'>
           <br>
@@ -451,24 +488,6 @@
                 />, assuming the risk was low to begin with.
               </p>
 
-              <p>
-                Activities that people partake in can affect the probability of
-                transmission of COVID and other respiratory viruses. Activities
-                where the infector is doing lots of exhalation and vocalization (e.g. loudly
-                talking during heavy exercise) could drastically increase the
-                risk of transmission. Likewise, doing activities where
-                susceptibles are inhaling more air in shorter time increases their risk of
-                getting COVID.
-
-              </p>
-              <p>
-
-              </p>
-              <p>
-                Choosing activities where an infector is quiet and at rest, along
-                with susceptibles being at rest, could decrease the risk of
-                airborne transmission.
-              </p>
             </div>
 
           </div>
