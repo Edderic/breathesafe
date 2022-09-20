@@ -320,20 +320,75 @@
           />
           </div>
 
-              <br id='behaviors'>
-              <br>
-              <br>
-              <h4>Behaviors</h4>
+          <br id='behaviors'>
+          <br>
+          <br>
+          <h4>Behaviors</h4>
 
-              <br id='inhalation'>
-              <br>
-              <br>
-              <h4>Inhalation</h4>
+          <br id='inhalation'>
+          <br>
+          <br>
+          <h4>Inhalation</h4>
+          <p> The worst case inhalation activity was <ColoredCell
+                              :colorScheme="inhalationActivityScheme"
+                              :maxVal=1
+                              :value='worstCaseInhalation["inhalationFactor"]'
+                              :text='worstCaseInhalation["inhalationActivity"]'
+                              :style="inlineCellCSS"
+                          />, which corresponds to a factor of
+              <ColoredCell
+                  :colorScheme="inhalationActivityScheme"
+                  :maxVal=1
+                  :value='worstCaseInhalation["inhalationFactor"]'
+                  :style="inlineCellCSS"
+              />. To better contextualize how good this is, let's look at the
+              table of inhalation activities and factors:
+          </p>
 
-              <br id='exhalation'>
-              <br>
-              <br>
-              <h4>Exhalation</h4>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th>Inhalation Activity</th>
+                <th>Factor</th>
+              </tr>
+              <tr v-for='(value, key, index) in susceptibleBreathingActivityFactorMappings'>
+                <td style='padding: 0.25em 1em;'>{{ ['Sleep or Nap', 'Sedentary / Passive', 'Light Intensity', 'Moderate Intensity', 'High Intensity'][index] }}</td>
+                <td style='padding: 0;'>
+                  <ColoredCell
+                    :colorScheme="inhalationActivityScheme"
+                    :maxVal=1
+                    :value='value["21 to <30"]["mean cubic meters per hour"]'
+                    :style="tableColoredCellWithHorizPadding"
+                    />
+                </td>
+              </tr>
+            </table>
+          </div>
+          <p>
+          If someone were to go from <ColoredCell
+                :colorScheme="inhalationActivityScheme"
+                :maxVal=1
+                :value='worstCaseInhalation["inhalationFactor"]'
+                :text='worstCaseInhalation["inhalationActivity"]'
+                :style="inlineCellCSS"
+            /> to <ColoredCell
+                :colorScheme="inhalationActivityScheme"
+                :maxVal=1
+                :value='susceptibleBreathingActivityFactorMappings["High Intensity"]["30 to <40"]["mean cubic meters per hour"]'
+                text='High intensity'
+                :style="inlineCellCSS"
+            />, this increases the risk by a factor of <ColoredCell
+                :colorScheme="inhalationActivityScheme"
+                :maxVal=1
+                :value='roundOut(susceptibleBreathingActivityFactorMappings["High Intensity"]["30 to <40"]["mean cubic meters per hour"] / worstCaseInhalation["inhalationFactor"], 1)'
+                :style="inlineCellCSS"
+            />, assuming that the risk was low to begin with.
+          </p>
+
+          <br id='exhalation'>
+          <br>
+          <br>
+          <h4>Exhalation</h4>
 
               <span>
               The riskiest aerosol generation activity recorded for a person in this measurement is <ColoredCell
@@ -393,7 +448,7 @@
                     :maxVal=1
                     :value='roundOut(aerosolActivityToFactor("Heavy exercise – Loudly speaking") / aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"]), 1)'
                     :style="inlineCellCSS"
-                /> (assuming the risk was low to begin with).
+                />, assuming the risk was low to begin with.
               </p>
 
               <p>
@@ -2169,6 +2224,12 @@ export default {
       ventilationACH: 0.0,
       portableACH: 0.0,
       totalACH: 0.0,
+      tableColoredCellWithHorizPadding: {
+        'color': 'white',
+        'font-weight': 'bold',
+        'text-shadow': '1px 1px 2px black',
+        'padding': '0.5em',
+      },
       tableColoredCell: {
         'color': 'white',
         'font-weight': 'bold',
@@ -2185,7 +2246,8 @@ export default {
         'padding': '1em',
         'margin': '0.5em',
         'text-align': 'center'
-      }
+      },
+      susceptibleBreathingActivityFactorMappings: susceptibleBreathingActivityToFactor
     }
   },
   methods: {
