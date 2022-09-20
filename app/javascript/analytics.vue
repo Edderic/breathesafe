@@ -394,7 +394,7 @@
                   <ColoredCell
                     :colorScheme="inhalationActivityScheme"
                     :maxVal=1
-                    :value='value["21 to <30"]["mean cubic meters per hour"]'
+                    :value='value[worstCaseInhalation["ageGroup"]]["mean cubic meters per hour"]'
                     :style="tableColoredCellWithHorizPadding"
                     />
                 </td>
