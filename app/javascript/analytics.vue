@@ -488,6 +488,22 @@
             />
           </div>
 
+          <p>
+          Below is a graph showing the relative amount of particles left
+          when a susceptible (x-axis) wears some type of mask and an infector
+          (y-axis) also wears some type of mask. For example, when the infector
+          is unmasked (i.e. "None"), but the susceptible is wearing a KN95,
+          then 0.15 of infectious particles are left over for the susceptible
+          to inhale, which is an 85% reduction of particles. If both wore
+          KN95s, then the left over particles is 0.0225 (i.e. a 98.75%
+          reduction of infectious airborne particles a susceptible can inhale).
+          <span class='bold'>If both wore elastomeric N99 respirators, then we
+          get a 10,000-fold reduction!</span> Upgrading to N95 respirators and
+          above (i.e. tight-fitting, high filtration efficiency), and having
+          mask mandates especially in times of surges, is a very effective and
+          cost-efficient way to prevent the spread of COVID-19 and other airborne
+          respiratory viruses.
+          </p>
           <div class='centered'>
             <table>
               <tr>
