@@ -480,11 +480,40 @@
           <br>
           <br>
           <h4>Masking</h4>
+          <p>Here is the breakdown of masking prevalance:</p>
           <div class='centered'>
             <HorizontalStackedBar
               :values="maskingBarChart.maskingValues()"
               :colors="maskingBarChart.maskingColors()"
             />
+          </div>
+
+          <div class='centered'>
+            <table>
+              <tr>
+                <th></th>
+                <th style='padding: 0;' v-for='(value1, key1) in maskFactors'>
+
+
+
+                  <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" transform='rotate(-40, 40, 40)' class='tilted-header'>{{key1}}</text>
+                  </svg>
+
+                </th>
+              </tr>
+              <tr v-for='(value1, key1) in maskFactors'>
+                <th class='table-td-mask'>{{key1}}</th>
+                <td class='table-td-mask' v-for='(value2, key2) in maskFactors'>
+                  <ColoredCell
+                    :colorScheme="riskColorScheme"
+                    :maxVal=1
+                    :value='roundOut(value1 * value2, 6)'
+                    :style="tableColoredCellMasking"
+                  />
+                </td>
+              </tr>
+            </table>
           </div>
 
           <p>The riskiest mask recorded for this measurement is <span><ColoredCell
@@ -2226,6 +2255,7 @@ export default {
       ventilationACH: 0.0,
       portableACH: 0.0,
       totalACH: 0.0,
+      maskFactors: maskToPenetrationFactor,
       tableColoredCellWithHorizPadding: {
         'color': 'white',
         'font-weight': 'bold',
@@ -2238,6 +2268,14 @@ export default {
         'text-shadow': '1px 1px 2px black',
         'padding-top': '0.5em',
         'padding-bottom': '0.5em',
+      },
+      tableColoredCellMasking: {
+        'color': 'white',
+        'font-weight': 'bold',
+        'text-shadow': '1px 1px 2px black',
+        'padding-top': '0.5em',
+        'padding-bottom': '0.5em',
+        'width': '5em',
       },
       infectorActivities: infectorActivityTypes,
       inlineCellCSS: {
@@ -2497,7 +2535,20 @@ export default {
     font-weight: bold;
   }
 
+  .table-td-mask {
+    padding: 0;
+    width: 3em;
+  }
+
   .table-td {
     padding: 0 0.5em;
+  }
+
+  .tilted-header {
+    font-size: 0.5em;
+  }
+
+  th.table-td-mask {
+    font-size: 0.5em;
   }
 </style>
