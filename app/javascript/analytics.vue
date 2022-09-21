@@ -1,23 +1,6 @@
 <template>
 
   <div class='col'>
-    <div class='row icon-bar'>
-      <VentIcon
-        height='6em'
-        width='6em'
-      />
-
-      <PacIcon
-        height='6em'
-        width='6em'
-      />
-
-      <RiskIcon
-        height='6em'
-        width='6em'
-      />
-    </div>
-
     <div class='row'>
       <div class='col border-showing left-pane'>
         <router-link :to="`/analytics/${this.$route.params.id}#risk-assessment`" class='link-h1'>
