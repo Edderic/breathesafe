@@ -451,13 +451,13 @@
                     :maxVal=1
                     :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
                     :style="inlineCellCSS"
-                />. By comparison to <ColoredCell
+                />. On the other hand, <ColoredCell
                     :colorScheme="riskiestAerosolGenerationActivityScheme"
                     :maxVal=1
                     :value='aerosolActivityToFactor("Heavy exercise – Loudly speaking")'
                     text='Heavy Exercise - Loudly Speaking'
                     :style="inlineCellCSS"
-                />, which maps to <ColoredCell
+                />, maps to <ColoredCell
                     :colorScheme="riskiestAerosolGenerationActivityScheme"
                     :maxVal=1
                     :value='aerosolActivityToFactor("Heavy exercise – Loudly speaking")'
