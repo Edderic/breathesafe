@@ -29,8 +29,8 @@ const infectorActivityTypeMapping = {
 const maskToFactor = {
   'None': 1.0,
   'Cloth / Surgical': 0.5,
+  'KN95': 0.15,
   'N95 - unfitted': 0.1,
-  'Elastomeric N95': 0.05,
   'Elastomeric N99': 0.01,
   'Elastomeric P100': 0.001
 }
