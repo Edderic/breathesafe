@@ -279,6 +279,32 @@
           </div>
 
           <p>
+          To give context of what {{roundOut(totalFlowRate, 1)}} {{
+          measurementUnits.airDeliveryRateMeasurementType}} means, that is
+          about {{
+            roundOut(totalFlowRatePerAirCleanerSuggestion, 1)}} times the amount 1
+            <a :href="airCleanerSuggestion.website"> {{
+              airCleanerSuggestion['singular']}}
+            </a> outputs.
+            <span class='bold'>
+              Adding {{
+              numSuggestedAirCleaners }} {{ airCleanerSuggestion['plural'] }} would
+              increase the CADR to
+
+              <ColoredCell
+                :colorScheme="colorInterpolationSchemeRoomVolume"
+                :maxVal=1
+                :value='totalFlowRatePlusExtraPacRounded'
+                :style='cellCSSMerged'
+              />
+                {{ measurementUnits.airDeliveryRateMeasurementType}}, which would
+                decrease the probability of infection by a factor of {{
+                  roundOut(totalFlowRatePlusExtraPacRounded / totalFlowRate, 1)
+                }} (assuming the risk was low to begin with).
+            </span>
+          </p>
+
+          <p>
           A combination of larger rooms along with high ACH can reduce the risk
           of contracting COVID-19 and other airborne viruses. The product of the two
           gives us the Clean Air Delivery Rate (CADR). The higher it is,
@@ -2235,6 +2261,9 @@ export default {
     },
     airCleanerSuggestion() {
       return airCleaners.find((ac) => ac.singular == 'Corsi-Rosenthal box (Max Speed)')
+    },
+    totalFlowRatePerAirCleanerSuggestion() {
+      return this.totalFlowRateCubicMetersPerHour / this.airCleanerSuggestion.cubicMetersPerHour
     },
     totalFlowRatePlusExtraPacRounded() {
       // TODO: could pull from risk.js airCleaners instead
