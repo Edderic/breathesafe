@@ -50,6 +50,16 @@
           :amount='maximumOccupancy - numInfected'
         />
       </div>
+
+      <p>
+        Assuming a wage of ${{wage}}/hour, and that each infected person takes
+        off for 5 days after infection, doing this intervention costs at least
+        <span class='bold'>${{ peopleCost() }}</span> in terms of <span
+        class='italic'>lost wages/labor</span>. Lost wages here are the wages not
+        received by sick employees who no longer have sick days. Similarly,
+        lost labor in terms of some business paying money for people being out on
+        sick days.
+      </p>
     </div>
   </div>
 </template>
@@ -71,6 +81,8 @@ export default {
     ColoredCell,
     PersonIcon
   },
+  computed: {
+  },
   data() {
     return {
       numInfected: round(this.maximumOccupancy * (1 - (1-this.intervention.computeRiskRounded())), 0),
@@ -80,10 +92,16 @@ export default {
         '4 hours',
         '8 hours',
         '40 hours',
-      ]
+      ],
+      wage: 15,
+      numDaysOff: 5,
+      numHoursPerDay: 8
     }
   },
   methods: {
+    peopleCost() {
+      return this.numInfected * this.wage * this.numDaysOff * this.numHoursPerDay
+    },
     roundOut(someValue, numRound) {
       return round(someValue, numRound)
     },
@@ -155,5 +173,14 @@ export default {
   .inline {
     display: inline-block;
   }
+
+  .bold {
+    font-weight: bold;
+  }
+
+  .italic {
+    font-style: italic;
+  }
+
 
 </style>
