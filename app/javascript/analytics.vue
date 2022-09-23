@@ -63,14 +63,15 @@
           <br>
           <br>
           <h3 class='subsection'>Analysis & Recommendations for {{this.roomName}}</h3>
-          <h4 class='subsection'>{{this.event.placeData.formattedAddress}}</h4>
-          <h4 class='subsection'>Measurements taken by {{this.event.firstName}} {{this.event.lastName}}</h4>
+          <h4 class='subsection' v-if='event && event.placeData'>{{event.placeData.formattedAddress}}</h4>
+          <h4 class='subsection' v-if='event && event.firstName'>Measurements taken by {{event.firstName}} {{event.lastName}}</h4>
           <h4 class='subsection'>on {{datetimeInWords}}</h4>
           <div class='centered col'>
             <div class='container'>
+
               <div class='centered'>
                 <RiskTable
-                  :intervention="nullIntervention"
+                  :event='event'
                   :maximumOccupancy='maximumOccupancy'
                 />
               </div>
@@ -95,7 +96,7 @@
           <br>
           <h4>Strengths</h4>
           <ul>
-            <li v-if="nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) > 1000">
+            <li v-if="nullIntervention && nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) > 1000">
 
               <span class='italic bold'>
                 <router-link :to="`/analytics/${this.$route.params.id}#clean-air-delivery-rate`">
@@ -183,7 +184,7 @@
           <br>
           <h4>Room for Improvement</h4>
           <ul>
-            <li v-if="nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) <= 1000">
+            <li v-if="nullIntervention && nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) <= 1000">
               <span class='italic bold'>
                 <router-link :to="`/analytics/${this.$route.params.id}#clean-air-delivery-rate`">
                   Clean Air Delivery Rate (CADR):
@@ -272,7 +273,7 @@
               <CleanAirDeliveryRateTable
                 :measurementUnits='measurementUnits'
                 :systemOfMeasurement='systemOfMeasurement'
-                :intervention='nullIntervention'
+                :intervention='selectedIntervention'
                 :cellCSS='cellCSS'
               />
             </div>
@@ -328,7 +329,7 @@
           <br>
           <br>
           <h4>Total ACH</h4>
-          <div class='centered'>
+          <div class='centered' v-if='nullIntervention'>
             <TotalACHTable
               :measurementUnits='measurementUnits'
               :systemOfMeasurement='systemOfMeasurement'
@@ -343,7 +344,7 @@
 
           <div class='centered'>
           <AchToDuration
-            :intervention='nullIntervention'
+            :intervention='selectedIntervention'
           />
           </div>
 
@@ -403,7 +404,7 @@
                   <ColoredCell
                     :colorScheme="inhalationActivityScheme"
                     :maxVal=1
-                    :value='value[worstCaseInhalation["ageGroup"]]["mean cubic meters per hour"]'
+                    :value='inhalationValue(value)'
                     :style="tableColoredCellWithHorizPadding"
                     />
                 </td>
@@ -1653,6 +1654,7 @@ import CleanAirDeliveryRateTable from './clean_air_delivery_rate_table.vue'
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import RiskTable from './risk_table.vue';
+import { Intervention } from './interventions.js'
 import TotalACHTable from './total_ach_table.vue';
 import VentIcon from './vent_icon.vue';
 import PacIcon from './pac_icon.vue';
@@ -1726,13 +1728,11 @@ export default {
           'currentUser',
         ]
     ),
-    ...mapState(
+    ...mapWritableState(
         useAnalyticsStore,
         [
           'interventions',
-          'nullIntervention',
-          'selectedIntervention',
-          'event'
+          'selectedIntervention'
         ]
     ),
     ...mapWritableState(
@@ -2235,6 +2235,9 @@ export default {
     colorInterpolationSchemeRoomVolumeMetric() {
       return assignBoundsToColorScheme(colorSchemeFall, this.cutoffsMetricVolume)
     },
+    async event() {
+      return await this.showAnalysis(this.$route.params.id)
+    },
     numSuggestedAirCleaners() {
       return computeAmountOfPortableAirCleanersThatCanFit(
         this.roomLengthMeters * this.roomWidthMeters,
@@ -2286,19 +2289,32 @@ export default {
       return round(this.ventilationAch, 1)
     }
   },
-  created() {
-    this.showAnalysis(this.$route.params.id)
+  async created() {
+    let event = await this.showAnalysis(this.$route.params.id)
 
-    this.$watch(
+    this.nullIntervention = new Intervention(
+      event,
+      []
+    )
+
+    this.selectedIntervention = this.nullIntervention
+
+    await this.$watch(
       () => this.$route.params,
       (toParams, previousParams) => {
         this.showAnalysis(toParams.id)
-        // react to route changes...
+        this.nullIntervention = new Intervention(
+          event,
+          []
+        )
+        this.selectedIntervention = this.nullIntervention
       }
     )
   },
   data() {
     return {
+      nullIntervention: undefined,
+      nullInterventionCADR: 0,
       center: {lat: 51.093048, lng: 6.842120},
       ventilationACH: 0.0,
       portableACH: 0.0,
@@ -2339,10 +2355,31 @@ export default {
     }
   },
   methods: {
-    ...mapActions(useAnalyticsStore, ['reload', 'setNumPeopleToInvestIn', 'selectIntervention']),
-    ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser', 'showAnalysis']),
+    ...mapActions(useAnalyticsStore, ['reload', 'setNumPeopleToInvestIn']),
+    ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
+    selectIntervention(event) {
+      let id = event.target.value
+      let intervention = this.interventions.find((interv) => { return interv.id == id })
+      this.selectedIntervention = intervention
+    },
+    inhalationValue(value) {
+      if (value && this.worstCaseInhalation["ageGroup"]) {
+        return value[this.worstCaseInhalation["ageGroup"]]["mean cubic meters per hour"]
+      } else {
+        return 0
+      }
+    },
+    async showAnalysis(id) {
+      let eventStores = useEventStores()
+      const showMeasurementSetStore = useShowMeasurementSetStore()
+      let event = await eventStores.findOrLoad(id);
+      this.event = event
+      showMeasurementSetStore.setMeasurementSet(event)
+
+      return event
+    },
     scrollFix(event, hashbang) {
       let element_to_scroll_to = document.getElementById(hashbang);
       element_to_scroll_to.scrollIntoView();
