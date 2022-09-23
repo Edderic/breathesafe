@@ -470,6 +470,9 @@ export class Intervention {
       tmp += `${intervention.amountText()} `
     }
 
+    // For now, assume that everyone's wearing the same mask
+    tmp += this.mask1.amountText()
+
     return tmp
   }
 
