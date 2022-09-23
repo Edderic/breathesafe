@@ -179,6 +179,9 @@ export class Intervention {
   }
 
   computeRisk(duration) {
+    /*
+     * Uses mask1 and mask2 for susceptible and infector
+     */
     if (!duration) {
       duration = 1
     }
@@ -226,6 +229,7 @@ export class Intervention {
     )
     const probaRandomSampleOfOneIsInfectious = 1.0
 
+    // Assumes that the infector is part of the riskiest activity group.
     let result = simplifiedRisk(
       [riskiestActivityGroup],
       occupancy,
