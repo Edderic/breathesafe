@@ -2,6 +2,17 @@
   <div class='centered column'>
     <table>
       <tr>
+        <th>
+           Intervention
+        </th>
+        <td>
+          <select class='centered' >
+            <option :value="interv.id" v-for='interv in interventions'>{{interv.websitesAndText[0].text}}</option>
+          </select>
+        </td>
+      </tr>
+
+      <tr>
         <th>Duration</th>
         <td>
           <select @change='setDuration'>
