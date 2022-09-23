@@ -441,6 +441,24 @@ export class Intervention {
     return cost
   }
 
+  implementationCostInYears(numYears) {
+    let cost = 0
+
+    for (let intervention of this.environmentalInterventions) {
+      cost += intervention.costInYears(numYears)
+    }
+
+    // For now, assume that everyone's wearing the same mask
+    cost += this.mask1.costInYears(numYears)
+    // Number of people wearing mask1
+    // Number of people wearing mask2
+    // Got to divide the number of people into two groups, those who wear mask1
+    // and those who wear mask2
+    // cost += this.mask1
+
+    return cost
+  }
+
   computeRiskRounded(duration) {
     return round(this.computeRisk(duration), 6)
   }
