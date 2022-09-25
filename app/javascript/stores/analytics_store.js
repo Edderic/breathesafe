@@ -62,6 +62,9 @@ export const useAnalyticsStore = defineStore('analytics', {
           'numDevices': function() { return 0 },
           'numDeviceFactor': function() { return 0 }
         }
+      },
+      implementationCostInYears() {
+        return 0
       }
     },
     workers: [
