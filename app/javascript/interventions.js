@@ -527,5 +527,18 @@ export class Intervention {
 
     return tmp
   }
+
+  textString() {
+    let text = ""
+
+    let loopables = this.environmentalInterventions.concat([this.mask1])
+
+    for (let intervention of this.environmentalInterventions) {
+      text += intervention.amountText()
+      text += " | "
+    }
+
+    return text.slice(0, -3)
+  }
 }
 

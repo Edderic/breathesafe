@@ -13,40 +13,85 @@ import { getSampleInterventions } from '../sample_interventions.js'
 // the first argument is a unique id of the store across your application
 export const useAnalyticsStore = defineStore('analytics', {
   state: () => ({
-    nullIntervention: new Intervention({
-      activityGroups: [],
-      totalAch: 0.1
-    }, []),
     interventions: [],
-    selectedIntervention: new Intervention({
-      activityGroups: [],
-      totalAch: 0.1
-    }, []),
+    selectedIntervention: {
+      computePortableAirCleanerACH() {
+        return 0.01
+      },
+      computeVentilationACH() {
+        return 0.01
+      },
+      computeUVACH() {
+        return 0.01
+      },
+      computeEmissionRate() {
+        return 0.01
+      },
+      computeVentilationDenominator() {
+        return 0.01
+      },
+      computeSusceptibleMask() {
+        return {
+          'maskPenetrationFactor': 'None'
+        }
+      },
+      computeRiskRounded() {
+        return 0
+      },
+      computeACH() {
+        return 0
+      },
+      findPortableAirCleaners() {
+        return {
+          'cubic meters per hour': 0,
+          'numDevices': 0
+        }
+      },
+      ventilationDenominator() { return 0.01 },
+      steadyStateCO2Reading() { return 0.01 },
+      ambientCO2Reading() { return 0.01 },
+      findPortableAirCleaners() {
+        return {
+          'numDevices': function() { return 0 },
+          'numDeviceFactor': function() { return 0 },
+          'singularName': function() { return '' }
+        }
+      },
+      findUVDevices() {
+        return {
+          'numDevices': function() { return 0 },
+          'numDeviceFactor': function() { return 0 }
+        }
+      }
+    },
     workers: [
       // Takes 10 seconds on macbook pro
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
-      new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
+      // new Worker('worker.js'),
     ],
     numPeopleToInvestIn: 5,
-    event: "",
+    event: {
+      activityGroups: [],
+      portableAirCleaners: []
+    },
   }),
   actions: {
     load(event) {
@@ -191,18 +236,6 @@ export const useAnalyticsStore = defineStore('analytics', {
         }))
       }
     },
-    selectIntervention(id) {
-      let intervention = this.interventions.find((interv) => { return interv.id == id })
-      this.selectedIntervention = intervention
-      for (let interv of this.interventions) {
-        if (intervention.id == interv.id) {
-          interv.select()
-        } else {
-          interv.unselect()
-        }
-      }
-      this.cost(intervention)
-    },
     setNumPeopleToInvestIn(num) {
       this.numPeopleToInvestIn = num
     },
@@ -212,14 +245,16 @@ export const useAnalyticsStore = defineStore('analytics', {
       // TODO: find the number of people that could upgrade to a mask
       let interventions = getSampleInterventions(this.event, this.numPeopleToInvestIn)
 
-      this.interventions = interventions.sort(
-          function(a, b) {
-            return (
-              (b.numEventsToInfectionWithCertainty()) / b.costInYears(10) -
-              (a.numEventsToInfectionWithCertainty()) / a.costInYears(10)
-            )
-          }.bind(this)
-      )
+      this.interventions = interventions
+
+      // this.interventions = interventions.sort(
+          // function(a, b) {
+            // return (
+              // (b.numEventsToInfectionWithCertainty()) / b.costInYears(10) -
+              // (a.numEventsToInfectionWithCertainty()) / a.costInYears(10)
+            // )
+          // }.bind(this)
+      // )
     }
   }
 });

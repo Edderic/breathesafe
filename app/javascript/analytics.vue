@@ -71,7 +71,6 @@
 
               <div class='centered'>
                 <RiskTable
-                  :event='event'
                   :maximumOccupancy='maximumOccupancy'
                 />
               </div>

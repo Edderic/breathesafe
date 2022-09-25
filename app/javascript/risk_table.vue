@@ -7,7 +7,7 @@
         </th>
         <td>
           <select class='centered' >
-            <option :value="interv.id" v-for='interv in interventions'>{{interv.websitesAndText[0].text}}</option>
+            <option :value="interv.id" v-for='interv in interventions'>{{interv.textString()}}</option>
           </select>
         </td>
       </tr>
@@ -25,10 +25,9 @@
 
         <td>
           <ColoredCell
-            v-if="intervention"
             :colorScheme="riskColorScheme"
             :maxVal=1
-            :value='roundOut(1 - (1-intervention.computeRiskRounded())**selectedHour, 6)'
+            :value='roundOut(this.risk, 6)'
             :style="styleProps"
             />
         </td>
@@ -42,16 +41,15 @@
         <span>On average, assuming max occupancy (~{{maximumOccupancy}}), and that there is one COVID infector in the room, and that everyone stays there for {{selectedHour}} hour(s), the number of people that would be infected is
 
             <ColoredCell
-                v-if="intervention"
                 :colorScheme="riskColorScheme"
                 :maxVal=1
-                :value='roundOut(maximumOccupancy * (1 - (1-intervention.computeRiskRounded())**selectedHour), 1)'
+                :value='roundOut(maximumOccupancy * risk, 1)'
                 class='inline'
                 :style="styleProps"
             />:
         </span>
       </div>
-      <div class='people-icons'>
+      <div class='people-icons' v-if='numInfected'>
         <PersonIcon
           backgroundColor='red'
           :amount='numInfected'
@@ -68,8 +66,11 @@
         <span class='bold'>${{ peopleCost() }}</span> in terms of <span
         class='italic'>lost wages/labor</span>. Lost wages here are the wages not
         received by sick employees who no longer have sick days. Similarly,
-        lost labor in terms of some business paying money for people being out on
-        sick days.
+        lost labor is in terms of some business paying money for people being
+        out on sick days. Implementation cost of the intervention (initial +
+        recurring cost of 3 months) is
+        <span class='bold'> ${{ selectedIntervention.implementationCostInYears(0.25) }}</span>, for a total cost of
+        <span class='bold'> ${{ selectedIntervention.implementationCostInYears(0.25) + peopleCost() }}</span>.
       </p>
     </div>
   </div>
@@ -79,7 +80,11 @@
 import ColoredCell from './colored_cell.vue'
 import PersonIcon from './person_icon.vue'
 
+import { useAnalyticsStore } from './stores/analytics_store'
 import { round } from './misc.js'
+import { Intervention } from './interventions.js'
+import { mapWritableState, mapState, mapActions } from 'pinia';
+import { getSampleInterventions } from './sample_interventions.js'
 import {
   assignBoundsToColorScheme,
   riskColorInterpolationScheme,
@@ -93,10 +98,50 @@ export default {
     PersonIcon
   },
   computed: {
+    // TODO: could pull in information from event/1 from Rails.
+    ...mapState(
+        useAnalyticsStore,
+        [
+          'event'
+        ]
+    ),
+    ...mapWritableState(
+        useAnalyticsStore,
+        [
+          'selectedIntervention'
+        ]
+    ),
+    numInfected() {
+      round(this.maximumOccupancy * this.risk, 0)
+    },
+    risk() {
+      return (1 - (1-this.selectedIntervention.computeRiskRounded())**this.selectedHour)
+    },
+    interventions() {
+      let analyticsStore = useAnalyticsStore()
+      let numPeopleToInvestIn = 1
+      let event = analyticsStore.event
+      return getSampleInterventions(event, numPeopleToInvestIn)
+    },
+
+    styleProps() {
+      return {
+          'font-weight': 'bold',
+          'color': 'white',
+          'text-shadow': '1px 1px 2px black',
+          'padding': '1em'
+        }
+    },
+    averageInfectedPeopleInterpolationScheme() {
+      const copy = JSON.parse(JSON.stringify(riskColorInterpolationScheme))
+      return assignBoundsToColorScheme(copy, infectedPeopleColorBounds)
+    },
+    riskColorScheme() {
+      return riskColorInterpolationScheme
+    },
   },
   data() {
     return {
-      numInfected: round(this.maximumOccupancy * (1 - (1-this.intervention.computeRiskRounded())), 0),
       selectedHour: 1,
       hoursToSelect: [
         '1 hour',
@@ -119,29 +164,9 @@ export default {
 
     setDuration(event) {
       this.selectedHour = this.hoursToSelect[event.target.value].split(' ')[0]
-      this.risk = (1 - (1-this.intervention.computeRiskRounded())**this.selectedHour)
-      this.numInfected = round(this.maximumOccupancy * this.risk, 0)
     }
   },
-  computed: {
-    styleProps() {
-      return {
-          'font-weight': 'bold',
-          'color': 'white',
-          'text-shadow': '1px 1px 2px black',
-          'padding': '1em'
-        }
-    },
-    averageInfectedPeopleInterpolationScheme() {
-      const copy = JSON.parse(JSON.stringify(riskColorInterpolationScheme))
-      return assignBoundsToColorScheme(copy, infectedPeopleColorBounds)
-    },
-    riskColorScheme() {
-      return riskColorInterpolationScheme
-    },
-  },
   props: {
-    intervention: Object,
     maximumOccupancy: Number,
   }
 }
