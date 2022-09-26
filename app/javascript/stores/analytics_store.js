@@ -14,59 +14,6 @@ import { getSampleInterventions } from '../sample_interventions.js'
 export const useAnalyticsStore = defineStore('analytics', {
   state: () => ({
     interventions: [],
-    selectedIntervention: {
-      computePortableAirCleanerACH() {
-        return 0.01
-      },
-      computeVentilationACH() {
-        return 0.01
-      },
-      computeUVACH() {
-        return 0.01
-      },
-      computeEmissionRate() {
-        return 0.01
-      },
-      computeVentilationDenominator() {
-        return 0.01
-      },
-      computeSusceptibleMask() {
-        return {
-          'maskPenetrationFactor': 'None'
-        }
-      },
-      computeRiskRounded() {
-        return 0
-      },
-      computeACH() {
-        return 0
-      },
-      findPortableAirCleaners() {
-        return {
-          'cubic meters per hour': 0,
-          'numDevices': 0
-        }
-      },
-      ventilationDenominator() { return 0.01 },
-      steadyStateCO2Reading() { return 0.01 },
-      ambientCO2Reading() { return 0.01 },
-      findPortableAirCleaners() {
-        return {
-          'numDevices': function() { return 0 },
-          'numDeviceFactor': function() { return 0 },
-          'singularName': function() { return '' }
-        }
-      },
-      findUVDevices() {
-        return {
-          'numDevices': function() { return 0 },
-          'numDeviceFactor': function() { return 0 }
-        }
-      },
-      implementationCostInYears() {
-        return 0
-      }
-    },
     workers: [
       // Takes 10 seconds on macbook pro
       // new Worker('worker.js'),
@@ -91,15 +38,10 @@ export const useAnalyticsStore = defineStore('analytics', {
       // new Worker('worker.js'),
     ],
     numPeopleToInvestIn: 5,
-    event: {
-      activityGroups: [],
-      portableAirCleaners: []
-    },
   }),
   actions: {
     load(event) {
       this.event = event
-      this.reload()
     },
     computeLostWages() {
     },
@@ -242,22 +184,5 @@ export const useAnalyticsStore = defineStore('analytics', {
     setNumPeopleToInvestIn(num) {
       this.numPeopleToInvestIn = num
     },
-    reload() {
-      this.nullIntervention = new Intervention(this.event, [])
-
-      // TODO: find the number of people that could upgrade to a mask
-      let interventions = getSampleInterventions(this.event, this.numPeopleToInvestIn)
-
-      this.interventions = interventions
-
-      // this.interventions = interventions.sort(
-          // function(a, b) {
-            // return (
-              // (b.numEventsToInfectionWithCertainty()) / b.costInYears(10) -
-              // (a.numEventsToInfectionWithCertainty()) / a.costInYears(10)
-            // )
-          // }.bind(this)
-      // )
-    }
   }
 });

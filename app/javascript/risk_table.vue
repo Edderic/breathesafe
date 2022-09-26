@@ -1,16 +1,6 @@
 <template>
   <div class='centered column'>
     <table>
-      <tr>
-        <th>
-           Intervention
-        </th>
-        <td>
-          <select class='centered' >
-            <option :value="interv.id" v-for='interv in interventions'>{{interv.textString()}}</option>
-          </select>
-        </td>
-      </tr>
 
       <tr>
         <th>Duration</th>
@@ -99,16 +89,10 @@ export default {
   },
   computed: {
     // TODO: could pull in information from event/1 from Rails.
-    ...mapState(
-        useAnalyticsStore,
-        [
-          'event'
-        ]
-    ),
     ...mapWritableState(
         useAnalyticsStore,
         [
-          'selectedIntervention'
+          // 'selectedIntervention'
         ]
     ),
     numInfected() {
@@ -118,10 +102,8 @@ export default {
       return (1 - (1-this.selectedIntervention.computeRiskRounded())**this.selectedHour)
     },
     interventions() {
-      let analyticsStore = useAnalyticsStore()
       let numPeopleToInvestIn = 1
-      let event = analyticsStore.event
-      return getSampleInterventions(event, numPeopleToInvestIn)
+      return getSampleInterventions(this.event, numPeopleToInvestIn)
     },
 
     styleProps() {
@@ -168,6 +150,9 @@ export default {
   },
   props: {
     maximumOccupancy: Number,
+    event: Object,
+    interventions: Array,
+    selectedIntervention: Object
   }
 }
 </script>

@@ -533,7 +533,7 @@ export class Intervention {
 
     let loopables = this.environmentalInterventions.concat([this.mask1])
 
-    for (let intervention of this.environmentalInterventions) {
+    for (let intervention of loopables) {
       text += intervention.amountText()
       text += " | "
     }
