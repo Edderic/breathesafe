@@ -69,7 +69,7 @@
           <div class='centered col'>
             <div class='container'>
 
-              <div class='centered'>
+              <div class='centered col'>
                 <div class='centered'>
                   <table>
                   <tr>
@@ -2622,14 +2622,15 @@ export default {
     height: 50em;
     position: fixed;
     left: 0em;
-    border-right: 0px;
+    border-right: 1px solid black;
+    height: 100vh;
     border-top: 0px;
     border-bottom: 0px;
   }
 
   .right-pane {
-    width: 70vw;
     height: auto;
+    width: 70%;
     margin-left: 20rem;
   }
 
