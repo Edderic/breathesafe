@@ -39,7 +39,7 @@
             />:
         </span>
       </div>
-      <div class='people-icons' v-if='numInfected'>
+      <div class='people-icons'>
         <PersonIcon
           backgroundColor='red'
           :amount='numInfected'
@@ -96,7 +96,7 @@ export default {
         ]
     ),
     numInfected() {
-      round(this.maximumOccupancy * this.risk, 0)
+      return round(this.maximumOccupancy * this.risk, 0) || 0
     },
     risk() {
       return (1 - (1-this.selectedIntervention.computeRiskRounded())**this.selectedHour)
