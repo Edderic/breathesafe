@@ -70,8 +70,26 @@
             <div class='container'>
 
               <div class='centered'>
+                <div class='centered'>
+                  <table>
+                  <tr>
+                    <th>
+                       Intervention
+                    </th>
+                    <td>
+                      <select class='centered' @change='selectIntervention'>
+                        <option :value="interv.id" v-for='interv in interventions'>{{interv.textString()}}</option>
+                      </select>
+                    </td>
+                  </tr>
+                  </table>
+                </div>
                 <RiskTable
                   :maximumOccupancy='maximumOccupancy'
+                  :interventions='interventions'
+                  :event='event'
+                  :selectedIntervention='selectedIntervention'
+
                 />
               </div>
 
@@ -95,7 +113,7 @@
           <br>
           <h4>Strengths</h4>
           <ul>
-            <li v-if="nullIntervention && nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) > 1000">
+            <li v-if="selectedIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) > 1000">
 
               <span class='italic bold'>
                 <router-link :to="`/analytics/${this.$route.params.id}#clean-air-delivery-rate`">
@@ -111,7 +129,7 @@
               <ColoredCell
                 :colorScheme="colorInterpolationSchemeRoomVolume"
                 :maxVal=1
-                :value='roundOut(nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement), 0)'
+                :value='roundOut(selectedIntervention.computeCleanAirDeliveryRate(systemOfMeasurement), 0)'
                 :style='cellCSSMerged'
               />
 
@@ -183,7 +201,7 @@
           <br>
           <h4>Room for Improvement</h4>
           <ul>
-            <li v-if="nullIntervention && nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) <= 1000">
+            <li v-if="selectedIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) <= 1000">
               <span class='italic bold'>
                 <router-link :to="`/analytics/${this.$route.params.id}#clean-air-delivery-rate`">
                   Clean Air Delivery Rate (CADR):
@@ -193,7 +211,7 @@
               <ColoredCell
                 :colorScheme="colorInterpolationSchemeRoomVolume"
                 :maxVal=1
-                :value='roundOut(nullIntervention.computeCleanAirDeliveryRate(systemOfMeasurement), 0)'
+                :value='roundOut(selectedIntervention.computeCleanAirDeliveryRate(systemOfMeasurement), 0)'
                 :style='cellCSSMerged'
               /> {{ measurementUnits.airDeliveryRateMeasurementType }} of clean
               air. One can invest in ventilation, filtration, and/or upper-room UV
@@ -328,15 +346,15 @@
           <br>
           <br>
           <h4>Total ACH</h4>
-          <div class='centered' v-if='nullIntervention'>
+          <div class='centered'>
             <TotalACHTable
               :measurementUnits='measurementUnits'
               :systemOfMeasurement='systemOfMeasurement'
               :totalFlowRate='totalFlowRate'
               :roomUsableVolume='roomUsableVolume'
-              :portableAch='nullIntervention.computePortableAirCleanerACH()'
-              :ventilationAch='nullIntervention.computeVentilationACH()'
-              :uvAch='nullIntervention.computeUVACH()'
+              :portableAch='selectedIntervention.computePortableAirCleanerACH()'
+              :ventilationAch='selectedIntervention.computeVentilationACH()'
+              :uvAch='selectedIntervention.computeUVACH()'
               :cellCSS='cellCSS'
               />
           </div>
@@ -780,7 +798,7 @@
                   />
                   <td>=</td>
                   <ColoredCell
-                    v-if="nullIntervention"
+                    v-if="selectedIntervention"
                     :colorScheme="averageInfectedPeopleInterpolationScheme"
                     :maxVal=1
                     :value='roundOut(infectorProductWithIntervention, 1)'
@@ -788,7 +806,6 @@
                   />
                   <td>x</td>
                   <ColoredCell
-                    v-if="nullIntervention"
                     :colorScheme="averageInfectedPeopleInterpolationScheme"
                     :maxVal=1
                     :value='roundOut(susceptibleProductWithIntervention, 3)'
@@ -844,7 +861,6 @@
                 </tr>
                 <tr>
                   <ColoredCell
-                    v-if="nullIntervention"
                     :colorScheme="averageInfectedPeopleInterpolationScheme"
                     :maxVal=1
                     :value='roundOut(infectorProductWithIntervention, 1)'
@@ -852,7 +868,6 @@
                   />
                   <td>=</td>
                   <ColoredCell
-                    v-if="nullIntervention"
                     :colorScheme="averageInfectedPeopleInterpolationScheme"
                     :maxVal=1
                     :value=18.6
@@ -860,7 +875,6 @@
                   />
                   <td>x</td>
                   <ColoredCell
-                    v-if="nullIntervention"
                     :colorScheme="averageInfectedPeopleInterpolationScheme"
                     :maxVal=1
                     :value=3.3
@@ -912,7 +926,6 @@
                 </tr>
                 <tr>
                   <ColoredCell
-                    v-if="nullIntervention"
                     :colorScheme="averageInfectedPeopleInterpolationScheme"
                     :maxVal=1
                     :value='roundOut(susceptibleProductWithIntervention, 3)'
@@ -1660,6 +1673,7 @@ import PacIcon from './pac_icon.vue';
 import RiskIcon from './risk_icon.vue';
 import { airCleaners } from './air_cleaners.js';
 import { datetimeEnglish } from './date.js'
+import { getSampleInterventions } from './sample_interventions.js'
 import {
   AEROSOL_GENERATION_BOUNDS,
   colorSchemeFall,
@@ -1725,13 +1739,6 @@ export default {
         useMainStore,
         [
           'currentUser',
-        ]
-    ),
-    ...mapWritableState(
-        useAnalyticsStore,
-        [
-          'interventions',
-          'selectedIntervention'
         ]
     ),
     ...mapWritableState(
@@ -1820,6 +1827,9 @@ export default {
         'padding-top': '1em',
         'padding-bottom': '1em',
       }
+    },
+    interventions() {
+      return getSampleInterventions(this.event, this.numPeopleToInvestIn)
     },
     datetimeInWords() {
       return datetimeEnglish(this.startDatetime)
@@ -2291,29 +2301,20 @@ export default {
   async created() {
     let event = await this.showAnalysis(this.$route.params.id)
 
-    this.nullIntervention = new Intervention(
-      event,
-      []
-    )
-
-    this.selectedIntervention = this.nullIntervention
-
     await this.$watch(
       () => this.$route.params,
       (toParams, previousParams) => {
         this.showAnalysis(toParams.id)
-        this.nullIntervention = new Intervention(
-          event,
-          []
-        )
-        this.selectedIntervention = this.nullIntervention
       }
     )
   },
   data() {
     return {
-      nullIntervention: undefined,
-      nullInterventionCADR: 0,
+      event: {
+        activityGroups: [],
+        portableAirCleaners: [],
+        totalAch: 0.1
+      },
       center: {lat: 51.093048, lng: 6.842120},
       ventilationACH: 0.0,
       portableACH: 0.0,
@@ -2350,11 +2351,67 @@ export default {
         'margin': '0.5em',
         'text-align': 'center'
       },
+      selectedIntervention: {
+        computeCleanAirDeliveryRate() {
+          return 0
+        },
+        computePortableAirCleanerACH() {
+          return 0.01
+        },
+        computeVentilationACH() {
+          return 0.01
+        },
+        computeUVACH() {
+          return 0.01
+        },
+        computeEmissionRate() {
+          return 0.01
+        },
+        computeVentilationDenominator() {
+          return 0.01
+        },
+        computeSusceptibleMask() {
+          return {
+            'maskPenetrationFactor': 'None'
+          }
+        },
+        computeRiskRounded() {
+          return 0
+        },
+        computeACH() {
+          return 0
+        },
+        findPortableAirCleaners() {
+          return {
+            'cubic meters per hour': 0,
+            'numDevices': 0
+          }
+        },
+        ventilationDenominator() { return 0.01 },
+        steadyStateCO2Reading() { return 0.01 },
+        ambientCO2Reading() { return 0.01 },
+        findPortableAirCleaners() {
+          return {
+            'numDevices': function() { return 0 },
+            'numDeviceFactor': function() { return 0 },
+            'singularName': function() { return '' }
+          }
+        },
+        findUVDevices() {
+          return {
+            'numDevices': function() { return 0 },
+            'numDeviceFactor': function() { return 0 }
+          }
+        },
+        implementationCostInYears() {
+          return 0
+        }
+      },
       susceptibleBreathingActivityFactorMappings: susceptibleBreathingActivityToFactor
     }
   },
   methods: {
-    ...mapActions(useAnalyticsStore, ['reload', 'setNumPeopleToInvestIn']),
+    ...mapActions(useAnalyticsStore, ['setNumPeopleToInvestIn']),
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
@@ -2405,7 +2462,6 @@ export default {
     },
     setNumPeople(event) {
       this.setNumPeopleToInvestIn(parseInt(event.target.value))
-      this.reload()
     },
     computeTotalFlowRateCubicMetersPerHour(totalACH) {
       return this.roomUsableVolumeCubicMeters * totalACH
