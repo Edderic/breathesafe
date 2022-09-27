@@ -151,7 +151,6 @@ export default {
   props: {
     maximumOccupancy: Number,
     event: Object,
-    interventions: Array,
     selectedIntervention: Object
   }
 }
