@@ -2341,6 +2341,9 @@ export default {
       }
     )
   },
+  mounted() {
+    this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedMask)
+  },
   data() {
     return {
       event: {
@@ -2385,6 +2388,7 @@ export default {
         'text-align': 'center'
       },
       selectedMask: new Mask(MASKS[0], this.maximumOccupancy),
+      selectedAirCleanerObj: airCleaners[0],
       selectedIntervention: {
         computeCleanAirDeliveryRate() {
           return 0
