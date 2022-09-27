@@ -2277,9 +2277,6 @@ export default {
     colorInterpolationSchemeRoomVolumeMetric() {
       return assignBoundsToColorScheme(colorSchemeFall, this.cutoffsMetricVolume)
     },
-    async event() {
-      return await this.showAnalysis(this.$route.params.id)
-    },
     numSuggestedAirCleaners() {
       return computeAmountOfPortableAirCleanersThatCanFit(
         this.roomLengthMeters * this.roomWidthMeters,
