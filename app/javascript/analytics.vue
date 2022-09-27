@@ -83,6 +83,16 @@
                     </td>
                   </tr>
                   <tr>
+                    <th>
+                       Portable Air Cleaner
+                    </th>
+                    <td>
+                      <select class='centered' @change='selectAirCleaner'>
+                        <option :value="cleaner.singular" v-for='cleaner in airCleanerInstances'>{{cleaner.singular}}</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
 
                     <td>
                       <select class='centered' @change='selectIntervention'>
