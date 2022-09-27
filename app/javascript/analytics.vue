@@ -1688,7 +1688,7 @@ import TotalACHTable from './total_ach_table.vue';
 import VentIcon from './vent_icon.vue';
 import PacIcon from './pac_icon.vue';
 import RiskIcon from './risk_icon.vue';
-import { airCleaners } from './air_cleaners.js';
+import { airCleaners, AirCleaner } from './air_cleaners.js';
 import { datetimeEnglish } from './date.js'
 import { getSampleInterventions } from './sample_interventions.js'
 import {
@@ -1844,6 +1844,14 @@ export default {
         'padding-top': '1em',
         'padding-bottom': '1em',
       }
+    },
+    airCleanerInstances() {
+      let collection = []
+      for (let a of airCleaners) {
+        collection.push(new AirCleaner(a, this.event))
+      }
+
+      return collection
     },
     maskInstances() {
       let collection = []
