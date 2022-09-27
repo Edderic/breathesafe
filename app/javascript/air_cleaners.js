@@ -86,11 +86,17 @@ export class AirCleaner {
   }
 
   numDevices() {
+    let length = 0
+    try {
+      length = this.event.portableAirCleaners.length
+    } catch (ex) {
+      // no-op
+    }
+
     let amountA = computeAmountOfPortableAirCleanersThatCanFit(
       this.event.roomLengthMeters * this.event.roomWidthMeters,
       this.areaInSquareMeters
-    ) - this.event.portableAirCleaners.length
-
+    ) - length
     return amountA
   }
 
