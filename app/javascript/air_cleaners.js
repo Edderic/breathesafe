@@ -4,6 +4,24 @@ import { convertVolume, computeAmountOfPortableAirCleanersThatCanFit } from './m
 export const airCleaners = [
   {
     'type': 'airCleaner',
+    'singular': 'None',
+    'plural': 'None',
+    'shortName': 'None',
+    'cubicMetersPerHour': cubicFeetPerMinuteTocubicMetersPerHour('cubic feet per minute', 0),
+    'areaInSquareMeters': convertLengthBasedOnMeasurementType(20, 'inches', 'meters')
+        * convertLengthBasedOnMeasurementType(20, 'inches', 'meters'),
+    'initialCostUSD': 0,
+    'initialDurationYears': 0,  // 6 months to replace filters
+    'recurringCostUSD': 0,
+    'recurringCostDuration': '6 months',
+    'recurringCostDetails': 'to replace filters',
+    'recurringCostPerYearUSD': 0,
+    'recurringDurationYears': 0,  // 6 months to replace filters
+    'website': "",
+    'imgLink': ""
+  },
+  {
+    'type': 'airCleaner',
     'singular': 'Corsi-Rosenthal box (Max Speed)',
     'plural': 'Corsi-Rosenthal boxes (Max Speed)',
     'shortName': 'CR boxes',
