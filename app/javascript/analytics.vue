@@ -104,7 +104,6 @@
                 </div>
                 <RiskTable
                   :maximumOccupancy='maximumOccupancy'
-                  :interventions='interventions'
                   :event='event'
                   :selectedIntervention='selectedIntervention'
 
