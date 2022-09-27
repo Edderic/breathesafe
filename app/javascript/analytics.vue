@@ -2326,6 +2326,9 @@ export default {
     },
     ventilationAchRounded() {
       return round(this.ventilationAch, 1)
+    },
+    selectedAirCleaner() {
+      return new AirCleaner(this.selectedAirCleanerObj, this.event)
     }
   },
   async created() {
