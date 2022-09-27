@@ -74,8 +74,16 @@
                   <table>
                   <tr>
                     <th>
-                       Intervention
+                       Mask
                     </th>
+                    <td>
+                      <select class='centered' @change='selectMask'>
+                        <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+
                     <td>
                       <select class='centered' @change='selectIntervention'>
                         <option :value="interv.id" v-for='interv in interventions'>{{interv.textString()}}</option>
@@ -1692,7 +1700,7 @@ import {
   reducedRisk } from './risk.js';
 import { convertVolume, computeAmountOfPortableAirCleanersThatCanFit } from './measurement_units.js';
 import { useAnalyticsStore } from './stores/analytics_store'
-import { MASKS, MaskingBarChart } from './masks.js';
+import { Mask, MASKS, MaskingBarChart } from './masks.js';
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
@@ -1827,6 +1835,14 @@ export default {
         'padding-top': '1em',
         'padding-bottom': '1em',
       }
+    },
+    maskInstances() {
+      let collection = []
+      for (let m of MASKS) {
+        collection.push(new Mask(m, this.maximumOccupancy))
+      }
+
+      return collection
     },
     interventions() {
       return getSampleInterventions(this.event, this.numPeopleToInvestIn)
@@ -2351,6 +2367,7 @@ export default {
         'margin': '0.5em',
         'text-align': 'center'
       },
+      selectedMask: new Mask(MASKS[0], this.maximumOccupancy),
       selectedIntervention: {
         computeCleanAirDeliveryRate() {
           return 0
@@ -2415,6 +2432,11 @@ export default {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
+    selectMask(event) {
+      let name = event.target.value
+      this.selectedMask = new Mask(MASKS.find((m) => m.name == name), this.maximumOccupancy)
+      this.selectedIntervention =  new Intervention(this.event, [], this.selectedMask)
+    },
     selectIntervention(event) {
       let id = event.target.value
       let intervention = this.interventions.find((interv) => { return interv.id == id })
