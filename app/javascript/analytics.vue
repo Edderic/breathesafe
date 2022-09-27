@@ -2456,7 +2456,12 @@ export default {
     selectMask(event) {
       let name = event.target.value
       this.selectedMask = new Mask(MASKS.find((m) => m.name == name), this.maximumOccupancy)
-      this.selectedIntervention =  new Intervention(this.event, [], this.selectedMask)
+      this.selectedIntervention = new Intervention(this.event, [], this.selectedMask)
+    },
+    selectAirCleaner(event) {
+      let name = event.target.value
+      this.selectedAirCleanerObj = airCleaners.find((m) => m.singular == name)
+      this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedMask)
     },
     selectIntervention(event) {
       let id = event.target.value
