@@ -92,14 +92,6 @@
                       </select>
                     </td>
                   </tr>
-                  <tr>
-
-                    <td>
-                      <select class='centered' @change='selectIntervention'>
-                        <option :value="interv.id" v-for='interv in interventions'>{{interv.textString()}}</option>
-                      </select>
-                    </td>
-                  </tr>
                   </table>
                 </div>
                 <RiskTable
@@ -2332,17 +2324,18 @@ export default {
     }
   },
   async created() {
-    let event = await this.showAnalysis(this.$route.params.id)
+    this.event = await this.showAnalysis(this.$route.params.id)
+    this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedMask)
 
     await this.$watch(
       () => this.$route.params,
       (toParams, previousParams) => {
-        this.showAnalysis(toParams.id)
+        this.event = this.showAnalysis(toParams.id)
+        this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedMask)
       }
     )
   },
   mounted() {
-    this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedMask)
   },
   data() {
     return {
@@ -2456,7 +2449,7 @@ export default {
     selectMask(event) {
       let name = event.target.value
       this.selectedMask = new Mask(MASKS.find((m) => m.name == name), this.maximumOccupancy)
-      this.selectedIntervention = new Intervention(this.event, [], this.selectedMask)
+      this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedMask)
     },
     selectAirCleaner(event) {
       let name = event.target.value
@@ -2479,7 +2472,6 @@ export default {
       let eventStores = useEventStores()
       const showMeasurementSetStore = useShowMeasurementSetStore()
       let event = await eventStores.findOrLoad(id);
-      this.event = event
       showMeasurementSetStore.setMeasurementSet(event)
 
       return event
