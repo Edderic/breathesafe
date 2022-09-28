@@ -99,7 +99,8 @@ export default {
       return round(this.maximumOccupancy * this.risk, 0) || 0
     },
     risk() {
-      return (1 - (1-this.selectedIntervention.computeRiskRounded())**this.selectedHour)
+      const duration = 1
+      return (1 - (1-this.selectedIntervention.computeRiskRounded(duration, this.numInfectors))**this.selectedHour)
     },
     interventions() {
       let numPeopleToInvestIn = 1
@@ -151,7 +152,8 @@ export default {
   props: {
     maximumOccupancy: Number,
     event: Object,
-    selectedIntervention: Object
+    numInfectors: Number,
+    selectedIntervention: Object,
   }
 }
 </script>
