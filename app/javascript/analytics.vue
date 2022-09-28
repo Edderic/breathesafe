@@ -93,7 +93,7 @@
                       </a>
                     </td>
                     <td>
-                      <select class='centered' @change='selectMask'>
+                      <select class='centered' @change='selectInfectorMask'>
                         <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
                       </select>
                     </td>
@@ -2467,7 +2467,7 @@ export default {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
-    selectMask(event) {
+    selectInfectorMask(event) {
       let name = event.target.value
       this.selectedInfectorMask = new Mask(MASKS.find((m) => m.name == name), this.maximumOccupancy)
       this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedInfectorMask)
