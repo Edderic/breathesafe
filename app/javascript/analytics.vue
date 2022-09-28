@@ -100,6 +100,21 @@
                   </tr>
                   <tr>
                     <th>
+                       Susceptible Mask
+                    </th>
+                    <td>
+                      <a :href="selectedSusceptibleMask.website()">
+                        <img :src="selectedSusceptibleMask.imgLink()" alt="">
+                      </a>
+                    </td>
+                    <td>
+                      <select class='centered' @change='selectSusceptibleMask'>
+                        <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>
                        Portable Air Cleaner
                     </th>
                     <td>
@@ -2401,7 +2416,8 @@ export default {
         'margin': '0.5em',
         'text-align': 'center'
       },
-      selectedInfectorMask: new Mask(MASKS[0], this.maximumOccupancy),
+      selectedInfectorMask: new Mask(MASKS[0], 1),
+      selectedSusceptibleMask: new Mask(MASKS[0], this.maximumOccupancy, 1),
       selectedAirCleanerObj: airCleaners[0],
       selectedIntervention: {
         computeCleanAirDeliveryRate() {
@@ -2467,15 +2483,36 @@ export default {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
+    selectSusceptibleMask(event) {
+      let name = event.target.value
+      // TODO: have some occupancy variable in the data that can be set to maximum occupancy as the default
+      this.selectedSusceptibleMask = new Mask(MASKS.find((m) => m.name == name), this.maximumOccupancy  - 1)
+      this.selectedIntervention = new Intervention(
+          this.event,
+          [this.selectedAirCleaner],
+          this.selectedInfectorMask,
+          this.selectedSusceptibleMask
+      )
+    },
     selectInfectorMask(event) {
       let name = event.target.value
-      this.selectedInfectorMask = new Mask(MASKS.find((m) => m.name == name), this.maximumOccupancy)
-      this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedInfectorMask)
+      this.selectedInfectorMask = new Mask(MASKS.find((m) => m.name == name), 1)
+      this.selectedIntervention = new Intervention(
+          this.event,
+          [this.selectedAirCleaner],
+          this.selectedInfectorMask,
+          this.selectedSusceptibleMask
+      )
     },
     selectAirCleaner(event) {
       let name = event.target.value
       this.selectedAirCleanerObj = airCleaners.find((m) => m.singular == name)
-      this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedInfectorMask)
+      this.selectedIntervention = new Intervention(
+          this.event,
+          [this.selectedAirCleaner],
+          this.selectedInfectorMask,
+          this.selectedSusceptibleMask
+      )
     },
     selectIntervention(event) {
       let id = event.target.value
