@@ -75,9 +75,9 @@
                   <tr>
                     <td>
                     </td>
-                    <th>Type
-                    </th>
                     <th>Image
+                    </th>
+                    <th>Type
                     </th>
                     <th>
                       Amount
@@ -88,14 +88,14 @@
                        Infector Mask
                     </th>
                     <td>
-                      <select class='centered' @change='selectMask'>
-                        <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
-                      </select>
-                    </td>
-                    <td>
                       <a :href="selectedInfectorMask.website()">
                         <img :src="selectedInfectorMask.imgLink()" alt="">
                       </a>
+                    </td>
+                    <td>
+                      <select class='centered' @change='selectMask'>
+                        <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
+                      </select>
                     </td>
                   </tr>
                   <tr>
@@ -103,14 +103,14 @@
                        Portable Air Cleaner
                     </th>
                     <td>
-                      <select class='centered' @change='selectAirCleaner'>
-                        <option :value="cleaner.singular" v-for='cleaner in airCleanerInstances'>{{cleaner.singular}}</option>
-                      </select>
-                    </td>
-                    <td>
                       <a :href="selectedAirCleaner.website()">
                         <img :src="selectedAirCleaner.imgLink()" alt="">
                       </a>
+                    </td>
+                    <td>
+                      <select class='centered' @change='selectAirCleaner'>
+                        <option :value="cleaner.singular" v-for='cleaner in airCleanerInstances'>{{cleaner.singular}}</option>
+                      </select>
                     </td>
                   </tr>
                   </table>
