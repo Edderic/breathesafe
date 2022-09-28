@@ -73,13 +73,29 @@
                 <div class='centered'>
                   <table>
                   <tr>
+                    <td>
+                    </td>
+                    <th>Type
+                    </th>
+                    <th>Image
+                    </th>
                     <th>
-                       Mask
+                      Amount
+                    </th>
+                  </tr>
+                  <tr>
+                    <th>
+                       Infector Mask
                     </th>
                     <td>
                       <select class='centered' @change='selectMask'>
                         <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
                       </select>
+                    </td>
+                    <td>
+                      <a :href="selectedInfectorMask.website()">
+                        <img :src="selectedInfectorMask.imgLink()" alt="">
+                      </a>
                     </td>
                   </tr>
                   <tr>
@@ -90,6 +106,11 @@
                       <select class='centered' @change='selectAirCleaner'>
                         <option :value="cleaner.singular" v-for='cleaner in airCleanerInstances'>{{cleaner.singular}}</option>
                       </select>
+                    </td>
+                    <td>
+                      <a :href="selectedAirCleaner.website()">
+                        <img :src="selectedAirCleaner.imgLink()" alt="">
+                      </a>
                     </td>
                   </tr>
                   </table>
@@ -2325,13 +2346,13 @@ export default {
   },
   async created() {
     this.event = await this.showAnalysis(this.$route.params.id)
-    this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedMask)
+    this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedInfectorMask)
 
     await this.$watch(
       () => this.$route.params,
       (toParams, previousParams) => {
         this.event = this.showAnalysis(toParams.id)
-        this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedMask)
+        this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedInfectorMask)
       }
     )
   },
@@ -2380,7 +2401,7 @@ export default {
         'margin': '0.5em',
         'text-align': 'center'
       },
-      selectedMask: new Mask(MASKS[0], this.maximumOccupancy),
+      selectedInfectorMask: new Mask(MASKS[0], this.maximumOccupancy),
       selectedAirCleanerObj: airCleaners[0],
       selectedIntervention: {
         computeCleanAirDeliveryRate() {
@@ -2448,13 +2469,13 @@ export default {
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
     selectMask(event) {
       let name = event.target.value
-      this.selectedMask = new Mask(MASKS.find((m) => m.name == name), this.maximumOccupancy)
-      this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedMask)
+      this.selectedInfectorMask = new Mask(MASKS.find((m) => m.name == name), this.maximumOccupancy)
+      this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedInfectorMask)
     },
     selectAirCleaner(event) {
       let name = event.target.value
       this.selectedAirCleanerObj = airCleaners.find((m) => m.singular == name)
-      this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedMask)
+      this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedInfectorMask)
     },
     selectIntervention(event) {
       let id = event.target.value
