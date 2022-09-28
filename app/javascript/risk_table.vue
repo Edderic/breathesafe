@@ -28,12 +28,12 @@
      >
 
       <div class='centered column'>
-        <span>On average, assuming max occupancy (~{{maximumOccupancy}}), and that there is one COVID infector in the room, and that everyone stays there for {{selectedHour}} hour(s), the number of people that would be infected is
+        <span>On average, assuming {{ numInfectors }} COVID infector(s) in the room, and that everyone stays there for {{selectedHour}} hour(s), the number of people that would be infected is
 
             <ColoredCell
                 :colorScheme="riskColorScheme"
                 :maxVal=1
-                :value='roundOut(maximumOccupancy * risk, 1)'
+                :value='roundOut(numSusceptibles * risk, 1)'
                 class='inline'
                 :style="styleProps"
             />:
@@ -46,7 +46,7 @@
         />
         <PersonIcon
           backgroundColor='green'
-          :amount='maximumOccupancy - numInfected'
+          :amount='numSusceptibles - numInfected'
         />
       </div>
 
@@ -96,7 +96,7 @@ export default {
         ]
     ),
     numInfected() {
-      return round(this.maximumOccupancy * this.risk, 0) || 0
+      return round(this.numSusceptibles * this.risk, 0) || 0
     },
     risk() {
       const duration = 1
@@ -150,7 +150,7 @@ export default {
     }
   },
   props: {
-    maximumOccupancy: Number,
+    numSusceptibles: Number,
     event: Object,
     numInfectors: Number,
     selectedIntervention: Object,

@@ -70,27 +70,25 @@
             <div class='container'>
 
               <div class='centered col'>
-                <div class='centered'>
+                <div class='centered parameters'>
                   <table>
                   <tr>
                     <td>
                     </td>
-                    <th>Image
-                    </th>
-                    <th>Type
-                    </th>
                     <th>
                       Amount
+                    </th>
+                    <th>Protection
+                    </th>
+                    <th>Image
                     </th>
                   </tr>
                   <tr>
                     <th>
-                       Infector Mask
+                       Infector
                     </th>
                     <td>
-                      <a :href="selectedInfectorMask.website()">
-                        <img :src="selectedInfectorMask.imgLink()" alt="">
-                      </a>
+                      <input class='centered' :value='numInfectors' @change='setNumInfectors'/>
                     </td>
                     <td>
                       <select class='centered' @change='selectInfectorMask'>
@@ -98,43 +96,54 @@
                       </select>
                     </td>
                     <td>
-                      <input class='centered' :value='numInfectors' @change='setNumInfectors'/>
+                      <a :href="selectedInfectorMask.website()">
+                        <img :src="selectedInfectorMask.imgLink()" alt="">
+                      </a>
                     </td>
                   </tr>
                   <tr>
                     <th>
-                       Susceptible Mask
+                       Susceptible
                     </th>
+
                     <td>
-                      <a :href="selectedSusceptibleMask.website()">
-                        <img :src="selectedSusceptibleMask.imgLink()" alt="">
-                      </a>
+                      <input class='centered' :value='numSusceptibles' @change='setNumSusceptibles'/>
                     </td>
+
                     <td>
                       <select class='centered' @change='selectSusceptibleMask'>
                         <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
                       </select>
+                    </td>
+                    <td>
+                      <a :href="selectedSusceptibleMask.website()">
+                        <img :src="selectedSusceptibleMask.imgLink()" alt="">
+                      </a>
                     </td>
                   </tr>
                   <tr>
                     <th>
                        Portable Air Cleaner
                     </th>
+
                     <td>
-                      <a :href="selectedAirCleaner.website()">
-                        <img :src="selectedAirCleaner.imgLink()" alt="">
-                      </a>
                     </td>
+
                     <td>
                       <select class='centered' @change='selectAirCleaner'>
                         <option :value="cleaner.singular" v-for='cleaner in airCleanerInstances'>{{cleaner.singular}}</option>
                       </select>
                     </td>
+                    <td>
+                      <a :href="selectedAirCleaner.website()">
+                        <img :src="selectedAirCleaner.imgLink()" alt="">
+                      </a>
+                    </td>
                   </tr>
                   </table>
                 </div>
                 <RiskTable
-                  :maximumOccupancy='maximumOccupancy'
+                  :numSusceptibles='numSusceptibles'
                   :event='event'
                   :selectedIntervention='selectedIntervention'
                   :numInfectors='numInfectors'
@@ -2365,12 +2374,14 @@ export default {
   async created() {
     this.event = await this.showAnalysis(this.$route.params.id)
     this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedInfectorMask)
+    this.numSusceptibles = this.event.maximumOccupancy - this.numInfectors
 
     await this.$watch(
       () => this.$route.params,
       (toParams, previousParams) => {
         this.event = this.showAnalysis(toParams.id)
         this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedInfectorMask)
+        this.numSusceptibles = this.event.maximumOccupancy - this.numInfectors
       }
     )
   },
@@ -2388,6 +2399,7 @@ export default {
       portableACH: 0.0,
       totalACH: 0.0,
       numInfectors: 1,
+      numSusceptibles: 30,
       maskFactors: maskToPenetrationFactor,
       tableColoredCellWithHorizPadding: {
         'color': 'white',
@@ -2487,6 +2499,9 @@ export default {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
+    setNumSusceptibles(event) {
+      this.numSusceptibles = parseInt(event.target.value)
+    },
     setNumInfectors(event) {
       this.numInfectors = parseInt(event.target.value)
     },
@@ -2796,5 +2811,13 @@ export default {
 
   th.table-td-mask {
     font-size: 0.5em;
+  }
+
+  .parameters td img {
+    height: 3.5em;
+  }
+
+  .parameters td {
+    padding: 0.25em;
   }
 </style>
