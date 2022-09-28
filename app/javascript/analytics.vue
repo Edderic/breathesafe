@@ -97,6 +97,9 @@
                         <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
                       </select>
                     </td>
+                    <td>
+                      <input class='centered' :value='numInfectors' @change='setNumInfectors'/>
+                    </td>
                   </tr>
                   <tr>
                     <th>
@@ -134,7 +137,7 @@
                   :maximumOccupancy='maximumOccupancy'
                   :event='event'
                   :selectedIntervention='selectedIntervention'
-
+                  :numInfectors='numInfectors'
                 />
               </div>
 
@@ -2384,6 +2387,7 @@ export default {
       ventilationACH: 0.0,
       portableACH: 0.0,
       totalACH: 0.0,
+      numInfectors: 1,
       maskFactors: maskToPenetrationFactor,
       tableColoredCellWithHorizPadding: {
         'color': 'white',
@@ -2483,6 +2487,9 @@ export default {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
+    setNumInfectors(event) {
+      this.numInfectors = parseInt(event.target.value)
+    },
     selectSusceptibleMask(event) {
       let name = event.target.value
       // TODO: have some occupancy variable in the data that can be set to maximum occupancy as the default

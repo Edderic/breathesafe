@@ -178,12 +178,16 @@ export class Intervention {
     return this.ventilationAch
   }
 
-  computeRisk(duration) {
+  computeRisk(duration, numInfectors) {
     /*
      * Uses mask1 and mask2 for susceptible and infector
      */
     if (!duration) {
       duration = 1
+    }
+
+    if (!numInfectors) {
+      numInfectors = 1
     }
 
     let totalAch = this.event.totalAch
@@ -220,7 +224,7 @@ export class Intervention {
     // TODO: consolidate this information in one place
     const basicInfectionQuanta = 18.6
     const variantMultiplier = 3.3
-    const quanta = basicInfectionQuanta * variantMultiplier
+    const quanta = numInfectors * basicInfectionQuanta * variantMultiplier
     const susceptibleAgeGroup = '30 to <40'
 
     const susceptibleInhalationFactor = findWorstCaseInhFactor(
@@ -459,8 +463,8 @@ export class Intervention {
     return cost
   }
 
-  computeRiskRounded(duration) {
-    return round(this.computeRisk(duration), 6)
+  computeRiskRounded(duration, numInfectors) {
+    return round(this.computeRisk(duration, numInfectors), 6)
   }
 
   amountText() {
