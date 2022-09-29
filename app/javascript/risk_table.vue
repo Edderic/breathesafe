@@ -22,21 +22,6 @@
             />
         </td>
       </tr>
-      <tr>
-        <th>
-          Average New infections
-        </th>
-
-        <td>
-            <ColoredCell
-                :colorScheme="riskColorScheme"
-                :maxVal=1
-                :value='roundOut(numSusceptibles * risk, 1)'
-                class='inline'
-                :style="styleProps"
-            />
-        </td>
-      </tr>
 
     </table>
     <div class='multi-column'>
