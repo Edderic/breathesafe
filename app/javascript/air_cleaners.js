@@ -18,7 +18,7 @@ export const airCleaners = [
     'recurringCostPerYearUSD': 0,
     'recurringDurationYears': 0,  // 6 months to replace filters
     'website': "",
-    'imgLink': ""
+    'imgLink': "https://t3.ftcdn.net/jpg/02/15/15/46/360_F_215154625_hJg9QkfWH9Cu6LCTUc8TiuV6jQSI0C5X.jpg"
   },
   {
     'type': 'airCleaner',
