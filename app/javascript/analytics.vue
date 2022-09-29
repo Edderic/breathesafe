@@ -2750,7 +2750,6 @@ export default {
 
   .right-pane {
     height: auto;
-    width: 70%;
     margin-left: 20rem;
   }
 
