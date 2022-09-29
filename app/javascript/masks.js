@@ -23,7 +23,7 @@ export const MASKS = [
     'type': 'No mask',
     'filtrationType': 'None',
     'interventionType': 'mask',
-    'imgLink': ""
+    'imgLink': "https://t3.ftcdn.net/jpg/02/15/15/46/360_F_215154625_hJg9QkfWH9Cu6LCTUc8TiuV6jQSI0C5X.jpg"
   },
 
   {
@@ -44,7 +44,7 @@ export const MASKS = [
     'imgLink': 'https://cdn.shopify.com/s/files/1/0384/4145/1653/products/Single-Mask-Front-Denim-USA-Made-Surgical-Masks-sw_700x.jpg?v=1618508031'
   },
   {
-    'name': 'N95 Mask (3M Aura)',
+    'name': '3M Aura',
     'shortName': '3M Aura',
     'filtrationEfficiency': 0.95,
     'initialCostUSD': 30,
@@ -61,7 +61,7 @@ export const MASKS = [
     'imgLink': 'https://m.media-amazon.com/images/I/51IBeI2RK+L._AC_UL640_FMwebp_QL65_.jpg'
   },
   {
-    'name': 'Elastomeric Mask (Flo Mask Pro w/ Pro Filter)',
+    'name': 'Flo Mask Pro w/ Pro Filter',
     'shortName': 'Flo Mask Pro',
     'filtrationEfficiency': 0.99,
     'initialCostUSD': 90,
@@ -78,7 +78,7 @@ export const MASKS = [
     'imgLink': "https://cdn.shopify.com/s/files/1/0405/0154/3079/products/RB0A6673_28402bc4-206b-4a64-92f7-e591c70a1e64_900x.jpg?v=1647932779"
   },
   {
-    'name': 'Elastomeric Mask (GVS Elipse P100)',
+    'name': 'GVS Elipse P100',
     'shortName': 'GVS Elipse P100',
     'filtrationEfficiency': 0.9997,
     'initialCostUSD': 26,
