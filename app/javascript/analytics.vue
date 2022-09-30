@@ -22,7 +22,7 @@
 
       <SideBar class='col border-showing item sticky'/>
 
-      <div class='col border-showing item'>
+      <div class='col border-showing item scrollableY'>
         <RiskTable
           :numSusceptibles='numSusceptibles'
           :event='event'
@@ -2666,8 +2666,11 @@ export default {
 
   .sticky {
     position: sticky;
-    top: 0;
+    top: 3.2em;
     height: 100vh;
+  }
+
+  .scrollableY {
   }
 </style>
 
