@@ -2,60 +2,7 @@
 
   <div class='col'>
     <div class='row'>
-      <div class='col border-showing left-pane'>
-        <router-link :to="`/analytics/${this.$route.params.id}#risk-assessment`" class='link-h1'>
-          Risk Assessment
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#overview`" class='link-h1'>
-          Overview
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#strengths`" class='link-h2'>
-          Strengths
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#room-for-improvement`" class='link-h2'>
-          Room for Improvement
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#details`" class='link-h1'>
-          Details
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#clean-air-delivery-rate`" class='link-h2'>
-          Clean Air Delivery Rate (CADR)
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#air-changes-per-hour`" class='link-h2'>
-          Air Changes per Hour (ACH)
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#total-ach`" class='link-h2'>
-          Total ACH
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#behaviors`" class='link-h2'>
-          Behaviors
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#inhalation`" class='link-h2'>
-          Inhalation
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#exhalation`" class='link-h2'>
-          Exhalation
-        </router-link>
-
-        <router-link :to="`/analytics/${this.$route.params.id}#masking`" class='link-h2'>
-          Masking
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#interventions`" class='link-h1'>
-          Interventions
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#computational-details`" class='link-h1'>
-          Computational Details
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#details-ventilation-ach`" class='link-h2'>
-          Ventilation ACH
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#details-upper-room-germicidal-uv-ach`" class='link-h2'>
-          Upper-Room Germicidal UV ACH
-        </router-link>
-        <router-link :to="`/analytics/${this.$route.params.id}#details-portable-air-cleaner-ach`" class='link-h2'>
-          Portable Air Cleaner ACH
-        </router-link>
-      </div>
+      <SideBar class='col border-showing left-pane'/>
 
       <div class='col border-showing right-pane'>
         <div class='container'>
@@ -1728,6 +1675,7 @@ import TotalACHTable from './total_ach_table.vue';
 import VentIcon from './vent_icon.vue';
 import PacIcon from './pac_icon.vue';
 import RiskIcon from './risk_icon.vue';
+import SideBar from './side_bar.vue';
 import { airCleaners, AirCleaner } from './air_cleaners.js';
 import { datetimeEnglish } from './date.js'
 import { getSampleInterventions } from './sample_interventions.js'
@@ -1788,6 +1736,7 @@ export default {
     PacIcon,
     RiskIcon,
     RiskTable,
+    SideBar,
     TotalACHTable,
     VentIcon
   },
