@@ -229,7 +229,7 @@ export default {
 
   .container {
     display: grid;
-    grid-template-columns: 25% 25% 25% 25%;
+    grid-template-columns: 50% 50%;
     grid-template-rows: auto;
   }
 
