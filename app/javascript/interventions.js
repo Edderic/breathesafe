@@ -192,6 +192,7 @@ export class Intervention {
 
     let totalAch = this.event.totalAch
     if (!totalAch) {
+      debugger
       throw 'No ACH data'
     }
 

@@ -17,78 +17,10 @@
             <div class='container'>
 
               <div class='centered col'>
-                <div class='centered parameters'>
-                  <table>
-                  <tr>
-                    <td>
-                    </td>
-                    <th>
-                      Amount
-                    </th>
-                    <th>Protection
-                    </th>
-                    <th>Image
-                    </th>
-                  </tr>
-                  <tr>
-                    <th>
-                       Infector
-                    </th>
-                    <td>
-                      <input class='centered' :value='numInfectors' @change='setNumInfectors'/>
-                    </td>
-                    <td>
-                      <select class='centered' @change='selectInfectorMask'>
-                        <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
-                      </select>
-                    </td>
-                    <td>
-                      <a :href="selectedInfectorMask.website()">
-                        <img :src="selectedInfectorMask.imgLink()" alt="">
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>
-                       Susceptible
-                    </th>
-
-                    <td>
-                      <input class='centered' :value='numSusceptibles' @change='setNumSusceptibles'/>
-                    </td>
-
-                    <td>
-                      <select class='centered' @change='selectSusceptibleMask'>
-                        <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
-                      </select>
-                    </td>
-                    <td>
-                      <a :href="selectedSusceptibleMask.website()">
-                        <img :src="selectedSusceptibleMask.imgLink()" alt="">
-                      </a>
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>
-                       Portable Air Cleaner
-                    </th>
-
-                    <td>
-                    </td>
-
-                    <td>
-                      <select class='centered' @change='selectAirCleaner'>
-                        <option :value="cleaner.singular" v-for='cleaner in airCleanerInstances'>{{cleaner.singular}}</option>
-                      </select>
-                    </td>
-                    <td>
-                      <a :href="selectedAirCleaner.website()">
-                        <img :src="selectedAirCleaner.imgLink()" alt="">
-                      </a>
-                    </td>
-                  </tr>
-                  </table>
-                </div>
+                <Controls
+                  :maskInstances='maskInstances'
+                  :airCleanerInstances='airCleanerInstances'
+                />
                 <RiskTable
                   :numSusceptibles='numSusceptibles'
                   :event='event'
@@ -1666,6 +1598,7 @@
 // Have a VueX store that maintains state across components
 import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
+import Controls from './controls.vue';
 import CleanAirDeliveryRateTable from './clean_air_delivery_rate_table.vue'
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
@@ -1728,8 +1661,9 @@ export default {
   name: 'Analytics',
   components: {
     AchToDuration,
-    ColoredCell,
     CleanAirDeliveryRateTable,
+    ColoredCell,
+    Controls,
     DayHourHeatmap,
     Event,
     HorizontalStackedBar,
@@ -1772,7 +1706,10 @@ export default {
     ...mapWritableState(
       useAnalyticsStore,
       [
-        'numPeopleToInvestIn'
+        'numPeopleToInvestIn',
+        'selectedAirCleaner',
+        'numInfectors',
+        'numSusceptibles',
       ]
     ),
     ...mapWritableState(
@@ -2316,9 +2253,6 @@ export default {
     ventilationAchRounded() {
       return round(this.ventilationAch, 1)
     },
-    selectedAirCleaner() {
-      return new AirCleaner(this.selectedAirCleanerObj, this.event)
-    }
   },
   async created() {
     this.event = await this.showAnalysis(this.$route.params.id)
@@ -2347,8 +2281,6 @@ export default {
       ventilationACH: 0.0,
       portableACH: 0.0,
       totalACH: 0.0,
-      numInfectors: 1,
-      numSusceptibles: 30,
       maskFactors: maskToPenetrationFactor,
       tableColoredCellWithHorizPadding: {
         'color': 'white',
@@ -2381,9 +2313,6 @@ export default {
         'margin': '0.5em',
         'text-align': 'center'
       },
-      selectedInfectorMask: new Mask(MASKS[0], 1),
-      selectedSusceptibleMask: new Mask(MASKS[0], this.maximumOccupancy, 1),
-      selectedAirCleanerObj: airCleaners[0],
       selectedIntervention: {
         computeCleanAirDeliveryRate() {
           return 0
@@ -2444,47 +2373,10 @@ export default {
     }
   },
   methods: {
-    ...mapActions(useAnalyticsStore, ['setNumPeopleToInvestIn']),
+    ...mapActions(useAnalyticsStore, ['setNumPeopleToInvestIn', 'showAnalysis']),
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
-    setNumSusceptibles(event) {
-      this.numSusceptibles = parseInt(event.target.value)
-    },
-    setNumInfectors(event) {
-      this.numInfectors = parseInt(event.target.value)
-    },
-    selectSusceptibleMask(event) {
-      let name = event.target.value
-      // TODO: have some occupancy variable in the data that can be set to maximum occupancy as the default
-      this.selectedSusceptibleMask = new Mask(MASKS.find((m) => m.name == name), this.maximumOccupancy  - 1)
-      this.selectedIntervention = new Intervention(
-          this.event,
-          [this.selectedAirCleaner],
-          this.selectedInfectorMask,
-          this.selectedSusceptibleMask
-      )
-    },
-    selectInfectorMask(event) {
-      let name = event.target.value
-      this.selectedInfectorMask = new Mask(MASKS.find((m) => m.name == name), 1)
-      this.selectedIntervention = new Intervention(
-          this.event,
-          [this.selectedAirCleaner],
-          this.selectedInfectorMask,
-          this.selectedSusceptibleMask
-      )
-    },
-    selectAirCleaner(event) {
-      let name = event.target.value
-      this.selectedAirCleanerObj = airCleaners.find((m) => m.singular == name)
-      this.selectedIntervention = new Intervention(
-          this.event,
-          [this.selectedAirCleaner],
-          this.selectedInfectorMask,
-          this.selectedSusceptibleMask
-      )
-    },
     selectIntervention(event) {
       let id = event.target.value
       let intervention = this.interventions.find((interv) => { return interv.id == id })
@@ -2496,14 +2388,6 @@ export default {
       } else {
         return 0
       }
-    },
-    async showAnalysis(id) {
-      let eventStores = useEventStores()
-      const showMeasurementSetStore = useShowMeasurementSetStore()
-      let event = await eventStores.findOrLoad(id);
-      showMeasurementSetStore.setMeasurementSet(event)
-
-      return event
     },
     scrollFix(event, hashbang) {
       let element_to_scroll_to = document.getElementById(hashbang);
