@@ -6,6 +6,7 @@ import { airCleaners, AirCleaner } from '../air_cleaners.js'
 import { UpperRoomGermicidalUV, UPPER_ROOM_GERMICIDAL_UV } from '../upper_room_germicidal_uv.js'
 import { Intervention } from '../interventions.js'
 import { useShowMeasurementSetStore } from './show_measurement_set_store';
+import { useEventStores } from './event_stores';
 import { getSampleInterventions } from '../sample_interventions.js'
 
 
@@ -37,11 +38,32 @@ export const useAnalyticsStore = defineStore('analytics', {
       // new Worker('worker.js'),
       // new Worker('worker.js'),
     ],
+    numInfectors: 1,
+    numSusceptibles: 30,
     numPeopleToInvestIn: 5,
+    selectedInfectorMask: new Mask(MASKS[0], 1),
+    selectedAirCleanerObj: airCleaners[0],
+    event: {}
   }),
+  getters: {
+    selectedSusceptibleMask() {
+      return new Mask(MASKS[0], this.maximumOccupancy, 1)
+    },
+    selectedAirCleaner() {
+      return new AirCleaner(this.selectedAirCleanerObj, this.event)
+    }
+  },
   actions: {
-    load(event) {
+    async showAnalysis(id) {
+      let eventStores = useEventStores()
+      const showMeasurementSetStore = useShowMeasurementSetStore()
+      let event = await eventStores.findOrLoad(id);
       this.event = event
+      showMeasurementSetStore.setMeasurementSet(event)
+
+      this.numSusceptibles = this.event.maximumOccupancy - this.numInfectors
+
+      return event
     },
     computeLostWages() {
     },
@@ -183,6 +205,43 @@ export const useAnalyticsStore = defineStore('analytics', {
     },
     setNumPeopleToInvestIn(num) {
       this.numPeopleToInvestIn = num
+    },
+    setNumSusceptibles(event) {
+      this.numSusceptibles = parseInt(event.target.value)
+    },
+    setNumInfectors(event) {
+      this.numInfectors = parseInt(event.target.value)
+    },
+    selectSusceptibleMask(event) {
+      let name = event.target.value
+      // TODO: have some occupancy variable in the data that can be set to maximum occupancy as the default
+      this.selectedSusceptibleMask = new Mask(MASKS.find((m) => m.name == name), this.maximumOccupancy  - 1)
+      this.selectedIntervention = new Intervention(
+          this.event,
+          [this.selectedAirCleaner],
+          this.selectedInfectorMask,
+          this.selectedSusceptibleMask
+      )
+    },
+    selectInfectorMask(event) {
+      let name = event.target.value
+      this.selectedInfectorMask = new Mask(MASKS.find((m) => m.name == name), 1)
+      this.selectedIntervention = new Intervention(
+          this.event,
+          [this.selectedAirCleaner],
+          this.selectedInfectorMask,
+          this.selectedSusceptibleMask
+      )
+    },
+    selectAirCleaner(event) {
+      let name = event.target.value
+      this.selectedAirCleanerObj = airCleaners.find((m) => m.singular == name)
+      this.selectedIntervention = new Intervention(
+          this.event,
+          [this.selectedAirCleaner],
+          this.selectedInfectorMask,
+          this.selectedSusceptibleMask
+      )
     },
   }
 });

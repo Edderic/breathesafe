@@ -1,32 +1,8 @@
 <template>
   <div class='justify-content-center column'>
-    <table>
-
-      <tr>
-        <th>Duration</th>
-        <td>
-          <select @change='setDuration'>
-            <option :value="i" v-for='(v, i) in hoursToSelect'>{{v}}</option>
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <th>Individual risk given 1 infector</th>
-
-        <td>
-          <ColoredCell
-            :colorScheme="riskColorScheme"
-            :maxVal=1
-            :value='roundOut(this.risk, 6)'
-            :style="styleProps"
-            />
-        </td>
-      </tr>
-
-    </table>
-    <div class='multi-column'>
+    <div class='container'>
       <div
-        class='align-items-center column'
+        class='item'
        >
 
         <h2>Average New Infections</h2>
@@ -55,7 +31,7 @@
       </div>
 
       <div
-        class='align-items-center column'
+        class='item'
        >
 
         <h2>Lost Labor & Lost Wages</h2>
@@ -95,9 +71,23 @@
           ${{wage}}/hour, and that each infected person takes off for 5 days after
           infection, doing this intervention costs at least
           <span class='bold'>${{ peopleCost() }}</span> in terms of <span
-          class='italic'>lost wages/labor</span>.  Implementation cost of the intervention (initial +
-          recurring cost of 3 months) is
-          <span class='bold'> ${{ selectedIntervention.implementationCostInYears(0.25) }}</span>, for a total cost of
+          class='italic'>lost wages/labor</span>.
+        </p>
+      </div>
+
+      <div class='item'>
+        <h2>Cost of Implementation</h2>
+        <p>
+          Implementation cost of the intervention (initial +
+            recurring cost of 3 months) is
+            <span class='bold'> ${{ selectedIntervention.implementationCostInYears(0.25) }}</span>
+        </p>
+      </div>
+
+      <div class='item'>
+        <h2>Total Cost</h2>
+        <p>
+          Total cost is
           <span class='bold'> ${{ selectedIntervention.implementationCostInYears(0.25) + peopleCost() }}</span>.
         </p>
       </div>
@@ -164,13 +154,6 @@ export default {
   },
   data() {
     return {
-      selectedHour: 1,
-      hoursToSelect: [
-        '1 hour',
-        '4 hours',
-        '8 hours',
-        '40 hours',
-      ],
       wage: 15,
       numDaysOff: 5,
       numHoursPerDay: 8
@@ -184,9 +167,6 @@ export default {
       return round(someValue, numRound)
     },
 
-    setDuration(event) {
-      this.selectedHour = this.hoursToSelect[event.target.value].split(' ')[0]
-    }
   },
   props: {
     numSusceptibles: Number,
@@ -227,6 +207,7 @@ export default {
   .column {
     display: flex;
     flex-direction: column;
+    margin: 1em;
   }
 
   .row {
@@ -246,9 +227,10 @@ export default {
     font-style: italic;
   }
 
-  .multi-column {
-    display: flex;
-    flex-direction: row;
+  .container {
+    display: grid;
+    grid-template-columns: 25% 25% 25% 25%;
+    grid-template-rows: auto;
   }
 
 </style>
