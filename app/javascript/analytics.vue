@@ -1,10 +1,9 @@
 <template>
 
   <div class='col'>
-    <div class='row'>
-      <SideBar class='col border-showing left-pane'/>
+    <div class='grid'>
+      <div class='item class sticky'>
 
-      <div class='col border-showing right-pane'>
         <div class='container'>
           <br id='risk-assessment'>
           <br>
@@ -13,22 +12,28 @@
           <h4 class='subsection' v-if='event && event.placeData'>{{event.placeData.formattedAddress}}</h4>
           <h4 class='subsection' v-if='event && event.firstName'>Measurements taken by {{event.firstName}} {{event.lastName}}</h4>
           <h4 class='subsection'>on {{datetimeInWords}}</h4>
+        </div>
+
+        <Controls
+          :maskInstances='maskInstances'
+          :airCleanerInstances='airCleanerInstances'
+        />
+      </div>
+
+      <SideBar class='col border-showing item sticky'/>
+
+      <div class='col border-showing item'>
+        <RiskTable
+          :numSusceptibles='numSusceptibles'
+          :event='event'
+          :selectedIntervention='selectedIntervention'
+          :numInfectors='numInfectors'
+        />
+
+        <div class='centered col'>
+
           <div class='centered col'>
             <div class='container'>
-
-              <div class='centered col'>
-                <Controls
-                  :maskInstances='maskInstances'
-                  :airCleanerInstances='airCleanerInstances'
-                />
-                <RiskTable
-                  :numSusceptibles='numSusceptibles'
-                  :event='event'
-                  :selectedIntervention='selectedIntervention'
-                  :numInfectors='numInfectors'
-                />
-              </div>
-
               <p>
 
                 The assessments below assume that an infector is present and is
@@ -2652,4 +2657,17 @@ export default {
   .parameters td {
     padding: 0.25em;
   }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 40% 15% 45%;
+  }
+
+
+  .sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
 </style>
+
