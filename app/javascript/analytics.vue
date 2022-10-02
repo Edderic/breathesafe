@@ -54,29 +54,11 @@
           :numInfectors='numInfectors'
         />
 
-        <div class='centered col'>
-
-          <div class='centered col'>
-            <div class='container'>
-              <p>
-
-                The assessments below assume that an infector is present and is
-                doing the riskiest recorded behaviors. For example, the model assumes that the
-                infector is wearing the riskiest mask (i.e. the mask with the worst fit and
-                filtration efficiency) and is also doing the riskiest aerosol generation activity
-                recorded (e.g. loudly talking).
-              </p>
-
-              <br id='overview'>
-              <br>
-              <br>
-              <h3>Overview</h3>
-
-
+        <div class='item'>
           <br id='strengths'>
           <br>
           <br>
-          <h4>Strengths</h4>
+          <h3>Strengths</h3>
           <ul>
             <li v-if="selectedIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) > 1000">
 
@@ -161,10 +143,13 @@
             </li>
           </ul>
 
+        </div>
+
+        <div class='item'>
           <br id='room-for-improvement'>
           <br>
           <br>
-          <h4>Room for Improvement</h4>
+          <h3>Room for Improvement</h3>
           <ul>
             <li v-if="selectedIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) <= 1000">
               <span class='italic bold'>
@@ -236,6 +221,27 @@
 
 
           </ul>
+        </div>
+
+        <div class='centered col'>
+
+          <div class='centered col'>
+            <div class='container'>
+              <p>
+
+                The assessments below assume that an infector is present and is
+                doing the riskiest recorded behaviors. For example, the model assumes that the
+                infector is wearing the riskiest mask (i.e. the mask with the worst fit and
+                filtration efficiency) and is also doing the riskiest aerosol generation activity
+                recorded (e.g. loudly talking).
+              </p>
+
+              <br id='overview'>
+              <br>
+              <br>
+              <h3>Overview</h3>
+
+
 
 
 
