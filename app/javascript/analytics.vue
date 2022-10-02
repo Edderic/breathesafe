@@ -22,7 +22,15 @@
 
       <SideBar class='col border-showing item sticky'/>
 
-      <div class='col border-showing item scrollableY'>
+      <div class='col border-showing item scrollableY content' >
+        <PeopleAffected
+          class='item'
+          :numSusceptibles='numSusceptibles'
+          :event='event'
+          :selectedIntervention='selectedIntervention'
+          :numInfectors='numInfectors'
+        />
+
         <RiskTable
           :numSusceptibles='numSusceptibles'
           :event='event'
@@ -1612,6 +1620,7 @@ import { Intervention } from './interventions.js'
 import TotalACHTable from './total_ach_table.vue';
 import VentIcon from './vent_icon.vue';
 import PacIcon from './pac_icon.vue';
+import PeopleAffected from './people_affected.vue';
 import RiskIcon from './risk_icon.vue';
 import SideBar from './side_bar.vue';
 import { airCleaners, AirCleaner } from './air_cleaners.js';
@@ -1673,6 +1682,7 @@ export default {
     Event,
     HorizontalStackedBar,
     PacIcon,
+    PeopleAffected,
     RiskIcon,
     RiskTable,
     SideBar,
@@ -2663,6 +2673,14 @@ export default {
     grid-template-columns: 40% 15% 45%;
   }
 
+  .content {
+    display: grid;
+    grid-template-columns: 50% 50%;
+  }
+
+  .item {
+    padding: 1em;
+  }
 
   .sticky {
     position: sticky;
