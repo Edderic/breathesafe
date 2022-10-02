@@ -1,10 +1,13 @@
 <template>
   <div class='justify-content-center column'>
-    <h2>Total Cost</h2>
-    <p>
-      Total cost is
-      <span class='bold'> ${{ selectedIntervention.implementationCostInYears(0.25) + peopleCost() }}</span>.
-    </p>
+    <div class='item'>
+      <h2>Cost of Implementation</h2>
+      <p>
+        Implementation cost of the intervention (initial +
+          recurring cost of 3 months) is
+          <span class='bold'> ${{ selectedIntervention.implementationCostInYears(0.25) }}</span>
+      </p>
+    </div>
   </div>
 </template>
 

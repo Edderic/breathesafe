@@ -39,6 +39,14 @@
           :numInfectors='numInfectors'
         />
 
+        <ImplementationCost
+          class='item'
+          :numSusceptibles='numSusceptibles'
+          :event='event'
+          :selectedIntervention='selectedIntervention'
+          :numInfectors='numInfectors'
+        />
+
         <RiskTable
           :numSusceptibles='numSusceptibles'
           :event='event'
@@ -1628,6 +1636,7 @@ import { Intervention } from './interventions.js'
 import TotalACHTable from './total_ach_table.vue';
 import VentIcon from './vent_icon.vue';
 import LostLaborWages from './lost_labor_wages.vue';
+import ImplementationCost from './implementation_cost.vue';
 import PacIcon from './pac_icon.vue';
 import PeopleAffected from './people_affected.vue';
 import RiskIcon from './risk_icon.vue';
@@ -1690,6 +1699,7 @@ export default {
     DayHourHeatmap,
     Event,
     HorizontalStackedBar,
+    ImplementationCost,
     LostLaborWages,
     PacIcon,
     PeopleAffected,
