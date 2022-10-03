@@ -70,35 +70,7 @@
           class='item'
         />
 
-
-        <div class='centered col'>
-
-          <div class='centered col'>
-            <div class='container'>
-              <p>
-
-                The assessments below assume that an infector is present and is
-                doing the riskiest recorded behaviors. For example, the model assumes that the
-                infector is wearing the riskiest mask (i.e. the mask with the worst fit and
-                filtration efficiency) and is also doing the riskiest aerosol generation activity
-                recorded (e.g. loudly talking).
-              </p>
-
-              <br id='overview'>
-              <br>
-              <br>
-              <h3>Overview</h3>
-
-
-
-
-
-          <br id='details'>
-          <br>
-          <br>
-          <h3>Details</h3>
-
-
+        <div class='item'>
           <br id='clean-air-delivery-rate'>
           <br>
           <br>
@@ -148,6 +120,37 @@
           relative to the production rate of contaminants such as airborne
           viruses like that of COVID-19, the safer the environment.
           </p>
+
+        </div>
+
+
+        <div class='centered col'>
+
+          <div class='centered col'>
+            <div class='container'>
+              <p>
+
+                The assessments below assume that an infector is present and is
+                doing the riskiest recorded behaviors. For example, the model assumes that the
+                infector is wearing the riskiest mask (i.e. the mask with the worst fit and
+                filtration efficiency) and is also doing the riskiest aerosol generation activity
+                recorded (e.g. loudly talking).
+              </p>
+
+              <br id='overview'>
+              <br>
+              <br>
+              <h3>Overview</h3>
+
+
+
+
+
+          <br id='details'>
+          <br>
+          <br>
+          <h3>Details</h3>
+
 
           <br id='air-changes-per-hour'>
           <br>

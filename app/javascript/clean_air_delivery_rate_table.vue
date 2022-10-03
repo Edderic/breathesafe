@@ -6,23 +6,6 @@
         <span>Clean Air Delivery Rate</span>
         <span class='font-light'>({{this.measurementUnits.airDeliveryRateMeasurementTypeShort}})</span>
       </th>
-      <th></th>
-      <th class='col centered'>
-        <span>Unoccupied Room Volume</span>
-        <span class='font-light'>({{this.measurementUnits.cubicLengthShort}})</span>
-      </th>
-      <th></th>
-      <th class='col centered'>
-        <span>Total ACH</span>
-        <span class='font-light'>(1 / h)</span>
-      </th>
-      <th v-if="systemOfMeasurement == 'imperial'"></th>
-      <th class='col centered' v-if="systemOfMeasurement == 'imperial'">
-        <span></span>
-        <span class='font-light'>(min / h)</span>
-      </th>
-    </tr>
-    <tr>
       <td>
       <ColoredCell
         :colorScheme="colorInterpolationSchemeRoomVolume"
@@ -31,7 +14,16 @@
         :style='cellCSSMerged'
       />
       </td>
+    </tr>
+    <tr>
+      <td></td>
       <td>=</td>
+    </tr>
+    <tr>
+      <th class='col centered'>
+        <span>Unoccupied Room Volume</span>
+        <span class='font-light'>({{this.measurementUnits.cubicLengthShort}})</span>
+      </th>
       <td>
       <ColoredCell
         :colorScheme="colorInterpolationSchemeRoomVolume"
@@ -40,7 +32,16 @@
         :style='cellCSSMerged'
       />
       </td>
+    </tr>
+    <tr>
+      <td></td>
       <td>x</td>
+    </tr>
+    <tr>
+      <th class='col centered'>
+        <span>Total ACH</span>
+        <span class='font-light'>(1 / h)</span>
+      </th>
       <td>
       <ColoredCell
         :colorScheme="colorInterpolationSchemeTotalAch"
@@ -49,7 +50,16 @@
         :style='cellCSSMerged'
       />
       </td>
-      <td v-if="systemOfMeasurement == 'imperial'">/</td>
+    </tr>
+    <tr v-if="systemOfMeasurement == 'imperial'">
+      <th></th>
+      <th>/</th>
+    </tr>
+    <tr v-if="systemOfMeasurement == 'imperial'">
+      <th class='col centered' v-if="systemOfMeasurement == 'imperial'">
+        <span></span>
+        <span class='font-light'>(min / h)</span>
+      </th>
       <td>
       <ColoredCell
         v-if="systemOfMeasurement == 'imperial'"
@@ -91,6 +101,8 @@ export default {
         'color': 'white',
         'text-shadow': '1px 1px 2px black',
         'text-align': 'center',
+        'padding-left': '0.5em',
+        'padding-right': '0.5em',
       }
 
       // return Object.assign(this.cellCSS, default)
