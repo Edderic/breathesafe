@@ -54,96 +54,14 @@
           :numInfectors='numInfectors'
         />
 
-        <div class='item'>
-          <br id='strengths'>
-          <br>
-          <br>
-          <h3>Strengths</h3>
-          <ul>
-            <li v-if="selectedIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) > 1000">
+        <Strengths
+          :selectedIntervention='selectedIntervention'
+          :maskingBarChart='maskingBarChart'
+          :colorInterpolationSchemeRoomVolume='colorInterpolationSchemeRoomVolume'
+          :cellCSSMerged='cellCSSMerged'
+          class='item'
+        />
 
-              <span class='italic bold'>
-                <router-link :to="`/analytics/${this.$route.params.id}#clean-air-delivery-rate`">
-                  Clean Air Delivery Rate (CADR):
-                </router-link>
-              </span>&nbsp;&nbsp;
-
-
-              Assuming that the air is well-mixed (i.e. infector's air
-              particles are distributed evenly throughout the space (i.e. via fans),
-              people are getting
-
-              <ColoredCell
-                :colorScheme="colorInterpolationSchemeRoomVolume"
-                :maxVal=1
-                :value='roundOut(selectedIntervention.computeCleanAirDeliveryRate(systemOfMeasurement), 0)'
-                :style='cellCSSMerged'
-              />
-
-            {{ measurementUnits.airDeliveryRateMeasurementType }} of clean air.
-            </li>
-
-            <li v-if='maskingBarChart.isStrength(0.2)'>
-            <span class='italic bold'>
-              <router-link :to="`/analytics/${this.$route.params.id}#masking`" class='link-h2'>
-                Masking
-              </router-link>
-            </span>&nbsp;&nbsp;
-
-            <ColoredCell
-              :colorScheme="reducedRiskColorScheme"
-              :maxVal=1
-              :value='roundOut(maskingBarChart.fractionOfSubparMasks(), 2)'
-              :style='cellCSSMerged'
-            />
-            </li>
-
-            <li v-if='exhalationActivityIsStrength'>
-              <span class='italic bold'>
-                <router-link :to="`/analytics/${this.$route.params.id}#exhalation`">
-                  Exhalation activity:
-                </router-link>
-              </span>&nbsp;&nbsp;
-
-
-              <span>
-              The riskiest aerosol generation activity recorded during this measurement is <ColoredCell
-                    :colorScheme="riskiestAerosolGenerationActivityScheme"
-                    :maxVal=1
-                    :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
-                    :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
-                    :style="inlineCellCSS"
-                />.
-              </span>
-            </li>
-
-            <li v-if='inhalationActivityIsStrength'>
-              <span class='italic bold'>
-                <router-link :to="`/analytics/${this.$route.params.id}#inhalation`">
-                  Inhalation activity:
-                </router-link>
-              </span>&nbsp;&nbsp;
-
-              <span>The worst case inhalation activity is <ColoredCell
-                    :colorScheme="inhalationActivityScheme"
-                    :maxVal=1
-                    :value='worstCaseInhalation["inhalationFactor"]'
-                    :text='worstCaseInhalation["inhalationActivity"]'
-                    :style="inlineCellCSS"
-                />.
-              </span>
-            </li>
-
-            <li v-if='maskingBarChart.isStrength(0.2)'>
-            <span class='italic bold'>
-              <router-link :to="`/analytics/${this.$route.params.id}#masking`" class='link-h2'>
-                Masking
-              </router-link>
-            </span>&nbsp;&nbsp;
-            </li>
-          </ul>
-
-        </div>
 
         <div class='item'>
           <br id='room-for-improvement'>
@@ -1647,6 +1565,7 @@ import PacIcon from './pac_icon.vue';
 import PeopleAffected from './people_affected.vue';
 import RiskIcon from './risk_icon.vue';
 import SideBar from './side_bar.vue';
+import Strengths from './strengths.vue';
 import { airCleaners, AirCleaner } from './air_cleaners.js';
 import { datetimeEnglish } from './date.js'
 import { getSampleInterventions } from './sample_interventions.js'
@@ -1712,6 +1631,7 @@ export default {
     RiskIcon,
     RiskTable,
     SideBar,
+    Strengths,
     TotalACHTable,
     VentIcon
   },
