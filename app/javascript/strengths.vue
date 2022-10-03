@@ -149,41 +149,12 @@ export default {
   },
   computed: {
     ...mapState(
-        useMainStore,
-        [
-          'currentUser',
-        ]
-    ),
-    ...mapWritableState(
-        useMainStore,
-        [
-          'focusTab',
-        ]
-    ),
-    ...mapState(
-        usePrevalenceStore,
-        [
-          'riskOfOne',
-        ]
-    ),
-    ...mapState(
         useProfileStore,
         [
-          'lengthMeasurementType',
           'airDeliveryRateMeasurementType',
-          'carbonDioxideMonitors',
           'measurementUnits',
           'systemOfMeasurement'
         ]
-    ),
-    ...mapWritableState(
-      useAnalyticsStore,
-      [
-        'numPeopleToInvestIn',
-        'selectedAirCleaner',
-        'numInfectors',
-        'numSusceptibles',
-      ]
     ),
     ...mapWritableState(
         useShowMeasurementSetStore,
