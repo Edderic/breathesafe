@@ -62,84 +62,14 @@
           class='item'
         />
 
+        <RoomForImprovement
+          :selectedIntervention='selectedIntervention'
+          :maskingBarChart='maskingBarChart'
+          :colorInterpolationSchemeRoomVolume='colorInterpolationSchemeRoomVolume'
+          :cellCSSMerged='cellCSSMerged'
+          class='item'
+        />
 
-        <div class='item'>
-          <br id='room-for-improvement'>
-          <br>
-          <br>
-          <h3>Room for Improvement</h3>
-          <ul>
-            <li v-if="selectedIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) <= 1000">
-              <span class='italic bold'>
-                <router-link :to="`/analytics/${this.$route.params.id}#clean-air-delivery-rate`">
-                  Clean Air Delivery Rate (CADR):
-                </router-link>
-              </span>&nbsp;&nbsp;
-
-              <ColoredCell
-                :colorScheme="colorInterpolationSchemeRoomVolume"
-                :maxVal=1
-                :value='roundOut(selectedIntervention.computeCleanAirDeliveryRate(systemOfMeasurement), 0)'
-                :style='cellCSSMerged'
-              /> {{ measurementUnits.airDeliveryRateMeasurementType }} of clean
-              air. One can invest in ventilation, filtration, and/or upper-room UV
-              technologies to increase the amount of clean air delivered, which
-              will dilute the inhaled dose of contaminants such as SARS-CoV-2.
-            </li>
-
-            <li v-if='!maskingBarChart.isStrength(0.2)'>
-            <span class='italic bold'>
-              <router-link :to="`/analytics/${this.$route.params.id}#masking`">
-                Masking:
-              </router-link>
-            </span> &nbsp;&nbsp; <ColoredCell
-              :colorScheme="reducedRiskColorScheme"
-              :maxVal=1
-              :text='roundOut(maskingBarChart.fractionOfSubparMasks() * 100, 2)'
-              :value='roundOut(maskingBarChart.fractionOfSubparMasks(), 2)'
-              :style='cellCSSMerged'
-            /> percent of people were wearing subpar masks. Switching to better-fitting, high filtration efficiency masks such as N95s or elastomeric respirators is a very cost-effective way to decrease risk.
-            </li>
-
-            <li v-if='!exhalationActivityIsStrength'>
-              <span class='italic bold'>
-                <router-link :to="`/analytics/${this.$route.params.id}#exhalation`">
-                  Exhalation activity:
-                </router-link>
-              </span>&nbsp;&nbsp;
-
-
-              <span>
-              The riskiest aerosol generation activity recorded during this measurement was <ColoredCell
-                    :colorScheme="riskiestAerosolGenerationActivityScheme"
-                    :maxVal=1
-                    :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
-                    :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
-                    :style="inlineCellCSS"
-                />.
-              </span>
-            </li>
-
-            <li v-if='!inhalationActivityIsStrength'>
-              <span class='italic bold'>
-                <router-link :to="`/analytics/${this.$route.params.id}#inhalation`">
-                  Inhalation activity:
-                </router-link>
-              </span>&nbsp;&nbsp;
-
-              <span>The worst case inhalation activity was <ColoredCell
-                    :colorScheme="inhalationActivityScheme"
-                    :maxVal=1
-                    :value='worstCaseInhalation["inhalationFactor"]'
-                    :text='worstCaseInhalation["inhalationActivity"]'
-                    :style="inlineCellCSS"
-                />.
-              </span>
-            </li>
-
-
-          </ul>
-        </div>
 
         <div class='centered col'>
 
@@ -1564,6 +1494,7 @@ import ImplementationCost from './implementation_cost.vue';
 import PacIcon from './pac_icon.vue';
 import PeopleAffected from './people_affected.vue';
 import RiskIcon from './risk_icon.vue';
+import RoomForImprovement from './room_for_improvement.vue';
 import SideBar from './side_bar.vue';
 import Strengths from './strengths.vue';
 import { airCleaners, AirCleaner } from './air_cleaners.js';
@@ -1630,6 +1561,7 @@ export default {
     PeopleAffected,
     RiskIcon,
     RiskTable,
+    RoomForImprovement,
     SideBar,
     Strengths,
     TotalACHTable,
