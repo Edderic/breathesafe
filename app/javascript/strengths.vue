@@ -100,43 +100,21 @@ import { datetimeEnglish } from './date.js'
 import { getSampleInterventions } from './sample_interventions.js'
 import {
   AEROSOL_GENERATION_BOUNDS,
-  colorSchemeFall,
   colorPaletteFall,
   assignBoundsToColorScheme,
-  riskColorInterpolationScheme,
-  infectedPeopleColorBounds,
   convertColorListToCutpoints,
   generateEvenSpacedBounds } from './colors.js';
 import {
-  findRiskiestMask,
   findRiskiestPotentialInfector,
   riskOfEncounteringInfectious,
   riskIndividualIsNotInfGivenNegRapidTest,
   reducedRisk } from './risk.js';
-import { convertVolume, computeAmountOfPortableAirCleanersThatCanFit } from './measurement_units.js';
-import { useAnalyticsStore } from './stores/analytics_store'
-import { Mask, MASKS, MaskingBarChart } from './masks.js';
-import { useEventStore } from './stores/event_store';
-import { useEventStores } from './stores/event_stores';
-import { useMainStore } from './stores/main_store';
 import { useShowMeasurementSetStore } from './stores/show_measurement_set_store';
 import { useProfileStore } from './stores/profile_store';
-import { usePrevalenceStore } from './stores/prevalence_store';
-import { mapWritableState, mapState, mapActions } from 'pinia';
+import { mapWritableState, mapState } from 'pinia';
 import {
-  CO2_TO_MET,
-  computePortableACH,
-  computeVentilationACH,
-  convertCubicMetersPerHour,
-  convertLengthBasedOnMeasurementType,
-  cubicFeetPerMinuteTocubicMetersPerHour,
-  displayCADR,
   findWorstCaseInhFactor,
-  getCO2Rate,
   infectorActivityTypes,
-  maskToPenetrationFactor,
-  setupCSRF,
-  simplifiedRisk,
   susceptibleBreathingActivityToFactor,
   round
 
@@ -489,5 +467,5 @@ export default {
 
   .scrollableY {
   }
-</style>
 
+</style>
