@@ -2,9 +2,11 @@
 <template>
   <table>
     <tr>
-      <th class='col centered'>
-        <span>Clean Air Delivery Rate</span>
-        <span class='font-light'>({{this.measurementUnits.airDeliveryRateMeasurementTypeShort}})</span>
+      <th class='centered'>
+        <div class='col'>
+          <span>Clean Air Delivery Rate</span>
+          <span class='font-light'>({{this.measurementUnits.airDeliveryRateMeasurementTypeShort}})</span>
+        </div>
       </th>
       <td>
       <ColoredCell
@@ -20,9 +22,11 @@
       <td>=</td>
     </tr>
     <tr>
-      <th class='col centered'>
-        <span>Unoccupied Room Volume</span>
-        <span class='font-light'>({{this.measurementUnits.cubicLengthShort}})</span>
+      <th class='centered'>
+        <div class='col'>
+          <span>Unoccupied Room Volume</span>
+          <span class='font-light'>({{this.measurementUnits.cubicLengthShort}})</span>
+        </div>
       </th>
       <td>
       <ColoredCell
@@ -38,9 +42,11 @@
       <td>x</td>
     </tr>
     <tr>
-      <th class='col centered'>
-        <span>Total ACH</span>
-        <span class='font-light'>(1 / h)</span>
+      <th class='centered'>
+        <div class='col'>
+          <span>Total ACH</span>
+          <span class='font-light'>(1 / h)</span>
+        </div>
       </th>
       <td>
       <ColoredCell
@@ -56,9 +62,11 @@
       <th>/</th>
     </tr>
     <tr v-if="systemOfMeasurement == 'imperial'">
-      <th class='col centered' v-if="systemOfMeasurement == 'imperial'">
-        <span></span>
-        <span class='font-light'>(min / h)</span>
+      <th class='centered' v-if="systemOfMeasurement == 'imperial'">
+        <div class='col'>
+          <span></span>
+          <span class='font-light'>(min / h)</span>
+        </div>
       </th>
       <td>
       <ColoredCell
@@ -154,6 +162,8 @@ export default {
   .col {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
 
 
@@ -162,6 +172,8 @@ export default {
     padding-bottom: 0.5em;
     padding-left: 0.5em;
     padding-right: 0.5em;
+    text-align: center;
+    font-weight: bold;
   }
 
 

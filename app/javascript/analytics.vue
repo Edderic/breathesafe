@@ -73,14 +73,41 @@
         <CADR
           class='item'
           :cellCSSMerged='cellCSSMerged'
+          :cellCSS='cellCSS'
           :measurementUnits='measurementUnits'
           :airCleanerSuggestion='airCleanerSuggestion'
           :numSuggestedAirCleaners='numSuggestedAirCleaners'
           :colorScheme="colorInterpolationSchemeRoomVolume"
+          :selectedIntervention='selectedIntervention'
           :systemOfMeasurement='systemOfMeasurement'
           :totalFlowRateCubicMetersPerHour='totalFlowRateCubicMetersPerHour'
           :totalFlowRate='totalFlowRate'
         />
+
+        <div class='item'>
+          <br id='total-ach'>
+          <br>
+          <br>
+          <h4>Total ACH</h4>
+          <div class='centered'>
+            <TotalACHTable
+              :measurementUnits='measurementUnits'
+              :systemOfMeasurement='systemOfMeasurement'
+              :totalFlowRate='totalFlowRate'
+              :roomUsableVolume='roomUsableVolume'
+              :portableAch='selectedIntervention.computePortableAirCleanerACH()'
+              :ventilationAch='selectedIntervention.computeVentilationACH()'
+              :uvAch='selectedIntervention.computeUVACH()'
+              :cellCSS='cellCSS'
+              />
+          </div>
+
+          <div class='centered'>
+          <AchToDuration
+            :intervention='selectedIntervention'
+          />
+          </div>
+        </div>
 
 
         <div class='centered col'>
@@ -123,28 +150,6 @@
             ventilation, filtration, upper-room germicidal UV).
           </p>
 
-          <br id='total-ach'>
-          <br>
-          <br>
-          <h4>Total ACH</h4>
-          <div class='centered'>
-            <TotalACHTable
-              :measurementUnits='measurementUnits'
-              :systemOfMeasurement='systemOfMeasurement'
-              :totalFlowRate='totalFlowRate'
-              :roomUsableVolume='roomUsableVolume'
-              :portableAch='selectedIntervention.computePortableAirCleanerACH()'
-              :ventilationAch='selectedIntervention.computeVentilationACH()'
-              :uvAch='selectedIntervention.computeUVACH()'
-              :cellCSS='cellCSS'
-              />
-          </div>
-
-          <div class='centered'>
-          <AchToDuration
-            :intervention='selectedIntervention'
-          />
-          </div>
 
           <br id='behaviors'>
           <br>
