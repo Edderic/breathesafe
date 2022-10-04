@@ -70,58 +70,17 @@
           class='item'
         />
 
-        <div class='item'>
-          <br id='clean-air-delivery-rate'>
-          <br>
-          <br>
-          <h4>Clean Air Delivery Rate</h4>
-
-          <div class='container'>
-            <div class='centered'>
-              <CleanAirDeliveryRateTable
-                :measurementUnits='measurementUnits'
-                :systemOfMeasurement='systemOfMeasurement'
-                :intervention='selectedIntervention'
-                :cellCSS='cellCSS'
-              />
-            </div>
-          </div>
-
-          <p>
-          To give context of what {{roundOut(totalFlowRate, 1)}} {{
-          measurementUnits.airDeliveryRateMeasurementType}} means, that is
-          about {{
-            roundOut(totalFlowRatePerAirCleanerSuggestion, 1)}} times the amount 1
-            <a :href="airCleanerSuggestion.website"> {{
-              airCleanerSuggestion['singular']}}
-            </a> outputs.
-            <span class='bold'>
-              Adding {{
-              numSuggestedAirCleaners }} {{ airCleanerSuggestion['plural'] }} would
-              increase the CADR to
-
-              <ColoredCell
-                :colorScheme="colorInterpolationSchemeRoomVolume"
-                :maxVal=1
-                :value='totalFlowRatePlusExtraPacRounded'
-                :style='cellCSSMerged'
-              />
-                {{ measurementUnits.airDeliveryRateMeasurementType}}, which would
-                decrease the probability of infection by a factor of {{
-                  roundOut(totalFlowRatePlusExtraPacRounded / totalFlowRate, 1)
-                }} (assuming the risk was low to begin with).
-            </span>
-          </p>
-
-          <p>
-          A combination of larger rooms along with high ACH can reduce the risk
-          of contracting COVID-19 and other airborne viruses. The product of the two
-          gives us the Clean Air Delivery Rate (CADR). The higher it is,
-          relative to the production rate of contaminants such as airborne
-          viruses like that of COVID-19, the safer the environment.
-          </p>
-
-        </div>
+        <CADR
+          class='item'
+          :cellCSSMerged='cellCSSMerged'
+          :measurementUnits='measurementUnits'
+          :airCleanerSuggestion='airCleanerSuggestion'
+          :numSuggestedAirCleaners='numSuggestedAirCleaners'
+          :colorScheme="colorInterpolationSchemeRoomVolume"
+          :systemOfMeasurement='systemOfMeasurement'
+          :totalFlowRateCubicMetersPerHour='totalFlowRateCubicMetersPerHour'
+          :totalFlowRate='totalFlowRate'
+        />
 
 
         <div class='centered col'>
@@ -1486,6 +1445,7 @@ import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
 import Controls from './controls.vue';
 import CleanAirDeliveryRateTable from './clean_air_delivery_rate_table.vue'
+import CADR from './cadr.vue'
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import RiskTable from './risk_table.vue';
@@ -1552,6 +1512,7 @@ export default {
   name: 'Analytics',
   components: {
     AchToDuration,
+    CADR,
     CleanAirDeliveryRateTable,
     ColoredCell,
     Controls,
@@ -2125,16 +2086,6 @@ export default {
     },
     airCleanerSuggestion() {
       return airCleaners.find((ac) => ac.singular == 'Corsi-Rosenthal box (Max Speed)')
-    },
-    totalFlowRatePerAirCleanerSuggestion() {
-      return this.totalFlowRateCubicMetersPerHour / this.airCleanerSuggestion.cubicMetersPerHour
-    },
-    totalFlowRatePlusExtraPacRounded() {
-      // TODO: could pull from risk.js airCleaners instead
-
-      const newCADRcubicMetersPerHour = this.totalFlowRateCubicMetersPerHour + this.airCleanerSuggestion.cubicMetersPerHour * this.numSuggestedAirCleaners
-
-      return round(displayCADR(this.systemOfMeasurement, newCADRcubicMetersPerHour), 1)
     },
     portableAchRounded() {
       return round(this.portableAch, 1)
