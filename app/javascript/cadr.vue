@@ -47,19 +47,11 @@
           }}</span> (assuming the risk was low to begin with).
       </span>
     </p>
-
-    <p>
-    A combination of larger rooms along with high ACH can reduce the risk
-    of contracting COVID-19 and other airborne viruses. The product of the two
-    gives us the Clean Air Delivery Rate (CADR). The higher it is,
-    relative to the production rate of contaminants such as airborne
-    viruses like that of COVID-19, the safer the environment.
-    </p>
-
   </div>
 </template>
 
 <script>
+import CleanAirDeliveryRateTable from './clean_air_delivery_rate_table.vue'
 import ColoredCell from './colored_cell.vue';
 
 import {
@@ -71,6 +63,7 @@ export default {
   name: 'CADR',
   components: {
     ColoredCell,
+    CleanAirDeliveryRateTable,
   },
   data() {
     return {}
@@ -99,10 +92,12 @@ export default {
   },
   props: {
     'airCleanerSuggestion': Object,
+    'cellCSS': Object,
     'cellCSSMerged': Object,
     'measurementUnits': Object,
     'numSuggestedAirCleaners': Number,
     'colorScheme': Object,
+    'selectedIntervention': Object,
     'systemOfMeasurement': String,
     'totalFlowRate': Number,
     'totalFlowRateCubicMetersPerHour': Number,
