@@ -7,23 +7,6 @@
         <span>Total ACH</span>
         <span class='font-light'>(1 / h)</span>
       </th>
-      <th></th>
-      <th class='col centered'>
-        <span>Ventilation ACH</span>
-        <span class='font-light'>(1 / h)</span>
-      </th>
-      <th></th>
-      <th class='col centered'>
-        <span>Portable ACH</span>
-        <span class='font-light'>(1 / h)</span>
-      </th>
-      <th></th>
-      <th class='col centered'>
-        <span>Upper-Room UV ACH</span>
-        <span class='font-light'>(1 / h)</span>
-      </th>
-    </tr>
-    <tr>
       <td>
       <ColoredCell
         :colorScheme="colorInterpolationSchemeTotalAch"
@@ -32,7 +15,16 @@
         :style='cellCSSMerged'
       />
       </td>
+    </tr>
+    <tr>
+      <th></th>
       <td class='operator'>=</td>
+    </tr>
+    <tr>
+      <th class='col centered'>
+        <span>Ventilation ACH</span>
+        <span class='font-light'>(1 / h)</span>
+      </th>
       <td>
       <ColoredCell
         :colorScheme="colorInterpolationSchemeTotalAch"
@@ -41,7 +33,16 @@
         :style='cellCSSMerged'
       />
       </td>
+    </tr>
+    <tr>
+      <td></td>
       <td class='operator'>+</td>
+    </tr>
+    <tr>
+      <th class='col centered'>
+        <span>Portable ACH</span>
+        <span class='font-light'>(1 / h)</span>
+      </th>
       <td>
       <ColoredCell
         :colorScheme="colorInterpolationSchemeTotalAch"
@@ -50,7 +51,16 @@
         :style='cellCSSMerged'
       />
       </td>
+    </tr>
+    <tr>
+      <td></td>
       <td class='operator'>+</td>
+    </tr>
+    <tr>
+      <th class='col centered'>
+        <span>Upper-Room UV ACH</span>
+        <span class='font-light'>(1 / h)</span>
+      </th>
       <td>
       <ColoredCell
         :colorScheme="colorInterpolationSchemeTotalAch"
