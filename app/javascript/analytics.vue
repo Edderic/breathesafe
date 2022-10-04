@@ -102,11 +102,30 @@
               />
           </div>
 
-          <div class='centered'>
+          <p>
+            Air Changes per Hour (ACH) tells us how much clean air is generated
+            relative to the volume of the room. If a device outputs 5 ACH, that means it
+            produces clean air that is 5 times the volume of the room in an hour.  Total
+            ACH for a room can be computed by summing up the ACH of different types (e.g.
+            ventilation, filtration, upper-room germicidal UV).
+          </p>
+
+        </div>
+
+        <div class='item'>
+          <br id='ach-to-duration'>
+          <br>
+          <br>
+          <h4>ACH & Time-to-Remove</h4>
           <AchToDuration
             :intervention='selectedIntervention'
           />
-          </div>
+
+          <p>
+          Increasing ACH speeds up the rate of removal, which dilutes the dose
+          a susceptible gets, thereby decreasing the likelihood of transmitting COVID-19.
+          </p>
+
         </div>
 
 
@@ -136,19 +155,6 @@
           <br>
           <br>
           <h3>Details</h3>
-
-
-          <br id='air-changes-per-hour'>
-          <br>
-          <br>
-          <h4>Air Changes per Hour (ACH)</h4>
-          <p>
-            Air Changes per Hour (ACH) tells us how much clean air is generated
-            relative to the volume of the room. If a device outputs 5 ACH, that means it
-            produces clean air that is 5 times the volume of the room in an hour.  Total
-            ACH for a room can be computed by summing up the ACH of different types (e.g.
-            ventilation, filtration, upper-room germicidal UV).
-          </p>
 
 
           <br id='behaviors'>
