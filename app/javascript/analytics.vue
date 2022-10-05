@@ -128,35 +128,7 @@
 
         </div>
 
-
-        <div class='centered col'>
-
-          <div class='centered col'>
-            <div class='container'>
-              <p>
-
-                The assessments below assume that an infector is present and is
-                doing the riskiest recorded behaviors. For example, the model assumes that the
-                infector is wearing the riskiest mask (i.e. the mask with the worst fit and
-                filtration efficiency) and is also doing the riskiest aerosol generation activity
-                recorded (e.g. loudly talking).
-              </p>
-
-              <br id='overview'>
-              <br>
-              <br>
-              <h3>Overview</h3>
-
-
-
-
-
-          <br id='details'>
-          <br>
-          <br>
-          <h3>Details</h3>
-
-
+        <div class='item'>
           <br id='behaviors'>
           <br>
           <br>
@@ -180,7 +152,9 @@
             with susceptibles being at rest, could decrease the risk of
             airborne transmission.
           </p>
+        </div>
 
+        <div class='item'>
           <br id='inhalation'>
           <br>
           <br>
@@ -220,6 +194,7 @@
               </tr>
             </table>
           </div>
+
           <p>
           If someone were to go from <ColoredCell
                 :colorScheme="inhalationActivityScheme"
@@ -240,74 +215,88 @@
                 :style="inlineCellCSS"
             />, assuming that the risk was low to begin with.
           </p>
+        </div>
 
+
+        <div class='item'>
           <br id='exhalation'>
           <br>
           <br>
           <h4>Exhalation</h4>
 
-              <span>
-              The riskiest aerosol generation activity recorded for a person in this measurement is <ColoredCell
-                    :colorScheme="riskiestAerosolGenerationActivityScheme"
-                    :maxVal=1
-                    :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
-                    :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
-                    :style="inlineCellCSS"
-                />. Here's a table to contextualize how good or bad it is. In this model, it essentially maps into a factor, where higher leads to more risk.
-              </span>
-              <div class='centered'>
-                <table>
-                  <tr>
-                    <th>Infector Activity</th>
-                    <th>Factor</th>
-                  </tr>
-                  <tr v-for='(value, key) in infectorActivities'>
-                    <td class='table-td'>{{key}}</td>
-                    <td class='table-td'>
-                    <ColoredCell
-                      :colorScheme="riskiestAerosolGenerationActivityScheme"
-                      :maxVal=1
-                      :value='value'
-                      :style="tableColoredCell"
-                    />
-                    </td>
-                  </tr>
-                </table>
-              </div>
+          <span>
+            The riskiest aerosol generation activity recorded for a person in this measurement is <ColoredCell
+                  :colorScheme="riskiestAerosolGenerationActivityScheme"
+                  :maxVal=1
+                  :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
+                  :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
+                  :style="inlineCellCSS"
+              />. Here's a table to contextualize how good or bad it is. In this model, it essentially maps into a factor, where higher leads to more risk.
+          </span>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th>Infector Activity</th>
+                <th>Factor</th>
+              </tr>
+              <tr v-for='(value, key) in infectorActivities'>
+                <td class='table-td'>{{key}}</td>
+                <td class='table-td'>
+                <ColoredCell
+                  :colorScheme="riskiestAerosolGenerationActivityScheme"
+                  :maxVal=1
+                  :value='value'
+                  :style="tableColoredCell"
+                />
+                </td>
+              </tr>
+            </table>
+          </div>
 
-              <p>
-                For example, <ColoredCell
-                    :colorScheme="riskiestAerosolGenerationActivityScheme"
-                    :maxVal=1
-                    :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
-                    :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
-                    :style="inlineCellCSS"
-                /> maps to <ColoredCell
-                    :colorScheme="riskiestAerosolGenerationActivityScheme"
-                    :maxVal=1
-                    :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
-                    :style="inlineCellCSS"
-                />. On the other hand, <ColoredCell
-                    :colorScheme="riskiestAerosolGenerationActivityScheme"
-                    :maxVal=1
-                    :value='aerosolActivityToFactor("Heavy exercise – Loudly speaking")'
-                    text='Heavy Exercise - Loudly Speaking'
-                    :style="inlineCellCSS"
-                />, maps to <ColoredCell
-                    :colorScheme="riskiestAerosolGenerationActivityScheme"
-                    :maxVal=1
-                    :value='aerosolActivityToFactor("Heavy exercise – Loudly speaking")'
-                    :style="inlineCellCSS"
-                />. Switching to the latter from the former  essentially
-                increases the risk of transmission by a factor of <ColoredCell
-                    :colorScheme="riskiestAerosolGenerationActivityScheme"
-                    :maxVal=1
-                    :value='roundOut(aerosolActivityToFactor("Heavy exercise – Loudly speaking") / aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"]), 1)'
-                    :style="inlineCellCSS"
-                />, assuming the risk was low to begin with.
-              </p>
+          <p>
+            For example, <ColoredCell
+                :colorScheme="riskiestAerosolGenerationActivityScheme"
+                :maxVal=1
+                :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
+                :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
+                :style="inlineCellCSS"
+            /> maps to <ColoredCell
+                :colorScheme="riskiestAerosolGenerationActivityScheme"
+                :maxVal=1
+                :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
+                :style="inlineCellCSS"
+            />. On the other hand, <ColoredCell
+                :colorScheme="riskiestAerosolGenerationActivityScheme"
+                :maxVal=1
+                :value='aerosolActivityToFactor("Heavy exercise – Loudly speaking")'
+                text='Heavy Exercise - Loudly Speaking'
+                :style="inlineCellCSS"
+            />, maps to <ColoredCell
+                :colorScheme="riskiestAerosolGenerationActivityScheme"
+                :maxVal=1
+                :value='aerosolActivityToFactor("Heavy exercise – Loudly speaking")'
+                :style="inlineCellCSS"
+            />. Switching to the latter from the former  essentially
+            increases the risk of transmission by a factor of <ColoredCell
+                :colorScheme="riskiestAerosolGenerationActivityScheme"
+                :maxVal=1
+                :value='roundOut(aerosolActivityToFactor("Heavy exercise – Loudly speaking") / aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"]), 1)'
+                :style="inlineCellCSS"
+            />, assuming the risk was low to begin with.
+          </p>
 
-            </div>
+        </div>
+        <div>
+
+        <div>
+          <div>
+
+
+
+
+
+
+        </div>
 
           </div>
 
