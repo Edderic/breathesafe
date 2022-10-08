@@ -39,6 +39,7 @@ import {
   riskColorInterpolationScheme,
   infectedPeopleColorBounds,
 } from './colors.js';
+import { useAnalyticsStore } from './stores/analytics_store.js'
 
 export default {
   name: 'PeopleAffected',
@@ -48,6 +49,12 @@ export default {
   },
   computed: {
     // TODO: could pull in information from event/1 from Rails.
+    ...mapWritableState(
+        useAnalyticsStore,
+        [
+          'selectedHour',
+        ]
+    ),
     numInfected() {
       return round(this.numSusceptibles * this.risk, 0) || 0
     },

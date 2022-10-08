@@ -1443,6 +1443,7 @@ export default {
         'selectedAirCleaner',
         'numInfectors',
         'numSusceptibles',
+        'selectedIntervention'
       ]
     ),
     ...mapWritableState(
@@ -2035,62 +2036,6 @@ export default {
         'padding': '1em',
         'margin': '0.5em',
         'text-align': 'center'
-      },
-      selectedIntervention: {
-        computeCleanAirDeliveryRate() {
-          return 0
-        },
-        computePortableAirCleanerACH() {
-          return 0.01
-        },
-        computeVentilationACH() {
-          return 0.01
-        },
-        computeUVACH() {
-          return 0.01
-        },
-        computeEmissionRate() {
-          return 0.01
-        },
-        computeVentilationDenominator() {
-          return 0.01
-        },
-        computeSusceptibleMask() {
-          return {
-            'maskPenetrationFactor': 'None'
-          }
-        },
-        computeRiskRounded() {
-          return 0
-        },
-        computeACH() {
-          return 0
-        },
-        findPortableAirCleaners() {
-          return {
-            'cubic meters per hour': 0,
-            'numDevices': 0
-          }
-        },
-        ventilationDenominator() { return 0.01 },
-        steadyStateCO2Reading() { return 0.01 },
-        ambientCO2Reading() { return 0.01 },
-        findPortableAirCleaners() {
-          return {
-            'numDevices': function() { return 0 },
-            'numDeviceFactor': function() { return 0 },
-            'singularName': function() { return '' }
-          }
-        },
-        findUVDevices() {
-          return {
-            'numDevices': function() { return 0 },
-            'numDeviceFactor': function() { return 0 }
-          }
-        },
-        implementationCostInYears() {
-          return 0
-        }
       },
       susceptibleBreathingActivityFactorMappings: susceptibleBreathingActivityToFactor
     }
