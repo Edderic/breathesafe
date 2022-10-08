@@ -1,1440 +1,1316 @@
 <template>
 
-  <div class='col'>
-    <div class='grid'>
-      <div class='item class sticky'>
+  <div class='grid'>
+    <div class='item class sticky'>
 
-        <div class='container'>
-          <br id='risk-assessment'>
-          <br>
-          <br>
-          <h3 class='subsection'>Analysis & Recommendations for {{this.roomName}}</h3>
-          <h4 class='subsection' v-if='event && event.placeData'>{{event.placeData.formattedAddress}}</h4>
-          <h4 class='subsection' v-if='event && event.firstName'>Measurements taken by {{event.firstName}} {{event.lastName}}</h4>
-          <h4 class='subsection'>on {{datetimeInWords}}</h4>
-        </div>
-
-        <Controls
-          :maskInstances='maskInstances'
-          :airCleanerInstances='airCleanerInstances'
-        />
+      <div class='container'>
+        <br id='risk-assessment'>
+        <br>
+        <br>
+        <h3 class='subsection'>Analysis & Recommendations for {{this.roomName}}</h3>
+        <h4 class='subsection' v-if='event && event.placeData'>{{event.placeData.formattedAddress}}</h4>
+        <h4 class='subsection' v-if='event && event.firstName'>Measurements taken by {{event.firstName}} {{event.lastName}}</h4>
+        <h4 class='subsection'>on {{datetimeInWords}}</h4>
       </div>
 
-      <SideBar class='col border-showing item sticky'/>
+      <Controls
+        :maskInstances='maskInstances'
+        :airCleanerInstances='airCleanerInstances'
+      />
+    </div>
 
-      <div class='col border-showing item scrollableY content' >
-        <PeopleAffected
-          class='item'
-          :numSusceptibles='numSusceptibles'
-          :event='event'
-          :selectedIntervention='selectedIntervention'
-          :numInfectors='numInfectors'
-        />
+    <SideBar class='col border-showing item sticky'/>
 
-        <LostLaborWages
-          class='item'
-          :numSusceptibles='numSusceptibles'
-          :event='event'
-          :selectedIntervention='selectedIntervention'
-          :numInfectors='numInfectors'
-        />
+    <div class='col border-showing item scrollableY content' >
+      <PeopleAffected
+        class='item'
+        :numSusceptibles='numSusceptibles'
+        :event='event'
+        :selectedIntervention='selectedIntervention'
+        :numInfectors='numInfectors'
+      />
 
-        <ImplementationCost
-          class='item'
-          :numSusceptibles='numSusceptibles'
-          :event='event'
-          :selectedIntervention='selectedIntervention'
-          :numInfectors='numInfectors'
-        />
+      <LostLaborWages
+        class='item'
+        :numSusceptibles='numSusceptibles'
+        :event='event'
+        :selectedIntervention='selectedIntervention'
+        :numInfectors='numInfectors'
+      />
 
-        <RiskTable
-          :numSusceptibles='numSusceptibles'
-          :event='event'
-          :selectedIntervention='selectedIntervention'
-          :numInfectors='numInfectors'
-        />
+      <ImplementationCost
+        class='item'
+        :numSusceptibles='numSusceptibles'
+        :event='event'
+        :selectedIntervention='selectedIntervention'
+        :numInfectors='numInfectors'
+      />
 
-        <Strengths
-          :selectedIntervention='selectedIntervention'
-          :maskingBarChart='maskingBarChart'
-          :colorInterpolationSchemeRoomVolume='colorInterpolationSchemeRoomVolume'
-          :cellCSSMerged='cellCSSMerged'
-          class='item'
-        />
+      <RiskTable
+        :numSusceptibles='numSusceptibles'
+        :event='event'
+        :selectedIntervention='selectedIntervention'
+        :numInfectors='numInfectors'
+      />
 
-        <RoomForImprovement
-          :selectedIntervention='selectedIntervention'
-          :maskingBarChart='maskingBarChart'
-          :colorInterpolationSchemeRoomVolume='colorInterpolationSchemeRoomVolume'
-          :cellCSSMerged='cellCSSMerged'
-          class='item'
-        />
+      <Strengths
+        :selectedIntervention='selectedIntervention'
+        :maskingBarChart='maskingBarChart'
+        :colorInterpolationSchemeRoomVolume='colorInterpolationSchemeRoomVolume'
+        :cellCSSMerged='cellCSSMerged'
+        class='item'
+      />
 
-        <CADR
-          class='item'
-          :cellCSSMerged='cellCSSMerged'
-          :cellCSS='cellCSS'
-          :measurementUnits='measurementUnits'
-          :airCleanerSuggestion='airCleanerSuggestion'
-          :numSuggestedAirCleaners='numSuggestedAirCleaners'
-          :colorScheme="colorInterpolationSchemeRoomVolume"
-          :selectedIntervention='selectedIntervention'
-          :systemOfMeasurement='systemOfMeasurement'
-          :totalFlowRateCubicMetersPerHour='totalFlowRateCubicMetersPerHour'
-          :totalFlowRate='totalFlowRate'
-        />
+      <RoomForImprovement
+        :selectedIntervention='selectedIntervention'
+        :maskingBarChart='maskingBarChart'
+        :colorInterpolationSchemeRoomVolume='colorInterpolationSchemeRoomVolume'
+        :cellCSSMerged='cellCSSMerged'
+        class='item'
+      />
 
-        <div class='item'>
-          <br id='total-ach'>
-          <br>
-          <br>
-          <h4>Total ACH</h4>
-          <div class='centered'>
-            <TotalACHTable
-              :measurementUnits='measurementUnits'
-              :systemOfMeasurement='systemOfMeasurement'
-              :totalFlowRate='totalFlowRate'
-              :roomUsableVolume='roomUsableVolume'
-              :portableAch='selectedIntervention.computePortableAirCleanerACH()'
-              :ventilationAch='selectedIntervention.computeVentilationACH()'
-              :uvAch='selectedIntervention.computeUVACH()'
-              :cellCSS='cellCSS'
-              />
-          </div>
+      <CADR
+        class='item'
+        :cellCSSMerged='cellCSSMerged'
+        :cellCSS='cellCSS'
+        :measurementUnits='measurementUnits'
+        :airCleanerSuggestion='airCleanerSuggestion'
+        :numSuggestedAirCleaners='numSuggestedAirCleaners'
+        :colorScheme="colorInterpolationSchemeRoomVolume"
+        :selectedIntervention='selectedIntervention'
+        :systemOfMeasurement='systemOfMeasurement'
+        :totalFlowRateCubicMetersPerHour='totalFlowRateCubicMetersPerHour'
+        :totalFlowRate='totalFlowRate'
+      />
 
-          <p>
-            Air Changes per Hour (ACH) tells us how much clean air is generated
-            relative to the volume of the room. If a device outputs 5 ACH, that means it
-            produces clean air that is 5 times the volume of the room in an hour.  Total
-            ACH for a room can be computed by summing up the ACH of different types (e.g.
-            ventilation, filtration, upper-room germicidal UV).
-          </p>
-
+      <div class='item'>
+        <br id='total-ach'>
+        <br>
+        <br>
+        <h4>Total ACH</h4>
+        <div class='centered'>
+          <TotalACHTable
+            :measurementUnits='measurementUnits'
+            :systemOfMeasurement='systemOfMeasurement'
+            :totalFlowRate='totalFlowRate'
+            :roomUsableVolume='roomUsableVolume'
+            :portableAch='selectedIntervention.computePortableAirCleanerACH()'
+            :ventilationAch='selectedIntervention.computeVentilationACH()'
+            :uvAch='selectedIntervention.computeUVACH()'
+            :cellCSS='cellCSS'
+            />
         </div>
 
-        <div class='item'>
-          <br id='ach-to-duration'>
-          <br>
-          <br>
-          <h4>ACH & Time-to-Remove</h4>
-          <AchToDuration
-            :intervention='selectedIntervention'
-          />
+        <p>
+          Air Changes per Hour (ACH) tells us how much clean air is generated
+          relative to the volume of the room. If a device outputs 5 ACH, that means it
+          produces clean air that is 5 times the volume of the room in an hour.  Total
+          ACH for a room can be computed by summing up the ACH of different types (e.g.
+          ventilation, filtration, upper-room germicidal UV).
+        </p>
 
-          <p>
-          Increasing ACH speeds up the rate of removal, which dilutes the dose
-          a susceptible gets, thereby decreasing the likelihood of transmitting COVID-19.
-          </p>
+      </div>
 
-        </div>
+      <div class='item'>
+        <br id='ach-to-duration'>
+        <br>
+        <br>
+        <h4>ACH & Time-to-Remove</h4>
+        <AchToDuration
+          :intervention='selectedIntervention'
+        />
 
-        <div class='item'>
-          <br id='behaviors'>
-          <br>
-          <br>
-          <h3>Behaviors</h3>
+        <p>
+        Increasing ACH speeds up the rate of removal, which dilutes the dose
+        a susceptible gets, thereby decreasing the likelihood of transmitting COVID-19.
+        </p>
 
-          <p>
-            Activities that people partake in can affect the probability of
-            transmission of COVID and other respiratory viruses. Activities
-            where the infector is doing lots of exhalation and vocalization (e.g. loudly
-            talking during heavy exercise) could drastically increase the
-            risk of transmission. Likewise, doing activities where
-            susceptibles are inhaling more air in shorter time increases their risk of
-            getting COVID.
+      </div>
 
-          </p>
-          <p>
+      <div class='item'>
+        <br id='behaviors'>
+        <br>
+        <br>
+        <h3>Behaviors</h3>
 
-          </p>
-          <p>
-            Choosing activities where an infector is quiet and at rest, along
-            with susceptibles being at rest, could decrease the risk of
-            airborne transmission.
-          </p>
-        </div>
+        <p>
+          Activities that people partake in can affect the probability of
+          transmission of COVID and other respiratory viruses. Activities
+          where the infector is doing lots of exhalation and vocalization (e.g. loudly
+          talking during heavy exercise) could drastically increase the
+          risk of transmission. Likewise, doing activities where
+          susceptibles are inhaling more air in shorter time increases their risk of
+          getting COVID.
 
-        <div class='item'>
-          <br id='inhalation'>
-          <br>
-          <br>
-          <h4>Inhalation</h4>
-          <p> The worst case inhalation activity was <ColoredCell
-                              :colorScheme="inhalationActivityScheme"
-                              :maxVal=1
-                              :value='worstCaseInhalation["inhalationFactor"]'
-                              :text='worstCaseInhalation["inhalationActivity"]'
-                              :style="inlineCellCSS"
-                          />, which corresponds to a factor of
-              <ColoredCell
-                  :colorScheme="inhalationActivityScheme"
-                  :maxVal=1
-                  :value='worstCaseInhalation["inhalationFactor"]'
-                  :style="inlineCellCSS"
-              />. To better contextualize how good this is, let's look at the
-              table of inhalation activities and factors:
-          </p>
+        </p>
+        <p>
 
-          <div class='centered'>
-            <table>
-              <tr>
-                <th>Inhalation Activity</th>
-                <th>Factor</th>
-              </tr>
-              <tr v-for='(value, key, index) in susceptibleBreathingActivityFactorMappings'>
-                <td style='padding: 0.25em 1em;'>{{ ['Sleep or Nap', 'Sedentary / Passive', 'Light Intensity', 'Moderate Intensity', 'High Intensity'][index] }}</td>
-                <td style='padding: 0;'>
-                  <ColoredCell
-                    :colorScheme="inhalationActivityScheme"
-                    :maxVal=1
-                    :value='inhalationValue(value)'
-                    :style="tableColoredCellWithHorizPadding"
-                    />
-                </td>
-              </tr>
-            </table>
-          </div>
+        </p>
+        <p>
+          Choosing activities where an infector is quiet and at rest, along
+          with susceptibles being at rest, could decrease the risk of
+          airborne transmission.
+        </p>
+      </div>
 
-          <p>
-          If someone were to go from <ColoredCell
+      <div class='item-span-wide'>
+        <br id='inhalation'>
+        <br>
+        <br>
+        <h4>Inhalation</h4>
+        <p> The worst case inhalation activity was <ColoredCell
+                            :colorScheme="inhalationActivityScheme"
+                            :maxVal=1
+                            :value='worstCaseInhalation["inhalationFactor"]'
+                            :text='worstCaseInhalation["inhalationActivity"]'
+                            :style="inlineCellCSS"
+                        />, which corresponds to a factor of
+            <ColoredCell
                 :colorScheme="inhalationActivityScheme"
                 :maxVal=1
                 :value='worstCaseInhalation["inhalationFactor"]'
-                :text='worstCaseInhalation["inhalationActivity"]'
                 :style="inlineCellCSS"
-            /> to <ColoredCell
-                :colorScheme="inhalationActivityScheme"
-                :maxVal=1
-                :value='susceptibleBreathingActivityFactorMappings["High Intensity"]["30 to <40"]["mean cubic meters per hour"]'
-                text='High intensity'
-                :style="inlineCellCSS"
-            />, this increases the risk by a factor of <ColoredCell
-                :colorScheme="inhalationActivityScheme"
-                :maxVal=1
-                :value='roundOut(susceptibleBreathingActivityFactorMappings["High Intensity"]["30 to <40"]["mean cubic meters per hour"] / worstCaseInhalation["inhalationFactor"], 1)'
-                :style="inlineCellCSS"
-            />, assuming that the risk was low to begin with.
-          </p>
+            />. To better contextualize how good this is, let's look at the
+            table of inhalation activities and factors:
+        </p>
+
+        <div class='centered'>
+          <table>
+            <tr>
+              <th>Inhalation Activity</th>
+              <th>Factor</th>
+            </tr>
+            <tr v-for='(value, key, index) in susceptibleBreathingActivityFactorMappings'>
+              <td style='padding: 0.25em 1em;'>{{ ['Sleep or Nap', 'Sedentary / Passive', 'Light Intensity', 'Moderate Intensity', 'High Intensity'][index] }}</td>
+              <td style='padding: 0;'>
+                <ColoredCell
+                  :colorScheme="inhalationActivityScheme"
+                  :maxVal=1
+                  :value='inhalationValue(value)'
+                  :style="tableColoredCellWithHorizPadding"
+                  />
+              </td>
+            </tr>
+          </table>
         </div>
 
+        <p>
+        If someone were to go from <ColoredCell
+              :colorScheme="inhalationActivityScheme"
+              :maxVal=1
+              :value='worstCaseInhalation["inhalationFactor"]'
+              :text='worstCaseInhalation["inhalationActivity"]'
+              :style="inlineCellCSS"
+          /> to <ColoredCell
+              :colorScheme="inhalationActivityScheme"
+              :maxVal=1
+              :value='susceptibleBreathingActivityFactorMappings["High Intensity"]["30 to <40"]["mean cubic meters per hour"]'
+              text='High intensity'
+              :style="inlineCellCSS"
+          />, this increases the risk by a factor of <ColoredCell
+              :colorScheme="inhalationActivityScheme"
+              :maxVal=1
+              :value='roundOut(susceptibleBreathingActivityFactorMappings["High Intensity"]["30 to <40"]["mean cubic meters per hour"] / worstCaseInhalation["inhalationFactor"], 1)'
+              :style="inlineCellCSS"
+          />, assuming that the risk was low to begin with.
+        </p>
+      </div>
 
-        <div class='item'>
-          <br id='exhalation'>
-          <br>
-          <br>
-          <h4>Exhalation</h4>
 
-          <span>
-            The riskiest aerosol generation activity recorded for a person in this measurement is <ColoredCell
-                  :colorScheme="riskiestAerosolGenerationActivityScheme"
-                  :maxVal=1
-                  :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
-                  :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
-                  :style="inlineCellCSS"
-              />. Here's a table to contextualize how good or bad it is. In this model, it essentially maps into a factor, where higher leads to more risk.
-          </span>
-          <div class='centered'>
-            <table>
-              <tr>
-                <th>Infector Activity</th>
-                <th>Factor</th>
-              </tr>
-              <tr v-for='(value, key) in infectorActivities'>
-                <td class='table-td'>{{key}}</td>
-                <td class='table-td'>
-                <ColoredCell
-                  :colorScheme="riskiestAerosolGenerationActivityScheme"
-                  :maxVal=1
-                  :value='value'
-                  :style="tableColoredCell"
-                />
-                </td>
-              </tr>
-            </table>
-          </div>
+      <div class='item-span-wide'>
+        <br id='exhalation'>
+        <br>
+        <br>
+        <h4>Exhalation</h4>
 
-          <p>
-            For example, <ColoredCell
+        <span>
+          The riskiest aerosol generation activity recorded for a person in this measurement is <ColoredCell
                 :colorScheme="riskiestAerosolGenerationActivityScheme"
                 :maxVal=1
                 :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
                 :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
                 :style="inlineCellCSS"
-            /> maps to <ColoredCell
+            />. Here's a table to contextualize how good or bad it is. In this model, it essentially maps into a factor, where higher leads to more risk.
+        </span>
+        <div class='centered'>
+          <table>
+            <tr>
+              <th>Infector Activity</th>
+              <th>Factor</th>
+            </tr>
+            <tr v-for='(value, key) in infectorActivities'>
+              <td class='table-td'>{{key}}</td>
+              <td class='table-td'>
+              <ColoredCell
                 :colorScheme="riskiestAerosolGenerationActivityScheme"
                 :maxVal=1
-                :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
-                :style="inlineCellCSS"
-            />. On the other hand, <ColoredCell
-                :colorScheme="riskiestAerosolGenerationActivityScheme"
-                :maxVal=1
-                :value='aerosolActivityToFactor("Heavy exercise – Loudly speaking")'
-                text='Heavy Exercise - Loudly Speaking'
-                :style="inlineCellCSS"
-            />, maps to <ColoredCell
-                :colorScheme="riskiestAerosolGenerationActivityScheme"
-                :maxVal=1
-                :value='aerosolActivityToFactor("Heavy exercise – Loudly speaking")'
-                :style="inlineCellCSS"
-            />. Switching to the latter from the former  essentially
-            increases the risk of transmission by a factor of <ColoredCell
-                :colorScheme="riskiestAerosolGenerationActivityScheme"
-                :maxVal=1
-                :value='roundOut(aerosolActivityToFactor("Heavy exercise – Loudly speaking") / aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"]), 1)'
-                :style="inlineCellCSS"
-            />, assuming the risk was low to begin with.
-          </p>
-
-        </div>
-        <div>
-
-        <div>
-          <div>
-
-
-
-
-
-
+                :value='value'
+                :style="tableColoredCell"
+              />
+              </td>
+            </tr>
+          </table>
         </div>
 
-          </div>
+        <p>
+          For example, <ColoredCell
+              :colorScheme="riskiestAerosolGenerationActivityScheme"
+              :maxVal=1
+              :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
+              :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
+              :style="inlineCellCSS"
+          /> maps to <ColoredCell
+              :colorScheme="riskiestAerosolGenerationActivityScheme"
+              :maxVal=1
+              :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
+              :style="inlineCellCSS"
+          />. On the other hand, <ColoredCell
+              :colorScheme="riskiestAerosolGenerationActivityScheme"
+              :maxVal=1
+              :value='aerosolActivityToFactor("Heavy exercise – Loudly speaking")'
+              text='Heavy Exercise - Loudly Speaking'
+              :style="inlineCellCSS"
+          />, maps to <ColoredCell
+              :colorScheme="riskiestAerosolGenerationActivityScheme"
+              :maxVal=1
+              :value='aerosolActivityToFactor("Heavy exercise – Loudly speaking")'
+              :style="inlineCellCSS"
+          />. Switching to the latter from the former  essentially
+          increases the risk of transmission by a factor of <ColoredCell
+              :colorScheme="riskiestAerosolGenerationActivityScheme"
+              :maxVal=1
+              :value='roundOut(aerosolActivityToFactor("Heavy exercise – Loudly speaking") / aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"]), 1)'
+              :style="inlineCellCSS"
+          />, assuming the risk was low to begin with.
+        </p>
 
-          <div class='container'>
-          <br id='masking'>
+      </div>
+
+      <div class='item-span-wide'>
+        <br id='masking'>
+        <br>
+        <br>
+        <h4>Masking</h4>
+        <p>Here is the breakdown of masking prevalance:</p>
+        <div class='centered'>
+          <HorizontalStackedBar
+            :values="maskingBarChart.maskingValues()"
+            :colors="maskingBarChart.maskingColors()"
+          />
+        </div>
+
+        <p>
+        To see the effects of masking by yourself vs. when everyone is
+        masked, see graph below, which shows the relative amount of particles left when
+        a susceptible (x-axis) wears some type of mask and an infector (y-axis) also
+        wears some type of mask.
+
+        </p>
+        <div class='centered'>
+          <table>
+            <tr>
+              <th></th>
+              <th style='padding: 0;' v-for='(value1, key1) in maskFactors'>
+
+
+
+                <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" transform='rotate(-40, 40, 40)' class='tilted-header'>{{key1}}</text>
+                </svg>
+
+              </th>
+            </tr>
+            <tr v-for='(value1, key1) in maskFactors'>
+              <th class='table-td-mask'>{{key1}}</th>
+              <td class='table-td-mask' v-for='(value2, key2) in maskFactors'>
+                <ColoredCell
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='roundOut(value1 * value2, 6)'
+                  :style="tableColoredCellMasking"
+                />
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <p>
+        For example, when the infector is unmasked (i.e.
+            "None"), but the susceptible is wearing a KN95, then 0.15 of infectious
+        particles are left over for the susceptible to inhale, which is an 85%
+        reduction of particles. If both wore KN95s, then the left over particles is
+        0.0225 (i.e. a 98.75% reduction of infectious airborne particles a susceptible
+            can inhale).  <span class='bold'>If both wore elastomeric N99 respirators, then
+        we get a 10,000-fold reduction!</span> Upgrading to N95 respirators and above
+        (i.e. tight-fitting, high filtration efficiency), and having mask mandates
+        especially in times of surges, is a very effective and cost-efficient way to
+        prevent the spread of COVID-19 and other airborne respiratory viruses.
+        </p>
+        <p>The riskiest mask recorded for this measurement is <span><ColoredCell
+              :colorScheme="riskiestMaskColorScheme"
+              :maxVal=1
+              :value='riskiestMask["maskPenetrationFactor"]'
+              :text='riskiestMask["maskType"]'
+              :style="inlineCellCSS"
+          /></span>, so susceptibles are assumed to be wearing these (unless specified otherwise in the Interventions section).
+         </p>
+
+      </div>
+      <div class='item-span-wide'>
+
+        <div class='container'>
+
+
+          <br id='computational-details'>
           <br>
           <br>
-          <h4>Masking</h4>
-          <p>Here is the breakdown of masking prevalance:</p>
-          <div class='centered'>
-            <HorizontalStackedBar
-              :values="maskingBarChart.maskingValues()"
-              :colors="maskingBarChart.maskingColors()"
-            />
-          </div>
+          <h3>Computational Details</h3>
+          <p>Click on an intervention to see how risks are calculated.</p>
 
-          <p>
-          To see the effects of masking by yourself vs. when everyone is
-          masked, see graph below, which shows the relative amount of particles left when
-          a susceptible (x-axis) wears some type of mask and an infector (y-axis) also
-          wears some type of mask.
-
-          </p>
           <div class='centered'>
             <table>
               <tr>
+                <th class='col centered'>
+                  <span>Risk in 40 hours</span>
+                  <span class='font-light'>(Probability)</span>
+                </th>
                 <th></th>
-                <th style='padding: 0;' v-for='(value1, key1) in maskFactors'>
-
-
-
-                  <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-                    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" transform='rotate(-40, 40, 40)' class='tilted-header'>{{key1}}</text>
-                  </svg>
-
+                <th class='col centered'>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Intermediate Factor</span>
+                  <span class='font-light'>(Quanta)</span>
                 </th>
               </tr>
-              <tr v-for='(value1, key1) in maskFactors'>
-                <th class='table-td-mask'>{{key1}}</th>
-                <td class='table-td-mask' v-for='(value2, key2) in maskFactors'>
-                  <ColoredCell
-                    :colorScheme="riskColorScheme"
-                    :maxVal=1
-                    :value='roundOut(value1 * value2, 6)'
-                    :style="tableColoredCellMasking"
-                  />
+              <tr>
+                <ColoredCell
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='this.selectedIntervention.computeRiskRounded(40)'
+                  class='color-cell'
+                />
+                <td>=</td>
+                <td class='col centered'>
+                  1
                 </td>
+                <td>-</td>
+                <td class='col centered'>
+                  1
+                </td>
+                <td>/</td>
+                <td class='col centered'>
+                  exp
+                </td>
+                <td>^</td>
+                <ColoredCell
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='roundOut(intermediateProductWithIntervention, 6)'
+                  class='color-cell'
+                />
               </tr>
             </table>
           </div>
 
-          <p>
-          For example, when the infector is unmasked (i.e.
-              "None"), but the susceptible is wearing a KN95, then 0.15 of infectious
-          particles are left over for the susceptible to inhale, which is an 85%
-          reduction of particles. If both wore KN95s, then the left over particles is
-          0.0225 (i.e. a 98.75% reduction of infectious airborne particles a susceptible
-              can inhale).  <span class='bold'>If both wore elastomeric N99 respirators, then
-          we get a 10,000-fold reduction!</span> Upgrading to N95 respirators and above
-          (i.e. tight-fitting, high filtration efficiency), and having mask mandates
-          especially in times of surges, is a very effective and cost-efficient way to
-          prevent the spread of COVID-19 and other airborne respiratory viruses.
-          </p>
-          <p>The riskiest mask recorded for this measurement is <span><ColoredCell
-                :colorScheme="riskiestMaskColorScheme"
-                :maxVal=1
-                :value='riskiestMask["maskPenetrationFactor"]'
-                :text='riskiestMask["maskType"]'
-                :style="inlineCellCSS"
-            /></span>, so susceptibles are assumed to be wearing these (unless specified otherwise in the Interventions section).
-           </p>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th class='col centered'>
+                  <span>Intermediate Factor</span>
+                  <span class='font-light'>(Quanta)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Infector Product</span>
+                  <span class='font-light'>(Quanta / h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Susceptible Product</span>
+                  <span class='font-light'>(m³ / h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Duration</span>
+                  <span class='font-light'>(h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Clean Air Delivery Rate</span>
+                  <span class='font-light'>(m³ / h)</span>
+                </th>
+              </tr>
+              <tr>
+                <ColoredCell
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='roundOut(intermediateProductWithIntervention, 6)'
+                  class='color-cell'
+                />
+                <td>=</td>
+                <ColoredCell
+                  v-if="selectedIntervention"
+                  :colorScheme="averageInfectedPeopleInterpolationScheme"
+                  :maxVal=1
+                  :value='roundOut(infectorProductWithIntervention, 1)'
+                  class='color-cell'
+                />
+                <td>x</td>
+                <ColoredCell
+                  :colorScheme="averageInfectedPeopleInterpolationScheme"
+                  :maxVal=1
+                  :value='roundOut(susceptibleProductWithIntervention, 3)'
+                  class='color-cell'
+                />
+                <td>x</td>
+                <td class='col centered'>
+                  40
+                </td>
+                <td>/</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                  :maxVal=1
+                  :value='roundOut(computeTotalFlowRate(roomUsableVolumeCubicMeters *  selectedIntervention.computeACH()), 1)'
+                  class='color-cell'
+                />
+              </tr>
+            </table>
+          </div>
 
-            <br id='interventions'>
-            <br>
-            <br>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th class='col centered'>
+                  <span>Infector Product</span>
+                  <span class='font-light'>(Quanta / h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Original Strain</span>
+                  <span class='font-light'>(Quanta / h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Variant Factor</span>
+                  <span class='font-light italic'>BA-2</span>
+                  <span class='font-light'>(dimension-less)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Infector Exhalation Factor: </span>
+                  <span class='font-light italic'>{{riskiestPotentialInfector["aerosolGenerationActivity"]}}</span>
+                  <span class='font-light'>(dimensionless)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Infector Masking Penetration Factor</span>
+                  <span class='font-light italic'>
+                    {{selectedIntervention.computeSusceptibleMask()['maskType']}}
+                  </span>
+                  <span class='font-light'>(dimensionless)</span>
+                </th>
+              </tr>
+              <tr>
+                <ColoredCell
+                  :colorScheme="averageInfectedPeopleInterpolationScheme"
+                  :maxVal=1
+                  :value='roundOut(infectorProductWithIntervention, 1)'
+                  class='color-cell'
+                />
+                <td>=</td>
+                <ColoredCell
+                  :colorScheme="averageInfectedPeopleInterpolationScheme"
+                  :maxVal=1
+                  :value=18.6
+                  class='color-cell'
+                />
+                <td>x</td>
+                <ColoredCell
+                  :colorScheme="averageInfectedPeopleInterpolationScheme"
+                  :maxVal=1
+                  :value=3.3
+                  class='color-cell'
+                />
+                <td>x</td>
+                <ColoredCell
+                    :colorScheme="riskiestAerosolGenerationActivityScheme"
+                    :maxVal=1
+                    :value='roundOut(aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"]), 1)'
+                  class='color-cell'
+                />
+                <td>x</td>
+                <ColoredCell
+                  :colorScheme="riskiestMaskColorScheme"
+                  :maxVal=1
+                  :value='selectedIntervention.computeSusceptibleMask()["maskPenetrationFactor"]'
+                  class='color-cell'
+                />
+              </tr>
+            </table>
+          </div>
 
-            <h3>Interventions</h3>
-            <p>
-            An intervention in the list below is either some sort of mask, air cleaning
-            device, or a combination of both. The short-term and longer-term
-            probabilities of transmission are displayed. Let's consider the 40-hour
-            risk. One can interpret it as follows:
-            <ol>
-              <li>A susceptible is with an infector in this room for 40 hours straight.</li>
-              <li>A susceptible has been with an infector in this room for 40
-                  events total, with each event spanning an hour.
-              </li>
-              <li>A susceptible has been with an infector in this room for 5
-                  events total, with each event spanning 8 hours.
-             </li>
-            </ol>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th class='col centered'>
+                  <span>Susceptible Product</span>
+                  <span class='font-light'>(m³ / h)</span>
+                </th>
 
-            The last interpretation is useful for workers who have to work on-site.
-            This is the risk of working a 40-hour work week, conditional on an infector
-            (asymptomatic or not) being present.
-            </p>
-            <p>
-            The <span class='bold'>Total Cost in 10 years</span> is the estimate which is given by
-            <span class='italic'>Initial Cost + Yearly Recurring Cost x 10 years</span>.
-            </p>
-            <p>
-            The <span class='bold'>Benefit / Cost</span> is comprised of the number
-            of hours it takes to infect with high certainty (99%), divided by the <span
-            class='italic'>Total Cost in 10 years</span>. The higher it is, the more bang
-            for the buck.
+                <th></th>
+                <th class='col centered'>
+                  <span>Susceptible Masking Penetration Factor</span>
+                  <span class='font-light italic'>
+                    {{selectedIntervention.computeSusceptibleMask()['maskType']}}
+                  </span>
+                  <span class='font-light'>(dimensionless)</span>
+                </th>
 
-            One could modify the <span class='bold'>number of people to invest
-            in</span> to see how the return of investment changes. Costs of
-            interventions that use masks scale with the number of people. On the
-            other hand, costs of interventions that only use portable air cleaners
-            or upper room germicidal UV don't, and scale more with the volume or
-            square footage of the room.
+                <th></th>
+                <th class='col centered'>
+                  <span>Susceptible Breathing Rate</span>
+                  <span class='font-light italic'>
+                    {{worstCaseInhalation["inhalationActivity"]}}
+                  </span>
+                  <span class='font-light'>(m³ / h)</span>
+                </th>
+              </tr>
+              <tr>
+                <ColoredCell
+                  :colorScheme="averageInfectedPeopleInterpolationScheme"
+                  :maxVal=1
+                  :value='roundOut(susceptibleProductWithIntervention, 3)'
+                  class='color-cell'
+                />
 
-            </p>
+                <td>=</td>
+                <ColoredCell
+                  :colorScheme="riskiestMaskColorScheme"
+                  :maxVal=1
+                  :value='selectedIntervention.computeSusceptibleMask()["maskPenetrationFactor"]'
+                  class='color-cell'
+                />
 
-            <div class='container centered'>
-              <label class='bold'>Number of people to invest in (e.g. employees)</label>
-              <input :value='numPeopleToInvestIn' @change='setNumPeople'>
-            </div>
+                <td>x</td>
+                <ColoredCell
+                    :colorScheme="inhalationActivityScheme"
+                    :maxVal=1
+                    :value='worstCaseInhalation["inhalationFactor"]'
+                  class='color-cell'
+                />
+              </tr>
 
-            <div class='scroll-table'>
-              <table>
-                <tr>
-                  <th>Investments</th>
-                  <th>1-hour Risk</th>
-                  <th>8-hour Risk</th>
-                  <th>40-hour Risk</th>
-                  <th>Initial Cost</th>
-                  <th>Yearly Recurring Cost</th>
-                  <th>Total Cost in 10 years</th>
-                  <th>Benefit / Cost</th>
-                </tr>
-                <tr v-for='intervention in interventions' @click='selectIntervention(intervention.id)' :class='{ clicked: intervention.selected }'>
-                  <td v-if='intervention.applicable()'>
-                      <div v-for='obj in intervention.websitesAndText()' class='col centered container'>
-                        <img :src="obj.imgLink">
-                        <a :href="obj.website" >{{obj.text}}</a>
-                      </div>
-                  </td>
+            </table>
+          </div>
 
-                  <td>
-                  <ColoredCell
-                      v-if='intervention.applicable()'
-                      :colorScheme="riskColorScheme"
-                      :maxVal=1
-                      :value='intervention.computeRiskRounded(1)'
-                      class='color-cell'
-                  />
-                  </td>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th class='col centered'>
+                  <span>Clean Air Delivery Rate</span>
+                  <span class='font-light'>(m³ / h)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Unoccupied Room Volume</span>
+                  <span class='font-light'>(m³)</span>
+                </th>
+                <th></th>
+                <th class='col centered'>
+                  <span>Total ACH</span>
+                  <span class='font-light'>(1 / h)</span>
+                </th>
+              </tr>
+              <tr>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                  :maxVal=1
+                  :value='roundOut(computeTotalFlowRate(roomUsableVolumeCubicMeters *  selectedIntervention.computeACH()), 1)'
+                  class='color-cell'
+                />
+                <td>=</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                  :maxVal=1
+                  :value='roundOut(roomUsableVolumeCubicMeters, 1)'
+                  class='color-cell'
+                />
+                <td>x</td>
+                <ColoredCell
+                  :colorScheme="colorInterpolationSchemeTotalAch"
+                  :maxVal=1
+                  :value='roundOut(selectedIntervention.computeACH(), 1)'
+                  class='color-cell'
+                />
+              </tr>
+            </table>
+          </div>
 
-                  <td>
-                  <ColoredCell
-                      v-if='intervention.applicable()'
-                      :colorScheme="riskColorScheme"
-                      :maxVal=1
-                      :value='intervention.computeRiskRounded(8)'
-                      class='color-cell'
-                  />
-                  </td>
-                  <td>
-                  <ColoredCell
-                      v-if='intervention.applicable()'
-                      :colorScheme="riskColorScheme"
-                      :maxVal=1
-                      :value='intervention.computeRiskRounded(40)'
-                      class='color-cell'
-                  />
-                  </td>
-                  <td v-if='intervention.applicable()' >
-                    <div v-for='interv in intervention.interventions' class='padded'>
-                      {{ interv.initialCostText() }}
-                    </div>
-                  </td>
-                  <td v-if='intervention.applicable()' >
-                    <div v-for='interv in intervention.interventions' class='padded'>
-                      {{ interv.recurringCostText() }}
-                    </div>
-                  </td>
-                  <td v-if='intervention.applicable()' >${{ intervention.costInYears(10) }}</td>
-                  <td v-if='intervention.applicable()' >
-                    {{ roundOut((intervention.numEventsToInfectionWithCertainty()) / intervention.costInYears(10), 2 )}}
-                  </td>
-                </tr>
-              </table>
-            </div>
-
-
-            <br id='computational-details'>
-            <br>
-            <br>
-            <h3>Computational Details</h3>
-            <p>Click on an intervention to see how risks are calculated.</p>
-
+          <div class='container'>
             <div class='centered'>
               <table>
                 <tr>
-                  <th class='col centered'>
-                    <span>Risk in 40 hours</span>
-                    <span class='font-light'>(Probability)</span>
-                  </th>
-                  <th></th>
-                  <th class='col centered'>
-                  </th>
-                  <th></th>
-                  <th class='col centered'>
-                  </th>
-                  <th></th>
-                  <th class='col centered'>
-                  </th>
-                  <th></th>
-                  <th class='col centered'>
-                    <span>Intermediate Factor</span>
-                    <span class='font-light'>(Quanta)</span>
-                  </th>
-                </tr>
-                <tr>
-                  <ColoredCell
-                    :colorScheme="riskColorScheme"
-                    :maxVal=1
-                    :value='this.selectedIntervention.computeRiskRounded(40)'
-                    class='color-cell'
-                  />
-                  <td>=</td>
-                  <td class='col centered'>
-                    1
-                  </td>
-                  <td>-</td>
-                  <td class='col centered'>
-                    1
-                  </td>
-                  <td>/</td>
-                  <td class='col centered'>
-                    exp
-                  </td>
-                  <td>^</td>
-                  <ColoredCell
-                    :colorScheme="riskColorScheme"
-                    :maxVal=1
-                    :value='roundOut(intermediateProductWithIntervention, 6)'
-                    class='color-cell'
-                  />
-                </tr>
-              </table>
-            </div>
-
-            <div class='centered'>
-              <table>
-                <tr>
-                  <th class='col centered'>
-                    <span>Intermediate Factor</span>
-                    <span class='font-light'>(Quanta)</span>
-                  </th>
-                  <th></th>
-                  <th class='col centered'>
-                    <span>Infector Product</span>
-                    <span class='font-light'>(Quanta / h)</span>
-                  </th>
-                  <th></th>
-                  <th class='col centered'>
-                    <span>Susceptible Product</span>
-                    <span class='font-light'>(m³ / h)</span>
-                  </th>
-                  <th></th>
-                  <th class='col centered'>
-                    <span>Duration</span>
-                    <span class='font-light'>(h)</span>
-                  </th>
-                  <th></th>
-                  <th class='col centered'>
-                    <span>Clean Air Delivery Rate</span>
-                    <span class='font-light'>(m³ / h)</span>
-                  </th>
-                </tr>
-                <tr>
-                  <ColoredCell
-                    :colorScheme="riskColorScheme"
-                    :maxVal=1
-                    :value='roundOut(intermediateProductWithIntervention, 6)'
-                    class='color-cell'
-                  />
-                  <td>=</td>
-                  <ColoredCell
-                    v-if="selectedIntervention"
-                    :colorScheme="averageInfectedPeopleInterpolationScheme"
-                    :maxVal=1
-                    :value='roundOut(infectorProductWithIntervention, 1)'
-                    class='color-cell'
-                  />
-                  <td>x</td>
-                  <ColoredCell
-                    :colorScheme="averageInfectedPeopleInterpolationScheme"
-                    :maxVal=1
-                    :value='roundOut(susceptibleProductWithIntervention, 3)'
-                    class='color-cell'
-                  />
-                  <td>x</td>
-                  <td class='col centered'>
-                    40
-                  </td>
-                  <td>/</td>
-                  <ColoredCell
-                    :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
-                    :maxVal=1
-                    :value='roundOut(computeTotalFlowRate(roomUsableVolumeCubicMeters *  selectedIntervention.computeACH()), 1)'
-                    class='color-cell'
-                  />
-                </tr>
-              </table>
-            </div>
-
-            <div class='centered'>
-              <table>
-                <tr>
-                  <th class='col centered'>
-                    <span>Infector Product</span>
-                    <span class='font-light'>(Quanta / h)</span>
-                  </th>
-                  <th></th>
-                  <th class='col centered'>
-                    <span>Original Strain</span>
-                    <span class='font-light'>(Quanta / h)</span>
-                  </th>
-                  <th></th>
-                  <th class='col centered'>
-                    <span>Variant Factor</span>
-                    <span class='font-light italic'>BA-2</span>
-                    <span class='font-light'>(dimension-less)</span>
-                  </th>
-                  <th></th>
-                  <th class='col centered'>
-                    <span>Infector Exhalation Factor: </span>
-                    <span class='font-light italic'>{{riskiestPotentialInfector["aerosolGenerationActivity"]}}</span>
-                    <span class='font-light'>(dimensionless)</span>
-                  </th>
-                  <th></th>
-                  <th class='col centered'>
-                    <span>Infector Masking Penetration Factor</span>
-                    <span class='font-light italic'>
-                      {{selectedIntervention.computeSusceptibleMask()['maskType']}}
-                    </span>
-                    <span class='font-light'>(dimensionless)</span>
-                  </th>
-                </tr>
-                <tr>
-                  <ColoredCell
-                    :colorScheme="averageInfectedPeopleInterpolationScheme"
-                    :maxVal=1
-                    :value='roundOut(infectorProductWithIntervention, 1)'
-                    class='color-cell'
-                  />
-                  <td>=</td>
-                  <ColoredCell
-                    :colorScheme="averageInfectedPeopleInterpolationScheme"
-                    :maxVal=1
-                    :value=18.6
-                    class='color-cell'
-                  />
-                  <td>x</td>
-                  <ColoredCell
-                    :colorScheme="averageInfectedPeopleInterpolationScheme"
-                    :maxVal=1
-                    :value=3.3
-                    class='color-cell'
-                  />
-                  <td>x</td>
-                  <ColoredCell
-                      :colorScheme="riskiestAerosolGenerationActivityScheme"
-                      :maxVal=1
-                      :value='roundOut(aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"]), 1)'
-                    class='color-cell'
-                  />
-                  <td>x</td>
-                  <ColoredCell
-                    :colorScheme="riskiestMaskColorScheme"
-                    :maxVal=1
-                    :value='selectedIntervention.computeSusceptibleMask()["maskPenetrationFactor"]'
-                    class='color-cell'
-                  />
-                </tr>
-              </table>
-            </div>
-
-            <div class='centered'>
-              <table>
-                <tr>
-                  <th class='col centered'>
-                    <span>Susceptible Product</span>
-                    <span class='font-light'>(m³ / h)</span>
-                  </th>
-
-                  <th></th>
-                  <th class='col centered'>
-                    <span>Susceptible Masking Penetration Factor</span>
-                    <span class='font-light italic'>
-                      {{selectedIntervention.computeSusceptibleMask()['maskType']}}
-                    </span>
-                    <span class='font-light'>(dimensionless)</span>
-                  </th>
-
-                  <th></th>
-                  <th class='col centered'>
-                    <span>Susceptible Breathing Rate</span>
-                    <span class='font-light italic'>
-                      {{worstCaseInhalation["inhalationActivity"]}}
-                    </span>
-                    <span class='font-light'>(m³ / h)</span>
-                  </th>
-                </tr>
-                <tr>
-                  <ColoredCell
-                    :colorScheme="averageInfectedPeopleInterpolationScheme"
-                    :maxVal=1
-                    :value='roundOut(susceptibleProductWithIntervention, 3)'
-                    class='color-cell'
-                  />
-
-                  <td>=</td>
-                  <ColoredCell
-                    :colorScheme="riskiestMaskColorScheme"
-                    :maxVal=1
-                    :value='selectedIntervention.computeSusceptibleMask()["maskPenetrationFactor"]'
-                    class='color-cell'
-                  />
-
-                  <td>x</td>
-                  <ColoredCell
-                      :colorScheme="inhalationActivityScheme"
-                      :maxVal=1
-                      :value='worstCaseInhalation["inhalationFactor"]'
-                    class='color-cell'
-                  />
-                </tr>
-
-              </table>
-            </div>
-
-            <div class='centered'>
-              <table>
-                <tr>
-                  <th class='col centered'>
-                    <span>Clean Air Delivery Rate</span>
-                    <span class='font-light'>(m³ / h)</span>
-                  </th>
-                  <th></th>
-                  <th class='col centered'>
-                    <span>Unoccupied Room Volume</span>
-                    <span class='font-light'>(m³)</span>
-                  </th>
-                  <th></th>
                   <th class='col centered'>
                     <span>Total ACH</span>
+                    <span class='font-light'>(1 / h)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Ventilation ACH</span>
+                    <span class='font-light'>(1 / h)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Portable ACH</span>
+                    <span class='font-light'>(1 / h)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Upper-Room UV ACH</span>
                     <span class='font-light'>(1 / h)</span>
                   </th>
                 </tr>
                 <tr>
                   <ColoredCell
-                    :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                    :colorScheme="colorInterpolationSchemeTotalAch"
                     :maxVal=1
-                    :value='roundOut(computeTotalFlowRate(roomUsableVolumeCubicMeters *  selectedIntervention.computeACH()), 1)'
+                    :value='roundOut(this.selectedIntervention.computeACH(), 1)'
                     class='color-cell'
                   />
                   <td>=</td>
                   <ColoredCell
-                    :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                    :colorScheme="colorInterpolationSchemeTotalAch"
                     :maxVal=1
-                    :value='roundOut(roomUsableVolumeCubicMeters, 1)'
+                    :value='roundOut(this.selectedIntervention.computeVentilationACH(), 1)'
+                    class='color-cell'
+                  />
+                  <td>+</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.computePortableAirCleanerACH(), 1)'
+                    class='color-cell'
+                  />
+                  <td>+</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.computeUVACH(), 1)'
+                    class='color-cell'
+                  />
+                </tr>
+              </table>
+            </div>
+          </div>
+
+
+          <br id='details-ventilation-ach'>
+          <br>
+          <br>
+          <h4>Ventilation ACH</h4>
+
+          <div class='container'>
+            <div class='centered'>
+              <table>
+                <tr>
+                  <th class='col centered'>
+                    <span>Ventilation ACH</span>
+                    <span class='font-light'>(1 / h)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span></span>
+                    <span class='font-light'>(m³ x s) / (h x L)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Total CO2 Emission Rate</span>
+                    <span class='font-light'>(L / s)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span></span>
+                    <span class='font-light'>(ppm)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Denominator</span>
+                    <span class='font-light'>(m³ ppm)</span>
+                  </th>
+                </tr>
+                <tr>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.computeVentilationACH(), 1)'
+                    class='color-cell'
+                  />
+                  <td>=</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='3.6'
+                    class='color-cell'
+                    style='background-color: grey;'
+                  />
+                  <td>x</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.computeEmissionRate(), 3)'
                     class='color-cell'
                   />
                   <td>x</td>
                   <ColoredCell
                     :colorScheme="colorInterpolationSchemeTotalAch"
                     :maxVal=1
-                    :value='roundOut(selectedIntervention.computeACH(), 1)'
+                    :value='1000000'
+                    class='color-cell'
+                    style='background-color: grey;'
+                  />
+                  <td>/</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.ventilationDenominator(), 1)'
                     class='color-cell'
                   />
                 </tr>
               </table>
             </div>
-
-            <div class='container'>
-              <div class='centered'>
-                <table>
-                  <tr>
-                    <th class='col centered'>
-                      <span>Total ACH</span>
-                      <span class='font-light'>(1 / h)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Ventilation ACH</span>
-                      <span class='font-light'>(1 / h)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Portable ACH</span>
-                      <span class='font-light'>(1 / h)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Upper-Room UV ACH</span>
-                      <span class='font-light'>(1 / h)</span>
-                    </th>
-                  </tr>
-                  <tr>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.computeACH(), 1)'
-                      class='color-cell'
-                    />
-                    <td>=</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.computeVentilationACH(), 1)'
-                      class='color-cell'
-                    />
-                    <td>+</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.computePortableAirCleanerACH(), 1)'
-                      class='color-cell'
-                    />
-                    <td>+</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.computeUVACH(), 1)'
-                      class='color-cell'
-                    />
-                  </tr>
-                </table>
-              </div>
-            </div>
-
-
-            <br id='details-ventilation-ach'>
-            <br>
-            <br>
-            <h4>Ventilation ACH</h4>
-
-            <div class='container'>
-              <div class='centered'>
-                <table>
-                  <tr>
-                    <th class='col centered'>
-                      <span>Ventilation ACH</span>
-                      <span class='font-light'>(1 / h)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span></span>
-                      <span class='font-light'>(m³ x s) / (h x L)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Total CO2 Emission Rate</span>
-                      <span class='font-light'>(L / s)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span></span>
-                      <span class='font-light'>(ppm)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Denominator</span>
-                      <span class='font-light'>(m³ ppm)</span>
-                    </th>
-                  </tr>
-                  <tr>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.computeVentilationACH(), 1)'
-                      class='color-cell'
-                    />
-                    <td>=</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='3.6'
-                      class='color-cell'
-                      style='background-color: grey;'
-                    />
-                    <td>x</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.computeEmissionRate(), 3)'
-                      class='color-cell'
-                    />
-                    <td>x</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='1000000'
-                      class='color-cell'
-                      style='background-color: grey;'
-                    />
-                    <td>/</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.ventilationDenominator(), 1)'
-                      class='color-cell'
-                    />
-                  </tr>
-                </table>
-              </div>
-            </div>
-
-            <div class='container'>
-              <div class='centered'>
-                <table>
-                  <tr>
-                    <th class='col centered'>
-                      <span></span>
-                      <span class='font-light'>(m³ x s) / (h x L)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span></span>
-                      <span class='font-light'>(m³ / L)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span></span>
-                      <span class='font-light'>(s / h)</span>
-                    </th>
-                  </tr>
-                  <tr>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='3.6'
-                      class='color-cell'
-                      style='background-color: grey;'
-                    />
-                    <td>=</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='0.001'
-                      class='color-cell'
-                      style='background-color: grey;'
-                    />
-                    <td>x</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='3600'
-                      class='color-cell'
-                      style='background-color: grey;'
-                    />
-                  </tr>
-                </table>
-
-              </div>
-            </div>
-
-            <div class='container'>
-              <div class='centered'>
-                <table>
-                  <tr>
-                    <th class='col centered'>
-                      <span>Denominator</span>
-                      <span class='font-light'>(m³ ppm)</span>
-                    </th>
-                    <th></th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Steady State CO2</span>
-                      <span class='font-light'>(ppm)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Ambient CO2</span>
-                      <span class='font-light'>(ppm)</span>
-                    </th>
-                    <th></th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Volume Occupied by Air</span>
-                      <span class='font-light'>(m³)</span>
-                    </th>
-                  </tr>
-                  <tr>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.ventilationDenominator(), 1)'
-                      class='color-cell'
-                    />
-                    <td>=</td>
-                    <td>(</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.steadyStateCO2Reading(), 0)'
-                      class='color-cell'
-                    />
-                    <td>-</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.ambientCO2Reading(), 0)'
-                      class='color-cell'
-                    />
-                    <td>)</td>
-                    <td>x</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
-                      :maxVal=1
-                      :value='roundOut(roomUsableVolumeCubicMeters, 1)'
-                      class='color-cell'
-                    />
-                  </tr>
-                </table>
-              </div>
-            </div>
-
-            <div class='container'>
-              <div class='centered'>
-                <table>
-                  <tr>
-                    <th class='col centered'>
-                      <span>Total CO2 Emission Rate</span>
-                      <span class='font-light'>(L / s)</span>
-                    </th>
-
-                    <th></th>
-
-                    <th class='col centered'>
-                      <span>Exhalation Activity CO2</span>
-                      <span class='font-light'>(L / s)</span>
-                    </th>
-
-                    <th></th>
-
-                    <th class='col centered'>
-                      <span>Num People</span>
-                    </th>
-
-                    <th></th>
-
-                    <th class='col centered'>
-                      <span>Activity</span>
-                    </th>
-
-                    <th></th>
-
-                    <th class='col centered'>
-                      <span>Sex</span>
-                    </th>
-
-                    <th></th>
-
-                    <th class='col centered'>
-                      <span>Age Group</span>
-                    </th>
-                  </tr>
-                  <tr v-for='(activityGroup, i) in activityGroups'>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.computeEmissionRate(), 3)'
-                      class='color-cell'
-                      v-if='i == 0'
-                    />
-                    <td v-else></td>
-
-                    <td v-if='i == 0'>=</td>
-                    <td v-else>+</td>
-
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(co2Rate(activityGroup), 6)'
-                      class='color-cell'
-                    />
-
-                    <td>x</td>
-
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='activityGroup.numberOfPeople'
-                      class='color-cell'
-                      style='background-color: grey'
-                    />
-                    <td></td>
-
-                    <td>{{activityGroup.carbonDioxideGenerationActivity}}</td>
-
-                    <td></td>
-
-                    <td>{{activityGroup.sex}}</td>
-
-                    <td></td>
-
-                    <td>{{activityGroup.ageGroup}}</td>
-                  </tr>
-                </table>
-              </div>
-            </div>
-
-            <p><span class='bold'>Exhalation Activity CO2</span> values were calculated using regression on data referenced <a href="https://forhealth.org/tools/co2-calculator/">here</a>.</p>
-
-
-            <br id='details-upper-room-germicidal-uv-ach'>
-            <br>
-            <br>
-            <h4>Upper-Room Germicidal UV ACH</h4>
-
-            <div class='container'>
-              <div class='centered'>
-                <table>
-                  <tr>
-                    <th class='col centered'>
-                      <span>Upper-Room Germicidal UV ACH</span>
-                      <span class='font-light'>(1 / h)</span>
-                    </th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Number of Devices</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Power</span>
-                      <span class='font-light'>(mW)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Volume Occupied by Air</span>
-                      <span class='font-light'>(m³)</span>
-                    </th>
-                  </tr>
-
-                  <tr>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.computeUVACH(), 1)'
-                      class='color-cell'
-                    />
-                    <td>=</td>
-                    <td>2</td>
-                    <td>x</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.findUVDevices().numDevices(), 0)'
-                      class='color-cell'
-                    />
-                    <td>x</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.findUVDevices().mW, 0)'
-                      class='color-cell'
-                    />
-                    <td>/</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
-                      :maxVal=1
-                      :value='roundOut(roomUsableVolumeCubicMeters, 1)'
-                      class='color-cell'
-                    />
-                  </tr>
-                </table>
-              </div>
-            </div>
-
-            <p>
-            I got the idea of how to estimate Upper-Room UV ACH from <a href="https://twitter.com/joeyfox85/status/1512230529424371712?s=20&t=Fsswbo2rLsUPZqrsGyI0IQ">Joey Fox</a>.
-            To figure out how many fixtures are needed, one can use the
-              <a href="To figure out how many fixtures are needed, one can use the">
-              CDC's guidelines. See the Installation and Maintenance section for more details:
-              </a>
-            </p>
-            <p class='quote'>A typical room with 500 square feet (ft2) of floor space will generally require two to three UV fixtures.</p>
-
-            <div class='container'>
-              <div class='centered'>
-                <table>
-                  <tr>
-                    <th class='col centered'>
-                      <span>Number of Devices</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Room Length</span>
-                      <span class='font-light'>(m)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Room Width</span>
-                      <span class='font-light'>(m)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Square Meters</span>
-                      <span class='font-light'>(m²)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Factor</span>
-                      <span class='font-light'>(dimension-less)</span>
-                    </th>
-                  </tr>
-
-                  <tr>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.findUVDevices().numDevices(), 1)'
-                      class='color-cell'
-                    />
-                    <td>=</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
-                      :maxVal=1
-                      :value='roundOut(this.roomLengthMeters, 0)'
-                      class='color-cell'
-                    />
-                    <td>x</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
-                      :maxVal=1
-                      :value='roundOut(this.roomWidthMeters, 0)'
-                      class='color-cell'
-                    />
-                    <td>/</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
-                      :maxVal=1
-                      :value='46.4515'
-                      class='color-cell'
-                      style='background-color: grey;'
-                    />
-                    <td>x</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
-                      :maxVal=1
-                      :value='this.selectedIntervention.findUVDevices().numDeviceFactor()'
-                      class='color-cell'
-                      style='background-color: grey;'
-                    />
-                  </tr>
-                </table>
-              </div>
-            </div>
-
-            <div class='container'>
-              <div class='centered'>
-                <table>
-                  <tr>
-                    <th class='col centered'>
-                      <span>Square Meters</span>
-                      <span class='font-light'>(m²)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Square Feet</span>
-                      <span class='font-light'>(ft²)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span></span>
-                      <span class='font-light'>(m² / ft²)</span>
-                    </th>
-                  </tr>
-
-                  <tr>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
-                      :maxVal=1
-                      :value='46.4515'
-                      class='color-cell'
-                      style='background-color: grey;'
-                    />
-                    <td>=</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
-                      :maxVal=1
-                      :value='500'
-                      class='color-cell'
-                      style='background-color: grey;'
-                    />
-                    <td>x</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
-                      :maxVal=1
-                      :value='0.092903'
-                      class='color-cell'
-                      style='background-color: grey;'
-                    />
-                  </tr>
-                </table>
-              </div>
-            </div>
-
-
-            <br id='details-portable-air-cleaner-ach'>
-            <br>
-            <br>
-            <h4>Portable Air Cleaner ACH</h4>
-
-            <div class='container'>
-              <div class='centered'>
-                <table>
-                  <tr>
-                    <th class='col centered'>
-                      <span>Portable Air Cleaner ACH</span>
-                      <span class='font-light'>(1 / h)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Number of Devices</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Clean Air Delivery Rate</span>
-                      <span class='font-light'>(m³ / h)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Volume Occupied by Air</span>
-                      <span class='font-light'>(m³)</span>
-                    </th>
-                  </tr>
-
-                  <tr>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.computePortableAirCleanerACH(), 1)'
-                      class='color-cell'
-                    />
-                    <td>=</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeTotalAch"
-                      :maxVal=1
-                        :value='roundOut(this.selectedIntervention.findPortableAirCleaners().numDevices(), 0)'
-                      class='color-cell'
-                    />
-                    <td>x</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.findPortableAirCleaners().cubicMetersPerHour, 0)'
-                      class='color-cell'
-                    />
-                    <td>/</td>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
-                      :maxVal=1
-                      :value='roundOut(roomUsableVolumeCubicMeters, 1)'
-                      class='color-cell'
-                    />
-                  </tr>
-                </table>
-              </div>
-            </div>
-
-            <div class='container'>
-              <div class='centered'>
-                <table>
-                  <tr>
-                    <th class='col centered'>
-                      <span>Clean Air Delivery Rate</span>
-                      <span class='font-light'>(m³ / h)</span>
-                    </th>
-                    <th></th>
-                    <th class='col centered'>
-                      <span>Description</span>
-                    </th>
-                  </tr>
-
-                  <tr>
-                    <ColoredCell
-                      :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
-                      :maxVal=1
-                      :value='roundOut(this.selectedIntervention.findPortableAirCleaners().cubicMetersPerHour, 0)'
-                      class='color-cell'
-                    />
-                    <td></td>
-                    <td>{{selectedIntervention.findPortableAirCleaners().singularName()}}</td>
-                  </tr>
-                </table>
-              </div>
-            </div>
-
-            <h4>Rapid Testing</h4>
-
-            <p>
-              <span>If, at max occupancy, everyone did rapid testing beforehand, and all got negative results, the probability that at least one person is infectious drops down to
-                  <ColoredCell
-                    :colorScheme="riskColorScheme"
-                    :maxVal=1
-                    :value='riskEncounteringInfectiousAllNegRapid'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-                  />.
-              </span>
-            </p>
-
-
           </div>
-
-        </div>
-
-        <div class='container'>
-          <label class='subsection'>Occupancy</label>
 
           <div class='container'>
-          <span>Assuming a COVID infectious prevalence rate of {{this.riskOfOneRounded}}, and that the room is at max occupancy ~{{maximumOccupancy}}, the probability of having at least one infector in the room is
-              <ColoredCell
-                :colorScheme="riskColorScheme"
-                :maxVal=1
-                :value='maxOccupancyEncounterRisk'
-                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-              />.
-          </span>
+            <div class='centered'>
+              <table>
+                <tr>
+                  <th class='col centered'>
+                    <span></span>
+                    <span class='font-light'>(m³ x s) / (h x L)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span></span>
+                    <span class='font-light'>(m³ / L)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span></span>
+                    <span class='font-light'>(s / h)</span>
+                  </th>
+                </tr>
+                <tr>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='3.6'
+                    class='color-cell'
+                    style='background-color: grey;'
+                  />
+                  <td>=</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='0.001'
+                    class='color-cell'
+                    style='background-color: grey;'
+                  />
+                  <td>x</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='3600'
+                    class='color-cell'
+                    style='background-color: grey;'
+                  />
+                </tr>
+              </table>
+
+            </div>
           </div>
 
-          <div class='container col centered' v-if="heatmapShowable">
-            <h4 :style="{'margin-bottom': 0}">Popular Times at {{this.roomName}}</h4>
-            <DayHourHeatmap
-              :dayHours="occupancy.parsed"
-            />
+          <div class='container'>
+            <div class='centered'>
+              <table>
+                <tr>
+                  <th class='col centered'>
+                    <span>Denominator</span>
+                    <span class='font-light'>(m³ ppm)</span>
+                  </th>
+                  <th></th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Steady State CO2</span>
+                    <span class='font-light'>(ppm)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Ambient CO2</span>
+                    <span class='font-light'>(ppm)</span>
+                  </th>
+                  <th></th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Volume Occupied by Air</span>
+                    <span class='font-light'>(m³)</span>
+                  </th>
+                </tr>
+                <tr>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.ventilationDenominator(), 1)'
+                    class='color-cell'
+                  />
+                  <td>=</td>
+                  <td>(</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.steadyStateCO2Reading(), 0)'
+                    class='color-cell'
+                  />
+                  <td>-</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.ambientCO2Reading(), 0)'
+                    class='color-cell'
+                  />
+                  <td>)</td>
+                  <td>x</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                    :maxVal=1
+                    :value='roundOut(roomUsableVolumeCubicMeters, 1)'
+                    class='color-cell'
+                  />
+                </tr>
+              </table>
+            </div>
           </div>
+
+          <div class='container'>
+            <div class='centered'>
+              <table>
+                <tr>
+                  <th class='col centered'>
+                    <span>Total CO2 Emission Rate</span>
+                    <span class='font-light'>(L / s)</span>
+                  </th>
+
+                  <th></th>
+
+                  <th class='col centered'>
+                    <span>Exhalation Activity CO2</span>
+                    <span class='font-light'>(L / s)</span>
+                  </th>
+
+                  <th></th>
+
+                  <th class='col centered'>
+                    <span>Num People</span>
+                  </th>
+
+                  <th></th>
+
+                  <th class='col centered'>
+                    <span>Activity</span>
+                  </th>
+
+                  <th></th>
+
+                  <th class='col centered'>
+                    <span>Sex</span>
+                  </th>
+
+                  <th></th>
+
+                  <th class='col centered'>
+                    <span>Age Group</span>
+                  </th>
+                </tr>
+                <tr v-for='(activityGroup, i) in activityGroups'>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.computeEmissionRate(), 3)'
+                    class='color-cell'
+                    v-if='i == 0'
+                  />
+                  <td v-else></td>
+
+                  <td v-if='i == 0'>=</td>
+                  <td v-else>+</td>
+
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(co2Rate(activityGroup), 6)'
+                    class='color-cell'
+                  />
+
+                  <td>x</td>
+
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='activityGroup.numberOfPeople'
+                    class='color-cell'
+                    style='background-color: grey'
+                  />
+                  <td></td>
+
+                  <td>{{activityGroup.carbonDioxideGenerationActivity}}</td>
+
+                  <td></td>
+
+                  <td>{{activityGroup.sex}}</td>
+
+                  <td></td>
+
+                  <td>{{activityGroup.ageGroup}}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <p><span class='bold'>Exhalation Activity CO2</span> values were calculated using regression on data referenced <a href="https://forhealth.org/tools/co2-calculator/">here</a>.</p>
+
+
+          <br id='details-upper-room-germicidal-uv-ach'>
+          <br>
+          <br>
+          <h4>Upper-Room Germicidal UV ACH</h4>
+
+          <div class='container'>
+            <div class='centered'>
+              <table>
+                <tr>
+                  <th class='col centered'>
+                    <span>Upper-Room Germicidal UV ACH</span>
+                    <span class='font-light'>(1 / h)</span>
+                  </th>
+                  <th></th>
+                  <th></th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Number of Devices</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Power</span>
+                    <span class='font-light'>(mW)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Volume Occupied by Air</span>
+                    <span class='font-light'>(m³)</span>
+                  </th>
+                </tr>
+
+                <tr>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.computeUVACH(), 1)'
+                    class='color-cell'
+                  />
+                  <td>=</td>
+                  <td>2</td>
+                  <td>x</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.findUVDevices().numDevices(), 0)'
+                    class='color-cell'
+                  />
+                  <td>x</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.findUVDevices().mW, 0)'
+                    class='color-cell'
+                  />
+                  <td>/</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                    :maxVal=1
+                    :value='roundOut(roomUsableVolumeCubicMeters, 1)'
+                    class='color-cell'
+                  />
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <p>
+          I got the idea of how to estimate Upper-Room UV ACH from <a href="https://twitter.com/joeyfox85/status/1512230529424371712?s=20&t=Fsswbo2rLsUPZqrsGyI0IQ">Joey Fox</a>.
+          To figure out how many fixtures are needed, one can use the
+            <a href="To figure out how many fixtures are needed, one can use the">
+            CDC's guidelines. See the Installation and Maintenance section for more details:
+            </a>
+          </p>
+          <p class='quote'>A typical room with 500 square feet (ft2) of floor space will generally require two to three UV fixtures.</p>
+
+          <div class='container'>
+            <div class='centered'>
+              <table>
+                <tr>
+                  <th class='col centered'>
+                    <span>Number of Devices</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Room Length</span>
+                    <span class='font-light'>(m)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Room Width</span>
+                    <span class='font-light'>(m)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Square Meters</span>
+                    <span class='font-light'>(m²)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Factor</span>
+                    <span class='font-light'>(dimension-less)</span>
+                  </th>
+                </tr>
+
+                <tr>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.findUVDevices().numDevices(), 1)'
+                    class='color-cell'
+                  />
+                  <td>=</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                    :maxVal=1
+                    :value='roundOut(this.roomLengthMeters, 0)'
+                    class='color-cell'
+                  />
+                  <td>x</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                    :maxVal=1
+                    :value='roundOut(this.roomWidthMeters, 0)'
+                    class='color-cell'
+                  />
+                  <td>/</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                    :maxVal=1
+                    :value='46.4515'
+                    class='color-cell'
+                    style='background-color: grey;'
+                  />
+                  <td>x</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                    :maxVal=1
+                    :value='this.selectedIntervention.findUVDevices().numDeviceFactor()'
+                    class='color-cell'
+                    style='background-color: grey;'
+                  />
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <div class='container'>
+            <div class='centered'>
+              <table>
+                <tr>
+                  <th class='col centered'>
+                    <span>Square Meters</span>
+                    <span class='font-light'>(m²)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Square Feet</span>
+                    <span class='font-light'>(ft²)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span></span>
+                    <span class='font-light'>(m² / ft²)</span>
+                  </th>
+                </tr>
+
+                <tr>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                    :maxVal=1
+                    :value='46.4515'
+                    class='color-cell'
+                    style='background-color: grey;'
+                  />
+                  <td>=</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                    :maxVal=1
+                    :value='500'
+                    class='color-cell'
+                    style='background-color: grey;'
+                  />
+                  <td>x</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                    :maxVal=1
+                    :value='0.092903'
+                    class='color-cell'
+                    style='background-color: grey;'
+                  />
+                </tr>
+              </table>
+            </div>
+          </div>
+
+
+          <br id='details-portable-air-cleaner-ach'>
+          <br>
+          <br>
+          <h4>Portable Air Cleaner ACH</h4>
+
+          <div class='container'>
+            <div class='centered'>
+              <table>
+                <tr>
+                  <th class='col centered'>
+                    <span>Portable Air Cleaner ACH</span>
+                    <span class='font-light'>(1 / h)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Number of Devices</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Clean Air Delivery Rate</span>
+                    <span class='font-light'>(m³ / h)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Volume Occupied by Air</span>
+                    <span class='font-light'>(m³)</span>
+                  </th>
+                </tr>
+
+                <tr>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.computePortableAirCleanerACH(), 1)'
+                    class='color-cell'
+                  />
+                  <td>=</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                      :value='roundOut(this.selectedIntervention.findPortableAirCleaners().numDevices(), 0)'
+                    class='color-cell'
+                  />
+                  <td>x</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.findPortableAirCleaners().cubicMetersPerHour, 0)'
+                    class='color-cell'
+                  />
+                  <td>/</td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                    :maxVal=1
+                    :value='roundOut(roomUsableVolumeCubicMeters, 1)'
+                    class='color-cell'
+                  />
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <div class='container'>
+            <div class='centered'>
+              <table>
+                <tr>
+                  <th class='col centered'>
+                    <span>Clean Air Delivery Rate</span>
+                    <span class='font-light'>(m³ / h)</span>
+                  </th>
+                  <th></th>
+                  <th class='col centered'>
+                    <span>Description</span>
+                  </th>
+                </tr>
+
+                <tr>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.findPortableAirCleaners().cubicMetersPerHour, 0)'
+                    class='color-cell'
+                  />
+                  <td></td>
+                  <td>{{selectedIntervention.findPortableAirCleaners().singularName()}}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <h4>Rapid Testing</h4>
+
+          <p>
+            <span>If, at max occupancy, everyone did rapid testing beforehand, and all got negative results, the probability that at least one person is infectious drops down to
+                <ColoredCell
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='riskEncounteringInfectiousAllNegRapid'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+                />.
+            </span>
+          </p>
+
+
         </div>
 
       </div>
+
+      <div class='container'>
+        <label class='subsection'>Occupancy</label>
+
+        <div class='container'>
+        <span>Assuming a COVID infectious prevalence rate of {{this.riskOfOneRounded}}, and that the room is at max occupancy ~{{maximumOccupancy}}, the probability of having at least one infector in the room is
+            <ColoredCell
+              :colorScheme="riskColorScheme"
+              :maxVal=1
+              :value='maxOccupancyEncounterRisk'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
+            />.
+        </span>
+        </div>
+
+        <div class='container col centered' v-if="heatmapShowable">
+          <h4 :style="{'margin-bottom': 0}">Popular Times at {{this.roomName}}</h4>
+          <DayHourHeatmap
+            :dayHours="occupancy.parsed"
+          />
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -2502,7 +2378,7 @@ export default {
 
   .grid {
     display: grid;
-    grid-template-columns: 40% 15% 45%;
+    grid-template-columns: 40vw 15vw 45vw;
   }
 
   .content {
@@ -2512,6 +2388,13 @@ export default {
 
   .item {
     padding: 1em;
+  }
+
+  .item-span-wide {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    grid-row-start: auto;
+    grid-row-end: auto;
   }
 
   .sticky {
