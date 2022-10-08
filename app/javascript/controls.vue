@@ -57,6 +57,7 @@
       </th>
 
       <td>
+        <input class='centered' :value='numPACs' @change='setNumPACs'/>
       </td>
 
       <td>
@@ -126,7 +127,8 @@ export default {
         'numSusceptibles',
         'selectedAirCleaner',
         'selectedInfectorMask',
-        'selectedSusceptibleMask'
+        'selectedSusceptibleMask',
+        'numPACs'
       ]
     ),
   },
@@ -137,6 +139,8 @@ export default {
         'selectAirCleaner',
         'selectSusceptibleMask',
         'selectInfectorMask',
+        'setNumInfectors',
+        'setNumPACs',
       ]
     ),
     setDuration(event) {
