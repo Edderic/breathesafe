@@ -108,7 +108,7 @@ export const useAnalyticsStore = defineStore('analytics', {
       return new Mask(MASKS[0], this.maximumOccupancy, 1)
     },
     selectedAirCleaner() {
-      return new AirCleaner(this.selectedAirCleanerObj, this.event)
+      return new AirCleaner(this.selectedAirCleanerObj, this.event, this.numPACs)
     }
   },
   actions: {
@@ -270,8 +270,15 @@ export const useAnalyticsStore = defineStore('analytics', {
     setNumInfectors(event) {
       this.numInfectors = parseInt(event.target.value)
     },
-    setNumPAC(event) {
-      this.numPAC = parseInt(event.target.value)
+    setNumPACs(event) {
+      this.numPACs = parseInt(event.target.value)
+
+      this.selectedIntervention = new Intervention(
+          this.event,
+          [this.selectedAirCleaner],
+          this.selectedInfectorMask,
+          this.selectedSusceptibleMask
+      )
     },
     selectSusceptibleMask(event) {
       let name = event.target.value

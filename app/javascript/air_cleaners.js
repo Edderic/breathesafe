@@ -41,7 +41,8 @@ export const airCleaners = [
 ]
 
 export class AirCleaner {
-  constructor(device, event) {
+  constructor(device, event, amount) {
+    this.amount = amount
     this.event = event
     this.initCost = device.initialCostUSD
     this.cubicMetersPerHour = device.cubicMetersPerHour
@@ -86,18 +87,7 @@ export class AirCleaner {
   }
 
   numDevices() {
-    let length = 0
-    try {
-      length = this.event.portableAirCleaners.length
-    } catch (ex) {
-      // no-op
-    }
-
-    let amountA = computeAmountOfPortableAirCleanersThatCanFit(
-      this.event.roomLengthMeters * this.event.roomWidthMeters,
-      this.areaInSquareMeters
-    ) - length
-    return amountA
+    return this.amount
   }
 
   initialCost() {
