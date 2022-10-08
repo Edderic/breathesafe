@@ -110,7 +110,6 @@ export default {
   name: 'Controls',
   data() {
     return {
-      selectedHour: 1,
       hoursToSelect: [
         '1 hour',
         '4 hours',
@@ -127,6 +126,7 @@ export default {
         'numSusceptibles',
         'selectedAirCleaner',
         'selectedInfectorMask',
+        'selectedHour',
         'selectedSusceptibleMask',
         'numPACs'
       ]
@@ -144,7 +144,7 @@ export default {
       ]
     ),
     setDuration(event) {
-      this.selectedHour = this.hoursToSelect[event.target.value].split(' ')[0]
+      this.selectedHour = parseInt(this.hoursToSelect[event.target.value].split(' ')[0])
     },
     roundOut(someValue, numRound) {
       return round(someValue, numRound)
