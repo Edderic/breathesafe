@@ -41,6 +41,7 @@ export const useAnalyticsStore = defineStore('analytics', {
     numInfectors: 1,
     numSusceptibles: 30,
     numPeopleToInvestIn: 5,
+    numPACs: 0,
     selectedInfectorMask: new Mask(MASKS[0], 1),
     selectedAirCleanerObj: airCleaners[0],
     event: {}
@@ -211,6 +212,9 @@ export const useAnalyticsStore = defineStore('analytics', {
     },
     setNumInfectors(event) {
       this.numInfectors = parseInt(event.target.value)
+    },
+    setNumPAC(event) {
+      this.numPAC = parseInt(event.target.value)
     },
     selectSusceptibleMask(event) {
       let name = event.target.value
