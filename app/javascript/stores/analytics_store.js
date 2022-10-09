@@ -99,14 +99,12 @@ export const useAnalyticsStore = defineStore('analytics', {
       }
     },
     selectedInfectorMask: new Mask(MASKS[0], 1),
+    selectedSusceptibleMask: new Mask(MASKS[0], 1),
     selectedAirCleanerObj: airCleaners[0],
     selectedHour: 1,
     event: {}
   }),
   getters: {
-    selectedSusceptibleMask() {
-      return new Mask(MASKS[0], this.maximumOccupancy, 1)
-    },
     selectedAirCleaner() {
       return new AirCleaner(this.selectedAirCleanerObj, this.event, this.numPACs)
     }
@@ -283,7 +281,11 @@ export const useAnalyticsStore = defineStore('analytics', {
     selectSusceptibleMask(event) {
       let name = event.target.value
       // TODO: have some occupancy variable in the data that can be set to maximum occupancy as the default
-      this.selectedSusceptibleMask = new Mask(MASKS.find((m) => m.name == name), this.maximumOccupancy  - 1)
+      this.selectedSusceptibleMask = new Mask(
+        MASKS.find((m) => m.name == name),
+        this.event.maximumOccupancy - 1
+      )
+
       this.selectedIntervention = new Intervention(
           this.event,
           [this.selectedAirCleaner],
