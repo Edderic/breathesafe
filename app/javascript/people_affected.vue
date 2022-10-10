@@ -52,12 +52,10 @@ export default {
     ...mapWritableState(
         useAnalyticsStore,
         [
+          'numInfected',
           'selectedHour',
         ]
     ),
-    numInfected() {
-      return round(this.numSusceptibles * this.risk, 0) || 0
-    },
     risk() {
       const duration = 1
       return (1 - (1-this.selectedIntervention.computeRiskRounded(duration, this.numInfectors))**this.selectedHour)
@@ -85,15 +83,9 @@ export default {
   },
   data() {
     return {
-      wage: 15,
-      numDaysOff: 5,
-      numHoursPerDay: 8
     }
   },
   methods: {
-    peopleCost() {
-      return this.numInfected * this.wage * this.numDaysOff * this.numHoursPerDay
-    },
     roundOut(someValue, numRound) {
       return round(someValue, numRound)
     },

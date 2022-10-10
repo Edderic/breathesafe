@@ -3,7 +3,15 @@
     <h2>Total Cost</h2>
     <p>
       Total cost is
-      <span class='bold'> ${{ selectedIntervention.implementationCostInYears(0.25) + peopleCost() }}</span>.
+
+      <ColoredCell
+          :colorScheme="riskColorScheme"
+          :maxVal=1
+          :value='totalCost'
+          :text='totalCostText'
+          class='inline'
+          :style="styleProps"
+      />.
     </p>
   </div>
 </template>
@@ -13,7 +21,6 @@ import ColoredCell from './colored_cell.vue'
 
 import { useAnalyticsStore } from './stores/analytics_store'
 import { round } from './misc.js'
-import { Intervention } from './interventions.js'
 import { mapWritableState, mapState, mapActions } from 'pinia';
 import { getSampleInterventions } from './sample_interventions.js'
 import {
@@ -29,36 +36,20 @@ export default {
   },
   computed: {
     // TODO: could pull in information from event/1 from Rails.
-    ...mapWritableState(
+    ...mapState(
         useAnalyticsStore,
         [
-          // 'selectedIntervention'
+          'peopleCost',
+          'styleProps'
         ]
     ),
-    numInfected() {
-      return round(this.numSusceptibles * this.risk, 0) || 0
+    totalCost() {
+      return this.selectedIntervention.implementationCostInYears(0.25) + this.peopleCost
     },
-    risk() {
-      const duration = 1
-      return (1 - (1-this.selectedIntervention.computeRiskRounded(duration, this.numInfectors))**this.selectedHour)
-    },
-    interventions() {
-      let numPeopleToInvestIn = 1
-      return getSampleInterventions(this.event, numPeopleToInvestIn)
+    totalCostText() {
+      return `${this.totalCost}`
     },
 
-    styleProps() {
-      return {
-          'font-weight': 'bold',
-          'color': 'white',
-          'text-shadow': '1px 1px 2px black',
-          'padding': '1em'
-        }
-    },
-    averageInfectedPeopleInterpolationScheme() {
-      const copy = JSON.parse(JSON.stringify(riskColorInterpolationScheme))
-      return assignBoundsToColorScheme(copy, infectedPeopleColorBounds)
-    },
     riskColorScheme() {
       return riskColorInterpolationScheme
     },
@@ -71,9 +62,6 @@ export default {
     }
   },
   methods: {
-    peopleCost() {
-      return this.numInfected * this.wage * this.numDaysOff * this.numHoursPerDay
-    },
     roundOut(someValue, numRound) {
       return round(someValue, numRound)
     },
