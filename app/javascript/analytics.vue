@@ -16,6 +16,7 @@
       <Controls
         :maskInstances='maskInstances'
         :airCleanerInstances='airCleanerInstances'
+        :riskColorScheme='riskColorScheme'
       />
     </div>
 

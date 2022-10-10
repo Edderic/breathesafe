@@ -107,7 +107,20 @@ export const useAnalyticsStore = defineStore('analytics', {
   getters: {
     selectedAirCleaner() {
       return new AirCleaner(this.selectedAirCleanerObj, this.event, this.numPACs)
-    }
+    },
+    risk() {
+      const duration = 1
+      return (1 - (1-this.selectedIntervention.computeRiskRounded(duration, this.numInfectors))**this.selectedHour)
+    },
+
+    styleProps() {
+      return {
+          'font-weight': 'bold',
+          'color': 'white',
+          'text-shadow': '1px 1px 2px black',
+          'padding': '1em'
+        }
+    },
   },
   actions: {
     async showAnalysis(id) {
