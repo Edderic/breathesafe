@@ -55,6 +55,7 @@ import ColoredCell from './colored_cell.vue'
 import PersonIcon from './person_icon.vue'
 import { round } from './misc.js'
 import { mapWritableState, mapState, mapActions } from 'pinia';
+import { useAnalyticsStore } from './stores/analytics_store.js'
 import {
   assignBoundsToColorScheme,
   riskColorInterpolationScheme,
@@ -62,25 +63,17 @@ import {
 } from './colors.js';
 
 export default {
-  name: 'PeopleAffected',
+  name: 'LostLaborWages',
   components: {
     ColoredCell,
     PersonIcon
   },
   computed: {
     // TODO: could pull in information from event/1 from Rails.
+    ...mapState(useAnalyticsStore, ['risk']),
     numInfected() {
       return round(this.numSusceptibles * this.risk, 0) || 0
     },
-    risk() {
-      const duration = 1
-      return (1 - (1-this.selectedIntervention.computeRiskRounded(duration, this.numInfectors))**this.selectedHour)
-    },
-    interventions() {
-      let numPeopleToInvestIn = 1
-      return getSampleInterventions(this.event, numPeopleToInvestIn)
-    },
-
     styleProps() {
       return {
           'font-weight': 'bold',

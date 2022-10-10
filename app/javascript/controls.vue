@@ -100,6 +100,7 @@
 </template>
 
 <script>
+import ColoredCell from './colored_cell.vue';
 import { mapWritableState, mapState, mapActions } from 'pinia';
 import { useAnalyticsStore } from './stores/analytics_store'
 import {
@@ -108,6 +109,9 @@ import {
 
 export default {
   name: 'Controls',
+  components: {
+    ColoredCell
+  },
   data() {
     return {
       hoursToSelect: [
@@ -119,6 +123,13 @@ export default {
     }
   },
   computed: {
+    ...mapState(
+      useAnalyticsStore,
+      [
+        'risk',
+        'styleProps'
+      ]
+    ),
     ...mapWritableState(
       useAnalyticsStore,
       [
@@ -152,7 +163,8 @@ export default {
   },
   props: {
     maskInstances: Array,
-    airCleanerInstances: Array
+    airCleanerInstances: Array,
+    riskColorScheme: Array,
   }
 }
 </script>
