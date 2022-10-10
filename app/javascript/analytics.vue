@@ -47,7 +47,7 @@
         :numInfectors='numInfectors'
       />
 
-      <RiskTable
+      <TotalCost
         :numSusceptibles='numSusceptibles'
         :event='event'
         :selectedIntervention='selectedIntervention'
@@ -1325,7 +1325,7 @@ import CleanAirDeliveryRateTable from './clean_air_delivery_rate_table.vue'
 import CADR from './cadr.vue'
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
-import RiskTable from './risk_table.vue';
+import TotalCost from './total_cost.vue';
 import { Intervention } from './interventions.js'
 import TotalACHTable from './total_ach_table.vue';
 import VentIcon from './vent_icon.vue';
@@ -1401,7 +1401,7 @@ export default {
     PacIcon,
     PeopleAffected,
     RiskIcon,
-    RiskTable,
+    TotalCost,
     RoomForImprovement,
     SideBar,
     Strengths,

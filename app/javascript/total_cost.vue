@@ -23,7 +23,7 @@ import {
 } from './colors.js';
 
 export default {
-  name: 'RiskTable',
+  name: 'TotalCost',
   components: {
     ColoredCell,
   },
