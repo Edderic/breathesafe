@@ -16,7 +16,6 @@ import ColoredCell from './colored_cell.vue'
 
 import { useAnalyticsStore } from './stores/analytics_store'
 import { round } from './misc.js'
-import { Intervention } from './interventions.js'
 import { mapWritableState, mapState, mapActions } from 'pinia';
 import { getSampleInterventions } from './sample_interventions.js'
 import {
@@ -41,15 +40,7 @@ export default {
     numInfected() {
       return round(this.numSusceptibles * this.risk, 0) || 0
     },
-    risk() {
-      const duration = 1
-      return (1 - (1-this.selectedIntervention.computeRiskRounded(duration, this.numInfectors))**this.selectedHour)
-    },
-    interventions() {
-      let numPeopleToInvestIn = 1
-      return getSampleInterventions(this.event, numPeopleToInvestIn)
-    },
-
+    ...mapState(useAnalyticsStore, ['risk']),
     styleProps() {
       return {
           'font-weight': 'bold',

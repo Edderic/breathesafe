@@ -455,6 +455,7 @@ export class Intervention {
 
     // For now, assume that everyone's wearing the same mask
     cost += this.mask1.costInYears(numYears)
+    cost += this.mask2.costInYears(numYears)
     // Number of people wearing mask1
     // Number of people wearing mask2
     // Got to divide the number of people into two groups, those who wear mask1

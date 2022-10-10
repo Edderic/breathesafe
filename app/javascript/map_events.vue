@@ -73,7 +73,6 @@ import CleanAirDeliveryRateTable from './clean_air_delivery_rate_table.vue';
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import Events from './events.vue';
-import RiskTable from './risk_table.vue';
 import TotalACHTable from './total_ach_table.vue';
 import AchToDuration from './ach_to_duration.vue';
 import { binValue, getColor, riskColorInterpolationScheme } from './colors';
@@ -90,7 +89,6 @@ export default {
     DayHourHeatmap,
     Events,
     HorizontalStackedBar,
-    RiskTable,
     TotalACHTable,
     AchToDuration
   },
