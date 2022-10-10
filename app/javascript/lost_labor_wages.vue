@@ -18,8 +18,8 @@
             <ColoredCell
                 :colorScheme="riskColorScheme"
                 :maxVal=1
-                :value='roundOut(peopleCost(), 1)'
-                :text='`$${roundOut(peopleCost(), 1)}`'
+                :value='roundOut(peopleCost, 1)'
+                :text='`$${roundOut(peopleCost, 1)}`'
                 class='inline'
                 :style="styleProps"
             />
@@ -43,7 +43,7 @@
         Assuming a wage of
         ${{wage}}/hour, and that each infected person takes off for 5 days after
         infection, doing this intervention costs at least
-        <span class='bold'>${{ peopleCost() }}</span> in terms of <span
+        <span class='bold'>${{ peopleCost }}</span> in terms of <span
         class='italic'>lost wages/labor</span>.
       </p>
     </div>
@@ -70,7 +70,7 @@ export default {
   },
   computed: {
     // TODO: could pull in information from event/1 from Rails.
-    ...mapState(useAnalyticsStore, ['risk']),
+    ...mapState(useAnalyticsStore, ['risk', 'peopleCost']),
     numInfected() {
       return round(this.numSusceptibles * this.risk, 0) || 0
     },
@@ -98,9 +98,6 @@ export default {
     }
   },
   methods: {
-    peopleCost() {
-      return this.numInfected * this.wage * this.numDaysOff * this.numHoursPerDay
-    },
     roundOut(someValue, numRound) {
       return round(someValue, numRound)
     },

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { defineStore } from 'pinia'
 import { MASKS, Mask  } from '../masks.js'
-import { hourToIndex } from '../misc.js'
+import { hourToIndex, round } from '../misc.js'
 import { airCleaners, AirCleaner } from '../air_cleaners.js'
 import { UpperRoomGermicidalUV, UPPER_ROOM_GERMICIDAL_UV } from '../upper_room_germicidal_uv.js'
 import { Intervention } from '../interventions.js'
@@ -14,6 +14,9 @@ import { getSampleInterventions } from '../sample_interventions.js'
 // the first argument is a unique id of the store across your application
 export const useAnalyticsStore = defineStore('analytics', {
   state: () => ({
+    wage: 15,
+    numDaysOff: 5,
+    numHoursPerDay: 8,
     interventions: [],
     workers: [
       // Takes 10 seconds on macbook pro
@@ -105,6 +108,12 @@ export const useAnalyticsStore = defineStore('analytics', {
     event: {}
   }),
   getters: {
+    numInfected() {
+      return round(this.numSusceptibles * this.risk, 0) || 0
+    },
+    peopleCost() {
+      return this.numInfected * this.wage * this.numDaysOff * this.numHoursPerDay
+    },
     selectedAirCleaner() {
       return new AirCleaner(this.selectedAirCleanerObj, this.event, this.numPACs)
     },
