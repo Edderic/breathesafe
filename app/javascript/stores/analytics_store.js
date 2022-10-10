@@ -41,7 +41,7 @@ export const useAnalyticsStore = defineStore('analytics', {
     numInfectors: 1,
     numSusceptibles: 30,
     numPeopleToInvestIn: 5,
-    numPACs: 0,
+    numPACs: 1,
     selectedIntervention: {
       computeCleanAirDeliveryRate() {
         return 0
