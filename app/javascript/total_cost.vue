@@ -1,5 +1,5 @@
 <template>
-  <div class='justify-content-center column'>
+  <div>
     <h2>Total Cost</h2>
     <p>
       Total cost is
