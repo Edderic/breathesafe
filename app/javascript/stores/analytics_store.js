@@ -87,7 +87,8 @@ export const useAnalyticsStore = defineStore('analytics', {
           'isFiltrationAirCleaner': function() { return true },
           'initialCostText': function() { return '' },
           'recurringCostText': function() { return '' },
-          'costInYears': function(x) { return 0}
+          'costInYears': function(x) { return 0 },
+          'name': function() { return '' }
         }
       },
       findUVDevices() {
