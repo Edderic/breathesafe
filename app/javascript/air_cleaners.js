@@ -83,7 +83,7 @@ export class AirCleaner {
     return 0
   }
   costInYears(years) {
-    return this.numDevices() * (this.device.initialCostUSD + years * this.device.recurringCostPerYearUSD)
+    return this.numDevices() * (this.device.initialCostUSD + years * this.device.recurringCostUSD)
   }
 
   numDevices() {
@@ -95,7 +95,7 @@ export class AirCleaner {
   }
 
   initialCostText() {
-    return `${this.shortName}: $${this.initialCost()} `
+    return `$${this.initialCost()} `
   }
 
   isUpperUV() {
@@ -118,7 +118,7 @@ export class AirCleaner {
   }
 
   recurringCostText() {
-    return `${this.shortName}: $${this.device.recurringCostPerYearUSD * this.numDevices()} ${this.recurringCostDetails}. `
+    return `$${this.device.recurringCostUSD * this.numDevices()} ${this.recurringCostDetails}. `
   }
 
   singularName() {

@@ -139,6 +139,7 @@ export default {
         'selectedInfectorMask',
         'selectedHour',
         'selectedSusceptibleMask',
+        'setNumSusceptibles',
         'numPACs'
       ]
     ),

@@ -75,20 +75,19 @@ export const useAnalyticsStore = defineStore('analytics', {
       computeACH() {
         return 0
       },
-      findPortableAirCleaners() {
-        return {
-          'cubic meters per hour': 0,
-          'numDevices': 0
-        }
-      },
       ventilationDenominator() { return 0.01 },
       steadyStateCO2Reading() { return 0.01 },
       ambientCO2Reading() { return 0.01 },
       findPortableAirCleaners() {
         return {
+          'amountText': function() { return 'None' },
           'numDevices': function() { return 0 },
           'numDeviceFactor': function() { return 0 },
-          'singularName': function() { return '' }
+          'singularName': function() { return '' },
+          'isFiltrationAirCleaner': function() { return true },
+          'initialCostText': function() { return '' },
+          'recurringCostText': function() { return '' },
+          'costInYears': function(x) { return 0}
         }
       },
       findUVDevices() {
