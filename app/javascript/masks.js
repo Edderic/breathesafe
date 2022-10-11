@@ -145,6 +145,10 @@ export class Mask {
     return this.numDevices() * (this.device.initialCostUSD + years * this.device.recurringCostPerYearUSD)
   }
 
+  name() {
+    return this.maskName
+  }
+
   numDevices() {
     return this.numDev
   }
