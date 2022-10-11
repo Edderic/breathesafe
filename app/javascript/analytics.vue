@@ -54,6 +54,15 @@
         :numInfectors='numInfectors'
       />
 
+      <AirCleanerCostOfImplementation
+        class='item'
+        :numSusceptibles='numSusceptibles'
+        :event='event'
+        :selectedIntervention='selectedIntervention'
+        :numInfectors='numInfectors'
+      />
+
+
       <Strengths
         :selectedIntervention='selectedIntervention'
         :maskingBarChart='maskingBarChart'
@@ -1319,6 +1328,7 @@
 <script>
 // Have a VueX store that maintains state across components
 import axios from 'axios';
+import AirCleanerCostOfImplementation from './air_cleaner_cost_of_implementation.vue';
 import ColoredCell from './colored_cell.vue';
 import Controls from './controls.vue';
 import CleanAirDeliveryRateTable from './clean_air_delivery_rate_table.vue'
@@ -1389,6 +1399,7 @@ export default {
   name: 'Analytics',
   components: {
     AchToDuration,
+    AirCleanerCostOfImplementation,
     CADR,
     CleanAirDeliveryRateTable,
     ColoredCell,

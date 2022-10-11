@@ -1,10 +1,10 @@
 <template>
   <div class='justify-content-center column'>
-    <div class='item'>
+    <div>
       <h2>Cost of Implementation</h2>
       <p>
         Implementation cost of the intervention (initial +
-          recurring cost of 3 months) is
+          recurring for a whole year) is
 
         <ColoredCell
             :colorScheme="riskColorScheme"
@@ -15,6 +15,18 @@
             :style="styleProps"
         />.
       </p>
+      <table>
+        <tr>
+          <th></th>
+          <th>Name</th>
+          <th>Cost in Year 1</th>
+        </tr>
+        <tr>
+          <th>Air Cleaner</th>
+          <td>{{airCleaner.amountText()}}</td>
+          <td>{{airCleaner.costInYears(1)}}</td>
+        </tr>
+      </table>
     </div>
   </div>
 </template>
@@ -33,7 +45,7 @@ import {
 } from './colors.js';
 
 export default {
-  name: 'RiskTable',
+  name: 'ImplementationCost',
   components: {
     ColoredCell,
   },
@@ -45,12 +57,15 @@ export default {
           'styleProps'
         ]
     ),
+    airCleaner() {
+      return this.selectedIntervention.findPortableAirCleaners()
+    },
     numInfected() {
       return round(this.numSusceptibles * this.risk, 0) || 0
     },
     ...mapState(useAnalyticsStore, ['risk']),
     implementationCost() {
-      return this.selectedIntervention.implementationCostInYears(0.25)
+      return this.selectedIntervention.implementationCostInYears(1)
     },
     implementationCostText() {
       return `$${this.implementationCost}`
@@ -88,6 +103,9 @@ export default {
 <style scoped>
   table {
     padding: 1em;
+  }
+  tr {
+    text-align: center;
   }
   th {
     padding: 1em;
