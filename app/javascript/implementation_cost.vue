@@ -112,6 +112,7 @@ export default {
 <style scoped>
   table {
     padding: 1em;
+    font-size: 0.75em;
   }
   tr {
     text-align: center;
