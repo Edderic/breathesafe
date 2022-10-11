@@ -47,7 +47,7 @@ export default {
       return this.selectedIntervention.implementationCostInYears(0.25) + this.peopleCost
     },
     totalCostText() {
-      return `${this.totalCost}`
+      return `$${this.totalCost}`
     },
 
     riskColorScheme() {
