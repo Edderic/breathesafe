@@ -86,6 +86,9 @@ export class AirCleaner {
     return this.numDevices() * (this.device.initialCostUSD + years * this.device.recurringCostUSD)
   }
 
+  name() {
+    return this.singular
+  }
   numDevices() {
     return this.amount
   }
