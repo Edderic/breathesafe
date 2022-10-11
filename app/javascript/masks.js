@@ -122,7 +122,7 @@ export class Mask {
   }
 
   amountText() {
-    return `${this.maskName} per person. `
+    return `${this.maskName} for ${this.numDev} people.`
   }
 
   computeACH() {
