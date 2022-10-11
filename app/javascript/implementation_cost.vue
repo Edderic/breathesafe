@@ -1,33 +1,39 @@
 <template>
-  <div class='justify-content-center column'>
-    <div>
-      <h2>Cost of Implementation</h2>
-      <p>
-        Implementation cost of the intervention (initial +
-          recurring for a whole year) is
+  <div>
+    <h2>Cost of Implementation</h2>
+    <p>
+      Implementation cost of the intervention (initial +
+        recurring for a whole year) is
 
-        <ColoredCell
-            :colorScheme="riskColorScheme"
-            :maxVal=1
-            :value='implementationCost'
-            :text='implementationCostText'
-            class='inline'
-            :style="styleProps"
-        />.
-      </p>
-      <table>
-        <tr>
-          <th></th>
-          <th>Name</th>
-          <th>Cost in Year 1</th>
-        </tr>
-        <tr>
-          <th>Air Cleaner</th>
-          <td>{{airCleaner.amountText()}}</td>
-          <td>{{airCleaner.costInYears(1)}}</td>
-        </tr>
-      </table>
-    </div>
+      <ColoredCell
+          :colorScheme="riskColorScheme"
+          :maxVal=1
+          :value='implementationCost'
+          :text='implementationCostText'
+          class='inline'
+          :style="styleProps"
+      />.
+    </p>
+    <table>
+      <tr>
+        <th></th>
+        <th>Amount</th>
+        <th>Name</th>
+        <th>Cost in Year 1</th>
+      </tr>
+      <tr>
+        <th>Air Cleaner</th>
+        <td>{{airCleaner.numDevices()}}</td>
+        <td>{{airCleaner.name()}}</td>
+        <td>{{airCleaner.costInYears(1)}}</td>
+      </tr>
+      <tr>
+        <th>Susceptible Mask</th>
+        <td>{{susceptibleMask.numDevices()}}</td>
+        <td>{{susceptibleMask.name()}}</td>
+        <td>{{susceptibleMask.costInYears(1)}}</td>
+      </tr>
+    </table>
   </div>
 </template>
 
