@@ -5,7 +5,15 @@
       <p>
         Implementation cost of the intervention (initial +
           recurring cost of 3 months) is
-          <span class='bold'> ${{ selectedIntervention.implementationCostInYears(0.25) }}</span>
+
+        <ColoredCell
+            :colorScheme="riskColorScheme"
+            :maxVal=1
+            :value='implementationCost'
+            :text='implementationCostText'
+            class='inline'
+            :style="styleProps"
+        />.
       </p>
     </div>
   </div>
@@ -31,23 +39,21 @@ export default {
   },
   computed: {
     // TODO: could pull in information from event/1 from Rails.
-    ...mapWritableState(
+    ...mapState(
         useAnalyticsStore,
         [
-          // 'selectedIntervention'
+          'styleProps'
         ]
     ),
     numInfected() {
       return round(this.numSusceptibles * this.risk, 0) || 0
     },
     ...mapState(useAnalyticsStore, ['risk']),
-    styleProps() {
-      return {
-          'font-weight': 'bold',
-          'color': 'white',
-          'text-shadow': '1px 1px 2px black',
-          'padding': '1em'
-        }
+    implementationCost() {
+      return this.selectedIntervention.implementationCostInYears(0.25)
+    },
+    implementationCostText() {
+      return `$${this.implementationCost}`
     },
     averageInfectedPeopleInterpolationScheme() {
       const copy = JSON.parse(JSON.stringify(riskColorInterpolationScheme))
@@ -65,9 +71,6 @@ export default {
     }
   },
   methods: {
-    peopleCost() {
-      return this.numInfected * this.wage * this.numDaysOff * this.numHoursPerDay
-    },
     roundOut(someValue, numRound) {
       return round(someValue, numRound)
     },
