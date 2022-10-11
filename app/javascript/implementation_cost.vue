@@ -66,6 +66,9 @@ export default {
     airCleaner() {
       return this.selectedIntervention.findPortableAirCleaners()
     },
+    susceptibleMask() {
+      return this.selectedIntervention.mask2
+    },
     numInfected() {
       return round(this.numSusceptibles * this.risk, 0) || 0
     },
