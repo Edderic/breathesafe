@@ -48,6 +48,7 @@
       />
 
       <TotalCost
+        class='item'
         :numSusceptibles='numSusceptibles'
         :event='event'
         :selectedIntervention='selectedIntervention'
