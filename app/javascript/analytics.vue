@@ -25,7 +25,6 @@
     <div class='col border-showing item scrollableY content' >
       <PeopleAffected
         class='item'
-        :numSusceptibles='numSusceptibles'
         :event='event'
         :selectedIntervention='selectedIntervention'
         :numInfectors='numInfectors'
@@ -48,6 +47,14 @@
       />
 
       <TotalCost
+        class='item'
+        :numSusceptibles='numSusceptibles'
+        :event='event'
+        :selectedIntervention='selectedIntervention'
+        :numInfectors='numInfectors'
+      />
+
+      <Savings
         class='item'
         :numSusceptibles='numSusceptibles'
         :event='event'
@@ -1337,6 +1344,7 @@ import CADR from './cadr.vue'
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import TotalCost from './total_cost.vue';
+import Savings from './Savings.vue';
 import { Intervention } from './interventions.js'
 import TotalACHTable from './total_ach_table.vue';
 import VentIcon from './vent_icon.vue';
@@ -1413,6 +1421,7 @@ export default {
     PacIcon,
     PeopleAffected,
     RiskIcon,
+    Savings,
     TotalCost,
     RoomForImprovement,
     SideBar,

@@ -19,11 +19,11 @@
     <div class='people-icons people '>
       <PersonIcon
         backgroundColor='red'
-        :amount='numInfected'
+        :amount='roundOut(numInfected, 0)'
       />
       <PersonIcon
         backgroundColor='green'
-        :amount='numSusceptibles - numInfected'
+        :amount='numSusceptibles - roundOut(numInfected, 0)'
       />
     </div>
   </div>
@@ -53,13 +53,11 @@ export default {
         useAnalyticsStore,
         [
           'numInfected',
+          'numSusceptibles',
           'selectedHour',
+          'risk'
         ]
     ),
-    risk() {
-      const duration = 1
-      return (1 - (1-this.selectedIntervention.computeRiskRounded(duration, this.numInfectors))**this.selectedHour)
-    },
     interventions() {
       let numPeopleToInvestIn = 1
       return getSampleInterventions(this.event, numPeopleToInvestIn)
@@ -92,7 +90,6 @@ export default {
 
   },
   props: {
-    numSusceptibles: Number,
     event: Object,
     numInfectors: Number,
     selectedIntervention: Object,
