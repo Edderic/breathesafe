@@ -13,6 +13,48 @@
           :style="styleProps"
       />.
     </p>
+
+    <table>
+      <tr>
+        <th>Lost Labor &nbsp; Wages</th>
+        <td>
+          <ColoredCell
+            :colorScheme="riskColorScheme"
+            :maxVal=1
+            :value='peopleCost'
+            :text='peopleCostText'
+            class='inline'
+            :style="styleProps"
+          />
+        </td>
+      </tr>
+      <tr>
+        <th>Implementation Cost</th>
+        <td>
+          <ColoredCell
+            :colorScheme="riskColorScheme"
+            :maxVal=1
+            :value='selectedIntervention.implementationCostInYears(1)'
+            :text='implementationCostText'
+            class='inline'
+            :style="styleProps"
+          />
+        </td>
+      </tr>
+      <tr>
+        <th>Sum</th>
+        <td>
+          <ColoredCell
+            :colorScheme="riskColorScheme"
+            :maxVal=1
+            :value='totalCost'
+            :text='totalCostText'
+            class='inline'
+            :style="styleProps"
+          />
+</td>
+      </tr>
+    </table>
   </div>
 </template>
 
@@ -43,8 +85,12 @@ export default {
           'styleProps'
         ]
     ),
+    peopleCostText() { return `$${this.peopleCost}` },
+    implementationCostText() {
+      return `$${this.selectedIntervention.implementationCostInYears(1)}`
+    },
     totalCost() {
-      return this.selectedIntervention.implementationCostInYears(0.25) + this.peopleCost
+      return this.selectedIntervention.implementationCostInYears(1) + this.peopleCost
     },
     totalCostText() {
       return `$${this.totalCost}`
