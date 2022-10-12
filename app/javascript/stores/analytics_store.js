@@ -45,69 +45,27 @@ export const useAnalyticsStore = defineStore('analytics', {
     numSusceptibles: 30,
     numPeopleToInvestIn: 5,
     numPACs: 1,
-    selectedIntervention: {
-      computeCleanAirDeliveryRate() {
-        return 0
-      },
-      computePortableAirCleanerACH() {
-        return 0.01
-      },
-      computeVentilationACH() {
-        return 0.01
-      },
-      computeUVACH() {
-        return 0.01
-      },
-      computeEmissionRate() {
-        return 0.01
-      },
-      computeVentilationDenominator() {
-        return 0.01
-      },
-      computeSusceptibleMask() {
-        return {
-          'maskPenetrationFactor': 'None'
-        }
-      },
-      computeRiskRounded() {
-        return 0
-      },
-      computeACH() {
-        return 0
-      },
-      ventilationDenominator() { return 0.01 },
-      steadyStateCO2Reading() { return 0.01 },
-      ambientCO2Reading() { return 0.01 },
-      findPortableAirCleaners() {
-        return {
-          'amountText': function() { return 'None' },
-          'numDevices': function() { return 0 },
-          'numDeviceFactor': function() { return 0 },
-          'singularName': function() { return '' },
-          'isFiltrationAirCleaner': function() { return true },
-          'initialCostText': function() { return '' },
-          'recurringCostText': function() { return '' },
-          'costInYears': function(x) { return 0 },
-          'name': function() { return '' }
-        }
-      },
-      findUVDevices() {
-        return {
-          'numDevices': function() { return 0 },
-          'numDeviceFactor': function() { return 0 }
-        }
-      },
-      implementationCostInYears() {
-        return 0
-      }
-    },
     selectedInfectorMask: new Mask(MASKS[0], 1),
-    selectedSusceptibleMask: new Mask(MASKS[0], 1),
+    selectedSuscMask: MASKS[0],
     selectedAirCleanerObj: airCleaners[0],
     selectedHour: 1,
-    event: {}
+    event: {
+      activityGroups: [],
+      totalAch: 0.1
+    }
   }),
   getters: {
+    selectedSusceptibleMask() {
+      return new Mask(this.selectedSuscMask, this.numSusceptibles)
+    },
+    selectedIntervention() {
+      return new Intervention(
+          this.event,
+          [this.selectedAirCleaner],
+          this.selectedInfectorMask,
+          this.selectedSusceptibleMask
+      )
+    },
     numInfected() {
       return round(this.numSusceptibles * this.risk, 0) || 0
     },
@@ -286,62 +244,25 @@ export const useAnalyticsStore = defineStore('analytics', {
     },
     setNumSusceptibles(event) {
       this.numSusceptibles = parseInt(event.target.value)
-      this.selectedSusceptibleMask = new Mask(this.selectedSusceptibleMask.mask, this.numSusceptibles)
-
-      this.selectedIntervention = new Intervention(
-          this.event,
-          [this.selectedAirCleaner],
-          this.selectedInfectorMask,
-          this.selectedSusceptibleMask
-      )
     },
     setNumInfectors(event) {
       this.numInfectors = parseInt(event.target.value)
     },
     setNumPACs(event) {
       this.numPACs = parseInt(event.target.value)
-
-      this.selectedIntervention = new Intervention(
-          this.event,
-          [this.selectedAirCleaner],
-          this.selectedInfectorMask,
-          this.selectedSusceptibleMask
-      )
     },
     selectSusceptibleMask(event) {
       let name = event.target.value
       // TODO: have some occupancy variable in the data that can be set to maximum occupancy as the default
-      this.selectedSusceptibleMask = new Mask(
-        MASKS.find((m) => m.name == name),
-        this.numSusceptibles
-      )
-
-      this.selectedIntervention = new Intervention(
-          this.event,
-          [this.selectedAirCleaner],
-          this.selectedInfectorMask,
-          this.selectedSusceptibleMask
-      )
+      this.selectedSuscMask = MASKS.find((m) => m.name == name)
     },
     selectInfectorMask(event) {
       let name = event.target.value
       this.selectedInfectorMask = new Mask(MASKS.find((m) => m.name == name), 1)
-      this.selectedIntervention = new Intervention(
-          this.event,
-          [this.selectedAirCleaner],
-          this.selectedInfectorMask,
-          this.selectedSusceptibleMask
-      )
     },
     selectAirCleaner(event) {
       let name = event.target.value
       this.selectedAirCleanerObj = airCleaners.find((m) => m.singular == name)
-      this.selectedIntervention = new Intervention(
-          this.event,
-          [this.selectedAirCleaner],
-          this.selectedInfectorMask,
-          this.selectedSusceptibleMask
-      )
     },
   }
 });
