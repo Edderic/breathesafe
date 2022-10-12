@@ -452,7 +452,6 @@ export class Intervention {
     for (let intervention of this.environmentalInterventions) {
       cost += intervention.costInYears(numYears)
     }
-
     // For now, assume that everyone's wearing the same mask
     cost += this.mask1.costInYears(numYears)
     cost += this.mask2.costInYears(numYears)

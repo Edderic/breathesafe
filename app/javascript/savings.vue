@@ -4,30 +4,17 @@
     <p>
       Compared to the scenario where no one is wearing masks and no portable air cleaner is added, doing this intervention as a business saves you
 
-      <ColoredCell
+        <ColoredCell
           :colorScheme="riskColorScheme"
           :maxVal=1
-          :value='totalCost'
-          :text='totalCostText'
+          :value='difference'
+          :text='differenceText'
           class='inline'
           :style="styleProps"
-      />.
+        />.
     </p>
 
     <table>
-      <tr>
-        <th>Total Cost of this Intervention</th>
-        <td>
-          <ColoredCell
-            :colorScheme="riskColorScheme"
-            :maxVal=1
-            :value='selectedCost'
-            :text='selectedCostText'
-            class='inline'
-            :style="styleProps"
-          />
-        </td>
-      </tr>
       <tr>
         <th>Total Cost of Not Masking and Not Adding PACs</th>
         <td>
@@ -36,6 +23,19 @@
             :maxVal=1
             :value='nullCost'
             :text='nullCostText'
+            class='inline'
+            :style="styleProps"
+          />
+        </td>
+      </tr>
+      <tr>
+        <th>Total Cost of this Intervention</th>
+        <td>
+          <ColoredCell
+            :colorScheme="riskColorScheme"
+            :maxVal=1
+            :value='selectedCost'
+            :text='selectedCostText'
             class='inline'
             :style="styleProps"
           />
@@ -52,7 +52,7 @@
             class='inline'
             :style="styleProps"
           />
-</td>
+        </td>
       </tr>
     </table>
   </div>
@@ -104,20 +104,20 @@ export default {
       }
     },
     nullCost() {
-      debugger
       return this.nullIntervention.implementationCostInYears(1) + this.nullIntervention.peopleCost(this.peopleCostArgs)
     },
 
     nullCostText() {
-      return `$${this.nullCost}`
+      return `$${round(this.nullCost, 0)}`
     },
 
     selectedCost() {
-      return this.selectedIntervention.implementationCostInYears(1) + this.selectedIntervention.peopleCost(this.peopleCostArgs)
+      return this.selectedIntervention.implementationCostInYears(1)
+        + this.selectedIntervention.peopleCost(this.peopleCostArgs)
     },
 
     selectedCostText() {
-      return `$${this.totalCost}`
+      return `$${round(this.selectedCost, 0)}`
     },
 
     riskColorScheme() {
@@ -129,7 +129,7 @@ export default {
     },
 
     differenceText() {
-      return `$${difference}`
+      return `$${round(this.difference, 0)}`
     },
   },
   data() {
