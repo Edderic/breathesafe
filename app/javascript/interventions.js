@@ -502,6 +502,11 @@ export class Intervention {
     return tmp
   }
 
+  peopleCost(args) {
+    let numInfected = this.computeRiskRounded(args.duration, args.numInfectors) * args.numSusceptibles
+    return numInfected * args.wage * args.numDaysOff * args.numHoursPerDay
+  }
+
   steadyStateCO2Reading() {
     return this.event.ventilationCo2SteadyStatePpm
   }

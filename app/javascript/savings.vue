@@ -21,8 +21,8 @@
           <ColoredCell
             :colorScheme="riskColorScheme"
             :maxVal=1
-            :value='peopleCost'
-            :text='peopleCostText'
+            :value='selectedCost'
+            :text='selectedCostText'
             class='inline'
             :style="styleProps"
           />
@@ -34,8 +34,8 @@
           <ColoredCell
             :colorScheme="riskColorScheme"
             :maxVal=1
-            :value='selectedIntervention.implementationCostInYears(1)'
-            :text='implementationCostText'
+            :value='nullCost'
+            :text='nullCostText'
             class='inline'
             :style="styleProps"
           />
@@ -47,8 +47,8 @@
           <ColoredCell
             :colorScheme="riskColorScheme"
             :maxVal=1
-            :value='totalCost'
-            :text='totalCostText'
+            :value='difference'
+            :text='differenceText'
             class='inline'
             :style="styleProps"
           />
@@ -82,7 +82,10 @@ export default {
         useAnalyticsStore,
         [
           'nullIntervention',
+          'numInfectors',
+          'numSusceptibles',
           'peopleCost',
+          'selectedHour',
           'styleProps'
         ]
     ),
@@ -90,26 +93,43 @@ export default {
     implementationCostText() {
       return `$${this.selectedIntervention.implementationCostInYears(1)}`
     },
-    savings() {
-      return this.selectedIntervention.implementationCostInYears(1) + this.peopleCost
+    peopleCostArgs() {
+      return {
+        wage: 15,
+        duration: this.selectedHour,
+        numInfectors: this.numInfectors,
+        numSusceptibles: this.numSusceptibles,
+        numDaysOff: 5,
+        numHoursPerDay: 8,
+      }
     },
-    totalCost() {
-      return this.selectedIntervention.implementationCostInYears(1) + this.peopleCost
-    },
-    nullRisk() {
-      const duration = 1
-      return (1 - (1-this.nullIntervention.computeRiskRounded(duration, this.numInfectors))**this.selectedHour)
-    },
-    nullNumInfected() {
-      return this.nullRisk * this.numSusceptibles
+    nullCost() {
+      debugger
+      return this.nullIntervention.implementationCostInYears(1) + this.nullIntervention.peopleCost(this.peopleCostArgs)
     },
 
-    totalCostText() {
+    nullCostText() {
+      return `$${this.nullCost}`
+    },
+
+    selectedCost() {
+      return this.selectedIntervention.implementationCostInYears(1) + this.selectedIntervention.peopleCost(this.peopleCostArgs)
+    },
+
+    selectedCostText() {
       return `$${this.totalCost}`
     },
 
     riskColorScheme() {
       return riskColorInterpolationScheme
+    },
+
+    difference() {
+      return this.nullCost - this.selectedCost
+    },
+
+    differenceText() {
+      return `$${difference}`
     },
   },
   data() {
