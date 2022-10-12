@@ -2002,14 +2002,12 @@ export default {
   },
   async created() {
     this.event = await this.showAnalysis(this.$route.params.id)
-    this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedInfectorMask)
     this.numSusceptibles = this.event.maximumOccupancy - this.numInfectors
 
     await this.$watch(
       () => this.$route.params,
       (toParams, previousParams) => {
         this.event = this.showAnalysis(toParams.id)
-        this.selectedIntervention = new Intervention(this.event, [this.selectedAirCleaner], this.selectedInfectorMask)
         this.numSusceptibles = this.event.maximumOccupancy - this.numInfectors
       }
     )
