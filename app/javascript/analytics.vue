@@ -1344,7 +1344,7 @@ import CADR from './cadr.vue'
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import TotalCost from './total_cost.vue';
-import Savings from './Savings.vue';
+import Savings from './savings.vue';
 import { Intervention } from './interventions.js'
 import TotalACHTable from './total_ach_table.vue';
 import VentIcon from './vent_icon.vue';
