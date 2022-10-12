@@ -55,6 +55,14 @@ export const useAnalyticsStore = defineStore('analytics', {
     }
   }),
   getters: {
+    nullIntervention() {
+      return new Intervention(
+          this.event,
+          [],
+          new Mask(MASKS[0], 1),
+          new Mask(MASKS[0], this.numSusceptibles),
+      )
+    },
     selectedSusceptibleMask() {
       return new Mask(this.selectedSuscMask, this.numSusceptibles)
     },
@@ -67,7 +75,7 @@ export const useAnalyticsStore = defineStore('analytics', {
       )
     },
     numInfected() {
-      return round(this.numSusceptibles * this.risk, 0) || 0
+      return round(this.numSusceptibles * this.risk, 2) || 0
     },
     peopleCost() {
       return this.numInfected * this.wage * this.numDaysOff * this.numHoursPerDay
