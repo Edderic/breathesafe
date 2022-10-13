@@ -12,7 +12,14 @@
       <table>
         <tr>
           <th>
+          </th>
+          <th>
             Lost Labor and Wages
+          </th>
+        </tr>
+        <tr>
+          <th>
+            Per Event
           </th>
           <td>
             <ColoredCell
@@ -20,6 +27,21 @@
                 :maxVal=1
                 :value='roundOut(peopleCost, 1)'
                 :text='`$${roundOut(peopleCost, 1)}`'
+                class='inline'
+                :style="styleProps"
+            />
+          </td>
+        </tr>
+        <tr>
+          <th>
+            Per Year
+          </th>
+          <td>
+            <ColoredCell
+                :colorScheme="riskColorScheme"
+                :maxVal=1
+                :value='roundOut(peopleCost * numTransmissionEvents, 1)'
+                :text='`$${roundOut(peopleCost * numTransmissionEvents, 1)}`'
                 class='inline'
                 :style="styleProps"
             />
@@ -46,6 +68,13 @@
         <span class='bold'>${{ peopleCost }}</span> in terms of <span
         class='italic'>lost wages/labor</span>.
       </p>
+      <p>
+        Assuming this scenario happens <span class='bold'>4</span> times a year,
+        due to immunity-evasive COVID-19 variants,
+        we have an average of 4 x ${{peopleCost}} =
+        <span class='bold'>${{ numTransmissionEvents * peopleCost }}</span> in terms of <span
+        class='italic'>yearly lost wages/labor</span>.
+      </p>
     </div>
   </div>
 </template>
@@ -71,6 +100,9 @@ export default {
   computed: {
     // TODO: could pull in information from event/1 from Rails.
     ...mapState(useAnalyticsStore, ['risk', 'peopleCost']),
+    numTransmissionEvents() {
+      return 4
+    },
     numInfected() {
       return round(this.numSusceptibles * this.risk, 0) || 0
     },
