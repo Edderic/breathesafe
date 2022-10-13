@@ -27,7 +27,6 @@
                 :maxVal=1
                 :value='roundOut(peopleCost, 1)'
                 :text='`$${roundOut(peopleCost, 1)}`'
-                class='inline'
                 :style="styleProps"
             />
           </td>
@@ -42,7 +41,6 @@
                 :maxVal=1
                 :value='roundOut(peopleCost * numTransmissionEvents, 1)'
                 :text='`$${roundOut(peopleCost * numTransmissionEvents, 1)}`'
-                class='inline'
                 :style="styleProps"
             />
           </td>
