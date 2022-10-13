@@ -5,7 +5,7 @@
       Compared to the scenario where no one is wearing masks and no portable air cleaner is added, doing this intervention as a business saves you
 
         <ColoredCell
-          :colorScheme="riskColorScheme"
+          :colorScheme="interpolationScheme"
           :maxVal=1
           :value='difference'
           :text='differenceText'
@@ -45,7 +45,7 @@
         <th>Savings</th>
         <td>
           <ColoredCell
-            :colorScheme="riskColorScheme"
+            :colorScheme="interpolationScheme"
             :maxVal=1
             :value='difference'
             :text='differenceText'
@@ -68,6 +68,7 @@ import { getSampleInterventions } from './sample_interventions.js'
 import {
   assignBoundsToColorScheme,
   riskColorInterpolationScheme,
+  colorInterpolationSchemeAch,
   infectedPeopleColorBounds,
 } from './colors.js';
 
@@ -120,6 +121,9 @@ export default {
       return `$${round(this.selectedCost, 0)}`
     },
 
+    interpolationScheme() {
+      return colorInterpolationSchemeAch
+    },
     riskColorScheme() {
       return riskColorInterpolationScheme
     },
