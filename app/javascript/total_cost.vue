@@ -23,7 +23,6 @@
             :maxVal=1
             :value='peopleCost'
             :text='peopleCostText'
-            class='inline'
             :style="styleProps"
           />
         </td>
@@ -36,7 +35,6 @@
             :maxVal=1
             :value='selectedIntervention.implementationCostInYears(1)'
             :text='implementationCostText'
-            class='inline'
             :style="styleProps"
           />
         </td>
@@ -49,7 +47,6 @@
             :maxVal=1
             :value='totalCost'
             :text='totalCostText'
-            class='inline'
             :style="styleProps"
           />
 </td>
