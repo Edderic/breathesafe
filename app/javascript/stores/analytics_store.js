@@ -78,7 +78,7 @@ export const useAnalyticsStore = defineStore('analytics', {
       return round(this.numSusceptibles * this.risk, 2) || 0
     },
     peopleCost() {
-      return this.numInfected * this.wage * this.numDaysOff * this.numHoursPerDay
+      return round(this.numInfected * this.wage * this.numDaysOff * this.numHoursPerDay, 2)
     },
     selectedAirCleaner() {
       return new AirCleaner(this.selectedAirCleanerObj, this.event, this.numPACs)
