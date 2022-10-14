@@ -612,7 +612,8 @@
                 <ColoredCell
                   :colorScheme="riskiestMaskColorScheme"
                   :maxVal=1
-                  :value='selectedIntervention.computeSusceptibleMask()["maskPenetrationFactor"]'
+                  :value='1 - selectedSusceptibleMask.filtrationEfficiency()'
+                  :text='roundOut(1 - selectedSusceptibleMask.filtrationEfficiency(), 6)'
                   class='color-cell'
                 />
 
