@@ -530,7 +530,7 @@
                 <th class='col centered'>
                   <span>Infector Masking Penetration Factor</span>
                   <span class='font-light italic'>
-                    {{selectedIntervention.computeSusceptibleMask()['maskType']}}
+                    {{selectedInfectorMask.maskType}}
                   </span>
                   <span class='font-light'>(dimensionless)</span>
                 </th>
@@ -567,7 +567,8 @@
                 <ColoredCell
                   :colorScheme="riskiestMaskColorScheme"
                   :maxVal=1
-                  :value='selectedIntervention.computeSusceptibleMask()["maskPenetrationFactor"]'
+                  :value='1 - selectedInfectorMask.filtrationEfficiency()'
+                  :text='roundOut(1 - selectedInfectorMask.filtrationEfficiency(), 6)'
                   class='color-cell'
                 />
               </tr>
@@ -1447,7 +1448,8 @@ export default {
         'numInfectors',
         'numSusceptibles',
         'selectedIntervention',
-        'selectedHour'
+        'selectedHour',
+        'selectedInfectorMask'
       ]
     ),
     ...mapWritableState(
@@ -1554,9 +1556,7 @@ export default {
     infectorProductWithIntervention() {
       return 18.6 * 3.3 * this.aerosolActivityToFactor(
         this.riskiestPotentialInfector["aerosolGenerationActivity"]
-      ) * this.selectedIntervention.computeSusceptibleMask()[
-        "maskPenetrationFactor"
-      ]
+      ) * (1 - this.selectedInfectorMask.filtrationEfficiency())
     },
     inhalationActivityScheme() {
       const minimum = 0.258

@@ -45,7 +45,7 @@ export const useAnalyticsStore = defineStore('analytics', {
     numSusceptibles: 30,
     numPeopleToInvestIn: 5,
     numPACs: 1,
-    selectedInfectorMask: new Mask(MASKS[0], 1),
+    selectedInfMask: MASKS[0],
     selectedSuscMask: MASKS[0],
     selectedAirCleanerObj: airCleaners[0],
     selectedHour: 1,
@@ -65,6 +65,9 @@ export const useAnalyticsStore = defineStore('analytics', {
     },
     selectedSusceptibleMask() {
       return new Mask(this.selectedSuscMask, this.numSusceptibles)
+    },
+    selectedInfectorMask() {
+      return new Mask(this.selectedInfMask, this.numInfectors)
     },
     selectedIntervention() {
       return new Intervention(
@@ -266,7 +269,7 @@ export const useAnalyticsStore = defineStore('analytics', {
     },
     selectInfectorMask(event) {
       let name = event.target.value
-      this.selectedInfectorMask = new Mask(MASKS.find((m) => m.name == name), 1)
+      this.selectedInfMask = MASKS.find((m) => m.name == name)
     },
     selectAirCleaner(event) {
       let name = event.target.value
