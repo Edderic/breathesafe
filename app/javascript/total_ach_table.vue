@@ -112,6 +112,8 @@ export default {
         'color': 'white',
         'text-shadow': '1px 1px 2px black',
         'text-align': 'center',
+        'padding-left': '1em',
+        'padding-right': '1em',
       }
 
       // return Object.assign(this.cellCSS, default)
