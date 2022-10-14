@@ -26,6 +26,13 @@
         :amount='numSusceptibles - roundOut(numInfected, 0)'
       />
     </div>
+
+    <p>If the average number of new infections is less than 1 everywhere,
+    COVID-19 will become extinct. Business owners can do their part by making their
+    environments less conducive to spread, for example, by adopting higher indoor
+    air quality standards and masking. <span class='bold'>At the very least,
+    aim for a combination of interventions to keep the average new infections below 1</span>.
+    </p>
   </div>
 </template>
 
