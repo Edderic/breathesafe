@@ -156,7 +156,7 @@ accounts from the command line" section above to understand what it is doing.
 After making sure that `$BREATHESAFE_DEV/app/assets/images/generated` has SVGs,
 in the earlier step, we can sync to S3:
 
-`aws s3 sync $BREATHESAFE_DEV/app/assets/images/generated $BREATHESAFE_PROD_S3/images/generated --profile breathesafe-edderic`
+`aws s3 sync $BREATHESAFE_DEV/app/assets/images/generated $BREATHESAFE_DEV_S3/images/generated --profile breathesafe-edderic`
 # Sync
 
 Right now, we host a bunch of Google Maps custom markers in S3. So when we make
