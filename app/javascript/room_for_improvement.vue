@@ -190,6 +190,7 @@ export default {
   },
   props: {
     cellCSSMerged: Object,
+    inlineCellCSS: Object,
     colorInterpolationSchemeRoomVolume: Object,
     maskingBarChart: Object,
     selectedIntervention: Object
