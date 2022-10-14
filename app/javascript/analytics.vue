@@ -374,7 +374,7 @@
          </p>
 
       </div>
-      <div class='item-span-wide'>
+      <div class='item-span-wide computation-details'>
 
         <div class='container'>
 
@@ -2369,6 +2369,10 @@ export default {
   }
 
   .scrollableY {
+  }
+
+  .computation-details {
+    font-size: 0.5em;
   }
 </style>
 
