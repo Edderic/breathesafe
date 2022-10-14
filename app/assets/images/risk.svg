@@ -16,7 +16,7 @@
     </g>
   </g>
 
-  <g transform="translate(84, 23) skewX(-63) skewY(36) scale(0.47)">
+  <g transform="translate(83, 24) skewX(-63) skewY(33) scale(0.47)">
     <path d='M 6 29 l 20 30 l 30 -20 l -20 -30 z' stroke='black' fill='transparent' stroke-linejoin='round'/>
     <g transform="rotate(-32, 20, 25)">
       <circle cx="23" cy="27" r="5" fill="green" />
