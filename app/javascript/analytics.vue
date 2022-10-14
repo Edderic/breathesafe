@@ -389,7 +389,7 @@
             <table>
               <tr>
                 <th class='col centered'>
-                  <span>Risk in 40 hours</span>
+                  <span>Risk</span>
                   <span class='font-light'>(Probability)</span>
                 </th>
                 <th></th>
@@ -411,7 +411,7 @@
                 <ColoredCell
                   :colorScheme="riskColorScheme"
                   :maxVal=1
-                  :value='this.selectedIntervention.computeRiskRounded(40)'
+                  :value='this.selectedIntervention.computeRiskRounded(this.selectedHour)'
                   class='color-cell'
                 />
                 <td>=</td>
@@ -1442,9 +1442,11 @@ export default {
       [
         'numPeopleToInvestIn',
         'selectedAirCleaner',
+        'selectedSusceptibleMask',
         'numInfectors',
         'numSusceptibles',
-        'selectedIntervention'
+        'selectedIntervention',
+        'selectedHour'
       ]
     ),
     ...mapWritableState(
@@ -1528,9 +1530,6 @@ export default {
     datetimeInWords() {
       return datetimeEnglish(this.startDatetime)
     },
-    durationWithIntervention() {
-      return 40
-    },
     inhalationActivityIsStrength() {
       // highest range for Sedentary / Sedentary passive is 6 to <11
       return this.worstCaseInhalation['inhalationFactor']
@@ -1549,7 +1548,7 @@ export default {
         this.selectedIntervention.computeACH())
 
       return this.infectorProductWithIntervention * this.susceptibleProductWithIntervention
-         * this.durationWithIntervention / cadr
+         * this.selectedHour / cadr
     },
     infectorProductWithIntervention() {
       return 18.6 * 3.3 * this.aerosolActivityToFactor(
@@ -1972,7 +1971,7 @@ export default {
       return round(this.totalAch, 1)
     },
     susceptibleProductWithIntervention() {
-      return this.selectedIntervention.computeSusceptibleMask()["maskPenetrationFactor"]
+      return (1 - this.selectedSusceptibleMask.filtrationEfficiency())
         * this.worstCaseInhalation["inhalationFactor"]
     },
     ventilationAchRounded() {
@@ -2044,11 +2043,6 @@ export default {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
-    selectIntervention(event) {
-      let id = event.target.value
-      let intervention = this.interventions.find((interv) => { return interv.id == id })
-      this.selectedIntervention = intervention
-    },
     inhalationValue(value) {
       if (value && this.worstCaseInhalation["ageGroup"]) {
         return value[this.worstCaseInhalation["ageGroup"]]["mean cubic meters per hour"]

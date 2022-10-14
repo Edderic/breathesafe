@@ -62,7 +62,7 @@
       <p>
         Assuming a wage of
         ${{wage}}/hour, and that each infected person takes off for 5 days after
-        infection, doing this intervention costs at least
+        infection, doing this intervention costs an average of
         <span class='bold'>${{ peopleCost }}</span> in terms of <span
         class='italic'>lost wages/labor</span>.
       </p>
