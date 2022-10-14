@@ -1281,26 +1281,8 @@
               </table>
             </div>
           </div>
-
-          <h4>Rapid Testing</h4>
-
-          <p>
-            <span>If, at max occupancy, everyone did rapid testing beforehand, and all got negative results, the probability that at least one person is infectious drops down to
-                <ColoredCell
-                  :colorScheme="riskColorScheme"
-                  :maxVal=1
-                  :value='riskEncounteringInfectiousAllNegRapid'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'padding': '1em', 'margin': '0.5em', 'display': 'inline-block' }"
-                />.
-            </span>
-          </p>
-
-
         </div>
-
       </div>
-
-
     </div>
   </div>
 </template>
