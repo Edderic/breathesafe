@@ -76,6 +76,7 @@
         :maskingBarChart='maskingBarChart'
         :colorInterpolationSchemeRoomVolume='colorInterpolationSchemeRoomVolume'
         :cellCSSMerged='cellCSSMerged'
+        :inlineCellCSS='inlineCellCSS'
         class='item'
       />
 
@@ -84,6 +85,7 @@
         :maskingBarChart='maskingBarChart'
         :colorInterpolationSchemeRoomVolume='colorInterpolationSchemeRoomVolume'
         :cellCSSMerged='cellCSSMerged'
+        :inlineCellCSS='inlineCellCSS'
         class='item'
       />
 
