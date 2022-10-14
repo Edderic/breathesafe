@@ -364,15 +364,6 @@
         especially in times of surges, is a very effective and cost-efficient way to
         prevent the spread of COVID-19 and other airborne respiratory viruses.
         </p>
-        <p>The riskiest mask recorded for this measurement is <span><ColoredCell
-              :colorScheme="riskiestMaskColorScheme"
-              :maxVal=1
-              :value='riskiestMask["maskPenetrationFactor"]'
-              :text='riskiestMask["maskType"]'
-              :style="inlineCellCSS"
-          /></span>, so susceptibles are assumed to be wearing these (unless specified otherwise in the Interventions section).
-         </p>
-
       </div>
       <div class='item-span-wide computation-details'>
 
