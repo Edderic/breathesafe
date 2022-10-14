@@ -46,7 +46,7 @@ export const MASKS = [
   {
     'name': '3M Aura',
     'shortName': '3M Aura',
-    'filtrationEfficiency': 0.95,
+    'filtrationEfficiency': 0.90,
     'initialCostUSD': 30,
     'initialDurationYears': 2 / 5, // Assuming 1 mask / week
     'recurringCostUSD': 30,
