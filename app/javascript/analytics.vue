@@ -484,7 +484,7 @@
                 <ColoredCell
                   :colorScheme="averageInfectedPeopleInterpolationScheme"
                   :maxVal=1
-                  :value='roundOut(susceptibleProductWithIntervention, 3)'
+                  :value='roundOut(susceptibleProductWithIntervention, 6)'
                   class='color-cell'
                 />
                 <td>x</td>
@@ -604,7 +604,7 @@
                 <ColoredCell
                   :colorScheme="averageInfectedPeopleInterpolationScheme"
                   :maxVal=1
-                  :value='roundOut(susceptibleProductWithIntervention, 3)'
+                  :value='roundOut(susceptibleProductWithIntervention, 6)'
                   class='color-cell'
                 />
 
