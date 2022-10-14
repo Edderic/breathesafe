@@ -23,7 +23,6 @@
             :maxVal=1
             :value='nullCost'
             :text='nullCostText'
-            class='inline'
             :style="styleProps"
           />
         </td>
@@ -36,7 +35,6 @@
             :maxVal=1
             :value='selectedCost'
             :text='selectedCostText'
-            class='inline'
             :style="styleProps"
           />
         </td>
@@ -49,7 +47,6 @@
             :maxVal=1
             :value='difference'
             :text='differenceText'
-            class='inline'
             :style="styleProps"
           />
         </td>
