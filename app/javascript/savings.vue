@@ -33,8 +33,8 @@
           <ColoredCell
             :colorScheme="riskColorScheme"
             :maxVal=1
-            :value='selectedCost'
-            :text='selectedCostText'
+            :value='totalCost'
+            :text='totalCostText'
             :style="styleProps"
           />
         </td>
@@ -79,12 +79,15 @@ export default {
     ...mapState(
         useAnalyticsStore,
         [
+          'averageNumTimesAnInfectorShowsUpPerYear',
           'nullIntervention',
           'numInfectors',
           'numSusceptibles',
           'peopleCost',
           'selectedHour',
-          'styleProps'
+          'styleProps',
+          'totalCost',
+          'totalCostText',
         ]
     ),
     peopleCostText() { return `$${this.peopleCost}` },
@@ -102,20 +105,15 @@ export default {
       }
     },
     nullCost() {
-      return this.nullIntervention.implementationCostInYears(1) + this.nullIntervention.peopleCost(this.peopleCostArgs)
+      return round(
+        this.nullIntervention.implementationCostInYears(1)
+        + this.averageNumTimesAnInfectorShowsUpPerYear
+        * this.nullIntervention.peopleCost(this.peopleCostArgs),
+      -2)
     },
 
     nullCostText() {
       return `$${round(this.nullCost, 0)}`
-    },
-
-    selectedCost() {
-      return this.selectedIntervention.implementationCostInYears(1)
-        + this.selectedIntervention.peopleCost(this.peopleCostArgs)
-    },
-
-    selectedCostText() {
-      return `$${round(this.selectedCost, 0)}`
     },
 
     interpolationScheme() {
@@ -126,7 +124,7 @@ export default {
     },
 
     difference() {
-      return this.nullCost - this.selectedCost
+      return this.nullCost - this.totalCost
     },
 
     differenceText() {
