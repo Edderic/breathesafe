@@ -39,8 +39,8 @@
             <ColoredCell
                 :colorScheme="riskColorScheme"
                 :maxVal=1
-                :value='roundOut(peopleCost * numTransmissionEvents, 1)'
-                :text='`$${roundOut(peopleCost * numTransmissionEvents, 1)}`'
+                :value='yearlyPeopleCost'
+                :text='yearlyPeopleCostText'
                 :style="styleProps"
             />
           </td>
@@ -69,8 +69,9 @@
       <p>
         Assuming this scenario happens <span class='bold'>4</span> times a year,
         due to immunity-evasive COVID-19 variants,
-        we have an average of 4 x ${{peopleCost}} =
-        <span class='bold'>${{ numTransmissionEvents * peopleCost }}</span> in terms of <span
+        we have an average of 4 x ${{peopleCost}}
+        ≈
+        <span class='bold'>{{yearlyPeopleCostText}}</span> in terms of <span
         class='italic'>yearly lost wages/labor</span>.
       </p>
     </div>
@@ -97,10 +98,16 @@ export default {
   },
   computed: {
     // TODO: could pull in information from event/1 from Rails.
-    ...mapState(useAnalyticsStore, ['risk', 'peopleCost']),
-    numTransmissionEvents() {
-      return 4
-    },
+    ...mapState(
+      useAnalyticsStore,
+      [
+        'risk',
+        'peopleCost',
+        'averageNumTimesAnInfectorShowsUpPerYear',
+        'yearlyPeopleCost',
+        'yearlyPeopleCostText'
+      ]
+    ),
     numInfected() {
       return round(this.numSusceptibles * this.risk, 0) || 0
     },

@@ -16,13 +16,13 @@
 
     <table>
       <tr>
-        <th>Lost Labor &nbsp; Wages</th>
+        <th>Lost Labor &#38; Wages</th>
         <td>
           <ColoredCell
             :colorScheme="riskColorScheme"
             :maxVal=1
-            :value='peopleCost'
-            :text='peopleCostText'
+            :value='yearlyPeopleCost'
+            :text='yearlyPeopleCostText'
             :style="styleProps"
           />
         </td>
@@ -79,18 +79,16 @@ export default {
         useAnalyticsStore,
         [
           'peopleCost',
-          'styleProps'
+          'peopleCostText',
+          'yearlyPeopleCost',
+          'yearlyPeopleCostText',
+          'styleProps',
+          'totalCost',
+          'totalCostText',
         ]
     ),
-    peopleCostText() { return `$${this.peopleCost}` },
     implementationCostText() {
       return `$${this.selectedIntervention.implementationCostInYears(1)}`
-    },
-    totalCost() {
-      return this.selectedIntervention.implementationCostInYears(1) + this.peopleCost
-    },
-    totalCostText() {
-      return `$${this.totalCost}`
     },
 
     riskColorScheme() {

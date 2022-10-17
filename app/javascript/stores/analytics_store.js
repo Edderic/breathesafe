@@ -83,6 +83,29 @@ export const useAnalyticsStore = defineStore('analytics', {
     peopleCost() {
       return round(this.numInfected * this.wage * this.numDaysOff * this.numHoursPerDay, 2)
     },
+    averageNumTimesAnInfectorShowsUpPerYear() {
+      return 4
+    },
+    yearlyPeopleCost() {
+      return round(
+        this.averageNumTimesAnInfectorShowsUpPerYear
+        * this.numInfected
+        * this.wage
+        * this.numDaysOff
+        * this.numHoursPerDay, -2)
+    },
+    peopleCostText() { return `$${this.peopleCost}` },
+    yearlyPeopleCostText() { return `$${this.yearlyPeopleCost}` },
+    totalCost() {
+      return round(
+        this.selectedIntervention.implementationCostInYears(1)
+        + this.yearlyPeopleCost,
+        -2
+      )
+    },
+    totalCostText() {
+      return `$${this.totalCost}`
+    },
     selectedAirCleaner() {
       return new AirCleaner(this.selectedAirCleanerObj, this.event, this.numPACs)
     },
