@@ -3,7 +3,8 @@
     <h2>Cost of Implementation</h2>
     <p>
       Implementation cost of the intervention (initial +
-        recurring for a whole year) is
+        recurring for a whole year) is ≈
+
 
       <ColoredCell
           :colorScheme="riskColorScheme"
@@ -60,6 +61,8 @@ export default {
     ...mapState(
         useAnalyticsStore,
         [
+          'implementationCost',
+          'implementationCostText',
           'styleProps'
         ]
     ),
@@ -77,7 +80,7 @@ export default {
       return this.selectedIntervention.implementationCostInYears(1)
     },
     implementationCostText() {
-      return `$${this.implementationCost}`
+      return `$${round(this.implementationCost, -2)}`
     },
     averageInfectedPeopleInterpolationScheme() {
       const copy = JSON.parse(JSON.stringify(riskColorInterpolationScheme))

@@ -77,6 +77,12 @@ export const useAnalyticsStore = defineStore('analytics', {
           this.selectedSusceptibleMask
       )
     },
+    implementationCost() {
+      return round(this.selectedIntervention.implementationCostInYears(1), -2)
+    },
+    implementationCostText() {
+      return `$${this.implementationCost}`
+    },
     numInfected() {
       return round(this.numSusceptibles * this.risk, 2) || 0
     },

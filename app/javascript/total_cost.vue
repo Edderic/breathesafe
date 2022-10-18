@@ -33,7 +33,7 @@
           <ColoredCell
             :colorScheme="riskColorScheme"
             :maxVal=1
-            :value='selectedIntervention.implementationCostInYears(1)'
+            :value='implementationCost'
             :text='implementationCostText'
             :style="styleProps"
           />
@@ -78,6 +78,8 @@ export default {
     ...mapState(
         useAnalyticsStore,
         [
+          'implementationCost',
+          'implementationCostText',
           'peopleCost',
           'peopleCostText',
           'yearlyPeopleCost',
@@ -87,9 +89,6 @@ export default {
           'totalCostText',
         ]
     ),
-    implementationCostText() {
-      return `$${this.selectedIntervention.implementationCostInYears(1)}`
-    },
 
     riskColorScheme() {
       return riskColorInterpolationScheme
