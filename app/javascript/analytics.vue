@@ -23,6 +23,10 @@
     <SideBar class='col border-showing item sticky'/>
 
     <div class='col border-showing item scrollableY content' >
+      <IndividualRisk
+        class='item'
+        :riskColorScheme='riskColorScheme'
+      />
       <PeopleAffected
         class='item'
         :event='event'
@@ -1306,6 +1310,7 @@ import TotalACHTable from './total_ach_table.vue';
 import VentIcon from './vent_icon.vue';
 import LostLaborWages from './lost_labor_wages.vue';
 import ImplementationCost from './implementation_cost.vue';
+import IndividualRisk from './individual_risk.vue';
 import PacIcon from './pac_icon.vue';
 import PeopleAffected from './people_affected.vue';
 import RiskIcon from './risk_icon.vue';
@@ -1372,6 +1377,7 @@ export default {
     DayHourHeatmap,
     Event,
     HorizontalStackedBar,
+    IndividualRisk,
     ImplementationCost,
     LostLaborWages,
     PacIcon,

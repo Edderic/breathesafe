@@ -82,18 +82,6 @@
           </select>
         </td>
       </tr>
-      <tr>
-        <th>Individual risk given 1 infector</th>
-
-        <td>
-          <ColoredCell
-            :colorScheme="riskColorScheme"
-            :maxVal=1
-            :value='roundOut(this.risk, 6)'
-            :style="styleProps"
-            />
-        </td>
-      </tr>
 
     </table>
   </div>
