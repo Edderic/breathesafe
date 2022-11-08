@@ -1960,17 +1960,13 @@ export default {
       return round(this.ventilationAch, 1)
     },
   },
+  async beforeRouteUpdate(to, from) {
+    this.event = await this.showAnalysis(this.$route.params.id)
+    this.numSusceptibles = this.event.maximumOccupancy - this.numInfectors
+  },
   async created() {
     this.event = await this.showAnalysis(this.$route.params.id)
     this.numSusceptibles = this.event.maximumOccupancy - this.numInfectors
-
-    await this.$watch(
-      () => this.$route.params,
-      (toParams, previousParams) => {
-        this.event = this.showAnalysis(toParams.id)
-        this.numSusceptibles = this.event.maximumOccupancy - this.numInfectors
-      }
-    )
   },
   mounted() {
   },

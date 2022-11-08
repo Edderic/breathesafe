@@ -1,7 +1,7 @@
 <template>
   <div>
-    <router-link :to="`/analytics/${this.$route.params.id}#risk-assessment`" class='link-h1'>
-      Risk Assessment
+    <router-link :to="`/analytics/${this.$route.params.id}#individual-risk`" class='link-h1'>
+      Individual Risk
     </router-link>
     <router-link :to="`/analytics/${this.$route.params.id}#overview`" class='link-h1'>
       Overview

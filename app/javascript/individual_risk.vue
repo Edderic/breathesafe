@@ -1,5 +1,9 @@
 <template>
   <div>
+    <br id='individual-risk'>
+    <br>
+    <br>
+
     <h2>Individual risk</h2>
     <table>
       <tr>
