@@ -19,7 +19,14 @@
 
     <table>
       <tr>
-        <th>Total Cost of Not Masking and Not Adding PACs</th>
+        <th>
+        </th>
+        <th>
+          Total Costs
+        </th>
+      </tr>
+      <tr>
+        <th>No Mask and PACs</th>
         <td>
           <ColoredCell
             :colorScheme="riskColorScheme"
@@ -31,7 +38,7 @@
         </td>
       </tr>
       <tr>
-        <th>Total Cost of this Intervention</th>
+        <th>This Set of Interventions</th>
         <td>
           <ColoredCell
             :colorScheme="riskColorScheme"

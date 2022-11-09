@@ -28,19 +28,20 @@
       {{ measurementUnits.airDeliveryRateMeasurementType }} of clean air.
       </li>
 
-      <li v-if='maskingBarChart.isStrength(0.2)'>
+      <li v-if='selectedIntervention.mask1.filtrationEfficiency() > 0.5'>
       <span class='italic bold'>
-        <router-link :to="`/analytics/${this.$route.params.id}#masking`" class='link-h2'>
-          Masking
+        <router-link :to="`/analytics/${this.$route.params.id}#masking`">
+          Infector Masking:
         </router-link>
-      </span>&nbsp;&nbsp;
+      </span> &nbsp;&nbsp; Infector mask is good for source control. Using N95s or elastomeric respirators could dramatically lower risk.
+      </li>
 
-      <ColoredCell
-        :colorScheme="reducedRiskColorScheme"
-        :maxVal=1
-        :value='roundOut(maskingBarChart.fractionOfSubparMasks(), 2)'
-        :style='cellCSSMerged'
-      />
+      <li v-if='selectedIntervention.mask2.filtrationEfficiency() > 0.5'>
+      <span class='italic bold'>
+        <router-link :to="`/analytics/${this.$route.params.id}#masking`">
+          Susceptible Masking:
+        </router-link>
+      </span> &nbsp;&nbsp; Mask worn by susceptibles is good for preventing inhalation of infectious viruses suspended in air. Using N95s or elastomeric respirators could dramatically lower risk.
       </li>
 
       <li v-if='exhalationActivityIsStrength'>

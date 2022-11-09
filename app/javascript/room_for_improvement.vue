@@ -23,18 +23,20 @@
         will dilute the inhaled dose of contaminants such as SARS-CoV-2.
       </li>
 
-      <li v-if='!maskingBarChart.isStrength(0.2)'>
+      <li v-if='selectedIntervention.mask1.filtrationEfficiency() <= 0.5'>
       <span class='italic bold'>
         <router-link :to="`/analytics/${this.$route.params.id}#masking`">
-          Masking:
+          Infector Masking:
         </router-link>
-      </span> &nbsp;&nbsp; <ColoredCell
-        :colorScheme="reducedRiskColorScheme"
-        :maxVal=1
-        :text='roundOut(maskingBarChart.fractionOfSubparMasks() * 100, 2)'
-        :value='roundOut(maskingBarChart.fractionOfSubparMasks(), 2)'
-        :style='cellCSSMerged'
-      /> percent of people were wearing subpar masks. Switching to better-fitting, high filtration efficiency masks such as N95s or elastomeric respirators is a very cost-effective way to decrease risk.
+      </span> &nbsp;&nbsp; Infector mask isn't good for source control. Switching to better-fitting, high filtration efficiency masks such as N95s or elastomeric respirators is a very cost-effective way to decrease risk.
+      </li>
+
+      <li v-if='selectedIntervention.mask2.filtrationEfficiency() <= 0.5'>
+      <span class='italic bold'>
+        <router-link :to="`/analytics/${this.$route.params.id}#masking`">
+          Susceptible Masking:
+        </router-link>
+      </span> &nbsp;&nbsp; Masks worn by susceptibles aren't good for preventing inhalation of infectious viruses suspended in air. Using N95s or elastomeric respirators could dramatically lower risk.
       </li>
 
       <li v-if='!exhalationActivityIsStrength'>
