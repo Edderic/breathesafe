@@ -1,7 +1,7 @@
 <template>
 
   <div class='grid'>
-    <div class='item class sticky'>
+    <div class='item controls'>
 
       <div class='container'>
         <h3 class='subsection'>Analysis & Recommendations for {{this.roomName}}</h3>
@@ -17,7 +17,7 @@
       />
     </div>
 
-    <SideBar class='col border-showing item sticky'/>
+    <SideBar class='col hide-horizontal-border item sticky'/>
 
     <div class='col border-showing item scrollableY content' >
 
@@ -2134,6 +2134,10 @@ export default {
     border: 1px solid grey;
   }
 
+  .hide-horizontal-border {
+    border: 0;
+  }
+
   .centered {
     display: flex;
     align-items: center;
@@ -2345,7 +2349,14 @@ export default {
   .sticky {
     position: sticky;
     top: 3.2em;
-    height: 90vh;
+    height: 80vh;
+  }
+
+  .controls {
+    border-right: 1px solid grey;
+    position: sticky;
+    height: 100vh;
+    top: 3.2em;
   }
 
   .scrollableY {
