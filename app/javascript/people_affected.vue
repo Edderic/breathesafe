@@ -2,6 +2,9 @@
   <div
     class='item'
    >
+    <br id='average-new-infections'>
+    <br>
+    <br>
 
     <h2>Average New Infections</h2>
     <div class='justify-content-center column'>

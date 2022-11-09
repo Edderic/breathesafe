@@ -3,7 +3,7 @@
     <br id='room-for-improvement'>
     <br>
     <br>
-    <h3>Room for Improvement</h3>
+    <h2>Room for Improvement</h2>
     <ul>
       <li v-if="selectedIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) <= 1000">
         <span class='italic bold'>

@@ -1,7 +1,10 @@
 <template>
   <div class='justify-content-center column'>
     <div>
-      <h3>Air Cleaner Cost</h3>
+      <br id='air-cleaner-cost-details'>
+      <br>
+      <br>
+      <h2>Air Cleaner Cost Details</h2>
       <p>
         Implementation cost of the intervention (initial +
           recurring for a whole year) is

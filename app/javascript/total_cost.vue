@@ -1,5 +1,8 @@
 <template>
   <div>
+    <br id='total-cost'>
+    <br>
+    <br>
     <h2>Total Cost</h2>
     <p>
       Total cost is

@@ -3,7 +3,7 @@
     <br id='strengths'>
     <br>
     <br>
-    <h3>Strengths</h3>
+    <h2>Strengths</h2>
     <ul>
       <li v-if="selectedIntervention.computeCleanAirDeliveryRate(systemOfMeasurement) > 1000">
 

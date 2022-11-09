@@ -1,10 +1,13 @@
 <template>
   <div>
-    <router-link :to="`/analytics/${this.$route.params.id}#individual-risk`" class='link-h1'>
-      Individual Risk
+    <router-link :to="`/analytics/${this.$route.params.id}#risk-assessment`" class='link-h1'>
+      Risk Assessment
     </router-link>
-    <router-link :to="`/analytics/${this.$route.params.id}#overview`" class='link-h1'>
-      Overview
+    <router-link :to="`/analytics/${this.$route.params.id}#average-new-infections`" class='link-h2'>
+      Average New Infections
+    </router-link>
+    <router-link :to="`/analytics/${this.$route.params.id}#individual-risk`" class='link-h2'>
+      Individual Risk
     </router-link>
     <router-link :to="`/analytics/${this.$route.params.id}#strengths`" class='link-h2'>
       Strengths
@@ -12,6 +15,27 @@
     <router-link :to="`/analytics/${this.$route.params.id}#room-for-improvement`" class='link-h2'>
       Room for Improvement
     </router-link>
+
+    <router-link :to="`/analytics/${this.$route.params.id}#economics`" class='link-h1'>
+      Economics
+    </router-link>
+    <router-link :to="`/analytics/${this.$route.params.id}#lost-labor-and-wages`" class='link-h2'>
+      Lost Labor &#38; Wages
+    </router-link>
+    <router-link :to="`/analytics/${this.$route.params.id}#implementation-cost`" class='link-h2'>
+      Implementation Cost
+    </router-link>
+    <router-link :to="`/analytics/${this.$route.params.id}#total-cost`" class='link-h2'>
+      Total Cost
+    </router-link>
+    <router-link :to="`/analytics/${this.$route.params.id}#savings`" class='link-h2'>
+      Savings
+    </router-link>
+
+    <router-link :to="`/analytics/${this.$route.params.id}#air-cleaner-cost-details`" class='link-h2'>
+      Air Cleaner Cost Details
+    </router-link>
+
     <router-link :to="`/analytics/${this.$route.params.id}#details`" class='link-h1'>
       Details
     </router-link>

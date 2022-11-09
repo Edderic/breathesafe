@@ -4,9 +4,6 @@
     <div class='item class sticky'>
 
       <div class='container'>
-        <br id='risk-assessment'>
-        <br>
-        <br>
         <h3 class='subsection'>Analysis & Recommendations for {{this.roomName}}</h3>
         <h4 class='subsection' v-if='event && event.placeData'>{{event.placeData.formattedAddress}}</h4>
         <h4 class='subsection' v-if='event && event.firstName'>Measurements taken by {{event.firstName}} {{event.lastName}}</h4>
@@ -23,16 +20,54 @@
     <SideBar class='col border-showing item sticky'/>
 
     <div class='col border-showing item scrollableY content' >
-      <IndividualRisk
-        class='item'
-        :riskColorScheme='riskColorScheme'
-      />
+
+      <div class='item-span-wide'>
+        <br id='risk-assessment'>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <h1 class='centered'>Risk Assessment</h1>
+      </div>
+
       <PeopleAffected
         class='item'
         :event='event'
         :selectedIntervention='selectedIntervention'
         :numInfectors='numInfectors'
       />
+
+      <IndividualRisk
+        class='item'
+        :riskColorScheme='riskColorScheme'
+      />
+      <Strengths
+        :selectedIntervention='selectedIntervention'
+        :maskingBarChart='maskingBarChart'
+        :colorInterpolationSchemeRoomVolume='colorInterpolationSchemeRoomVolume'
+        :cellCSSMerged='cellCSSMerged'
+        :inlineCellCSS='inlineCellCSS'
+        class='item'
+      />
+
+      <RoomForImprovement
+        :selectedIntervention='selectedIntervention'
+        :maskingBarChart='maskingBarChart'
+        :colorInterpolationSchemeRoomVolume='colorInterpolationSchemeRoomVolume'
+        :cellCSSMerged='cellCSSMerged'
+        :inlineCellCSS='inlineCellCSS'
+        class='item'
+      />
+
+      <div class='item-span-wide'>
+        <br id='economics'>
+        <br>
+        <br>
+        <h1 class='centered'>Economics</h1>
+      </div>
+
 
       <LostLaborWages
         class='item'
@@ -74,24 +109,8 @@
         :numInfectors='numInfectors'
       />
 
+      <div class='item'></div>
 
-      <Strengths
-        :selectedIntervention='selectedIntervention'
-        :maskingBarChart='maskingBarChart'
-        :colorInterpolationSchemeRoomVolume='colorInterpolationSchemeRoomVolume'
-        :cellCSSMerged='cellCSSMerged'
-        :inlineCellCSS='inlineCellCSS'
-        class='item'
-      />
-
-      <RoomForImprovement
-        :selectedIntervention='selectedIntervention'
-        :maskingBarChart='maskingBarChart'
-        :colorInterpolationSchemeRoomVolume='colorInterpolationSchemeRoomVolume'
-        :cellCSSMerged='cellCSSMerged'
-        :inlineCellCSS='inlineCellCSS'
-        class='item'
-      />
 
       <CADR
         class='item'

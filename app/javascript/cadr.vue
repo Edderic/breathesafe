@@ -3,7 +3,7 @@
     <br id='clean-air-delivery-rate'>
     <br>
     <br>
-    <h4>Clean Air Delivery Rate</h4>
+    <h2>Clean Air Delivery Rate</h2>
 
     <div class='container'>
       <div class='centered'>

@@ -6,6 +6,9 @@
     <div
       class='item'
      >
+      <br id='lost-labor-and-wages'>
+      <br>
+      <br>
 
       <h2>Lost Labor & Lost Wages</h2>
 

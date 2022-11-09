@@ -1,5 +1,10 @@
 <template>
   <div>
+
+    <br id='implementation-cost'>
+    <br>
+    <br>
+
     <h2>Cost of Implementation</h2>
     <p>
       Implementation cost of the intervention (initial +
