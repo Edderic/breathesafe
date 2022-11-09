@@ -111,6 +111,16 @@
 
       <div class='item'></div>
 
+      <div class='item-span-wide'>
+        <br id='risk-assessment-details'>
+        <br>
+        <br>
+        <h1 class='centered'>
+          Risk Assessment Details
+        </h1>
+      </div>
+
+
 
       <CADR
         class='item'
@@ -130,7 +140,7 @@
         <br id='total-ach'>
         <br>
         <br>
-        <h4>Total ACH</h4>
+        <h2>Total ACH</h2>
         <div class='centered'>
           <TotalACHTable
             :measurementUnits='measurementUnits'
@@ -2335,7 +2345,7 @@ export default {
   .sticky {
     position: sticky;
     top: 3.2em;
-    height: 100vh;
+    height: 90vh;
   }
 
   .scrollableY {
