@@ -63,10 +63,12 @@
       </p>
 
       <p>
+        The average number of infections this set of interventions generates is <span class='bold'>{{numInfected}}</span>.
         Assuming a wage of
         ${{wage}}/hour, and that each infected person takes off for 5 days after
         infection, doing this intervention costs an average of
-        <span class='bold'>${{ peopleCost }}</span> in terms of <span
+        <span class='bold'>{{numInfected}} x 8 hours / day x 5 days x $15 / hour ≈
+ ${{ peopleCost }}</span> in terms of <span
         class='italic'>lost wages/labor</span>.
       </p>
       <p>
@@ -112,7 +114,7 @@ export default {
       ]
     ),
     numInfected() {
-      return round(this.numSusceptibles * this.risk, 0) || 0
+      return round(this.numSusceptibles * this.risk, 1) || 0
     },
     styleProps() {
       return {
