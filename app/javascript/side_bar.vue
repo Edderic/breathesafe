@@ -1,14 +1,17 @@
 <template>
   <div>
     <div class='container scroll'>
-      <router-link :to="`/analytics/${this.$route.params.id}#risk-assessment`" class='link-h1'>
-        Risk Assessment
+      <router-link :to="`/analytics/${this.$route.params.id}#risk-assessment-summary`" class='link-h1'>
+        Risk Assessment Summary
       </router-link>
       <router-link :to="`/analytics/${this.$route.params.id}#average-new-infections`" class='link-h2'>
         Average New Infections
       </router-link>
       <router-link :to="`/analytics/${this.$route.params.id}#individual-risk`" class='link-h2'>
         Individual Risk
+      </router-link>
+      <router-link :to="`/analytics/${this.$route.params.id}#risk-equation`" class='link-h1'>
+        Risk Equation
       </router-link>
       <router-link :to="`/analytics/${this.$route.params.id}#strengths`" class='link-h2'>
         Strengths
@@ -52,11 +55,11 @@
       <router-link :to="`/analytics/${this.$route.params.id}#behaviors`" class='link-h2'>
         Behaviors
       </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#inhalation`" class='link-h2'>
-        Inhalation
+      <router-link :to="`/analytics/${this.$route.params.id}#inhalation-activity`" class='link-h2'>
+        Inhalation Activity
       </router-link>
-      <router-link :to="`/analytics/${this.$route.params.id}#exhalation`" class='link-h2'>
-        Exhalation
+      <router-link :to="`/analytics/${this.$route.params.id}#infector-activity`" class='link-h2'>
+        Infector Activity
       </router-link>
 
       <router-link :to="`/analytics/${this.$route.params.id}#masking`" class='link-h2'>

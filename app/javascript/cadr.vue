@@ -15,38 +15,6 @@
         />
       </div>
     </div>
-
-    <p>
-    To give context of what <ColoredCell
-          :colorScheme="colorScheme"
-          :maxVal=1
-          :value='roundOut(totalFlowRate, 0)'
-          :style='cellCSSMerged'
-        />
-    {{
-    measurementUnits.airDeliveryRateMeasurementType}} means, that is
-    about {{
-      roundOut(totalFlowRatePerAirCleanerSuggestion, 1)}} times the amount 1
-      <a :href="airCleanerSuggestion.website"> {{
-        airCleanerSuggestion['singular']}}
-      </a> outputs.
-      <span>
-        Adding {{
-        numSuggestedAirCleaners }} {{ airCleanerSuggestion['plural'] }} would
-        increase the CADR to
-
-        <ColoredCell
-          :colorScheme="colorScheme"
-          :maxVal=1
-          :value='totalFlowRatePlusExtraPacRounded'
-          :style='cellCSSMerged'
-        />
-          {{ measurementUnits.airDeliveryRateMeasurementType}}, which would
-          decrease the probability of infection by a factor of <span class='bold'>{{
-            roundOut(factor, 1)
-          }}</span> (assuming the risk was low to begin with).
-      </span>
-    </p>
   </div>
 </template>
 
@@ -108,6 +76,11 @@ export default {
 <style scoped>
   .bold {
     font-weight: bold;
+  }
+  .centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
 </style>
