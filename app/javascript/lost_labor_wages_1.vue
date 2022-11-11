@@ -12,73 +12,45 @@
 
       <h2>Lost Labor & Lost Wages</h2>
 
-      <table>
-        <tr>
-          <th>
-          </th>
-          <th>
-            Lost Labor and Wages
-          </th>
-        </tr>
-        <tr>
-          <th>
-            Per Event
-          </th>
-          <td>
-            <ColoredCell
-                :colorScheme="riskColorScheme"
-                :maxVal=1
-                :value='roundOut(peopleCost, 1)'
-                :text='`$${roundOut(peopleCost, 1)}`'
-                :style="styleProps"
-            />
-          </td>
-        </tr>
-        <tr>
-          <th>
-            Per Year
-          </th>
-          <td>
-            <ColoredCell
-                :colorScheme="riskColorScheme"
-                :maxVal=1
-                :value='yearlyPeopleCost'
-                :text='yearlyPeopleCostText'
-                :style="styleProps"
-            />
-          </td>
-        </tr>
-      </table>
-      <p>
-        We define <span class='italic'>lost labor</span> as businesses paying for employees taking sick
-        days. For those employees that no longer have sick days, then the time they are
-        taking off is considered to be <span class='italic'>lost wages</span>.
-
-        <span class='bold'>
-        Either way, when someone is sick, someone is paying for it, whether it
-        be a business or the individual itself.
-        </span>
-
-        This metric combines both concepts.
-      </p>
-
-      <p>
-        The average number of infections this set of interventions generates is <span class='bold'>{{numInfected}}</span>.
-        Assuming a wage of
-        ${{wage}}/hour, and that each infected person takes off for 5 days after
-        infection, doing this intervention costs an average of
-        <span class='bold'>{{numInfected}} x 8 hours / day x 5 days x $15 / hour ≈
- ${{ peopleCost }}</span> in terms of <span
-        class='italic'>lost wages/labor</span>.
-      </p>
-      <p>
-        Assuming this scenario happens <span class='bold'>4</span> times a year,
-        due to immunity-evasive COVID-19 variants,
-        we have an average of 4 x ${{peopleCost}}
-        ≈
-        <span class='bold'>{{yearlyPeopleCostText}}</span> in terms of <span
-        class='italic'>yearly lost wages/labor</span>.
-      </p>
+      <div class='align-items-center'>
+        <table>
+          <tr>
+            <th>
+            </th>
+            <th>
+              Lost Labor and Wages
+            </th>
+          </tr>
+          <tr>
+            <th>
+              Per Event
+            </th>
+            <td>
+              <ColoredCell
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='roundOut(peopleCost, 1)'
+                  :text='`$${roundOut(peopleCost, 1)}`'
+                  :style="styleProps"
+              />
+            </td>
+          </tr>
+          <tr>
+            <th>
+              Per Year
+            </th>
+            <td>
+              <ColoredCell
+                  :colorScheme="riskColorScheme"
+                  :maxVal=1
+                  :value='yearlyPeopleCost'
+                  :text='yearlyPeopleCostText'
+                  :style="styleProps"
+              />
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
   </div>
 </template>
@@ -96,7 +68,7 @@ import {
 } from './colors.js';
 
 export default {
-  name: 'LostLaborWages',
+  name: 'LostLaborWages1',
   components: {
     ColoredCell,
     PersonIcon

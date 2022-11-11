@@ -44,6 +44,23 @@
         :riskColorScheme='riskColorScheme'
       />
 
+      <LostLaborWages1
+        class='item'
+        :numSusceptibles='numSusceptibles'
+        :event='event'
+        :selectedIntervention='selectedIntervention'
+        :numInfectors='numInfectors'
+      />
+
+      <LostLaborWages2
+        class='item'
+        :numSusceptibles='numSusceptibles'
+        :event='event'
+        :selectedIntervention='selectedIntervention'
+        :numInfectors='numInfectors'
+      />
+
+
 
       <div class='item-span-wide'>
         <br id='risk-equation'>
@@ -199,14 +216,6 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
         <h1 class='centered'>Economics</h1>
       </div>
 
-
-      <LostLaborWages
-        class='item'
-        :numSusceptibles='numSusceptibles'
-        :event='event'
-        :selectedIntervention='selectedIntervention'
-        :numInfectors='numInfectors'
-      />
 
       <ImplementationCost
         class='item'
@@ -1468,7 +1477,8 @@ import Savings from './savings.vue';
 import { Intervention } from './interventions.js'
 import TotalACHTable from './total_ach_table.vue';
 import VentIcon from './vent_icon.vue';
-import LostLaborWages from './lost_labor_wages.vue';
+import LostLaborWages1 from './lost_labor_wages_1.vue';
+import LostLaborWages2 from './lost_labor_wages_2.vue';
 import ImplementationCost from './implementation_cost.vue';
 import IndividualRisk from './individual_risk.vue';
 import PacIcon from './pac_icon.vue';
@@ -1539,7 +1549,8 @@ export default {
     HorizontalStackedBar,
     IndividualRisk,
     ImplementationCost,
-    LostLaborWages,
+    LostLaborWages1,
+    LostLaborWages2,
     PacIcon,
     PeopleAffected,
     RiskIcon,
