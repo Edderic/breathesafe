@@ -209,46 +209,6 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
         class='item'
       />
 
-      <div class='item-span-wide'>
-        <br id='economics'>
-        <br>
-        <br>
-        <h1 class='centered'>Economics</h1>
-      </div>
-
-
-      <ImplementationCost
-        class='item'
-        :numSusceptibles='numSusceptibles'
-        :event='event'
-        :selectedIntervention='selectedIntervention'
-        :numInfectors='numInfectors'
-      />
-
-      <TotalCost
-        class='item'
-        :numSusceptibles='numSusceptibles'
-        :event='event'
-        :selectedIntervention='selectedIntervention'
-        :numInfectors='numInfectors'
-      />
-
-      <Savings
-        class='item'
-        :numSusceptibles='numSusceptibles'
-        :event='event'
-        :selectedIntervention='selectedIntervention'
-        :numInfectors='numInfectors'
-      />
-
-      <AirCleanerCostOfImplementation
-        class='item'
-        :numSusceptibles='numSusceptibles'
-        :event='event'
-        :selectedIntervention='selectedIntervention'
-        :numInfectors='numInfectors'
-      />
-
       <div class='item'></div>
 
       <div class='item-span-wide'>
@@ -1465,21 +1425,17 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
 <script>
 // Have a VueX store that maintains state across components
 import axios from 'axios';
-import AirCleanerCostOfImplementation from './air_cleaner_cost_of_implementation.vue';
 import ColoredCell from './colored_cell.vue';
 import Controls from './controls.vue';
 import CleanAirDeliveryRateTable from './clean_air_delivery_rate_table.vue'
 import CADR from './cadr.vue'
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
-import TotalCost from './total_cost.vue';
-import Savings from './savings.vue';
 import { Intervention } from './interventions.js'
 import TotalACHTable from './total_ach_table.vue';
 import VentIcon from './vent_icon.vue';
 import LostLaborWages1 from './lost_labor_wages_1.vue';
 import LostLaborWages2 from './lost_labor_wages_2.vue';
-import ImplementationCost from './implementation_cost.vue';
 import IndividualRisk from './individual_risk.vue';
 import PacIcon from './pac_icon.vue';
 import PeopleAffected from './people_affected.vue';
@@ -1539,7 +1495,6 @@ export default {
   name: 'Analytics',
   components: {
     AchToDuration,
-    AirCleanerCostOfImplementation,
     CADR,
     CleanAirDeliveryRateTable,
     ColoredCell,
@@ -1548,14 +1503,11 @@ export default {
     Event,
     HorizontalStackedBar,
     IndividualRisk,
-    ImplementationCost,
     LostLaborWages1,
     LostLaborWages2,
     PacIcon,
     PeopleAffected,
     RiskIcon,
-    Savings,
-    TotalCost,
     RoomForImprovement,
     SideBar,
     Strengths,
