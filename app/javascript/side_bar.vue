@@ -80,7 +80,7 @@ export default {
           selection.classList.remove("active")
         }
       }
-    }, { threshold: [0] });
+    }, { threshold: [0.50] });
 
     for (let j of document.querySelectorAll(".link-h2")) {
       console.log(j.id.substring(5))
@@ -115,6 +115,6 @@ export default {
   }
 
   .active {
-    background-color: grey;
+    background-color: #d9d9d9;
   }
 </style>
