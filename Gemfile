@@ -75,3 +75,6 @@ group :test do
   gem "selenium-webdriver"
   gem "webdrivers"
 end
+
+# QR code gem
+gem 'rqrcode'

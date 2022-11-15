@@ -1,3 +1,5 @@
+
+
 Rails.application.routes.draw do
   devise_for :users, {
     registrations: 'registrations',
@@ -25,7 +27,10 @@ Rails.application.routes.draw do
   post 'users/:user_id/profile', to: 'users/profiles#create'
   put 'users/:user_id/profile', to: 'users/profiles#update'
 
-
+  controller :pages do
+    get :qr_code_generator
+    get :qr_code_download
+  end
 
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
@@ -33,3 +38,5 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "articles#index"
 end
+
+
