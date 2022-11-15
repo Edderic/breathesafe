@@ -2462,7 +2462,7 @@ export default {
   .scrollableY {
   }
 
-  .computation-details {
+  #section-computational-details {
     font-size: 0.5em;
   }
 
