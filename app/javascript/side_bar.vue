@@ -80,7 +80,7 @@ export default {
           selection.classList.remove("active")
         }
       }
-    }, { threshold: [0.50] });
+    }, { threshold: [0.20] });
 
     for (let j of document.querySelectorAll(".link-h2")) {
       console.log(j.id.substring(5))
