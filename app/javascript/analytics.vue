@@ -450,13 +450,6 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
         <br>
         <br>
         <h4>Masking</h4>
-        <p>Here is the breakdown of masking prevalance:</p>
-        <div class='centered'>
-          <HorizontalStackedBar
-            :values="maskingBarChart.maskingValues()"
-            :colors="maskingBarChart.maskingColors()"
-          />
-        </div>
 
         <p>
         To see the effects of masking by yourself vs. when everyone is
