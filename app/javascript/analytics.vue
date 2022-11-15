@@ -21,7 +21,7 @@
 
     <div class='col border-showing item scrollableY content' >
 
-      <div class='item-span-wide'>
+      <div class='item-span-wide' id='section-risk-assessment-summary'>
         <br id='risk-assessment-summary'>
         <br>
         <br>
@@ -34,6 +34,7 @@
 
       <PeopleAffected
         class='item'
+        id='section-average-new-infections'
         :event='event'
         :selectedIntervention='selectedIntervention'
         :numInfectors='numInfectors'
@@ -41,11 +42,13 @@
 
       <IndividualRisk
         class='item'
+        id='section-individual-risk'
         :riskColorScheme='riskColorScheme'
       />
 
       <LostLaborWages1
         class='item'
+        id='section-lost-labor-and-wages'
         :numSusceptibles='numSusceptibles'
         :event='event'
         :selectedIntervention='selectedIntervention'
@@ -53,7 +56,7 @@
       />
 
       <LostLaborWages2
-        class='item'
+        class='item lost-labor-and-wages'
         :numSusceptibles='numSusceptibles'
         :event='event'
         :selectedIntervention='selectedIntervention'
@@ -62,7 +65,7 @@
 
 
 
-      <div class='item-span-wide'>
+      <div class='item-span-wide' id='section-risk-equation'>
         <br id='risk-equation'>
         <br>
         <br>
@@ -198,6 +201,7 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
         :cellCSSMerged='cellCSSMerged'
         :inlineCellCSS='inlineCellCSS'
         class='item'
+        id='section-strengths'
       />
 
       <RoomForImprovement
@@ -207,11 +211,12 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
         :cellCSSMerged='cellCSSMerged'
         :inlineCellCSS='inlineCellCSS'
         class='item'
+        id='section-room-for-improvement'
       />
 
       <div class='item'></div>
 
-      <div class='item-span-wide'>
+      <div class='item-span-wide' id='section-risk-assessment-details'>
         <br id='risk-assessment-details'>
         <br>
         <br>
@@ -223,6 +228,7 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
 
 
       <CADR
+        id='section-clean-air-delivery-rate'
         class='item'
         :cellCSSMerged='cellCSSMerged'
         :cellCSS='cellCSS'
@@ -236,7 +242,7 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
         :totalFlowRate='totalFlowRate'
       />
 
-      <div class='item'>
+      <div class='item' id='section-total-ach'>
         <br id='total-ach'>
         <br>
         <br>
@@ -280,7 +286,7 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
 
       </div>
 
-      <div class='item'>
+      <div class='item' id='section-behaviors'>
         <br id='behaviors'>
         <br>
         <br>
@@ -306,7 +312,7 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
         </p>
       </div>
 
-      <div class='item-span-wide'>
+      <div class='item-span-wide' id='section-inhalation-activity'>
         <br id='inhalation-activity'>
         <br>
         <br>
@@ -370,7 +376,7 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
       </div>
 
 
-      <div class='item-span-wide'>
+      <div class='item-span-wide' id='section-infector-activity'>
         <br id='infector-activity'>
         <br>
         <br>
@@ -439,7 +445,7 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
 
       </div>
 
-      <div class='item-span-wide'>
+      <div class='item-span-wide' id='section-masking'>
         <br id='masking'>
         <br>
         <br>
@@ -500,7 +506,7 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
         prevent the spread of COVID-19 and other airborne respiratory viruses.
         </p>
       </div>
-      <div class='item-span-wide computation-details'>
+      <div class='item-span-wide' id='section-computational-details'>
 
         <div class='container'>
 
@@ -862,7 +868,7 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
           <br>
           <h4>Ventilation ACH</h4>
 
-          <div class='container'>
+          <div class='container' id='section-details-ventilation-ach'>
             <div class='centered'>
               <table>
                 <tr>
@@ -1136,7 +1142,7 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
           <br>
           <h4>Upper-Room Germicidal UV ACH</h4>
 
-          <div class='container'>
+          <div class='container' id='section-details-upper-room-germicidal-uv-ach'>
             <div class='centered'>
               <table>
                 <tr>
@@ -1330,9 +1336,9 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
           <br id='details-portable-air-cleaner-ach'>
           <br>
           <br>
-          <h4>Portable Air Cleaner ACH</h4>
+          <h4 >Portable Air Cleaner ACH</h4>
 
-          <div class='container'>
+          <div class='container' id='section-details-portable-air-cleaner-ach'>
             <div class='centered'>
               <table>
                 <tr>
