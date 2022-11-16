@@ -22,7 +22,7 @@ export const airCleaners = [
   },
   {
     'type': 'airCleaner',
-    'singular': 'Corsi-Rosenthal box (Max Speed)',
+    'singular': 'CR box (Max Speed)',
     'plural': 'Corsi-Rosenthal boxes (Max Speed)',
     'shortName': 'CR boxes',
     'cubicMetersPerHour': cubicFeetPerMinuteTocubicMetersPerHour('cubic feet per minute', 600),

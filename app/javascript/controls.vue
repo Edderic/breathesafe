@@ -174,4 +174,8 @@ export default {
   img {
     height: 3em;
   }
+
+  input {
+    width: 4em;
+  }
 </style>

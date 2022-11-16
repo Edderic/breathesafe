@@ -99,12 +99,11 @@ export default {
 
 <style scoped>
   .link-h1 {
-    margin-left: 1em;
     margin-top: 1em;
   }
 
   .link-h2 {
-    margin-left: 1.5em;
+    margin-left: 0.5em;
     margin-top: 1em;
   }
 
@@ -128,6 +127,9 @@ export default {
   @media (max-width: 1400px) {
     #link-interventions {
       display: inline-block;
+    }
+    .link-h1, .link-h2 {
+      font-size: 0.75em;
     }
   }
 </style>
