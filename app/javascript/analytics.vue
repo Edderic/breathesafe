@@ -19,7 +19,22 @@
 
     <SideBar class='col hide-horizontal-border item sticky'/>
 
-    <div class='col border-showing item scrollableY content' >
+    <div class='col item scrollableY content' >
+      <div class='item-span-wide column-controls' id='section-interventions'>
+
+        <div class='container'>
+          <h3 class='subsection'>Analysis & Recommendations for {{this.roomName}}</h3>
+          <h4 class='subsection' v-if='event && event.placeData'>{{event.placeData.formattedAddress}}</h4>
+          <h4 class='subsection' v-if='event && event.firstName'>Measurements taken by {{event.firstName}} {{event.lastName}}</h4>
+          <h4 class='subsection'>on {{datetimeInWords}}</h4>
+        </div>
+
+        <Controls
+          :maskInstances='maskInstances'
+          :airCleanerInstances='airCleanerInstances'
+          :riskColorScheme='riskColorScheme'
+        />
+      </div>
 
       <div class='item-span-wide' id='section-risk-assessment-summary'>
         <br id='risk-assessment-summary'>
@@ -2426,8 +2441,60 @@ export default {
   .content {
     display: grid;
     grid-template-columns: 50% 50%;
+    border-left: 1px solid grey;
   }
 
+  .column-controls {
+    display: none;
+  }
+
+  @media (max-width: 1400px) {
+    .controls {
+      display: none;
+    }
+    .grid {
+      grid-template-columns: 15vw 85vw;
+    }
+
+    .column-controls {
+      display: block;
+    }
+  }
+
+  @media (max-width: 1000px) {
+    .controls {
+      display: none;
+    }
+    .grid {
+      grid-template-columns: 20vw 80vw;
+    }
+
+    .column-controls {
+      display: block;
+    }
+  }
+
+  @media (max-width: 750px) {
+    .controls {
+      display: none;
+    }
+    .grid {
+      grid-template-columns: 25vw 75vw;
+    }
+
+    .column-controls {
+      display: block;
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .equations {
+      font-size: 0.5em;
+    }
+  }
   .item {
     padding: 1em;
   }

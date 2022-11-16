@@ -1,6 +1,9 @@
 <template>
   <div>
     <div class='container scroll'>
+      <router-link :to="`/analytics/${this.$route.params.id}#interventions`" class='link-h1' id='link-interventions'>
+        Interventions
+      </router-link>
       <router-link :to="`/analytics/${this.$route.params.id}#risk-assessment-summary`" class='link-h1' id='link-risk-assessment-summary'>
         Risk Assessment Summary
       </router-link>
@@ -96,12 +99,12 @@ export default {
 
 <style scoped>
   .link-h1 {
-    margin-left: 2em;
+    margin-left: 1em;
     margin-top: 1em;
   }
 
   .link-h2 {
-    margin-left: 3em;
+    margin-left: 1.5em;
     margin-top: 1em;
   }
 
@@ -116,5 +119,15 @@ export default {
 
   .active {
     background-color: #d9d9d9;
+  }
+
+  #link-interventions {
+    display: none;
+  }
+
+  @media (max-width: 1400px) {
+    #link-interventions {
+      display: inline-block;
+    }
   }
 </style>
