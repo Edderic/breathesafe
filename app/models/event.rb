@@ -11,29 +11,13 @@ class Event < ApplicationRecord
     # end
     events = Event.connection.exec_query(
       <<-SQL
-        select distinct(events_with_state.id) as distinct_id, events_with_state.*, num_cases_last_seven_days, population_states.population, num_cases_last_seven_days::float / population_states.population as naive_prevalence, profiles.user_id, profiles.first_name, profiles.last_name, authors.admin as authored_by_admin
+        select distinct(events_with_state.id) as distinct_id, events_with_state.*, population_states.population, profiles.user_id, profiles.first_name, profiles.last_name, authors.admin as authored_by_admin
         from (
           select events.*, array_to_string(regexp_matches(place_data->>'formatted_address', '[A-Z]{2}'), ';') as state_short_name
           from events
         ) as events_with_state
 
         left join states on (states.code = events_with_state.state_short_name)
-        left join (
-          select (curr_cum - prev_cum) as num_cases_last_seven_days, state from
-            (
-              select blah.date as curr_date, blah.state, blah.cases_cumulative as curr_cum, bleh.cases_cumulative as prev_cum, bleh.date as seven_days_ago_date from (
-                select date, cases_cumulative, state
-                from covid_states
-                where date = '#{Date.today - 1.day}'
-              ) as blah
-              inner join (
-                select date, to_date('#{Date.today - 1.day}', 'YYYY-MM-DD') as recent_date,  state, cases_cumulative from covid_states where date = '#{Date.today - 8.day}'
-              ) as bleh on (
-                blah.date = bleh.recent_date
-                and blah.state = bleh.state
-              )
-           ) as cases
-        ) as cases_2 on (cases_2.state = states.full_name)
         left join population_states on (
           population_states.name = states.full_name
         )
