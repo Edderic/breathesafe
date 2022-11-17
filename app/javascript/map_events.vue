@@ -1,66 +1,59 @@
 <template>
-  <div class='body row'>
-    <div class='col'>
-      <div class='row'>
-        <GMapMap
-            :center="center"
-            :zoom="zoom"
-            map-type-id="terrain"
-            class='map'
+  <div class='body grid'>
+    <GMapMap
+      :center="center"
+      :zoom="zoom"
+      map-type-id="terrain"
+      class='map'
+    >
+      <GMapCluster
+          :styles="[
+            {
+              textColor: 'black',
+              url: 'https://raw.githubusercontent.com/googlemaps/v3-utility-library/37c2a570c318122df57b83140f5f54665b9359e5/packages/markerclustererplus/images/m1.png',
+              height: 52,
+              width: 53,
+            },
+            {
+              textColor: 'black',
+              url: 'https://raw.githubusercontent.com/googlemaps/v3-utility-library/37c2a570c318122df57b83140f5f54665b9359e5/packages/markerclustererplus/images/m2.png',
+              height: 55,
+              width: 56,
+            },
+            {
+              textColor: 'black',
+              url: 'https://raw.githubusercontent.com/googlemaps/v3-utility-library/37c2a570c318122df57b83140f5f54665b9359e5/packages/markerclustererplus/images/m3.png',
+              height: 65,
+              width: 66,
+            },
+            {
+              textColor: 'black',
+              url: 'https://raw.githubusercontent.com/googlemaps/v3-utility-library/37c2a570c318122df57b83140f5f54665b9359e5/packages/markerclustererplus/images/m4.png',
+              height: 77,
+              width: 78,
+            },
+            {
+              textColor: 'black',
+              url: 'https://raw.githubusercontent.com/googlemaps/v3-utility-library/37c2a570c318122df57b83140f5f54665b9359e5/packages/markerclustererplus/images/m5.png',
+              height: 89,
+              width: 90,
+            },
+          ]"
+        :zoomOnClick='true'
+      >
+        <GMapMarker
+            :key="index"
+            v-for="(m, index) in displayables"
+            :position="m.placeData.center"
+            :clickable="true"
+            :draggable="false"
+            :icon="icon(m)"
+            @click="openMarker(m.id)"
         >
-          <GMapCluster
-              :styles="[
-                {
-                  textColor: 'black',
-                  url: 'https://raw.githubusercontent.com/googlemaps/v3-utility-library/37c2a570c318122df57b83140f5f54665b9359e5/packages/markerclustererplus/images/m1.png',
-                  height: 52,
-                  width: 53,
-                },
-                {
-                  textColor: 'black',
-                  url: 'https://raw.githubusercontent.com/googlemaps/v3-utility-library/37c2a570c318122df57b83140f5f54665b9359e5/packages/markerclustererplus/images/m2.png',
-                  height: 55,
-                  width: 56,
-                },
-                {
-                  textColor: 'black',
-                  url: 'https://raw.githubusercontent.com/googlemaps/v3-utility-library/37c2a570c318122df57b83140f5f54665b9359e5/packages/markerclustererplus/images/m3.png',
-                  height: 65,
-                  width: 66,
-                },
-                {
-                  textColor: 'black',
-                  url: 'https://raw.githubusercontent.com/googlemaps/v3-utility-library/37c2a570c318122df57b83140f5f54665b9359e5/packages/markerclustererplus/images/m4.png',
-                  height: 77,
-                  width: 78,
-                },
-                {
-                  textColor: 'black',
-                  url: 'https://raw.githubusercontent.com/googlemaps/v3-utility-library/37c2a570c318122df57b83140f5f54665b9359e5/packages/markerclustererplus/images/m5.png',
-                  height: 89,
-                  width: 90,
-                },
-              ]"
-            :zoomOnClick='true'
-          >
-            <GMapMarker
-                :key="index"
-                v-for="(m, index) in displayables"
-                :position="m.placeData.center"
-                :clickable="true"
-                :draggable="false"
-                :icon="icon(m)"
-                @click="openMarker(m.id)"
-            >
-            </GMapMarker>
-          </GMapCluster>
-        </GMapMap>
-      </div>
-
-      <div>
-        <Events/>
-      </div>
-    </div>
+        </GMapMarker>
+      </GMapCluster>
+    </GMapMap>
+    <Events/>
   </div>
 </template>
 
@@ -197,7 +190,7 @@ export default {
   }
   .body {
     position: absolute;
-    top: 4.2em;
+    top: 3.2em;
   }
   .wide {
     flex-direction: column;
@@ -223,8 +216,7 @@ export default {
   }
 
   .map {
-    width: 100vw;
-    height: 32vh;
+    height: 90vh;
   }
 
   .icon {
@@ -265,6 +257,13 @@ export default {
 
   p {
     padding: 1em;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: auto;
+
   }
 
 </style>

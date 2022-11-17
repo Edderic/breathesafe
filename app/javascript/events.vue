@@ -344,7 +344,7 @@ export default {
 
   .scrollable {
     overflow-y: scroll;
-    height: 50vh;
+    height: 80vh;
   }
 
   .row {
