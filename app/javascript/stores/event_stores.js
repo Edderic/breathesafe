@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { Intervention } from '../interventions.js';
 import { Mask, MASKS } from '../masks.js'
 import { useMainStore } from './main_store'
 import { useProfileStore } from './profile_store'
@@ -85,12 +86,7 @@ export const useEventStores = defineStore('events', {
       //     i.e. Assumes everyone will be wearing the selectedMask
       const numWays = selectedMask.numWays
 
-      const prevalenceStore = usePrevalenceStore()
-      //prevalenceStore.maskType  const susceptibleMaskType = prevalenceStore.maskType
       // TODO: make this a query parameter using router
-      const susceptibleMaskType = selectedMask.filtrationType
-      const ascertainmentBiasMitigator = 24
-      let probaRandomSampleOfOneIsInfectious;
 
       let riskTime;
 
@@ -101,19 +97,24 @@ export const useEventStores = defineStore('events', {
       }
 
       for (let event of this.events) {
-        const flowRate = event.roomUsableVolumeCubicMeters * event.totalAch
-
-        probaRandomSampleOfOneIsInfectious = event['naivePrevalence'] * ascertainmentBiasMitigator
-
-        event['risk'] = computeRiskWithVariableOccupancy(
+        let intervention = new Intervention(
           event,
-          probaRandomSampleOfOneIsInfectious,
-          flowRate,
-          event.roomUsableVolumeCubicMeters,
-          susceptibleMaskType,
-          riskTime,
-          numWays
+          [
+          ],
+          this.selectedMask,
         )
+
+        if (numWays == 2) {
+          let intervention = new Intervention(
+            event,
+            [
+            ],
+            this.selectedMask,
+            this.selectedMask
+          )
+        }
+
+        event['risk'] = intervention.computeRisk(1)
       }
     },
   }

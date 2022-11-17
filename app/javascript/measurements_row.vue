@@ -13,8 +13,8 @@
           class='risk-score'
           :colorScheme="colorInterpolationScheme"
           :maxVal=1
-          :value='roundOut(nullIntervention.computeRisk(1), 6)'
-          :text='gradeLetter(nullIntervention.computeRisk(1))'
+          :value='roundOut(this.measurements.risk, 6)'
+          :text='gradeLetter(this.measurements.risk)'
           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
           :title='roundOut(nullIntervention.computeRisk(1), 6)'
         />
