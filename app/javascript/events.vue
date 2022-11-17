@@ -22,9 +22,6 @@
           <th></th>
           <th>Room</th>
           <th>Address</th>
-          <th class='clickable col justify-space-between'>
-            1-hr Risk
-          </th>
           <th class='desktop'>
             1-hr Risk w/ 1 Infector
           </th>
@@ -35,16 +32,6 @@
           <td></td>
           <td></td>
           <td></td>
-          <td class='desktop'>
-            <div class='row horizontally-center' >
-              <span :style="circleCSS" @click='sortByRisk'>
-                {{this.sortRiskArrow}}
-              </span>
-              <router-link :style="circleCSS" to='/faqs#one-hr-risk'>
-                ?
-              </router-link>
-            </div>
-          </td>
           <td>
             <div class='row horizontally-center'>
               <span :style="circleCSS" @click='sortByInfectorRisk'>{{this.sortRiskInfectorArrow}}</span>

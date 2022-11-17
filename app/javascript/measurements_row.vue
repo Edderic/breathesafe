@@ -13,20 +13,6 @@
           class='risk-score'
           :colorScheme="colorInterpolationScheme"
           :maxVal=1
-          :value='measurements.risk'
-          :text='gradeLetter(this.measurements.risk)'
-          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
-          :title='roundOut(measurements.risk, 6)'
-          :exception='{ "text": "NA", "value": 0, color: {r: 200, g: 200, b: 200}}'
-        />
-      </router-link>
-    </td>
-    <td class='containing-cell desktop'>
-      <router-link :to='link' @click="showAnalysis(this.measurements.id)">
-        <ColoredCell
-          class='risk-score'
-          :colorScheme="colorInterpolationScheme"
-          :maxVal=1
           :value='roundOut(nullIntervention.computeRisk(1), 6)'
           :text='gradeLetter(nullIntervention.computeRisk(1))'
           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
