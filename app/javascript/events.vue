@@ -343,7 +343,7 @@ export default {
   }
 
   .scrollable {
-    overflow-y: scroll;
+    overflow-y: auto;
     height: 80vh;
   }
 
@@ -385,6 +385,12 @@ export default {
     text-shadow: 1px 1px 2px black;
     box-shadow: 1px 1px 2px black;
     text-decoration: none;
+  }
+
+  @media (max-width: 1400px) {
+    .scrollable {
+      height: 45vh;
+    }
   }
 
   @media (max-width: 800px) {

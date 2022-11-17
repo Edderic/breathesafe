@@ -266,4 +266,14 @@ export default {
 
   }
 
+  @media (max-width: 1400px) {
+    .grid {
+      display: flex;
+      flex-direction: column;
+    }
+    .map {
+      height: 40vh;
+    }
+  }
+
 </style>
