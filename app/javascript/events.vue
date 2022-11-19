@@ -18,6 +18,8 @@
 
     <div class='scrollable'>
       <table>
+        <!--//add thead th element in the scrollable element for sticky col headers in .scrollable css--> 
+        <thead>
         <tr>
           <th></th>
           <th>Room</th>
@@ -28,6 +30,7 @@
           <th v-if="adminView">User ID</th>
           <th v-if="adminView">Approve</th>
         </tr>
+        </thead>
         <tr>
           <td></td>
           <td></td>
@@ -306,6 +309,8 @@ export default {
 </script>
 
 <style scoped>
+
+
   tr:hover.clickable {
     background-color: #efefef;
     cursor: pointer;
@@ -314,9 +319,14 @@ export default {
     background-color: #e6e6e6;
   }
   td {
-    padding: 1em;
+    
     text-align: center;
     vertical-align: center;
+    /*
+    padding: 1em;
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    */
   }
 
   .col {
@@ -337,15 +347,25 @@ export default {
     margin: 0 1em;
   }
   th {
+    background: #eee;
+    /*
+    padding: 8px 16px;
+    border: 1px solid #ccc;
     padding-top: 1em;
     padding-left: 1em;
     padding-right: 1em;
+    */
   }
 
   .scrollable {
     overflow-y: auto;
-    height: 80vh;
+    height: 80vh
   }
+
+  .scrollable thead th {
+        position: sticky;
+        top: 0;
+      }
 
   .row {
     display: flex;
@@ -402,7 +422,7 @@ export default {
       width: auto;
     }
     .desktop {
-      display: none;
+      /*display: none;*/
     }
   }
   @media (min-width: 800px) {
