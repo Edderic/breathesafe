@@ -651,14 +651,8 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
                 </th>
                 <th></th>
                 <th class='col centered'>
-                  <span>Original Strain</span>
+                  <span>Quanta Generation Rate</span>
                   <span class='font-light'>(Quanta / h)</span>
-                </th>
-                <th></th>
-                <th class='col centered'>
-                  <span>Variant Factor</span>
-                  <span class='font-light italic'>BA-2</span>
-                  <span class='font-light'>(dimension-less)</span>
                 </th>
                 <th></th>
                 <th class='col centered'>
@@ -686,14 +680,7 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
                 <ColoredCell
                   :colorScheme="averageInfectedPeopleInterpolationScheme"
                   :maxVal=1
-                  :value=18.6
-                  class='color-cell'
-                />
-                <td>x</td>
-                <ColoredCell
-                  :colorScheme="averageInfectedPeopleInterpolationScheme"
-                  :maxVal=1
-                  :value=3.3
+                  :value=10
                   class='color-cell'
                 />
                 <td>x</td>
@@ -1488,6 +1475,7 @@ import { usePrevalenceStore } from './stores/prevalence_store';
 import { mapWritableState, mapState, mapActions } from 'pinia';
 import {
   CO2_TO_MET,
+  QUANTA,
   computePortableACH,
   computeVentilationACH,
   convertCubicMetersPerHour,
@@ -1672,7 +1660,7 @@ export default {
          * this.selectedHour / cadr
     },
     infectorProductWithIntervention() {
-      return 18.6 * 3.3 * this.aerosolActivityToFactor(
+      return QUANTA * this.aerosolActivityToFactor(
         this.riskiestPotentialInfector["aerosolGenerationActivity"]
       ) * (1 - this.selectedInfectorMask.filtrationEfficiency())
     },
@@ -1785,9 +1773,7 @@ export default {
       const flowRate = this.totalFlowRateCubicMetersPerHour
 
       // TODO: consolidate this information in one place
-      const basicInfectionQuanta = 18.6
-      const variantMultiplier = 3.3
-      const quanta = basicInfectionQuanta * variantMultiplier
+      const quanta = QUANTA
       const susceptibleAgeGroup = '30 to <40'
       const susceptibleMaskPenentrationFactor = 1
       const susceptibleInhalationFactor = findWorstCaseInhFactor(
@@ -1831,7 +1817,7 @@ export default {
       // TODO: consolidate this information in one place
       const basicInfectionQuanta = 18.6
       const variantMultiplier = 3.3
-      const quanta = basicInfectionQuanta * variantMultiplier
+      const quanta = QUANTA
       const susceptibleAgeGroup = '30 to <40'
       const susceptibleMaskPenentrationFactor = 1
       const susceptibleInhalationFactor = findWorstCaseInhFactor(
@@ -1868,9 +1854,7 @@ export default {
       const flowRate = this.totalFlowRateCubicMetersPerHour + this.numSuggestedAirCleaners * this.airCleanerSuggestion.cubicMetersPerHour
 
       // TODO: consolidate this information in one place
-      const basicInfectionQuanta = 18.6
-      const variantMultiplier = 3.3
-      const quanta = basicInfectionQuanta * variantMultiplier
+      const quanta = QUANTA
       const susceptibleAgeGroup = '30 to <40'
       const susceptibleMaskPenentrationFactor = maskToPenetrationFactor[
         this.maskSuggestion['filtrationType']

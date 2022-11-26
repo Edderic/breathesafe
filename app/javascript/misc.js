@@ -2,6 +2,8 @@
 
 import axios from 'axios';
 
+export const QUANTA = 10; // https://www.sciencedirect.com/science/article/pii/S1674987121001493?via%3Dihub
+
 const INCHES_PER_FOOT = 12;
 const CUBIC_FEET_PER_CUBIC_METER = 35.3147
 const CUBIC_METER_PER_CUBIC_FEET = 1 / CUBIC_FEET_PER_CUBIC_METER
@@ -314,9 +316,7 @@ export function computeRiskWithVariableOccupancy(
   const susceptibleAgeGroup = '30 to <40' // TODO:
   const susceptibleMaskPenentrationFactor = maskToPenetrationFactor[susceptibleMaskType]
 
-  const basicInfectionQuanta = 18.6
-  const variantMultiplier = 3.3
-  const quanta = basicInfectionQuanta * variantMultiplier
+  const quanta = QUANTA
   const duration = 1
 
   // TODO: randomly pick from the set of activity groups. Let's say there

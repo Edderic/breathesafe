@@ -18,7 +18,7 @@ import {
   setupCSRF,
   simplifiedRisk,
   round,
-
+  QUANTA
 } from  './misc';
 
 
@@ -225,7 +225,7 @@ export class Intervention {
     // TODO: consolidate this information in one place
     const basicInfectionQuanta = 18.6
     const variantMultiplier = 3.3
-    const quanta = numInfectors * basicInfectionQuanta * variantMultiplier
+    const quanta = numInfectors * QUANTA
     const susceptibleAgeGroup = '30 to <40'
 
     const susceptibleInhalationFactor = findWorstCaseInhFactor(
@@ -331,9 +331,7 @@ export class Intervention {
     const occupancy = 1
     const flowRate = totalAch * this.roomUsableVolumeCubicMeters
     // TODO: consolidate this information in one place
-    const basicInfectionQuanta = 18.6
-    const variantMultiplier = 3.3
-    const quanta = basicInfectionQuanta * variantMultiplier
+    const quanta = QUANTA
     const susceptibleAgeGroup = '30 to <40'
 
     const susceptibleInhalationFactor = findWorstCaseInhFactor(
