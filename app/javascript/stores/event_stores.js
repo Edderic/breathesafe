@@ -84,7 +84,7 @@ export const useEventStores = defineStore('events', {
       //   1 is for 1-way masking
       //   2 is for 2-way masking.
       //     i.e. Assumes everyone will be wearing the selectedMask
-      const numWays = 1;
+      let numWays = 1;
       if (selectedMask) {
         numWays = selectedMask.numWays
       }
