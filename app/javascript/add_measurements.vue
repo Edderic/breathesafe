@@ -375,6 +375,8 @@ export default {
     await this.getCurrentUser()
     await this.loadProfile()
     this.loadCO2Monitors()
+
+    this.reverseGeocode()
   },
   data() {
     return {
@@ -402,6 +404,21 @@ export default {
     ...mapActions(useEventStores, ['load']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
+    reverseGeocode() {
+
+      let geocoder = new google.maps.Geocoder()
+      let location = await this.$getLocation()
+      const latLng = {
+        lat: location.lat,
+        lng: location.lng
+      }
+
+      console.log(latLng)
+
+        geocoder.geocode({ location: latLng}).then((response) => {
+           console.log(response)
+        })
+      },
     addActivityGrouping() {
       this.activityGroups.unshift({
         'id': this.generateUUID(),
