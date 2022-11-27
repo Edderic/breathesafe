@@ -376,7 +376,7 @@ export default {
     await this.loadProfile()
     this.loadCO2Monitors()
 
-    this.reverseGeocode()
+    await this.reverseGeocode()
   },
   data() {
     return {
@@ -404,7 +404,7 @@ export default {
     ...mapActions(useEventStores, ['load']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
-    reverseGeocode() {
+    async reverseGeocode() {
 
       let geocoder = new google.maps.Geocoder()
       let location = await this.$getLocation()
