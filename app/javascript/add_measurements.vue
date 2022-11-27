@@ -6,6 +6,91 @@
     <div class='container centered'>
       <h2>Add Measurements</h2>
     </div>
+
+    <div class='container row'>
+      <button>
+        Whereabouts
+      </button>
+      <button>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
+          <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
+          <path d="M 31 20 l -5 13 h 25 l 3 -13 z m -5 13 v 20 h 25 v -20 m 0 20 l 3 -13.5 l 0 -19" fill="transparent" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
+          <text x="34" y="59">L</text>
+          <text x="12" y="38">H</text>
+          <text x="57" y="44">W</text>
+
+        </svg>
+      </button>
+      <button>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
+          <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
+          <path d="m 20 30 h 40 l -20 -20 z" stroke='black' fill='#ccc'/>
+          <path d="m 20 30 h 40 v 30 h -40 z" stroke='black' fill='#eee'/>
+
+          <path d="m 20 30 m 4 4 v 15 h 10 v -15 z" stroke='black' fill='#ddd'/>
+          <path d="m 20 30 m 25 4 v 15 h 10 v -15 z" stroke='black' fill='#ddd'/>
+
+          <path d='m 20 30 m -10 1 c 3 4 5 5 21 8' stroke='green' fill='transparent'/>
+          <path d='m 20 30 m -10 1 m 21 8 l -2 2 l 3 -2 l -2 -2 l -0.5 4' stroke='green' fill='green'/>
+
+          <path d='m 20 30 m -13 12 h 19' stroke='green' fill='transparent'/>
+          <path d='m 20 30 m -13 12 m 19 0 l 0 2 l 2 -2 l -2 -2 z' stroke='green' fill='green'/>
+
+          <path d='m 20 30 m -10 23 c 4 -3 5 -4 19 -7' stroke='green' fill='transparent'/>
+          <path d='m 20 30 m -10 23 m 19 -7 l 1 2 l 2 -3 l -3.5 -1 z' stroke='green' fill='green'/>
+
+
+          <path d='m 20 30 m 29 8 c 4 0 15 -3 19 -7' stroke='red' fill='transparent'/>
+          <path d='m 20 30 m 29 8 m 19 -7 l 1 2 l 2 -3 l -3.5 -0.8 z' stroke='red' fill='red'/>
+
+          <path d='m 20 30 m 29 12 h 20' stroke='red' fill='transparent'/>
+          <path d='m 20 30 m 29 12 m 20 0 l 0 2 l 2.5 -2 l -2.5 -2 z' stroke='red' fill='red'/>
+
+          <path d='m 20 30 m 29 16 c 4 0 17 2 20 5' stroke='red' fill='transparent'/>
+          <path d='m 20 30 m 29 16 m 20 5 l -2 1.5 l 3 0 l 0 -3 z' stroke='red' fill='red'/>
+          <text x="25" y="65">VENT</text>
+        </svg>
+      </button>
+
+      <button>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
+          <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
+          <path d="M 30 20 l -5 17 h 25 l 3 -17 z m -5 17 v 23 h 25 v -23 m 0 23 l 3 -17.5 l 0 -19" fill="white" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
+          <path d="M 27 43 v 17 m 5 0 v -17 m 5 0 v 17 m 5 0 v -17 m 5 0 v 17 " fill="transparent" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
+          <path d="M 25 43 h 24" fill="transparent" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
+
+          <ellipse cx="39" cy="28" rx="10" ry="7" stroke="black" fill="transparent" stroke-width="1"/>
+          <ellipse cx="39" cy="28" rx="7" ry="5" stroke="black" fill="transparent" stroke-width="1"/>
+          <ellipse cx="39" cy="28" rx="4" ry="3" stroke="black" fill="transparent" stroke-width="1"/>
+
+          <path d="M 34 25 c 0 -5 0 -5 -5 -13 " stroke='green' fill='transparent'/>
+          <path d="M 34 25 m -5 -13 l 2 -2 l -5 0 l 1 5 z" stroke='green' fill='green' />
+
+          <path d="M 40 25 l 0 -17 " stroke='green'/>
+          <path d="M 40 25 m 0 -17 l 3 0 l -3 -3 l -3 3 z" stroke='green' fill='green'/>
+
+
+          <path d="M 46 25 c 0 -5 0 -5 5 -13" stroke='green' fill='transparent'/>
+          <path d="M 46 25 m 5 -13 l 2.5 2.5 l 0 -5 l -5 1 z" stroke='green' fill='green'/>
+
+
+          <path d="M 46 55 c 2 7 0 10 6 15" stroke='red' fill='transparent'/>
+          <path d="M 46 55 l 3 -1 l -4 -2 l -2 4.5" stroke='red' fill='red'/>
+
+          <path d="M 31 55 c 0 5 0 10 -7 14" stroke='red' fill='transparent'/>
+          <path d="M 31 55 l 3 2 l -2 -5 l -3 3 z" stroke='red' fill='red'/>
+
+
+          <text x="55" y="38">PAC</text>
+
+        </svg>
+
+
+      </button>
+      <button>
+        Behaviors
+      </button>
+    </div>
     <div class='container'>
 
       <div class='container bold' v-for='message in messages'>
@@ -781,7 +866,7 @@ export default {
 
   .row {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
   }
 
   .textarea-label {
@@ -819,5 +904,11 @@ export default {
 
   .selected {
     background-color: #e6e6e6;
+  }
+
+  text {
+    dominant-baseline: hanging;
+    font: 10px Verdana, Helvetica, Arial, sans-serif;
+    font-weight: bold;
   }
 </style>
