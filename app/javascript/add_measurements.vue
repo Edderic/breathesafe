@@ -7,7 +7,7 @@
       <h2>Add Measurements</h2>
     </div>
 
-    <div class='container row'>
+    <div class='container row centered'>
       <button id='whereabouts' @click='setDisplay("whereabouts")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
