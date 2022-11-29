@@ -883,10 +883,6 @@ export default {
     width: 30em;
   }
 
-  button {
-    padding: 1em 3em;
-  }
-
   table {
     text-align: center;
   }
