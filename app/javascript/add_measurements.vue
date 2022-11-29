@@ -415,7 +415,6 @@ export default {
           'ventilationCO2MeasurementDeviceName',
           'ventilationCO2MeasurementDeviceSerial',
           'ventilationCO2SteadyStatePPM',
-          'duration',
           'private',
           'formatted_address',
           'infectorActivity',
@@ -600,7 +599,6 @@ export default {
             'ventilation_co2_steady_state_ppm': this.ventilationCO2SteadyStatePPM,
             'ventilation_notes': this.ventilationNotes,
             'start_datetime': this.startDatetime,
-            'duration': this.duration,
             'private': this.private,
             'place_data': this.placeData,
             'occupancy': {
@@ -709,9 +707,6 @@ export default {
       }
 
       this.setGMapsPlace(this.placeData.center)
-    },
-    setDuration(event) {
-      this.duration = event.target.value;
     },
     setEventPrivacy(event) {
       this.private = event.target.value;
