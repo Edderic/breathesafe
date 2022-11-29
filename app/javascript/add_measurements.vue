@@ -471,6 +471,7 @@ export default {
       messages: [],
       roomUsableVolumeFactor: 0.8,
       useOwnHeight: true,
+      display: 'whereabouts',
       personHeightToRoomHeight: undefined,
       personHeightToRoomWidth: undefined,
       personHeightToRoomLength: undefined,
@@ -482,6 +483,9 @@ export default {
     ...mapActions(useEventStores, ['load']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
+    setDisplay(string) {
+      this.display = string
+    },
     async reverseGeocode() {
 
       let geocoder = new google.maps.Geocoder()
