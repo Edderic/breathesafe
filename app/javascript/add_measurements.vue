@@ -139,10 +139,10 @@
       <div class='container'>
         <label>Google Search</label>
         <GMapAutocomplete
-             placeholder="This is a placeholder"
-             @place_changed="setPlace"
-            style='width: 20em;'
-          >
+           class='autocomplete'
+           placeholder="This is a placeholder"
+           @place_changed="setPlace"
+        >
         </GMapAutocomplete>
       </div>
 
