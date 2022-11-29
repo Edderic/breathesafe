@@ -8,10 +8,17 @@
     </div>
 
     <div class='container row'>
-      <button>
-        Whereabouts
+      <button id='whereabouts' @click='setDisplay("whereabouts")'>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
+          <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
+          <circle cx="40" cy="25" r="20" fill="white"/>
+
+          <path d='m 21 28 c 0 15 10 22 19 40 c 10 -18 19 -28 19 -40' stroke='white' fill='white'/>
+
+          <circle cx="40" cy="25" r="10" fill="rgb(150, 29, 2)"/>
+        </svg>
       </button>
-      <button>
+      <button id='room_dimensions' @click='setDisplay("room_dimensions")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="M 31 20 l -5 13 h 25 l 3 -13 z m -5 13 v 20 h 25 v -20 m 0 20 l 3 -13.5 l 0 -19" fill="transparent" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
@@ -21,7 +28,7 @@
 
         </svg>
       </button>
-      <button>
+      <button id='ventilation' @click='setDisplay("ventilation")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="m 20 30 h 40 l -20 -20 z" stroke='black' fill='#ccc'/>
@@ -52,7 +59,7 @@
         </svg>
       </button>
 
-      <button>
+      <button id='pac' @click='setDisplay("pac")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="M 30 20 l -5 17 h 25 l 3 -17 z m -5 17 v 23 h 25 v -23 m 0 23 l 3 -17.5 l 0 -19" fill="white" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
@@ -82,12 +89,10 @@
 
 
           <text x="55" y="38">PAC</text>
-
         </svg>
-
-
       </button>
-      <button>
+
+      <button id='behaviors' @click='setDisplay("behaviors")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="m 5 40 c 0 -10 10 -20 15 -20 c 5 0 10 0 6 10 c 4 4 4 4 4 12 l -5 0 l 3 4 l -8 1 l 8 7 c -2 10 -16 6 -16 5 z" stroke='black' fill='#eee'/>
@@ -128,124 +133,105 @@
         {{ message }}
       </div>
       <br>
-
-    </div>
-    <div class='container'>
-      <label>Google Search</label>
-      <GMapAutocomplete
-           placeholder="This is a placeholder"
-           @place_changed="setPlace"
-          style='width: 20em;'
-        >
-      </GMapAutocomplete>
     </div>
 
-    <div class='container'>
-      <label>Room name</label>
-      <input
-        :value="roomName"
-        @change="setRoomName">
-    </div>
-
-    <div class='container'>
-      <label>Start time</label>
-      <input class='wider-input'
-        v-model="startDatetime"
-      >
-    </div>
-
-    <div class='container'>
-      <label>Duration</label>
-
-      <select :value='duration' @change='setDuration'>
-        <option>1 minute</option>
-        <option>5 minutes</option>
-        <option>10 minutes</option>
-        <option>15 minutes</option>
-        <option>30 minutes</option>
-        <option>45 minutes</option>
-        <option>1 hour</option>
-        <option>1.25 hours</option>
-        <option>1.5 hours</option>
-        <option>2 hours</option>
-        <option>3 hours</option>
-        <option>4 hours</option>
-        <option>5 hours</option>
-        <option>6 hours</option>
-        <option>7 hours</option>
-        <option>8 hours</option>
-      </select>
-    </div>
-
-    <div class='container'>
-      <label>Make this information private</label>
-      <select :value='private' @change='setEventPrivacy'>
-        <option>public</option>
-        <option>private</option>
-      </select>
-    </div>
-
-
-    <div class='container'>
-      <label class='subsection'>Room Dimensions</label>
-      <button :class="{ selected: this.useOwnHeight }" @click='setUseOwnHeight(true)'>Use own height to estimate</button>
-      <button :class="{ selected: !this.useOwnHeight }" @click='setUseOwnHeight(false)'>Input Directly</button>
-
-      <div v-if="this.useOwnHeight">
-        <div class='container'>
-          <label>How many times can you fit your height into the <span class='bold'>length</span> of the room?</label>
-          <input
-            :value="personHeightToRoomLength"
-            @change="setPersonHeightToRoomLength">
-        </div>
-
-        <div class='container'>
-          <label>How many times can you fit your height into the <span class='bold'>height</span> of the room?</label>
-          <input
-            :value="personHeightToRoomHeight"
-            @change="setPersonHeightToRoomHeight">
-        </div>
-
-        <div class='container'>
-          <label>How many times can you fit your height into the <span class='bold'>width</span> of the room?</label>
-          <input
-            :value="personHeightToRoomWidth"
-            @change="setPersonHeightToRoomWidth">
-        </div>
+    <div class='whereabouts' v-if='display == "whereabouts"'>
+      <div class='container'>
+        <label>Google Search</label>
+        <GMapAutocomplete
+             placeholder="This is a placeholder"
+             @place_changed="setPlace"
+            style='width: 20em;'
+          >
+        </GMapAutocomplete>
       </div>
 
-      <div v-if="!this.useOwnHeight">
-        <div class='container'>
-          <label>Length ({{ measurementUnits.lengthMeasurementType }})</label>
-          <input
-            :value="roomLength"
-            @change="setRoomLength">
-        </div>
-
-        <div class='container'>
-          <label>Width ({{ measurementUnits.lengthMeasurementType }})</label>
-          <input
-            :value="roomWidth"
-            @change="setRoomWidth">
-        </div>
-
-        <div class='container'>
-          <label>Height ({{ measurementUnits.lengthMeasurementType }})</label>
-          <input
-            :value="roomHeight"
-            @change="setRoomHeight">
-        </div>
+      <div class='container whereabouts'>
+        <label>Room name</label>
+        <input
+          :value="roomName"
+          @change="setRoomName">
       </div>
 
       <div class='container'>
-        <label>Usable Volume Factor (dimension-less)</label>
-        <input
-          v-model="roomUsableVolumeFactor"
+        <label>Start time</label>
+        <input class='wider-input'
+          v-model="startDatetime"
         >
+      </div>
+
+      <div class='container'>
+        <label>Make this information private</label>
+        <select :value='private' @change='setEventPrivacy'>
+          <option>public</option>
+          <option>private</option>
+        </select>
       </div>
     </div>
 
-    <div class='container'>
+    <div class='room_dimensions' v-if='display == "room_dimensions"'>
+      <div class='container'>
+        <label class='subsection'>Room Dimensions</label>
+        <button :class="{ selected: this.useOwnHeight }" @click='setUseOwnHeight(true)'>Use own height to estimate</button>
+        <button :class="{ selected: !this.useOwnHeight }" @click='setUseOwnHeight(false)'>Input Directly</button>
+
+        <div v-if="this.useOwnHeight">
+          <div class='container'>
+            <label>How many times can you fit your height into the <span class='bold'>length</span> of the room?</label>
+            <input
+              :value="personHeightToRoomLength"
+              @change="setPersonHeightToRoomLength">
+          </div>
+
+          <div class='container'>
+            <label>How many times can you fit your height into the <span class='bold'>height</span> of the room?</label>
+            <input
+              :value="personHeightToRoomHeight"
+              @change="setPersonHeightToRoomHeight">
+          </div>
+
+          <div class='container'>
+            <label>How many times can you fit your height into the <span class='bold'>width</span> of the room?</label>
+            <input
+              :value="personHeightToRoomWidth"
+              @change="setPersonHeightToRoomWidth">
+          </div>
+        </div>
+
+        <div v-if="!this.useOwnHeight">
+          <div class='container'>
+            <label>Length ({{ measurementUnits.lengthMeasurementType }})</label>
+            <input
+              :value="roomLength"
+              @change="setRoomLength">
+          </div>
+
+          <div class='container'>
+            <label>Width ({{ measurementUnits.lengthMeasurementType }})</label>
+            <input
+              :value="roomWidth"
+              @change="setRoomWidth">
+          </div>
+
+          <div class='container'>
+            <label>Height ({{ measurementUnits.lengthMeasurementType }})</label>
+            <input
+              :value="roomHeight"
+              @change="setRoomHeight">
+          </div>
+        </div>
+
+        <div class='container'>
+          <label>Usable Volume Factor (dimension-less)</label>
+          <input
+            v-model="roomUsableVolumeFactor"
+          >
+        </div>
+      </div>
+    </div>
+
+
+    <div class='container' v-if='display == "pac"'>
       <label class='subsection'>Portable Air Cleaning</label>
       <button @click='addPortableAirCleaner'>+</button>
       <div class='container border-showing' v-for='portableAirCleaner in portableAirCleaners' :key=portableAirCleaner.id>
@@ -274,7 +260,7 @@
       </div>
     </div>
 
-    <div class='container'>
+    <div class='container' v-if='display == "ventilation"'>
       <label class='subsection'>Ventilation</label>
       <div class='container'>
         <label>CO2 Measurement Device</label>
@@ -304,7 +290,7 @@
       </div>
     </div>
 
-    <div class='container'>
+    <div class='container' v-if='display == "behaviors"'>
       <label class='subsection'>Activity Groups</label>
       <button @click='addActivityGrouping'>+</button>
       <div class='container border-showing' v-for='activityGroup in activityGroups' :key=activityGroup.id>
@@ -363,36 +349,13 @@
           <button class='normal-padded' @click='removeActivityGroup(activityGroup.id)'>Remove</button>
           <button class='normal-padded' @click='cloneActivityGroup(activityGroup.id)'>Clone</button>
         </div>
-      </div>
-    </div>
 
-
-    <div class='container'>
-      <label class='subsection'>Occupancy</label>
-
-      <div class='container'>
-        <label class='textarea-label'>Max occupancy</label>
-        <input
-          v-model="maximumOccupancy"
-        >
       </div>
 
-      <div class='container wide'>
-        <label class='textarea-label'>Unparsed HTML</label>
-        <textarea type="textarea" rows=5 columns=80  @change='parseOccupancyData'>{{ occupancy.unparsedOccupancyData }}</textarea>
+      <div class='container centered'>
+        <button class='normal-padded' @click='cancel'>Cancel</button>
+        <button class='normal-padded' @click='save'>Save</button>
       </div>
-
-      <div class='container wide'>
-        <label class='textarea-label'>Parsed</label>
-        <DayHourHeatmap
-          :dayHours="occupancy.parsed"
-        />
-      </div>
-
-    </div>
-    <div class='container centered'>
-      <button class='normal-padded' @click='cancel'>Cancel</button>
-      <button class='normal-padded' @click='save'>Save</button>
     </div>
   </div>
 </template>
