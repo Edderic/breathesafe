@@ -845,6 +845,22 @@ export default {
   .container {
     margin: 1em;
   }
+
+  @media(max-width: 800px) {
+    .container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      text-align: center;
+    }
+
+    input {
+      width: auto;
+    }
+  }
+
   label {
     padding: 1em;
   }
