@@ -178,9 +178,16 @@
         <div v-if="this.useOwnHeight">
           <div class='container'>
             <label>How many times can you fit your height into the <span class='bold'>length</span> of the room?</label>
-            <input
-              :value="personHeightToRoomLength"
-              @change="setPersonHeightToRoomLength">
+            <div class='continuous'>
+              <CircularButton text='-10' @click='addLength(-10)'/>
+              <CircularButton text='-1' @click='addLength(-1)'/>
+              <input
+                :value="personHeightToRoomLength"
+                @change="setPersonHeightToRoomLength">
+
+                <CircularButton text='+1' @click='addLength(1)'/>
+                <CircularButton text='+10' @click='addLength(10)'/>
+              </div>
           </div>
 
           <div class='container'>
@@ -364,6 +371,7 @@
 // Have a VueX store that maintains state across components
 import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
+import CircularButton from './circular_button.vue';
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
@@ -379,6 +387,7 @@ import {
 export default {
   name: 'AddMeasurements',
   components: {
+    CircularButton,
     ColoredCell,
     DayHourHeatmap,
     Event
@@ -472,9 +481,9 @@ export default {
       roomUsableVolumeFactor: 0.8,
       useOwnHeight: true,
       display: 'whereabouts',
-      personHeightToRoomHeight: undefined,
-      personHeightToRoomWidth: undefined,
-      personHeightToRoomLength: undefined,
+      personHeightToRoomHeight: 1,
+      personHeightToRoomWidth: 1,
+      personHeightToRoomLength: 1,
     }
   },
   methods: {
@@ -807,30 +816,33 @@ export default {
     setUseOwnHeight(value) {
       this.useOwnHeight = value
     },
-    setPersonHeightToRoomWidth(event) {
+    setPersonHeightToRoomWidth(value) {
       this.roomWidthMeters = convertLengthBasedOnMeasurementType(
-        event.target.value * this.heightMeters,
+        value * this.heightMeters,
         'meters',
         'meters'
       )
       this.personHeightToRoomWidth = event.target.value
     },
-    setPersonHeightToRoomHeight(event) {
+    setPersonHeightToRoomHeight(value) {
       this.roomHeightMeters = convertLengthBasedOnMeasurementType(
-        event.target.value * this.heightMeters,
+        value * this.heightMeters,
         'meters',
         'meters'
       )
-      this.personHeightToRoomHeight = event.target.value
+      this.personHeightToRoomHeight = value
     },
-    setPersonHeightToRoomLength(event) {
+    addLength(value) {
+      this.setPersonHeightToRoomLength(this.personHeightToRoomLength + parseInt(value))
+    },
+    setPersonHeightToRoomLength(value) {
       this.roomLengthMeters = convertLengthBasedOnMeasurementType(
-        event.target.value * this.heightMeters,
+        value * this.heightMeters,
         this.measurementUnits.lengthMeasurementType,
         'meters',
         'meters'
       )
-      this.personHeightToRoomLength = event.target.value
+      this.personHeightToRoomLength = value
     },
   },
 }
@@ -923,6 +935,21 @@ export default {
     dominant-baseline: hanging;
     font: 10px Verdana, Helvetica, Arial, sans-serif;
     font-weight: bold;
+  }
+
+  .round {
+    border-radius: 100%;
+    background-color: #e6e6e6;
+  }
+
+  .continuous {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    height: 2em;
+  }
+  .continuous input {
+    width: 5em;
   }
 
 </style>
