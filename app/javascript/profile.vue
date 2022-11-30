@@ -317,6 +317,13 @@ export default {
 
       carbonDioxideMonitor['serial'] = event.target.value;
     },
+    updateStrideLengthMeters(event) {
+      this.strideLengthMeters = convertLengthBasedOnMeasurementType(
+        event.target.value,
+        this.measurementUnits.lengthMeasurementType,
+        'meters'
+      )
+    },
     updateHeightMeters(event) {
       this.heightMeters = convertLengthBasedOnMeasurementType(
         event.target.value,

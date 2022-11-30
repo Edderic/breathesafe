@@ -177,17 +177,32 @@
 
         <div v-if="this.useOwnHeight">
           <div class='container'>
-            <label>How many times can you fit your height into the <span class='bold'>length</span> of the room?</label>
+            <label>How many steps does it take to traverse the <span class='bold'>length</span> of the room?</label>
             <div class='continuous'>
-              <CircularButton text='-10' @click='addLength(-10)'/>
-              <CircularButton text='-1' @click='addLength(-1)'/>
+              <CircularButton text='-10' @click='addStrideLength(-10, "Length")'/>
+              <CircularButton text='-1' @click='addStrideLength(-1, "Length")'/>
               <input
-                :value="personHeightToRoomLength"
-                @change="setPersonHeightToRoomLength">
+                :value="strideLengthForLength"
+                @change='setStrideLengthEvent($event, "Length")'
+                >
 
-                <CircularButton text='+1' @click='addLength(1)'/>
-                <CircularButton text='+10' @click='addLength(10)'/>
-              </div>
+              <CircularButton text='+1' @click='addStrideLength(1, "Length")'/>
+              <CircularButton text='+10' @click='addStrideLength(10, "Length")'/>
+            </div>
+          </div>
+
+          <div class='container'>
+            <label>How many steps does it take to traverse the <span class='bold'>width</span> of the room?</label>
+            <div class='continuous'>
+              <CircularButton text='-10' @click='addStrideLength(-10, "Width")'/>
+              <CircularButton text='-1' @click='addStrideLength(-1, "Width")'/>
+              <input
+                :value="strideLengthForWidth"
+                @change='setStrideLengthEvent($event, "Width")'
+                >
+              <CircularButton text='+1' @click='addStrideLength(1, "Width")'/>
+              <CircularButton text='+10' @click='addStrideLength(10, "Width")'/>
+            </div>
           </div>
 
           <div class='container'>
@@ -195,13 +210,6 @@
             <input
               :value="personHeightToRoomHeight"
               @change="setPersonHeightToRoomHeight">
-          </div>
-
-          <div class='container'>
-            <label>How many times can you fit your height into the <span class='bold'>width</span> of the room?</label>
-            <input
-              :value="personHeightToRoomWidth"
-              @change="setPersonHeightToRoomWidth">
           </div>
         </div>
 
@@ -410,7 +418,8 @@ export default {
         [
           'measurementUnits',
           'carbonDioxideMonitors',
-          'heightMeters'
+          'heightMeters',
+          'strideLengthMeters'
         ]
     ),
     ...mapWritableState(
@@ -482,8 +491,8 @@ export default {
       useOwnHeight: true,
       display: 'whereabouts',
       personHeightToRoomHeight: 1,
-      personHeightToRoomWidth: 1,
-      personHeightToRoomLength: 1,
+      strideLengthForWidth: 1,
+      strideLengthForLength: 1,
     }
   },
   methods: {
@@ -816,14 +825,6 @@ export default {
     setUseOwnHeight(value) {
       this.useOwnHeight = value
     },
-    setPersonHeightToRoomWidth(value) {
-      this.roomWidthMeters = convertLengthBasedOnMeasurementType(
-        value * this.heightMeters,
-        'meters',
-        'meters'
-      )
-      this.personHeightToRoomWidth = event.target.value
-    },
     setPersonHeightToRoomHeight(value) {
       this.roomHeightMeters = convertLengthBasedOnMeasurementType(
         value * this.heightMeters,
@@ -832,18 +833,17 @@ export default {
       )
       this.personHeightToRoomHeight = value
     },
-    addLength(value) {
-      this.setPersonHeightToRoomLength(this.personHeightToRoomLength + parseInt(value))
+    addStrideLength(value, axes) {
+      this.setStrideLength(this[`strideLengthFor${axes}`] + parseInt(value), axes)
     },
-    setPersonHeightToRoomLength(value) {
-      this.roomLengthMeters = convertLengthBasedOnMeasurementType(
-        value * this.heightMeters,
-        this.measurementUnits.lengthMeasurementType,
-        'meters',
-        'meters'
-      )
-      this.personHeightToRoomLength = value
+    setStrideLength(value, axes) {
+      this[`room${axes}Meters`] = value * this.strideLengthMeters
+      this[`strideLengthFor${axes}`] = value
     },
+    setStrideLengthEvent(event, axes) {
+      this.setStrideLength(parseFloat(event.target.value), axes)
+    }
+
   },
 }
 
@@ -950,6 +950,8 @@ export default {
   }
   .continuous input {
     width: 5em;
+    margin-left: 1em;
+    margin-right: 1em;
   }
 
 </style>

@@ -76,6 +76,7 @@ export const useProfileStore = defineStore('profile', {
             prevalenceStore.eventDisplayRiskTime = profile.event_display_risk_time
 
             this.heightMeters = profile.height_meters
+            this.strideLengthMeters = profile.stride_length_meters
             this.firstName = profile.first_name
             this.lastName = profile.last_name
             this.message = data.message
