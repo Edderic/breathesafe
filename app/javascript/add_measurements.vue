@@ -846,18 +846,30 @@ export default {
     margin: 1em;
   }
 
+  .autocomplete {
+    width: 20em;
+  }
+
+  .wider-input {
+    width: 30em;
+  }
+
   @media(max-width: 800px) {
     .container {
       display: flex;
       flex-direction: column;
     }
 
+    .autocomplete {
+      width: auto;
+    }
+
     label {
       text-align: center;
     }
 
-    input {
-      width: auto;
+    .wider-input, input {
+      width: 100%;
     }
   }
 
@@ -895,10 +907,6 @@ export default {
     justify-content: center;
   }
 
-  .wider-input {
-    width: 30em;
-  }
-
   table {
     text-align: center;
   }
@@ -916,4 +924,5 @@ export default {
     font: 10px Verdana, Helvetica, Arial, sans-serif;
     font-weight: bold;
   }
+
 </style>
