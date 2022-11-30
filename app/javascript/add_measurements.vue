@@ -3,7 +3,7 @@
     <br id='top'>
     <br>
     <br>
-    <div class='container centered'>
+    <div class='container centered add-measurements'>
       <h2>Add Measurements</h2>
     </div>
 
@@ -172,8 +172,10 @@
     <div class='room_dimensions' v-if='display == "room_dimensions"'>
       <div class='container'>
         <label class='subsection'>Room Dimensions</label>
-        <button :class="{ selected: this.useOwnHeight }" @click='setUseOwnHeight(true)'>Use own height to estimate</button>
-        <button :class="{ selected: !this.useOwnHeight }" @click='setUseOwnHeight(false)'>Input Directly</button>
+        <div class='row'>
+          <button :class="{ selected: this.useOwnHeight }" @click='setUseOwnHeight(true)'>Use own height and stride length to estimate</button>
+          <button :class="{ selected: !this.useOwnHeight }" @click='setUseOwnHeight(false)'>Input Directly</button>
+        </div>
 
         <div v-if="this.useOwnHeight">
           <div class='container'>
@@ -872,25 +874,6 @@ export default {
     width: 30em;
   }
 
-  @media(max-width: 800px) {
-    .container {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .autocomplete {
-      width: auto;
-    }
-
-    label {
-      text-align: center;
-    }
-
-    .wider-input, input {
-      width: 100%;
-    }
-  }
-
   label {
     padding: 1em;
   }
@@ -952,12 +935,52 @@ export default {
     display: flex;
     flex-direction: row;
     justify-content: center;
+    align-items: center;
     height: 2em;
   }
   .continuous input {
-    width: 5em;
+    width: 2em;
+    height: 1em;
+    font-weight: bold;
+    font-size: 24px;
     margin-left: 1em;
     margin-right: 1em;
+    text-align: center;
+  }
+
+  @media(max-width: 800px) {
+    br {
+      display: none;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+    }
+    .add-measurements {
+      display: none;
+    }
+
+    .autocomplete {
+      width: auto;
+    }
+
+    .row {
+      flex-direction: row;
+    }
+
+    .row button {
+      width: 100%;
+      padding-top: 1em;
+      padding-bottom: 1em;
+    }
+
+    label {
+      text-align: center;
+    }
+
+    .wider-input, input {
+      width: 100%;
+    }
   }
 
 </style>
