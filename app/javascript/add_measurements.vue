@@ -207,9 +207,16 @@
 
           <div class='container'>
             <label>How many times can you fit your height into the <span class='bold'>height</span> of the room?</label>
-            <input
-              :value="personHeightToRoomHeight"
-              @change="setPersonHeightToRoomHeight">
+
+            <div class='continuous'>
+              <CircularButton text='-10' @click='addRoomHeight(-10)'/>
+              <CircularButton text='-1' @click='addRoomHeight(-1)'/>
+              <input
+                :value="personHeightToRoomHeight"
+                @change="setPersonHeightToRoomHeight">
+              <CircularButton text='+1' @click='addRoomHeight(1)'/>
+              <CircularButton text='+10' @click='addRoomHeight(10)'/>
+            </div>
           </div>
         </div>
 
@@ -826,12 +833,11 @@ export default {
       this.useOwnHeight = value
     },
     setPersonHeightToRoomHeight(value) {
-      this.roomHeightMeters = convertLengthBasedOnMeasurementType(
-        value * this.heightMeters,
-        'meters',
-        'meters'
-      )
+      this.roomHeightMeters = value * this.heightMeters
       this.personHeightToRoomHeight = value
+    },
+    addRoomHeight(value) {
+      this.setPersonHeightToRoomHeight(parseFloat(value) + this.personHeightToRoomHeight)
     },
     addStrideLength(value, axes) {
       this.setStrideLength(this[`strideLengthFor${axes}`] + parseInt(value), axes)
