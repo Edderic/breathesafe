@@ -35,6 +35,23 @@
       </p>
     </div>
 
+    <div class='container'>
+      <div class='row'>
+        <label>Stride length ({{ measurementUnits.lengthMeasurementType }})</label>
+        <div :style='circle'
+          @click='toggle("showWhyStrideLength")'>?
+        </div>
+        <input :value='strideLength' @change='updateStrideLengthMeters' :disabled="this.status == 'saved'">
+      </div>
+      <p v-show="showWhyStrideLength">
+        We need the room volume to assess risk.
+        To estimate the length and width of the room, one could use one's
+stride length as a way to estimate. Take a step as you normally would while
+walking. The distance between the very tip of your toes of the back foot and
+the very tip of your toes of the front foot is the stride length.
+      </p>
+    </div>
+
     <div class='container centered'>
       <button @click='save' v-if='this.status == "edit"'>Save</button>
       <button @click='editProfile' v-if='this.status == "saved"'>Edit</button>
@@ -134,6 +151,7 @@ export default {
           'carbonDioxideMonitors',
           'systemOfMeasurement',
           'heightMeters',
+          'strideLengthMeters',
           'firstName',
           'lastName',
           'status'
@@ -142,6 +160,13 @@ export default {
     height() {
       return convertLengthBasedOnMeasurementType(
         this.heightMeters,
+        'meters',
+        this.measurementUnits.lengthMeasurementType
+      )
+    },
+    strideLength() {
+      return convertLengthBasedOnMeasurementType(
+        this.strideLengthMeters,
         'meters',
         this.measurementUnits.lengthMeasurementType
       )
@@ -160,6 +185,7 @@ export default {
   data() {
     return {
       showWhyHeight: false,
+      showWhyStrideLength: false,
       circle: toggleCSS
     }
   },

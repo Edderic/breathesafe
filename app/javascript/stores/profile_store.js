@@ -20,6 +20,7 @@ export const useProfileStore = defineStore('profile', {
       'airDeliveryRateMeasurementTypeShort': 'ft³ / h',
       'cubicLengthShort': 'ft³',
     },
+    strideLengthMeters: 0.43,
     systemOfMeasurement: "imperial",
     carbonDioxideMonitors: [
       {
@@ -105,12 +106,8 @@ export const useProfileStore = defineStore('profile', {
           'first_name': this.firstName,
           'last_name': this.lastName,
           'height_meters': this.heightMeters,
+          'stride_length_meters': this.strideLengthMeters,
           'measurement_system': this.systemOfMeasurement,
-          'uncounted_cases_multiplier': prevalenceStore.uncountedFactor,
-          'num_people_population': prevalenceStore.numPopulation,
-          'num_positive_cases_last_seven_days': prevalenceStore.numPositivesLastSevenDays,
-          'mask_type': prevalenceStore.maskType,
-          'event_display_risk_time': this.eventDisplayRiskTime
         }
       }
 
@@ -137,13 +134,10 @@ export const useProfileStore = defineStore('profile', {
       let toSave = {
         'profile': {
           'measurement_system': this.systemOfMeasurement,
-          'uncounted_cases_multiplier': prevalenceStore.uncountedFactor,
-          'num_people_population': prevalenceStore.numPopulation,
-          'num_positive_cases_last_seven_days': prevalenceStore.numPositivesLastSevenDays,
           'mask_type': prevalenceStore.maskType,
-          'event_display_risk_time': this.eventDisplayRiskTime,
           'first_name': this.firstName,
           'last_name': this.lastName,
+          'stride_length_meters': this.strideLengthMeters,
           'height_meters': this.heightMeters,
         }
       }
