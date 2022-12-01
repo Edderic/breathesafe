@@ -968,7 +968,7 @@ export default {
   }
 
   .border-showing {
-    border: 1px solid grey;
+    border: 0;
   }
 
   .centered {
