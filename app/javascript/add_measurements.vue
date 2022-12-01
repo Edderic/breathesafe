@@ -171,7 +171,7 @@
 
     <div class='room_dimensions' v-if='display == "room_dimensions"'>
       <div class='container'>
-        <label class='subsection'>Room Dimensions</label>
+        <h2 class='subsection'>Room Dimensions</h2>
         <div class='row'>
           <button :class="{ selected: this.useOwnHeight }" @click='setUseOwnHeight(true)'>Use own height and stride length to estimate</button>
           <button :class="{ selected: !this.useOwnHeight }" @click='setUseOwnHeight(false)'>Input Directly</button>
@@ -211,37 +211,58 @@
             <label>How many times can you fit your height into the <span class='bold'>height</span> of the room?</label>
 
             <div class='continuous'>
-              <CircularButton text='-10' @click='addRoomHeight(-10)'/>
-              <CircularButton text='-1' @click='addRoomHeight(-1)'/>
+              <CircularButton text='-10' @click='addRoomHeightUsingOwnHeight(-10)'/>
+              <CircularButton text='-1' @click='addRoomHeightUsingOwnHeight(-1)'/>
               <input
                 :value="personHeightToRoomHeight"
                 @change="setPersonHeightToRoomHeight">
-              <CircularButton text='+1' @click='addRoomHeight(1)'/>
-              <CircularButton text='+10' @click='addRoomHeight(10)'/>
+              <CircularButton text='+1' @click='addRoomHeightUsingOwnHeight(1)'/>
+              <CircularButton text='+10' @click='addRoomHeightUsingOwnHeight(10)'/>
             </div>
           </div>
         </div>
 
         <div v-if="!this.useOwnHeight">
           <div class='container'>
-            <label>Length ({{ measurementUnits.lengthMeasurementType }})</label>
-            <input
-              :value="roomLength"
-              @change="setRoomDim($event, 'Length')">
+            <label><span class='bold'>Length</span> ({{ measurementUnits.lengthMeasurementType }})</label>
+
+            <div class='continuous'>
+              <CircularButton text='-10' @click='addRoomDim(-10, "Length")'/>
+              <CircularButton text='-1' @click='addRoomDim(-1, "Length")'/>
+              <input
+                :value="roomLength"
+                @change="setRoomDim($event, 'Length')">
+              <CircularButton text='+1' @click='addRoomDim(1, "Length")'/>
+              <CircularButton text='+10' @click='addRoomDim(10, "Length")'/>
+            </div>
           </div>
 
           <div class='container'>
-            <label>Width ({{ measurementUnits.lengthMeasurementType }})</label>
-            <input
-              :value="roomWidth"
-              @change="setRoomDim($event, 'Width')">
+            <label><span class='bold'>Width</span> ({{ measurementUnits.lengthMeasurementType }})</label>
+
+            <div class='continuous'>
+              <CircularButton text='-10' @click='addRoomDim(-10, "Width")'/>
+              <CircularButton text='-1' @click='addRoomDim(-1, "Width")'/>
+              <input
+                :value="roomWidth"
+                @change="setRoomDim($event, 'Width')">
+              <CircularButton text='+1' @click='addRoomDim(1, "Width")'/>
+              <CircularButton text='+10' @click='addRoomDim(10, "Width")'/>
+            </div>
           </div>
 
           <div class='container'>
-            <label>Height ({{ measurementUnits.lengthMeasurementType }})</label>
-            <input
-              :value="roomHeight"
-              @change="setRoomDim($event, 'Height')">
+            <label><span class='bold'>Height</span> ({{ measurementUnits.lengthMeasurementType }})</label>
+
+            <div class='continuous'>
+              <CircularButton text='-10' @click='addRoomHeight(-10)'/>
+              <CircularButton text='-1' @click='addRoomHeight(-1)'/>
+              <input
+                :value="roomHeight"
+                @change="setRoomHeight">
+              <CircularButton text='+1' @click='addRoomHeight(1)'/>
+              <CircularButton text='+10' @click='addRoomHeight(10)'/>
+            </div>
           </div>
         </div>
 
@@ -502,6 +523,10 @@ export default {
     await this.getCurrentUser()
     await this.loadProfile()
     this.loadCO2Monitors()
+
+    this.roomLengthMeters = this.strideLengthForLength * this.strideLengthMeters
+    this.roomWidthMeters = this.strideLengthForWidth * this.strideLengthMeters
+    this.roomHeightMeters = this.personHeightToRoomHeight * this.heightMeters
 
     await this.reverseGeocode()
   },
@@ -767,6 +792,23 @@ export default {
     setRoomName(event) {
       this.roomName = event.target.value;
     },
+    addRoomHeight(amount) {
+      let newEvent = {
+        target: {
+          value: this.roomHeight + amount
+        }
+      }
+      this.setRoomHeight(newEvent)
+    },
+    setRoomHeight(event) {
+      this['roomHeightMeters'] = convertLengthBasedOnMeasurementType(
+        event.target.value,
+        this.measurementUnits.lengthMeasurementType,
+        'meters'
+      )
+
+      this.personHeightToRoomHeight = this['roomHeightMeters'] / this.heightMeters
+    },
     setRoomDim(event, dimension) {
       this[`room${dimension}Meters`] = convertLengthBasedOnMeasurementType(
         event.target.value,
@@ -848,8 +890,17 @@ export default {
     addVolumeFactor(value) {
       this.roomUsableVolumeFactor += parseFloat(value)
     },
-    addRoomHeight(value) {
+    addRoomHeightUsingOwnHeight(value) {
       this.setPersonHeightToRoomHeight(parseFloat(value) + this.personHeightToRoomHeight)
+    },
+    addRoomDim(amount, dimension) {
+      let newEvent = {
+        'target': {
+          'value': this[`room${dimension}`] + amount
+        }
+      }
+
+      this.setRoomDim(newEvent, dimension)
     },
     addStrideLength(value, axes) {
       this.setStrideLength(this[`strideLengthFor${axes}`] + parseInt(value), axes)
@@ -983,7 +1034,7 @@ export default {
       padding-bottom: 1em;
     }
 
-    label {
+    label, h2 {
       text-align: center;
     }
 
