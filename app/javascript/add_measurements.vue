@@ -154,14 +154,14 @@
       </div>
 
       <div class='container'>
-        <label>Start time</label>
+        <label><span class='bold'>Start time</span></label>
         <input class='wider-input'
           v-model="startDatetime"
         >
       </div>
 
       <div class='container'>
-        <label>Make this information private</label>
+        <label><span class='bold'>Make this information private</span></label>
         <select :value='private' @change='setEventPrivacy'>
           <option>public</option>
           <option>private</option>
@@ -1028,6 +1028,10 @@ export default {
       height: 2em;
     }
 
+    .container select {
+      height: 3em;
+    }
+
     .add-measurements {
       display: none;
     }
@@ -1051,7 +1055,7 @@ export default {
     }
 
     .wider-input, input {
-      width: 100%;
+      width: auto;
     }
   }
 
