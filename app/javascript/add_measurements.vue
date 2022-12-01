@@ -227,21 +227,21 @@
             <label>Length ({{ measurementUnits.lengthMeasurementType }})</label>
             <input
               :value="roomLength"
-              @change="setRoomLength">
+              @change="setRoomDim($event, 'Length')">
           </div>
 
           <div class='container'>
             <label>Width ({{ measurementUnits.lengthMeasurementType }})</label>
             <input
               :value="roomWidth"
-              @change="setRoomWidth">
+              @change="setRoomDim($event, 'Width')">
           </div>
 
           <div class='container'>
             <label>Height ({{ measurementUnits.lengthMeasurementType }})</label>
             <input
               :value="roomHeight"
-              @change="setRoomHeight">
+              @change="setRoomDim($event, 'Height')">
           </div>
         </div>
 
@@ -456,10 +456,7 @@ export default {
           'portableAirCleaners',
           'rapidTestResult',
           'rapidTestResults',
-          'roomHeight',
-          'roomLength',
           'roomName',
-          'roomWidth',
           'roomHeightMeters',
           'roomLengthMeters',
           'roomWidthMeters',
@@ -478,6 +475,27 @@ export default {
           'events'
         ]
     ),
+    roomLength() {
+      return convertLengthBasedOnMeasurementType(
+        this.roomLengthMeters,
+        'meters',
+        this.measurementUnits.lengthMeasurementType,
+      )
+    },
+    roomWidth() {
+      return convertLengthBasedOnMeasurementType(
+        this.roomWidthMeters,
+        'meters',
+        this.measurementUnits.lengthMeasurementType,
+      )
+    },
+    roomHeight() {
+      return convertLengthBasedOnMeasurementType(
+        this.roomHeightMeters,
+        'meters',
+        this.measurementUnits.lengthMeasurementType,
+      )
+    }
   },
   async created() {
     // TODO: fire and forget. Make asynchronous.
@@ -749,29 +767,14 @@ export default {
     setRoomName(event) {
       this.roomName = event.target.value;
     },
-    setRoomLength(event) {
-      this.roomLength = event.target.value;
-      this.roomLengthMeters = convertLengthBasedOnMeasurementType(
+    setRoomDim(event, dimension) {
+      this[`room${dimension}Meters`] = convertLengthBasedOnMeasurementType(
         event.target.value,
         this.measurementUnits.lengthMeasurementType,
         'meters'
       )
-    },
-    setRoomWidth(event) {
-      this.roomWidth = event.target.value;
-      this.roomWidthMeters = convertLengthBasedOnMeasurementType(
-        event.target.value,
-        this.measurementUnits.lengthMeasurementType,
-        'meters'
-      )
-    },
-    setRoomHeight(event) {
-      this.roomHeight = event.target.value;
-      this.roomHeightMeters = convertLengthBasedOnMeasurementType(
-        event.target.value,
-        this.measurementUnits.lengthMeasurementType,
-        'meters'
-      )
+
+      this[`strideLengthFor${dimension}`] = this[`room${dimension}Meters`] / this.strideLengthMeters
     },
     setSinglePassFiltrationEfficiency(event) {
       this.singlePassFiltrationEfficiency = event.target.value;
