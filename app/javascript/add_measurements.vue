@@ -247,9 +247,13 @@
 
         <div class='container'>
           <label>Usable Volume Factor (dimension-less)</label>
-          <input
-            v-model="roomUsableVolumeFactor"
-          >
+          <div class='continuous'>
+            <CircularButton text='-0.1' @click='addVolumeFactor(-0.1)'/>
+            <input
+              v-model="roomUsableVolumeFactor"
+            >
+            <CircularButton text='+0.1' @click='addVolumeFactor(0.1)'/>
+          </div>
         </div>
       </div>
     </div>
@@ -837,6 +841,9 @@ export default {
     setPersonHeightToRoomHeight(value) {
       this.roomHeightMeters = value * this.heightMeters
       this.personHeightToRoomHeight = value
+    },
+    addVolumeFactor(value) {
+      this.roomUsableVolumeFactor += parseFloat(value)
     },
     addRoomHeight(value) {
       this.setPersonHeightToRoomHeight(parseFloat(value) + this.personHeightToRoomHeight)
