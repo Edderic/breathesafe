@@ -137,7 +137,7 @@
 
     <div class='whereabouts' v-if='display == "whereabouts"'>
       <div class='container'>
-        <label>Google Search</label>
+        <label><span class='bold'>Google Search</span></label>
         <GMapAutocomplete
            class='autocomplete'
            placeholder="This is a placeholder"
@@ -147,7 +147,7 @@
       </div>
 
       <div class='container whereabouts'>
-        <label>Room name</label>
+        <label><span class='bold'>Room name</span></label>
         <input
           :value="roomName"
           @change="setRoomName">
@@ -1023,6 +1023,11 @@ export default {
       display: flex;
       flex-direction: column;
     }
+
+    .container input {
+      height: 2em;
+    }
+
     .add-measurements {
       display: none;
     }
