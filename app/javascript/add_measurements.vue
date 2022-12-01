@@ -526,6 +526,7 @@ export default {
     this.roomWidthMeters = this.strideLengthForWidth * this.strideLengthMeters
     this.roomHeightMeters = this.personHeightToRoomHeight * this.heightMeters
 
+    this.setCarbonDioxideMonitor({ target: { value: this.carbonDioxideMonitors[0].name }})
     await this.reverseGeocode()
   },
   data() {
