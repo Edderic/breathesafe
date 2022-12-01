@@ -1,12 +1,5 @@
 <template>
   <div class='border-showing' id='message'>
-    <br id='top'>
-    <br>
-    <br>
-    <div class='container centered add-measurements'>
-      <h2>Add Measurements</h2>
-    </div>
-
     <div class='container row centered'>
       <button id='whereabouts' @click='setDisplay("whereabouts")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
@@ -169,9 +162,8 @@
       </div>
     </div>
 
-    <div class='room_dimensions' v-if='display == "room_dimensions"'>
+    <div class='room_dimensions page' v-if='display == "room_dimensions"'>
       <div class='container'>
-        <h2 class='subsection'>Room Dimensions</h2>
         <div class='row'>
           <button :class="{ selected: this.useOwnHeight }" @click='setUseOwnHeight(true)'>Use own height and stride length to estimate</button>
           <button :class="{ selected: !this.useOwnHeight }" @click='setUseOwnHeight(false)'>Input Directly</button>
