@@ -67,6 +67,7 @@ class Users::ProfilesController < ApplicationController
         message = "Successfully updated."
       else
         message = "Did not update."
+        status = 422
       end
     end
 
