@@ -309,9 +309,8 @@
     </div>
 
     <div class='container' v-if='display == "ventilation"'>
-      <label class='subsection'>Ventilation</label>
       <div class='container'>
-        <label>CO2 Measurement Device</label>
+        <label><span class='bold'>CO2 Measurement Device</span></label>
 
         <select :value='ventilationCO2MeasurementDeviceName' @change='setCarbonDioxideMonitor'>
           <option v-for='carbonDioxideMonitor in carbonDioxideMonitors'>{{ carbonDioxideMonitor['name'] }}</option>
@@ -319,21 +318,21 @@
       </div>
 
       <div class='container'>
-        <label>CO2 Ambient (parts per million)</label>
+        <label><span class='bold'>CO2 Ambient (parts per million)</span></label>
         <input
           :value="ventilationCO2AmbientPPM"
           @change="setCarbonDioxideAmbient">
       </div>
 
       <div class='container'>
-        <label>CO2 Steady State (parts per million)</label>
+        <label><span class='bold'>CO2 Steady State (parts per million)</span></label>
         <input
           :value="ventilationCO2SteadyStatePPM"
           @change="setCarbonDioxideSteadyState">
       </div>
 
       <div class='container wide'>
-        <label class='textarea-label'>Notes</label>
+        <label class='textarea-label'><span class='bold'>Notes</span></label>
         <textarea type="textarea" rows=5 columns=80  @change='setVentilationNotes'>{{ ventilationNotes }}</textarea>
       </div>
     </div>
