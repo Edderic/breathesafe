@@ -184,6 +184,7 @@
               <CircularButton text='-10' @click='addStrideLength(-10, "Length")'/>
               <CircularButton text='-1' @click='addStrideLength(-1, "Length")'/>
               <input
+                type='number'
                 :value="strideLengthForLength"
                 @change='setStrideLengthEvent($event, "Length")'
                 >
@@ -199,6 +200,7 @@
               <CircularButton text='-10' @click='addStrideLength(-10, "Width")'/>
               <CircularButton text='-1' @click='addStrideLength(-1, "Width")'/>
               <input
+                type='number'
                 :value="strideLengthForWidth"
                 @change='setStrideLengthEvent($event, "Width")'
                 >
@@ -214,6 +216,7 @@
               <CircularButton text='-10' @click='addRoomHeightUsingOwnHeight(-10)'/>
               <CircularButton text='-1' @click='addRoomHeightUsingOwnHeight(-1)'/>
               <input
+                type='number'
                 :value="personHeightToRoomHeight"
                 @change="setPersonHeightToRoomHeight">
               <CircularButton text='+1' @click='addRoomHeightUsingOwnHeight(1)'/>
@@ -230,6 +233,7 @@
               <CircularButton text='-10' @click='addRoomDim(-10, "Length")'/>
               <CircularButton text='-1' @click='addRoomDim(-1, "Length")'/>
               <input
+                type='number'
                 :value="roomLength"
                 @change="setRoomDim($event, 'Length')">
               <CircularButton text='+1' @click='addRoomDim(1, "Length")'/>
@@ -244,6 +248,7 @@
               <CircularButton text='-10' @click='addRoomDim(-10, "Width")'/>
               <CircularButton text='-1' @click='addRoomDim(-1, "Width")'/>
               <input
+                type='number'
                 :value="roomWidth"
                 @change="setRoomDim($event, 'Width')">
               <CircularButton text='+1' @click='addRoomDim(1, "Width")'/>
@@ -258,6 +263,7 @@
               <CircularButton text='-10' @click='addRoomHeight(-10)'/>
               <CircularButton text='-1' @click='addRoomHeight(-1)'/>
               <input
+                type='number'
                 :value="roomHeight"
                 @change="setRoomHeight">
               <CircularButton text='+1' @click='addRoomHeight(1)'/>
@@ -271,6 +277,7 @@
           <div class='continuous'>
             <CircularButton text='-0.1' @click='addVolumeFactor(-0.1)'/>
             <input
+              type='number'
               v-model="roomUsableVolumeFactor"
             >
             <CircularButton text='+0.1' @click='addVolumeFactor(0.1)'/>
