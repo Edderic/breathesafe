@@ -1011,6 +1011,17 @@ export default {
     margin-right: 0.5em;
   }
 
+  .grouping {
+    padding: 1em;
+    border: 1px solid #e6e6e6;
+  }
+
+  .add-activity-groups {
+    padding: 1em;
+    font-weight: bold;
+    font-size: 20px;
+  }
+
   @media(max-width: 800px) {
     textarea {
       width: auto;
@@ -1023,6 +1034,19 @@ export default {
       flex-direction: column;
       margin-left: 0;
       margin-right: 0;
+    }
+
+    .grouping .container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    .grouping input[type='number'] {
+      width: 2em;
+      font-size: 24px;
     }
 
     .container input {
