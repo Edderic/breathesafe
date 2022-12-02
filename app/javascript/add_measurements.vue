@@ -853,10 +853,6 @@ export default {
       let activityGroup = this.findActivityGroup()(id);
       activityGroup['ageGroup'] = event.target.value;
     },
-    setMaskType(event, id) {
-      let activityGroup = this.findActivityGroup()(id);
-      activityGroup['maskType'] = event.target.value;
-    },
     setNumberOfPeople(event, id) {
       let activityGroup = this.findActivityGroup()(id);
       activityGroup['numberOfPeople'] = event.target.value;
