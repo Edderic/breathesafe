@@ -408,13 +408,6 @@
           </select>
         </div>
 
-        <div class='container'>
-          <label>Rapid test results</label>
-          <select :value='activityGroup["rapidTestResult"]' @change='setRapidTestResult($event, activityGroup.id)'>
-            <option v-for='r in rapidTestResults'>{{ r }}</option>
-          </select>
-        </div>
-
         <div class='container centered'>
           <button class='normal-padded' @click='removeActivityGroup(activityGroup.id)'>Remove</button>
           <button class='normal-padded' @click='cloneActivityGroup(activityGroup.id)'>Clone</button>
@@ -892,10 +885,6 @@ export default {
       this.ventilationNotes = event.target.value;
     },
 
-    setRapidTestResult(event, id) {
-      let activityGroup = this.findActivityGroup()(id);
-      activityGroup['rapidTestResult'] = event.target.value;
-    },
     setPortableAirCleaningDeviceAirDeliveryRate(event, id) {
       let portableAirCleaner = this.findPortableAirCleaningDevice()(id);
       portableAirCleaner['airDeliveryRate'] = event.target.value;
