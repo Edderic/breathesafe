@@ -23,7 +23,7 @@ export const useEventStore = defineStore('event', {
     roomHeightMeters: 1,
     duration: "",
     ventilationCO2AmbientPPM: 420,
-    ventilationCO2SteadyStatePPM: '',
+    ventilationCO2SteadyStatePPM: 800,
     ventilationCO2MeasurementDeviceName: '',
     ventilationCO2MeasurementDeviceModel: '',
     ventilationCO2MeasurementDeviceSerial: '',
