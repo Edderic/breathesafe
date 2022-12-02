@@ -362,14 +362,19 @@
 
     <div class='container' v-if='display == "behaviors"'>
       <label class='subsection'>Activity Groups</label>
-      <button @click='addActivityGrouping'>+</button>
-      <div class='container border-showing' v-for='activityGroup in activityGroups' :key=activityGroup.id>
+      <button @click='addActivityGrouping' class='add-activity-groups'>+</button>
+      <div class='container grouping' v-for='activityGroup in activityGroups' :key=activityGroup.id>
 
         <div class='container'>
-          <label>Number of people</label>
+          <label># people</label>
+          <CircularButton class='circular-button' text='-5' @click='addNumPeople(-5, activityGroup.id)'/>
+          <CircularButton class='circular-button' text='-1' @click='addNumPeople(-1, activityGroup.id)'/>
           <input
             :value="activityGroup['numberOfPeople']"
+            type='number'
             @change="setNumberOfPeople($event, activityGroup.id)">
+          <CircularButton class='circular-button' text='+1' @click='addNumPeople(1, activityGroup.id)'/>
+          <CircularButton class='circular-button' text='+5' @click='addNumPeople(5, activityGroup.id)'/>
         </div>
 
         <div class='container'>
