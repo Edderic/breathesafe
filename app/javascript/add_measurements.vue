@@ -788,6 +788,10 @@ export default {
     setRoomName(event) {
       this.roomName = event.target.value;
     },
+    addNumPeople(amount, activityGroupId) {
+      let activityGroup = this.findActivityGroup()(activityGroupId);
+      activityGroup.numberOfPeople += parseInt(amount)
+    },
     addCO2SteadyState(amount) {
       this.ventilationCO2SteadyStatePPM += parseInt(amount)
     },
