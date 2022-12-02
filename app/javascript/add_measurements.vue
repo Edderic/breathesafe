@@ -586,10 +586,8 @@ export default {
         'aerosolGenerationActivity': "",
         'carbonDioxideGenerationActivity': "",
         'ageGroup': "",
-        'sex': "",
         'maskType': "",
-        'numberOfPeople': "",
-        'rapidTestResult': 'Unknown'
+        'numberOfPeople': 1,
       })
     },
     cancel() {
@@ -749,10 +747,7 @@ export default {
         'aerosolGenerationActivity': activityGroup['aerosolGenerationActivity'],
         'carbonDioxideGenerationActivity': activityGroup['carbonDioxideGenerationActivity'],
         'ageGroup': activityGroup['ageGroup'],
-        'maskType': activityGroup['maskType'],
-        'sex': activityGroup['sex'],
         'numberOfPeople': activityGroup['numberOfPeople'],
-        'rapidTestResult': activityGroup['rapidTestResult']
       });
     },
     removeActivityGroup(id) {
