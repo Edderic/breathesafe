@@ -323,14 +323,14 @@
         <div class='continuous mega'>
           <CircularButton text='-100' @click='addCO2Ambient(-100)'/>
           <CircularButton text='-10' @click='addCO2Ambient(-10)'/>
-          <CircularButton text='-1' @click='addCO2Ambient(-10)'/>
+          <CircularButton text='-1' @click='addCO2Ambient(-1)'/>
 
           <input
             type='number'
             :value="ventilationCO2AmbientPPM"
             @change="setCarbonDioxideAmbient">
 
-          <CircularButton text='+1' @click='addCO2Ambient(10)'/>
+          <CircularButton text='+1' @click='addCO2Ambient(1)'/>
           <CircularButton text='+10' @click='addCO2Ambient(10)'/>
           <CircularButton text='+100' @click='addCO2Ambient(100)'/>
         </div>
@@ -338,9 +338,20 @@
 
       <div class='container'>
         <label><span class='bold'>CO2 Steady State (parts per million)</span></label>
-        <input
-          :value="ventilationCO2SteadyStatePPM"
-          @change="setCarbonDioxideSteadyState">
+        <div class='continuous mega'>
+          <CircularButton text='-100' @click='addCO2SteadyState(-100)'/>
+          <CircularButton text='-10' @click='addCO2SteadyState(-10)'/>
+          <CircularButton text='-1' @click='addCO2SteadyState(-1)'/>
+
+          <input
+            type='number'
+            :value="ventilationCO2SteadyStatePPM"
+            @change="setCarbonDioxideSteadyState">
+
+          <CircularButton text='+1' @click='addCO2SteadyState(1)'/>
+          <CircularButton text='+10' @click='addCO2SteadyState(10)'/>
+          <CircularButton text='+100' @click='addCO2SteadyState(100)'/>
+        </div>
       </div>
 
       <div class='container wide'>
@@ -802,6 +813,9 @@ export default {
     },
     setRoomName(event) {
       this.roomName = event.target.value;
+    },
+    addCO2SteadyState(amount) {
+      this.ventilationCO2SteadyStatePPM += parseInt(amount)
     },
     addCO2Ambient(amount) {
       this.ventilationCO2AmbientPPM += parseInt(amount)
