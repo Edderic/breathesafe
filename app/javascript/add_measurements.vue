@@ -1027,22 +1027,32 @@ export default {
     align-items: center;
   }
   .continuous input {
-    width: 2em;
+    width: 3em;
     height: 1em;
     font-weight: bold;
     font-size: 24px;
-    margin-left: 1em;
-    margin-right: 1em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
     text-align: center;
   }
 
+  .continuous.mega .round {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+  }
+
   @media(max-width: 800px) {
+    textarea {
+      width: auto;
+    }
     br {
       display: none;
     }
     .container {
       display: flex;
       flex-direction: column;
+      margin-left: 0;
+      margin-right: 0;
     }
 
     .container input {
