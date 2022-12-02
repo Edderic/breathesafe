@@ -373,14 +373,6 @@
         </div>
 
         <div class='container'>
-          <label>Sex</label>
-          <select :value='activityGroup["sex"]' @change='setSex($event, activityGroup.id)'>
-            <option>Male</option>
-            <option>Female</option>
-          </select>
-        </div>
-
-        <div class='container'>
           <label>Aerosol generation</label>
           <select :value='activityGroup["aerosolGenerationActivity"]' @change='setAerosolGenerationActivity($event, activityGroup.id)'>
             <option v-for='(value, infectorActivityType, index) in infectorActivityTypeMapping'>{{ infectorActivityType }}</option>
@@ -748,10 +740,6 @@ export default {
         return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
           (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
         );
-    },
-    setSex(event, id) {
-      let activityGroup = this.findActivityGroup()(id)
-      activityGroup['sex'] = event.target.value
     },
     cloneActivityGroup(id) {
       const activityGroup = this.activityGroups.find(
