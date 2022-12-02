@@ -398,13 +398,6 @@
           </select>
         </div>
 
-        <div class='container'>
-          <label>Mask Type</label>
-          <select :value='activityGroup["maskType"]' @change='setMaskType($event, activityGroup.id)'>
-            <option v-for='m in maskTypes'>{{ m }}</option>
-          </select>
-        </div>
-
         <div class='container centered'>
           <button class='normal-padded' @click='removeActivityGroup(activityGroup.id)'>Remove</button>
           <button class='normal-padded' @click='cloneActivityGroup(activityGroup.id)'>Clone</button>
