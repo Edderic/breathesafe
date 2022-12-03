@@ -1,6 +1,6 @@
 <template>
   <div class='border-showing' id='message'>
-    <div class='container row centered'>
+    <div class='container row centered menu'>
       <button id='whereabouts' @click='setDisplay("whereabouts")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
@@ -120,15 +120,15 @@
         </svg>
       </button>
     </div>
-    <div class='container'>
 
-      <div class='container bold' v-for='message in messages'>
+    <div class='container chunk'>
+      <div class='container bold message' v-for='message in messages'>
         {{ message }}
       </div>
       <br>
     </div>
 
-    <div class='whereabouts' v-if='display == "whereabouts"'>
+    <div class='whereabouts chunk' v-if='display == "whereabouts"'>
       <div class='container'>
         <label><span class='bold'>Google Search</span></label>
         <GMapAutocomplete
@@ -160,9 +160,24 @@
           <option>private</option>
         </select>
       </div>
+
+      <div class='container'>
+        <label class='bold'>Maximum Occupancy</label>
+        <div class='continuous'>
+          <CircularButton text='-10' @click='addMaxOccupancy(-10)'/>
+          <CircularButton text='-1' @click='addMaxOccupancy(-1)'/>
+          <input
+            type='number'
+            v-model="maximumOccupancy"
+          >
+
+          <CircularButton text='+1' @click='addMaxOccupancy(1)'/>
+          <CircularButton text='+10' @click='addMaxOccupancy(10)'/>
+        </div>
+      </div>
     </div>
 
-    <div class='room_dimensions page' v-if='display == "room_dimensions"'>
+    <div class='room_dimensions chunk page' v-if='display == "room_dimensions"'>
       <div class='container'>
         <div class='row'>
           <button :class="{ selected: this.useOwnHeight }" @click='setUseOwnHeight(true)'>Use own height and stride length to estimate</button>
@@ -279,7 +294,7 @@
     </div>
 
 
-    <div class='container' v-if='display == "pac"'>
+    <div class='container chunk' v-if='display == "pac"'>
       <label class='subsection'>Portable Air Cleaning</label>
       <button @click='addPortableAirCleaner'>+</button>
       <div class='container border-showing' v-for='portableAirCleaner in portableAirCleaners' :key=portableAirCleaner.id>
@@ -308,7 +323,7 @@
       </div>
     </div>
 
-    <div class='container' v-if='display == "ventilation"'>
+    <div class='container chunk' v-if='display == "ventilation"'>
       <div class='container'>
         <label><span class='bold'>CO2 Measurement Device</span></label>
 
@@ -360,7 +375,7 @@
       </div>
     </div>
 
-    <div class='container' v-if='display == "behaviors"'>
+    <div class='container chunk' v-if='display == "behaviors"'>
       <label class='subsection'>Activity Groups</label>
       <button @click='addActivityGrouping' class='add-activity-groups'>+</button>
       <div class='container grouping' v-for='activityGroup in activityGroups' :key=activityGroup.id>
@@ -385,7 +400,7 @@
         </div>
 
         <div class='container'>
-          <label>CO2 generation</label>
+          <label>CO2 gen.</label>
           <select :value='activityGroup["carbonDioxideGenerationActivity"]' @change='setCarbonDioxideGenerationActivity($event, activityGroup.id)'>
             <option v-for='(value, carbonDioxideActivity, index) in carbonDioxideActivities'>{{ carbonDioxideActivity }}</option>
           </select>
@@ -580,6 +595,9 @@ export default {
            console.log(response)
         })
       },
+    addMaxOccupancy(amount) {
+      this.maximumOccupancy += parseInt(amount)
+    },
     addActivityGrouping() {
       this.activityGroups.unshift({
         'id': this.generateUUID(),
@@ -1007,8 +1025,8 @@ export default {
   }
 
   .continuous.mega .round {
-    margin-left: 0.5em;
-    margin-right: 0.5em;
+    margin-left: 0.25em;
+    margin-right: 0.25em;
   }
 
   .grouping {
@@ -1022,7 +1040,15 @@ export default {
     font-size: 20px;
   }
 
+  .message {
+    padding-left: 1em;
+    padding-right: 1em;
+  }
+
   @media(max-width: 800px) {
+    .menu button {
+      border: 0;
+    }
     textarea {
       width: auto;
     }
@@ -1049,12 +1075,19 @@ export default {
       font-size: 24px;
     }
 
+    .continuous.mega {
+    }
+
     .container input {
       height: 2em;
+      margin-left: 1em;
+      margin-right: 1em;
     }
 
     .container select {
       height: 3em;
+      margin-left: 1em;
+      margin-right: 1em;
     }
 
     .add-measurements {
@@ -1081,6 +1114,9 @@ export default {
 
     .wider-input, input {
       width: auto;
+    }
+    .chunk {
+      width: 100vw;
     }
   }
 
