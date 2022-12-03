@@ -376,8 +376,6 @@
     </div>
 
     <div class='container chunk' v-if='display == "behaviors"'>
-      <label class='subsection'>Activity Groups</label>
-      <button @click='addActivityGrouping' class='add-activity-groups'>+</button>
       <div class='container grouping' v-for='activityGroup in activityGroups' :key=activityGroup.id>
 
         <div class='container'>
@@ -420,7 +418,7 @@
 
       </div>
 
-      <div class='container centered'>
+      <div class='container centered col final'>
         <button class='normal-padded' @click='cancel'>Cancel</button>
         <button class='normal-padded' @click='save'>Save</button>
       </div>
@@ -546,6 +544,8 @@ export default {
     this.roomLengthMeters = this.strideLengthForLength * this.strideLengthMeters
     this.roomWidthMeters = this.strideLengthForWidth * this.strideLengthMeters
     this.roomHeightMeters = this.personHeightToRoomHeight * this.heightMeters
+
+    this.addActivityGrouping()
 
     this.setCarbonDioxideMonitor({ target: { value: this.carbonDioxideMonitors[0].name }})
     await this.reverseGeocode()
@@ -1004,8 +1004,6 @@ export default {
   }
 
   .round {
-    border-radius: 100%;
-    background-color: #e6e6e6;
   }
 
   .continuous {
@@ -1035,9 +1033,10 @@ export default {
   }
 
   .add-activity-groups {
-    padding: 1em;
     font-weight: bold;
-    font-size: 20px;
+    font-size: 2em;
+    height: 2em;
+    width: 2em;
   }
 
   .message {
@@ -1046,6 +1045,10 @@ export default {
   }
 
   @media(max-width: 800px) {
+    .menu {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
     .menu button {
       border: 0;
     }
@@ -1117,6 +1120,24 @@ export default {
     }
     .chunk {
       width: 100vw;
+    }
+
+    .container.centered button {
+      width: 50%;
+      padding-top: 1em;
+      padding-bottom: 1em;
+      margin-top: 1em;
+      margin-bottom: 1em;
+    }
+
+    .final {
+      justify-content: center;
+      align-items: center;
+    }
+
+    .final button {
+      font-weight: bold;
+      font-size: 1em;
     }
   }
 
