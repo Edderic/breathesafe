@@ -18,35 +18,37 @@
 
     <div class='scrollable'>
       <table>
-        <!--//add thead th element in the scrollable element for sticky col headers in .scrollable css--> 
+        <!--//add thead th element in the scrollable element for sticky col headers in .scrollable css-->
         <thead>
-        <tr>
-          <th></th>
-          <th>Room</th>
-          <th>Address</th>
-          <th class='desktop'>
-            1-hr Risk w/ 1 Infector
-          </th>
-          <th v-if="adminView">User ID</th>
-          <th v-if="adminView">Approve</th>
-        </tr>
-        </thead>
-        <tr>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>
-            <div class='row horizontally-center'>
-              <span :style="circleCSS" @click='sortByInfectorRisk'>{{this.sortRiskInfectorArrow}}</span>
+          <tr>
+            <th></th>
+            <th>Room</th>
+            <th>Address</th>
+            <th class='desktop'>
+              <div>
+                1-hr Risk w/ 1 Infector
+                <div class='row horizontally-center'>
+                  <span :style="circleCSS" @click='sortByInfectorRisk'>{{this.sortRiskInfectorArrow}}</span>
 
-              <router-link :style="circleCSS" to='/faqs#one-hr-risk-with-infector'
-              title="This risk assumes that there is an infector is in the room."
-              >
-              ?
-              </router-link>
-            </div>
-          </td>
-        </tr>
+                  <router-link :style="circleCSS" to='/faqs#one-hr-risk-with-infector'
+                  title="This risk assumes that there is an infector is in the room."
+                  >
+                  ?
+                  </router-link>
+                </div>
+              </div>
+            </th>
+            <th v-if="adminView">User ID</th>
+            <th v-if="adminView">Approve</th>
+          </tr>
+          <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            <th>
+            </th>
+          </tr>
+        </thead>
         <MeasurementsRow v-for="ev in displayables" :key="ev.id" :measurements="ev"/>
       </table>
     </div>
@@ -319,7 +321,7 @@ export default {
     background-color: #e6e6e6;
   }
   td {
-    
+
     text-align: center;
     vertical-align: center;
     /*
@@ -363,9 +365,9 @@ export default {
   }
 
   .scrollable thead th {
-        position: sticky;
-        top: 0;
-      }
+    position: sticky;
+    top: 0;
+  }
 
   .row {
     display: flex;
