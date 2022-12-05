@@ -5,7 +5,7 @@ require_relative "application"
 Rails.application.initialize!
 
 ActionMailer::Base.smtp_settings = {
-  :user_name => ENV['SENDGRID_USER_NAME'], # This is the string literal 'apikey', NOT the ID of your API key
+  :user_name => 'apikey', # This is the string literal 'apikey', NOT the ID of your API key
   :password => ENV['SENDGRID_API_KEY'], # This is the secret sendgrid API key which was issued during API key creation
   :domain => 'breathesafe.xyz',
   :address => 'smtp.sendgrid.net',
