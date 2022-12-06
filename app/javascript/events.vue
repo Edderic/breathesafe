@@ -2,13 +2,6 @@
 <div class='col'>
     <div class='middle-controls horizontally-center controls'>
       <input class='margined' @change="updateSearch" placeholder="Search for events">
-      <select class='margined' :value='eventDisplayRiskTime' @change='setDisplayRiskTime'>
-        <option>At this hour</option>
-        <option>At 25% occupancy</option>
-        <option>At 50% occupancy</option>
-        <option>At 75% occupancy</option>
-        <option>At max occupancy</option>
-      </select>
 
       <select class='margined' :value='`${selectedMask.numWays}-way ${selectedMask.maskName}`' @change='setMaskType'>
         <option v-for='m in masks'>{{ m.numWays }}-way {{ m.maskName }}</option>
