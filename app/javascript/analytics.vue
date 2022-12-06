@@ -2027,7 +2027,7 @@ export default {
       return displayCADR(this.systemOfMeasurement, this.totalFlowRateCubicMetersPerHour)
     },
     airCleanerSuggestion() {
-      return airCleaners.find((ac) => ac.singular == 'Corsi-Rosenthal box (Max Speed)')
+      return airCleaners.find((ac) => ac.singular == 'CR box (Max Speed)')
     },
     portableAchRounded() {
       return round(this.portableAch, 1)
