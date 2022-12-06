@@ -58,7 +58,6 @@ export const useMainStore = defineStore('main', {
       const showMeasurementSetStore = useShowMeasurementSetStore()
       let event = await eventStores.findOrLoad(id);
       showMeasurementSetStore.setMeasurementSet(event)
-      analyticsStore.load(event)
     },
     setMessage(message) {
       this.message = message
