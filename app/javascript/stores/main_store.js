@@ -47,8 +47,10 @@ export const useMainStore = defineStore('main', {
       this.center = event.placeData.center
 
       let element_to_scroll_to = document.getElementById(`measurements-${id}`);
-      element_to_scroll_to.scrollIntoView({behavior: 'smooth'});
+      element_to_scroll_to.scrollIntoView({behavior: 'smooth', block: 'center'});
     },
+
+
     async showAnalysis(id) {
       let eventStores = useEventStores()
       const analyticsStore = useAnalyticsStore()

@@ -13,7 +13,7 @@
             :clickable="true"
             :draggable="false"
             :icon="icon(m)"
-            @click="openMarker(m.id)"
+            @click="centerMapTo(m.id)"
         >
         </GMapMarker>
     </GMapMap>
@@ -52,7 +52,7 @@ export default {
   computed: {
     ...mapStores(useMainStore),
     ...mapState(useProfileStore, ["measurementUnits", 'systemOfMeasurement']),
-    ...mapState(useMainStore, ["focusTab", "focusSubTab", "signedIn", "markers"]),
+    ...mapState(useMainStore, ["centerMapTo"]),
     ...mapState(useEventStores, ["selectedMask"]),
     ...mapWritableState(useMainStore, ['center', 'zoom', 'openedMarkerID']),
     ...mapWritableState(
@@ -122,9 +122,6 @@ export default {
     },
     maskingColors(m) {
       return new MaskingBarChart(m.activityGroups).maskingColors()
-    },
-    openMarker(id) {
-      this.openedMarkerID = id
     },
     nullIntervention(m) {
       return new Intervention(m, [])
