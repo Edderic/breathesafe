@@ -1691,45 +1691,7 @@ export default {
 
       return assignBoundsToColorScheme(scheme, evenSpacedBounds)
     },
-    reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleaners() {
-      const result = (
-        this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible
-        - this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners
-      ) / this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible
 
-      return result
-    },
-    reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersAndMasks() {
-      const result = (
-        this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible
-        - this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleanersAndMasks
-      ) / this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible
-
-      return result
-    },
-    reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersAndMasksText() {
-      return `${round(this.reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersAndMasks * 100, 4)}%`
-    },
-    reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersText() {
-      return `${round(this.reducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleaners * 100, 1)}%`
-    },
-
-    absoluteReducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleaners() {
-      const result = (
-        this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible
-        - this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners
-      )
-
-      return round(result, 6)
-    },
-    absoluteReducedRiskOfUnmaskedVsUnmaskedButWithSuggestedAirCleanersAndMasks() {
-      const result = (
-        this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible
-        - this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleanersAndMasks
-      )
-
-      return round(result, 6)
-    },
     riskiestPotentialInfector() {
       return findRiskiestPotentialInfector(this.activityGroups)
     },
