@@ -481,7 +481,7 @@ export default {
       flex-direction: column;
     }
     .controls {
-      width: auto;
+      width: 100%;
     }
     .desktop {
       /*display: none;*/
