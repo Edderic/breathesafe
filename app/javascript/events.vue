@@ -38,7 +38,15 @@
                 </div>
               </div>
             </th>
-            <th>Est. Distance</th>
+            <th>
+              <div>
+                Est. Distance
+                <div class='row horizontally-center'>
+                  <span :style="circleCSS" @click='sortByDistance'>{{this.sortDistanceArrow}}</span>
+
+                </div>
+              </div>
+            </th>
             <th v-if="adminView">User ID</th>
             <th v-if="adminView">Approve</th>
           </tr>
@@ -116,6 +124,9 @@ export default {
     },
     sortRiskInfectorArrow() {
       return sortArrow(this.$route.query['sort-how'], this.$route.query.sort == 'risk-infector')
+    },
+    sortDistanceArrow() {
+      return sortArrow(this.$route.query['sort-how'], this.$route.query.sort == 'distance')
     }
   },
   async created() {
@@ -263,6 +274,40 @@ export default {
         }
       )
     },
+    sortByDistance() {
+      let copy = JSON.parse(JSON.stringify(this.$route.query))
+      let newQuery;
+
+      if (this.$route.query.sort != 'distance') {
+        newQuery = {
+          'sort': 'distance',
+          'sort-how': 'ascending'
+        }
+      }
+
+      else if (this.$route.query['sort-how'] == "descending" && this.$route.query.sort == 'distance') {
+        newQuery = {
+          'sort': 'distance',
+          'sort-how': 'ascending'
+        }
+      }
+
+      else if (this.$route.query['sort-how'] == 'ascending' && this.$route.query.sort == 'distance') {
+        newQuery = {
+          'sort': 'distance',
+          'sort-how': 'descending'
+        }
+      }
+
+      Object.assign(copy, newQuery)
+      this.$router.push(
+        {
+          name: 'MapEvents',
+          query: copy
+        }
+      )
+    },
+
     sortByInfectorRisk() {
       // this one is not dependent on occupancy. We're assuming that there's one person sick
 
@@ -315,6 +360,16 @@ export default {
       else if (this.$route.query.sort == 'risk-infector' && this.$route.query['sort-how'] == 'descending') {
         this.displayables = this.displayables.sort(
           (a, b) => new Intervention(b, []).computeRisk() - new Intervention(a, []).computeRisk()
+        )
+      }
+      else if (this.$route.query.sort == 'distance' && this.$route.query['sort-how'] == 'ascending') {
+        this.displayables = this.displayables.sort(
+          (a, b) => a.distance - b.distance
+        )
+      }
+      else if (this.$route.query.sort == 'distance' && this.$route.query['sort-how'] == 'descending') {
+        this.displayables = this.displayables.sort(
+          (a, b) => b.distance - a.distance
         )
       }
     }
