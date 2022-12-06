@@ -5,13 +5,14 @@ import { useMainStore } from './main_store'
 import { useProfileStore } from './profile_store'
 import { usePrevalenceStore } from './prevalence_store'
 import axios from 'axios'
-import { computeRiskWithVariableOccupancy, deepSnakeToCamel, setupCSRF } from  '../misc'
+import { computeRiskWithVariableOccupancy, deepSnakeToCamel, setupCSRF, round } from  '../misc'
 
 
 // useStore could be anything like useUser, useCart
 // the first argument is a unique id of the store across your application
 export const useEventStores = defineStore('events', {
   state: () => ({
+    location: { lat: 0, lng: 0},
     events: [],
     displayables: [],
     masks: [],
@@ -20,6 +21,16 @@ export const useEventStores = defineStore('events', {
   getters: {
   },
   actions: {
+    setDistance(mainStore, events) {
+      let milesPerEuclidean = 0.8 / 0.012414
+
+      for (let event of events) {
+        let x = (mainStore.whereabouts.lat - event.placeData.center.lat)**2
+        let y = (mainStore.whereabouts.lng - event.placeData.center.lng)**2
+
+        event.distance = round(Math.sqrt(x + y) * milesPerEuclidean, 1)
+      }
+    },
     async load() {
       setupCSRF()
 
@@ -28,13 +39,13 @@ export const useEventStores = defineStore('events', {
 
       await mainStore.getCurrentUser();
       await profileStore.loadProfile()
-
       let success = true
       await axios.get('/events')
         .then(response => {
           console.log(response)
           if (response.status == 200) {
             let camelized = deepSnakeToCamel(response.data.events)
+            this.setDistance(mainStore, camelized)
             this.events = camelized
             this.displayables = this.events
           }

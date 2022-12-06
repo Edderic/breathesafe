@@ -18,7 +18,8 @@ export const useMainStore = defineStore('main', {
     focusSubTab: "Analytics",
     signedIn: false,
     currentUser: undefined,
-    message: ''
+    message: '',
+    whereabouts: {lat: 51.093048, lng: 6.842120},
   }),
   getters: {
     isAdmin(state) {

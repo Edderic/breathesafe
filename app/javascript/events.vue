@@ -38,10 +38,12 @@
                 </div>
               </div>
             </th>
+            <th>Est. Distance</th>
             <th v-if="adminView">User ID</th>
             <th v-if="adminView">Approve</th>
           </tr>
           <tr>
+            <th></th>
             <th></th>
             <th></th>
             <th></th>
@@ -82,14 +84,17 @@ export default {
           'displayables',
           'masks',
           'numWays',
-          'selectedMask'
+          'selectedMask',
         ]
     ),
     ...mapWritableState(
         useMainStore,
         [
+          'center',
           'focusTab',
-          'signedIn'
+          'signedIn',
+          'zoom',
+          'whereabouts'
         ]
     ),
     ...mapState(
@@ -115,15 +120,21 @@ export default {
   },
   async created() {
     this.eventDisplayRiskTime = this.$route.query['eventDisplayRiskTime'] || 'At max occupancy'
-    await this.load();
+    // await this.getWhereabouts()
 
     if (this.$route.query['mask']) {
       this.selectedMask = this.findMask(
-          this.$route.query['mask'],
-          this.$route.query['numWays']
+        this.$route.query['mask'],
+        this.$route.query['numWays']
       )
     }
 
+    let coordinates = await this.$getLocation()
+
+    this.whereabouts = coordinates
+    this.center = { lat: coordinates.lat, lng: coordinates.lng };
+    this.zoom = 15;
+    await this.load()
     this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
     this.sortByParams()
 
@@ -176,7 +187,8 @@ export default {
         useMainStore,
         [
           'setFocusTab',
-          'focusEvent'
+          'focusEvent',
+          'getWhereabouts'
         ]
     ),
     ...mapActions(

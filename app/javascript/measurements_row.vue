@@ -20,6 +20,9 @@
         />
       </router-link>
     </td>
+    <td>
+      {{ measurements.distance }}
+    </td>
     <td v-if='adminView'>{{ measurements.authorId }}</td>
     <td v-if='adminView && approvable'>
       <button @click='approve'>

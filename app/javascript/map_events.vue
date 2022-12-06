@@ -54,7 +54,8 @@ export default {
     ...mapState(useProfileStore, ["measurementUnits", 'systemOfMeasurement']),
     ...mapState(useMainStore, ["centerMapTo"]),
     ...mapState(useEventStores, ["selectedMask"]),
-    ...mapWritableState(useMainStore, ['center', 'zoom', 'openedMarkerID']),
+
+    ...mapWritableState(useMainStore, ['center', 'whereabouts', 'zoom', 'openedMarkerID']),
     ...mapWritableState(
         useEventStores,
         [
@@ -69,14 +70,6 @@ export default {
   },
   async created() {
     // TODO: modify the store
-    this.$getLocation()
-      .then((coordinates) => {
-        this.center = { lat: coordinates.lat, lng: coordinates.lng };
-        this.zoom = 15;
-      })
-      .catch((error) => {
-        console.log(error);
-      });
 
     // TODO: handle case where no one is signed in
   },
