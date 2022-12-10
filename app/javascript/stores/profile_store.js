@@ -75,6 +75,7 @@ export const useProfileStore = defineStore('profile', {
             this.message = data.message
             this.systemOfMeasurement = profile.measurement_system
             this.measurementUnits = getMeasurementUnits(profile.measurement_system)
+            this.socials = profile.socials || {}
           }
 
           // whatever you want
@@ -102,6 +103,7 @@ export const useProfileStore = defineStore('profile', {
           'height_meters': this.heightMeters,
           'stride_length_meters': this.strideLengthMeters,
           'measurement_system': this.systemOfMeasurement,
+          'socials': this.socials
         }
       }
 
