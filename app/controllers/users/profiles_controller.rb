@@ -91,6 +91,7 @@ class Users::ProfilesController < ApplicationController
       "last_name",
       "measurement_system",
       "user_id",
+      "socials": [:mastodon, :twitter, :facebook]
     )
   end
 end

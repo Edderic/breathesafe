@@ -30,7 +30,11 @@ export const useProfileStore = defineStore('profile', {
       }
     ],
     'eventDisplayRiskTime': "At max occupancy",
-    status: 'saved'
+    status: 'saved',
+    socials: {
+      'twitter': '',
+      'mastodon': '',
+    }
   }),
   getters: {
     // ...mapState(useMainStore, ['currentUser']),
@@ -140,6 +144,7 @@ export const useProfileStore = defineStore('profile', {
           'last_name': this.lastName,
           'stride_length_meters': this.strideLengthMeters,
           'height_meters': this.heightMeters,
+          'socials': this.socials
         }
       }
 
