@@ -473,7 +473,7 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
         wears some type of mask.
 
         </p>
-        <div class='centered'>
+        <div class='centered masking-table'>
           <table>
             <tr>
               <th></th>
@@ -2437,9 +2437,14 @@ export default {
       flex-direction: column;
     }
 
-    .equations {
+    .masking-table, .equations {
       font-size: 0.5em;
     }
+
+    .masking-table text {
+      font-size: 1em;
+    }
+
   }
   .item {
     padding: 1em;
