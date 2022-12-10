@@ -6,14 +6,14 @@
     </div>
 
     <div class='container row centered menu'>
-      <button id='miscellaneous-button' @click='setDisplay("miscellaneous")'>
+      <button class='tab-item' id='miscellaneous-button' @click='setDisplay("miscellaneous")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <text x="12" y="30">Misc</text>
         </svg>
       </button>
 
-      <button id='ventilation' @click='setDisplay("ventilation")'>
+      <button class='tab-item' id='ventilation' @click='setDisplay("ventilation")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="m 20 30 h 40 l -20 -20 z" stroke='black' fill='#ccc'/>
@@ -44,7 +44,7 @@
         </svg>
       </button>
 
-      <button id='length_estimation' @click='setDisplay("length_estimation")'>
+      <button class='tab-item' id='length_estimation' @click='setDisplay("length_estimation")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="M 31 20 l -5 13 h 25 l 3 -13 z m -5 13 v 20 h 25 v -20 m 0 20 l 3 -13.5 l 0 -19" fill="transparent" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
@@ -55,7 +55,7 @@
         </svg>
       </button>
 
-      <button id='socials' @click='setDisplay("socials")'>
+      <button class='tab-item' id='socials' @click='setDisplay("socials")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
 
@@ -76,23 +76,23 @@
 
 
     <div class='container' v-if="display == 'miscellaneous'">
-      <div class='container'>
-        <label>First name</label>
+      <div class='container mobile'>
+        <label class='bold'>First name</label>
         <input :value='firstName' @change='updateFirstName' :disabled="this.status == 'saved'">
       </div>
-      <div class='container'>
-        <label>Last name</label>
+      <div class='container mobile'>
+        <label class='bold'>Last name</label>
         <input :value='lastName' @change='updateLastName' :disabled="this.status == 'saved'">
       </div>
-      <div class='container centered'>
+      <div class='container centered change'>
         <button @click='save' v-if='this.status == "edit"'>Save</button>
         <button @click='editProfile' v-if='this.status == "saved"'>Edit</button>
       </div>
     </div>
 
     <div class='container' v-if='display == "length_estimation"'>
-      <div class='container'>
-        <label>System of Measurement</label>
+      <div class='container mobile'>
+        <label class='bold'>System of Measurement</label>
 
         <select :value='systemOfMeasurement' @change='setSystemOfMeasurement'>
           <option>imperial</option>
@@ -101,14 +101,16 @@
       </div>
 
       <div class='container'>
-        <div class='row'>
-          <label>Height ({{ measurementUnits.lengthMeasurementType }})</label>
-          <div :style='circle'
-            @click='toggle("showWhyHeight")'>?
+        <div class='row mobile'>
+          <div class='row '>
+            <label><span class='bold'>Height</span> ({{ measurementUnits.lengthMeasurementType }})</label>
+            <div :style='circle'
+              @click='toggle("showWhyHeight")'>?
+            </div>
           </div>
-          <input :value='height' @change='updateHeightMeters' :disabled="this.status == 'saved'">
+          <input type='number' :value='height' @change='updateHeightMeters' :disabled="this.status == 'saved'">
         </div>
-        <div class='row' v-show="showWhyHeight">
+        <div class='row mobile' v-show="showWhyHeight">
           <p >
             How tall are you? We need the room volume to assess risk. We assume a box model, so
             the components are length, width, and height. To calculate room height, you
@@ -152,17 +154,19 @@
       </div>
 
       <div class='container'>
-        <div class='row'>
-          <label>Stride length ({{ measurementUnits.lengthMeasurementType }})</label>
-          <div :style='circle'
-            @click='toggle("showWhyStrideLength")'>?
+        <div class='row mobile'>
+          <div class='row'>
+            <label><span class='bold'>Stride length</span> ({{ measurementUnits.lengthMeasurementType }})</label>
+            <div :style='circle'
+              @click='toggle("showWhyStrideLength")'>?
+            </div>
           </div>
           <input :value='strideLength' @change='updateStrideLengthMeters' :disabled="this.status == 'saved'">
         </div>
-        <div class='row' v-show="showWhyStrideLength">
+        <div class='row mobile' v-show="showWhyStrideLength">
           <p >
             How big is your step? To estimate the length and/or width of the
-            room, one could use one's stride length as a way to estimate. Take a step as
+            room, one could walk the length and /or width, and see how many steps it takes. To measure the stride length, take a step as
             you normally would while walking. The distance between the very tip of your
             toes of the back foot and the very tip of your toes of the front foot is the
             stride length.
@@ -211,41 +215,44 @@
         </div>
       </div>
 
-      <div class='container centered'>
+      <div class='container centered change'>
         <button @click='save' v-if='this.status == "edit"'>Save</button>
         <button @click='editProfile' v-if='this.status == "saved"'>Edit</button>
       </div>
     </div>
 
     <div class='container' v-if='display == "ventilation"'>
-      <label class='subsection'>CO2 Monitors</label>
-      <button @click='newCO2monitor'>+</button>
+      <div class='row centered'>
+        <label class='subsection'>CO2 Monitors</label>
+
+        <CircularButton text='+' @click='newCO2monitor'/>
+      </div>
       <div class='border-showing' v-for='carbonDioxideMonitor in carbonDioxideMonitors' :key=carbonDioxideMonitor.id>
-        <div class='container'>
-          <label>Model</label>
+        <div class='container mobile'>
+          <label class='bold'>Model</label>
           <input
             :value="carbonDioxideMonitor['model']"
             :disabled="carbonDioxideMonitor.status == 'display'"
             @change="setCarbonDioxideMonitorModel($event, carbonDioxideMonitor['id'])">
         </div>
 
-        <div class='container'>
-          <label>Name</label>
+        <div class='container mobile'>
+          <label class='bold'>Name</label>
           <input
             :value="carbonDioxideMonitor['name']"
             :disabled="carbonDioxideMonitor.status == 'display'"
             @change="setCarbonDioxideMonitorName($event, carbonDioxideMonitor['id'])">
         </div>
 
-        <div class='container'>
-          <label>Serial</label>
+        <div class='container mobile'>
+          <label class='bold'>Serial</label>
           <input
             :value="carbonDioxideMonitor['serial']"
             :disabled="carbonDioxideMonitor.status == 'display'"
             @change='setCarbonDioxideMonitorSerial($event, carbonDioxideMonitor["id"])'>
         </div>
 
-        <div class='container centered'
+        <div class='container centered change'
             v-if="carbonDioxideMonitor.status == 'editable'"
         >
           <button
@@ -256,7 +263,7 @@
           <button @click='saveCO2Monitor(carbonDioxideMonitor["id"])' :disabled="!validCO2Monitor(carbonDioxideMonitor)">Save</button>
         </div>
 
-        <div class='container centered'
+        <div class='container centered change'
             v-if="carbonDioxideMonitor.status == 'display'"
         >
           <button @click='editCO2Monitor(carbonDioxideMonitor["id"])'>Edit</button>
@@ -265,18 +272,18 @@
     </div>
 
     <div class='container' v-if='display == "socials"'>
-      <div class='container'>
-        <label>Twitter</label>
+      <div class='container mobile'>
+        <label class='bold'>Twitter</label>
         <input :value='socials.twitter' @change='updateSocials($event, "twitter")' :disabled="this.status == 'saved'">
       </div>
-      <div class='container'>
-        <label>Mastodon</label>
+      <div class='container mobile'>
+        <label class='bold'>Mastodon</label>
         <input :value='socials.mastodon' @change='updateSocials($event, "mastodon")' :disabled="this.status == 'saved'">
       </div>
-      <div class='container'>
-        <label>Facebook</label>
+      <div class='container mobile'>
+        <label class='bold'>Facebook</label>
         <input :value='socials.facebook' @change='updateSocials($event, "facebook")' :disabled="this.status == 'saved'">
-      <div class='container centered'>
+      <div class='container centered change'>
         <button @click='save' v-if='this.status == "edit"'>Save</button>
         <button @click='editProfile' v-if='this.status == "saved"'>Edit</button>
       </div>
@@ -291,6 +298,8 @@ import axios from 'axios';
 import { useEventStore } from './stores/event_store';
 import { useMainStore } from './stores/main_store';
 import { convertLengthBasedOnMeasurementType, generateUUID, setupCSRF } from './misc';
+import CircularButton from './circular_button.vue';
+import PersonIcon from './person_icon.vue';
 import { useEventStores } from './stores/event_stores';
 import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia'
@@ -299,7 +308,9 @@ import { toggleCSS } from './colors.js'
 export default {
   name: 'Profile',
   components: {
-    Event
+    CircularButton,
+    Event,
+    PersonIcon
   },
   computed: {
     ...mapWritableState(
@@ -543,6 +554,11 @@ export default {
   .subsection {
     font-weight: bold;
   }
+
+  .bold {
+    font-weight: bold;
+  }
+
   .wide {
     flex-direction: column;
   }
@@ -553,7 +569,7 @@ export default {
 
   .centered {
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
   }
 
   button {
@@ -579,5 +595,51 @@ export default {
   .question-mark {
     font-size: 1.25em;
     fill: red;
+  }
+
+  button.tab-item {
+    padding: 0;
+  }
+  .menu {
+    background-color: #eee;
+  }
+  .menu button {
+    border: 0;
+  }
+
+  select {
+    height: 3em;
+  }
+
+  .change button {
+    margin-top: 4em;
+    font-weight: bold;
+  }
+
+  @media(max-width: 800px) {
+    .border-showing {
+      border: 0;
+      width: 95vw;
+    }
+
+    .mobile {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label, h2 {
+      text-align: center;
+    }
+
+    .container input {
+      height: 2em;
+      margin-left: 1em;
+      margin-right: 1em;
+    }
+
+    input {
+      width: auto;
+    }
+
   }
 </style>
