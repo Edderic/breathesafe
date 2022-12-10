@@ -130,7 +130,6 @@ export const useProfileStore = defineStore('profile', {
       let toSave = {
         'profile': {
           'measurement_system': this.systemOfMeasurement,
-          'mask_type': prevalenceStore.maskType,
           'first_name': this.firstName,
           'last_name': this.lastName,
           'stride_length_meters': this.strideLengthMeters,
