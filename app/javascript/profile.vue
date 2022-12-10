@@ -110,7 +110,7 @@
         </div>
         <div class='row' v-show="showWhyHeight">
           <p >
-            We need the room volume to assess risk. We assume a box model, so
+            How tall are you? We need the room volume to assess risk. We assume a box model, so
             the components are length, width, and height. To calculate room height, you
             could use your own height as a reference. When you add a measurement, for
             example, you will be asked how many times you can fit your height into the
@@ -161,10 +161,11 @@
         </div>
         <div class='row' v-show="showWhyStrideLength">
           <p >
-            To estimate the length and/or width of the room, one could use one's
-    stride length as a way to estimate. Take a step as you normally would while
-    walking. The distance between the very tip of your toes of the back foot and
-    the very tip of your toes of the front foot is the stride length.
+            How big is your step? To estimate the length and/or width of the
+            room, one could use one's stride length as a way to estimate. Take a step as
+            you normally would while walking. The distance between the very tip of your
+            toes of the back foot and the very tip of your toes of the front foot is the
+            stride length.
           </p>
 
           <svg
