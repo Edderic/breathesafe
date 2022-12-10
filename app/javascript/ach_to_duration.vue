@@ -15,7 +15,7 @@
           :maxVal=1
           :value='durationMinutesToRemove(0.99)'
           :style='cellCSSMerged'
-        /> minutes to remove 99% of the virus that have been exhaled by the infector.
+        /> minutes to remove 99% of the virus that have been exhaled by the infector (after the infector has left).
       </span>
 
       <span>Increasing total ACH, whether done by added ventilation, portable
