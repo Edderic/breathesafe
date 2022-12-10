@@ -51,12 +51,6 @@ export const useProfileStore = defineStore('profile', {
       let hasProfile = false
 
       if (!currentUser) {
-        prevalenceStore.numPositivesLastSevenDays = 300000
-        prevalenceStore.numPopulation = 60000000
-        prevalenceStore.uncountedFactor = 10
-        prevalenceStore.maskType = "None"
-        prevalenceStore.eventDisplayRiskTime = this.eventDisplayRiskTime
-
         this.message = "No current user found. Using defaults."
         this.systemOfMeasurement = "imperial"
         this.measurementUnits = getMeasurementUnits(this.systemOfMeasurement)
@@ -73,11 +67,6 @@ export const useProfileStore = defineStore('profile', {
             hasProfile = true
 
             let profile = data.profile
-            prevalenceStore.numPositivesLastSevenDays = profile.num_positive_cases_last_seven_days
-            prevalenceStore.numPopulation = profile.num_people_population
-            prevalenceStore.uncountedFactor = profile.uncounted_cases_multiplier
-            prevalenceStore.maskType = profile.mask_type
-            prevalenceStore.eventDisplayRiskTime = profile.event_display_risk_time
 
             this.heightMeters = profile.height_meters
             this.strideLengthMeters = profile.stride_length_meters
