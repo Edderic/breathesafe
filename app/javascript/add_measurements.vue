@@ -899,15 +899,20 @@ export default {
     setUseOwnHeight(value) {
       this.useOwnHeight = value
     },
-    setPersonHeightToRoomHeight(value) {
-      this.roomHeightMeters = value * this.heightMeters
-      this.personHeightToRoomHeight = value
+    setPersonHeightToRoomHeight(event) {
+      let value = event.target.value
+      this.roomHeightMeters = parseFloat(value) * this.heightMeters
+      this.personHeightToRoomHeight = parseFloat(value)
     },
     addVolumeFactor(value) {
       this.roomUsableVolumeFactor += parseFloat(value)
     },
     addRoomHeightUsingOwnHeight(value) {
-      this.setPersonHeightToRoomHeight(parseFloat(value) + this.personHeightToRoomHeight)
+      this.setPersonHeightToRoomHeight({
+        target: {
+          value: parseFloat(value) + this.personHeightToRoomHeight
+        }
+      })
     },
     addRoomDim(amount, dimension) {
       let newEvent = {
