@@ -225,8 +225,36 @@
       <div class='row centered'>
         <label class='subsection'>CO2 Monitors</label>
 
+        <CircularButton text='?' @click='showAllowedCO2Models'/>
         <CircularButton text='+' @click='newCO2monitor'/>
       </div>
+
+      <div v-if='showingAllowedCO2Models'>
+        <p>Here are the list of acceptable CO2 monitors for logging data into Breathesafe. They use NDIR sensors. </p>
+        <table class='allowable-co2-monitors'>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Cost</th>
+          </tr>
+          <tr v-for='carbonDioxideMonitor in allowableCO2Monitors'>
+            <td>
+            <a :href="carbonDioxideMonitor.website">
+              <img :src="carbonDioxideMonitor.imageLink" :alt="`Image of ${carbonDioxideMonitor.name}`" class='icon-img'>
+            </a>
+            </td>
+            <td>
+            <a :href="carbonDioxideMonitor.website">
+              {{ carbonDioxideMonitor.name }}
+            </a>
+            </td>
+            <td>
+              {{ carbonDioxideMonitor.estimatedCost }}
+            </td>
+          </tr>
+        </table>
+      </div>
+
       <div class='border-showing' v-for='carbonDioxideMonitor in carbonDioxideMonitors' :key=carbonDioxideMonitor.id>
         <div class='container mobile'>
           <label class='bold'>Model</label>
@@ -304,6 +332,7 @@ import { useEventStores } from './stores/event_stores';
 import { useProfileStore } from './stores/profile_store';
 import { mapWritableState, mapState, mapActions } from 'pinia'
 import { toggleCSS } from './colors.js'
+import { CARBON_DIOXIDE_MONITORS } from './carbon_dioxide_monitors.js'
 
 export default {
   name: 'Profile',
@@ -339,6 +368,9 @@ export default {
           'socials'
         ]
     ),
+    allowableCO2Monitors() {
+      return CARBON_DIOXIDE_MONITORS
+    },
     height() {
       return convertLengthBasedOnMeasurementType(
         this.heightMeters,
@@ -366,6 +398,7 @@ export default {
   },
   data() {
     return {
+      showingAllowedCO2Models: false,
       showWhyHeight: false,
       showWhyStrideLength: false,
       circle: toggleCSS,
@@ -375,6 +408,9 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['setFocusTab', 'getCurrentUser']),
     ...mapActions(useProfileStore, ['setSystemOfMeasurement', 'loadProfile', 'loadCO2Monitors', 'updateProfile']),
+    showAllowedCO2Models() {
+      this.showingAllowedCO2Models = !this.showingAllowedCO2Models
+    },
     setDisplay(string) {
       this.display = string
     },
@@ -614,6 +650,16 @@ export default {
   .change button {
     margin-top: 4em;
     font-weight: bold;
+  }
+
+  tr td {
+    text-align: center;
+    padding: 0.5em;
+  }
+
+  .icon-img {
+    width: 10rem;
+    height: 10rem
   }
 
   @media(max-width: 800px) {
