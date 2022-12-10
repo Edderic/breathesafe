@@ -483,6 +483,10 @@ export default {
     .controls {
       width: 100%;
     }
+
+    .scrollable {
+      font-size: 0.9em;
+    }
     .desktop {
       /*display: none;*/
     }
@@ -491,6 +495,7 @@ export default {
     .middle-controls {
       display: flex;
       flex-direction: row;
+
     }
     .desktop {
       display: table-cell;
