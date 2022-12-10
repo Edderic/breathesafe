@@ -355,7 +355,7 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
               <th>Factor</th>
             </tr>
             <tr v-for='(value, key, index) in susceptibleBreathingActivityFactorMappings'>
-              <td style='padding: 0.25em 1em;'>{{ ['Sleep or Nap', 'Sedentary / Passive', 'Light Intensity', 'Moderate Intensity', 'High Intensity'][index] }}</td>
+              <td style='padding: 0.25em 1em;' :class="{ bold: key == worstCaseInhalation['inhalationActivity']}">{{ ['Sleep or Nap', 'Sedentary / Passive', 'Light Intensity', 'Moderate Intensity', 'High Intensity'][index] }}</td>
               <td style='padding: 0;'>
                 <ColoredCell
                   :colorScheme="inhalationActivityScheme"
@@ -367,27 +367,6 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
             </tr>
           </table>
         </div>
-
-        <p>
-        If someone were to go from <ColoredCell
-              :colorScheme="inhalationActivityScheme"
-              :maxVal=1
-              :value='worstCaseInhalation["inhalationFactor"]'
-              :text='worstCaseInhalation["inhalationActivity"]'
-              :style="inlineCellCSS"
-          /> to <ColoredCell
-              :colorScheme="inhalationActivityScheme"
-              :maxVal=1
-              :value='susceptibleBreathingActivityFactorMappings["High Intensity"]["30 to <40"]["mean cubic meters per hour"]'
-              text='High intensity'
-              :style="inlineCellCSS"
-          />, this increases the risk by a factor of <ColoredCell
-              :colorScheme="inhalationActivityScheme"
-              :maxVal=1
-              :value='roundOut(susceptibleBreathingActivityFactorMappings["High Intensity"]["30 to <40"]["mean cubic meters per hour"] / worstCaseInhalation["inhalationFactor"], 1)'
-              :style="inlineCellCSS"
-          />, assuming that the risk was low to begin with.
-        </p>
       </div>
 
 
@@ -404,7 +383,7 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
                 :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
                 :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
                 :style="inlineCellCSS"
-            />. Here's a table to contextualize how good or bad it is. In this model, it essentially maps into a factor, where higher leads to more risk.
+            />. See table for contextualization.
         </span>
         <div class='centered'>
           <table>
@@ -413,7 +392,7 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
               <th>Factor</th>
             </tr>
             <tr v-for='(value, key) in infectorActivities'>
-              <td class='table-td'>{{key}}</td>
+              <td :class='{"table-td": true, bold: key == riskiestPotentialInfector["aerosolGenerationActivity"]}'>{{key}}</td>
               <td class='table-td'>
               <ColoredCell
                 :colorScheme="riskiestAerosolGenerationActivityScheme"
@@ -425,39 +404,6 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
             </tr>
           </table>
         </div>
-
-        <p>
-          For example, <ColoredCell
-              :colorScheme="riskiestAerosolGenerationActivityScheme"
-              :maxVal=1
-              :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
-              :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
-              :style="inlineCellCSS"
-          /> maps to <ColoredCell
-              :colorScheme="riskiestAerosolGenerationActivityScheme"
-              :maxVal=1
-              :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
-              :style="inlineCellCSS"
-          />. On the other hand, <ColoredCell
-              :colorScheme="riskiestAerosolGenerationActivityScheme"
-              :maxVal=1
-              :value='aerosolActivityToFactor("Heavy exercise – Loudly speaking")'
-              text='Heavy Exercise - Loudly Speaking'
-              :style="inlineCellCSS"
-          />, maps to <ColoredCell
-              :colorScheme="riskiestAerosolGenerationActivityScheme"
-              :maxVal=1
-              :value='aerosolActivityToFactor("Heavy exercise – Loudly speaking")'
-              :style="inlineCellCSS"
-          />. Switching to the latter from the former  essentially
-          increases the risk of transmission by a factor of <ColoredCell
-              :colorScheme="riskiestAerosolGenerationActivityScheme"
-              :maxVal=1
-              :value='roundOut(aerosolActivityToFactor("Heavy exercise – Loudly speaking") / aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"]), 1)'
-              :style="inlineCellCSS"
-          />, assuming the risk was low to begin with.
-        </p>
-
       </div>
 
       <div class='item-span-wide' id='section-masking'>
