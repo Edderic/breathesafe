@@ -324,7 +324,8 @@ export default {
           'strideLengthMeters',
           'firstName',
           'lastName',
-          'status'
+          'status',
+          'socials'
         ]
     ),
     height() {
@@ -504,6 +505,9 @@ export default {
         this.measurementUnits.lengthMeasurementType,
         'meters'
       )
+    },
+    updateSocials(event, what) {
+      this.socials[what] = event.target.value
     },
     updateFirstName(event) {
       this.firstName = event.target.value
