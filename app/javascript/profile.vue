@@ -263,6 +263,21 @@
         </div>
       </div>
     </div>
+
+    <div class='container' v-if='display == "socials"'>
+      <div class='container'>
+        <label>Twitter</label>
+        <input :value='firstName' @change='updateFirstName' :disabled="this.status == 'saved'">
+      </div>
+      <div class='container'>
+        <label>Mastodon</label>
+        <input :value='lastName' @change='updateLastName' :disabled="this.status == 'saved'">
+      </div>
+      <div class='container centered'>
+        <button @click='save' v-if='this.status == "edit"'>Save</button>
+        <button @click='editProfile' v-if='this.status == "saved"'>Edit</button>
+      </div>
+    </div>
   </div>
 </template>
 
