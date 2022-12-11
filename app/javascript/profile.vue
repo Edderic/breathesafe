@@ -1,9 +1,6 @@
 <template>
   <div class='wide border-showing'>
-
-    <div class='container centered'>
-      <h2>Profile</h2>
-    </div>
+    <h2>Profile</h2>
 
     <div class='container row centered menu'>
       <button class='tab-item' id='miscellaneous-button' @click='setDisplay("miscellaneous")'>
