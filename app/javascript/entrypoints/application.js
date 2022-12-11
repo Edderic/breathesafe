@@ -37,6 +37,7 @@ import App from '../app.vue';
 import AddMeasurements from '../add_measurements.vue';
 import FAQs from '../faqs.vue';
 import MapEvents from '../map_events.vue'
+import Landing from '../landing.vue'
 import Profile from '../profile.vue'
 import Registration from '../registration.vue'
 import SignIn from '../sign_in.vue'
@@ -54,7 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Each route should map to a component.
   // We'll talk about nested routes later.
   const routes = [
-    { path: '/', component: MapEvents, name: 'MapEvents' },
+    { path: '/', component: Landing, name: 'Landing' },
+    { path: '/venues', component: MapEvents, name: 'Venues' },
     { path: '/analytics/:id', component: Analytics, name: 'Analytics' },
     { path: '/signin', component: SignIn, name: 'SignIn' },
     { path: '/events/new', component: AddMeasurements, name: 'AddMeasurements' },
