@@ -1,6 +1,6 @@
 <template>
   <div class='main'>
-    <p class='tagline'>Breathesafe: The <span class='italic'>Yelp</span> of Indoor Air Quality</p>
+    <p class='tagline'>Breathesafe: COVID Risk Assessments of Venues</p>
     <router-link :to='{ name: "Venues" }'>
     <img src="https://breathesafe-development.s3.us-east-2.amazonaws.com/images/map-screenshot.png" alt="Map with locations marked with circles with different colors, indicating indoor air quality">
     </router-link>
@@ -25,7 +25,7 @@
       <router-link :to='{ name: "Venues" }'>
         <Button text='Find Safer Venues'/>
       </router-link>
-      <Button text='Add Indoor Air Quality Measurements'/>
+      <Button text='Add Measurements'/>
     </div>
 
   </div>
@@ -88,7 +88,13 @@ export default {
     font-weight: bold;
   }
 
+  .call-to-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
   .call-to-actions a {
     text-decoration: none;
+
   }
 </style>

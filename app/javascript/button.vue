@@ -31,6 +31,8 @@ export default {
     background-color: rgb(219, 21, 0);
     color: white;
     margin-top: 1em;
-    margin-bottom: 1em;
+  }
+
+  @media(max-width: 800px) {
   }
 </style>
