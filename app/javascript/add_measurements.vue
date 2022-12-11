@@ -1132,8 +1132,6 @@ export default {
       width: 50%;
       padding-top: 1em;
       padding-bottom: 1em;
-      margin-top: 1em;
-      margin-bottom: 1em;
     }
 
     .final {
