@@ -99,7 +99,7 @@ export default {
       }
       else {
         this.$router.push({
-          name: 'MapEvents'
+          name: 'Venues'
         });
       }
     }

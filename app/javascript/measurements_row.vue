@@ -143,7 +143,7 @@ export default {
         .then(response => {
           this.message = data.message
           this.$router.push({
-            name: 'MapEvents',
+            name: 'Venues',
             query: {
               'admin-view': true
             }

@@ -40,7 +40,7 @@ import { useProfileStore } from './stores/profile_store';
 import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
 
 export default {
-  name: 'MapEvents',
+  name: 'Venues',
   components: {
     CleanAirDeliveryRateTable,
     DayHourHeatmap,
@@ -93,7 +93,7 @@ export default {
       prevQuery['iconFocus'] = value
 
       this.$router.push({
-        name: 'MapEvents',
+        name: 'Venues',
         query: prevQuery
       })
 
