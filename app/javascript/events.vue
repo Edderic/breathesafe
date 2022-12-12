@@ -180,7 +180,7 @@ export default {
       Object.assign(oldQuery, newQuery)
 
       this.$router.push({
-        name: 'MapEvents',
+        name: 'Venues',
         query: oldQuery
       })
     },
@@ -226,7 +226,7 @@ export default {
       })
 
       this.$router.push({
-        name: 'MapEvents',
+        name: 'Venues',
         query: query
       })
 
@@ -262,7 +262,7 @@ export default {
       Object.assign(copy, newQuery)
       this.$router.push(
         {
-          name: 'MapEvents',
+          name: 'Venues',
           query: copy
         }
       )
@@ -295,7 +295,7 @@ export default {
       Object.assign(copy, newQuery)
       this.$router.push(
         {
-          name: 'MapEvents',
+          name: 'Venues',
           query: copy
         }
       )
@@ -331,7 +331,7 @@ export default {
       Object.assign(copy, newQuery)
       this.$router.push(
         {
-          name: 'MapEvents',
+          name: 'Venues',
           query: copy
         }
       )
