@@ -1,16 +1,20 @@
 <template>
-  <div class='main'>
-    <p class='tagline'>Breathesafe: COVID Risk Assessments of Venues</p>
-    <router-link :to='{ name: "Venues" }'>
-    <img src="https://breathesafe-development.s3.us-east-2.amazonaws.com/images/map-screenshot.png" alt="Map with locations marked with circles with different colors, indicating indoor air quality">
-    </router-link>
-
-    <div style='display: none;'>
-      <div class='quote'>
-        <a href="https://twitter.com/kprather88/status/1551262466813726720?ref_src=twsrc%5Etfw">Humans take 22,000 breaths per day. Air is the #1 exposure route to all pollution and pathogens.</a>
+  <div>
+    <h2 class='tagline'>Breathesafe: Find Spaces with Cleaner Air</h2>
+    <div class='main'>
+      <div class='centered'>
+        <router-link :to='{ name: "Venues" }'>
+        <img src="https://breathesafe-development.s3.us-east-2.amazonaws.com/images/map-screenshot.png" alt="Map with locations marked with circles with different colors, indicating indoor air quality">
+        </router-link>
       </div>
 
-      <a class='author' href="https://kprather.scrippsprofiles.ucsd.edu/">- Kimberly Prather, Ph.D</a>
+      <div class='call-to-actions centered'>
+        <router-link :to='{ name: "Venues" }'>
+          <Button text='Find Safer Venues'/>
+        </router-link>
+        <Button text='Add Measurements'/>
+      </div>
+
     </div>
 
     <div>
@@ -19,13 +23,6 @@
       </div>
 
       <a class='author' href="https://leadership.ucdavis.edu/people/richard-corsi">- Richard Corsi, Ph.D</a>
-    </div>
-
-    <div class='call-to-actions'>
-      <router-link :to='{ name: "Venues" }'>
-        <Button text='Find Safer Venues'/>
-      </router-link>
-      <Button text='Add Measurements'/>
     </div>
 
   </div>
@@ -68,6 +65,7 @@ export default {
     margin-left: 2em;
     padding-left: 1em;
     border-left: 5px solid black;
+    max-width: 25em;
   }
   .author {
     margin-left: 2em;
@@ -76,9 +74,6 @@ export default {
     margin-left: 3em;
   }
 
-  img {
-    width: 100vw;
-  }
   .italic {
     font-style: italic;
   }
@@ -95,6 +90,29 @@ export default {
   }
   .call-to-actions a {
     text-decoration: none;
+  }
 
+  .main {
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: auto;
+  }
+
+  .centered {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  img {
+    width: 30em;
+  }
+  @media(max-width: 700px) {
+    img {
+      width: 100vw;
+    }
+
+    .call-to-actions {
+      height: 14em;
+    }
   }
 </style>
