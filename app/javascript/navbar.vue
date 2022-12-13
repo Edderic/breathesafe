@@ -10,8 +10,7 @@
         <router-link class='desktop clickable side-padding' to='/faqs'>FAQs</router-link>
         <router-link class='desktop clickable side-padding' to='/venues'>Venues</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "Venues"}' v-if='signedIn'>Profile</router-link>
-        <router-link class='desktop clickable side-padding' to='/register' v-if=!signedIn>Register</router-link>
-        <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn>Sign in</router-link>
+        <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn>Sign up/Sign in</router-link>
         <a class='desktop clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
 
         <Accordion class='mobile' @click='toggleMobileCol'/>
@@ -22,8 +21,7 @@
       <router-link class='mobile-row clickable side-padding' to='/faqs'>FAQs</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "Venues"}'>Venues</router-link>
       <router-link class='mobile-row clickable side-padding' to='/profile' v-if='signedIn'>Profile</router-link>
-      <router-link class='mobile-row clickable side-padding' to='/register' v-if=!signedIn>Register</router-link>
-      <router-link class='mobile-row clickable side-padding' to='/signin' v-if=!signedIn>Sign in</router-link>
+      <router-link class='mobile-row clickable side-padding' to='/signin' v-if=!signedIn>Sign up/Sign in</router-link>
       <a class='mobile-row clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
     </div>
   </div>

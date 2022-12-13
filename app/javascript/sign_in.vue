@@ -1,14 +1,14 @@
 <template>
   <form class='wide border-showing' action="">
     <div class='container centered'>
-      <h2>Sign in</h2>
+      <h2>Sign up/Sign in</h2>
     </div>
 
     <div class='container centered'>
       <h3>{{ message }}</h3>
     </div>
 
-    <div class='container'>
+    <div class='container' v-if='!registered'>
       <label>Email</label>
 
       <input
@@ -16,7 +16,7 @@
         @change="setEmail">
     </div>
 
-    <div class='container'>
+    <div class='container' v-if='!registered'>
       <label>Password</label>
 
       <input
@@ -27,7 +27,8 @@
       >
     </div>
 
-    <div class='container'>
+    <div class='container row'>
+      <button @click="signUp">Sign up</button>
       <button @click="signIn">Sign In</button>
     </div>
   </form>
@@ -53,6 +54,7 @@ export default {
       name: "",
       email: "",
       password: "",
+      registered: false
     }
   },
   methods: {
@@ -63,6 +65,32 @@ export default {
     },
     setPassword(event) {
       this.password = event.target.value;
+    },
+    signUp() {
+      let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
+      axios.defaults.headers.common['X-CSRF-Token'] = token
+      axios.defaults.headers.common['Accept'] = 'application/json'
+      axios.post('/users', {
+        user: {
+          email: this.email,
+          password: this.password
+        }
+      })
+      .then(response => {
+        console.log(response)
+        if (response.status == 201) {
+          this.message = `Sent a confirmation email to ${this.email}. Please check.`
+          this.$router.push({
+            path: '/signin'
+          })
+        }
+
+        // whatever you want
+      })
+      .catch(error => {
+        console.log(error)
+        // whatever you want
+      })
     },
     async signIn() {
       let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
