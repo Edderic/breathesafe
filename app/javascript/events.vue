@@ -6,7 +6,7 @@
       <select class='margined' :value='`${selectedMask.numWays}-way ${selectedMask.maskName}`' @change='setMaskType'>
         <option v-for='m in masks'>{{ m.numWays }}-way {{ m.maskName }}</option>
       </select>
-      <router-link class='margined button' to="/events/new" v-if='signedIn'>Create</router-link>
+      <router-link class='margined button' to="/events/new" v-if='signedIn'>Add Measurements</router-link>
     </div>
 
     <div class='scrollable'>
