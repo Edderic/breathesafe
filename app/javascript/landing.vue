@@ -12,7 +12,9 @@
         <router-link :to='{ name: "Venues" }'>
           <Button text='Find Safer Venues'/>
         </router-link>
-        <Button text='Add Measurements'/>
+        <router-link :to='{ name: "AddMeasurements" }'>
+          <Button text='Add Measurements'/>
+        </router-link>
       </div>
 
     </div>

@@ -27,7 +27,7 @@
       >
     </div>
 
-    <div class='container row'>
+    <div class='container row' v-if='!registered'>
       <button @click="signUp">Sign up</button>
       <button @click="signIn">Sign In</button>
     </div>
@@ -83,6 +83,7 @@ export default {
           this.$router.push({
             path: '/signin'
           })
+          this.registered = true
         }
 
         // whatever you want
