@@ -87,6 +87,7 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+    height: 14em;
   }
   .call-to-actions a {
     text-decoration: none;

@@ -30,7 +30,6 @@ export default {
     font-size: 1.5em;
     background-color: rgb(219, 21, 0);
     color: white;
-    margin-top: 1em;
   }
 
   @media(max-width: 800px) {
