@@ -8,8 +8,9 @@
 
       <div class='vertical-centered'>
         <router-link class='desktop clickable side-padding' to='/faqs'>FAQs</router-link>
-        <router-link class='desktop clickable side-padding' to='/venues'>Venues</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "Venues"}' v-if='signedIn'>Profile</router-link>
+        <router-link class='desktop clickable side-padding' :to='{ name: "Venues"}'>Venues</router-link>
+        <router-link class='desktop clickable side-padding' :to='{ name: "AddMeasurements"}' v-if='signedIn'>Add Measurements</router-link>
+        <router-link class='desktop clickable side-padding' :to='{ name: "Profile"}' v-if='signedIn'>Profile</router-link>
         <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn>Sign up/Sign in</router-link>
         <a class='desktop clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
 
@@ -20,7 +21,8 @@
     <div class='mobile-col' v-if="showMobile()">
       <router-link class='mobile-row clickable side-padding' to='/faqs'>FAQs</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "Venues"}'>Venues</router-link>
-      <router-link class='mobile-row clickable side-padding' to='/profile' v-if='signedIn'>Profile</router-link>
+      <router-link class='mobile-row clickable side-padding' :to='{ name: "AddMeasurements"}' v-if='signedIn'>Add Measurements</router-link>
+      <router-link class='mobile-row clickable side-padding' :to='{ name: "Profile"}' v-if='signedIn'>Profile</router-link>
       <router-link class='mobile-row clickable side-padding' to='/signin' v-if=!signedIn>Sign up/Sign in</router-link>
       <a class='mobile-row clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
     </div>
