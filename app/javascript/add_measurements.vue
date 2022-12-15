@@ -1082,7 +1082,6 @@ export default {
     border: 0;
   }
 
-  @media(max-width: 800px) {
     .menu {
       margin-top: 0;
       margin-bottom: 0;
@@ -1172,6 +1171,12 @@ export default {
       font-weight: bold;
       font-size: 1em;
     }
-  }
 
+
+  @media(min-width: 750px) {
+    .border-showing, .chunk {
+      width: 750px;
+    }
+
+  }
 </style>
