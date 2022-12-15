@@ -296,25 +296,29 @@
 
 
     <div class='container chunk' v-if='display == "pac"'>
-      <label class='subsection'>Portable Air Cleaning</label>
-      <button @click='addPortableAirCleaner'>+</button>
+      <div class='space-around'>
+        <label class='subsection'>Portable Air Cleaning</label>
+        <CircularButton text='+' @click='addPortableAirCleaner'/>
+      </div>
       <div class='container border-showing' v-for='portableAirCleaner in portableAirCleaners' :key=portableAirCleaner.id>
         <div class='container'>
-          <label>Air delivery rate ({{ measurementUnits.airDeliveryRateMeasurementType }})</label>
+          <label><span class='bold'>Air delivery rate</span> ({{ measurementUnits.airDeliveryRateMeasurementType }})</label>
           <input
+            type='number'
             :value="portableAirCleaner['airDeliveryRate']"
             @change="setPortableAirCleaningDeviceAirDeliveryRate($event, portableAirCleaner.id)">
         </div>
 
         <div class='container'>
-          <label>Single-pass filtration efficiency (dimensionless)</label>
+          <label><span class='bold'>Single-pass filtration efficiency </span>(dimensionless)</label>
           <input
+            type='number'
             :value="portableAirCleaner['singlePassFiltrationEfficiency']"
             @change="setPortableAirCleaningDeviceSinglePassFiltrationEfficiency($event, portableAirCleaner.id)">
         </div>
 
         <div class='container wide'>
-          <label class='textarea-label'>Notes</label>
+          <label class='textarea-label bold'>Notes</label>
           <textarea type="textarea" rows=5 columns=80  @change='setPortableAirCleaningNotes($event, portableAirCleaner.id)'>{{ portableAirCleaner['notes'] }}</textarea>
         </div>
 
@@ -334,7 +338,7 @@
       </div>
 
       <div class='container'>
-        <label><span class='bold'>CO2 Ambient (parts per million)</span></label>
+        <label><span class='bold'>CO2 Ambient </span>(parts per million)</label>
 
         <div class='continuous mega'>
           <CircularButton text='-100' @click='addCO2Ambient(-100)'/>
@@ -353,7 +357,7 @@
       </div>
 
       <div class='container'>
-        <label><span class='bold'>CO2 Steady State (parts per million)</span></label>
+        <label><span class='bold'>CO2 Steady State </span>(parts per million)</label>
         <div class='continuous mega'>
           <CircularButton text='-100' @click='addCO2SteadyState(-100)'/>
           <CircularButton text='-10' @click='addCO2SteadyState(-10)'/>
@@ -986,6 +990,7 @@ export default {
   .wide {
     display: flex;
     flex-direction: row;
+    align-items: center;
   }
 
   .row {
@@ -1008,6 +1013,7 @@ export default {
   .centered {
     display: flex;
     justify-content: center;
+    align-items: center;
   }
 
   table {
@@ -1077,100 +1083,113 @@ export default {
     min-width: 500px;
     justify-content: space-around;
     background-color: #eee;
+    margin-top: 0;
+    margin-bottom: 0;
   }
+
+  .space-around {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+  }
+
   .menu button {
     border: 0;
   }
 
-    .menu {
-      margin-top: 0;
-      margin-bottom: 0;
-    }
-    textarea {
-      width: auto;
-    }
-    br {
-      display: none;
-    }
-    .container {
-      display: flex;
-      flex-direction: column;
-      margin-left: 0;
-      margin-right: 0;
-    }
+  .menu .tab-item {
+    border-top: 4px solid #eee;
+    border-bottom: 4px solid #eee;
+  }
 
-    .grouping .container {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      margin-top: 0;
-      margin-bottom: 0;
-    }
+  .menu button.selected {
+    border-bottom: 4px solid black;
+  }
 
-    .grouping input[type='number'] {
-      width: 2em;
-      font-size: 24px;
-    }
+  textarea {
+  }
+  br {
+    display: none;
+  }
+  .container {
+    display: flex;
+    flex-direction: column;
+    margin-left: 0;
+    margin-right: 0;
+  }
 
-    .continuous.mega {
-    }
+  .grouping .container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
 
-    .container input {
-      height: 2em;
-      margin-left: 1em;
-      margin-right: 1em;
-    }
+  .grouping input[type='number'] {
+    width: 2em;
+    font-size: 24px;
+  }
 
-    .container select {
-      height: 3em;
-      margin-left: 1em;
-      margin-right: 1em;
-    }
+  .continuous.mega {
+  }
 
-    .add-measurements {
-      display: none;
-    }
+  .container input {
+    height: 2em;
+    margin-left: 1em;
+    margin-right: 1em;
+  }
 
-    .autocomplete {
-      width: auto;
-    }
+  .container select {
+    height: 3em;
+    margin-left: 1em;
+    margin-right: 1em;
+  }
 
-    .row {
-      flex-direction: row;
-    }
+  .add-measurements {
+    display: none;
+  }
 
-    .row button {
-      width: 100%;
-      padding-top: 1em;
-      padding-bottom: 1em;
-    }
+  .autocomplete {
+    width: auto;
+  }
 
-    label, h2 {
-      text-align: center;
-    }
+  .row {
+    flex-direction: row;
+  }
 
-    .wider-input, input {
-      width: auto;
-    }
-    .chunk {
-      width: 100vw;
-    }
+  .row button {
+    width: 100%;
+    padding-top: 1em;
+    padding-bottom: 1em;
+  }
 
-    .container.centered button {
-      width: 50%;
-      padding-top: 1em;
-      padding-bottom: 1em;
-    }
+  label, h2 {
+    text-align: center;
+  }
 
-    .final {
-      justify-content: center;
-      align-items: center;
-    }
+  .wider-input, input {
+    width: auto;
+  }
+  .chunk {
+    width: 100vw;
+  }
 
-    .final button {
-      font-weight: bold;
-      font-size: 1em;
-    }
+  .container.centered button {
+    width: 50%;
+    padding-top: 1em;
+    padding-bottom: 1em;
+  }
+
+  .final {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .final button {
+    font-weight: bold;
+    font-size: 1em;
+  }
 
 
   @media(min-width: 750px) {

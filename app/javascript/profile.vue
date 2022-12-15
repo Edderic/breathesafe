@@ -616,7 +616,6 @@ export default {
 
   p {
     padding: 1em;
-    width: 20rem;
   }
 
 
