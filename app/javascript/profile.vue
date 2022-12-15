@@ -226,7 +226,7 @@
         <CircularButton text='+' @click='newCO2monitor'/>
       </div>
 
-      <div v-if='showingAllowedCO2Models'>
+      <div class='centered column' v-if='showingAllowedCO2Models'>
         <p>Here are the list of acceptable CO2 monitors for logging data into Breathesafe. They use NDIR sensors. </p>
         <table class='allowable-co2-monitors'>
           <tr>
@@ -592,6 +592,11 @@ export default {
     font-weight: bold;
   }
 
+  .column {
+    display: flex;
+    flex-direction: column;
+  }
+
   .wide {
     flex-direction: column;
   }
@@ -664,30 +669,41 @@ export default {
     text-align: center;
   }
 
-  @media(max-width: 800px) {
-    .border-showing {
-      border: 0;
-      width: 95vw;
+
+  .border-showing {
+    border: 0;
+    width: 95vw;
+  }
+
+  .mobile {
+    display: flex;
+    flex-direction: column;
+  }
+
+  label, h2 {
+    text-align: center;
+  }
+
+  .container input {
+    height: 2em;
+    margin-left: 1em;
+    margin-right: 1em;
+  }
+
+  input {
+    width: auto;
+  }
+
+  @media(min-width: 750px) {
+    .border-showing, .chunk {
+      width: 750px;
     }
 
-    .mobile {
-      display: flex;
-      flex-direction: column;
-    }
-
-    label, h2 {
-      text-align: center;
-    }
-
-    .container input {
-      height: 2em;
-      margin-left: 1em;
-      margin-right: 1em;
-    }
-
-    input {
+    p {
+      padding: 1em;
       width: auto;
     }
+
 
   }
 </style>
