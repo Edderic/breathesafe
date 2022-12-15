@@ -2,7 +2,7 @@
   <div class='border-showing' id='message'>
     <h2>Add Measurements</h2>
     <div class='container row centered menu'>
-      <button id='whereabouts' @click='setDisplay("whereabouts")'>
+      <button id='whereabouts' :class='{ "tab-item": true, "selected": display == "whereabouts"}' @click='setDisplay("whereabouts")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <circle cx="40" cy="25" r="20" fill="white"/>
@@ -12,7 +12,7 @@
           <circle cx="40" cy="25" r="10" fill="rgb(150, 29, 2)"/>
         </svg>
       </button>
-      <button id='room_dimensions' @click='setDisplay("room_dimensions")'>
+      <button id='room_dimensions' :class='{ "tab-item": true, "selected": display == "room_dimensions"}' @click='setDisplay("room_dimensions")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="M 31 20 l -5 13 h 25 l 3 -13 z m -5 13 v 20 h 25 v -20 m 0 20 l 3 -13.5 l 0 -19" fill="transparent" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
@@ -22,7 +22,7 @@
 
         </svg>
       </button>
-      <button id='ventilation' @click='setDisplay("ventilation")'>
+      <button id='ventilation' :class='{ "tab-item": true, "selected": display == "ventilation"}' @click='setDisplay("ventilation")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="m 20 30 h 40 l -20 -20 z" stroke='black' fill='#ccc'/>
@@ -53,7 +53,7 @@
         </svg>
       </button>
 
-      <button id='pac' @click='setDisplay("pac")'>
+      <button id='pac' :class='{ "tab-item": true, "selected": display == "pac"}' @click='setDisplay("pac")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="M 30 20 l -5 17 h 25 l 3 -17 z m -5 17 v 23 h 25 v -23 m 0 23 l 3 -17.5 l 0 -19" fill="white" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
@@ -86,7 +86,7 @@
         </svg>
       </button>
 
-      <button id='behaviors' @click='setDisplay("behaviors")'>
+      <button id='behaviors' :class='{ "tab-item": true, "selected": display == "behaviors"}' @click='setDisplay("behaviors")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="m 5 40 c 0 -10 10 -20 15 -20 c 5 0 10 0 6 10 c 4 4 4 4 4 12 l -5 0 l 3 4 l -8 1 l 8 7 c -2 10 -16 6 -16 5 z" stroke='black' fill='#eee'/>
