@@ -3,14 +3,14 @@
     <h2>Profile</h2>
 
     <div class='container row centered menu'>
-      <button class='tab-item' id='miscellaneous-button' @click='setDisplay("miscellaneous")'>
+      <button :class='{ "tab-item": true, "selected": display == "miscellaneous"}' id='miscellaneous-button' @click='setDisplay("miscellaneous")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <text x="12" y="30">Misc</text>
         </svg>
       </button>
 
-      <button class='tab-item' id='ventilation' @click='setDisplay("ventilation")'>
+      <button :class='{ "tab-item": true, "selected": display == "ventilation"}' id='ventilation' @click='setDisplay("ventilation")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="m 20 30 h 40 l -20 -20 z" stroke='black' fill='#ccc'/>
@@ -41,7 +41,7 @@
         </svg>
       </button>
 
-      <button class='tab-item' id='length_estimation' @click='setDisplay("length_estimation")'>
+      <button :class='{ "tab-item": true, "selected": display == "length_estimation"}' id='length_estimation' @click='setDisplay("length_estimation")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="M 31 20 l -5 13 h 25 l 3 -13 z m -5 13 v 20 h 25 v -20 m 0 20 l 3 -13.5 l 0 -19" fill="transparent" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
@@ -52,7 +52,7 @@
         </svg>
       </button>
 
-      <button class='tab-item' id='socials' @click='setDisplay("socials")'>
+      <button :class='{ "tab-item": true, "selected": display == "socials"}' id='socials' @click='setDisplay("socials")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
 
@@ -638,6 +638,16 @@ export default {
   button.tab-item {
     padding: 0;
   }
+
+  .menu .tab-item {
+    border-top: 4px solid #eee;
+    border-bottom: 4px solid #eee;
+  }
+
+  .menu button.selected {
+    border-bottom: 4px solid black;
+  }
+
   .menu {
     background-color: #eee;
     min-width: 445px;
