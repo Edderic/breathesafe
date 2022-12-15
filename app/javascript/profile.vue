@@ -635,6 +635,7 @@ export default {
   }
   .menu {
     background-color: #eee;
+    min-width: 445px;
   }
   .menu button {
     border: 0;
@@ -657,6 +658,10 @@ export default {
   .icon-img {
     width: 10rem;
     height: 10rem
+  }
+
+  h2 {
+    text-align: center;
   }
 
   @media(max-width: 800px) {

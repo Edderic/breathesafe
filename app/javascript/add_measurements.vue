@@ -1022,6 +1022,10 @@ export default {
     background-color: #e6e6e6;
   }
 
+  h2 {
+    text-align: center;
+  }
+
   text {
     dominant-baseline: hanging;
     font: 10px Verdana, Helvetica, Arial, sans-serif;
@@ -1069,13 +1073,19 @@ export default {
     padding-right: 1em;
   }
 
+  .menu {
+    min-width: 500px;
+    justify-content: space-around;
+    background-color: #eee;
+  }
+  .menu button {
+    border: 0;
+  }
+
   @media(max-width: 800px) {
     .menu {
       margin-top: 0;
       margin-bottom: 0;
-    }
-    .menu button {
-      border: 0;
     }
     textarea {
       width: auto;
