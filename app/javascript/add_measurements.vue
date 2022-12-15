@@ -539,6 +539,31 @@ export default {
   async created() {
     // TODO: fire and forget. Make asynchronous.
     await this.getCurrentUser()
+    if (!this.currentUser) {
+      this.$router.push({
+        name: 'SignIn',
+        query: {
+          'attempt-name': 'AddMeasurements'
+        }
+      })
+    }
+
+    this.$watch(
+      () => this.$route.name,
+      (toName, previousName) => {
+        if (toName == 'AddMeasurements') {
+          // check to see if the currentUser
+          if (!this.currentUser) {
+            this.$router.push({
+              name: 'SignIn',
+              query: {
+                'attempt-name': 'AddMeasurements'
+              }
+            })
+          }
+        }
+      }
+    )
     await this.loadProfile()
     this.loadCO2Monitors()
 
@@ -549,7 +574,16 @@ export default {
     this.addActivityGrouping()
 
     this.setCarbonDioxideMonitor({ target: { value: this.carbonDioxideMonitors[0].name }})
-    await this.reverseGeocode()
+    // this.$watch(
+      // () => this.$route.name,
+      // (toName, previousName) => {
+        // debugger
+
+        // react to route changes...
+      // }
+    // )
+
+
   },
   data() {
     return {
@@ -581,21 +615,6 @@ export default {
     setDisplay(string) {
       this.display = string
     },
-    async reverseGeocode() {
-
-      let geocoder = new google.maps.Geocoder()
-      let location = await this.$getLocation()
-      const latLng = {
-        lat: location.lat,
-        lng: location.lng
-      }
-
-      console.log(latLng)
-
-        geocoder.geocode({ location: latLng}).then((response) => {
-           console.log(response)
-        })
-      },
     addMaxOccupancy(amount) {
       this.maximumOccupancy += parseInt(amount)
     },
