@@ -21,6 +21,14 @@ export const useEventStores = defineStore('events', {
   getters: {
   },
   actions: {
+    addEvent(event) {
+      let camelized = deepSnakeToCamel([event])
+      const mainStore = useMainStore()
+
+      this.setDistance(mainStore, camelized)
+      this.events.push(camelized[0])
+      this.displayables = this.events
+    },
     setDistance(mainStore, events) {
       let milesPerEuclidean = 0.8 / 0.012414
 

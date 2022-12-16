@@ -613,7 +613,7 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useProfileStore, ['loadCO2Monitors', 'loadProfile']),
-    ...mapActions(useEventStores, ['load']),
+    ...mapActions(useEventStores, ['load', 'addEvent']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
     setDisplay(string) {
@@ -743,12 +743,16 @@ export default {
       setupCSRF()
 
       let successful = false
+      let newEvent = null
+
       await axios.post('/events', toSave)
         .then(response => {
           console.log(response)
           if (response.status == 201 || response.status == 200) {
             // TODO: could make this more efficient by just adding the event
             // directly to the store?
+            newEvent = response.data.event
+            this.addEvent(newEvent)
             successful = true
           }
 
@@ -761,16 +765,12 @@ export default {
         })
 
       if (successful) {
-        await this.load()
         // if admin and private - don't alert
         // if admin and public - don't alert
         // if not admin and public - alert
         // if not admin and private - don't alert
 
-        if (this.private != 'private' && !this.currentUser.admin) {
-          alert('Thanks for submitting. Your measurements will be reviewed by an administrator in the next few days. It will only be visible to you until that happens.')
-        }
-        this.$router.push({ path: '/'})
+        this.$router.push({ name: 'Analytics', params: { 'id': newEvent.id }})
       }
     },
     generateUUID() {
