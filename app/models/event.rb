@@ -48,15 +48,11 @@ class Event < ApplicationRecord
     if current_user && current_user.admin?
       ""
     elsif current_user && !current_user.admin?
-      # Only show if the current user is the author OR
-      # Event has been approved by an admin and the privacy setting is set to public
-      # Or the author is an admin
-      "where events_with_state.author_id = #{current_user.id} or (events_with_state.approved_by_id is not null or authors.admin = true) and events_with_state.private = 'public'"
+      "where events_with_state.author_id = #{current_user.id} or events_with_state.private = 'public'"
     else
       # If not logged in
-      # Show only those that have been approved by an admin and public
-      # OR Show only those that have been authored by an admin and public
-      "where (events_with_state.approved_by_id is not null or authors.admin = true) and events_with_state.private = 'public'"
+      # Show only those that have been authored by an admin and public
+      "where events_with_state.private = 'public'"
     end
   end
 end
