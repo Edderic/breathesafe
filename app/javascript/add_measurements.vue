@@ -183,9 +183,10 @@
 
     <div class='room_dimensions chunk page' v-if='display == "room_dimensions"'>
       <div class='container'>
-        <div class='row'>
-          <button :class="{ selected: this.useOwnHeight }" @click='setUseOwnHeight(true)'>Use own height and stride length to estimate</button>
-          <button :class="{ selected: !this.useOwnHeight }" @click='setUseOwnHeight(false)'>Input Directly</button>
+        <div class='menu row'>
+          <Button :class="{ selected: this.useOwnHeight, tab: true }" @click='setUseOwnHeight(true)' text='Estimate Volume'/>
+          <Button :class="{ selected: !this.useOwnHeight, tab: true }" @click='setUseOwnHeight(false)' text='Input Directly'/>
+
         </div>
 
         <div v-if="this.useOwnHeight">
@@ -326,7 +327,7 @@
         </div>
 
         <div class='container centered'>
-          <button class='normal-padded' @click='removeAirCleaner(portableAirCleaner.id)'>Remove</button>
+          <Button class='normal-padded' @click='removeAirCleaner(portableAirCleaner.id)' text='Remove'/>
         </div>
       </div>
     </div>
@@ -425,16 +426,16 @@
           </select>
         </div>
 
-        <div class='container centered'>
-          <button class='normal-padded' @click='removeActivityGroup(activityGroup.id)'>Remove</button>
-          <button class='normal-padded' @click='cloneActivityGroup(activityGroup.id)'>Clone</button>
+        <div class='container space-around'>
+          <Button class='normal-padded' @click='removeActivityGroup(activityGroup.id)' text='Remove'/>
+          <Button class='normal-padded' @click='cloneActivityGroup(activityGroup.id)' text='Clone'/>
         </div>
 
       </div>
 
-      <div class='container centered col final'>
-        <button class='normal-padded' @click='cancel'>Cancel</button>
-        <button class='normal-padded' @click='save'>Save</button>
+      <div class='container space-around row final'>
+        <Button class='normal-padded ' @click='cancel' text='Cancel' major='true'/>
+        <Button class='normal-padded button' @click='save' text='Save' major='true'/>
       </div>
     </div>
   </div>
@@ -443,6 +444,7 @@
 <script>
 // Have a VueX store that maintains state across components
 import axios from 'axios';
+import Button from './button.vue'
 import ColoredCell from './colored_cell.vue';
 import CircularButton from './circular_button.vue';
 import DayHourHeatmap from './day_hour_heatmap.vue';
@@ -460,6 +462,7 @@ import {
 export default {
   name: 'AddMeasurements',
   components: {
+    Button,
     CircularButton,
     ColoredCell,
     DayHourHeatmap,
@@ -980,6 +983,11 @@ export default {
 </script>
 
 <style scoped>
+  .button {
+    color: white;
+    width: 4em;
+    text-shadow: 1px 1px 2px black;
+  }
   .main {
     display: flex;
     flex-direction: row;
@@ -1041,6 +1049,13 @@ export default {
   }
 
   .selected {
+    background-color: #e6e6e6;
+
+  }
+
+  .tab {
+    width: 50%;
+    margin: 0;
     background-color: #e6e6e6;
   }
 
@@ -1111,11 +1126,16 @@ export default {
 
   .menu button {
     border: 0;
+    background-color: #eee;
   }
 
   .menu .tab-item {
     border-top: 4px solid #eee;
     border-bottom: 4px solid #eee;
+  }
+
+  .menu button.selected, .menu .button.selected {
+    background-color: #cacaca;
   }
 
   .menu button.selected {
@@ -1206,9 +1226,9 @@ export default {
     align-items: center;
   }
 
-  .final button {
-    font-weight: bold;
-    font-size: 1em;
+  .final .button {
+    width: 50%;
+    border: 1px solid white;
   }
 
 
