@@ -155,7 +155,10 @@
       </div>
 
       <div class='container'>
-        <label><span class='bold'>Make this information private</span></label>
+        <label class='centered'><span class='bold'>Make this information private</span>
+          <CircularButton text='?' @click='toggleInfo("privacyInfo")'/>
+        </label>
+        <p v-if='privacyInfo'>Select <span class='bold'>private</span> if you don't want the rest of the public to see it. Useful for assessing risk at places like your home. On the other hand, if you want the public to benefit with this measurement, select <span class='bold'>public</span>.</p>
         <select :value='private' @change='setEventPrivacy'>
           <option>public</option>
           <option>private</option>
@@ -296,7 +299,7 @@
 
 
     <div class='container chunk' v-if='display == "pac"'>
-      <div class='space-around'>
+      <div class='centered'>
         <label class='subsection'>Portable Air Cleaning</label>
         <CircularButton text='+' @click='addPortableAirCleaner'/>
       </div>
@@ -338,7 +341,10 @@
       </div>
 
       <div class='container'>
-        <label><span class='bold'>CO2 Ambient </span>(parts per million)</label>
+        <label class='centered'><span class='bold'>CO2 Ambient </span>(parts per million)
+          <CircularButton text='?' @click='toggleInfo("ambientInfo")'/>
+        </label>
+        <p v-if='ambientInfo'>This is the reading outdoors.</p>
 
         <div class='continuous mega'>
           <CircularButton text='-100' @click='addCO2Ambient(-100)'/>
@@ -357,7 +363,10 @@
       </div>
 
       <div class='container'>
-        <label><span class='bold'>CO2 Steady State </span>(parts per million)</label>
+        <label class='centered'><span class='bold'>CO2 Steady State </span>(parts per million)
+          <CircularButton text='?' @click='toggleInfo("steadyStateInfo")'/>
+        </label>
+        <p v-if='steadyStateInfo'>This is the CO2 reading indoors, taken when the CO2 readings have flattened over time, while the occupancy has stayed the same.</p>
         <div class='continuous mega'>
           <CircularButton text='-100' @click='addCO2SteadyState(-100)'/>
           <CircularButton text='-10' @click='addCO2SteadyState(-10)'/>
@@ -592,6 +601,9 @@ export default {
   data() {
     return {
       center: {lat: 51.093048, lng: 6.842120},
+      ambientInfo: false,
+      privacyInfo: false,
+      steadyStateInfo: false,
       ventilationACH: 0.0,
       portableACH: 0.0,
       totalACH: 0.0,
@@ -616,6 +628,10 @@ export default {
     ...mapActions(useEventStores, ['load', 'addEvent']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
+
+    toggleInfo(info) {
+      this[info] = !this[info]
+    },
     setDisplay(string) {
       this.display = string
     },
@@ -1124,6 +1140,10 @@ export default {
     align-items: center;
     margin-top: 0;
     margin-bottom: 0;
+  }
+
+  p {
+    padding: 1em;
   }
 
   .grouping input[type='number'] {
