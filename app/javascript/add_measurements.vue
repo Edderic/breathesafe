@@ -342,7 +342,7 @@
       </div>
 
       <div class='container'>
-        <label class='centered'><span class='bold'>CO2 Ambient </span>(parts per million)
+        <label class='centered'><span class='bold'>CO2 Ambient</span>&nbsp;(parts per million)
           <CircularButton text='?' @click='toggleInfo("ambientInfo")'/>
         </label>
         <p v-if='ambientInfo'>This is the reading outdoors.</p>
@@ -364,7 +364,7 @@
       </div>
 
       <div class='container'>
-        <label class='centered'><span class='bold'>CO2 Steady State </span>(parts per million)
+        <label class='centered'><span class='bold'>CO2 Steady State&nbsp; </span>(parts per million)
           <CircularButton text='?' @click='toggleInfo("steadyStateInfo")'/>
         </label>
         <p v-if='steadyStateInfo'>This is the CO2 reading indoors, taken when the CO2 readings have flattened over time, while the occupancy has stayed the same.</p>
