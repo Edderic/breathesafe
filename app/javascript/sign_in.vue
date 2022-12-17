@@ -46,7 +46,7 @@ export default {
   components: {
   },
   computed: {
-    ...mapWritableState(useMainStore, ['message'])
+    ...mapWritableState(useMainStore, ['message', 'currentUser'])
   },
   created() { },
   data() {
@@ -109,7 +109,7 @@ export default {
         if (response.status == 201) {
           success = true
         }
-
+        this.currentUser = response.data
         // whatever you want
       })
       .catch(error => {
@@ -118,7 +118,6 @@ export default {
         // whatever you want
       })
 
-      await this.getCurrentUser();
       await this.loadProfile()
 
       if (this.$route.query && this.$route.query['attempt-name']) {
