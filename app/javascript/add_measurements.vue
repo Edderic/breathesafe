@@ -391,6 +391,17 @@
     </div>
 
     <div class='container chunk' v-if='display == "behaviors"'>
+      <div class='centered'>
+        <label class='subsection'>Behavior</label>
+        <CircularButton text='?' @click='toggleInfo("behaviorInfo")'/>
+        <CircularButton text='+' @click='addActivityGrouping'/>
+      </div>
+
+      <p v-if="behaviorInfo">Re: <span class='bold'># people</span>: What is the current occupancy? Lets us quantify the ventilation rate.</p>
+      <p v-if="behaviorInfo">Re: <span class='bold'>Aerosol Generation</span>: Speaking generates more aerosols than by breathing. Affects risk.</p>
+      <p v-if="behaviorInfo">Re: <span class='bold'>CO2 gen.</span>: Exercising produces more CO2 than resting. Knowing this value helps us quantify the ventilation rate.</p>
+      <p v-if="behaviorInfo">Re: <span class='bold'>Age group</span>: A baby produces less CO2 than an adult.</p>
+
       <div class='container grouping' v-for='activityGroup in activityGroups' :key=activityGroup.id>
 
         <div class='container'>
@@ -605,6 +616,7 @@ export default {
     return {
       center: {lat: 51.093048, lng: 6.842120},
       ambientInfo: false,
+      behaviorInfo: false,
       privacyInfo: false,
       steadyStateInfo: false,
       ventilationACH: 0.0,
