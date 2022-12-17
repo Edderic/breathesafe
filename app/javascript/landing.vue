@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class='tagline'>Breathesafe: Find Spaces with Cleaner Air</h2>
+    <h2 class='tagline'>Find Clean Air Indoors</h2>
     <div class='main'>
       <div class='centered'>
         <router-link :to='{ name: "Venues" }'>
@@ -10,10 +10,10 @@
 
       <div class='call-to-actions centered'>
         <router-link :to='{ name: "Venues" }'>
-          <Button text='Find Safer Venues'/>
+          <Button text='Find Safer Venues' major='true'/>
         </router-link>
         <router-link :to='{ name: "AddMeasurements" }'>
-          <Button text='Add Measurements'/>
+          <Button text='Add Measurements' major='true'/>
         </router-link>
       </div>
 
