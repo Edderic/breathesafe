@@ -598,8 +598,6 @@ export default {
     this.roomWidthMeters = this.strideLengthForWidth * this.strideLengthMeters
     this.roomHeightMeters = this.personHeightToRoomHeight * this.heightMeters
 
-    this.addActivityGrouping()
-
     this.setCarbonDioxideMonitor({ target: { value: this.carbonDioxideMonitors[0].name }})
     // this.$watch(
       // () => this.$route.name,
