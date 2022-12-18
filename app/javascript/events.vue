@@ -11,7 +11,7 @@
       <input class='margined' @change="updateSearch" placeholder="Search for events">
 
       <div class='row space-around'>
-        <select class='margined' @change='setDuration'>
+        <select class='margined' :value='durationHours' @change='setDuration'>
           <option value=1>1 hour</option>
           <option value=2>2 hours</option>
           <option value=4>4 hours</option>
@@ -148,13 +148,16 @@ export default {
   async created() {
     this.eventDisplayRiskTime = this.$route.query['eventDisplayRiskTime'] || 'At max occupancy'
     // await this.getWhereabouts()
+    this.loadMasks()
 
     if (this.$route.query['mask']) {
-      this.selectedMask = this.findMask(
-        this.$route.query['mask'],
-        this.$route.query['numWays']
-      )
+      this.selectedMask = this.findMask( this.$route.query['mask'], this.$route.query['numWays'])
     }
+
+    if (this.$route.query['durationHours']) {
+      this.durationHours = parseInt(this.$route.query['durationHours'])
+    }
+
     await this.load()
     this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
     this.sortByParams()
@@ -162,14 +165,15 @@ export default {
     this.$watch(
       () => this.$route.query,
       (toQuery, previousQuery) => {
-        if (toQuery['eventDisplayRiskTime'] != previousQuery['eventDisplayRiskTime']) {
-          this.eventDisplayRiskTime = toQuery['eventDisplayRiskTime']
-        }
         if (toQuery['mask'] != previousQuery['mask'] || toQuery['numWays'] != previousQuery['numWays']) {
           this.selectedMask = this.findMask(
             toQuery['mask'],
             toQuery['numWays'],
           )
+        }
+
+        if (toQuery['durationHours']) {
+          this.durationHours = parseInt(toQuery['durationHours'])
         }
 
         this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
