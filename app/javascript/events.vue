@@ -10,17 +10,19 @@
 
       <input class='margined' @change="updateSearch" placeholder="Search for events">
 
-      <select class='margined' @change='setDuration'>
-        <option value=1>1 hour</option>
-        <option value=2>2 hours</option>
-        <option value=4>4 hours</option>
-        <option value=8>8 hours</option>
-        <option value=40>40 hours</option>
-      </select>
+      <div class='row space-around'>
+        <select class='margined' @change='setDuration'>
+          <option value=1>1 hour</option>
+          <option value=2>2 hours</option>
+          <option value=4>4 hours</option>
+          <option value=8>8 hours</option>
+          <option value=40>40 hours</option>
+        </select>
 
-      <select class='margined' :value='`${selectedMask.numWays}-way ${selectedMask.maskName}`' @change='setMaskType'>
-        <option v-for='m in masks'>{{ m.numWays }}-way {{ m.maskName }}</option>
-      </select>
+        <select class='margined' :value='`${selectedMask.numWays}-way ${selectedMask.maskName}`' @change='setMaskType'>
+          <option v-for='m in masks'>{{ m.numWays }}-way {{ m.maskName }}</option>
+        </select>
+      </div>
     </div>
 
     <div class='scrollable'>
@@ -33,7 +35,7 @@
             <th>Address</th>
             <th class='desktop'>
               <div>
-                1-hr Risk w/ 1 Infector
+                Risk w/ 1 Infector
                 <div class='row horizontally-center'>
                   <span :style="circleCSS" @click='sortByInfectorRisk'>{{this.sortRiskInfectorArrow}}</span>
 
