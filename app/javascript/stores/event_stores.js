@@ -40,6 +40,16 @@ export const useEventStores = defineStore('events', {
         event.distance = round(Math.sqrt(x + y) * milesPerEuclidean, 1)
       }
     },
+    loadMasks() {
+      // Load masks
+      let masks = []
+      for (let mask of MASKS) {
+        masks.push(new Mask(mask, 1, 1))
+        masks.push(new Mask(mask, 1, 2))
+      }
+
+      this.masks = masks
+    },
     async load() {
       setupCSRF()
 
@@ -67,14 +77,7 @@ export const useEventStores = defineStore('events', {
           // whatever you want
         })
 
-      // Load masks
-      let masks = []
-      for (let mask of MASKS) {
-        masks.push(new Mask(mask, 1, 1))
-        masks.push(new Mask(mask, 1, 2))
-      }
-
-      this.masks = masks
+      this.loadMasks()
     },
 
     async findOrLoad(id) {

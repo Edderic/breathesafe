@@ -86,12 +86,14 @@ export default {
     }, { threshold: [0.20] });
 
     for (let j of document.querySelectorAll(".link-h2")) {
-      console.log(j.id.substring(5))
-      observer.observe(document.querySelector(`#section-${j.id.substring(5)}`));
+      if (j.id) {
+        observer.observe(document.querySelector(`#section-${j.id.substring(5)}`));
+      }
     }
     for (let j of document.querySelectorAll(".link-h1")) {
-      console.log(j.id.substring(5))
-      observer.observe(document.querySelector(`#section-${j.id.substring(5)}`));
+      if (j.id) {
+        observer.observe(document.querySelector(`#section-${j.id.substring(5)}`));
+      }
     }
   }
 }

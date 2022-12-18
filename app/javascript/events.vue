@@ -165,7 +165,13 @@ export default {
     this.$watch(
       () => this.$route.query,
       (toQuery, previousQuery) => {
-        if (toQuery['mask'] != previousQuery['mask'] || toQuery['numWays'] != previousQuery['numWays']) {
+        if (!toQuery['mask']) {
+          let selectedMask= this.findMask(
+            'No mask',
+            1,
+          )
+          this.selectedMask = selectedMask
+        } else if (toQuery['mask'] != previousQuery['mask'] || toQuery['numWays'] != previousQuery['numWays']) {
           this.selectedMask = this.findMask(
             toQuery['mask'],
             toQuery['numWays'],
@@ -236,6 +242,7 @@ export default {
         useEventStores,
         [
           'load',
+          'loadMasks',
           'computeRiskAll'
         ]
     ),
@@ -248,7 +255,7 @@ export default {
     },
 
     findMask(name, numWays) {
-      return this.masks.find((m) => m.maskName == name && m.numWays == numWays)
+      return this.masks.find((m) => m.maskName == name && m.numWays == parseInt(numWays))
     },
 
     setDuration(event) {
