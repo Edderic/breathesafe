@@ -20,7 +20,7 @@
         />
       </router-link>
     </td>
-    <td>
+    <td v-if='permittedGeolocation'>
       {{ measurements.distance }}
     </td>
     <td v-if='adminView'>{{ measurements.authorId }}</td>
@@ -132,6 +132,7 @@ export default {
   },
   props: {
     measurements: Object,
+    permittedGeolocation: Boolean
   },
   methods: {
     async approve() {

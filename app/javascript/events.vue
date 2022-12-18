@@ -6,7 +6,12 @@
       <select class='margined' :value='`${selectedMask.numWays}-way ${selectedMask.maskName}`' @change='setMaskType'>
         <option v-for='m in masks'>{{ m.numWays }}-way {{ m.maskName }}</option>
       </select>
-      <router-link class='margined button' to="/events/new" v-if='signedIn'>Add Measurements</router-link>
+      <div class='space-around'>
+      <Pin class='pin' @click='setLocation' height='48px' width='48px'/>
+      <router-link to="/events/new" v-if='signedIn'>
+        <CircularButton class='circular-button' text='+'/>
+      </router-link>
+      </div>
     </div>
 
     <div class='scrollable'>
@@ -31,7 +36,7 @@
                 </div>
               </div>
             </th>
-            <th>
+            <th v-if='permittedGeolocation'>
               <div>
                 Est. Distance
                 <div class='row horizontally-center'>
@@ -47,12 +52,12 @@
             <th></th>
             <th></th>
             <th></th>
-            <th></th>
+            <th v-if='permittedGeolocation'></th>
             <th>
             </th>
           </tr>
         </thead>
-        <MeasurementsRow v-for="ev in displayables" :key="ev.id" :measurements="ev"/>
+        <MeasurementsRow v-for="ev in displayables" :key="ev.id" :measurements="ev" :permittedGeolocation='permittedGeolocation'/>
       </table>
     </div>
   </div>
@@ -61,7 +66,10 @@
 <script>
 // Have a VueX store that maintains state across components
 import axios from 'axios';
+import Button from './button.vue';
+import CircularButton from './circular_button.vue';
 import MeasurementsRow from './measurements_row.vue';
+import Pin from './pin.vue';
 import { Mask, MASKS } from './masks.js'
 import { toggleCSS } from './colors.js'
 import { Intervention } from './interventions.js';
@@ -74,7 +82,10 @@ import { mapWritableState, mapState, mapActions } from 'pinia'
 export default {
   name: 'Events',
   components: {
+    Button,
+    CircularButton,
     Event,
+    Pin,
     MeasurementsRow
   },
   computed: {
@@ -132,12 +143,6 @@ export default {
         this.$route.query['numWays']
       )
     }
-
-    let coordinates = await this.$getLocation()
-
-    this.whereabouts = coordinates
-    this.center = { lat: coordinates.lat, lng: coordinates.lng };
-    this.zoom = 15;
     await this.load()
     this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
     this.sortByParams()
@@ -164,11 +169,26 @@ export default {
   },
   data() {
     return {
+      'permittedGeolocation': false,
       'search': "",
       'eventDisplayRiskTime': 'At max occupancy'
     }
   },
   methods: {
+    async setLocation() {
+      let coordinates = await this.$getLocation()
+      // test if the getLocation
+
+      this.whereabouts = coordinates
+      this.center = { lat: coordinates.lat, lng: coordinates.lng };
+      this.zoom = 15;
+      this.permittedGeolocation = true;
+
+      await this.load()
+      this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
+      this.sortByParams()
+    },
+
     setDisplayRiskTime(e) {
       this.eventDisplayRiskTime = e.target.value
       let oldQuery = JSON.parse(JSON.stringify(this.$route.query))
@@ -468,6 +488,22 @@ export default {
     box-shadow: 1px 1px 2px black;
     text-decoration: none;
   }
+
+  .pin {
+    border: 0;
+    padding: 0;
+  }
+
+  .space-around {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .circular-button {
+    margin: 0;
+  }
+
+
 
   @media (max-width: 1400px) {
     .scrollable {
