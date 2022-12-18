@@ -1,17 +1,18 @@
 <template>
 <div class='col'>
     <div class='middle-controls horizontally-center controls'>
+      <div class='space-around margin-vertical row'>
+        <Pin class='pin' @click='setLocation' height='48px' width='48px'/>
+        <router-link to="/events/new">
+          <CircularButton class='circular-button' text='+'/>
+        </router-link>
+      </div>
+
       <input class='margined' @change="updateSearch" placeholder="Search for events">
 
       <select class='margined' :value='`${selectedMask.numWays}-way ${selectedMask.maskName}`' @change='setMaskType'>
         <option v-for='m in masks'>{{ m.numWays }}-way {{ m.maskName }}</option>
       </select>
-      <div class='space-around'>
-      <Pin class='pin' @click='setLocation' height='48px' width='48px'/>
-      <router-link to="/events/new" v-if='signedIn'>
-        <CircularButton class='circular-button' text='+'/>
-      </router-link>
-      </div>
     </div>
 
     <div class='scrollable'>
@@ -451,6 +452,7 @@ export default {
 
   .row {
     display: flex;
+    flex-direction: row;
   }
 
   .col {
@@ -472,7 +474,6 @@ export default {
   }
 
   .controls {
-    padding-top: 1em;
     padding-bottom: 1em;
     width: 100vw;
     background-color: #eee;
@@ -503,7 +504,10 @@ export default {
     margin: 0;
   }
 
-
+  .margin-vertical {
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
 
   @media (max-width: 1400px) {
     .scrollable {

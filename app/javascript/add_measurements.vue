@@ -2,6 +2,7 @@
   <div class='border-showing' id='message'>
     <h2>Add Measurements</h2>
     <div class='container row centered menu'>
+      <Pin />
       <button id='whereabouts' :class='{ "tab-item": true, "selected": display == "whereabouts"}' @click='setDisplay("whereabouts")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
