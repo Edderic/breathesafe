@@ -13,6 +13,7 @@ import { computeRiskWithVariableOccupancy, deepSnakeToCamel, setupCSRF, round } 
 export const useEventStores = defineStore('events', {
   state: () => ({
     location: { lat: 0, lng: 0},
+    durationHours: 1,
     events: [],
     displayables: [],
     masks: [],
@@ -139,7 +140,7 @@ export const useEventStores = defineStore('events', {
           )
         }
 
-        event['risk'] = intervention.computeRisk(1)
+        event['risk'] = intervention.computeRisk(this.durationHours)
       }
     },
   }

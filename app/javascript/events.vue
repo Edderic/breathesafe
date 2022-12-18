@@ -10,6 +10,14 @@
 
       <input class='margined' @change="updateSearch" placeholder="Search for events">
 
+      <select class='margined' @change='setDuration'>
+        <option value=1>1 hour</option>
+        <option value=2>2 hours</option>
+        <option value=4>4 hours</option>
+        <option value=8>8 hours</option>
+        <option value=40>40 hours</option>
+      </select>
+
       <select class='margined' :value='`${selectedMask.numWays}-way ${selectedMask.maskName}`' @change='setMaskType'>
         <option v-for='m in masks'>{{ m.numWays }}-way {{ m.maskName }}</option>
       </select>
@@ -95,6 +103,7 @@ export default {
         [
           'events',
           'displayables',
+          'durationHours',
           'masks',
           'numWays',
           'selectedMask',
@@ -160,6 +169,7 @@ export default {
             toQuery['numWays'],
           )
         }
+
         this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
         this.sortByParams()
         // react to route changes...
@@ -235,6 +245,20 @@ export default {
       return this.masks.find((m) => m.maskName == name && m.numWays == numWays)
     },
 
+    setDuration(event) {
+      let val = parseInt(event.target.value)
+      let query = JSON.parse(JSON.stringify(this.$route.query))
+
+      Object.assign(query, {
+        durationHours: val,
+      })
+
+      this.$router.push({
+        name: 'Venues',
+        query: query
+      })
+
+    },
     setMaskType(event) {
       let val = event.target.value
       let numWays = val.split('-way ')[0]
