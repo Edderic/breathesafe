@@ -261,7 +261,7 @@ export const riskColorInterpolationScheme = [
     },
   },
   {
-    'lowerBound': 0.01,
+    'lowerBound': 0.05,
     'upperBound': 0.1,
     'lowerColor': {
       letterGrade: 'D',
@@ -279,8 +279,8 @@ export const riskColorInterpolationScheme = [
     },
   },
   {
-    'lowerBound': 0.001,
-    'upperBound': 0.01,
+    'lowerBound': 0.01,
+    'upperBound': 0.05,
     'lowerColor': {
       name: 'yellow',
       letterGrade: 'C',
@@ -297,8 +297,8 @@ export const riskColorInterpolationScheme = [
     },
   },
   {
-    'lowerBound': 0.0001,
-    'upperBound': 0.001,
+    'lowerBound': 0.005,
+    'upperBound': 0.01,
     'lowerColor': {
       name: 'green',
       letterGrade: 'B',
@@ -316,7 +316,7 @@ export const riskColorInterpolationScheme = [
   },
   {
     'lowerBound': -0.000001,
-    'upperBound': 0.0001,
+    'upperBound': 0.005,
     'lowerColor': {
       name: 'dark green',
       letterGrade: 'A',
