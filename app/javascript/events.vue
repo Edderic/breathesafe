@@ -36,7 +36,7 @@
             <th class='desktop'>
               <div>
                 Risk w/ 1 Infector
-                <div class='row horizontally-center'>
+                <div class='row space-around'>
                   <span :style="circleCSS" @click='sortByInfectorRisk'>{{this.sortRiskInfectorArrow}}</span>
 
                   <router-link :style="circleCSS" to='/faqs#one-hr-risk-with-infector'
