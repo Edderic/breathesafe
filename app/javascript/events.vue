@@ -1,7 +1,7 @@
 <template>
 <div class='col'>
     <div class='middle-controls horizontally-center controls'>
-      <div class='space-around margin-vertical row'>
+      <div class='space-around row'>
         <Pin class='pin' @click='setLocation' height='48px' width='48px'/>
         <router-link to="/events/new">
           <CircularButton class='circular-button' text='+'/>
@@ -506,6 +506,7 @@ export default {
   }
 
   .controls {
+    padding-top: 1em;
     padding-bottom: 1em;
     width: 100vw;
     background-color: #eee;
@@ -537,11 +538,6 @@ export default {
 
   .circular-button {
     margin: 0;
-  }
-
-  .margin-vertical {
-    margin-top: 1em;
-    margin-bottom: 1em;
   }
 
   @media (max-width: 1400px) {
