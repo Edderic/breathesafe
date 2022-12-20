@@ -306,6 +306,10 @@ export default {
     max-width: 20em;
   }
 
+  th {
+    padding: 1em;
+  }
+
   @media (max-width: 1400px) {
     .grid {
       display: flex;
