@@ -1,25 +1,27 @@
 <template>
   <div class='body grid'>
-    <table class='grade-info' v-if='showGradeInfo'>
-      <tr>
-        <th>Grade</th>
-        <th>Text</th>
-      </tr>
+    <div v-if='showGradeInfo' class='centered column'>
+      <table class='grade-info'>
+        <tr>
+          <th>Grade</th>
+          <th>Probability of Transmission</th>
+        </tr>
 
-      <tr v-for='item in gradeColors'>
-        <td>
-          <ColoredCell
-            class='risk-score'
-            :colorScheme="riskColorScheme"
-            :maxVal=1
-            :backgroundColor='item.color'
-            :text='item.grade'
-            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'border-radius': '100%', 'width': '2em', 'height': '2em' }"
-          />
-        </td>
-        <td>{{ item.text }}</td>
-      </tr>
-    </table>
+        <tr v-for='item in gradeColors'>
+          <td>
+            <ColoredCell
+              class='risk-score'
+              :colorScheme="riskColorScheme"
+              :maxVal=1
+              :backgroundColor='item.color'
+              :text='item.grade'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'border-radius': '100%', 'width': '2em', 'height': '2em' }"
+            />
+          </td>
+          <td>{{ item.text }}</td>
+        </tr>
+      </table>
+    </div>
     <GMapMap
       :center="center"
       :zoom="zoom"
@@ -301,6 +303,7 @@ export default {
 
   .grade-info {
     text-align: center;
+    max-width: 20em;
   }
 
   @media (max-width: 1400px) {
