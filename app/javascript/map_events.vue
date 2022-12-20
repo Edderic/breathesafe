@@ -314,8 +314,7 @@ export default {
     .map {
       height: 40vh;
     }
-
-    body {
+    .body {
       height: 95vh;
     }
   }
