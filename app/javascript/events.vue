@@ -32,7 +32,7 @@
           <th>Text</th>
         </tr>
 
-        <tr v-for='item in betweenGrades'>
+        <tr v-for='item in gradeColors'>
           <td>
             <ColoredCell
               class='risk-score'
@@ -97,21 +97,24 @@
 import axios from 'axios';
 import Button from './button.vue';
 import CircularButton from './circular_button.vue';
+import ColoredCell from './colored_cell.vue';
 import MeasurementsRow from './measurements_row.vue';
 import Pin from './pin.vue';
 import { Mask, MASKS } from './masks.js'
-import { toggleCSS } from './colors.js'
+import { gradeColorMapping, toggleCSS } from './colors.js'
 import { Intervention } from './interventions.js';
 import { useProfileStore } from './stores/profile_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { filterEvents, getWeekdayText, sortArrow } from './misc'
+import { riskColorInterpolationScheme } from './colors'
 import { mapWritableState, mapState, mapActions } from 'pinia'
 
 export default {
   name: 'Events',
   components: {
     Button,
+    ColoredCell,
     CircularButton,
     Event,
     Pin,
@@ -150,6 +153,23 @@ export default {
       css['cursor'] = 'pointer'
       return css
     },
+
+    gradeColors() {
+      let objs = []
+      let thing
+
+      for (let gradeToColor in gradeColorMapping) {
+          thing = gradeColorMapping[gradeToColor]
+          objs.push({
+            grade: gradeToColor,
+            text: `Between ${thing.bounds[0]} and ${thing.bounds[1]}`,
+            color: `rgb(${thing.color['r']}, ${thing.color['g']}, ${thing.color['b']} )`
+          })
+      }
+
+      return objs
+    },
+
     adminView() {
       return this.isAdmin && this.$route.query['admin-view'] == 'true'
     },
