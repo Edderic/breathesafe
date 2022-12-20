@@ -92,7 +92,7 @@ export const useEventStores = defineStore('events', {
       return event
     },
 
-    computeRiskAll(eventDisplayRiskTime, selectedMask) {
+    computeRiskAll(selectedMask) {
       /*
        * Parameters:
        *   eventDisplayRiskTime: String
