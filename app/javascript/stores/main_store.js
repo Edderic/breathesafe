@@ -32,6 +32,8 @@ export const useMainStore = defineStore('main', {
   },
   actions: {
     centerMapTo(id) {
+      this.openedMarkerId = id
+
       let eventStores = useEventStores()
       let event = eventStores.events.find((ev) => { return ev.id == id })
 
@@ -43,6 +45,8 @@ export const useMainStore = defineStore('main', {
           ev.clicked = false
         }
       }
+
+      this.zoom = 15
 
       // update Google Maps to center at the location of the event
       this.center = event.placeData.center

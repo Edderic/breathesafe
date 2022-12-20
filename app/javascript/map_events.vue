@@ -36,6 +36,31 @@
             :icon="icon(m)"
             @click="centerMapTo(m.id)"
         >
+          <GMapInfoWindow :opened="m.id == openedMarkerId">
+
+            <table>
+              <tr>
+                <th>Room Name</th>
+                <td>
+                  {{ m.roomName }}
+                </td>
+              </tr>
+              <tr>
+                <th v-if='m.placeData && m.placeData.website'>Website</th>
+                <td>
+                  <a :href="m.placeData && m.placeData.website" target='_blank'>
+                    {{ shortenLink(m.placeData.website, 30) }}
+                  </a>
+                </td>
+              </tr>
+              <tr>
+                <th>Google Maps Link</th>
+                <td>
+                  <a :href='`https://www.google.com/maps/place/?q=place_id:${m.placeData.placeId}`' target='_blank'>link</a>
+                </td>
+              </tr>
+            </table>
+          </GMapInfoWindow>
         </GMapMarker>
     </GMapMap>
     <Events/>
@@ -75,7 +100,7 @@ export default {
   computed: {
     ...mapStores(useMainStore),
     ...mapState(useProfileStore, ["measurementUnits", 'systemOfMeasurement']),
-    ...mapState(useMainStore, ["centerMapTo"]),
+    ...mapState(useMainStore, ["centerMapTo", 'openedMarkerId']),
     ...mapState(useEventStores, ['showGradeInfo', "selectedMask"]),
 
     ...mapWritableState(useMainStore, ['center', 'whereabouts', 'zoom', 'openedMarkerID']),
@@ -123,6 +148,20 @@ export default {
     ...mapActions(useEventStores, ['load']),
     createIntervention(m) {
       return new Intervention(m, [this.selectedMask])
+    },
+    shortenLink(link, allowableLength) {
+      if (!link) {
+        return link
+      }
+      let length = link.length
+      let suffix = ''
+
+      if (link.length > allowableLength) {
+        length = allowableLength
+        suffix = '...'
+      }
+
+      return link.substring(0, allowableLength) + suffix
     },
     isClicked(value) {
       return this.$route.query['iconFocus'] == value
@@ -270,6 +309,10 @@ export default {
     }
     .map {
       height: 40vh;
+    }
+
+    body {
+      height: 95vh;
     }
   }
 

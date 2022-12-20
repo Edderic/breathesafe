@@ -218,6 +218,13 @@ export default {
     getOpenHours(x) {
       return getWeekdayText(x)
     },
+    pluralize(property, word) {
+      if (this[property] > 1) {
+        return `${this[property]} ${word}s`
+      }
+
+      return `${this[property]} ${word}`
+    },
     ...mapActions(
         useMainStore,
         [
