@@ -520,6 +520,9 @@ export default {
     padding: 0;
   }
 
+  th {
+    padding: 1em;
+  }
   .space-around {
     display: flex;
     justify-content: space-around;
