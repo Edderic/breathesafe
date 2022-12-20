@@ -321,7 +321,7 @@ export default {
       flex-direction: column;
     }
     .map {
-      height: 40vh;
+      max-height: 33%;
     }
     .body {
       height: 90vh;

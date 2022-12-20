@@ -484,11 +484,6 @@ export default {
     flex-direction: row;
   }
 
-  .col {
-    display: flex;
-    flex-direction: column;
-  }
-
   .justify-space-between {
     display: flex;
     justify-items: space-between;
@@ -538,8 +533,8 @@ export default {
   }
 
   @media (max-width: 1400px) {
-    .scrollable {
-      height: 45vh;
+    .col {
+      height: 60vh;
     }
   }
 
