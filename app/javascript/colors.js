@@ -252,7 +252,7 @@ export const colorInterpolationSchemeAch = [
 export const riskColorInterpolationScheme = [
   {
     'lowerBound': 0.1,
-    'upperBound': 0.999999,
+    'upperBound': 1,
     'lowerColor': {
       name: 'red',
       letterGrade: 'E',
@@ -323,7 +323,7 @@ export const riskColorInterpolationScheme = [
     },
   },
   {
-    'lowerBound': -0.000001,
+    'lowerBound': 0.000001,
     'upperBound': 0.005,
     'lowerColor': {
       name: 'dark green',
