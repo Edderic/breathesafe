@@ -466,7 +466,12 @@ export default {
 
   .scrollable {
     overflow-y: auto;
-    height: 80vh
+    height: 85vh;
+    width: 100%;
+  }
+
+  .scrollable table {
+    width: 100%;
   }
 
   .scrollable thead th {
