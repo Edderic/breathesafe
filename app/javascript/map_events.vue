@@ -324,7 +324,7 @@ export default {
       height: 40vh;
     }
     .body {
-      height: 95vh;
+      height: 90vh;
     }
   }
 
