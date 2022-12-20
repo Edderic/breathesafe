@@ -26,27 +26,7 @@
     </div>
 
     <div class='scrollable'>
-      <table v-if='showGradeInfo'>
-        <tr>
-          <th>Grade</th>
-          <th>Text</th>
-        </tr>
-
-        <tr v-for='item in gradeColors'>
-          <td>
-            <ColoredCell
-              class='risk-score'
-              :colorScheme="riskColorScheme"
-              :maxVal=1
-              :backgroundColor='item.color'
-              :text='item.grade'
-              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'border-radius': '100%', 'width': '2em', 'height': '2em' }"
-            />
-          </td>
-          <td>{{ item.text }}</td>
-        </tr>
-      </table>
-      <table v-if='!showGradeInfo'>
+      <table>
         <!--//add thead th element in the scrollable element for sticky col headers in .scrollable css-->
         <thead>
           <tr>
@@ -130,6 +110,7 @@ export default {
           'masks',
           'numWays',
           'selectedMask',
+          'showGradeInfo'
         ]
     ),
     ...mapWritableState(
@@ -152,22 +133,6 @@ export default {
       let css = JSON.parse(JSON.stringify(toggleCSS))
       css['cursor'] = 'pointer'
       return css
-    },
-
-    gradeColors() {
-      let objs = []
-      let thing
-
-      for (let gradeToColor in gradeColorMapping) {
-          thing = gradeColorMapping[gradeToColor]
-          objs.push({
-            grade: gradeToColor,
-            text: `Between ${thing.bounds[0]} and ${thing.bounds[1]}`,
-            color: `rgb(${thing.color['r']}, ${thing.color['g']}, ${thing.color['b']} )`
-          })
-      }
-
-      return objs
     },
 
     adminView() {
@@ -229,7 +194,6 @@ export default {
   },
   data() {
     return {
-      'showGradeInfo': false,
       'permittedGeolocation': false,
       'search': "",
       'riskColorScheme': riskColorInterpolationScheme

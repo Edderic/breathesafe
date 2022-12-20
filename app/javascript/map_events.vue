@@ -1,10 +1,31 @@
 <template>
   <div class='body grid'>
+    <table class='grade-info' v-if='showGradeInfo'>
+      <tr>
+        <th>Grade</th>
+        <th>Text</th>
+      </tr>
+
+      <tr v-for='item in gradeColors'>
+        <td>
+          <ColoredCell
+            class='risk-score'
+            :colorScheme="riskColorScheme"
+            :maxVal=1
+            :backgroundColor='item.color'
+            :text='item.grade'
+            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'border-radius': '100%', 'width': '2em', 'height': '2em' }"
+          />
+        </td>
+        <td>{{ item.text }}</td>
+      </tr>
+    </table>
     <GMapMap
       :center="center"
       :zoom="zoom"
       map-type-id="terrain"
       class='map'
+      v-if='!showGradeInfo'
     >
         <GMapMarker
             :key="index"
@@ -27,12 +48,13 @@ import { displayCADR } from './misc.js';
 import { MaskingBarChart } from './masks.js';
 import { Intervention } from './interventions.js';
 import CleanAirDeliveryRateTable from './clean_air_delivery_rate_table.vue';
+import ColoredCell from './colored_cell.vue';
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import Events from './events.vue';
 import TotalACHTable from './total_ach_table.vue';
 import AchToDuration from './ach_to_duration.vue';
-import { binValue, getColor, riskColorInterpolationScheme } from './colors';
+import { binValue, getColor, gradeColorMapping, riskColorInterpolationScheme } from './colors';
 import { getPlaceType } from './icons';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
@@ -42,6 +64,7 @@ import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
 export default {
   name: 'Venues',
   components: {
+    ColoredCell,
     CleanAirDeliveryRateTable,
     DayHourHeatmap,
     Events,
@@ -53,7 +76,7 @@ export default {
     ...mapStores(useMainStore),
     ...mapState(useProfileStore, ["measurementUnits", 'systemOfMeasurement']),
     ...mapState(useMainStore, ["centerMapTo"]),
-    ...mapState(useEventStores, ["selectedMask"]),
+    ...mapState(useEventStores, ['showGradeInfo', "selectedMask"]),
 
     ...mapWritableState(useMainStore, ['center', 'whereabouts', 'zoom', 'openedMarkerID']),
     ...mapWritableState(
@@ -62,6 +85,22 @@ export default {
           'displayables'
         ]
     ),
+    gradeColors() {
+      let objs = []
+      let thing
+
+      for (let gradeToColor in gradeColorMapping) {
+          thing = gradeColorMapping[gradeToColor]
+          objs.push({
+            grade: gradeToColor,
+            text: `Between ${thing.bounds[0]} and ${thing.bounds[1]}`,
+            color: `rgb(${thing.color['r']}, ${thing.color['g']}, ${thing.color['b']} )`
+          })
+      }
+
+      return objs
+    },
+
     cellCSS(){
     },
     riskColorScheme() {
@@ -218,6 +257,10 @@ export default {
     grid-template-columns: 50% 50%;
     grid-template-rows: auto;
 
+  }
+
+  .grade-info {
+    text-align: center;
   }
 
   @media (max-width: 1400px) {

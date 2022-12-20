@@ -18,6 +18,7 @@ export const useEventStores = defineStore('events', {
     displayables: [],
     masks: [],
     selectedMask: new Mask(MASKS[0], 1, 1),
+    showGradeInfo: false,
   }),
   getters: {
   },
