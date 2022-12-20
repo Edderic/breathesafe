@@ -184,7 +184,6 @@ export default {
     }
   },
   async created() {
-    this.eventDisplayRiskTime = this.$route.query['eventDisplayRiskTime'] || 'At max occupancy'
     // await this.getWhereabouts()
     this.loadMasks()
 
@@ -197,7 +196,7 @@ export default {
     }
 
     await this.load()
-    this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
+    this.computeRiskAll(this.selectedMask)
     this.sortByParams()
 
     this.$watch(
@@ -220,7 +219,7 @@ export default {
           this.durationHours = parseInt(toQuery['durationHours'])
         }
 
-        this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
+        this.computeRiskAll(this.selectedMask)
         this.sortByParams()
         // react to route changes...
       }
@@ -230,9 +229,10 @@ export default {
   },
   data() {
     return {
+      'showGradeInfo': false,
       'permittedGeolocation': false,
       'search': "",
-      'eventDisplayRiskTime': 'At max occupancy'
+      'riskColorScheme': riskColorInterpolationScheme
     }
   },
   methods: {
@@ -329,7 +329,7 @@ export default {
     },
 
     sortByRisk() {
-      this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
+      this.computeRiskAll(this.selectedMask)
 
       let copy = JSON.parse(JSON.stringify(this.$route.query))
       let newQuery;
