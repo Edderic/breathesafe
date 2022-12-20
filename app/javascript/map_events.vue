@@ -56,9 +56,14 @@
                 </td>
               </tr>
               <tr>
-                <th>Google Maps Link</th>
+                <th>Links</th>
                 <td>
-                  <a :href='`https://www.google.com/maps/place/?q=place_id:${m.placeData.placeId}`' target='_blank'>link</a>
+                  <div class='column'>
+                    <a :href='`https://www.google.com/maps/place/?q=place_id:${m.placeData.placeId}`' target='_blank'>📍 Google Maps</a>
+                    <router-link :to='{ name: "Analytics", params: {id: m.id}}' @click="showAnalysis(m.id)">
+                      ☣️  Risk Analysis
+                    </router-link>
+                  </div>
                 </td>
               </tr>
             </table>
@@ -145,7 +150,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(useMainStore, ['getCurrentUser']),
+    ...mapActions(useMainStore, ['getCurrentUser', 'showAnalysis']),
     ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useEventStores, ['load']),
     createIntervention(m) {
@@ -307,7 +312,7 @@ export default {
   }
 
   th {
-    padding: 1em;
+    padding: 0 1em;
   }
 
   @media (max-width: 1400px) {
