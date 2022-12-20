@@ -323,7 +323,7 @@ export const riskColorInterpolationScheme = [
     },
   },
   {
-    'lowerBound': 0.000001,
+    'lowerBound': 0.000000,
     'upperBound': 0.005,
     'lowerColor': {
       name: 'dark green',
