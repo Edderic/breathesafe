@@ -9,7 +9,7 @@
 </template>
 
 <script>
-  import { getColor, interpolateRgb } from './colors';
+  import { gradeColorMapping, getColor, interpolateRgb } from './colors';
 
   export default {
     computed: {
@@ -23,6 +23,11 @@
         }
       },
       cellColor() {
+        if (this.backgroundColor) {
+          return this.backgroundColor
+        }
+
+
         if (this.exception && this.exception.value == this.value) {
           const color = this.exception.color
           return `rgb(${color.r}, ${color.g}, ${color.b})`
@@ -36,7 +41,8 @@
       'value': Number,
       'text': String,
       'colorScheme': Object,
-      'exception': Object
+      'exception': Object,
+      'backgroundColor': String
     }
   }
 </script>
