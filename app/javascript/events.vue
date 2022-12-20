@@ -57,14 +57,6 @@
             <th v-if="adminView">User ID</th>
             <th v-if="adminView">Approve</th>
           </tr>
-          <tr>
-            <th></th>
-            <th></th>
-            <th></th>
-            <th v-if='permittedGeolocation'></th>
-            <th>
-            </th>
-          </tr>
         </thead>
         <MeasurementsRow v-for="ev in displayables" :key="ev.id" :measurements="ev" :permittedGeolocation='permittedGeolocation'/>
       </table>
