@@ -95,8 +95,6 @@ export const useEventStores = defineStore('events', {
     computeRiskAll(selectedMask) {
       /*
        * Parameters:
-       *   eventDisplayRiskTime: String
-       *     e.g. "At max occupancy", "At 75% occupancy", ... "At this hour"
        *
        *   selectedMask: Mask object
        *
@@ -116,14 +114,6 @@ export const useEventStores = defineStore('events', {
       }
 
       // TODO: make this a query parameter using router
-
-      let riskTime;
-
-      if (eventDisplayRiskTime) {
-        riskTime = eventDisplayRiskTime
-      } else {
-        riskTime = 'At max occupancy'
-      }
 
       for (let event of this.events) {
         let intervention = new Intervention(

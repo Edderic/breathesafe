@@ -29,7 +29,6 @@ export const useProfileStore = defineStore('profile', {
         'model': ""
       }
     ],
-    'eventDisplayRiskTime': "At max occupancy",
     status: 'saved',
     socials: {
       'twitter': '',

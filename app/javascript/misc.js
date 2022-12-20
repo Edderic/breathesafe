@@ -307,7 +307,6 @@ export function computeRiskWithVariableOccupancy(
   flowRate,
   roomUsableVolumeCubicMeters,
   susceptibleMaskType,
-  eventDisplayRiskTime,
   numWays
 ) {
   // const probaRandomSampleOfOneIsInfectious = this.numPositivesLastSevenDays
@@ -334,22 +333,7 @@ export function computeRiskWithVariableOccupancy(
   const maximumOccupancy = event.maximumOccupancy
 
   let date = new Date()
-  let occupancy;
-  if (eventDisplayRiskTime == "At this hour") {
-    occupancy = findCurrentOccupancy(maximumOccupancy, date, event.occupancy.parsed)
-  }
-  else if (eventDisplayRiskTime == "At 25% occupancy") {
-    occupancy = Math.ceil(0.25 * maximumOccupancy)
-  }
-  else if (eventDisplayRiskTime == "At 50% occupancy") {
-    occupancy = Math.ceil(0.5 * maximumOccupancy)
-  }
-  else if (eventDisplayRiskTime == "At 75% occupancy") {
-    occupancy = Math.ceil(0.75 * maximumOccupancy)
-  }
-  else {
-    occupancy = maximumOccupancy
-  }
+  let occupancy = maximumOccupancy;
 
   const numSamples = 1000000
 

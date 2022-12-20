@@ -58,7 +58,6 @@ export default {
     ColoredCell
   },
   computed: {
-    ...mapState(useProfileStore, ['eventDisplayRiskTime']),
     ...mapState(usePrevalenceStore, ['numPositivesLastSevenDays', 'numPopulation', 'uncountedFactor', 'maskType']),
     ...mapState(useEventStore, ['infectorActivityTypeMapping']),
     ...mapState(useEventStores, ['selectedMask']),

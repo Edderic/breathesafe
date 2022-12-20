@@ -246,25 +246,10 @@ export default {
       this.permittedGeolocation = true;
 
       await this.load()
-      this.computeRiskAll(this.eventDisplayRiskTime, this.selectedMask)
+      this.computeRiskAll(this.selectedMask)
       this.sortByParams()
     },
 
-    setDisplayRiskTime(e) {
-      this.eventDisplayRiskTime = e.target.value
-      let oldQuery = JSON.parse(JSON.stringify(this.$route.query))
-
-      let newQuery = {
-        eventDisplayRiskTime: this.eventDisplayRiskTime
-      }
-
-      Object.assign(oldQuery, newQuery)
-
-      this.$router.push({
-        name: 'Venues',
-        query: oldQuery
-      })
-    },
     getOpenHours(x) {
       return getWeekdayText(x)
     },
