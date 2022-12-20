@@ -487,10 +487,6 @@ export function binValue(colorScheme, value) {
   for (let obj of colorScheme) {
     if (obj['lowerBound'] <= value && value < obj['upperBound']) {
 
-      if (Math.abs(obj['upperBound'] - value) < Math.abs(obj['lowerBound'] - value)) {
-        return obj['upperColor']
-      }
-
       return obj['lowerColor']
     }
   }
