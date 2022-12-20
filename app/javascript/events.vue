@@ -201,6 +201,7 @@ export default {
   },
   methods: {
     async setLocation() {
+      this.showGradeInfo = false
       let coordinates = await this.$getLocation()
       // test if the getLocation
 
