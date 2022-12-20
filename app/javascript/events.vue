@@ -508,7 +508,7 @@ export default {
   .controls {
     padding-top: 1em;
     padding-bottom: 1em;
-    width: 100vw;
+    width: 100%;
     background-color: #eee;
   }
 

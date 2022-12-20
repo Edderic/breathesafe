@@ -223,6 +223,7 @@ export default {
   .body {
     position: absolute;
     top: 3.2em;
+    width: 100vw;
   }
   .wide {
     flex-direction: column;
