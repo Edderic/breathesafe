@@ -26,7 +26,27 @@
     </div>
 
     <div class='scrollable'>
-      <table>
+      <table v-if='showGradeInfo'>
+        <tr>
+          <th>Grade</th>
+          <th>Text</th>
+        </tr>
+
+        <tr v-for='item in betweenGrades'>
+          <td>
+            <ColoredCell
+              class='risk-score'
+              :colorScheme="riskColorScheme"
+              :maxVal=1
+              :backgroundColor='item.color'
+              :text='item.grade'
+              :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'border-radius': '100%', 'width': '2em', 'height': '2em' }"
+            />
+          </td>
+          <td>{{ item.text }}</td>
+        </tr>
+      </table>
+      <table v-if='!showGradeInfo'>
         <!--//add thead th element in the scrollable element for sticky col headers in .scrollable css-->
         <thead>
           <tr>
@@ -39,11 +59,9 @@
                 <div class='row space-around'>
                   <span :style="circleCSS" @click='sortByInfectorRisk'>{{this.sortRiskInfectorArrow}}</span>
 
-                  <router-link :style="circleCSS" to='/faqs#one-hr-risk-with-infector'
-                  title="This risk assumes that there is an infector is in the room."
-                  >
-                  ?
-                  </router-link>
+                  <div :style="circleCSS" @click='showGradeInfo = !showGradeInfo'>
+                    ?
+                  </div>
                 </div>
               </div>
             </th>
