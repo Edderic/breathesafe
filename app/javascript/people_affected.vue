@@ -6,9 +6,8 @@
     <br>
     <br>
 
-    <h2>Average New Infections</h2>
-    <div class='justify-content-center column'>
-      <span>On average, assuming {{ numInfectors }} COVID infector(s) in the room, and that everyone stays there for {{selectedHour}} hour(s), the number of people that would be infected is
+    <div class='justify-content-center align-items-center'>
+      <label class='bold'>Average New Infections</label> <CircularButton text='?' @click='show = !show'/>
 
           <ColoredCell
               :colorScheme="riskColorScheme"
@@ -16,31 +15,46 @@
               :value='roundOut(numSusceptibles * risk, 1)'
               class='inline'
               :style="styleProps"
-          />:
-      </span>
-    </div>
-    <div class='people-icons people '>
-      <PersonIcon
-        backgroundColor='red'
-        :amount='roundOut(numInfected, 0)'
-      />
-      <PersonIcon
-        backgroundColor='green'
-        :amount='numSusceptibles - roundOut(numInfected, 0)'
-      />
+          />
     </div>
 
-    <p>If the average number of new infections is less than 1 everywhere,
-    COVID-19 will become extinct. Business owners can do their part by making their
-    environments less conducive to spread, for example, by adopting higher indoor
-    air quality standards and masking. <span class='bold'>At the very least,
-    aim for a combination of interventions to keep the average new infections below 1</span>.
-    </p>
+    <div v-if='show'>
+      <div class='justify-content-center column'>
+        <span>On average, assuming {{ numInfectors }} COVID infector(s) in the room, and that everyone stays there for {{selectedHour}} hour(s), the number of people that would be infected is
+
+            <ColoredCell
+                :colorScheme="riskColorScheme"
+                :maxVal=1
+                :value='roundOut(numSusceptibles * risk, 1)'
+                class='inline'
+                :style="styleProps"
+            />:
+        </span>
+      </div>
+      <div class='people-icons people '>
+        <PersonIcon
+          backgroundColor='red'
+          :amount='roundOut(numInfected, 0)'
+        />
+        <PersonIcon
+          backgroundColor='green'
+          :amount='numSusceptibles - roundOut(numInfected, 0)'
+        />
+      </div>
+
+      <p>If the average number of new infections is less than 1 everywhere,
+      COVID-19 will become extinct. Business owners can do their part by making their
+      environments less conducive to spread, for example, by adopting higher indoor
+      air quality standards and masking. <span class='bold'>At the very least,
+      aim for a combination of interventions to keep the average new infections below 1</span>.
+      </p>
+    </div>
   </div>
 </template>
 
 <script>
 import ColoredCell from './colored_cell.vue'
+import CircularButton from './circular_button.vue'
 import PersonIcon from './person_icon.vue'
 import { round } from './misc.js'
 import { mapWritableState, mapState, mapActions } from 'pinia';
@@ -54,6 +68,7 @@ import { useAnalyticsStore } from './stores/analytics_store.js'
 export default {
   name: 'PeopleAffected',
   components: {
+    CircularButton,
     ColoredCell,
     PersonIcon
   },
@@ -91,6 +106,7 @@ export default {
   },
   data() {
     return {
+      show: false
     }
   },
   methods: {
