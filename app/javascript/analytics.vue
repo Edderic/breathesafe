@@ -19,7 +19,7 @@
 
     <SideBar class='col hide-horizontal-border item sticky'/>
 
-    <div class='col item scrollableY content' >
+    <div class='col item scrollableY' >
       <div class='item-span-wide column-controls' id='section-interventions'>
 
         <div class='container'>
@@ -38,28 +38,53 @@
 
       <div class='item-span-wide' id='section-risk-assessment-summary'>
         <br id='risk-assessment-summary'>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <br>
-        <h1 class='centered'>Risk Assessment Summary</h1>
+        <h2 class='centered'>Risk Assessment Summary</h2>
       </div>
 
-      <PeopleAffected
-        class='item'
-        id='section-average-new-infections'
-        :event='event'
-        :selectedIntervention='selectedIntervention'
-        :numInfectors='numInfectors'
-      />
+      <table class='item-span-wide stuff'>
+        <PeopleAffected
+          id='section-average-new-infections'
+          :event='event'
+          :selectedIntervention='selectedIntervention'
+          :numInfectors='numInfectors'
+          class='align-items-center'
+        />
 
-      <IndividualRisk
-        class='item'
-        id='section-individual-risk'
-        :riskColorScheme='riskColorScheme'
-      />
+        <IndividualRisk
+          id='section-individual-risk'
+          :riskColorScheme='riskColorScheme'
+          class='align-items-center'
+        />
+
+
+      </table>
+
+      <div class='item-span-wide' id='section-risk-assessment-summary'>
+        <br id='risk-assessment-summary'>
+        <h2 class='centered'>Indoor Air Quality</h2>
+      </div>
+      <table>
+        <CleanAirDeliveryRateTable :cellCSS='cellCSS' :intervention='selectedIntervention' :measurementUnits='measurementUnits' :systemOfMeasurement='systemOfMeasurement'/>
+        <TotalACHTable
+          :measurementUnits='measurementUnits'
+          :systemOfMeasurement='systemOfMeasurement'
+          :totalFlowRate='totalFlowRate'
+          :roomUsableVolume='roomUsableVolume'
+          :selectedIntervention='selectedIntervention'
+          :cellCSS='cellCSS'
+          :roomUsableVolumeCubicMeters='roomUsableVolumeCubicMeters'
+        />
+
+        <AchToDuration
+          :intervention='selectedIntervention'
+        />
+
+      </table>
+
+      <div class='item-span-wide' id='section-risk-assessment-summary'>
+        <br id='risk-assessment-summary'>
+        <h2 class='centered'>Behaviors</h2>
+      </div>
 
       <LostLaborWages1
         class='item'
@@ -241,58 +266,11 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
       </div>
 
 
-
-      <CADR
-        id='section-clean-air-delivery-rate'
-        class='item'
-        :cellCSSMerged='cellCSSMerged'
-        :cellCSS='cellCSS'
-        :measurementUnits='measurementUnits'
-        :airCleanerSuggestion='airCleanerSuggestion'
-        :numSuggestedAirCleaners='numSuggestedAirCleaners'
-        :colorScheme="colorInterpolationSchemeRoomVolume"
-        :selectedIntervention='selectedIntervention'
-        :systemOfMeasurement='systemOfMeasurement'
-        :totalFlowRateCubicMetersPerHour='totalFlowRateCubicMetersPerHour'
-        :totalFlowRate='totalFlowRate'
-      />
-
-      <div class='item' id='section-total-ach'>
-        <br id='total-ach'>
-        <br>
-        <br>
-        <h2>Total ACH</h2>
-        <div class='centered'>
-          <TotalACHTable
-            :measurementUnits='measurementUnits'
-            :systemOfMeasurement='systemOfMeasurement'
-            :totalFlowRate='totalFlowRate'
-            :roomUsableVolume='roomUsableVolume'
-            :portableAch='selectedIntervention.computePortableAirCleanerACH()'
-            :ventilationAch='selectedIntervention.computeVentilationACH()'
-            :uvAch='selectedIntervention.computeUVACH()'
-            :cellCSS='cellCSS'
-            />
-        </div>
-
-        <p>
-          Air Changes per Hour (ACH) tells us how much clean air is generated
-          relative to the volume of the room. If a device outputs 5 ACH, that means it
-          produces clean air that is 5 times the volume of the room in an hour.  Total
-          ACH for a room can be computed by summing up the ACH of different types (e.g.
-          ventilation, filtration, upper-room germicidal UV).
-        </p>
-
-      </div>
-
       <div class='item'>
         <br id='ach-to-duration'>
         <br>
         <br>
         <h4>ACH & Time-to-Remove</h4>
-        <AchToDuration
-          :intervention='selectedIntervention'
-        />
 
         <p>
         Increasing ACH speeds up the rate of removal, which dilutes the dose
@@ -700,49 +678,6 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
                 />
               </tr>
 
-            </table>
-          </div>
-
-          <div class='centered'>
-            <table>
-              <tr>
-                <th class='col centered'>
-                  <span>Clean Air Delivery Rate</span>
-                  <span class='font-light'>(m³ / h)</span>
-                </th>
-                <th></th>
-                <th class='col centered'>
-                  <span>Unoccupied Room Volume</span>
-                  <span class='font-light'>(m³)</span>
-                </th>
-                <th></th>
-                <th class='col centered'>
-                  <span>Total ACH</span>
-                  <span class='font-light'>(1 / h)</span>
-                </th>
-              </tr>
-              <tr>
-                <ColoredCell
-                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
-                  :maxVal=1
-                  :value='roundOut(computeTotalFlowRate(roomUsableVolumeCubicMeters *  selectedIntervention.computeACH()), 1)'
-                  class='color-cell'
-                />
-                <td>=</td>
-                <ColoredCell
-                  :colorScheme="colorInterpolationSchemeRoomVolumeMetric"
-                  :maxVal=1
-                  :value='roundOut(roomUsableVolumeCubicMeters, 1)'
-                  class='color-cell'
-                />
-                <td>x</td>
-                <ColoredCell
-                  :colorScheme="colorInterpolationSchemeTotalAch"
-                  :maxVal=1
-                  :value='roundOut(selectedIntervention.computeACH(), 1)'
-                  class='color-cell'
-                />
-              </tr>
             </table>
           </div>
 
@@ -1380,6 +1315,7 @@ import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import { Intervention } from './interventions.js'
 import TotalACHTable from './total_ach_table.vue';
+import TotalACH from './total_ach.vue';
 import VentIcon from './vent_icon.vue';
 import LostLaborWages1 from './lost_labor_wages_1.vue';
 import LostLaborWages2 from './lost_labor_wages_2.vue';
@@ -1460,6 +1396,7 @@ export default {
     SideBar,
     Strengths,
     TotalACHTable,
+    TotalACH,
     VentIcon
   },
   computed: {
@@ -1550,7 +1487,6 @@ export default {
         'font-weight': 'bold',
         'color': 'white',
         'text-shadow': '1px 1px 2px black',
-        'text-align': 'center',
         'display': 'inline-block',
         'padding': '1em'
       }
@@ -2040,7 +1976,6 @@ export default {
         'text-shadow': '1px 1px 2px black',
         'padding': '1em',
         'margin': '0.5em',
-        'text-align': 'center'
       },
       susceptibleBreathingActivityFactorMappings: susceptibleBreathingActivityToFactor
     }
@@ -2153,7 +2088,6 @@ export default {
   }
 
   table {
-    text-align: center;
     padding: 2em;
   }
 
@@ -2430,5 +2364,15 @@ export default {
   .equations {
     font-style: italic;
   }
+
+  .stuff td {
+    text-align: center;
+  }
+
+  .explainer {
+    max-width: 25em;
+    margin: 0 auto;
+  }
+
 </style>
 

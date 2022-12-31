@@ -1,34 +1,60 @@
 <template>
 
-  <div :style='containerCSSMerged'>
-    Imagine an infectious person stays at this room and then leaves. With
-      <ColoredCell
-        :colorScheme="colorInterpolationSchemeTotalAch"
-        :maxVal=1
-        :value='totalAchRounded'
-        :style='cellCSSMerged'
-      />
-      ACH,
-      <span class='highlight'>
-        it takes <ColoredCell
-          :colorScheme="removalScheme"
-          :maxVal=1
-          :value='durationMinutesToRemove(0.99)'
-          :style='cellCSSMerged'
-        /> minutes to remove 99% of the virus that have been exhaled by the infector (after the infector has left).
-      </span>
+  <tr>
+    <td>
+      <div class='justify-content-center align-items-center row'>
+        <label class='bold'>Time to 99% Dilution</label>
 
-      <span>Increasing total ACH, whether done by added ventilation, portable
-      air cleaning, or upper room germicidal ultra violet irradiation, the faster
-      the rate of removal of airborne pathogens, and the safer it is for
-      everyone.
-      </span>
-    </div>
+        <CircularButton text='?' @click='show = !show'/>
+      </div>
+    </td>
+    <td>
+      <ColoredCell
+        :colorScheme="removalScheme"
+        :maxVal=1
+        :value='durationMinutesToRemove(0.99)'
+        :style='headerCellCSS'
+      />
+    </td>
+  </tr>
+  <tr v-if='show'>
+    <td  colspan='2'>
+      <div class='explainer'>
+        <p>
+          Imagine an infectious person stays at this room and then leaves. With
+          <ColoredCell
+            :colorScheme="colorInterpolationSchemeTotalAch"
+            :maxVal=1
+            :value='totalAchRounded'
+            :style='cellCSSMerged'
+          />
+          ACH,
+          <span class='highlight'>
+            it takes <ColoredCell
+              :colorScheme="removalScheme"
+              :maxVal=1
+              :value='durationMinutesToRemove(0.99)'
+              :style='cellCSSMerged'
+            /> minutes to remove 99% of the virus that have been exhaled by the infector (after the infector has left).
+          </span>
+
+          <span>Increasing total ACH, whether done by added ventilation, portable
+          air cleaning, or upper room germicidal ultra violet irradiation, the faster
+          the rate of removal of airborne pathogens, and the safer it is for
+          everyone.
+          </span>
+        </p>
+      </div>
+    </td>
+  </tr>
 
 </template>
 
 <script>
+import CircularButton from './circular_button.vue'
 import ColoredCell from './colored_cell.vue'
+import { mapWritableState, mapState, mapActions } from 'pinia';
+import { useAnalyticsStore } from './stores/analytics_store'
 import { convertVolume } from './measurement_units.js';
 import { binSearch } from './interventions.js'
 import {
@@ -46,21 +72,40 @@ import {
 export default {
   name: 'AchToDuration',
   components: {
+    CircularButton,
     ColoredCell
   },
+  data() {
+    return {
+      show: false
+    }
+  },
   computed: {
+    ...mapState(
+      useAnalyticsStore,
+      [
+        'styleProps'
+      ]
+    ),
+    headerCellCSS() {
+      let def = {
+        'display': 'block',
+        'padding': '1em'
+      }
+      return Object.assign(JSON.parse(JSON.stringify(this.cellCSSMerged)), def)
+    },
     cellCSSMerged() {
       let def = {
         'font-weight': 'bold',
         'color': 'white',
         'text-shadow': '1px 1px 2px black',
         'text-align': 'center',
-        'display': 'inline-block',
-        'padding': '0.5em'
+        'padding': '0.5em',
+        'display': 'inline-block'
       }
 
       // return Object.assign(this.cellCSS, default)
-      return Object.assign(def, this.cellCSS)
+      return Object.assign(this.cellCSS, def)
     },
     containerCSSMerged() {
       let css = {
@@ -123,5 +168,29 @@ export default {
 
   .container {
 
+  }
+  .align-items-center {
+    display: flex;
+    align-items: center;
+  }
+
+  .justify-content-center {
+    display: flex;
+    justify-content: center;
+  }
+
+
+  .bold {
+    font-weight: bold;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .explainer {
+    max-width: 25em;
+    margin: 0 auto;
   }
 </style>

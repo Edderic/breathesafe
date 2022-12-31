@@ -1,81 +1,80 @@
 <template>
-  <div>
-    <br id='individual-risk'>
-    <br>
-    <br>
-
-    <div class='justify-content-center align-items-center'>
-      <label class='bold'>Individual Risk</label> <CircularButton text='?' @click='show = !show'/>
-
+  <tr>
+    <td>
+      <div class='row align-items-center justify-content-center'>
+        <h3 class='bold'>Individual Risk</h3>
+        <CircularButton text='?' @click='show = !show'/>
+      </div>
+    </td>
+    <td class='second-td'>
       <ColoredCell
         :colorScheme="riskColorScheme"
         :maxVal=1
         :value='english(this.risk)'
         :style="styleProps"
         />
-    </div>
+    </td>
+  </tr>
 
-    <div v-if='show'>
-      <table>
-        <tr>
-          <th>Infection risk given {{numInfectors}} infector(s)</th>
+  <tr v-if='show'>
+    <th>Infection risk given {{numInfectors}} infector(s)</th>
 
-          <td>
-            <ColoredCell
-              :colorScheme="riskColorScheme"
-              :maxVal=1
-              :value='roundOut(this.risk, 6)'
-              :style="styleProps"
-              />
-          </td>
-        </tr>
-        <tr>
+    <td>
+      <ColoredCell
+        :colorScheme="riskColorScheme"
+        :maxVal=1
+        :value='roundOut(this.risk, 6)'
+        :style="styleProps"
+        />
+    </td>
+  </tr>
+  <tr v-if='show'>
+    <th>Risk Relative to Having a Car Accident</th>
+    <td>
+    </td>
+  </tr>
+  <tr v-if='show'>
+    <th>...Within the Average Daily Drive</th>
 
-          <th>Risk Relative to Having a Car Accident</th>
+    <td>
+      <ColoredCell
+        :colorScheme="riskColorScheme"
+        :maxVal=1
+        :value='roundOut(this.relativeRiskDailyDrive, 6)'
+        :text='`${roundOut(this.relativeRiskDailyDrive, 0)}x`'
+        :style="styleProps"
+        />
+    </td>
+  </tr>
+  <tr v-if='show'>
+    <th>...Within Driving 1000 miles</th>
 
-          <td>
-          </td>
-        </tr>
-        <tr>
-          <th>...Within the Average Daily Drive</th>
+    <td>
+      <ColoredCell
+        :colorScheme="riskColorScheme"
+        :maxVal=1
+        :value='this.relativeRisk1000Miles'
+        :text='displayRelativeRisk1000Miles'
+        :style="styleProps"
+        />
+    </td>
+  </tr>
+  <tr v-if='show'>
+    <td colspan='2'>
+      <div class='explainer'>
+        <p><a href="https://www.kbb.com/car-advice/average-miles-driven-per-year/">The average American drives 17.6 miles a day</a>. On average, the risk of getting into a car accident for driving that long is <span class='bold'>1 in {{roundOut(1 / averageDailyDrivingRisk, 0)}}</span>.
+        Conditional on {{this.numInfectors}} infector(s) being present, the infection risk for the average susceptible individual is <span class='bold'>{{roundOut(this.relativeRiskDailyDrive, 0)}}x</span> that risk.
+        </p>
 
-          <td>
-            <ColoredCell
-              :colorScheme="riskColorScheme"
-              :maxVal=1
-              :value='roundOut(this.relativeRiskDailyDrive, 6)'
-              :text='`${roundOut(this.relativeRiskDailyDrive, 0)}x`'
-              :style="styleProps"
-              />
-          </td>
-        </tr>
-        <tr>
-          <th>...Within Driving 1000 miles</th>
+        <p>
 
-          <td>
-            <ColoredCell
-              :colorScheme="riskColorScheme"
-              :maxVal=1
-              :value='this.relativeRisk1000Miles'
-              :text='displayRelativeRisk1000Miles'
-              :style="styleProps"
-              />
-          </td>
-        </tr>
-      </table>
+        <a href="https://carsurance.net/insights/odds-of-dying-in-a-car-crash/#:~:text=Odds%20of%20Getting%20in%20a%20Car%20Accident&text=In%20fact%2C%20your%20odds%20of,anywhere%20and%20at%20any%20time">The risk of getting into a car accident within the span of 1000 miles of driving is <span class='bold'>1 in {{roundOut(1 / thousandMilesRisk, 0)}}</span>.</a>
 
-      <p><a href="https://www.kbb.com/car-advice/average-miles-driven-per-year/">The average American drives 17.6 miles a day</a>. On average, the risk of getting into a car accident for driving that long is <span class='bold'>1 in {{roundOut(1 / averageDailyDrivingRisk, 0)}}</span>.
-      Conditional on {{this.numInfectors}} infector(s) being present, the infection risk for the average susceptible individual is <span class='bold'>{{roundOut(this.relativeRiskDailyDrive, 0)}}x</span> that risk.
-      </p>
-
-      <p>
-
-      <a href="https://carsurance.net/insights/odds-of-dying-in-a-car-crash/#:~:text=Odds%20of%20Getting%20in%20a%20Car%20Accident&text=In%20fact%2C%20your%20odds%20of,anywhere%20and%20at%20any%20time">The risk of getting into a car accident within the span of 1000 miles of driving is <span class='bold'>1 in {{roundOut(1 / thousandMilesRisk, 0)}}</span>.</a>
-
-      Conditional on {{this.numInfectors}} infector(s) being present, the infection risk for the average susceptible individual is <span class='bold'>{{displayRelativeRisk1000Miles}}</span> that risk.
-      </p>
-    </div>
-  </div>
+        Conditional on {{this.numInfectors}} infector(s) being present, the infection risk for the average susceptible individual is <span class='bold'>{{displayRelativeRisk1000Miles}}</span> that risk.
+        </p>
+      </div>
+    </td>
+  </tr>
 </template>
 
 <script>
@@ -166,4 +165,18 @@ export default {
     align-items: center;
   }
 
+  .col {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .second-td {
+    width: 8em;
+  }
+  .explainer {
+    max-width: 25em;
+    margin: 0 auto;
+  }
+
 </style>
+

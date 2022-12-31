@@ -1,76 +1,108 @@
-
-
 <template>
-  <table>
-    <tr>
-      <th class='col centered'>
-        <span>Total ACH</span>
-        <span class='font-light'>(1 / h)</span>
-      </th>
-      <td>
+  <tr id='section-total-ach'>
+    <td>
+      <div class='row justify-content-center align-items-center'>
+        <label class='bold'>Total ACH</label>
+        <CircularButton text='?' @click='show = !show'/>
+      </div>
+    </td>
+    <td>
       <ColoredCell
         :colorScheme="colorInterpolationSchemeTotalAch"
         :maxVal=1
         :value='totalAchRounded'
         :style='cellCSSMerged'
       />
-      </td>
-    </tr>
-    <tr>
-      <th></th>
-      <td class='operator'>=</td>
-    </tr>
-    <tr>
-      <th class='col centered'>
-        <span>Ventilation ACH</span>
-        <span class='font-light'>(1 / h)</span>
-      </th>
-      <td>
-      <ColoredCell
-        :colorScheme="colorInterpolationSchemeTotalAch"
-        :maxVal=1
-        :value='ventilationAchRounded'
-        :style='cellCSSMerged'
-      />
-      </td>
-    </tr>
-    <tr>
-      <td></td>
-      <td class='operator'>+</td>
-    </tr>
-    <tr>
-      <th class='col centered'>
-        <span>Portable ACH</span>
-        <span class='font-light'>(1 / h)</span>
-      </th>
-      <td>
-      <ColoredCell
-        :colorScheme="colorInterpolationSchemeTotalAch"
-        :maxVal=1
-        :value='portableAchRounded'
-        :style='cellCSSMerged'
-      />
-      </td>
-    </tr>
-    <tr>
-      <td></td>
-      <td class='operator'>+</td>
-    </tr>
-    <tr>
-      <th class='col centered'>
-        <span>Upper-Room UV ACH</span>
-        <span class='font-light'>(1 / h)</span>
-      </th>
-      <td>
-      <ColoredCell
-        :colorScheme="colorInterpolationSchemeTotalAch"
-        :maxVal=1
-        :value='uvAchRounded'
-        :style='cellCSSMerged'
-      />
-      </td>
-    </tr>
-  </table>
+    </td>
+  </tr>
+
+  <tr v-if='show'>
+    <td colspan='2'>
+      <table class='explainer'>
+        <tr>
+          <th class='col centered'>
+            <span>Total ACH</span>
+            <span class='font-light'>(1 / h)</span>
+          </th>
+          <td>
+          <ColoredCell
+            :colorScheme="colorInterpolationSchemeTotalAch"
+            :maxVal=1
+            :value='totalAchRounded'
+            :style='cellCSSMerged'
+          />
+          </td>
+        </tr>
+        <tr>
+          <th></th>
+          <td class='operator'>=</td>
+        </tr>
+        <tr>
+          <th class='col centered'>
+            <span>Ventilation ACH</span>
+            <span class='font-light'>(1 / h)</span>
+          </th>
+          <td>
+          <ColoredCell
+            :colorScheme="colorInterpolationSchemeTotalAch"
+            :maxVal=1
+            :value='ventilationAchRounded'
+            :style='cellCSSMerged'
+          />
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td class='operator'>+</td>
+        </tr>
+        <tr>
+          <th class='col centered'>
+            <span>Portable ACH</span>
+            <span class='font-light'>(1 / h)</span>
+          </th>
+          <td>
+          <ColoredCell
+            :colorScheme="colorInterpolationSchemeTotalAch"
+            :maxVal=1
+            :value='portableAchRounded'
+            :style='cellCSSMerged'
+          />
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td class='operator'>+</td>
+        </tr>
+        <tr>
+          <th class='col centered'>
+            <span>Upper-Room UV ACH</span>
+            <span class='font-light'>(1 / h)</span>
+          </th>
+          <td>
+          <ColoredCell
+            :colorScheme="colorInterpolationSchemeTotalAch"
+            :maxVal=1
+            :value='uvAchRounded'
+            :style='cellCSSMerged'
+          />
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr v-if='show'>
+    <td>
+      <p class='explainer'>
+        Air Changes per Hour (ACH) tells us how much clean air is generated
+        relative to the volume of the room. If a device outputs 5 ACH, that means it
+        produces clean air that is 5 times the volume of the room in an hour.  Total
+        ACH for a room can be computed by summing up the ACH of different types (e.g.
+        ventilation, filtration, upper-room germicidal UV).
+      </p>
+    </td>
+  </tr>
+
 </template>
 
 
@@ -86,23 +118,37 @@ import {
   round,
 } from  './misc';
 
+import CircularButton from './circular_button.vue'
 import ColoredCell from './colored_cell.vue'
 
 export default {
   name: 'TotalACH',
   components: {
+    CircularButton,
     ColoredCell
+  },
+  data() {
+    return {
+      show: false
+    }
   },
   props: {
     cellCSS: Object,
     measurementUnits: Object,
     systemOfMeasurement: String,
-    portableAch: Number,
-    ventilationAch: Number,
-    uvAch: Number,
     roomUsableVolumeCubicMeters: Number,
+    selectedIntervention: Object
   },
   computed: {
+    portableAch() {
+      return this.selectedIntervention.computePortableAirCleanerACH()
+    },
+    ventilationAch() {
+      return this.selectedIntervention.computeVentilationACH()
+    },
+    uvAch() {
+      return this.selectedIntervention.computeUVACH()
+    },
     colorInterpolationSchemeTotalAch() {
       return colorInterpolationSchemeAch
     },
@@ -185,5 +231,29 @@ export default {
 
   .operator {
     font-weight: bold;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .bold {
+    font-weight: bold;
+  }
+
+  .justify-content-center {
+    display: flex;
+    justify-content: center;
+  }
+
+  .align-items-center {
+    display: flex;
+    align-items: center;
+  }
+
+  .explainer {
+    max-width: 25em;
+    margin: 0 auto;
   }
 </style>
