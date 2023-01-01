@@ -1222,6 +1222,7 @@ import ColoredCell from './colored_cell.vue';
 import Controls from './controls.vue';
 import CleanAirDeliveryRateTable from './clean_air_delivery_rate_table.vue'
 import InhalationActivity from './inhalation_activity.vue'
+import InfectorActivity from './infector_activity.vue'
 import CADR from './cadr.vue'
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
