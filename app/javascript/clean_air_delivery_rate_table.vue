@@ -14,6 +14,7 @@
         :colorScheme="colorInterpolationSchemeRoomVolume"
         :maxVal=1
         :value='totalFlowRateRounded'
+        :text='totalFlowRateText'
         :style="styleProps"
       />
     </td>
@@ -174,6 +175,14 @@ export default {
     },
     totalFlowRateRounded() {
       return round(this.totalFlowRate, 1)
+    },
+    totalFlowRateText() {
+      let roundTo = 1;
+      if (this.totalFlowRate > 1) {
+        roundTo = 0
+      }
+
+      return `${round(this.totalFlowRate, roundTo)} ${this.measurementUnits.airDeliveryRateMeasurementTypeShort}`
     },
     totalFlowRate() {
       return displayCADR(
