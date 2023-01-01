@@ -93,30 +93,19 @@
           :inlineCellCSS='inlineCellCSS'
           :tableColoredCellWithHorizPadding='tableColoredCellWithHorizPadding'
         />
+        <InfectorActivity
+          :aerosolGenerationActivity='aerosolGenerationActivity'
+          :riskiestAerosolGenerationActivityScheme='riskiestAerosolGenerationActivityScheme'
+          :aerosolActivityToFactor='aerosolActivityToFactor'
+          :riskiestPotentialInfector='riskiestPotentialInfector'
+          :inlineCellCSS='inlineCellCSS'
+          :tableColoredCell='tableColoredCell'
+        />
       </table>
       <div class='item-span-wide' id='section-risk-assessment-summary'>
         <br id='risk-assessment-summary'>
         <h2 class='centered'>Behaviors</h2>
       </div>
-
-      <LostLaborWages1
-        class='item'
-        id='section-lost-labor-and-wages'
-        :numSusceptibles='numSusceptibles'
-        :event='event'
-        :selectedIntervention='selectedIntervention'
-        :numInfectors='numInfectors'
-      />
-
-      <LostLaborWages2
-        class='item lost-labor-and-wages'
-        :numSusceptibles='numSusceptibles'
-        :event='event'
-        :selectedIntervention='selectedIntervention'
-        :numInfectors='numInfectors'
-      />
-
-
 
       <div class='item-span-wide' id='section-risk-equation'>
         <br id='risk-equation'>
