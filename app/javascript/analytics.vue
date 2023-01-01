@@ -268,19 +268,6 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
       </div>
 
 
-      <div class='item'>
-        <br id='ach-to-duration'>
-        <br>
-        <br>
-        <h4>ACH & Time-to-Remove</h4>
-
-        <p>
-        Increasing ACH speeds up the rate of removal, which dilutes the dose
-        a susceptible gets, thereby decreasing the likelihood of transmitting COVID-19.
-        </p>
-
-      </div>
-
       <div class='item' id='section-behaviors'>
         <br id='behaviors'>
         <br>
@@ -307,42 +294,6 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
         </p>
       </div>
 
-
-      <div class='item-span-wide' id='section-infector-activity'>
-        <br id='infector-activity'>
-        <br>
-        <br>
-        <h4>Infector Activity</h4>
-
-        <span>
-          The riskiest aerosol generation activity recorded for a person in this measurement is <ColoredCell
-                :colorScheme="riskiestAerosolGenerationActivityScheme"
-                :maxVal=1
-                :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
-                :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
-                :style="inlineCellCSS"
-            />. See table for contextualization.
-        </span>
-        <div class='centered'>
-          <table>
-            <tr>
-              <th>Infector Activity</th>
-              <th>Factor</th>
-            </tr>
-            <tr v-for='(value, key) in infectorActivities'>
-              <td :class='{"table-td": true, bold: key == riskiestPotentialInfector["aerosolGenerationActivity"]}'>{{key}}</td>
-              <td class='table-td'>
-              <ColoredCell
-                :colorScheme="riskiestAerosolGenerationActivityScheme"
-                :maxVal=1
-                :value='value'
-                :style="tableColoredCell"
-              />
-              </td>
-            </tr>
-          </table>
-        </div>
-      </div>
 
       <div class='item-span-wide' id='section-masking'>
         <br id='masking'>
@@ -1278,8 +1229,6 @@ import { Intervention } from './interventions.js'
 import TotalACHTable from './total_ach_table.vue';
 import TotalACH from './total_ach.vue';
 import VentIcon from './vent_icon.vue';
-import LostLaborWages1 from './lost_labor_wages_1.vue';
-import LostLaborWages2 from './lost_labor_wages_2.vue';
 import IndividualRisk from './individual_risk.vue';
 import PacIcon from './pac_icon.vue';
 import PeopleAffected from './people_affected.vue';
@@ -1349,8 +1298,7 @@ export default {
     HorizontalStackedBar,
     IndividualRisk,
     InhalationActivity,
-    LostLaborWages1,
-    LostLaborWages2,
+    InfectorActivity,
     PacIcon,
     PeopleAffected,
     RiskIcon,

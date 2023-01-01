@@ -17,47 +17,53 @@
   </tr>
 
   <tr v-if='show'>
-    <th>Infection risk given {{numInfectors}} infector(s)</th>
+    <td colspan='2'>
+      <table class='explainer'>
+        <tr>
+          <th>Infection risk given {{numInfectors}} infector(s)</th>
+          <td>
+            <ColoredCell
+            :colorScheme="riskColorScheme"
+            :maxVal=1
+            :value='roundOut(this.risk, 6)'
+            :style="styleProps"
+            />
+          </td>
+        </tr>
+        <tr>
+          <th>Risk Relative to Having a Car Accident</th>
+          <td>
+          </td>
+        </tr>
+        <tr>
+          <th>...Within the Average Daily Drive</th>
 
-    <td>
-      <ColoredCell
-        :colorScheme="riskColorScheme"
-        :maxVal=1
-        :value='roundOut(this.risk, 6)'
-        :style="styleProps"
-        />
-    </td>
-  </tr>
-  <tr v-if='show'>
-    <th>Risk Relative to Having a Car Accident</th>
-    <td>
-    </td>
-  </tr>
-  <tr v-if='show'>
-    <th>...Within the Average Daily Drive</th>
+          <td>
+            <ColoredCell
+              :colorScheme="riskColorScheme"
+              :maxVal=1
+              :value='roundOut(this.relativeRiskDailyDrive, 6)'
+              :text='`${roundOut(this.relativeRiskDailyDrive, 0)}x`'
+              :style="styleProps"
+              />
+          </td>
+        </tr>
+        <tr>
+          <th>...Within Driving 1000 miles</th>
 
-    <td>
-      <ColoredCell
-        :colorScheme="riskColorScheme"
-        :maxVal=1
-        :value='roundOut(this.relativeRiskDailyDrive, 6)'
-        :text='`${roundOut(this.relativeRiskDailyDrive, 0)}x`'
-        :style="styleProps"
-        />
+          <td>
+            <ColoredCell
+              :colorScheme="riskColorScheme"
+              :maxVal=1
+              :value='this.relativeRisk1000Miles'
+              :text='displayRelativeRisk1000Miles'
+              :style="styleProps"
+              />
+          </td>
+        </tr>
+      </table>
     </td>
-  </tr>
-  <tr v-if='show'>
-    <th>...Within Driving 1000 miles</th>
 
-    <td>
-      <ColoredCell
-        :colorScheme="riskColorScheme"
-        :maxVal=1
-        :value='this.relativeRisk1000Miles'
-        :text='displayRelativeRisk1000Miles'
-        :style="styleProps"
-        />
-    </td>
   </tr>
   <tr v-if='show'>
     <td colspan='2'>
