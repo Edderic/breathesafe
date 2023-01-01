@@ -236,26 +236,6 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
 
       </div>
 
-      <Strengths
-        :selectedIntervention='selectedIntervention'
-        :maskingBarChart='maskingBarChart'
-        :colorInterpolationSchemeRoomVolume='colorInterpolationSchemeRoomVolume'
-        :cellCSSMerged='cellCSSMerged'
-        :inlineCellCSS='inlineCellCSS'
-        class='item'
-        id='section-strengths'
-      />
-
-      <RoomForImprovement
-        :selectedIntervention='selectedIntervention'
-        :maskingBarChart='maskingBarChart'
-        :colorInterpolationSchemeRoomVolume='colorInterpolationSchemeRoomVolume'
-        :cellCSSMerged='cellCSSMerged'
-        :inlineCellCSS='inlineCellCSS'
-        class='item'
-        id='section-room-for-improvement'
-      />
-
       <div class='item'></div>
 
       <div class='item-span-wide' id='section-risk-assessment-details'>
@@ -1234,9 +1214,7 @@ import IndividualRisk from './individual_risk.vue';
 import PacIcon from './pac_icon.vue';
 import PeopleAffected from './people_affected.vue';
 import RiskIcon from './risk_icon.vue';
-import RoomForImprovement from './room_for_improvement.vue';
 import SideBar from './side_bar.vue';
-import Strengths from './strengths.vue';
 import { airCleaners, AirCleaner } from './air_cleaners.js';
 import { datetimeEnglish } from './date.js'
 import { getSampleInterventions } from './sample_interventions.js'
@@ -1303,9 +1281,7 @@ export default {
     PacIcon,
     PeopleAffected,
     RiskIcon,
-    RoomForImprovement,
     SideBar,
-    Strengths,
     TotalACHTable,
     TotalACH,
     VentIcon
