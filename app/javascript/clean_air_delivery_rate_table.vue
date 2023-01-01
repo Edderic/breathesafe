@@ -2,7 +2,7 @@
 <template>
   <tr>
     <td class='justify-content-center align-items-center'>
-      <label class='bold'>Clean Air Delivery Rate</label>
+      <h3 class='bold'>Clean Air Delivery Rate</h3>
 
       <div class='row'>
         <CircularButton text='?' @click='show = !show'/>

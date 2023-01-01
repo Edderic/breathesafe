@@ -3,7 +3,7 @@
   <tr>
     <td>
       <div class='justify-content-center align-items-center row'>
-        <label class='bold'>Time to 99% Dilution</label>
+        <h3 class='bold'>Time to 99% Dilution</h3>
 
         <CircularButton text='?' @click='show = !show'/>
       </div>

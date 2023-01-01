@@ -68,33 +68,6 @@
 export default {
   name: 'SideBar',
   mounted() {
-    var observer = new IntersectionObserver(function(entries) {
-      // isIntersecting is true when element and viewport are overlapping
-      // isIntersecting is false when element and viewport don't overlap
-      for (let entry of entries) {
-        let id = entry.target.id;
-        let selection = document.querySelector(`#link-${id.substring(8)}`)
-
-        if(entry.isIntersecting === true) {
-          selection.classList.add("active")
-          console.log('Element has just become visible in screen');
-        }
-        else {
-          selection.classList.remove("active")
-        }
-      }
-    }, { threshold: [0.20] });
-
-    for (let j of document.querySelectorAll(".link-h2")) {
-      if (j.id) {
-        observer.observe(document.querySelector(`#section-${j.id.substring(5)}`));
-      }
-    }
-    for (let j of document.querySelectorAll(".link-h1")) {
-      if (j.id) {
-        observer.observe(document.querySelector(`#section-${j.id.substring(5)}`));
-      }
-    }
   }
 }
 </script>

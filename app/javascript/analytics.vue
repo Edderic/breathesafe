@@ -81,6 +81,19 @@
 
       </table>
 
+      <div class='item-span-wide' id='section-behaviors'>
+        <br id='risk-assessment-summary'>
+        <h2 class='centered'>Behaviors</h2>
+      </div>
+      <table>
+        <InhalationActivity
+          :worstCaseInhalation='worstCaseInhalation'
+          :inhalationActivityScheme='inhalationActivityScheme'
+          :susceptibleBreathingActivityFactorMappings='susceptibleBreathingActivityFactorMappings'
+          :inlineCellCSS='inlineCellCSS'
+          :tableColoredCellWithHorizPadding='tableColoredCellWithHorizPadding'
+        />
+      </table>
       <div class='item-span-wide' id='section-risk-assessment-summary'>
         <br id='risk-assessment-summary'>
         <h2 class='centered'>Behaviors</h2>
@@ -303,48 +316,6 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That
           with susceptibles being at rest, could decrease the risk of
           airborne transmission.
         </p>
-      </div>
-
-      <div class='item-span-wide' id='section-inhalation-activity'>
-        <br id='inhalation-activity'>
-        <br>
-        <br>
-        <h4>Inhalation Activity</h4>
-        <p> The worst case inhalation activity was <ColoredCell
-                            :colorScheme="inhalationActivityScheme"
-                            :maxVal=1
-                            :value='worstCaseInhalation["inhalationFactor"]'
-                            :text='worstCaseInhalation["inhalationActivity"]'
-                            :style="inlineCellCSS"
-                        />, which corresponds to a factor of
-            <ColoredCell
-                :colorScheme="inhalationActivityScheme"
-                :maxVal=1
-                :value='worstCaseInhalation["inhalationFactor"]'
-                :style="inlineCellCSS"
-            />. To better contextualize how good this is, let's look at the
-            table of inhalation activities and factors:
-        </p>
-
-        <div class='centered'>
-          <table>
-            <tr>
-              <th>Inhalation Activity</th>
-              <th>Factor</th>
-            </tr>
-            <tr v-for='(value, key, index) in susceptibleBreathingActivityFactorMappings'>
-              <td style='padding: 0.25em 1em;' :class="{ bold: key == worstCaseInhalation['inhalationActivity']}">{{ ['Sleep or Nap', 'Sedentary / Passive', 'Light Intensity', 'Moderate Intensity', 'High Intensity'][index] }}</td>
-              <td style='padding: 0;'>
-                <ColoredCell
-                  :colorScheme="inhalationActivityScheme"
-                  :maxVal=1
-                  :value='inhalationValue(value)'
-                  :style="tableColoredCellWithHorizPadding"
-                  />
-              </td>
-            </tr>
-          </table>
-        </div>
       </div>
 
 
@@ -1310,6 +1281,7 @@ import axios from 'axios';
 import ColoredCell from './colored_cell.vue';
 import Controls from './controls.vue';
 import CleanAirDeliveryRateTable from './clean_air_delivery_rate_table.vue'
+import InhalationActivity from './inhalation_activity.vue'
 import CADR from './cadr.vue'
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
@@ -1387,6 +1359,7 @@ export default {
     Event,
     HorizontalStackedBar,
     IndividualRisk,
+    InhalationActivity,
     LostLaborWages1,
     LostLaborWages2,
     PacIcon,
@@ -1985,13 +1958,6 @@ export default {
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
-    inhalationValue(value) {
-      if (value && this.worstCaseInhalation["ageGroup"]) {
-        return value[this.worstCaseInhalation["ageGroup"]]["mean cubic meters per hour"]
-      } else {
-        return 0
-      }
-    },
     scrollFix(event, hashbang) {
       let element_to_scroll_to = document.getElementById(hashbang);
       element_to_scroll_to.scrollIntoView();

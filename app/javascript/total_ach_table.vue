@@ -2,7 +2,7 @@
   <tr id='section-total-ach'>
     <td>
       <div class='row justify-content-center align-items-center'>
-        <label class='bold'>Total ACH</label>
+        <h3 class='bold'>Total ACH</h3>
         <CircularButton text='?' @click='show = !show'/>
       </div>
     </td>
@@ -92,7 +92,7 @@
   </tr>
 
   <tr v-if='show'>
-    <td>
+    <td colspan='2'>
       <p class='explainer'>
         Air Changes per Hour (ACH) tells us how much clean air is generated
         relative to the volume of the room. If a device outputs 5 ACH, that means it
