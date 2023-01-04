@@ -496,6 +496,9 @@ export function binValue(colorScheme, value) {
 }
 
 export function getColor(colorScheme, value) {
+  if (!colorScheme || colorScheme.length == 0) {
+    return '#aaa'
+  }
   for (let obj of colorScheme) {
     if (obj['lowerBound'] <= value && value < obj['upperBound']) {
       return interpolateRgb(
