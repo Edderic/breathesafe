@@ -81,10 +81,8 @@
         />
       </table>
 
-      <div class='item-span-wide' id='section-behaviors'>
-        <br id='risk-assessment-summary'>
-        <h2 class='centered'>Behaviors</h2>
-      </div>
+      <Behaviors
+      />
       <table>
         <InhalationActivity
           :worstCaseInhalation='worstCaseInhalation'
@@ -131,46 +129,6 @@
 
 
 
-      <div class='item'></div>
-
-      <div class='item-span-wide' id='section-risk-assessment-details'>
-        <br id='risk-assessment-details'>
-        <br>
-        <br>
-        <h1 class='centered'>
-          Risk Assessment Details
-        </h1>
-      </div>
-
-
-      <div class='item' id='section-behaviors'>
-        <br id='behaviors'>
-        <br>
-        <br>
-        <h3>Behaviors</h3>
-
-        <p>
-          Activities that people partake in can affect the probability of
-          transmission of COVID and other respiratory viruses. Activities
-          where the infector is doing lots of exhalation and vocalization (e.g. loudly
-          talking during heavy exercise) could drastically increase the
-          risk of transmission. Likewise, doing activities where
-          susceptibles are inhaling more air in shorter time increases their risk of
-          getting COVID.
-
-        </p>
-        <p>
-
-        </p>
-        <p>
-          Choosing activities where an infector is quiet and at rest, along
-          with susceptibles being at rest, could decrease the risk of
-          airborne transmission.
-        </p>
-      </div>
-
-
-
     </div>
   </div>
 </template>
@@ -178,6 +136,7 @@
 <script>
 // Have a VueX store that maintains state across components
 import axios from 'axios';
+import Behaviors from './behaviors.vue';
 import ColoredCell from './colored_cell.vue';
 import Controls from './controls.vue';
 import ComputationalDetails from './computational_details.vue';
@@ -251,6 +210,7 @@ export default {
   name: 'Analytics',
   components: {
     AchToDuration,
+    Behaviors,
     CADR,
     CleanAirDeliveryRateTable,
     ColoredCell,
