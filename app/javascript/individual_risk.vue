@@ -10,7 +10,8 @@
       <ColoredCell
         :colorScheme="riskColorScheme"
         :maxVal=1
-        :value='english(this.risk)'
+        :value='risk'
+        :text='english(risk)'
         :style="styleProps"
         />
     </td>
