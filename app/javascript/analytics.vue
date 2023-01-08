@@ -857,7 +857,7 @@ export default {
   .controls {
     border-right: 1px solid grey;
     position: sticky;
-    height: 100vh;
+    height: 92vh;
     top: 3.2em;
   }
 
