@@ -854,6 +854,13 @@ export default {
     margin-top: 1em;
   }
 
+  .controls {
+    border-right: 1px solid grey;
+    position: sticky;
+    height: 100vh;
+    top: 3.2em;
+  }
+
   @media (max-width: 840em) {
     .centered {
       overflow-x: auto;
@@ -944,24 +951,24 @@ export default {
   }
 
   @media (max-width: 1000px) {
-    .controls {
-      display: none;
-    }
     .grid {
-      grid-template-columns: 20vw 80vw;
+      grid-template-columns: 100vw;
     }
 
     .column-controls {
       display: block;
     }
+
+    .controls {
+      position: static;
+      height: auto;
+      border-right: 0;
+    }
   }
 
   @media (max-width: 750px) {
-    .controls {
-      display: none;
-    }
     .grid {
-      grid-template-columns: 25vw 75vw;
+      grid-template-columns: 100vw;
     }
 
     .column-controls {
@@ -976,6 +983,11 @@ export default {
       font-size: 1em;
     }
 
+    .controls {
+      position: static;
+      height: auto;
+      border-right: 0;
+    }
   }
   .item {
     padding: 1em;
@@ -992,13 +1004,6 @@ export default {
     position: sticky;
     top: 3.2em;
     height: 80vh;
-  }
-
-  .controls {
-    border-right: 1px solid grey;
-    position: sticky;
-    height: 100vh;
-    top: 3.2em;
   }
 
   .scrollableY {
