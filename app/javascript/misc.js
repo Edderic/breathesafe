@@ -2,7 +2,10 @@
 
 import axios from 'axios';
 
-export const QUANTA = 10; // https://www.sciencedirect.com/science/article/pii/S1674987121001493?via%3Dihub
+export const QUANTA = 100;
+// https://www.sciencedirect.com/science/article/pii/S1674987121001493?via%3Dihub
+// could be as high as 1000 quanta per hour for B.1.1.529. See https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8848576/
+// The above has a wide distribution. We use 100 quanta (more on the higher end) to be conservative.
 
 const INCHES_PER_FOOT = 12;
 const CUBIC_FEET_PER_CUBIC_METER = 35.3147

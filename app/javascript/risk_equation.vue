@@ -67,9 +67,10 @@
         <th>quanta generation rate</th>
         <td>For SARS-CoV-2, some researchers have observed an
 <a href="https://docs.google.com/spreadsheets/d/16K1OQkLD4BjgBdO8ePj6ytf-RpPMlJ6aXFg3PrIQBbQ/edit#gid=519189277">
-average value of 63 quanta per hour</a>, specifically for the BA.2 variant. That's the value we're using here. However, some people are superspreaders, with researchers estimating about
-<a href="https://onlinelibrary.wiley.com/doi/full/10.1111/ina.12751">
-970 quanta per hour</a> in some cases. Quanta generation rate with new variants is currently unknown, so we're using 63 quanta per hour since it is convenient to do so.</td>
+average value of 63 quanta per hour</a>, specifically for the BA.2 variant. Some have observed up to about
+<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8848576/" target='_blank'>
+1000 quanta per hour
+</a>. There is large variability in quanta, partly due to individual differences, and the time since infection. If an individual is close to being fully recovered, they might not be as contagious as they were in the earlier parts of infection. <span class='bold'>Therefore, take the absolute risk estimates here with a grain of salt.</span> Here, we use 100 quanta per hour to be more conservative, as part of following the precautionary principle.</td>
       </tr>
       <tr>
         <th>
@@ -183,4 +184,7 @@ export default {
     font-weight: 100;
   }
 
+  .bold {
+    font-weight: bold;
+  }
 </style>
