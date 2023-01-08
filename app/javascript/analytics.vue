@@ -2,7 +2,6 @@
 
   <div class='grid'>
     <div class='item controls'>
-
       <div class='container'>
         <h3 class='subsection'>Analysis & Recommendations for {{this.roomName}}</h3>
         <h4 class='subsection' v-if='event && event.placeData'>{{event.placeData.formattedAddress}}</h4>
@@ -17,114 +16,102 @@
       />
     </div>
 
-    <SideBar class='col hide-horizontal-border item sticky'/>
+    <div class='second-column'>
+      <div class='col item' >
+        <div class='item'>
+          <div class='item-span-wide' id='section-risk-assessment-summary'>
+            <br id='risk-assessment-summary'>
+            <h2 class='centered'>Risk Assessment Summary</h2>
+          </div>
 
-    <div class='col item scrollableY' >
-      <div class='item-span-wide column-controls' id='section-interventions'>
+          <table class='item-span-wide stuff'>
+            <PeopleAffected
+              id='section-average-new-infections'
+              :event='event'
+              :selectedIntervention='selectedIntervention'
+              :numInfectors='numInfectors'
+              class='align-items-center'
+            />
 
-        <div class='container'>
-          <h3 class='subsection'>Analysis & Recommendations for {{this.roomName}}</h3>
-          <h4 class='subsection' v-if='event && event.placeData'>{{event.placeData.formattedAddress}}</h4>
-          <h4 class='subsection' v-if='event && event.firstName'>Measurements taken by {{event.firstName}} {{event.lastName}}</h4>
-          <h4 class='subsection'>on {{datetimeInWords}}</h4>
+            <IndividualRisk
+              id='section-individual-risk'
+              :riskColorScheme='riskColorScheme'
+              class='align-items-center'
+            />
+
+
+          </table>
+
+          <div class='item-span-wide' id='section-risk-assessment-summary'>
+            <br id='risk-assessment-summary'>
+            <h2 class='centered'>Indoor Air Quality</h2>
+          </div>
+
+          <table>
+            <CleanAirDeliveryRateTable :cellCSS='cellCSS' :intervention='selectedIntervention' :measurementUnits='measurementUnits' :systemOfMeasurement='systemOfMeasurement'/>
+            <TotalACHTable
+              :measurementUnits='measurementUnits'
+              :systemOfMeasurement='systemOfMeasurement'
+              :totalFlowRate='totalFlowRate'
+              :roomUsableVolume='roomUsableVolume'
+              :selectedIntervention='selectedIntervention'
+              :cellCSS='cellCSS'
+              :roomUsableVolumeCubicMeters='roomUsableVolumeCubicMeters'
+            />
+
+            <AchToDuration
+              :intervention='selectedIntervention'
+            />
+          </table>
         </div>
-
-        <Controls
-          :maskInstances='maskInstances'
-          :airCleanerInstances='airCleanerInstances'
-          :riskColorScheme='riskColorScheme'
-        />
       </div>
+      <div class='item'>
 
-      <div class='item-span-wide' id='section-risk-assessment-summary'>
-        <br id='risk-assessment-summary'>
-        <h2 class='centered'>Risk Assessment Summary</h2>
-      </div>
-
-      <table class='item-span-wide stuff'>
-        <PeopleAffected
-          id='section-average-new-infections'
-          :event='event'
-          :selectedIntervention='selectedIntervention'
-          :numInfectors='numInfectors'
-          class='align-items-center'
+        <Behaviors
         />
+        <table>
+          <InhalationActivity
+            :worstCaseInhalation='worstCaseInhalation'
+            :inhalationActivityScheme='inhalationActivityScheme'
+            :susceptibleBreathingActivityFactorMappings='susceptibleBreathingActivityFactorMappings'
+            :inlineCellCSS='inlineCellCSS'
+            :tableColoredCellWithHorizPadding='tableColoredCellWithHorizPadding'
+          />
+          <InfectorActivity
+            :aerosolGenerationActivity='aerosolGenerationActivity'
+            :riskiestAerosolGenerationActivityScheme='riskiestAerosolGenerationActivityScheme'
+            :aerosolActivityToFactor='aerosolActivityToFactor'
+            :riskiestPotentialInfector='riskiestPotentialInfector'
+            :inlineCellCSS='inlineCellCSS'
+            :tableColoredCell='tableColoredCell'
+          />
+          <Masking
+            :riskColorScheme='riskColorScheme'
+            :cellCSSMerged='cellCSSMerged'
+            :intervention='selectedIntervention'
+          />
+        </table>
 
-        <IndividualRisk
-          id='section-individual-risk'
-          :riskColorScheme='riskColorScheme'
-          class='align-items-center'
-        />
+        <div class='item-span-wide' id='section-details'>
+          <br id='details'>
+          <h2 class='centered'>Details</h2>
 
-
-      </table>
-
-      <div class='item-span-wide' id='section-risk-assessment-summary'>
-        <br id='risk-assessment-summary'>
-        <h2 class='centered'>Indoor Air Quality</h2>
-      </div>
-
-      <table>
-        <CleanAirDeliveryRateTable :cellCSS='cellCSS' :intervention='selectedIntervention' :measurementUnits='measurementUnits' :systemOfMeasurement='systemOfMeasurement'/>
-        <TotalACHTable
-          :measurementUnits='measurementUnits'
-          :systemOfMeasurement='systemOfMeasurement'
-          :totalFlowRate='totalFlowRate'
-          :roomUsableVolume='roomUsableVolume'
-          :selectedIntervention='selectedIntervention'
-          :cellCSS='cellCSS'
-          :roomUsableVolumeCubicMeters='roomUsableVolumeCubicMeters'
-        />
-
-        <AchToDuration
-          :intervention='selectedIntervention'
-        />
-      </table>
-
-      <Behaviors
-      />
-      <table>
-        <InhalationActivity
-          :worstCaseInhalation='worstCaseInhalation'
-          :inhalationActivityScheme='inhalationActivityScheme'
-          :susceptibleBreathingActivityFactorMappings='susceptibleBreathingActivityFactorMappings'
-          :inlineCellCSS='inlineCellCSS'
-          :tableColoredCellWithHorizPadding='tableColoredCellWithHorizPadding'
-        />
-        <InfectorActivity
-          :aerosolGenerationActivity='aerosolGenerationActivity'
-          :riskiestAerosolGenerationActivityScheme='riskiestAerosolGenerationActivityScheme'
-          :aerosolActivityToFactor='aerosolActivityToFactor'
-          :riskiestPotentialInfector='riskiestPotentialInfector'
-          :inlineCellCSS='inlineCellCSS'
-          :tableColoredCell='tableColoredCell'
-        />
-        <Masking
-          :riskColorScheme='riskColorScheme'
-          :cellCSSMerged='cellCSSMerged'
-          :intervention='selectedIntervention'
-        />
-      </table>
-
-      <div class='item-span-wide' id='section-details'>
-        <br id='details'>
-        <h2 class='centered'>Details</h2>
-
-        <RiskEquation/>
-        <ComputationalDetails
-          :aerosolActivityToFactor='aerosolActivityToFactor'
-          :riskColorScheme='riskColorScheme'
-          :riskiestPotentialInfector='riskiestPotentialInfector'
-          :roomUsableVolumeCubicMeters='roomUsableVolumeCubicMeters'
-          :selectedInfectorMask='selectedInfectorMask'
-          :selectedIntervention='selectedIntervention'
-          :selectedSusceptibleMask='selectedSusceptibleMask'
-          :selectedHour='selectedHour'
-          :roomLengthMeters='roomLengthMeters'
-          :roomWidthMeters='roomWidthMeters'
-          :worstCaseInhalation='worstCaseInhalation'
-          :activityGroups='activityGroups'
-        />
+          <RiskEquation/>
+          <ComputationalDetails
+            :aerosolActivityToFactor='aerosolActivityToFactor'
+            :riskColorScheme='riskColorScheme'
+            :riskiestPotentialInfector='riskiestPotentialInfector'
+            :roomUsableVolumeCubicMeters='roomUsableVolumeCubicMeters'
+            :selectedInfectorMask='selectedInfectorMask'
+            :selectedIntervention='selectedIntervention'
+            :selectedSusceptibleMask='selectedSusceptibleMask'
+            :selectedHour='selectedHour'
+            :roomLengthMeters='roomLengthMeters'
+            :roomWidthMeters='roomWidthMeters'
+            :worstCaseInhalation='worstCaseInhalation'
+            :activityGroups='activityGroups'
+          />
+        </div>
       </div>
 
 
@@ -455,9 +442,6 @@ export default {
     averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptible() {
       return round(this.maximumOccupancy * this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptible, 1)
     },
-    averageTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners() {
-      return round(this.maximumOccupancy * this.riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners, 1)
-    },
     riskTransmissionOfUnmaskedInfectorToUnmaskedSusceptibleWithSuggestedAirCleaners() {
       const riskiestActivityGroup = {
         'numberOfPeople': 1,
@@ -767,6 +751,7 @@ export default {
 
   table {
     padding: 2em;
+    margin: 0 auto;
   }
 
   .scrollable {
@@ -928,29 +913,33 @@ export default {
 
   .grid {
     display: grid;
-    grid-template-columns: 40vw 15vw 45vw;
-  }
-
-  .content {
-    display: grid;
-    grid-template-columns: 50% 50%;
-    border-left: 1px solid grey;
+    grid-template-columns: 40vw 60vw;
   }
 
   .column-controls {
     display: none;
   }
 
+  .second-column {
+    display: flex;
+    flex-direction: row
+  }
+
   @media (max-width: 1400px) {
-    .controls {
-      display: none;
-    }
     .grid {
-      grid-template-columns: 15vw 85vw;
+      grid-template-columns: 40vw 60vw;
+    }
+
+    .third-col {
+      display:
     }
 
     .column-controls {
       display: block;
+    }
+
+    .second-column {
+      flex-direction: column;
     }
   }
 
@@ -977,11 +966,6 @@ export default {
 
     .column-controls {
       display: block;
-    }
-
-    .content {
-      display: flex;
-      flex-direction: column;
     }
 
     .masking-table, .equations {

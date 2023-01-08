@@ -58,6 +58,7 @@ export default {
   }
 
   .row {
+    margin: 1em 0;
     display: flex;
     flex-direction: row;
   }
