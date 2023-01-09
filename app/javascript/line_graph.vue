@@ -1,14 +1,16 @@
 <template>
   <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" :viewBox="viewBox" height='20em' width='30em'>
-    <text x="10%" y="45%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em ">{{ylabel}}</text>
+    <text class='label' x="10%" y="45%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em">{{ylabel}}</text>
 
-    <text :x="xLabelX" y="95%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em ">{{xlabel}}</text>
+    <text class='label' :x="xLabelX" y="95%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em ">{{xlabel}}</text>
+
+    <text :x="xLabelX" y="2%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 40em ">{{title}}</text>
 
     <path :d='yAxis' stroke='black' fill='black' :stroke-width='axisStrokeWidth'/>
     <path :d='xAxis' stroke='black' fill='black' :stroke-width='axisStrokeWidth'/>
 
     <path :d='xTicks' stroke='black' fill='black' stroke-width='100'/>
-    <text v-for='(xTickLabel, index) in xTickLabels' :x='getXTickLabelXPos(index, xTickLabels.length)' :y='getXTickLabelYPos' text-anchor='middle'>{{xTickLabel}}</text>
+    <text v-for='(xTickLabel, index) in getXTickLabels' :x='getXTickLabelXPos(index, getXTickLabels.length)' :y='getXTickLabelYPos' text-anchor='middle'>{{xTickLabel}}</text>
 
     <text v-for='(yTickLabel, index) in yTickLabels' :x='getYTickLabelXPos' :y='getYTickLabelYPos(index, yTickLabels.length)' text-anchor='middle' alignment-baseline='middle'>{{yTickLabel}}</text>
 
@@ -24,16 +26,81 @@ export default {
   },
   data() {
     return {
-      xTickLabels: [0, 10, 20, 30, 40],
       yTickLabels: [0, 250, 500, 750, 1000]
     }
   },
   props: {
     lines: Array,
+    title: String,
     xlabel: String,
     ylabel: String,
+    xTickLabels: Array
   },
   computed: {
+    globalMinX() {
+      let gMinX = 1000000
+
+      for (let line of this.lines) {
+        for (let point of line.points) {
+          if (point[0] < gMinX)
+            gMinX = point[0]
+        }
+      }
+
+      return gMinX
+    },
+    globalMinY() {
+      let gMinY = -1000000
+
+      for (let line of this.lines) {
+        for (let point of line.points) {
+          if (point[1] < gMinY)
+            gMinY = point[0]
+        }
+      }
+
+      return gMinY
+    },
+    globalMaxX() {
+      let gMaxX = -1000000
+
+      for (let line of this.lines) {
+        for (let point of line.points) {
+          if (point[0] > gMaxX)
+            gMaxX = point[0]
+        }
+      }
+
+      return gMaxX
+    },
+    globalMaxY() {
+      let gMaxY = -1000000
+
+      for (let line of this.lines) {
+        for (let point of line.points) {
+          if (point[1] > gMaxY)
+            gMaxY = point[0]
+        }
+      }
+
+      return gMaxY
+    },
+    getXTickLabels() {
+      if (this.xTickLabels) {
+        return this.xTickLabels
+      }
+
+      let xDiff = this.globalMaxX - this.globalMinX
+
+      let collection = []
+      let length = 5
+      for (let i = 0; i < length; i++) {
+        collection.push(xDiff * i / (length - 1))
+      }
+
+      return collection
+    },
+
     xLabelX() {
       return this.yAxisXStart + this.xAxisNormalizer / 2
     },
@@ -60,7 +127,7 @@ export default {
     },
     xTicks() {
       let collection = `M ${this.yAxisLineEnd} v ${this.xTickLength}`
-      let len = this.xTickLabels.length
+      let len = this.getXTickLabels.length
       for (let i = 0; i < len; i++) {
 
         collection += `M ${this.yAxisXStart + this.xAxisNormalizer * i / (len - 1)} ${this.xAxisYEnd} v ${this.xTickLength}`
@@ -203,5 +270,9 @@ export default {
 <style scoped>
   text {
     font-size: 20em;
+  }
+
+  .label {
+    font-weight: bold;
   }
 </style>
