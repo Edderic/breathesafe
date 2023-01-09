@@ -3,8 +3,13 @@
     <text x="10%" y="45%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em ">Concentration</text>
     <text x="55%" y="95%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em ">Time (min)</text>
 
-    <path :d='yAxis' stroke='black' fill='black' stroke-width='100'/>
-    <path :d='xAxis' stroke='black' fill='black' stroke-width='100'/>
+    <path :d='yAxis' stroke='black' fill='black' :stroke-width='axisStrokeWidth'/>
+    <path :d='xAxis' stroke='black' fill='black' :stroke-width='axisStrokeWidth'/>
+
+    <path :d='xTicks' stroke='black' fill='black' stroke-width='100'/>
+    <text v-for='(xTickLabel, index) in xTickLabels' :x='getXTickLabelXPos(index, xTickLabels.length)' :y='getXTickLabelYPos' text-anchor='middle'>{{xTickLabel}}</text>
+
+    <text v-for='(yTickLabel, index) in yTickLabels' :x='getYTickLabelXPos' :y='getYTickLabelYPos(index, yTickLabels.length)' text-anchor='middle' alignment-baseline='middle'>{{yTickLabel}}</text>
 
     <path :d='path(line)' :stroke='line.color' fill='transparent' stroke-width='50' v-for='line in lines'/>
 
@@ -17,12 +22,45 @@ export default {
   components: {
   },
   data() {
-    return {}
+    return {
+      xTickLabels: [0, 10, 20, 30, 40],
+      yTickLabels: [0, 250, 500, 750, 1000]
+    }
   },
   props: {
     lines: Array
   },
   computed: {
+    axisStrokeWidth() {
+      return 100
+    },
+    xTickLength() {
+      return 0.025 * this.viewBoxY
+    },
+    xTickAndxTickLabelSpacing() {
+      return 0.025 * this.viewBoxY
+    },
+    yTickLength() {
+      return 0.025 * this.viewBoxX
+    },
+    yTickAndyTickLabelSpacing() {
+      return 0.025 * this.viewBoxX
+    },
+    getYTickLabelXPos() {
+      return this.yAxisXStart - this.yTickLength - this.yTickAndyTickLabelSpacing
+    },
+    getXTickLabelYPos() {
+      return this.yAxisYEnd + this.xTickLength + this.xTickAndxTickLabelSpacing
+    },
+    xTicks() {
+      let collection = `M ${this.yAxisLineEnd} v ${this.xTickLength}`
+      let len = this.xTickLabels.length
+      for (let i = 0; i < len; i++) {
+
+        collection += `M ${this.yAxisXStart + this.xAxisNormalizer * i / (len - 1)} ${this.xAxisYEnd} v ${this.xTickLength}`
+      }
+      return collection
+    },
     viewBoxX() {
       return 15000
     },
@@ -38,12 +76,11 @@ export default {
       return `m ${this.yAxisLineStart} L ${this.yAxisLineEnd}`
     },
 
-    yAxisXStart() {
-      return 0.23 * this.viewBoxX
+    yAxisXEnd() {
+      return this.yAxisXStart
     },
-
     yAxisYStart() {
-      return 20
+      return 1000
     },
     yAxisLineStart() {
       return `${this.yAxisXStart} ${this.yAxisYStart}`
@@ -62,7 +99,7 @@ export default {
     },
 
     xAxisYEnd() {
-      return this.viewBoxY * 0.9
+      return this.viewBoxY * 0.8
     },
 
     xAxisXEnd() {
@@ -74,7 +111,7 @@ export default {
     },
 
     yAxisXStart() {
-      return this.viewBoxX * 0.23
+      return this.viewBoxX * 0.3
     },
 
     yAxisYEnd() {
@@ -84,7 +121,7 @@ export default {
 
 
     xAxisNormalizer() {
-      return parseFloat(this.xAxisXEnd) - parseFloat(this.xAxisXStart)
+      return parseFloat(this.xAxisXEnd) - parseFloat(this.yAxisXStart)
     },
 
     yAxisNormalizer() {
@@ -93,6 +130,15 @@ export default {
 
   },
   methods: {
+    getXTickLabelXPos(i, len) {
+      // Ideally this would be independent of y-Axis
+      // But since we're only plotting in the first quadrant, it works
+      return this.yAxisXStart + this.xAxisNormalizer * i / (len - 1)
+    },
+    getYTickLabelYPos(i, len) {
+      return this.yAxisYStart + (1 - i / (len - 1)) * this.yAxisNormalizer
+    },
+
     path(line) {
       let collection = ""
       let topX = this.maxX(line)
@@ -149,4 +195,7 @@ export default {
 </script>
 
 <style scoped>
+  text {
+    font-size: 20em;
+  }
 </style>
