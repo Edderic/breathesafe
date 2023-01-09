@@ -19,6 +19,10 @@
     <div class='second-column'>
       <div class='col item' >
         <div class='item'>
+          <LineGraph
+            :lines="[{ 'color': 'red', points: [[0, 420], [1, 421], [2, 900]]}]"
+          />
+
           <div class='item-span-wide' id='section-risk-assessment-summary'>
             <br id='risk-assessment-summary'>
             <h2 class='centered'>Risk Assessment Summary</h2>
@@ -157,6 +161,7 @@ import {
   convertColorListToCutpoints,
   generateEvenSpacedBounds } from './colors.js';
 import AchToDuration from './ach_to_duration.vue'
+import LineGraph from './line_graph.vue'
 import {
   findRiskiestMask,
   findRiskiestPotentialInfector,
@@ -209,6 +214,7 @@ export default {
     IndividualRisk,
     InhalationActivity,
     InfectorActivity,
+    LineGraph,
     Masking,
     PacIcon,
     PeopleAffected,

@@ -158,7 +158,7 @@ export default {
           letter = 'L'
         }
 
-        collection += `${letter} ${point[0] / (line.points.length - 1) * this.xAxisNormalizer + this.xAxisXStart} ${this.yAxisYStart + (1- (point[1] / topY)) * this.yAxisNormalizer } `
+        collection += `${letter} ${point[0] / (line.points.length - 1) * this.xAxisNormalizer + this.yAxisXStart} ${this.yAxisYStart + (1- (point[1] / topY)) * this.yAxisNormalizer } `
         c += 1
 
       }
