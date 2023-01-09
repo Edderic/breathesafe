@@ -1,7 +1,8 @@
 <template>
   <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" :viewBox="viewBox" height='20em' width='30em'>
-    <text x="10%" y="45%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em ">Concentration</text>
-    <text x="55%" y="95%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em ">Time (min)</text>
+    <text x="10%" y="45%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em ">{{ylabel}}</text>
+
+    <text :x="xLabelX" y="95%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em ">{{xlabel}}</text>
 
     <path :d='yAxis' stroke='black' fill='black' :stroke-width='axisStrokeWidth'/>
     <path :d='xAxis' stroke='black' fill='black' :stroke-width='axisStrokeWidth'/>
@@ -28,9 +29,14 @@ export default {
     }
   },
   props: {
-    lines: Array
+    lines: Array,
+    xlabel: String,
+    ylabel: String,
   },
   computed: {
+    xLabelX() {
+      return this.yAxisXStart + this.xAxisNormalizer / 2
+    },
     axisStrokeWidth() {
       return 100
     },
