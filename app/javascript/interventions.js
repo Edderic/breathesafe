@@ -222,9 +222,8 @@ export class Intervention {
 
     const occupancy = 1
     const flowRate = totalAch * this.roomUsableVolumeCubicMeters
+    const volume = this.roomUsableVolumeCubicMeters
     // TODO: consolidate this information in one place
-    const basicInfectionQuanta = 18.6
-    const variantMultiplier = 3.3
     const quanta = numInfectors * QUANTA
     const susceptibleAgeGroup = '30 to <40'
 
@@ -233,6 +232,7 @@ export class Intervention {
       susceptibleAgeGroup
     )
     const probaRandomSampleOfOneIsInfectious = 1.0
+
 
     // Assumes that the infector is part of the riskiest activity group.
     let result = simplifiedRisk(
@@ -243,7 +243,8 @@ export class Intervention {
       susceptibleMaskPenentrationFactor,
       susceptibleAgeGroup,
       probaRandomSampleOfOneIsInfectious,
-      duration
+      duration,
+      totalAch
     )
 
     return result

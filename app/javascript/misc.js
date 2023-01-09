@@ -377,6 +377,34 @@ export function findCurrentOccupancy(maxOccupancy, date, parsed) {
   return 0
 }
 
+function steadyStateFactor(a, time) {
+  /*
+   * Parameters:
+   *   c_0: initial concentration (e.g. quanta, CO2)
+   *   cadr: clean air delivery rate (m3 / h)
+   *   generation_rate:  (quanta / h)
+   *   volume: room volume (m3)
+   *   time: minutes
+   *
+   */
+  // let generationRateInMinutes = a.generationRate / 60
+  // let cadrInMinutes = a.cadr / 60
+  //
+  // return generationRateInMinutes / cadrInMinutes + (a.c_0 - generationRateInMinutes / cadrInMinutes) * Math.exp(-a.ach * time / 60)
+  //
+  return 1 - Math.exp(-a.ach * time / 60)
+}
+
+function integrateSteadyStateFactor(duration, steadyStateFactorArgs) {
+  let sum = 0
+
+  for (let i = 0; i < duration * 60; i++) {
+    sum += steadyStateFactor(steadyStateFactorArgs, i)
+  }
+
+  return sum
+}
+
 function findWorstCaseInhalationFactor(activityGroups, susceptibleAgeGroup) {
   let inhalationFactor = 0
   let val;
@@ -424,7 +452,8 @@ export function simplifiedRisk(
   susceptibleMaskPenentrationFactor,
   susceptibleAgeGroup,
   probaRandomSampleOfOneIsInfectious,
-  duration
+  duration,
+  ach
 ) {
   let total = 0.0
 
@@ -455,7 +484,8 @@ export function simplifiedRisk(
       infectorSpecificTerm,
       susceptibleInhalationFactor['inhalationFactor'],
       susceptibleMaskPenentrationFactor,
-      duration
+      duration,
+      ach
     ) * probaAtLeastOneInfectious
   }
 
@@ -481,6 +511,7 @@ export function sampleComputeRisk(
   )
 
   let infectionCount = 0
+  let steadyStateFactor = 1
 
   for (let i = 0; i < numSamples; i++) {
     // pick a susceptible behavior
@@ -1050,8 +1081,10 @@ export function computeRisk(
   infectorSpecificTerm,
   susceptibleInhalationFactor,
   susceptibleMaskPenentrationFactor,
-  duration
+  duration,
+  ach
 ) {
+
 
     const denominator = flowRate
 
@@ -1059,7 +1092,14 @@ export function computeRisk(
       * susceptibleMaskPenentrationFactor
 
     const numerator = quanta * infectorSpecificTerm
-      * susceptibleSpecificTerm * duration
+      * susceptibleSpecificTerm
 
-    return 1 - Math.exp(- numerator / denominator)
+    let steadyStateFactor = integrateSteadyStateFactor(duration, {
+      ach: ach,
+    })
+
+    debugger
+    let inhaled_quanta = numerator * steadyStateFactor / flowRate
+
+    return 1 - Math.exp(- inhaled_quanta)
 }
