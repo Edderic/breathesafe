@@ -12,7 +12,7 @@
     <path :d='xTicks' stroke='black' fill='black' stroke-width='100'/>
     <text v-for='(xTickLabel, index) in getXTickLabels' :x='getXTickLabelXPos(index, getXTickLabels.length)' :y='getXTickLabelYPos' text-anchor='middle'>{{xTickLabel}}</text>
 
-    <text v-for='(yTickLabel, index) in yTickLabels' :x='getYTickLabelXPos' :y='getYTickLabelYPos(index, yTickLabels.length)' text-anchor='middle' alignment-baseline='middle'>{{yTickLabel}}</text>
+    <text v-for='(yTickLabel, index) in getYTickLabels' :x='getYTickLabelXPos' :y='getYTickLabelYPos(index, getYTickLabels.length)' text-anchor='middle' alignment-baseline='middle'>{{yTickLabel}}</text>
 
     <path :d='path(line)' :stroke='line.color' fill='transparent' stroke-width='50' v-for='line in lines'/>
 
@@ -26,7 +26,6 @@ export default {
   },
   data() {
     return {
-      yTickLabels: [0, 250, 500, 750, 1000]
     }
   },
   props: {
@@ -34,7 +33,8 @@ export default {
     title: String,
     xlabel: String,
     ylabel: String,
-    xTickLabels: Array
+    xTickLabels: Array,
+    yTickLabels: Array
   },
   computed: {
     globalMinX() {
@@ -50,12 +50,12 @@ export default {
       return gMinX
     },
     globalMinY() {
-      let gMinY = -1000000
+      let gMinY = 1000000
 
       for (let line of this.lines) {
         for (let point of line.points) {
           if (point[1] < gMinY)
-            gMinY = point[0]
+            gMinY = point[1]
         }
       }
 
@@ -79,7 +79,7 @@ export default {
       for (let line of this.lines) {
         for (let point of line.points) {
           if (point[1] > gMaxY)
-            gMaxY = point[0]
+            gMaxY = point[1]
         }
       }
 
@@ -95,7 +95,22 @@ export default {
       let collection = []
       let length = 5
       for (let i = 0; i < length; i++) {
-        collection.push(xDiff * i / (length - 1))
+        collection.push(this.globalMinX + xDiff * i / (length - 1))
+      }
+
+      return collection
+    },
+    getYTickLabels() {
+      if (this.yTickLabels) {
+        return this.yTickLabels
+      }
+
+      let xDiff = this.globalMaxY - this.globalMinY
+
+      let collection = []
+      let length = 5
+      for (let i = 0; i < length; i++) {
+        collection.push(this.globalMinY + xDiff * i / (length - 1))
       }
 
       return collection
