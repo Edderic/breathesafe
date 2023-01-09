@@ -20,7 +20,10 @@
       <div class='col item' >
         <div class='item'>
           <LineGraph
-            :lines="[{ 'color': 'red', points: [[0, 420], [1, 421], [2, 900]]}]"
+            :lines="[{ 'color': 'red', points: [[0, 420], [1, 421], [2, 900]]}, { 'color': 'blue', points: [[0, 500], [1, 600]] }]"
+            xlabel="Time (min)"
+            ylabel='Concentration'
+            title="Risk"
           />
 
           <div class='item-span-wide' id='section-risk-assessment-summary'>
