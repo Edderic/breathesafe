@@ -229,9 +229,6 @@ export default {
 
     path(line) {
       let collection = ""
-      let topX = this.maxX(line)
-      let topY = this.maxY(line)
-
       let proportionX = 0;
 
       let c = 0
@@ -246,7 +243,7 @@ export default {
           letter = 'L'
         }
 
-        collection += `${letter} ${point[0] / (line.points.length - 1) * this.xAxisNormalizer + this.yAxisXStart} ${this.yAxisYStart + (1- (point[1] / topY)) * this.yAxisNormalizer } `
+        collection += `${letter} ${point[0] / (this.globalMaxX) * this.xAxisNormalizer + this.yAxisXStart} ${this.yAxisYStart + (1- ((point[1] - this.globalMinY)/ (this.globalMaxY - this.globalMinY))) * this.yAxisNormalizer } `
         c += 1
 
       }
