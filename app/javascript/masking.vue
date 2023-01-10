@@ -20,11 +20,6 @@
   <tr v-if='show'>
     <td colspan='2'>
       <div class='explainer' id='section-masking'>
-        <br id='masking'>
-        <br>
-        <br>
-        <h4>Masking</h4>
-
         <p>
         To see the effects of masking by yourself vs. when everyone is
         masked, see graph below, which shows the relative amount of particles left when
