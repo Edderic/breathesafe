@@ -19,6 +19,11 @@
     <div class='second-column'>
       <div class='col item' >
         <div class='item'>
+          <div class='item-span-wide' id='section-risk-assessment-summary'>
+            <br id='risk-assessment-summary'>
+            <h2 class='centered'>Risk Assessment</h2>
+          </div>
+
           <LineGraph
             :lines="[riskLine]"
             xlabel="Time (hours)"
@@ -27,12 +32,8 @@
             :title="riskTitle"
             setYTicksToPercentages='true'
             :xTickLabels="[0, 10, 20, 30, 40]"
+            @point='point'
           />
-
-          <div class='item-span-wide' id='section-risk-assessment-summary'>
-            <br id='risk-assessment-summary'>
-            <h2 class='centered'>Risk Assessment Summary</h2>
-          </div>
 
           <table class='item-span-wide stuff'>
             <PeopleAffected
@@ -695,6 +696,12 @@ export default {
     scrollFix(event, hashbang) {
       let element_to_scroll_to = document.getElementById(hashbang);
       element_to_scroll_to.scrollIntoView();
+    },
+
+    point(event) {
+      this.selectedHour = round(event[0] / 60, 2)
+
+
     },
     aerosolActivityToFactor(key) {
       return infectorActivityTypes[key]

@@ -1,5 +1,5 @@
 <template>
-  <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" :viewBox="viewBox" height='20em' width='30em'>
+  <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" :viewBox="viewBox" height='20em' width='30em' @mouseover='mouseover'>
     <text class='label' x="10%" y="45%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em">{{ylabel}}</text>
 
     <text class='label' :x="xLabelX" y="95%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em ">{{xlabel}}</text>
@@ -14,7 +14,9 @@
 
     <text v-for='(yTickLabel, index) in getYTickLabels' :x='getYTickLabelXPos' :y='getYTickLabelYPos(index, getYTickLabels.length)' text-anchor='middle' alignment-baseline='middle'>{{yTickProcessed(yTickLabel)}}</text>
 
-    <path :d='path(line)' :stroke='line.color' fill='transparent' stroke-width='50' v-for='line in lines'/>
+    <path :d='path(line)' :stroke='line.color' fill='transparent' stroke-width='50' v-for='line in lines' />
+
+    <circle :cx='highlighterX' :cy='highlighterY' r='100' fill='red'/>
 
   </svg>
 </template>
@@ -27,6 +29,8 @@ export default {
   },
   data() {
     return {
+      highlighterX: 0,
+      highlighterY: 0
     }
   },
   props: {
@@ -211,9 +215,12 @@ export default {
     xAxisXStart() {
       return this.viewBoxX * 0.23
     },
+    xAxisYStart() {
+      return this.xAxisYEnd
+    },
 
     yAxisXStart() {
-      return this.viewBoxX * 0.3
+      return this.xAxisXStart
     },
 
     yAxisYEnd() {
@@ -232,6 +239,33 @@ export default {
 
   },
   methods: {
+    mouseover(event) {
+      let offsetX = event.offsetX
+      let offsetY = event.offsetY
+
+      let element = event.srcElement
+      let xNormalized = offsetX / element.clientWidth * this.viewBoxX
+      let yNormalized = offsetY / element.clientHeight * this.viewBoxY
+
+      if (this.pointWithinData(xNormalized, yNormalized)) {
+        let nearestPoint = this.findNearestPoint(xNormalized, yNormalized)
+        this.highlighterX = this.convertXToPlottable(nearestPoint[0])
+        this.highlighterY = this.convertYToPlottable(nearestPoint[1])
+
+        this.$emit('point', nearestPoint)
+      }
+    },
+    findNearestPoint(x, y) {
+      let line = this.lines[0]
+      let xProportion = (x - this.xAxisXStart) / this.xAxisNormalizer
+      let xIndex = parseInt(xProportion * line.points.length)
+
+      return line.points[xIndex]
+    },
+    pointWithinData(xNormalized, yNormalized) {
+      return this.xAxisXStart <= xNormalized && xNormalized <= this.xAxisXEnd
+        && this.yAxisYStart <= yNormalized && yNormalized <= this.yAxisYEnd
+    },
     yTickProcessed(yTick) {
       if (this.setYTicksToPercentages) {
         return `${round(yTick * 100, this.roundYTicksTo)}%`
@@ -264,12 +298,20 @@ export default {
           letter = 'L'
         }
 
-        collection += `${letter} ${point[0] / (this.globalMaxX) * this.xAxisNormalizer + this.yAxisXStart} ${this.yAxisYStart + (1- ((point[1] - this.globalMinY)/ (this.globalMaxY - this.globalMinY))) * this.yAxisNormalizer } `
+        collection += `${letter} ${this.convertXToPlottable(point[0])} ${this.convertYToPlottable(point[1])} `
         c += 1
 
       }
 
       return collection
+    },
+
+    convertXToPlottable(x) {
+      return x / (this.globalMaxX) * this.xAxisNormalizer + this.yAxisXStart
+    },
+
+    convertYToPlottable(y) {
+      return this.yAxisYStart + (1- ((y - this.globalMinY)/ (this.globalMaxY - this.globalMinY))) * this.yAxisNormalizer
     },
 
     maxX(line) {

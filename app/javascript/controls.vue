@@ -72,18 +72,6 @@
       </td>
     </tr>
     </table>
-    <table>
-
-      <tr>
-        <th>Duration</th>
-        <td>
-          <select @change='setDuration'>
-            <option :value="i" v-for='(v, i) in hoursToSelect'>{{v}}</option>
-          </select>
-        </td>
-      </tr>
-
-    </table>
   </div>
 </template>
 
