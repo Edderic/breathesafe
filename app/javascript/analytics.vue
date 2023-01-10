@@ -319,7 +319,7 @@ export default {
     },
     riskLine() {
       let loop = this.selectedIntervention.computeRisk(
-          this.selectedHour, this.numInfectors, true
+          40, this.numInfectors, true
       )
 
       let collection = []
