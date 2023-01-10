@@ -30,6 +30,7 @@
             ylabel='Risk'
             :ylim='[0, 1]'
             :title="riskTitle"
+            :xHighlighter='selectedHour * 60'
             setYTicksToPercentages='true'
             :xTickLabels="[0, 10, 20, 30, 40]"
             @point='point'

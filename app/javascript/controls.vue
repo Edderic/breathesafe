@@ -72,6 +72,14 @@
       </td>
     </tr>
     </table>
+    <table>
+      <tr>
+        <th>Duration (hours)</th>
+        <td>
+          <input type="number" :value='selectedHour' @change='setDuration'>
+        </td>
+      </tr>
+    </table>
   </div>
 </template>
 

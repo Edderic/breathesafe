@@ -1,5 +1,5 @@
 <template>
-  <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" :viewBox="viewBox" height='20em' width='30em' @mouseover='mouseover' @touchstart='mouseover'>
+  <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" :viewBox="viewBox" height='20em' width='30em'>
     <text class='label' x="10%" y="45%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em">{{ylabel}}</text>
 
     <text class='label' :x="xLabelX" y="95%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em ">{{xlabel}}</text>
@@ -29,8 +29,6 @@ export default {
   },
   data() {
     return {
-      highlighterX: 0,
-      highlighterY: 0
     }
   },
   props: {
@@ -38,6 +36,7 @@ export default {
     title: String,
     xlabel: String,
     ylabel: String,
+    xHighlighter: Number,
     xTickLabels: Array,
     yTickLabels: Array,
     ylim: Array,
@@ -48,6 +47,19 @@ export default {
     }
   },
   computed: {
+    nearestPoint() {
+      let line = this.lines[0]
+      if (line.points.length == 0) {
+        return [0, 0]
+      }
+      return line.points[parseInt(this.xHighlighter)]
+    },
+    highlighterX() {
+      return this.convertXToPlottable(this.nearestPoint[0])
+    },
+    highlighterY() {
+      return this.convertYToPlottable(this.nearestPoint[1])
+    },
     globalMinX() {
       let gMinX = 1000000
 
