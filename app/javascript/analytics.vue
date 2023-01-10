@@ -21,9 +21,12 @@
         <div class='item'>
           <LineGraph
             :lines="[riskLine]"
-            xlabel="Time (min)"
+            xlabel="Time (hours)"
             ylabel='Risk'
-            title="Risk"
+            :ylim='[0, 1]'
+            :title="riskTitle"
+            setYTicksToPercentages='true'
+            :xTickLabels="[0, 10, 20, 30, 40]"
           />
 
           <div class='item-span-wide' id='section-risk-assessment-summary'>
@@ -311,6 +314,9 @@ export default {
           'totalAch'
         ]
     ),
+    riskTitle() {
+      return `Conditional Risk on ${this.numInfectors} Infector(s)`
+    },
     riskLine() {
       let loop = this.selectedIntervention.computeRisk(
           this.selectedHour, this.numInfectors, true

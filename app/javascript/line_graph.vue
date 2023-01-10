@@ -12,7 +12,7 @@
     <path :d='xTicks' stroke='black' fill='black' stroke-width='100'/>
     <text v-for='(xTickLabel, index) in getXTickLabels' :x='getXTickLabelXPos(index, getXTickLabels.length)' :y='getXTickLabelYPos' text-anchor='middle'>{{xTickLabel}}</text>
 
-    <text v-for='(yTickLabel, index) in getYTickLabels' :x='getYTickLabelXPos' :y='getYTickLabelYPos(index, getYTickLabels.length)' text-anchor='middle' alignment-baseline='middle'>{{yTickLabel}}</text>
+    <text v-for='(yTickLabel, index) in getYTickLabels' :x='getYTickLabelXPos' :y='getYTickLabelYPos(index, getYTickLabels.length)' text-anchor='middle' alignment-baseline='middle'>{{yTickProcessed(yTickLabel)}}</text>
 
     <path :d='path(line)' :stroke='line.color' fill='transparent' stroke-width='50' v-for='line in lines'/>
 
@@ -20,6 +20,7 @@
 </template>
 
 <script>
+import { round } from './misc.js'
 export default {
   name: 'LineGraph',
   components: {
@@ -34,7 +35,13 @@ export default {
     xlabel: String,
     ylabel: String,
     xTickLabels: Array,
-    yTickLabels: Array
+    yTickLabels: Array,
+    ylim: Array,
+    setYTicksToPercentages: Boolean,
+    roundYTicksTo: {
+      type: Number,
+      default: 2
+    }
   },
   computed: {
     globalMinX() {
@@ -50,6 +57,9 @@ export default {
       return gMinX
     },
     globalMinY() {
+      if (this.ylim) {
+        return this.ylim[0]
+      }
       let gMinY = 1000000
 
       for (let line of this.lines) {
@@ -62,6 +72,7 @@ export default {
       return gMinY
     },
     globalMaxX() {
+
       let gMaxX = -1000000
 
       for (let line of this.lines) {
@@ -74,6 +85,9 @@ export default {
       return gMaxX
     },
     globalMaxY() {
+      if (this.ylim) {
+        return this.ylim[1]
+      }
       let gMaxY = -1000000
 
       for (let line of this.lines) {
@@ -218,6 +232,13 @@ export default {
 
   },
   methods: {
+    yTickProcessed(yTick) {
+      if (this.setYTicksToPercentages) {
+        return `${round(yTick * 100, this.roundYTicksTo)}%`
+      }
+
+      return round(yTick, this.roundYTicksTo)
+    },
     getXTickLabelXPos(i, len) {
       // Ideally this would be independent of y-Axis
       // But since we're only plotting in the first quadrant, it works
