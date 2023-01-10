@@ -22,31 +22,28 @@
       <td colspan='2'>
         <div class='explainer'>
           <p>
-            The riskiest aerosol generation activity recorded for a person in this measurement is <ColoredCell
+            The riskiest aerosol generation activity recorded for a person in this measurement is <span class='bold'>{{riskiestPotentialInfector["aerosolGenerationActivity"]}}</span>,
+            which corresponds to a factor of <span class='bold'>{{aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])}}</span>. See Risk Equation section for more details.
+          </p>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th>Infector Activity</th>
+                <th>Factor</th>
+              </tr>
+              <tr v-for='(value, key) in infectorActivities'>
+                <td :class='{"table-td": true, bold: key == riskiestPotentialInfector["aerosolGenerationActivity"]}'>{{key}}</td>
+                <td class='table-td'>
+                <ColoredCell
                   :colorScheme="riskiestAerosolGenerationActivityScheme"
                   :maxVal=1
-                  :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
-                  :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
-                  :style="inlineCellCSS"
-              />. See table for contextualization.
-          </p>
-          <table>
-            <tr>
-              <th>Infector Activity</th>
-              <th>Factor</th>
-            </tr>
-            <tr v-for='(value, key) in infectorActivities'>
-              <td :class='{"table-td": true, bold: key == riskiestPotentialInfector["aerosolGenerationActivity"]}'>{{key}}</td>
-              <td class='table-td'>
-              <ColoredCell
-                :colorScheme="riskiestAerosolGenerationActivityScheme"
-                :maxVal=1
-                :value='value'
-                :style="tableColoredCell"
-              />
-              </td>
-            </tr>
-          </table>
+                  :value='value'
+                  :style="tableColoredCell"
+                />
+                </td>
+              </tr>
+            </table>
+          </div>
         </div>
       </td>
     </tr>
@@ -109,5 +106,15 @@ export default {
   .explainer {
     max-width: 25em;
     margin: 0 auto;
+  }
+
+  .centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bold {
+    font-weight: bold;
   }
 </style>

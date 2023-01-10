@@ -21,17 +21,6 @@
     <td colspan='2'>
       <table class='explainer'>
         <tr>
-          <th>Infection risk given {{numInfectors}} infector(s)</th>
-          <td>
-            <ColoredCell
-            :colorScheme="riskColorScheme"
-            :maxVal=1
-            :value='roundOut(this.risk, 6)'
-            :style="styleProps"
-            />
-          </td>
-        </tr>
-        <tr>
           <th>Risk Relative to Having a Car Accident</th>
           <td>
           </td>

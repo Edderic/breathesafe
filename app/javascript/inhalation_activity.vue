@@ -21,20 +21,14 @@
     <tr v-if='show'>
       <td colspan='2'>
         <div class='explainer'>
-          <p> The worst case inhalation activity was <ColoredCell
-                                :colorScheme="inhalationActivityScheme"
-                                :maxVal=1
-                                :value='worstCaseInhalation["inhalationFactor"]'
-                                :text='worstCaseInhalation["inhalationActivity"]'
-                                :style="inlineCellCSS"
-                            />, which corresponds to a factor of
-                <ColoredCell
-                    :colorScheme="inhalationActivityScheme"
-                    :maxVal=1
-                    :value='worstCaseInhalation["inhalationFactor"]'
-                    :style="inlineCellCSS"
-                />. To better contextualize how good this is, let's look at the
-                table of inhalation activities and factors:
+          <p> The worst case inhalation activity was <span
+          class='bold'>{{worstCaseInhalation["inhalationActivity"]}}</span> , which
+          corresponds to a factor of <span
+          class='bold'>{{worstCaseInhalation["inhalationFactor"]}}</span>. To better
+          contextualize how good this is, let's look at the
+          table of inhalation activities and factors. See Risk Equation section
+          for more details.
+
           </p>
 
           <div class='centered'>
@@ -114,5 +108,14 @@ export default {
   .explainer {
     max-width: 25em;
     margin: 0 auto;
+  }
+  .centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bold {
+    font-weight: bold;
   }
 </style>

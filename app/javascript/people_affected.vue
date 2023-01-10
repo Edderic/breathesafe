@@ -22,15 +22,11 @@
     <tr v-if='show'>
       <td colspan=2>
         <div class='explainer'>
-          <span>On average, assuming {{ numInfectors }} COVID infector(s) in the room, and that everyone stays there for {{selectedHour}} hour(s), the number of people that would be infected is
+          <span>On average, assuming {{ numInfectors }} COVID infector(s) in
+          the room, and that everyone stays there for {{selectedHour}} hour(s), the
+          number of people that would be infected is <span
+          class='bold'>{{roundOut(numSusceptibles * risk, 1)}}</span>:
 
-              <ColoredCell
-                  :colorScheme="riskColorScheme"
-                  :maxVal=1
-                  :value='roundOut(numSusceptibles * risk, 1)'
-                  class='inline'
-                  :style="styleProps"
-              />:
           </span>
           <div class='people-icons people '>
             <PersonIcon

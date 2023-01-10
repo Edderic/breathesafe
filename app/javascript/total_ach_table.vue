@@ -231,6 +231,7 @@ export default {
 
   .operator {
     font-weight: bold;
+    text-align: center;
   }
 
   .row {

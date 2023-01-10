@@ -22,20 +22,10 @@
       <div class='explainer'>
         <p>
           Imagine an infectious person stays at this room and then leaves. With
-          <ColoredCell
-            :colorScheme="colorInterpolationSchemeTotalAch"
-            :maxVal=1
-            :value='totalAchRounded'
-            :style='cellCSSMerged'
-          />
-          ACH,
+          <span class='bold'>{{totalAchRounded}}</span> ACH,
           <span class='highlight'>
-            it takes <ColoredCell
-              :colorScheme="removalScheme"
-              :maxVal=1
-              :value='durationMinutesToRemove(0.99)'
-              :style='cellCSSMerged'
-            /> minutes to remove 99% of the virus that have been exhaled by the infector (after the infector has left).
+            it takes {{ durationMinutesToRemove(0.99)}}
+            minutes to remove 99% of the virus that have been exhaled by the infector (after the infector has left).
           </span>
 
           <span>Increasing total ACH, whether done by added ventilation, portable
