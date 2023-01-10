@@ -363,4 +363,14 @@ export default {
   .label {
     font-weight: bold;
   }
+
+  svg {
+    margin: 0 auto;
+  }
+
+  @media (max-width: 750px) {
+    svg {
+      width: 25em;
+    }
+  }
 </style>
