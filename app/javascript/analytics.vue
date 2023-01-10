@@ -700,8 +700,6 @@ export default {
 
     point(event) {
       this.selectedHour = round(event[0] / 60, 2)
-
-
     },
     aerosolActivityToFactor(key) {
       return infectorActivityTypes[key]

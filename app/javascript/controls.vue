@@ -132,7 +132,7 @@ export default {
       ]
     ),
     setDuration(event) {
-      this.selectedHour = parseInt(this.hoursToSelect[event.target.value].split(' ')[0])
+      this.selectedHour = parseInt(event.target.value)
     },
     roundOut(someValue, numRound) {
       return round(someValue, numRound)

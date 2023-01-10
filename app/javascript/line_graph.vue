@@ -1,5 +1,5 @@
 <template>
-  <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" :viewBox="viewBox" height='20em' width='30em' @mouseover='mouseover'>
+  <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" :viewBox="viewBox" height='20em' width='30em' @mouseover='mouseover' @touchstart='mouseover'>
     <text class='label' x="10%" y="45%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em">{{ylabel}}</text>
 
     <text class='label' :x="xLabelX" y="95%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em ">{{xlabel}}</text>
@@ -255,6 +255,7 @@ export default {
         this.$emit('point', nearestPoint)
       }
     },
+
     findNearestPoint(x, y) {
       let line = this.lines[0]
       let xProportion = (x - this.xAxisXStart) / this.xAxisNormalizer
