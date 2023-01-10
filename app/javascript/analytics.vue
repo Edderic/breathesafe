@@ -20,9 +20,9 @@
       <div class='col item' >
         <div class='item'>
           <LineGraph
-            :lines="[{ 'color': 'red', points: [[0, 420], [1, 421], [2, 900]]}, { 'color': 'blue', points: [[0, 500], [1, 600]] }]"
+            :lines="[riskLine]"
             xlabel="Time (min)"
-            ylabel='Concentration'
+            ylabel='Risk'
             title="Risk"
           />
 
@@ -311,6 +311,18 @@ export default {
           'totalAch'
         ]
     ),
+    riskLine() {
+      let loop = this.selectedIntervention.computeRisk(
+          this.selectedHour, this.numInfectors, true
+      )
+
+      let collection = []
+      for (let i = 1; i <= loop.length; i++) {
+        collection.push([i, loop[i]])
+      }
+
+      return { 'color': 'red', points: collection}
+    },
     cellCSSMerged() {
       let def = {
         'font-weight': 'bold',
