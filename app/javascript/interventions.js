@@ -178,7 +178,8 @@ export class Intervention {
     return this.ventilationAch
   }
 
-  computeRisk(duration, numInfectors) {
+
+  computeRisk(duration, numInfectors, loop) {
     /*
      * Uses mask1 and mask2 for susceptible and infector
      */
@@ -233,7 +234,6 @@ export class Intervention {
     )
     const probaRandomSampleOfOneIsInfectious = 1.0
 
-
     // Assumes that the infector is part of the riskiest activity group.
     let result = simplifiedRisk(
       [riskiestActivityGroup],
@@ -244,7 +244,8 @@ export class Intervention {
       susceptibleAgeGroup,
       probaRandomSampleOfOneIsInfectious,
       duration,
-      totalAch
+      totalAch,
+      loop
     )
 
     return result

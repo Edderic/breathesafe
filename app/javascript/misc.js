@@ -348,7 +348,7 @@ export function computeRiskWithVariableOccupancy(
     susceptibleMaskPenentrationFactor,
     susceptibleAgeGroup,
     probaRandomSampleOfOneIsInfectious,
-    duration
+    duration,
   )
 
   return r
@@ -396,13 +396,24 @@ function steadyStateFactor(a, time) {
 }
 
 function integrateSteadyStateFactor(duration, steadyStateFactorArgs) {
+  /*
+   * Parameters:
+   *   duration: hours
+   *   steadyStateFactorArgs: Object
+   */
   let sum = 0
+  let cumulative = []
 
-  for (let i = 0; i < duration * 60; i++) {
+  for (let i = 1; i <= duration; i++) {
+    // Scale by hour
     sum += steadyStateFactor(steadyStateFactorArgs, i)
+    cumulative.push(sum)
   }
 
-  return sum
+  return {
+    sum: sum,
+    cumulative: cumulative
+  }
 }
 
 function findWorstCaseInhalationFactor(activityGroups, susceptibleAgeGroup) {
@@ -453,7 +464,8 @@ export function simplifiedRisk(
   susceptibleAgeGroup,
   probaRandomSampleOfOneIsInfectious,
   duration,
-  ach
+  ach,
+  loop
 ) {
   let total = 0.0
 
@@ -478,6 +490,20 @@ export function simplifiedRisk(
 
     // What inhalation factor should we choose?
     // Pick the worst one?
+    if (loop) {
+      return computeRisk(
+        flowRate,
+        quanta,
+        infectorSpecificTerm,
+        susceptibleInhalationFactor['inhalationFactor'],
+        susceptibleMaskPenentrationFactor,
+        duration,
+        ach,
+        loop
+      )
+
+    }
+
     total += computeRisk(
       flowRate,
       quanta,
@@ -485,7 +511,8 @@ export function simplifiedRisk(
       susceptibleInhalationFactor['inhalationFactor'],
       susceptibleMaskPenentrationFactor,
       duration,
-      ach
+      ach,
+      loop
     ) * probaAtLeastOneInfectious
   }
 
@@ -1082,7 +1109,8 @@ export function computeRisk(
   susceptibleInhalationFactor,
   susceptibleMaskPenentrationFactor,
   duration,
-  ach
+  ach,
+  durationLoop
 ) {
 
 
@@ -1094,11 +1122,26 @@ export function computeRisk(
     const numerator = quanta * infectorSpecificTerm
       * susceptibleSpecificTerm
 
-    let steadyStateFactor = integrateSteadyStateFactor(duration, {
+    let steadyStateFactorObj = integrateSteadyStateFactor(duration * 60, {
       ach: ach,
     })
 
-    debugger
+    if (durationLoop) {
+      let coll = []
+
+      for (let steadyStateVal of steadyStateFactorObj.cumulative) {
+
+        coll.push(
+          1- Math.exp(-steadyStateVal / 60 * numerator / flowRate)
+        )
+      }
+
+      return coll
+    }
+
+
+    let steadyStateFactor = steadyStateFactorObj.sum / 60 // normalize for 1 hr
+
     let inhaled_quanta = numerator * steadyStateFactor / flowRate
 
     return 1 - Math.exp(- inhaled_quanta)

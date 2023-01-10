@@ -116,8 +116,7 @@ export const useAnalyticsStore = defineStore('analytics', {
       return new AirCleaner(this.selectedAirCleanerObj, this.event, this.numPACs)
     },
     risk() {
-      const duration = 1
-      return (1 - (1-this.selectedIntervention.computeRiskRounded(duration, this.numInfectors))**this.selectedHour)
+      return this.selectedIntervention.computeRiskRounded(this.selectedHour, this.numInfectors)
     },
 
     styleProps() {
