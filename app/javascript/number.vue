@@ -1,12 +1,12 @@
 <template>
   <div>
-      <CircularButton v-for='leftButton in leftButtons' :text='leftButton.text' @click='send(leftButton.emitSignal, leftButton.text)'/>
+      <CircularButton v-for='leftButton in leftButtons' :text='leftButton.text' @click='send(leftButton.emitSignal, {value: leftButton.text, identifier: identifier})'/>
       <input
         type='number'
         :value='value'
         @change='change'
       >
-      <CircularButton v-for='rightButton in rightButtons' :text='rightButton.text' @click='send(rightButton.emitSignal, rightButton.text)'/>
+      <CircularButton v-for='rightButton in rightButtons' :text='rightButton.text' @click='send(rightButton.emitSignal, {value: rightButton.text, identifier: identifier})'/>
   </div>
 </template>
 
@@ -24,14 +24,15 @@ export default {
   props: {
     leftButtons: Array,
     rightButtons: Array,
-    value: Number
+    value: Number,
+    identifier: String
   },
   computed: {
 
   },
   methods: {
     change(event) {
-      this.$emit('update', event.target.value)
+      this.$emit('update', { value: event.target.value, identifier: this.identifier})
     },
     send(method, args) {
       this.$emit(method, args)
@@ -56,7 +57,11 @@ export default {
   }
 
   input[type='number'] {
-    width: 2em;
+    min-width: 2em;
     font-size: 24px;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
   }
+
+
 </style>

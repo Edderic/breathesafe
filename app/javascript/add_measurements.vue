@@ -343,7 +343,7 @@
         <label class='centered'><span class='bold'>CO2 Ambient</span>&nbsp;(parts per million)
           <CircularButton text='?' @click='toggleInfo("ambientInfo")'/>
         </label>
-        <p v-if='ambientInfo'>This is the reading outdoors.</p>
+        <p class='centered' v-if='ambientInfo'>This is the reading outdoors.</p>
 
         <div class='continuous mega'>
           <CircularButton text='-100' @click='addCO2Ambient(-100)'/>
@@ -362,24 +362,22 @@
       </div>
 
       <div class='container'>
-        <label class='centered'><span class='bold'>CO2 Steady State&nbsp; </span>(parts per million)
+        <label class='centered'><span class='bold'>CO2 Readings&nbsp; </span>(parts per million)
           <CircularButton text='?' @click='toggleInfo("steadyStateInfo")'/>
+          <CircularButton text='+' @click='addCO2Reading'/>
+          <CircularButton text='-' @click='removeLastCO2Reading'/>
         </label>
-        <p v-if='steadyStateInfo'>This is the CO2 reading indoors, taken when the CO2 readings have flattened over time, while the occupancy has stayed the same.</p>
-        <div class='continuous mega'>
-          <CircularButton text='-100' @click='addCO2SteadyState(-100)'/>
-          <CircularButton text='-10' @click='addCO2SteadyState(-10)'/>
-          <CircularButton text='-1' @click='addCO2SteadyState(-1)'/>
-
-          <input
-            type='number'
-            :value="ventilationCO2SteadyStatePPM"
-            @change="setCarbonDioxideSteadyState">
-
-          <CircularButton text='+1' @click='addCO2SteadyState(1)'/>
-          <CircularButton text='+10' @click='addCO2SteadyState(10)'/>
-          <CircularButton text='+100' @click='addCO2SteadyState(100)'/>
-        </div>
+        <p class='centered' v-if='steadyStateInfo'>These are the CO2 readings indoors.</p>
+        <Number
+          v-for='co2Reading in co2Readings'
+          class='continuous'
+          :leftButtons="[{text: '-100', emitSignal: 'adjustCO2'}, {text: '-10', emitSignal: 'adjustCO2'}, {text: '-1', emitSignal: 'adjustCO2'}]"
+          :rightButtons="[{text: '+100', emitSignal: 'adjustCO2'}, {text: '+10', emitSignal: 'adjustCO2'}, {text: '+1', emitSignal: 'adjustCO2'}]"
+          :value='co2Reading.value'
+          :identifier='co2Reading.identifier'
+          @adjustCO2='adjustCO2'
+          @update='updateCO2'
+        />
       </div>
 
       <div class='container wide'>
@@ -466,6 +464,7 @@ import { mapWritableState, mapState, mapActions } from 'pinia';
 import {
    setupCSRF, cubicFeetPerMinuteTocubicMetersPerHour, daysToIndexDict,
    convertLengthBasedOnMeasurementType, computeVentilationACH, computePortableACH,
+   generateUUID,
    parseOccupancyHTML
 } from  './misc';
 
@@ -617,6 +616,12 @@ export default {
       behaviorInfo: false,
       privacyInfo: false,
       steadyStateInfo: false,
+      co2Readings: [
+        {
+          value: 800,
+          identifier: generateUUID()
+        }
+      ],
       ventilationACH: 0.0,
       portableACH: 0.0,
       totalACH: 0.0,
@@ -648,15 +653,28 @@ export default {
     setDisplay(string) {
       this.display = string
     },
-    updateMaxOccupancy(amount) {
-      this.maximumOccupancy = parseInt(amount)
+    updateMaxOccupancy(args) {
+      this.maximumOccupancy = parseInt(args.value)
     },
-    addMaxOccupancy(amount) {
-      this.maximumOccupancy += parseInt(amount)
+    addMaxOccupancy(args) {
+      this.maximumOccupancy += parseInt(args.value)
+    },
+    addCO2Reading() {
+      let value = 800
+      if (this.co2Readings.length > 0) {
+        value = parseInt(this.co2Readings[this.co2Readings.length - 1].value)
+      }
+      this.co2Readings.push({
+        value: value,
+        identifier: generateUUID()
+      })
+    },
+    removeLastCO2Reading() {
+      this.co2Readings.pop()
     },
     addActivityGrouping() {
       this.activityGroups.unshift({
-        'id': this.generateUUID(),
+        'id': generateUUID(),
         'aerosolGenerationActivity': "",
         'carbonDioxideGenerationActivity': "",
         'ageGroup': "",
@@ -817,7 +835,7 @@ export default {
       );
 
       this.activityGroups.push({
-        'id': this.generateUUID(),
+        'id': generateUUID(),
         'aerosolGenerationActivity': activityGroup['aerosolGenerationActivity'],
         'carbonDioxideGenerationActivity': activityGroup['carbonDioxideGenerationActivity'],
         'ageGroup': activityGroup['ageGroup'],
@@ -900,6 +918,20 @@ export default {
     },
     setSinglePassFiltrationEfficiency(event) {
       this.singlePassFiltrationEfficiency = event.target.value;
+    },
+    adjustCO2(args) {
+      let co2Reading = this.co2Readings.find(
+        (co2Reading) => co2Reading.identifier == args.identifier
+      )
+
+      co2Reading.value += parseInt(args.value)
+    },
+    updateCO2(args) {
+      let co2Reading = this.co2Readings.find(
+        (co2Reading) => co2Reading.identifier == args.identifier
+      )
+
+      co2Reading.value = parseInt(args.value)
     },
     setCarbonDioxideAmbient(event) {
       this.ventilationCO2AmbientPPM = event.target.value;

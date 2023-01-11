@@ -42,7 +42,6 @@ const maskToFactor = {
 
 export const maskToPenetrationFactor = maskToFactor
 
-
 export const co2ActivityToSusceptibleBreathingActivity = {
   "Calisthenics—light effort": "Light Intensity",
   "Calisthenics—moderate effort": "Moderate Intensity",
