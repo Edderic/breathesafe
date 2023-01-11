@@ -168,17 +168,14 @@
 
       <div class='container'>
         <label class='bold'>Maximum Occupancy</label>
-        <div class='continuous'>
-          <CircularButton text='-10' @click='addMaxOccupancy(-10)'/>
-          <CircularButton text='-1' @click='addMaxOccupancy(-1)'/>
-          <input
-            type='number'
-            v-model="maximumOccupancy"
-          >
-
-          <CircularButton text='+1' @click='addMaxOccupancy(1)'/>
-          <CircularButton text='+10' @click='addMaxOccupancy(10)'/>
-        </div>
+        <Number
+          class='continuous'
+          :leftButtons="[{text: '-10', emitSignal: 'addMaxOccupancy'}, {text: '-1', emitSignal: 'addMaxOccupancy'}]"
+          :rightButtons="[{text: '+1', emitSignal: 'addMaxOccupancy'}, {text: '+10', emitSignal: 'addMaxOccupancy'}]"
+          :value='maximumOccupancy'
+          @addMaxOccupancy='addMaxOccupancy'
+          @update='updateMaxOccupancy'
+        />
       </div>
     </div>
 
@@ -460,6 +457,7 @@ import Button from './button.vue'
 import ColoredCell from './colored_cell.vue';
 import CircularButton from './circular_button.vue';
 import DayHourHeatmap from './day_hour_heatmap.vue';
+import Number from './number.vue'
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
@@ -478,7 +476,8 @@ export default {
     CircularButton,
     ColoredCell,
     DayHourHeatmap,
-    Event
+    Event,
+    Number,
   },
   computed: {
     ...mapState(
@@ -648,6 +647,9 @@ export default {
     },
     setDisplay(string) {
       this.display = string
+    },
+    updateMaxOccupancy(amount) {
+      this.maximumOccupancy = parseInt(amount)
     },
     addMaxOccupancy(amount) {
       this.maximumOccupancy += parseInt(amount)
