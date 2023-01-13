@@ -464,6 +464,7 @@ import { mapWritableState, mapState, mapActions } from 'pinia';
 import {
    setupCSRF, cubicFeetPerMinuteTocubicMetersPerHour, daysToIndexDict,
    convertLengthBasedOnMeasurementType, computeVentilationACH, computePortableACH,
+   computeVentilationNIDR,
    generateUUID,
    parseOccupancyHTML
 } from  './misc';
@@ -742,12 +743,19 @@ export default {
         * parseFloat(this.roomLengthMeters)
         * parseFloat(this.roomUsableVolumeFactor)
 
-      this.ventilationACH = computeVentilationACH(
+      let normalizedCO2Readings =  []
+      for (let co2Reading of this.co2Readings) {
+        normalizedCO2Readings.push(co2Reading.value / 1000000)
+      }
+
+      let ventilationNIDR = computeVentilationNIDR(
         this.activityGroups,
-        this.ventilationCO2AmbientPPM,
-        this.ventilationCO2SteadyStatePPM,
+        normalizedCO2Readings,
+        this.ventilationCO2AmbientPPM / 1000000,
         this.roomUsableVolumeCubicMeters
-      )
+      ).result
+
+      this.ventilationACH = ventilationNIDR.cadr / this.roomUsableVolumeCubicMeters
 
       this.portableACH = computePortableACH(
         this.portableAirCleaners,
@@ -772,6 +780,7 @@ export default {
             'ventilation_co2_steady_state_ppm': this.ventilationCO2SteadyStatePPM,
             'ventilation_notes': this.ventilationNotes,
             'start_datetime': this.startDatetime,
+            'co2_readings': this.co2Readings,
             'private': this.private,
             'place_data': this.placeData,
             'occupancy': {

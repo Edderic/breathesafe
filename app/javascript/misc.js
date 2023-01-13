@@ -381,17 +381,28 @@ function steadyStateFactor(a, time) {
    * Parameters:
    *   c_0: initial concentration (e.g. quanta, CO2)
    *   cadr: clean air delivery rate (m3 / h)
-   *   generation_rate:  (quanta / h)
+   *   generation_rate:  (quanta / h or m3 / h)
    *   volume: room volume (m3)
    *   time: minutes
    *
    */
-  // let generationRateInMinutes = a.generationRate / 60
-  // let cadrInMinutes = a.cadr / 60
-  //
-  // return generationRateInMinutes / cadrInMinutes + (a.c_0 - generationRateInMinutes / cadrInMinutes) * Math.exp(-a.ach * time / 60)
-  //
-  return 1 - Math.exp(-a.ach * time / 60)
+
+  if (!a.generationRate) {
+    a.generationRate = 0
+  }
+
+  if (!a.c_0) {
+    a.c_0 = 0
+  }
+
+  if (!a.cBackground) {
+    a.cBackground = 0
+  }
+
+  let generationRateInMinutes = a.generationRate / 60
+  let cadrInMinutes = a.cadr / 60
+
+  return a.cBackground + generationRateInMinutes / cadrInMinutes + (a.c_0 - a.cBackground - generationRateInMinutes / cadrInMinutes) * Math.exp(-a.cadr / a.roomUsableVolumeCubicMeters * time / 60)
 }
 
 function integrateSteadyStateFactor(duration, steadyStateFactorArgs) {
@@ -463,7 +474,7 @@ export function simplifiedRisk(
   susceptibleAgeGroup,
   probaRandomSampleOfOneIsInfectious,
   duration,
-  ach,
+  roomUsableVolumeCubicMeters,
   loop
 ) {
   let total = 0.0
@@ -497,7 +508,7 @@ export function simplifiedRisk(
         susceptibleInhalationFactor['inhalationFactor'],
         susceptibleMaskPenentrationFactor,
         duration,
-        ach,
+        roomUsableVolumeCubicMeters,
         loop
       )
 
@@ -510,7 +521,7 @@ export function simplifiedRisk(
       susceptibleInhalationFactor['inhalationFactor'],
       susceptibleMaskPenentrationFactor,
       duration,
-      ach,
+      roomUsableVolumeCubicMeters,
       loop
     ) * probaAtLeastOneInfectious
   }
@@ -807,6 +818,9 @@ export function deepSnakeToCamel(obj) {
 }
 
 function emissionRate(activityGroups) {
+  /*
+   * Returns total CO2 emission rate (L/s)
+   */
   let total = 0
 
   for (let activityGroup of activityGroups) {
@@ -820,6 +834,193 @@ function emissionRate(activityGroups) {
 
 export function computeCO2EmissionRate(activityGroups) {
   return emissionRate(activityGroups)
+}
+
+function gradientDescent(producer, producerArgs, actualData, gradArgs) {
+  /*
+   * Parameters
+   *   producer: Function
+   *     some function that could produce data. Takes in producerArgs
+   *   producerArgs: Object
+   *     Arguments for the producer
+   *   actualData: Array
+   *     Data. Used to compare error
+   *
+   *   gradArgs: Object
+   *     Has stepSize
+   */
+
+  let newData = producer(producerArgs)
+  let change = {}
+  let changeError = 0
+  let prevError = 0
+  let old = {}
+
+  prevError = computeError(
+    newData,
+    actualData,
+    (data1, data2) => Math.abs(data1 - data2)
+  )
+
+  let newProducerArgs = JSON.parse(JSON.stringify(producerArgs))
+
+  for (let searchArg of gradArgs.searchArgs) {
+    change[searchArg] = Math.random() * gradArgs.initialStep[searchArg]
+    newProducerArgs[searchArg] += change[searchArg]
+    old[searchArg] = producerArgs[searchArg]
+  }
+
+  newData = producer(newProducerArgs)
+  let error = computeError(
+    newData,
+    actualData,
+    (data1, data2) => Math.abs(data1 - data2)
+  )
+
+  changeError = error - prevError
+  prevError = error
+  let trueCount = 0
+
+  for (let i = 0; i < 1000; i++) {
+    for (let searchArg of gradArgs.searchArgs) {
+      producerArgs[searchArg] = -gradArgs.stepSize[searchArg] * changeError
+        / change[searchArg]
+        + old[searchArg]
+    }
+
+    newData = producer(producerArgs)
+
+    error = computeError(
+      newData,
+      actualData,
+      (data1, data2) => Math.abs(data1 - data2)
+    )
+    changeError = error - prevError
+    prevError = error
+
+    trueCount = 0
+
+    for (let searchArg of gradArgs.searchArgs) {
+      change[searchArg] = producerArgs[searchArg] - old[searchArg]
+      old[searchArg] = producerArgs[searchArg]
+
+      // if (change[searchArg] < 0.00001 && change[searchArg] > -0.0001) {
+        // trueCount += 1
+      // }
+    }
+
+    // if (trueCount == gradArgs.searchArgs.length) {
+       // return {
+         // result: producerArgs,
+         // error: error
+       // }
+    // }
+  }
+
+  return {
+    result: producerArgs,
+    error: error
+  }
+}
+
+export function computeVentilationNIDR(
+  activityGroups,
+  co2Readings,
+  co2Background,
+  roomUsableVolumeCubicMeters
+) {
+  // Assumption: There are at least two CO2 readings
+  // co2Readings are divided by 1000 (i.e. 420 ppm is 0.000420)
+  const startCO2 = (co2Readings[0] + co2Readings[1]) / 2
+  // L / s * 1 m3 / 1000 L * 3600 seconds / h
+  // gives us m3 / h
+  let generationRate = emissionRate(activityGroups) / 1000 * 3600
+
+  let gradArgs = {
+    initialStep: {
+      'cadr': 10,
+      'c0': 0.00000000000000001
+    },
+    stepSize: {
+      'cadr': 50000,
+      'c0': 0.00000000000000001
+    },
+    searchArgs: [
+      'cadr',
+      // 'c0'
+    ]
+  }
+
+  let producerArgs = {
+    roomUsableVolumeCubicMeters: roomUsableVolumeCubicMeters,
+    cadr: 500,
+    c0: startCO2,
+    generationRate: generationRate,
+    cBackground: co2Background,
+    windowLength: co2Readings.length
+  }
+
+  let errors = []
+  let error = 0
+  let newData = undefined
+
+  // for (let i = 0; i < 1000; i++) {
+    // producerArgs['cadr'] = i
+    // newData = generateData(producerArgs)
+//
+    // error = computeError(newData, co2Readings,
+      // (data1, data2) => Math.abs(data1 - data2)
+    // )
+//
+    // errors.push(error)
+  // }
+
+  producerArgs['cadr'] = 100
+
+  let results = gradientDescent(
+    generateData,
+    producerArgs,
+    co2Readings,
+    gradArgs
+  )
+
+  return results
+}
+
+function computeError(data1, data2, comparatorFunc) {
+  /*
+   * Assumptions: data1 and data2 are of the same length
+   */
+
+  if (data1.length != data2.length) {
+    throw `data1 length (${data1.length}) should be equal to data2 length (${data2.length}).`
+  }
+
+  let summation = 0
+
+  for (let i = 0; i < data1.length; i++) {
+    summation += comparatorFunc(data1[i], data2[i])
+  }
+
+  return summation / data1.length
+}
+
+function generateData(args) {
+  let collection = []
+
+  for (let t=0; t < args.windowLength; t++) {
+    collection.push(
+      steadyStateFactor({
+        roomUsableVolumeCubicMeters: args.roomUsableVolumeCubicMeters,
+        c_0: args.c0,
+        generationRate: args.generationRate,
+        cadr: args.cadr,
+        cBackground: args.cBackground
+      }, t)
+    )
+  }
+
+  return collection
 }
 
 export function computeVentilationACH(
@@ -1108,7 +1309,7 @@ export function computeRisk(
   susceptibleInhalationFactor,
   susceptibleMaskPenentrationFactor,
   duration,
-  ach,
+  roomUsableVolumeCubicMeters,
   durationLoop
 ) {
 
@@ -1121,8 +1322,16 @@ export function computeRisk(
     const numerator = quanta * infectorSpecificTerm
       * susceptibleSpecificTerm
 
+    // Assumptions: the infector comes in at the same time as the susceptible.
+    // At the beginning, infectious dose is 0.
+    //
+    // we pass in generation rate to be same as the cadr = 1 so that we end up with 1 -
+    // Math.exp(-ach * t / 60). i.e. we can pass the real values of generation
+    // rate / cadr at a later point
     let steadyStateFactorObj = integrateSteadyStateFactor(duration * 60, {
-      ach: ach,
+      roomUsableVolumeCubicMeters: roomUsableVolumeCubicMeters,
+      generationRate: flowRate,
+      cadr: flowRate,
     })
 
     if (durationLoop) {
@@ -1139,9 +1348,9 @@ export function computeRisk(
     }
 
 
-    let steadyStateFactor = steadyStateFactorObj.sum / 60 // normalize for 1 hr
+    let steadyStateMultiplier = steadyStateFactorObj.sum / 60 // normalize for 1 hr
 
-    let inhaled_quanta = numerator * steadyStateFactor / flowRate
+    let inhaled_quanta = numerator * steadyStateMultiplier / flowRate
 
     return 1 - Math.exp(- inhaled_quanta)
 }

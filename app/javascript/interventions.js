@@ -244,7 +244,7 @@ export class Intervention {
       susceptibleAgeGroup,
       probaRandomSampleOfOneIsInfectious,
       duration,
-      totalAch,
+      this.roomUsableVolumeCubicMeters,
       loop
     )
 
