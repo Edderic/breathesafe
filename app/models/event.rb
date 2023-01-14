@@ -11,16 +11,12 @@ class Event < ApplicationRecord
     # end
     events = Event.connection.exec_query(
       <<-SQL
-        select distinct(events_with_state.id) as distinct_id, events_with_state.*, population_states.population, profiles.user_id, profiles.first_name, profiles.last_name, authors.admin as authored_by_admin
+        select distinct(events_with_state.id) as distinct_id, events_with_state.*, profiles.user_id, profiles.first_name, profiles.last_name, authors.admin as authored_by_admin
         from (
           select events.*, array_to_string(regexp_matches(place_data->>'formatted_address', '[A-Z]{2}'), ';') as state_short_name
           from events
         ) as events_with_state
 
-        left join states on (states.code = events_with_state.state_short_name)
-        left join population_states on (
-          population_states.name = states.full_name
-        )
         left join profiles on (
           events_with_state.author_id = profiles.user_id
         )

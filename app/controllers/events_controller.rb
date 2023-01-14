@@ -89,6 +89,10 @@ class EventsController < ApplicationController
       :duration,
       :private,
       :maximum_occupancy,
+      co2_readings: [
+        :value,
+        :key
+      ],
       activity_groups: [
         :id,
         :aerosolGenerationActivity,
