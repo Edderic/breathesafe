@@ -51,7 +51,8 @@ export const useAnalyticsStore = defineStore('analytics', {
     selectedHour: 1,
     event: {
       activityGroups: [],
-      totalAch: 0.1
+      totalAch: 0.1,
+      roomUsableVolumeCubicMeters: 1
     }
   }),
   getters: {

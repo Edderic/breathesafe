@@ -32,8 +32,12 @@ class Event < ApplicationRecord
 
   def self.json_parse(events)
     events.map do |ev|
-      ["place_data", "activity_groups", "occupancy", "portable_air_cleaners"].each do |col|
-        ev[col] = JSON.parse(ev[col])
+      ["co2_readings", "place_data", "activity_groups", "occupancy", "portable_air_cleaners"].each do |col|
+        unless ev[col]
+          ev[col] = []
+        else
+          ev[col] = JSON.parse(ev[col])
+        end
       end
 
       ev

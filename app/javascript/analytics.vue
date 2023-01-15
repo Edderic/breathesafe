@@ -71,6 +71,16 @@
               :roomUsableVolumeCubicMeters='roomUsableVolumeCubicMeters'
             />
 
+
+            <LineGraph
+              :lines="[co2Projection, readings]"
+              xlabel="Time (minutes)"
+              ylabel='CO2 Conc.'
+              :ylim='[400, 2000]'
+              title="CO2 concentration over Time"
+            />
+
+
             <AchToDuration
               :intervention='selectedIntervention'
             />
@@ -195,7 +205,9 @@ import {
   convertLengthBasedOnMeasurementType,
   cubicFeetPerMinuteTocubicMetersPerHour,
   displayCADR,
+  computeCO2EmissionRate,
   findWorstCaseInhFactor,
+  genConcCurve,
   getCO2Rate,
   infectorActivityTypes,
   maskToPenetrationFactor,
@@ -281,6 +293,7 @@ export default {
           'roomName',
           'activityGroups',
           'ageGroups',
+          'co2Readings',
           'carbonDioxideActivities',
           'ventilationCo2AmbientPpm',
           'ventilationCo2MeasurementDeviceModel',
@@ -290,6 +303,7 @@ export default {
           'duration',
           'private',
           'formatted_address',
+          'initialCo2',
           'infectorActivity',
           'infectorActivityTypeMapping',
           'maskTypes',
@@ -318,6 +332,37 @@ export default {
     ),
     riskTitle() {
       return `Conditional Risk on ${this.numInfectors} Infector(s)`
+    },
+    readings() {
+      let collection = []
+      for (let i = 0; i < this.co2Readings.length; i++) {
+        collection.push([i, this.co2Readings[i].value])
+      }
+      return { points: collection, color: 'blue' }
+    },
+    co2Projection() {
+      let generationRate = computeCO2EmissionRate(this.activityGroups) / 1000 * 3600
+      let windowLength = 0
+
+      let producerArgs = {
+        roomUsableVolumeCubicMeters: this.roomUsableVolumeCubicMeters,
+        cadr: this.ventilationAch * this.roomUsableVolumeCubicMeters,
+        c0: this.initialCo2,
+        generationRate: generationRate * 1000000,
+        cBackground: this.ventilationCo2AmbientPpm,
+        windowLength: 120
+      }
+
+      let projection = genConcCurve(producerArgs)
+      if (!projection[0]) {
+        projection = []
+      }
+
+      let collection = []
+      for (let i = 0; i < projection.length; i++) {
+        collection.push([i, projection[i]])
+      }
+      return { points: collection, color: 'red' }
     },
     riskLine() {
       let loop = this.selectedIntervention.computeRisk(
@@ -658,7 +703,8 @@ export default {
       event: {
         activityGroups: [],
         portableAirCleaners: [],
-        totalAch: 0.1
+        totalAch: 0.1,
+        roomUsableVolumeCubicMeters: 1,
       },
       center: {lat: 51.093048, lng: 6.842120},
       ventilationACH: 0.0,

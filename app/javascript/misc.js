@@ -836,6 +836,61 @@ export function computeCO2EmissionRate(activityGroups) {
   return emissionRate(activityGroups)
 }
 
+function greedy(producer, producerArgs, actualData, gradArgs) {
+  let lastMoves = []
+
+  let minErrorIteration = 100000000
+  let lastMinErrorIteration = minErrorIteration
+  let possibleError1 = 0
+
+  for (let i = 0; i < 10000; i++) {
+
+    let bestVar = undefined
+    let bestMove = 0
+
+    for (let searchArg of gradArgs.searchArgs) {
+      for (let j of [-1, 1]) {
+
+        let copyProducerArgs = JSON.parse(JSON.stringify(producerArgs))
+
+        copyProducerArgs[searchArg] = producerArgs[searchArg] + j
+
+        let newData = producer(copyProducerArgs)
+
+        possibleError1 = computeError(
+          newData,
+          actualData,
+          (data1, data2) => Math.abs(data1 - data2)
+        )
+
+        if (possibleError1 < minErrorIteration) {
+          minErrorIteration = possibleError1
+          bestVar = searchArg
+          bestMove = j
+        }
+      }
+    }
+
+    if (minErrorIteration == lastMinErrorIteration) {
+      return {
+        result: producerArgs,
+        error: minErrorIteration
+      }
+    }
+
+    lastMinErrorIteration = minErrorIteration
+
+    lastMoves.push({bestVar: bestVar, bestMove: bestMove})
+    producerArgs[bestVar] += bestMove
+
+  }
+
+  return {
+    result: producerArgs,
+    error: minErrorIteration
+  }
+}
+
 function gradientDescent(producer, producerArgs, actualData, gradArgs) {
   /*
    * Parameters
@@ -881,7 +936,7 @@ function gradientDescent(producer, producerArgs, actualData, gradArgs) {
   prevError = error
   let trueCount = 0
 
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 10000; i++) {
     for (let searchArg of gradArgs.searchArgs) {
       producerArgs[searchArg] = -gradArgs.stepSize[searchArg] * changeError
         / change[searchArg]
@@ -927,27 +982,32 @@ export function computeVentilationNIDR(
   activityGroups,
   co2Readings,
   co2Background,
-  roomUsableVolumeCubicMeters
+  roomUsableVolumeCubicMeters,
+  method
 ) {
+  let useMethod = undefined
+  if (!method)  {
+    useMethod = 'gradientDescent'
+  }
   // Assumption: There are at least two CO2 readings
   // co2Readings are divided by 1000 (i.e. 420 ppm is 0.000420)
   const startCO2 = (co2Readings[0] + co2Readings[1]) / 2
   // L / s * 1 m3 / 1000 L * 3600 seconds / h
   // gives us m3 / h
-  let generationRate = emissionRate(activityGroups) / 1000 * 3600
+  let generationRate = emissionRate(activityGroups) / 1000 * 3600 * 1000000
 
   let gradArgs = {
     initialStep: {
-      'cadr': 10,
-      'c0': 0.00000000000000001
+      'cadr': 1,
+      'c0': 1
     },
     stepSize: {
-      'cadr': 50000,
-      'c0': 0.00000000000000001
+      'cadr': 0.005,
+      'c0': 0.005
     },
     searchArgs: [
       'cadr',
-      // 'c0'
+      'c0'
     ]
   }
 
@@ -963,29 +1023,39 @@ export function computeVentilationNIDR(
   let errors = []
   let error = 0
   let newData = undefined
+  let minError = 1000000000
+  let bestArg = 0
 
-  // for (let i = 0; i < 1000; i++) {
-    // producerArgs['cadr'] = i
-    // newData = generateData(producerArgs)
-//
-    // error = computeError(newData, co2Readings,
-      // (data1, data2) => Math.abs(data1 - data2)
-    // )
-//
-    // errors.push(error)
-  // }
+  if (useMethod == 'bruteForce') {
+    for (let i = 0; i < 1000; i++) {
+      producerArgs['cadr'] = i
+      newData = generateData(producerArgs)
+
+      error = computeError(newData, co2Readings,
+        (data1, data2) => Math.abs(data1 - data2)
+      )
+
+      errors.push(error)
+
+      if (error < minError) {
+        minError = error
+        bestArg = i
+      }
+    }
+
+    return { cadr: bestArg, error: minError }
+  }
 
   producerArgs['cadr'] = 100
 
-  let results = gradientDescent(
+  return greedy(
     generateData,
     producerArgs,
     co2Readings,
     gradArgs
   )
-
-  return results
 }
+
 
 function computeError(data1, data2, comparatorFunc) {
   /*
@@ -1021,6 +1091,10 @@ function generateData(args) {
   }
 
   return collection
+}
+
+export function genConcCurve(args) {
+  return generateData(args)
 }
 
 export function computeVentilationACH(

@@ -12,6 +12,8 @@ import {
 // the first argument is a unique id of the store across your application
 export const useShowMeasurementSetStore = defineStore('showMeasurementSet', {
   state: () => ({
+    co2Readings: [],
+    initialCo2: 420,
     placeData: {
       'place_id': "",
       'formatted_address': "",
@@ -149,6 +151,8 @@ export const useShowMeasurementSetStore = defineStore('showMeasurementSet', {
       this.roomLengthMeters = measurementSet.roomLengthMeters
       this.roomWidthMeters = measurementSet.roomWidthMeters
       this.roomHeightMeters = measurementSet.roomHeightMeters
+      this.initialCo2 = measurementSet.initialCo2
+      this.co2Readings = measurementSet.co2Readings
       this.displayMeasurementsTailoredToUser()
       this.ventilationCo2AmbientPpm = measurementSet.ventilationCo2AmbientPpm
       this.ventilationCo2MeasurementDeviceModel = measurementSet.ventilationCo2MeasurementDeviceModel

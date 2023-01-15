@@ -16,7 +16,7 @@
 
     <path :d='path(line)' :stroke='line.color' fill='transparent' stroke-width='50' v-for='line in lines' />
 
-    <circle :cx='highlighterX' :cy='highlighterY' r='100' fill='red'/>
+    <circle v-if='showHighlighter' :cx='highlighterX' :cy='highlighterY' r='100' fill='red'/>
 
   </svg>
 </template>
@@ -29,6 +29,7 @@ export default {
   },
   data() {
     return {
+      showHighlighter: true
     }
   },
   props: {
@@ -50,8 +51,11 @@ export default {
     nearestPoint() {
       let line = this.lines[0]
       if (line.points.length == 0) {
+        this.showHighlighter = false
         return [0, 0]
       }
+
+      this.showHighlighter = true
       return line.points[parseInt(this.xHighlighter)]
     },
     highlighterX() {
