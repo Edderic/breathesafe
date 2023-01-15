@@ -372,7 +372,7 @@
           v-for='co2Reading in co2Readings'
           class='continuous'
           :leftButtons="[{text: '-100', emitSignal: 'adjustCO2'}, {text: '-10', emitSignal: 'adjustCO2'}, {text: '-1', emitSignal: 'adjustCO2'}]"
-          :rightButtons="[{text: '+100', emitSignal: 'adjustCO2'}, {text: '+10', emitSignal: 'adjustCO2'}, {text: '+1', emitSignal: 'adjustCO2'}]"
+          :rightButtons="[{text: '+1', emitSignal: 'adjustCO2'}, {text: '+10', emitSignal: 'adjustCO2'}, {text: '+100', emitSignal: 'adjustCO2'}]"
           :value='co2Reading.value'
           :identifier='co2Reading.identifier'
           @adjustCO2='adjustCO2'
