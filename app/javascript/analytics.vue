@@ -338,7 +338,7 @@ export default {
       for (let i = 0; i < this.co2Readings.length; i++) {
         collection.push([i, this.co2Readings[i].value])
       }
-      return { points: collection, color: 'blue' }
+      return { points: collection, color: 'blue', 'legend': 'readings' }
     },
     co2Projection() {
       let generationRate = computeCO2EmissionRate(this.activityGroups) / 1000 * 3600
@@ -362,7 +362,7 @@ export default {
       for (let i = 0; i < projection.length; i++) {
         collection.push([i, projection[i]])
       }
-      return { points: collection, color: 'red' }
+      return { points: collection, color: 'red', legend: 'estimate' }
     },
     riskLine() {
       let loop = this.selectedIntervention.computeRisk(
@@ -374,7 +374,7 @@ export default {
         collection.push([i, loop[i]])
       }
 
-      return { 'color': 'red', points: collection}
+      return { 'color': 'red', points: collection, 'legend': 'projection'}
     },
     cellCSSMerged() {
       let def = {

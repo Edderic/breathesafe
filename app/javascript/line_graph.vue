@@ -1,5 +1,12 @@
 <template>
   <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" :viewBox="viewBox" height='20em' width='30em'>
+    <path :d='legendBox' :stroke='legend.color' :fill='legend.color' stroke-width='10'/>
+
+    <g v-for='(line, index) in lines'>
+      <path :d='plotLegend(line, index)' :stroke='line.color' :fill='transparent' stroke-width='20' />
+      <text :x='getXLegend(index)' :y='getYLegend(index)' anchor='middle' alignment-baseline='middle'>{{line.legend}}</text>
+    </g>
+
     <text class='label' x="10%" y="45%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em">{{ylabel}}</text>
 
     <text class='label' :x="xLabelX" y="95%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em ">{{xlabel}}</text>
@@ -33,6 +40,12 @@ export default {
     }
   },
   props: {
+    legend: {
+      type: Object,
+      default: {
+        color: '#fcefd4'
+      }
+    },
     lines: Array,
     title: String,
     xlabel: String,
@@ -48,6 +61,22 @@ export default {
     }
   },
   computed: {
+    legendStartX() {
+      return 0.7 * this.viewBoxX
+    },
+    legendStartY() {
+      return 0.2 * this.viewBoxY
+    },
+    legendBox() {
+      return `M ${this.legendStartX} ${this.legendStartY} h ${this.legendWidth} v ${this.legendHeight} h -${this.legendWidth} z`
+    },
+
+    legendWidth() {
+      return 0.2 * this.viewBoxX
+    },
+    legendHeight() {
+      return this.legendOffsetY * (this.lines.length + 1)
+    },
     nearestPoint() {
       let line = this.lines[0]
       if (line.points.length == 0) {
@@ -253,8 +282,32 @@ export default {
       return parseFloat(this.yAxisYEnd) - parseFloat(this.yAxisYStart)
     },
 
+    legendOffsetX() {
+      return this.viewBoxX * 0.025
+    },
+
+    legendOffsetY() {
+      return this.viewBoxY * 0.05
+    },
+
+    legendLineLength () {
+      return this.viewBoxX * 0.05
+    },
+
+    legendXTextOffset() {
+      return this.viewBoxX * 0.07
+    }
   },
   methods: {
+    getXLegend(index) {
+      return `${this.legendStartX + this.legendOffsetX + this.legendXTextOffset}`
+    },
+    getYLegend(index) {
+      return `${this.legendStartY + this.legendOffsetY * (index + 1)}`
+    },
+    plotLegend(line, index) {
+      return `M ${this.legendStartX + this.legendOffsetX} ${this.getYLegend(index)} h ${this.legendLineLength}`
+    },
     mouseover(event) {
       let offsetX = event.offsetX
       let offsetY = event.offsetY
