@@ -76,7 +76,7 @@
               :lines="[co2Projection, readings]"
               xlabel="Time (minutes)"
               ylabel='CO2 Conc.'
-              :ylim='[400, 2000]'
+              :ylim='[400, readingsMax + 300]'
               title="CO2 concentration over Time"
             />
 
@@ -339,6 +339,18 @@ export default {
         collection.push([i, this.co2Readings[i].value])
       }
       return { points: collection, color: 'blue', 'legend': 'readings' }
+    },
+
+    readingsMax() {
+      let maximum = -100000000
+
+      for (let i = 0; i < this.co2Projection.points.length; i++) {
+        if (this.co2Projection.points[i][1] > maximum) {
+          maximum = this.co2Projection.points[i][1]
+        }
+      }
+
+      return maximum
     },
     co2Projection() {
       let generationRate = computeCO2EmissionRate(this.activityGroups) / 1000 * 3600
