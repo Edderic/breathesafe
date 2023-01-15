@@ -565,6 +565,44 @@ export default {
   },
   async created() {
     // TODO: fire and forget. Make asynchronous.
+
+    let ventilationNIDR = computeVentilationNIDR(
+      [
+        {
+          carbonDioxideGenerationActivity: 'Lying or sitting quietly',
+          ageGroup: '3 to <6',
+          numberOfPeople: 1
+        },
+        {
+          carbonDioxideGenerationActivity: 'Lying or sitting quietly',
+          ageGroup: '30 to <40',
+          numberOfPeople: 2
+        }
+      ],
+      [1373, 1347, 1367,  1368, 1369, 1345, 1380],
+      this.ventilationCO2AmbientPPM,
+      31.77,
+      'bruteForce'
+    )
+
+    let ventilationNIDRGradient = computeVentilationNIDR(
+      [
+        {
+          carbonDioxideGenerationActivity: 'Lying or sitting quietly',
+          ageGroup: '3 to <6',
+          numberOfPeople: 1
+        },
+        {
+          carbonDioxideGenerationActivity: 'Lying or sitting quietly',
+          ageGroup: '30 to <40',
+          numberOfPeople: 2
+        }
+      ],
+      [1373, 1347, 1367,  1368, 1369, 1345, 1380],
+      this.ventilationCO2AmbientPPM,
+      31.77,
+    )
+
     await this.getCurrentUser()
     if (!this.currentUser) {
       this.$router.push({
@@ -694,13 +732,14 @@ export default {
     async save() {
       this.messages = []
 
-      if (!this.placeData || !this.placeData.place_id) {
-        this.messages.push("Error: Google Maps data missing. Please use the Google Search to search for the place of interest.")
-      }
+      // if (!this.placeData || !this.placeData.place_id) {
+        // this.messages.push("Error: Google Maps data missing. Please use the Google Search to search for the place of interest.")
+      // }
       if (this.activityGroups.length == 0) {
         this.messages.push("Error: Please fill out activities done by people so we can compute clean air delivery rate through ventilation.")
       }
 
+      // TODO: use CO2 readings instead?
       if (!this.ventilationCO2SteadyStatePPM) {
         this.messages.push("Error: Please fill out CO2 steady state so we can compute clean air delivery rate of ventilation.")
       }
@@ -745,17 +784,18 @@ export default {
 
       let normalizedCO2Readings =  []
       for (let co2Reading of this.co2Readings) {
-        normalizedCO2Readings.push(co2Reading.value / 1000000)
+        normalizedCO2Readings.push(co2Reading.value)
       }
 
       let ventilationNIDR = computeVentilationNIDR(
         this.activityGroups,
         normalizedCO2Readings,
-        this.ventilationCO2AmbientPPM / 1000000,
-        this.roomUsableVolumeCubicMeters
-      ).result
+        this.ventilationCO2AmbientPPM,
+        this.roomUsableVolumeCubicMeters,
+      )
 
-      this.ventilationACH = ventilationNIDR.cadr / this.roomUsableVolumeCubicMeters
+      this.ventilationACH = ventilationNIDR.result.cadr / this.roomUsableVolumeCubicMeters
+      this.initialCO2 = ventilationNIDR.result.c0
 
       this.portableACH = computePortableACH(
         this.portableAirCleaners,
@@ -781,6 +821,7 @@ export default {
             'ventilation_notes': this.ventilationNotes,
             'start_datetime': this.startDatetime,
             'co2_readings': this.co2Readings,
+            'initial_co2': this.initialCO2,
             'private': this.private,
             'place_data': this.placeData,
             'occupancy': {
