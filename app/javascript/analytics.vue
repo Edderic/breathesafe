@@ -93,6 +93,11 @@
         />
 
         <table>
+          <VentilationNDIR
+            :cadr='ventilationCadr'
+            :systemOfMeasurement='systemOfMeasurement'
+            :measurementUnits='measurementUnits'
+          />
           <SteadyState
             :generationRate='generationRate'
             :roomUsableVolumeCubicMeters='roomUsableVolumeCubicMeters'
@@ -101,11 +106,6 @@
             :cadr='ventilationCadr'
             />
 
-          <VentilationNDIR
-            :cadr='ventilationCadr'
-            :systemOfMeasurement='systemOfMeasurement'
-            :measurementUnits='measurementUnits'
-          />
         </table>
 
 

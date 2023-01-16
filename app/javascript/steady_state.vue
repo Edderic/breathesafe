@@ -1,12 +1,11 @@
 <template>
     <DrillDownSection
-
-      title='Steady State Concentration'
+      title='Steady State CO2 Concentration'
       :value='roundOut(steadyState, 0)'
       :text='steadyStateText'
       :colorScheme='carbonDioxideColorScheme'
     >
-      <p class='explainer'>In the long run, this is what the steady state CO2 concentration would be. </p>
+      <p class='explainer'>In the long run, this is what the steady state CO2 concentration would be, assuming that the number of people at the time the measurement was taken, along with their activities, along with the ventilation rate, stay constant.</p>
     </DrillDownSection>
 </template>
 
