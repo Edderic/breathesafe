@@ -100,6 +100,12 @@
             :cBackground='ventilationCo2AmbientPpm'
             :cadr='ventilationCadr'
             />
+
+          <VentilationNDIR
+            :cadr='ventilationCadr'
+            :systemOfMeasurement='systemOfMeasurement'
+            :measurementUnits='measurementUnits'
+          />
         </table>
 
 
@@ -195,6 +201,7 @@ import {
 import AchToDuration from './ach_to_duration.vue'
 import LineGraph from './line_graph.vue'
 import SteadyState from './steady_state.vue'
+import VentilationNDIR from './ventilation_ndir.vue'
 import {
   findRiskiestMask,
   findRiskiestPotentialInfector,
@@ -259,7 +266,8 @@ export default {
     SteadyState,
     TotalACHTable,
     TotalACH,
-    VentIcon
+    VentIcon,
+    VentilationNDIR
   },
   computed: {
     ...mapState(
