@@ -249,6 +249,106 @@ export const colorInterpolationSchemeAch = [
   },
 ]
 
+/*
+ * < 500
+ * 700
+ * 900
+ * 1200
+ * 1500
+ * 2000
+ */
+export const co2ColorScheme = [
+  {
+    'lowerBound': 1500,
+    'upperBound': 2000,
+    'lowerColor': {
+      name: 'red',
+      letterGrade: 'E',
+      r: 219,
+      g: 21,
+      b: 0
+    },
+    'upperColor': {
+      name: 'darkRed',
+      letterGrade: 'F',
+      r: 174,
+      g: 17,
+      b: 0
+    },
+  },
+  {
+    'lowerBound': 1200,
+    'upperBound': 1500,
+    'lowerColor': {
+      letterGrade: 'D',
+      name: 'orange',
+      r: 245,
+      g: 150,
+      b: 2
+    },
+    'upperColor': {
+      name: 'red',
+      letterGrade: 'E',
+      r: 219,
+      g: 21,
+      b: 0
+    },
+  },
+  {
+    'lowerBound': 900,
+    'upperBound': 1200,
+    'lowerColor': {
+      name: 'yellow',
+      letterGrade: 'C',
+      r: 255,
+      g: 233,
+      b: 56
+    },
+    'upperColor': {
+      letterGrade: 'D',
+      name: 'orange',
+      r: 245,
+      g: 150,
+      b: 2
+    },
+  },
+  {
+    'lowerBound': 700,
+    'upperBound': 900,
+    'lowerColor': {
+      name: 'green',
+      letterGrade: 'B',
+      r: 87,
+      g: 195,
+      b: 40
+    },
+    'upperColor': {
+      name: 'yellow',
+      letterGrade: 'C',
+      r: 255,
+      g: 233,
+      b: 56
+    },
+  },
+  {
+    'lowerBound': 370,
+    'upperBound': 700,
+    'lowerColor': {
+      name: 'dark green',
+      letterGrade: 'A',
+      r: 87,
+      g: 195,
+      b: 40
+    },
+    'upperColor': {
+      name: 'green',
+      letterGrade: 'B',
+      r: 11,
+      g: 161,
+      b: 3
+    },
+  },
+]
 export const riskColorInterpolationScheme = [
   {
     'lowerBound': 0.1,

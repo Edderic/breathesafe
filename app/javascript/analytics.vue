@@ -1,4 +1,4 @@
-<template>
+/<template>
 
   <div class='grid'>
     <div class='item controls'>
@@ -72,16 +72,6 @@
               :roomUsableVolumeCubicMeters='roomUsableVolumeCubicMeters'
             />
 
-
-            <LineGraph
-              :lines="[co2Projection, readings]"
-              xlabel="Time (minutes)"
-              ylabel='CO2 Conc.'
-              :ylim='[400, readingsMax + 300]'
-              title="CO2 concentration over Time"
-            />
-
-
             <AchToDuration
               :intervention='selectedIntervention'
             />
@@ -89,6 +79,29 @@
         </div>
       </div>
       <div class='item'>
+        <div class='item-span-wide' id='section-ventilation'>
+          <br>
+          <h2 class='centered'>Ventilation</h2>
+        </div>
+
+        <LineGraph
+          :lines="[co2Projection, readings]"
+          xlabel="Time (minutes)"
+          ylabel='CO2 Conc.'
+          :ylim='[400, readingsMax + 300]'
+          title="CO2 concentration over Time"
+        />
+
+        <table>
+          <SteadyState
+            :generationRate='generationRate'
+            :roomUsableVolumeCubicMeters='roomUsableVolumeCubicMeters'
+            :c0='c0'
+            :cBackground='ventilationCo2AmbientPpm'
+            :cadr='ventilationCadr'
+            />
+        </table>
+
 
         <Behaviors
         />
@@ -181,6 +194,7 @@ import {
   generateEvenSpacedBounds } from './colors.js';
 import AchToDuration from './ach_to_duration.vue'
 import LineGraph from './line_graph.vue'
+import SteadyState from './steady_state.vue'
 import {
   findRiskiestMask,
   findRiskiestPotentialInfector,
@@ -242,6 +256,7 @@ export default {
     RiskEquation,
     RiskIcon,
     SideBar,
+    SteadyState,
     TotalACHTable,
     TotalACH,
     VentIcon
@@ -353,15 +368,20 @@ export default {
 
       return maximum
     },
+    generationRate() {
+      return computeCO2EmissionRate(this.activityGroups) * 1000 * 3600
+    },
+    ventilationCadr() {
+      return this.ventilationAch * this.roomUsableVolumeCubicMeters
+    },
     co2Projection() {
-      let generationRate = computeCO2EmissionRate(this.activityGroups) / 1000 * 3600
       let windowLength = 0
 
       let producerArgs = {
         roomUsableVolumeCubicMeters: this.roomUsableVolumeCubicMeters,
-        cadr: this.ventilationAch * this.roomUsableVolumeCubicMeters,
+        cadr: this.ventilationCadr,
         c0: this.initialCo2,
-        generationRate: generationRate * 1000000,
+        generationRate: this.generationRate,
         cBackground: this.ventilationCo2AmbientPpm,
         windowLength: 120
       }
@@ -842,7 +862,6 @@ export default {
   }
 
   table {
-    padding: 2em;
     margin: 0 auto;
   }
 

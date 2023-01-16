@@ -405,6 +405,10 @@ function steadyStateFactor(a, time) {
   return a.cBackground + generationRateInMinutes / cadrInMinutes + (a.c_0 - a.cBackground - generationRateInMinutes / cadrInMinutes) * Math.exp(-a.cadr / a.roomUsableVolumeCubicMeters * time / 60)
 }
 
+export function steadyStateFac(a, time) {
+  return steadyStateFactor(a, time)
+}
+
 function integrateSteadyStateFactor(duration, steadyStateFactorArgs) {
   /*
    * Parameters:
