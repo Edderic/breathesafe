@@ -25,6 +25,7 @@
           </div>
 
           <LineGraph
+            class='centered'
             :lines="[riskLine]"
             xlabel="Time (hours)"
             ylabel='Risk'
