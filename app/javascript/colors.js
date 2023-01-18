@@ -472,24 +472,24 @@ export const AEROSOL_GENERATION_BOUNDS = [
 
 export const infectedPeopleColorBounds = [
   {
-    'lowerBound': 4 / 5,
-    'upperBound': 1,
+    'lowerBound': 1.25,
+    'upperBound': 1.5,
   },
   {
-    'lowerBound': 3 / 5,
-    'upperBound': 4 / 5,
+    'lowerBound': 1,
+    'upperBound': 1.25,
   },
   {
-    'lowerBound': 2 / 5,
-    'upperBound': 3 / 5
+    'lowerBound': 0.75,
+    'upperBound': 1
   },
   {
-    'lowerBound': 1 / 5,
-    'upperBound': 2 / 5,
+    'lowerBound': 0.5,
+    'upperBound': 0.75,
   },
   {
-    'lowerBound': 0 / 5,
-    'upperBound': 1 / 5,
+    'lowerBound': 0,
+    'upperBound': 0.5,
   },
 ]
 
