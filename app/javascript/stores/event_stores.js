@@ -93,6 +93,16 @@ export const useEventStores = defineStore('events', {
       return event
     },
 
+    susceptibleMask(selectedMask) {
+      if (selectedMask.numWays == 2) {
+        return new Mask(selectedMask.mask, 1)
+      } else {
+        return new Mask(MASKS[0], 1)
+      }
+    },
+    infectorMask(selectedMask) {
+      return new Mask(selectedMask.mask, 1)
+    },
     computeRiskAll(selectedMask) {
       /*
        * Parameters:
@@ -121,20 +131,15 @@ export const useEventStores = defineStore('events', {
           event,
           [
           ],
-          this.selectedMask,
+          this.infectorMask(selectedMask),
+          this.susceptibleMask(selectedMask),
+          1,
+          1
         )
 
-        if (numWays == 2) {
-          let intervention = new Intervention(
-            event,
-            [
-            ],
-            this.selectedMask,
-            this.selectedMask
-          )
-        }
 
         event['risk'] = intervention.computeRisk(this.durationHours)
+
       }
     },
   }

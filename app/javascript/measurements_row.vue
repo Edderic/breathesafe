@@ -16,7 +16,7 @@
           :value='roundOut(this.measurements.risk, 6)'
           :text='gradeLetter(this.measurements.risk)'
           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
-          :title='roundOut(nullIntervention.computeRisk(1), 6)'
+          :title='roundOut(this.measurements.risk, 6)'
         />
       </router-link>
     </td>
@@ -51,6 +51,7 @@ import { useShowMeasurementSetStore } from './stores/show_measurement_set_store'
 import { findCurrentOccupancy, filterEvents, getWeekdayText, round, setupCSRF } from './misc'
 import { riskColorInterpolationScheme } from './colors.js'
 import { mapWritableState, mapState, mapActions } from 'pinia'
+import { Mask } from './masks.js'
 
 export default {
   name: 'MeasurementsRow',
@@ -113,15 +114,28 @@ export default {
       let types = this.measurements.placeData.types
       return getPlaceIcon(types)
     },
+    infectorMask() {
+      return new Mask(this.selectedMask.mask, 1)
+    },
+    susceptibleMask() {
+      if (this.selectedMask.numWays == 2) {
+        return new Mask(this.selectedMask.mask, 1)
+      } else {
+        return new Mask(this.selectedMask.mask, 1)
+      }
+    },
     link() {
       return `/analytics/${this.measurements.id}`
     },
     nullIntervention() {
-      return new Intervention(
+      let blah =  new Intervention(
         this.measurements,
         [
-          this.selectedMask
-        ]
+        ],
+        this.infectorMask,
+        this.susceptibleMask,
+        1,
+        1
       )
     }
   },

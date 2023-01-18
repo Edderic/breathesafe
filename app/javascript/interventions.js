@@ -213,6 +213,9 @@ export class Intervention {
   }
 
   computeRisk(duration, numInfectors, loop) {
+    if (!numInfectors) {
+      numInfectors = 1
+    }
     /*
      * Uses mask1 and mask2 for susceptible and infector
      */
