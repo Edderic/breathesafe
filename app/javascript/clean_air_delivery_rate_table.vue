@@ -11,7 +11,7 @@
     </td>
     <td>
       <ColoredCell
-        :colorScheme="colorInterpolationSchemeRoomVolume"
+        :colorScheme="colorInterpSchemeRoomVol"
         :maxVal=1
         :value='totalFlowRateRounded'
         :text='totalFlowRateText'
@@ -31,7 +31,7 @@
           </th>
           <td>
           <ColoredCell
-            :colorScheme="colorInterpolationSchemeRoomVolume"
+            :colorScheme="colorInterpSchemeRoomVol"
             :maxVal=1
             :value='totalFlowRateRounded'
             :style='cellCSSMerged'
@@ -51,7 +51,7 @@
           </th>
           <td>
           <ColoredCell
-            :colorScheme="colorInterpolationSchemeRoomVolume"
+            :colorScheme="colorInterpSchemeRoomVol"
             :maxVal=1
             :value='roomUsableVolumeRounded'
             :style='cellCSSMerged'
@@ -116,6 +116,7 @@ import {
   assignBoundsToColorScheme,
   colorSchemeFall,
   colorInterpolationSchemeAch,
+  colorInterpolationSchemeRoomVolume,
   cutoffsVolume,
 } from './colors.js';
 import {
@@ -154,8 +155,8 @@ export default {
       // return Object.assign(this.cellCSS, default)
       return Object.assign(def, this.cellCSS)
     },
-    colorInterpolationSchemeRoomVolume() {
-      return assignBoundsToColorScheme(colorSchemeFall, cutoffsVolume(this.measurementUnits))
+    colorInterpSchemeRoomVol() {
+      return colorInterpolationSchemeRoomVolume(this.measurementUnits)
     },
     colorInterpolationSchemeTotalAch(){
       return colorInterpolationSchemeAch

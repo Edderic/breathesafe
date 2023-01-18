@@ -61,6 +61,11 @@ export const gradeColorMapping = {
 
 export const colorPaletteFall = paletteFall
 
+
+export function colorInterpolationSchemeRoomVolume(measurementUnits) {
+  return assignBoundsToScheme(colorSchemeFall, cutoffVol(measurementUnits))
+}
+
 export const colorSchemeFall = [
   {
     'upperColor': {
@@ -147,7 +152,7 @@ export function minutesToRemovalScheme() {
   return assignBoundsToScheme(scheme, evenSpacedBounds)
 }
 
-export function cutoffsVolume(measurementUnits) {
+function cutoffVol(measurementUnits) {
   let factor = 500 // cubic meters per hour
   let collection = []
 
@@ -164,6 +169,10 @@ export function cutoffsVolume(measurementUnits) {
   }
 
   return collection
+}
+
+export function cutoffsVolume(measurementUnits) {
+  return cutoffVol(measurementUnits)
 }
 
 export const colorInterpolationSchemeAch = [
