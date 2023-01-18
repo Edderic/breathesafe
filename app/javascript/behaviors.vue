@@ -7,7 +7,7 @@
     </div>
   </div>
 
-  <div class='item' id='section-behaviors' v-if='show'>
+  <div class='explainer' id='section-behaviors' v-if='show'>
     <p>
       Activities that people partake in can affect the probability of
       transmission of COVID and other respiratory viruses. Activities
@@ -63,4 +63,9 @@ export default {
     flex-direction: row;
   }
 
+
+  .explainer {
+    max-width: 25em;
+    margin: 0 auto;
+  }
 </style>
