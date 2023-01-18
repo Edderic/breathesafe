@@ -1120,9 +1120,6 @@ export default {
       border-right: 0;
     }
   }
-  .item {
-    padding: 1em;
-  }
 
   .item-span-wide {
     grid-column-start: 1;
