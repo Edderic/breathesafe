@@ -85,6 +85,7 @@
         </div>
 
         <LineGraph
+          class='centered'
           :lines="[co2Projection, readings]"
           xlabel="Time (minutes)"
           ylabel='CO2 Conc.'
