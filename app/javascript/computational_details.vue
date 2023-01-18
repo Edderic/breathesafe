@@ -457,9 +457,9 @@
               <td>=</td>
               <td>(</td>
               <ColoredCell
-                :colorScheme="colorInterpolationSchemeTotalAch"
+                :colorScheme="carbonDioxideColorScheme"
                 :maxVal=1
-                :value='roundOut(this.selectedIntervention.steadyStateCO2Reading(), 0)'
+                :value='roundOut(this.selectedIntervention.steadyStateCO2Reading(numInfectors, numSusceptibles), 0)'
                 class='color-cell'
               />
               <td>-</td>
@@ -875,6 +875,7 @@ import {
   maskToPenetrationFactor,
   setupCSRF,
   simplifiedRisk,
+  steadyStateFac,
   susceptibleBreathingActivityToFactor,
   round
 
@@ -884,6 +885,7 @@ import {
   AEROSOL_GENERATION_BOUNDS,
   colorSchemeFall,
   colorPaletteFall,
+  co2ColorScheme,
   assignBoundsToColorScheme,
   riskColorInterpolationScheme,
   infectedPeopleColorBounds,
@@ -906,6 +908,8 @@ export default {
   },
   props: {
     activityGroups: Array,
+    numSusceptibles: Number,
+    numInfectors: Number,
     roomUsableVolumeCubicMeters: Number,
     roomLengthMeters: Number,
     roomWidthMeters: Number,
@@ -919,6 +923,9 @@ export default {
     worstCaseInhalation: Object
   },
   computed: {
+    carbonDioxideColorScheme() {
+      return co2ColorScheme
+    },
     averageInfectedPeopleInterpolationScheme() {
       const copy = JSON.parse(JSON.stringify(riskColorInterpolationScheme))
       return assignBoundsToColorScheme(copy, infectedPeopleColorBounds)

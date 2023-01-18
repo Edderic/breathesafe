@@ -75,7 +75,9 @@ export const useAnalyticsStore = defineStore('analytics', {
           this.event,
           [this.selectedAirCleaner],
           this.selectedInfectorMask,
-          this.selectedSusceptibleMask
+          this.selectedSusceptibleMask,
+          this.numInfectors,
+          this.numSusceptibles
       )
     },
     implementationCost() {

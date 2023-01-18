@@ -142,6 +142,8 @@
           <RiskEquation/>
           <ComputationalDetails
             :aerosolActivityToFactor='aerosolActivityToFactor'
+            :numSusceptibles='numSusceptibles'
+            :numInfectors='numInfectors'
             :riskColorScheme='riskColorScheme'
             :riskiestPotentialInfector='riskiestPotentialInfector'
             :roomUsableVolumeCubicMeters='roomUsableVolumeCubicMeters'

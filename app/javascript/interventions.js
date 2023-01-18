@@ -17,6 +17,7 @@ import {
   maskToPenetrationFactor,
   setupCSRF,
   simplifiedRisk,
+  steadyStateFac,
   round,
   QUANTA
 } from  './misc';
@@ -83,7 +84,9 @@ function probability_getting_infected_at_least_once(args) {
 }
 
 export class Intervention {
-  constructor(event, environmentalInterventions, mask1, mask2) {
+  constructor(event, environmentalInterventions, mask1, mask2, numInfectors, numSusceptibles) {
+    this.numInfectors = numInfectors
+    this.numSusceptibles = numSusceptibles
     this.environmentalInterventions = environmentalInterventions
     this.mask1 = mask1
     this.mask2 = mask2
@@ -178,33 +181,18 @@ export class Intervention {
     return this.ventilationAch
   }
 
-
-  computeRisk(duration, numInfectors, loop) {
-    /*
-     * Uses mask1 and mask2 for susceptible and infector
-     */
-    if (!duration) {
-      duration = 1
-    }
-
-    if (!numInfectors) {
-      numInfectors = 1
-    }
-
+  flowRate() {
     let totalAch = this.event.totalAch
+
     if (!totalAch) {
       debugger
       throw 'No ACH data'
     }
 
+
     let uvAch = 0
     let ventilationAch = 0
     let portableAch = 0
-    let riskiestActivityGroup = JSON.parse(JSON.stringify(this.riskiestActivityGroup))
-    // When there are no interventions, default to the maskType of the riskiest potential infector
-    let susceptibleMaskPenentrationFactor = maskToPenetrationFactor[this.mask1.maskType]
-    // susceptible and infector wear the same mask
-    riskiestActivityGroup['maskType'] = this.mask2.maskType
 
     for (let intervention of this.environmentalInterventions) {
 
@@ -221,11 +209,27 @@ export class Intervention {
       return 0
     }
 
+    return totalAch * this.roomUsableVolumeCubicMeters
+  }
+
+  computeRisk(duration, numInfectors, loop) {
+    /*
+     * Uses mask1 and mask2 for susceptible and infector
+     */
+    if (!duration) {
+      duration = 1
+    }
+
+    let riskiestActivityGroup = JSON.parse(JSON.stringify(this.riskiestActivityGroup))
+    // When there are no interventions, default to the maskType of the riskiest potential infector
+    let susceptibleMaskPenentrationFactor = maskToPenetrationFactor[this.mask1.maskType]
+    // susceptible and infector wear the same mask
+    riskiestActivityGroup['maskType'] = this.mask2.maskType
+
     const occupancy = 1
-    const flowRate = totalAch * this.roomUsableVolumeCubicMeters
     const volume = this.roomUsableVolumeCubicMeters
     // TODO: consolidate this information in one place
-    const quanta = numInfectors * QUANTA
+    const quanta = this.numInfectors * QUANTA
     const susceptibleAgeGroup = '30 to <40'
 
     const susceptibleInhalationFactor = findWorstCaseInhFactor(
@@ -238,7 +242,7 @@ export class Intervention {
     let result = simplifiedRisk(
       [riskiestActivityGroup],
       occupancy,
-      flowRate,
+      this.flowRate(),
       quanta,
       susceptibleMaskPenentrationFactor,
       susceptibleAgeGroup,
@@ -506,8 +510,32 @@ export class Intervention {
     return numInfected * args.wage * args.numDaysOff * args.numHoursPerDay
   }
 
+  generationRate() {
+    let copy = JSON.parse(JSON.stringify(this.activityGroups))
+    copy[0].numberOfPeople = this.numInfectors + this.numSusceptibles
+    // debugger
+    // TODO: find the most common
+    // this.activityGroups
+    return computeCO2EmissionRate([copy[0]]) * 1000 * 3600
+
+    // TODO: compute emission rate from the number of infectors and
+    // susceptibles? However that uses age...
+    // What if we just use the *most common age* and the *most common behavior* for
+    //
+    //
+    // Easier to use the generation rate in the initial reading instead?
+    // Problem with this though is that it's confusing, since it doesn't relate
+    // to the number of infectors and susceptibles
+  }
+
   steadyStateCO2Reading() {
-    return this.event.ventilationCo2SteadyStatePpm
+    return steadyStateFac({
+      roomUsableVolumeCubicMeters: this.roomUsableVolumeCubicMeters,
+      c_0: this.ambientCO2Reading(),
+      generationRate: this.generationRate(),
+      cadr: this.flowRate(),
+      cBackground: this.ambientCO2Reading()
+    }, 1000000)
   }
 
   ambientCO2Reading() {
