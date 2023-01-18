@@ -79,7 +79,7 @@ export default {
     },
     nearestPoint() {
       let line = this.lines[0]
-      if (line.points.length == 0) {
+      if (line.points.length == 0 || !this.xHighlighter) {
         this.showHighlighter = false
         return [0, 0]
       }
