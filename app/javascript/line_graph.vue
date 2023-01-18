@@ -65,7 +65,7 @@ export default {
       return 0.7 * this.viewBoxX
     },
     legendStartY() {
-      return 0.2 * this.viewBoxY
+      return 0.4 * this.viewBoxY
     },
     legendBox() {
       return `M ${this.legendStartX} ${this.legendStartY} h ${this.legendWidth} v ${this.legendHeight} h -${this.legendWidth} z`
