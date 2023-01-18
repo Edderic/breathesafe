@@ -358,6 +358,10 @@ export default {
       return `Conditional Risk on ${this.numInfectors} Infector(s)`
     },
     readings() {
+      if (!this.co2Readings) {
+        return [[0, this.ventilationCo2SteadyStatePpm]]
+      }
+
       let collection = []
       for (let i = 0; i < this.co2Readings.length; i++) {
         collection.push([i, this.co2Readings[i].value])
@@ -382,13 +386,20 @@ export default {
     ventilationCadr() {
       return this.ventilationAch * this.roomUsableVolumeCubicMeters
     },
+    initialCarbonDioxideReading() {
+      if (!parseInt(this.initialCo2)) {
+        return this.ventilationCo2SteadyStatePpm
+      } else {
+        return this.initialCo2
+      }
+    },
     co2Projection() {
       let windowLength = 0
 
       let producerArgs = {
         roomUsableVolumeCubicMeters: this.roomUsableVolumeCubicMeters,
         cadr: this.ventilationCadr,
-        c0: this.initialCo2,
+        c0: this.initialCarbonDioxideReading,
         generationRate: this.generationRate,
         cBackground: this.ventilationCo2AmbientPpm,
         windowLength: 120
