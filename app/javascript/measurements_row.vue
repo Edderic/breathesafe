@@ -114,30 +114,9 @@ export default {
       let types = this.measurements.placeData.types
       return getPlaceIcon(types)
     },
-    infectorMask() {
-      return new Mask(this.selectedMask.mask, 1)
-    },
-    susceptibleMask() {
-      if (this.selectedMask.numWays == 2) {
-        return new Mask(this.selectedMask.mask, 1)
-      } else {
-        return new Mask(this.selectedMask.mask, 1)
-      }
-    },
     link() {
       return `/analytics/${this.measurements.id}`
     },
-    nullIntervention() {
-      let blah =  new Intervention(
-        this.measurements,
-        [
-        ],
-        this.infectorMask,
-        this.susceptibleMask,
-        1,
-        1
-      )
-    }
   },
   data() {
     return {
