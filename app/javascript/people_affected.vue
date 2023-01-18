@@ -11,7 +11,7 @@
 
       <td class='second-td'>
         <ColoredCell
-            :colorScheme="riskColorScheme"
+            :colorScheme="averageInfectedPeopleInterpolationScheme"
             :maxVal=1
             :value='roundOut(numSusceptibles * risk, 1)'
             :style="styleProps"
