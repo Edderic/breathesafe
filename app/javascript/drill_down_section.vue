@@ -1,10 +1,9 @@
 <template>
     <tr>
-
       <td class='bold'>
 
         <div class='row align-items-center justify-content-center'>
-          <h3>{{title}}</h3>
+          <h3 class='title'>{{title}}</h3>
           <CircularButton text='?' @click='show = !show'/>
         </div>
       </td>
@@ -84,4 +83,9 @@ export default {
   .second-td {
     width: 8em;
   }
+
+  .title {
+    max-width: 12em;
+  }
+
 </style>

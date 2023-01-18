@@ -1,12 +1,33 @@
 <template>
     <DrillDownSection
-      title='Steady State CO2 Concentration'
+      title='Steady State CO2 (at the time of measurement)'
       :value='roundOut(steadyState, 0)'
       :text='steadyStateText'
       :colorScheme='carbonDioxideColorScheme'
     >
-      <p class='explainer'>In the long run, this is what the steady state CO2 concentration would be, assuming that the number of people at the time the measurement was taken, along with their activities, along with the ventilation rate, stay constant.</p>
-    </DrillDownSection>
+      <p class='explainer'>In the long run, this is what the steady state CO2
+      concentration would be, assuming that the number of people <span
+      class='bold'>at the time the measurement was taken</span>, along with their
+      activities, along with the ventilation rate, stay constant.
+      </p>
+
+    <p>See the table below for more information about the number of people and the activities that were taken during measurement:</p>
+
+    <br>
+
+      <table>
+        <tr>
+          <th># people</th>
+          <th>Activity</th>
+          <th>Age Group</th>
+        </tr>
+        <tr v-for='activityGroup in activityGroups'>
+          <td>{{activityGroup.numberOfPeople}}</td>
+          <td>{{activityGroup.carbonDioxideGenerationActivity}}</td>
+          <td>{{activityGroup.ageGroup}}</td>
+        </tr>
+      </table>
+  </DrillDownSection>
 </template>
 
 <script>
@@ -27,6 +48,7 @@ export default {
     return { show: false }
   },
   props: {
+    activityGroups: Array,
     generationRate: Number,
     roomUsableVolumeCubicMeters: Number,
     c0: Number,
@@ -86,5 +108,13 @@ export default {
 
   .second-td {
     width: 8em;
+  }
+
+  .bold {
+    font-weight: bold;
+  }
+
+  td {
+    padding: 1em;
   }
 </style>

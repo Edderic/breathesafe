@@ -100,6 +100,7 @@
             :measurementUnits='measurementUnits'
           />
           <SteadyState
+            :activityGroups='activityGroups'
             :generationRate='generationRate'
             :roomUsableVolumeCubicMeters='roomUsableVolumeCubicMeters'
             :c0='c0'
