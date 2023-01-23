@@ -193,6 +193,12 @@ export default {
   },
   methods: {
     async setLocation() {
+
+      this.$progress.start()
+      let elements = document.getElementsByClassName('vue3-progress')
+      elements[0].style.opacity = 1
+      elements[0].style.display = 'block'
+
       this.showGradeInfo = false
       let coordinates = await this.$getLocation()
       // test if the getLocation
@@ -205,6 +211,9 @@ export default {
       await this.load()
       this.computeRiskAll(this.selectedMask)
       this.sortByParams()
+      this.$progress.finish()
+      elements[0].style.opacity = 0
+      elements[0].style.display = 'none'
     },
 
     getOpenHours(x) {

@@ -7,11 +7,12 @@
     "@fawmi/vue-google-maps": "^0.9.72",
     "@vitejs/plugin-vue": "^2.3.3",
     "axios": "^0.27.2",
-    "nprogress": "^0.2.0",
     "pinia": "^2.0.14",
     "vue": "^3.2.37",
+    "vue-nprogress": "^0.2.0",
     "vue-router": "4",
     "vue-worker": "^1.2.1",
-    "vue3-geolocation": "^1.0.0"
+    "vue3-geolocation": "^1.0.0",
+    "vue3-progress": "^0.0.1-beta4"
   }
 }
