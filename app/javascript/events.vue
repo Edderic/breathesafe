@@ -508,6 +508,7 @@ export default {
   .pin {
     border: 0;
     padding: 0;
+    margin: 0 1em;
   }
 
   th {
@@ -519,7 +520,7 @@ export default {
   }
 
   .circular-button {
-    margin: 0;
+    margin: 0 1em;
   }
 
   @media (max-width: 1400px) {
