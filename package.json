@@ -7,6 +7,7 @@
     "@fawmi/vue-google-maps": "^0.9.72",
     "@vitejs/plugin-vue": "^2.3.3",
     "axios": "^0.27.2",
+    "nprogress": "^0.2.0",
     "pinia": "^2.0.14",
     "vue": "^3.2.37",
     "vue-router": "4",
