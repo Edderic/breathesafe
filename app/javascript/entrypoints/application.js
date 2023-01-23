@@ -29,6 +29,7 @@ console.log('Visit the guide for more information: ', 'https://vite-ruby.netlify
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import VueGoogleMaps from '@fawmi/vue-google-maps';
+import Vue3Progress from "vue3-progress";
 import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router';
 import Vue3Geolocation from 'vue3-geolocation';
 
@@ -85,6 +86,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })
 
+  const options = {
+    position: "fixed",
+    height: "3px",
+    display: 'block',
+    opacity: 1
+
+   // color: "<Your Color>",
+  };
+
   // Make sure to _use_ the router instance to make the
   // whole app router-aware.
 
@@ -98,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
       },
   // }).use(pinia).use(Vue3Geolocation).mount('#app')
   })
-    .use(pinia).use(Vue3Geolocation).use(router).mount('#app')
+    .use(pinia).use(Vue3Progress, options).use(Vue3Geolocation).use(router).mount('#app')
 
 
   const mainStore = useMainStore();

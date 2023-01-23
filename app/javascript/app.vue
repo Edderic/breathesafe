@@ -1,4 +1,5 @@
 <template>
+  <vue3-progress/>
   <div class='column'>
     <NavBar></NavBar>
 
