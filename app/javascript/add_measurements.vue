@@ -368,15 +368,10 @@
           <CircularButton text='-' @click='removeLastCO2Reading'/>
         </label>
         <p class='centered' v-if='steadyStateInfo'>These are the CO2 readings indoors.</p>
-        <Number
-          v-for='co2Reading in co2Readings'
-          class='continuous'
-          :leftButtons="[{text: '-100', emitSignal: 'adjustCO2'}, {text: '-10', emitSignal: 'adjustCO2'}, {text: '-1', emitSignal: 'adjustCO2'}]"
-          :rightButtons="[{text: '+1', emitSignal: 'adjustCO2'}, {text: '+10', emitSignal: 'adjustCO2'}, {text: '+100', emitSignal: 'adjustCO2'}]"
-          :value='co2Reading.value'
-          :identifier='co2Reading.identifier'
-          @adjustCO2='adjustCO2'
-          @update='updateCO2'
+        <input type="file" @change="handleFileChangeCO2">
+        <LineGraph
+          :lines="[co2ReadingLines]"
+          :ylim='[400, co2YMax]'
         />
       </div>
 
@@ -456,6 +451,7 @@ import ColoredCell from './colored_cell.vue';
 import CircularButton from './circular_button.vue';
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import Number from './number.vue'
+import LineGraph from './line_graph.vue'
 import { useEventStore } from './stores/event_store';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
@@ -477,6 +473,7 @@ export default {
     ColoredCell,
     DayHourHeatmap,
     Event,
+    LineGraph,
     Number,
   },
   computed: {
@@ -541,6 +538,30 @@ export default {
           'events'
         ]
     ),
+    co2YMax() {
+      let co2ReadingsLength = this.co2Readings.length
+      let yMax = 1000
+
+      for (let i = 0; i < co2ReadingsLength; i++) {
+        if (this.co2Readings[i].value > yMax) {
+          yMax = this.co2Readings[i].value
+        }
+      }
+
+      return yMax
+
+    },
+    co2ReadingLines() {
+      let co2ReadingsLength = this.co2Readings.length
+
+      let collection = []
+
+      for (let i = 0; i < co2ReadingsLength; i++) {
+        collection.push([i, this.co2Readings[i].value])
+      }
+
+      return { 'color': 'red', points: collection, 'legend': 'CO2 readings'}
+    },
     roomLength() {
       return convertLengthBasedOnMeasurementType(
         this.roomLengthMeters,
@@ -685,6 +706,57 @@ export default {
     ...mapActions(useEventStores, ['load', 'addEvent']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
+
+    handleFileChangeCO2(event) {
+      let reader = new FileReader()
+      let collection = []
+
+      reader.onload = function(evt) {
+        // Set file data
+        let result = evt.currentTarget.result
+        let splitByLine = result.split('\n')
+
+        let lineCounter = 0
+        let header = []
+        let object = {}
+        let columnCounter = 0
+
+        for (let line of splitByLine) {
+          object = {}
+          columnCounter = 0
+
+          for (let item of line.split(',')) {
+            if (lineCounter == 0) {
+              header.push(item)
+            } else {
+
+              if (header[columnCounter].includes("Carbon dioxide")) {
+                object.value = parseInt(item.replaceAll('"', ''))
+                object[header[columnCounter]] = parseInt(item)
+              } else if (header[columnCounter].includes("Time")) {
+                object.identifier = new Date(item)
+                object[header[columnCounter]] = object.identifier
+              } else {
+                object[header[columnCounter]] = item.replaceAll('"', '')
+              }
+            }
+
+            columnCounter += 1
+          }
+
+          if (lineCounter > 0) {
+            collection.push(JSON.parse(JSON.stringify(object)))
+          }
+
+          lineCounter += 1
+        }
+
+        this.co2Readings = collection
+      }.bind(this)
+
+      reader.readAsText(event.target.files[0])
+
+    },
 
     toggleInfo(info) {
       this[info] = !this[info]
