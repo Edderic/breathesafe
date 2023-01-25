@@ -11,17 +11,14 @@ class Event < ApplicationRecord
     # end
     events = Event.connection.exec_query(
       <<-SQL
-        select distinct(events_with_state.id) as distinct_id, events_with_state.*, profiles.user_id, profiles.first_name, profiles.last_name, authors.admin as authored_by_admin
-        from (
-          select events.*, array_to_string(regexp_matches(place_data->>'formatted_address', '[A-Z]{2}'), ';') as state_short_name
-          from events
-        ) as events_with_state
+        select distinct(events.id) as distinct_id, events.*, profiles.user_id, profiles.first_name, profiles.last_name, authors.admin as authored_by_admin
+        from events
 
         left join profiles on (
-          events_with_state.author_id = profiles.user_id
+          events.author_id = profiles.user_id
         )
         left join users as authors on (
-          events_with_state.author_id = authors.id
+          events.author_id = authors.id
         )
         #{self.where_clause(user)}
       SQL
@@ -48,11 +45,11 @@ class Event < ApplicationRecord
     if current_user && current_user.admin?
       ""
     elsif current_user && !current_user.admin?
-      "where events_with_state.author_id = #{current_user.id} or events_with_state.private = 'public'"
+      "where events.author_id = #{current_user.id} or events.private = 'public'"
     else
       # If not logged in
       # Show only those that have been authored by an admin and public
-      "where events_with_state.private = 'public'"
+      "where events.private = 'public'"
     end
   end
 end
