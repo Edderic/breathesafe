@@ -366,7 +366,43 @@
           <CircularButton text='?' @click='toggleInfo("steadyStateInfo")'/>
         </label>
 
-        <p class='centered' v-if='steadyStateInfo'>These are the CO2 readings indoors.</p>
+        <div v-if='steadyStateInfo'>
+          <p >These are the CO2 readings indoors. <span class='bold'>
+Measurements are assumed to be spaced 1-minute apart</span>. If you have an Aranet4, you could change the sampling rate to once per minute by following instructions listed <a href="https://forum.aranet.com/all-about-aranet4/how-to-change-the-measurement-interval-on-aranet4-device/" target='_blank'>here</a>.</p>
+
+          <h3>Enter One-by-one</h3>
+          <p >When using a mobile device, one can upload CO₂ data one-by-one (see "Enter one-by-one" section).
+  <span class='bold'>please enter at least 5 points</span>. Using less than that could make the estimates be heavily impacted by measurement error.</p>
+          <p>Entering one-by-one is most useful in situations where you're on the run and are logging with your mobile device.</p>
+
+          <h3>Bulk Upload</h3>
+          <p>For bulk uploads, one can take a comma-separated values (CSV) file with the columns containing the following: <span class='bold'>Time</span> and <span class='bold'>Carbon dioxide</span>. For example:</p>
+          <div class='centered'>
+            <table>
+              <tr>
+                <th>Time(mm/dd/yyyy)</th>
+                <th>Carbon dioxide(ppm)</th>
+              </tr>
+              <tr>
+                <td>01/10/2023 10:55:19 AM</td>
+                <td>1168</td>
+              </tr>
+              <tr>
+                <td>01/10/2023 10:56:19 AM</td>
+                <td>1185</td>
+              </tr>
+              <tr>
+                <td>...</td>
+                <td>...</td>
+              </tr>
+            </table>
+          </div>
+
+
+          <p>Using bulk upload is useful for increasing the accuracy of ventilation rate estimates (since it uses more data).</p>
+
+          <p>Once you've hit chosen a CSV that matches the data format above, you could then filter for the relevant section using <span class='bold'>Start Date Time</span> and <span class='bold'>End Date Time</span>. Clicking on one of them will show you a widget that lets you select a date, along with a time. The relevant section will be marked in the <span>Zoomed Out</span> graph. The "start" vertical line corresponds to <span class='bold'>Start Date Time</span> while the "end" vertical line corresponds to <span class='bold'>End Date Time</span>. The <span class='bold'>Zoomed In</span> graph shows the data between  <span class='bold'>Start Date Time</span> and <span class='bold'>End Date Time</span>.</p>
+        </div>
 
         <div class='menu row'>
           <Button :class="{ selected: !this.useUploadFile, tab: true }" @click='showUploadFile(false)' text='Enter One-by-one'/>
