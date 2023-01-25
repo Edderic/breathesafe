@@ -987,8 +987,16 @@ export default {
         * parseFloat(this.roomUsableVolumeFactor)
 
 
+      let co2ReadingsToSave = []
+
+      if (this.useUploadFile) {
+        co2ReadingsToSave = this.filterCO2Readings
+      } else {
+        co2ReadingsToSave = this.co2Readings
+      }
+
       let normalizedCO2Readings =  []
-      for (let co2Reading of this.filterCO2Readings) {
+      for (let co2Reading of co2ReadingsToSave) {
         normalizedCO2Readings.push(co2Reading.value)
       }
 
@@ -1025,7 +1033,7 @@ export default {
             'ventilation_co2_steady_state_ppm': this.ventilationCO2SteadyStatePPM,
             'ventilation_notes': this.ventilationNotes,
             'start_datetime': this.startDatetime,
-            'co2_readings': this.co2Readings,
+            'co2_readings': co2ReadingsToSave,
             'initial_co2': this.initialCO2,
             'private': this.private,
             'place_data': this.placeData,
