@@ -361,7 +361,7 @@
         </div>
       </div>
 
-      <div class='container'>
+      <div class='container centered'>
         <label class='centered'><span class='bold'>CO2 Readings&nbsp; </span>(parts per million)
           <CircularButton text='?' @click='toggleInfo("steadyStateInfo")'/>
           <CircularButton text='+' @click='addCO2Reading'/>
