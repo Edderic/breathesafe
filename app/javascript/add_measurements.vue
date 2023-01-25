@@ -364,41 +364,65 @@
       <div class='container centered'>
         <label class='centered'><span class='bold'>CO2 Readings&nbsp; </span>(parts per million)
           <CircularButton text='?' @click='toggleInfo("steadyStateInfo")'/>
-          <CircularButton text='+' @click='addCO2Reading'/>
-          <CircularButton text='-' @click='removeLastCO2Reading'/>
         </label>
-        <p class='centered' v-if='steadyStateInfo'>These are the CO2 readings indoors.</p>
-        <input type="file" @change="handleFileChangeCO2">
-        <div class='collapsable'>
-          <LineGraph
-            :lines="[co2ReadingLines, startCO2VerticalLine, endCO2VerticalLine]"
-            :ylim='[co2YMin, co2YMax]'
-            title='CO₂ Readings (All)'
-            xlabel='Time (min)'
-            ylabel='CO₂ (ppm)'
-            roundYTicksTo='0'
-          />
 
-          <LineGraph
-            :lines="[co2ReadingsZoomedIn]"
-            :ylim='[co2YMin, co2YMax]'
-            title='CO₂ Readings (Zoomed In)'
-            xlabel='Time (min)'
-            ylabel='CO₂ (ppm)'
-            roundYTicksTo='0'
-          />
+        <p class='centered' v-if='steadyStateInfo'>These are the CO2 readings indoors.</p>
+
+        <div class='menu row'>
+          <Button :class="{ selected: !this.useUploadFile, tab: true }" @click='showUploadFile(false)' text='Enter One-by-one'/>
+          <Button :class="{ selected: this.useUploadFile, tab: true }" @click='showUploadFile(true)' text='Bulk Upload'/>
         </div>
 
+        <div class='container centered' v-if='!useUploadFile'>
+          <div class='container row'>
+            <CircularButton text='+' @click='addCO2Reading'/>
+            <CircularButton text='-' @click='removeLastCO2Reading'/>
+          </div>
+          <Number
+            v-for='co2Reading in co2Readings'
+            class='continuous'
+            :leftButtons="[{text: '-100', emitSignal: 'adjustCO2'}, {text: '-10', emitSignal: 'adjustCO2'}, {text: '-1', emitSignal: 'adjustCO2'}]"
+            :rightButtons="[{text: '+1', emitSignal: 'adjustCO2'}, {text: '+10', emitSignal: 'adjustCO2'}, {text: '+100', emitSignal: 'adjustCO2'}]"
+            :value='co2Reading.value'
+            :identifier='co2Reading.identifier'
+            @adjustCO2='adjustCO2'
+            @update='updateCO2'
+          />
+        </div>
+        <div class='container centered' v-if='useUploadFile'>
+          <input type="file" @change="handleFileChangeCO2">
 
-        <div class='collapsable'>
-          <div>
-            <label class='centered'><span class='bold'>Start Date Time</span></label>
-            <Datepicker v-model='startDateTimeCO2' />
+          <div class='collapsable'>
+            <LineGraph
+              :lines="[co2ReadingLines, startCO2VerticalLine, endCO2VerticalLine]"
+              :ylim='[co2YMin, co2YMax]'
+              title='CO₂ Readings (Zoomed Out)'
+              xlabel='Time (min)'
+              ylabel='CO₂ (ppm)'
+              roundYTicksTo='0'
+            />
+
+            <LineGraph
+              :lines="[co2ReadingsZoomedIn]"
+              :ylim='[co2YMin, co2YMax]'
+              title='CO₂ Readings (Zoomed In)'
+              xlabel='Time (min)'
+              ylabel='CO₂ (ppm)'
+              roundYTicksTo='0'
+            />
           </div>
 
-          <div>
-            <label class='centered'><span class='bold'>End Date Time</span></label>
-            <Datepicker v-model='endDateTimeCO2' />
+
+          <div class='collapsable'>
+            <div>
+              <label class='centered'><span class='bold'>Start Date Time</span></label>
+              <Datepicker v-model='startDateTimeCO2' />
+            </div>
+
+            <div>
+              <label class='centered'><span class='bold'>End Date Time</span></label>
+              <Datepicker v-model='endDateTimeCO2' />
+            </div>
           </div>
         </div>
       </div>
@@ -792,6 +816,7 @@ export default {
       messages: [],
       roomUsableVolumeFactor: 0.8,
       useOwnHeight: true,
+      useUploadFile: false,
       display: 'whereabouts',
       personHeightToRoomHeight: 1,
       strideLengthForWidth: 1,
@@ -1214,6 +1239,9 @@ export default {
       let portableAirCleaner = this.findPortableAirCleaningDevice()(id);
       portableAirCleaner['singlePassFiltrationEfficiency'] = event.target.value;
     },
+    showUploadFile(value) {
+      this.useUploadFile = value
+    },
     setUseOwnHeight(value) {
       this.useOwnHeight = value
     },
@@ -1352,7 +1380,9 @@ export default {
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    max-width: 100vw;
   }
+
   .continuous input {
     width: 3em;
     height: 1em;
@@ -1504,6 +1534,18 @@ export default {
   .final .button {
     width: 50%;
     border: 1px solid white;
+  }
+
+  .collapsable {
+    display: flex;
+    flex-direction: row;
+  }
+
+
+  @media(max-width: 1000px) {
+    .collapsable {
+      flex-direction: column;
+    }
   }
 
 
