@@ -369,10 +369,38 @@
         </label>
         <p class='centered' v-if='steadyStateInfo'>These are the CO2 readings indoors.</p>
         <input type="file" @change="handleFileChangeCO2">
-        <LineGraph
-          :lines="[co2ReadingLines]"
-          :ylim='[400, co2YMax]'
-        />
+        <div class='collapsable'>
+          <LineGraph
+            :lines="[co2ReadingLines, startCO2VerticalLine, endCO2VerticalLine]"
+            :ylim='[co2YMin, co2YMax]'
+            title='CO₂ Readings (All)'
+            xlabel='Time (min)'
+            ylabel='CO₂ (ppm)'
+            roundYTicksTo='0'
+          />
+
+          <LineGraph
+            :lines="[co2ReadingsZoomedIn]"
+            :ylim='[co2YMin, co2YMax]'
+            title='CO₂ Readings (Zoomed In)'
+            xlabel='Time (min)'
+            ylabel='CO₂ (ppm)'
+            roundYTicksTo='0'
+          />
+        </div>
+
+
+        <div class='collapsable'>
+          <div>
+            <label class='centered'><span class='bold'>Start Date Time</span></label>
+            <Datepicker v-model='startDateTimeCO2' />
+          </div>
+
+          <div>
+            <label class='centered'><span class='bold'>End Date Time</span></label>
+            <Datepicker v-model='endDateTimeCO2' />
+          </div>
+        </div>
       </div>
 
       <div class='container wide'>
@@ -449,6 +477,7 @@ import axios from 'axios';
 import Button from './button.vue'
 import ColoredCell from './colored_cell.vue';
 import CircularButton from './circular_button.vue';
+import Datepicker from "@vuepic/vue-datepicker";
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import Number from './number.vue'
 import LineGraph from './line_graph.vue'
@@ -472,6 +501,7 @@ export default {
     CircularButton,
     ColoredCell,
     DayHourHeatmap,
+    Datepicker,
     Event,
     LineGraph,
     Number,
@@ -538,13 +568,68 @@ export default {
           'events'
         ]
     ),
+    filterCO2Readings() {
+      let tmp;
+      let collection = []
+
+
+      for (let i = 0; i < this.tmpCO2Readings.length; i++) {
+        tmp = this.tmpCO2Readings[i]
+        if (+tmp.identifier > +this.startDateTimeCO2 && +tmp.identifier < +this.endDateTimeCO2) {
+          collection.push(
+            this.tmpCO2Readings[i]
+          )
+        }
+      }
+
+      return collection
+    },
+
+
+    startCO2VerticalLine() {
+      let co2ReadingsLength = this.tmpCO2Readings.length
+
+      let index = 0
+      for (let i = 0; i < co2ReadingsLength; i++) {
+        if (+this.tmpCO2Readings[i].identifier == +this.startDateTimeCO2) {
+          index = i
+          continue
+        }
+      }
+
+      let collection = [
+        [index, this.co2YMin],
+        [index + 1, this.co2YMax],
+      ]
+      return { 'color': 'blue', points: collection, 'legend': 'start'}
+    },
+    endCO2VerticalLine() {
+      let co2ReadingsLength = this.tmpCO2Readings.length
+
+      let index = 0
+      for (let i = 0; i < co2ReadingsLength; i++) {
+        if (+this.tmpCO2Readings[i].identifier == +this.endDateTimeCO2) {
+          index = i
+          continue
+        }
+      }
+
+      let collection = [
+        [index, this.co2YMin],
+        [index + 1, this.co2YMax],
+      ]
+      return { 'color': 'green', points: collection, 'legend': 'end'}
+    },
+    co2YMin() {
+      return 400
+    },
     co2YMax() {
-      let co2ReadingsLength = this.co2Readings.length
+      let co2ReadingsLength = this.tmpCO2Readings.length
       let yMax = 1000
 
       for (let i = 0; i < co2ReadingsLength; i++) {
-        if (this.co2Readings[i].value > yMax) {
-          yMax = this.co2Readings[i].value
+        if (this.tmpCO2Readings[i].value > yMax) {
+          yMax = this.tmpCO2Readings[i].value
         }
       }
 
@@ -552,12 +637,23 @@ export default {
 
     },
     co2ReadingLines() {
-      let co2ReadingsLength = this.co2Readings.length
+      let co2ReadingsLength = this.tmpCO2Readings.length
 
       let collection = []
 
       for (let i = 0; i < co2ReadingsLength; i++) {
-        collection.push([i, this.co2Readings[i].value])
+        collection.push([i, this.tmpCO2Readings[i].value])
+      }
+
+      return { 'color': 'red', points: collection, 'legend': 'CO2 readings'}
+    },
+    co2ReadingsZoomedIn() {
+      let co2ReadingsLength = this.filterCO2Readings.length
+
+      let collection = []
+
+      for (let i = 0; i < co2ReadingsLength; i++) {
+        collection.push([i, this.filterCO2Readings[i].value])
       }
 
       return { 'color': 'red', points: collection, 'legend': 'CO2 readings'}
@@ -682,6 +778,8 @@ export default {
           identifier: generateUUID()
         }
       ],
+      tmpCO2Readings: [
+      ],
       ventilationACH: 0.0,
       portableACH: 0.0,
       totalACH: 0.0,
@@ -698,6 +796,8 @@ export default {
       personHeightToRoomHeight: 1,
       strideLengthForWidth: 1,
       strideLengthForLength: 1,
+      startDateTimeCO2: new Date(),
+      endDateTimeCO2: new Date(),
     }
   },
   methods: {
@@ -735,7 +835,11 @@ export default {
                 object[header[columnCounter]] = parseInt(item)
               } else if (header[columnCounter].includes("Time")) {
                 object.identifier = new Date(item)
+                object.identifier.setSeconds(0)
                 object[header[columnCounter]] = object.identifier
+                if (lineCounter == 1) {
+                  this.startDateTimeCO2 = object.identifier
+                }
               } else {
                 object[header[columnCounter]] = item.replaceAll('"', '')
               }
@@ -745,13 +849,16 @@ export default {
           }
 
           if (lineCounter > 0) {
-            collection.push(JSON.parse(JSON.stringify(object)))
+            collection.push(object)
           }
 
           lineCounter += 1
         }
 
-        this.co2Readings = collection
+        this.tmpCO2Readings = collection
+        let lastReading = this.tmpCO2Readings[this.tmpCO2Readings.length - 1]
+        this.endDateTimeCO2 = lastReading.identifier
+
       }.bind(this)
 
       reader.readAsText(event.target.files[0])
@@ -854,8 +961,9 @@ export default {
         * parseFloat(this.roomLengthMeters)
         * parseFloat(this.roomUsableVolumeFactor)
 
+
       let normalizedCO2Readings =  []
-      for (let co2Reading of this.co2Readings) {
+      for (let co2Reading of this.filterCO2Readings) {
         normalizedCO2Readings.push(co2Reading.value)
       }
 

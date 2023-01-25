@@ -30,6 +30,9 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import VueGoogleMaps from '@fawmi/vue-google-maps';
 import Vue3Progress from "vue3-progress";
+import Datepicker from "@vuepic/vue-datepicker";
+import '@vuepic/vue-datepicker/dist/main.css'
+
 import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router';
 import Vue3Geolocation from 'vue3-geolocation';
 
@@ -108,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
       },
   // }).use(pinia).use(Vue3Geolocation).mount('#app')
   })
-    .use(pinia).use(Vue3Progress, options).use(Vue3Geolocation).use(router).mount('#app')
+    .use(pinia).use(Datepicker).use(Vue3Progress, options).use(Vue3Geolocation).use(router).mount('#app')
 
 
   const mainStore = useMainStore();

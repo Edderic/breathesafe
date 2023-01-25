@@ -6,6 +6,7 @@
   "dependencies": {
     "@fawmi/vue-google-maps": "^0.9.72",
     "@vitejs/plugin-vue": "^2.3.3",
+    "@vuepic/vue-datepicker": "^3.6.5",
     "axios": "^0.27.2",
     "pinia": "^2.0.14",
     "vue": "^3.2.37",
