@@ -12,7 +12,8 @@ export const useEventStore = defineStore('event', {
       'center': {
         'lat': 0,
         'lng': 0
-      }
+      },
+      'types': ['premise']
     },
     roomName: "",
     roomHeight: "",
