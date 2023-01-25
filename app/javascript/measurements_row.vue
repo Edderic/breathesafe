@@ -112,7 +112,11 @@ export default {
     },
     emojis() {
       let types = this.measurements.placeData.types
-      return getPlaceIcon(types)
+      if (types) {
+        return getPlaceIcon(types)
+      }
+
+      return getPlaceIcon(['premise'])
     },
     link() {
       return `/analytics/${this.measurements.id}`

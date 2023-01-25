@@ -188,7 +188,13 @@ export default {
     icon(marker) {
       let color = binValue(riskColorInterpolationScheme, marker.risk || 0)
 
-      const placeType = getPlaceType(marker.placeData.types)
+      let placeType;
+
+      if (marker && marker.placeData && marker.placeData.types) {
+        placeType = getPlaceType(marker.placeData.types)
+      } else {
+        placeType = 'premise'
+      }
 
       return `${window.gon.S3_HTTPS}/images/generated/${placeType}--${color.letterGrade}.svg`
     },
