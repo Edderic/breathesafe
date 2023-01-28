@@ -527,15 +527,26 @@ export class Intervention {
     // Easier to use the generation rate in the initial reading instead?
     // Problem with this though is that it's confusing, since it doesn't relate
     // to the number of infectors and susceptibles
+    //
+    // We don't know which group the susceptibles and infector(s) came from.
+    // What if we just distribute the infector and susceptibles evenly?
   }
 
   steadyStateCO2Reading() {
+    // We want it to use the same system of measurement
+    //
+    // Emission rate is in L / s
+    //  * 1 m3 / 1000 L * 3600 s / h gives us 3.6 m3 / h
+    //
+    // cadr is in m3?
+    // roomUsableVolumeCubicMeters is m3
+    //
     return steadyStateFac({
       roomUsableVolumeCubicMeters: this.roomUsableVolumeCubicMeters,
-      c_0: this.ambientCO2Reading(),
-      generationRate: this.computeEmissionRate() * 1000 * 3600,
+      c_0: this.event.initialCo2 / 1000000,
+      generationRate: this.computeEmissionRate() * 3.6,
       cadr: this.flowRate(),
-      cBackground: this.ambientCO2Reading()
+      cBackground: this.ambientCO2Reading() / 1000000
     }, 1000000)
   }
 

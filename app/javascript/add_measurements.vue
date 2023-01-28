@@ -426,7 +426,15 @@ Measurements are assumed to be spaced 1-minute apart</span>. If you have an Aran
           />
         </div>
         <div class='container centered' v-if='useUploadFile'>
-          <input type="file" @change="handleFileChangeCO2">
+          <div class='container'>
+            <input type="file" @change="handleFileChangeCO2">
+          </div>
+
+          <div v-if='tmpCO2Readings.length > 0' class='row centered container'>
+             Use last <select :value='lastXMinutes' @change='useLastXMinutes'>
+               <option :value="selection" v-for='selection in possibleLastXMinutes'>{{selection}}</option>
+             </select> minutes
+          </div>
 
           <div class='collapsable' v-if='tmpCO2Readings.length > 0'>
             <LineGraph
@@ -832,6 +840,8 @@ export default {
       behaviorInfo: false,
       privacyInfo: false,
       steadyStateInfo: false,
+      lastXMinutes: 5,
+      possibleLastXMinutes: [5, 10, 15, 20, 25, 30, 45, 60, 75, 90, 120, 180],
       co2Readings: [
         {
           value: 800,
@@ -868,6 +878,12 @@ export default {
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
 
+    useLastXMinutes(event) {
+      let MS = 1000
+      let newDate = this.endDateTimeCO2 - this.lastXMinutes * 60 * MS
+      this.startDateTimeCO2  = new Date(newDate)
+      this.lastXMinutes = parseInt(event.target.value)
+    },
     handleFileChangeCO2(event) {
       let reader = new FileReader()
       let collection = []
