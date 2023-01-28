@@ -428,7 +428,7 @@ Measurements are assumed to be spaced 1-minute apart</span>. If you have an Aran
         <div class='container centered' v-if='useUploadFile'>
           <input type="file" @change="handleFileChangeCO2">
 
-          <div class='collapsable'>
+          <div class='collapsable' v-if='tmpCO2Readings.length > 0'>
             <LineGraph
               :lines="[co2ReadingLines, startCO2VerticalLine, endCO2VerticalLine]"
               :ylim='[co2YMin, co2YMax]'
@@ -449,7 +449,7 @@ Measurements are assumed to be spaced 1-minute apart</span>. If you have an Aran
           </div>
 
 
-          <div class='collapsable'>
+          <div class='collapsable' v-if='tmpCO2Readings.length > 0'>
             <div>
               <label class='centered'><span class='bold'>Start Date Time</span></label>
               <Datepicker v-model='startDateTimeCO2' />
