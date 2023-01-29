@@ -1,5 +1,8 @@
 <template>
-  <div :class='{button: true, major: major}'>{{text}}</div>
+  <div :class='{button: true, major: major, selected: selected, shadow: sidePadded, "side-padded": sidePadded}'>
+{{text}}
+  <slot></slot>
+</div>
 </template>
 
 <script>
@@ -11,11 +14,24 @@ export default {
     return {}
   },
   props: {
-    text: String,
-    major: Boolean
+    text: {
+      type: String,
+      default: ''
+    },
+    major: Boolean,
+    shadow: {
+      type: Boolean,
+      default: false
+    },
+    selected: {
+      type: Boolean,
+      default: false
+    }
   },
   computed: {
-
+    sidePadded() {
+      return this.text.length > 0
+    }
   }, methods: {
   }
 
@@ -23,20 +39,34 @@ export default {
 </script>
 
 <style scoped>
+  .side-padded {
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-top: 1em;
+    padding-bottom: 1em;
+  }
   .button {
     margin-top: 1em;
     margin-bottom: 1em;
     font-weight: bold;
     border: none;
     text-align: center;
-    padding: 1em;
     font-size: 1.5em;
-    background-color: rgb(200, 200, 200);
     color: white;
+    background-color: #eee;
+  }
+
+  .selected {
+    background-color: #e6e6e6;
+    border-bottom: 4px solid black;
   }
 
   .major {
     background-color: rgb(219, 21, 0);
+  }
+
+  .shadow {
+    text-shadow: 1px 1px 2px black;
   }
 
   @media(max-width: 800px) {

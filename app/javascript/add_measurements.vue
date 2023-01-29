@@ -3,8 +3,8 @@
     <h2>Add Measurements</h2>
     <div class='container row centered menu'>
       <Pin />
-      <button id='whereabouts' :class='{ "tab-item": true, "selected": display == "whereabouts"}' @click='setDisplay("whereabouts")'>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
+      <Button id='whereabouts' :class='{ "tab-item": true }' shadow='false' :selected='display == "whereabouts"' @click='setDisplay("whereabouts")'>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <circle cx="40" cy="25" r="20" fill="white"/>
 
@@ -12,9 +12,9 @@
 
           <circle cx="40" cy="25" r="10" fill="rgb(150, 29, 2)"/>
         </svg>
-      </button>
-      <button id='room_dimensions' :class='{ "tab-item": true, "selected": display == "room_dimensions"}' @click='setDisplay("room_dimensions")'>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
+      </Button>
+      <Button id='room_dimensions' :class='{ "tab-item": true, }' :selected='display == "room_dimensions"' @click='setDisplay("room_dimensions")'>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="M 31 20 l -5 13 h 25 l 3 -13 z m -5 13 v 20 h 25 v -20 m 0 20 l 3 -13.5 l 0 -19" fill="transparent" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
           <text x="34" y="59">L</text>
@@ -22,9 +22,9 @@
           <text x="57" y="44">W</text>
 
         </svg>
-      </button>
-      <button id='ventilation' :class='{ "tab-item": true, "selected": display == "ventilation"}' @click='setDisplay("ventilation")'>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
+      </Button>
+      <Button id='ventilation' :class='{ "tab-item": true }' :selected='display == "ventilation"' @click='setDisplay("ventilation")'>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="m 20 30 h 40 l -20 -20 z" stroke='black' fill='#ccc'/>
           <path d="m 20 30 h 40 v 30 h -40 z" stroke='black' fill='#eee'/>
@@ -52,10 +52,10 @@
           <path d='m 20 30 m 29 16 m 20 5 l -2 1.5 l 3 0 l 0 -3 z' stroke='red' fill='red'/>
           <text x="25" y="65">VENT</text>
         </svg>
-      </button>
+      </Button>
 
-      <button id='pac' :class='{ "tab-item": true, "selected": display == "pac"}' @click='setDisplay("pac")'>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
+      <Button id='pac' :class='{ "tab-item": true, }' :selected='display == "pac"' @click='setDisplay("pac")'>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="M 30 20 l -5 17 h 25 l 3 -17 z m -5 17 v 23 h 25 v -23 m 0 23 l 3 -17.5 l 0 -19" fill="white" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
           <path d="M 27 43 v 17 m 5 0 v -17 m 5 0 v 17 m 5 0 v -17 m 5 0 v 17 " fill="transparent" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
@@ -85,10 +85,10 @@
 
           <text x="55" y="38">PAC</text>
         </svg>
-      </button>
+      </Button>
 
-      <button id='behaviors' :class='{ "tab-item": true, "selected": display == "behaviors"}' @click='setDisplay("behaviors")'>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
+      <Button id='behaviors' :class='{ "tab-item": true, }' :selected='display == "behaviors"' @click='setDisplay("behaviors")'>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="m 5 40 c 0 -10 10 -20 15 -20 c 5 0 10 0 6 10 c 4 4 4 4 4 12 l -5 0 l 3 4 l -8 1 l 8 7 c -2 10 -16 6 -16 5 z" stroke='black' fill='#eee'/>
           <path d="m 20 30 l 5 -3" stroke='black' fill='transparent'/>
@@ -120,7 +120,7 @@
             <circle cx="44.5" cy="30" r="2" fill="black"/>
           </g>
         </svg>
-      </button>
+      </Button>
     </div>
 
     <div class='container chunk'>
@@ -182,8 +182,8 @@
     <div class='room_dimensions chunk page' v-if='display == "room_dimensions"'>
       <div class='container'>
         <div class='menu row'>
-          <Button :class="{ selected: this.useOwnHeight, tab: true }" @click='setUseOwnHeight(true)' text='Estimate Volume'/>
-          <Button :class="{ selected: !this.useOwnHeight, tab: true }" @click='setUseOwnHeight(false)' text='Input Directly'/>
+          <Button :class="{ selected: this.useOwnHeight, tab: true }" shadow='true' @click='setUseOwnHeight(true)' text='Estimate Volume'/>
+          <Button :class="{ selected: !this.useOwnHeight, tab: true }" shadow='true' @click='setUseOwnHeight(false)' text='Input Directly'/>
 
         </div>
 
@@ -405,8 +405,8 @@ Measurements are assumed to be spaced 1-minute apart</span>. If you have an Aran
         </div>
 
         <div class='menu row'>
-          <Button :class="{ selected: !this.useUploadFile, tab: true }" @click='showUploadFile(false)' text='Enter One-by-one'/>
-          <Button :class="{ selected: this.useUploadFile, tab: true }" @click='showUploadFile(true)' text='Bulk Upload'/>
+          <Button :class="{ tab: true }" @click='showUploadFile(false)' shadow='true' text='Enter One-by-one' :selected="!this.useUploadFile"/>
+          <Button :class="{ tab: true }" @click='showUploadFile(true)' shadow='true' text='Bulk Upload' :selected="this.useUploadFile"/>
         </div>
 
         <div class='container centered' v-if='!useUploadFile'>
@@ -450,10 +450,10 @@ Measurements are assumed to be spaced 1-minute apart</span>. If you have an Aran
             />
           </div>
 
-          <div v-if='tmpCO2Readings.length > 0' class='row centered container'>
+          <p v-if='tmpCO2Readings.length > 0' class='row centered container'>
              Use last <input type="number" :value='lastXMinutes' @change='useLastXMinutes' @mouseleave='useLastXMinutes'>
              minutes before the &nbsp;<span class='bold'> End Date Time </span>&nbsp; listed below.
-          </div>
+          </p>
 
 
           <div class='collapsable' v-if='tmpCO2Readings.length > 0'>
@@ -531,8 +531,8 @@ Measurements are assumed to be spaced 1-minute apart</span>. If you have an Aran
       </div>
 
       <div class='container space-around row final'>
-        <Button class='normal-padded ' @click='cancel' text='Cancel' major='true'/>
-        <Button class='normal-padded button' @click='save' text='Save' major='true'/>
+        <Button class='normal-padded ' @click='cancel' :shadow='true' text='Cancel' major='true'/>
+        <Button class='normal-padded button' @click='save' :shadow='true' text='Save' major='true'/>
       </div>
     </div>
   </div>
@@ -1349,7 +1349,6 @@ export default {
   .button {
     color: white;
     width: 4em;
-    text-shadow: 1px 1px 2px black;
   }
   .main {
     display: flex;
@@ -1496,15 +1495,10 @@ export default {
 
   .menu .tab-item {
     border-top: 4px solid #eee;
-    border-bottom: 4px solid #eee;
   }
 
   .menu button.selected, .menu .button.selected {
     background-color: #cacaca;
-  }
-
-  .menu button.selected {
-    border-bottom: 4px solid black;
   }
 
   textarea {
@@ -1569,6 +1563,9 @@ export default {
     padding-bottom: 1em;
   }
 
+  h3 {
+    margin-left: 1em;
+  }
   label, h2 {
     text-align: center;
   }
