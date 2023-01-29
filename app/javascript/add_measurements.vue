@@ -430,12 +430,6 @@ Measurements are assumed to be spaced 1-minute apart</span>. If you have an Aran
             <input type="file" @change="handleFileChangeCO2">
           </div>
 
-          <div v-if='tmpCO2Readings.length > 0' class='row centered container'>
-             Use last <select :value='lastXMinutes' @change='useLastXMinutes'>
-               <option :value="selection" v-for='selection in possibleLastXMinutes'>{{selection}}</option>
-             </select> minutes
-          </div>
-
           <div class='collapsable' v-if='tmpCO2Readings.length > 0'>
             <LineGraph
               :lines="[co2ReadingLines, startCO2VerticalLine, endCO2VerticalLine]"
@@ -454,6 +448,11 @@ Measurements are assumed to be spaced 1-minute apart</span>. If you have an Aran
               ylabel='CO₂ (ppm)'
               roundYTicksTo='0'
             />
+          </div>
+
+          <div v-if='tmpCO2Readings.length > 0' class='row centered container'>
+             Use last <input type="number" :value='lastXMinutes' @change='useLastXMinutes'>
+             minutes before the &nbsp;<span class='bold'> End Date Time </span>&nbsp; listed below.
           </div>
 
 
