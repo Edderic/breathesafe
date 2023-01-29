@@ -451,7 +451,7 @@ Measurements are assumed to be spaced 1-minute apart</span>. If you have an Aran
           </div>
 
           <div v-if='tmpCO2Readings.length > 0' class='row centered container'>
-             Use last <input type="number" :value='lastXMinutes' @change='useLastXMinutes'>
+             Use last <input type="number" :value='lastXMinutes' @change='useLastXMinutes' @mouseleave='useLastXMinutes'>
              minutes before the &nbsp;<span class='bold'> End Date Time </span>&nbsp; listed below.
           </div>
 
@@ -934,6 +934,7 @@ export default {
         this.tmpCO2Readings = collection
         let lastReading = this.tmpCO2Readings[this.tmpCO2Readings.length - 1]
         this.endDateTimeCO2 = lastReading.identifier
+        this.lastXMinutes = (this.endDateTimeCO2 - this.startDateTimeCO2) / 60000
 
       }.bind(this)
 
