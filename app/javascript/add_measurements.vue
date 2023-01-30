@@ -335,7 +335,7 @@
         <label><span class='bold'>CO2 Measurement Device</span></label>
 
         <select :value='ventilationCO2MeasurementDeviceName' @change='setCarbonDioxideMonitor'>
-          <option v-for='carbonDioxideMonitor in carbonDioxideMonitors'>{{ carbonDioxideMonitor['name'] }}</option>
+          <option v-for='carbonDioxideMonitor in carbonDioxideMonitors' :value='carbonDioxideMonitors["name"]'>{{ carbonDioxideMonitor['name'] }}</option>
         </select>
       </div>
 
@@ -750,44 +750,8 @@ export default {
   async created() {
     // TODO: fire and forget. Make asynchronous.
 
-    let ventilationNIDR = computeVentilationNIDR(
-      [
-        {
-          carbonDioxideGenerationActivity: 'Lying or sitting quietly',
-          ageGroup: '3 to <6',
-          numberOfPeople: 1
-        },
-        {
-          carbonDioxideGenerationActivity: 'Lying or sitting quietly',
-          ageGroup: '30 to <40',
-          numberOfPeople: 2
-        }
-      ],
-      [1373, 1347, 1367,  1368, 1369, 1345, 1380],
-      this.ventilationCO2AmbientPPM,
-      31.77,
-      'bruteForce'
-    )
-
-    let ventilationNIDRGradient = computeVentilationNIDR(
-      [
-        {
-          carbonDioxideGenerationActivity: 'Lying or sitting quietly',
-          ageGroup: '3 to <6',
-          numberOfPeople: 1
-        },
-        {
-          carbonDioxideGenerationActivity: 'Lying or sitting quietly',
-          ageGroup: '30 to <40',
-          numberOfPeople: 2
-        }
-      ],
-      [1373, 1347, 1367,  1368, 1369, 1345, 1380],
-      this.ventilationCO2AmbientPPM,
-      31.77,
-    )
-
     await this.getCurrentUser()
+
     if (!this.currentUser) {
       this.$router.push({
         name: 'SignIn',
@@ -795,6 +759,8 @@ export default {
           'attempt-name': 'AddMeasurements'
         }
       })
+    } else {
+      this.loadStuff()
     }
 
     this.$watch(
@@ -809,17 +775,12 @@ export default {
                 'attempt-name': 'AddMeasurements'
               }
             })
+          } else {
+            this.loadStuff()
           }
         }
       }
     )
-    await this.loadProfile()
-    this.loadCO2Monitors()
-
-    this.roomLengthMeters = this.strideLengthForLength * this.strideLengthMeters
-    this.roomWidthMeters = this.strideLengthForWidth * this.strideLengthMeters
-    this.roomHeightMeters = this.personHeightToRoomHeight * this.heightMeters
-
     this.setCarbonDioxideMonitor({ target: { value: this.carbonDioxideMonitors[0].name }})
     // this.$watch(
       // () => this.$route.name,
@@ -984,6 +945,16 @@ export default {
     parseOccupancyData(event) {
       this.occupancy.unparsedOccupancyData = event.target.value
       this.occupancy.parsed = parseOccupancyHTML(this.occupancy.unparsedOccupancyData)
+    },
+    async loadStuff() {
+      await this.loadProfile()
+      await this.loadCO2Monitors()
+      this.ventilationCO2MeasurementDeviceName = this.carbonDioxideMonitors[0].name
+
+      this.roomLengthMeters = this.strideLengthForLength * this.strideLengthMeters
+      this.roomWidthMeters = this.strideLengthForWidth * this.strideLengthMeters
+      this.roomHeightMeters = this.personHeightToRoomHeight * this.heightMeters
+
     },
     async save() {
       this.messages = []
