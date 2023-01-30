@@ -46,8 +46,6 @@ export default {
     padding-bottom: 1em;
   }
   .button {
-    margin-top: 1em;
-    margin-bottom: 1em;
     font-weight: bold;
     border: none;
     text-align: center;
