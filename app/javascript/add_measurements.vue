@@ -123,10 +123,8 @@
       </Button>
     </div>
 
-    <div class='container chunk'>
-      <div class='container bold message' v-for='message in messages'>
-        {{ message }}
-      </div>
+    <div class='centered container chunk'>
+      <ClosableMessage @onclose='messages = []' :messages='messages'/>
       <br>
     </div>
 
@@ -544,6 +542,7 @@ import axios from 'axios';
 import Button from './button.vue'
 import ColoredCell from './colored_cell.vue';
 import CircularButton from './circular_button.vue';
+import ClosableMessage from './closable_message.vue';
 import Datepicker from "@vuepic/vue-datepicker";
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import Number from './number.vue'
@@ -567,6 +566,7 @@ export default {
     Button,
     CircularButton,
     ColoredCell,
+    ClosableMessage,
     DayHourHeatmap,
     Datepicker,
     Event,
