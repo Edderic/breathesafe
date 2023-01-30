@@ -3,13 +3,6 @@
     <h2>Profile</h2>
 
     <div class='container row centered menu'>
-      <button :class='{ "tab-item": true, "selected": display == "miscellaneous"}' id='miscellaneous-button' @click='setDisplay("miscellaneous")'>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
-          <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
-          <text x="12" y="30">Misc</text>
-        </svg>
-      </button>
-
       <button :class='{ "tab-item": true, "selected": display == "ventilation"}' id='ventilation' @click='setDisplay("ventilation")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
@@ -49,6 +42,13 @@
           <text x="12" y="38">H</text>
           <text x="57" y="44">W</text>
 
+        </svg>
+      </button>
+
+      <button :class='{ "tab-item": true, "selected": display == "miscellaneous"}' id='miscellaneous-button' @click='setDisplay("miscellaneous")'>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
+          <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
+          <text x="12" y="30">Misc</text>
         </svg>
       </button>
 
