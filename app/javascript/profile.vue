@@ -68,7 +68,7 @@
 
     </div>
     <div class='container centered'>
-      <h3>{{ message }}</h3>
+      <ClosableMessage @onclose='messages = []' :messages='messages'/>
     </div>
 
 
@@ -242,7 +242,7 @@
             </tr>
             <tr>
               <td>Name</td>
-              <td>Once you're in the process of adding measurements, you will be asked which CO₂ monitor you're using. <p class='bold'>This acts as a nickname for the serial #, and you can select the value of this field.</p> </td>
+              <td><p>Once you're in the process of adding measurements, you will be asked which CO₂ monitor you're using. <span class='bold'>This acts as a nickname for the serial #, and you can select the value of this field.</span></p> </td>
             </tr>
             <tr>
               <td>Serial</td>
@@ -347,6 +347,7 @@ import { useEventStore } from './stores/event_store';
 import { useMainStore } from './stores/main_store';
 import { convertLengthBasedOnMeasurementType, generateUUID, setupCSRF } from './misc';
 import CircularButton from './circular_button.vue';
+import ClosableMessage from './closable_message.vue';
 import PersonIcon from './person_icon.vue';
 import { useEventStores } from './stores/event_stores';
 import { useProfileStore } from './stores/profile_store';
@@ -358,6 +359,7 @@ export default {
   name: 'Profile',
   components: {
     CircularButton,
+    ClosableMessage,
     Event,
     PersonIcon
   },
@@ -412,12 +414,18 @@ export default {
     this.loadCO2Monitors()
     this.loadProfile()
 
+    if (this.carbonDioxideMonitors.length == 0) {
+      this.messages.push("In order to add measurements, please make sure to have at least one carbon dioxide monitor listed.")
+    }
+
+
     if (!this.currentUser) {
       this.$router.push({ name: 'SignIn', query: {'attempt-name': 'Profile'} })
     }
   },
   data() {
     return {
+      messages: [],
       showingAllowedCO2Models: false,
       showWhyHeight: false,
       showWhyStrideLength: false,

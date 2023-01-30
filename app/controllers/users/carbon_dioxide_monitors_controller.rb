@@ -92,7 +92,7 @@ class Users::CarbonDioxideMonitorsController < ApplicationController
             co2_monitor.destroy!
           end
 
-          message = "Deleted association between current user and monitor with serial #{co2_monitor.serial}, and the monitor itself."
+          message = "Deleted association between current user and monitor with serial #{co2_monitor.serial}, and the monitor itself. Note: you will not be able to add new measurements of venues without a CO₂ monitor. Please add at least one."
         rescue StandardError => e
           message = "Something went wrong with the deletion of CO2 monitor and the relationship between CO2 monitor and current user."
         end

@@ -949,11 +949,17 @@ export default {
     async loadStuff() {
       await this.loadProfile()
       await this.loadCO2Monitors()
-      this.ventilationCO2MeasurementDeviceName = this.carbonDioxideMonitors[0].name
 
-      this.roomLengthMeters = this.strideLengthForLength * this.strideLengthMeters
-      this.roomWidthMeters = this.strideLengthForWidth * this.strideLengthMeters
-      this.roomHeightMeters = this.personHeightToRoomHeight * this.heightMeters
+      if (this.carbonDioxideMonitors.length == 0) {
+        this.message = "In order to add measurements, please make sure to have at least one carbon dioxide monitor listed."
+        this.$router.push({ name: 'Profile'})
+      } else {
+        this.ventilationCO2MeasurementDeviceName = this.carbonDioxideMonitors[0].name
+
+        this.roomLengthMeters = this.strideLengthForLength * this.strideLengthMeters
+        this.roomWidthMeters = this.strideLengthForWidth * this.strideLengthMeters
+        this.roomHeightMeters = this.personHeightToRoomHeight * this.heightMeters
+      }
 
     },
     async save() {
