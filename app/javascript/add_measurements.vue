@@ -1447,7 +1447,6 @@ export default {
 
   .menu {
     min-width: 500px;
-    justify-content: space-around;
     background-color: #eee;
     margin-top: 0;
     margin-bottom: 0;
