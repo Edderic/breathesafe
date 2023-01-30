@@ -220,14 +220,37 @@
 
     <div class='container' v-if='display == "ventilation"'>
       <div class='row centered'>
-        <label class='subsection'>CO2 Monitors</label>
+        <label class='subsection'>CO₂ Monitors*</label>
 
         <CircularButton text='?' @click='showAllowedCO2Models'/>
         <CircularButton text='+' @click='newCO2monitor'/>
       </div>
 
       <div class='centered column' v-if='showingAllowedCO2Models'>
-        <p>Here are the list of acceptable CO2 monitors for logging data into Breathesafe. They use NDIR sensors. </p>
+        <p class='bold'>In order to add data, it is required to have at least one CO₂ monitor listed in your profile.</p>
+        <table class='variable-explanation' border='1'>
+          <thead>
+            <tr>
+              <th>Variable</th>
+              <td>Explanation</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Model</td>
+              <td>The type of CO₂ monitor. For example, "Aranet4"</td>
+            </tr>
+            <tr>
+              <td>Name</td>
+              <td>Once you're in the process of adding measurements, you will be asked which CO₂ monitor you're using. <p class='bold'>This acts as a nickname for the serial #, and you can select the value of this field.</p> </td>
+            </tr>
+            <tr>
+              <td>Serial</td>
+              <td>The serial number.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>Here are the list of acceptable CO₂ monitors for logging data into Breathesafe. They use NDIR sensors. </p>
         <table class='allowable-co2-monitors'>
           <tr>
             <th>Image</th>
@@ -701,6 +724,9 @@ export default {
 
   input {
     width: auto;
+  }
+
+  .variable-explanation {
   }
 
   @media(min-width: 750px) {
