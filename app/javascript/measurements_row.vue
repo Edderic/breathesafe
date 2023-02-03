@@ -7,7 +7,7 @@
     </td>
     <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.roomName}}</td>
     <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.placeData.formattedAddress}}</td>
-    <td class='containing-cell'>
+    <td class='containing-cell score'>
       <router-link :to='link' @click="showAnalysis(this.measurements.id)">
         <ColoredCell
           class='risk-score'
@@ -226,6 +226,11 @@ export default {
 
   a {
     text-decoration: none;
+  }
+
+  .score:hover:after {
+
+    content: "Click for full analysis"
   }
 
   @media (max-width: 800px) {
