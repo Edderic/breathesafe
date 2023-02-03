@@ -7,8 +7,8 @@
     </td>
     <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.roomName}}</td>
     <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.placeData.formattedAddress}}</td>
-    <td class='containing-cell score'>
-      <router-link :to='link' @click="showAnalysis(this.measurements.id)">
+    <td class='containing-cell score' @click="showAnalysis(this.measurements.id)">
+      <router-link :to='link'>
         <ColoredCell
           class='risk-score'
           :colorScheme="colorInterpolationScheme"
@@ -230,7 +230,7 @@ export default {
 
   .score:hover:after {
 
-    content: "Click for full analysis"
+    content: "Click grade for full analysis"
   }
 
   @media (max-width: 800px) {
