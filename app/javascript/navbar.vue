@@ -2,8 +2,12 @@
   <div class='col'>
     <div class='row spaced-between main fixed-nav-bar'>
       <div class='left row vertical-centered'>
-        <span class='logo'>😷</span>
-        <h2 class='title'>Breathesafe</h2>
+        <router-link :to='{ name: "Venues"}' class='logo-link'>
+          <div class='row'>
+            <div class='logo vertical-centered'>😷</div>
+            <h2 class='title'>Breathesafe</h2>
+          </div>
+        </router-link>
       </div>
 
       <div class='vertical-centered'>
@@ -113,6 +117,12 @@ export default {
     padding: 1em;
     font-size: 1.3em;
   }
+
+  .logo-link {
+    text-decoration: none;
+    color: black;
+  }
+
   .row {
     display: flex;
     flex-direction: row;

@@ -557,7 +557,6 @@ import {
    convertLengthBasedOnMeasurementType, computeVentilationACH, computePortableACH,
    computeVentilationNIDR,
    generateUUID,
-   parseOccupancyHTML
 } from  './misc';
 
 export default {

@@ -65,6 +65,15 @@ export const useEventStores = defineStore('events', {
           console.log(response)
           if (response.status == 200) {
             let camelized = deepSnakeToCamel(response.data.events)
+            // for (let i of camelized) {
+              // let number = parseInt(Math.random() * 100)
+              // let street = ["New York Ave.", "St. James St.", "Park Place", "Baltic Ave.", "Indiana Ave.", "Kentucky Ave.", "Illinois Ave.", "Ventnor Ave."][parseInt( Math.random() * 8 )]
+              // let state = 'Iowa'
+              // let zip = ['12345', '54321', '20202'][parseInt(Math.random() * 3)]
+              // i.placeData.formattedAddress = `${number} ${street}, ${state} ${zip}`
+              // i.placeData.center.lat += 0.0
+              // i.placeData.center.lng -= 20.0
+            // }
             this.setDistance(mainStore, camelized)
             this.events = camelized
             this.displayables = this.events
