@@ -229,7 +229,6 @@ export default {
   }
 
   .score:hover:after {
-
     content: "Click grade for full analysis"
   }
 
