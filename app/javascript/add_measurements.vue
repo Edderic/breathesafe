@@ -748,60 +748,27 @@
     },
     async created() {
       // TODO: fire and forget. Make asynchronous.
-
       await this.getCurrentUser()
 
       if (!this.currentUser) {
-        this.$router.push({
-          name: 'SignIn',
-          query: {
-            'attempt-name': 'AddMeasurements'
-          }
-        })
+        this.signIn()
       } else {
         this.loadStuff()
-      }
 
-      if (this.$route.query['section']) {
-        this.setDisplay(this.$route.query['section'])
-      }
-
-      this.$watch(
-        () => this.$route.query,
-        (toQuery, prevQuery) => {
-          if (toQuery['section']) {
-            this.setDisplay(this.$route.query['section'])
-          }
-        }
-      )
-
-      this.$watch(
-        () => this.$route.name,
-        (toName, previousName) => {
-          if (toName == 'AddMeasurements') {
-            // check to see if the currentUser
-            if (!this.currentUser) {
-              this.$router.push({
-                name: 'SignIn',
-                query: {
-                  'attempt-name': 'AddMeasurements'
-                }
-              })
-            } else {
-              this.loadStuff()
+        this.$watch(
+          () => this.$route.name,
+          (toName, previousName) => {
+            if (toName == 'AddMeasurements') {
+              if (!this.currentUser) {
+                this.signIn()
+              } else {
+                this.loadStuff()
+              }
             }
           }
-        }
-      )
-      this.setCarbonDioxideMonitor({ target: { value: this.carbonDioxideMonitors[0].name }})
-      // this.$watch(
-        // () => this.$route.name,
-        // (toName, previousName) => {
-          // debugger
+        )
 
-          // react to route changes...
-        // }
-      // )
+      }
 
 
     },
@@ -813,7 +780,6 @@
         privacyInfo: false,
         steadyStateInfo: false,
         lastXMinutes: 5,
-        possibleLastXMinutes: [5, 10, 15, 20, 25, 30, 45, 60, 75, 90, 120, 180],
         co2Readings: [
           {
             value: 800,
@@ -846,9 +812,41 @@
     methods: {
       ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
       ...mapActions(useProfileStore, ['loadCO2Monitors', 'loadProfile']),
-      ...mapActions(useEventStores, ['load', 'addEvent']),
+      ...mapActions(useEventStores, ['load', 'addEvent', 'findOrLoad']),
       ...mapActions(useEventStore, ['addPortableAirCleaner']),
       ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
+
+      signIn() {
+        let query = JSON.parse(JSON.stringify(this.$route.query))
+
+        query['attempt-name'] = 'AddMeasurements'
+
+        this.$router.push({
+          name: 'SignIn',
+          query: query
+        })
+      },
+      async copyEvent(id) {
+        let event = await this.findOrLoad(id)
+        this.authorId = this.currentUser.id
+        this.placeData = event.placeData
+        this.roomName = event.roomName
+        this.startDateTime = new Date()
+        this.private = event.private
+        this.maximumOccupancy = event.maximumOccupancy
+        this.co2Readings = []
+        this.portableAirCleaners = event.portableAirCleaners
+        this.portableACH = event.portableACH
+        this.ventilationCO2AmbientPPM =  event.ventilationCo2AmbientPpm
+
+        this.roomWidthMeters = parseFloat(event.roomWidthMeters)
+        this.roomHeightMeters = parseFloat(event.roomHeightMeters)
+        this.roomLengthMeters = parseFloat(event.roomLengthMeters)
+
+        this.activityGroups = event.activityGroups
+        this.roomUsableVolumeCubicMeters = event.roomUsableVolumeCubicMeters
+        this.roomUsableVolumeFactor = event.roomUsableVolumeFactor
+      },
 
       useLastXMinutes(event) {
         let MS = 1000
@@ -964,14 +962,24 @@
         await this.loadCO2Monitors()
 
         if (this.carbonDioxideMonitors.length == 0) {
-          this.message = "In order to add measurements, please make sure to have at least one carbon dioxide monitor listed."
-          this.$router.push({ name: 'Profile'})
+          this.message = { str: "In order to add measurements, please make sure to have at least one carbon dioxide monitor listed.", to: { name: 'Profile', query: {section: 'ventilation'}}}
+          this.$router.push({ name: 'Profile', query: {section: 'ventilation'}})
         } else {
+
+          this.setCarbonDioxideMonitor({ target: { value: this.carbonDioxideMonitors[0].name }})
           this.ventilationCO2MeasurementDeviceName = this.carbonDioxideMonitors[0].name
 
-          this.roomLengthMeters = this.strideLengthForLength * this.strideLengthMeters
-          this.roomWidthMeters = this.strideLengthForWidth * this.strideLengthMeters
-          this.roomHeightMeters = this.personHeightToRoomHeight * this.heightMeters
+          if (this.$route.query['section'] && this.$route.name == 'AddMeasurements') {
+            this.setDisplay(this.$route.query['section'])
+          }
+
+          if (this.$route.query['copy'] && this.$route.name == 'AddMeasurements') {
+            this.copyEvent(this.$route.query['copy'])
+          } else {
+            this.roomLengthMeters = this.strideLengthForLength * this.strideLengthMeters
+            this.roomWidthMeters = this.strideLengthForWidth * this.strideLengthMeters
+            this.roomHeightMeters = this.personHeightToRoomHeight * this.heightMeters
+          }
         }
 
       },
@@ -1065,7 +1073,7 @@
           )
         }
 
-        if (this.roomWidthMeters) {
+        if (!this.roomWidthMeters) {
           this.messages.push(
             {
               str: "Error: Room width cannot be blank.\n ",

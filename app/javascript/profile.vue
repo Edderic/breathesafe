@@ -428,7 +428,7 @@ export default {
     this.loadProfile()
 
     if (this.carbonDioxideMonitors.length == 0) {
-      this.messages.push("In order to add measurements, please make sure to have at least one carbon dioxide monitor listed.")
+      this.messages.push({ str: "In order to add measurements, please make sure to have at least one carbon dioxide monitor listed." })
     }
 
 

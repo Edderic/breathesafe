@@ -120,9 +120,14 @@ export default {
 
       await this.loadProfile()
 
-      if (this.$route.query && this.$route.query['attempt-name']) {
+      if (this.$route.query['attempt-name']) {
+        let query = JSON.parse(JSON.stringify(this.$route.query))
+        let attemptName = this.$route.query['attempt-name']
+        delete query['attempt-name']
+
         this.$router.push({
-          name: this.$route.query['attempt-name']
+          name: attemptName,
+          query: query
         });
       }
       else {

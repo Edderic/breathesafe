@@ -63,6 +63,9 @@
                     <router-link :to='{ name: "Analytics", params: {id: m.id}}' @click="showAnalysis(m.id)">
                       ☣️  Risk Analysis
                     </router-link>
+                    <router-link :to='{ name: "AddMeasurements", query: {copy: m.id} }'>
+                      ➕ Add New Measurements
+                    </router-link>
                   </div>
                 </td>
               </tr>
