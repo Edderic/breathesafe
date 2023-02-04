@@ -411,6 +411,19 @@ export default {
   // TODO: pull data from profiles for given current_user
   async created() {
     await this.getCurrentUser()
+
+    if (this.$route.query['section']) {
+      this.setDisplay(this.$route.query['section'])
+    }
+
+    this.$watch(
+      () => this.$route.query,
+      (toQuery, previousQuery) => {
+        if (toQuery['section']) {
+          this.setDisplay(toQuery['section'])
+        }
+      }
+    )
     this.loadCO2Monitors()
     this.loadProfile()
 
@@ -422,6 +435,7 @@ export default {
     if (!this.currentUser) {
       this.$router.push({ name: 'SignIn', query: {'attempt-name': 'Profile'} })
     }
+
   },
   data() {
     return {
@@ -440,6 +454,7 @@ export default {
       this.showingAllowedCO2Models = !this.showingAllowedCO2Models
     },
     setDisplay(string) {
+      this.$router.push({ 'name': 'Profile', query: {'section': string}})
       this.display = string
     },
     validCO2Monitor(monitor) {
