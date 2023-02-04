@@ -762,6 +762,19 @@
         this.loadStuff()
       }
 
+      if (this.$route.query['section']) {
+        this.setDisplay(this.$route.query['section'])
+      }
+
+      this.$watch(
+        () => this.$route.query,
+        (toQuery, prevQuery) => {
+          if (toQuery['section']) {
+            this.setDisplay(this.$route.query['section'])
+          }
+        }
+      )
+
       this.$watch(
         () => this.$route.name,
         (toName, previousName) => {
@@ -906,6 +919,7 @@
         this[info] = !this[info]
       },
       setDisplay(string) {
+        this.$router.push({ 'name': 'AddMeasurements', query: {'section': string}})
         this.display = string
       },
       updateMaxOccupancy(args) {
@@ -965,15 +979,27 @@
         this.messages = []
 
         // if (!this.placeData || !this.placeData.place_id) {
-          // this.messages.push({str: "Error: Google Maps data missing. Please use the Google Search to search for the place of interest."})
+          // this.messages.push({str: "Error: Google Maps data missing. Please use the Google Search to search for the place of interest.", to: {
+                // name: 'AddMeasurements',
+                // query: {
+                  // 'section': 'whereabouts'
+                // }
+              // }
+          // })
+
         // }
         if (this.activityGroups.length == 0) {
-          this.messages.push({str: "Error: Please fill out activities done by people so we can compute clean air delivery rate through ventilation."})
-        }
-
-        // TODO: use CO2 readings instead?
-        if (!this.ventilationCO2SteadyStatePPM) {
-          this.messages.push({str: "Error: Please fill out CO2 steady state so we can compute clean air delivery rate of ventilation."})
+          this.messages.push(
+            {
+              str: "Error: Please fill out activities done by people so we can compute clean air delivery rate through ventilation.",
+              to: {
+                name: 'AddMeasurements',
+                query: {
+                  'section': 'behaviors'
+                }
+              }
+            }
+          )
         }
 
         if (!this.ventilationCO2AmbientPPM) {
@@ -981,10 +1007,30 @@
         }
 
         if (this.maximumOccupancy == 0) {
-          this.messages.push({str: "Error: maximum occupancy of a room cannot be 0."})
+          this.messages.push(
+            {
+              str: "Error: maximum occupancy of a room cannot be 0.",
+              to: {
+                name: 'AddMeasurements',
+                query: {
+                  'section': 'whereabouts'
+                }
+              }
+            }
+          )
         }
         if (!this.roomName) {
-          this.messages.push({str: "Error: Room name cannot be blank.\n "})
+          this.messages.push(
+            {
+              str: "Error: Room name cannot be blank.\n ",
+              to: {
+                name: 'AddMeasurements',
+                query: {
+                  'section': 'whereabouts'
+                }
+              }
+            }
+          )
         }
 
         if (!this.startDatetime) {
@@ -992,15 +1038,68 @@
         }
 
         if (!this.roomHeightMeters) {
-          this.messages.push({str: "Error: Room height cannot be blank.\n "})
+          this.messages.push(
+            {
+              str: "Error: Room height cannot be blank.\n ",
+              to: {
+                name: 'AddMeasurements',
+                query: {
+                  'section': 'room_dimensions'
+                }
+              }
+            }
+          )
         }
 
         if (!this.roomLengthMeters) {
-          this.messages.push({str: "Error: Room length cannot be blank.\n "})
+          this.messages.push(
+            {
+              str: "Error: Room length cannot be blank.\n ",
+              to: {
+                name: 'AddMeasurements',
+                query: {
+                  'section': 'room_dimensions'
+                }
+              }
+            }
+          )
         }
 
-        if (!this.roomWidthMeters) {
-          this.messages.push({str: "Error: Room width cannot be blank.\n "})
+        if (this.roomWidthMeters) {
+          this.messages.push(
+            {
+              str: "Error: Room width cannot be blank.\n ",
+              to: {
+                name: 'AddMeasurements',
+                query: {
+                  'section': 'room_dimensions'
+                }
+              }
+            }
+          )
+        }
+
+
+        let co2ReadingsToSave = []
+
+        if (this.useUploadFile) {
+          co2ReadingsToSave = this.filterCO2Readings
+        } else {
+          co2ReadingsToSave = this.co2Readings
+        }
+
+        if (co2ReadingsToSave.length == 0) {
+          this.messages.push(
+            {
+              str: "Error: Please add indoor CO2 readings, either one-by-one or by bulk.",
+              to: {
+                name: 'AddMeasurements',
+                query: {
+                  'section': 'ventilation'
+                }
+              }
+            }
+          )
         }
 
         if (this.messages.length > 0) {
@@ -1013,15 +1112,6 @@
           * parseFloat(this.roomHeightMeters)
           * parseFloat(this.roomLengthMeters)
           * parseFloat(this.roomUsableVolumeFactor)
-
-
-        let co2ReadingsToSave = []
-
-        if (this.useUploadFile) {
-          co2ReadingsToSave = this.filterCO2Readings
-        } else {
-          co2ReadingsToSave = this.co2Readings
-        }
 
         let normalizedCO2Readings =  []
         for (let co2Reading of co2ReadingsToSave) {
