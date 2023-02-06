@@ -748,6 +748,74 @@
     },
     async created() {
       // TODO: fire and forget. Make asynchronous.
+      // let activityGroups = [
+        // {"id"=>"360c52db-e0f6-4c71-b790-8e3d7b148ef3",
+          // "ageGroup"=>"50 to <60",
+          // "maskType"=>"",
+          // "numberOfPeople"=>"1000",
+          // "aerosolGenerationActivity"=>"Resting – Oral breathing",
+          // "carbonDioxideGenerationActivity"=>"Lying or sitting quietly"},
+        // {"id"=>"614aeaca-2caf-4b30-8743-e82115c1f14b",
+          // "ageGroup"=>"60 to <70",
+          // "numberOfPeople"=>"500",
+          // "aerosolGenerationActivity"=>"Resting – Oral breathing",
+          // "carbonDioxideGenerationActivity"=>"Lying or sitting quietly"}
+      // ]
+//
+      // let normalizedCO2Readings = [
+        // 411,
+        // 431,
+        // 451,
+        // 471,
+        // 491,
+        // 511,
+        // 531,
+        // 551,
+        // 571,
+        // 591,
+        // 611,
+        // 631,
+        // 651,
+        // 651,
+        // 671,
+        // 691,
+        // 711,
+        // 731,
+        // 751,
+        // 771,
+        // 791,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811,
+        // 811
+      // ]
+//
+      // let ventilationNIDR = computeVentilationNIDR(
+        // activityGroups,
+        // normalizedCO2Readings,
+        // this.ventilationCO2AmbientPPM,
+        // this.roomUsableVolumeCubicMeters,
+      // )
+      // debugger
+
+
       await this.getCurrentUser()
 
       if (!this.currentUser) {
@@ -984,6 +1052,7 @@
 
       },
       async save() {
+
         this.messages = []
 
         // if (!this.placeData || !this.placeData.place_id) {
@@ -1096,10 +1165,10 @@
           co2ReadingsToSave = this.co2Readings
         }
 
-        if (co2ReadingsToSave.length == 0) {
+        if (co2ReadingsToSave.length <= 1) {
           this.messages.push(
             {
-              str: "Error: Please add indoor CO2 readings, either one-by-one or by bulk.",
+              str: "Error: Please add at least 2 carbon dioxide readings, either one-by-one or by bulk.",
               to: {
                 name: 'AddMeasurements',
                 query: {
