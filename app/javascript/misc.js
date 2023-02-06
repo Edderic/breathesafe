@@ -762,7 +762,7 @@ function greedy(producer, producerArgs, actualData, gradArgs) {
   let lastMinErrorIteration = minErrorIteration
   let possibleError1 = 0
 
-  for (let i = 0; i < 100000; i++) {
+  for (let i = 0; i < 1000000; i++) {
 
     let bestVar = undefined
     let bestMove = 0
