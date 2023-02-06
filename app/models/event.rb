@@ -1,4 +1,5 @@
 class Event < ApplicationRecord
+  belongs_to :author, class_name: 'User'
 
   def self.can_be_accessed_by(user)
     # unless user
