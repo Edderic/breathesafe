@@ -3,7 +3,7 @@ export const CARBON_DIOXIDE_MONITORS = [
     'name': 'Aranet 4 Home',
     'website': 'https://www.co2meter.com/products/aranet4-home-indoor-air-quality-monitor',
     'estimatedCost': '$250',
-    'imageLink': 'https://cdn.shopify.com/s/files/1/0019/5952/products/aranet4-product-photo-ppm-shopify_large.jpg?v=1647088427'
+    'imageLink': 'https://aranet.com/uploads/2022/01/image_standart-500x500.png'
   },
   {
     'name': 'Temtop M2000',
