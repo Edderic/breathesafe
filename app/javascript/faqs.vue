@@ -102,12 +102,9 @@
           <br>
           <br>
           <h3>How do I contribute data?</h3>
-
           <p>
-          If you haven't signed up, please do. You will be sent a confirmation email. After
-          clicking on the confirmation email, you'll be sent to the
-          <router-link to="/profile">Profile</router-link> page. You
-          can add your CO2 monitor(s) in the Profile page. They must be one of the
+          In order to contribute data, you must be in possession of one of these
+          carbon dioxide monitors. They must be one of the
           following NDIR devices:
           </p>
 
@@ -145,9 +142,14 @@
           </p>
 
           <p>
-          Once you have one of the models through the Profile, you can
-          then go to <router-link to='/'>Venues</router-link> and click on the
-          <router-link to='/events/new#top'>Add Measurements</router-link> link.
+          Once you have one of the models, you can <router-link :to='{ name: "SignIn"}'>sign up</router-link>.
+          You will be sent a confirmation email. After
+          clicking on the confirmation email, you'll be sent to the
+          <router-link to="/profile">Profile</router-link> page. Please fill out
+          your <router-link :to='{ name: "SignIn"}'>Profile</router-link>, especially the
+          <router-link :to='{name: "Profile", query: { section: "ventilation"}}'>ventilation section, which asks about the CO2 monitor.</router-link>.
+          Once that is filled out, one can click on the
+          <router-link to='/events/new'>Add Measurements</router-link> link.
           </p>
 
           <br id='modeling'>
