@@ -53,7 +53,8 @@
           <p>
           In order to contribute data, you must be in possession of one of these
           carbon dioxide monitors. They must be one of the
-          following NDIR devices:
+          following NDIR devices. Note that the Aranet4 is preferred for its long battery life, portability, and data storage.
+
           </p>
 
           <div class='centered'>
@@ -95,7 +96,7 @@
           clicking on the confirmation email, you'll be sent to the
           <router-link to="/profile">Profile</router-link> page. Please fill out
           your <router-link :to='{ name: "SignIn"}'>Profile</router-link>, especially the
-          <router-link :to='{name: "Profile", query: { section: "ventilation"}}'>ventilation section, which asks about the CO2 monitor.</router-link>.
+          <router-link :to='{name: "Profile", query: { section: "ventilation"}}'>ventilation section, which asks about the CO2 monitor</router-link>.
           Once that is filled out, one can click on the
           <router-link to='/events/new'>Add Measurements</router-link> link.
           </p>

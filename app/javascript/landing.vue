@@ -12,7 +12,7 @@
         <router-link :to='{ name: "Venues" }'>
           <Button text='Find Safer Venues' major='true'/>
         </router-link>
-        <router-link :to='{ name: "AddMeasurements" }'>
+        <router-link to='/faqs#data-contribution'>
           <Button text='Add Measurements' major='true'/>
         </router-link>
       </div>
