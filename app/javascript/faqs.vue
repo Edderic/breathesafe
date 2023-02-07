@@ -5,15 +5,15 @@
         Frequently Asked Questions
       </router-link>
 
+      <router-link to="/faqs#data-contribution" class='link-h2'>
+        How do I contribute data?
+      </router-link>
+
       <router-link to="/faqs#why-should-we-care-about-covid-risk" class='link-h2'>
         Why should we care about covid risk?
       </router-link>
       <router-link to="/faqs#how-to-improve-indoor-air-quality" class='link-h2'>
         Is there a succinct video I can watch to learn about indoor air quality?
-      </router-link>
-
-      <router-link to="/faqs#data-contribution" class='link-h2'>
-        How do I contribute data?
       </router-link>
 
       <router-link to="/faqs#modeling" class='link-h1'>
@@ -45,58 +45,6 @@
           <br>
           <br>
           <h3 class='subsection'>Frequently Asked Questions</h3>
-
-          <br id='why-should-we-care-about-covid-risk'>
-          <br>
-          <br>
-          <h4 >Why should we care about covid risk?</h4>
-          <p>
-            While vaccines prevent deaths and hospitalizations to a great degree, they by themselves are not so great at
-            <a href="https://www.nejm.org/doi/full/10.1056/NEJMoa2119451">
-            preventing symptomatic infections
-            </a>
-            and
-            <a href="https://www.nature.com/articles/d41586-022-01453-0#:~:text=The%20researchers%20found%20that%20vaccination,found%20much%20higher%20protection%20rates."
-            >
-            long COVID
-            </a>.
-            As of August 2022, it is estimated that
-            <a
-            href="https://www.npr.org/2022/07/31/1114375163/long-covid-longhaulers-disability-labor-ada"
-            >
-            4 million employees in the U.S. are out of work due to long-COVID.
-            </a>
-
-            Decreasing the risk of transmission will decrease the
-            likelihood of contracting COVID, and therefore,
-            <a href="https://www.science.org/content/article/what-causes-long-covid-three-leading-theories"
-            >
-            long-COVID</a>.
-
-            Doing so will also make spaces become more
-            accessible to
-            <a href="https://www.theatlantic.com/health/archive/2022/02/covid-pandemic-immunocompromised-risk-vaccines/622094/"
-            >the millions of immunocompromised people in the U.S.</a>
-            We need a "vaccines-plus" strategy, not just a "vaccines-only" strategy, using non-pharmaceutical interventions such as cleaning the air, masking, and rapid testing.
-
-            Investing in infrastructure to clean the air will make the spaces
-            we inhabit <a href="https://www.science.org/doi/10.1126/science.abd9149">be
-            more resilient not just to COVID-19, but also to other respiratory viruses</a>.
-          </p>
-
-          <p class='bold'>For more up-to-date information about COVID-19, check out <a href="https://peoplescdc.org/">People's CDC</a>.
-          </p>
-
-          <br id='how-to-improve-indoor-air-quality'>
-          <br>
-          <br>
-
-          <h4>Is there a succinct video I can watch to learn about indoor air quality?</h4>
-          <p>This one by Scientific American is pretty good.</p>
-
-          <div class='centered'>
-            <iframe width="560" height="315" src="https://www.youtube.com/embed/djnie-h6Bn8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-          </div>
 
           <br id='data-contribution'>
           <br>
@@ -151,6 +99,58 @@
           Once that is filled out, one can click on the
           <router-link to='/events/new'>Add Measurements</router-link> link.
           </p>
+
+          <br id='why-should-we-care-about-covid-risk'>
+          <br>
+          <br>
+          <h4 >Why should we care about covid risk?</h4>
+          <p>
+            While vaccines prevent deaths and hospitalizations to a great degree, they by themselves are not so great at
+            <a href="https://www.nejm.org/doi/full/10.1056/NEJMoa2119451">
+            preventing symptomatic infections
+            </a>
+            and
+            <a href="https://www.nature.com/articles/d41586-022-01453-0#:~:text=The%20researchers%20found%20that%20vaccination,found%20much%20higher%20protection%20rates."
+            >
+            long COVID
+            </a>.
+            As of August 2022, it is estimated that
+            <a
+            href="https://www.npr.org/2022/07/31/1114375163/long-covid-longhaulers-disability-labor-ada"
+            >
+            4 million employees in the U.S. are out of work due to long-COVID.
+            </a>
+
+            Decreasing the risk of transmission will decrease the
+            likelihood of contracting COVID, and therefore,
+            <a href="https://www.science.org/content/article/what-causes-long-covid-three-leading-theories"
+            >
+            long-COVID</a>.
+
+            Doing so will also make spaces become more
+            accessible to
+            <a href="https://www.theatlantic.com/health/archive/2022/02/covid-pandemic-immunocompromised-risk-vaccines/622094/"
+            >the millions of immunocompromised people in the U.S.</a>
+            We need a "vaccines-plus" strategy, not just a "vaccines-only" strategy, using non-pharmaceutical interventions such as cleaning the air, masking, and rapid testing.
+
+            Investing in infrastructure to clean the air will make the spaces
+            we inhabit <a href="https://www.science.org/doi/10.1126/science.abd9149">be
+            more resilient not just to COVID-19, but also to other respiratory viruses</a>.
+          </p>
+
+          <p class='bold'>For more up-to-date information about COVID-19, check out <a href="https://peoplescdc.org/">People's CDC</a>.
+          </p>
+
+          <br id='how-to-improve-indoor-air-quality'>
+          <br>
+          <br>
+
+          <h4>Is there a succinct video I can watch to learn about indoor air quality?</h4>
+          <p>This one by Scientific American is pretty good.</p>
+
+          <div class='centered'>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/djnie-h6Bn8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
 
           <br id='modeling'>
           <br>
