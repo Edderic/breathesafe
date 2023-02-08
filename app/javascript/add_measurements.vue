@@ -368,6 +368,17 @@
             <p >These are the CO2 readings indoors. <span class='bold'>
   Measurements are assumed to be spaced 1-minute apart</span>. If you have an Aranet4, you could change the sampling rate to once per minute by following instructions listed <a href="https://forum.aranet.com/all-about-aranet4/how-to-change-the-measurement-interval-on-aranet4-device/" target='_blank'>here</a>.</p>
 
+            <div class='centered'>
+              <LineGraph
+                :lines="[ascendingThenSteady, descendingThenSteady, steady]"
+                :ylim='[400, 1500]'
+                title='Idealized CO₂ Readings'
+                xlabel='Time (min)'
+                ylabel='CO₂ (ppm)'
+                roundYTicksTo='0'
+              />
+            </div>
+
             <h3>Enter One-by-one</h3>
             <p >When using a mobile device, one can upload CO₂ data one-by-one (see "Enter one-by-one" section).
     <span class='bold'>please enter at least 5 points</span>. Using less than that could make the estimates be heavily impacted by measurement error.</p>
@@ -557,6 +568,7 @@
      convertLengthBasedOnMeasurementType, computeVentilationACH, computePortableACH,
      computeVentilationNIDR,
      generateUUID,
+     genConcCurve
   } from  './misc';
 
   export default {
@@ -634,6 +646,58 @@
             'events'
           ]
       ),
+
+      ascendingThenSteady() {
+        let curve = genConcCurve({
+          roomUsableVolumeCubicMeters: 10,
+          c0: 420,
+          generationRate: 20000,
+          cadr: 20,
+          cBackground: 420,
+          windowLength: 120
+        })
+
+        let collection = []
+        for (let i = 0; i < curve.length; i++) {
+          collection.push([i, curve[i]])
+        }
+
+        return { points: collection, color: 'red', legend: 'ascending' }
+      },
+      descendingThenSteady() {
+        let curve = genConcCurve({
+          roomUsableVolumeCubicMeters: 10,
+          c0: 1500,
+          generationRate: 2000,
+          cadr: 20,
+          cBackground: 420,
+          windowLength: 120
+        })
+
+        let collection = []
+        for (let i = 0; i < curve.length; i++) {
+          collection.push([i, curve[i]])
+        }
+
+        return { points: collection, color: 'green', legend: 'descending' }
+      },
+      steady() {
+        let curve = genConcCurve({
+          roomUsableVolumeCubicMeters: 1,
+          c0: 1200,
+          generationRate: 10,
+          cadr: 10,
+          cBackground: 1200,
+          windowLength: 120
+        })
+
+        let collection = []
+        for (let i = 0; i < curve.length; i++) {
+          collection.push([i, curve[i]])
+        }
+
+        return { points: collection, color: 'blue', legend: 'at steady state' }
+      },
       filterCO2Readings() {
         let tmp;
         let collection = []

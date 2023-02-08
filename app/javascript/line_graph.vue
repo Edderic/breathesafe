@@ -71,8 +71,19 @@ export default {
       return `M ${this.legendStartX} ${this.legendStartY} h ${this.legendWidth} v ${this.legendHeight} h -${this.legendWidth} z`
     },
 
+    maxCharLengthLegend() {
+      let maxLength = 0
+      for (let line of this.lines) {
+        if (line.legend.length > maxLength) {
+          maxLength = line.legend.length
+        }
+      }
+
+      return maxLength
+    },
+
     legendWidth() {
-      return 0.2 * this.viewBoxX
+      return 0.2 * this.viewBoxX + (this.maxCharLengthLegend - 7) * 0.01 * this.viewBoxX
     },
     legendHeight() {
       return this.legendOffsetY * (this.lines.length + 1)
