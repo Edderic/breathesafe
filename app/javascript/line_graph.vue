@@ -1,12 +1,5 @@
 <template>
   <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" :viewBox="viewBox" height='20em' width='30em'>
-    <path :d='legendBox' :stroke='legend.color' :fill='legend.color' stroke-width='10'/>
-
-    <g v-for='(line, index) in lines'>
-      <path :d='plotLegend(line, index)' :stroke='line.color' :fill='transparent' stroke-width='20' />
-      <text :x='getXLegend(index)' :y='getYLegend(index)' anchor='middle' alignment-baseline='middle'>{{line.legend}}</text>
-    </g>
-
     <text class='label' x="10%" y="45%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em">{{ylabel}}</text>
 
     <text class='label' :x="xLabelX" y="95%" text-anchor="middle" fill="black" dy=".4em" style="font-size: 20em ">{{xlabel}}</text>
@@ -24,6 +17,13 @@
     <path :d='path(line)' :stroke='line.color' fill='transparent' stroke-width='50' v-for='line in lines' />
 
     <circle v-if='showHighlighter' :cx='highlighterX' :cy='highlighterY' r='100' fill='red'/>
+
+    <path :d='legendBox' :stroke='legend.color' :fill='legend.color' stroke-width='10'/>
+
+    <g v-for='(line, index) in lines'>
+      <path :d='plotLegend(line, index)' :stroke='line.color' :fill='transparent' stroke-width='20' />
+      <text :x='getXLegend(index)' :y='getYLegend(index)' anchor='middle' alignment-baseline='middle'>{{line.legend}}</text>
+    </g>
 
   </svg>
 </template>

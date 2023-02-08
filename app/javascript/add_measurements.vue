@@ -368,6 +368,12 @@
             <p >These are the CO2 readings indoors. <span class='bold'>
   Measurements are assumed to be spaced 1-minute apart</span>. If you have an Aranet4, you could change the sampling rate to once per minute by following instructions listed <a href="https://forum.aranet.com/all-about-aranet4/how-to-change-the-measurement-interval-on-aranet4-device/" target='_blank'>here</a>.</p>
 
+            <h2>Same Occupancy & Behavior Assumption</h2>
+
+            <p>Carbon dioxide logged should be data for when occupancy has stayed the same, and people have not changed their activities. In other words, use readings when the number of people in the space has remained constant, and use readings when people were doing the same thing they were doing as in the beginning of the time window. For example, if there were 20 people who were sitting in the beginning, there should be 20 people who were sitting at the end of the measurement time window.</p>
+
+            <h2>Idealized CO₂ Readings</h2>
+
             <div class='centered'>
               <LineGraph
                 :lines="[ascendingThenSteady, descendingThenSteady, steady]"
@@ -379,12 +385,25 @@
               />
             </div>
 
-            <h3>Enter One-by-one</h3>
+            <p>If the same-occupancy-and-behavior assumption applies, then the readings will look like one of the above:
+            <ul>
+              <li>ascending</li>
+              <li>descending</li>
+              <li>at steady state</li>
+            </ul>
+            </p>
+
+            <p>
+
+            Once the same-occupancy-and-behavior assumption applies, you can then proceed in logging data, either manually one-by-one, or by bulk.
+            </p>
+
+            <h2>Enter One-by-one</h2>
             <p >When using a mobile device, one can upload CO₂ data one-by-one (see "Enter one-by-one" section).
     <span class='bold'>please enter at least 5 points</span>. Using less than that could make the estimates be heavily impacted by measurement error.</p>
-            <p>Entering one-by-one is most useful in situations where you're on the run and are logging with your mobile device.</p>
+            <p>Entering one-by-one is most useful in situations when your CO₂ monitor doesn't have data-storage capabilities (unlike the Aranet).</p>
 
-            <h3>Bulk Upload</h3>
+            <h2>Bulk Upload</h2>
             <p>For bulk uploads, one can take a comma-separated values (CSV) file with the columns containing the following: <span class='bold'>Time</span> and <span class='bold'>Carbon dioxide</span>. For example:</p>
             <div class='centered'>
               <table>
@@ -408,9 +427,44 @@
             </div>
 
 
-            <p>Using bulk upload is useful for increasing the accuracy of ventilation rate estimates (since it uses more data).</p>
+            <p>Using bulk upload is useful for increasing the accuracy of ventilation rate estimates (since it uses more data). The Aranet4 provides this data through their app.</p>
 
-            <p>Once you've hit chosen a CSV that matches the data format above, you could then filter for the relevant section using <span class='bold'>Start Date Time</span> and <span class='bold'>End Date Time</span>. Clicking on one of them will show you a widget that lets you select a date, along with a time. The relevant section will be marked in the <span>Zoomed Out</span> graph. The "start" vertical line corresponds to <span class='bold'>Start Date Time</span> while the "end" vertical line corresponds to <span class='bold'>End Date Time</span>. The <span class='bold'>Zoomed In</span> graph shows the data between  <span class='bold'>Start Date Time</span> and <span class='bold'>End Date Time</span>.</p>
+            <h3>Saving a CSV with Aranet</h3>
+
+            <p>Open the Aranet app. Click on the Aranet device within the Aranet app:</p>
+            <div class='centered'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/co2-readings-click-on-device.jpeg" alt="Click on the Aranet device" class='img'>
+            </div>
+
+            <h4>Save to iCloud Drive (for Mac)</h4>
+
+            <p>One could save data to the cloud, which can be accessed by mobile devices or PCs:</p>
+            <div class='centered'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/co2-readings-scroll-down-to-Save-to-Files.PNG" alt="Click on 'Save to Files'" class='img'>
+            </div>
+
+            <p>Save in a folder. Here I created a folder called "CO2" to store my readings:</p>
+
+            <div class='centered'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/co2-readings-save-file-to-folder.jpeg" alt="Save File in Folder" class='img'>
+            </div>
+
+            <p>Press the "Save" button.</p>
+
+
+            <h4>Save to PC or Mac</h4>
+
+            <p>One could also save to a laptop and do the uploading of the CSV file on the laptop:</p>
+
+            <div class='centered'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/co2-readings-save-to-pc.jpg" alt="Click on Mac laptop" class='img'>
+            </div>
+
+
+            <h2>Filtering the Data for the Time Window of Interest</h2>
+
+            <p>Once you've chosen a CSV that matches the data format above, you could then filter for the relevant section using <span class='bold'>Start Date Time</span> and <span class='bold'>End Date Time</span>. Clicking on one of them will show you a widget that lets you select a date, along with a time. The relevant section will be marked in the <span>Zoomed Out</span> graph. The "start" vertical line corresponds to <span class='bold'>Start Date Time</span> while the "end" vertical line corresponds to <span class='bold'>End Date Time</span>. The <span class='bold'>Zoomed In</span> graph shows the data between  <span class='bold'>Start Date Time</span> and <span class='bold'>End Date Time</span>.</p>
+
           </div>
 
           <div class='menu row'>
@@ -1635,10 +1689,6 @@
     background-color: #e6e6e6;
   }
 
-  h2 {
-    text-align: center;
-  }
-
   text {
     dominant-baseline: hanging;
     font: 10px Verdana, Helvetica, Arial, sans-serif;
@@ -1776,7 +1826,7 @@
     padding-bottom: 1em;
   }
 
-  h3 {
+  h2, h3, h4, h5 {
     margin-left: 1em;
   }
   label, h2 {
@@ -1811,6 +1861,9 @@
     flex-direction: row;
   }
 
+  .img {
+    max-width: 400px;
+  }
 
   @media(max-width: 1000px) {
     .collapsable {
