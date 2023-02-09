@@ -1,5 +1,5 @@
 <template>
-  <div class='wide border-showing'>
+  <div class='wide'>
     <h2>Profile</h2>
 
     <div class='container row centered menu'>
@@ -81,10 +81,6 @@
         <label class='bold'>Last name</label>
         <input :value='lastName' @change='updateLastName' :disabled="this.status == 'saved'">
       </div>
-      <div class='container centered change'>
-        <button @click='save' v-if='this.status == "edit"'>Save</button>
-        <button @click='editProfile' v-if='this.status == "saved"'>Edit</button>
-      </div>
     </div>
 
     <div class='container' v-if='display == "length_estimation"'>
@@ -109,7 +105,7 @@
         </div>
         <div class='row mobile' v-show="showWhyHeight">
           <p >
-            How tall are you? We need the room volume to assess risk. We assume a box model, so
+            <span class='bold'>How tall are you?</span> We need the room volume to assess risk. We assume a box model, so
             the components are length, width, and height. To calculate room height, you
             could use your own height as a reference. When you add a measurement, for
             example, you will be asked how many times you can fit your height into the
@@ -212,10 +208,6 @@
         </div>
       </div>
 
-      <div class='container centered change'>
-        <button @click='save' v-if='this.status == "edit"'>Save</button>
-        <button @click='editProfile' v-if='this.status == "saved"'>Edit</button>
-      </div>
     </div>
 
     <div class='container' v-if='display == "ventilation"'>
@@ -275,7 +267,7 @@
         </table>
       </div>
 
-      <div class='border-showing' v-for='carbonDioxideMonitor in carbonDioxideMonitors' :key=carbonDioxideMonitor.id>
+      <div class='border-showing carbon-dioxide-monitor' v-for='carbonDioxideMonitor in carbonDioxideMonitors' :key=carbonDioxideMonitor.id>
         <div class='container mobile'>
           <label class='bold'>Model</label>
           <input
@@ -303,18 +295,19 @@
         <div class='container centered change'
             v-if="carbonDioxideMonitor.status == 'editable'"
         >
-          <button
+          <Button
             @click='removeCO2Monitor(carbonDioxideMonitor["id"])'
             v-if="carbonDioxideMonitor.status == 'editable' && hasBeenSaved(carbonDioxideMonitor['id'])"
-          >Remove</button>
-          <button @click='cancelEditing(carbonDioxideMonitor["id"])'>Cancel</button>
-          <button @click='saveCO2Monitor(carbonDioxideMonitor["id"])' :disabled="!validCO2Monitor(carbonDioxideMonitor)">Save</button>
+            text='Remove'
+          />
+          <Button @click='cancelEditing(carbonDioxideMonitor["id"])' text='Cancel'/>
+          <Button @click='saveCO2Monitor(carbonDioxideMonitor["id"])' :disabled="!validCO2Monitor(carbonDioxideMonitor)" text="Save"/>
         </div>
 
         <div class='container centered change'
             v-if="carbonDioxideMonitor.status == 'display'"
         >
-          <button @click='editCO2Monitor(carbonDioxideMonitor["id"])'>Edit</button>
+          <Button @click='editCO2Monitor(carbonDioxideMonitor["id"])' text='Edit'/>
         </div>
       </div>
     </div>
@@ -331,11 +324,12 @@
       <div class='container mobile'>
         <label class='bold'>Facebook</label>
         <input :value='socials.facebook' @change='updateSocials($event, "facebook")' :disabled="this.status == 'saved'">
-      <div class='container centered change'>
-        <button @click='save' v-if='this.status == "edit"'>Save</button>
-        <button @click='editProfile' v-if='this.status == "saved"'>Edit</button>
       </div>
     </div>
+
+    <div class='container centered change' >
+      <Button @click='save' v-if='display != "ventilation" && this.status == "edit"' text='Save'/>
+      <Button @click='editProfile' v-if='display != "ventilation" && this.status == "saved"' text='Edit'/>
     </div>
   </div>
 </template>
@@ -347,6 +341,7 @@ import { useEventStore } from './stores/event_store';
 import { useMainStore } from './stores/main_store';
 import { convertLengthBasedOnMeasurementType, generateUUID, setupCSRF } from './misc';
 import CircularButton from './circular_button.vue';
+import Button from './button.vue';
 import ClosableMessage from './closable_message.vue';
 import PersonIcon from './person_icon.vue';
 import { useEventStores } from './stores/event_stores';
@@ -358,6 +353,7 @@ import { CARBON_DIOXIDE_MONITORS } from './carbon_dioxide_monitors.js'
 export default {
   name: 'Profile',
   components: {
+    Button,
     CircularButton,
     ClosableMessage,
     Event,
@@ -444,7 +440,7 @@ export default {
       showWhyHeight: false,
       showWhyStrideLength: false,
       circle: toggleCSS,
-      display: 'miscellaneous'
+      display: 'ventilation'
     }
   },
   methods: {
@@ -661,6 +657,7 @@ export default {
   }
 
   p {
+    max-width: 450px;
     padding: 1em;
   }
 
@@ -726,7 +723,7 @@ export default {
 
 
   .border-showing {
-    border: 0;
+    border: 1px solid gray;
     width: 95vw;
   }
 
@@ -749,8 +746,10 @@ export default {
     width: auto;
   }
 
-  .variable-explanation {
+  .carbon-dioxide-monitor{
+    margin-top: 1em;
   }
+
 
   @media(min-width: 750px) {
     .border-showing, .chunk {
