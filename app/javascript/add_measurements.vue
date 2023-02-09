@@ -130,6 +130,17 @@
 
     <div class='whereabouts chunk' v-if='display == "whereabouts"'>
       <div class='container'>
+        <label class='centered'><span class='bold'>Make this information private</span>
+          <CircularButton text='?' @click='toggleInfo("privacyInfo")'/>
+        </label>
+        <p v-if='privacyInfo'>Select <span class='bold'>private</span> if you don't want the rest of the public to see it. Useful for assessing risk at places like your home. On the other hand, if you want the public to benefit with this measurement, select <span class='bold'>public</span>.</p>
+        <select :value='private' @change='setEventPrivacy'>
+          <option>public</option>
+          <option>private</option>
+        </select>
+      </div>
+
+      <div class='container' v-if='private == "public"'>
         <label><span class='bold'>Google Search</span></label>
         <GMapAutocomplete
            class='autocomplete'
@@ -151,17 +162,6 @@
         <input class='wider-input'
           v-model="startDatetime"
         >
-      </div>
-
-      <div class='container'>
-        <label class='centered'><span class='bold'>Make this information private</span>
-          <CircularButton text='?' @click='toggleInfo("privacyInfo")'/>
-        </label>
-        <p v-if='privacyInfo'>Select <span class='bold'>private</span> if you don't want the rest of the public to see it. Useful for assessing risk at places like your home. On the other hand, if you want the public to benefit with this measurement, select <span class='bold'>public</span>.</p>
-        <select :value='private' @change='setEventPrivacy'>
-          <option>public</option>
-          <option>private</option>
-        </select>
       </div>
 
       <div class='container'>
