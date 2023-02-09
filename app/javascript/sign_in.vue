@@ -28,8 +28,10 @@
     </div>
 
     <div class='container row' v-if='!registered'>
-      <button @click="signUp">Sign up</button>
-      <button @click="signIn">Sign In</button>
+      <Button @click="signUp" text='Sign up'/>
+      <br>
+
+      <Button @click="signIn" text='Sign In'/>
     </div>
   </form>
 </template>
@@ -39,11 +41,13 @@
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import { mapActions, mapWritableState } from 'pinia';
+import Button from './button.vue';
 import axios from 'axios';
 
 export default {
   name: 'SignIn',
   components: {
+    Button
   },
   computed: {
     ...mapWritableState(useMainStore, ['message', 'currentUser'])
