@@ -7,6 +7,9 @@
       :colorScheme='colorInterpSchemeRoomVol'
     >
       <p class='explainer'>This is the amount of estimated non-infectious air that is from mechanical ventilation, open windows, and infiltration.</p>
+      <h3 v-if='ventilationNotes.length > 0'>Notes</h3>
+      <p>{{ventilationNotes}}</p>
+
     </DrillDownSection>
 </template>
 
@@ -34,7 +37,8 @@ export default {
   props: {
     cadr: Number,
     systemOfMeasurement: String,
-    measurementUnits: Object
+    measurementUnits: Object,
+    ventilationNotes: String
   },
   computed: {
     cadrLocale() {

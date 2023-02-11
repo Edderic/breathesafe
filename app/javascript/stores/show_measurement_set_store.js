@@ -154,6 +154,7 @@ export const useShowMeasurementSetStore = defineStore('showMeasurementSet', {
       this.initialCo2 = measurementSet.initialCo2
       this.co2Readings = measurementSet.co2Readings
       this.displayMeasurementsTailoredToUser()
+      this.ventilationNotes = measurementSet.ventilationNotes
       this.ventilationCo2AmbientPpm = measurementSet.ventilationCo2AmbientPpm
       this.ventilationCo2MeasurementDeviceModel = measurementSet.ventilationCo2MeasurementDeviceModel
       this.ventilationCo2MeasurementDeviceName = measurementSet.ventilationCo2MeasurementDeviceName

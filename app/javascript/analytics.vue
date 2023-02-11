@@ -98,6 +98,7 @@
             :cadr='ventilationCadr'
             :systemOfMeasurement='systemOfMeasurement'
             :measurementUnits='measurementUnits'
+            :ventilationNotes='ventilationNotes'
           />
           <SteadyState
             :activityGroups='activityGroups'

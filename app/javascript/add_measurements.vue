@@ -436,6 +436,13 @@
               <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/co2-readings-click-on-device.jpeg" alt="Click on the Aranet device" class='img'>
             </div>
 
+            <h3>Click on the Export Button</h3>
+
+            <p>Click on the top-right icon.</p>
+            <div class='centered'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/co2-readings-click-on-top-right.jpeg" alt="Click on top-right" class='img'>
+            </div>
+
             <h4>Save to iCloud Drive (for Mac)</h4>
 
             <p>One could save data to the cloud, which can be accessed by mobile devices or PCs:</p>
@@ -546,7 +553,7 @@
           <CircularButton text='+' @click='addActivityGrouping'/>
         </div>
 
-        <p v-if="behaviorInfo">Re: <span class='bold'># people</span>: What is the current occupancy? Lets us quantify the ventilation rate.</p>
+        <p v-if="behaviorInfo">Re: <span class='bold'># people</span>: How many people are doing the activities? Lets us quantify the ventilation rate.</p>
         <p v-if="behaviorInfo">Re: <span class='bold'>Aerosol Generation</span>: Speaking generates more aerosols than by breathing. Affects risk.</p>
         <p v-if="behaviorInfo">Re: <span class='bold'>CO2 gen.</span>: Exercising produces more CO2 than resting. Knowing this value helps us quantify the ventilation rate.</p>
         <p v-if="behaviorInfo">Re: <span class='bold'>Age group</span>: A baby produces less CO2 than an adult.</p>
