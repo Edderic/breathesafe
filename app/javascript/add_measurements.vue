@@ -1290,10 +1290,10 @@
           co2ReadingsToSave = this.co2Readings
         }
 
-        if (co2ReadingsToSave.length <= 1) {
+        if (co2ReadingsToSave.length <= 10) {
           this.messages.push(
             {
-              str: "Error: Please add at least 2 carbon dioxide readings, either one-by-one or by bulk.",
+              str: "Error: Please add at least 10 carbon dioxide readings, either one-by-one or by bulk, where each measurement is spaced 1-minute apart.",
               to: {
                 name: 'AddMeasurements',
                 query: {
