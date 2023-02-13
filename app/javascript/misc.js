@@ -756,23 +756,27 @@ export function computeCO2EmissionRate(activityGroups) {
 }
 
 function greedy(producer, producerArgs, actualData, gradArgs) {
-  let lastMoves = []
+  // let lastMoves = []
 
   let minErrorIteration = 100000000
   let lastMinErrorIteration = minErrorIteration
   let possibleError1 = 0
 
+  let bestPosition = {}
+  let bestMove = {
+    'cadr': 0,
+    'c0': 0
+  }
+
   for (let i = 0; i < 1000000; i++) {
 
-    let bestVar = undefined
-    let bestMove = 0
-
-    for (let searchArg of gradArgs.searchArgs) {
-      for (let j of [-1, 1]) {
+    for (let cadr_d of [-1, 0, 1]) {
+      for (let c0_d of [-1, 0, 1]) {
 
         let copyProducerArgs = JSON.parse(JSON.stringify(producerArgs))
 
-        copyProducerArgs[searchArg] = producerArgs[searchArg] + j
+        copyProducerArgs['cadr'] = producerArgs['cadr'] + cadr_d
+        copyProducerArgs['c0'] = producerArgs['c0'] + c0_d
 
         let newData = producer(copyProducerArgs)
 
@@ -784,28 +788,26 @@ function greedy(producer, producerArgs, actualData, gradArgs) {
 
         if (possibleError1 < minErrorIteration) {
           minErrorIteration = possibleError1
-          bestVar = searchArg
-          bestMove = j
+          bestPosition = JSON.parse(JSON.stringify(copyProducerArgs))
         }
       }
     }
 
     if (minErrorIteration == lastMinErrorIteration) {
       return {
-        result: producerArgs,
+        result: bestPosition,
         error: minErrorIteration
       }
     }
 
     lastMinErrorIteration = minErrorIteration
 
-    lastMoves.push({bestVar: bestVar, bestMove: bestMove})
-    producerArgs[bestVar] += bestMove
-
+    // lastMoves.push({bestVar: bestVar, bestMove: bestMove})
+    Object.assign(producerArgs, bestPosition)
   }
 
   return {
-    result: producerArgs,
+    result: bestPosition,
     error: minErrorIteration
   }
 }
