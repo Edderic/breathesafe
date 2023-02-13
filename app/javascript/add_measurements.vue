@@ -1150,6 +1150,68 @@
         this.occupancy.unparsedOccupancyData = event.target.value
         this.occupancy.parsed = parseOccupancyHTML(this.occupancy.unparsedOccupancyData)
       },
+
+      checkActivityGroups() {
+        for (let activityGroup of this.activityGroups) {
+
+          if (!!activityGroup['ageGroup']) {
+            this.messages.push(
+              {
+                str: "Error: Each activity group should have an age group. Cannot be blank.",
+                to: {
+                  name: 'AddMeasurements',
+                  query: {
+                    'section': 'behaviors'
+                  }
+                }
+              }
+            )
+          }
+
+          if (!!activityGroup['ageGroup']) {
+            this.messages.push(
+              {
+                str: "Error: Each activity group should have an age group. Cannot be blank.",
+                to: {
+                  name: 'AddMeasurements',
+                  query: {
+                    'section': 'behaviors'
+                  }
+                }
+              }
+            )
+          }
+
+          if (!!activityGroup['numberOfPeople']) {
+            this.messages.push(
+              {
+                str: "Error: Each activity group should a number of people. Cannot be blank.",
+                to: {
+                  name: 'AddMeasurements',
+                  query: {
+                    'section': 'behaviors'
+                  }
+                }
+              }
+            )
+          }
+
+          if (!!activityGroup['carbonDioxideGenerationActivity']) {
+            this.messages.push(
+              {
+                str: "Error: Each activity group should a carbon dioxide generation activity. Cannot be blank.",
+                to: {
+                  name: 'AddMeasurements',
+                  query: {
+                    'section': 'behaviors'
+                  }
+                }
+              }
+            )
+          }
+
+        }
+      },
       async loadStuff() {
         await this.loadProfile()
         await this.loadCO2Monitors()
