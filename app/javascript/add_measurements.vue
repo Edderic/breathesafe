@@ -1153,8 +1153,7 @@
 
       checkActivityGroups() {
         for (let activityGroup of this.activityGroups) {
-
-          if (!!activityGroup['ageGroup']) {
+          if (!activityGroup['ageGroup']) {
             this.messages.push(
               {
                 str: "Error: Each activity group should have an age group. Cannot be blank.",
@@ -1168,21 +1167,7 @@
             )
           }
 
-          if (!!activityGroup['ageGroup']) {
-            this.messages.push(
-              {
-                str: "Error: Each activity group should have an age group. Cannot be blank.",
-                to: {
-                  name: 'AddMeasurements',
-                  query: {
-                    'section': 'behaviors'
-                  }
-                }
-              }
-            )
-          }
-
-          if (!!activityGroup['numberOfPeople']) {
+          if (!activityGroup['numberOfPeople']) {
             this.messages.push(
               {
                 str: "Error: Each activity group should a number of people. Cannot be blank.",
@@ -1196,10 +1181,24 @@
             )
           }
 
-          if (!!activityGroup['carbonDioxideGenerationActivity']) {
+          if (!activityGroup['carbonDioxideGenerationActivity']) {
             this.messages.push(
               {
                 str: "Error: Each activity group should a carbon dioxide generation activity. Cannot be blank.",
+                to: {
+                  name: 'AddMeasurements',
+                  query: {
+                    'section': 'behaviors'
+                  }
+                }
+              }
+            )
+          }
+
+          if (!activityGroup['aerosolGenerationActivity']) {
+            this.messages.push(
+              {
+                str: "Error: Each activity group should an aerosol generation activity. Cannot be blank.",
                 to: {
                   name: 'AddMeasurements',
                   query: {
@@ -1252,6 +1251,8 @@
           // })
 
         // }
+        this.checkActivityGroups()
+
         if (this.activityGroups.length == 0) {
           this.messages.push(
             {
