@@ -1070,7 +1070,7 @@
                 header.push(item)
               } else {
 
-                if (header[columnCounter].includes("Carbon dioxide")) {
+                if (header[columnCounter].includes("Carbon dioxide") || header[columnCounter].includes("Carbon Dioxide")) {
                   object.value = parseInt(item.replaceAll('"', ''))
                   object[header[columnCounter]] = parseInt(item)
                 } else if (header[columnCounter].includes("Time")) {
