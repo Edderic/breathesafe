@@ -961,9 +961,19 @@
           }
         )
 
+        this.$watch(
+          () => this.$route.query,
+          (toQuery, fromQuery) => {
+            if (toQuery['section'] && this.$route.name == 'AddMeasurements') {
+              if (!this.currentUser) {
+                this.signIn()
+              } else {
+                this.display = toQuery['section']
+              }
+            }
+          }
+        )
       }
-
-
     },
     data() {
       return {
