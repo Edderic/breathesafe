@@ -379,9 +379,9 @@ export function findCurrentOccupancy(maxOccupancy, date, parsed) {
 function steadyStateFactor(a, time) {
   /*
    * Parameters:
-   *   c_0: initial concentration (e.g. quanta, CO2)
+   *   c_0: initial concentration (e.g. quanta, CO2 (ppm))
    *   cadr: clean air delivery rate (m3 / h)
-   *   generation_rate:  (quanta / h or m3 / h)
+   *   generation_rate:  (quanta / h or m3 / h * ppm)
    *   volume: room volume (m3)
    *   time: minutes
    *
