@@ -920,6 +920,7 @@ export function computeVentilationNIDR(
   const startCO2 = (co2Readings[0] + co2Readings[1]) / 2
   // L / s * 1 m3 / 1000 L * 3600 seconds / h
   // gives us m3 / h
+  // Multiply by 1000000 ppm is the same thing as multiplying by 1
   let generationRate = emissionRate(activityGroups) / 1000 * 3600 * 1000000
 
   let gradArgs = {
