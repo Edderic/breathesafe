@@ -763,51 +763,56 @@ function greedy(producer, producerArgs, actualData, gradArgs) {
   let possibleError1 = 0
 
   let bestPosition = {}
-  let bestMove = {
+  let bestLocalMove = {
     'cadr': 0,
     'c0': 0
   }
 
+  let newData = []
+  let copyProducerArgs = {};
+
   for (let i = 0; i < 1000000; i++) {
 
     for (let cadr_d of [-1, 0, 1]) {
-      for (let c0_d of [-1, 0, 1]) {
+      // for (let c0_d of [-1, 0, 1]) {
 
-        let copyProducerArgs = JSON.parse(JSON.stringify(producerArgs))
+      copyProducerArgs = JSON.parse(JSON.stringify(producerArgs))
 
-        copyProducerArgs['cadr'] = producerArgs['cadr'] + cadr_d
-        copyProducerArgs['c0'] = producerArgs['c0'] + c0_d
-
-        let newData = producer(copyProducerArgs)
-
-        possibleError1 = computeError(
-          newData,
-          actualData,
-          (data1, data2) => Math.abs(data1 - data2)
-        )
-
-        if (possibleError1 < minErrorIteration) {
-          minErrorIteration = possibleError1
-          bestPosition = JSON.parse(JSON.stringify(copyProducerArgs))
-        }
+      if ((producerArgs['c0_d'] < 1 && c0_d == -1) || (producerArgs['cadr_d'] < 1 && cadr_d == -1)) {
+        continue
       }
+
+      copyProducerArgs['cadr'] = producerArgs['cadr'] + cadr_d
+      // copyProducerArgs['c0'] = producerArgs['c0'] + c0_d
+
+      newData = producer(copyProducerArgs)
+
+      possibleError1 = computeError(
+        newData,
+        actualData,
+        (data1, data2) => Math.abs(data1 - data2)
+      )
+
+      if (possibleError1 < minErrorIteration) {
+        minErrorIteration = possibleError1
+        bestLocalMove = JSON.parse(JSON.stringify(copyProducerArgs))
+      }
+      // }
     }
 
-    if (minErrorIteration == lastMinErrorIteration) {
+    if (minErrorIteration >= lastMinErrorIteration) {
       return {
-        result: bestPosition,
-        error: minErrorIteration
+        result: bestLocalMove,
+        error: lastMinErrorIteration
       }
     }
 
     lastMinErrorIteration = minErrorIteration
-
-    // lastMoves.push({bestVar: bestVar, bestMove: bestMove})
-    Object.assign(producerArgs, bestPosition)
+    Object.assign(producerArgs, bestLocalMove)
   }
 
   return {
-    result: bestPosition,
+    result: bestLocalMove,
     error: minErrorIteration
   }
 }
@@ -934,7 +939,7 @@ export function computeVentilationNIDR(
 
   let producerArgs = {
     roomUsableVolumeCubicMeters: roomUsableVolumeCubicMeters,
-    cadr: 500,
+    cadr: 100,
     c0: startCO2,
     generationRate: generationRate,
     cBackground: co2Background,
@@ -966,8 +971,6 @@ export function computeVentilationNIDR(
 
     return { cadr: bestArg, error: minError }
   }
-
-  producerArgs['cadr'] = 100
 
   return greedy(
     generateData,
@@ -1006,7 +1009,7 @@ function generateData(args) {
         c_0: args.c0,
         generationRate: args.generationRate,
         cadr: args.cadr,
-        cBackground: args.cBackground
+        cBackground: parseFloat(args.cBackground)
       }, t)
     )
   }
