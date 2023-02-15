@@ -1,23 +1,12 @@
 <template>
-  <tr id='section-total-ach'>
-    <td>
-      <div class='row justify-content-center align-items-center'>
-        <h3 class='bold'>Masking Reduction Factor</h3>
-        <CircularButton text='?' @click='show = !show'/>
-      </div>
-    </td>
-    <td>
-      <ColoredCell
-        :colorScheme="riskColorScheme"
-        :maxVal=1
-        :value='maskingFactor'
-        :text='maskingFactorText'
-        :style='cellCSSMerged'
-      />
-    </td>
-  </tr>
+  <DrillDownSection
+    title='Masking Reduction Factor'
+    :value='maskingFactor'
+    :text='maskingFactorText'
+    :colorScheme='riskColorScheme'
+  >
 
-  <tr v-if='show'>
+  <tr>
     <td colspan='2'>
       <div class='explainer' id='section-masking'>
         <p>
@@ -70,6 +59,7 @@
       </div>
     </td>
   </tr>
+  </DrillDownSection>
 
 </template>
 
@@ -89,12 +79,14 @@ import {
 
 import CircularButton from './circular_button.vue'
 import ColoredCell from './colored_cell.vue'
+import DrillDownSection from './drill_down_section.vue'
 
 export default {
   name: 'TotalACH',
   components: {
     CircularButton,
-    ColoredCell
+    ColoredCell,
+    DrillDownSection
   },
   data() {
     return {
