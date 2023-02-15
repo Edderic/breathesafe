@@ -246,6 +246,6 @@ export default {
 
   .explainer {
     max-width: 25em;
-    margin: 0 auto;
+    margin: 1em auto;
   }
 </style>
