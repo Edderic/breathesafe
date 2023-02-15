@@ -1,24 +1,11 @@
 <template>
+  <DrillDownSection
 
-    <tr>
-      <td>
-        <div class='row justify-content-center align-items-center'>
-          <h3 class='bold'>Infector Activity</h3>
-          <CircularButton text='?' @click='show = !show'/>
-        </div>
-      </td>
-      <td>
-        <ColoredCell
-            :colorScheme="riskiestAerosolGenerationActivityScheme"
-            :maxVal=1
-            :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
-            :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
-            :style="inlineCellCSS"
-        />
-      </td>
-    </tr>
-
-    <tr v-if='show'>
+    title='Infector Activity'
+    :value='aerosolActivityToFactor(riskiestPotentialInfector["aerosolGenerationActivity"])'
+    :text='riskiestPotentialInfector["aerosolGenerationActivity"]'
+    :colorScheme='riskiestAerosolGenerationActivityScheme'
+  >
       <td colspan='2'>
         <div class='explainer'>
           <p>
@@ -46,20 +33,21 @@
           </div>
         </div>
       </td>
-    </tr>
-
+  </DrillDownSection>
 </template>
 
 <script>
 import ColoredCell from './colored_cell.vue';
 import CircularButton from './circular_button.vue';
+import DrillDownSection from './drill_down_section.vue'
 import { infectorActivityTypes } from './misc'
 
 export default {
   name: 'InfectorActivity',
   components: {
     ColoredCell,
-    CircularButton
+    CircularButton,
+    DrillDownSection
   },
   data() {
     return {
