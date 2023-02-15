@@ -1,23 +1,13 @@
 <template>
 
-  <tr>
-    <td>
-      <div class='justify-content-center align-items-center row'>
-        <h3 class='bold'>Time to 99% Dilution</h3>
+  <DrillDownSection
 
-        <CircularButton text='?' @click='show = !show'/>
-      </div>
-    </td>
-    <td>
-      <ColoredCell
-        :colorScheme="removalScheme"
-        :maxVal=1
-        :value='durationMinutesToRemove(0.99)'
-        :style='headerCellCSS'
-      />
-    </td>
-  </tr>
-  <tr v-if='show'>
+    title='Time to 99% Dilution'
+    :value='durationMinutesToRemove(0.99)'
+    :text='text'
+    :colorScheme='removalScheme'
+  >
+  <tr>
     <td  colspan='2'>
       <div class='explainer'>
         <p>
@@ -37,12 +27,14 @@
       </div>
     </td>
   </tr>
+  </DrillDownSection>
 
 </template>
 
 <script>
 import CircularButton from './circular_button.vue'
 import ColoredCell from './colored_cell.vue'
+import DrillDownSection from './drill_down_section.vue'
 import { mapWritableState, mapState, mapActions } from 'pinia';
 import { useAnalyticsStore } from './stores/analytics_store'
 import { convertVolume } from './measurement_units.js';
@@ -63,7 +55,8 @@ export default {
   name: 'AchToDuration',
   components: {
     CircularButton,
-    ColoredCell
+    ColoredCell,
+    DrillDownSection
   },
   data() {
     return {
@@ -77,6 +70,17 @@ export default {
         'styleProps'
       ]
     ),
+    text() {
+      let val = this.durationMinutesToRemove(0.99)
+      let maybeRounded;
+
+      if (val > 1) {
+        maybeRounded = round(val, 0)
+      } else {
+        maybeRounded = val
+      }
+      return `${maybeRounded} min`
+    },
     headerCellCSS() {
       let def = {
         'display': 'block',

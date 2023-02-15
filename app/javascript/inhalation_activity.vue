@@ -1,28 +1,15 @@
 <template>
-
+  <DrillDownSection
+    title='Inhalation Activity'
+    :value='worstCaseInhalation["inhalationFactor"]'
+    :text='worstCaseInhalation["inhalationActivity"]'
+    :colorScheme='inhalationActivityScheme'
+  >
     <tr>
-      <td>
-        <div class='row justify-content-center align-items-center'>
-          <h3 class='bold'>Inhalation Activity</h3>
-          <CircularButton text='?' @click='show = !show'/>
-        </div>
-      </td>
-      <td>
-        <ColoredCell
-            :colorScheme="inhalationActivityScheme"
-            :maxVal=1
-            :value='worstCaseInhalation["inhalationFactor"]'
-            :text='worstCaseInhalation["inhalationActivity"]'
-            :style="inlineCellCSS"
-        />
-      </td>
-    </tr>
-
-    <tr v-if='show'>
       <td colspan='2'>
         <div class='explainer'>
           <p> The worst case inhalation activity was <span
-          class='bold'>{{worstCaseInhalation["inhalationActivity"]}}</span> , which
+          class='bold'>{{worstCaseInhalation["inhalationActivity"]}}</span>, which
           corresponds to a factor of <span
           class='bold'>{{worstCaseInhalation["inhalationFactor"]}}</span>. To better
           contextualize how good this is, let's look at the
@@ -53,18 +40,21 @@
         </div>
       </td>
     </tr>
+  </DrillDownSection>
 
 </template>
 
 <script>
 import ColoredCell from './colored_cell.vue';
 import CircularButton from './circular_button.vue';
+import DrillDownSection from './drill_down_section.vue'
 
 export default {
   name: 'InhalationActivity',
   components: {
     ColoredCell,
-    CircularButton
+    CircularButton,
+    DrillDownSection
   },
   data() {
     return {
