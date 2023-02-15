@@ -1,10 +1,8 @@
 <template>
-  <div class='row centered'>
-    <h3 class='bold'>Risk Equation</h3>
-    <CircularButton text='?' @click='show = !show'/>
-  </div>
-
-  <div v-if='show' class='explainer' id='section-risk-equation'>
+  <DrillDownSection
+    title='Risk Equation'
+    :showStat='false'
+  >
     <p>
     The probability of infection is proportional to the dose of contaminants
     (e.g. viruses) inhaled. That dose is a fraction of contaminants over the
@@ -126,15 +124,17 @@ average value of 63 quanta per hour</a>, specifically for the BA.2 variant. Some
       </tr>
     </table>
 
-  </div>
+  </DrillDownSection>
 </template>
 
 <script>
 import CircularButton from './circular_button.vue'
+import DrillDownSection from './drill_down_section.vue'
 export default {
-  name: '',
+  name: 'RiskEquation',
   components: {
-    CircularButton
+    CircularButton,
+    DrillDownSection
   },
   data() {
     return {
