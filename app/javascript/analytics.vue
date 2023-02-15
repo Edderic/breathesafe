@@ -9,6 +9,15 @@
         <h4 class='subsection'>on {{datetimeInWords}}</h4>
       </div>
 
+      <table>
+        <tr>
+          <th><CircularButton text='+'/></th> <td>Add Measurements</td>
+        </tr>
+        <tr>
+          <th><CircularButton text='✎'/></th> <td>Update</td>
+        </tr>
+      </table>
+
       <Controls
         :maskInstances='maskInstances'
         :airCleanerInstances='airCleanerInstances'
@@ -171,6 +180,7 @@
 // Have a VueX store that maintains state across components
 import axios from 'axios';
 import Behaviors from './behaviors.vue';
+import CircularButton from './circular_button.vue';
 import ColoredCell from './colored_cell.vue';
 import Controls from './controls.vue';
 import ComputationalDetails from './computational_details.vue';
@@ -251,6 +261,7 @@ export default {
     AchToDuration,
     Behaviors,
     CADR,
+    CircularButton,
     CleanAirDeliveryRateTable,
     ColoredCell,
     ComputationalDetails,
@@ -911,10 +922,6 @@ export default {
   }
 
   .padded {
-    padding: 1em;
-  }
-
-  th {
     padding: 1em;
   }
 

@@ -30,7 +30,5 @@ export default {
   }
 
   .round {
-    margin-left: 1em;
-    margin-right: 1em;
   }
 </style>
