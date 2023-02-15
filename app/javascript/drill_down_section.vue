@@ -4,7 +4,7 @@
 
         <div class='row align-items-center justify-content-center'>
           <h3 class='title'>{{title}}</h3>
-          <CircularButton text='?' @click='show = !show'/>
+          <CircularButton class='showHideButton' text='?' @click='show = !show'/>
         </div>
       </td>
 
@@ -86,6 +86,11 @@ export default {
 
   .title {
     max-width: 12em;
+    margin-left: 1em;
   }
 
+  .showHideButton {
+    margin-left: 1em;
+    margin-right: 1em;
+  }
 </style>
