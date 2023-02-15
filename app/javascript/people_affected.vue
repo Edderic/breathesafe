@@ -1,25 +1,12 @@
 <template>
+  <DrillDownSection
+
+    title='Average New Infections'
+    :value='roundOut(numSusceptibles * risk, 1)'
+    :text='roundOut(numSusceptibles * risk, 1)'
+    :colorScheme='averageInfectedPeopleInterpolationScheme'
+  >
     <tr>
-
-      <td class='bold'>
-
-        <div class='row align-items-center justify-content-center'>
-          <h3>Average New Infections</h3>
-          <CircularButton text='?' @click='show = !show'/>
-        </div>
-      </td>
-
-      <td class='second-td'>
-        <ColoredCell
-            :colorScheme="averageInfectedPeopleInterpolationScheme"
-            :maxVal=1
-            :value='roundOut(numSusceptibles * risk, 1)'
-            :style="styleProps"
-        />
-      </td>
-    </tr>
-
-    <tr v-if='show'>
       <td colspan=2>
         <div class='explainer'>
           <span>On average, assuming {{ numInfectors }} COVID infector(s) in
@@ -46,13 +33,15 @@
           aim for a combination of interventions to keep the average new infections below 1</span>.
           </p>
         </div>
-    </td>
-  </tr>
+      </td>
+    </tr>
+  </DrillDownSection>
 </template>
 
 <script>
 import ColoredCell from './colored_cell.vue'
 import CircularButton from './circular_button.vue'
+import DrillDownSection from './drill_down_section.vue'
 import PersonIcon from './person_icon.vue'
 import { round } from './misc.js'
 import { mapWritableState, mapState, mapActions } from 'pinia';
@@ -68,6 +57,7 @@ export default {
   components: {
     CircularButton,
     ColoredCell,
+    DrillDownSection,
     PersonIcon
   },
   computed: {
