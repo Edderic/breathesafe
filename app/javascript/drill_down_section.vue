@@ -1,5 +1,15 @@
 <template>
-    <tr>
+
+    <div class='row align-items-center justify-content-center' v-if='!showStat'>
+      <h2 class='title'>{{title}}</h2>
+      <CircularButton class='showHideButton' text='?' @click='show = !show'/>
+    </div>
+
+    <div class='explainer' v-if='!showStat && show'>
+      <slot></slot>
+    </div>
+
+    <tr v-if='showStat'>
       <td class='bold'>
 
         <div class='row align-items-center justify-content-center'>
@@ -8,7 +18,7 @@
         </div>
       </td>
 
-      <td class='second-td'>
+      <td class='second-td' v-if='showStat'>
         <ColoredCell
             :colorScheme="colorScheme"
             :maxVal=1
@@ -18,7 +28,7 @@
         />
       </td>
     </tr>
-    <tr v-if='show'>
+    <tr v-if='show && showStat'>
       <td colspan='2'>
         <div class='explainer'>
           <slot></slot>
@@ -45,8 +55,18 @@ export default {
   props: {
     title: String,
     value: Number,
-    text: Number,
-    colorScheme: Object
+    text: {
+      default: '',
+      type: String
+    },
+    colorScheme: {
+      default: {},
+      type: Object
+    },
+    showStat: {
+      default: true,
+      type: Boolean
+    }
   },
   computed: {
     styleProps() {

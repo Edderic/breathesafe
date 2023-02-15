@@ -1,13 +1,8 @@
 <template>
-  <div class='item-span-wide' id='section-behaviors'>
-    <br id='risk-assessment-summary'>
-    <div class='row centered'>
-      <h2 class='centered'>Behaviors</h2>
-      <CircularButton text='?' @click='show = !show'/>
-    </div>
-  </div>
-
-  <div class='explainer' id='section-behaviors' v-if='show'>
+  <DrillDownSection
+    title='Behaviors'
+    :showStat='false'
+  >
     <p>
       Activities that people partake in can affect the probability of
       transmission of COVID and other respiratory viruses. Activities
@@ -26,16 +21,18 @@
       with susceptibles being at rest, could decrease the risk of
       airborne transmission.
     </p>
-  </div>
+  </DrillDownSection>
 </template>
 
 <script>
 import CircularButton from './circular_button.vue'
+import DrillDownSection from './drill_down_section.vue'
 
 export default {
   name: '',
   components: {
     CircularButton,
+    DrillDownSection
   },
   data() {
     return { show: false }
@@ -67,5 +64,15 @@ export default {
   .explainer {
     max-width: 25em;
     margin: 0 auto;
+  }
+
+  .title {
+    max-width: 12em;
+    margin-left: 1em;
+  }
+
+  .showHideButton {
+    margin-left: 1em;
+    margin-right: 1em;
   }
 </style>
