@@ -1,25 +1,13 @@
 
 <template>
+  <DrillDownSection
+
+    title='Non-Infectious Air Delivery Rate'
+    :value='totalFlowRateRounded'
+    :text='totalFlowRateText'
+    :colorScheme='colorInterpSchemeRoomVol'
+  >
   <tr>
-    <td class='justify-content-center align-items-center'>
-      <h3 class='bold'>Clean Air Delivery Rate</h3>
-
-      <div class='row'>
-        <CircularButton text='?' @click='show = !show'/>
-
-      </div>
-    </td>
-    <td>
-      <ColoredCell
-        :colorScheme="colorInterpSchemeRoomVol"
-        :maxVal=1
-        :value='totalFlowRateRounded'
-        :text='totalFlowRateText'
-        :style="styleProps"
-      />
-    </td>
-  </tr>
-  <tr v-if='show'>
     <td colspan='2'>
       <table class='explainer'>
         <tr>
@@ -104,11 +92,13 @@
       </table>
     </td>
   </tr>
+  </DrillDownSection>
 </template>
 
 <script>
 import CircularButton from './circular_button.vue'
 import ColoredCell from './colored_cell.vue'
+import DrillDownSection from './drill_down_section.vue'
 import { useAnalyticsStore } from './stores/analytics_store';
 import { mapWritableState, mapState, mapActions } from 'pinia';
 import { convertVolume } from './measurement_units.js';
@@ -129,6 +119,7 @@ export default {
   components: {
     ColoredCell,
     CircularButton,
+    DrillDownSection
   },
   data() {
     return {
