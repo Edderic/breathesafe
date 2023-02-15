@@ -1,22 +1,10 @@
 <template>
-  <tr id='section-total-ach'>
-    <td>
-      <div class='row justify-content-center align-items-center'>
-        <h3 class='bold'>Total ACH</h3>
-        <CircularButton text='?' @click='show = !show'/>
-      </div>
-    </td>
-    <td>
-      <ColoredCell
-        :colorScheme="colorInterpolationSchemeTotalAch"
-        :maxVal=1
-        :value='totalAchRounded'
-        :style='cellCSSMerged'
-      />
-    </td>
-  </tr>
-
-  <tr v-if='show'>
+  <DrillDownSection
+    title='Total ACH'
+    :value='totalAchRounded'
+    :colorScheme='colorInterpolationSchemeTotalAch'
+  >
+  <tr >
     <td colspan='2'>
       <table class='explainer'>
         <tr>
@@ -91,7 +79,7 @@
     </td>
   </tr>
 
-  <tr v-if='show'>
+  <tr>
     <td colspan='2'>
       <p class='explainer'>
         Air Changes per Hour (ACH) tells us how much clean air is generated
@@ -100,9 +88,10 @@
         ACH for a room can be computed by summing up the ACH of different types (e.g.
         ventilation, filtration, upper-room germicidal UV).
       </p>
+      <p class='explainer'>ACH affects how fast the steady state concentration of contaminants is achieved. See <span class='bold'>Time to Reach Steady State</span>.</p>
     </td>
   </tr>
-
+  </DrillDownSection>
 </template>
 
 
@@ -120,12 +109,14 @@ import {
 
 import CircularButton from './circular_button.vue'
 import ColoredCell from './colored_cell.vue'
+import DrillDownSection from './drill_down_section.vue'
 
 export default {
   name: 'TotalACH',
   components: {
     CircularButton,
-    ColoredCell
+    ColoredCell,
+    DrillDownSection
   },
   data() {
     return {
