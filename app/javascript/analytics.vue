@@ -11,9 +11,14 @@
 
       <table>
         <tr>
-          <th><CircularButton text='+'/></th> <td>Add Measurements</td>
+          <th>
+            <router-link :to='{ name: "AddMeasurements", query: {copy: this.$route.params.id} }'>
+              <CircularButton text='➕'/>
+            </router-link>
+          </th>
+          <td>Add New Measurements</td>
         </tr>
-        <tr>
+        <tr v-if='false'>
           <th><CircularButton text='✎'/></th> <td>Update</td>
         </tr>
       </table>
