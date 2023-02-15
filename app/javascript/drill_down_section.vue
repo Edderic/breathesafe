@@ -56,7 +56,6 @@ export default {
     title: String,
     value: Number,
     text: {
-      default: '',
       type: String
     },
     colorScheme: {
