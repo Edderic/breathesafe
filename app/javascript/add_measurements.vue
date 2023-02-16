@@ -3,7 +3,7 @@
     <h2>Add Measurements</h2>
     <div class='container row centered menu'>
       <Pin />
-      <Button id='whereabouts' :class='{ "tab-item": true }' shadow='false' :selected='display == "whereabouts"' @click='setDisplay("whereabouts")'>
+      <Button id='whereabouts' :class='{ "tab-item": true }' shadow='false' :selected='!display || $route.query.section == "whereabouts"' @click='setDisplay("whereabouts")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <circle cx="40" cy="25" r="20" fill="white"/>
@@ -13,7 +13,7 @@
           <circle cx="40" cy="25" r="10" fill="rgb(150, 29, 2)"/>
         </svg>
       </Button>
-      <Button id='room_dimensions' :class='{ "tab-item": true, }' :selected='display == "room_dimensions"' @click='setDisplay("room_dimensions")'>
+      <Button id='room_dimensions' :class='{ "tab-item": true, }' :selected='$route.query.section == "room_dimensions"' @click='setDisplay("room_dimensions")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="M 31 20 l -5 13 h 25 l 3 -13 z m -5 13 v 20 h 25 v -20 m 0 20 l 3 -13.5 l 0 -19" fill="transparent" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
@@ -23,7 +23,7 @@
 
         </svg>
       </Button>
-      <Button id='ventilation' :class='{ "tab-item": true }' :selected='display == "ventilation"' @click='setDisplay("ventilation")'>
+      <Button id='ventilation' :class='{ "tab-item": true }' :selected='$route.query.section == "ventilation"' @click='setDisplay("ventilation")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="m 20 30 h 40 l -20 -20 z" stroke='black' fill='#ccc'/>
@@ -54,7 +54,7 @@
         </svg>
       </Button>
 
-      <Button id='pac' :class='{ "tab-item": true, }' :selected='display == "pac"' @click='setDisplay("pac")'>
+      <Button id='pac' :class='{ "tab-item": true, }' :selected='$route.query.section == "pac"' @click='setDisplay("pac")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="M 30 20 l -5 17 h 25 l 3 -17 z m -5 17 v 23 h 25 v -23 m 0 23 l 3 -17.5 l 0 -19" fill="white" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
@@ -87,7 +87,7 @@
         </svg>
       </Button>
 
-      <Button id='behaviors' :class='{ "tab-item": true, }' :selected='display == "behaviors"' @click='setDisplay("behaviors")'>
+      <Button id='behaviors' :class='{ "tab-item": true, }' :selected='$route.query.section == "behaviors"' @click='setDisplay("behaviors")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="m 5 40 c 0 -10 10 -20 15 -20 c 5 0 10 0 6 10 c 4 4 4 4 4 12 l -5 0 l 3 4 l -8 1 l 8 7 c -2 10 -16 6 -16 5 z" stroke='black' fill='#eee'/>
@@ -128,7 +128,7 @@
       <br>
     </div>
 
-    <div class='whereabouts chunk' v-if='display == "whereabouts"'>
+    <div class='whereabouts chunk' v-if='$route.query.section == "whereabouts" || this.$route.query.section == ""'>
       <div class='container'>
         <label class='centered'><span class='bold'>Make this information private</span>
           <CircularButton text='?' @click='toggleInfo("privacyInfo")'/>
@@ -177,7 +177,7 @@
       </div>
     </div>
 
-    <div class='room_dimensions chunk page' v-if='display == "room_dimensions"'>
+    <div class='room_dimensions chunk page' v-if='$route.query.section == "whereabouts"'>
       <div class='container'>
         <div class='menu row'>
           <Button :class="{ selected: !this.useOwnHeight, tab: true }" shadow='true' @click='setUseOwnHeight(false)' text='Input Directly'/>
@@ -295,7 +295,7 @@
       </div>
 
 
-      <div class='container chunk' v-if='display == "pac"'>
+      <div class='container chunk' v-if='$route.query.section == "pac"'>
         <div class='centered'>
           <label class='subsection'>Portable Air Cleaning</label>
           <CircularButton text='+' @click='addPortableAirCleaner'/>
@@ -328,7 +328,7 @@
         </div>
       </div>
 
-      <div class='container chunk' v-if='display == "ventilation"'>
+      <div class='container chunk' v-if='$route.query.section == "ventilation"'>
         <div class='container'>
           <label><span class='bold'>CO2 Measurement Device</span></label>
 
@@ -546,7 +546,7 @@
         </div>
       </div>
 
-      <div class='container chunk' v-if='display == "behaviors"'>
+      <div class='container chunk' v-if='$route.query.section == "behaviors"'>
         <div class='centered'>
           <label class='subsection'>Behavior</label>
           <CircularButton text='?' @click='toggleInfo("behaviorInfo")'/>
