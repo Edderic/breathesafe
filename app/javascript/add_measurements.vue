@@ -1172,7 +1172,9 @@
       },
       cancel() {
         // TODO: clear out data for Add New Event
-        this.$router.go(-1)
+        this.$router.push({
+          'name': 'Venues'
+        })
       },
       parseOccupancyData(event) {
         this.occupancy.unparsedOccupancyData = event.target.value
