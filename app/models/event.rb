@@ -46,11 +46,11 @@ class Event < ApplicationRecord
     if current_user && current_user.admin?
       ""
     elsif current_user && !current_user.admin?
-      "where events.author_id = #{current_user.id} or events.private = 'public'"
+      "where events.author_id = #{current_user.id} or (events.private = 'public' and events.status = 'complete')"
     else
       # If not logged in
       # Show only those that have been authored by an admin and public
-      "where events.private = 'public'"
+      "where events.private = 'public' and events.status = 'complete'"
     end
   end
 end
