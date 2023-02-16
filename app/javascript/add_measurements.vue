@@ -904,6 +904,18 @@
         )
 
         this.$watch(
+          () => this.$route.params,
+          (toParams, fromParams) => {
+            if (toParams['action'] && this.$route.name == 'AddMeasurements') {
+              if (!this.currentUser) {
+                this.signIn()
+              } else {
+                this.loadStuff()
+              }
+            }
+          }
+        )
+        this.$watch(
           () => this.$route.query,
           (toQuery, fromQuery) => {
             if (toQuery['section'] && this.$route.name == 'AddMeasurements') {
@@ -961,6 +973,92 @@
       ...mapActions(useEventStore, ['addPortableAirCleaner']),
       ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
 
+      debugVentilationCalc() {
+        let activityGroups = [
+          {id: "360c52db-e0f6-4c71-b790-8e3d7b148ef3",
+            ageGroup:"6 to <11",
+            maskType:"",
+            numberOfPeople:"10",
+            aerosolGenerationActivity:"Light exercise - Oral breathing",
+            carbonDioxideGenerationActivity:"Dancing—aerobic, general"},
+          // {"id":"614aeaca-2caf-4b30-8743-e82115c1f14b",
+            // "ageGroup":"60 to <70",
+            // "numberOfPeople":"500",
+            // "aerosolGenerationActivity":"Resting – Oral breathing",
+            // "carbonDioxideGenerationActivity":"Lying or sitting quietly"}
+        ]
+        // let normalizedCO2Readings = [
+            // 497,
+            // 457,
+            // 472,
+            // 476,
+            // 471,
+            // 488,
+            // 500,
+            // 487,
+            // 490,
+            // 480,
+            // 525,
+            // 504,
+            // 508,
+            // 525,
+            // 547,
+            // 523,
+            // 552,
+            // 554,
+            // 568,
+            // 559,
+            // 573,
+            // 561,
+            // 572,
+            // 577,
+            // 588,
+            // 598,
+            // 594,
+            // 585,
+            // 581,
+            // 594,
+            // 578,
+            // 597,
+            // 591,
+            // 594,
+            // 579,
+            // 592,
+            // 592,
+            // 600,
+            // 577,
+            // 582,
+            // 584,
+            // 581,
+            // 614,
+            // 588,
+            // 617,
+            // 596,
+            // 604,
+            // 602,
+            // 601,
+            // 615,
+            // 612,
+            // 611,
+            // 614,
+            // 609,
+            // 599,
+            // 605,
+            // 623,
+            // 608,
+            // 599,
+            // 619,
+            // 602,
+        // ]
+
+        // let ventilationNIDR = computeVentilationNIDR(
+          // activityGroups,
+          // normalizedCO2Readings,
+          // this.ventilationCO2AmbientPPM,
+          // 228.99,
+        // )
+        // debugger
+      },
       signIn() {
         let query = JSON.parse(JSON.stringify(this.$route.query))
 
@@ -991,6 +1089,14 @@
         this.activityGroups = event.activityGroups
         this.roomUsableVolumeCubicMeters = event.roomUsableVolumeCubicMeters
         this.roomUsableVolumeFactor = event.roomUsableVolumeFactor
+      },
+
+      async copyEventWithId(id) {
+        this.copyEventWithId()
+        let event = await this.findOrLoad(id)
+
+        this.id = id
+        this.co2Readings = event.co2Readings
       },
 
       useLastXMinutes(event) {
@@ -1062,8 +1168,12 @@
         this[info] = !this[info]
       },
       setDisplay(string) {
-        this.$router.push({ 'name': 'AddMeasurements', query: {'section': string}})
-        this.display = string
+        let name = 'AddMeasurements'
+        if (this.$route.params['id']) {
+          name = 'UpdateOrCopyMeasurements'
+        }
+
+        this.$router.push({ 'name': name, query: {'section': string}, params: JSON.parse(JSON.stringify(this.$route.params))})
       },
       updateMaxOccupancy(args) {
         this.maximumOccupancy = parseInt(args.value)
@@ -1177,13 +1287,26 @@
           this.setCarbonDioxideMonitor({ target: { value: this.carbonDioxideMonitors[0].name }})
           this.ventilationCO2MeasurementDeviceName = this.carbonDioxideMonitors[0].name
 
-          if (this.$route.query['section'] && this.$route.name == 'AddMeasurements') {
-            this.setDisplay(this.$route.query['section'])
+          // debugger
+          // if (!!this.$route.query['section'] && this.$route.name == 'AddMeasurements' || this.$route.name == 'UpdateOrCopyMeasurements') {
+            // this.setDisplay(this.$route.query['section'])
+          // }
+
+
+          if (this.$route.params['action'] == 'copy' && this.$route.name == 'UpdateOrCopyMeasurements') {
+            this.copyEvent(this.$route.params['id'])
+            this.id = undefined
+            // if the draft exists, clicking on the draft button should
+            // maintain the draft
+
+            // if the draft doesn't exist, clicking on the draft button should
+            // create a new draft
+          } else if (this.$route.params['action'] == 'update' && this.$route.name == 'UpdateOrCopyMeasurements') {
+            this.copyEvent(this.$route.params['id'])
+            this.id = this.$route.params['id']
           }
 
-          if (this.$route.query['copy'] && this.$route.name == 'AddMeasurements') {
-            this.copyEvent(this.$route.query['copy'])
-          } else {
+          else {
             this.roomLengthMeters = this.strideLengthForLength * this.strideLengthMeters
             this.roomWidthMeters = this.strideLengthForWidth * this.strideLengthMeters
             this.roomHeightMeters = this.personHeightToRoomHeight * this.heightMeters
@@ -1299,7 +1422,6 @@
           )
         }
 
-        this.showMessages()
       },
 
       checkRoomName() {
@@ -1321,19 +1443,29 @@
         if (this.messages.length > 0) {
           let element_to_scroll_to = document.getElementById('message');
           element_to_scroll_to.scrollIntoView();
-          return
+          return true
         }
+
+        return false
+
       },
 
       async save(status) {
         if (status == 'complete') {
           this.checkForErrors()
+          let hasErrors = this.showMessages()
+
+          if (hasErrors) {
+            return
+          }
         } else {
           // draft
           if (!this.roomName) {
+            this.messages = []
             this.checkRoomName()
-            this.showMessages()
-            return
+            if (this.showMessages()) {
+              return
+            }
           }
         }
 
@@ -1401,12 +1533,30 @@
           }
         }
 
+        let newRoute = {
+          name: '/events',
+          action: 'post'
+        }
+
+        if (this.id) {
+          // update
+          toSave['id'] = this.id
+
+          // change the location to something else
+          // create an update endpoint
+
+          newRoute = {
+            name: `/events/${this.id}`,
+            action: 'put'
+          }
+        }
+
         setupCSRF()
 
         let successful = false
         let newEvent = null
 
-        await axios.post('/events', toSave)
+        await axios[newRoute.action](newRoute.name, toSave)
           .then(response => {
             console.log(response)
             if (response.status == 201 || response.status == 200) {
@@ -1415,6 +1565,12 @@
               newEvent = response.data.event
               this.addEvent(newEvent)
               successful = true
+
+              if (successful && status == 'complete') {
+                this.$router.push({ name: 'Analytics', params: { 'id': newEvent.id }})
+              } else {
+                this.$router.push({ name: 'Venues'})
+              }
             }
 
             // whatever you want
@@ -1425,11 +1581,6 @@
             // whatever you want
           })
 
-        if (successful && status == 'complete') {
-          this.$router.push({ name: 'Analytics', params: { 'id': newEvent.id }})
-        } else {
-          this.$router.push({ name: 'Venues'})
-        }
       },
       generateUUID() {
           // https://stackoverflow.com/questions/105034/how-to-create-guid-uuid

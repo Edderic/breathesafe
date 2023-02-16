@@ -18,6 +18,7 @@ Rails.application.routes.draw do
 
   post 'events', to: 'events#create'
   post 'events/:id/approve', to: 'events#approve'
+  put 'events/:id', to: 'events#update'
   get 'events', to: 'events#index'
   get 'profiles', to: 'users/profiles#index'
 

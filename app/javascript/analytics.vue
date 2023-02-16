@@ -9,19 +9,18 @@
         <h4 class='subsection'>on {{datetimeInWords}}</h4>
       </div>
 
-      <table>
-        <tr>
-          <th>
-            <router-link :to='{ name: "AddMeasurements", query: {copy: this.$route.params.id} }'>
-              <CircularButton text='➕'/>
-            </router-link>
-          </th>
-          <td>Add New Measurements</td>
-        </tr>
-        <tr v-if='false'>
-          <th><CircularButton text='✎'/></th> <td>Update</td>
-        </tr>
-      </table>
+      <div class='centered col'>
+        <div>
+          <router-link :to='{ name: "UpdateOrCopyMeasurements", params: {action: "update", id: this.$route.params.id} }'>
+            ✎ Update
+          </router-link>
+        </div>
+        <div>
+          <router-link :to='{ name: "UpdateOrCopyMeasurements", params: {action: "copy", id: this.$route.params.id} }'>
+            ➕ Add New Measurements
+          </router-link>
+        </div>
+      </div>
 
       <Controls
         :maskInstances='maskInstances'

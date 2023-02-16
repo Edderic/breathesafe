@@ -19,6 +19,7 @@
           :title='roundOut(this.measurements.risk, 6)'
         />
       </router-link >
+      <router-link :to='{name: "AddMeasurements", params: {id: this.measurements.id, action: "update"}}' v-if='measurements.status == "draft"'>
         <ColoredCell
           v-if='measurements.status == "draft"'
           :colorScheme="colorInterpolationScheme"
@@ -28,6 +29,7 @@
           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'background-color': 'grey' }"
           title='Draft'
         />
+      </router-link>
     </td>
     <td v-if='permittedGeolocation'>
       {{ measurements.distance }}

@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/analytics/:id', component: Analytics, name: 'Analytics' },
     { path: '/signin', component: SignIn, name: 'SignIn' },
     { path: '/events/new', component: AddMeasurements, name: 'AddMeasurements' },
+    { path: '/events/:id/:action', component: AddMeasurements, name: 'UpdateOrCopyMeasurements' },
     { path: '/profile', component: Profile, name: 'Profile' },
     { path: '/register', component: Registration, name: 'Registration' },
     { path: '/faqs', component: FAQs, name: 'FAQs' },
