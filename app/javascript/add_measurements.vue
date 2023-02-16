@@ -601,8 +601,9 @@
         </div>
 
         <div class='container space-around row final'>
-          <Button class='normal-padded ' @click='cancel' :shadow='true' text='Cancel' major='true'/>
-          <Button class='normal-padded button' @click='save' :shadow='true' text='Save' major='true'/>
+          <Button  class='normal-padded' @click='cancel' :shadow='true' text='Cancel' major='true'/>
+          <Button style='background-color: green;' class='normal-padded' @click='save("draft")' :shadow='true' text='Draft' major='true'/>
+          <Button style='background-color: green;' class='normal-padded button' @click='save("complete")' :shadow='true' text='Save' major='true'/>
         </div>
       </div>
     </div>
@@ -724,6 +725,13 @@
         }
 
         return { points: collection, color: 'red', legend: 'ascending' }
+      },
+      co2ReadingsToSave() {
+        if (this.useUploadFile) {
+          return this.filterCO2Readings
+        } else {
+          return this.co2Readings
+        }
       },
       descendingThenSteady() {
         let curve = genConcCurve({
@@ -1267,8 +1275,7 @@
         }
 
       },
-      async save() {
-
+      checkForErrors() {
         this.messages = []
 
         // if (!this.placeData || !this.placeData.place_id) {
@@ -1314,19 +1321,7 @@
             }
           )
         }
-        if (!this.roomName) {
-          this.messages.push(
-            {
-              str: "Error: Room name cannot be blank.\n ",
-              to: {
-                name: 'AddMeasurements',
-                query: {
-                  'section': 'whereabouts'
-                }
-              }
-            }
-          )
-        }
+        this.checkRoomName()
 
         if (!this.startDatetime) {
           this.messages.push({str: "Error: Start time cannot be blank.\n "})
@@ -1374,16 +1369,7 @@
           )
         }
 
-
-        let co2ReadingsToSave = []
-
-        if (this.useUploadFile) {
-          co2ReadingsToSave = this.filterCO2Readings
-        } else {
-          co2ReadingsToSave = this.co2Readings
-        }
-
-        if (co2ReadingsToSave.length <= 10) {
+        if (this.co2ReadingsToSave.length <= 10) {
           this.messages.push(
             {
               str: "Error: Please add at least 10 carbon dioxide readings, either one-by-one or by bulk, where each measurement is spaced 1-minute apart.",
@@ -1397,10 +1383,42 @@
           )
         }
 
+        this.showMessages()
+      },
+
+      checkRoomName() {
+        if (!this.roomName) {
+          this.messages.push(
+            {
+              str: "Error: Room name cannot be blank.\n ",
+              to: {
+                name: 'AddMeasurements',
+                query: {
+                  'section': 'whereabouts'
+                }
+              }
+            }
+          )
+        }
+      },
+      showMessages() {
         if (this.messages.length > 0) {
           let element_to_scroll_to = document.getElementById('message');
           element_to_scroll_to.scrollIntoView();
           return
+        }
+      },
+
+      async save(status) {
+        if (status == 'complete') {
+          this.checkForErrors()
+        } else {
+          // draft
+          if (!this.roomName) {
+            this.checkRoomName()
+            this.showMessages()
+            return
+          }
         }
 
         this.roomUsableVolumeCubicMeters = parseFloat(this.roomWidthMeters)
@@ -1409,7 +1427,7 @@
           * parseFloat(this.roomUsableVolumeFactor)
 
         let normalizedCO2Readings =  []
-        for (let co2Reading of co2ReadingsToSave) {
+        for (let co2Reading of this.co2ReadingsToSave) {
           normalizedCO2Readings.push(co2Reading.value)
         }
 
@@ -1446,7 +1464,7 @@
               'ventilation_co2_steady_state_ppm': this.ventilationCO2SteadyStatePPM,
               'ventilation_notes': this.ventilationNotes,
               'start_datetime': this.startDatetime,
-              'co2_readings': co2ReadingsToSave,
+              'co2_readings': this.co2ReadingsToSave,
               'initial_co2': this.initialCO2,
               'private': this.private,
               'place_data': this.placeData,
@@ -1462,7 +1480,8 @@
               'room_length_meters': this.roomLengthMeters,
               'room_usable_volume_cubic_meters': this.roomUsableVolumeCubicMeters,
               'room_name': this.roomName,
-              'room_usable_volume_factor': this.roomUsableVolumeFactor
+              'room_usable_volume_factor': this.roomUsableVolumeFactor,
+              'status': status
           }
         }
 
@@ -1490,13 +1509,10 @@
             // whatever you want
           })
 
-        if (successful) {
-          // if admin and private - don't alert
-          // if admin and public - don't alert
-          // if not admin and public - alert
-          // if not admin and private - don't alert
-
+        if (successful && status == 'complete') {
           this.$router.push({ name: 'Analytics', params: { 'id': newEvent.id }})
+        } else {
+          this.$router.push({ name: 'Venues'})
         }
       },
       generateUUID() {
