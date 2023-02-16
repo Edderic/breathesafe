@@ -45,6 +45,28 @@ class EventsController < ApplicationController
     end
   end
 
+  def update
+    status = :unprocessable_entity
+
+    if !current_user || (current_user.id != event_data[:author_id] && !current_user.admin?)
+      status = :unprocessable_entity
+    else
+      event = Event.find(params[:id])
+      if event.update(event_data)
+        status = 200
+      end
+    end
+
+    respond_to do |format|
+      format.json do
+        render json: {
+          event: event
+        }.to_json, status: status
+      end
+    end
+  end
+
+
   def create
     if !current_user
       status = :unprocessable_entity
@@ -93,7 +115,8 @@ class EventsController < ApplicationController
       :status,
       co2_readings: [
         :value,
-        :key
+        :key,
+        :identifier
       ],
       activity_groups: [
         :id,
