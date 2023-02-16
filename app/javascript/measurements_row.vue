@@ -8,7 +8,7 @@
     <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.roomName}}</td>
     <td @click="centerMapTo(this.measurements.id)" >{{this.measurements.placeData.formattedAddress}}</td>
     <td class='containing-cell score' @click="showAnalysis(this.measurements.id)">
-      <router-link :to='link'>
+      <router-link :to='link' v-if='measurements.status == "complete"'>
         <ColoredCell
           class='risk-score'
           :colorScheme="colorInterpolationScheme"
@@ -18,7 +18,16 @@
           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
           :title='roundOut(this.measurements.risk, 6)'
         />
-      </router-link>
+      </router-link >
+        <ColoredCell
+          v-if='measurements.status == "draft"'
+          :colorScheme="colorInterpolationScheme"
+          :maxVal=1
+          :value=1
+          text='Draft'
+          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
+          title='Draft'
+        />
     </td>
     <td v-if='permittedGeolocation'>
       {{ measurements.distance }}
@@ -125,6 +134,8 @@ export default {
   data() {
     return {
     }
+  },
+  created() {
   },
   props: {
     measurements: Object,

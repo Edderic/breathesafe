@@ -85,6 +85,7 @@ function probability_getting_infected_at_least_once(args) {
 
 export class Intervention {
   constructor(event, environmentalInterventions, mask1, mask2, numInfectors, numSusceptibles) {
+    this.status = event.status
     this.numInfectors = numInfectors
     this.numSusceptibles = numSusceptibles
     this.environmentalInterventions = environmentalInterventions

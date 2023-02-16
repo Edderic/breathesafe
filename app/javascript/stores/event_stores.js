@@ -146,9 +146,9 @@ export const useEventStores = defineStore('events', {
           1
         )
 
-
-        event['risk'] = intervention.computeRisk(this.durationHours)
-
+        if (intervention.status == 'complete') {
+          event['risk'] = intervention.computeRisk(this.durationHours)
+        }
       }
     },
   }

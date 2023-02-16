@@ -152,6 +152,7 @@ export const useShowMeasurementSetStore = defineStore('showMeasurementSet', {
       this.roomWidthMeters = measurementSet.roomWidthMeters
       this.roomHeightMeters = measurementSet.roomHeightMeters
       this.initialCo2 = measurementSet.initialCo2
+      this.status = measurementSet.status
       this.co2Readings = measurementSet.co2Readings
       this.displayMeasurementsTailoredToUser()
       this.ventilationNotes = measurementSet.ventilationNotes
