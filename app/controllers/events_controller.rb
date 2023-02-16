@@ -90,6 +90,7 @@ class EventsController < ApplicationController
       :private,
       :maximum_occupancy,
       :initial_co2,
+      :status,
       co2_readings: [
         :value,
         :key
