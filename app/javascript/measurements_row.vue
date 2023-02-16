@@ -25,7 +25,7 @@
           :maxVal=1
           :value=1
           text='Draft'
-          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black' }"
+          :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black', 'background-color': 'grey' }"
           title='Draft'
         />
     </td>
