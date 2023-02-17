@@ -129,10 +129,17 @@ export default {
         let attemptName = this.$route.query['attempt-name']
         delete query['attempt-name']
 
-        this.$router.push({
+        let obj = {
           name: attemptName,
           query: query
-        });
+        }
+
+        // TODO: would be nice if we could pass in parameters from query string
+        // For example pass information from query string so that if someone
+        // was logged in, but is no longer logged in, and they click on a
+        // button that requires being signed in, they can be redirected into
+        // the page of interest after successful sign in.
+        this.$router.push(obj);
       }
       else {
         this.$router.push({

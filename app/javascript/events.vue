@@ -159,25 +159,27 @@ export default {
     this.$watch(
       () => this.$route.query,
       (toQuery, previousQuery) => {
-        if (!toQuery['mask']) {
-          let selectedMask= this.findMask(
-            'No mask',
-            1,
-          )
-          this.selectedMask = selectedMask
-        } else if (toQuery['mask'] != previousQuery['mask'] || toQuery['numWays'] != previousQuery['numWays']) {
-          this.selectedMask = this.findMask(
-            toQuery['mask'],
-            toQuery['numWays'],
-          )
-        }
+        if (this.$route.name == 'Venues') {
+          if (!toQuery['mask']) {
+            let selectedMask= this.findMask(
+              'No mask',
+              1,
+            )
+            this.selectedMask = selectedMask
+          } else if (toQuery['mask'] != previousQuery['mask'] || toQuery['numWays'] != previousQuery['numWays']) {
+            this.selectedMask = this.findMask(
+              toQuery['mask'],
+              toQuery['numWays'],
+            )
+          }
 
-        if (toQuery['durationHours']) {
-          this.durationHours = parseInt(toQuery['durationHours'])
-        }
+          if (toQuery['durationHours']) {
+            this.durationHours = parseInt(toQuery['durationHours'])
+          }
 
-        this.computeRiskAll(this.selectedMask)
-        this.sortByParams()
+          this.computeRiskAll(this.selectedMask)
+          this.sortByParams()
+        }
         // react to route changes...
       }
     )

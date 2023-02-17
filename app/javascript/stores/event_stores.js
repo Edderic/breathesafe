@@ -57,7 +57,6 @@ export const useEventStores = defineStore('events', {
       const mainStore = useMainStore()
       const profileStore = useProfileStore()
 
-      await mainStore.getCurrentUser();
       await profileStore.loadProfile()
       let success = true
       await axios.get('/events')

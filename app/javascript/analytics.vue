@@ -11,12 +11,12 @@
 
       <div class='centered col'>
         <div>
-          <router-link :to='{ name: "UpdateOrCopyMeasurements", params: {action: "update", id: this.$route.params.id} }'>
+          <router-link :to='{ name: "UpdateOrCopyMeasurements", params: {action: "update", id: this.$route.params.id} }' v-if='currentUser'>
             ✎ Update
           </router-link>
         </div>
         <div>
-          <router-link :to='{ name: "UpdateOrCopyMeasurements", params: {action: "copy", id: this.$route.params.id} }'>
+          <router-link :to='{ name: "UpdateOrCopyMeasurements", params: {action: "copy", id: this.$route.params.id} }' v-if='currentUser'>
             ➕ Add New Measurements
           </router-link>
         </div>

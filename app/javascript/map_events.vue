@@ -63,7 +63,10 @@
                     <router-link :to='{ name: "Analytics", params: {id: m.id}}' @click="showAnalysis(m.id)">
                       ☣️  Risk Analysis
                     </router-link>
-                    <router-link :to='{ name: "AddMeasurements", query: {copy: m.id} }'>
+                    <router-link :to='{ name: "UpdateOrCopyMeasurements", params: {action: "update", id: m.id} }' v-if='currentUser && m.authorId == currentUser.id'>
+                      ✏️  Update
+                    </router-link>
+                    <router-link :to='{ name: "UpdateOrCopyMeasurements", params: {action: "copy", id: m.id} }' v-if='showAddNewMeasurements'>
                       ➕ Add New Measurements
                     </router-link>
                   </div>
@@ -109,6 +112,7 @@ export default {
   },
   computed: {
     ...mapStores(useMainStore),
+    ...mapState(useMainStore, ['currentUser']),
     ...mapState(useProfileStore, ["measurementUnits", 'systemOfMeasurement']),
     ...mapState(useMainStore, ["centerMapTo", 'openedMarkerId']),
     ...mapState(useEventStores, ['showGradeInfo', "selectedMask"]),
@@ -140,6 +144,9 @@ export default {
     },
     riskColorScheme() {
       return riskColorInterpolationScheme
+    },
+    showAddNewMeasurements() {
+      return true
     },
   },
   async created() {

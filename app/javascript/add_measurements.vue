@@ -3,7 +3,7 @@
     <h2>Add Measurements</h2>
     <div class='container row centered menu'>
       <Pin />
-      <Button id='whereabouts' :class='{ "tab-item": true }' shadow='false' :selected='!display || $route.query.section == "whereabouts"' @click='setDisplay("whereabouts")'>
+      <Button id='whereabouts' :class='{ "tab-item": true }' shadow='false' :selected='!$route.query.section || !display || $route.query.section == "whereabouts"' @click='setDisplay("whereabouts")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <circle cx="40" cy="25" r="20" fill="white"/>
@@ -128,7 +128,7 @@
       <br>
     </div>
 
-    <div class='whereabouts chunk' v-if='$route.query.section == "whereabouts" || this.$route.query.section == ""'>
+    <div class='whereabouts chunk' v-if='!$route.query.section || !display || $route.query.section == "whereabouts"'>
       <div class='container'>
         <label class='centered'><span class='bold'>Make this information private</span>
           <CircularButton text='?' @click='toggleInfo("privacyInfo")'/>
@@ -177,7 +177,7 @@
       </div>
     </div>
 
-    <div class='room_dimensions chunk page' v-if='$route.query.section == "whereabouts"'>
+    <div class='room_dimensions chunk page' v-if='$route.query.section == "room_dimensions"'>
       <div class='container'>
         <div class='menu row'>
           <Button :class="{ selected: !this.useOwnHeight, tab: true }" shadow='true' @click='setUseOwnHeight(false)' text='Input Directly'/>
@@ -630,7 +630,8 @@
      convertLengthBasedOnMeasurementType, computeVentilationACH, computePortableACH,
      computeVentilationNIDR,
      generateUUID,
-     genConcCurve
+     genConcCurve,
+     round
   } from  './misc';
 
   export default {
@@ -889,45 +890,24 @@
         this.signIn()
       } else {
         this.loadStuff()
-
-        this.$watch(
-          () => this.$route.name,
-          (toName, previousName) => {
-            if (toName == 'AddMeasurements') {
-              if (!this.currentUser) {
-                this.signIn()
-              } else {
-                this.loadStuff()
-              }
-            }
-          }
-        )
-
-        this.$watch(
-          () => this.$route.params,
-          (toParams, fromParams) => {
-            if (toParams['action'] && this.$route.name == 'AddMeasurements') {
-              if (!this.currentUser) {
-                this.signIn()
-              } else {
-                this.loadStuff()
-              }
-            }
-          }
-        )
-        this.$watch(
-          () => this.$route.query,
-          (toQuery, fromQuery) => {
-            if (toQuery['section'] && this.$route.name == 'AddMeasurements') {
-              if (!this.currentUser) {
-                this.signIn()
-              } else {
-                this.display = toQuery['section']
-              }
-            }
-          }
-        )
       }
+
+      this.$watch(
+        () => this.$route.params,
+        (toParams, fromParams) => {
+          if (toParams['action'] && (this.$route.name == 'AddMeasurements' || this.$route.name == 'UpdateOrCopyMeasurements')) {
+            this.loadStuff()
+          }
+        }
+      )
+      this.$watch(
+        () => this.$route.query,
+        (toQuery, fromQuery) => {
+          if (toQuery['section'] && (this.$route.name == 'AddMeasurements' || this.$route.name == 'UpdateOrCopyMeasurements')) {
+            this.display = toQuery['section']
+          }
+        }
+      )
     },
     data() {
       return {
@@ -1060,17 +1040,18 @@
         // debugger
       },
       signIn() {
-        let query = JSON.parse(JSON.stringify(this.$route.query))
+        if (!this.currentUser) {
+          let query = JSON.parse(JSON.stringify(this.$route.query))
 
-        query['attempt-name'] = 'AddMeasurements'
+          query['attempt-name'] = this.$route.name
 
-        this.$router.push({
-          name: 'SignIn',
-          query: query
-        })
+          this.$router.push({
+            name: 'SignIn',
+            query: query
+          })
+        }
       },
-      async copyEvent(id) {
-        let event = await this.findOrLoad(id)
+      copyEvent(event) {
         this.authorId = this.currentUser.id
         this.placeData = event.placeData
         this.roomName = event.roomName
@@ -1079,6 +1060,17 @@
         this.maximumOccupancy = event.maximumOccupancy
         this.co2Readings = []
         this.portableAirCleaners = event.portableAirCleaners
+        for (let portableAirCleaner of this.portableAirCleaners) {
+          portableAirCleaner['airDeliveryRate'] = round(
+            convertLengthBasedOnMeasurementType(
+              portableAirCleaner.airDeliveryRateCubicMetersPerHour,
+              'meters',
+              this.measurementUnits.lengthMeasurementType,
+            ),
+            1
+          )
+        }
+
         this.portableACH = event.portableACH
         this.ventilationCO2AmbientPPM =  event.ventilationCo2AmbientPpm
 
@@ -1091,11 +1083,9 @@
         this.roomUsableVolumeFactor = event.roomUsableVolumeFactor
       },
 
-      async copyEventWithId(id) {
-        this.copyEventWithId()
-        let event = await this.findOrLoad(id)
-
-        this.id = id
+      async copyEventWithId(event) {
+        this.copyEvent(event)
+        this.id = event.id
         this.co2Readings = event.co2Readings
       },
 
@@ -1279,6 +1269,7 @@
         await this.loadProfile()
         await this.loadCO2Monitors()
 
+        let event;
         if (this.carbonDioxideMonitors.length == 0) {
           this.message = { str: "In order to add measurements, please make sure to have at least one carbon dioxide monitor listed.", to: { name: 'Profile', query: {section: 'ventilation'}}}
           this.$router.push({ name: 'Profile', query: {section: 'ventilation'}})
@@ -1292,21 +1283,25 @@
             // this.setDisplay(this.$route.query['section'])
           // }
 
-
-          if (this.$route.params['action'] == 'copy' && this.$route.name == 'UpdateOrCopyMeasurements') {
-            this.copyEvent(this.$route.params['id'])
+          if (this.$route.params['action'] == 'copy' && this.$route.name == 'UpdateOrCopyMeasurements' && !this.$route.query['section']) {
+            // load during the first part
+            event = await this.findOrLoad(this.$route.params.id)
+            this.copyEvent(event)
             this.id = undefined
             // if the draft exists, clicking on the draft button should
             // maintain the draft
 
             // if the draft doesn't exist, clicking on the draft button should
             // create a new draft
-          } else if (this.$route.params['action'] == 'update' && this.$route.name == 'UpdateOrCopyMeasurements') {
-            this.copyEvent(this.$route.params['id'])
+          } else if (this.$route.params['action'] == 'update' && this.$route.name == 'UpdateOrCopyMeasurements' && !this.$route.query['section']) {
+            // load during the first part
+            // TODO: when loading reset so that
+            event = await this.findOrLoad(this.$route.params.id)
+            this.copyEventWithId(event)
             this.id = this.$route.params['id']
           }
 
-          else {
+          else if (this.$route.name == 'AddMeasurements' && !this.$route.query['section']) {
             this.roomLengthMeters = this.strideLengthForLength * this.strideLengthMeters
             this.roomWidthMeters = this.strideLengthForWidth * this.strideLengthMeters
             this.roomHeightMeters = this.personHeightToRoomHeight * this.heightMeters
@@ -1408,7 +1403,7 @@
           )
         }
 
-        if (this.co2ReadingsToSave.length <= 10) {
+        if (this.co2ReadingsToSave.length < 10) {
           this.messages.push(
             {
               str: "Error: Please add at least 10 carbon dioxide readings, either one-by-one or by bulk, where each measurement is spaced 1-minute apart.",
@@ -1538,6 +1533,8 @@
           action: 'post'
         }
 
+
+        // Will only happen when update
         if (this.id) {
           // update
           toSave['id'] = this.id
@@ -1550,6 +1547,7 @@
             action: 'put'
           }
         }
+
 
         setupCSRF()
 

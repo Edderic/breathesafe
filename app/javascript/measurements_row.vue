@@ -19,7 +19,7 @@
           :title='roundOut(this.measurements.risk, 6)'
         />
       </router-link >
-      <router-link :to='{name: "AddMeasurements", params: {id: this.measurements.id, action: "update"}}' v-if='measurements.status == "draft"'>
+      <router-link :to='{name: "UpdateOrCopyMeasurements", params: {id: this.measurements.id, action: "update"}}' v-if='measurements.status == "draft"'>
         <ColoredCell
           v-if='measurements.status == "draft"'
           :colorScheme="colorInterpolationScheme"

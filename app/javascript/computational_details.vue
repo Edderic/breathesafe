@@ -867,7 +867,6 @@ import {
   computePortableACH,
   computeVentilationACH,
   convertCubicMetersPerHour,
-  convertLengthBasedOnMeasurementType,
   cubicFeetPerMinuteTocubicMetersPerHour,
   displayCADR,
   findWorstCaseInhFactor,
