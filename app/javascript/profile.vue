@@ -3,7 +3,7 @@
     <h2>Profile</h2>
 
     <div class='container row centered menu'>
-      <button :class='{ "tab-item": true, "selected": display == "ventilation"}' id='ventilation' @click='setDisplay("ventilation")'>
+      <button :class='{ "tab-item": true, "selected": !display || display == "ventilation"}' id='ventilation' @click='setDisplay("ventilation")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='6em' width='6em'>
           <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
           <path d="m 20 30 h 40 l -20 -20 z" stroke='black' fill='#ccc'/>
@@ -210,7 +210,7 @@
 
     </div>
 
-    <div class='container' v-if='display == "ventilation"'>
+    <div class='container' v-if='!display || display == "ventilation"'>
       <div class='row centered'>
         <label class='subsection'>CO₂ Monitors*</label>
 

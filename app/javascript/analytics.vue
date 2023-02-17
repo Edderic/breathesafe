@@ -11,7 +11,7 @@
 
       <div class='centered col'>
         <div>
-          <router-link :to='{ name: "UpdateOrCopyMeasurements", params: {action: "update", id: this.$route.params.id} }' v-if='currentUser'>
+          <router-link :to='{ name: "UpdateOrCopyMeasurements", params: {action: "update", id: this.$route.params.id} }' v-if='currentUser && (currentUser.admin || event.authorId == currentUser.id)'>
             ✎ Update
           </router-link>
         </div>
