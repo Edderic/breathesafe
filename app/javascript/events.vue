@@ -3,7 +3,7 @@
     <div class='middle-controls horizontally-center controls'>
       <div class='buttons space-around row'>
 
-        <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" width="3em" height="3em">
+        <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" width="3em" height="3em" @click='setDisplay("filter")'>
           <circle cx="40" cy="40" r="40" fill="rgb(200,200,200)"/>
           <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' fill='#aaa'/>
         </svg>
@@ -45,7 +45,7 @@
                 <div class='row space-around'>
                   <span :style="circleCSS" @click='sortByInfectorRisk'>{{this.sortRiskInfectorArrow}}</span>
 
-                  <div :style="circleCSS" @click='showGradeInfo = !showGradeInfo'>
+                  <div :style="circleCSS" @click='setDisplay("gradeInfo")'>
                     ?
                   </div>
                 </div>
@@ -105,6 +105,7 @@ export default {
           'events',
           'displayables',
           'durationHours',
+          'display',
           'masks',
           'numWays',
           'selectedMask',
@@ -247,7 +248,8 @@ export default {
         [
           'load',
           'loadMasks',
-          'computeRiskAll'
+          'computeRiskAll',
+          'setDisplay'
         ]
     ),
     newEvent() {

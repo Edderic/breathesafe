@@ -18,11 +18,20 @@ export const useEventStores = defineStore('events', {
     displayables: [],
     masks: [],
     selectedMask: new Mask(MASKS[0], 1, 1),
-    showGradeInfo: false,
+    display: 'map',
+    filterForDraft: false,
+    placeTypePicked: 'all'
   }),
   getters: {
   },
   actions: {
+    setDisplay(arg) {
+      if (this.display == arg) {
+        this.display = 'map'
+      } else {
+        this.display = arg
+      }
+    },
     addEvent(event) {
       let camelized = deepSnakeToCamel([event])
       const mainStore = useMainStore()

@@ -1,6 +1,6 @@
 <template>
   <div class='body grid'>
-    <div v-if='showGradeInfo' class='centered column'>
+    <div v-if='display == "gradeInfo"' class='centered column'>
       <table class='grade-info'>
         <tr>
           <th>Grade</th>
@@ -22,12 +22,29 @@
         </tr>
       </table>
     </div>
+
+    <div v-if='display == "filter"' class='filters col scrollable'>
+      <div class='row'>
+        <input type="checkbox" v-model='filterForDraft' id='filterForDraft'>
+        <label for="filterForDraft">
+        Draft
+        </label>
+      </div>
+      <div class='location-types'>
+        <div class='row centered' v-for='(v, k) in icons'>
+          <span class='icon'>{{v}}</span>
+          <label :for="k">
+            {{k}}
+          </label>
+        </div>
+      </div>
+    </div>
     <GMapMap
       :center="center"
       :zoom="zoom"
       map-type-id="terrain"
       class='map'
-      v-if='!showGradeInfo'
+      v-if='display == "map"'
     >
         <GMapMarker
             :key="index"
@@ -93,7 +110,7 @@ import Events from './events.vue';
 import TotalACHTable from './total_ach_table.vue';
 import AchToDuration from './ach_to_duration.vue';
 import { binValue, getColor, gradeColorMapping, riskColorInterpolationScheme } from './colors';
-import { getPlaceType } from './icons';
+import { getPlaceType, ICONS } from './icons';
 import { useEventStores } from './stores/event_stores';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
@@ -115,15 +132,20 @@ export default {
     ...mapState(useMainStore, ['currentUser']),
     ...mapState(useProfileStore, ["measurementUnits", 'systemOfMeasurement']),
     ...mapState(useMainStore, ["centerMapTo", 'openedMarkerId']),
-    ...mapState(useEventStores, ['showGradeInfo', "selectedMask"]),
+    ...mapState(useEventStores, ['display', "selectedMask"]),
 
     ...mapWritableState(useMainStore, ['center', 'whereabouts', 'zoom', 'openedMarkerID']),
     ...mapWritableState(
         useEventStores,
         [
-          'displayables'
+          'displayables',
+          'filterForDraft',
+          'placeTypePicked'
         ]
     ),
+    icons() {
+      return ICONS;
+    },
     gradeColors() {
       let objs = []
       let thing
@@ -259,6 +281,7 @@ export default {
   .centered {
     display: flex;
     justify-content: center;
+    align-items: center;
   }
 
   .column {
@@ -271,12 +294,18 @@ export default {
     padding: 1em 3em;
   }
 
+  .filters {
+    position: relative;
+    top: 5em;
+    left: 0;
+    height: 80vh;
+  }
   .map {
     height: 90vh;
   }
 
   .icon {
-    font-size: large;
+    font-size: 2em;
     padding-top: 0.125em;
     padding-bottom: 0.125em;
     padding-right: 0.25em;
@@ -309,6 +338,7 @@ export default {
   }
   .scrollable {
     margin-left: 3em;
+    overflow-y: auto;
   }
 
   p {
@@ -316,10 +346,14 @@ export default {
   }
 
   .grid {
-    display: grid;
-    grid-template-columns: 50% 50%;
-    grid-template-rows: auto;
+    display: flex;
+    flex-direction: row;
 
+  }
+
+  .align-items-center {
+    display: flex;
+    align-items: center;
   }
 
   .grade-info {
@@ -329,6 +363,12 @@ export default {
 
   th {
     padding: 0 1em;
+  }
+
+  .location-types {
+    display: grid;
+    grid-template-columns: 33% 33% 33%;
+    grid-template-rows: auto;
   }
 
   @media (max-width: 1400px) {
