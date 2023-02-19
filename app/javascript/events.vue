@@ -1,16 +1,22 @@
 <template>
 <div class='col'>
     <div class='middle-controls horizontally-center controls'>
-      <div class='space-around row'>
+      <div class='buttons space-around row'>
+
+        <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" width="3em" height="3em">
+          <circle cx="40" cy="40" r="40" fill="rgb(200,200,200)"/>
+          <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' fill='#aaa'/>
+        </svg>
+
         <Pin class='pin' @click='setLocation' height='48px' width='48px'/>
-        <router-link to="/events/new">
+        <router-link to="/events/new" class='button'>
           <CircularButton class='circular-button' text='+'/>
         </router-link>
       </div>
 
       <input class='margined' @change="updateSearch" placeholder="Search for events">
 
-      <div class='row space-around'>
+      <div class='row space-around '>
         <select class='margined' :value='durationHours' @change='setDuration'>
           <option value=1>1 hour</option>
           <option value=2>2 hours</option>
@@ -506,20 +512,21 @@ export default {
   }
 
   .button {
+    display: flex;
     color: white;
     border: none;
     font-weight: bold;
     border-radius: 2%;
-    background-color: #aaa;
-    text-shadow: 1px 1px 2px black;
-    box-shadow: 1px 1px 2px black;
     text-decoration: none;
+  }
+
+  .buttons {
+    min-width: 15em;
   }
 
   .pin {
     border: 0;
     padding: 0;
-    margin: 0 1em;
   }
 
   th {
@@ -528,10 +535,14 @@ export default {
   .space-around {
     display: flex;
     justify-content: space-around;
+    align-items: center;
   }
 
   .circular-button {
-    margin: 0 1em;
+  }
+
+  .filter-button {
+    cursor: pointer;
   }
 
   @media (max-width: 1400px) {
