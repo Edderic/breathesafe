@@ -63,7 +63,7 @@
                     <router-link :to='{ name: "Analytics", params: {id: m.id}}' @click="showAnalysis(m.id)">
                       ☣️  Risk Analysis
                     </router-link>
-                    <router-link :to='{ name: "UpdateOrCopyMeasurements", params: {action: "update", id: m.id} }' v-if='currentUser && m.authorId == currentUser.id'>
+                    <router-link :to='{ name: "UpdateOrCopyMeasurements", params: {action: "update", id: m.id} }' v-if='currentUser && (m.authorId == currentUser.id || currentUser.admin)'>
                       ✏️  Update
                     </router-link>
                     <router-link :to='{ name: "UpdateOrCopyMeasurements", params: {action: "copy", id: m.id} }' v-if='showAddNewMeasurements'>
