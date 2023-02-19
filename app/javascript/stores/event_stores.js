@@ -20,11 +20,23 @@ export const useEventStores = defineStore('events', {
     selectedMask: new Mask(MASKS[0], 1, 1),
     display: 'map',
     filterForDraft: false,
-    placeTypePicked: 'all'
+    placeTypePicked: 'all',
+    placeTypeCounts: {}
   }),
   getters: {
   },
   actions: {
+    countPlaceTypes(data) {
+      for (let d of data) {
+        for (let placeType of d.placeData.types) {
+           if (!this.placeTypeCounts[placeType]) {
+              this.placeTypeCounts[placeType] = 0
+           }
+
+          this.placeTypeCounts[placeType] += 1
+        }
+      }
+    },
     setDisplay(arg) {
       if (this.display == arg) {
         this.display = 'map'
@@ -73,6 +85,7 @@ export const useEventStores = defineStore('events', {
           console.log(response)
           if (response.status == 200) {
             let camelized = deepSnakeToCamel(response.data.events)
+            this.countPlaceTypes(camelized)
             // for (let i of camelized) {
               // let number = parseInt(Math.random() * 100)
               // let street = ["New York Ave.", "St. James St.", "Park Place", "Baltic Ave.", "Indiana Ave.", "Kentucky Ave.", "Illinois Ave.", "Ventnor Ave."][parseInt( Math.random() * 8 )]

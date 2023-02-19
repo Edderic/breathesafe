@@ -31,11 +31,12 @@
         </label>
       </div>
       <div class='location-types'>
-        <div class='row centered' v-for='(v, k) in icons'>
-          <span class='icon'>{{v}}</span>
+        <div :class='{"location-type": true, row: true, "align-items-center": true, clicked: placeTypePicked == k}' v-for='(v, k) in placeTypeCounts' @click='placeTypePicked = k'>
+          <span class='icon'>{{icons[k]}}</span>
           <label :for="k">
             {{k}}
           </label>
+          <span>{{v}}</span>
         </div>
       </div>
     </div>
@@ -132,7 +133,7 @@ export default {
     ...mapState(useMainStore, ['currentUser']),
     ...mapState(useProfileStore, ["measurementUnits", 'systemOfMeasurement']),
     ...mapState(useMainStore, ["centerMapTo", 'openedMarkerId']),
-    ...mapState(useEventStores, ['display', "selectedMask"]),
+    ...mapState(useEventStores, ['display', "selectedMask", 'placeTypeCounts']),
 
     ...mapWritableState(useMainStore, ['center', 'whereabouts', 'zoom', 'openedMarkerID']),
     ...mapWritableState(
@@ -295,10 +296,12 @@ export default {
   }
 
   .filters {
+    padding: 1em;
     position: relative;
-    top: 5em;
+    top: 0;
     left: 0;
-    height: 80vh;
+    height: 90vh;
+    width: 50vw;
   }
   .map {
     height: 90vh;
@@ -317,7 +320,7 @@ export default {
     background-color: #efefef;
   }
 
-  .icon.clicked {
+  .clicked {
     background-color: #e6e6e6;
   }
 
@@ -337,7 +340,6 @@ export default {
     justify-content: space-between;
   }
   .scrollable {
-    margin-left: 3em;
     overflow-y: auto;
   }
 
@@ -365,9 +367,14 @@ export default {
     padding: 0 1em;
   }
 
+  .location-type:hover {
+    background-color: #efefef;
+    cursor: pointer;
+  }
+
   .location-types {
     display: grid;
-    grid-template-columns: 33% 33% 33%;
+    grid-template-columns: 50% 50%;
     grid-template-rows: auto;
   }
 
@@ -381,6 +388,10 @@ export default {
     }
     .body {
       height: 90vh;
+    }
+
+    .filters {
+      width: 100vw;
     }
   }
 
