@@ -348,8 +348,9 @@ export default {
   }
 
   .grid {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: auto;
 
   }
 
