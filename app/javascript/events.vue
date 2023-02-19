@@ -109,7 +109,8 @@ export default {
           'masks',
           'numWays',
           'selectedMask',
-          'showGradeInfo'
+          'search',
+          'showGradeInfo',
         ]
     ),
     ...mapWritableState(
@@ -196,7 +197,6 @@ export default {
   data() {
     return {
       'permittedGeolocation': false,
-      'search': "",
       'riskColorScheme': riskColorInterpolationScheme
     }
   },
@@ -219,7 +219,7 @@ export default {
 
       await this.load()
       this.computeRiskAll(this.selectedMask)
-      this.sortByParams()
+      // this.sortByParams()
       this.$progress.finish()
       elements[0].style.opacity = 0
       elements[0].style.display = 'none'
@@ -249,15 +249,12 @@ export default {
           'load',
           'loadMasks',
           'computeRiskAll',
-          'setDisplay'
+          'setDisplay',
+          'updateSearch'
         ]
     ),
     newEvent() {
       this.setFocusTab('event')
-    },
-    updateSearch(event) {
-      this.search = event.target.value
-      this.displayables = filterEvents(this.search, this.events)
     },
 
     findMask(name, numWays) {
@@ -402,23 +399,8 @@ export default {
     },
 
     sortByParams() {
-      if (this.$route.query.sort == 'risk-infector' && this.$route.query['sort-how'] == 'ascending') {
-        this.displayables = this.displayables.sort((a, b) => a.risk - b.risk)
-      }
-
-      else if (this.$route.query.sort == 'risk-infector' && this.$route.query['sort-how'] == 'descending') {
-        this.displayables = this.displayables.sort((a, b) => b.risk - a.risk)
-      }
-      else if (this.$route.query.sort == 'distance' && this.$route.query['sort-how'] == 'ascending') {
-        this.displayables = this.displayables.sort(
-          (a, b) => a.distance - b.distance
-        )
-      }
-      else if (this.$route.query.sort == 'distance' && this.$route.query['sort-how'] == 'descending') {
-        this.displayables = this.displayables.sort(
-          (a, b) => b.distance - a.distance
-        )
-      }
+      this.sortHow = this.$route.query['sort-how']
+      this.sort = this.$route.query.sort
     }
   },
 }

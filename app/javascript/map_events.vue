@@ -31,7 +31,7 @@
         </label>
       </div>
       <div class='location-types'>
-        <div :class='{"location-type": true, row: true, "align-items-center": true, clicked: placeTypePicked == k}' v-for='(v, k) in placeTypeCounts' @click='placeTypePicked = k'>
+        <div :class='{"location-type": true, row: true, "align-items-center": true, clicked: placeTypePicked == k}' v-for='(v, k) in placeTypeCounts' @click='pickPlaceType(k)'>
           <span class='icon'>{{icons[k]}}</span>
           <label :for="k">
             {{k}}
@@ -133,13 +133,12 @@ export default {
     ...mapState(useMainStore, ['currentUser']),
     ...mapState(useProfileStore, ["measurementUnits", 'systemOfMeasurement']),
     ...mapState(useMainStore, ["centerMapTo", 'openedMarkerId']),
-    ...mapState(useEventStores, ['display', "selectedMask", 'placeTypeCounts']),
+    ...mapState(useEventStores, ['display', 'displayables', "selectedMask", 'placeTypeCounts', 'updateSearch']),
 
     ...mapWritableState(useMainStore, ['center', 'whereabouts', 'zoom', 'openedMarkerID']),
     ...mapWritableState(
         useEventStores,
         [
-          'displayables',
           'filterForDraft',
           'placeTypePicked'
         ]
@@ -185,7 +184,7 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'showAnalysis']),
     ...mapActions(useProfileStore, ['loadProfile']),
-    ...mapActions(useEventStores, ['load']),
+    ...mapActions(useEventStores, ['load', 'pickPlaceType']),
     createIntervention(m) {
       return new Intervention(m, [this.selectedMask])
     },

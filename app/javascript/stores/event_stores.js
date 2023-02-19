@@ -5,7 +5,7 @@ import { useMainStore } from './main_store'
 import { useProfileStore } from './profile_store'
 import { usePrevalenceStore } from './prevalence_store'
 import axios from 'axios'
-import { computeRiskWithVariableOccupancy, deepSnakeToCamel, setupCSRF, round } from  '../misc'
+import { computeRiskWithVariableOccupancy, deepSnakeToCamel, setupCSRF, round, filterEvents } from  '../misc'
 
 
 // useStore could be anything like useUser, useCart
@@ -13,19 +13,61 @@ import { computeRiskWithVariableOccupancy, deepSnakeToCamel, setupCSRF, round } 
 export const useEventStores = defineStore('events', {
   state: () => ({
     location: { lat: 0, lng: 0},
+    displayables: [],
     durationHours: 1,
     events: [],
-    displayables: [],
     masks: [],
     selectedMask: new Mask(MASKS[0], 1, 1),
     display: 'map',
     filterForDraft: false,
-    placeTypePicked: 'all',
-    placeTypeCounts: {}
+    placeTypePicked: '',
+    placeTypeCounts: {},
+    search: '',
+    sort: '',
+    sortHow: ''
   }),
   getters: {
+
   },
   actions: {
+    setDisplayables() {
+      let collection = []
+      const lowercasedSearch = this.search.toLowerCase()
+
+      for (let event of this.events) {
+        for (let placeType of event.placeData.types) {
+          if (
+            (!!lowercasedSearch || event.roomName.toLowerCase().match(lowercasedSearch) )
+            && ((placeType == this.placeTypePicked) || !this.placeTypePicked)
+          )
+          {
+            collection.push(event)
+
+          }
+        }
+      }
+
+
+      if (this.sort == 'riskInfector' && this.sortHow == 'ascending') {
+        collection.sort((a, b) => a.risk - b.risk)
+      } else if (this.sort == 'riskInfector' && this.sortHow == 'descending') {
+        collection.sort((a, b) => b.risk - a.risk)
+      } else if (this.sort == 'distance' && this.sortHow == 'ascending') {
+        collection.sort((a, b) => a.distance - b.distance)
+      } else if (this.sort == 'distance' && this.sortHow == 'descending') {
+        collection.sort((a, b) => b.distance - a.distance)
+      }
+
+      this.displayables = collection
+    },
+    updateSearch(event) {
+      this.search = event.target.value
+      this.setDisplayables()
+    },
+    pickPlaceType(placeType) {
+      this.placeTypePicked = placeType
+      this.setDisplayables()
+    },
     countPlaceTypes(data) {
       for (let d of data) {
         for (let placeType of d.placeData.types) {
@@ -97,7 +139,7 @@ export const useEventStores = defineStore('events', {
             // }
             this.setDistance(mainStore, camelized)
             this.events = camelized
-            this.displayables = this.events
+            this.setDisplayables()
           }
 
           // whatever you want

@@ -637,7 +637,8 @@ function generatePeopleBehaviors(
   return peopleBehaviors
 }
 
-export function filterEvents(search, events) {
+
+export function filterEvents(search, events, placeType) {
   let collection = []
   const lowercasedSearch = search.toLowerCase()
   let typeFound
@@ -645,9 +646,11 @@ export function filterEvents(search, events) {
   for (let event of events) {
     typeFound = false
 
-    for (let type of event.placeData.types) {
-      if (type.match(search)) {
-        typeFound = true
+    if (!!placeType) {
+      for (let type of event.placeData.types) {
+        if (type.match(placeType)) {
+          typeFound = true
+        }
       }
     }
     if (event.roomName.toLowerCase().match(lowercasedSearch)
