@@ -33,4 +33,10 @@ export default {
 </script>
 
 <style scoped>
+
+  button {
+    display: flex;
+    cursor: pointer;
+  }
+
 </style>
