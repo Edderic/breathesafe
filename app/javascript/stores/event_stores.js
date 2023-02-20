@@ -69,12 +69,15 @@ export const useEventStores = defineStore('events', {
     },
     countPlaceTypes(data) {
       for (let d of data) {
+        let countable = false
         for (let placeType of d.placeData.types) {
-           if (!this.placeTypeCounts[placeType]) {
-              this.placeTypeCounts[placeType] = 0
-           }
+          if (!this.placeTypeCounts[placeType]) {
+             this.placeTypeCounts[placeType] = 0
+          }
 
           this.placeTypeCounts[placeType] += 1
+
+          break
         }
       }
     },
