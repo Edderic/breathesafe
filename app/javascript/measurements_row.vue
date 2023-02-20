@@ -73,6 +73,7 @@ export default {
     ...mapState(usePrevalenceStore, ['numPositivesLastSevenDays', 'numPopulation', 'uncountedFactor', 'maskType']),
     ...mapState(useEventStore, ['infectorActivityTypeMapping']),
     ...mapState(useEventStores, ['selectedMask']),
+    ...mapWritableState(useEventStores, ['display']),
     ...mapState(useMainStore, ['isAdmin']),
     ...mapState(
         useShowMeasurementSetStore,

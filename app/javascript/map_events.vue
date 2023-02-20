@@ -1,6 +1,6 @@
 <template>
   <div class='body grid'>
-    <div v-if='display == "gradeInfo"' class='centered column'>
+    <div v-show='display == "gradeInfo"' class='centered column'>
       <table class='grade-info'>
         <tr>
           <th>Grade</th>
@@ -49,7 +49,7 @@
       :zoom="zoom"
       map-type-id="terrain"
       class='map'
-      v-if='display == "map"'
+      v-show='display == "map"'
     >
         <GMapMarker
             :key="index"

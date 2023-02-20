@@ -35,6 +35,7 @@ export const useMainStore = defineStore('main', {
       this.openedMarkerId = id
 
       let eventStores = useEventStores()
+      eventStores.display = 'map';
       let event = eventStores.events.find((ev) => { return ev.id == id })
 
       // indicate that the event was selected
