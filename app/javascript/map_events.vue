@@ -24,12 +24,19 @@
     </div>
 
     <div v-if='display == "filter"' class='filters col scrollable'>
-      <div class='row'>
-        <input type="checkbox" v-model='filterForDraft' id='filterForDraft'>
-        <label for="filterForDraft">
-        Draft
-        </label>
+
+      <div class='row centered padded'>
+        <CircularButton text='🗺️' @click="display = 'map'" class='icon'/>
       </div>
+      <div class='row centered padded'>
+        <div>
+          <input type="checkbox" value='$route.query.draft == "true"' @click="setDraft($route.query.draft)" id='filterForDraft'>
+          <label for="filterForDraft">
+          Draft
+          </label>
+        </div>
+      </div>
+
       <div class='location-types'>
         <div :class='{"location-type": true, row: true, "align-items-center": true, clicked: placeTypePicked == k}' v-for='(v, k) in placeTypeCounts' @click='pickPlaceKind(k)'>
           <span class='icon'>{{icons[k]}}</span>
@@ -110,6 +117,8 @@ import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import Events from './events.vue';
 import TotalACHTable from './total_ach_table.vue';
 import AchToDuration from './ach_to_duration.vue';
+import Button from './button.vue';
+import CircularButton from './circular_button.vue';
 import { binValue, getColor, gradeColorMapping, riskColorInterpolationScheme } from './colors';
 import { getPlaceType, ICONS } from './icons';
 import { useEventStores } from './stores/event_stores';
@@ -120,6 +129,8 @@ import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
 export default {
   name: 'Venues',
   components: {
+    Button,
+    CircularButton,
     ColoredCell,
     CleanAirDeliveryRateTable,
     DayHourHeatmap,
@@ -133,12 +144,13 @@ export default {
     ...mapState(useMainStore, ['currentUser']),
     ...mapState(useProfileStore, ["measurementUnits", 'systemOfMeasurement']),
     ...mapState(useMainStore, ["centerMapTo", 'openedMarkerId']),
-    ...mapState(useEventStores, ['display', 'displayables', "selectedMask", 'placeTypeCounts', 'updateSearch']),
+    ...mapState(useEventStores, ['displayables', "selectedMask", 'placeTypeCounts', 'updateSearch']),
 
     ...mapWritableState(useMainStore, ['center', 'whereabouts', 'zoom', 'openedMarkerID']),
     ...mapWritableState(
         useEventStores,
         [
+          'display',
           'filterForDraft',
           'placeTypePicked'
         ]
@@ -182,6 +194,14 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser', 'showAnalysis']),
     ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useEventStores, ['load', 'setDisplayables']),
+    setDraft(val) {
+      let query = JSON.parse(JSON.stringify(this.$route.query))
+      let newQuery = {draft: val !== 'true'}
+
+      Object.assign(query, newQuery)
+
+      this.$router.push({ name: 'Venues', query: query })
+    },
     pickPlaceKind(placeType) {
       let prevQuery = JSON.parse(JSON.stringify(this.$route.query))
 
@@ -355,6 +375,10 @@ export default {
 
   p {
     padding: 1em;
+  }
+
+  .padded {
+    padding: 0.5em;
   }
 
   .grid {

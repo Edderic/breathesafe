@@ -1,5 +1,5 @@
 <template>
-  <div :class='{button: true, major: major, selected: selected, shadow: sidePadded, "side-padded": sidePadded}'>
+  <div :class='{button: true, major: major, selected: selected, shadow: sidePadded, "side-padded": true}'>
 {{text}}
   <slot></slot>
 </div>
@@ -40,10 +40,10 @@ export default {
 
 <style scoped>
   .side-padded {
-    padding-left: 1em;
-    padding-right: 1em;
-    padding-top: 1em;
-    padding-bottom: 1em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
   }
   .button {
     font-weight: bold;
@@ -51,7 +51,10 @@ export default {
     text-align: center;
     font-size: 1.5em;
     color: white;
-    background-color: #eee;
+    background-color: rgb(200,200,200);
+  }
+  .button:hover {
+    cursor: pointer;
   }
 
   .selected {

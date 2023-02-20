@@ -30,6 +30,9 @@ export const useEventStores = defineStore('events', {
 
   },
   actions: {
+    setDraft(val) {
+      this.filterForDraft = val
+    },
     setDisplayables() {
       let collection = []
       if (!this.search) {
@@ -41,6 +44,7 @@ export const useEventStores = defineStore('events', {
 
         for (let placeType of event.placeData.types) {
           if (
+            (this.filterForDraft && event.status == 'draft' || !this.filterForDraft) &&
             (!lowercasedSearch || event.roomName.toLowerCase().match(lowercasedSearch) )
             && ((placeType == this.placeTypePicked) || !this.placeTypePicked)
           ) {

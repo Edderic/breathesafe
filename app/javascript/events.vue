@@ -194,7 +194,7 @@ export default {
         }
 
         this.durationHours = parseInt(toQuery['durationHours']) || 1
-
+        this.setDraft(toQuery['draft'] === 'true')
         this.updateSearch({ target: { value: toQuery['search']}})
 
         this.pickPlaceType(toQuery['placeType'])
@@ -257,11 +257,13 @@ export default {
     ...mapActions(
         useEventStores,
         [
+
           'load',
           'loadMasks',
           'computeRiskAll',
           'pickPlaceType',
           'setDisplay',
+          'setDraft',
           'setDisplayables',
           'updateSearch'
         ]
