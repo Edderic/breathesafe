@@ -111,6 +111,8 @@ export default {
           'selectedMask',
           'search',
           'showGradeInfo',
+          'sort',
+          'sortHow',
         ]
     ),
     ...mapWritableState(
@@ -250,6 +252,7 @@ export default {
           'loadMasks',
           'computeRiskAll',
           'setDisplay',
+          'setDisplayables',
           'updateSearch'
         ]
     ),
@@ -401,6 +404,7 @@ export default {
     sortByParams() {
       this.sortHow = this.$route.query['sort-how']
       this.sort = this.$route.query.sort
+      this.setDisplayables()
     }
   },
 }

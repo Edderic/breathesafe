@@ -47,9 +47,9 @@ export const useEventStores = defineStore('events', {
         }
       }
 
-      if (this.sort == 'riskInfector' && this.sortHow == 'ascending') {
+      if (this.sort == 'risk-infector' && this.sortHow == 'ascending') {
         collection.sort((a, b) => a.risk - b.risk)
-      } else if (this.sort == 'riskInfector' && this.sortHow == 'descending') {
+      } else if (this.sort == 'risk-infector' && this.sortHow == 'descending') {
         collection.sort((a, b) => b.risk - a.risk)
       } else if (this.sort == 'distance' && this.sortHow == 'ascending') {
         collection.sort((a, b) => a.distance - b.distance)
