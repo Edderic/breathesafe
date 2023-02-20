@@ -172,17 +172,6 @@ export default {
     },
   },
   async created() {
-    // TODO: modify the store
-
-    // TODO: handle case where no one is signed in
-    this.$watch(
-      () => this.$route.query,
-      (toQuery, previousQuery) => {
-        if (this.$route.name == "Venues") {
-          this.pickPlaceType(toQuery['placeType'])
-        }
-      }
-    )
   },
   data() {
     return {
@@ -192,7 +181,7 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'showAnalysis']),
     ...mapActions(useProfileStore, ['loadProfile']),
-    ...mapActions(useEventStores, ['load', 'pickPlaceType']),
+    ...mapActions(useEventStores, ['load', 'setDisplayables']),
     pickPlaceKind(placeType) {
       let prevQuery = JSON.parse(JSON.stringify(this.$route.query))
 

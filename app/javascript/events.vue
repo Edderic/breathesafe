@@ -158,10 +158,6 @@ export default {
       this.selectedMask = this.findMask( this.$route.query['mask'], this.$route.query['numWays'])
     }
 
-    if (this.$route.query['durationHours']) {
-      this.durationHours = parseInt(this.$route.query['durationHours'])
-    }
-
     await this.load()
     this.queryChecks(this.$route.query, {})
 
@@ -197,13 +193,11 @@ export default {
           )
         }
 
-        if (toQuery['durationHours'] != previousQuery['durationHours']) {
-          this.durationHours = parseInt(toQuery['durationHours'])
-        }
+        this.durationHours = parseInt(toQuery['durationHours']) || 1
 
-        if (toQuery['search'] != previousQuery['search']) {
-          this.updateSearch({ target: { value: toQuery['search']}})
-        }
+        this.updateSearch({ target: { value: toQuery['search']}})
+
+        this.pickPlaceType(toQuery['placeType'])
 
         this.computeRiskAll(this.selectedMask)
         this.sortByParams()
@@ -266,6 +260,7 @@ export default {
           'load',
           'loadMasks',
           'computeRiskAll',
+          'pickPlaceType',
           'setDisplay',
           'setDisplayables',
           'updateSearch'

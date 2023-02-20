@@ -32,6 +32,9 @@ export const useEventStores = defineStore('events', {
   actions: {
     setDisplayables() {
       let collection = []
+      if (!this.search) {
+        this.search = ''
+      }
       const lowercasedSearch = this.search.toLowerCase()
 
       for (let event of this.events) {
@@ -61,13 +64,13 @@ export const useEventStores = defineStore('events', {
     },
     updateSearch(event) {
       this.search = event.target.value
-      this.setDisplayables()
     },
     pickPlaceType(placeType) {
       this.placeTypePicked = placeType
-      this.setDisplayables()
     },
     countPlaceTypes(data) {
+      this.placeTypeCounts = {}
+
       for (let d of data) {
         let countable = false
         for (let placeType of d.placeData.types) {
