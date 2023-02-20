@@ -25,7 +25,7 @@
 
     <div v-if='display == "filter"' class='filters col scrollable'>
 
-      <div class='row centered padded'>
+      <div class='row centered padded topFilterRow'>
         <div>
           <input type="checkbox" :value='filterForDraft' @click="setDraft($route.query.draft)" id='filterForDraft'>
           <label for="filterForDraft">
@@ -406,6 +406,9 @@ export default {
     display: grid;
     grid-template-columns: 50% 50%;
     grid-template-rows: auto;
+  }
+  .topFilterRow {
+    border-bottom: 1px solid #eee;
   }
 
   @media (max-width: 700px) {
