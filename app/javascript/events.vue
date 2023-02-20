@@ -229,6 +229,7 @@ export default {
       this.center = { lat: coordinates.lat, lng: coordinates.lng };
       this.zoom = 15;
       this.permittedGeolocation = true;
+      this.display = 'map';
 
       await this.load()
       this.computeRiskAll(this.selectedMask)
