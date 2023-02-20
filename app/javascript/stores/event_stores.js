@@ -35,18 +35,17 @@ export const useEventStores = defineStore('events', {
       const lowercasedSearch = this.search.toLowerCase()
 
       for (let event of this.events) {
+
         for (let placeType of event.placeData.types) {
           if (
             (!!lowercasedSearch || event.roomName.toLowerCase().match(lowercasedSearch) )
             && ((placeType == this.placeTypePicked) || !this.placeTypePicked)
-          )
-          {
+          ) {
             collection.push(event)
-
+            break
           }
         }
       }
-
 
       if (this.sort == 'riskInfector' && this.sortHow == 'ascending') {
         collection.sort((a, b) => a.risk - b.risk)

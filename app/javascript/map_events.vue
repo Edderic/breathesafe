@@ -31,7 +31,7 @@
         </label>
       </div>
       <div class='location-types'>
-        <div :class='{"location-type": true, row: true, "align-items-center": true, clicked: placeTypePicked == k}' v-for='(v, k) in placeTypeCounts' @click='pickPlaceType(k)'>
+        <div :class='{"location-type": true, row: true, "align-items-center": true, clicked: placeTypePicked == k}' v-for='(v, k) in placeTypeCounts' @click='pickPlaceKind(k)'>
           <span class='icon'>{{icons[k]}}</span>
           <label :for="k">
             {{k}}
@@ -175,6 +175,14 @@ export default {
     // TODO: modify the store
 
     // TODO: handle case where no one is signed in
+    this.$watch(
+      () => this.$route.query,
+      (toQuery, previousQuery) => {
+        if (this.$route.name == "Venues") {
+          this.pickPlaceType(toQuery['placeType'])
+        }
+      }
+    )
   },
   data() {
     return {
@@ -185,6 +193,20 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser', 'showAnalysis']),
     ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useEventStores, ['load', 'pickPlaceType']),
+    pickPlaceKind(placeType) {
+      let prevQuery = JSON.parse(JSON.stringify(this.$route.query))
+
+      if (placeType == this.$route.query['placeType']) {
+        delete prevQuery['placeType']
+      } else {
+        Object.assign(prevQuery, { placeType: placeType })
+      }
+
+      this.$router.push({
+        name: 'Venues',
+        query: prevQuery
+      })
+    },
     createIntervention(m) {
       return new Intervention(m, [this.selectedMask])
     },
