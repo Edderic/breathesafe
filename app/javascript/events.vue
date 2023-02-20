@@ -14,7 +14,7 @@
         </router-link>
       </div>
 
-      <input class='margined' @change="updateSearch" placeholder="Search for events">
+      <input class='margined' :value='$route.query["search"]' @change="searchFor" placeholder="Search for events">
 
       <div class='row space-around '>
         <select class='margined' :value='durationHours' @change='setDuration'>
@@ -163,33 +163,12 @@ export default {
     }
 
     await this.load()
-    this.computeRiskAll(this.selectedMask)
-    this.sortByParams()
+    this.queryChecks(this.$route.query, {})
 
     this.$watch(
       () => this.$route.query,
       (toQuery, previousQuery) => {
-        if (this.$route.name == 'Venues') {
-          if (!toQuery['mask']) {
-            let selectedMask= this.findMask(
-              'No mask',
-              1,
-            )
-            this.selectedMask = selectedMask
-          } else if (toQuery['mask'] != previousQuery['mask'] || toQuery['numWays'] != previousQuery['numWays']) {
-            this.selectedMask = this.findMask(
-              toQuery['mask'],
-              toQuery['numWays'],
-            )
-          }
-
-          if (toQuery['durationHours']) {
-            this.durationHours = parseInt(toQuery['durationHours'])
-          }
-
-          this.computeRiskAll(this.selectedMask)
-          this.sortByParams()
-        }
+        this.queryChecks(toQuery, previousQuery)
         // react to route changes...
       }
     )
@@ -203,6 +182,42 @@ export default {
     }
   },
   methods: {
+    queryChecks(toQuery, previousQuery) {
+      if (this.$route.name == 'Venues') {
+        if (!toQuery['mask']) {
+          let selectedMask= this.findMask(
+            'No mask',
+            1,
+          )
+          this.selectedMask = selectedMask
+        } else if (toQuery['mask'] != previousQuery['mask'] || toQuery['numWays'] != previousQuery['numWays']) {
+          this.selectedMask = this.findMask(
+            toQuery['mask'],
+            toQuery['numWays'],
+          )
+        }
+
+        if (toQuery['durationHours'] != previousQuery['durationHours']) {
+          this.durationHours = parseInt(toQuery['durationHours'])
+        }
+
+        if (toQuery['search'] != previousQuery['search']) {
+          this.updateSearch({ target: { value: toQuery['search']}})
+        }
+
+        this.computeRiskAll(this.selectedMask)
+        this.sortByParams()
+      }
+    },
+    searchFor(event) {
+      let query = JSON.parse(JSON.stringify(this.$route.query))
+      Object.assign(query, { search: event.target.value })
+
+      this.$router.push({
+        name: 'Venues',
+        query: query
+      })
+    },
     async setLocation() {
 
       this.$progress.start()
