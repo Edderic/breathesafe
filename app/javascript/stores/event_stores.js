@@ -38,7 +38,7 @@ export const useEventStores = defineStore('events', {
 
         for (let placeType of event.placeData.types) {
           if (
-            (!!lowercasedSearch || event.roomName.toLowerCase().match(lowercasedSearch) )
+            (!lowercasedSearch || event.roomName.toLowerCase().match(lowercasedSearch) )
             && ((placeType == this.placeTypePicked) || !this.placeTypePicked)
           ) {
             collection.push(event)
