@@ -23,7 +23,7 @@
       </table>
     </div>
 
-    <div v-if='display == "filter"' class='filters col scrollable'>
+    <div v-show='display == "filter"' class='filters col scrollable'>
 
       <div class='row centered padded topFilterRow'>
         <div>
