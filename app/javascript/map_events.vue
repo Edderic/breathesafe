@@ -26,11 +26,8 @@
     <div v-if='display == "filter"' class='filters col scrollable'>
 
       <div class='row centered padded'>
-        <CircularButton text='🗺️' @click="display = 'map'" class='icon'/>
-      </div>
-      <div class='row centered padded'>
         <div>
-          <input type="checkbox" value='$route.query.draft == "true"' @click="setDraft($route.query.draft)" id='filterForDraft'>
+          <input type="checkbox" :value='filterForDraft' @click="setDraft($route.query.draft)" id='filterForDraft'>
           <label for="filterForDraft">
           Draft
           </label>
@@ -144,7 +141,7 @@ export default {
     ...mapState(useMainStore, ['currentUser']),
     ...mapState(useProfileStore, ["measurementUnits", 'systemOfMeasurement']),
     ...mapState(useMainStore, ["centerMapTo", 'openedMarkerId']),
-    ...mapState(useEventStores, ['displayables', "selectedMask", 'placeTypeCounts', 'updateSearch']),
+    ...mapState(useEventStores, ['displayables', "filterForDraft", "selectedMask", 'placeTypeCounts', 'updateSearch']),
 
     ...mapWritableState(useMainStore, ['center', 'whereabouts', 'zoom', 'openedMarkerID']),
     ...mapWritableState(
