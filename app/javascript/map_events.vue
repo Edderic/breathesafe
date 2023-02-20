@@ -323,12 +323,10 @@ export default {
   }
 
   .filters {
-    padding: 1em;
     position: relative;
     top: 0;
     left: 0;
     height: 90vh;
-    width: 50vw;
   }
   .map {
     height: 90vh;
@@ -410,6 +408,20 @@ export default {
     grid-template-rows: auto;
   }
 
+  @media (max-width: 700px) {
+    .location-type {
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+    }
+    .location-types {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+
   @media (max-width: 1400px) {
     .grid {
       display: flex;
@@ -425,6 +437,7 @@ export default {
     .filters {
       width: 100vw;
     }
+
   }
 
 </style>
