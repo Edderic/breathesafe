@@ -52,11 +52,11 @@ const paletteFall = [
 ]
 export const gradeColorMapping = {
   'A': { 'bounds': [0, 0.001], color: paletteFall[5] },
-  'B': { 'bounds': [0.001, 0.005], color: paletteFall[4] },
-  'C': { 'bounds': [0.005, 0.01], color: paletteFall[3] },
-  'D': { 'bounds': [0.01, 0.05], color: paletteFall[2] },
-  'E': { 'bounds': [0.05, 0.1], color: paletteFall[1] },
-  'F': { 'bounds': [0.1, 1], color: paletteFall[0] },
+  'B': { 'bounds': [0.001, 0.01], color: paletteFall[4] },
+  'C': { 'bounds': [0.01, 0.05], color: paletteFall[3] },
+  'D': { 'bounds': [0.05, 0.1], color: paletteFall[2] },
+  'E': { 'bounds': [0.1, 0.2], color: paletteFall[1] },
+  'F': { 'bounds': [0.2, 1], color: paletteFall[0] },
 }
 
 export const colorPaletteFall = paletteFall
