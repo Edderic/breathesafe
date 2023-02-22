@@ -18,10 +18,10 @@
          Infector
       </th>
       <td>
-        <input class='centered' :value='numInfectors' @change='setNumInfectors'/>
+        <input class='centered' :value='numInfectors' @change='setNumInfs'/>
       </td>
       <td>
-        <select class='centered' @change='selectInfectorMask'>
+        <select class='centered' :value='selectedInfectorMask.name()' @change='selectInfMask'>
           <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
         </select>
       </td>
@@ -37,11 +37,11 @@
       </th>
 
       <td>
-        <input class='centered' :value='numSusceptibles' @change='setNumSusceptibles'/>
+        <input class='centered' :value='numSusceptibles' @change='setNumSus'/>
       </td>
 
       <td>
-        <select class='centered' @change='selectSusceptibleMask'>
+        <select class='centered' :value='selectedSusceptibleMask.name()' @change='selectSusMask'>
           <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
         </select>
       </td>
@@ -57,11 +57,11 @@
       </th>
 
       <td>
-        <input class='centered' :value='numPACs' @change='setNumPACs'/>
+        <input class='centered' :value='numPACs' @change='setNumPortableAirCleaners'/>
       </td>
 
       <td>
-        <select class='centered' @change='selectAirCleaner'>
+        <select class='centered' :value='selectedAirCleaner.name()' @change='selectPAC'>
           <option :value="cleaner.singular" v-for='cleaner in airCleanerInstances'>{{cleaner.singular}}</option>
         </select>
       </td>
@@ -121,6 +121,7 @@ export default {
         'numSusceptibles',
         'selectedAirCleaner',
         'selectedInfectorMask',
+        'selectedInfMask',
         'selectedHour',
         'selectedSusceptibleMask',
         'setNumSusceptibles',
@@ -139,8 +140,36 @@ export default {
         'setNumPACs',
       ]
     ),
+    copyQuery(arg) {
+      let query = JSON.parse(JSON.stringify(this.$route.query))
+      Object.assign(query, arg)
+
+      this.$router.push({
+        name: 'Analytics',
+        params: this.$route.params,
+        query: query
+      })
+    },
+    setNumInfs(event) {
+      this.copyQuery({'numInfectors': event.target.value})
+    },
+    setNumSus(event) {
+      this.copyQuery({'numSusceptibles': event.target.value})
+    },
+    selectInfMask(event) {
+      this.copyQuery({'infectorMask': event.target.value})
+    },
+    selectSusMask(event) {
+      this.copyQuery({'susceptibleMask': event.target.value})
+    },
     setDuration(event) {
-      this.selectedHour = parseInt(event.target.value)
+      this.copyQuery({'duration': event.target.value})
+    },
+    setNumPortableAirCleaners(event) {
+      this.copyQuery({'numPACs': event.target.value})
+    },
+    selectPAC(event) {
+      this.copyQuery({'pacName': event.target.value})
     },
     roundOut(someValue, numRound) {
       return round(someValue, numRound)

@@ -767,6 +767,18 @@ export default {
   async created() {
     this.event = await this.showAnalysis(this.$route.params.id)
     this.numSusceptibles = this.event.maximumOccupancy - this.numInfectors
+
+    this.processQuery(this.$route.query, {})
+
+
+    this.$watch(
+      () => this.$route.query,
+      (toQuery, previousQuery) => {
+        this.processQuery(toQuery, previousQuery)
+        // react to route changes...
+      }
+    )
+
   },
   mounted() {
   },
@@ -808,10 +820,34 @@ export default {
     }
   },
   methods: {
-    ...mapActions(useAnalyticsStore, ['setNumPeopleToInvestIn', 'showAnalysis']),
+    ...mapActions(
+        useAnalyticsStore,
+        [
+          'setNumPeopleToInvestIn',
+          'showAnalysis',
+          'selectAirCleaner',
+          'selectSusceptibleMask',
+          'selectInfectorMask',
+          'setNumPACs',
+          'setDuration',
+          'setNumInfectors',
+          'setNumSusceptibles'
+        ]
+    ),
     ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
     ...mapActions(useEventStore, ['addPortableAirCleaner']),
     ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
+    processQuery(toQuery, fromQuery) {
+      if (this.$route.name == 'Analytics') {
+        this.selectSusceptibleMask(toQuery['susceptibleMask'])
+        this.setNumSusceptibles(toQuery['numSusceptibles'])
+        this.selectInfectorMask(toQuery['infectorMask'])
+        this.setNumInfectors(toQuery['numInfectors'])
+        this.setNumPACs(toQuery['numPACs'])
+        this.selectAirCleaner(toQuery['pacName'])
+        this.setDuration(toQuery['duration'])
+      }
+    },
     scrollFix(event, hashbang) {
       let element_to_scroll_to = document.getElementById(hashbang);
       element_to_scroll_to.scrollIntoView();

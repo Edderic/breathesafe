@@ -284,27 +284,39 @@ export const useAnalyticsStore = defineStore('analytics', {
     setNumPeopleToInvestIn(num) {
       this.numPeopleToInvestIn = num
     },
-    setNumSusceptibles(event) {
-      this.numSusceptibles = parseInt(event.target.value)
+    setNumSusceptibles(value) {
+      this.numSusceptibles = parseInt(value) || 1
     },
-    setNumInfectors(event) {
-      this.numInfectors = parseInt(event.target.value)
+    setNumInfectors(value) {
+      this.numInfectors = parseInt(value) || 1
     },
-    setNumPACs(event) {
-      this.numPACs = parseInt(event.target.value)
+    setNumPACs(value) {
+      this.numPACs = parseInt(value) || 0
     },
-    selectSusceptibleMask(event) {
-      let name = event.target.value
+    selectSusceptibleMask(name) {
       // TODO: have some occupancy variable in the data that can be set to maximum occupancy as the default
-      this.selectedSuscMask = MASKS.find((m) => m.name == name)
+      if (!name) {
+        this.selectedSuscMask = MASKS[0]
+      } else {
+        this.selectedSuscMask = MASKS.find((m) => m.name == name)
+      }
     },
-    selectInfectorMask(event) {
-      let name = event.target.value
-      this.selectedInfMask = MASKS.find((m) => m.name == name)
+    selectInfectorMask(name) {
+      if (!name) {
+        this.selectedInfMask = MASKS[0]
+      } else {
+        this.selectedInfMask = MASKS.find((m) => m.name == name)
+      }
     },
-    selectAirCleaner(event) {
-      let name = event.target.value
-      this.selectedAirCleanerObj = airCleaners.find((m) => m.singular == name)
+    setDuration(hour) {
+      this.selectedHour = parseInt(hour)
+    },
+    selectAirCleaner(name) {
+      if (!name) {
+        this.selectedAirCleanerObj = airCleaners[0]
+      } else {
+        this.selectedAirCleanerObj = airCleaners.find((m) => m.singular == name)
+      }
     },
   }
 });
