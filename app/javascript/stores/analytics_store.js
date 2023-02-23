@@ -309,7 +309,11 @@ export const useAnalyticsStore = defineStore('analytics', {
       }
     },
     setDuration(hour) {
-      this.selectedHour = parseInt(hour)
+      if (!hour) {
+        this.selectedHour = 1
+      } else {
+        this.selectedHour = parseFloat(hour)
+      }
     },
     selectAirCleaner(name) {
       if (!name) {
