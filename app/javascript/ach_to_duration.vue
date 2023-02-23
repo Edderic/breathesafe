@@ -1,7 +1,6 @@
 <template>
 
   <DrillDownSection
-
     title='Time to 99% Dilution'
     :value='durationMinutesToRemove(0.99)'
     :text='text'
@@ -15,14 +14,11 @@
           <span class='bold'>{{totalAchRounded}}</span> ACH,
           <span class='highlight'>
             it takes {{ durationMinutesToRemove(0.99)}}
-            minutes to remove 99% of the virus that have been exhaled by the infector (after the infector has left).
-          </span>
-
-          <span>Increasing total ACH, whether done by added ventilation, portable
-          air cleaning, or upper room germicidal ultra violet irradiation, the faster
-          the rate of removal of airborne pathogens, and the safer it is for
-          everyone.
-          </span>
+            minutes to remove 99% of the virus from the air that has been
+            exhaled by the infector.  </span> This is useful for situations when you know
+            there's been an infector in the room, you have your mask, and you are trying to
+            figure out how long you should wait to remove your mask. One should wait at
+            least {{ durationMinutesToRemove(0.99) }} minutes to be safe.
         </p>
       </div>
     </td>
@@ -157,7 +153,7 @@ export default {
   }
 
   .highlight {
-    font-weight: bold;
+    font-style: italic;
   }
 
   .container {
