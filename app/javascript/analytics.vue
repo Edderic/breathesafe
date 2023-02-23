@@ -68,10 +68,7 @@
 
           </table>
 
-          <div class='item-span-wide' id='section-risk-assessment-summary'>
-            <br id='risk-assessment-summary'>
-            <h2 class='centered'>Indoor Air Quality</h2>
-          </div>
+          <IndoorAirQuality/>
 
           <table>
             <CleanAirDeliveryRateTable :cellCSS='cellCSS' :intervention='selectedIntervention' :measurementUnits='measurementUnits' :systemOfMeasurement='systemOfMeasurement'/>
@@ -202,6 +199,7 @@ import TotalACHTable from './total_ach_table.vue';
 import TotalACH from './total_ach.vue';
 import VentIcon from './vent_icon.vue';
 import IndividualRisk from './individual_risk.vue';
+import IndoorAirQuality from './indoor_air_quality.vue';
 import PacIcon from './pac_icon.vue';
 import PeopleAffected from './people_affected.vue';
 import RiskIcon from './risk_icon.vue';
@@ -276,6 +274,7 @@ export default {
     Event,
     HorizontalStackedBar,
     IndividualRisk,
+    IndoorAirQuality,
     InhalationActivity,
     InfectorActivity,
     LineGraph,

@@ -88,7 +88,16 @@
         ACH for a room can be computed by summing up the ACH of different types (e.g.
         ventilation, filtration, upper-room germicidal UV).
       </p>
-      <p class='explainer'>ACH affects how fast the steady state concentration of contaminants is achieved. See <span class='bold'>Time to Reach Steady State</span>.</p>
+      <p class='explainer'>ACH affects how fast the steady state concentration
+      of contaminants is achieved. At steady state, the concentration of
+      airborne pathogens inhaled becomes some constant.
+
+  For situations in which the infector has left, in
+      the long run, the concentration will be 0. In other words, the steady state
+      concentration will be 0. ACH directly affects the amount of time it takes for
+      the concentration to decay to a relatively low value. The higher the ACH,
+      the faster the rate of removal of airborne pathogens. See <span
+      class='bold'>Time to 99% Dilution</span> for more details.</p>
     </td>
   </tr>
   </DrillDownSection>
