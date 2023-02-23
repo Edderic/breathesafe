@@ -101,9 +101,9 @@
           class='centered'
           :lines="[co2Projection, readings]"
           xlabel="Time (minutes)"
-          ylabel='CO2 Conc.'
+          ylabel='CO₂ Conc.'
           :ylim='[400, readingsMax + 300]'
-          title="CO2 concentration over Time"
+          title="CO₂ concentration over Time"
         />
 
         <table>
