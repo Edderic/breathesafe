@@ -43,6 +43,7 @@ export const useAnalyticsStore = defineStore('analytics', {
     ],
     numInfectors: 1,
     numSusceptibles: 30,
+    defaultNumSusceptibles: 30,
     numPeopleToInvestIn: 5,
     numPACs: 1,
     selectedInfMask: MASKS[0],
@@ -139,7 +140,7 @@ export const useAnalyticsStore = defineStore('analytics', {
       this.event = event
       showMeasurementSetStore.setMeasurementSet(event)
 
-      this.numSusceptibles = this.event.maximumOccupancy - this.numInfectors
+      this.defaultNumSusceptibles = this.event.maximumOccupancy - this.numInfectors
 
       return event
     },
@@ -285,7 +286,7 @@ export const useAnalyticsStore = defineStore('analytics', {
       this.numPeopleToInvestIn = num
     },
     setNumSusceptibles(value) {
-      this.numSusceptibles = parseInt(value) || 1
+      this.numSusceptibles = parseInt(value) || this.defaultNumSusceptibles
     },
     setNumInfectors(value) {
       this.numInfectors = parseInt(value) || 1
