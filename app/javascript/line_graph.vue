@@ -10,7 +10,7 @@
     <path :d='xAxis' stroke='black' fill='black' :stroke-width='axisStrokeWidth'/>
 
     <path :d='xTicks' stroke='black' fill='black' stroke-width='100'/>
-    <text v-for='(xTickLabel, index) in getXTickLabels' :x='getXTickLabelXPos(index, getXTickLabels.length)' :y='getXTickLabelYPos' text-anchor='middle'>{{xTickLabel}}</text>
+    <text v-for='(xTickLabel, index) in getXTickLabels' :x='getXTickLabelXPos(index, getXTickLabels.length)' :y='getXTickLabelYPos' text-anchor='middle'>{{xTickProcessed(xTickLabel)}}</text>
 
     <text v-for='(yTickLabel, index) in getYTickLabels' :x='getYTickLabelXPos' :y='getYTickLabelYPos(index, getYTickLabels.length)' text-anchor='middle' alignment-baseline='middle'>{{yTickProcessed(yTickLabel)}}</text>
 
@@ -56,6 +56,10 @@ export default {
     ylim: Array,
     setYTicksToPercentages: Boolean,
     roundYTicksTo: {
+      type: Number,
+      default: 2
+    },
+    roundXTicksTo: {
       type: Number,
       default: 2
     }
@@ -353,6 +357,9 @@ export default {
       }
 
       return round(yTick, this.roundYTicksTo)
+    },
+    xTickProcessed(xTick) {
+      return round(xTick, this.roundXTicksTo)
     },
     getXTickLabelXPos(i, len) {
       // Ideally this would be independent of y-Axis
