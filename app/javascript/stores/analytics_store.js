@@ -291,7 +291,7 @@ export const useAnalyticsStore = defineStore('analytics', {
       this.numInfectors = parseInt(value) || 1
     },
     setNumPACs(value) {
-      this.numPACs = parseInt(value) || 0
+      this.numPACs = parseInt(value) || 1
     },
     selectSusceptibleMask(name) {
       // TODO: have some occupancy variable in the data that can be set to maximum occupancy as the default
