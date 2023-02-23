@@ -6,7 +6,7 @@
       :text='cadrText'
       :colorScheme='colorInterpSchemeRoomVol'
     >
-      <p class='explainer'>This is the amount of estimated non-infectious air that is from mechanical ventilation, open windows, and infiltration.</p>
+      <p class='explainer'>This is the amount of estimated non-infectious air that is from mechanical ventilation, open windows, and infiltration. This is estimated from the generation rate of carbon dioxide, which depends on number of occupants and the activities that people were doing at the time, along with the carbon dioxide readings.</p>
       <h3 v-if='ventilationNotes.length > 0'>Notes</h3>
       <p>{{ventilationNotes}}</p>
 
