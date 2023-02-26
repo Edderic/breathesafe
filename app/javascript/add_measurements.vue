@@ -1797,7 +1797,6 @@
 <style scoped>
   .button {
     color: white;
-    width: 4em;
   }
   .main {
     display: flex;
