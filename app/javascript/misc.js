@@ -777,30 +777,30 @@ function greedy(producer, producerArgs, actualData, gradArgs) {
   for (let i = 0; i < 1000000; i++) {
 
     for (let cadr_d of [-1, 0, 1]) {
-      // for (let c0_d of [-1, 0, 1]) {
+      for (let c0_d of [-1, 0, 1]) {
 
-      copyProducerArgs = JSON.parse(JSON.stringify(producerArgs))
+        copyProducerArgs = JSON.parse(JSON.stringify(producerArgs))
 
-      if ((producerArgs['c0_d'] < 1 && c0_d == -1) || (producerArgs['cadr_d'] < 1 && cadr_d == -1)) {
-        continue
+        if ((producerArgs['c0_d'] < 1 && c0_d == -1) || (producerArgs['cadr_d'] < 1 && cadr_d == -1)) {
+          continue
+        }
+
+        copyProducerArgs['cadr'] = producerArgs['cadr'] + cadr_d
+        copyProducerArgs['c0'] = producerArgs['c0'] + c0_d
+
+        newData = producer(copyProducerArgs)
+
+        possibleError1 = computeError(
+          newData,
+          actualData,
+          (data1, data2) => Math.abs(data1 - data2)
+        )
+
+        if (possibleError1 < minErrorIteration) {
+          minErrorIteration = possibleError1
+          bestLocalMove = JSON.parse(JSON.stringify(copyProducerArgs))
+        }
       }
-
-      copyProducerArgs['cadr'] = producerArgs['cadr'] + cadr_d
-      // copyProducerArgs['c0'] = producerArgs['c0'] + c0_d
-
-      newData = producer(copyProducerArgs)
-
-      possibleError1 = computeError(
-        newData,
-        actualData,
-        (data1, data2) => Math.abs(data1 - data2)
-      )
-
-      if (possibleError1 < minErrorIteration) {
-        minErrorIteration = possibleError1
-        bestLocalMove = JSON.parse(JSON.stringify(copyProducerArgs))
-      }
-      // }
     }
 
     if (minErrorIteration >= lastMinErrorIteration) {
