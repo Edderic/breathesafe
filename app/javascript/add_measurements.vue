@@ -3,7 +3,7 @@
     <h2>Add Measurements</h2>
     <div class='container row centered menu'>
       <Pin />
-      <Button id='whereabouts' :class='{ "tab-item": true }' shadow='false' :selected='!$route.query.section || !display || $route.query.section == "whereabouts"' @click='setDisplay("whereabouts")'>
+      <Button id='whereabouts' :class='{ "tab-item": true, "menu-button": true }' shadow='false' :selected='!$route.query.section || !display || $route.query.section == "whereabouts"' @click='setDisplay("whereabouts")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <circle cx="40" cy="25" r="20" fill="white"/>
 
@@ -12,7 +12,7 @@
           <circle cx="40" cy="25" r="10" fill="rgb(150, 29, 2)"/>
         </svg>
       </Button>
-      <Button id='room_dimensions' :class='{ "tab-item": true, }' :selected='$route.query.section == "room_dimensions"' @click='setDisplay("room_dimensions")'>
+      <Button id='room_dimensions' :class='{ "tab-item": true, "menu-button": true}' :selected='$route.query.section == "room_dimensions"' @click='setDisplay("room_dimensions")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <path d="M 31 20 l -5 13 h 25 l 3 -13 z m -5 13 v 20 h 25 v -20 m 0 20 l 3 -13.5 l 0 -19" fill="transparent" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
           <text x="34" y="59">L</text>
@@ -21,7 +21,7 @@
 
         </svg>
       </Button>
-      <Button id='ventilation' :class='{ "tab-item": true }' :selected='$route.query.section == "ventilation"' @click='setDisplay("ventilation")'>
+      <Button id='ventilation' :class='{ "tab-item": true, "menu-button": true}' :selected='$route.query.section == "ventilation"' @click='setDisplay("ventilation")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <path d="m 20 30 h 40 l -20 -20 z" stroke='black' fill='#ccc'/>
           <path d="m 20 30 h 40 v 30 h -40 z" stroke='black' fill='#eee'/>
@@ -51,7 +51,7 @@
         </svg>
       </Button>
 
-      <Button id='pac' :class='{ "tab-item": true, }' :selected='$route.query.section == "pac"' @click='setDisplay("pac")'>
+      <Button id='pac' :class='{ "tab-item": true, "menu-button": true  }' :selected='$route.query.section == "pac"' @click='setDisplay("pac")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <path d="M 30 20 l -5 17 h 25 l 3 -17 z m -5 17 v 23 h 25 v -23 m 0 23 l 3 -17.5 l 0 -19" fill="white" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
           <path d="M 27 43 v 17 m 5 0 v -17 m 5 0 v 17 m 5 0 v -17 m 5 0 v 17 " fill="transparent" stroke='black' stroke-linecap='round' stroke-linejoin='round'/>
@@ -83,7 +83,7 @@
         </svg>
       </Button>
 
-      <Button id='behaviors' :class='{ "tab-item": true, }' :selected='$route.query.section == "behaviors"' @click='setDisplay("behaviors")'>
+      <Button id='behaviors' :class='{ "tab-item": true, "menu-button": true  }' :selected='$route.query.section == "behaviors"' @click='setDisplay("behaviors")'>
         <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
           <path d="m 5 40 c 0 -10 10 -20 15 -20 c 5 0 10 0 6 10 c 4 4 4 4 4 12 l -5 0 l 3 4 l -8 1 l 8 7 c -2 10 -16 6 -16 5 z" stroke='black' fill='#eee'/>
           <path d="m 20 30 l 5 -3" stroke='black' fill='transparent'/>
@@ -2038,6 +2038,9 @@
 
   .img {
     max-width: 400px;
+  }
+  .menu-button {
+    background-color: transparent;
   }
 
   @media(max-width: 1000px) {
