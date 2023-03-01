@@ -1,7 +1,10 @@
 <template>
 
     <div class='row align-items-center justify-content-center' v-if='!showStat'>
-      <h2 class='title'>{{title}}</h2>
+      <h2 class='title row align-items-center justify-content-center'>
+        <div v-html='icon' class='icon'></div>
+        {{title}}
+      </h2>
       <CircularButton class='showHideButton' text='?' @click='show = !show'/>
     </div>
 
@@ -53,6 +56,7 @@ export default {
     return { show: false}
   },
   props: {
+    icon: String,
     title: String,
     value: Number,
     text: {
@@ -111,5 +115,14 @@ export default {
   .showHideButton {
     margin-left: 1em;
     margin-right: 1em;
+  }
+
+  .icon {
+    padding-right: 0.5em;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: row;
   }
 </style>
