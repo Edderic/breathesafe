@@ -1,0 +1,303 @@
+<template>
+  <DrillDownSection
+    title='Indoor Air Quality'
+    :showStat='false'
+  >
+    <p>
+      Indoor Air Quality, in the case of preventing airborne transmission of
+      pathogens such as COVID, can be improved by the following:
+
+      <ul>
+        <li>Remove the source</li>
+        <li>Dilute polluted air</li>
+      </ul>
+    </p>
+    <h3>Remove the source</h3>
+
+    <div class='centered column'>
+      <div class='centered'>
+        <RapidTest height='10em' width='10em'/>
+        <table class='has-borders'>
+
+          <thead>
+            <tr>
+              <th>Symptom</th>
+              <th>Has none</th>
+            </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td>cough</td><td>✅</td>
+          </tr>
+          <tr>
+            <td>runny nose</td><td>❌</td>
+          </tr>
+
+          <tr>
+            <td>fever</td> <td>✅</td>
+          </tr>
+
+          <tr>
+            <td>...</td> <td>...</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class='fig-title'>Rapid Test and Symptoms Checklist</p>
+    </div>
+
+    <p>
+      Using tests (e.g. rapid tests, PCR) and checking for symptoms could help
+      screen potential infectors, and hence remove sources of infection.
+      Unfortunately, some carriers may be asymptomatic. Rapid testing doesn't
+      have high sensitivity (i.e.
+      <a href="https://pubmed.ncbi.nlm.nih.gov/34242764/">
+      the probability that someone tests positive
+      given that they are carriers of the virus is far from 100%
+      </a>). PCR is known to have higher sensitivity, but results might not be
+      available same-day. Hence, removal of source doesn't always happen, and
+      multiple interventions for reducing the probability of transmission are
+      encouraged, as suggested by <a
+      href="https://peoplescdc.org/2022/11/17/safer-in-person-gatherings/">People's
+      CDC's Safer In-Person Gatherings</a>.
+    </p>
+
+    <h3>Dilute polluted air</h3>
+    <p>
+      Since the removal of sources of infection doesn't always happen, we also
+      consider doing interventions that 1. assume there is someone infectious in the room,
+      and 2. <span class='italic'>dilute</span> the non-zero concentration of infectious
+      particles in the air. When an infector is present, the air inside a room is
+      dirty to some extent and contains infectious pathogens that are kept airborne
+      by tiny particles. That concentration is measured in terms of infectiousness
+      over time (e.g. quanta per hour). The total dose inhaled is essentially
+      concentration times time (e.g.  quanta -- see the Risk Equation section for
+          more details about quanta). The more ventilation, filtration, and UV
+      (upper-room germicidal UV or far UV) there is in the room, the more the
+      infectious particles gets <span class='italic'>diluted</span>, and the
+      overall inhaled amount of quanta is lower. Wearing tight-fitted, high
+      filtration efficiency N95 and elastomeric respirators also dilute the
+      concentration significantly.  See the Masking Reduction Factor
+      section for more details about that.
+    </p>
+
+    <p>
+      Below, we'll focus more on the effects of increasing ventilation,
+filtration, and UV.
+      Assuming the air is well-mixed (i.e. fans are blowing around air so that
+      the concentration of indoor air pollution is evenly distributed across the
+      room), the concentration that a susceptible inhales over time is affected by
+      two parameters:
+      <ul>
+        <li>non-infectious air delivery rate (NADR)</li>
+        <li>Air Changes per Hour (ACH)</li>
+      </ul>
+    </p>
+
+    <p>
+      NADR is measured in volume per time (e.g. cubic feet per minute). It is increased
+      by improving ventilation and supplementing via filtration (with portable
+      air cleaners), and UV (upper-room germicidal UV or far UV). <span
+      class='italic'>In the long run, the higher the NADR, the lower the dose that
+      one gets</span>. As time goes by, the concentration
+      approaches some value, which is called the steady-state concentration,
+      and NADR affects this value. <span class='italic'>The higher the NADR,
+      the lower the steady-state concentration, and vice versa.</span>
+    </p>
+    <p>
+      ACH, on the other hand, is NADR divided by the volume of the room. ACH
+      affects how fast the concentration gets to the steady state (i.e. the flattened part of the curve). <span
+      class='italic'>The higher the ACH, the faster one reaches the steady state
+      concentration.</span>
+
+    </p>
+
+    <LineGraph
+      :lines="[baseCase, largerVol, highNADR]"
+      :ylim='[0, 0.09]'
+      title='Contaminant concentration over time'
+      xlabel='Time (min)'
+      ylabel='Contaminant concentration (quanta / min)'
+      :legendStartOffset='[0.45, 0.55]'
+      :roundXTicksTo='0'
+    />
+
+    <p>
+      If the volume of the room is relatively small and
+      NADR is relatively big, then it does not take a lot of time to reach
+      steady state. On the other hand, if the volume of the room is relatively
+      big and NADR is relatively small, then it takes a while to reach steady state.
+      See the graph above to see how having different values of NADR and ACH
+      interact to produce concentration curves. We assume that a susceptible
+      and infector come in at the same time and stay at the venue, and
+      everything else is kept constant. The dose is the area under the concentration
+      curve.
+      <span class='italic'>
+      The smaller that area is, the less likely
+        susceptibles will be infected.
+      </span>
+    </p>
+
+
+    <p>In the graph above, we compare different concentration curves. The first curve in red, called "base case," involves a certain non-infectious air delivery rate and volume. The curve in green, called "larger vol., same NADR," has the same non-infectious air delivery rate as the base case, but has larger volume -- double that of the base case. Since volume is larger, ACH is decreased, which makes it take longer to hit the steady state concentration -- same as the base case. </p>
+    <p>
+How is this information useful? Assuming that you have two rooms and the same NADR for both, but one is bigger than the other, and that the infector comes in at the same time as you, a susceptible, and assuming well-mixed air (i.e. fans are blowing air around), the room will initially be safer for a period of time. <span class='italic'>Using larger spaces is good because in the beginning, there is more clean air to begin with that dilutes the dirty air. However, in the long run, the concentration of dirty air is dictated by NADR. Both curves will approach the same steady state, given the same NADR.</span> Here we can see that a decrease in ACH (due to an increase in volume) isn't necessarily a bad thing.
+    </p>
+    <p>In the graph above, we also display the scenario where NADR is increased (doubled) relative to the base case, but volume is kept the same (in blue). This leads to a situation where the steady state concentration is lower, and it's faster to reach the steady state. Increasing NADR decreases the state state concentration (i.e. safer in the long run), and increases ACH, which means that it's faster to reach steady state.</p>
+    <p>In conclusion, we see how NADR and volume interact to decrease the concentration of infectious, pathogenic air.
+      <ul>
+        <li><span class='italic'>Prefer larger spaces over smaller spaces.</span> Larger spaces are safer than smaller spaces, at least for an initial period. Very large spaces will have low ACH, but that's not necessarily a bad thing with respect to risk.</li>
+        <li><span class='italic'>Prefer higher NADR over lower NADR.</span> The higher the NADR, the less risky a venue is. People will be inhaling lower concentrations of dirty air with higher NADR in the long run.</li>
+      </ul>
+    </p>
+  </DrillDownSection>
+</template>
+
+<script>
+import { useMainStore } from './stores/main_store';
+import { useProfileStore } from './stores/profile_store';
+import { useEventStores } from './stores/event_stores';
+import { useEventStore } from './stores/event_store';
+import CircularButton from './circular_button.vue'
+import DrillDownSection from './drill_down_section.vue'
+import LineGraph from './line_graph.vue'
+import RapidTest from './rapid_test.vue'
+import { genConcCurve } from './misc'
+import { mapWritableState, mapState, mapActions } from 'pinia';
+
+export default {
+  name: '',
+  components: {
+    CircularButton,
+    DrillDownSection,
+    LineGraph,
+    RapidTest
+  },
+  data() {
+    return { show: false }
+  },
+  props: {
+  },
+  computed: {
+    baseCase() {
+      let curve = genConcCurve({
+        roomUsableVolumeCubicMeters: 10,
+        c0: 0,
+        generationRate: 1.6,
+        cadr: 20,
+        cBackground: 0,
+        windowLength: 180
+      })
+
+      let collection = []
+      for (let i = 0; i < curve.length; i++) {
+        collection.push([i, curve[i]])
+      }
+
+      return { points: collection, color: 'red', legend: 'base case' }
+    },
+    largerVol() {
+      let curve = genConcCurve({
+        roomUsableVolumeCubicMeters: 20,
+        c0: 0,
+        generationRate: 1.6,
+        cadr: 20,
+        cBackground: 0,
+        windowLength: 180
+      })
+
+      let collection = []
+      for (let i = 0; i < curve.length; i++) {
+        collection.push([i, curve[i]])
+      }
+
+      return { points: collection, color: 'green', legend: 'larger vol., same NADR (lower ACH)' }
+    },
+    highNADR() {
+      let curve = genConcCurve({
+        roomUsableVolumeCubicMeters: 10,
+        c0: 0,
+        generationRate: 1.6,
+        cadr: 40,
+        cBackground: 0,
+        windowLength: 180
+      })
+
+      let collection = []
+      for (let i = 0; i < curve.length; i++) {
+        collection.push([i, curve[i]])
+      }
+
+      return { points: collection, color: 'blue', legend: 'same vol., higher NADR (higher ACH)' }
+    },
+
+
+  },
+  async created() {
+    // TODO: fire and forget. Make asynchronous.
+    // this.debugVentilationCalc()
+
+  },
+  data() {
+  },
+  methods: {
+
+
+
+  }
+
+}
+</script>
+
+<style scoped>
+  .centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .row {
+    margin: 1em 0;
+    display: flex;
+    flex-direction: row;
+  }
+
+
+  .explainer {
+    max-width: 25em;
+    margin: 0 auto;
+  }
+
+  .title {
+    max-width: 12em;
+    margin-left: 1em;
+  }
+  .italic {
+    font-style: italic;
+  }
+
+  .showHideButton {
+    margin-left: 1em;
+    margin-right: 1em;
+  }
+
+  .has-borders {
+    border-collapse: collapse;
+    border: 2px solid gray;
+  }
+
+  th, td {
+    border: 1px solid gray;
+    padding: 0.25em;
+    text-align: center;
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fig-title {
+    font-style: italic;
+  }
+</style>
