@@ -71,18 +71,29 @@
       by tiny particles. That concentration is measured in terms of infectiousness
       over time (e.g. quanta per hour). The total dose inhaled is essentially
       concentration times time (e.g.  quanta -- see the Risk Equation section for
-          more details about quanta). The more ventilation, filtration, and UV
+          more details about quanta).
+    </p>
+
+    <div class='centered column'>
+      <div class='centered'>
+        <VentIcon :showText='true'/>
+        <PacIcon :showText='false' height='5em' width='5em' />
+      </div>
+      <p class='fig-title'>Ventilation via open windows and Filtration via Corsi-Rosenthal box, a type of DIY portable air-cleaner</p>
+    </div>
+
+    <p>
+      The more ventilation, filtration, and UV
       (upper-room germicidal UV or far UV) there is in the room, the more the
       infectious particles gets <span class='italic'>diluted</span>, and the
       overall inhaled amount of quanta is lower. Wearing tight-fitted, high
       filtration efficiency N95 and elastomeric respirators also dilute the
       concentration significantly.  See the Masking Reduction Factor
-      section for more details about that.
+      section for more details about that. However, below, we'll focus more on
+      the effects of increasing ventilation, filtration, and UV. See
     </p>
 
     <p>
-      Below, we'll focus more on the effects of increasing ventilation,
-filtration, and UV.
       Assuming the air is well-mixed (i.e. fans are blowing around air so that
       the concentration of indoor air pollution is evenly distributed across the
       room), the concentration that a susceptible inhales over time is affected by
@@ -161,6 +172,8 @@ import CircularButton from './circular_button.vue'
 import DrillDownSection from './drill_down_section.vue'
 import LineGraph from './line_graph.vue'
 import RapidTest from './rapid_test.vue'
+import PacIcon from './pac_icon.vue'
+import VentIcon from './vent_icon.vue'
 import { genConcCurve } from './misc'
 import { mapWritableState, mapState, mapActions } from 'pinia';
 
@@ -170,7 +183,9 @@ export default {
     CircularButton,
     DrillDownSection,
     LineGraph,
-    RapidTest
+    PacIcon,
+    RapidTest,
+    VentIcon,
   },
   data() {
     return { show: false }
@@ -298,5 +313,14 @@ export default {
 
   .fig-title {
     font-style: italic;
+  }
+
+  .symptomatic {
+    background-color: red;
+  }
+  .asymptomatic {
+    background-color: green;
+    text-decoration: line-through;
+    color: white;
   }
 </style>
