@@ -16,30 +16,29 @@
 
     <div class='centered column'>
       <div class='centered'>
-        <RapidTest height='10em' width='10em'/>
+        <RapidTest height='13em' width='13em'/>
         <table class='has-borders'>
 
           <thead>
             <tr>
-              <th>Symptom</th>
-              <th>Has none</th>
+              <th>Has symptom</th>
             </tr>
           </thead>
           <tbody>
-          <tr>
-            <td>cough</td><td>✅</td>
-          </tr>
-          <tr>
-            <td>runny nose</td><td>❌</td>
-          </tr>
+            <tr>
+              <td class='asymptomatic'>cough</td>
+            </tr>
+            <tr>
+              <td class='symptomatic'>runny nose</td>
+            </tr>
 
-          <tr>
-            <td>fever</td> <td>✅</td>
-          </tr>
+            <tr>
+              <td class='asymptomatic'>fever</td>
+            </tr>
 
-          <tr>
-            <td>...</td> <td>...</td>
-          </tr>
+            <tr>
+              <td>...</td>
+            </tr>
           </tbody>
         </table>
       </div>
