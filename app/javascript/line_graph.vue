@@ -62,14 +62,18 @@ export default {
     roundXTicksTo: {
       type: Number,
       default: 2
+    },
+    legendStartOffset: {
+      type: Array,
+      default: [0.6, 0.4]
     }
   },
   computed: {
     legendStartX() {
-      return 0.7 * this.viewBoxX
+      return this.legendStartOffset[0] * this.viewBoxX
     },
     legendStartY() {
-      return 0.4 * this.viewBoxY
+      return this.legendStartOffset[1] * this.viewBoxY
     },
     legendBox() {
       return `M ${this.legendStartX} ${this.legendStartY} h ${this.legendWidth} v ${this.legendHeight} h -${this.legendWidth} z`
