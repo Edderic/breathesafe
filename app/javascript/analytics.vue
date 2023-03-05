@@ -91,7 +91,10 @@
       <div class='item'>
         <div class='item-span-wide' id='section-ventilation'>
           <br>
-          <h2 class='centered'>Ventilation</h2>
+          <h2 class='centered'>
+            <VentIcon :showText='false' height='3em' width='3em' />
+            Ventilation
+          </h2>
         </div>
 
         <LineGraph
