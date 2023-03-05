@@ -27,7 +27,7 @@
     <path d='m 20 30 m 29 16 c 4 0 17 2 20 5' stroke='red' fill='transparent'/>
     <path d='m 20 30 m 29 16 m 20 5 l -2 1.5 l 3 0 l 0 -3 z' stroke='red' fill='red'/>
 
-    <text x="25" y="65">VENT</text>
+    <text x="25" y="65" v-if='showText'>VENT</text>
   </svg>
 
 
@@ -45,7 +45,10 @@ export default {
 
     width: {
       default: '5em'
-    }
+    },
+    showText: {
+      default: true
+    },
   }
 
 }
