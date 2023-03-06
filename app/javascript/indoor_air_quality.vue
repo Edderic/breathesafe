@@ -90,8 +90,82 @@
       filtration efficiency N95 and elastomeric respirators also dilute the
       concentration significantly.  See the Masking Reduction Factor
       section for more details about that. However, below, we'll focus more on
-      the effects of increasing ventilation, filtration, and UV. See
+      the effects of increasing ventilation, filtration, and UV.
     </p>
+
+    <h3>Unmixed Air</h3>
+    <div class='centered column'>
+      <Interaction/>
+      <p class='fig-title'>Infector and susceptible entered the room. Infector talks to susceptible for a small amount of time. No fans to mix the air.</p>
+    </div>
+
+    <p>
+    In the above graph, we show the scenario of an infector talking and the susceptible listening
+    to the infector for a few minutes.
+
+    The gradient of colors denote concentration, with the green
+    colored areas having the lowest concentration of infectious aerosols, and the
+    dark red areas having the highest concentration of infectious aerosols.
+    When air is not well-mixed, and an infector is present, short-range
+    transmission is very likely. In this scenario, an infector talking, singing, or even just
+    breathing can produce a jet of aerosols toward the susceptible, and a
+    susceptible can inhale a high dose quickly, and develop an infection in the
+    process.
+    </p>
+
+    <p>Notice the symmetry. The density above the susceptible's head is the
+    same as the densitiy below the susceptible's head. This is because aerosols <span class='italic'>float</span>. They are so light that they <span class='italic'>can float for hours.</span></p>
+
+    <h3>Mixed Air (Initially, in a Smaller Room)</h3>
+    <div class='centered column'>
+      <InteractionWithFan :early='true'/>
+      <p class='fig-title'>Infector and susceptible entered the room. Infector talks to susceptible for a small amount of time. A fan running mixes the air, leading to some dilution.</p>
+    </div>
+
+    <p>Mixing the air via fans can lower the inhaled dose for the susceptible. The cleaner sections of the initial graph become polluted. However, the most polluted sections become less polluted. If there is a fan placed in between the infector and the susceptible, the jet of aerosols that were going directly to the susceptible (e.g. as the infector breathes in front of the susceptible) become redirected and are more likely to spread through the room. Instead of inhaling high concentrations of the virus in a very short time (in red), the susceptible can breathe in a smaller concentration of the virus. The total dose that a susceptible gets is concentration times time. One way to lower the dose is by lowering the concentration.</p>
+
+    <h3>Mixed Air (Initially, in a Larger Room)</h3>
+
+    <div class='centered column'>
+      <InteractionWithFan :early='true' :largerVolume='true'/>
+      <p class='fig-title'>Infector and susceptible interacting for a long
+      time, with a fan to mix the air, but no ventilation, filtration, or UV.</p>
+    </div>
+
+    <p>Mixing the air while in a larger room leads to lower initial concentration for the susceptible. This is because the larger room has more clean air to begin with than a smaller room.</p>
+
+
+    <h3>Mixed Air (Later)</h3>
+    <div class='centered column'>
+      <InteractionWithFan :early='false'/>
+      <p class='fig-title'>Infector and susceptible interacting for a long
+      time, with a fan to mix the air, but no ventilation, filtration, or UV.</p>
+    </div>
+
+    <p>As we've seen, mixing the air initially can lead to dilution. However, when there aren't mitigations in place to remove (e.g. ventilation or filtration) or inactivate viruses in the air (e.g. far UV or Upper Room Germicidal UV), high concentrations of particles containing infectious pathogens can build up everywhere.
+<span class='italic'>It is worthwhile to note that the larger the room, the longer it takes to reach this state of high concentration</span>.
+</p>
+
+    <h3>Mixed Air with Fan and Air Cleaner</h3>
+
+    <div class='centered column'>
+      <InteractionWithFan :early='false' :airCleaner='true'/>
+      <p class='fig-title'>Infector and susceptible interacting for a long
+      time, with a fan to mix the air, AND portable air cleaner</p>
+    </div>
+
+    <p>Using a fan to mix the air, and a portable air cleaner to remove contaminants from the air, the concentration that a susceptible inhales is lower than in the context of not having an air cleaner. Similarly, ventilation and UV could reduce the risk of transmission by decreasing the concentration per inhalation.</p>
+
+
+    <h3>Recap</h3>
+
+    <p>To recap, we learned through the graphs that we can dilute the concentration several ways:
+      <ul>
+        <li>More mixing decreases effect of short-range transmission.</li>
+        <li>Larger rooms are safer than smaller rooms (at least initially).</li>
+        <li>Removal of pathogens in the air means there's less to inhale.</li>
+      </ul>
+</p>
 
     <p>
       Assuming the air is well-mixed (i.e. fans are blowing around air so that
@@ -134,9 +208,9 @@
 
     <p>
       If the volume of the room is relatively small and
-      NADR is relatively big, then it does not take a lot of time to reach
+      NADR is relatively big (i.e. high ACH), then it does not take a lot of time to reach
       steady state. On the other hand, if the volume of the room is relatively
-      big and NADR is relatively small, then it takes a while to reach steady state.
+      big and NADR is relatively small (i.e. low ACH), then it takes a while to reach steady state.
       See the graph above to see how having different values of NADR and ACH
       interact to produce concentration curves. We assume that a susceptible
       and infector come in at the same time and stay at the venue, and
@@ -149,6 +223,7 @@
     </p>
 
 
+    <h3>NADR & ACH Graphs</h3>
     <p>In the graph above, we compare different concentration curves. The first curve in red, called "base case," involves a certain non-infectious air delivery rate and volume. The curve in green, called "larger vol., same NADR," has the same non-infectious air delivery rate as the base case, but has larger volume -- double that of the base case. Since volume is larger, ACH is decreased, which makes it take longer to hit the steady state concentration -- same as the base case. </p>
     <p>
 How is this information useful? Assuming that you have two rooms and the same NADR for both, but one is bigger than the other, and that the infector comes in at the same time as you, a susceptible, and assuming well-mixed air (i.e. fans are blowing air around), the room will initially be safer for a period of time. <span class='italic'>Using larger spaces is good because in the beginning, there is more clean air to begin with that dilutes the dirty air. However, in the long run, the concentration of dirty air is dictated by NADR. Both curves will approach the same steady state, given the same NADR.</span> Here we can see that a decrease in ACH (due to an increase in volume) isn't necessarily a bad thing.
@@ -170,6 +245,8 @@ import { useEventStores } from './stores/event_stores';
 import { useEventStore } from './stores/event_store';
 import CircularButton from './circular_button.vue'
 import DrillDownSection from './drill_down_section.vue'
+import Interaction from './interaction.vue'
+import InteractionWithFan from './interaction_with_fan.vue'
 import LineGraph from './line_graph.vue'
 import RapidTest from './rapid_test.vue'
 import PacIcon from './pac_icon.vue'
@@ -182,6 +259,8 @@ export default {
   components: {
     CircularButton,
     DrillDownSection,
+    Interaction,
+    InteractionWithFan,
     LineGraph,
     PacIcon,
     RapidTest,
