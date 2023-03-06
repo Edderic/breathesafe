@@ -167,6 +167,8 @@
       </ul>
 </p>
 
+    <h3>NADR and ACH</h3>
+    <p>In the earlier section, we gave an intuitive explanation of what's happening using heatmaps. In this section, we'll explain the recapped points in a more mathematical fashion.</p>
     <p>
       Assuming the air is well-mixed (i.e. fans are blowing around air so that
       the concentration of indoor air pollution is evenly distributed across the
