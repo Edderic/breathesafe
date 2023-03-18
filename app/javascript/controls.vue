@@ -1,6 +1,6 @@
 <template>
   <div class='centered parameters column'>
-    <h2>Interventions</h2>
+    <h2>Dilute the Air</h2>
     <table>
     <tr>
       <td>

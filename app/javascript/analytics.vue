@@ -22,6 +22,12 @@
         </div>
       </div>
 
+      <h2 class='centered'>Remove the Source</h2>
+      <HasInfector
+
+      />
+
+
       <Controls
         :maskInstances='maskInstances'
         :airCleanerInstances='airCleanerInstances'
@@ -51,6 +57,7 @@
           />
 
           <table class='item-span-wide stuff'>
+            <ProbaAtLeastOneInfectorPresent/>
             <PeopleAffected
               id='section-average-new-infections'
               :event='event'
@@ -196,6 +203,7 @@ import InfectorActivity from './infector_activity.vue'
 import Masking from './masking.vue'
 import CADR from './cadr.vue'
 import DayHourHeatmap from './day_hour_heatmap.vue';
+import HasInfector from './has_infector.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import { Intervention } from './interventions.js'
 import TotalACHTable from './total_ach_table.vue';
@@ -205,6 +213,7 @@ import IndividualRisk from './individual_risk.vue';
 import IndoorAirQuality from './indoor_air_quality.vue';
 import PacIcon from './pac_icon.vue';
 import PeopleAffected from './people_affected.vue';
+import ProbaAtLeastOneInfectorPresent from './proba_at_least_one_infector_present.vue';
 import RiskIcon from './risk_icon.vue';
 import RiskEquation from './risk_equation.vue';
 import SideBar from './side_bar.vue';
@@ -275,6 +284,7 @@ export default {
     Controls,
     DayHourHeatmap,
     Event,
+    HasInfector,
     HorizontalStackedBar,
     IndividualRisk,
     IndoorAirQuality,
@@ -284,6 +294,7 @@ export default {
     Masking,
     PacIcon,
     PeopleAffected,
+    ProbaAtLeastOneInfectorPresent,
     RiskEquation,
     RiskIcon,
     SideBar,

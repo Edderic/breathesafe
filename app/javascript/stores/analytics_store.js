@@ -1,13 +1,14 @@
 import axios from 'axios';
 import { defineStore } from 'pinia'
 import { MASKS, Mask  } from '../masks.js'
-import { hourToIndex, round } from '../misc.js'
+import { generateUUID, hourToIndex, round } from '../misc.js'
 import { airCleaners, AirCleaner } from '../air_cleaners.js'
 import { UpperRoomGermicidalUV, UPPER_ROOM_GERMICIDAL_UV } from '../upper_room_germicidal_uv.js'
 import { Intervention } from '../interventions.js'
 import { useShowMeasurementSetStore } from './show_measurement_set_store';
 import { useEventStores } from './event_stores';
 import { getSampleInterventions } from '../sample_interventions.js'
+import { ProbaInfectious } from '../proba_infectious.js';
 
 
 // TODO: use the last location that the user was in, as the default
@@ -46,6 +47,34 @@ export const useAnalyticsStore = defineStore('analytics', {
     defaultNumSusceptibles: 30,
     numPeopleToInvestIn: 5,
     numPACs: 1,
+    possibleInfectorGroups: [
+      {
+        numPeople: 1,
+        identifier: generateUUID(),
+        evidence: [
+          {
+            name: 'PCR',
+            result: '?',
+            sensitivity: 0.95,
+            specificity: 0.99,
+          },
+          {
+            name: 'Rapid Test',
+            result: '?',
+            sensitivity: 0.9,
+            specificity: 0.99,
+          },
+          {
+            name: 'Has Symptoms',
+            result: '?',
+            sensitivity: 0.75,
+            specificity: 0.95,
+          },
+        ]
+      }
+    ],
+
+    priorProbabilityOfInfectiousness: 0.01,
     selectedInfMask: MASKS[0],
     selectedSuscMask: MASKS[0],
     selectedAirCleanerObj: airCleaners[0],
@@ -57,6 +86,26 @@ export const useAnalyticsStore = defineStore('analytics', {
     }
   }),
   getters: {
+    numSusceptibles() {
+      let count = 0
+
+      for (let possibleInfectorGroup of this.possibleInfectorGroups) {
+        count += possibleInfectorGroup.numPeople
+      }
+
+      return count - 1
+    },
+    probabilityOneInfectorIsPresent() {
+      let values = []
+      let calculator = new ProbaInfectious(this.priorProbabilityOfInfectiousness)
+
+      let product = 1
+
+      for (let possibleInfectorGroup of this.possibleInfectorGroups) {
+        product *= (1 - calculator.compute(possibleInfectorGroup.evidence)) ** possibleInfectorGroup.numPeople
+      }
+      return 1 - product
+    },
     nullIntervention() {
       return new Intervention(
           this.event,
@@ -120,7 +169,7 @@ export const useAnalyticsStore = defineStore('analytics', {
       return new AirCleaner(this.selectedAirCleanerObj, this.event, this.numPACs)
     },
     risk() {
-      return this.selectedIntervention.computeRiskRounded(this.selectedHour, this.numInfectors)
+      return this.selectedIntervention.computeRiskRounded(this.selectedHour, this.numInfectors) * this.probabilityOneInfectorIsPresent
     },
 
     styleProps() {

@@ -289,6 +289,13 @@ export const hourToIndex = {
   '12 AM': 23,
 }
 
+export function oneInFormat(ratio) {
+  if (1 / ratio >= 10) {
+    return round(1 / ratio, 0)
+  }
+  return round(1 / ratio, 1)
+}
+
 export function sortArrow(value, applicable) {
   if (!applicable) {
     return "⇵"
@@ -663,9 +670,13 @@ export function filterEvents(search, events, placeType) {
   return collection
 }
 
-export function round(val, numDigits) {
+function r(val, numDigits) {
   const factor = 10**numDigits
   return Math.round(val * factor) / factor
+}
+
+export function round(val, numDigits) {
+  return r(val, numDigits)
 }
 // Assumes there are at least two colors
 export function interpolateColor(colors, ratio) {
