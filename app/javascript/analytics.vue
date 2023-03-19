@@ -23,13 +23,18 @@
       </div>
 
       <div class='centered col'>
-        <h2 class='centered'>Remove the Source </h2>
-        <HasInfector />
+        <Menu>
+          <Button  text='Remove the Source' :selected='selectedInterventionType == "Remove the Source"' @click='selectInterventionType("Remove the Source")'/>
+          <Button  text='Dilute the Air' :selected='selectedInterventionType == "Dilute the Air"' @click='selectInterventionType("Dilute the Air")'/>
+        </Menu>
+      </div>
 
+      <div class='centered col' v-show='selectedInterventionType  == "Remove the Source"'>
+        <HasInfector />
       </div>
 
 
-      <Controls
+      <Controls v-show='selectedInterventionType == "Dilute the Air"'
         :maskInstances='maskInstances'
         :airCleanerInstances='airCleanerInstances'
         :riskColorScheme='riskColorScheme'
@@ -96,22 +101,6 @@
           </table>
         </div>
       </div>
-
-      <div class='item controls'>
-        <div class='centered col'>
-          <h2 class='centered'>Remove the Source </h2>
-          <HasInfector />
-        </div>
-
-      </div>
-
-
-      <Controls
-        :maskInstances='maskInstances'
-        :airCleanerInstances='airCleanerInstances'
-        :riskColorScheme='riskColorScheme'
-      />
-
 
       <div class='item'>
         <div class='item-span-wide' id='section-ventilation'>
@@ -211,6 +200,7 @@
 // Have a VueX store that maintains state across components
 import axios from 'axios';
 import Behaviors from './behaviors.vue';
+import Button from './button.vue';
 import CircularButton from './circular_button.vue';
 import ColoredCell from './colored_cell.vue';
 import Controls from './controls.vue';
@@ -223,6 +213,7 @@ import CADR from './cadr.vue'
 import DayHourHeatmap from './day_hour_heatmap.vue';
 import HasInfector from './has_infector.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
+import Menu from './menu.vue';
 import { Intervention } from './interventions.js'
 import TotalACHTable from './total_ach_table.vue';
 import TotalACH from './total_ach.vue';
@@ -294,6 +285,7 @@ export default {
   components: {
     AchToDuration,
     Behaviors,
+    Button,
     CADR,
     CircularButton,
     CleanAirDeliveryRateTable,
@@ -310,6 +302,7 @@ export default {
     InfectorActivity,
     LineGraph,
     Masking,
+    Menu,
     PacIcon,
     PeopleAffected,
     ProbaAtLeastOneInfectorPresent,
@@ -359,6 +352,7 @@ export default {
         'selectedSusceptibleMask',
         'numInfectors',
         'numSusceptibles',
+        'selectedInterventionType',
         'selectedIntervention',
         'selectedHour',
         'selectedInfectorMask',
@@ -857,6 +851,7 @@ export default {
           'selectAirCleaner',
           'selectSusceptibleMask',
           'selectInfectorMask',
+          'selectInterventionType',
           'setNumPACs',
           'setDuration',
           'setNumInfectors',

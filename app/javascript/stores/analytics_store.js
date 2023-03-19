@@ -79,6 +79,7 @@ export const useAnalyticsStore = defineStore('analytics', {
     selectedSuscMask: MASKS[0],
     selectedAirCleanerObj: airCleaners[0],
     selectedHour: 1,
+    selectedInterventionType: 'Remove the Source',
     event: {
       activityGroups: [],
       totalAch: 0.1,
@@ -366,6 +367,9 @@ export const useAnalyticsStore = defineStore('analytics', {
           employeeMask: employeeMask
         }))
       }
+    },
+    selectInterventionType(str) {
+      this.selectedInterventionType = str
     },
     setNumPeopleToInvestIn(num) {
       this.numPeopleToInvestIn = num
