@@ -182,6 +182,42 @@ export const useAnalyticsStore = defineStore('analytics', {
     },
   },
   actions: {
+    addPossibleInfectorGroup() {
+      this.possibleInfectorGroups.push(
+        {
+          numPeople: 1,
+          identifier: generateUUID(),
+          evidence: [
+            {
+              name: 'PCR',
+              result: '?',
+              sensitivity: 0.95,
+              specificity: 0.99,
+            },
+            {
+              name: 'Rapid Test',
+              result: '?',
+              sensitivity: 0.9,
+              specificity: 0.99,
+            },
+            {
+              name: 'Has Symptoms',
+              result: '?',
+              sensitivity: 0.75,
+              specificity: 0.95,
+            },
+          ]
+        }
+      )
+    },
+    removePossibleInfectorGroup(identifier) {
+      for (let i = 0; i < this.possibleInfectorGroups.length; i++) {
+        if (this.possibleInfectorGroups[i].identifier == identifier) {
+          this.possibleInfectorGroups.splice(i, 1)
+          break
+        }
+      }
+    },
     async showAnalysis(id) {
       let eventStores = useEventStores()
       const showMeasurementSetStore = useShowMeasurementSetStore()

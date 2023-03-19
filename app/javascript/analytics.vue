@@ -22,10 +22,11 @@
         </div>
       </div>
 
-      <h2 class='centered'>Remove the Source</h2>
-      <HasInfector
+      <div class='centered col'>
+        <h2 class='centered'>Remove the Source </h2>
+        <HasInfector />
 
-      />
+      </div>
 
 
       <Controls
@@ -343,7 +344,8 @@ export default {
         'numSusceptibles',
         'selectedIntervention',
         'selectedHour',
-        'selectedInfectorMask'
+        'selectedInfectorMask',
+        'probabilityOneInfectorIsPresent'
       ]
     ),
     ...mapWritableState(
@@ -390,7 +392,7 @@ export default {
         ]
     ),
     riskTitle() {
-      return `Conditional Risk on ${this.numInfectors} Infector(s)`
+      return `COVID-19 Transmission Risk`
     },
     readings() {
       if (!this.co2Readings) {
@@ -458,7 +460,7 @@ export default {
 
       let collection = []
       for (let i = 1; i <= loop.length; i++) {
-        collection.push([i, loop[i]])
+        collection.push([i, loop[i] * this.probabilityOneInfectorIsPresent])
       }
 
       return { 'color': 'red', points: collection, 'legend': 'projection'}
