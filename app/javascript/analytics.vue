@@ -96,6 +96,23 @@
           </table>
         </div>
       </div>
+
+      <div class='item controls'>
+        <div class='centered col'>
+          <h2 class='centered'>Remove the Source </h2>
+          <HasInfector />
+        </div>
+
+      </div>
+
+
+      <Controls
+        :maskInstances='maskInstances'
+        :airCleanerInstances='airCleanerInstances'
+        :riskColorScheme='riskColorScheme'
+      />
+
+
       <div class='item'>
         <div class='item-span-wide' id='section-ventilation'>
           <br>
