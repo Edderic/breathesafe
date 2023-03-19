@@ -775,13 +775,8 @@ export default {
       return round(this.ventilationAch, 1)
     },
   },
-  async beforeRouteUpdate(to, from) {
-    this.event = await this.showAnalysis(this.$route.params.id)
-    this.numSusceptibles = this.event.maximumOccupancy - this.numInfectors
-  },
   async created() {
     this.event = await this.showAnalysis(this.$route.params.id)
-    this.numSusceptibles = this.event.maximumOccupancy - this.numInfectors
 
     this.processQuery(this.$route.query, {})
 
@@ -855,7 +850,6 @@ export default {
     processQuery(toQuery, fromQuery) {
       if (this.$route.name == 'Analytics') {
         this.selectSusceptibleMask(toQuery['susceptibleMask'])
-        this.setNumSusceptibles(toQuery['numSusceptibles'])
         this.selectInfectorMask(toQuery['infectorMask'])
         this.setNumInfectors(toQuery['numInfectors'])
         this.setNumPACs(toQuery['numPACs'])
