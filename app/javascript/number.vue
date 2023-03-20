@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class='centered'>
       <CircularButton v-for='leftButton in leftButtons' :text='leftButton.text' @click='send(leftButton.emitSignal, {value: leftButton.text, identifier: identifier})'/>
       <input
         type='number'
@@ -64,4 +64,9 @@ export default {
   }
 
 
+  .centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 </style>

@@ -1,64 +1,37 @@
 <template>
-  <div class='container'>
-    <label>Number of positive cases last seven days</label>
-    <input
-      :value="numPositivesLastSevenDays" @change='setNumPositivesLastSevenDays'>
-  </div>
+  <div class='container centered col'>
+    <p>Your estimate of how many COVID-19 cases there are currently:</p>
+    <p><span class='bold'>1 in {{denominator}}</span></p>
+    <h3>Update the denominator:</h3>
 
-  <div class='container'>
-    <label>Number of people in the population</label>
-    <input
-      :value="numPopulation" @change='setNumPopulation'>
-  </div>
+        <Number
+          class='row'
+          :leftButtons="[{text: '-10', emitSignal: 'increment'}, {text: '-1', emitSignal: 'increment'}]"
+          :rightButtons="[{text: '+1', emitSignal: 'increment'}, {text: '+10', emitSignal: 'increment'}]"
+          :value='denominator'
+          @increment='increment'
+          @update='update'
+        />
 
-  <div class='container'>
-    <label>Multiplier to account for Uncounted Cases</label>
-    <input
-      :value="uncountedFactor" @change='setUncountedFactor'>
-  </div>
-
-  <div class='container'>
-    <label>Probability that one individual sampled from the population is infectious</label>
-    <input disabled
-      :value="probabilityInfectious">
-  </div>
-
-  <div class='container'>
-    <label>Mask Type</label>
-    <select :value='maskType' @change='setMaskType'>
-      <option v-for='m in maskValues'>{{ m }}</option>
-    </select>
   </div>
 
 </template>
 
 <script>
-import { useMainStore } from './stores/main_store'
-import { useEventStores } from './stores/event_stores'
-import { usePrevalenceStore } from './stores/prevalence_store';
-import { useProfileStore } from './stores/profile_store';
-import { maskToPenetrationFactor } from './misc'
+import { useAnalyticsStore } from './stores/analytics_store'
+import Number from './number.vue'
 import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
+import { round } from './misc.js'
 
 export default {
-  name: 'App',
+  name: 'Prevalence',
   components: {
+    Number
   },
   computed: {
-    ...mapState(useMainStore, ["focusSubTab"]),
-    ...mapWritableState(usePrevalenceStore, ['numPositivesLastSevenDays', 'numPopulation', 'uncountedFactor', 'maskType']),
-    ...mapWritableState(useMainStore, ['center', 'zoom']),
-    probabilityInfectious() {
-      return parseFloat(this.numPositivesLastSevenDays)
-        * parseFloat(this.uncountedFactor) / parseFloat(this.numPopulation)
-    },
-    maskValues() {
-      let values = []
-      for (let mask in maskToPenetrationFactor) {
-        values.push(mask)
-      }
-
-      return values
+    ...mapWritableState(useAnalyticsStore, ['priorProbabilityOfInfectiousness']),
+    denominator() {
+      return round(1 / this.priorProbabilityOfInfectiousness, 0)
     }
   },
   created() {
@@ -67,27 +40,16 @@ export default {
     return {}
   },
   methods: {
-    ...mapActions(useProfileStore, ['updateProfile']),
-    ...mapActions(useEventStores, ['computeRiskAll']),
-    setNumPopulation(e) {
-      this.numPopulation = e.target.value
-      this.updateProfile()
-      this.computeRiskAll()
+    ...mapActions(useAnalyticsStore, ['setPriorProbabilityOfInfectiousness']),
+    increment(obj) {
+      let denominator = 1 / this.priorProbabilityOfInfectiousness
+
+      denominator += parseInt(obj.value)
+
+      this.priorProbabilityOfInfectiousness = 1 / denominator
     },
-    setUncountedFactor(e) {
-      this.uncountedFactor = e.target.value
-      this.updateProfile()
-      this.computeRiskAll()
-    },
-    setNumPositivesLastSevenDays(e) {
-      this.numPositivesLastSevenDays = e.target.value
-      this.updateProfile()
-      this.computeRiskAll()
-    },
-    setMaskType(e) {
-      this.maskType = e.target.value
-      this.updateProfile()
-      this.computeRiskAll()
+    update(obj) {
+      this.priorProbabilityOfInfectiousness = 1 / parseInt(obj.value)
     }
   },
 }
@@ -95,46 +57,22 @@ export default {
 
 
 <style scoped>
-  .col {
-    display: flex;
-    flex-direction: column;
-  }
-  .row {
-    display: flex;
-    flex-direction: row;
-  }
   .container {
     margin: 1em;
-  }
-  label {
-    padding: 1em;
-  }
-  .subsection {
-    font-weight: bold;
-  }
-  .body {
-    position: absolute;
-    top: 4.2em;
-  }
-  .wide {
-    flex-direction: column;
-  }
-
-  .border-showing {
-    border: 1px solid grey;
   }
 
   .centered {
     display: flex;
+    align-items: center;
     justify-content: center;
   }
 
-  .column {
-    display: flex;
+  .col {
     flex-direction: column;
   }
 
-  button {
-    padding: 1em 3em;
+  .bold {
+    font-weight: bold;
+    font-style: italic;
   }
 </style>

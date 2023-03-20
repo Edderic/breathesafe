@@ -30,7 +30,13 @@
       </div>
 
       <div class='centered col' v-show='selectedInterventionType  == "Remove the Source"'>
-        <HasInfector />
+        <Menu>
+          <Button text='Prevalence' :selected='selectedRemoveSourceTab == "Prevalence"' @click='selectRemoveSourceTab("Prevalence")'/>
+          <Button text='Occupancy & Results' :selected='selectedRemoveSourceTab == "Occupancy & Results"' @click='selectRemoveSourceTab("Occupancy & Results")'/>
+        </Menu>
+
+        <Prevalence v-show='selectedRemoveSourceTab == "Prevalence"'/>
+        <HasInfector v-show='selectedRemoveSourceTab == "Occupancy & Results"'/>
       </div>
 
 
@@ -214,6 +220,7 @@ import DayHourHeatmap from './day_hour_heatmap.vue';
 import HasInfector from './has_infector.vue';
 import HorizontalStackedBar from './horizontal_stacked_bar.vue';
 import Menu from './menu.vue';
+import Prevalence from './prevalence.vue';
 import { Intervention } from './interventions.js'
 import TotalACHTable from './total_ach_table.vue';
 import TotalACH from './total_ach.vue';
@@ -303,6 +310,7 @@ export default {
     LineGraph,
     Masking,
     Menu,
+    Prevalence,
     PacIcon,
     PeopleAffected,
     ProbaAtLeastOneInfectorPresent,
@@ -356,6 +364,7 @@ export default {
         'selectedIntervention',
         'selectedHour',
         'selectedInfectorMask',
+        'selectedRemoveSourceTab',
         'probabilityOneInfectorIsPresent'
       ]
     ),
@@ -852,6 +861,7 @@ export default {
           'selectSusceptibleMask',
           'selectInfectorMask',
           'selectInterventionType',
+          'selectRemoveSourceTab',
           'setNumPACs',
           'setDuration',
           'setNumInfectors',

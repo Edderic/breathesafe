@@ -61,7 +61,7 @@ export const useAnalyticsStore = defineStore('analytics', {
           {
             name: 'Rapid Test',
             result: '?',
-            sensitivity: 0.9,
+            sensitivity: 0.80,
             specificity: 0.99,
           },
           {
@@ -80,6 +80,7 @@ export const useAnalyticsStore = defineStore('analytics', {
     selectedAirCleanerObj: airCleaners[0],
     selectedHour: 1,
     selectedInterventionType: 'Remove the Source',
+    selectedRemoveSourceTab: 'Prevalence',
     event: {
       activityGroups: [],
       totalAch: 0.1,
@@ -370,6 +371,9 @@ export const useAnalyticsStore = defineStore('analytics', {
     },
     selectInterventionType(str) {
       this.selectedInterventionType = str
+    },
+    selectRemoveSourceTab(str) {
+      this.selectedRemoveSourceTab = str
     },
     setNumPeopleToInvestIn(num) {
       this.numPeopleToInvestIn = num
