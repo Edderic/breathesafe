@@ -56,13 +56,13 @@ export const useAnalyticsStore = defineStore('analytics', {
             name: 'PCR',
             result: '?',
             sensitivity: 0.95,
-            specificity: 0.99,
+            specificity: 0.999,
           },
           {
             name: 'Rapid Test',
             result: '?',
             sensitivity: 0.80,
-            specificity: 0.99,
+            specificity: 0.999,
           },
           {
             name: 'Has Symptoms',
@@ -194,13 +194,13 @@ export const useAnalyticsStore = defineStore('analytics', {
               name: 'PCR',
               result: '?',
               sensitivity: 0.95,
-              specificity: 0.99,
+              specificity: 0.999,
             },
             {
               name: 'Rapid Test',
               result: '?',
-              sensitivity: 0.9,
-              specificity: 0.99,
+              sensitivity: 0.8,
+              specificity: 0.999,
             },
             {
               name: 'Has Symptoms',

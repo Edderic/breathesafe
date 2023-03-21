@@ -1,6 +1,6 @@
 <template>
   <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em' class='round button'>
-    <circle cx="40" cy="40" r="40" fill="rgb(200, 200, 200)"/>
+    <circle cx="40" cy="40" r="40" :fill="backgroundColor"/>
 
     <slot v-if='!text'></slot>
     <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class='tilted-header'>{{text}}</text>
@@ -16,7 +16,11 @@ export default {
     return {}
   },
   props: {
-    text: String
+    text: String,
+    backgroundColor: {
+      type: String,
+      default: 'rgb(200, 200, 200)'
+    }
   },
   computed: {
   },

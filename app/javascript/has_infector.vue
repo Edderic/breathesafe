@@ -1,80 +1,137 @@
 <template>
-  <div>
-    <div v-for='possibleInfectorGroup in possibleInfectorGroups' class='centered column bordered'>
-      <div class='container column centered '>
-        <label for="">Number of people</label>
+  <div class='blah'>
+    <div class='column centered'>
+      <div class='row'>
+        <span class='padded'>Groups</span>
+          <CircularButton text='+' @click='addInfectorGroup'/>
+        </div>
 
-        <Number
-          class='row'
-          :leftButtons="[{text: '-10', emitSignal: 'increment'}, {text: '-1', emitSignal: 'increment'}]"
-          :rightButtons="[{text: '+1', emitSignal: 'increment'}, {text: '+10', emitSignal: 'increment'}]"
-          :value='possibleInfectorGroup.numPeople'
-          :identifier='possibleInfectorGroup.identifier'
-          @increment='incrementNumberOfPeople'
-          @update='updateNumberOfPeople'
-        />
-      </div>
+        <table>
+          <thead>
+            <tr>
+              <th class='padded'>Number of People</tH>
+              <th class='test'>PCR</tH>
+              <th class='test'>Rapid</tH>
+              <th class='test'>Symp</tH>
+              <th class='test'>Del</tH>
+            </tr>
+          </thead>
 
-      <div class='container column centered' v-for='ev in possibleInfectorGroup.evidence'>
-        <label for="">{{ ev.name }}</label>
-
-        <select :value='ev.result' @change='setResult($event, possibleInfectorGroup, ev.name)'>
-          <option value="?">Unknown</option>
-          <option value="-">Negative</option>
-          <option value="+">Positive</option>
-        </select>
-
-      </div>
-
-      <div class='container'>
-        <CircularButton text='+' @click='addPossibleInfectorGroup'/>
-        <CircularButton text='x' @click='removePossibleInfectorGroup(possibleInfectorGroup.identifier)'/>
+          <tbody>
+            <tr v-for='v in possibleInfectorGroups' @click="choosePossibleInfectorGroup(v)" :style='{"border-color": backgroundColorGroup(v)}' class='clickable-row'>
+              <td class='padded'>
+                <Number
+                  class='row'
+                  :leftButtons="[{text: '-10', emitSignal: 'increment'}, {text: '-1', emitSignal: 'increment'}]"
+                  :rightButtons="[{text: '+1', emitSignal: 'increment'}, {text: '+10', emitSignal: 'increment'}]"
+                  :value='v.numPeople'
+                  :identifier='v.identifier'
+                  @increment='incrementNumberOfPeople'
+                  @update='updateNumberOfPeople'
+                />
+              </td>
+              <td v-for='e in v.evidence' :style="{'background-color': backgroundColorResult(e.result), 'color': colorResult(e.result)}" @click='cycleResult(e, v)'>{{e.result}}</td>
+              <td class='padded' >
+                <CircularButton text='x' @click='removePossibleInfectorGroup(v.identifier)'/>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-  </div>
-</template>
 
-<script>
+  </template>
 
-import { mapWritableState, mapState, mapActions } from 'pinia';
-import { useAnalyticsStore } from './stores/analytics_store.js'
-import { ProbaInfectious } from './proba_infectious.js';
-import { round, oneInFormat } from './misc.js';
-import CircularButton from './circular_button.vue'
-import Number from './number.vue'
-export default {
-  name: 'HasInfector',
-  components: {
-    CircularButton,
-    Number
-  },
-  data() {
-    // P(+ | inf) P(inf) = 0.95 * 0.01
-    // P(+ | inf) P(inf) + P(+ | not inf) P(not inf)  = 0.95 * 0.01 + 0.01 * 0.99
+  <script>
+
+  import { mapWritableState, mapState, mapActions } from 'pinia';
+  import { useAnalyticsStore } from './stores/analytics_store.js'
+  import { ProbaInfectious } from './proba_infectious.js';
+  import { round, oneInFormat } from './misc.js';
+  import CircularButton from './circular_button.vue'
+  import Number from './number.vue'
+  export default {
+    name: 'HasInfector',
+    components: {
+      CircularButton,
+      Number
+    },
+    created() {
+      this.possibleInfectorGroup = this.possibleInfectorGroups[0]
+    },
+    data() {
+      // P(+ | inf) P(inf) = 0.95 * 0.01
+      // P(+ | inf) P(inf) + P(+ | not inf) P(not inf)  = 0.95 * 0.01 + 0.01 * 0.99
 
 
-    return {
-    }
-  },
-  props: {
-  },
-  computed: {
-    ...mapWritableState(
-        useAnalyticsStore,
-        [
-          'possibleInfectorGroups',
-          'priorProbabilityOfInfectiousness'
-        ]
-    ),
-  },
-  methods: {
-    ...mapActions(
-        useAnalyticsStore,
+      return {
+        possibleInfectorGroup: {}
+      }
+    },
+    props: {
+    },
+    computed: {
+      ...mapWritableState(
+          useAnalyticsStore,
+          [
+            'possibleInfectorGroups',
+            'priorProbabilityOfInfectiousness'
+          ]
+      ),
+    },
+    methods: {
+      ...mapActions(
+          useAnalyticsStore,
         [
           'addPossibleInfectorGroup',
           'removePossibleInfectorGroup',
         ]
     ),
+    addInfectorGroup() {
+      this.addPossibleInfectorGroup()
+      this.possibleInfectorGroup = this.possibleInfectorGroups[this.possibleInfectorGroups.length - 1]
+    },
+    cycleResult(evidence, group) {
+      if (evidence.result == '?')  {
+        evidence.result = '+'
+      } else if (evidence.result == '+') {
+        evidence.result = '-'
+      } else {
+        evidence.result = '?'
+      }
+    },
+    colorResult(result) {
+      if (result == '+') {
+        return 'white'
+      } else if (result == '-') {
+        return 'white'
+      } else {
+        return 'black'
+      }
+    },
+    backgroundColorResult(result) {
+      if (result == '+') {
+        return 'red'
+      } else if (result == '-') {
+        return 'green'
+      } else {
+        return '#cacaca'
+      }
+    },
+    removeInfectorGroup(identifier) {
+      this.removePossibleInfectorGroup(identifier)
+      this.possibleInfectorGroup = this.possibleInfectorGroups[this.possibleInfectorGroups.length - 1]
+    },
+    backgroundColorGroup(group) {
+      if (group == this.possibleInfectorGroup) {
+        return 'rgb(200,200,200)'
+      } else {
+        return '#eee'
+      }
+    },
+    choosePossibleInfectorGroup(pig) {
+      this.possibleInfectorGroup = pig
+    },
     incrementNumberOfPeople(obj) {
       let possibleInfectorGroup = this.possibleInfectorGroups.find((ev) => { return ev.identifier == obj.identifier})
       possibleInfectorGroup.numPeople += parseInt(obj.value)
@@ -124,4 +181,29 @@ export default {
     margin: 0.5em;
   }
 
+  .blah {
+    display: grid;
+    grid-template-columns: 10em auto;
+  }
+
+  .padded {
+    padding: 0.5em;
+  }
+
+  .unselected {
+    background-color: #cacaca;
+  }
+
+  td {
+    text-align: center;
+  }
+
+  .clickable-row {
+    cursor: pointer;
+    border-collapse: collapse;
+  }
+
+  .test {
+    min-width: 3em;
+  }
 </style>
