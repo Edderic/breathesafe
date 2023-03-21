@@ -48,6 +48,13 @@ export const useAnalyticsStore = defineStore('analytics', {
     numPeopleToInvestIn: 5,
     numPACs: 1,
     possibleInfectorGroups: [
+      // for Rapid tests:
+      // https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8863328/ uses 100% for specificity
+      //
+      // https://covid19-sciencetable.ca/sciencebrief/use-of-rapid-antigen-tests-during-the-omicron-wave/#:~:text=In%20light%20of%20the%20results,and%20a%20specificity%20of%2099.5%25.
+      // says 99.5% for specificity, 60% for sensitivity
+      //
+      // https://www.bmj.com/content/378/bmj-2022-071215 says only 97% for specificity, 80% for FlowFlex
       {
         numPeople: 1,
         identifier: generateUUID(),
@@ -58,11 +65,12 @@ export const useAnalyticsStore = defineStore('analytics', {
             sensitivity: 0.95,
             specificity: 0.999,
           },
+          // https://www.bmj.com/content/378/bmj-2022-071215
           {
             name: 'Rapid Test',
             result: '?',
             sensitivity: 0.80,
-            specificity: 0.999,
+            specificity: 0.998,
           },
           {
             name: 'Has Symptoms',
