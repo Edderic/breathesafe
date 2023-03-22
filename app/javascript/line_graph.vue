@@ -16,11 +16,11 @@
 
     <path :d='path(line)' :stroke='line.color' fill='transparent' stroke-width='50' v-for='line in lines' />
 
-    <circle v-if='showHighlighter' :cx='highlighterX' :cy='highlighterY' r='100' fill='red'/>
 
     <path :d='legendBox' :stroke='legend.color' :fill='legend.color' stroke-width='10'/>
 
     <g v-for='(line, index) in lines'>
+      <circle v-if='showHighlighter' :cx='highlighterX(line)' :cy='highlighterY(line)' r='100' :fill='line.color'/>
       <path :d='plotLegend(line, index)' :stroke='line.color' :fill='transparent' stroke-width='20' />
       <text :x='getXLegend(index)' :y='getYLegend(index)' anchor='middle' alignment-baseline='middle'>{{line.legend}}</text>
     </g>
@@ -95,22 +95,6 @@ export default {
     },
     legendHeight() {
       return this.legendOffsetY * (this.lines.length + 1)
-    },
-    nearestPoint() {
-      let line = this.lines[0]
-      if (line.points.length == 0 || !this.xHighlighter) {
-        this.showHighlighter = false
-        return [0, 0]
-      }
-
-      this.showHighlighter = true
-      return line.points[parseInt(this.xHighlighter)]
-    },
-    highlighterX() {
-      return this.convertXToPlottable(this.nearestPoint[0])
-    },
-    highlighterY() {
-      return this.convertYToPlottable(this.nearestPoint[1])
     },
     globalMinX() {
       let gMinX = 1000000
@@ -318,6 +302,21 @@ export default {
     }
   },
   methods: {
+    highlighterX(line) {
+      return this.convertXToPlottable(this.nearestPoint(line)[0])
+    },
+    highlighterY(line) {
+      return this.convertYToPlottable(this.nearestPoint(line)[1])
+    },
+    nearestPoint(line) {
+      if (line.points.length == 0 || !this.xHighlighter) {
+        this.showHighlighter = false
+        return [0, 0]
+      }
+
+      this.showHighlighter = true
+      return line.points[parseInt(this.xHighlighter)]
+    },
     getXLegend(index) {
       return `${this.legendStartX + this.legendOffsetX + this.legendXTextOffset}`
     },
