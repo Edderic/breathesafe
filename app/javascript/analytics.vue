@@ -25,7 +25,7 @@
       <div class='centered col'>
         <Menu backgroundColor='transparent'>
           <Button  text='Remove the Source' :selected='selectedInterventionType == "Remove the Source"' @click='selectInterventionType("Remove the Source")'/>
-          <Button  text='Dilute the Air' :selected='selectedInterventionType == "Dilute the Air"' @click='selectInterventionType("Dilute the Air")'/>
+          <Button  text='Lower the Dose' :selected='selectedInterventionType == "Lower the Dose"' @click='selectInterventionType("Lower the Dose")'/>
         </Menu>
       </div>
 
@@ -40,7 +40,7 @@
       </div>
 
 
-      <Controls v-show='selectedInterventionType == "Dilute the Air"'
+      <Controls v-show='selectedInterventionType == "Lower the Dose"'
         :maskInstances='maskInstances'
         :airCleanerInstances='airCleanerInstances'
         :riskColorScheme='riskColorScheme'

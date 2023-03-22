@@ -1,81 +1,89 @@
 <template>
   <div class='centered parameters column'>
-    <table>
-    <tr>
-      <td>
-      </td>
-      <th>
-        Amount
-      </th>
-      <th>Protection
-      </th>
-      <th>Image
-      </th>
-    </tr>
-    <tr>
-      <th>
-         Infector
-      </th>
-      <td>
-        <input class='centered' :value='numInfectors' @change='setNumInfs'/>
-      </td>
-      <td>
-        <select class='centered' :value='selectedInfectorMask.name()' @change='selectInfMask'>
-          <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
-        </select>
-      </td>
-      <td>
-        <a :href="selectedInfectorMask.website()">
-          <img :src="selectedInfectorMask.imgLink()" alt="">
-        </a>
-      </td>
-    </tr>
-    <tr>
-      <th>
-         Susceptible
-      </th>
-
-      <td>
-        <input class='centered' :value='numSusceptibles' @change='setNumSus'/>
-      </td>
-
-      <td>
-        <select class='centered' :value='selectedSusceptibleMask.name()' @change='selectSusMask'>
-          <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
-        </select>
-      </td>
-      <td>
-        <a :href="selectedSusceptibleMask.website()">
-          <img :src="selectedSusceptibleMask.imgLink()" alt="">
-        </a>
-      </td>
-    </tr>
-    <tr>
-      <th>
-         Portable Air Cleaner
-      </th>
-
-      <td>
-        <input class='centered' :value='numPACs' @change='setNumPortableAirCleaners'/>
-      </td>
-
-      <td>
-        <select class='centered' :value='selectedAirCleaner.name()' @change='selectPAC'>
-          <option :value="cleaner.singular" v-for='cleaner in airCleanerInstances'>{{cleaner.singular}}</option>
-        </select>
-      </td>
-      <td>
-        <a :href="selectedAirCleaner.website()">
-          <img :src="selectedAirCleaner.imgLink()" alt="">
-        </a>
-      </td>
-    </tr>
-    </table>
+    <h3>Duration (hours)</h3>
+    <Number
+      class='continuous'
+      :leftButtons="[{text: '-1', emitSignal: 'incrementDuration'}]"
+      :rightButtons="[{text: '+1', emitSignal: 'incrementDuration'}]"
+      :value='selectedHour'
+      @incrementDuration='incrementDuration'
+      @update='setDuration'
+    />
+    <h3>Masking</h3>
     <table>
       <tr>
-        <th>Duration (hours)</th>
         <td>
-          <input type="number" :value='selectedHour' @change='setDuration'>
+        </td>
+        <th>Protection
+        </th>
+        <th>Image
+        </th>
+      </tr>
+      <tr>
+        <th>
+           Infector
+        </th>
+        <td>
+          <select class='centered' :value='selectedInfectorMask.name()' @change='selectInfMask'>
+            <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
+          </select>
+        </td>
+        <td>
+          <a :href="selectedInfectorMask.website()">
+            <img :src="selectedInfectorMask.imgLink()" alt="">
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <th>
+           Susceptible
+        </th>
+
+        <td>
+          <select class='centered' :value='selectedSusceptibleMask.name()' @change='selectSusMask'>
+            <option :value="mask.maskName" v-for='mask in maskInstances'>{{mask.maskName}}</option>
+          </select>
+        </td>
+        <td>
+          <a :href="selectedSusceptibleMask.website()">
+            <img :src="selectedSusceptibleMask.imgLink()" alt="">
+          </a>
+        </td>
+      </tr>
+    </table>
+    <h3>Air Cleaning</h3>
+    <table>
+      <tr>
+        <th>
+          Amount
+        </th>
+        <td>
+          <Number
+            class='continuous'
+            :leftButtons="[{text: '-1', emitSignal: 'incrementNumPAC'}]"
+            :rightButtons="[{text: '+1', emitSignal: 'incrementNumPAC'}]"
+            :value='numPACs'
+            @incrementNumPAC='incrementNumPACs'
+            @update='setNumPortableAirCleaners'
+          />
+        </td>
+      </tr>
+      <tr>
+        <th>Protection
+        </th>
+        <td>
+          <select class='centered' :value='selectedAirCleaner.name()' @change='selectPAC'>
+            <option :value="cleaner.singular" v-for='cleaner in airCleanerInstances'>{{cleaner.singular}}</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th>Image
+        </th>
+        <td>
+          <a :href="selectedAirCleaner.website()">
+            <img :src="selectedAirCleaner.imgLink()" alt="">
+          </a>
         </td>
       </tr>
     </table>
@@ -84,6 +92,7 @@
 
 <script>
 import ColoredCell from './colored_cell.vue';
+import Number from './number.vue';
 import { mapWritableState, mapState, mapActions } from 'pinia';
 import { useAnalyticsStore } from './stores/analytics_store'
 import {
@@ -93,7 +102,8 @@ import {
 export default {
   name: 'Controls',
   components: {
-    ColoredCell
+    ColoredCell,
+    Number
   },
   data() {
     return {
@@ -161,11 +171,17 @@ export default {
     selectSusMask(event) {
       this.copyQuery({'susceptibleMask': event.target.value})
     },
+    incrementDuration(event) {
+      this.copyQuery({'duration': parseInt(event.value) + this.selectedHour})
+    },
     setDuration(event) {
-      this.copyQuery({'duration': event.target.value})
+      this.copyQuery({'duration': event.value})
+    },
+    incrementNumPACs(event) {
+      this.copyQuery({'numPACs': parseInt(this.numPACs) + parseInt(event.value)})
     },
     setNumPortableAirCleaners(event) {
-      this.copyQuery({'numPACs': event.target.value})
+      this.copyQuery({'numPACs': event.value})
     },
     selectPAC(event) {
       this.copyQuery({'pacName': event.target.value})
