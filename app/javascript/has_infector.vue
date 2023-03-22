@@ -32,7 +32,7 @@
               </td>
               <td v-for='e in v.evidence' :style="{'background-color': backgroundColorResult(e.result), 'color': colorResult(e.result)}" @click='cycleResult(e, index)'>{{e.result}}</td>
               <td class='padded' >
-                <CircularButton text='x' @click='removePossibleInfectorGroup(v.identifier)'/>
+                <CircularButton text='x' @click='removeInfectorGroup(v.identifier)'/>
               </td>
             </tr>
           </tbody>
@@ -130,8 +130,33 @@
       }
     },
     removeInfectorGroup(identifier) {
+      let index = this.possibleInfectorGroups.findIndex((g) => g.identifier == identifier)
+
+      // clean up the route query
+      let query = JSON.parse(JSON.stringify(this.$route.query))
+
+      for (let k in query) {
+        let split = k.split('-')
+        if (split.length == 2) {
+          let i = split[1]
+
+          if (i == index) {
+            delete query[k]
+          }
+        }
+      }
+
       this.removePossibleInfectorGroup(identifier)
+      this.$router.push(
+        {
+          name: 'Analytics',
+          query: query
+        }
+      )
+
       this.possibleInfectorGroup = this.possibleInfectorGroups[this.possibleInfectorGroups.length - 1]
+
+
     },
     backgroundColorGroup(group) {
       if (group == this.possibleInfectorGroup) {
