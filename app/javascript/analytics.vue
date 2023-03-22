@@ -57,7 +57,7 @@
 
           <LineGraph
             class='centered'
-            :lines="[riskLine]"
+            :lines="[marginalRiskLine, conditionalRiskLine]"
             xlabel="Time (hours)"
             ylabel='Risk'
             :ylim='[0, 1]'
@@ -474,7 +474,8 @@ export default {
       }
       return { points: collection, color: 'red', legend: 'estimate' }
     },
-    riskLine() {
+    marginalRiskLine() {
+      // Assumes that the presence of an infector is probabilistic
       let loop = this.selectedIntervention.computeRisk(
           40, this.numInfectors, true
       )
@@ -484,7 +485,20 @@ export default {
         collection.push([i, loop[i] * this.probabilityOneInfectorIsPresent])
       }
 
-      return { 'color': 'red', points: collection, 'legend': 'projection'}
+      return { 'color': 'red', points: collection, 'legend': 'marginal'}
+    },
+    conditionalRiskLine() {
+      // Assumes the presence of an infector
+      let loop = this.selectedIntervention.computeRisk(
+          40, this.numInfectors, true
+      )
+
+      let collection = []
+      for (let i = 1; i <= loop.length; i++) {
+        collection.push([i, loop[i]])
+      }
+
+      return { 'color': 'blue', points: collection, 'legend': 'conditional on 1 infector'}
     },
     cellCSSMerged() {
       let def = {
