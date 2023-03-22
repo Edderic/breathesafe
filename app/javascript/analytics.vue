@@ -24,23 +24,15 @@
 
       <div class='centered col'>
         <Menu backgroundColor='transparent'>
-          <Button  text='Remove the Source' :selected='selectedInterventionType == "Remove the Source"' @click='selectInterventionType("Remove the Source")'/>
-          <Button  text='Lower the Dose' :selected='selectedInterventionType == "Lower the Dose"' @click='selectInterventionType("Lower the Dose")'/>
+          <Button text='Prevalence' :selected='selectedInterventionType == "Prevalence"' @click='selectInterventionType("Prevalence")'/>
+          <Button text='Occupancy' :selected='selectedInterventionType == "Occupancy & Tests"' @click='selectInterventionType("Occupancy & Tests")'/>
+          <Button text='Dilution' :selected='selectedInterventionType == "Dilution"' @click='selectInterventionType("Dilution")'/>
         </Menu>
       </div>
 
-      <div class='centered col' v-show='selectedInterventionType  == "Remove the Source"'>
-        <Menu backgroundColor='transparent'>
-          <Button text='Prevalence' :selected='selectedRemoveSourceTab == "Prevalence"' @click='selectRemoveSourceTab("Prevalence")'/>
-          <Button text='Occupancy & Results' :selected='selectedRemoveSourceTab == "Occupancy & Results"' @click='selectRemoveSourceTab("Occupancy & Results")'/>
-        </Menu>
-
-        <Prevalence v-show='selectedRemoveSourceTab == "Prevalence"'/>
-        <HasInfector v-show='selectedRemoveSourceTab == "Occupancy & Results"'/>
-      </div>
-
-
-      <Controls v-show='selectedInterventionType == "Lower the Dose"'
+      <Prevalence v-show='selectedInterventionType == "Prevalence"'/>
+      <HasInfector v-show='selectedInterventionType == "Occupancy & Tests"'/>
+      <Controls v-show='selectedInterventionType == "Dilution"'
         :maskInstances='maskInstances'
         :airCleanerInstances='airCleanerInstances'
         :riskColorScheme='riskColorScheme'
@@ -1141,10 +1133,6 @@ export default {
 
   .parameters td img {
     height: 3.5em;
-  }
-
-  .parameters td {
-    padding: 0.25em;
   }
 
   .grid {

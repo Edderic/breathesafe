@@ -1,15 +1,28 @@
 <template>
-  <div class='blah'>
-    <div class='column centered'>
-      <div class='row'>
-        <span class='padded'>Groups</span>
-          <CircularButton text='+' @click='addInfectorGroup'/>
+  <div class='column centered'>
+    <div class='row'>
+      <span class='padded'>Groups</span>
+        <CircularButton text='+' @click='addInfectorGroup'/>
+      </div>
+
+      <div class='column' v-for='(v, index) in possibleInfectorGroups' >
+        <div class='centered column'>
+          <h4>Number of People</h4>
+
+          <Number
+            class='row'
+            :leftButtons="[{text: '-10', emitSignal: 'increment'}, {text: '-1', emitSignal: 'increment'}]"
+            :rightButtons="[{text: '+1', emitSignal: 'increment'}, {text: '+10', emitSignal: 'increment'}]"
+            :value='v.numPeople'
+            :identifier='v.identifier'
+            @increment='incrementNumberOfPeople'
+            @update='updateNumberOfPeople'
+          />
         </div>
 
         <table>
           <thead>
             <tr>
-              <th class='padded'>Number of People</tH>
               <th class='test'>PCR</tH>
               <th class='test'>Rapid</tH>
               <th class='test'>Symp</tH>
@@ -18,18 +31,7 @@
           </thead>
 
           <tbody>
-            <tr v-for='(v, index) in possibleInfectorGroups' @click="choosePossibleInfectorGroup(v)" :style='{"border-color": backgroundColorGroup(v)}' class='clickable-row'>
-              <td class='padded'>
-                <Number
-                  class='row'
-                  :leftButtons="[{text: '-10', emitSignal: 'increment'}, {text: '-1', emitSignal: 'increment'}]"
-                  :rightButtons="[{text: '+1', emitSignal: 'increment'}, {text: '+10', emitSignal: 'increment'}]"
-                  :value='v.numPeople'
-                  :identifier='v.identifier'
-                  @increment='incrementNumberOfPeople'
-                  @update='updateNumberOfPeople'
-                />
-              </td>
+            <tr @click="choosePossibleInfectorGroup(v)" :style='{"border-color": backgroundColorGroup(v)}' class='clickable-row'>
               <td v-for='e in v.evidence' :style="{'background-color': backgroundColorResult(e.result), 'color': colorResult(e.result)}" @click='cycleResult(e, index)'>{{e.result}}</td>
               <td class='padded' >
                 <CircularButton text='x' @click='removeInfectorGroup(v.identifier)'/>
@@ -235,16 +237,11 @@
 
   .bordered {
     border: 1px solid black;
-    padding: 1em;
+    padding: 0.5em;
   }
 
   .container {
     margin: 0.5em;
-  }
-
-  .blah {
-    display: grid;
-    grid-template-columns: 10em auto;
   }
 
   .padded {

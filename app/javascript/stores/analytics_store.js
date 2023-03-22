@@ -87,8 +87,7 @@ export const useAnalyticsStore = defineStore('analytics', {
     selectedSuscMask: MASKS[0],
     selectedAirCleanerObj: airCleaners[0],
     selectedHour: 1,
-    selectedInterventionType: 'Remove the Source',
-    selectedRemoveSourceTab: 'Prevalence',
+    selectedInterventionType: 'Prevalence',
     event: {
       activityGroups: [],
       totalAch: 0.1,
@@ -402,9 +401,6 @@ export const useAnalyticsStore = defineStore('analytics', {
     },
     selectInterventionType(str) {
       this.selectedInterventionType = str
-    },
-    selectRemoveSourceTab(str) {
-      this.selectedRemoveSourceTab = str
     },
     setNumPeopleToInvestIn(num) {
       this.numPeopleToInvestIn = num
