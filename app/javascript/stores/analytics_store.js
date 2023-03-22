@@ -100,7 +100,7 @@ export const useAnalyticsStore = defineStore('analytics', {
       let count = 0
 
       for (let possibleInfectorGroup of this.possibleInfectorGroups) {
-        count += possibleInfectorGroup.numPeople
+        count += parseInt(possibleInfectorGroup.numPeople)
       }
 
       return count - 1
