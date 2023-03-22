@@ -57,7 +57,7 @@
 
           <LineGraph
             class='centered'
-            :lines="[marginalRiskLine, conditionalRiskLine]"
+            :lines="[conditionalRiskLine, marginalRiskLine]"
             xlabel="Time (hours)"
             ylabel='Risk'
             :ylim='[0, 1]'
