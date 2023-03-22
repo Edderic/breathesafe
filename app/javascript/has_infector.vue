@@ -171,7 +171,7 @@
     incrementNumberOfPeople(obj) {
       this.updatePeople(obj,
         function(newQuery, key, possibleInfectorGroup, obj) {
-          newQuery[key] = possibleInfectorGroup.numPeople + parseInt(obj.value)
+          newQuery[key] = parseInt(possibleInfectorGroup.numPeople) + parseInt(obj.value)
         }
       )
     },
@@ -207,7 +207,7 @@
     updateNumberOfPeople(obj) {
       this.updatePeople(obj,
         function(newQuery, key, possibleInfectorGroup, obj) {
-          newQuery[key] =  parseInt(obj.value)
+          newQuery[key] = parseInt(obj.value)
         }
       )
     }
