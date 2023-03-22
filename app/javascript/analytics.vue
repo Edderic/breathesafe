@@ -365,7 +365,8 @@ export default {
         'selectedHour',
         'selectedInfectorMask',
         'selectedRemoveSourceTab',
-        'probabilityOneInfectorIsPresent'
+        'probabilityOneInfectorIsPresent',
+        'priorProbabilityOfInfectiousness'
       ]
     ),
     ...mapWritableState(
@@ -881,11 +882,17 @@ export default {
         this.selectAirCleaner(toQuery['pacName'])
         this.setDuration(toQuery['duration'])
         this.setInfectorGroups(toQuery)
+        this.setPrevalence(toQuery)
       }
     },
     scrollFix(event, hashbang) {
       let element_to_scroll_to = document.getElementById(hashbang);
       element_to_scroll_to.scrollIntoView();
+    },
+    setPrevalence(toQuery) {
+      if (toQuery['prevalenceDenominator']) {
+        this.priorProbabilityOfInfectiousness = 1 / toQuery['prevalenceDenominator']
+      }
     },
 
     point(event) {

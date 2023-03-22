@@ -40,16 +40,37 @@ export default {
     return {}
   },
   methods: {
-    ...mapActions(useAnalyticsStore, ['setPriorProbabilityOfInfectiousness']),
     increment(obj) {
       let denominator = 1 / this.priorProbabilityOfInfectiousness
 
       denominator += parseInt(obj.value)
 
-      this.priorProbabilityOfInfectiousness = 1 / denominator
+      // this.priorProbabilityOfInfectiousness = 1 / denominator
+      let query = JSON.parse(JSON.stringify(this.$route.query))
+      let newQuery = {}
+
+      newQuery['prevalenceDenominator'] = parseInt(denominator)
+
+      Object.assign(query, newQuery)
+
+      this.$router.push({
+        name: 'Analytics',
+        query: query
+      })
     },
     update(obj) {
-      this.priorProbabilityOfInfectiousness = 1 / parseInt(obj.value)
+      // this.priorProbabilityOfInfectiousness = 1 / denominator
+      let query = JSON.parse(JSON.stringify(this.$route.query))
+      let newQuery = {}
+
+      newQuery['prevalenceDenominator'] = parseInt(obj.value)
+
+      Object.assign(query, newQuery)
+
+      this.$router.push({
+        name: 'Analytics',
+        query: query
+      })
     }
   },
 }
