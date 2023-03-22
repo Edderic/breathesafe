@@ -51,8 +51,9 @@
       <div class='col item' >
         <div class='item'>
           <div class='item-span-wide' id='section-risk-assessment-summary'>
-            <br id='risk-assessment-summary'>
-            <h2 class='centered'>Risk Assessment</h2>
+            <h2 class='centered'>
+            <span class='header-icon'>🎲</span>&nbsp; Risk Assessment
+            </h2>
           </div>
 
           <LineGraph
@@ -1013,10 +1014,6 @@ export default {
     flex-direction: column;
   }
 
-  .margined {
-    margin: 2em;
-  }
-
   .padded {
     padding: 1em;
   }
@@ -1082,16 +1079,6 @@ export default {
     margin-left: 20rem;
   }
 
-  .link-h1 {
-    margin-left: 2em;
-    margin-top: 1em;
-  }
-
-  .link-h2 {
-    margin-left: 3em;
-    margin-top: 1em;
-  }
-
   .controls {
     border-right: 1px solid grey;
     position: sticky;
@@ -1116,6 +1103,10 @@ export default {
       margin-left: 0;
       width: 100vw;
     }
+  }
+
+  .header-icon {
+    font-size: 2.5em;
   }
 
   .icon-bar {
