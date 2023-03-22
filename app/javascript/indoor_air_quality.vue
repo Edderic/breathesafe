@@ -1,6 +1,7 @@
 <template>
   <DrillDownSection
     title='Indoor Air Quality'
+    icon='<span style="font-size: 2em;">💨</span>'
     :showStat='false'
   >
     <p>

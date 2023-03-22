@@ -48,11 +48,11 @@
     </div>
 
     <div class='second-column'>
-      <div class='col item' >
+      <div class='item' >
         <div class='item'>
           <div class='item-span-wide' id='section-risk-assessment-summary'>
             <h2 class='centered'>
-            <span class='header-icon'>🎲</span>&nbsp; Risk Assessment
+              <span class='header-icon'>🎲</span>&nbsp; Risk Assessment
             </h2>
           </div>
 
@@ -1106,7 +1106,7 @@ export default {
   }
 
   .header-icon {
-    font-size: 2.5em;
+    font-size: 2em;
   }
 
   .icon-bar {
