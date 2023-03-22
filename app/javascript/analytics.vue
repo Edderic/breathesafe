@@ -23,14 +23,14 @@
       </div>
 
       <div class='centered col'>
-        <Menu>
+        <Menu backgroundColor='transparent'>
           <Button  text='Remove the Source' :selected='selectedInterventionType == "Remove the Source"' @click='selectInterventionType("Remove the Source")'/>
           <Button  text='Dilute the Air' :selected='selectedInterventionType == "Dilute the Air"' @click='selectInterventionType("Dilute the Air")'/>
         </Menu>
       </div>
 
       <div class='centered col' v-show='selectedInterventionType  == "Remove the Source"'>
-        <Menu>
+        <Menu backgroundColor='transparent'>
           <Button text='Prevalence' :selected='selectedRemoveSourceTab == "Prevalence"' @click='selectRemoveSourceTab("Prevalence")'/>
           <Button text='Occupancy & Results' :selected='selectedRemoveSourceTab == "Occupancy & Results"' @click='selectRemoveSourceTab("Occupancy & Results")'/>
         </Menu>
@@ -1243,5 +1243,8 @@ export default {
     margin: 0 auto;
   }
 
+  .menu {
+    background-color: transparent;
+  }
 </style>
 

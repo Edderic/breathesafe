@@ -1,18 +1,22 @@
 <template>
-  <div class='container row centered menu'>
+  <div :class='{container: true, row: true, centered: true, menu: true, "background-color": backgroundColor}'>
     <slot></slot>
   </div>
 </template>
 
 <script>
 export default {
-  name: '',
+  name: 'Menu',
   components: {
   },
   data() {
     return {}
   },
   props: {
+    backgroundColor: {
+      type: String,
+      default: '#eee'
+    }
   },
   computed: {
 
@@ -25,7 +29,6 @@ export default {
 <style scoped>
   .menu {
     min-width: 500px;
-    background-color: #eee;
     margin-top: 0;
     margin-bottom: 0;
   }
