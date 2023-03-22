@@ -205,13 +205,13 @@ export const useAnalyticsStore = defineStore('analytics', {
               specificity: 0.999,
             },
             {
-              name: 'Rapid Test',
+              name: 'Rapid',
               result: '?',
               sensitivity: 0.8,
               specificity: 0.999,
             },
             {
-              name: 'Has Symptoms',
+              name: 'Symptoms',
               result: '?',
               sensitivity: 0.75,
               specificity: 0.95,
@@ -219,6 +219,29 @@ export const useAnalyticsStore = defineStore('analytics', {
           ]
         }
       )
+    },
+    setInfectorGroups(query) {
+      //
+      for (const [key, value] of Object.entries(query)) {
+        let split = key.split('-')
+        if (split.length == 2) {
+          let index = parseInt(split[1])
+
+          while (index + 1 > this.possibleInfectorGroups.length) {
+            this.addPossibleInfectorGroup()
+          }
+
+          if (split[0] == 'numPeople') {
+            this.possibleInfectorGroups[index][split[0]] = value
+          } else {
+            let evidence = this.possibleInfectorGroups[index].evidence.find(
+              (e) => {return e.name == split[0]}
+            )
+            evidence['result'] = value
+
+          }
+        }
+      }
     },
     removePossibleInfectorGroup(identifier) {
       for (let i = 0; i < this.possibleInfectorGroups.length; i++) {

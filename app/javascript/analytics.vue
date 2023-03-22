@@ -856,6 +856,7 @@ export default {
         useAnalyticsStore,
         [
           'setNumPeopleToInvestIn',
+          'setInfectorGroups',
           'showAnalysis',
           'selectAirCleaner',
           'selectSusceptibleMask',
@@ -879,6 +880,7 @@ export default {
         this.setNumPACs(toQuery['numPACs'])
         this.selectAirCleaner(toQuery['pacName'])
         this.setDuration(toQuery['duration'])
+        this.setInfectorGroups(toQuery)
       }
     },
     scrollFix(event, hashbang) {
