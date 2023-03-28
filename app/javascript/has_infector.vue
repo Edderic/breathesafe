@@ -32,7 +32,7 @@
 
           <tbody>
             <tr @click="choosePossibleInfectorGroup(v)" :style='{"border-color": backgroundColorGroup(v)}' class='clickable-row'>
-              <td v-for='e in v.evidence' :style="{'background-color': backgroundColorResult(e.result), 'color': colorResult(e.result)}" @click='cycleResult(e, index)'>{{e.result}}</td>
+              <td v-for='(value, key) in v.evidence' :style="{'background-color': backgroundColorResult(value), 'color': colorResult(value)}" @click='cycleResult(key, value, index)'>{{value}}</td>
               <td class='padded' >
                 <CircularButton text='x' @click='removeInfectorGroup(v.identifier)'/>
               </td>
@@ -93,19 +93,19 @@
       this.addPossibleInfectorGroup()
       this.possibleInfectorGroup = this.possibleInfectorGroups[this.possibleInfectorGroups.length - 1]
     },
-    cycleResult(evidence, index) {
+    cycleResult(key, value, index) {
       let newQuery = {}
       let query = JSON.parse(JSON.stringify(this.$route.query))
 
-      if (evidence.result == '?')  {
-        evidence.result = '+'
-      } else if (evidence.result == '+') {
-        evidence.result = '-'
+      if (value == '?')  {
+        value = '+'
+      } else if (value == '+') {
+        value = '-'
       } else {
-        evidence.result = '?'
+        value = '?'
       }
 
-      newQuery[`${evidence.name}-${index}`] = evidence.result
+      newQuery[`${key}-${index}`] = value
       Object.assign(query, newQuery)
 
       this.$router.push({
@@ -176,10 +176,6 @@
           newQuery[key] = parseInt(possibleInfectorGroup.numPeople) + parseInt(obj.value)
         }
       )
-    },
-    posteriorInfectiousness(possibleInfectorGroup) {
-      let calculator = new ProbaInfectious(this.priorProbabilityOfInfectiousness)
-      return calculator.compute(possibleInfectorGroup.evidence)
     },
     setResult(event, posInfectorGroup, evName) {
       let possibleInfectorGroup = this.possibleInfectorGroups.find((infGroup) => { return posInfectorGroup.identifier == infGroup.identifier})

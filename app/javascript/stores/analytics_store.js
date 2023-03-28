@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { CPT } from '../cpt.js'
+import { Factor } from '../factor.js'
 import { defineStore } from 'pinia'
 import { MASKS, Mask  } from '../masks.js'
 import { generateUUID, hourToIndex, round } from '../misc.js'
@@ -58,31 +60,145 @@ export const useAnalyticsStore = defineStore('analytics', {
       {
         numPeople: 1,
         identifier: generateUUID(),
-        evidence: [
-          {
-            name: 'PCR',
-            result: '?',
-            sensitivity: 0.95,
-            specificity: 0.999,
-          },
-          // https://www.bmj.com/content/378/bmj-2022-071215
-          {
-            name: 'Rapid Test',
-            result: '?',
-            sensitivity: 0.80,
-            specificity: 0.998,
-          },
-          {
-            name: 'Has Symptoms',
-            result: '?',
-            sensitivity: 0.75,
-            specificity: 0.95,
-          },
+        evidence: [], // {'pcr': '-', 'symptomatic': '-'}
+        outcome: 'has_covid',
+        cpts: [
+          new CPT(
+            {
+              outcome: 'has_covid',
+              factor: new Factor([
+                {
+                  has_covid: 'true',
+                  value: 0.01
+                },
+                {
+                  has_covid: 'false',
+                  value: 0.99
+                },
+              ])
+            }
+          ),
+          new CPT(
+            {
+              outcome: 'pcr',
+              factor: new Factor(
+                [
+                  {
+                    'pcr': '-',
+                    'has_covid': 'false',
+                    'value': 0.999
+                  },
+                  {
+                    'pcr': '+',
+                    'has_covid': 'false',
+                    'value': 0.001
+                  },
+                  {
+                    'pcr': '+',
+                    'has_covid': 'true',
+                    'value': 0.95
+                  },
+                  {
+                    'pcr': '-',
+                    'has_covid': 'true',
+                    'value': 0.05
+                  },
+                ]
+              )
+            }
+          ),
+
+          new CPT(
+            {
+              outcome: 'rapid',
+              factor: new Factor(
+                [
+                  {
+                    'rapid': '-',
+                    'has_covid': 'false',
+                    'symptomatic': 'false',
+                    'value': 1.0
+                  },
+                  {
+                    'rapid': '+',
+                    'has_covid': 'false',
+                    'symptomatic': 'false',
+                    'value': 0.0
+                  },
+                  {
+                    'rapid': '-',
+                    'has_covid': 'false',
+                    'symptomatic': 'true',
+                    'value': 1.0
+                  },
+                  {
+                    'rapid': '+',
+                    'has_covid': 'false',
+                    'symptomatic': 'true',
+                    'value': 0.0
+                  },
+                  {
+                    'rapid': '-',
+                    'has_covid': 'true',
+                    'symptomatic': 'false',
+                    'value': 0.5
+                  },
+                  {
+                    'rapid': '+',
+                    'has_covid': 'true',
+                    'symptomatic': 'false',
+                    'value': 0.5
+                  },
+                  {
+                    'rapid': '+',
+                    'has_covid': 'true',
+                    'symptomatic': 'true',
+                    'value': 0.8
+                  },
+                  {
+                    'rapid': '-',
+                    'has_covid': 'true',
+                    'symptomatic': 'true',
+                    'value': 0.2
+                  },
+                ]
+              )
+            }
+          ),
+          new CPT(
+            {
+
+              outcome: 'symptomatic',
+              factor: new Factor([
+                {
+                  'symptomatic': 'true',
+                  'has_covid': 'true',
+                  'value': 0.75,
+                },
+
+                {
+                  'symptomatic': 'false',
+                  'has_covid': 'true',
+                  'value': 0.25,
+                },
+
+                {
+                  'symptomatic': 'true',
+                  'has_covid': 'false',
+                  'value': 0.08,
+                },
+                {
+                  'symptomatic': 'false',
+                  'has_covid': 'false',
+                  'value': 0.92,
+                },
+              ])
+            }
+          )
         ]
       }
     ],
 
-    priorProbabilityOfInfectiousness: 0.01,
     selectedInfMask: MASKS[0],
     selectedSuscMask: MASKS[0],
     selectedAirCleanerObj: airCleaners[0],
@@ -106,12 +222,15 @@ export const useAnalyticsStore = defineStore('analytics', {
     },
     probabilityOneInfectorIsPresent() {
       let values = []
-      let calculator = new ProbaInfectious(this.priorProbabilityOfInfectiousness)
+      let calculator = new ProbaInfectious()
 
       let product = 1
+      let computation = 0
+      for (let pig of this.possibleInfectorGroups) {
+        computation = calculator.compute(pig.outcome, pig.evidence, pig.cpts)
+        let probaInfectious = computation.arrayOfObj[0].value
 
-      for (let possibleInfectorGroup of this.possibleInfectorGroups) {
-        product *= (1 - calculator.compute(possibleInfectorGroup.evidence)) ** possibleInfectorGroup.numPeople
+        product *= (1 - probaInfectious) ** pig.numPeople
       }
       return 1 - product
     },
@@ -197,24 +316,6 @@ export const useAnalyticsStore = defineStore('analytics', {
           numPeople: 1,
           identifier: generateUUID(),
           evidence: [
-            {
-              name: 'PCR',
-              result: '?',
-              sensitivity: 0.95,
-              specificity: 0.999,
-            },
-            {
-              name: 'Rapid',
-              result: '?',
-              sensitivity: 0.8,
-              specificity: 0.999,
-            },
-            {
-              name: 'Symptoms',
-              result: '?',
-              sensitivity: 0.75,
-              specificity: 0.95,
-            },
           ]
         }
       )

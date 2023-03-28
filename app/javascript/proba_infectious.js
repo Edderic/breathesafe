@@ -1,12 +1,11 @@
 export class ProbaInfectious {
-  constructor(prior) {
+  constructor() {
     /*
      * {
      *   infectiousness: 0.05
      * }
      */
 
-    this.prior = prior
 
   }
 
@@ -42,41 +41,41 @@ export class ProbaInfectious {
    *         ]
    *
    */
-  compute(evidence) {
+  compute(outcome, evidence, cpts) {
+    // TODO: filter for evidence
 
-    let numerator = this.prior;
+    let factors = []
+    for (let cpt of cpts) {
+      factors.push(cpt.toFactor())
+    }
 
-    for (let e of evidence) {
-      if (e.result == '?') {
-        continue
-      }
-      else if (e.result == '+') {
-        // P(+ | inf) * P(inf)
-        numerator *= e.sensitivity
-      } else {
-        // P(- | inf) * P(inf)
-        numerator *= (1 - e.sensitivity)
+    let numerator = factors[0]
+    for (let i = 1; i < factors.length; i++) {
+      numerator = numerator.prod(factors[i])
+    }
+
+    let evidenceKeys = []
+    for (let k of evidence) {
+      evidenceKeys.push(k)
+    }
+
+    let varsToSumOutNumerator = []
+
+    for (let k in numerator.arrayOfObj[0]) {
+      if (!evidenceKeys.includes(k) && !['value', outcome].includes(k)) {
+        varsToSumOutNumerator.push(k)
       }
     }
 
-    let other = (1 - this.prior)
+    let num = numerator.sum(varsToSumOutNumerator)
 
-    for (let e of evidence) {
-      if (e.result == '?') {
-        continue
-      }
-      else if (e.result == '+') {
-        // P(+ | not inf) * P(not inf)
-        other *= (1 - e.specificity)
-      } else {
-        // P(- | not inf)
-        //
-        other *= e.specificity
-      }
-    }
 
-    let denominator = numerator + other
+    let varsToSumOutDenominator = JSON.parse(JSON.stringify(varsToSumOutNumerator))
 
-    return numerator / denominator
+    varsToSumOutDenominator.push(outcome)
+
+    let den = numerator.sum(varsToSumOutDenominator)
+
+    return num.div(den).filter({ has_covid: 'true'})
   }
 }
