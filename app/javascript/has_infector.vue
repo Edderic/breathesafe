@@ -32,7 +32,7 @@
 
           <tbody>
             <tr @click="choosePossibleInfectorGroup(v)" :style='{"border-color": backgroundColorGroup(v)}' class='clickable-row'>
-              <td v-for='(value, key) in v.evidence' :style="{'background-color': backgroundColorResult(value), 'color': colorResult(value)}" @click='cycleResult(key, value, index)'>{{value}}</td>
+              <td v-for='(value, key) in v.evidence' :style="{'background-color': backgroundColorResult(value), 'color': colorResult(value)}" @click='cycleResult(key, value, index)'>{{getValue(value)}}</td>
               <td class='padded' >
                 <CircularButton text='x' @click='removeInfectorGroup(v.identifier)'/>
               </td>
@@ -87,129 +87,138 @@
         [
           'addPossibleInfectorGroup',
           'removePossibleInfectorGroup',
-        ]
-    ),
-    addInfectorGroup() {
-      this.addPossibleInfectorGroup()
-      this.possibleInfectorGroup = this.possibleInfectorGroups[this.possibleInfectorGroups.length - 1]
-    },
-    cycleResult(key, value, index) {
-      let newQuery = {}
-      let query = JSON.parse(JSON.stringify(this.$route.query))
+        ],
+      ),
+      addInfectorGroup() {
+        this.addPossibleInfectorGroup()
+        this.possibleInfectorGroup = this.possibleInfectorGroups[this.possibleInfectorGroups.length - 1]
+      },
+      cycleResult(key, value, index) {
+        let newQuery = {}
+        let query = JSON.parse(JSON.stringify(this.$route.query))
 
-      if (value == '?')  {
-        value = '+'
-      } else if (value == '+') {
-        value = '-'
-      } else {
-        value = '?'
-      }
-
-      newQuery[`${key}-${index}`] = value
-      Object.assign(query, newQuery)
-
-      this.$router.push({
-        name: 'Analytics',
-        query: query
-      })
-    },
-    colorResult(result) {
-      if (result == '+') {
-        return 'white'
-      } else if (result == '-') {
-        return 'white'
-      } else {
-        return 'black'
-      }
-    },
-    backgroundColorResult(result) {
-      if (result == '+') {
-        return 'red'
-      } else if (result == '-') {
-        return 'green'
-      } else {
-        return '#cacaca'
-      }
-    },
-    removeInfectorGroup(identifier) {
-      let index = this.possibleInfectorGroups.findIndex((g) => g.identifier == identifier)
-
-      // clean up the route query
-      let query = JSON.parse(JSON.stringify(this.$route.query))
-
-      for (let k in query) {
-        let split = k.split('-')
-        if (split.length == 2) {
-          let i = split[1]
-
-          if (i == index) {
-            delete query[k]
-          }
+        if (value == '?')  {
+          value = '+'
+        } else if (value == '+') {
+          value = '-'
+        } else {
+          value = '?'
         }
-      }
 
-      this.removePossibleInfectorGroup(identifier)
-      this.$router.push(
-        {
+        newQuery[`${key}-${index}`] = value
+        Object.assign(query, newQuery)
+
+        this.$router.push({
           name: 'Analytics',
           query: query
+        })
+      },
+      colorResult(result) {
+        if (result == '+') {
+          return 'white'
+        } else if (result == '-') {
+          return 'white'
+        } else {
+          return 'black'
         }
-      )
+      },
+      backgroundColorResult(result) {
+        if (result == '+') {
+          return 'red'
+        } else if (result == '-') {
+          return 'green'
+        } else {
+          return '#cacaca'
+        }
+      },
 
-      this.possibleInfectorGroup = this.possibleInfectorGroups[this.possibleInfectorGroups.length - 1]
+      getValue(value) {
+        if (!value) {
+          return "?"
+        } else {
+          return value
+        }
+      },
+
+      removeInfectorGroup(identifier) {
+        let index = this.possibleInfectorGroups.findIndex((g) => g.identifier == identifier)
+
+        // clean up the route query
+        let query = JSON.parse(JSON.stringify(this.$route.query))
+
+        for (let k in query) {
+          let split = k.split('-')
+          if (split.length == 2) {
+            let i = split[1]
+
+            if (i == index) {
+              delete query[k]
+            }
+          }
+        }
+
+        this.removePossibleInfectorGroup(identifier)
+        this.$router.push(
+          {
+            name: 'Analytics',
+            query: query
+          }
+        )
+
+        this.possibleInfectorGroup = this.possibleInfectorGroups[this.possibleInfectorGroups.length - 1]
 
 
-    },
-    backgroundColorGroup(group) {
-      if (group == this.possibleInfectorGroup) {
-        return 'rgb(200,200,200)'
-      } else {
-        return '#eee'
+      },
+      backgroundColorGroup(group) {
+        if (group == this.possibleInfectorGroup) {
+          return 'rgb(200,200,200)'
+        } else {
+          return '#eee'
+        }
+      },
+      choosePossibleInfectorGroup(pig) {
+        this.possibleInfectorGroup = pig
+      },
+      incrementNumberOfPeople(obj) {
+        this.updatePeople(obj,
+          function(newQuery, key, possibleInfectorGroup, obj) {
+            newQuery[key] = parseInt(possibleInfectorGroup.numPeople) + parseInt(obj.value)
+          }
+        )
+      },
+      setResult(event, posInfectorGroup, evName) {
+        let possibleInfectorGroup = this.possibleInfectorGroups.find((infGroup) => { return posInfectorGroup.identifier == infGroup.identifier})
+
+        let evidence = possibleInfectorGroup.evidence.find((ev) => { return ev.name == evName})
+        evidence.result = event.target.value
+      },
+      updatePeople(obj, func) {
+        let possibleInfectorGroup = this.possibleInfectorGroups.find((ev) => { return ev.identifier == obj.identifier})
+
+        let index = this.possibleInfectorGroups.findIndex((ev) => { return ev.identifier == obj.identifier})
+
+
+        let query = JSON.parse(JSON.stringify(this.$route.query))
+        let key = `numPeople-${index}`
+        let newQuery = {}
+
+        func(newQuery, key, possibleInfectorGroup, obj)
+
+        Object.assign(query, newQuery)
+
+        this.$router.push({
+          name: 'Analytics',
+          query: query
+        })
+      },
+      updateNumberOfPeople(obj) {
+        this.updatePeople(obj,
+          function(newQuery, key, possibleInfectorGroup, obj) {
+            newQuery[key] = parseInt(obj.value)
+          }
+        )
       }
-    },
-    choosePossibleInfectorGroup(pig) {
-      this.possibleInfectorGroup = pig
-    },
-    incrementNumberOfPeople(obj) {
-      this.updatePeople(obj,
-        function(newQuery, key, possibleInfectorGroup, obj) {
-          newQuery[key] = parseInt(possibleInfectorGroup.numPeople) + parseInt(obj.value)
-        }
-      )
-    },
-    setResult(event, posInfectorGroup, evName) {
-      let possibleInfectorGroup = this.possibleInfectorGroups.find((infGroup) => { return posInfectorGroup.identifier == infGroup.identifier})
-
-      let evidence = possibleInfectorGroup.evidence.find((ev) => { return ev.name == evName})
-      evidence.result = event.target.value
-    },
-    updatePeople(obj, func) {
-      let possibleInfectorGroup = this.possibleInfectorGroups.find((ev) => { return ev.identifier == obj.identifier})
-
-      let index = this.possibleInfectorGroups.findIndex((ev) => { return ev.identifier == obj.identifier})
-
-
-      let query = JSON.parse(JSON.stringify(this.$route.query))
-      let key = `numPeople-${index}`
-      let newQuery = {}
-
-      func(newQuery, key, possibleInfectorGroup, obj)
-
-      Object.assign(query, newQuery)
-
-      this.$router.push({
-        name: 'Analytics',
-        query: query
-      })
-    },
-    updateNumberOfPeople(obj) {
-      this.updatePeople(obj,
-        function(newQuery, key, possibleInfectorGroup, obj) {
-          newQuery[key] = parseInt(obj.value)
-        }
-      )
     }
-  }
 
 }
 </script>

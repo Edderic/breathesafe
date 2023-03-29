@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CPT } from '../cpt.js'
+import { CPT, CPTs } from '../cpt.js'
 import { Factor } from '../factor.js'
 import { defineStore } from 'pinia'
 import { MASKS, Mask  } from '../masks.js'
@@ -61,142 +61,13 @@ export const useAnalyticsStore = defineStore('analytics', {
       {
         numPeople: 1,
         identifier: generateUUID(),
-        evidence: [], // {'pcr': '-', 'symptomatic': '-'}
+        evidence: {
+          'pcr': '?',
+          'rapid': '?',
+          'symptomatic': '?',
+        }, // {'pcr': '-', 'symptomatic': '-'}
         outcome: 'has_covid',
-        cpts: [
-          new CPT(
-            {
-              outcome: 'has_covid',
-              factor: new Factor([
-                {
-                  has_covid: 'true',
-                  value: 0.01
-                },
-                {
-                  has_covid: 'false',
-                  value: 0.99
-                },
-              ])
-            }
-          ),
-          new CPT(
-            {
-              outcome: 'pcr',
-              factor: new Factor(
-                [
-                  {
-                    'pcr': '-',
-                    'has_covid': 'false',
-                    'value': 0.999
-                  },
-                  {
-                    'pcr': '+',
-                    'has_covid': 'false',
-                    'value': 0.001
-                  },
-                  {
-                    'pcr': '+',
-                    'has_covid': 'true',
-                    'value': 0.95
-                  },
-                  {
-                    'pcr': '-',
-                    'has_covid': 'true',
-                    'value': 0.05
-                  },
-                ]
-              )
-            }
-          ),
-
-          new CPT(
-            {
-              outcome: 'rapid',
-              factor: new Factor(
-                [
-                  {
-                    'rapid': '-',
-                    'has_covid': 'false',
-                    'symptomatic': 'false',
-                    'value': 1.0
-                  },
-                  {
-                    'rapid': '+',
-                    'has_covid': 'false',
-                    'symptomatic': 'false',
-                    'value': 0.0
-                  },
-                  {
-                    'rapid': '-',
-                    'has_covid': 'false',
-                    'symptomatic': 'true',
-                    'value': 1.0
-                  },
-                  {
-                    'rapid': '+',
-                    'has_covid': 'false',
-                    'symptomatic': 'true',
-                    'value': 0.0
-                  },
-                  {
-                    'rapid': '-',
-                    'has_covid': 'true',
-                    'symptomatic': 'false',
-                    'value': 0.5
-                  },
-                  {
-                    'rapid': '+',
-                    'has_covid': 'true',
-                    'symptomatic': 'false',
-                    'value': 0.5
-                  },
-                  {
-                    'rapid': '+',
-                    'has_covid': 'true',
-                    'symptomatic': 'true',
-                    'value': 0.8
-                  },
-                  {
-                    'rapid': '-',
-                    'has_covid': 'true',
-                    'symptomatic': 'true',
-                    'value': 0.2
-                  },
-                ]
-              )
-            }
-          ),
-          new CPT(
-            {
-
-              outcome: 'symptomatic',
-              factor: new Factor([
-                {
-                  'symptomatic': 'true',
-                  'has_covid': 'true',
-                  'value': 0.75,
-                },
-
-                {
-                  'symptomatic': 'false',
-                  'has_covid': 'true',
-                  'value': 0.25,
-                },
-
-                {
-                  'symptomatic': 'true',
-                  'has_covid': 'false',
-                  'value': 0.08,
-                },
-                {
-                  'symptomatic': 'false',
-                  'has_covid': 'false',
-                  'value': 0.92,
-                },
-              ])
-            }
-          )
-        ]
+        cpts: CPTs
       }
     ],
 
@@ -316,8 +187,13 @@ export const useAnalyticsStore = defineStore('analytics', {
         {
           numPeople: 1,
           identifier: generateUUID(),
-          evidence: [
-          ]
+          evidence: {
+            'pcr': '?',
+            'rapid': '?',
+            'symptomatic': '?',
+          }, // {'pcr': '-', 'symptomatic': '-'}
+          outcome: 'has_covid',
+          cpts: CPTs
         }
       )
     },
@@ -335,10 +211,7 @@ export const useAnalyticsStore = defineStore('analytics', {
           if (split[0] == 'numPeople') {
             this.possibleInfectorGroups[index][split[0]] = value
           } else {
-            let evidence = this.possibleInfectorGroups[index].evidence.find(
-              (e) => {return e.name == split[0]}
-            )
-            evidence['result'] = value
+            this.possibleInfectorGroups[index].evidence[split[0]] = value
 
           }
         }

@@ -15,34 +15,32 @@ export class ProbaInfectious {
    *  - Rapid Test result
    *  - Has symptoms
    * Parameters:
-   *    evidence: Array[Object]
+   *    evidence: Object
    *      Example:
-   *         [
    *           {
-   *             evidenceName: 'Rapid Test',
-   *             result: '+',
-   *             sensitivity: 0.9,
-   *             specificity: 0.99,
+   *             rapid: '+'
    *           },
 
    *           {
-   *             evidenceName: 'PCR',
-   *             result: '+',
-   *             sensitivity: 0.95,
-   *             specificity: 0.99
+   *             pcr: '?',
    *           },
 
    *           {
-   *             evidenceName: 'Symptoms',
-   *             result: '+',
-   *             sensitivity: 0.75,
-   *             specificity: 0.25
+   *             symptomatic: '-'
    *           }
-   *         ]
+   *
    *
    */
   compute(outcome, evidence, cpts) {
     // TODO: filter for evidence
+
+    let evidenceWithoutUnknowns = {}
+
+    for (let k in evidence) {
+      if (evidence[k] != '?') {
+        evidenceWithoutUnknowns[k] = evidence[k]
+      }
+    }
 
     let factors = []
     for (let cpt of cpts) {
@@ -55,7 +53,7 @@ export class ProbaInfectious {
     }
 
     let evidenceKeys = []
-    for (let k of evidence) {
+    for (let k in evidenceWithoutUnknowns) {
       evidenceKeys.push(k)
     }
 
@@ -69,13 +67,16 @@ export class ProbaInfectious {
 
     let num = numerator.sum(varsToSumOutNumerator)
 
-
     let varsToSumOutDenominator = JSON.parse(JSON.stringify(varsToSumOutNumerator))
 
     varsToSumOutDenominator.push(outcome)
 
     let den = numerator.sum(varsToSumOutDenominator)
 
-    return num.div(den).filter({ has_covid: 'true'})
+    let filter = JSON.parse(JSON.stringify(evidenceWithoutUnknowns))
+
+    filter['has_covid'] = 'true'
+
+    return num.div(den).filter(filter)
   }
 }
