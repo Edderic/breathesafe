@@ -51,12 +51,12 @@ export const CPTs = [
           {
             'pcr': '+',
             'has_covid': 'true',
-            'value': 0.95
+            'value': 0.927
           },
           {
             'pcr': '-',
             'has_covid': 'true',
-            'value': 0.05
+            'value': 0.073
           },
         ]
       )
@@ -72,49 +72,49 @@ export const CPTs = [
             'rapid': '-',
             'has_covid': 'false',
             'symptomatic': '-',
-            'value': 1.0
+            'value': 0.999
           },
           {
             'rapid': '+',
             'has_covid': 'false',
             'symptomatic': '-',
-            'value': 0.0
+            'value': 0.001
           },
           {
             'rapid': '-',
             'has_covid': 'false',
             'symptomatic': '+',
-            'value': 1.0
+            'value': 0.999
           },
           {
             'rapid': '+',
             'has_covid': 'false',
             'symptomatic': '+',
-            'value': 0.0
+            'value': 0.001
           },
           {
             'rapid': '-',
             'has_covid': 'true',
             'symptomatic': '-',
-            'value': 0.5
+            'value': 0.56
           },
           {
             'rapid': '+',
             'has_covid': 'true',
             'symptomatic': '-',
-            'value': 0.5
+            'value': 0.44
           },
           {
             'rapid': '+',
             'has_covid': 'true',
             'symptomatic': '+',
-            'value': 0.8
+            'value': 0.79
           },
           {
             'rapid': '-',
             'has_covid': 'true',
             'symptomatic': '+',
-            'value': 0.2
+            'value': 0.21
           },
         ]
       )
@@ -128,13 +128,13 @@ export const CPTs = [
         {
           'symptomatic': '+',
           'has_covid': 'true',
-          'value': 0.75,
+          'value': 0.324,
         },
 
         {
           'symptomatic': '-',
           'has_covid': 'true',
-          'value': 0.25,
+          'value': 0.676,
         },
 
         {
