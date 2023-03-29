@@ -49,6 +49,7 @@ export const useAnalyticsStore = defineStore('analytics', {
     defaultNumSusceptibles: 30,
     numPeopleToInvestIn: 5,
     numPACs: 1,
+    priorProbabilityOfInfectiousness: 0.01,
     possibleInfectorGroups: [
       // for Rapid tests:
       // https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8863328/ uses 100% for specificity
