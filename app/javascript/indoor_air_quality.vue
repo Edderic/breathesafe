@@ -10,56 +10,8 @@
 
       <ul>
         <li>Remove the source</li>
-        <li>Dilute polluted air</li>
+        <li><span class='italic'>Dilute polluted air</span></li>
       </ul>
-    </p>
-    <h3>Remove the source</h3>
-
-    <div class='centered column'>
-      <div class='centered'>
-        <RapidTest height='13em' width='13em'/>
-        <table class='has-borders'>
-
-          <thead>
-            <tr>
-              <th>Has symptom</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class='asymptomatic'>cough</td>
-            </tr>
-            <tr>
-              <td class='symptomatic'>runny nose</td>
-            </tr>
-
-            <tr>
-              <td class='asymptomatic'>fever</td>
-            </tr>
-
-            <tr>
-              <td>...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p class='fig-title'>Rapid Test and Symptoms Checklist</p>
-    </div>
-
-    <p>
-      Using tests (e.g. rapid tests, PCR) and checking for symptoms could help
-      screen potential infectors, and hence remove sources of infection.
-      Unfortunately, some carriers may be asymptomatic. Rapid testing doesn't
-      have high sensitivity (i.e.
-      <a href="https://pubmed.ncbi.nlm.nih.gov/34242764/">
-      the probability that someone tests positive
-      given that they are carriers of the virus is far from 100%
-      </a>). PCR is known to have higher sensitivity, but results might not be
-      available same-day. Hence, removal of source doesn't always happen, and
-      multiple interventions for reducing the probability of transmission are
-      encouraged, as suggested by <a
-      href="https://peoplescdc.org/2022/11/17/safer-in-person-gatherings/">People's
-      CDC's Safer In-Person Gatherings</a>.
     </p>
 
     <h3>Dilute polluted air</h3>
@@ -377,11 +329,6 @@ export default {
     margin-right: 1em;
   }
 
-  .has-borders {
-    border-collapse: collapse;
-    border: 2px solid gray;
-  }
-
   th, td {
     border: 1px solid gray;
     padding: 0.25em;
@@ -397,12 +344,4 @@ export default {
     font-style: italic;
   }
 
-  .symptomatic {
-    background-color: red;
-  }
-  .asymptomatic {
-    background-color: green;
-    text-decoration: line-through;
-    color: white;
-  }
 </style>

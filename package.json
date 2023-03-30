@@ -10,6 +10,7 @@
     "axios": "^0.27.2",
     "pinia": "^2.0.14",
     "vue": "^3.2.37",
+    "vue-mathjax-next": "^0.0.4",
     "vue-nprogress": "^0.2.0",
     "vue-router": "4",
     "vue-worker": "^1.2.1",
