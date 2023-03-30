@@ -604,6 +604,11 @@ vue-demi@*:
   resolved "https://registry.yarnpkg.com/vue-demi/-/vue-demi-0.13.1.tgz#7604904c88be338418a10abbc94d5b8caa14cb8c"
   integrity sha512-xmkJ56koG3ptpLnpgmIzk9/4nFf4CqduSJbUM0OdPoU87NwRuZ6x49OLhjSa/fC15fV+5CbEnrxU4oyE022svg==
 
+vue-mathjax-next@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/vue-mathjax-next/-/vue-mathjax-next-0.0.4.tgz#795ff0d423fe4a2bbe12d87e2e6e534981ff12b1"
+  integrity sha512-8M+dUNc3j5IhC/gLVxqGoT7QjgJU8dMTjrCpC5qVwTcKvp2Iyxyulltv45UXWCm9UPC28viplP964Y0LZYiGMQ==
+
 vue-nprogress@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/vue-nprogress/-/vue-nprogress-0.2.0.tgz#92a99f605dd152bdd4fc940ab0ca535723a5b394"
