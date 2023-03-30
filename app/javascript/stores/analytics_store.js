@@ -380,8 +380,10 @@ export const useAnalyticsStore = defineStore('analytics', {
     setNumPeopleToInvestIn(num) {
       this.numPeopleToInvestIn = num
     },
-    setNumSusceptibles(value) {
-      this.numSusceptibles = parseInt(value) || this.defaultNumSusceptibles
+    setNumSusceptibles(toQuery) {
+      if (!toQuery['numPeople-0']) {
+        this.possibleInfectorGroups[0].numPeople = this.defaultNumSusceptibles
+      }
     },
     setNumInfectors(value) {
       this.numInfectors = parseInt(value) || 1

@@ -890,6 +890,7 @@ export default {
         this.setDuration(toQuery['duration'])
         this.setInfectorGroups(toQuery)
         this.setPrevalence(toQuery)
+        this.setNumSusceptibles(toQuery)
       }
     },
     scrollFix(event, hashbang) {
