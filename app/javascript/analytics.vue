@@ -205,6 +205,7 @@ import ColoredCell from './colored_cell.vue';
 import Controls from './controls.vue';
 import ComputationalDetails from './computational_details.vue';
 import CleanAirDeliveryRateTable from './clean_air_delivery_rate_table.vue'
+import { Factor } from './factor.js';
 import InhalationActivity from './inhalation_activity.vue'
 import InfectorActivity from './infector_activity.vue'
 import Masking from './masking.vue'
@@ -359,7 +360,8 @@ export default {
         'selectedInfectorMask',
         'selectedRemoveSourceTab',
         'probabilityOneInfectorIsPresent',
-        'priorProbabilityOfInfectiousness'
+        'priorProbabilityOfInfectiousness',
+        'possibleInfectorGroups'
       ]
     ),
     ...mapWritableState(
@@ -900,6 +902,20 @@ export default {
     setPrevalence(toQuery) {
       if (toQuery['prevalenceDenominator']) {
         this.priorProbabilityOfInfectiousness = 1 / toQuery['prevalenceDenominator']
+        let hasCovidCPT;
+        for (let g of this.possibleInfectorGroups) {
+          hasCovidCPT = g.cpts.find((c) => c.outcome == 'has_covid')
+          hasCovidCPT.factor = new Factor([
+            {
+              has_covid: 'true',
+              value: this.priorProbabilityOfInfectiousness
+            },
+            {
+              has_covid: 'false',
+              value: 1 - this.priorProbabilityOfInfectiousness
+            }
+          ])
+        }
       }
     },
 
