@@ -1073,6 +1073,7 @@ export default {
   }
 
   .controls {
+    overflow: auto;
     border-right: 1px solid grey;
     position: sticky;
     height: 92vh;
