@@ -22,7 +22,7 @@ is the <span class='italic'>probability that at least one person is infectious, 
 <vue-mathjax formula='e'></vue-mathjax>. See the "Probability that at least one person is infectious" section above to get more details about this.
 </span>
         The left term
-        <vue-mathjax formula='$P(t \mid e, I=1)$'></vue-mathjax>
+        <vue-mathjax formula='$P(\text{transmit} \mid e, I=1)$'></vue-mathjax>
         is the probability of transmission given evidence e, assuming there's one infector. We'll focus more on this here.
 
         </p>
@@ -371,8 +371,8 @@ export default {
       return ` $$
         \\begin{equation}
         \\begin{aligned}
-        P(t \\mid e) &= \\sum_i P(t \\mid e, i) \\cdot P(i \\mid e) \\\\
-&\\approx P(t \\mid e, I = 1) \\cdot P(I \\geq 1 \\mid e) \\
+        P(\\text{transmit} \\mid e) &= \\sum_i P(\\text{transmit} \\mid e, i) \\cdot P(i \\mid e) \\\\
+&\\approx P(\\text{transmit} \\mid e, I = 1) \\cdot P(I \\geq 1 \\mid e) \\
 
 
         \\end{aligned}
