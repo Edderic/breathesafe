@@ -9,13 +9,12 @@
     <tr>
       <td colspan=2>
         <div class='explainer'>
-          <span>On average, assuming {{ numInfectors }} COVID infector(s) in
-          the room, and that everyone stays there for {{selectedHour}} hour(s), the
+          <span>If the assumptions are correct, and one were to do these a bunch of times, on average, assuming that everyone stays there for {{selectedHour}} hour(s), the
           number of people that would be infected is <span
-          class='bold'>{{roundOut(numSusceptibles * risk, 1)}}</span>:
+          class='italic'>{{roundOut(numSusceptibles * risk, 1)}}</span>:
 
           </span>
-          <div class='people-icons people '>
+          <div class='people-icons people justify-content-center align-items-center'>
             <PersonIcon
               backgroundColor='red'
               :amount='roundOut(numInfected, 0)'
@@ -28,10 +27,34 @@
 
           <p>If the average number of new infections is less than 1 everywhere,
           COVID-19 will become extinct. Business owners can do their part by making their
-          environments less conducive to spread, for example, by adopting higher indoor
-          air quality standards and masking. <span class='bold'>At the very least,
+          environments less conducive to spread, for example, by
+
+          <ul>
+            <li>testing and symptoms checking pre-entry</li>
+            <li>keeping occupancy low</li>
+            <li>masking with high quality, tight-fitting masks such as N95s</li>
+            <li>improving ventilation</li>
+            <li>supplementing with filtration</li>
+          </ul>
+
+
+          </p>
+          <p>
+          <span class='italic'>At the very least,
           aim for a combination of interventions to keep the average new infections below 1</span>.
           </p>
+
+          <h3>Mathematical Details</h3>
+
+          <p>
+          The <span class='italic'>Average new Infections</span> metric is calculated by multiplying the number of susceptibles by the probability of transmission. In other words, the average new infections is equivalent to
+          <vue-mathjax formula='$s \cdot P(t \mid e) $'></vue-mathjax>, where <vue-mathjax formula='s'></vue-mathjax> is the number of susceptibles, and <vue-mathjax formula='$P(t \mid e)$'></vue-mathjax> is the probability of transmission given the evidence (i.e. what we know).
+          </p>
+          <p>
+          Assuming there are <vue-mathjax :formula='`$${numSusceptibles}$`'></vue-mathjax> susceptibles, and that the probability of transmission given the evidence is <vue-mathjax :formula='`$1 \\text{ in } ${roundOut(1 / risk, 1)}$`'></vue-mathjax>, then the average new infections is
+
+          <vue-mathjax :formula="mainFormula"></vue-mathjax>
+  </p>
         </div>
       </td>
     </tr>
@@ -71,6 +94,19 @@ export default {
           'risk'
         ]
     ),
+    mainFormula() {
+      return `
+        $$
+        \\begin{equation}
+        \\begin{aligned}
+        A &= s \\cdot P(t \\mid e) \\\\
+        &= ${this.numSusceptibles} \\cdot \\frac{1}{${round(1/this.risk, 1)}} \\\\
+        &\\approx ${round(this.numSusceptibles * this.risk, 1)}
+        \\end{aligned}
+        \\end{equation}
+        $$
+      `
+    },
     interventions() {
       let numPeopleToInvestIn = 1
       return getSampleInterventions(this.event, numPeopleToInvestIn)
