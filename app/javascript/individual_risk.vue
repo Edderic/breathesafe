@@ -8,55 +8,10 @@
   >
     <tr>
       <td colspan='2'>
-        <table class='explainer'>
-          <tr>
-            <th>Risk Relative to Having a Car Accident</th>
-            <td>
-            </td>
-          </tr>
-          <tr>
-            <th>...Within the Average Daily Drive</th>
-
-            <td>
-              <ColoredCell
-                :colorScheme="riskColorScheme"
-                :maxVal=1
-                :value='roundOut(this.relativeRiskDailyDrive, 6)'
-                :text='`${roundOut(this.relativeRiskDailyDrive, 0)}x`'
-                :style="styleProps"
-                />
-            </td>
-          </tr>
-          <tr>
-            <th>...Within Driving 1000 miles</th>
-
-            <td>
-              <ColoredCell
-                :colorScheme="riskColorScheme"
-                :maxVal=1
-                :value='this.relativeRisk1000Miles'
-                :text='displayRelativeRisk1000Miles'
-                :style="styleProps"
-                />
-            </td>
-          </tr>
-        </table>
-        <div class='explainer'>
-          <p><a href="https://www.kbb.com/car-advice/average-miles-driven-per-year/">The average American drives 35.4 miles a day</a>. On average, the risk of getting into a car accident for driving that long is <span class='bold'>1 in {{roundOut(1 / averageDailyDrivingRisk, 0)}}</span>.
-          The infection risk for the average susceptible individual is <span class='bold'>{{roundOut(this.relativeRiskDailyDrive, 0)}}x</span> that risk.
-          It takes about {{ numberOfDailyDrivesToEqualRisk }}
-          </p>
-
-          <p></p>
-          <p>
-            <span v-for='index in roundOut(1 / averageDailyDrivingRisk, 0)'>🚗</span>
-          </p>
-        </div>
 
         <h3>Mathematical Details</h3>
         <p>
         This is the risk of transmission
-<vue-mathjax formula='t'></vue-mathjax>
 incorporating prevalence, occupancy, and various mitigations.
 <vue-mathjax :formula='formula'></vue-mathjax>
         </p>
