@@ -169,7 +169,6 @@
           <br id='details'>
           <h2 class='centered'>Details</h2>
 
-          <RiskEquation/>
           <ComputationalDetails
             :aerosolActivityToFactor='aerosolActivityToFactor'
             :numSusceptibles='numSusceptibles'
@@ -225,7 +224,6 @@ import PacIcon from './pac_icon.vue';
 import PeopleAffected from './people_affected.vue';
 import ProbaAtLeastOneInfectorPresent from './proba_at_least_one_infector_present.vue';
 import RiskIcon from './risk_icon.vue';
-import RiskEquation from './risk_equation.vue';
 import SideBar from './side_bar.vue';
 import { airCleaners, AirCleaner } from './air_cleaners.js';
 import { datetimeEnglish } from './date.js'
@@ -308,7 +306,6 @@ export default {
     PacIcon,
     PeopleAffected,
     ProbaAtLeastOneInfectorPresent,
-    RiskEquation,
     RiskIcon,
     SideBar,
     SteadyState,
