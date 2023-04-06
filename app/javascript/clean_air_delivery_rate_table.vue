@@ -61,16 +61,32 @@ per time (e.g. cubic feet per minute).
       </div>
 
 
-<p>
-If we imagine the sides made up of the length and height were chopped off (i.e. the two sides with {{convertLengthTo(this.event.roomLengthMeters)}} x {{convertLengthTo(this.event.roomHeightMeters)}} square {{measurementUnits.lengthMeasurementType}} = {{this.roundOut(convertLengthTo(this.event.roomLengthMeters * convertLengthTo(this.event.roomHeightMeters)), 1)}} square {{this.measurementUnits.lengthMeasurementType}}), then the non-infectious air delivery rate would have been:
-</p>
+      <p>
+      If we imagine the sides made up of the length and height were chopped off (i.e. the two sides with {{convertLengthTo(this.event.roomLengthMeters)}} x {{convertLengthTo(this.event.roomHeightMeters)}} square {{measurementUnits.lengthMeasurementType}} = {{this.roundOut(convertLengthTo(this.event.roomLengthMeters * convertLengthTo(this.event.roomHeightMeters)), 1)}} square {{this.measurementUnits.lengthMeasurementType}}), then the non-infectious air delivery rate would have been:
+      </p>
 
-<vue-mathjax :formula='outdoorsNADRDerivation'></vue-mathjax>
+      <vue-mathjax :formula='outdoorsNADRDerivation'></vue-mathjax>
 
-<p class='italic'>
-{{ outdoorsNADRText }} from being outside is {{ outdoorsIsNumTimesTheNADR}} times the estimated NADR from being inside in this room!
+      <p>
+      {{ outdoorsNADRText }} from being outside is {{ outdoorsIsNumTimesTheNADR}} times the estimated NADR from being inside in this room! As you may recall from earlier sections, NADR, represented as <vue-mathjax formula='$Q$'></vue-mathjax>, is the denominator of the first term, which is the steady state concentration.
 
 
+
+      </p>
+
+      <p>
+        <vue-mathjax formula='$$C_t = g/Q \cdot (1 - e^{-\frac{Q}{V} \cdot t}) $$'></vue-mathjax>
+      </p>
+      <p>
+      So in the long run, if Q is very large, then the concentration curve is
+      basically hovering around 0.
+      <p>
+        <vue-mathjax formula='$$g/Q \approx 0  \text{     if Q} >> 0$$'></vue-mathjax>
+      </p>
+
+      Dose is essentially concentration times time, so
+      if the concentration part is very small, the dose is also small, which means
+      that <span class='italic'>it is much safer being outdoors relative to being inside in this room.</span>
       </p>
       <h3>Mathematical Details</h3>
       <table class='explainer mathematical-details'>
