@@ -1212,24 +1212,28 @@ export function getMeasurementUnits(systemOfMeasurement) {
   let airDeliveryRateMeasurementType;
   let airDeliveryRateMeasurementTypeShort;
   let cubicLengthShort;
+  let squareLengthShort;
 
   if (systemOfMeasurement == 'imperial') {
     lengthMeasurementType = 'feet';
     airDeliveryRateMeasurementType = 'cubic feet per minute';
     airDeliveryRateMeasurementTypeShort = 'ft³ / min';
     cubicLengthShort = 'ft³'
+    squareLengthShort = 'ft²'
   } else {
     lengthMeasurementType = 'meters';
     airDeliveryRateMeasurementType = 'cubic meters per hour';
     airDeliveryRateMeasurementTypeShort = 'm³ / h';
     cubicLengthShort = 'm³'
+    squareLengthShort = 'm²'
   }
 
   return {
     'lengthMeasurementType': lengthMeasurementType,
     'airDeliveryRateMeasurementType': airDeliveryRateMeasurementType,
     'airDeliveryRateMeasurementTypeShort': airDeliveryRateMeasurementTypeShort,
-    'cubicLengthShort': cubicLengthShort
+    'cubicLengthShort': cubicLengthShort,
+    'squareLengthShort': squareLengthShort
   }
 }
 

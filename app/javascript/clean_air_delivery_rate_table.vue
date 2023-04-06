@@ -9,7 +9,71 @@
   >
   <tr>
     <td colspan='2'>
-      <table class='explainer'>
+
+      <p>
+      How does a non-infectious air delivery rate of {{totalFlowRateRounded}} {{measurementUnits.airDeliveryRateMeasurementTypeShort}} compare to being outside?
+
+      Let's assume there's "light air". According to the U.S. National Weather Service, this is characterized as having the
+
+      </p>
+
+      <p class='quote'>
+        <a href="https://www.weather.gov/pqr/wind">
+        ...direction of wind shown by smoke drift, not by wind vanes. Little if any movement with flags. Wind barely moves tree leaves.
+        </a>
+      </p>
+      <p>
+      The speed of moving air when there is "light air" is around 1 to 3 miles per hour. Let's look at the lower bound of 1 mph.
+
+
+      </p>
+      <vue-mathjax :formula='windspeedMPHtoCFM'></vue-mathjax>
+
+      <p>Non-infectious air delivery rates are measured in volume per time. If
+we have the windspeed, for example, in feet per minute, we still need to select
+an appropriate area (e.g. sq. ft.) to go along with the windspeed to get volume
+per time (e.g. cubic feet per minute).
+      </p>
+
+      <div class='justify-content-center'>
+        <table>
+          <thead>
+          <tr>
+            <th>Type</th>
+            <th>Measurement ({{measurementUnits.lengthMeasurementType}})</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <th>Length</th>
+            <th>{{ convertLengthTo(this.event.roomLengthMeters) }}</th>
+          </tr>
+          <tr>
+            <th>Width</th>
+            <th>{{ convertLengthTo(this.event.roomWidthMeters) }}</th>
+          </tr>
+          <tr>
+            <th>Height</th>
+            <th>{{ convertLengthTo(this.event.roomHeightMeters) }}</th>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+
+<p>
+If we imagine the sides made up of the length and height were chopped off (i.e. the two sides with {{convertLengthTo(this.event.roomLengthMeters)}} x {{convertLengthTo(this.event.roomHeightMeters)}} square {{measurementUnits.lengthMeasurementType}} = {{this.roundOut(convertLengthTo(this.event.roomLengthMeters * convertLengthTo(this.event.roomHeightMeters)), 1)}} square {{this.measurementUnits.lengthMeasurementType}}), then the non-infectious air delivery rate would have been:
+</p>
+
+<vue-mathjax :formula='outdoorsNADRDerivation'></vue-mathjax>
+
+<p class='italic'>
+{{ outdoorsNADRText }} from being outside is {{ outdoorsIsNumTimesTheNADR}} times the estimated NADR from being inside in this room!
+
+
+      </p>
+      <h3>Mathematical Details</h3>
+      <table class='explainer mathematical-details'>
         <tr>
           <th class='centered'>
             <div class='col'>
@@ -110,6 +174,7 @@ import {
   cutoffsVolume,
 } from './colors.js';
 import {
+  convertLengthBasedOnMeasurementType,
   displayCADR,
   round
 } from './misc.js'
@@ -130,9 +195,34 @@ export default {
     ...mapState(
       useAnalyticsStore,
       [
-        'styleProps'
+        'styleProps',
+        'event'
       ]
     ),
+
+    outdoorsNADRDerivation(){
+      return `$$${
+        round(
+            this.convertLengthTo(this.event.roomLengthMeters)
+            * this.convertLengthTo(this.event.roomHeightMeters),
+            1
+        )
+      } \\text{ ${this.measurementUnits.squareLengthShort}} \\cdot ${this.windSpeed} \\text{ ft / min} = ${this.outdoorsNADR} \\text{ ${this.measurementUnits.airDeliveryRateMeasurementTypeShort}}$$`
+    },
+    outdoorsNADR() {
+      return this.convertLengthTo(this.event.roomLengthMeters) * this.convertLengthTo(this.event.roomHeightMeters) * this.windSpeed
+    },
+    outdoorsNADRText() {
+      return `${this.outdoorsNADR} ${this.measurementUnits.airDeliveryRateMeasurementTypeShort}`
+    },
+    outdoorsIsNumTimesTheNADR() {
+      return round(this.outdoorsNADR / this.totalFlowRate, 0)
+    },
+    windSpeed() {
+      // feet per minute
+      return convertLengthBasedOnMeasurementType(88, 'feet', this.measurementUnits.lengthMeasurementType)
+    },
+
     cellCSSMerged() {
       let def = {
         'font-weight': 'bold',
@@ -181,6 +271,17 @@ export default {
         this.systemOfMeasurement,
         this.intervention.roomUsableVolumeCubicMeters * this.intervention.computeACH()
       )
+    },
+    windspeedMPHtoCFM() {
+      return `
+        $$
+        \\begin{equation}
+        \\begin{aligned}
+          1 \\text{mi}/\\text{h} &= 88 \\text{ ft} / \\text{min}
+        \\end{aligned}
+        \\end{equation}
+        $$
+      `
     }
   },
   props: {
@@ -188,12 +289,24 @@ export default {
     intervention: Object,
     measurementUnits: Object,
     systemOfMeasurement: String,
+  },
+  methods: {
+    convertLengthTo(fromNum) {
+      return convertLengthBasedOnMeasurementType(
+        fromNum,
+        'meters',
+        this.measurementUnits.lengthMeasurementType
+      )
+    },
+    roundOut(x,y) {
+      return round(x,y)
+    }
   }
 }
 </script>
 
 <style scoped>
-  .bold {
+  th, .bold {
     font-weight: bold;
   }
 
@@ -214,8 +327,11 @@ export default {
     padding-bottom: 0.5em;
     padding-left: 0.5em;
     padding-right: 0.5em;
-    text-align: center;
     font-weight: bold;
+  }
+
+  .mathematical-details td {
+    text-align: center;
   }
 
   .justify-content-center {
@@ -236,5 +352,18 @@ export default {
   .explainer {
     max-width: 25em;
     margin: 0 auto;
+  }
+
+  .italic {
+    font-style: italic;
+  }
+
+  .quote {
+    font-style: italic;
+    margin: 1em;
+    margin-left: 2em;
+    padding-left: 1em;
+    border-left: 5px solid black;
+    max-width: 25em;
   }
 </style>

@@ -120,37 +120,13 @@
       </ul>
 </p>
 
-    <h3>NADR and ACH</h3>
-    <p>In the earlier section, we gave an intuitive explanation of what's happening using heatmaps. In this section, we'll explain the recapped points in a more mathematical fashion.</p>
-    <p>
-      Assuming the air is well-mixed (i.e. fans are blowing around air so that
-      the concentration of indoor air pollution is evenly distributed across the
-      room), the concentration that a susceptible inhales over time is affected by
-      two parameters:
-      <ul>
-        <li>non-infectious air delivery rate (NADR)</li>
-        <li>Air Changes per Hour (ACH)</li>
-      </ul>
-    </p>
+  <h3>NADR and ACH</h3>
+  <p>This section will explain the points above but in more technical terms. In the individual risk section, we have shown that the concentration curve in the scenario where susceptible came in at the same time as an infector (and that if the initial concentration in the space is 0), the concentration curve is:
+  </p>
 
-    <p>
-      NADR is measured in volume per time (e.g. cubic feet per minute). It is increased
-      by improving ventilation and supplementing via filtration (with portable
-      air cleaners), and UV (upper-room germicidal UV or far UV). <span
-      class='italic'>In the long run, the higher the NADR, the lower the dose that
-      one gets</span>. As time goes by, the concentration
-      approaches some value, which is called the steady-state concentration,
-      and NADR affects this value. <span class='italic'>The higher the NADR,
-      the lower the steady-state concentration, and vice versa.</span>
-    </p>
-    <p>
-      ACH, on the other hand, is NADR divided by the volume of the room. ACH
-      affects how fast the concentration gets to the steady state (i.e. the flattened part of the curve). <span
-      class='italic'>The higher the ACH, the faster one reaches the steady state
-      concentration.</span>
+  <vue-mathjax formula='$$C_t = g/Q \cdot (1 - e^{-\frac{Q}{V} \cdot t}) $$'></vue-mathjax>
 
-    </p>
-
+  <p>Non-infectious air delivery rate <vue-mathjax formula='$Q$'></vue-mathjax> determines the steady-state concentration of the curve. ACH <vue-mathjax formula='$Q / V$'></vue-mathjax> determines how fast the curve gets to that steady state.</p>
     <LineGraph
       :lines="[baseCase, largerVol, highNADR]"
       :ylim='[0, 0.09]'
@@ -161,35 +137,29 @@
       :roundXTicksTo='0'
     />
 
-    <p>
-      If the volume of the room is relatively small and
-      NADR is relatively big (i.e. high ACH), then it does not take a lot of time to reach
-      steady state. On the other hand, if the volume of the room is relatively
-      big and NADR is relatively small (i.e. low ACH), then it takes a while to reach steady state.
-      See the graph above to see how having different values of NADR and ACH
-      interact to produce concentration curves. We assume that a susceptible
-      and infector come in at the same time and stay at the venue, and
-      everything else is kept constant. The dose is the area under the concentration
-      curve.
-      <span class='italic'>
-      The smaller that area is, the less likely
-        susceptibles will be infected.
-      </span>
-    </p>
 
+    <p>In the graph above, we compare different concentration curves. The first
+curve in red, called "base case," involves a certain non-infectious air
+delivery rate and volume. The curve in green, called "larger vol., same NADR,"
+has the same non-infectious air delivery rate as the base case, but has larger
+volume -- double that of the base case. Since volume is larger, ACH is
+decreased, which makes it take longer to hit the steady state concentration --
+same as the base case. </p>
+    <p> How is this information useful? Assuming that you have two rooms and
+the same NADR for both, but one is bigger than the other, and that the infector
+comes in at the same time as you, a susceptible, and assuming well-mixed air
+(i.e. fans are blowing air around), the room will initially be safer for a
+period of time. <span class='italic'>Using larger spaces is good because in the
+beginning, there is more clean air. We can see that a decrease in ACH (due to an
+increase in volume) isn't necessarily a bad thing.</span>  </p>
 
-    <h3>NADR & ACH Graphs</h3>
-    <p>In the graph above, we compare different concentration curves. The first curve in red, called "base case," involves a certain non-infectious air delivery rate and volume. The curve in green, called "larger vol., same NADR," has the same non-infectious air delivery rate as the base case, but has larger volume -- double that of the base case. Since volume is larger, ACH is decreased, which makes it take longer to hit the steady state concentration -- same as the base case. </p>
-    <p>
-How is this information useful? Assuming that you have two rooms and the same NADR for both, but one is bigger than the other, and that the infector comes in at the same time as you, a susceptible, and assuming well-mixed air (i.e. fans are blowing air around), the room will initially be safer for a period of time. <span class='italic'>Using larger spaces is good because in the beginning, there is more clean air to begin with that dilutes the dirty air. However, in the long run, the concentration of dirty air is dictated by NADR. Both curves will approach the same steady state, given the same NADR.</span> Here we can see that a decrease in ACH (due to an increase in volume) isn't necessarily a bad thing.
-    </p>
-    <p>In the graph above, we also display the scenario where NADR is increased (doubled) relative to the base case, but volume is kept the same (in blue). This leads to a situation where the steady state concentration is lower, and it's faster to reach the steady state. Increasing NADR decreases the state state concentration (i.e. safer in the long run), and increases ACH, which means that it's faster to reach steady state.</p>
-    <p>In conclusion, we see how NADR and volume interact to decrease the concentration of infectious, pathogenic air.
-      <ul>
-        <li><span class='italic'>Prefer larger spaces over smaller spaces.</span> Larger spaces are safer than smaller spaces, at least for an initial period. Very large spaces will have low ACH, but that's not necessarily a bad thing with respect to risk.</li>
-        <li><span class='italic'>Prefer higher NADR over lower NADR.</span> The higher the NADR, the less risky a venue is. People will be inhaling lower concentrations of dirty air with higher NADR in the long run.</li>
-      </ul>
-    </p>
+    <p>In the graph above, we also display the scenario where NADR is increased
+(doubled) relative to the base case, but volume is kept the same (in blue).
+This leads to a situation where the steady state concentration is lower, and
+it's faster to reach the steady state. Increasing NADR decreases the state
+state concentration (i.e. safer in the long run), and increases ACH, which
+means that it's faster to reach steady state.</p>
+
   </DrillDownSection>
 </template>
 

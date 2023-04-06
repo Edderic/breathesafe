@@ -6,26 +6,49 @@
     :text='english(risk)'
     :colorScheme='riskColorScheme'
   >
-    <tr>
-      <td colspan='2'>
 
         <h3>Mathematical Details</h3>
         <p>
-        This is the risk of transmission
-incorporating prevalence, occupancy, and various mitigations.
-<vue-mathjax :formula='formula'></vue-mathjax>
+        The risk of transmission <vue-mathjax formula='$s$'></vue-mathjax>
+incorporating environmental factors (e.g. air cleaning)
+<vue-mathjax formula='$e_2$'></vue-mathjax> and evidence about people's infectiousness status <vue-mathjax formula='$e_1$'></vue-mathjax> (e.g. Rapid Tests, PCR, symptoms) is <vue-mathjax formula='$P(s \mid e_1, e_2)$'></vue-mathjax>. Through the sum and product rules of probability, we could expand it as such:
         </p>
         <p>
-        The right term
-<vue-mathjax formula='$P(I \geq 1 \mid e)$'></vue-mathjax>
-is the <span class='italic'>probability that at least one person is infectious, given some evidence
-<vue-mathjax formula='e'></vue-mathjax>. See the "Probability that at least one person is infectious" section above to get more details about this.
-</span>
-        The left term
-        <vue-mathjax formula='$P(\text{transmit} \mid e, I=1)$'></vue-mathjax>
-        is the probability of transmission given evidence e, assuming there's one infector. We'll focus more on this here.
+
+<vue-mathjax formula='$$P(\text{s} \mid e_1, e_2) = \sum_i P(\text{s} \mid e_2, e_1, i) \cdot P(i \mid e_2, e_1)$$'></vue-mathjax>
 
         </p>
+        <p>Once we know how many people are infectious <vue-mathjax formula='$i$'></vue-mathjax>, then knowing about the result of rapid tests, PCR, or symptoms (<vue-mathjax formula='$e_1$'></vue-mathjax>) doesn't tell us anything about the probability of transmission. Therefore, we can omit it from the first term:
+        </p>
+        <p>
+          <vue-mathjax formula='$$P(s \mid e_2, e_1, i) = P(s \mid e_2, i)$$'></vue-mathjax>
+        </p>
+        <p>Likewise, for the <vue-mathjax formula='$P(i \mid e_2, e_1)$'></vue-mathjax> term, we assume that knowing about venue type (e.g. bar, hospital) or behavior (e.g. masking) doesn't tell us anything about the probability of being infectious, so we'll omit <vue-mathjax formula='$e_2$'></vue-mathjax> from it:</p>
+
+        <p>
+        <vue-mathjax formula='$$P(i \mid e_2, e_1) = P(i \mid e_1)$$'></vue-mathjax>
+        </p>
+
+        <p>In practice, it probably does matter, but for convenience, we'll go with the above assumption.</p>
+        <p>So far we have:</p>
+        <p><vue-mathjax formula='$$P(\text{s} \mid e_1, e_2) = \sum_i P(\text{s} \mid e_2, i) \cdot P(i \mid e_1)$$'></vue-mathjax></p>
+
+        <p>We can simplify this even more, assuming that at most, there could be one infector in the room (and not 2 or more):</p>
+        <p><vue-mathjax formula='$$P(\text{s} \mid e_1, e_2) \approx P(\text{s} \mid e_2, I=1) \cdot P(I \geq 1 \mid e_1)$$'></vue-mathjax></p>
+
+        <p>
+        The right term
+<vue-mathjax formula='$P(I \geq 1 \mid e_1)$'></vue-mathjax>
+is the <span class='italic'>probability that at least one person is infectious, given some evidence
+<vue-mathjax formula='e'></vue-mathjax>.
+</span> See the "Probability that at least one person is infectious" section above to get more details about this.
+        The left term
+        <vue-mathjax formula='$P(s \mid e_2, I=1)$'></vue-mathjax>
+        is the probability of transmission given evidence e, assuming there's one infector, where <vue-mathjax formula='$e_2$'></vue-mathjax> stands for environmental factors such as the non-infectious air delivery rate, masking behavior of people, and activities done by people. We'll focus more on this here.
+
+        </p>
+
+        <p>Note that the approximation above is more likely to be true when the prevalence of COVID is very low, such that having two or more infectors in a space is unlikely. However, if the probability of having two or more infectors is high, this approximation might underestimate the risk  -- for example in a COVID ward of a hospital.</p>
 
         <p>
 <vue-mathjax :formula='transmissionFormula'></vue-mathjax>
@@ -35,10 +58,11 @@ is the <span class='italic'>probability that at least one person is infectious, 
 
         <p>
         The dose that one gets is the following:
-        <vue-mathjax formula='$$ \text{dose} = \int_0^t \text{concentration(t)} \cdot dt$$'></vue-mathjax>
+        <vue-mathjax formula='$$ \text{dose} = \int_0^t \text{c(t)} \cdot dt$$'></vue-mathjax>
 
         In other words, take the area under the curve of the concentration with respect to time. When an infector and susceptible come in at the same time and stay there, the concentration curve starts at 0 and then increases. The rate of increase slows down until it reaches 0. At that point the steady state concentration is reached.
         </p>
+
 
         <LineGraph
           :lines="[constantConcentration, incorporatingACH]"
@@ -60,7 +84,7 @@ is the <span class='italic'>probability that at least one person is infectious, 
         <vue-mathjax formula='$\text{concentration(t)}$'></vue-mathjax> can be broken down into the following:
 
         <vue-mathjax formula='$$\text{concentration}(t) = g \cdot b_r / Q \cdot r_{ss}(t)$$'></vue-mathjax>
-        where <vue-mathjax formula='$g$'></vue-mathjax> is the contamination generation rate (quanta / h), <vue-mathjax formula='$b_a$'></vue-mathjax> is the exhalation factor for the infector which depends on the activity, <vue-mathjax formula='$r_{mi}$'> is the masking penetration of the infector, </vue-mathjax> <vue-mathjax formula='$b_r$'></vue-mathjax> is the inhalation rate (m3 / h), <vue-mathjax formula='$Q$'></vue-mathjax> is the contamination removal rate (m3 / h),  <vue-mathjax formula='$t$'></vue-mathjax> is the duration (hours), and <vue-mathjax formula='$r_{ss}(t)$'></vue-mathjax> is a factor that tells us the height of the curve at a given <vue-mathjax formula='$t$'></vue-mathjax>.
+        where <vue-mathjax formula='$g$'></vue-mathjax> is the contamination generation rate (quanta / h), <vue-mathjax formula='$r_{mi}$'> is the masking penetration of the infector, </vue-mathjax> <vue-mathjax formula='$b_r$'></vue-mathjax> is the inhalation rate (m3 / h), <vue-mathjax formula='$Q$'></vue-mathjax> is the contamination removal rate (m3 / h),  <vue-mathjax formula='$t$'></vue-mathjax> is the duration (hours), and <vue-mathjax formula='$r_{ss}(t)$'></vue-mathjax> is a factor that tells us the height of the curve at a given <vue-mathjax formula='$t$'></vue-mathjax>.
         </p>
 
         <h4>Contamination generation rate</h4>
@@ -80,7 +104,7 @@ is the <span class='italic'>probability that at least one person is infectious, 
 
         <h5>Masking Penetration of Infector</h5>
         <p>
-          The masking penetration of infector <vue-mathjax formula='$r_{mi}$'></vue-mathjax> is a multiplier that corresponds to how much pollution goes through the infector's mask (or leaks around it), a value between 0 and 1. <span class='italic'>N95s have much low penetration factors than surgical masks and cloth masks.</span>
+          The masking penetration of infector <vue-mathjax formula='$r_{mi}$'></vue-mathjax> is a multiplier that corresponds to how much pollution goes through the infector's mask (or leaks around it), a value between 0 and 1. <span class='italic'>N95s have much lower penetration factors than surgical masks and cloth masks.</span>
         </p>
 
         <h4>Inhalation rate</h4>
@@ -94,7 +118,7 @@ is the <span class='italic'>probability that at least one person is infectious, 
 
         <h5>Susceptible activity factor</h5>
 
-        <vue-mathjax formula='$r_i$'></vue-mathjax> is a factor taking into account the breathing rate of the susceptible when taking into account more strenuous activities. <span class='italic'>The faster a susceptible breathes in (e.g. when exercising), the higher the risk, relative to breathing slowly (e.g. at rest).</span>
+        <vue-mathjax formula='$r_i$'></vue-mathjax> is a factor of the susceptible taking into account the increase of breathing rate relative to being at rest when taking into account more strenuous activities. <span class='italic'>The faster a susceptible breathes in (e.g. when exercising), the higher the risk, relative to breathing slowly (e.g. at rest).</span>
 
         <h5>Susceptible masking penetration factor</h5>
         <vue-mathjax formula='$r_{mi}$'></vue-mathjax> is the masking penetration factor for the susceptible (between 0 and 1). Like masking for source control for the infector, masks also protect in terms of lowering the inhalation dose. <span class='italic'>N95s have much low penetration factors than surgical masks and cloth masks.</span>
@@ -122,18 +146,18 @@ is the <span class='italic'>probability that at least one person is infectious, 
 
         </p>
 
-        <h3>Where does the steady state factor come from?</h3>
+        <h3>Derivation of the Concentration Curve</h3>
 
         <p>The scenario we are considering is when the infector and susceptibles come in into the room at the same time, and that there were no infectors prior to the location (and therefore the initial concentration of dirty air is 0. The change in concentration over time is then dictated by the following equation:</p>
 
         <vue-mathjax formula='$$\frac{dC}{dt} = \frac{-Q \cdot C_{t} + g}{V}$$'></vue-mathjax>
 
         <p>where <vue-mathjax formula='$Q$'></vue-mathjax> is the non-infections air delivery rate, <vue-mathjax formula='$C_t$'></vue-mathjax> is the concentration at time <vue-mathjax formula='$t$'></vue-mathjax>, <vue-mathjax formula='$g$'></vue-mathjax> is the quanta generation rate, and <vue-mathjax formula='$V$'></vue-mathjax> is the volume of the room. What the above says is that some amount of air <vue-mathjax formula='$g$'></vue-mathjax> is being generated by the infector. We then divide it by the volume of the room <vue-mathjax formula='$V$'></vue-mathjax> to get the added concentration. In other words, <vue-mathjax formula='$g / V$'></vue-mathjax> is the proportion of dirty air that's being added. However, some non-infectious air is being delivered at a rate <vue-mathjax formula='$Q$'></vue-mathjax>, made up of concentration <vue-mathjax formula='$C_{t}$'></vue-mathjax>. In other words, <vue-mathjax formula='$Q$'></vue-mathjax> with a concentration of <vue-mathjax formula='$C_t$'></vue-mathjax> is being removed.</p>
-        <vue-mathjax formula='$$V \cdot \frac{dC}{dt} = -Q \cdot C_t + q$$'></vue-mathjax>
+        <vue-mathjax formula='$$V \cdot \frac{dC}{dt} = -Q \cdot C_t + g$$'></vue-mathjax>
         <br>
-        <vue-mathjax formula='$$B_t = -Q \cdot C_t + q$$'></vue-mathjax>
+        <vue-mathjax formula='$$B_t = -Q \cdot C_t + g$$'></vue-mathjax>
         <br>
-        <vue-mathjax formula='$$B_0 = -Q \cdot C_0 + q$$'></vue-mathjax>
+        <vue-mathjax formula='$$B_0 = -Q \cdot C_0 + g$$'></vue-mathjax>
         <br>
         <vue-mathjax formula='$$\frac{dB_t}{dt} = -Q \frac{dC_t}{dt}$$'></vue-mathjax>
         <br>
@@ -197,13 +221,6 @@ is the <span class='italic'>probability that at least one person is infectious, 
 
 
 
-      </td>
-
-    </tr>
-    <tr>
-      <td colspan='2'>
-      </td>
-    </tr>
   </DrillDownSection>
 </template>
 
@@ -357,7 +374,7 @@ export default {
 
         \\begin{equation}
         \\begin{aligned}
-            P(t \\mid e, I=1) &= 1 - \\text{exp}^{-\\text{dose}}
+            P(s \\mid e, I=1) &= 1 - \\text{exp}^{-\\text{dose}}
         \\end{aligned}
         \\end{equation}
         $$
@@ -369,14 +386,8 @@ export default {
       // r_ss: steady state factor
 
       return ` $$
-        \\begin{equation}
-        \\begin{aligned}
-        P(\\text{transmit} \\mid e) &= \\sum_i P(\\text{transmit} \\mid e, i) \\cdot P(i \\mid e) \\\\
-&\\approx P(\\text{transmit} \\mid e, I = 1) \\cdot P(I \\geq 1 \\mid e) \\
 
 
-        \\end{aligned}
-        \\end{equation}
       $$
       `
     },
