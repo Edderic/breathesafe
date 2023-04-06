@@ -81,10 +81,13 @@ per time (e.g. cubic feet per minute).
       <p>
       So in the long run, if Q is very large, then the concentration curve is
       basically hovering around 0.
+      </p>
       <p>
         <vue-mathjax formula='$$g/Q \approx 0  \text{     if Q} >> 0$$'></vue-mathjax>
       </p>
 
+      <p>
+      Being outside, the steady-state concentration will be {{outdoorsIsNumTimesTheNADR}} times smaller than the steady-state concentration of being inside in this room.
       Dose is essentially concentration times time, so
       if the concentration part is very small, the dose is also small, which means
       that <span class='italic'>it is much safer being outdoors relative to being inside in this room.</span>
