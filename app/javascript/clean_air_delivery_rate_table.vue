@@ -10,6 +10,7 @@
   <tr>
     <td colspan='2'>
 
+      <h3>How does this NADR compare to being outside?</h3>
       <p>
       How does a non-infectious air delivery rate of {{totalFlowRateRounded}} {{measurementUnits.airDeliveryRateMeasurementTypeShort}} compare to being outside?
 
@@ -68,7 +69,7 @@ per time (e.g. cubic feet per minute).
       <vue-mathjax :formula='outdoorsNADRDerivation'></vue-mathjax>
 
       <p>
-      {{ outdoorsNADRText }} from being outside is {{ outdoorsIsNumTimesTheNADR}} times the estimated NADR from being inside in this room! As you may recall from earlier sections, NADR, represented as <vue-mathjax formula='$Q$'></vue-mathjax>, is the denominator of the first term, which is the steady state concentration.
+      {{ outdoorsNADRText }} from being outside is {{ outdoorsIsNumTimesTheNADR}} times the estimated NADR from being inside in this room! As you may recall from earlier sections, NADR, represented as <vue-mathjax formula='$Q$'></vue-mathjax> in the concentration curve, is the denominator of the first term, which is the steady state concentration.
 
 
 
