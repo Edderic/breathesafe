@@ -1,7 +1,7 @@
 <template>
 
   <DrillDownSection
-    title='Time to 99% Dilution'
+    title='Time to Steady State'
     :value='durationMinutesToRemove(0.99)'
     :text='text'
     :colorScheme='removalScheme'
@@ -18,8 +18,48 @@
             exhaled by the infector.  </span> This is useful for situations when you know
             there's been an infector in the room, you have your mask, and you are trying to
             figure out how long you should wait to remove your mask. One should wait at
-            least {{ durationMinutesToRemove(0.99) }} minutes to be safe.
+            least {{ durationMinutesToRemove(0.99) }} minutes to drastically
+            reduce the risk of inhaling a large dose of infectious particles
+            that are residuals from an infector having been there.
         </p>
+
+        <h3>Mathematical Details</h3>
+
+
+        <p>
+          You may recall in the "Derivation of the Concentration Curve" section under "Individual Risk" that when there is an initial concentration <vue-mathjax formula='$c_0$'></vue-mathjax> that is non-zero, we have:
+        </p>
+
+        <p>
+          <vue-mathjax formula='$$C_t = g/Q + (1 \cdot C_0 - g/Q) \cdot e^{-\frac{Q}{V} \cdot t} $$'></vue-mathjax>
+        </p>
+
+        <p>
+        Once the infector leaves, the generation rate of dirty air <vue-mathjax formula='$g$'></vue-mathjax> becomes 0, and we have a decay curve that starts at <vue-mathjax formula='$C_0$'></vue-mathjax> and then drops to 0 as time goes by. How long it takes depends on ACH
+        <vue-mathjax formula='$Q/V$'></vue-mathjax>:
+        </p>
+
+        <p>
+          <vue-mathjax formula='$$C_t = C_0 \cdot e^{-\frac{Q}{V} \cdot t} $$'></vue-mathjax>
+        </p>
+
+
+        <p>
+          Plugging in <span class='bold'>{{totalAchRounded}}</span> ACH, then we'll want to solve for <vue-mathjax formula='$t$'></vue-mathjax>:
+        </p>
+        <p>
+          <vue-mathjax :formula='achToDurationFormula'></vue-mathjax>
+        </p>
+
+        <p>
+          If <vue-mathjax formula='$C_t$'></vue-mathjax> was one-hundredth of the initial concentration
+          <vue-mathjax formula='$C_0$'></vue-mathjax>, then we have:
+        </p>
+        <p>
+          <vue-mathjax :formula='achToDurationFormulaContinuation'
+></vue-mathjax>
+        </p>
+
       </div>
     </td>
   </tr>
@@ -66,6 +106,35 @@ export default {
         'styleProps'
       ]
     ),
+    achToDurationFormulaContinuation() {
+      return `
+        $$
+
+        \\begin{equation}
+        \\begin{aligned}
+        -ln(0.01)/98.4 &= t \\\\
+        ${round(this.durationMinutesToRemove(0.99) / 60, 2)} \\text{ hours} &= \\\\
+        ${this.durationMinutesToRemove(0.99)} \\text{ minutes} &= \\\\
+        \\end{aligned}
+        \\end{equation}
+        $$'
+      `
+    },
+    achToDurationFormula() {
+      return `
+
+$$
+\\begin{equation}
+\\begin{aligned}
+C_t &= C_0 \\cdot e^{-${this.totalAchRounded} \\cdot t} \\\\
+C_t / C_0 &= e^{-${this.totalAchRounded} \\cdot t} \\\\
+ln(C_t / C_0) &= -${this.totalAchRounded} \\cdot t \\\\
+- ln(C_t / C_0) / ${this.totalAchRounded} &= t \\\\
+\\end{aligned}
+\\end{equation}
+$$
+`
+    },
     text() {
       let val = this.durationMinutesToRemove(0.99)
       let maybeRounded;

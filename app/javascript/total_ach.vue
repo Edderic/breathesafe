@@ -4,6 +4,14 @@
     <br>
     <br>
     <h2>Total ACH</h2>
+    <p>
+      Air Changes per Hour (ACH) tells us how much clean air is generated
+      relative to the volume of the room. If a device outputs 5 ACH, that means it
+      produces clean air that is 5 times the volume of the room in an hour.  Total
+      ACH for a room can be computed by summing up the ACH of different types (e.g.
+      ventilation, filtration, upper-room germicidal UV).
+    </p>
+
     <div class='centered'>
       <TotalACHTable
         :measurementUnits='measurementUnits'
@@ -16,14 +24,6 @@
         :cellCSS='cellCSS'
         />
     </div>
-
-    <p>
-      Air Changes per Hour (ACH) tells us how much clean air is generated
-      relative to the volume of the room. If a device outputs 5 ACH, that means it
-      produces clean air that is 5 times the volume of the room in an hour.  Total
-      ACH for a room can be computed by summing up the ACH of different types (e.g.
-      ventilation, filtration, upper-room germicidal UV).
-    </p>
 
   </div>
 

@@ -4,6 +4,22 @@
     :value='totalAchRounded'
     :colorScheme='colorInterpolationSchemeTotalAch'
   >
+
+  <tr>
+    <td colspan='2'>
+      <p class='explainer'>
+        Air Changes per Hour (ACH) tells us how much clean air is generated
+        relative to the volume of the room. If a device outputs 5 ACH, that means it
+        produces clean air that is 5 times the volume of the room in an hour.  Total
+        ACH for a room can be computed by summing up the ACH of different types (e.g.
+        ventilation, filtration, upper-room germicidal UV).
+      </p>
+      <p class='explainer'>ACH affects how fast the steady state concentration
+      of contaminants is achieved. The higher the ACH,
+      the faster the concentration reaches steady state. See <span
+      class='bold'>Time to Steady State</span> for more details.</p>
+    </td>
+  </tr>
   <tr >
     <td colspan='2'>
       <table class='explainer'>
@@ -76,22 +92,6 @@
           </td>
         </tr>
       </table>
-    </td>
-  </tr>
-
-  <tr>
-    <td colspan='2'>
-      <p class='explainer'>
-        Air Changes per Hour (ACH) tells us how much clean air is generated
-        relative to the volume of the room. If a device outputs 5 ACH, that means it
-        produces clean air that is 5 times the volume of the room in an hour.  Total
-        ACH for a room can be computed by summing up the ACH of different types (e.g.
-        ventilation, filtration, upper-room germicidal UV).
-      </p>
-      <p class='explainer'>ACH affects how fast the steady state concentration
-      of contaminants is achieved. The higher the ACH,
-      the faster the concentration reaches steady state. See <span
-      class='bold'>Time to 99% Dilution</span> for more details.</p>
     </td>
   </tr>
   </DrillDownSection>

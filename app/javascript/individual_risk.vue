@@ -187,7 +187,7 @@ is the <span class='italic'>probability that at least one person is infectious, 
         <br>
         <vue-mathjax formula='$$-Q \cdot C_t = -g + (-Q \cdot C_0 + g) \cdot e^{-\frac{Q}{V} \cdot t} $$'></vue-mathjax>
         <br>
-        <vue-mathjax formula='$$C_t = g/Q + (1 \cdot C_0/Q - g/Q) \cdot e^{-\frac{Q}{V} \cdot t} $$'></vue-mathjax>
+        <vue-mathjax formula='$$C_t = g/Q + (C_0 - g/Q) \cdot e^{-\frac{Q}{V} \cdot t} $$'></vue-mathjax>
         <br>
         <p>Given the scenario we are considering, where there were no infectors in the space before, so <vue-mathjax formula='$C_0 = 0$'></vue-mathjax>, we have:
         <vue-mathjax formula='$$C_t = g/Q - g/Q \cdot e^{-\frac{Q}{V} \cdot t} $$'></vue-mathjax>
