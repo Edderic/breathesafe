@@ -90,7 +90,7 @@ per time (e.g. cubic feet per minute).
       Being outside, the steady-state concentration will be {{outdoorsIsNumTimesTheNADR}} times smaller than the steady-state concentration of being inside in this room.
       Dose is essentially concentration times time, so
       if the concentration part is very small, the dose is also small, which means
-      that <span class='italic'>it is much safer being outdoors relative to being inside in this room.</span>
+      that <span class='italic'>it is much safer being outdoors relative to being inside in this room, with everything else held constant.</span>
       </p>
       <h3>Mathematical Details</h3>
       <table class='explainer mathematical-details'>
