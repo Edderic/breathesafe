@@ -27,6 +27,16 @@
       >
     </div>
 
+    <div class='container' v-if='!registered'>
+      <input
+        v-model='agreeTOSMedicalDisclaimerPrivacyPolicy'
+        type="checkbox"
+      >
+
+      By signing up, you agree to <router-link :to="{'name': 'Disclaimer'}">Disclaimer</router-link>
+      </div>
+
+
     <div class='container row' v-if='!registered'>
       <Button @click="signUp" text='Sign up'/>
       <br>
@@ -58,6 +68,7 @@ export default {
       name: "",
       email: "",
       password: "",
+      agreeTOSMedicalDisclaimerPrivacyPolicy: false,
       registered: false
     }
   },

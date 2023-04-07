@@ -42,6 +42,7 @@ import Analytics from '../analytics.vue'
 import App from '../app.vue';
 import AddMeasurements from '../add_measurements.vue';
 import FAQs from '../faqs.vue';
+import Disclaimer from '../disclaimer.vue';
 import Venues from '../map_events.vue'
 import Landing from '../landing.vue'
 import Profile from '../profile.vue'
@@ -70,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/profile', component: Profile, name: 'Profile' },
     { path: '/register', component: Registration, name: 'Registration' },
     { path: '/faqs', component: FAQs, name: 'FAQs' },
+    { path: '/disclaimer', component: Disclaimer, name: 'Disclaimer' },
   ]
 
   // 3. Create the router instance and pass the `routes` option
