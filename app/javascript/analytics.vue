@@ -63,13 +63,6 @@
 
           <table class='item-span-wide stuff'>
             <ProbaAtLeastOneInfectorPresent/>
-            <PeopleAffected
-              id='section-average-new-infections'
-              :event='event'
-              :selectedIntervention='selectedIntervention'
-              :numInfectors='numInfectors'
-              class='align-items-center'
-            />
 
             <IndividualRisk
               id='section-individual-risk'
@@ -77,6 +70,13 @@
               class='align-items-center'
             />
 
+            <PeopleAffected
+              id='section-average-new-infections'
+              :event='event'
+              :selectedIntervention='selectedIntervention'
+              :numInfectors='numInfectors'
+              class='align-items-center'
+            />
 
           </table>
 
