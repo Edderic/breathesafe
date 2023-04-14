@@ -48,6 +48,7 @@ import Landing from '../landing.vue'
 import Profile from '../profile.vue'
 import Registration from '../registration.vue'
 import SignIn from '../sign_in.vue'
+import TermsOfService from '../terms_of_service.vue'
 import { useEventStore } from '../stores/event_store.js';
 import { useMainStore } from '../stores/main_store.js';
 
@@ -72,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/register', component: Registration, name: 'Registration' },
     { path: '/faqs', component: FAQs, name: 'FAQs' },
     { path: '/disclaimer', component: Disclaimer, name: 'Disclaimer' },
+    { path: '/terms-of-service', component: TermsOfService, name: 'TermsOfService' },
   ]
 
   // 3. Create the router instance and pass the `routes` option

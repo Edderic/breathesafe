@@ -1,6 +1,7 @@
 <template>
+  <CircularButton text="TOC" class='toc-button'/>
   <div class='grid'>
-    <div class='toc margined'>
+    <div class='toc margined overflow' >
       <div  ><br></div><h2 ><strong>TABLE OF CONTENTS</strong></h2><div  ><br></div>
 
 
@@ -100,7 +101,11 @@
     </div>
     <div class='margined main'>
       <div >
-          <div ><div ><bdt class="block-component"><span ></span></bdt><bdt ><h1>TERMS OF USE</h1></bdt><bdt class="statement-end-if-in-editor"></bdt></div><div  ><br></div><div  data-custom- ><strong>Last updated</strong> <bdt ><strong>April 07, 2023</strong></bdt></div><div  ><br></div><div  ><br></div><div  ><br></div><div ><strong><h2>AGREEMENT TO OUR LEGAL TERMS</h2></strong></div></div><div  ><div  id="agreement" ><a name="_6aa3gkhykvst"></a></div></div><div  ><br></div><div  ><div  data-custom-class="body_text" ><span >We are <bdt class="block-container question question-in-editor" data-id="9d459c4e-c548-e5cb-7729-a118548965d2" data-type="question">Breathesafe LLC</bdt><bdt class="block-component"></bdt> (<bdt class="block-component"></bdt>"<strong>Company</strong>," "<strong>we</strong>," "<strong>us</strong>," "<strong>our</strong>"<bdt class="statement-end-if-in-editor"></bdt>)<span ><span ><span ><bdt ><bdt class="block-component"></bdt></bdt><span ><bdt class="block-component"></bdt><span >, a company <span ><span >registered in<bdt class="block-component"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt> <bdt >Nevada</bdt><span ><span >, <bdt >United States</bdt></span></span><bdt class="statement-end-if-in-editor"></bdt></span></span><bdt class="block-component"><span ><span >&nbsp;at <bdt >401 Ryland St</bdt><bdt class="block-component"></bdt>, <bdt >STE 200-A</bdt><span ><span ><bdt class="statement-end-if-in-editor"></bdt></span></span>, <bdt >Reno</bdt></span></span><span ><span data-custom-class="body_text"><span ><span data-custom-class="body_text"><span ><bdt class="block-component"></bdt><bdt class="block-component"></bdt>, <bdt >NV</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt> <bdt >89502</bdt><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span><span ><bdt ><bdt class="statement-end-if-in-editor"></bdt></bdt></span></bdt></span><bdt class="statement-end-if-in-editor">.</bdt></span><bdt class="block-component"></bdt></span></span></span></span></div></div><div  ><br></div><div  ><div  data-custom-class="body_text" ><span >We operate <bdt class="block-component"></bdt>the website <bdt ><a href="http://www.breathesafe.xyz" target="_blank" data-custom->http://www.breathesafe.xyz</a></bdt> (the <bdt class="block-component"></bdt>"<strong>Site</strong>"<bdt class="statement-end-if-in-editor"></bdt>)<bdt class="block-component"></bdt><bdt class="block-component"></bdt>, as well as any other related products and services that refer or link to these legal terms (the <bdt class="block-component"></bdt>"<strong>Legal Terms</strong>"<bdt class="statement-end-if-in-editor"></bdt>) (collectively, the <bdt class="block-component"></bdt>"<strong>Services</strong>"<bdt class="statement-end-if-in-editor"></bdt>).<bdt class="block-component"></bdt></span></div><div  ><br></div><div  data-custom-class="body_text" ><bdt >We provide risk assessment tools to help individuals assess COVID transmission risk of venues around them so that individuals are empowered to make more informed decisions about COVID risk.</bdt></div><div  data-custom-class="body_text" ><span ><bdt class="statement-end-if-in-editor"></bdt></span></div><div  ><br></div><div  data-custom-class="body_text" ><span >You can contact us by <bdt class="block-component"></bdt>phone at <bdt >908 917 0124</bdt>, email at <bdt >info@breathesafe.xyz</bdt><bdt class="block-component"></bdt>,<bdt class="statement-end-if-in-editor"></bdt> or by mail to <bdt >776 Main St #541005</bdt><bdt class="block-component"></bdt>, <bdt >Waltham</bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt>, <bdt >MA</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt> <bdt >02454</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt><bdt class="block-component">,&nbsp;</bdt><bdt >United States</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt>.</span></div><div  ><br></div><div  data-custom-class="body_text" ><span >These Legal Terms constitute a legally binding agreement made between you, whether personally or on behalf of an entity (<bdt class="block-component"></bdt>"<strong>you</strong>"<bdt class="statement-end-if-in-editor"></bdt>), and <bdt >Breathesafe LLC</bdt>, concerning your access to and use of the Services. You agree that by accessing the Services, you have read, understood, and agreed to be bound by all of these Legal Terms. IF YOU DO NOT AGREE WITH ALL OF THESE LEGAL TERMS, THEN YOU ARE EXPRESSLY PROHIBITED FROM USING THE SERVICES AND YOU MUST DISCONTINUE USE IMMEDIATELY.<bdt class="block-component"></bdt><bdt class="block-component"></bdt></span></div><div  ><br></div><div  data-custom-class="body_text" ><span >We will provide you with prior notice of any scheduled changes to the Services you are using. The modified Legal Terms will become effective upon posting or notifying you by <bdt >info@breathesafe.xyz</bdt>, as stated in the email message. By continuing to use the Services after the effective date of any changes, you agree to be bound by the modified terms.<bdt class="block-component"></bdt><bdt class="statement-end-if-in-editor"></bdt></span></div></div><div  ><br></div><div  ><div  data-custom-class="body_text" ><bdt class="block-container if" data-type="if" id="a2595956-7028-dbe5-123e-d3d3a93ed076"><bdt data-type="conditional-block"><bdt data-type="body"><span ><bdt class="block-component"></bdt>The Services are intended for users who are at least 18 years old. Persons under the age
+          <div ><div ><bdt class='tos-header'>
+          <h1>TERMS OF USE</h1>
+
+          </bdt>
+<bdt class="statement-end-if-in-editor"></bdt></div><div  ><br></div><div  data-custom- ><strong>Last updated</strong> <bdt ><strong>April 07, 2023</strong></bdt></div><div  ><br></div><div  ><br></div><div  ><br></div><div ><strong><h2>AGREEMENT TO OUR LEGAL TERMS</h2></strong></div></div><div  ><div  id="agreement" ><a name="_6aa3gkhykvst"></a></div></div><div  ><br></div><div  ><div  data-custom-class="body_text" ><span >We are <bdt class="block-container question question-in-editor" data-id="9d459c4e-c548-e5cb-7729-a118548965d2" data-type="question">Breathesafe LLC</bdt><bdt class="block-component"></bdt> (<bdt class="block-component"></bdt>"<strong>Company</strong>," "<strong>we</strong>," "<strong>us</strong>," "<strong>our</strong>"<bdt class="statement-end-if-in-editor"></bdt>)<span ><span ><span ><bdt ><bdt class="block-component"></bdt></bdt><span ><bdt class="block-component"></bdt><span >, a company <span ><span >registered in<bdt class="block-component"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt> <bdt >Nevada</bdt><span ><span >, <bdt >United States</bdt></span></span><bdt class="statement-end-if-in-editor"></bdt></span></span><bdt class="block-component"><span ><span >&nbsp;at <bdt >401 Ryland St</bdt><bdt class="block-component"></bdt>, <bdt >STE 200-A</bdt><span ><span ><bdt class="statement-end-if-in-editor"></bdt></span></span>, <bdt >Reno</bdt></span></span><span ><span data-custom-class="body_text"><span ><span data-custom-class="body_text"><span ><bdt class="block-component"></bdt><bdt class="block-component"></bdt>, <bdt >NV</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt> <bdt >89502</bdt><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span><span ><bdt ><bdt class="statement-end-if-in-editor"></bdt></bdt></span></bdt></span><bdt class="statement-end-if-in-editor">.</bdt></span><bdt class="block-component"></bdt></span></span></span></span></div></div><div  ><br></div><div  ><div  data-custom-class="body_text" ><span >We operate <bdt class="block-component"></bdt>the website <bdt ><a href="http://www.breathesafe.xyz" target="_blank" data-custom->http://www.breathesafe.xyz</a></bdt> (the <bdt class="block-component"></bdt>"<strong>Site</strong>"<bdt class="statement-end-if-in-editor"></bdt>)<bdt class="block-component"></bdt><bdt class="block-component"></bdt>, as well as any other related products and services that refer or link to these legal terms (the <bdt class="block-component"></bdt>"<strong>Legal Terms</strong>"<bdt class="statement-end-if-in-editor"></bdt>) (collectively, the <bdt class="block-component"></bdt>"<strong>Services</strong>"<bdt class="statement-end-if-in-editor"></bdt>).<bdt class="block-component"></bdt></span></div><div  ><br></div><div  data-custom-class="body_text" ><bdt >We provide risk assessment tools to help individuals assess COVID transmission risk of venues around them so that individuals are empowered to make more informed decisions about COVID risk.</bdt></div><div  data-custom-class="body_text" ><span ><bdt class="statement-end-if-in-editor"></bdt></span></div><div  ><br></div><div  data-custom-class="body_text" ><span >You can contact us by <bdt class="block-component"></bdt>phone at <bdt >908 917 0124</bdt>, email at <bdt >info@breathesafe.xyz</bdt><bdt class="block-component"></bdt>,<bdt class="statement-end-if-in-editor"></bdt> or by mail to <bdt >776 Main St #541005</bdt><bdt class="block-component"></bdt>, <bdt >Waltham</bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt>, <bdt >MA</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt> <bdt >02454</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt><bdt class="block-component">,&nbsp;</bdt><bdt >United States</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt>.</span></div><div  ><br></div><div  data-custom-class="body_text" ><span >These Legal Terms constitute a legally binding agreement made between you, whether personally or on behalf of an entity (<bdt class="block-component"></bdt>"<strong>you</strong>"<bdt class="statement-end-if-in-editor"></bdt>), and <bdt >Breathesafe LLC</bdt>, concerning your access to and use of the Services. You agree that by accessing the Services, you have read, understood, and agreed to be bound by all of these Legal Terms. IF YOU DO NOT AGREE WITH ALL OF THESE LEGAL TERMS, THEN YOU ARE EXPRESSLY PROHIBITED FROM USING THE SERVICES AND YOU MUST DISCONTINUE USE IMMEDIATELY.<bdt class="block-component"></bdt><bdt class="block-component"></bdt></span></div><div  ><br></div><div  data-custom-class="body_text" ><span >We will provide you with prior notice of any scheduled changes to the Services you are using. The modified Legal Terms will become effective upon posting or notifying you by <bdt >info@breathesafe.xyz</bdt>, as stated in the email message. By continuing to use the Services after the effective date of any changes, you agree to be bound by the modified terms.<bdt class="block-component"></bdt><bdt class="statement-end-if-in-editor"></bdt></span></div></div><div  ><br></div><div  ><div  data-custom-class="body_text" ><bdt class="block-container if" data-type="if" id="a2595956-7028-dbe5-123e-d3d3a93ed076"><bdt data-type="conditional-block"><bdt data-type="body"><span ><bdt class="block-component"></bdt>The Services are intended for users who are at least 18 years old. Persons under the age
     of 18 are not permitted to use or register for the Services.</span></bdt></bdt><bdt data-type="conditional-block"><bdt class="block-component"></bdt></bdt></bdt></div><div  ><br></div><div  data-custom-class="body_text" >We recommend that you print a copy of these Legal Terms for your records.</div><div  ><br></div>
 
 
@@ -1198,13 +1203,19 @@ Generator</a>.  </div></div>
   </div>
 </template>
 <script>
-export default { name: '',
-  components: { },
+
+import CircularButton from './circular_button.vue';
+
+export default {
+  name: 'TermsOfService',
+  components: {
+    CircularButton,
+  },
   data() { return {} },
   props: { },
-  computed: { },
+  computed: {
+  },
   methods: {
-
   }
 }
 </script>
@@ -1219,6 +1230,7 @@ export default { name: '',
     top: 0;
     display: flex;
     flex-direction: column;
+    height: 90vh;
   }
 
   .grid {
@@ -1229,5 +1241,46 @@ export default { name: '',
   .main {
     margin-left: 35vw;
     width: 60vw;
+  }
+
+  .overflow {
+
+    overflow: auto;
+  }
+
+  .toc-button {
+    position: fixed;
+    left: 87vw;
+    top: 4em;
+  }
+
+  @media(min-width: 750px) {
+    .toc-button {
+      display: none;
+    }
+
+  }
+  @media(max-width: 750px) {
+    .grid {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .toc {
+      position: relative;
+      width: 75vw;
+    }
+
+    .main {
+      width: 75vw;
+      margin-left: 0;
+    }
+
+  }
+
+  .tos-header {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
   }
 </style>

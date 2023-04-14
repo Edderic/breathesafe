@@ -33,12 +33,12 @@
         type="checkbox"
       >
 
-      By signing up, you agree to <router-link :to="{'name': 'Disclaimer'}">Disclaimer</router-link>
+      By signing up, you agree to our <router-link :to="{'name': 'TermsOfService'}">Terms of Service</router-link>, <router-link :to="{'name': 'Disclaimer'}">Disclaimer</router-link>
       </div>
 
 
     <div class='container row' v-if='!registered'>
-      <Button @click="signUp" text='Sign up'/>
+      <Button @click="signUp" text='Sign up' :disabled='!agreeTOSMedicalDisclaimerPrivacyPolicy'/>
       <br>
 
       <Button @click="signIn" text='Sign In'/>
@@ -82,6 +82,10 @@ export default {
       this.password = event.target.value;
     },
     signUp() {
+      if (!this.agreeTOSMedicalDisclaimerPrivacyPolicy) {
+        return
+      }
+
       let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
       axios.defaults.headers.common['X-CSRF-Token'] = token
       axios.defaults.headers.common['Accept'] = 'application/json'

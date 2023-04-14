@@ -1,5 +1,5 @@
 <template>
-  <div :class='{button: true, major: major, selected: selected, shadow: sidePadded, "side-padded": true}'>
+  <div :class='{button: true, major: major, selected: selected, shadow: sidePadded, "side-padded": true}' :style='{"background-color": backgroundColor}'>
 {{text}}
   <slot></slot>
 </div>
@@ -14,6 +14,10 @@ export default {
     return {}
   },
   props: {
+    disabled: {
+      type: Boolean,
+      default: false
+    },
     text: {
       type: String,
       default: ''
@@ -29,6 +33,16 @@ export default {
     }
   },
   computed: {
+    backgroundColor() {
+      if (this.disabled) {
+        return '#eee'
+      } else if (this.major) {
+        return 'rgb(219, 21, 0)'
+
+      } else {
+        return 'rgb(200,200,200)'
+      }
+    },
     sidePadded() {
       return this.text.length > 0
     }
@@ -51,7 +65,7 @@ export default {
     text-align: center;
     font-size: 1.5em;
     color: white;
-    background-color: rgb(200,200,200);
+    background-color: ;
   }
   .button:hover {
     cursor: pointer;
@@ -62,9 +76,6 @@ export default {
     border-bottom: 4px solid black;
   }
 
-  .major {
-    background-color: rgb(219, 21, 0);
-  }
 
   .shadow {
     text-shadow: 1px 1px 2px black;
