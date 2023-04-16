@@ -102,9 +102,9 @@
       </router-link>
 
 
-
-
-
+      <br>
+      <br>
+      <br>
 
     </div>
     <div class='margined main'>
@@ -1254,6 +1254,7 @@ export default {
   .grid {
     display: grid;
     grid-template-columns: 35vw 65vw;
+    justify-content: center;
   }
 
   .main {
@@ -1268,7 +1269,7 @@ export default {
 
   .toc-button {
     position: fixed;
-    left: 87vw;
+    right: 1em;
     top: 4em;
   }
 
