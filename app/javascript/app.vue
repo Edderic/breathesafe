@@ -68,10 +68,6 @@ export default {
   .subsection {
     font-weight: bold;
   }
-  .body {
-    position: absolute;
-    top: 4.2em;
-  }
   .wide {
     flex-direction: column;
   }
@@ -83,12 +79,6 @@ export default {
   .centered {
     display: flex;
     justify-content: center;
-  }
-
-  .column {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
   }
 
   button {
@@ -138,6 +128,8 @@ export default {
   .router-view-container {
     display: flex;
     justify-content: center;
+    flex-direction: column;
+
   }
 
 </style>

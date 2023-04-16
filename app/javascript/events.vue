@@ -476,7 +476,7 @@ export default {
 
   .scrollable {
     overflow-y: auto;
-    height: 85vh;
+    height: 80vh;
     width: 100%;
   }
 
