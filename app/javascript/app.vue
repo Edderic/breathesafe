@@ -7,11 +7,13 @@
       <router-view></router-view>
     </div>
 
+    <Footer/>
   </div>
 </template>
 
 <script>
 // Have a VueX store that maintains state across components
+import Footer from './footer.vue';
 import NavBar from './navbar.vue';
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
@@ -20,6 +22,7 @@ import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
 export default {
   name: 'App',
   components: {
+    Footer,
     NavBar,
   },
   computed: {
@@ -135,7 +138,6 @@ export default {
   .router-view-container {
     display: flex;
     justify-content: center;
-    padding-top: 3.2em;
   }
 
 </style>
