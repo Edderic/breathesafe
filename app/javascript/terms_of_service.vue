@@ -108,8 +108,14 @@
 
     </div>
     <div class='margined main'>
+
+      <br>
+      <br>
+      <br>
+
       <div >
           <div ><div ><bdt class='tos-header'>
+
           <h1>TERMS OF USE</h1>
 
           </bdt>
@@ -1203,7 +1209,14 @@ class="block-component"></bdt></strong></span></strong></strong></div><div
 data-custom-class="body_text" ><strong><span ><strong><bdt
 >info@breathesafe.xyz</bdt></strong></span></strong></div></div> <div > These
 terms of use were created using Termly's <a >Terms and Conditions
-Generator</a>.  </div></div>
+Generator</a>.
+    <br>
+    <br>
+    <br>
+    <br>
+
+    </div>
+    </div>
 
   </div>
 </template>
