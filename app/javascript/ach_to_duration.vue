@@ -112,7 +112,7 @@ export default {
 
         \\begin{equation}
         \\begin{aligned}
-        -ln(0.01)/98.4 &= t \\\\
+        -ln(0.01)/${this.totalAchRounded} &= t \\\\
         ${round(this.durationMinutesToRemove(0.99) / 60, 2)} \\text{ hours} &= \\\\
         ${this.durationMinutesToRemove(0.99)} \\text{ minutes} &= \\\\
         \\end{aligned}
