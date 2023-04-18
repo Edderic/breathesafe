@@ -141,7 +141,7 @@
             :activityGroups='activityGroups'
             :generationRate='generationRate'
             :roomUsableVolumeCubicMeters='roomUsableVolumeCubicMeters'
-            :c0='c0'
+            :c0='initialCarbonDioxideReading'
             :cBackground='ventilationCo2AmbientPpm'
             :cadr='ventilationCadr'
             />

@@ -511,14 +511,25 @@ export class Intervention {
   }
 
   computeEmissionRate() {
+    // Assumes that the intervened number of people are distributed
+    // proportionally to the old total.
+    //
     // Returns:
     //   CO2 emission rate (L/s)
     let copy = JSON.parse(JSON.stringify(this.activityGroups))
-    copy[0].numberOfPeople = this.numInfectors + this.numSusceptibles
-    // debugger
-    // TODO: find the most common
-    // this.activityGroups
-    return computeCO2EmissionRate([copy[0]])
+
+    let oldTotal = 0
+    for (let group of copy) {
+      oldTotal += parseInt(group.numberOfPeople)
+    }
+
+    let newTotal = this.numInfectors + this.numSusceptibles
+
+    for (let group of copy) {
+      group.numberOfPeople = Math.ceil(newTotal / oldTotal * parseInt(group.numberOfPeople))
+    }
+
+    return computeCO2EmissionRate(copy)
 
     // TODO: compute emission rate from the number of infectors and
     // susceptibles? However that uses age...
@@ -544,10 +555,10 @@ export class Intervention {
     //
     return steadyStateFac({
       roomUsableVolumeCubicMeters: this.roomUsableVolumeCubicMeters,
-      c_0: this.event.initialCo2 / 1000000,
-      generationRate: this.computeEmissionRate() * 3.6,
+      c_0: this.event.initialCo2,
+      generationRate: this.computeEmissionRate() * 3600000,
       cadr: this.flowRate(),
-      cBackground: this.ambientCO2Reading() / 1000000
+      cBackground: this.ambientCO2Reading()
     }, 1000000)
   }
 
