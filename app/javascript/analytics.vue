@@ -43,6 +43,9 @@
       <div class='item' >
         <div class='item'>
           <div class='item-span-wide' id='section-risk-assessment-summary'>
+            <br>
+            <br>
+
             <h2 class='centered'>
               <span class='header-icon'>🎲</span>&nbsp; Risk Assessment
             </h2>
@@ -99,10 +102,16 @@
             />
           </table>
         </div>
+        <br>
+        <br>
+        <br>
+
       </div>
 
       <div class='item'>
         <div class='item-span-wide' id='section-ventilation'>
+          <br>
+          <br>
           <br>
           <h2 class='centered'>
             <VentIcon :showText='false' height='3em' width='3em' />
@@ -186,6 +195,11 @@
             :activityGroups='activityGroups'
           />
         </div>
+
+        <br>
+        <br>
+        <br>
+
       </div>
 
 
