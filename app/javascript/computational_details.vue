@@ -331,12 +331,12 @@
                 </th>
               </tr>
               <tr>
-                <ColoredCell
-                  :colorScheme="colorInterpolationSchemeTotalAch"
-                  :maxVal=1
-                  :value='roundOut(this.selectedIntervention.computeVentilationACH(), 1)'
-                  class='color-cell'
-                />
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.computeVentilationACH(), 1)'
+                    class='color-cell'
+                  />
                 <td>=</td>
                 <ColoredCell
                   :colorScheme="colorInterpolationSchemeTotalAch"
@@ -523,27 +523,31 @@
                 </th>
               </tr>
               <tr v-for='(activityGroup, i) in activityGroups'>
-                <ColoredCell
-                  :colorScheme="colorInterpolationSchemeTotalAch"
-                  :maxVal=1
-                  :value='roundOut(this.selectedIntervention.computeEmissionRate(), 3)'
-                  class='color-cell'
-                  v-if='i == 0'
-                />
+                <td v-if='i == 0' >
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(this.selectedIntervention.computeEmissionRate(), 3)'
+                    class='color-cell'
+                  />
+                </td>
                 <td v-else></td>
 
                 <td v-if='i == 0'>=</td>
                 <td v-else>+</td>
 
-                <ColoredCell
-                  :colorScheme="colorInterpolationSchemeTotalAch"
-                  :maxVal=1
-                  :value='roundOut(co2Rate(activityGroup), 6)'
-                  class='color-cell'
-                />
+                <td>
+                  <ColoredCell
+                    :colorScheme="colorInterpolationSchemeTotalAch"
+                    :maxVal=1
+                    :value='roundOut(co2Rate(activityGroup), 6)'
+                    class='color-cell'
+                  />
+                </td>
 
                 <td>x</td>
 
+                <td>
                 <ColoredCell
                   :colorScheme="colorInterpolationSchemeTotalAch"
                   :maxVal=1
@@ -551,6 +555,8 @@
                   class='color-cell'
                   style='background-color: grey'
                 />
+                </td>
+
                 <td></td>
 
                 <td>{{activityGroup.carbonDioxideGenerationActivity}}</td>
