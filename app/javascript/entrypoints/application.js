@@ -46,6 +46,7 @@ import Disclaimer from '../disclaimer.vue';
 import Venues from '../map_events.vue'
 import Landing from '../landing.vue'
 import Profile from '../profile.vue'
+import PrivacyPolicy from '../privacy_policy.vue'
 import Registration from '../registration.vue'
 import SignIn from '../sign_in.vue'
 import TermsOfService from '../terms_of_service.vue'
@@ -73,7 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/register', component: Registration, name: 'Registration' },
     { path: '/faqs', component: FAQs, name: 'FAQs' },
     { path: '/disclaimer', component: Disclaimer, name: 'Disclaimer' },
-    { path: '/terms-of-service', component: TermsOfService, name: 'TermsOfService' },
+    { path: '/terms_of_service', component: TermsOfService, name: 'TermsOfService' },
+    { path: '/privacy', component: PrivacyPolicy, name: 'PrivacyPolicy' },
   ]
 
   // 3. Create the router instance and pass the `routes` option
