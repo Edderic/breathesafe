@@ -11,6 +11,9 @@
     <br>
       <div  ><br></div><h2 ><strong>TABLE OF CONTENTS</strong></h2><div  ><br></div>
 
+      <router-link to="/privacy#top">
+        PRIVACY POLICY
+      </router-link>
 
       <router-link to="/privacy#infocollect">
         WHAT INFORMATION DO WE COLLECT?
@@ -84,7 +87,11 @@
       <br>
       <br>
       <br>
-      <div class="styles-content-27a7f7"><div class="styles-documentPreviewer-881656"><div><span class="document-previewer-logo-d16635"></span><div class="document-previewer-wrapper-a717db">      <div data-custom-class="body">
+      <div id="top">
+      <br>
+      <br>
+      <br>
+      <div class="styles-documentPreviewer-881656"><div><span class="document-previewer-logo-d16635"></span><div class="document-previewer-wrapper-a717db">      <div data-custom-class="body">
       <div><strong><span style="font-size: 26px;"><span
 data-custom-class="title"><bdt class="block-component"></bdt><bdt
 class="question">PRIVACY POLICY</bdt><bdt
@@ -153,10 +160,15 @@ POINTS</span></span></strong></div><div style="line-height:
 15px;"><span data-custom-class="body_text"><strong><em>This summary provides
 key points from our privacy notice, but you can find out more details about any
 of these topics by clicking the link following each key point or by using
-our&nbsp;</em></strong></span></span><a data-custom-class="link"
-href="#toc"><span style="font-size: 15px;"><span
+our&nbsp;</em></strong></span></span>
+
+<router-link to='privacy#toc'>
+<span style="font-size: 15px;"><span
 data-custom-class="body_text"><strong><em>table of
-contents</em></strong></span></span></a><span style="font-size: 15px;"><span
+contents</em></strong></span></span>
+</router-link>
+
+<span style="font-size: 15px;"><span
 data-custom-class="body_text"><strong><em>&nbsp;below to find the section you
 are looking for.</em></strong></span></span></div><div style="line-height:
 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size:
@@ -278,7 +290,7 @@ applicable data protection laws.</span></span></div><div style="line-height:
 15px;"><span data-custom-class="body_text">Want to learn more about what <bdt
 class="block-component"></bdt><bdt class="question">Breathesafe LLC</bdt><bdt
 class="statement-end-if-in-editor"></bdt> does with any information we
-collect?&nbsp;</span></span>Read the privacy policy below in full.<span style="font-size: 15px;"><span
+collect?&nbsp;</span></span>Read the privacy policy below in full<span style="font-size: 15px;"><span
 data-custom-class="body_text">.</span></span></div><div style="line-height:
 1.5;"><br></div><div style="line-height: 1.5;"><br></div>
 
@@ -433,9 +445,13 @@ account. If you choose to register in this way, we will collect the information
 described in the section called <bdt class="block-component"></bdt>"<bdt
 class="statement-end-if-in-editor"></bdt><span style="font-size: 15px;"><span
 data-custom-class="body_text"><span style="font-size: 15px;"><span
-style="color: rgb(89, 89, 89);"><a data-custom-class="link"
-href="#sociallogins">HOW DO WE HANDLE YOUR SOCIAL
-LOGINS?</a></span></span></span></span><bdt class="block-component"></bdt>"<bdt
+style="color: rgb(89, 89, 89);">
+
+<router-link to='privacy#sociallogins'>
+HOW DO WE HANDLE YOUR SOCIAL
+LOGINS?
+</router-link>
+</span></span></span></span><bdt class="block-component"></bdt>"<bdt
 class="statement-end-if-in-editor"></bdt> below.</span></span></span></div><div
 style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span
 style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px;
@@ -777,10 +793,13 @@ data-custom-class="body_text"><strong>Consent.&nbsp;</strong>We may process
 your information if you have given us permission (i.e.<bdt
 class="block-component"></bdt>,<bdt class="statement-end-if-in-editor"></bdt>
 consent) to use your personal information for a specific purpose. You can
-withdraw your consent at any time. Learn more about&nbsp;</span></span><a
-data-custom-class="link" href="#withdrawconsent"><span style="font-size:
+withdraw your consent at any time. Learn more about&nbsp;</span></span>
+
+<router-link to="privacy#withdrawconsent"><span style="font-size:
 15px;"><span data-custom-class="body_text">withdrawing your
-consent</span></span></a><span
+consent</span></span>
+</router-link>
+<span
 data-custom-class="body_text">.</span></li></ul><div style="line-height:
 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span
 data-custom-class="body_text"></span></span></bdt></div><ul><li
@@ -884,9 +903,13 @@ class="block-component"></bdt>,<bdt class="statement-end-if-in-editor"></bdt>
 express consent) to use your personal information for a specific purpose, or in
 situations where your permission can be inferred (i.e.<bdt
 class="block-component"></bdt>,<bdt class="statement-end-if-in-editor"></bdt>
-implied consent). You can&nbsp;</span></span><a data-custom-class="link"
-href="#withdrawconsent"><span data-custom-class="body_text"><span
-style="font-size: 15px;">withdraw your consent</span></span></a><span
+implied consent). You can&nbsp;</span></span>
+
+<router-link to="privacy#withdrawconsent"><span data-custom-class="body_text"><span
+style="font-size: 15px;">withdraw your consent</span></span>
+</router-link>
+
+<span
 data-custom-class="body_text"><span style="font-size: 15px;">&nbsp;at any
 time.</span></span></div><div style="line-height: 1.5;"><br></div><div
 style="line-height: 1.5;"><span data-custom-class="body_text"><span
@@ -1222,10 +1245,15 @@ class="forloop-component"></bdt><span data-custom-class="body_text">, please be
 aware that your information may be transferred to, stored, and processed by us
 in our facilities and by those third parties with whom we may share your
 personal information (see <bdt class="block-component"></bdt>"<bdt
-class="statement-end-if-in-editor"></bdt></span><a data-custom-class="link"
-href="#whoshare"><span style="font-size: 15px;"><span style="color: rgb(89, 89,
-89);">WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL
-INFORMATION?</span></span></a><span style="font-size: 15px; color: rgb(89, 89,
+class="statement-end-if-in-editor"></bdt></span>
+
+<router-link to='/privacy#whoshare'>
+<span
+style="font-size: 15px;"><span data-custom-class="body_text">WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL
+INFORMATION?</span></span>
+</router-link>
+
+<span style="font-size: 15px; color: rgb(89, 89,
 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span
 data-custom-class="body_text"><bdt class="block-component"></bdt>"<bdt
 class="statement-end-if-in-editor"></bdt> above),
@@ -1520,7 +1548,14 @@ style="font-size: 15px;"><a data-custom-class="link"
 href="https://www.edoeb.admin.ch/edoeb/en/home.html" rel="noopener noreferrer"
 target="_blank">Federal Data Protection and Information
 Commissioner</a></span></span></span></span></span></span>.</span></span></span></div><div
-style="line-height: 1.5;"><br></div><div id="withdrawconsent"
+style="line-height: 1.5;"><br></div>
+
+<div id="withdrawconsent">
+<br>
+<br>
+<br>
+</div>
+<div
 style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89,
 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span
 data-custom-class="body_text"><strong><u>Withdrawing your consent:</u></strong>
@@ -1782,17 +1817,21 @@ request</a></span></span></span><bdt class="block-component"><span
 data-custom-class="body_text"></span></bdt></span></span><span
 data-custom-class="body_text">.</span></div>
       </div>
-      <div style="color: #595959;font-size: 14px;font-family: Arial;padding-top:16px;">
-      This privacy policy was created using Termly's <a style="color: rgb(48, 48, 241) !important;" href="https://termly.io/products/privacy-policy-generator/">Privacy Policy Generator</a>.
-      </div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div><div class="styles-style-wrapper-80f49d"><div class="styles-custom-branding-wrapper-060584"><div class="styles-style-title-custom-branding-d423f4">Custom Branding</div><div><div><div class=""><label class="checkbox-wrapper-549611"><input class="checkbox-checkbox-hidden-input-517d1e" type="checkbox" name="isHideTermlyLogo" value=""><i class="checkbox-checkbox-ui-071e2c"></i><span class="checkbox-label-e7bc1c">Hide “Powered by Termly” logo</span></label></div></div></div></div><div class="styles-style-title-custom-policy-style-e221c8">Customize Policy Style</div><div class="styles-theme-selector-wrapper-51bbf8"><div class="theme-selector-wrapper-59648b"><div class="theme-selector-label-9278f5">Theme</div><div class="theme-selector-field-efdcee"><div class="input-funnel-v2-select-container-class-574cec"><label class="input-label-input-e45675"><div class="input-position-432827"><label class="input-blue-arrow-78f3a8"><select name="themeId" class="input-form-control-f4052a input-funnel-v2-select-classname-492ed3 _ar_hide_" _ar_hide_="width:200px;height:41px;margin:0px;position:static;display:inline-block;"><option value="CREATE_NEW_THEME">Create New Theme</option><option value="DEFAULT">Sharp (Default)</option></select></label></div></label></div></div></div></div><div class="styles-theme-editor-wrapper-666ac2"><div class="styles-defaultTheme-1d71bf">Select "Create New Theme" to edit your policy style.</div></div><div class="styles-style-buttons-wrapper-2026ff"><button data-tracking="click-apply-theme" class="J1dUDtG7Y3+CvXJ8RAiv-g== TIe6Owi5yE9xVSZJ9RE+yQ== urRme3XkWGBK+nw8of9m0A== styles-applyThemeButton-72c67f t-applyThemeButton EYCKN3j87uZW+KtEk-XAKw==">APPLY THEME</button></div><div class="styles-wrapper-upgrade-prompt-custom-style-ba6ec5"><div class="styles-container-191efe"><img class="styles-icon-20542d" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzNCIgaGVpZ2h0PSIzNiI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJhIiB4MT0iOTkuODczJSIgeDI9IjAlIiB5MT0iLjEyNyUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9Ii4wMTYlIiBzdG9wLWNvbG9yPSIjNDlCRkZFIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNDA1RkY2Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48Y2lyY2xlIGN4PSIxNS41IiBjeT0iMTUuNSIgcj0iMTUuNSIgZmlsbD0idXJsKCNhKSIvPjxwYXRoIGQ9Ik0xNS43NSAyMXYtOU0xMiAxMy43NUwxNS43NSAxMGwzLjc1IDMuNzUiIHN0cm9rZT0iI0ZGRiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjIiLz48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNC4wMTQgMjAuMDE3KSI+PHBhdGggZmlsbD0iI0VENkQ2RCIgZD0iTTExLjAwMi41NTNsOC43NzYgMTMuNTYyYTEuMjEgMS4yMSAwIDAxLTEuMDE2IDEuODY4SDEuMjFhMS4yMSAxLjIxIDAgMDEtMS4wMTYtMS44NjhMOC45Ny41NTNhMS4yMSAxLjIxIDAgMDEyLjAzMiAweiIvPjxyZWN0IHdpZHRoPSIyIiBoZWlnaHQ9IjYiIHg9IjguOTg2IiB5PSI0Ljk4MyIgZmlsbD0iI0ZGRiIgcng9IjEiLz48Y2lyY2xlIGN4PSI5Ljk4NiIgY3k9IjEyLjk4MyIgcj0iMSIgZmlsbD0iI0ZGRiIvPjwvZz48L2c+PC9zdmc+"><div class="styles-message-dca2d0">To create a custom theme, please upgrade. Pro+ plans start as low as $15/month. <span class="styles-link-06dfb9 t-link">View Plans</span></div></div></div></div></div>
+      </div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>
+<br>
+<br>
+<br>
   </div>
 </div>
 </template>
 
 <script>
+import CircularButton from './circular_button.vue'
+
 export default {
-  name: '',
+  name: 'PrivacyPolicy',
   components: {
+    CircularButton
   },
   data() {
     return {}

@@ -1,7 +1,6 @@
 <template>
 
   <router-link to="/terms-of-service#toc">
-
     <CircularButton text="TOC" class='toc-button'/>
   </router-link>
 
