@@ -42,6 +42,10 @@
         :airCleanerInstances='airCleanerInstances'
         :riskColorScheme='riskColorScheme'
       />
+
+      <br>
+      <br>
+      <br>
     </div>
 
     <div class='second-column'>
