@@ -2,6 +2,11 @@
 
   <div class='grid'>
     <div class='item controls'>
+
+      <br>
+      <br>
+      <br>
+
       <div class='container'>
         <h3 class='subsection'>Analysis & Recommendations for {{this.roomName}}</h3>
         <h4 class='subsection' v-if='event && event.placeData'>{{event.placeData.formattedAddress}}</h4>
