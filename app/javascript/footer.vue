@@ -1,7 +1,6 @@
 <template>
   <div class='footer row'>
     <router-link class='link' :to="{'name': 'TermsOfService'}">Terms of Service</router-link>
-    <a class='link' href="https://app.termly.io/notify/da32d236-6da0-4eac-b420-b983a26320f4">Data Subject Access Request (DSAR) Form</a>
     <router-link class='link' :to="{'name': 'PrivacyPolicy'}">Privacy Policy</router-link>
   </div>
 </template>
@@ -36,6 +35,7 @@ export default {
     vertical-align: center;
 
     border-top: 1px solid grey;
+    justify-content: end;
   }
 
   .link {
