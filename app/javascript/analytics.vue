@@ -76,6 +76,20 @@
           <table class='item-span-wide stuff'>
             <ProbaAtLeastOneInfectorPresent/>
 
+
+            <tr>
+              <td colspan=2>
+                <h3>Individual Risk</h3>
+              </td>
+            </tr>
+
+
+            <IndividualRiskConditional
+              id='section-individual-risk-conditional'
+              :riskColorScheme='riskColorScheme'
+              class='align-items-center'
+            />
+
             <IndividualRisk
               id='section-individual-risk'
               :riskColorScheme='riskColorScheme'
@@ -228,6 +242,9 @@ import Controls from './controls.vue';
 import ComputationalDetails from './computational_details.vue';
 import CleanAirDeliveryRateTable from './clean_air_delivery_rate_table.vue'
 import { Factor } from './factor.js';
+import IndividualRisk from './individual_risk.vue';
+import IndividualRiskConditional from './individual_risk_conditional.vue';
+import IndividualRiskHeader from './individual_risk_header.vue';
 import InhalationActivity from './inhalation_activity.vue'
 import InfectorActivity from './infector_activity.vue'
 import Masking from './masking.vue'
@@ -241,7 +258,6 @@ import { Intervention } from './interventions.js'
 import TotalACHTable from './total_ach_table.vue';
 import TotalACH from './total_ach.vue';
 import VentIcon from './vent_icon.vue';
-import IndividualRisk from './individual_risk.vue';
 import IndoorAirQuality from './indoor_air_quality.vue';
 import PacIcon from './pac_icon.vue';
 import PeopleAffected from './people_affected.vue';
@@ -319,6 +335,8 @@ export default {
     HasInfector,
     HorizontalStackedBar,
     IndividualRisk,
+    IndividualRiskConditional,
+    IndividualRiskHeader,
     IndoorAirQuality,
     InhalationActivity,
     InfectorActivity,

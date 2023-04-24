@@ -1,11 +1,35 @@
 <template>
   <DrillDownSection
 
-    title='Individual Risk'
+    title='...Using Prevalence & Occupancy'
     :value='risk'
     :text='english(risk)'
     :colorScheme='riskColorScheme'
   >
+
+    <p>
+    This is the risk of transmission that uses "Probability that at least one
+    infector is present." It is a risk score that combines the latter with information about
+    environmental and behavioral factors (e.g. masking, ventilation, filtration).
+    </p>
+
+    <p>
+    Things that affect this risk:
+
+    <ul>
+      <li>masking</li>
+      <li>ventilation</li>
+      <li>filtration</li>
+      <li>inhalation activity</li>
+      <li>infector activity</li>
+      <li>infectiousness of SARS-CoV-2</li>
+      <li>occupancy</li>
+      <li>prevalence of infectors in the population</li>
+    </ul>
+
+    </p>
+
+
 
         <h3>Mathematical Details</h3>
         <p>
@@ -44,181 +68,12 @@ is the <span class='italic'>probability that at least one person is infectious, 
 </span> See the "Probability that at least one person is infectious" section above to get more details about this.
         The left term
         <vue-mathjax formula='$P(s \mid e_2, I=1)$'></vue-mathjax>
-        is the probability of transmission given evidence e, assuming there's one infector, where <vue-mathjax formula='$e_2$'></vue-mathjax> stands for environmental factors such as the non-infectious air delivery rate, masking behavior of people, and activities done by people. We'll focus more on this here.
+        is the probability of transmission given evidence e, assuming there's one infector, where <vue-mathjax formula='$e_2$'></vue-mathjax> stands for environmental factors such as the non-infectious air delivery rate, masking behavior of people, and activities done by people. See the
+ "Assuming One Infector is Present" statistic above for more details.
 
         </p>
 
         <p>Note that the approximation above is more likely to be true when the prevalence of COVID is very low, such that having two or more infectors in a space is unlikely. However, if the probability of having two or more infectors is high, this approximation might underestimate the risk  -- for example in a COVID ward of a hospital.</p>
-
-        <p>
-<vue-mathjax :formula='transmissionFormula'></vue-mathjax>
-        </p>
-
-        <p>The dose can take a value between 0 and positive infinity. Zero dose leads to a 0 probability of transmission, while a very large dose basically leads to a probability of 1.</p>
-
-        <p>
-        The dose that one gets is the following:
-        <vue-mathjax formula='$$ \text{dose} = \int_0^t \text{c(t)} \cdot dt$$'></vue-mathjax>
-
-        In other words, take the area under the curve of the concentration with respect to time. When an infector and susceptible come in at the same time and stay there, the concentration curve starts at 0 and then increases. The rate of increase slows down until it reaches 0. At that point the steady state concentration is reached.
-        </p>
-
-
-        <LineGraph
-          :lines="[constantConcentration, incorporatingACH]"
-          :ylim='[0, 0.09]'
-          title='Contaminant concentration over time'
-          xlabel='Time (min)'
-          ylabel='Contaminant concentration (quanta / min)'
-          :legendStartOffset='[0.45, 0.55]'
-          :roundXTicksTo='0'
-        />
-        <p>
-
-
-
-        The higher the concentration of infectious air when a susceptible breathes, the less time it takes to infect someone. Likewise, the more time a susceptible spends inhaling some concentration, the higher the
-        probability of transmission for that susceptible.
-        </p>
-        <p>
-        <vue-mathjax formula='$\text{concentration(t)}$'></vue-mathjax> can be broken down into the following:
-
-        <vue-mathjax formula='$$\text{concentration}(t) = g \cdot b_r / Q \cdot r_{ss}(t)$$'></vue-mathjax>
-        where <vue-mathjax formula='$g$'></vue-mathjax> is the contamination generation rate (quanta / h), <vue-mathjax formula='$r_{mi}$'> is the masking penetration of the infector, </vue-mathjax> <vue-mathjax formula='$b_r$'></vue-mathjax> is the inhalation rate (m3 / h), <vue-mathjax formula='$Q$'></vue-mathjax> is the contamination removal rate (m3 / h),  <vue-mathjax formula='$t$'></vue-mathjax> is the duration (hours), and <vue-mathjax formula='$r_{ss}(t)$'></vue-mathjax> is a factor that tells us the height of the curve at a given <vue-mathjax formula='$t$'></vue-mathjax>.
-        </p>
-
-        <h4>Contamination generation rate</h4>
-        <vue-mathjax formula='$$g = q \cdot b_a \cdot r_{mi}$$'></vue-mathjax>
-
-        <p>The contamination generation rate is composed of the basic quanta generation rate <vue-mathjax formula='$q$'></vue-mathjax> times the infector exhalation factor <vue-mathjax formula='$b_a$'></vue-mathjax>, times the masking penetration factor <vue-mathjax formula='$r_{mi}$'></vue-mathjax>.</p>
-
-        <h5>Quanta generation rates</h5>
-        <p>
-        Quanta generation rate <vue-mathjax formula='$q$'></vue-mathjax> is the parameter that corresponds with how infectious an airborne pathogen is. For SARS-CoV-2, researchers have estimated as high as 18.6 quanta per hour for the Wuhan variant, and as high as <a href="https://docs.google.com/spreadsheets/d/16K1OQkLD4BjgBdO8ePj6ytf-RpPMlJ6aXFg3PrIQBbQ/edit#gid=1425126572">60 quanta per hour for Omicron BA.2</a>. In our calculations we use 100 to be on the more cautious side.
-        </p>
-
-        <h5>Infector Exhalation Factor</h5>
-        <p>
-          The infector exhalation factor <vue-mathjax formula='$b_a$'></vue-mathjax> is a multiplier. <span class='italic'>Staying quiet is less risky than talking, which is less risky than loud talking. </span>
-        </p>
-
-        <h5>Masking Penetration of Infector</h5>
-        <p>
-          The masking penetration of infector <vue-mathjax formula='$r_{mi}$'></vue-mathjax> is a multiplier that corresponds to how much pollution goes through the infector's mask (or leaks around it), a value between 0 and 1. <span class='italic'>N95s have much lower penetration factors than surgical masks and cloth masks.</span>
-        </p>
-
-        <h4>Inhalation rate</h4>
-        <p>Inhalation rate <vue-mathjax formula='$b_r$'></vue-mathjax> is equal to the following:
-        <vue-mathjax formula='$$ b_r = b \cdot r_i \cdot r_{mi}$$'></vue-mathjax>
-        </p>
-        <h5>Basic breathing rate</h5>
-        <p>
-        <vue-mathjax formula='$b$'></vue-mathjax> is the basic breathing rate. It depends on age and activity. For a 20 - 30 year old at rest, it's 0.288
-<vue-mathjax formula='$m^3 / \text{hr}$'></vue-mathjax>.
-
-        <h5>Susceptible activity factor</h5>
-
-        <vue-mathjax formula='$r_i$'></vue-mathjax> is a factor of the susceptible taking into account the increase of breathing rate relative to being at rest when taking into account more strenuous activities. <span class='italic'>The faster a susceptible breathes in (e.g. when exercising), the higher the risk, relative to breathing slowly (e.g. at rest).</span>
-
-        <h5>Susceptible masking penetration factor</h5>
-        <vue-mathjax formula='$r_{mi}$'></vue-mathjax> is the masking penetration factor for the susceptible (between 0 and 1). Like masking for source control for the infector, masks also protect in terms of lowering the inhalation dose. <span class='italic'>N95s have much low penetration factors than surgical masks and cloth masks.</span>
-        </p>
-
-        <h4>Non-infectious air delivery rate</h4>
-        <p>The non-infectious air delivery rate <vue-mathjax formula='$Q$'></vue-mathjax> is the product of the room volume <vue-mathjax formula='$V$'></vue-mathjax> and the total Air Changes per Hour (ACH) <vue-mathjax formula='$\lambda$'></vue-mathjax>:</p>
-
-        <p><vue-mathjax formula='$$Q = \lambda \cdot V$$'></vue-mathjax></p>
-
-        <p>The total air changes per hour <vue-mathjax formula='$\lambda$'></vue-mathjax> is the sum of air changes from portable air cleaners <vue-mathjax formula='$\lambda_{\text{PAC}}$'></vue-mathjax>, ventilation <vue-mathjax formula='$\lambda_{\text{Vent}}$'></vue-mathjax>, and UV <vue-mathjax formula='$\lambda_{\text{UV}}$'></vue-mathjax>:</p>
-        <p><vue-mathjax formula='$$\lambda = \lambda_{\text{PAC}} + \lambda_{\text{Vent}} + \lambda_{\text{UV}}$$'></vue-mathjax></p>
-
-        <h4>Steady-state factor</h4>
-        <p>
-        The steady-state factor <vue-mathjax formula='$r_{ss}(t)$'></vue-mathjax> gives us the height of the concentration curve at time <vue-mathjax formula='$t$'></vue-mathjax>.
-
-        <vue-mathjax formula='$$r_{ss}(t) = 1 - \text{exp}(-Q / V \cdot t)$$'></vue-mathjax>
-
-        At time <vue-mathjax formula='$t = 0$'></vue-mathjax>, we get 0. When enough time has passed, we get <vue-mathjax formula='$1$'></vue-mathjax> (i.e. the concentration has reached steady state).
-
-        </p>
-        <p>
-        The <vue-mathjax formula='$Q/V$'></vue-mathjax> term is the ACH. When ACH is high, it takes less time to reach steady state (<vue-mathjax formula='$r_{ss}(t) = 1$'></vue-mathjax>). This happens when <vue-mathjax formula='$Q$'></vue-mathjax> is high relative to <vue-mathjax formula='$V$'></vue-mathjax>. When we have the opposite, when <vue-mathjax formula='$V$'></vue-mathjax> is relatively large relative to <vue-mathjax formula='$Q$'></vue-mathjax>, it takes a longer time to reach the steady state concentration.
-
-        </p>
-
-        <h3>Derivation of the Concentration Curve</h3>
-
-        <p>The scenario we are considering is when the infector and susceptibles come in into the room at the same time, and that there were no infectors prior to the location (and therefore the initial concentration of dirty air is 0. The change in concentration over time is then dictated by the following equation:</p>
-
-        <vue-mathjax formula='$$\frac{dC}{dt} = \frac{-Q \cdot C_{t} + g}{V}$$'></vue-mathjax>
-
-        <p>where <vue-mathjax formula='$Q$'></vue-mathjax> is the non-infectious air delivery rate, <vue-mathjax formula='$C_t$'></vue-mathjax> is the concentration at time <vue-mathjax formula='$t$'></vue-mathjax>, <vue-mathjax formula='$g$'></vue-mathjax> is the quanta generation rate, and <vue-mathjax formula='$V$'></vue-mathjax> is the volume of the room. What the above says is that some amount of air <vue-mathjax formula='$g$'></vue-mathjax> is being generated by the infector. We then divide it by the volume of the room <vue-mathjax formula='$V$'></vue-mathjax> to get the added concentration. In other words, <vue-mathjax formula='$g / V$'></vue-mathjax> is the proportion of dirty air that's being added. However, some non-infectious air is being delivered at a rate <vue-mathjax formula='$Q$'></vue-mathjax>, made up of concentration <vue-mathjax formula='$C_{t}$'></vue-mathjax>. In other words, <vue-mathjax formula='$Q$'></vue-mathjax> with a concentration of <vue-mathjax formula='$C_t$'></vue-mathjax> is being removed.</p>
-        <vue-mathjax formula='$$V \cdot \frac{dC}{dt} = -Q \cdot C_t + g$$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$B_t = -Q \cdot C_t + g$$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$B_0 = -Q \cdot C_0 + g$$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$\frac{dB_t}{dt} = -Q \frac{dC_t}{dt}$$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$-\frac{1}{Q} \cdot \frac{dB_t}{dt} = \frac{dC_t}{dt}$$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$-\frac{1}{Q} \cdot \frac{dB_t}{dt} = \frac{B_t}{V}$$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$-\frac{V}{Q} \cdot \frac{dB_t}{dt} = B_t$$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$-\frac{V}{Q} \cdot \frac{dB_t}{B_t} = dt$$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$\frac{dB_t}{B_t} = -\frac{Q}{V} \cdot dt$$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$\int_0^t \frac{1}{B_t} \cdot dB_t = -\frac{Q}{V} \int_0^t dt$$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$ln(B_t) - ln(B_0) = -\frac{Q}{V} \cdot t $$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$e^{ln(B_t) - ln(B_0)} = e^{-\frac{Q}{V} \cdot t} $$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$e^{ln(B_t)} /e^{ln(B_0)} = e^{-\frac{Q}{V} \cdot t} $$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$B_t / B_0 = e^{-\frac{Q}{V} \cdot t} $$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$B_t = B_0 \cdot e^{-\frac{Q}{V} \cdot t} $$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$-Q \cdot C_t + g = (-Q \cdot C_0 + g) \cdot e^{-\frac{Q}{V} \cdot t} $$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$-Q \cdot C_t = -g + (-Q \cdot C_0 + g) \cdot e^{-\frac{Q}{V} \cdot t} $$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$C_t = g/Q + (C_0 - g/Q) \cdot e^{-\frac{Q}{V} \cdot t} $$'></vue-mathjax>
-        <br>
-        <p>Given the scenario we are considering, where there were no infectors in the space before, so <vue-mathjax formula='$C_0 = 0$'></vue-mathjax>, we have:
-        <vue-mathjax formula='$$C_t = g/Q - g/Q \cdot e^{-\frac{Q}{V} \cdot t} $$'></vue-mathjax>
-        <br>
-        <vue-mathjax formula='$$C_t = g/Q \cdot (1 - e^{-\frac{Q}{V} \cdot t}) $$'></vue-mathjax>
-        </p>
-
-        <p>We have two factors:
-          <vue-mathjax formula='$g/Q$'></vue-mathjax>
-          and <vue-mathjax formula='$(1 - e^{-\frac{Q}{V} \cdot
-              t})$'></vue-mathjax>. The first one is essentially the ratio of how much dirty
-          air, <vue-mathjax formula='$g$'></vue-mathjax>, there is relative to the non-infectious air, <vue-mathjax formula='$Q$'></vue-mathjax>. It determines the height of the curve
-          in the long run. The lower this number is, the lower the amount of
-          dirty air inhaled per breath. The latter term, affected by ACH, <vue-mathjax
-          formula='$Q/V$'></vue-mathjax>, determines how fast the steady state concentration is reached.
-        </p>
-
-
-        <LineGraph
-          :lines="[constantConcentration, incorporatingACH]"
-          :ylim='[0, 0.09]'
-          title='Contaminant concentration over time'
-          xlabel='Time (min)'
-          ylabel='Contaminant concentration (quanta / min)'
-          :legendStartOffset='[0.45, 0.55]'
-          :roundXTicksTo='0'
-        />
-
-
-
-
 
 
   </DrillDownSection>
