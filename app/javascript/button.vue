@@ -39,7 +39,10 @@ export default {
       } else if (this.major) {
         return 'rgb(219, 21, 0)'
 
-      } else {
+      } else if (this.selected) {
+        return '#e6e6e6'
+      }
+      else {
         return 'rgb(200,200,200)'
       }
     },
@@ -72,7 +75,6 @@ export default {
   }
 
   .selected {
-    background-color: #e6e6e6;
     border-bottom: 4px solid black;
   }
 
