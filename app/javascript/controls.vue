@@ -218,9 +218,4 @@ export default {
   input {
     width: 4em;
   }
-  @media (max-width: 750px) {
-    .parameters {
-      font-size: 0.5em;
-    }
-  }
 </style>
