@@ -347,7 +347,6 @@ export default {
     padding-bottom: 0.5em;
     padding-left: 0.5em;
     padding-right: 0.5em;
-    font-weight: bold;
   }
 
   .mathematical-details td {
