@@ -139,6 +139,9 @@ export const useAnalyticsStore = defineStore('analytics', {
     numInfected() {
       return round(this.numSusceptibles * this.risk, 2) || 0
     },
+    numInfectedConditional() {
+      return round(this.numSusceptibles * this.conditionalRisk, 2) || 0
+    },
     peopleCost() {
       return round(this.numInfected * this.wage * this.numDaysOff * this.numHoursPerDay, 2)
     },

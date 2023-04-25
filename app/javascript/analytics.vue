@@ -96,6 +96,20 @@
               class='align-items-center'
             />
 
+            <tr>
+              <td colspan=2>
+                <h3>Average New Infections</h3>
+              </td>
+            </tr>
+
+            <AverageNewInfectionsConditional
+              id='section-average-new-infections'
+              :event='event'
+              :selectedIntervention='selectedIntervention'
+              :numInfectors='numInfectors'
+              class='align-items-center'
+            />
+
             <PeopleAffected
               id='section-average-new-infections'
               :event='event'
@@ -261,6 +275,7 @@ import VentIcon from './vent_icon.vue';
 import IndoorAirQuality from './indoor_air_quality.vue';
 import PacIcon from './pac_icon.vue';
 import PeopleAffected from './people_affected.vue';
+import AverageNewInfectionsConditional from './average_new_infections_conditional.vue';
 import ProbaAtLeastOneInfectorPresent from './proba_at_least_one_infector_present.vue';
 import RiskIcon from './risk_icon.vue';
 import SideBar from './side_bar.vue';
@@ -346,6 +361,7 @@ export default {
     Prevalence,
     PacIcon,
     PeopleAffected,
+    AverageNewInfectionsConditional,
     ProbaAtLeastOneInfectorPresent,
     RiskIcon,
     SideBar,

@@ -9,8 +9,11 @@
 
     <p>
     This is the risk of transmission that uses "Probability that at least one
-    infector is present." It is a risk score that combines the latter with information about
+    infector is present." It weights the probability of transmission given one
+    infector in the room by the "Probability that at least one infector is
+    present." The probability of transmission given one infector is affected by
     environmental and behavioral factors (e.g. masking, ventilation, filtration).
+    Here we also make use of prevalence and occupancy to assess risk of transmission.
     </p>
 
     <p>
@@ -28,9 +31,6 @@
     </ul>
 
     </p>
-
-
-
         <h3>Mathematical Details</h3>
         <p>
         The risk of transmission <vue-mathjax formula='$s$'></vue-mathjax>

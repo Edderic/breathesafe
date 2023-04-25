@@ -1,7 +1,7 @@
 <template>
   <DrillDownSection
 
-    title='Average New Infections'
+    title='...Using Prevalence & Occupancy'
     :value='roundOut(numSusceptibles * risk, 1)'
     :text='roundOut(numSusceptibles * risk, 1)'
     :colorScheme='averageInfectedPeopleInterpolationScheme'

@@ -8,12 +8,7 @@
   >
 
     <p>
-    This is the risk of transmission assuming that there is one infector in the room.
-
-
-    infector is present. It combines that estimate with interventions that protect
-    when an infector is present (e.g. masking, ventilation, filtration) to give an
-    overall risk.
+    This is the risk of transmission assuming that there is one infector in the room, and takes into account air cleaning tools along with behavioral information.
     </p>
 
     <p>Things that affect this risk:</p>
