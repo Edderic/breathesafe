@@ -52,6 +52,7 @@
           ylabel='Contaminant concentration (quanta / min)'
           :legendStartOffset='[0.45, 0.55]'
           :roundXTicksTo='0'
+          width='25em'
         />
         <p>
 
@@ -194,6 +195,7 @@
           ylabel='Contaminant concentration (quanta / min)'
           :legendStartOffset='[0.45, 0.55]'
           :roundXTicksTo='0'
+          width='25em'
         />
 
 
