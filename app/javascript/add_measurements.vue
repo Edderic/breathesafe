@@ -1,5 +1,6 @@
 <template>
-  <div class='border-showing' id='message'>
+  <div class='border-showing add-measurements' id='message'>
+
     <h2>Add Measurements</h2>
     <div class='container row centered menu'>
       <Pin />
@@ -601,6 +602,10 @@
           <Button style='background-color: green;' class='normal-padded button' @click='save("complete")' :shadow='true' text='Save' major='true'/>
         </div>
       </div>
+
+      <br>
+      <br>
+      <br>
     </div>
   </template>
 
@@ -1942,7 +1947,6 @@
   textarea {
   }
   br {
-    display: none;
   }
   .container {
     display: flex;
@@ -1981,10 +1985,6 @@
     height: 3em;
     margin-left: 1em;
     margin-right: 1em;
-  }
-
-  .add-measurements {
-    display: none;
   }
 
   .autocomplete {
@@ -2055,5 +2055,9 @@
       width: 750px;
     }
 
+  }
+
+  .add-measurements {
+    margin-top: 3.2em;
   }
 </style>

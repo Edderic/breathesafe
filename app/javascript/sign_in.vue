@@ -1,5 +1,9 @@
 <template>
   <form class='wide border-showing' action="">
+    <br>
+    <br>
+    <br>
+
     <div class='container centered'>
       <h2>Sign up/Sign in</h2>
     </div>
