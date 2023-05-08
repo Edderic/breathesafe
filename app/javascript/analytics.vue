@@ -74,7 +74,6 @@
           />
 
           <table class='item-span-wide stuff'>
-            <ProbaAtLeastOneInfectorPresent/>
 
 
             <tr>
@@ -95,6 +94,8 @@
               :riskColorScheme='riskColorScheme'
               class='align-items-center'
             />
+
+            <ProbaAtLeastOneInfectorPresent/>
 
             <tr>
               <td colspan=2>
