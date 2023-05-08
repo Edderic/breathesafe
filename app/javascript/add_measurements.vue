@@ -1464,6 +1464,9 @@
           }
         }
 
+
+        this.$progress.start()
+
         this.roomUsableVolumeCubicMeters = parseFloat(this.roomWidthMeters)
           * parseFloat(this.roomHeightMeters)
           * parseFloat(this.roomLengthMeters)
@@ -1579,6 +1582,7 @@
             // whatever you want
           })
 
+          this.$progress.stop()
       },
       generateUUID() {
           // https://stackoverflow.com/questions/105034/how-to-create-guid-uuid
