@@ -80,6 +80,17 @@ export default {
     }
   },
   computed: {
+    circularProps() {
+      return {
+          'width': '1em',
+          'height': '1em',
+          'border-radius': '100%',
+          'font-weight': 'bold',
+          'color': 'white',
+          'text-shadow': '1px 1px 2px black',
+          'padding': '1em'
+        }
+    },
     styleProps() {
       return {
           'font-weight': 'bold',
