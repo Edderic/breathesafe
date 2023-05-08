@@ -22,6 +22,13 @@
       </td>
 
       <td class='second-td' v-if='showStat'>
+        <ColoredCell v-if='textGrade'
+            :colorScheme="colorScheme"
+            :maxVal=1
+            :value='value'
+            :text='textGrade'
+            :style="circularProps"
+        />
         <ColoredCell
             :colorScheme="colorScheme"
             :maxVal=1
@@ -59,6 +66,7 @@ export default {
     icon: String,
     title: String,
     value: Number,
+    textGrade: String,
     text: {
       type: String
     },

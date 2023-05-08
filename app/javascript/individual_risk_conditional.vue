@@ -208,6 +208,7 @@
 
 <script>
 import { useAnalyticsStore } from './stores/analytics_store'
+import { riskToGrade } from './colors.js'
 import { mapWritableState, mapState, mapActions } from 'pinia';
 import CircularButton from './circular_button.vue'
 import ColoredCell from './colored_cell.vue';

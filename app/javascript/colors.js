@@ -50,13 +50,25 @@ const paletteFall = [
     b: 3
   }
 ]
-export const gradeColorMapping = {
+
+const gcm = {
   'A': { 'bounds': [0, 0.001], color: paletteFall[5] },
   'B': { 'bounds': [0.001, 0.01], color: paletteFall[4] },
   'C': { 'bounds': [0.01, 0.05], color: paletteFall[3] },
   'D': { 'bounds': [0.05, 0.1], color: paletteFall[2] },
   'E': { 'bounds': [0.1, 0.2], color: paletteFall[1] },
   'F': { 'bounds': [0.2, 1], color: paletteFall[0] },
+}
+
+export const gradeColorMapping = gcm;
+
+export function riskToGrade(risk) {
+  for (let grade in gcm) {
+    let bounds =  gcm[grade].bounds
+    if (risk > bounds[0] && risk <= bounds[1]) {
+      return grade
+    }
+  }
 }
 
 export const colorPaletteFall = paletteFall

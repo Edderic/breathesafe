@@ -82,6 +82,7 @@ is the <span class='italic'>probability that at least one person is infectious, 
 <script>
 import { useAnalyticsStore } from './stores/analytics_store'
 import { mapWritableState, mapState, mapActions } from 'pinia';
+import { riskToGrade } from './colors.js';
 import CircularButton from './circular_button.vue'
 import ColoredCell from './colored_cell.vue';
 import DrillDownSection from './drill_down_section.vue';
@@ -276,6 +277,9 @@ export default {
       }
 
       return `${round(this.relativeRisk1000Miles, 0)}x`
+    },
+    grade() {
+      return `${riskToGrade(this.risk)}`
     },
   },
   methods: {
