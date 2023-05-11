@@ -331,6 +331,10 @@
       <Button @click='save' v-if='display != "ventilation" && this.status == "edit"' text='Save'/>
       <Button @click='editProfile' v-if='display != "ventilation" && this.status == "saved"' text='Edit'/>
     </div>
+    <br>
+    <br>
+    <br>
+
   </div>
 </template>
 
