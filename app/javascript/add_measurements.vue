@@ -1037,7 +1037,6 @@
           // this.ventilationCO2AmbientPPM,
           // 228.99,
         // )
-        // debugger
       },
       signIn() {
         if (!this.currentUser) {
@@ -1278,7 +1277,6 @@
           this.setCarbonDioxideMonitor({ target: { value: this.carbonDioxideMonitors[0].name }})
           this.ventilationCO2MeasurementDeviceName = this.carbonDioxideMonitors[0].name
 
-          // debugger
           // if (!!this.$route.query['section'] && this.$route.name == 'AddMeasurements' || this.$route.name == 'UpdateOrCopyMeasurements') {
             // this.setDisplay(this.$route.query['section'])
           // }
@@ -1466,6 +1464,9 @@
 
 
         this.$progress.start()
+        let elements = document.getElementsByClassName('vue3-progress')
+        elements[0].style.opacity = 1
+        elements[0].style.display = 'block'
 
         this.roomUsableVolumeCubicMeters = parseFloat(this.roomWidthMeters)
           * parseFloat(this.roomHeightMeters)
@@ -1483,7 +1484,6 @@
           this.ventilationCO2AmbientPPM,
           this.roomUsableVolumeCubicMeters,
         )
-
         this.ventilationACH = ventilationNIDR.result.cadr / this.roomUsableVolumeCubicMeters
         this.initialCO2 = ventilationNIDR.result.c0
 
@@ -1582,7 +1582,7 @@
             // whatever you want
           })
 
-          this.$progress.stop()
+          this.$progress.finish()
       },
       generateUUID() {
           // https://stackoverflow.com/questions/105034/how-to-create-guid-uuid
@@ -2045,6 +2045,11 @@
   }
   .menu-button {
     background-color: transparent;
+  }
+
+  label span {
+    margin-left: 1em;
+    margin-right: 1em;
   }
 
   @media(max-width: 1000px) {
