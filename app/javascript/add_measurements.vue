@@ -2047,11 +2047,6 @@
     background-color: transparent;
   }
 
-  label span {
-    margin-left: 1em;
-    margin-right: 1em;
-  }
-
   @media(max-width: 1000px) {
     .collapsable {
       flex-direction: column;

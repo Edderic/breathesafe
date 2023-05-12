@@ -37,6 +37,11 @@ export default {
   .round {
   }
 
+  svg {
+    margin-left: 1em;
+    margin-right: 1em;
+  }
+
   .button:hover {
     cursor: pointer;
   }
