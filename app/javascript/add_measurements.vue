@@ -176,8 +176,9 @@
     <div class='room_dimensions chunk page' v-if='$route.query.section == "room_dimensions"'>
       <div class='container'>
         <div class='menu row'>
-          <Button :class="{ selected: !this.useOwnHeight, tab: true }" shadow='true' @click='setUseOwnHeight(false)' text='Input Directly'/>
-            <Button :class="{ selected: this.useOwnHeight, tab: true }" shadow='true' @click='setUseOwnHeight(true)' text='Estimate Volume'/>
+
+            <Button :selected='!this.useOwnHeight' :class="{ tab: true }" shadow='true' @click='setUseOwnHeight(false)' text='Input Directly'/>
+            <Button :selected='this.useOwnHeight' :class="{  tab: true }" shadow='true' @click='setUseOwnHeight(true)' text='Estimate Volume'/>
 
           </div>
 
