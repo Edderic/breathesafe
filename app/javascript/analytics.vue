@@ -862,11 +862,27 @@ export default {
       return round(this.ventilationAch, 1)
     },
   },
+
   async created() {
-    this.event = await this.showAnalysis(this.$route.params.id)
+    this.event = await this.setEvent()
 
     this.processQuery(this.$route.query, {})
 
+    // After visiting UpdateOrCopyMeasurements, reload the event
+    debugger
+
+    this.$watch(
+      () => this.$route.name,
+      (toName, previousName) => {
+      debugger
+
+        if (previousName == 'UpdateOrCopyMeasurements' && toName == 'Analytics') {
+          this.event = this.setEvent()
+          debugger
+
+        }
+      }
+    )
 
     this.$watch(
       () => this.$route.query,
@@ -995,6 +1011,9 @@ export default {
     computeTotalFlowRateCubicMetersPerHour(totalACH) {
       return this.roomUsableVolumeCubicMeters * totalACH
     },
+    async setEvent() {
+      return await this.showAnalysis(this.$route.params.id)
+    }
   }
 }
 

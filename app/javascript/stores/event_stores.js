@@ -164,14 +164,8 @@ export const useEventStores = defineStore('events', {
 
     async findOrLoad(id) {
       // TODO: maybe create a Rails route to find a specific analytics to load?
-      let event = this.events.find((ev) => { return ev.id == parseInt(id) })
-
-      if (!event) {
-        await this.load()
-        event = this.events.find((ev) => { return ev.id == parseInt(id) })
-      }
-
-      return event
+      await this.load()
+      return this.events.find((ev) => { return ev.id == parseInt(id) })
     },
 
     susceptibleMask(selectedMask) {

@@ -175,11 +175,9 @@
 
     <div class='room_dimensions chunk page' v-if='$route.query.section == "room_dimensions"'>
       <div class='container'>
-        <div class='menu row'>
-
+          <div class='menu row'>
             <Button :selected='!this.useOwnHeight' :class="{ tab: true }" shadow='true' @click='setUseOwnHeight(false)' text='Input Directly'/>
             <Button :selected='this.useOwnHeight' :class="{  tab: true }" shadow='true' @click='setUseOwnHeight(true)' text='Estimate Volume'/>
-
           </div>
 
           <div v-if="this.useOwnHeight">
@@ -397,7 +395,7 @@
 
             <h2>Enter One-by-one</h2>
             <p >When using a mobile device, one can upload CO₂ data one-by-one (see "Enter one-by-one" section).
-    <span class='bold'>please enter at least 5 points</span>. Using less than that could make the estimates be heavily impacted by measurement error.</p>
+    <span class='bold'>please enter at least 10 points</span>. Using less than that could make the estimates be heavily impacted by measurement error.</p>
             <p>Entering one-by-one is most useful in situations when your CO₂ monitor doesn't have data-storage capabilities (unlike the Aranet).</p>
 
             <h2>Bulk Upload</h2>
@@ -472,11 +470,36 @@
           </div>
 
           <div class='menu row'>
+            <Button :class="{ tab: true }" @click='usingSteadyState = true' shadow='true' text='Simple' :selected="usingSteadyState"/>
+            <Button :class="{ tab: true }" @click='usingSteadyState = false' shadow='true' text='Advanced' :selected="!usingSteadyState"/>
+          </div>
+
+          <p v-if='!usingSteadyState'>For cases when the readings are increasing or decreasing (i.e. have not reached steady state yet), please add at least 10 readings, spaced 1 minute apart using either of the methods below. </p>
+
+          <div class='container' v-if='usingSteadyState'>
+            <label>Steady State Concentration</label>
+            <p>If your readings have been flat, and there has been no change in occupancy, please input the indoor CO2 reading value below. On the other hand, if the readings are increasing or decreasing, use "Advanced" instead.</p>
+
+            <div class='continuous mega'>
+              <CircularButton class='circular-button' text='-100' @click='addSteadyStateConcentration(-100)'/>
+              <CircularButton class='circular-button' text='-10' @click='addSteadyStateConcentration(-10)'/>
+              <CircularButton class='circular-button' text='-1' @click='addSteadyStateConcentration(-1)'/>
+              <input
+                type='number'
+                v-model='steadyStatePPM'>
+              <CircularButton class='circular-button' text='+1' @click='addSteadyStateConcentration(1)'/>
+              <CircularButton class='circular-button' text='+10' @click='addSteadyStateConcentration(10)'/>
+              <CircularButton class='circular-button' text='+100' @click='addSteadyStateConcentration(100)'/>
+            </div>
+          </div>
+
+
+          <div class='menu row' v-if='!usingSteadyState'>
             <Button :class="{ tab: true }" @click='showUploadFile(false)' shadow='true' text='Enter One-by-one' :selected="!this.useUploadFile"/>
             <Button :class="{ tab: true }" @click='showUploadFile(true)' shadow='true' text='Bulk Upload' :selected="this.useUploadFile"/>
           </div>
 
-          <div class='container centered' v-if='!useUploadFile'>
+          <div class='container centered' v-if='!useUploadFile && !usingSteadyState'>
             <div class='container row'>
               <CircularButton text='+' @click='addCO2Reading'/>
               <CircularButton text='-' @click='removeLastCO2Reading'/>
@@ -492,7 +515,7 @@
               @update='updateCO2'
             />
           </div>
-          <div class='container centered' v-if='useUploadFile'>
+          <div class='container centered' v-if='useUploadFile && !usingSteadyState'>
             <div class='container'>
               <input type="file" @change="handleFileChangeCO2">
             </div>
@@ -917,6 +940,7 @@
         behaviorInfo: false,
         privacyInfo: false,
         steadyStateInfo: false,
+        steadyStatePPM: 800,
         lastXMinutes: 5,
         co2Readings: [
           {
@@ -945,6 +969,7 @@
         strideLengthForLength: 1,
         startDateTimeCO2: new Date(),
         endDateTimeCO2: new Date(),
+        usingSteadyState: true,
       }
     },
     methods: {
@@ -1402,7 +1427,7 @@
           )
         }
 
-        if (this.co2ReadingsToSave.length < 10) {
+        if (this.co2ReadingsToSave.length < 10 && !this.usingSteadyState) {
           this.messages.push(
             {
               str: "Error: Please add at least 10 carbon dioxide readings, either one-by-one or by bulk, where each measurement is spaced 1-minute apart.",
@@ -1475,8 +1500,21 @@
           * parseFloat(this.roomUsableVolumeFactor)
 
         let normalizedCO2Readings =  []
-        for (let co2Reading of this.co2ReadingsToSave) {
-          normalizedCO2Readings.push(co2Reading.value)
+
+        if (this.usingSteadyState) {
+          this.co2Readings = []
+
+          for (let i = 0; i < 10; i++ ) {
+            normalizedCO2Readings.push(this.steadyStatePPM)
+            this.co2Readings.push({
+              value: this.steadyStatePPM,
+              identifier: generateUUID()
+            })
+          }
+        } else {
+          for (let co2Reading of this.co2ReadingsToSave) {
+            normalizedCO2Readings.push(co2Reading.value)
+          }
         }
 
         let ventilationNIDR = computeVentilationNIDR(
@@ -1584,6 +1622,8 @@
           })
 
           this.$progress.finish()
+          elements[0].style.opacity = 0
+          elements[0].style.display = 'none'
       },
       generateUUID() {
           // https://stackoverflow.com/questions/105034/how-to-create-guid-uuid
@@ -1641,6 +1681,9 @@
       },
       setRoomName(event) {
         this.roomName = event.target.value;
+      },
+      addSteadyStateConcentration(amount) {
+        this.steadyStatePPM += parseInt(amount)
       },
       addNumPeople(amount, activityGroupId) {
         let activityGroup = this.findActivityGroup()(activityGroupId);
