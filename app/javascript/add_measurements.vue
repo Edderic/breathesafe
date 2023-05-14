@@ -1069,6 +1069,7 @@
           let query = JSON.parse(JSON.stringify(this.$route.query))
 
           query['attempt-name'] = this.$route.name
+          query['params-id'] = this.$route.params.id
 
           this.$router.push({
             name: 'SignIn',
@@ -1323,6 +1324,14 @@
             event = await this.findOrLoad(this.$route.params.id)
             this.copyEventWithId(event)
             this.id = this.$route.params['id']
+
+            // if the 10 cO2 readings aren't the same, then default to Advanced page,
+            let same = this.co2Readings[0].value
+            for (let c of this.co2Readings) {
+              same = same == c.value
+            }
+
+            this.usingSteadyState = same
           }
 
           else if (this.$route.name == 'AddMeasurements' && !this.$route.query['section']) {
@@ -1470,6 +1479,7 @@
       },
 
       async save(status) {
+
         if (status == 'complete') {
           this.checkForErrors()
           let hasErrors = this.showMessages()
@@ -1536,6 +1546,7 @@
         // TODO: compute portable air cleaners ACH
         // update controller
         // update database schema
+
 
         let toSave = {
             'event': {

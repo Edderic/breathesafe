@@ -869,16 +869,13 @@ export default {
     this.processQuery(this.$route.query, {})
 
     // After visiting UpdateOrCopyMeasurements, reload the event
-    debugger
 
     this.$watch(
       () => this.$route.name,
       (toName, previousName) => {
-      debugger
 
         if (previousName == 'UpdateOrCopyMeasurements' && toName == 'Analytics') {
           this.event = this.setEvent()
-          debugger
 
         }
       }
