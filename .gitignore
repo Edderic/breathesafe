@@ -53,3 +53,7 @@ node_modules
 
 # Jupyter notebook checkpoints
 *.ipynb_checkpoints
+
+# Ctags
+tags
+*.mp4
