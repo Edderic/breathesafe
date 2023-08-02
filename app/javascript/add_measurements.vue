@@ -655,7 +655,7 @@
      computeVentilationNIDR,
      generateUUID,
      genConcCurve,
-     round
+     round, isValidDate
   } from  './misc';
 
   export default {
@@ -1139,6 +1139,8 @@
             object = {}
             columnCounter = 0
 
+            let dateToAdd = null;
+
             for (let item of line.split(',')) {
               if (lineCounter == 0) {
                 header.push(item)
@@ -1148,7 +1150,28 @@
                   object.value = parseInt(item.replaceAll('"', ''))
                   object[header[columnCounter]] = parseInt(item)
                 } else if (header[columnCounter].includes("Time")) {
-                  object.identifier = new Date(item)
+
+                  if (item == '') {
+                    continue
+                  }
+                  dateToAdd  = new Date(item)
+                  if (!isValidDate(dateToAdd)) {
+                    this.messages.push(
+                      {
+                        str: "Error: The date is not of the right format. Please ensure that the format for dates are in the form yyyy/mm/dd. For example, March 15, 2023 should be represented as 2023/05/15.",
+                        to: {
+                          name: 'AddMeasurements',
+                          query: {
+                            'section': 'ventilation'
+                          }
+                        }
+                      }
+                    )
+                    this.showMessages();
+                    return
+                  }
+
+                  object.identifier = dateToAdd
                   object.identifier.setSeconds(0)
                   object[header[columnCounter]] = object.identifier
                   if (lineCounter == 1) {
@@ -1162,7 +1185,7 @@
               columnCounter += 1
             }
 
-            if (lineCounter > 0) {
+            if (lineCounter > 0 && isValidDate(dateToAdd)) {
               collection.push(object)
             }
 
@@ -1173,7 +1196,6 @@
           let lastReading = this.tmpCO2Readings[this.tmpCO2Readings.length - 1]
           this.endDateTimeCO2 = lastReading.identifier
           this.lastXMinutes = (this.endDateTimeCO2 - this.startDateTimeCO2) / 60000
-
         }.bind(this)
 
         reader.readAsText(event.target.files[0])

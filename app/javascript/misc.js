@@ -260,6 +260,10 @@ export const susceptibleBreathingActivityToFactor = {
   }
 }
 
+export function isValidDate(date) {
+	return date instanceof Date && !isNaN(date);
+}
+
 export const infectorActivityTypes = infectorActivityTypeMapping
 
 export const hourToIndex = {
