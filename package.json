@@ -8,7 +8,6 @@
     "@vitejs/plugin-vue": "^2.3.3",
     "@vuepic/vue-datepicker": "^3.6.5",
     "axios": "^0.27.2",
-    "dayjs": "^1.11.9",
     "pinia": "^2.0.14",
     "vue": "^3.2.37",
     "vue-mathjax-next": "^0.0.4",
