@@ -112,12 +112,17 @@ if __name__ == '__main__':
                     df.append(reading, ignore_index=True)
 
                     df.to_csv(str(path), index=False)
-                except PmsSensorException:
-                    error_json = {
-                        'error': 'Connection problem',
-                        'datetime': datetime.now().strftime(datetime_strf)
-                    }
-                    print(error_json)
+                except Exception as e:
+                    if e.args and e.args[0] == 'unpack requires a buffer of 40 bytes':
+                        continue
+                    else:
+                        raise e
+                    # import pdb; pdb.set_trace()
+                    # error_json = {
+                        # 'error': 'Connection problem',
+                        # 'datetime': datetime.now().strftime(datetime_strf)
+                    # }
+                    # print(error_json)
 
     except Exception as e:
         import pdb; pdb.set_trace()
