@@ -82,7 +82,7 @@ if __name__ == '__main__':
     cwd = os.getcwd()
     args = get_args()
 
-    path = Path(cwd) / 'air_cleaner_data' / f'{str(datetime.now())}.csv'
+    path = Path(cwd) / 'air_cleaner_data' / f'{str(datetime.now()).replace(" ", "_")}.csv'
     print(f"Path: {path}")
 
     sensor_path_0 = args.sensor_path
@@ -109,10 +109,10 @@ if __name__ == '__main__':
                     reading = sensor.read()
 
                     print(reading)
-                    df.append(reading, ignore_index=True)
-
+                    df = df.append(reading, ignore_index=True)
                     df.to_csv(str(path), index=False)
                 except Exception as e:
+                    import pdb; pdb.set_trace()
                     if e.args and e.args[0] == 'unpack requires a buffer of 40 bytes':
                         continue
                     else:

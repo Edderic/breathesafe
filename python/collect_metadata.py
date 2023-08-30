@@ -78,12 +78,8 @@ if __name__ == '__main__':
         for path in data_paths
     ])
 
-    re.search('(?<=air_cleaner_data).*', str(data_paths[0]))[0]
-
-
     filepath_index = input(f"Which filepaths contain the data? {create_list_options(data_paths_sorted)}")
-    filepath = data_paths[int(filepath_index)]
-
+    filepath = data_paths_sorted[int(filepath_index)]
     row = {}
 
     while True:
