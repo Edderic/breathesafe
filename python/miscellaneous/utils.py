@@ -82,3 +82,48 @@ def compute_overall_fit_factor(
     agg_merge['overall fit factor'] = agg_merge['count'] / agg_merge['sum 1/ff']
     return agg_merge
 
+def compute_cadr(
+    df,
+    number_of_readings_per_grouping,
+    single_pass_filtration_efficiency,
+    column_names,
+    groupby_cols,
+    filter_area_sq_meters,
+):
+
+    """
+    Parameters:
+        df: pd.DataFrame
+            Contains anemometer readings.
+        number_of_readings_per_grouping: int
+            Number of readings for each grouping of groupby_cols.
+        groupby_cols: list[str]
+            The list of names of columns that will be used for grouping by.
+
+        column_names: list[str]
+            The columns that have the speed readings from the anemometer.
+            Readings are assumed to be in meters per second (m/s).
+
+        single_pass_filtration_efficiency: float
+            float between 0 and 1
+
+        filter_area_sq_meters: float
+            The filter area in square meters
+
+
+    Returns: float
+        In cubic feet per minute (CFM).
+    """
+    speed_estimates = readings.groupby(groupby_cols).sum()[column_names].sum(axis=1) / number_of_readings_per_grouping
+
+
+    cubic_meters_per_second = speed_estimates * filter_area_sq_meters
+
+    seconds_per_minute = 60
+    cubic_feet_per_cubic_meter = 35.3147
+    cubic_feet_per_minute = cubic_meters_per_second \
+            * seconds_per_minute \
+            * cubic_feet_per_cubic_meter \
+            * single_pass_filtration_efficiency # cubic feet per minute
+
+    return cubic_feet_per_minute
