@@ -219,3 +219,15 @@ start_time,Distance (in),Experiment,end_time,competing airflow (m/s),Fan,shroud,
 2023-08-29 23:42:14.958699,5,"AirGo QT3, 5 inches",2023-08-29 23:42:43.631152,1,GDSTIME 120mm Blower,False,,Starkvind EPA 12 (cut to fit),,../air_cleaner_data/2023-08-29_19:28:03.265445.csv,50.0,1
 2023-08-29 23:43:19.262477,5,"AirGo QT3, 5 inches",2023-08-29 23:43:40.700539,1,GDSTIME 120mm Blower,False,,Starkvind EPA 12 (cut to fit),,../air_cleaner_data/2023-08-29_19:28:03.265445.csv,50.0,1
 2023-08-29 23:44:08.125249,5,"AirGo QT3, 5 inches",2023-08-29 23:44:35.100867,1,GDSTIME 120mm Blower,False,,Starkvind EPA 12 (cut to fit),,../air_cleaner_data/2023-08-29_19:28:03.265445.csv,50.0,1
+2023-08-29 23:44:08.125249,5,"AirGo QT3, 5 inches",2023-08-29 23:44:35.100867,1,GDSTIME 120mm Blower,False,,Starkvind EPA 12 (cut to fit),,../air_cleaner_data/2023-08-30_19:37:45.946118.csv,50.0,1
+2023-08-30 23:40:45.840944,3,"AirGo QT3, 5 inches",2023-08-30 23:41:15.465214,1,GDSTIME 120mm Blower,False,,Starkvind EPA 12 (cut to fit),,../air_cleaner_data/2023-08-30_19:37:45.946118.csv,25.0,1
+2023-08-30 23:42:05.432137,3,"AirGo QT3, 5 inches",2023-08-30 23:42:36.502167,1,GDSTIME 120mm Blower,False,,Starkvind EPA 12 (cut to fit),,../air_cleaner_data/2023-08-30_19:37:45.946118.csv,25.0,1
+2023-08-30 23:43:05.993140,3,"AirGo QT3, 5 inches",2023-08-30 23:43:34.041257,1,GDSTIME 120mm Blower,False,,Starkvind EPA 12 (cut to fit),,../air_cleaner_data/2023-08-30_19:37:45.946118.csv,25.0,1
+2023-08-30 23:44:24.553710,3,"AirGo QT3, 5 inches",2023-08-30 23:45:08.077737,1,GDSTIME 120mm Blower,False,,Starkvind EPA 12 (cut to fit),,../air_cleaner_data/2023-08-30_19:37:45.946118.csv,25.0,1
+2023-08-30 23:46:14.588002,3,"AirGo QT3, 5 inches",2023-08-30 23:46:46.351076,1,GDSTIME 120mm Blower,False,,Starkvind EPA 12 (cut to fit),,../air_cleaner_data/2023-08-30_19:37:45.946118.csv,25.0,1
+2023-08-30 23:47:31.946754,3,"AirGo QT3, 5 inches",2023-08-30 23:47:54.685920,1,GDSTIME 120mm Blower,False,,Starkvind EPA 12 (cut to fit),,../air_cleaner_data/2023-08-30_19:37:45.946118.csv,25.0,1
+2023-08-30 23:48:20.139596,3,"AirGo QT3, 5 inches",2023-08-30 23:48:44.125005,1,GDSTIME 120mm Blower,False,,Starkvind EPA 12 (cut to fit),,../air_cleaner_data/2023-08-30_19:37:45.946118.csv,25.0,1
+2023-08-30 23:51:39.339080,3,"AirGo QT3, 5 inches",2023-08-30 23:52:08.803364,1,GDSTIME 120mm Blower,False,,Starkvind EPA 12 (cut to fit),,../air_cleaner_data/2023-08-30_19:37:45.946118.csv,25.0,1
+2023-08-30 23:52:33.915713,3,"AirGo QT3, 5 inches",2023-08-30 23:52:57.834284,1,GDSTIME 120mm Blower,False,,Starkvind EPA 12 (cut to fit),,../air_cleaner_data/2023-08-30_19:37:45.946118.csv,25.0,1
+2023-08-30 23:53:36.050527,3,"AirGo QT3, 5 inches",2023-08-30 23:54:03.518512,1,GDSTIME 120mm Blower,False,,Starkvind EPA 12 (cut to fit),,../air_cleaner_data/2023-08-30_19:37:45.946118.csv,25.0,1
+2023-08-30 23:54:39.668453,3,"AirGo QT3, 5 inches",2023-08-30 23:55:05.861220,1,GDSTIME 120mm Blower,False,,Starkvind EPA 12 (cut to fit),,../air_cleaner_data/2023-08-30_19:37:45.946118.csv,25.0,1
