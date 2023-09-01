@@ -114,8 +114,7 @@ def compute_cadr(
     Returns: float
         In cubic feet per minute (CFM).
     """
-    speed_estimates = readings.groupby(groupby_cols).sum()[column_names].sum(axis=1) / number_of_readings_per_grouping
-
+    speed_estimates = df.groupby(groupby_cols).sum()[column_names].sum(axis=1) / number_of_readings_per_grouping
 
     cubic_meters_per_second = speed_estimates * filter_area_sq_meters
 
