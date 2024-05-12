@@ -6,4 +6,12 @@
 #   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
 #   Character.create(name: "Luke", movie: movies.first)
 #
-User.create()
+require 'securerandom'
+
+users = User.all
+users.each do |u|
+  unless u.external_api_token
+    u.external_api_token = SecureRandom.uuid
+    u.save
+  end
+end
