@@ -14,6 +14,57 @@ class EventsController < ApplicationController
     end
   end
 
+  def external_create
+    api_token = params.require(:api_token)
+    profile = Profile.find_by(external_api_token: api_token)
+
+    unless profile && profile.can_post_via_external_api
+      status = :unprocessable_entity
+    else
+      status = :ok
+    end
+
+    user = profile.user
+
+    debugger
+    # TODO: Rename the fields in "co2_levels" to be
+    # "co2", and the "identifier" to be timestamp
+    # Convert the milliseconds to datetime?
+
+    if status == :ok
+      readings = params["_json"].map do |j|
+        json = JSON.parse(j.to_json)
+        json['timestamp'] = Time.at(json['timestamp'].to_i / 1000)
+      end
+
+      debugger
+
+      event = Event.create(
+        author_id: user.id,
+        status: draft,
+        sensor_data: readings
+      )
+
+      unless event
+        # TODO: is there a better status to signify validation error or something?
+        status = :unprocessable_entity
+        url = ""
+      else
+        url = "#{base_url}/#/events/#{event.id}/update"
+      end
+    end
+
+    respond_to do |format|
+      # Add CO2 stuff here
+      format.json do
+        render json: {
+          status: status,
+          url: url
+        }
+      end
+    end
+  end
+
   def index
     # TODO: if current user is nil, only show events that are public
     events = Event.can_be_accessed_by(current_user)
