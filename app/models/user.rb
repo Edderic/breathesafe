@@ -6,10 +6,6 @@ class User < ApplicationRecord
          :confirmable, :lockable, :timeoutable, :trackable
 
 
-  before_create do
-    self.external_api_token = SecureRandom.uuid
-  end
-
   has_one :profile
   has_many :events, foreign_key: 'author_id'
 
