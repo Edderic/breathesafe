@@ -113,7 +113,7 @@ class EventsController < ApplicationController
       :maximum_occupancy,
       :initial_co2,
       :status,
-      co2_readings: [
+      sensor_data: [
         :value,
         :key,
         :identifier

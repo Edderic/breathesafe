@@ -30,7 +30,7 @@ class Event < ApplicationRecord
 
   def self.json_parse(events)
     events.map do |ev|
-      ["co2_readings", "place_data", "activity_groups", "occupancy", "portable_air_cleaners"].each do |col|
+      ["sessor_data", "place_data", "activity_groups", "occupancy", "portable_air_cleaners"].each do |col|
         unless ev[col]
           ev[col] = []
         else
