@@ -14,6 +14,7 @@ export const useProfileStore = defineStore('profile', {
     firstName: "",
     lastName: "",
     heightMeters: "",
+    externalAPIToken: "",
     measurementUnits: {
       'lengthMeasurementType': "feet",
       'airDeliveryRateMeasurementType': 'cubic feet per minute',
@@ -67,6 +68,7 @@ export const useProfileStore = defineStore('profile', {
 
             let profile = data.profile
 
+            this.externalAPIToken = profile.external_api_token
             this.heightMeters = profile.height_meters
             this.strideLengthMeters = profile.stride_length_meters
             this.firstName = profile.first_name

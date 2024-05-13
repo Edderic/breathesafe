@@ -81,6 +81,11 @@
         <label class='bold'>Last name</label>
         <input :value='lastName' @change='updateLastName' :disabled="this.status == 'saved'">
       </div>
+
+      <div class='container mobile'>
+        <label class='bold'>External API Token</label>
+        <input :value='externalAPIToken' disabled="true">
+      </div>
     </div>
 
     <div class='container' v-if='display == "length_estimation"'>
@@ -374,7 +379,8 @@ export default {
     ...mapState(
         useProfileStore,
         [
-          'measurementUnits'
+          'measurementUnits',
+          'externalAPIToken'
         ]
     ),
     ...mapWritableState(
