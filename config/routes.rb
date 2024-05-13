@@ -16,6 +16,8 @@ Rails.application.routes.draw do
     get 'users/get_current_user', to: 'users/sessions#get_current_user'
   end
 
+  post 'events/external/:api_token', to: 'events#external_create'
+
   post 'events', to: 'events#create'
   post 'events/:id/approve', to: 'events#approve'
   put 'events/:id', to: 'events#update'
