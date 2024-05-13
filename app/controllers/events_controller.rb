@@ -1,4 +1,5 @@
 class EventsController < ApplicationController
+  skip_forgery_protection
   # TODO: Might want to rename this to index?
   def new
     respond_to do |format|
