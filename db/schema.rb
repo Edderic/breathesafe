@@ -89,6 +89,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_11_200807) do
     t.float "height_meters"
     t.float "stride_length_meters"
     t.jsonb "socials"
+    t.uuid "external_api_token"
+    t.boolean "can_post_via_external_api", default: true
     t.index ["user_id"], name: "index_profiles_on_user_id"
   end
 
@@ -129,8 +131,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_11_200807) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "admin", default: false
-    t.uuid "external_api_token"
-    t.boolean "can_post_via_external_api", default: true
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
