@@ -8,10 +8,10 @@
 #
 require 'securerandom'
 
-users = User.all
-users.each do |u|
-  unless u.external_api_token
-    u.external_api_token = SecureRandom.uuid
-    u.save
+profiles = Profile.all
+profiles.each do |p|
+  unless p.external_api_token
+    p.external_api_token = SecureRandom.uuid
+    p.save
   end
 end
