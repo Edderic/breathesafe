@@ -15,3 +15,24 @@ profiles.each do |p|
     p.save
   end
 end
+
+events = Event.all
+
+# Refactor the data. Use more precise language
+events.each do |e|
+  sensor_readings = e.sensor_readings
+
+  unless sensor_readings
+    next
+  end
+
+  readings = sensor_readings.map do |s|
+    {
+      "co2": s["value"],
+      "timestamp": s["identifier"]
+    }
+  end
+
+  e.sensor_readings = readings
+  e.save
+end
