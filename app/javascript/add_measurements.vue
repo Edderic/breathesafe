@@ -509,8 +509,8 @@
               class='continuous'
               :leftButtons="[{text: '-100', emitSignal: 'adjustCO2'}, {text: '-10', emitSignal: 'adjustCO2'}, {text: '-1', emitSignal: 'adjustCO2'}]"
               :rightButtons="[{text: '+1', emitSignal: 'adjustCO2'}, {text: '+10', emitSignal: 'adjustCO2'}, {text: '+100', emitSignal: 'adjustCO2'}]"
-              :value='sensorReading.value'
-              :identifier='sensorReading.identifier'
+              :value='sensorReading.co2'
+              :identifier='sensorReading.timestamp'
               @adjustCO2='adjustCO2'
               @update='updateCO2'
             />
@@ -1147,7 +1147,7 @@
               } else {
 
                 if (header[columnCounter].includes("Carbon dioxide") || header[columnCounter].includes("Carbon Dioxide")) {
-                  object.value = parseInt(item.replaceAll('"', ''))
+                  object.co2 = parseInt(item.replaceAll('"', ''))
                   object[header[columnCounter]] = parseInt(item)
                 } else if (header[columnCounter].includes("Time")) {
 
@@ -1171,11 +1171,11 @@
                     return
                   }
 
-                  object.identifier = dateToAdd
-                  object.identifier.setSeconds(0)
-                  object[header[columnCounter]] = object.identifier
+                  object.timestamp = dateToAdd
+                  object.timestamp.setSeconds(0)
+                  object[header[columnCounter]] = object.timestamp
                   if (lineCounter == 1) {
-                    this.startDateTimeCO2 = object.identifier
+                    this.startDateTimeCO2 = object.timestamp
                   }
                 } else {
                   object[header[columnCounter]] = item.replaceAll('"', '')
@@ -1194,7 +1194,7 @@
 
           this.tmpCO2Readings = collection
           let lastReading = this.tmpCO2Readings[this.tmpCO2Readings.length - 1]
-          this.endDateTimeCO2 = lastReading.identifier
+          this.endDateTimeCO2 = lastReading.timestamp
           this.lastXMinutes = (this.endDateTimeCO2 - this.startDateTimeCO2) / 60000
         }.bind(this)
 
