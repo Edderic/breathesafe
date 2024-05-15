@@ -42,7 +42,7 @@ class EventsController < ApplicationController
       event = Event.create(
         author_id: user.id,
         status: draft,
-        sensor_data: readings
+        sensor_readings: readings
       )
 
       unless event
@@ -165,8 +165,9 @@ class EventsController < ApplicationController
       :maximum_occupancy,
       :initial_co2,
       :status,
-      sensor_data: [
-        :value,
+      sensor_readings: [
+        :co2,
+        :timestamp,
         :key,
         :identifier
       ],

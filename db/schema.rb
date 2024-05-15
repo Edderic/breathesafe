@@ -62,7 +62,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_13_134735) do
     t.integer "maximum_occupancy"
     t.integer "approved_by_id"
     t.integer "initial_co2"
-    t.jsonb "sensor_data"
+    t.jsonb "sensor_readings"
     t.string "status"
     t.index ["author_id"], name: "index_events_on_author_id"
   end

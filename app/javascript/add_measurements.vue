@@ -505,12 +505,12 @@
               <CircularButton text='-' @click='removeLastCO2Reading'/>
             </div>
             <Number
-              v-for='co2Reading in co2Readings'
+              v-for='sensorReading in sensorReadings'
               class='continuous'
               :leftButtons="[{text: '-100', emitSignal: 'adjustCO2'}, {text: '-10', emitSignal: 'adjustCO2'}, {text: '-1', emitSignal: 'adjustCO2'}]"
               :rightButtons="[{text: '+1', emitSignal: 'adjustCO2'}, {text: '+10', emitSignal: 'adjustCO2'}, {text: '+100', emitSignal: 'adjustCO2'}]"
-              :value='co2Reading.value'
-              :identifier='co2Reading.identifier'
+              :value='sensorReading.value'
+              :identifier='sensorReading.identifier'
               @adjustCO2='adjustCO2'
               @update='updateCO2'
             />
@@ -522,7 +522,7 @@
 
             <div class='collapsable' v-if='tmpCO2Readings.length > 0'>
               <LineGraph
-                :lines="[co2ReadingLines, startCO2VerticalLine, endCO2VerticalLine]"
+                :lines="[sensorReadingLines, startCO2VerticalLine, endCO2VerticalLine]"
                 :ylim='[co2YMin, co2YMax]'
                 title='CO₂ Readings (Zoomed Out)'
                 xlabel='Time (min)'
@@ -531,7 +531,7 @@
               />
 
               <LineGraph
-                :lines="[co2ReadingsZoomedIn]"
+                :lines="[sensorReadingsZoomedIn]"
                 :ylim='[co2YMin, co2YMax]'
                 title='CO₂ Readings (Zoomed In)'
                 xlabel='Time (min)'
@@ -751,11 +751,11 @@
 
         return { points: collection, color: 'red', legend: 'ascending' }
       },
-      co2ReadingsToSave() {
+      sensorReadingsToSave() {
         if (this.useUploadFile) {
           return this.filterCO2Readings
         } else {
-          return this.co2Readings
+          return this.sensorReadings
         }
       },
       descendingThenSteady() {
@@ -811,10 +811,10 @@
 
 
       startCO2VerticalLine() {
-        let co2ReadingsLength = this.tmpCO2Readings.length
+        let sensorReadingsLength = this.tmpCO2Readings.length
 
         let index = 0
-        for (let i = 0; i < co2ReadingsLength; i++) {
+        for (let i = 0; i < sensorReadingsLength; i++) {
           if (+this.tmpCO2Readings[i].identifier == +this.startDateTimeCO2) {
             index = i
             continue
@@ -828,10 +828,10 @@
         return { 'color': 'blue', points: collection, 'legend': 'start'}
       },
       endCO2VerticalLine() {
-        let co2ReadingsLength = this.tmpCO2Readings.length
+        let sensorReadingsLength = this.tmpCO2Readings.length
 
         let index = 0
-        for (let i = 0; i < co2ReadingsLength; i++) {
+        for (let i = 0; i < sensorReadingsLength; i++) {
           if (+this.tmpCO2Readings[i].identifier == +this.endDateTimeCO2) {
             index = i
             continue
@@ -848,10 +848,10 @@
         return 400
       },
       co2YMax() {
-        let co2ReadingsLength = this.tmpCO2Readings.length
+        let sensorReadingsLength = this.tmpCO2Readings.length
         let yMax = 1000
 
-        for (let i = 0; i < co2ReadingsLength; i++) {
+        for (let i = 0; i < sensorReadingsLength; i++) {
           if (this.tmpCO2Readings[i].value > yMax) {
             yMax = this.tmpCO2Readings[i].value
           }
@@ -860,23 +860,23 @@
         return yMax
 
       },
-      co2ReadingLines() {
-        let co2ReadingsLength = this.tmpCO2Readings.length
+      sensorReadingLines() {
+        let sensorReadingsLength = this.tmpCO2Readings.length
 
         let collection = []
 
-        for (let i = 0; i < co2ReadingsLength; i++) {
+        for (let i = 0; i < sensorReadingsLength; i++) {
           collection.push([i, this.tmpCO2Readings[i].value])
         }
 
         return { 'color': 'red', points: collection, 'legend': 'CO2 readings'}
       },
-      co2ReadingsZoomedIn() {
-        let co2ReadingsLength = this.filterCO2Readings.length
+      sensorReadingsZoomedIn() {
+        let sensorReadingsLength = this.filterCO2Readings.length
 
         let collection = []
 
-        for (let i = 0; i < co2ReadingsLength; i++) {
+        for (let i = 0; i < sensorReadingsLength; i++) {
           collection.push([i, this.filterCO2Readings[i].value])
         }
 
@@ -942,7 +942,7 @@
         steadyStateInfo: false,
         steadyStatePPM: 800,
         lastXMinutes: 5,
-        co2Readings: [
+        sensorReadings: [
           {
             value: 800,
             identifier: generateUUID()
@@ -1084,7 +1084,7 @@
         this.startDateTime = new Date()
         this.private = event.private
         this.maximumOccupancy = event.maximumOccupancy
-        this.co2Readings = []
+        this.sensorReadings = []
         this.portableAirCleaners = event.portableAirCleaners
         for (let portableAirCleaner of this.portableAirCleaners) {
           portableAirCleaner['airDeliveryRate'] = round(
@@ -1112,7 +1112,7 @@
       async copyEventWithId(event) {
         this.copyEvent(event)
         this.id = event.id
-        this.co2Readings = event.co2Readings
+        this.sensorReadings = event.sensorReadings
       },
 
       useLastXMinutes(event) {
@@ -1221,16 +1221,16 @@
       },
       addCO2Reading() {
         let value = 800
-        if (this.co2Readings.length > 0) {
-          value = parseInt(this.co2Readings[this.co2Readings.length - 1].value)
+        if (this.sensorReadings.length > 0) {
+          value = parseInt(this.sensorReadings[this.sensorReadings.length - 1].value)
         }
-        this.co2Readings.push({
+        this.sensorReadings.push({
           value: value,
           identifier: generateUUID()
         })
       },
       removeLastCO2Reading() {
-        this.co2Readings.pop()
+        this.sensorReadings.pop()
       },
       addActivityGrouping() {
         this.activityGroups.unshift({
@@ -1348,8 +1348,8 @@
             this.id = this.$route.params['id']
 
             // if the 10 cO2 readings aren't the same, then default to Advanced page,
-            let same = this.co2Readings[0].value
-            for (let c of this.co2Readings) {
+            let same = this.sensorReadings[0].value
+            for (let c of this.sensorReadings) {
               same = same == c.value
             }
 
@@ -1458,7 +1458,7 @@
           )
         }
 
-        if (this.co2ReadingsToSave.length < 10 && !this.usingSteadyState) {
+        if (this.sensorReadingsToSave.length < 10 && !this.usingSteadyState) {
           this.messages.push(
             {
               str: "Error: Please add at least 10 carbon dioxide readings, either one-by-one or by bulk, where each measurement is spaced 1-minute apart.",
@@ -1534,18 +1534,18 @@
         let normalizedCO2Readings =  []
 
         if (this.usingSteadyState) {
-          this.co2Readings = []
+          this.sensorReadings = []
 
           for (let i = 0; i < 10; i++ ) {
             normalizedCO2Readings.push(this.steadyStatePPM)
-            this.co2Readings.push({
+            this.sensorReadings.push({
               value: this.steadyStatePPM,
               identifier: generateUUID()
             })
           }
         } else {
-          for (let co2Reading of this.co2ReadingsToSave) {
-            normalizedCO2Readings.push(co2Reading.value)
+          for (let sensorReading of this.sensorReadingsToSave) {
+            normalizedCO2Readings.push(sensorReading.value)
           }
         }
 
@@ -1582,7 +1582,7 @@
               'ventilation_co2_steady_state_ppm': this.ventilationCO2SteadyStatePPM,
               'ventilation_notes': this.ventilationNotes,
               'start_datetime': this.startDatetime,
-              'co2_readings': this.co2ReadingsToSave,
+              'sensor_data': this.sensorReadingsToSave,
               'initial_co2': this.initialCO2,
               'private': this.private,
               'place_data': this.placeData,
@@ -1758,18 +1758,18 @@
         this.singlePassFiltrationEfficiency = event.target.value;
       },
       adjustCO2(args) {
-        let co2Reading = this.co2Readings.find(
-          (co2Reading) => co2Reading.identifier == args.identifier
+        let sensorReading = this.sensorReadings.find(
+          (sensorReading) => sensorReading.identifier == args.identifier
         )
 
-        co2Reading.value += parseInt(args.value)
+        sensorReading.value += parseInt(args.value)
       },
       updateCO2(args) {
-        let co2Reading = this.co2Readings.find(
-          (co2Reading) => co2Reading.identifier == args.identifier
+        let sensorReading = this.sensorReadings.find(
+          (sensorReading) => sensorReading.identifier == args.identifier
         )
 
-        co2Reading.value = parseInt(args.value)
+        sensorReading.value = parseInt(args.value)
       },
       setCarbonDioxideAmbient(event) {
         this.ventilationCO2AmbientPPM = event.target.value;

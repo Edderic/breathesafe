@@ -425,7 +425,7 @@ export default {
           'roomName',
           'activityGroups',
           'ageGroups',
-          'co2Readings',
+          'sensorReadings',
           'carbonDioxideActivities',
           'ventilationCo2AmbientPpm',
           'ventilationCo2MeasurementDeviceModel',
@@ -466,13 +466,13 @@ export default {
       return `COVID-19 Transmission Risk`
     },
     readings() {
-      if (!this.co2Readings) {
+      if (!this.sensorReadings) {
         return [[0, this.ventilationCo2SteadyStatePpm]]
       }
 
       let collection = []
-      for (let i = 0; i < this.co2Readings.length; i++) {
-        collection.push([i, this.co2Readings[i].value])
+      for (let i = 0; i < this.sensorReadings.length; i++) {
+        collection.push([i, this.sensorReadings[i].value])
       }
       return { points: collection, color: 'blue', 'legend': 'readings' }
     },
