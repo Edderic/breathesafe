@@ -26,22 +26,16 @@ class EventsController < ApplicationController
 
     user = profile.user
 
-    debugger
-    # TODO: Rename the fields in "co2_levels" to be
-    # "co2", and the "identifier" to be timestamp
-    # Convert the milliseconds to datetime?
-
     if status == :ok
       readings = params["_json"].map do |j|
         json = JSON.parse(j.to_json)
         json['timestamp'] = Time.at(json['timestamp'].to_i / 1000)
+        json
       end
-
-      debugger
 
       event = Event.create(
         author_id: user.id,
-        status: draft,
+        status: 'draft',
         sensor_readings: readings
       )
 
@@ -50,7 +44,7 @@ class EventsController < ApplicationController
         status = :unprocessable_entity
         url = ""
       else
-        url = "#{base_url}/#/events/#{event.id}/update"
+        url = "#{request.host_with_port}/#/events/#{event.id}/update"
       end
     end
 
