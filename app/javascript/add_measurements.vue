@@ -1069,7 +1069,10 @@
           let query = JSON.parse(JSON.stringify(this.$route.query))
 
           query['attempt-name'] = this.$route.name
-          query['params-id'] = this.$route.params.id
+
+          for (let k in this.$route.params) {
+            query[`params-${k}`] = this.$route.params[k]
+          }
 
           this.$router.push({
             name: 'SignIn',
@@ -1079,6 +1082,10 @@
       },
       copyEvent(event) {
         this.authorId = this.currentUser.id
+        if (!event) {
+          debugger
+
+        }
         this.placeData = event.placeData
         this.roomName = event.roomName
         this.startDateTime = new Date()

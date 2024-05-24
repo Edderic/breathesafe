@@ -16,45 +16,90 @@ class EventsController < ApplicationController
 
   def external_create
     api_token = params.require(:api_token)
-    profile = Profile.find_by(external_api_token: api_token)
+    name = params["name"]
 
-    unless profile && profile.can_post_via_external_api
-      status = :unprocessable_entity
-    else
-      status = :ok
-    end
-
-    user = profile.user
-
-    if status == :ok
-      readings = params["_json"].map do |j|
-        json = JSON.parse(j.to_json)
-        json['timestamp'] = Time.at(json['timestamp'].to_i / 1000)
-        json
+    if name == "test"
+      respond_to do |format|
+        # Add CO2 stuff here
+        format.json do
+          render json: {
+            status: :ok,
+            name: 'test_success',
+            data: nil
+          }
+        end
       end
 
-      event = Event.create(
-        author_id: user.id,
-        status: 'draft',
-        sensor_readings: readings
-      )
+    elsif name == "share"
+      profile = Profile.find_by(external_api_token: api_token)
 
-      unless event
-        # TODO: is there a better status to signify validation error or something?
+      unless profile && profile.can_post_via_external_api
         status = :unprocessable_entity
-        url = ""
       else
-        url = "#{request.host_with_port}/#/events/#{event.id}/update"
+        status = :ok
       end
-    end
 
-    respond_to do |format|
-      # Add CO2 stuff here
-      format.json do
-        render json: {
-          status: status,
-          url: url
+      user = profile.user
+
+      if status == :ok
+        readings = params["_json"].map do |j|
+          json = JSON.parse(j.to_json)
+          json['timestamp'] = Time.at(json['timestamp'].to_i / 1000)
+          json
+        end
+
+        place_data = {
+          'center': {
+            'lat': readings[0]['latitude'],
+            'long': readings[0]['longitude'],
+          },
+          'types': []
         }
+
+        event = Event.create(
+          author_id: user.id,
+          status: 'draft',
+          sensor_readings: readings,
+          place_data: place_data,
+          room_height_meters: 2.43, # 8 ft
+          room_length_meters: 8,
+          room_width_meters: 5,
+          room_usable_volume_factor: 0.8,
+          activity_groups: [
+            {
+              "id"=>SecureRandom.uuid, # Do we really need this?
+              "sex"=>"Female", # Let's just average this out?
+              "ageGroup"=>"30 to <40",
+              "maskType"=>"None",
+              "numberOfPeople"=>"10",
+              "rapidTestResult"=>"Unknown",
+              "aerosolGenerationActivity"=>"Resting – Speaking",
+              "carbonDioxideGenerationActivity"=>"Sitting tasks, light effort (e.g, office work)",
+              "ventilationCo2MeasurementDeviceName"=>"AirCoda - External API"
+            }
+          ],
+        )
+
+        unless event
+          # TODO: is there a better status to signify validation error or something?
+          status = :unprocessable_entity
+          url = ""
+        else
+          url = "#{request.host_with_port}/#/events/#{event.id}/update"
+        end
+      end
+
+      respond_to do |format|
+        # Add CO2 stuff here
+        format.json do
+          render json: {
+            status: status,
+            name: "share-accepted",
+            data: {
+              url: url
+            }
+          }
+        end
       end
     end
   end
@@ -62,7 +107,6 @@ class EventsController < ApplicationController
   def index
     # TODO: if current user is nil, only show events that are public
     events = Event.can_be_accessed_by(current_user)
-
     respond_to do |format|
       format.json do
         render json: {

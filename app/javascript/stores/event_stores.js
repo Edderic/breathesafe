@@ -77,6 +77,12 @@ export const useEventStores = defineStore('events', {
 
       for (let d of data) {
         let countable = false
+
+        if (!d.placeData || !d.placeData.types) {
+          continue
+
+        }
+
         for (let placeType of d.placeData.types) {
           if (!this.placeTypeCounts[placeType]) {
              this.placeTypeCounts[placeType] = 0
@@ -131,21 +137,13 @@ export const useEventStores = defineStore('events', {
 
       await profileStore.loadProfile()
       let success = true
+
       await axios.get('/events')
         .then(response => {
           console.log(response)
           if (response.status == 200) {
             let camelized = deepSnakeToCamel(response.data.events)
             this.countPlaceTypes(camelized)
-            // for (let i of camelized) {
-              // let number = parseInt(Math.random() * 100)
-              // let street = ["New York Ave.", "St. James St.", "Park Place", "Baltic Ave.", "Indiana Ave.", "Kentucky Ave.", "Illinois Ave.", "Ventnor Ave."][parseInt( Math.random() * 8 )]
-              // let state = 'Iowa'
-              // let zip = ['12345', '54321', '20202'][parseInt(Math.random() * 3)]
-              // i.placeData.formattedAddress = `${number} ${street}, ${state} ${zip}`
-              // i.placeData.center.lat += 0.0
-              // i.placeData.center.lng -= 20.0
-            // }
             this.setDistance(mainStore, camelized)
             this.events = camelized
             this.setDisplayables()
@@ -165,7 +163,13 @@ export const useEventStores = defineStore('events', {
     async findOrLoad(id) {
       // TODO: maybe create a Rails route to find a specific analytics to load?
       await this.load()
-      return this.events.find((ev) => { return ev.id == parseInt(id) })
+      let event = this.events.find((ev) => { return ev.id == parseInt(id) })
+
+      if (!event) {
+        throw new Error("Event is undefined")
+      }
+
+      return event
     },
 
     susceptibleMask(selectedMask) {

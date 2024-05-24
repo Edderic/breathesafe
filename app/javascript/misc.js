@@ -741,6 +741,8 @@ export function deepSnakeToCamel(obj) {
 
   if (Array.isArray(obj)) {
     new_obj = []
+  } else if (obj == null) {
+    new_obj = ""
   } else if (typeof(obj) == 'object') {
     new_obj = {}
   } else {
