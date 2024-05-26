@@ -154,6 +154,7 @@ export const useShowMeasurementSetStore = defineStore('showMeasurementSet', {
       this.initialCo2 = measurementSet.initialCo2
       this.status = measurementSet.status
       this.sensorReadings = measurementSet.sensorData
+      this.sensorDataFromExternalApi = measurementSet.sensorDataFromExternalApi
       this.displayMeasurementsTailoredToUser()
       this.ventilationNotes = measurementSet.ventilationNotes
       this.ventilationCo2AmbientPpm = measurementSet.ventilationCo2AmbientPpm

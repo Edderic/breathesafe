@@ -469,14 +469,14 @@
 
           </div>
 
-          <div class='menu row'>
+          <div v-if='!sensorDataFromExternalApi' class='menu row'>
             <Button :class="{ tab: true }" @click='usingSteadyState = true' shadow='true' text='Simple' :selected="usingSteadyState"/>
             <Button :class="{ tab: true }" @click='usingSteadyState = false' shadow='true' text='Advanced' :selected="!usingSteadyState"/>
           </div>
 
-          <p v-if='!usingSteadyState'>For cases when the readings are increasing or decreasing (i.e. have not reached steady state yet), please add at least 10 readings, spaced 1 minute apart using either of the methods below. </p>
+          <p v-if='!usingSteadyState && !sensorDataFromExternalApi'>For cases when the readings are increasing or decreasing (i.e. have not reached steady state yet), please add at least 10 readings, spaced 1 minute apart using either of the methods below. </p>
 
-          <div class='container' v-if='usingSteadyState'>
+          <div class='container' v-if='usingSteadyState && !sensorDataFromExternalApi'>
             <label>Steady State Concentration</label>
             <p>If your readings have been flat, and there has been no change in occupancy, please input the indoor CO2 reading value below. On the other hand, if the readings are increasing or decreasing, use "Advanced" instead.</p>
 
@@ -495,15 +495,28 @@
 
 
           <div class='menu row' v-if='!usingSteadyState'>
-            <Button :class="{ tab: true }" @click='showUploadFile(false)' shadow='true' text='Enter One-by-one' :selected="!this.useUploadFile"/>
-            <Button :class="{ tab: true }" @click='showUploadFile(true)' shadow='true' text='Bulk Upload' :selected="this.useUploadFile"/>
+            <Button v-if="!sensorDataFromExternalApi" :class="{ tab: true }" @click='showUploadFile(false)' shadow='true' text='Enter One-by-one' :selected="!this.useUploadFile"/>
+            <Button v-if="!sensorDataFromExternalApi" :class="{ tab: true }" @click='showUploadFile(true)' shadow='true' text='Bulk Upload' :selected="this.useUploadFile"/>
           </div>
 
-          <div class='container centered' v-if='!useUploadFile && !usingSteadyState'>
-            <div class='container row'>
-              <CircularButton text='+' @click='addCO2Reading'/>
-              <CircularButton text='-' @click='removeLastCO2Reading'/>
+          <div class='container centered' v-if='sensorDataFromExternalApi'>
+            <Number
+              v-for='sensorReading in sensorReadings'
+              class='continuous'
+              :leftButtons="[]"
+              :rightButtons="[]"
+              :value='sensorReading.co2'
+              :identifier='sensorReading.timestamp'
+              @adjustCO2='adjustCO2'
+              @update='updateCO2'
+            />
+          </div>
+          <div class='container centered' v-if='(!useUploadFile && !usingSteadyState) && !sensorDataFromExternalApi'>
+            <div class='container row' >
+              <CircularButton v-if="!sensorDataFromExternalApi" text='+' @click='addCO2Reading'/>
+              <CircularButton v-if="!sensorDataFromExternalApi" text='-' @click='removeLastCO2Reading'/>
             </div>
+
             <Number
               v-for='sensorReading in sensorReadings'
               class='continuous'
@@ -515,7 +528,25 @@
               @update='updateCO2'
             />
           </div>
-          <div class='container centered' v-if='useUploadFile && !usingSteadyState'>
+
+          <div class='container centered' v-if='!sensorDataFromExternalApi && !useUploadFile && !usingSteadyState'>
+            <div class='container row' >
+              <CircularButton text='+' @click='addCO2Reading'/>
+              <CircularButton text='-' @click='removeLastCO2Reading'/>
+            </div>
+
+            <Number
+              v-for='sensorReading in sensorReadings'
+              class='continuous'
+              :leftButtons="[{text: '-100', emitSignal: 'adjustCO2'}, {text: '-10', emitSignal: 'adjustCO2'}, {text: '-1', emitSignal: 'adjustCO2'}]"
+              :rightButtons="[{text: '+1', emitSignal: 'adjustCO2'}, {text: '+10', emitSignal: 'adjustCO2'}, {text: '+100', emitSignal: 'adjustCO2'}]"
+              :value='sensorReading.co2'
+              :identifier='sensorReading.timestamp'
+              @adjustCO2='adjustCO2'
+              @update='updateCO2'
+            />
+          </div>
+          <div class='container centered' v-if='!sensorDataFromExternalApi && useUploadFile && !usingSteadyState'>
             <div class='container'>
               <input type="file" @change="handleFileChangeCO2">
             </div>
@@ -1114,6 +1145,7 @@
         this.activityGroups = event.activityGroups
         this.roomUsableVolumeCubicMeters = event.roomUsableVolumeCubicMeters
         this.roomUsableVolumeFactor = event.roomUsableVolumeFactor
+        this.sensorDataFromExternalApi = event.sensorDataFromExternalApi
       },
 
       async copyEventWithId(event) {
@@ -1545,14 +1577,18 @@
 
           for (let i = 0; i < 10; i++ ) {
             normalizedCO2Readings.push(this.steadyStatePPM)
+
             this.sensorReadings.push({
-              value: this.steadyStatePPM,
-              identifier: generateUUID()
+              co2: this.steadyStatePPM,
+              timestamp: timestamp
             })
           }
         } else {
+          // TODO: handle the case where sensor readings are not spaced apart by 1-minute
+          debugger
+
           for (let sensorReading of this.sensorReadingsToSave) {
-            normalizedCO2Readings.push(sensorReading.value)
+            normalizedCO2Readings.push(sensorReading.co2)
           }
         }
 
@@ -1769,14 +1805,14 @@
           (sensorReading) => sensorReading.identifier == args.identifier
         )
 
-        sensorReading.value += parseInt(args.value)
+        sensorReading.co2 += parseInt(args.value)
       },
       updateCO2(args) {
         let sensorReading = this.sensorReadings.find(
-          (sensorReading) => sensorReading.identifier == args.identifier
+          (sensorReading) => sensorReading.timestamp == args.timestamp
         )
 
-        sensorReading.value = parseInt(args.value)
+        sensorReading.co2 = parseInt(args.value)
       },
       setCarbonDioxideAmbient(event) {
         this.ventilationCO2AmbientPPM = event.target.value;

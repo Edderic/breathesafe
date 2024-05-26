@@ -42,29 +42,47 @@ class EventsController < ApplicationController
       user = profile.user
 
       if status == :ok
-        readings = params["_json"].map do |j|
+        data = params['data']
+
+        # Adds the CO2 stuff
+        readings = data["points"].map do |j|
           json = JSON.parse(j.to_json)
-          json['timestamp'] = Time.at(json['timestamp'].to_i / 1000)
+          json['identifier'] = Time.at(json['timestamp'].to_i / 1000)
           json
         end
 
+        bounds = data['bounds']
+
         place_data = {
           'center': {
-            'lat': readings[0]['latitude'],
-            'long': readings[0]['longitude'],
+            'lat': (bounds['ne'][1] + bounds['sw'][1]) / 2.0,
+            'long': (bounds['ne'][0] + bounds['sw'][0]) / 2.0,
           },
           'types': []
         }
 
         event = Event.create(
-          author_id: user.id,
           status: 'draft',
+          sensor_data_from_external_api: true,
+          author_id: user.id,
+          maximum_occupancy: 20,
           sensor_readings: readings,
           place_data: place_data,
           room_height_meters: 2.43, # 8 ft
           room_length_meters: 8,
           room_width_meters: 5,
           room_usable_volume_factor: 0.8,
+          room_usable_volume_cubic_meters: 2.43 * 8 * 5,
+          ventilation_co2_ambient_ppm: 420,
+          ventilation_co2_measurement_device_name: "AirCoda - External API",
+          ventilation_co2_measurement_device_model: "",
+          ventilation_co2_measurement_device_serial: "",
+          ventilation_ach: 0.1,
+          portable_ach: 0.1,
+          duration: "1 hour", # do we need this
+          private: "public",
+          occupancy: {"parsed": {}},
+
           activity_groups: [
             {
               "id"=>SecureRandom.uuid, # Do we really need this?
@@ -75,7 +93,6 @@ class EventsController < ApplicationController
               "rapidTestResult"=>"Unknown",
               "aerosolGenerationActivity"=>"Resting – Speaking",
               "carbonDioxideGenerationActivity"=>"Sitting tasks, light effort (e.g, office work)",
-              "ventilationCo2MeasurementDeviceName"=>"AirCoda - External API"
             }
           ],
         )
