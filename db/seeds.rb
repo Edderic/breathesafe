@@ -21,18 +21,25 @@ events = Event.all
 # Refactor the data. Use more precise language
 events.each do |e|
   sensor_readings = e.sensor_readings
-
-  unless sensor_readings
-    next
+  if e.sensor_data_from_external_api.nil?
+    e.sensor_data_from_external_api = false
   end
 
-  readings = sensor_readings.map do |s|
-    {
-      "co2": s["value"],
-      "timestamp": s["identifier"]
-    }
+  if sensor_readings
+    readings = sensor_readings.map do |s|
+
+      if s.key?('value')
+        return s.merge({
+          "co2": s["value"],
+          "timestamp": s["identifier"]
+        })
+      end
+
+      s
+    end
+
+    e.sensor_readings = readings
   end
 
-  e.sensor_readings = readings
   e.save
 end
