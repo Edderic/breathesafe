@@ -499,18 +499,31 @@
             <Button v-if="!sensorDataFromExternalApi" :class="{ tab: true }" @click='showUploadFile(true)' shadow='true' text='Bulk Upload' :selected="this.useUploadFile"/>
           </div>
 
-          <div class='container centered' v-if='sensorDataFromExternalApi'>
-            <Number
-              v-for='sensorReading in sensorReadings'
-              class='continuous'
-              :leftButtons="[]"
-              :rightButtons="[]"
-              :value='sensorReading.co2'
-              :identifier='sensorReading.timestamp'
-              @adjustCO2='adjustCO2'
-              @update='updateCO2'
-            />
-          </div>
+          <table v-if='sensorDataFromExternalApi'>
+            <thead>
+              <tr>
+                <th>Datetime</th>
+                <th>CO2 (ppm)</th>
+              </tr>
+            </thead>
+            <tr v-for='sensorReading in sensorReadings' >
+              <td>
+                <input type="text" class='longer-text' disabled='true' :value='sensorReading.identifier'>
+              </td>
+              <td>
+                <Number
+                  disabled=true
+                  class='continuous'
+                  :leftButtons="[]"
+                  :rightButtons="[]"
+                  :value='sensorReading.co2'
+                  :identifier='sensorReading.timestamp'
+                  @adjustCO2='adjustCO2'
+                  @update='updateCO2'
+                />
+              </td>
+            </tr>
+          </table>
           <div class='container centered' v-if='(!useUploadFile && !usingSteadyState) && !sensorDataFromExternalApi'>
             <div class='container row' >
               <CircularButton v-if="!sensorDataFromExternalApi" text='+' @click='addCO2Reading'/>
@@ -721,7 +734,8 @@
             'measurementUnits',
             'carbonDioxideMonitors',
             'heightMeters',
-            'strideLengthMeters'
+            'strideLengthMeters',
+            'externalAPIToken'
           ]
       ),
       ...mapWritableState(
@@ -942,9 +956,53 @@
       await this.getCurrentUser()
 
       if (!this.currentUser) {
-        this.signIn()
+        await this.signIn()
       } else {
-        this.loadStuff()
+        await this.loadStuff()
+      }
+
+      if (this.$route.name == "AddMeasurements") {
+        // create the thing
+
+        let defaultData = {
+          "bounds": {
+            "ne": [100, 200], "sw": [300, 400]
+          }, "points": [
+            { "timestamp":1714536176432, "co2":0}
+          ]
+        }
+        let payload = {
+          'sensor_data_from_external_api': false,
+          'data': defaultData,
+          'name': 'share'
+        }
+
+        await axios.post(`/events/external/${this.externalAPIToken}`, payload)
+          .then(response => {
+            console.log(response)
+            if (response.status == 201 || response.status == 200) {
+              // TODO: could make this more efficient by just adding the event
+              // directly to the store?
+              let newEvent = response.data.data.event
+              // TODO: convert Ruby casing to Javascript casing
+
+              this.addEvent(newEvent)
+              let successful = true
+
+              if (successful) {
+                this.$router.push({ name: 'UpdateOrCopyMeasurements', params: { 'id': newEvent.id, 'action': 'update' }})
+              } else {
+                // TODO: Maybe it should stay in the page? Show the error
+              }
+            }
+
+            // whatever you want
+          })
+          .catch(error => {
+            console.log(error)
+            this.message = "Something went wrong."
+            // whatever you want
+          })
       }
 
       this.$watch(
@@ -955,11 +1013,17 @@
           }
         }
       )
+
+      // Problem: sometimes we want to reload the data
       this.$watch(
         () => this.$route.query,
         (toQuery, fromQuery) => {
-          if (toQuery['section'] && (this.$route.name == 'AddMeasurements' || this.$route.name == 'UpdateOrCopyMeasurements')) {
-            this.display = toQuery['section']
+          // if (toQuery['section'] && (this.$route.name == 'AddMeasurements' || this.$route.name == 'UpdateOrCopyMeasurements')) {
+            // this.someAction(toQuery);
+          // }
+
+          if (toQuery['section'] != fromQuery['section']) {
+            this.save('draft')
           }
         }
       )
@@ -975,7 +1039,7 @@
         lastXMinutes: 5,
         sensorReadings: [
           {
-            value: 800,
+            co2: 800,
             identifier: generateUUID()
           }
         ],
@@ -1003,13 +1067,33 @@
         usingSteadyState: true,
       }
     },
+    watch() {
+      hasReloaded() = async function() {
+      }
+    },
     methods: {
       ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
       ...mapActions(useProfileStore, ['loadCO2Monitors', 'loadProfile']),
       ...mapActions(useEventStores, ['load', 'addEvent', 'findOrLoad']),
       ...mapActions(useEventStore, ['addPortableAirCleaner']),
       ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
+      async someAction(toQuery) {
+        let reloaded = await this.isReload()
 
+        if (reloaded) {
+          await this.loadStuff()
+
+          this.display = toQuery['section']
+        }
+      },
+
+      async isReload() {
+        return (window.performance.navigation && window.performance.navigation.type === 1) ||
+          window.performance
+          .getEntriesByType('navigation')
+          .map((nav) => nav.type)
+          .includes('reload')
+      },
       debugVentilationCalc() {
         let activityGroups = [
           {id: "360c52db-e0f6-4c71-b790-8e3d7b148ef3",
@@ -1095,7 +1179,7 @@
           // 228.99,
         // )
       },
-      signIn() {
+      async signIn() {
         if (!this.currentUser) {
           let query = JSON.parse(JSON.stringify(this.$route.query))
 
@@ -1365,12 +1449,11 @@
           this.setCarbonDioxideMonitor({ target: { value: this.carbonDioxideMonitors[0].name }})
           this.ventilationCO2MeasurementDeviceName = this.carbonDioxideMonitors[0].name
 
-          // if (!!this.$route.query['section'] && this.$route.name == 'AddMeasurements' || this.$route.name == 'UpdateOrCopyMeasurements') {
-            // this.setDisplay(this.$route.query['section'])
-          // }
+          if (this.$route.params['action'] == 'copy' && this.$route.name == 'UpdateOrCopyMeasurements') {
+            // Copying basically should copy an event. Create a copy in the database, then reroute to update?
+            // Similar thing with creating a new event? Create a default one,
+            // get an id, send it back to frontend with status as "draft"?
 
-          if (this.$route.params['action'] == 'copy' && this.$route.name == 'UpdateOrCopyMeasurements' && !this.$route.query['section']) {
-            // load during the first part
             event = await this.findOrLoad(this.$route.params.id)
             this.copyEvent(event)
             this.id = undefined
@@ -1379,17 +1462,15 @@
 
             // if the draft doesn't exist, clicking on the draft button should
             // create a new draft
-          } else if (this.$route.params['action'] == 'update' && this.$route.name == 'UpdateOrCopyMeasurements' && !this.$route.query['section']) {
-            // load during the first part
-            // TODO: when loading reset so that
+          } else if (this.$route.params['action'] == 'update' && this.$route.name == 'UpdateOrCopyMeasurements') {
             event = await this.findOrLoad(this.$route.params.id)
             this.copyEventWithId(event)
             this.id = this.$route.params['id']
 
             // if the 10 cO2 readings aren't the same, then default to Advanced page,
-            let same = this.sensorReadings[0].value
+            let same = this.sensorReadings[0].co2
             for (let c of this.sensorReadings) {
-              same = same == c.value
+              same = same == c.co2
             }
 
             this.usingSteadyState = same
@@ -1539,8 +1620,15 @@
 
       },
 
-      async save(status) {
-
+      async save(status, changeRoute) {
+        /*
+         * Parameters:
+         *   status: string
+         *     Could be "draft", "complete",
+         *
+         *   changeRoute: boolean
+         *     if changeRoute, route to analytics page
+         */
         if (status == 'complete') {
           this.checkForErrors()
           let hasErrors = this.showMessages()
@@ -1585,7 +1673,7 @@
           }
         } else {
           // TODO: handle the case where sensor readings are not spaced apart by 1-minute
-          debugger
+          // debugger
 
           for (let sensorReading of this.sensorReadingsToSave) {
             normalizedCO2Readings.push(sensorReading.co2)
@@ -1625,7 +1713,7 @@
               'ventilation_co2_steady_state_ppm': this.ventilationCO2SteadyStatePPM,
               'ventilation_notes': this.ventilationNotes,
               'start_datetime': this.startDatetime,
-              'sensor_data': this.sensorReadingsToSave,
+              'sensor_readings': this.sensorReadingsToSave,
               'initial_co2': this.initialCO2,
               'private': this.private,
               'place_data': this.placeData,
@@ -1682,10 +1770,12 @@
               this.addEvent(newEvent)
               successful = true
 
-              if (successful && status == 'complete') {
-                this.$router.push({ name: 'Analytics', params: { 'id': newEvent.id }})
-              } else {
-                this.$router.push({ name: 'Venues'})
+              if (changeRoute) {
+                if (successful && status == 'complete') {
+                  this.$router.push({ name: 'Analytics', params: { 'id': newEvent.id }})
+                } else {
+                  this.$router.push({ name: 'Venues'})
+                }
               }
             }
 
@@ -2183,5 +2273,10 @@
 
   .add-measurements {
     margin-top: 3.2em;
+  }
+
+  input.longer-text {
+    width: 15em;
+    height: 3.5em;
   }
 </style>
