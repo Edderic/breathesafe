@@ -731,6 +731,10 @@ function snakeToCamel(str) {
   );
 }
 
+export function formatDateTimeToLocale(dt) {
+  return `${dt.toISOString().substring(0,16)}`
+}
+
 export function deepSnakeToCamel(obj) {
   /*
    * Useful for converting nested objects / arrays. Ruby convention is to use

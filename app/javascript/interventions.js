@@ -183,7 +183,8 @@ export class Intervention {
   }
 
   flowRate() {
-    let totalAch = this.event.totalAch
+    // TODO: if no ACH, just assume really low values
+    let totalAch = this.event.totalAch || 0.3
 
     if (!totalAch) {
       debugger

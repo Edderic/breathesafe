@@ -61,9 +61,15 @@ class EventsController < ApplicationController
           'types': []
         }
 
+        if data.key?('sensor_data_from_external_api')
+          sensor_data_from_external_api = data['sensor_data_from_external_api']
+        else
+          sensor_data_from_external_api = true
+        end
+
         event = Event.create(
           status: 'draft',
-          sensor_data_from_external_api: true,
+          sensor_data_from_external_api: sensor_data_from_external_api,
           author_id: user.id,
           maximum_occupancy: 20,
           sensor_readings: readings,
@@ -113,7 +119,8 @@ class EventsController < ApplicationController
             status: status,
             name: "share-accepted",
             data: {
-              url: url
+              url: url,
+              event: event
             }
           }
         end
@@ -224,7 +231,14 @@ class EventsController < ApplicationController
         :co2,
         :timestamp,
         :key,
-        :identifier
+        :identifier,
+        :voc, # AirCoda
+        :isOther, # AirCoda
+        :latitude, # AirCoda
+        :longitude, # AirCoda
+        :readingAge, # AirCoda
+        :sessionTag, # AirCoda
+        :locationAge # AirCoda
       ],
       activity_groups: [
         :id,

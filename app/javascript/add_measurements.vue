@@ -499,31 +499,21 @@
             <Button v-if="!sensorDataFromExternalApi" :class="{ tab: true }" @click='showUploadFile(true)' shadow='true' text='Bulk Upload' :selected="this.useUploadFile"/>
           </div>
 
-          <table v-if='sensorDataFromExternalApi'>
-            <thead>
-              <tr>
-                <th>Datetime</th>
-                <th>CO2 (ppm)</th>
-              </tr>
-            </thead>
-            <tr v-for='sensorReading in sensorReadings' >
-              <td>
-                <input type="text" class='longer-text' disabled='true' :value='sensorReading.identifier'>
-              </td>
-              <td>
-                <Number
-                  disabled=true
-                  class='continuous'
-                  :leftButtons="[]"
-                  :rightButtons="[]"
-                  :value='sensorReading.co2'
-                  :identifier='sensorReading.timestamp'
-                  @adjustCO2='adjustCO2'
-                  @update='updateCO2'
-                />
-              </td>
-            </tr>
-          </table>
+          <div
+            class='container centered row' v-if='sensorDataFromExternalApi'
+            v-for='sensorReading in sensorReadings'
+            >
+            <input type="datetime-local" class='longer-text' v-model='sensorReading.identifier'>
+            <Number
+              class='continuous'
+              :leftButtons="[]"
+              :rightButtons="[]"
+              :value='sensorReading.co2'
+              :identifier='sensorReading.identifier'
+              @adjustCO2='adjustCO2'
+              @update='updateCO2'
+            />
+          </div>
           <div class='container centered' v-if='(!useUploadFile && !usingSteadyState) && !sensorDataFromExternalApi'>
             <div class='container row' >
               <CircularButton v-if="!sensorDataFromExternalApi" text='+' @click='addCO2Reading'/>
@@ -536,7 +526,7 @@
               :leftButtons="[{text: '-100', emitSignal: 'adjustCO2'}, {text: '-10', emitSignal: 'adjustCO2'}, {text: '-1', emitSignal: 'adjustCO2'}]"
               :rightButtons="[{text: '+1', emitSignal: 'adjustCO2'}, {text: '+10', emitSignal: 'adjustCO2'}, {text: '+100', emitSignal: 'adjustCO2'}]"
               :value='sensorReading.co2'
-              :identifier='sensorReading.timestamp'
+              :identifier='sensorReading.identifier'
               @adjustCO2='adjustCO2'
               @update='updateCO2'
             />
@@ -699,7 +689,8 @@
      computeVentilationNIDR,
      generateUUID,
      genConcCurve,
-     round, isValidDate
+     round, isValidDate,
+     formatDateTimeToLocale
   } from  './misc';
 
   export default {
@@ -734,8 +725,7 @@
             'measurementUnits',
             'carbonDioxideMonitors',
             'heightMeters',
-            'strideLengthMeters',
-            'externalAPIToken'
+            'strideLengthMeters'
           ]
       ),
       ...mapWritableState(
@@ -956,53 +946,9 @@
       await this.getCurrentUser()
 
       if (!this.currentUser) {
-        await this.signIn()
+        this.signIn()
       } else {
-        await this.loadStuff()
-      }
-
-      if (this.$route.name == "AddMeasurements") {
-        // create the thing
-
-        let defaultData = {
-          "bounds": {
-            "ne": [100, 200], "sw": [300, 400]
-          }, "points": [
-            { "timestamp":1714536176432, "co2":0}
-          ]
-        }
-        let payload = {
-          'sensor_data_from_external_api': false,
-          'data': defaultData,
-          'name': 'share'
-        }
-
-        await axios.post(`/events/external/${this.externalAPIToken}`, payload)
-          .then(response => {
-            console.log(response)
-            if (response.status == 201 || response.status == 200) {
-              // TODO: could make this more efficient by just adding the event
-              // directly to the store?
-              let newEvent = response.data.data.event
-              // TODO: convert Ruby casing to Javascript casing
-
-              this.addEvent(newEvent)
-              let successful = true
-
-              if (successful) {
-                this.$router.push({ name: 'UpdateOrCopyMeasurements', params: { 'id': newEvent.id, 'action': 'update' }})
-              } else {
-                // TODO: Maybe it should stay in the page? Show the error
-              }
-            }
-
-            // whatever you want
-          })
-          .catch(error => {
-            console.log(error)
-            this.message = "Something went wrong."
-            // whatever you want
-          })
+        this.loadStuff()
       }
 
       this.$watch(
@@ -1013,17 +959,11 @@
           }
         }
       )
-
-      // Problem: sometimes we want to reload the data
       this.$watch(
         () => this.$route.query,
         (toQuery, fromQuery) => {
-          // if (toQuery['section'] && (this.$route.name == 'AddMeasurements' || this.$route.name == 'UpdateOrCopyMeasurements')) {
-            // this.someAction(toQuery);
-          // }
-
-          if (toQuery['section'] != fromQuery['section']) {
-            this.save('draft')
+          if (toQuery['section'] && (this.$route.name == 'AddMeasurements' || this.$route.name == 'UpdateOrCopyMeasurements')) {
+            this.display = toQuery['section']
           }
         }
       )
@@ -1039,7 +979,7 @@
         lastXMinutes: 5,
         sensorReadings: [
           {
-            co2: 800,
+            value: 800,
             identifier: generateUUID()
           }
         ],
@@ -1067,33 +1007,13 @@
         usingSteadyState: true,
       }
     },
-    watch() {
-      hasReloaded() = async function() {
-      }
-    },
     methods: {
       ...mapActions(useMainStore, ['setGMapsPlace', 'setFocusTab', 'getCurrentUser']),
       ...mapActions(useProfileStore, ['loadCO2Monitors', 'loadProfile']),
       ...mapActions(useEventStores, ['load', 'addEvent', 'findOrLoad']),
       ...mapActions(useEventStore, ['addPortableAirCleaner']),
       ...mapState(useEventStore, ['findActivityGroup', 'findPortableAirCleaningDevice']),
-      async someAction(toQuery) {
-        let reloaded = await this.isReload()
 
-        if (reloaded) {
-          await this.loadStuff()
-
-          this.display = toQuery['section']
-        }
-      },
-
-      async isReload() {
-        return (window.performance.navigation && window.performance.navigation.type === 1) ||
-          window.performance
-          .getEntriesByType('navigation')
-          .map((nav) => nav.type)
-          .includes('reload')
-      },
       debugVentilationCalc() {
         let activityGroups = [
           {id: "360c52db-e0f6-4c71-b790-8e3d7b148ef3",
@@ -1179,7 +1099,7 @@
           // 228.99,
         // )
       },
-      async signIn() {
+      signIn() {
         if (!this.currentUser) {
           let query = JSON.parse(JSON.stringify(this.$route.query))
 
@@ -1347,9 +1267,17 @@
         if (this.sensorReadings.length > 0) {
           value = parseInt(this.sensorReadings[this.sensorReadings.length - 1].value)
         }
+
+        // TODO: add timestamp and identifier based on the start date and some interval
+
+        let identifier = formatDateTimeToLocale(new Date());
+
+        debugger
+
         this.sensorReadings.push({
           value: value,
-          identifier: generateUUID()
+          identifier: identifier,
+          timestamp: identifier
         })
       },
       removeLastCO2Reading() {
@@ -1449,11 +1377,15 @@
           this.setCarbonDioxideMonitor({ target: { value: this.carbonDioxideMonitors[0].name }})
           this.ventilationCO2MeasurementDeviceName = this.carbonDioxideMonitors[0].name
 
-          if (this.$route.params['action'] == 'copy' && this.$route.name == 'UpdateOrCopyMeasurements') {
-            // Copying basically should copy an event. Create a copy in the database, then reroute to update?
-            // Similar thing with creating a new event? Create a default one,
-            // get an id, send it back to frontend with status as "draft"?
+          // if (!!this.$route.query['section'] && this.$route.name == 'AddMeasurements' || this.$route.name == 'UpdateOrCopyMeasurements') {
+            // this.setDisplay(this.$route.query['section'])
+          // }
 
+          // TODO: when copying, copy a draft using the update controller method
+          // load the event
+          // Then we won't need this if statement anymore
+          if (this.$route.params['action'] == 'copy' && this.$route.name == 'UpdateOrCopyMeasurements' && !this.$route.query['section']) {
+            // load during the first part
             event = await this.findOrLoad(this.$route.params.id)
             this.copyEvent(event)
             this.id = undefined
@@ -1462,15 +1394,17 @@
 
             // if the draft doesn't exist, clicking on the draft button should
             // create a new draft
-          } else if (this.$route.params['action'] == 'update' && this.$route.name == 'UpdateOrCopyMeasurements') {
+          } else if (this.$route.params['action'] == 'update' && this.$route.name == 'UpdateOrCopyMeasurements' && !this.$route.query['section']) {
+            // load during the first part
+            // TODO: when loading reset so that
             event = await this.findOrLoad(this.$route.params.id)
             this.copyEventWithId(event)
             this.id = this.$route.params['id']
 
             // if the 10 cO2 readings aren't the same, then default to Advanced page,
-            let same = this.sensorReadings[0].co2
+            let same = this.sensorReadings[0].value
             for (let c of this.sensorReadings) {
-              same = same == c.co2
+              same = same == c.value
             }
 
             this.usingSteadyState = same
@@ -1620,15 +1554,8 @@
 
       },
 
-      async save(status, changeRoute) {
-        /*
-         * Parameters:
-         *   status: string
-         *     Could be "draft", "complete",
-         *
-         *   changeRoute: boolean
-         *     if changeRoute, route to analytics page
-         */
+      async save(status) {
+
         if (status == 'complete') {
           this.checkForErrors()
           let hasErrors = this.showMessages()
@@ -1673,7 +1600,7 @@
           }
         } else {
           // TODO: handle the case where sensor readings are not spaced apart by 1-minute
-          // debugger
+          debugger
 
           for (let sensorReading of this.sensorReadingsToSave) {
             normalizedCO2Readings.push(sensorReading.co2)
@@ -1713,7 +1640,7 @@
               'ventilation_co2_steady_state_ppm': this.ventilationCO2SteadyStatePPM,
               'ventilation_notes': this.ventilationNotes,
               'start_datetime': this.startDatetime,
-              'sensor_readings': this.sensorReadingsToSave,
+              'sensor_data': this.sensorReadingsToSave,
               'initial_co2': this.initialCO2,
               'private': this.private,
               'place_data': this.placeData,
@@ -1770,12 +1697,10 @@
               this.addEvent(newEvent)
               successful = true
 
-              if (changeRoute) {
-                if (successful && status == 'complete') {
-                  this.$router.push({ name: 'Analytics', params: { 'id': newEvent.id }})
-                } else {
-                  this.$router.push({ name: 'Venues'})
-                }
+              if (successful && status == 'complete') {
+                this.$router.push({ name: 'Analytics', params: { 'id': newEvent.id }})
+              } else {
+                this.$router.push({ name: 'Venues'})
               }
             }
 
@@ -1895,11 +1820,13 @@
           (sensorReading) => sensorReading.identifier == args.identifier
         )
 
+        debugger
+
         sensorReading.co2 += parseInt(args.value)
       },
       updateCO2(args) {
         let sensorReading = this.sensorReadings.find(
-          (sensorReading) => sensorReading.timestamp == args.timestamp
+          (sensorReading) => sensorReading.identifier == args.identifier
         )
 
         sensorReading.co2 = parseInt(args.value)
@@ -2275,8 +2202,6 @@
     margin-top: 3.2em;
   }
 
-  input.longer-text {
-    width: 15em;
-    height: 3.5em;
+  .longer-text {
   }
 </style>

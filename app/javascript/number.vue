@@ -2,6 +2,7 @@
   <div class='centered'>
       <CircularButton v-for='leftButton in leftButtons' :text='leftButton.text' @click='send(leftButton.emitSignal, {value: leftButton.text, identifier: identifier})'/>
       <input
+        :disabled='disabled'
         type='number'
         :value='value'
         @change='change'
@@ -25,7 +26,8 @@ export default {
     leftButtons: Array,
     rightButtons: Array,
     value: Number,
-    identifier: String
+    identifier: String,
+    disabled: Boolean
   },
   computed: {
 
