@@ -153,7 +153,7 @@ export const useShowMeasurementSetStore = defineStore('showMeasurementSet', {
       this.roomHeightMeters = measurementSet.roomHeightMeters
       this.initialCo2 = measurementSet.initialCo2
       this.status = measurementSet.status
-      this.sensorReadings = measurementSet.sensorData
+      this.sensorReadings = measurementSet.sensorReadings
       this.sensorDataFromExternalApi = measurementSet.sensorDataFromExternalApi
       this.displayMeasurementsTailoredToUser()
       this.ventilationNotes = measurementSet.ventilationNotes
