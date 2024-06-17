@@ -13,34 +13,34 @@ profiles.each do |p|
   # Add external api token
   unless p.external_api_token
     p.external_api_token = SecureRandom.uuid
-    p.save
   end
+
+  p.can_post_via_external_api = true
+  p.save
 end
 
 events = Event.all
 
 # Refactor the data. Use more precise language
 events.each do |e|
+  puts "Going though event id: #{e.id}"
   sensor_readings = e.sensor_readings
-  if e.sensor_data_from_external_api.nil?
-    e.sensor_data_from_external_api = false
-  end
 
   if sensor_readings
-    readings = sensor_readings.map do |s|
+    # Assumption, data is sampled every second
+    readings = sensor_readings.map.with_index do |s,i|
 
       if s.key?('value')
-        return s.merge({
+        s.merge({
           "co2": s["value"],
-          "timestamp": s["identifier"]
+          "timestamp": (e.start_datetime + i.second).to_s
         })
+      else
+        s
       end
-
-      s
     end
 
     e.sensor_readings = readings
   end
-
   e.save
 end
