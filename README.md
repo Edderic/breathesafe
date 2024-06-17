@@ -45,12 +45,30 @@ again.
 ## Install RVM
 - [RVM](https://rvm.io/)
 
-## Install Ruby
+### Install Ruby
 
-`rvm install 3.1.2`
+Edit this command to install the Ruby version specified in the Gemfile.
+`rvm install 3.1.2`.
 
 RVM suggests running the following:
 `source /Users/richhu/.rvm/scripts/rvm`
+
+## OR install ruby-install
+`brew install ruby-install`
+
+### Install Rbenv
+`brew install rbenv ruby-build`
+
+### Install Ruby
+`rbenv install 3.3.0`
+
+### Localize Ruby for this repo
+`rbenv local 3.3.0`
+
+### Ensure rbenv is setup
+```
+export PATH="$HOME/.rbenv/bin:$HOME/.rbenv/shims:$HOME/.rvm/bin:$PATH:"
+```
 
 ## Install Postgresql
 
@@ -88,8 +106,14 @@ Go to your local cloned breathsafe directory and type:
 
 `yarn install`
 
+## If using rbenv
+`which rails` should give something like `/Users/eddericugaddan/.rbenv/shims/rails`. If not, restart terminal.
+
 ## Start Rails
 `rails s`
+
+## Start the vite server
+`./bin/vite dev`
 
 ## Create DB
 
@@ -103,8 +127,10 @@ Go to your local cloned breathsafe directory and type:
 
 `psql -d breathesafe_development`
 
-# Creating a server on Heroku
+# Install heroku command line
+`brew tap heroku/brew && brew install heroku`
 
+# Creating a server on Heroku
 ```
 heroku buildpacks:set heroku/ruby
 ```
