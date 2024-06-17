@@ -62,7 +62,6 @@ export const useMainStore = defineStore('main', {
       const analyticsStore = useAnalyticsStore()
       const showMeasurementSetStore = useShowMeasurementSetStore()
       let event = await eventStores.findOrLoad(id);
-      debugger
       showMeasurementSetStore.setMeasurementSet(event)
     },
     setMessage(message) {

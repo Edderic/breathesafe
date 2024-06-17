@@ -522,6 +522,7 @@ export default {
       for (let i = 0; i < projection.length; i++) {
         collection.push([i, projection[i]])
       }
+
       return { points: collection, color: 'red', legend: 'estimate' }
     },
     marginalRiskLine() {

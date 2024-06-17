@@ -86,6 +86,9 @@ export default {
     maxCharLengthLegend() {
       let maxLength = 0
       for (let line of this.lines) {
+        if (!('legend' in line)) {
+          line.legend = ""
+        }
         if (line.legend.length > maxLength) {
           maxLength = line.legend.length
         }
@@ -104,6 +107,10 @@ export default {
       let gMinX = 1000000
 
       for (let line of this.lines) {
+        if (!('points' in line)) {
+          line.points = []
+        }
+
         for (let point of line.points) {
           if (point[0] < gMinX)
             gMinX = point[0]
@@ -119,6 +126,9 @@ export default {
       let gMinY = 1000000
 
       for (let line of this.lines) {
+        if (!('points' in line)) {
+          line.points = []
+        }
         for (let point of line.points) {
           if (point[1] < gMinY)
             gMinY = point[1]
@@ -131,7 +141,12 @@ export default {
 
       let gMaxX = -1000000
 
+
+
       for (let line of this.lines) {
+        if (!('points' in line)) {
+          line.points = []
+        }
         for (let point of line.points) {
           if (point[0] > gMaxX)
             gMaxX = point[0]
@@ -147,6 +162,9 @@ export default {
       let gMaxY = -1000000
 
       for (let line of this.lines) {
+        if (!('points' in line)) {
+          line.points = []
+        }
         for (let point of line.points) {
           if (point[1] > gMaxY)
             gMaxY = point[1]
@@ -313,6 +331,9 @@ export default {
       return this.convertYToPlottable(this.nearestPoint(line)[1])
     },
     nearestPoint(line) {
+      if (!('points' in line)) {
+          line.points = []
+      }
       if (line.points.length == 0 || !this.xHighlighter) {
         this.showHighlighter = false
         return [0, 0]
@@ -330,30 +351,33 @@ export default {
     plotLegend(line, index) {
       return `M ${this.legendStartX + this.legendOffsetX} ${this.getYLegend(index)} h ${this.legendLineLength}`
     },
-    mouseover(event) {
-      let offsetX = event.offsetX
-      let offsetY = event.offsetY
+    // mouseover(event) {
+      // let offsetX = event.offsetX
+      // let offsetY = event.offsetY
+//
+      // let element = event.srcElement
+      // let xNormalized = offsetX / element.clientWidth * this.viewBoxX
+      // let yNormalized = offsetY / element.clientHeight * this.viewBoxY
+//
+      // if (this.pointWithinData(xNormalized, yNormalized)) {
+        // let nearestPoint = this.findNearestPoint(xNormalized, yNormalized)
+        // this.highlighterX = this.convertXToPlottable(nearestPoint[0])
+        // this.highlighterY = this.convertYToPlottable(nearestPoint[1])
+//
+        // this.$emit('point', nearestPoint)
+      // }
+    // },
 
-      let element = event.srcElement
-      let xNormalized = offsetX / element.clientWidth * this.viewBoxX
-      let yNormalized = offsetY / element.clientHeight * this.viewBoxY
-
-      if (this.pointWithinData(xNormalized, yNormalized)) {
-        let nearestPoint = this.findNearestPoint(xNormalized, yNormalized)
-        this.highlighterX = this.convertXToPlottable(nearestPoint[0])
-        this.highlighterY = this.convertYToPlottable(nearestPoint[1])
-
-        this.$emit('point', nearestPoint)
-      }
-    },
-
-    findNearestPoint(x, y) {
-      let line = this.lines[0]
-      let xProportion = (x - this.xAxisXStart) / this.xAxisNormalizer
-      let xIndex = parseInt(xProportion * line.points.length)
-
-      return line.points[xIndex]
-    },
+    // findNearestPoint(x, y) {
+      // let line = this.lines[0]
+      // let xProportion = (x - this.xAxisXStart) / this.xAxisNormalizer
+      // if (!('points' in line)) {
+          // line.points = []
+      // }
+      // let xIndex = parseInt(xProportion * line.points.length)
+//
+      // return line.points[xIndex]
+    // },
     pointWithinData(xNormalized, yNormalized) {
       return this.xAxisXStart <= xNormalized && xNormalized <= this.xAxisXEnd
         && this.yAxisYStart <= yNormalized && yNormalized <= this.yAxisYEnd
@@ -385,6 +409,11 @@ export default {
 
       let letter = ''
 
+
+      if (!('points' in line)) {
+          line.points = []
+      }
+
       for (let point of line.points) {
         if (c == 0) {
           letter = 'M'
@@ -412,6 +441,9 @@ export default {
     maxX(line) {
       let tmpMax = -1000000
 
+      if (!('points' in line)) {
+          line.points = []
+      }
       for (let point of line.points) {
         if (point[0] > tmpMax)
           tmpMax = point[0]
