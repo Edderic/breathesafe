@@ -10,6 +10,7 @@ require 'securerandom'
 
 profiles = Profile.all
 profiles.each do |p|
+  # Add external api token
   unless p.external_api_token
     p.external_api_token = SecureRandom.uuid
     p.save
