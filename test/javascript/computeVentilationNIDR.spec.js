@@ -14,7 +14,7 @@ describe('computeVentilationNIDR', () => {
         maskType:"",
         numberOfPeople:"10",
         aerosolGenerationActivity:"Light exercise - Oral breathing",
-        carbonDioxideGenerationActivity:"Dancing—aerobic, general"
+        carbonDioxideGenerationActivity:"Sitting reading, writing, typing"
       },
     ]
     let normalizedCO2Readings = [
@@ -91,8 +91,8 @@ describe('computeVentilationNIDR', () => {
     // should be about 2052 according to
     // https://ospe-calc.herokuapp.com/Air_Changes_-_Ventilation
     console.log(ventilationNIDR)
-    expect(ventilationNIDR['result']['cadr'] > 2000).toBe(true);
+    expect(ventilationNIDR['result']['cadr'] > 570).toBe(true);
 
-    expect(ventilationNIDR['result']['cadr'] < 2100).toBe(true);
+    expect(ventilationNIDR['result']['cadr'] < 670).toBe(true);
   })
 });
