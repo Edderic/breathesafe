@@ -795,11 +795,11 @@ function greedy(producer, producerArgs, actualData, gradArgs) {
   let newData = []
   let copyProducerArgs = {};
 
+
   for (let i = 0; i < 1000000; i++) {
 
     for (let cadr_d of [-1, 0, 1]) {
       for (let c0_d of [-1, 0, 1]) {
-
         copyProducerArgs = JSON.parse(JSON.stringify(producerArgs))
 
         if ((producerArgs['c0_d'] < 1 && c0_d == -1) || (producerArgs['cadr_d'] < 1 && cadr_d == -1)) {

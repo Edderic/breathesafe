@@ -12,10 +12,7 @@ AWS credentials will help us programmatically dump databases and import them.
 Put these in your `~/.zshrc` file.
 
 ```zsh
-export BREATHESAFE_STAG_S3="s3://breathesafe-staging"
-export BREATHESAFE_PROD_S3="s3://breathesafe"
-export BREATHESAFE_DEV="<working directory to your breathesafe app>"
-export BREATHESAFE_DEV_S3="s3://breathesafe-development"
+source path-to-breathesafe-folder/.breathesafe-zshrc
 ```
 
 Afterwards, run `source ~/.zshrc` in your terminal.
