@@ -690,7 +690,9 @@
      generateUUID,
      genConcCurve,
      round, isValidDate,
-     formatDateTimeToLocale
+     formatDateTimeToLocale,
+     addMinutes
+
   } from  './misc';
 
   export default {
@@ -787,6 +789,8 @@
         return { points: collection, color: 'red', legend: 'ascending' }
       },
       sensorReadingsToSave() {
+        debugger
+
         if (this.useUploadFile) {
           return this.filterCO2Readings
         } else {
@@ -1502,25 +1506,27 @@
           * parseFloat(this.roomLengthMeters)
           * parseFloat(this.roomUsableVolumeFactor)
 
+        // TODO: ensure that we add objects to normalizedCO2Readings.
+        // Something like this: {'co2': 456, 'timestamp': '2024-01-01 01:22:33 UTC' }
         let normalizedCO2Readings =  []
 
         if (this.usingSteadyState) {
           this.sensorReadings = []
 
           for (let i = 0; i < 10; i++ ) {
-            normalizedCO2Readings.push(this.steadyStatePPM)
+            let timestamp = addMinutes(this.startDateTime, i)
 
-            this.sensorReadings.push({
-              co2: this.steadyStatePPM,
-              timestamp: timestamp
+            normalizedCO2Readings.push({
+              'co2': this.steadyStatePPM,
+              'timestamp': timestamp
             })
           }
         } else {
-          // TODO: handle the case where sensor readings are not spaced apart by 1-minute
-          debugger
-
           for (let sensorReading of this.sensorReadingsToSave) {
-            normalizedCO2Readings.push(sensorReading.co2)
+            normalizedCO2Readings.push({
+              'co2': sensorReading.co2,
+              'timestamp': sensorReading.timestamp
+            })
           }
         }
 

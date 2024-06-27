@@ -979,6 +979,11 @@ function gradientDescent(producer, producerArgs, actualData, gradArgs) {
 export function computeGenerationRate(activityGroups) {
   return emissionRate(activityGroups) / 1000 * 3600 * 1000000;
 }
+
+export function addMinutes(date, minutes) {
+    return new Date(date.getTime() + minutes*60000);
+}
+
 export function computeVentilationNIDR(
   activityGroups,
   co2Readings,
@@ -1011,9 +1016,6 @@ export function computeVentilationNIDR(
     ]
   }
 
-  // TODO: instead of passing windowLength
-  // use delta between timestamp of first CO2 reading and others
-  //
   let producerArgs = {
     roomUsableVolumeCubicMeters: roomUsableVolumeCubicMeters,
     cadr: 100,
