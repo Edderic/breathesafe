@@ -466,14 +466,16 @@ export default {
       return `COVID-19 Transmission Risk`
     },
     readings() {
+      let collection = []
+
       if (!this.sensorReadings) {
-        return [[0, this.ventilationCo2SteadyStatePpm]]
+        collection = [[0, this.ventilationCo2SteadyStatePpm], [1, this.ventilationCo2SteadyStatePpm]]
+      } else {
+        for (let i = 0; i < this.sensorReadings.length; i++) {
+          collection.push([i, this.sensorReadings[i].co2])
+        }
       }
 
-      let collection = []
-      for (let i = 0; i < this.sensorReadings.length; i++) {
-        collection.push([i, this.sensorReadings[i].value])
-      }
       return { points: collection, color: 'blue', 'legend': 'readings' }
     },
 
