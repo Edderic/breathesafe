@@ -1186,11 +1186,11 @@
       addActivityGrouping() {
         this.activityGroups.unshift({
           'id': generateUUID(),
-          'aerosolGenerationActivity': "",
-          'carbonDioxideGenerationActivity': "",
-          'ageGroup': "",
+          'aerosolGenerationActivity': "Resting – Speaking",
+          'carbonDioxideGenerationActivity': "Sitting reading, writing, typing",
+          'ageGroup': "21 to <30",
           'maskType': "",
-          'numberOfPeople': 1,
+          'numberOfPeople': 10,
         })
       },
       cancel() {
