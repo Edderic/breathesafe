@@ -503,30 +503,13 @@
             class='container centered row' v-if='sensorDataFromExternalApi'
             v-for='sensorReading in sensorReadings'
             >
-            <input type="datetime-local" class='longer-text' v-model='sensorReading.identifier'>
+            <input type="datetime-local" class='longer-text' v-model='sensorReading.timestamp'>
             <Number
               class='continuous'
               :leftButtons="[]"
               :rightButtons="[]"
               :value='sensorReading.co2'
-              :identifier='sensorReading.identifier'
-              @adjustCO2='adjustCO2'
-              @update='updateCO2'
-            />
-          </div>
-          <div class='container centered' v-if='(!useUploadFile && !usingSteadyState) && !sensorDataFromExternalApi'>
-            <div class='container row' >
-              <CircularButton v-if="!sensorDataFromExternalApi" text='+' @click='addCO2Reading'/>
-              <CircularButton v-if="!sensorDataFromExternalApi" text='-' @click='removeLastCO2Reading'/>
-            </div>
-
-            <Number
-              v-for='sensorReading in sensorReadings'
-              class='continuous'
-              :leftButtons="[{text: '-100', emitSignal: 'adjustCO2'}, {text: '-10', emitSignal: 'adjustCO2'}, {text: '-1', emitSignal: 'adjustCO2'}]"
-              :rightButtons="[{text: '+1', emitSignal: 'adjustCO2'}, {text: '+10', emitSignal: 'adjustCO2'}, {text: '+100', emitSignal: 'adjustCO2'}]"
-              :value='sensorReading.co2'
-              :identifier='sensorReading.identifier'
+              :identifier='sensorReading.timestamp'
               @adjustCO2='adjustCO2'
               @update='updateCO2'
             />
@@ -789,8 +772,6 @@
         return { points: collection, color: 'red', legend: 'ascending' }
       },
       sensorReadingsToSave() {
-        debugger
-
         if (this.useUploadFile) {
           return this.filterCO2Readings
         } else {
@@ -983,8 +964,8 @@
         lastXMinutes: 5,
         sensorReadings: [
           {
-            value: 800,
-            identifier: generateUUID()
+            co2: 800,
+            timestamp: new Date()
           }
         ],
         tmpCO2Readings: [
@@ -1044,7 +1025,7 @@
         }
         this.placeData = event.placeData
         this.roomName = event.roomName
-        this.startDateTime = new Date()
+        this.startDatetime = new Date()
         this.private = event.private
         this.maximumOccupancy = event.maximumOccupancy
         this.sensorReadings = []
@@ -1186,19 +1167,17 @@
       addCO2Reading() {
         let value = 800
         if (this.sensorReadings.length > 0) {
-          value = parseInt(this.sensorReadings[this.sensorReadings.length - 1].value)
+          value = parseInt(this.sensorReadings[this.sensorReadings.length - 1].co2)
         }
 
         // TODO: add timestamp and identifier based on the start date and some interval
 
-        let identifier = formatDateTimeToLocale(new Date());
-
-        debugger
+        let newTimestamp = addMinutes(this.startDatetime, this.sensorReadings.length);
 
         this.sensorReadings.push({
-          value: value,
-          identifier: identifier,
-          timestamp: identifier
+          co2: value,
+          identifier: newTimestamp,
+          timestamp: newTimestamp
         })
       },
       removeLastCO2Reading() {
@@ -1323,9 +1302,9 @@
             this.id = this.$route.params['id']
 
             // if the 10 cO2 readings aren't the same, then default to Advanced page,
-            let same = this.sensorReadings[0].value
+            let same = this.sensorReadings[0].co2
             for (let c of this.sensorReadings) {
-              same = same == c.value
+              same = same == c.co2
             }
 
             this.usingSteadyState = same
@@ -1522,6 +1501,8 @@
             })
           }
         } else {
+          // more flexible inputting of data
+
           for (let sensorReading of this.sensorReadingsToSave) {
             normalizedCO2Readings.push({
               'co2': sensorReading.co2,
@@ -1740,16 +1721,14 @@
       },
       adjustCO2(args) {
         let sensorReading = this.sensorReadings.find(
-          (sensorReading) => sensorReading.identifier == args.identifier
+          (sensorReading) => sensorReading.timestamp == args.identifier
         )
-
-        debugger
 
         sensorReading.co2 += parseInt(args.value)
       },
       updateCO2(args) {
         let sensorReading = this.sensorReadings.find(
-          (sensorReading) => sensorReading.identifier == args.identifier
+          (sensorReading) => sensorReading.timestamp == args.identifier
         )
 
         sensorReading.co2 = parseInt(args.value)
