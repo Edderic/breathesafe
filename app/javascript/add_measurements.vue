@@ -1493,7 +1493,7 @@
           this.sensorReadings = []
 
           for (let i = 0; i < 10; i++ ) {
-            let timestamp = addMinutes(this.startDateTime, i)
+            let timestamp = addMinutes(this.startDatetime, i)
 
             normalizedCO2Readings.push({
               'co2': this.steadyStatePPM,
@@ -1544,7 +1544,7 @@
               'ventilation_co2_steady_state_ppm': this.ventilationCO2SteadyStatePPM,
               'ventilation_notes': this.ventilationNotes,
               'start_datetime': this.startDatetime,
-              'sensor_data': this.sensorReadingsToSave,
+              'sensor_readings': normalizedCO2Readings,
               'initial_co2': this.initialCO2,
               'private': this.private,
               'place_data': this.placeData,

@@ -506,13 +506,14 @@ export default {
     co2Projection() {
       let windowLength = 0
 
+      // TODO: pass co2 readings
       let producerArgs = {
         roomUsableVolumeCubicMeters: this.roomUsableVolumeCubicMeters,
         cadr: this.ventilationCadr,
         c0: this.initialCarbonDioxideReading,
         generationRate: this.generationRate,
         cBackground: this.ventilationCo2AmbientPpm,
-        windowLength: 120
+        co2Readings: this.sensorReadings
       }
 
       let projection = genConcCurve(producerArgs)
@@ -521,8 +522,20 @@ export default {
       }
 
       let collection = []
-      for (let i = 0; i < projection.length; i++) {
-        collection.push([i, projection[i]])
+
+      let earliestTimestamp;
+      let deltaMinutes;
+
+      for (let i = 0; i < this.sensorReadings.length; i++) {
+        let readings = this.sensorReadings[i];
+        if (i == 0) {
+          earliestTimestamp = new Date(readings['timestamp'])
+          deltaMinutes = 0
+        } else {
+          deltaMinutes = Math.round((new Date(readings['timestamp']) - earliestTimestamp) / (1000 * 60))
+        }
+
+        collection.push([deltaMinutes, projection[i]])
       }
 
       return { points: collection, color: 'red', legend: 'estimate' }
@@ -868,7 +881,6 @@ export default {
 
   async created() {
     this.event = await this.setEvent()
-
     this.processQuery(this.$route.query, {})
 
     // After visiting UpdateOrCopyMeasurements, reload the event
