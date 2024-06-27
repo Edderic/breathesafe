@@ -763,13 +763,26 @@ export function deepSnakeToCamel(obj) {
 function emissionRate(activityGroups) {
   /*
    * Returns total CO2 emission rate (L/s)
+   *
+   * Parameters:
+   *   activityGroups: list[objects]
+   *
+   *     has the following columns:
+   *       - ageGroup
+   *       - carbonDioxideGenerationActivity
+   *       - numberOfPeople
    */
   let total = 0
 
   for (let activityGroup of activityGroups) {
     let met = getMetFromCO2GenerationActivity(activityGroup['carbonDioxideGenerationActivity'])
-    let co2GenerationRate = getCO2GenerationRate(met, activityGroup['sex'] == 'Male', activityGroup['ageGroup'])
-    total += co2GenerationRate * parseInt(activityGroup['numberOfPeople'])
+    let co2GenerationRateMale = getCO2GenerationRate(met, true, activityGroup['ageGroup'])
+    let co2GenerationRateFemale = getCO2GenerationRate(met, false, activityGroup['ageGroup'])
+
+    // Assumption: the space has an equal amount of genders in the room (50%
+    // men, 50% female)
+    let avgCO2Gen = (co2GenerationRateMale + co2GenerationRateFemale) / 2
+    total += avgCO2Gen * parseInt(activityGroup['numberOfPeople'])
   }
 
   return total
@@ -795,8 +808,9 @@ function greedy(producer, producerArgs, actualData, gradArgs) {
   let newData = []
   let copyProducerArgs = {};
 
+  let numIterations = 100000;
 
-  for (let i = 0; i < 1000000; i++) {
+  for (let i = 0; i < numIterations; i++) {
 
     for (let cadr_d of [-1, 0, 1]) {
       for (let c0_d of [-1, 0, 1]) {
@@ -928,6 +942,43 @@ function gradientDescent(producer, producerArgs, actualData, gradArgs) {
   }
 }
 
+/*
+ * Parameters:
+ *   activityGroups: list
+ *
+     [
+      {
+        id: "360c52db-e0f6-4c71-b790-8e3d7b148ef3",
+        ageGroup:"6 to <11",
+        maskType:"",
+        numberOfPeople:"10",
+        aerosolGenerationActivity:"Light exercise - Oral breathing",
+        carbonDioxideGenerationActivity:"Dancing—aerobic, general"
+      },
+      {
+        "id":"614aeaca-2caf-4b30-8743-e82115c1f14b",
+        "ageGroup":"60 to <70",
+        "numberOfPeople":"500",
+        "aerosolGenerationActivity":"Resting – Oral breathing",
+        "carbonDioxideGenerationActivity":"Lying or sitting quietly"
+      }
+    ]
+ */
+
+/*
+ * L / s * 1 m3 / 1000 L * 3600 seconds / h
+ * gives us m3 / h
+ * Multiply by 1000000 ppm is the same thing as multiplying by 1
+ *
+ * Parameters:
+ *   activityGroups: list[object]
+ *
+ * Returns: float
+ *   In m3 / h ppm (parts per million
+ */
+export function computeGenerationRate(activityGroups) {
+  return emissionRate(activityGroups) / 1000 * 3600 * 1000000;
+}
 export function computeVentilationNIDR(
   activityGroups,
   co2Readings,
@@ -941,11 +992,9 @@ export function computeVentilationNIDR(
   }
   // Assumption: There are at least two CO2 readings
   // co2Readings are divided by 1000 (i.e. 420 ppm is 0.000420)
-  const startCO2 = (co2Readings[0] + co2Readings[1]) / 2
-  // L / s * 1 m3 / 1000 L * 3600 seconds / h
-  // gives us m3 / h
-  // Multiply by 1000000 ppm is the same thing as multiplying by 1
-  let generationRate = emissionRate(activityGroups) / 1000 * 3600 * 1000000
+  const startCO2 = (co2Readings[0]['co2'] + co2Readings[1]['co2']) / 2
+
+  let generationRate = computeGenerationRate(activityGroups)
 
   let gradArgs = {
     initialStep: {
@@ -962,13 +1011,23 @@ export function computeVentilationNIDR(
     ]
   }
 
+  // TODO: instead of passing windowLength
+  // use delta between timestamp of first CO2 reading and others
+  //
   let producerArgs = {
     roomUsableVolumeCubicMeters: roomUsableVolumeCubicMeters,
     cadr: 100,
     c0: startCO2,
     generationRate: generationRate,
     cBackground: co2Background,
-    windowLength: co2Readings.length
+    co2Readings: co2Readings
+  }
+
+  let co2ReadingsArrayList = [];
+
+  // flatten the data so we just have an array of ints
+  for (let i = 0; i < co2Readings.length; i++) {
+    co2ReadingsArrayList.push(co2Readings[i]['co2'])
   }
 
   let errors = []
@@ -982,7 +1041,7 @@ export function computeVentilationNIDR(
       producerArgs['cadr'] = i
       newData = generateData(producerArgs)
 
-      error = computeError(newData, co2Readings,
+      error = computeError(newData, co2ReadingsArrayList,
         (data1, data2) => Math.abs(data1 - data2)
       )
 
@@ -1000,7 +1059,7 @@ export function computeVentilationNIDR(
   return greedy(
     generateData,
     producerArgs,
-    co2Readings,
+    co2ReadingsArrayList,
     gradArgs
   )
 }
@@ -1024,10 +1083,30 @@ function computeError(data1, data2, comparatorFunc) {
   return summation / data1.length
 }
 
+/*
+ * Returns: Array[int]
+ */
 function generateData(args) {
   let collection = []
 
-  for (let t=0; t < args.windowLength; t++) {
+  // TODO:
+  // If the data no longer jumps by 1 minutes,
+  // Could infer t by the distance between the current iteration and the
+  // beginning, in minutes
+  let earliestTimestamp;
+  let timeIndexMinutes = 0;
+
+  for (let t=0; t < args.co2Readings.length; t++) {
+    let co2Reading = args.co2Readings[t]
+
+    if (t == 0) {
+      earliestTimestamp = new Date(co2Reading['timestamp']);
+    } else {
+      timeIndexMinutes = Math.round(
+        (new Date(co2Reading['timestamp']) - earliestTimestamp) / (1000 * 60)
+      );
+    }
+
     collection.push(
       steadyStateFactor({
         roomUsableVolumeCubicMeters: args.roomUsableVolumeCubicMeters,
@@ -1035,7 +1114,7 @@ function generateData(args) {
         generationRate: args.generationRate,
         cadr: args.cadr,
         cBackground: parseFloat(args.cBackground)
-      }, t)
+      }, timeIndexMinutes)
     )
   }
 
