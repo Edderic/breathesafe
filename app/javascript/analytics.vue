@@ -526,6 +526,12 @@ export default {
       let earliestTimestamp;
       let deltaMinutes;
 
+      function sortByTimestamp(a, b) {
+        return new Date(a['timestamp']) - new Date(b['timestamp'])
+      }
+
+      this.sensorReadings = this.sensorReadings.sort(sortByTimestamp)
+
       for (let i = 0; i < this.sensorReadings.length; i++) {
         let readings = this.sensorReadings[i];
         if (i == 0) {

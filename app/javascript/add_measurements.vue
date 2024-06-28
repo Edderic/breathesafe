@@ -1517,6 +1517,7 @@
           this.ventilationCO2AmbientPPM,
           this.roomUsableVolumeCubicMeters,
         )
+
         this.ventilationACH = ventilationNIDR.result.cadr / this.roomUsableVolumeCubicMeters
         this.initialCO2 = ventilationNIDR.result.c0
 
