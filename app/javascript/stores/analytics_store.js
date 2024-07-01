@@ -9,6 +9,7 @@ import { UpperRoomGermicidalUV, UPPER_ROOM_GERMICIDAL_UV } from '../upper_room_g
 import { Intervention } from '../interventions.js'
 import { useShowMeasurementSetStore } from './show_measurement_set_store';
 import { useEventStores } from './event_stores';
+import { useMainStore } from './main_store';
 import { getSampleInterventions } from '../sample_interventions.js'
 import { ProbaInfectious } from '../proba_infectious.js';
 
@@ -231,14 +232,32 @@ export const useAnalyticsStore = defineStore('analytics', {
         }
       }
     },
-    async showAnalysis(id) {
+    async showAnalysis(id, signInFunc, redirectToEventsFunc) {
       let eventStores = useEventStores()
       const showMeasurementSetStore = useShowMeasurementSetStore()
       let event = await eventStores.findOrLoad(id);
-      this.event = event
-      showMeasurementSetStore.setMeasurementSet(event)
+      const mainStore = useMainStore();
+      let currentUser = await mainStore.getCurrentUser();
+      if (!event && !currentUser) {
+        // sign in
+        signInFunc()
+      } else if (event) {
+        // event exists but current user does not
+        // event exists AND current user exists
+        //
+        this.event = event
+        showMeasurementSetStore.setMeasurementSet(event)
 
-      this.defaultNumSusceptibles = this.event.maximumOccupancy - this.numInfectors
+        this.defaultNumSusceptibles = this.event.maximumOccupancy - this.numInfectors
+      } else {
+        // current user exists but event does not -> Go to /events
+        // hh
+        redirectToEventsFunc()
+      }
+
+      // the event might not exist if
+      // - the event is private, user owns it, but the user is not signed in
+      // - the event is private, user does not own it
 
       return event
     },
