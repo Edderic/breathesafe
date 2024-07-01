@@ -1166,6 +1166,10 @@
       },
       addCO2Reading() {
         let value = 800
+        if (this.sensorReadings.length == 1) {
+          this.sensorReadings[0].timestamp = this.startDatetime.toString()
+        }
+
         if (this.sensorReadings.length > 0) {
           value = parseInt(this.sensorReadings[this.sensorReadings.length - 1].co2)
         }
