@@ -33,7 +33,7 @@ events.each do |e|
       if s.key?('value')
         s.merge({
           "co2": s["value"],
-          "timestamp": (e.start_datetime + i.second).to_s
+          "timestamp": (e.start_datetime + i.minute).to_s
         })
       else
         s
