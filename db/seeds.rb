@@ -27,7 +27,7 @@ events.each do |e|
   sensor_readings = e.sensor_readings
 
   if sensor_readings
-    # Assumption, data is sampled every second
+    # Assumption, data is sampled every minute
     readings = sensor_readings.map.with_index do |s,i|
 
       if s.key?('value')
@@ -40,7 +40,17 @@ events.each do |e|
       end
     end
 
-    e.sensor_readings = readings
+  else
+    readings = (0..120).map.with_index do |i|
+      {
+        'co2': e.ventilation_co2_steady_state_ppm,
+        "timestamp": (e.start_datetime + i.minute).to_s
+      }
+    end
+
+
   end
+
+  e.sensor_readings = readings
   e.save
 end
