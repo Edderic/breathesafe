@@ -838,8 +838,11 @@
 
         let index = 0
         for (let i = 0; i < sensorReadingsLength; i++) {
-          if (+this.tmpCO2Readings[i].identifier == +this.startDateTimeCO2) {
-            index = i
+          if (+this.tmpCO2Readings[i].timestamp == +this.startDateTimeCO2) {
+            index = getDeltaMinutes(
+              this.tmpCO2Readings[i].timestamp,
+              this.tmpCO2Readings[0].timestamp
+            )
             continue
           }
         }
@@ -855,8 +858,11 @@
 
         let index = 0
         for (let i = 0; i < sensorReadingsLength; i++) {
-          if (+this.tmpCO2Readings[i].identifier == +this.endDateTimeCO2) {
-            index = i
+          if (+this.tmpCO2Readings[i].timestamp == +this.endDateTimeCO2) {
+            index = getDeltaMinutes(
+              this.tmpCO2Readings[i].timestamp,
+              this.tmpCO2Readings[0].timestamp
+            )
             continue
           }
         }
@@ -887,10 +893,15 @@
         let sensorReadingsLength = this.tmpCO2Readings.length
 
         let collection = []
+        let deltaMinutes;
 
         // TODO: handle case where sampling rate is variabble
         for (let i = 0; i < sensorReadingsLength; i++) {
-          collection.push([i, this.tmpCO2Readings[i].co2])
+          deltaMinutes = getDeltaMinutes(
+            this.tmpCO2Readings[i].timestamp,
+            this.tmpCO2Readings[0].timestamp
+          )
+          collection.push([deltaMinutes, this.tmpCO2Readings[i].co2])
         }
 
         return { 'color': 'red', points: collection, 'legend': 'CO2 readings'}
