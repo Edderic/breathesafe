@@ -47,8 +47,11 @@ events.each do |e|
         "timestamp": (e.start_datetime + i.minute).to_s
       }
     end
+  end
 
-
+  # Handle missing sensor_data_from_external_api
+  if e.sensor_data_from_external_api.nil?
+    e.sensor_data_from_external_api = false
   end
 
   e.sensor_readings = readings
