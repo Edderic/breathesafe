@@ -1086,6 +1086,16 @@ function computeError(data1, data2, comparatorFunc) {
 }
 
 /*
+ * Returns: int
+ *   Returns the number of minutes between the two
+ */
+export function getDeltaMinutes(laterTimestamp, earlierTimestamp) {
+    return Math.round(
+      (new Date(laterTimestamp) - new Date(earlierTimestamp)) / (1000 * 60)
+    )
+}
+
+/*
  * Returns: Array[int]
  */
 function generateData(args) {

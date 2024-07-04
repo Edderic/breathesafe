@@ -670,6 +670,7 @@
      setupCSRF, cubicFeetPerMinuteTocubicMetersPerHour, daysToIndexDict,
      convertLengthBasedOnMeasurementType, computeVentilationACH, computePortableACH,
      computeVentilationNIDR,
+     getDeltaMinutes,
      generateUUID,
      genConcCurve,
      round, isValidDate,
@@ -819,7 +820,9 @@
 
         for (let i = 0; i < this.tmpCO2Readings.length; i++) {
           tmp = this.tmpCO2Readings[i]
-          if (+tmp.identifier > +this.startDateTimeCO2 && +tmp.identifier < +this.endDateTimeCO2) {
+
+          // if between startDateTimeCO2 and endDateTimeCO2, include
+          if (+tmp.timestamp > +this.startDateTimeCO2 && +tmp.timestamp < +this.endDateTimeCO2) {
             collection.push(
               this.tmpCO2Readings[i]
             )
@@ -872,8 +875,8 @@
         let yMax = 1000
 
         for (let i = 0; i < sensorReadingsLength; i++) {
-          if (this.tmpCO2Readings[i].value > yMax) {
-            yMax = this.tmpCO2Readings[i].value
+          if (this.tmpCO2Readings[i].co2 > yMax) {
+            yMax = this.tmpCO2Readings[i].co2
           }
         }
 
@@ -885,8 +888,9 @@
 
         let collection = []
 
+        // TODO: handle case where sampling rate is variabble
         for (let i = 0; i < sensorReadingsLength; i++) {
-          collection.push([i, this.tmpCO2Readings[i].value])
+          collection.push([i, this.tmpCO2Readings[i].co2])
         }
 
         return { 'color': 'red', points: collection, 'legend': 'CO2 readings'}
@@ -895,9 +899,14 @@
         let sensorReadingsLength = this.filterCO2Readings.length
 
         let collection = []
+        let deltaMinutes;
 
         for (let i = 0; i < sensorReadingsLength; i++) {
-          collection.push([i, this.filterCO2Readings[i].value])
+          deltaMinutes = getDeltaMinutes(
+            this.filterCO2Readings[i].timestamp,
+            this.filterCO2Readings[0].timestamp
+          )
+          collection.push([deltaMinutes, this.filterCO2Readings[i].co2])
         }
 
         return { 'color': 'red', points: collection, 'legend': 'CO2 readings'}
@@ -1082,6 +1091,7 @@
 
           for (let line of splitByLine) {
             object = {}
+            // The index of the column.
             columnCounter = 0
 
             let dateToAdd = null;
@@ -1092,6 +1102,7 @@
               } else {
 
                 if (header[columnCounter].includes("Carbon dioxide") || header[columnCounter].includes("Carbon Dioxide")) {
+                  // Add CO2 data
                   object.co2 = parseInt(item.replaceAll('"', ''))
                   object[header[columnCounter]] = parseInt(item)
                 } else if (header[columnCounter].includes("Time")) {
@@ -1116,6 +1127,7 @@
                     return
                   }
 
+                  // Add timestamp
                   object.timestamp = dateToAdd
                   object.timestamp.setSeconds(0)
                   object[header[columnCounter]] = object.timestamp
@@ -1137,6 +1149,17 @@
             lineCounter += 1
           }
 
+          // tmpCO2Readings has the format
+          // [
+          //   {
+          //     'co2': 439,
+          //     'timestamp': "Sat Apr 22 2023 08:03:00 GMT-0400 (Eastern Daylight Time)",
+          //   }
+          //   {
+          //     'co2': 439,
+          //     'timestamp': "Sat Apr 22 2023 08:03:00 GMT-0400 (Eastern Daylight Time)",
+          //   }
+          // ]
           this.tmpCO2Readings = collection
           let lastReading = this.tmpCO2Readings[this.tmpCO2Readings.length - 1]
           this.endDateTimeCO2 = lastReading.timestamp
