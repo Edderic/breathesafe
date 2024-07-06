@@ -1486,10 +1486,10 @@
           )
         }
 
-        if (this.sensorReadingsToSave.length < 10 && !this.usingSteadyState) {
+        if (this.sensorReadingsToSave.length < 5 && !this.usingSteadyState) {
           this.messages.push(
             {
-              str: "Error: Please add at least 10 carbon dioxide readings, either one-by-one or by bulk, where each measurement is spaced 1-minute apart.",
+              str: "Error: Please add at least 5 carbon dioxide readings.",
               to: {
                 name: 'AddMeasurements',
                 query: {
