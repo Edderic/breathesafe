@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_05_13_134735) do
+ActiveRecord::Schema[7.0].define(version: 2024_07_04_180602) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -64,6 +64,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_13_134735) do
     t.integer "initial_co2"
     t.jsonb "sensor_readings"
     t.string "status"
+    t.boolean "sensor_data_from_external_api", default: false
     t.index ["author_id"], name: "index_events_on_author_id"
   end
 
