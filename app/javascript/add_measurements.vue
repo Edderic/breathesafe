@@ -499,22 +499,40 @@
             <Button v-if="!sensorDataFromExternalApi" :class="{ tab: true }" @click='showUploadFile(true)' shadow='true' text='Bulk Upload' :selected="this.useUploadFile"/>
           </div>
 
-          <div
-            class='container centered row' v-if='sensorDataFromExternalApi'
-            v-for='sensorReading in sensorReadings'
-            >
+          <table>
+            <thead>
+              <tr>
+                <th>Datetime</th>
+                <th>CO2</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if='sensorDataFromExternalApi'
 
-            <Datepicker v-model='sensorReading.timestamp' />
-            <Number
-              class='continuous'
-              :leftButtons="[]"
-              :rightButtons="[]"
-              :value='sensorReading.co2'
-              :identifier='sensorReading.timestamp'
-              @adjustCO2='adjustCO2'
-              @update='updateCO2'
-            />
-          </div>
+                v-for='sensorReading in sensorReadings'
+              >
+                <td>
+
+                  <Datepicker v-model='sensorReading.timestamp' />
+                </td>
+                <td>
+                  <Number
+                    class='continuous'
+                    :leftButtons="[]"
+                    :rightButtons="[]"
+                    :value='sensorReading.co2'
+                    :identifier='sensorReading.timestamp'
+                    @adjustCO2='adjustCO2'
+                    @update='updateCO2'
+                  />
+                </td>
+                <td>
+                  <CircularButton text='x' @click='removeCO2Reading(sensorReading.timestamp)'/>
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
           <div class='container centered' v-if='!sensorDataFromExternalApi && !useUploadFile && !usingSteadyState'>
             <div class='container row' >
@@ -1209,8 +1227,6 @@
           value = parseInt(this.sensorReadings[this.sensorReadings.length - 1].co2)
         }
 
-        // TODO: add timestamp and identifier based on the start date and some interval
-
         let newTimestamp = addMinutes(this.startDatetime, this.sensorReadings.length);
 
         this.sensorReadings.push({
@@ -1221,6 +1237,15 @@
       },
       removeLastCO2Reading() {
         this.sensorReadings.pop()
+      },
+
+      removeCO2Reading(timestamp) {
+        // TODO: might need to handle situation when we're using tmpCO2Readings
+        const sensorReadingIndex = this.sensorReadings.findIndex(
+          (sensorReading) => sensorReading.timestamp == timestamp
+        );
+
+        this.sensorReadings.splice(sensorReadingIndex, 1);
       },
       addActivityGrouping() {
         this.activityGroups.unshift({
