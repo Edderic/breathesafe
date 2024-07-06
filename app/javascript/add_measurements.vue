@@ -503,7 +503,8 @@
             class='container centered row' v-if='sensorDataFromExternalApi'
             v-for='sensorReading in sensorReadings'
             >
-            <input type="datetime-local" class='longer-text' v-model='sensorReading.timestamp'>
+
+            <Datepicker v-model='sensorReading.timestamp' />
             <Number
               class='continuous'
               :leftButtons="[]"
