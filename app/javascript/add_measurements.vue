@@ -508,7 +508,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-if='sensorDataFromExternalApi'
+              <tr v-if='sensorDataFromExternalApi || !useUploadFile'
 
                 v-for='sensorReading in sensorReadings'
               >
@@ -539,23 +539,6 @@
             </tbody>
           </table>
 
-          <div class='container centered' v-if='!sensorDataFromExternalApi && !useUploadFile && !usingSteadyState'>
-            <div class='container row' >
-              <CircularButton text='+' @click='addCO2Reading'/>
-              <CircularButton text='-' @click='removeLastCO2Reading'/>
-            </div>
-
-            <Number
-              v-for='sensorReading in sensorReadings'
-              class='continuous'
-              :leftButtons="[{text: '-100', emitSignal: 'adjustCO2'}, {text: '-10', emitSignal: 'adjustCO2'}, {text: '-1', emitSignal: 'adjustCO2'}]"
-              :rightButtons="[{text: '+1', emitSignal: 'adjustCO2'}, {text: '+10', emitSignal: 'adjustCO2'}, {text: '+100', emitSignal: 'adjustCO2'}]"
-              :value='sensorReading.co2'
-              :identifier='sensorReading.timestamp'
-              @adjustCO2='adjustCO2'
-              @update='updateCO2'
-            />
-          </div>
           <div class='container centered' v-if='!sensorDataFromExternalApi && useUploadFile && !usingSteadyState'>
             <div class='container'>
               <input type="file" @change="handleFileChangeCO2">
