@@ -531,6 +531,11 @@
                   <CircularButton text='x' @click='removeCO2Reading(sensorReading.timestamp)'/>
                 </td>
               </tr>
+              <tr>
+                <td colspan="3">
+                  <CircularButton text='+' @click='addCO2Reading'/>
+                </td>
+              </tr>
             </tbody>
           </table>
 
@@ -1218,16 +1223,21 @@
         this.maximumOccupancy += parseInt(args.value)
       },
       addCO2Reading() {
+        // TODO: when there is one sensorReading,
+        // add one minute to the timestamp
+
         let value = 800
         if (this.sensorReadings.length == 1) {
           this.sensorReadings[0].timestamp = this.startDatetime.toString()
         }
 
+        let lastSensorReading = this.sensorReadings[this.sensorReadings.length - 1]
+
         if (this.sensorReadings.length > 0) {
-          value = parseInt(this.sensorReadings[this.sensorReadings.length - 1].co2)
+          value = parseInt(lastSensorReading.co2)
         }
 
-        let newTimestamp = addMinutes(this.startDatetime, this.sensorReadings.length);
+        let newTimestamp = addMinutes(new Date(lastSensorReading.timestamp), 1);
 
         this.sensorReadings.push({
           co2: value,
