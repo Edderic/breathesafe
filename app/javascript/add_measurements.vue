@@ -499,7 +499,7 @@
             <Button v-if="!sensorDataFromExternalApi" :class="{ tab: true }" @click='showUploadFile(true)' shadow='true' text='Bulk Upload' :selected="this.useUploadFile"/>
           </div>
 
-          <table>
+          <table v-if='!usingSteadyState && !useUploadFile'>
             <thead>
               <tr>
                 <th>Datetime</th>
@@ -543,31 +543,11 @@
             <div class='container'>
               <input type="file" @change="handleFileChangeCO2">
             </div>
-
-            <div class='collapsable' v-if='tmpCO2Readings.length > 0'>
-              <LineGraph
-                :lines="[sensorReadingLines, startCO2VerticalLine, endCO2VerticalLine]"
-                :ylim='[co2YMin, co2YMax]'
-                title='CO₂ Readings (Zoomed Out)'
-                xlabel='Time (min)'
-                ylabel='CO₂ (ppm)'
-                roundYTicksTo='0'
-              />
-
-              <LineGraph
-                :lines="[sensorReadingsZoomedIn]"
-                :ylim='[co2YMin, co2YMax]'
-                title='CO₂ Readings (Zoomed In)'
-                xlabel='Time (min)'
-                ylabel='CO₂ (ppm)'
-                roundYTicksTo='0'
-              />
+            <div class='container'>
+              <p>
+              Once a CSV file is uploaded with <span>Time(mm/dd/yyyy)</span> and <span>Carbon dioxide(ppm)</span> as column headers, please select the relevant datetime range for this venue:
+              </p>
             </div>
-
-            <p v-if='tmpCO2Readings.length > 0' class='row centered container'>
-               Use last <input type="number" :value='lastXMinutes' @change='useLastXMinutes' @mouseleave='useLastXMinutes'>
-               minutes before the &nbsp;<span class='bold'> End Date Time </span>&nbsp; listed below.
-            </p>
 
 
             <div class='collapsable' v-if='tmpCO2Readings.length > 0'>
@@ -580,6 +560,17 @@
                 <label class='centered'><span class='bold'>End Date Time</span></label>
                 <Datepicker v-model='endDateTimeCO2' />
               </div>
+            </div>
+
+            <div class='collapsable' v-if='tmpCO2Readings.length > 0'>
+              <LineGraph
+                :lines="[sensorReadingsZoomedIn]"
+                :ylim='[co2YMin, co2YMax]'
+                title='CO₂ Readings'
+                xlabel='Time (min)'
+                ylabel='CO₂ (ppm)'
+                roundYTicksTo='0'
+              />
             </div>
           </div>
         </div>
