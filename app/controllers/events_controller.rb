@@ -47,7 +47,7 @@ class EventsController < ApplicationController
         # Adds the CO2 stuff
         readings = data["points"].map do |j|
           json = JSON.parse(j.to_json)
-          json['identifier'] = Time.at(json['timestamp'].to_i / 1000)
+          json['timestamp'] = Time.at(json['timestamp'].to_i / 1000)
           json
         end
 
