@@ -42,14 +42,21 @@ export const useEventStores = defineStore('events', {
 
       for (let event of this.events) {
 
-        for (let placeType of event.placeData.types) {
-          if (
-            (this.filterForDraft && event.status == 'draft' || !this.filterForDraft) &&
-            (!lowercasedSearch || event.roomName.toLowerCase().match(lowercasedSearch) )
-            && ((placeType == this.placeTypePicked) || !this.placeTypePicked)
-          ) {
-            collection.push(event)
-            break
+        // If a private reading
+        // ... placeData.types would be an empty object
+        if (event.placeData.types.length == 0) {
+          // add for now
+          collection.push(event)
+        } else {
+          for (let placeType of event.placeData.types) {
+            if (
+              (this.filterForDraft && event.status == 'draft' || !this.filterForDraft) &&
+              (!lowercasedSearch || event.roomName.toLowerCase().match(lowercasedSearch) )
+              && ((placeType == this.placeTypePicked) || !this.placeTypePicked)
+            ) {
+              collection.push(event)
+              break
+            }
           }
         }
       }
