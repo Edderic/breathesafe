@@ -325,6 +325,7 @@ import {
   findWorstCaseInhFactor,
   genConcCurve,
   getCO2Rate,
+  getDeltaMinutes,
   infectorActivityTypes,
   maskToPenetrationFactor,
   setupCSRF,
@@ -467,12 +468,18 @@ export default {
     },
     readings() {
       let collection = []
+      let deltaMinutes;
 
       if (!this.sensorReadings) {
         collection = [[0, this.ventilationCo2SteadyStatePpm], [1, this.ventilationCo2SteadyStatePpm]]
       } else {
         for (let i = 0; i < this.sensorReadings.length; i++) {
-          collection.push([i, this.sensorReadings[i].co2])
+          // TODO: make this work with variable sampling rates
+          deltaMinutes = getDeltaMinutes(
+            this.sensorReadings[i].timestamp,
+            this.sensorReadings[0].timestamp,
+          )
+          collection.push([deltaMinutes, this.sensorReadings[i].co2])
         }
       }
 
