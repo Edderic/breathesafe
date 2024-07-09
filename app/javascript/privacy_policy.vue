@@ -399,12 +399,38 @@ style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89,
 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span
 data-custom-class="body_text"><span style="font-size: 15px;"><span
 data-custom-class="body_text"><bdt
-class="forloop-component"></bdt></span></span></span></span></span></div><ul><li
-style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89,
-89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span
-data-custom-class="body_text"><span style="font-size: 15px;"><span
-data-custom-class="body_text"><bdt class="question">contact
-preferences</bdt></span></span></span></span></span></li></ul><div
+class="forloop-component"></bdt></span></span></span></span></span></div>
+  <ul>
+    <li style="line-height: 1.5;">
+      <span style="font-size: 15px; color: rgb(89, 89, 89);">
+        <span style="font-size: 15px; color: rgb(89, 89, 89);">
+          <span data-custom-class="body_text">
+            <span style="font-size: 15px;">
+              <span data-custom-class="body_text">
+                <bdt class="question">mask/respirator make and model</bdt>
+              </span>
+            </span>
+          </span>
+        </span>
+      </span>
+    </li>
+  </ul>
+  <ul>
+    <li style="line-height: 1.5;">
+      <span style="font-size: 15px; color: rgb(89, 89, 89);">
+        <span style="font-size: 15px; color: rgb(89, 89, 89);">
+          <span data-custom-class="body_text">
+            <span style="font-size: 15px;">
+              <span data-custom-class="body_text">
+                <bdt class="question">contact preferences</bdt>
+              </span>
+            </span>
+          </span>
+        </span>
+      </span>
+    </li>
+  </ul>
+<div
 style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89,
 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span
 data-custom-class="body_text"><span style="font-size: 15px;"><span
@@ -420,10 +446,18 @@ id="sensitiveinfo" style="line-height: 1.5;">
 15px;"><span data-custom-class="body_text"><strong>Sensitive
 Information.</strong>
 
-When necessary, with your consent or as otherwise permitted by  applicable law, we process the following categories of sensitive information:
+When necessary, with your consent or as otherwise permitted by applicable law, we process the following categories of sensitive information:
 
 <ul>
-  <li>location (geolocation, and venues that have been reviewed by the user).</li>
+  <li>name</li>
+  <li>email</li>
+  <li>password</li>
+  <li>location (for contributing venue data and finding safer venues via geolocation).</li>
+  <li>facial measurements (for assessing respirator fit.)</li>
+  <li>facial hair length (for assessing respirator fit.)</li>
+  <li>respirator comfort (for assessing adequacy of a respirator to an individual.)</li>
+  <li>user seal check results (for assessing respirator fit.)</li>
+  <li>demographic information (for assessing sampling bias and assessing equity concerns related to masks.) </li>
 </ul>
 
 </span></span>
@@ -1373,18 +1407,25 @@ class="block-component"></bdt>the period of time in which users have an account
 with us<bdt class="block-component"></bdt><span style="font-size: 15px;"><span
 style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt
 class="else-block"></bdt></span></span></span>.</span></span></span></div><div
-style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span
-style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px;
-color: rgb(89, 89, 89);"><span data-custom-class="body_text">When we have no
-ongoing legitimate business need to process your personal information, we will
-either delete or <bdt class="block-component"></bdt>anonymize<bdt
-class="statement-end-if-in-editor"></bdt> such information, or, if this is not
-possible (for example, because your personal information has been stored in
-backup archives), then we will securely store your personal information and
-isolate it from any further processing until deletion is possible.<span
-style="color: rgb(89, 89, 89);"><bdt
-class="block-component"></bdt></span></span></span></span></div><div
 style="line-height: 1.5;"><br></div>
+<div style="line-height: 1.5;">
+  <span style="font-size: 15px; color: rgb(89, 89, 89);">
+    <span style="font-size: 15px;
+  color: rgb(89, 89, 89);">
+      <span data-custom-class="body_text">When we have no
+  ongoing legitimate business need to process your personal information, we will
+  either delete or <bdt class="block-component"></bdt>anonymize<bdt
+  class="statement-end-if-in-editor"></bdt> such information, or, if this is not
+  possible (for example, because your personal information has been stored in
+  backup archives), then we will securely store your personal information and
+  isolate it from any further processing until deletion is possible.
+
+
+      </span>
+    </span>
+  </span>
+</div>
+<div style="line-height: 1.5;"><br></div>
 
 <div id="infosafe" style="line-height:
 1.5;">
@@ -1457,7 +1498,10 @@ become aware of any data we may have collected from children under age 18,
 please contact us at <span style="color: rgb(89, 89, 89); font-size:
 15px;"><span data-custom-class="body_text"><bdt
 class="block-component"></bdt><bdt
-class="question">info@breathesafe.xyz</bdt><bdt
+class="question">
+
+<a href="mailto:info@breathesafe.xyz">info@breathesafe.xyz</a>
+  </bdt><bdt
 class="else-block"></bdt></span></span>.</span><span
 data-custom-class="body_text"><bdt
 class="else-block"></bdt></span></span></span></div><div style="line-height:
@@ -1755,17 +1799,16 @@ data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span
 data-custom-class="body_text"><bdt
 class="block-component"></bdt></span></span></span></span></span></div><div
 style="line-height: 1.5;"><span style="font-size: 15px;"><span
-data-custom-class="body_text"><bdt class="question">776 Main St
-#541005</bdt><span style="color: rgb(89, 89, 89);"><span style="font-size:
+data-custom-class="body_text"><bdt class="question">138 Miller Ave</bdt><span style="color: rgb(89, 89, 89);"><span style="font-size:
 15px;"><bdt
 class="block-component"></bdt></span></span></span></span></div><div
 style="line-height: 1.5;"><span style="font-size: 15px;"><span
-data-custom-class="body_text"><bdt class="question">Waltham</bdt><span
+data-custom-class="body_text"><bdt class="question">Rumford</bdt><span
 style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><bdt
 class="block-component"></bdt><bdt class="block-component"></bdt>, <bdt
-class="question">MA</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt
+class="question">RI</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt
 class="block-component"></bdt><bdt class="block-component"></bdt> <bdt
-class="question">02454</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt
+class="question">02916</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt
 class="block-component"></bdt><bdt class="block-component"></bdt><bdt
 class="block-component"></bdt></span></span></span></span></div><div
 style="line-height: 1.5;"><span data-custom-class="body_text" style="font-size:
@@ -1800,7 +1843,9 @@ style="line-height: 1.5;"><br></div><div id="request" style="line-height:
 style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1">
 HOW CAN YOU REVIEW, UPDATE, OR DELETE THE DATA WE COLLECT FROM
 YOU?</span></strong></span></span></span></span></span></div><div
-style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span
+style="line-height: 1.5;"><br></div>
+
+<div style="line-height: 1.5;"><span
 style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px;
 color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt
 class="block-component"></bdt>Based on the applicable laws of your country, you
@@ -1813,9 +1858,16 @@ data-custom-class="body_text"><span style="font-size: 15px;"><a
 data-custom-class="link"
 href="https://app.termly.io/notify/da32d236-6da0-4eac-b420-b983a26320f4"
 rel="noopener noreferrer" target="_blank">data subject access
-request</a></span></span></span><bdt class="block-component"><span
-data-custom-class="body_text"></span></bdt></span></span><span
-data-custom-class="body_text">.</span></div>
+request</a>.
+</span>
+</span></span><bdt class="block-component">
+<span
+data-custom-class="body_text"></span></bdt></span></span>
+  <span data-custom-class="body_text">.
+For deletion of your data, you may also choose to use the <b>"Delete all my data"</b>
+ button available in the user profile.
+  </span>
+</div>
       </div>
       </div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>
 <br>
