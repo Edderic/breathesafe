@@ -13,20 +13,28 @@
 
       <div class='vertical-centered'>
         <a class='desktop clickable side-padding' @click='toggleShowSubNavBar("Venues")'>Venues</a>
-        <router-link class='desktop clickable side-padding' :to='{ name: "RespiratorRecommender"}' @click='showVenuesSubNavBar = false'>Respirator Recommender</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "Profile"}' v-if='signedIn' @click='showVenuesSubNavBar = false'>Profile</router-link>
-        <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn @click='showVenuesSubNavBar = false'>Sign up/Sign in</router-link>
+        <a class='desktop clickable side-padding' @click='toggleShowSubNavBar("RespiratorRecommender")'>Respirator Recommender</a>
+        <router-link class='desktop clickable side-padding' :to='{ name: "Profile"}' v-if='signedIn' @click='showSubNavBar = null'>Profile</router-link>
+        <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn @click='showSubNavBar = null'>Sign up/Sign in</router-link>
         <a class='desktop clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn"  >Sign out</a>
 
         <Accordion class='mobile' @click='toggleMobileCol'/>
       </div>
     </div>
 
-    <div class='row spaced-between main fixed-nav-bar-bottom' v-if='showVenuesSubNavBar'>
+    <div class='row spaced-between main fixed-nav-bar-bottom' v-if='showSubNavBar == "Venues"'>
       <div class='vertical-centered bunched-vertically-in-the-middle'>
-        <router-link class='desktop clickable side-padding' to='/faqs' @click='showVenuesSubNavBar = false'>FAQs</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "Venues"}' @click='showVenuesSubNavBar = false'>Find Venues</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "AddMeasurements"}' v-if='signedIn' @click='showVenuesSubNavBar = false'>Add Venue Measurements</router-link>
+        <router-link class='desktop clickable side-padding' to='/faqs' @click='toggleShowSubNavBar("Venues")'>FAQs</router-link>
+        <router-link class='desktop clickable side-padding' :to='{ name: "Venues"}' @click='toggleShowSubNavBar("Venues")'>Find Venues</router-link>
+        <router-link class='desktop clickable side-padding' :to='{ name: "AddMeasurements"}' v-if='signedIn' @click='toggleShowSubNavBar("Venues")'>Add Venue Measurements</router-link>
+
+        <Accordion class='mobile' @click='toggleMobileCol'/>
+      </div>
+    </div>
+
+    <div class='row spaced-between main fixed-nav-bar-bottom' v-if='showSubNavBar == "RespiratorRecommender"'>
+      <div class='vertical-centered bunched-vertically-in-the-middle'>
+        <router-link class='desktop clickable side-padding' :to='{ name: "RespiratorRecommender"}' @click='toggleShowSubNavBar("RespiratorRecommender")'>Find Respirators</router-link>
 
         <Accordion class='mobile' @click='toggleMobileCol'/>
       </div>
@@ -71,15 +79,19 @@ export default {
   },
   data() {
     return {
-      showVenuesSubNavBar: false
+      showSubNavBar: null
     }
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useEventStores, [ 'load']),
     toggleShowSubNavBar(string) {
-      if (string == "Venues") {
-        this.showVenuesSubNavBar = !this.showVenuesSubNavBar
+      if (string == this.showSubNavBar) {
+        this.showSubNavBar = null
+      } else if (!!this.showSubNavBar && string != this.showSubNavBar) {
+        this.showSubNavBar = string
+      } else if (this.showSubNavBar == null) {
+        this.showSubNavBar = string
       }
     },
     navToRegister() {
