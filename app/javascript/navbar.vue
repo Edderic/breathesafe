@@ -2,7 +2,7 @@
   <div class='col'>
     <div class='row spaced-between main fixed-nav-bar'>
       <div class='left row vertical-centered'>
-        <router-link :to='{ name: "Venues"}' class='logo-link'>
+        <router-link :to='{ name: "Landing"}' class='logo-link'>
           <div class='row'>
             <div class='logo vertical-centered'>😷</div>
             <h2 class='title'>Breathesafe</h2>
