@@ -27,7 +27,6 @@
         <router-link class='desktop clickable side-padding' to='/faqs' @click='showVenuesSubNavBar = false'>FAQs</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "Venues"}' @click='showVenuesSubNavBar = false'>Find Venues</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "AddMeasurements"}' v-if='signedIn' @click='showVenuesSubNavBar = false'>Add Venue Measurements</router-link>
-        <router-link class='desktop clickable side-padding' to='/signin' v-if='!signedIn' @click='showVenuesSubNavBar = false'>Sign up/Sign in</router-link>
 
         <Accordion class='mobile' @click='toggleMobileCol'/>
       </div>
