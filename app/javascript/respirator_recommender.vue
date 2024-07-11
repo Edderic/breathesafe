@@ -38,7 +38,8 @@ export default {
     Button
   },
   data() {
-    return {}
+    return {
+    }
   },
   props: {
   },

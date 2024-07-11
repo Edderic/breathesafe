@@ -1,5 +1,6 @@
 <template>
   <div class='col'>
+
     <div class='row spaced-between main fixed-nav-bar'>
       <div class='left row vertical-centered'>
         <router-link :to='{ name: "Landing"}' class='logo-link'>
@@ -11,22 +12,36 @@
       </div>
 
       <div class='vertical-centered'>
-        <router-link class='desktop clickable side-padding' to='/faqs'>FAQs</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "Venues"}'>Venues</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "RespiratorRecommender"}'>Respirator Recommender</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "AddMeasurements"}' v-if='signedIn'>Add Venue Measurements</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "Profile"}' v-if='signedIn'>Profile</router-link>
-        <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn>Sign up/Sign in</router-link>
-        <a class='desktop clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
+        <a class='desktop clickable side-padding' @click='toggleShowSubNavBar("Venues")'>Venues</a>
+        <router-link class='desktop clickable side-padding' :to='{ name: "RespiratorRecommender"}' @click='showVenuesSubNavBar = false'>Respirator Recommender</router-link>
+        <router-link class='desktop clickable side-padding' :to='{ name: "Profile"}' v-if='signedIn' @click='showVenuesSubNavBar = false'>Profile</router-link>
+        <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn @click='showVenuesSubNavBar = false'>Sign up/Sign in</router-link>
+        <a class='desktop clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn"  >Sign out</a>
 
         <Accordion class='mobile' @click='toggleMobileCol'/>
       </div>
-
     </div>
+
+    <div class='row spaced-between main fixed-nav-bar-bottom' v-if='showVenuesSubNavBar'>
+      <div class='vertical-centered bunched-vertically-in-the-middle'>
+        <router-link class='desktop clickable side-padding' to='/faqs' @click='showVenuesSubNavBar = false'>FAQs</router-link>
+        <router-link class='desktop clickable side-padding' :to='{ name: "Venues"}' @click='showVenuesSubNavBar = false'>Find Venues</router-link>
+        <router-link class='desktop clickable side-padding' :to='{ name: "AddMeasurements"}' v-if='signedIn' @click='showVenuesSubNavBar = false'>Add Venue Measurements</router-link>
+        <router-link class='desktop clickable side-padding' to='/signin' v-if='!signedIn' @click='showVenuesSubNavBar = false'>Sign up/Sign in</router-link>
+
+        <Accordion class='mobile' @click='toggleMobileCol'/>
+      </div>
+    </div>
+
     <div class='mobile-col' v-if="showMobile()">
+      <h2 class='vertical-centered'>Venues</h2>
       <router-link class='mobile-row clickable side-padding' to='/faqs'>FAQs</router-link>
-      <router-link class='mobile-row clickable side-padding' :to='{ name: "Venues"}'>Venues</router-link>
+      <router-link class='mobile-row clickable side-padding' :to='{ name: "Venues"}'>Add Venues</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "AddMeasurements"}' v-if='signedIn'>Add Measurements</router-link>
+      <h2 class='vertical-centered'>Respirator Recommender</h2>
+
+      <h2 class='vertical-centered'>Misc</h2>
+
       <router-link class='mobile-row clickable side-padding' :to='{ name: "Profile"}' v-if='signedIn'>Profile</router-link>
       <router-link class='mobile-row clickable side-padding' to='/signin' v-if=!signedIn>Sign up/Sign in</router-link>
       <a class='mobile-row clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>
@@ -57,11 +72,17 @@ export default {
   },
   data() {
     return {
+      showVenuesSubNavBar: false
     }
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useEventStores, [ 'load']),
+    toggleShowSubNavBar(string) {
+      if (string == "Venues") {
+        this.showVenuesSubNavBar = !this.showVenuesSubNavBar
+      }
+    },
     navToRegister() {
       this.focusTab = 'register'
     },
@@ -114,6 +135,10 @@ export default {
 
 
 <style scoped>
+  a {
+    cursor: pointer;
+  }
+
   .clickable {
     padding: 1em;
     font-size: 1.3em;
@@ -153,9 +178,22 @@ export default {
     align-items: center;
   }
 
+  .bunched-vertically-in-the-middle {
+    margin: 0 auto;
+  }
+
   .fixed-nav-bar {
      position: fixed;
      top: 0;
+     left: 0;
+     z-index: 9999;
+     width: 100%;
+     height: 50px;
+     background-color: white;
+  }
+  .fixed-nav-bar-bottom {
+     position: fixed;
+     top: 3em;
      left: 0;
      z-index: 9999;
      width: 100%;
