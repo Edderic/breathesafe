@@ -10,8 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_07_04_180602) do
+ActiveRecord::Schema[7.0].define(version: 2024_07_11_181621) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
 
   create_table "carbon_dioxide_monitors", force: :cascade do |t|
@@ -92,6 +93,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_04_180602) do
     t.jsonb "socials"
     t.uuid "external_api_token"
     t.boolean "can_post_via_external_api", default: true
+    t.json "demographics"
     t.index ["user_id"], name: "index_profiles_on_user_id"
   end
 
