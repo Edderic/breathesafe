@@ -14,7 +14,7 @@
         <router-link class='desktop clickable side-padding' to='/faqs'>FAQs</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "Venues"}'>Venues</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "RespiratorRecommender"}'>Respirator Recommender</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "AddMeasurements"}' v-if='signedIn'>Add Measurements</router-link>
+        <router-link class='desktop clickable side-padding' :to='{ name: "AddMeasurements"}' v-if='signedIn'>Add Venue Measurements</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "Profile"}' v-if='signedIn'>Profile</router-link>
         <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn>Sign up/Sign in</router-link>
         <a class='desktop clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn">Sign out</a>

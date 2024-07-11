@@ -12,8 +12,8 @@
         <router-link :to='{ name: "Venues" }'>
           <Button text='Find Safer Venues' major='true'/>
         </router-link>
-        <router-link to='/faqs#data-contribution'>
-          <Button text='Add Measurements' major='true'/>
+        <router-link :to='{ name: "RespiratorRecommender"}'>
+          <Button text='Find Respirators' major='true'/>
         </router-link>
       </div>
 
