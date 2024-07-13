@@ -294,7 +294,6 @@ export default {
     font-weight: bold;
   }
   .body {
-    position: absolute;
     top: 3.2em;
     width: 100vw;
   }

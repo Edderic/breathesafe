@@ -3,28 +3,20 @@
     <h2 class='tagline'>Respirator Users</h2>
     <div class='main'>
       <div class='centered'>
-        <router-link :to='{ name: "Venues" }'>
-        <img src="https://breathesafe-development.s3.us-east-2.amazonaws.com/images/map-screenshot.png" alt="Map with locations marked with circles with different colors, indicating indoor air quality">
-        </router-link>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <div class='call-to-actions centered'>
-        <router-link :to='{ name: "Venues" }'>
-          <Button text='Find Safer Venues' major='true'/>
-        </router-link>
-        <router-link to='/faqs#data-contribution'>
-          <Button text='Add Measurements' major='true'/>
-        </router-link>
-      </div>
-
-    </div>
-
-    <div>
-      <div class='quote'>
-        <a href="https://twitter.com/CorsIAQ/status/1424274541426008069">Our lifetime exposure to and uptake of air pollutants is largely DOMINATED by the air we breathe indoors - from our homes, workplaces, and schools.</a>
-      </div>
-
-      <a class='author' href="https://leadership.ucdavis.edu/people/richard-corsi">- Richard Corsi, Ph.D</a>
     </div>
 
   </div>

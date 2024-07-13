@@ -126,6 +126,8 @@ export default {
   }
 
   .router-view-container {
+    position: relative;
+    top: 3em;
     display: flex;
     justify-content: center;
     align-items: center;
