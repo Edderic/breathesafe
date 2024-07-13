@@ -34,7 +34,7 @@
 
     <div class='row spaced-between main fixed-nav-bar-bottom' v-if='showSubNavBar == "RespiratorRecommender"'>
       <div class='vertical-centered bunched-vertically-in-the-middle'>
-        <router-link class='desktop clickable side-padding' :to='{ name: "RespiratorRecommender"}' @click='toggleShowSubNavBar("RespiratorRecommender")'>Find Respirators</router-link>
+        <router-link class='desktop clickable side-padding' :to='{ name: "RespiratorUsers"}' @click='toggleShowSubNavBar("RespiratorRecommender")'>Testers</router-link>
 
         <Accordion class='mobile' @click='toggleMobileCol'/>
       </div>

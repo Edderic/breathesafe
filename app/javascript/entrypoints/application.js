@@ -47,7 +47,7 @@ import Venues from '../map_events.vue'
 import Landing from '../landing.vue'
 import Profile from '../profile.vue'
 import PrivacyPolicy from '../privacy_policy.vue'
-import RespiratorRecommender from '../respirator_recommender.vue'
+import RespiratorUsers from '../respirator_users.vue'
 import Registration from '../registration.vue'
 import SignIn from '../sign_in.vue'
 import TermsOfService from '../terms_of_service.vue'
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // We'll talk about nested routes later.
   const routes = [
     { path: '/', component: Landing, name: 'Landing' },
-    { path: '/respirator_recommender', component: RespiratorRecommender, name: 'RespiratorRecommender' },
+    { path: '/respirator_users', component: RespiratorUsers, name: 'RespiratorUsers' },
     { path: '/venues', component: Venues, name: 'Venues' },
     { path: '/analytics/:id', component: Analytics, name: 'Analytics' },
     { path: '/signin', component: SignIn, name: 'SignIn' },

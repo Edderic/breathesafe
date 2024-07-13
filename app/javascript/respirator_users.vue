@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class='tagline'>Respirator Recommender</h2>
+    <h2 class='tagline'>Respirator Users</h2>
     <div class='main'>
       <div class='centered'>
         <router-link :to='{ name: "Venues" }'>
@@ -33,7 +33,7 @@
 <script>
 import Button from './button.vue'
 export default {
-  name: 'RespiratorRecommender',
+  name: 'RespiratorUsers',
   components: {
     Button
   },
