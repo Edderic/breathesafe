@@ -7,11 +7,26 @@
           <thead>
             <tr>
               <th>Name</th>
+              <th>Race</th>
+              <th>Ethnicity</th>
+              <th>Gender</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td></td>
+              <td>
+                {{firstName}}
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td>
+                <Button @click="edit(profileId)" text='Edit' />
+              </td>
             </tr>
           </tbody>
         </table>
@@ -24,6 +39,11 @@
 
 <script>
 import Button from './button.vue'
+import { signIn } from './session.js'
+import { mapActions, mapWritableState, mapState } from 'pinia';
+import { useProfileStore } from './stores/profile_store';
+import { useMainStore } from './stores/main_store';
+
 export default {
   name: 'RespiratorUsers',
   components: {
@@ -36,12 +56,42 @@ export default {
   props: {
   },
   computed: {
+    ...mapState(
+        useMainStore,
+        [
+          'currentUser',
+        ]
+    ),
+    ...mapState(
+        useProfileStore,
+        [
+          'profileId',
+        ]
+    ),
+    ...mapWritableState(
+        useProfileStore,
+        [
+          'firstName',
+          'lastName',
+        ]
+    ),
+  },
+  async created() {
+    await this.getCurrentUser()
 
+    if (!this.currentUser) {
+      signIn.call(this)
+    } else {
+      this.loadStuff()
+    }
   },
   methods: {
-
+    ...mapActions(useMainStore, ['getCurrentUser']),
+    ...mapActions(useProfileStore, ['loadProfile']),
+    async loadStuff() {
+      await this.loadProfile()
+    },
   }
-
 }
 </script>
 

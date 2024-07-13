@@ -68,6 +68,7 @@ export const useProfileStore = defineStore('profile', {
 
             let profile = data.profile
 
+            this.profileId = profile.id
             this.externalAPIToken = profile.external_api_token
             this.heightMeters = profile.height_meters
             this.strideLengthMeters = profile.stride_length_meters
