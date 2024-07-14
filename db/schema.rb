@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_07_11_181621) do
+ActiveRecord::Schema[7.0].define(version: 2024_07_13_171444) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -94,6 +94,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_11_181621) do
     t.uuid "external_api_token"
     t.boolean "can_post_via_external_api", default: true
     t.json "demographics"
+    t.string "race_ethnicity"
+    t.string "sex_assigned_at_birth"
     t.index ["user_id"], name: "index_profiles_on_user_id"
   end
 

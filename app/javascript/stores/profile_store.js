@@ -21,6 +21,7 @@ export const useProfileStore = defineStore('profile', {
       'airDeliveryRateMeasurementTypeShort': 'ft³ / h',
       'cubicLengthShort': 'ft³',
     },
+    race_ethnicity: "",
     strideLengthMeters: 0.43,
     systemOfMeasurement: "imperial",
     carbonDioxideMonitors: [
@@ -74,6 +75,7 @@ export const useProfileStore = defineStore('profile', {
             this.strideLengthMeters = profile.stride_length_meters
             this.firstName = profile.first_name
             this.lastName = profile.last_name
+            this.raceEthnicity = profile.race_ethnicity
             this.message = data.message
             this.systemOfMeasurement = profile.measurement_system
             this.measurementUnits = getMeasurementUnits(profile.measurement_system)
@@ -134,6 +136,7 @@ export const useProfileStore = defineStore('profile', {
           'measurement_system': this.systemOfMeasurement,
           'first_name': this.firstName,
           'last_name': this.lastName,
+          'race_ethnicity': this.raceEthnicity,
           'stride_length_meters': this.strideLengthMeters,
           'height_meters': this.heightMeters,
           'socials': this.socials

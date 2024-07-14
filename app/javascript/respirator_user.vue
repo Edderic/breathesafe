@@ -1,51 +1,51 @@
 <template>
   <div>
-    <h2 class='tagline'>Respirator Users</h2>
+    <h2 class='tagline'>Respirator User</h2>
     <div class='main'>
-      <div class='centered'>
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Race &amp; Ethnicity</th>
-              <th>Sex Assigned at Birth</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                {{firstName}}
-              </td>
-              <td>
-              </td>
-              <td>
-              </td>
-              <td>
-                <Button @click="edit(profileId)" text='Edit' />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <SurveyQuestion
+        question="Which race or ethnicity best describes you?"
+        :answer_options="race_ethnicity_options"
+        @update="selectRaceEthnicity"
+      />
     </div>
+
+    <Button text="Save" @click='updateProfile'/>
   </div>
 </template>
 
 <script>
 import Button from './button.vue'
+import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 
 export default {
-  name: 'RespiratorUsers',
+  name: 'RespiratorUser',
   components: {
-    Button
+    Button,
+    SurveyQuestion
   },
   data() {
     return {
+      race_ethnicity_question: "Which race or ethnicity best describes you?",
+      race_ethnicity_options: [
+        "American Indian or Alaskan Native",
+        "Asian / Pacific Islander",
+        "Black or African American",
+        "Hispanic",
+        "White / Caucasian",
+        "Multiple ethnicity / Other",
+        "Prefer not to disclose",
+      ],
+      sex_assigned_at_birth_question: "What is your sex assigned at birth?",
+      sex_assigned_at_birth_options: [
+        "Male",
+        "Female",
+        "Intersex",
+        "Prefer Not To Disclose"
+      ]
     }
   },
   props: {
@@ -68,6 +68,7 @@ export default {
         [
           'firstName',
           'lastName',
+          'raceEthnicity'
         ]
     ),
   },
@@ -82,17 +83,13 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
-    ...mapActions(useProfileStore, ['loadProfile']),
+    ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     async loadStuff() {
+      // TODO: load the profile for the current user
       await this.loadProfile()
     },
-    edit(profileId) {
-      this.$router.push({
-        name: 'RespiratorUser',
-        params: {
-          id: profileId
-        }
-      })
+    selectRaceEthnicity(raceEth) {
+      this.raceEthnicity = raceEth
     }
   }
 }
@@ -103,7 +100,12 @@ export default {
     display: flex;
     flex-direction: column;
   }
+  .flex-dir-col {
+    display: flex;
+    flex-direction: column;
+  }
   p {
+
     margin: 1em;
   }
 
