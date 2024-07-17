@@ -1,0 +1,22 @@
+name: facemesh_gen
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - jupyter
+  - jupyterlab
+  - pandas
+  - numpy
+  - seaborn
+  - matplotlib
+  - scikit-learn
+  - jupyter_contrib_nbextensions
+  - pytest
+  - pre_commit
+  - autopep8
+  - opencv
+  - protobuf=3.20
+  - pip
+  - pip:
+    - mediapipe
+
