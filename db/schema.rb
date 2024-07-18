@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_07_13_171444) do
+ActiveRecord::Schema[7.0].define(version: 2024_07_18_132436) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -67,6 +67,23 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_13_171444) do
     t.string "status"
     t.boolean "sensor_data_from_external_api", default: false
     t.index ["author_id"], name: "index_events_on_author_id"
+  end
+
+  create_table "facial_measurements_tables", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.integer "face_width"
+    t.string "nose_bridge_height"
+    t.string "nose_bridge_breadth"
+    t.integer "jaw_width"
+    t.integer "face_depth"
+    t.integer "face_length"
+    t.string "lower_face_length"
+    t.integer "bitragion_menton_arc"
+    t.integer "bitragion_subnasale_arc"
+    t.string "cheek_fullness"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_facial_measurements_tables_on_user_id"
   end
 
   create_table "population_states", force: :cascade do |t|
@@ -142,6 +159,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_13_171444) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  add_foreign_key "facial_measurements_tables", "users"
   add_foreign_key "profiles", "users"
   add_foreign_key "user_carbon_dioxide_monitors", "users"
 end
