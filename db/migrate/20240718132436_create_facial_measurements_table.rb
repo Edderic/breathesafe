@@ -2,6 +2,7 @@ class CreateFacialMeasurementsTable < ActiveRecord::Migration[7.0]
   def change
     create_table :facial_measurements_tables do |t|
       t.references :user, null: false, foreign_key: true
+      t.string :source
       t.integer :face_width
       t.string :nose_bridge_height
       t.string :nose_bridge_breadth

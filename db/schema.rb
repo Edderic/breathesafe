@@ -71,6 +71,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_18_132436) do
 
   create_table "facial_measurements_tables", force: :cascade do |t|
     t.bigint "user_id", null: false
+    t.string "source"
     t.integer "face_width"
     t.string "nose_bridge_height"
     t.string "nose_bridge_breadth"
