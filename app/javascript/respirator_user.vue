@@ -25,179 +25,184 @@
       <Button text="Save" @click='saveProfile()'/>
     </div>
 
-    <div class='main' v-if='tabToShow=="FacialMeasurements"'>
+    <div class="edit-facial-measurements" v-if='tabToShow=="FacialMeasurements"'>
+
+
 
       <img class="adaptive-wide" src="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8587533/bin/bmjgh-2021-005537f01.jpg" alt="Depiction of different measurements">
 
 
       <br>
 
-      <table>
-        <thead>
-          <tr>
-            <th colspan='2'>Quantitative Measurements</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th>
-              <label for="source">Source</label>
-            </th>
-            <td>
-              <select
-                  v-if='latestFacialMeasurement'
-                  :value="latestFacialMeasurement.source"
-                  >
-                  <option>caliper/tape</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <th>
-              <label for="faceWidth">Face Width (mm)</label>
-            </th>
-            <td>
-              <input
-                  v-if='latestFacialMeasurement'
-                  type='number'
-                  :value="latestFacialMeasurement.faceWidth"
-                  @change='setFacialMeasurement($event, "faceWidth")'
-                  >
-            </td>
-          </tr>
+      <div class='flex-dir-col'>
+        <table>
+          <thead>
+            <tr>
+              <th colspan='2'>Quantitative Measurements</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>
+                <label for="source">Source</label>
+              </th>
+              <td>
+                <select
+                    v-if='latestFacialMeasurement'
+                    :value="latestFacialMeasurement.source"
+                    >
+                    <option>caliper/tape</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                <label for="faceWidth">Face Width (mm)</label>
+              </th>
+              <td>
+                <input
+                    v-if='latestFacialMeasurement'
+                    type='number'
+                    :value="latestFacialMeasurement.faceWidth"
+                    @change='setFacialMeasurement($event, "faceWidth")'
+                    >
+              </td>
+            </tr>
 
-          <tr>
-            <th>
-              <label for="jawWidth">Jaw Width (mm)</label>
-            </th>
-            <td>
-              <input
-                  v-if='latestFacialMeasurement'
-                  type='number'
-                  :value="latestFacialMeasurement.jawWidth"
-                  @change='setFacialMeasurement($event, "jawWidth")'
-                  >
-            </td>
-          </tr>
-          <tr>
-            <th>
-              <label for="faceDepth">Face Depth (mm)</label>
-            </th>
-            <td>
-              <input
-                  v-if='latestFacialMeasurement'
-                  type='number'
-                  :value="latestFacialMeasurement.faceDepth"
-                  @change='setFacialMeasurement($event, "faceDepth")'
-                  >
-            </td>
-          </tr>
-          <tr>
-            <th>
-              <label for="faceLength">Face Length (mm)</label>
-            </th>
-            <td>
-              <input
-                  v-if='latestFacialMeasurement'
-                  type='number'
-                  :value="latestFacialMeasurement.faceLength"
-                  @change='setFacialMeasurement($event, "faceLength")'
-                  >
-            </td>
-          </tr>
-          <tr>
-            <th>
-              <label for="bitragionMentonArc">Bitragion Menton Arc (mm)</label>
-            </th>
-            <td>
-              <input
-                  v-if='latestFacialMeasurement'
-                  type='number'
-                  :value="latestFacialMeasurement.bitragionMentonArc"
-                  @change='setFacialMeasurement($event, "bitragionMentonArc")'
-                  >
-            </td>
-          </tr>
+            <tr>
+              <th>
+                <label for="jawWidth">Jaw Width (mm)</label>
+              </th>
+              <td>
+                <input
+                    v-if='latestFacialMeasurement'
+                    type='number'
+                    :value="latestFacialMeasurement.jawWidth"
+                    @change='setFacialMeasurement($event, "jawWidth")'
+                    >
+              </td>
+            </tr>
+            <tr>
+              <th>
+                <label for="faceDepth">Face Depth (mm)</label>
+              </th>
+              <td>
+                <input
+                    v-if='latestFacialMeasurement'
+                    type='number'
+                    :value="latestFacialMeasurement.faceDepth"
+                    @change='setFacialMeasurement($event, "faceDepth")'
+                    >
+              </td>
+            </tr>
+            <tr>
+              <th>
+                <label for="faceLength">Face Length (mm)</label>
+              </th>
+              <td>
+                <input
+                    v-if='latestFacialMeasurement'
+                    type='number'
+                    :value="latestFacialMeasurement.faceLength"
+                    @change='setFacialMeasurement($event, "faceLength")'
+                    >
+              </td>
+            </tr>
+            <tr>
+              <th>
+                <label for="bitragionMentonArc">Bitragion Menton Arc (mm)</label>
+              </th>
+              <td>
+                <input
+                    v-if='latestFacialMeasurement'
+                    type='number'
+                    :value="latestFacialMeasurement.bitragionMentonArc"
+                    @change='setFacialMeasurement($event, "bitragionMentonArc")'
+                    >
+              </td>
+            </tr>
 
-          <tr>
-            <th>
-              <label for="bitragionSubnasaleArc">Bitragion Subnasale Arc (mm)</label>
-            </th>
-            <td>
-              <input
-                  v-if='latestFacialMeasurement'
-                  type='number'
-                  :value="latestFacialMeasurement.bitragionSubnasaleArc"
-                  @change='setFacialMeasurement($event, "bitragionSubnasaleArc")'
-                  >
-            </td>
-          </tr>
+            <tr>
+              <th>
+                <label for="bitragionSubnasaleArc">Bitragion Subnasale Arc (mm)</label>
+              </th>
+              <td>
+                <input
+                    v-if='latestFacialMeasurement'
+                    type='number'
+                    :value="latestFacialMeasurement.bitragionSubnasaleArc"
+                    @change='setFacialMeasurement($event, "bitragionSubnasaleArc")'
+                    >
+              </td>
+            </tr>
 
-        </tbody>
-      </table>
+          </tbody>
+        </table>
 
-      <br>
+        <br>
 
-      <table>
-        <thead>
-          <tr>
-            <th colspan='2'>Qualitative Information</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th>
-              <label for="noseBridgeHeight">Nose Bridge Height (mm)</label>
-            </th>
-            <td>
-              <select
-                  v-if='latestFacialMeasurement'
-                  :value="latestFacialMeasurement.noseBridgeHeight"
-                  @change='setFacialMeasurement($event, "noseBridgeHeight")'
-                  >
-                  <option>low</option>
-                  <option>medium</option>
-                  <option>high</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <th>
-              <label for="noseBridgeBreadth">Nose Bridge Breadth (mm)</label>
-            </th>
-            <td>
-              <select
-                  v-if='latestFacialMeasurement'
-                  :value="latestFacialMeasurement.noseBridgeBreadth"
-                  @change='setFacialMeasurement($event, "noseBridgeBreadth")'
-                  >
-                  <option>low</option>
-                  <option>medium</option>
-                  <option>high</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <th>
-              <label for="cheekFullness">Cheek Fullness</label>
-            </th>
-            <td>
-              <select
-                  v-if='latestFacialMeasurement'
-                  :value="latestFacialMeasurement.cheekFullness"
-                  @change='setFacialMeasurement($event, "cheekFullness")'
-                  >
-                  <option>hollow/gaunt</option>
-                  <option>medium</option>
-                  <option>rounded/full</option>
-              </select>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <table>
+          <thead>
+            <tr>
+              <th colspan='2'>Qualitative Information</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>
+                <label for="noseBridgeHeight">Nose Bridge Height (mm)</label>
+              </th>
+              <td>
+                <select
+                    v-if='latestFacialMeasurement'
+                    :value="latestFacialMeasurement.noseBridgeHeight"
+                    @change='setFacialMeasurement($event, "noseBridgeHeight")'
+                    >
+                    <option>low</option>
+                    <option>medium</option>
+                    <option>high</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                <label for="noseBridgeBreadth">Nose Bridge Breadth (mm)</label>
+              </th>
+              <td>
+                <select
+                    v-if='latestFacialMeasurement'
+                    :value="latestFacialMeasurement.noseBridgeBreadth"
+                    @change='setFacialMeasurement($event, "noseBridgeBreadth")'
+                    >
+                    <option>low</option>
+                    <option>medium</option>
+                    <option>high</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                <label for="cheekFullness">Cheek Fullness</label>
+              </th>
+              <td>
+                <select
+                    v-if='latestFacialMeasurement'
+                    :value="latestFacialMeasurement.cheekFullness"
+                    @change='setFacialMeasurement($event, "cheekFullness")'
+                    >
+                    <option>hollow/gaunt</option>
+                    <option>medium</option>
+                    <option>rounded/full</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <Button text="Save" @click='saveFacialMeasurement'/>
+      </div>
 
 
-      <Button text="Save" @click='saveFacialMeasurement'/>
     </div>
   </div>
 </template>
@@ -505,6 +510,10 @@ export default {
   img {
     width: 30em;
   }
+  .edit-facial-measurements {
+    display: flex;
+    flex-direction: row;
+  }
   @media(max-width: 700px) {
     img {
       width: 100vw;
@@ -512,6 +521,10 @@ export default {
 
     .call-to-actions {
       height: 14em;
+    }
+
+    .edit-facial-measurements {
+      flex-direction: columns;
     }
   }
 </style>
