@@ -16,6 +16,8 @@
       />
     </div>
 
+    <br>
+
     <Button text="Save" @click='saveAndGoTo("RespiratorUsers")'/>
   </div>
 </template>
