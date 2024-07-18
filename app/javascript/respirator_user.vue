@@ -339,6 +339,22 @@ export default {
           if (response.data.facial_measurements) {
             this.facialMeasurements = deepSnakeToCamel(data.facial_measurements)
           }
+
+          if (this.facialMeasurements.length == 0) {
+            this.facialMeasurements.push({
+              source: 'caliper/tape',
+                faceWidth: 0,
+                noseBridgeHeight: 'medium',
+                noseBridgeBreadth: 'medium',
+                jawWidth: 0,
+                faceDepth: 0,
+                faceLength: 0,
+                lowerFaceLength: 0,
+                bitragionMentonArc: 0,
+                bitragionSubnasaleArc: 0,
+                cheekFullness: 'medium',
+            })
+          }
           // whatever you want
         })
         .catch(error => {
