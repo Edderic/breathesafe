@@ -29,20 +29,6 @@
 
       <img class="adaptive-wide" src="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8587533/bin/bmjgh-2021-005537f01.jpg" alt="Depiction of different measurements">
 
-      <CircularButton text='+' @click='addFacialMeasurement' class='add-facial-measurements-button'/>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Created at</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for='f in sortedFacialMeasurements'>
-            <td>{{f.createdAt}}</td>
-          </tr>
-        </tbody>
-      </table>
 
       <br>
 
