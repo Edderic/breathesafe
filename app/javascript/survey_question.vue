@@ -2,7 +2,7 @@
   <div class='centered flex-dir-col'>
     <h3>{{question}}</h3>
     <div v-for="re in answer_options">
-      <input type="radio" :id="re" :value="re" @change='send(re)'/>
+      <input type="radio" :id="re" :value="re" @change='send(re)' :checked="isChecked(re)"/>
       <label :for="re">{{re}}</label>
     </div>
   </div>
@@ -27,13 +27,17 @@ export default {
   props: {
     question: String,
     answer_options: Array,
-    updateable: Object,
+    selected: String,
   },
   computed: {
+
   },
   async created() {
   },
   methods: {
+    isChecked(re) {
+      return this.selected == re
+    },
     change(event) {
       this.$emit('update', { value: event.target.value })
     },

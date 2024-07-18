@@ -15,11 +15,13 @@
           <tbody>
             <tr>
               <td>
-                {{firstName}}
+                {{firstName}} {{lastName}}
               </td>
               <td>
+                {{raceEthnicity}}
               </td>
               <td>
+                {{sexAssignedAtBirth}}
               </td>
               <td>
                 <Button @click="edit(profileId)" text='Edit' />
@@ -68,6 +70,8 @@ export default {
         [
           'firstName',
           'lastName',
+          'raceEthnicity',
+          'sexAssignedAtBirth',
         ]
     ),
   },

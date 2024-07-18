@@ -6,10 +6,17 @@
         question="Which race or ethnicity best describes you?"
         :answer_options="race_ethnicity_options"
         @update="selectRaceEthnicity"
+        :selected="raceEthnicity"
+      />
+      <SurveyQuestion
+        question="What is your sex assigned at birth?"
+        :answer_options="sex_assigned_at_birth_options"
+        @update="selectSexAssignedAtBirth"
+        :selected="sexAssignedAtBirth"
       />
     </div>
 
-    <Button text="Save" @click='updateProfile'/>
+    <Button text="Save" @click='saveAndGoTo("RespiratorUsers")'/>
   </div>
 </template>
 
@@ -68,7 +75,8 @@ export default {
         [
           'firstName',
           'lastName',
-          'raceEthnicity'
+          'raceEthnicity',
+          'sexAssignedAtBirth'
         ]
     ),
   },
@@ -78,6 +86,8 @@ export default {
     if (!this.currentUser) {
       signIn.call(this)
     } else {
+      // TODO: a parent might input data on behalf of their children.
+      // Currently, this.loadStuff() assumes We're loading the profile for the current user
       this.loadStuff()
     }
   },
@@ -88,8 +98,17 @@ export default {
       // TODO: load the profile for the current user
       await this.loadProfile()
     },
+    async saveAndGoTo(pathName) {
+      await this.updateProfile()
+      this.$router.push({
+        name: pathName,
+      })
+    },
     selectRaceEthnicity(raceEth) {
       this.raceEthnicity = raceEth
+    },
+    selectSexAssignedAtBirth(sexAssignedAtBirth) {
+      this.sexAssignedAtBirth = sexAssignedAtBirth
     }
   }
 }
