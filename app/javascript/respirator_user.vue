@@ -1,7 +1,12 @@
 <template>
   <div>
     <h2 class='tagline'>Respirator User</h2>
-    <div class='main'>
+    <div class='menu row'>
+      <Button :class="{ tab: true }" @click='tabToShow = "Demographics"' shadow='true' text='Demographics' :selected="tabToShow=='Demographics'"/>
+      <Button :class="{ tab: true }" @click='tabToShow = "FacialMeasurements"' shadow='true' text='Facial Measurements' :selected="tabToShow=='FacialMeasurements'"/>
+    </div>
+
+    <div class='main' v-if='tabToShow=="Demographics"'>
       <SurveyQuestion
         question="Which race or ethnicity best describes you?"
         :answer_options="race_ethnicity_options"
@@ -14,16 +19,109 @@
         @update="selectSexAssignedAtBirth"
         :selected="sexAssignedAtBirth"
       />
+
+      <br>
+
+      <Button text="Save" @click='saveProfile()'/>
     </div>
 
-    <br>
+    <div class='main' v-if='tabToShow=="FacialMeasurements"'>
+      <CircularButton text='+' @click='addFacialMeasurement' class='add-facial-measurements-button'/>
 
-    <Button text="Save" @click='saveAndGoTo("RespiratorUsers")'/>
+      <table>
+        <thead>
+          <tr>
+            <th>Created at</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for='f in sortedFacialMeasurements'>
+            <td>{{f.createdAt}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>
+              <label for="faceWidth">Face Width (mm)</label>
+            </th>
+            <td>
+              <input
+                  v-if='latestFacialMeasurement'
+                  type='number'
+                  :value="latestFacialMeasurement.faceWidth"
+                  @change='setFaceWidth'
+                  >
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <label for="noseBridgeHeight">Nose Bridge Height (mm)</label>
+            </th>
+            <td>
+              <select
+                  v-if='latestFacialMeasurement'
+                  :value="latestFacialMeasurement.noseBridgeHeight"
+                  @change='selectNoseBridgeHeight'
+                  >
+                  <option>low</option>
+                  <option>medium</option>
+                  <option>high</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <label for="noseBridgeBreadth">Nose Bridge Breadth (mm)</label>
+            </th>
+            <td>
+              <select
+                  v-if='latestFacialMeasurement'
+                  :value="latestFacialMeasurement.noseBridgeBreadth"
+                  @change='selectNoseBridgeBreadth'
+                  >
+                  <option>low</option>
+                  <option>medium</option>
+                  <option>high</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <label for="jawWidth">Jaw Width (mm)</label>
+            </th>
+            <td>
+              <input
+                  v-if='latestFacialMeasurement'
+                  type='number'
+                  :value="latestFacialMeasurement.jawWidth"
+                  @change='setJawWidth'
+                  >
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+
+      <Button text="Save" @click='saveFacialMeasurement'/>
+    </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
 import Button from './button.vue'
+import CircularButton from './circular_button.vue'
+import { deepSnakeToCamel } from './misc.js'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
@@ -34,10 +132,12 @@ export default {
   name: 'RespiratorUser',
   components: {
     Button,
+    CircularButton,
     SurveyQuestion
   },
   data() {
     return {
+      tabToShow: 'Demographics',
       race_ethnicity_question: "Which race or ethnicity best describes you?",
       race_ethnicity_options: [
         "American Indian or Alaskan Native",
@@ -54,7 +154,8 @@ export default {
         "Female",
         "Intersex",
         "Prefer Not To Disclose"
-      ]
+      ],
+      facialMeasurements: []
     }
   },
   props: {
@@ -81,6 +182,14 @@ export default {
           'sexAssignedAtBirth'
         ]
     ),
+    latestFacialMeasurement() {
+      return this.facialMeasurements[this.facialMeasurements.length - 1]
+    },
+    sortedFacialMeasurements() {
+      return this.facialMeasurements.sort((a, b) => {
+        return new Date(a.createdAt) > new Date(b.createdAt)
+      })
+    },
   },
   async created() {
     await this.getCurrentUser()
@@ -92,25 +201,111 @@ export default {
       // Currently, this.loadStuff() assumes We're loading the profile for the current user
       this.loadStuff()
     }
+
+    // TODO: add param watchers
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    addFacialMeasurement() {
+      this.facialMeasurements.push(
+        {
+          source: 'self-measurement',
+          faceWidth: 0,
+          noseBridgeHeight: 'medium',
+          noseBridgeBreadth: 'medium',
+          jawWidth: 0,
+          faceDepth: 0,
+          faceLength: 0,
+          lowerFaceLength: 0,
+          bitragionMentonArc: 0,
+          bitragionSubnasaleArc: 0,
+          cheekFullness: 'medium',
+
+        }
+      )
+    },
     async loadStuff() {
       // TODO: load the profile for the current user
-      await this.loadProfile()
+      this.loadProfile()
+      this.loadFacialMeasurements()
     },
-    async saveAndGoTo(pathName) {
+    async loadFacialMeasurements() {
+      // TODO: make this more flexible so parents can load data of their children
+      await axios.get(
+        `/users/${this.currentUser.id}/facial_measurements.json`,
+      )
+        .then(response => {
+          let data = response.data
+          if (response.data.facial_measurements) {
+            this.facialMeasurements = deepSnakeToCamel(data.facial_measurements)
+          }
+          // whatever you want
+        })
+        .catch(error => {
+          this.message = "Failed to load profile."
+          // whatever you want
+        })
+    },
+    async saveProfile() {
       await this.updateProfile()
       this.$router.push({
-        name: pathName,
+        name: "RespiratorUser",
+        params: {
+          id: this.currentUser.id,
+        },
+        query: {
+          tabToShow: 'FacialMeasurements'
+        }
       })
+    },
+    async saveFacialMeasurement() {
+      await axios.post(
+        `/users/${this.currentUser.id}/facial_measurements.json`, {
+          source: this.latestFacialMeasurement.source,
+          face_width: this.latestFacialMeasurement.faceWidth,
+          nose_bridge_height: this.latestFacialMeasurement.noseBridgeHeight,
+          nose_bridge_breadth: this.latestFacialMeasurement.noseBridgeBreadth,
+          jaw_width: this.latestFacialMeasurement.jawWidth,
+          face_depth: this.latestFacialMeasurement.faceDepth,
+          face_length: this.latestFacialMeasurement.faceLength,
+          lower_face_length: this.latestFacialMeasurement.lowerFaceLength,
+          bitragion_menton_arc: this.latestFacialMeasurement.bitragionMentonArc,
+          bitragion_subnasale_arc: this.latestFacialMeasurement.bitragionSubnasaleArc,
+          cheek_fullness: this.latestFacialMeasurement.cheekFullness,
+          user_id: this.currentUser.id
+        }
+      )
+        .then(response => {
+          let data = response.data
+          // whatever you want
+        })
+        .catch(error => {
+          this.message = "Failed to create facial measurement."
+          // whatever you want
+        })
+      this.$router.push({
+        name: 'RespiratorUsers',
+      })
+    },
+    selectNoseBridgeHeight(event) {
+      this.latestFacialMeasurement.noseBridgeHeight = event.target.value
+    },
+    selectNoseBridgeBreadth(event) {
+      this.latestFacialMeasurement.noseBridgeBreadth = event.target.value
     },
     selectRaceEthnicity(raceEth) {
       this.raceEthnicity = raceEth
     },
     selectSexAssignedAtBirth(sexAssignedAtBirth) {
       this.sexAssignedAtBirth = sexAssignedAtBirth
+    },
+    setFaceWidth(event) {
+      this.latestFacialMeasurement.faceWidth = event.target.value
+    },
+
+    setJawWidth(event) {
+      this.latestFacialMeasurement.jawWidth = event.target.value
     }
   }
 }
@@ -121,6 +316,36 @@ export default {
     display: flex;
     flex-direction: column;
   }
+  .add-facial-measurements-button {
+    margin: 1em auto;
+  }
+
+  input[type='number'] {
+    min-width: 2em;
+    font-size: 24px;
+    padding-left: 0.25em;
+    padding-right: 0.25em;
+  }
+
+  .menu {
+    justify-content:center;
+    min-width: 500px;
+    background-color: #eee;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .row {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .row button {
+    width: 100%;
+    padding-top: 1em;
+    padding-bottom: 1em;
+  }
+
+
   .flex-dir-col {
     display: flex;
     flex-direction: column;
@@ -128,6 +353,10 @@ export default {
   p {
 
     margin: 1em;
+  }
+
+  select {
+    padding: 0.25em;
   }
 
   .quote {
@@ -162,6 +391,10 @@ export default {
   }
   .call-to-actions a {
     text-decoration: none;
+  }
+  .label-input {
+    align-items:center;
+    justify-content:space-between;
   }
 
   .main {

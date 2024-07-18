@@ -31,6 +31,9 @@ Rails.application.routes.draw do
   post 'users/:user_id/profile', to: 'users/profiles#create'
   put 'users/:user_id/profile', to: 'users/profiles#update'
 
+  get 'users/:user_id/facial_measurements', to: 'users/facial_measurements#show'
+  post 'users/:user_id/facial_measurements', to: 'users/facial_measurements#create'
+
   controller :pages do
     get :qr_code_generator
     get :qr_code_download

@@ -163,7 +163,7 @@
       <div class='container'>
         <label class='bold'>Maximum Occupancy</label>
         <Number
-          class='continuous'
+            class='continuous'
           :leftButtons="[{text: '-10', emitSignal: 'addMaxOccupancy'}, {text: '-1', emitSignal: 'addMaxOccupancy'}]"
           :rightButtons="[{text: '+1', emitSignal: 'addMaxOccupancy'}, {text: '+10', emitSignal: 'addMaxOccupancy'}]"
           :value='maximumOccupancy'

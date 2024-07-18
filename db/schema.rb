@@ -69,7 +69,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_18_132436) do
     t.index ["author_id"], name: "index_events_on_author_id"
   end
 
-  create_table "facial_measurements_tables", force: :cascade do |t|
+  create_table "facial_measurements", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "source"
     t.integer "face_width"
@@ -84,7 +84,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_18_132436) do
     t.string "cheek_fullness"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_facial_measurements_tables_on_user_id"
+    t.index ["user_id"], name: "index_facial_measurements_on_user_id"
   end
 
   create_table "population_states", force: :cascade do |t|
@@ -160,7 +160,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_18_132436) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
-  add_foreign_key "facial_measurements_tables", "users"
+  add_foreign_key "facial_measurements", "users"
   add_foreign_key "profiles", "users"
   add_foreign_key "user_carbon_dioxide_monitors", "users"
 end
