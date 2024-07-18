@@ -2,7 +2,6 @@ class Users::FacialMeasurementsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def create
-    debugger
     if unauthorized?
       status = 401
       message = "Unauthorized."

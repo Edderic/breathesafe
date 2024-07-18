@@ -26,6 +26,9 @@
     </div>
 
     <div class='main' v-if='tabToShow=="FacialMeasurements"'>
+
+      <img class="adaptive-wide" src="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8587533/bin/bmjgh-2021-005537f01.jpg" alt="Depiction of different measurements">
+
       <CircularButton text='+' @click='addFacialMeasurement' class='add-facial-measurements-button'/>
 
       <table>
@@ -41,15 +44,28 @@
         </tbody>
       </table>
 
+      <br>
 
       <table>
         <thead>
           <tr>
-            <th></th>
-            <th></th>
+            <th colspan='2'>Quantitative Measurements</th>
           </tr>
         </thead>
         <tbody>
+          <tr>
+            <th>
+              <label for="source">Source</label>
+            </th>
+            <td>
+              <select
+                  v-if='latestFacialMeasurement'
+                  :value="latestFacialMeasurement.source"
+                  >
+                  <option>caliper/tape</option>
+              </select>
+            </td>
+          </tr>
           <tr>
             <th>
               <label for="faceWidth">Face Width (mm)</label>
@@ -59,10 +75,90 @@
                   v-if='latestFacialMeasurement'
                   type='number'
                   :value="latestFacialMeasurement.faceWidth"
-                  @change='setFaceWidth'
+                  @change='setFacialMeasurement($event, "faceWidth")'
                   >
             </td>
           </tr>
+
+          <tr>
+            <th>
+              <label for="jawWidth">Jaw Width (mm)</label>
+            </th>
+            <td>
+              <input
+                  v-if='latestFacialMeasurement'
+                  type='number'
+                  :value="latestFacialMeasurement.jawWidth"
+                  @change='setFacialMeasurement($event, "jawWidth")'
+                  >
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <label for="faceDepth">Face Depth (mm)</label>
+            </th>
+            <td>
+              <input
+                  v-if='latestFacialMeasurement'
+                  type='number'
+                  :value="latestFacialMeasurement.faceDepth"
+                  @change='setFacialMeasurement($event, "faceDepth")'
+                  >
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <label for="faceLength">Face Length (mm)</label>
+            </th>
+            <td>
+              <input
+                  v-if='latestFacialMeasurement'
+                  type='number'
+                  :value="latestFacialMeasurement.faceLength"
+                  @change='setFacialMeasurement($event, "faceLength")'
+                  >
+            </td>
+          </tr>
+          <tr>
+            <th>
+              <label for="bitragionMentonArc">Bitragion Menton Arc (mm)</label>
+            </th>
+            <td>
+              <input
+                  v-if='latestFacialMeasurement'
+                  type='number'
+                  :value="latestFacialMeasurement.bitragionMentonArc"
+                  @change='setFacialMeasurement($event, "bitragionMentonArc")'
+                  >
+            </td>
+          </tr>
+
+          <tr>
+            <th>
+              <label for="bitragionSubnasaleArc">Bitragion Subnasale Arc (mm)</label>
+            </th>
+            <td>
+              <input
+                  v-if='latestFacialMeasurement'
+                  type='number'
+                  :value="latestFacialMeasurement.bitragionSubnasaleArc"
+                  @change='setFacialMeasurement($event, "bitragionSubnasaleArc")'
+                  >
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+      <br>
+
+      <table>
+        <thead>
+          <tr>
+            <th colspan='2'>Qualitative Information</th>
+          </tr>
+        </thead>
+        <tbody>
           <tr>
             <th>
               <label for="noseBridgeHeight">Nose Bridge Height (mm)</label>
@@ -71,7 +167,7 @@
               <select
                   v-if='latestFacialMeasurement'
                   :value="latestFacialMeasurement.noseBridgeHeight"
-                  @change='selectNoseBridgeHeight'
+                  @change='setFacialMeasurement($event, "noseBridgeHeight")'
                   >
                   <option>low</option>
                   <option>medium</option>
@@ -87,7 +183,7 @@
               <select
                   v-if='latestFacialMeasurement'
                   :value="latestFacialMeasurement.noseBridgeBreadth"
-                  @change='selectNoseBridgeBreadth'
+                  @change='setFacialMeasurement($event, "noseBridgeBreadth")'
                   >
                   <option>low</option>
                   <option>medium</option>
@@ -97,15 +193,18 @@
           </tr>
           <tr>
             <th>
-              <label for="jawWidth">Jaw Width (mm)</label>
+              <label for="cheekFullness">Cheek Fullness</label>
             </th>
             <td>
-              <input
+              <select
                   v-if='latestFacialMeasurement'
-                  type='number'
-                  :value="latestFacialMeasurement.jawWidth"
-                  @change='setJawWidth'
+                  :value="latestFacialMeasurement.cheekFullness"
+                  @change='setFacialMeasurement($event, "cheekFullness")'
                   >
+                  <option>hollow/gaunt</option>
+                  <option>medium</option>
+                  <option>rounded/full</option>
+              </select>
             </td>
           </tr>
         </tbody>
@@ -210,7 +309,7 @@ export default {
     addFacialMeasurement() {
       this.facialMeasurements.push(
         {
-          source: 'self-measurement',
+          source: 'caliper/tape',
           faceWidth: 0,
           noseBridgeHeight: 'medium',
           noseBridgeBreadth: 'medium',
@@ -288,25 +387,15 @@ export default {
         name: 'RespiratorUsers',
       })
     },
-    selectNoseBridgeHeight(event) {
-      this.latestFacialMeasurement.noseBridgeHeight = event.target.value
-    },
-    selectNoseBridgeBreadth(event) {
-      this.latestFacialMeasurement.noseBridgeBreadth = event.target.value
-    },
     selectRaceEthnicity(raceEth) {
       this.raceEthnicity = raceEth
     },
     selectSexAssignedAtBirth(sexAssignedAtBirth) {
       this.sexAssignedAtBirth = sexAssignedAtBirth
     },
-    setFaceWidth(event) {
-      this.latestFacialMeasurement.faceWidth = event.target.value
+    setFacialMeasurement(event, whatToSet) {
+      this.latestFacialMeasurement[whatToSet] = event.target.value
     },
-
-    setJawWidth(event) {
-      this.latestFacialMeasurement.jawWidth = event.target.value
-    }
   }
 }
 </script>
@@ -408,6 +497,9 @@ export default {
     justify-content: space-around;
   }
 
+  .adaptive-wide img {
+    width: 100%;
+  }
   img {
     width: 30em;
   }
