@@ -34,8 +34,15 @@
 
       <img v-if='infoToShow == "quantitativeGuide"' class="adaptive-wide" src="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8587533/bin/bmjgh-2021-005537f01.jpg" alt="Depiction of different measurements">
 
-      <div v-if='infoToShow == "noseBridgeHeight"'>
-        <img src="https://qph.cf2.quoracdn.net/main-qimg-4a76e688296db52b1e13b73a03f56242.webp" alt="">
+      <div v-if='infoToShow == "noseBridgeHeight"' class='align-items-center'>
+        <p>Select options below to get an understanding of what "Low", "Medium", and "High" nose bridges are.</p>
+        <TabSet
+          :options='noseBridgeHeightOptions'
+          @update='setNoseBridgeHeightExampleToShow'
+        />
+        <img class='left-pane-image' v-if='noseBridgeHeightExample == "Low"' src="https://qph.cf2.quoracdn.net/main-qimg-4a76e688296db52b1e13b73a03f56242.webp" alt="low nose bridge">
+        <img class='left-pane-image' v-if='noseBridgeHeightExample == "Medium"' src="https://qph.cf2.quoracdn.net/main-qimg-688959ce2f1936ceb9fd523e8bc60094.webp" alt="medium nose bridge">
+        <img class='left-pane-image' v-if='noseBridgeHeightExample == "High"' src="https://qph.cf2.quoracdn.net/main-qimg-855fbe23110d6998624e7af03ccf642e.webp" alt="high nose bridge">
       </div>
 
 
@@ -161,7 +168,7 @@
                 <label for="noseBridgeHeight">Nose Bridge Height</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('NoseBridgeHeight')"/>
+                <CircularButton text="?" @click="toggleInfo('noseBridgeHeight')"/>
               </td>
               <td>
                 <select
@@ -222,6 +229,7 @@
 import axios from 'axios';
 import Button from './button.vue'
 import CircularButton from './circular_button.vue'
+import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
@@ -234,10 +242,23 @@ export default {
   components: {
     Button,
     CircularButton,
-    SurveyQuestion
+    SurveyQuestion,
+    TabSet
   },
   data() {
     return {
+      noseBridgeHeightExample: 'Low',
+      noseBridgeHeightOptions: [
+        {
+          text: 'Low'
+        },
+        {
+          text: 'Medium'
+        },
+        {
+          text: 'High'
+        }
+      ],
       tabToShow: 'Demographics',
       race_ethnicity_question: "Which race or ethnicity best describes you?",
       race_ethnicity_options: [
@@ -441,6 +462,9 @@ export default {
     setFacialMeasurement(event, whatToSet) {
       this.latestFacialMeasurement[whatToSet] = event.target.value
     },
+    setNoseBridgeHeightExampleToShow(opt) {
+      this.noseBridgeHeightExample = opt.name
+    },
     toggleInfo(infoToShow) {
       this.infoToShow = infoToShow;
     }
@@ -523,6 +547,16 @@ export default {
     font-weight: bold;
   }
 
+  .align-items-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .left-pane-image {
+
+  }
+
   .call-to-actions {
     display: flex;
     flex-direction: column;
@@ -552,7 +586,7 @@ export default {
     width: 100%;
   }
   img {
-    width: 30em;
+    max-width: 30em;
   }
   .edit-facial-measurements {
     display: flex;
