@@ -14,11 +14,14 @@
         :selected="raceEthnicity"
       />
       <SurveyQuestion
-        question="What is your sex assigned at birth?"
-        :answer_options="sex_assigned_at_birth_options"
-        @update="selectSexAssignedAtBirth"
-        :selected="sexAssignedAtBirth"
+        question="What is your gender?"
+        :answer_options="gender_and_sex_options"
+        @update="selectGenderAndSex"
+        :selected="genderAndSex"
       />
+      <div>
+        <input class='text-for-other' type="text" v-model='otherGender'>
+      </div>
 
       <br>
 
@@ -239,11 +242,14 @@ export default {
         "Prefer not to disclose",
       ],
       sex_assigned_at_birth_question: "What is your sex assigned at birth?",
-      sex_assigned_at_birth_options: [
-        "Male",
-        "Female",
+      gender_and_sex_options: [
+        "Cisgender male",
+        "Cisgender female",
+        "MTF transgender",
+        "FTM transgender",
         "Intersex",
-        "Prefer Not To Disclose"
+        "Prefer not to disclose",
+        "Other"
       ],
       facialMeasurements: []
     }
@@ -269,7 +275,8 @@ export default {
           'firstName',
           'lastName',
           'raceEthnicity',
-          'sexAssignedAtBirth'
+          'genderAndSex',
+          'otherGender'
         ]
     ),
     latestFacialMeasurement() {
@@ -397,8 +404,8 @@ export default {
     selectRaceEthnicity(raceEth) {
       this.raceEthnicity = raceEth
     },
-    selectSexAssignedAtBirth(sexAssignedAtBirth) {
-      this.sexAssignedAtBirth = sexAssignedAtBirth
+    selectGenderAndSex(genderAndSex) {
+      this.genderAndSex = genderAndSex
     },
     setFacialMeasurement(event, whatToSet) {
       this.latestFacialMeasurement[whatToSet] = event.target.value
@@ -421,6 +428,9 @@ export default {
     font-size: 24px;
     padding-left: 0.25em;
     padding-right: 0.25em;
+  }
+  .text-for-other {
+    margin: 0 1.25em;
   }
 
   .menu {

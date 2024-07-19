@@ -1,9 +1,9 @@
 <template>
   <div class='centered flex-dir-col'>
     <h3>{{question}}</h3>
-    <div v-for="re in answer_options">
-      <input type="radio" :id="re" :value="re" @change='send(re)' :checked="isChecked(re)"/>
-      <label :for="re">{{re}}</label>
+    <div v-for="re in questionWithAnswerOptions">
+      <input type="radio" :id="re.questionAndAnswerOption" :value="re.answerOption" @change='send(re.answerOption)' :checked="isChecked(re.answerOption)"/>
+      <label :for="re.questionAndAnswerOption">{{re.answerOption}}</label>
     </div>
   </div>
 </template>
@@ -30,7 +30,19 @@ export default {
     selected: String,
   },
   computed: {
+    questionWithAnswerOptions() {
+      let collection = []
+      for(let opt of this.answer_options) {
+        collection.push(
+          {
+            'questionAndAnswerOption': this.question.replaceAll("?", "").replaceAll(" ", "-") + opt,
+            'answerOption': opt
+          }
+        )
 
+      }
+      return collection
+    }
   },
   async created() {
   },

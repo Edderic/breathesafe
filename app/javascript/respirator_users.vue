@@ -8,7 +8,7 @@
             <tr>
               <th>Name</th>
               <th>Race &amp; Ethnicity</th>
-              <th>Sex Assigned at Birth</th>
+              <th>Gender</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -21,7 +21,7 @@
                 {{raceEthnicity}}
               </td>
               <td>
-                {{sexAssignedAtBirth}}
+                {{genderAndSex}}
               </td>
               <td>
                 <Button @click="edit(profileId)" text='Edit' />
@@ -71,7 +71,7 @@ export default {
           'firstName',
           'lastName',
           'raceEthnicity',
-          'sexAssignedAtBirth',
+          'genderAndSex',
         ]
     ),
   },
