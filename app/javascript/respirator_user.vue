@@ -2,8 +2,8 @@
   <div>
     <h2 class='tagline'>Respirator User</h2>
     <div class='menu row'>
-      <Button :class="{ tab: true }" @click='tabToShow = "Demographics"' shadow='true' text='Demographics' :selected="tabToShow=='Demographics'"/>
-      <Button :class="{ tab: true }" @click='tabToShow = "FacialMeasurements"' shadow='true' text='Facial Measurements' :selected="tabToShow=='FacialMeasurements'"/>
+      <Button :class="{ tab: true }" @click='setRouteTo("Demographics")' shadow='true' text='Demographics' :selected="tabToShow=='Demographics'"/>
+      <Button :class="{ tab: true }" @click='setRouteTo("FacialMeasurements")' shadow='true' text='Facial Measurements' :selected="tabToShow=='FacialMeasurements'"/>
     </div>
 
     <div class='main' v-if='tabToShow=="Demographics"'>
@@ -32,12 +32,17 @@
 
 
 
-      <img class="adaptive-wide" src="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8587533/bin/bmjgh-2021-005537f01.jpg" alt="Depiction of different measurements">
+      <img v-if='infoToShow == "quantitativeGuide"' class="adaptive-wide" src="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8587533/bin/bmjgh-2021-005537f01.jpg" alt="Depiction of different measurements">
+
+      <div v-if='infoToShow == "noseBridgeHeight"'>
+        <img src="https://qph.cf2.quoracdn.net/main-qimg-4a76e688296db52b1e13b73a03f56242.webp" alt="">
+      </div>
 
 
       <br>
 
       <div class='flex-dir-col'>
+        <br>
         <table>
           <thead>
             <tr>
@@ -147,7 +152,7 @@
         <table>
           <thead>
             <tr>
-              <th colspan='2'>Qualitative Measurements</th>
+              <th colspan='3'>Qualitative Measurements</th>
             </tr>
           </thead>
           <tbody>
@@ -155,6 +160,9 @@
               <th>
                 <label for="noseBridgeHeight">Nose Bridge Height</label>
               </th>
+              <td>
+                <CircularButton text="?" @click="toggleInfo('NoseBridgeHeight')"/>
+              </td>
               <td>
                 <select
                     v-if='latestFacialMeasurement'
@@ -177,9 +185,9 @@
                     :value="latestFacialMeasurement.noseBridgeBreadth"
                     @change='setFacialMeasurement($event, "noseBridgeBreadth")'
                     >
-                    <option>low</option>
+                    <option>narrow</option>
                     <option>medium</option>
-                    <option>high</option>
+                    <option>broad</option>
                 </select>
               </td>
             </tr>
@@ -251,7 +259,8 @@ export default {
         "Prefer not to disclose",
         "Other"
       ],
-      facialMeasurements: []
+      facialMeasurements: [],
+      infoToShow: "quantitativeGuide"
     }
   },
   props: {
@@ -299,7 +308,21 @@ export default {
       this.loadStuff()
     }
 
+    let toQuery = this.$route.query
+
+    if (toQuery['tabToShow'] && (this.$route.name == "RespiratorUser")) {
+      this.tabToShow = toQuery['tabToShow']
+    }
+
     // TODO: add param watchers
+    this.$watch(
+      () => this.$route.query,
+      (toQuery, fromQuery) => {
+        if (toQuery['tabToShow'] && (this.$route.name == "RespiratorUser")) {
+          this.tabToShow = toQuery['tabToShow']
+        }
+      }
+    )
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
@@ -401,6 +424,14 @@ export default {
         name: 'RespiratorUsers',
       })
     },
+    setRouteTo(tabToShow) {
+      this.$router.push({
+        name: "RespiratorUser",
+        query: {
+          tabToShow: tabToShow
+        }
+      })
+    },
     selectRaceEthnicity(raceEth) {
       this.raceEthnicity = raceEth
     },
@@ -410,6 +441,9 @@ export default {
     setFacialMeasurement(event, whatToSet) {
       this.latestFacialMeasurement[whatToSet] = event.target.value
     },
+    toggleInfo(infoToShow) {
+      this.infoToShow = infoToShow;
+    }
   }
 }
 </script>
