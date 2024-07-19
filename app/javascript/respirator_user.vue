@@ -50,7 +50,16 @@
         <img class='left-pane-image' src="https://amitismedtour.com/wp-content/uploads/2021/11/Wide-Nose-Rhinoplasty-1-1200x800.jpg" alt="before and after rhinoplasty. Wide vs. Narrow nose bridge">
       </div>
 
-
+      <div v-if='infoToShow == "cheekFullness"' class='align-items-center'>
+        <p class='left-pane'>Select options below to get an understanding of different types of cheek fullness are</p>
+        <TabSet
+          :options='cheekFullnessOptions'
+          @update='setCheekFullnessExampleToShow'
+        />
+        <img class='left-pane-image' v-if='cheekFullnessExample == "Hallow/gaunt"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-hollow.png" alt="hallow/gaunt cheeks">
+        <img class='left-pane-image' v-if='cheekFullnessExample == "Medium"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-neutral.png" alt="medium-ful cheeks">
+        <img class='left-pane-image' v-if='cheekFullnessExample == "Rounded/full"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-rounded.png" alt="rounded cheeks">
+      </div>
       <br>
 
       <div class='flex-dir-col'>
@@ -211,6 +220,9 @@
                 <label for="cheekFullness">Cheek Fullness</label>
               </th>
               <td>
+                <CircularButton text="?" @click="toggleInfo('cheekFullness')"/>
+              </td>
+              <td>
                 <select
                     v-if='latestFacialMeasurement'
                     :value="latestFacialMeasurement.cheekFullness"
@@ -255,6 +267,7 @@ export default {
   },
   data() {
     return {
+      cheekFullnessExample: 'Hallow/gaunt',
       noseBridgeHeightExample: 'Low',
       noseBridgeHeightOptions: [
         {
@@ -265,6 +278,17 @@ export default {
         },
         {
           text: 'High'
+        }
+      ],
+      cheekFullnessOptions: [
+        {
+          text: 'Hallow/gaunt'
+        },
+        {
+          text: 'Medium'
+        },
+        {
+          text: 'Rounded/full'
         }
       ],
       tabToShow: 'Demographics',
@@ -472,6 +496,9 @@ export default {
     },
     setNoseBridgeHeightExampleToShow(opt) {
       this.noseBridgeHeightExample = opt.name
+    },
+    setCheekFullnessExampleToShow(opt) {
+      this.cheekFullnessExample = opt.name
     },
     toggleInfo(infoToShow) {
       this.infoToShow = infoToShow;
