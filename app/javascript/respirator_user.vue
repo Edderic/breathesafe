@@ -60,7 +60,7 @@
             </tr>
             <tr>
               <th>
-                <label for="faceWidth">Face Width (mm)</label>
+                <label for="faceWidth">Face Width <b>(B)</b> (mm) </label>
               </th>
               <td>
                 <input
@@ -74,7 +74,7 @@
 
             <tr>
               <th>
-                <label for="jawWidth">Jaw Width (mm)</label>
+                <label for="jawWidth">Jaw Width <b>(C)</b> (mm)</label>
               </th>
               <td>
                 <input
@@ -87,7 +87,7 @@
             </tr>
             <tr>
               <th>
-                <label for="faceDepth">Face Depth (mm)</label>
+                <label for="faceDepth">Face Depth <b>(P)</b> (mm)</label>
               </th>
               <td>
                 <input
@@ -100,7 +100,7 @@
             </tr>
             <tr>
               <th>
-                <label for="faceLength">Face Length (mm)</label>
+                <label for="faceLength">Face Length <b>(D)</b> (mm)</label>
               </th>
               <td>
                 <input
@@ -113,7 +113,7 @@
             </tr>
             <tr>
               <th>
-                <label for="bitragionMentonArc">Bitragion Menton Arc (mm)</label>
+                <label for="bitragionMentonArc">Bitragion Menton Arc <b>(K)</b> (mm)</label>
               </th>
               <td>
                 <input
@@ -127,7 +127,7 @@
 
             <tr>
               <th>
-                <label for="bitragionSubnasaleArc">Bitragion Subnasale Arc (mm)</label>
+                <label for="bitragionSubnasaleArc">Bitragion Subnasale Arc <b>(L)</b> (mm)</label>
               </th>
               <td>
                 <input
@@ -147,13 +147,13 @@
         <table>
           <thead>
             <tr>
-              <th colspan='2'>Qualitative Information</th>
+              <th colspan='2'>Qualitative Measurements</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <th>
-                <label for="noseBridgeHeight">Nose Bridge Height (mm)</label>
+                <label for="noseBridgeHeight">Nose Bridge Height</label>
               </th>
               <td>
                 <select
@@ -169,7 +169,7 @@
             </tr>
             <tr>
               <th>
-                <label for="noseBridgeBreadth">Nose Bridge Breadth (mm)</label>
+                <label for="noseBridgeBreadth">Nose Bridge Breadth</label>
               </th>
               <td>
                 <select
