@@ -35,7 +35,7 @@
       <img v-if='infoToShow == "quantitativeGuide"' class="adaptive-wide" src="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8587533/bin/bmjgh-2021-005537f01.jpg" alt="Depiction of different measurements">
 
       <div v-if='infoToShow == "noseBridgeHeight"' class='align-items-center'>
-        <p>Select options below to get an understanding of what "Low", "Medium", and "High" nose bridges are.</p>
+        <p class='left-pane'>Select options below to get an understanding of what "Low", "Medium", and "High" nose bridges are.</p>
         <TabSet
           :options='noseBridgeHeightOptions'
           @update='setNoseBridgeHeightExampleToShow'
@@ -43,6 +43,11 @@
         <img class='left-pane-image' v-if='noseBridgeHeightExample == "Low"' src="https://qph.cf2.quoracdn.net/main-qimg-4a76e688296db52b1e13b73a03f56242.webp" alt="low nose bridge">
         <img class='left-pane-image' v-if='noseBridgeHeightExample == "Medium"' src="https://qph.cf2.quoracdn.net/main-qimg-688959ce2f1936ceb9fd523e8bc60094.webp" alt="medium nose bridge">
         <img class='left-pane-image' v-if='noseBridgeHeightExample == "High"' src="https://qph.cf2.quoracdn.net/main-qimg-855fbe23110d6998624e7af03ccf642e.webp" alt="high nose bridge">
+      </div>
+
+      <div class='align-items-center' v-if='infoToShow == "noseBridgeBreadth"' >
+        <p class='left-pane'>Wide vs. Medium nose bridge</p>
+        <img class='left-pane-image' src="https://amitismedtour.com/wp-content/uploads/2021/11/Wide-Nose-Rhinoplasty-1-1200x800.jpg" alt="before and after rhinoplasty. Wide vs. Narrow nose bridge">
       </div>
 
 
@@ -186,6 +191,9 @@
               <th>
                 <label for="noseBridgeBreadth">Nose Bridge Breadth</label>
               </th>
+              <td>
+                <CircularButton text="?" @click="toggleInfo('noseBridgeBreadth')"/>
+              </td>
               <td>
                 <select
                     v-if='latestFacialMeasurement'
@@ -555,6 +563,9 @@ export default {
 
   .left-pane-image {
 
+  }
+  p.left-pane {
+    max-width: 50%;
   }
 
   .call-to-actions {
