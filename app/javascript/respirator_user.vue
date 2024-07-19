@@ -534,7 +534,7 @@ export default {
     }
 
     .edit-facial-measurements {
-      flex-direction: columns;
+      flex-direction: column;
     }
   }
 </style>
