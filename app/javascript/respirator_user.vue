@@ -34,7 +34,7 @@
 
       <img v-if='infoToShow == "quantitativeGuide"' class="adaptive-wide" src="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8587533/bin/bmjgh-2021-005537f01.jpg" alt="Depiction of different measurements">
 
-      <div v-if='infoToShow == "noseBridgeHeight"' class='align-items-center'>
+      <div v-show='infoToShow == "noseBridgeHeight"' class='align-items-center'>
         <p class='left-pane'>Select options below to get an understanding of what "Low", "Medium", and "High" nose bridges are.</p>
         <TabSet
           :options='noseBridgeHeightOptions'
@@ -50,7 +50,7 @@
         <img class='left-pane-image' src="https://amitismedtour.com/wp-content/uploads/2021/11/Wide-Nose-Rhinoplasty-1-1200x800.jpg" alt="before and after rhinoplasty. Wide vs. Narrow nose bridge">
       </div>
 
-      <div v-if='infoToShow == "cheekFullness"' class='align-items-center'>
+      <div v-show='infoToShow == "cheekFullness"' class='align-items-center'>
         <p class='left-pane'>Select options below to get an understanding of different types of cheek fullness:</p>
         <TabSet
           :options='cheekFullnessOptions'
