@@ -67,7 +67,11 @@
         <table>
           <thead>
             <tr>
-              <th colspan='2'>Quantitative Measurements</th>
+              <th colspan='1'>Quantitative Measurements</th>
+              <th>
+                <CircularButton text="?" @click="toggleInfo('quantitativeGuide')" :highlight="infoToShow == 'quantitativeGuide'"/>
+              </th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -182,7 +186,7 @@
                 <label for="noseBridgeHeight">Nose Bridge Height</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('noseBridgeHeight')"/>
+                <CircularButton text="?" @click="toggleInfo('noseBridgeHeight')" :highlight="infoToShow == 'noseBridgeHeight'"/>
               </td>
               <td>
                 <select
@@ -201,7 +205,7 @@
                 <label for="noseBridgeBreadth">Nose Bridge Breadth</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('noseBridgeBreadth')"/>
+                <CircularButton text="?" @click="toggleInfo('noseBridgeBreadth')" :highlight="infoToShow == 'noseBridgeBreadth'"/>
               </td>
               <td>
                 <select
@@ -220,7 +224,7 @@
                 <label for="cheekFullness">Cheek Fullness</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('cheekFullness')"/>
+                <CircularButton text="?" @click="toggleInfo('cheekFullness')" :highlight="infoToShow == 'cheekFullness'"/>
               </td>
               <td>
                 <select
