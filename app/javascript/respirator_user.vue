@@ -52,6 +52,7 @@
 
       <div v-if='infoToShow == "cheekFullness"' class='align-items-center'>
         <p class='left-pane'>Select options below to get an understanding of different types of cheek fullness:</p>
+
         <TabSet
           :options='cheekFullnessOptions'
           @update='setCheekFullnessExampleToShow'
