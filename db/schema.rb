@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_07_22_030245) do
+ActiveRecord::Schema[7.0].define(version: 2024_07_22_173522) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -87,6 +87,16 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_22_030245) do
     t.integer "nose_bridge_height"
     t.integer "lip_width"
     t.index ["user_id"], name: "index_facial_measurements_on_user_id"
+  end
+
+  create_table "masks", force: :cascade do |t|
+    t.string "unique_internal_model_code"
+    t.json "modifications"
+    t.string "type"
+    t.string "image_urls"
+    t.string "where_to_buy_urls"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "population_states", force: :cascade do |t|
