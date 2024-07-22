@@ -34,6 +34,10 @@ Rails.application.routes.draw do
   get 'users/:user_id/facial_measurements', to: 'users/facial_measurements#show'
   post 'users/:user_id/facial_measurements', to: 'users/facial_measurements#create'
 
+  get 'masks', to: 'masks#index'
+  post 'masks', to: 'masks#create'
+  get 'masks/:id', to: 'masks#show'
+
   controller :pages do
     get :qr_code_generator
     get :qr_code_download

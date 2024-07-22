@@ -94,6 +94,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_22_173522) do
     t.json "modifications"
     t.string "type"
     t.string "image_urls"
+    t.string "author_ids"
     t.string "where_to_buy_urls"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

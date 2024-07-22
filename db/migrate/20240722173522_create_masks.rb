@@ -5,6 +5,7 @@ class CreateMasks < ActiveRecord::Migration[7.0]
       t.json :modifications
       t.string :type
       t.string :image_urls
+      t.string :author_ids
       t.string :where_to_buy_urls
 
       t.timestamps
