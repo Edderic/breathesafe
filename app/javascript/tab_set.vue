@@ -15,23 +15,18 @@ export default {
     CircularButton,
   },
   data() {
-    return {
-      tabToShow: '',
-    }
   },
   props: {
     options: Array,
+    tabToShow: String
 
   },
   computed: {
   },
   async created() {
-    this.tabToShow = this.options[0].text
   },
   methods: {
     setTabThenTrigger(option) {
-      this.tabToShow = option.text
-
       this.$emit('update', {
         'name': option.text
       })

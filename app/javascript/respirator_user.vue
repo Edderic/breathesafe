@@ -1,20 +1,68 @@
 <template>
   <div>
     <h2 class='tagline'>Respirator User</h2>
+    <div class='container chunk'>
+      <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
+      <br>
+    </div>
+
     <div class='menu row'>
-      <Button :class="{ tab: true }" @click='setRouteTo("Demographics")' shadow='true' text='Demographics' :selected="tabToShow=='Demographics'"/>
-      <Button :class="{ tab: true }" @click='setRouteTo("FacialMeasurements")' shadow='true' text='Facial Measurements' :selected="tabToShow=='FacialMeasurements'"/>
+      <TabSet
+        :options='tabToShowOptions'
+        @update='setRouteTo'
+        :tabToShow='tabToShow'
+      />
+    </div>
+
+    <div class='main justify-items-center' v-if='tabToShow=="Name"'>
+      <p class='narrow-p '>
+        A user could input data on behalf of other users (e.g. a parent inputting data of their children).
+        Adding names could help you distinguish among individuals who you'd be inputting data for.
+        This data will not be shared publicly.
+      </p>
+      <table>
+        <tbody>
+          <tr>
+            <td>What is first name of the individual you'll be adding data for?</td>
+            <td>
+              <input
+                  type='text'
+                  v-model='firstName'
+              >
+            </td>
+          </tr>
+          <tr>
+            <td>What is the last name of the individual you'll be adding data for?</td>
+            <td>
+              <input
+                  type='text'
+                  v-model='lastName'
+              >
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <br>
+
+      <Button text="Save" @click='saveProfile("Demographics")'/>
     </div>
 
     <div class='main' v-if='tabToShow=="Demographics"'>
+      <p class='narrow-p'>
+        Demographic data will be used to assess sampling bias and this data will only
+        be reported in aggregate. If a category has less than 5 types of
+        people, individuals will be grouped in a "not enough data/prefer not to
+        disclose" group to preserve privacy.
+      </p>
       <SurveyQuestion
-        question="Which race or ethnicity best describes you?"
+        :question="raceEthnicityQuestion"
         :answer_options="race_ethnicity_options"
         @update="selectRaceEthnicity"
         :selected="raceEthnicity"
       />
       <SurveyQuestion
-        question="What is your gender?"
+        :question="genderSexQuestion"
         :answer_options="gender_and_sex_options"
         @update="selectGenderAndSex"
         :selected="genderAndSex"
@@ -25,7 +73,7 @@
 
       <br>
 
-      <Button text="Save" @click='saveProfile()'/>
+      <Button text="Save" @click='saveProfile("FacialMeasurements")'/>
     </div>
 
     <div class="edit-facial-measurements" v-if='tabToShow=="FacialMeasurements"'>
@@ -39,6 +87,7 @@
         <TabSet
           :options='noseBridgeHeightOptions'
           @update='setNoseBridgeHeightExampleToShow'
+          :tabToShow='noseBridgeHeightExample'
         />
         <img class='left-pane-image' v-if='noseBridgeHeightExample == "Low"' src="https://qph.cf2.quoracdn.net/main-qimg-4a76e688296db52b1e13b73a03f56242.webp" alt="low nose bridge">
         <img class='left-pane-image' v-if='noseBridgeHeightExample == "Medium"' src="https://qph.cf2.quoracdn.net/main-qimg-688959ce2f1936ceb9fd523e8bc60094.webp" alt="medium nose bridge">
@@ -253,6 +302,7 @@
 import axios from 'axios';
 import Button from './button.vue'
 import CircularButton from './circular_button.vue'
+import ClosableMessage from './closable_message.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
 import SurveyQuestion from './survey_question.vue'
@@ -266,11 +316,13 @@ export default {
   components: {
     Button,
     CircularButton,
+    ClosableMessage,
     SurveyQuestion,
     TabSet
   },
   data() {
     return {
+      errorMessages: [],
       cheekFullnessExample: 'Hallow/gaunt',
       noseBridgeHeightExample: 'Low',
       noseBridgeHeightOptions: [
@@ -296,6 +348,17 @@ export default {
         }
       ],
       tabToShow: 'Demographics',
+      tabToShowOptions: [
+        {
+          text: "Name",
+        },
+        {
+          text: "Demographics",
+        },
+        {
+          text: "FacialMeasurements"
+        }
+      ],
       race_ethnicity_question: "Which race or ethnicity best describes you?",
       race_ethnicity_options: [
         "American Indian or Alaskan Native",
@@ -336,6 +399,12 @@ export default {
         ]
     ),
     ...mapWritableState(
+        useMainStore,
+        [
+          'message'
+        ]
+    ),
+    ...mapWritableState(
         useProfileStore,
         [
           'firstName',
@@ -345,8 +414,18 @@ export default {
           'otherGender'
         ]
     ),
+
+    genderSexQuestion() {
+      return `Which is ${this.firstName}'s gender?`;
+    },
+    raceEthnicityQuestion() {
+      return `Which race or ethnicity best describes ${this.firstName}?`;
+    },
     latestFacialMeasurement() {
-      return this.facialMeasurements[this.facialMeasurements.length - 1]
+      return this.facialMeasurements[this.facialMeasurements.length - 1];
+    },
+    messages() {
+      return this.errorMessages;
     },
     sortedFacialMeasurements() {
       return this.facialMeasurements.sort((a, b) => {
@@ -440,7 +519,7 @@ export default {
           // whatever you want
         })
     },
-    async saveProfile() {
+    async saveProfile(tabToShow) {
       await this.updateProfile()
       this.$router.push({
         name: "RespiratorUser",
@@ -448,11 +527,34 @@ export default {
           id: this.currentUser.id,
         },
         query: {
-          tabToShow: 'FacialMeasurements'
+          tabToShow: tabToShow
         }
       })
     },
+    runFacialMeasurementValidations() {
+      let quantitativeMeasurements = [
+        'faceWidth', 'noseBridgeHeight', 'noseBridgeBreadth', 'jawWidth',
+        'faceDepth', 'faceLength', 'lowerFaceLength', 'bitragionSubnasaleArc',
+        'bitragionMentonArc'
+      ]
+
+      let negativeOrZero = [];
+
+      for(let q of quantitativeMeasurements) {
+        if (this.latestFacialMeasurement[q] <= 0) {
+          this.errorMessages.push({
+            str: `${q} cannot be zero or negative.`,
+          })
+        }
+      }
+    },
     async saveFacialMeasurement() {
+      this.runFacialMeasurementValidations()
+
+      if (this.errorMessages.length > 0) {
+        return;
+      }
+
       await axios.post(
         `/users/${this.currentUser.id}/facial_measurements.json`, {
           source: this.latestFacialMeasurement.source,
@@ -481,11 +583,11 @@ export default {
         name: 'RespiratorUsers',
       })
     },
-    setRouteTo(tabToShow) {
+    setRouteTo(opt) {
       this.$router.push({
         name: "RespiratorUser",
         query: {
-          tabToShow: tabToShow
+          tabToShow: opt.name
         }
       })
     },
@@ -528,6 +630,10 @@ export default {
   }
   .text-for-other {
     margin: 0 1.25em;
+  }
+
+  .justify-items-center {
+    justify-items: center;
   }
 
   .menu {
@@ -599,6 +705,11 @@ export default {
     max-width: 50%;
   }
 
+  p.narrow-p {
+    max-width: 40em;
+  }
+
+
   .call-to-actions {
     display: flex;
     flex-direction: column;
@@ -621,7 +732,7 @@ export default {
 
   .centered {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
   }
 
   .adaptive-wide img {

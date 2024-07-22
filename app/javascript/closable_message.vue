@@ -57,6 +57,12 @@ export default {
     width: 400px;
     font-weight: bold;
     background-color: #ffffd6;
+
+    position: absolute;
+    margin-left: auto;
+    margin-right: auto;
+    left: 0;
+    right: 0;
   }
 
   .close {
