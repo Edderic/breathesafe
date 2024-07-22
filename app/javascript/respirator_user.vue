@@ -82,28 +82,12 @@
 
       <img v-if='infoToShow == "quantitativeGuide"' class="adaptive-wide" src="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8587533/bin/bmjgh-2021-005537f01.jpg" alt="Depiction of different measurements">
 
-      <div v-show='infoToShow == "noseBridgeHeight"' class='align-items-center'>
-        <p class='left-pane'>Select options below to get an understanding of what "Low", "Medium", and "High" nose bridges are.</p>
-        <TabSet
-          :options='noseBridgeHeightOptions'
-          @update='setNoseBridgeHeightExampleToShow'
-          :tabToShow='noseBridgeHeightExample'
-        />
-        <img class='left-pane-image' v-if='noseBridgeHeightExample == "Low"' src="https://qph.cf2.quoracdn.net/main-qimg-4a76e688296db52b1e13b73a03f56242.webp" alt="low nose bridge">
-        <img class='left-pane-image' v-if='noseBridgeHeightExample == "Medium"' src="https://qph.cf2.quoracdn.net/main-qimg-688959ce2f1936ceb9fd523e8bc60094.webp" alt="medium nose bridge">
-        <img class='left-pane-image' v-if='noseBridgeHeightExample == "High"' src="https://qph.cf2.quoracdn.net/main-qimg-855fbe23110d6998624e7af03ccf642e.webp" alt="high nose bridge">
-      </div>
-
-      <div class='align-items-center' v-if='infoToShow == "noseBridgeBreadth"' >
-        <p class='left-pane'>Wide vs. Medium nose bridge</p>
-        <img class='left-pane-image' src="https://amitismedtour.com/wp-content/uploads/2021/11/Wide-Nose-Rhinoplasty-1-1200x800.jpg" alt="before and after rhinoplasty. Wide vs. Narrow nose bridge">
-      </div>
-
       <div v-show='infoToShow == "cheekFullness"' class='align-items-center'>
         <p class='left-pane'>Select options below to get an understanding of different types of cheek fullness:</p>
         <TabSet
           :options='cheekFullnessOptions'
           @update='setCheekFullnessExampleToShow'
+          :tabToShow="cheekFullnessExample"
         />
         <img class='left-pane-image' v-if='cheekFullnessExample == "Hallow/gaunt"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-hollow.png" alt="hallow/gaunt cheeks">
         <img class='left-pane-image' v-if='cheekFullnessExample == "Medium"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-neutral.png" alt="medium-ful cheeks">
@@ -218,6 +202,62 @@
               </td>
             </tr>
 
+            <tr>
+              <th>
+                <label for="noseProtrusion">Nose Protrusion <b>(M)</b> (mm)</label>
+              </th>
+              <td>
+                <input
+                    v-if='latestFacialMeasurement'
+                    type='number'
+                    :value="latestFacialMeasurement.noseProtrusion"
+                    @change='setFacialMeasurement($event, "noseProtrusion")'
+                    >
+              </td>
+            </tr>
+
+            <tr>
+              <th>
+                <label for="nasalRootBreadth">Nasal Root Breadth <b>(H)</b> (mm)</label>
+              </th>
+              <td>
+                <input
+                    v-if='latestFacialMeasurement'
+                    type='number'
+                    :value="latestFacialMeasurement.nasalRootBreadth"
+                    @change='setFacialMeasurement($event, "nasalRootBreadth")'
+                    >
+              </td>
+            </tr>
+
+            <tr>
+              <th>
+                <label for="noseBridgeHeight">Nose Bridge Height <b>(H)</b> (mm)</label>
+              </th>
+              <td>
+                <input
+                    v-if='latestFacialMeasurement'
+                    type='number'
+                    :value="latestFacialMeasurement.noseBridgeHeight"
+                    @change='setFacialMeasurement($event, "noseBridgeHeight")'
+                    >
+              </td>
+            </tr>
+
+            <tr>
+              <th>
+                <label for="lipWidth">Lip Width <b>(J)</b> (mm)</label>
+              </th>
+              <td>
+                <input
+                    v-if='latestFacialMeasurement'
+                    type='number'
+                    :value="latestFacialMeasurement.lipWidth"
+                    @change='setFacialMeasurement($event, "lipWidth")'
+                    >
+              </td>
+            </tr>
+
           </tbody>
         </table>
 
@@ -230,44 +270,6 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <th>
-                <label for="noseBridgeHeight">Nose Bridge Height</label>
-              </th>
-              <td>
-                <CircularButton text="?" @click="toggleInfo('noseBridgeHeight')" :highlight="infoToShow == 'noseBridgeHeight'"/>
-              </td>
-              <td>
-                <select
-                    v-if='latestFacialMeasurement'
-                    :value="latestFacialMeasurement.noseBridgeHeight"
-                    @change='setFacialMeasurement($event, "noseBridgeHeight")'
-                    >
-                    <option>low</option>
-                    <option>medium</option>
-                    <option>high</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <th>
-                <label for="noseBridgeBreadth">Nose Bridge Breadth</label>
-              </th>
-              <td>
-                <CircularButton text="?" @click="toggleInfo('noseBridgeBreadth')" :highlight="infoToShow == 'noseBridgeBreadth'"/>
-              </td>
-              <td>
-                <select
-                    v-if='latestFacialMeasurement'
-                    :value="latestFacialMeasurement.noseBridgeBreadth"
-                    @change='setFacialMeasurement($event, "noseBridgeBreadth")'
-                    >
-                    <option>narrow</option>
-                    <option>medium</option>
-                    <option>broad</option>
-                </select>
-              </td>
-            </tr>
             <tr>
               <th>
                 <label for="cheekFullness">Cheek Fullness</label>
@@ -468,8 +470,8 @@ export default {
         {
           source: 'caliper/tape',
           faceWidth: 0,
-          noseBridgeHeight: 'medium',
-          noseBridgeBreadth: 'medium',
+          noseBridgeHeight: 0,
+          nasalRootBreadth: 0,
           jawWidth: 0,
           faceDepth: 0,
           faceLength: 0,
@@ -501,8 +503,10 @@ export default {
             this.facialMeasurements.push({
               source: 'caliper/tape',
                 faceWidth: 0,
-                noseBridgeHeight: 'medium',
-                noseBridgeBreadth: 'medium',
+                noseBridgeHeight: 0,
+                nasalRootBreadth: 0,
+                noseProtrusion: 0,
+                lipWidth: 0,
                 jawWidth: 0,
                 faceDepth: 0,
                 faceLength: 0,
@@ -533,9 +537,9 @@ export default {
     },
     runFacialMeasurementValidations() {
       let quantitativeMeasurements = [
-        'faceWidth', 'noseBridgeHeight', 'noseBridgeBreadth', 'jawWidth',
-        'faceDepth', 'faceLength', 'lowerFaceLength', 'bitragionSubnasaleArc',
-        'bitragionMentonArc'
+        'faceWidth', 'noseBridgeHeight', 'nasalRootBreadth', 'lipWidth',
+        'noseProtrusion', 'jawWidth', 'faceDepth', 'faceLength',
+        'lowerFaceLength', 'bitragionSubnasaleArc', 'bitragionMentonArc'
       ]
 
       let negativeOrZero = [];
@@ -560,7 +564,9 @@ export default {
           source: this.latestFacialMeasurement.source,
           face_width: this.latestFacialMeasurement.faceWidth,
           nose_bridge_height: this.latestFacialMeasurement.noseBridgeHeight,
-          nose_bridge_breadth: this.latestFacialMeasurement.noseBridgeBreadth,
+          nasal_root_breadth: this.latestFacialMeasurement.nasalRootBreadth,
+          lip_width: this.latestFacialMeasurement.lipWidth,
+          nose_protrusion: this.latestFacialMeasurement.noseProtrusion,
           jaw_width: this.latestFacialMeasurement.jawWidth,
           face_depth: this.latestFacialMeasurement.faceDepth,
           face_length: this.latestFacialMeasurement.faceLength,

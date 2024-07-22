@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_07_19_023510) do
+ActiveRecord::Schema[7.0].define(version: 2024_07_22_030245) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -73,8 +73,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_19_023510) do
     t.bigint "user_id", null: false
     t.string "source"
     t.integer "face_width"
-    t.string "nose_bridge_height"
-    t.string "nose_bridge_breadth"
     t.integer "jaw_width"
     t.integer "face_depth"
     t.integer "face_length"
@@ -84,6 +82,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_19_023510) do
     t.string "cheek_fullness"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "nasal_root_breadth"
+    t.integer "nose_protrusion"
+    t.integer "nose_bridge_height"
+    t.integer "lip_width"
     t.index ["user_id"], name: "index_facial_measurements_on_user_id"
   end
 
