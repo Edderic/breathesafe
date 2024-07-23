@@ -45,6 +45,8 @@ import FAQs from '../faqs.vue';
 import Disclaimer from '../disclaimer.vue';
 import Venues from '../map_events.vue'
 import Landing from '../landing.vue'
+import AddMask from '../add_mask.vue'
+import Masks from '../masks.vue'
 import Profile from '../profile.vue'
 import PrivacyPolicy from '../privacy_policy.vue'
 import RespiratorUsers from '../respirator_users.vue'
@@ -68,6 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const routes = [
     { path: '/', component: Landing, name: 'Landing' },
     { path: '/respirator_users', component: RespiratorUsers, name: 'RespiratorUsers' },
+    { path: '/masks', component: Masks, name: 'Masks' },
+    { path: '/masks/new', component: AddMask, name: 'AddMask' },
     { path: '/respirator_user/:id', component: RespiratorUser, name: 'RespiratorUser' },
     { path: '/venues', component: Venues, name: 'Venues' },
     { path: '/analytics/:id', component: Analytics, name: 'Analytics' },

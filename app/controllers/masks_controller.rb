@@ -69,14 +69,13 @@ class MasksController < ApplicationController
 
   def mask_data
     params.require(:mask).permit(
-      "unique_internal_model_code"
-      "modifications"
-      "type"
-      "image_urls"
-      "author_ids"
-      "where_to_buy_urls"
-      "created_at"
-      "updated_at"
+      :unique_internal_model_code,
+      :filter_type,
+      :elastomeric,
+      image_urls: [],
+      author_ids: [],
+      where_to_buy_urls: [],
+      modifications: {},
     )
   end
 end
