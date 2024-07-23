@@ -92,7 +92,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_22_173522) do
   create_table "masks", force: :cascade do |t|
     t.string "unique_internal_model_code"
     t.json "modifications"
-    t.string "type"
+    t.string "filter_type"
+    t.boolean "elastomeric"
     t.string "image_urls"
     t.string "author_ids"
     t.string "where_to_buy_urls"

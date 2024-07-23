@@ -3,7 +3,8 @@ class CreateMasks < ActiveRecord::Migration[7.0]
     create_table :masks do |t|
       t.string :unique_internal_model_code
       t.json :modifications
-      t.string :type
+      t.string :filter_type
+      t.boolean :elastomeric
       t.string :image_urls
       t.string :author_ids
       t.string :where_to_buy_urls
