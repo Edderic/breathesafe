@@ -58,10 +58,39 @@ class MasksController < ApplicationController
       to_render = {}
     else
       to_render = {
-        masks: JSON.parse(Mask.where(user_id: current_user.id).to_json)
+        mask: JSON.parse(Mask.find(params[:id]).to_json)
       }
     end
 
+
+    respond_to do |format|
+      format.json do
+        render json: to_render.to_json, status: status, message: message
+      end
+    end
+  end
+
+  def update
+    # TODO: For now, only current user can access facial measurements
+    # Later on, parents should be able to view / edit their children's data
+    unless current_user
+      status = 401
+      message = "Unauthorized."
+      to_render = {}
+    else
+      to_render = {
+        mask: JSON.parse(Mask.find(params[:id]).to_json)
+      }
+    end
+
+    mask = Mask.find(params[:id])
+    if mask.update(mask_data)
+      status = 204
+      to_render = {}
+    else
+      status = 400 # bad request
+      to_render = {}
+    end
 
     respond_to do |format|
       format.json do

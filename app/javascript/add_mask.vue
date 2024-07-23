@@ -1,6 +1,6 @@
 <template>
   <div class='align-items-center'>
-    <h2 class='tagline'>Add Mask</h2>
+    <h2 class='tagline'>{{tagline}}</h2>
     <div class='container chunk'>
       <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
       <br>
@@ -17,7 +17,7 @@
             <th>Filter type</th>
             <td>
               <select
-                  :value="filterType"
+                  v-model="filterType"
                   >
                   <option>cloth</option>
                   <option>surgical</option>
@@ -32,7 +32,7 @@
           <tr>
             <th>Elastomeric</th>
             <select
-                :value="elastomeric"
+                v-model="elastomeric"
                 >
                 <option>true</option>
                 <option>false</option>
@@ -130,6 +130,13 @@ export default {
           'message'
         ]
     ),
+    tagline() {
+      if (this.$route.params.id) {
+        return "Edit Mask"
+      } else {
+        return "Create Mask"
+      }
+    },
     messages() {
       return this.errorMessages;
     },
@@ -139,10 +146,9 @@ export default {
 
     if (!this.currentUser) {
       signIn.call(this)
-    } else {
-      // TODO: a parent might input data on behalf of their children.
-      // Currently, this.loadStuff() assumes We're loading the profile for the current user
-      this.loadStuff()
+    }
+    if (this.$route.params.id) {
+      this.loadMask()
     }
   },
   methods: {
@@ -178,6 +184,7 @@ export default {
     },
     async loadStuff() {
       // TODO: load the profile for the current user
+
     },
     runValidations() {
       if (this.imageUrls.length <= 0) {
@@ -186,6 +193,34 @@ export default {
         })
       }
     },
+    async loadMask() {
+      await axios.get(
+        `/masks/${this.$route.params.id}.json`
+      )
+        .then(response => {
+          let data = response.data
+          // whatever you want
+          let mask = deepSnakeToCamel(data.mask)
+          let items = [
+            'uniqueInternalModelCode',
+            'modifications',
+            'filterType',
+            'elastomeric',
+            'imageUrls',
+            'whereToBuyUrls',
+            'authorIds'
+          ]
+
+          for(let item of items) {
+            this[item] = mask[item]
+          }
+
+        })
+        .catch(error => {
+          this.message = "Failed to load mask."
+          // whatever you want
+        })
+    },
     async saveMask() {
       this.runValidations()
 
@@ -193,31 +228,61 @@ export default {
         return;
       }
 
-      await axios.post(
-        `/masks.json`, {
-          mask: {
-            unique_internal_model_code: this.uniqueInternalModelCode,
-            modifications: this.modifications,
-            filter_type: this.filterType,
-            elastomeric: this.elastomeric,
-            image_urls: this.imageUrls,
-            where_to_buy_urls: this.whereToBuyUrls,
-            author_ids: [this.currentUser.id],
+      if (this.$route.params.id) {
+        await axios.put(
+          `/masks/${this.$route.params.id}.json`, {
+            mask: {
+              unique_internal_model_code: this.uniqueInternalModelCode,
+              modifications: this.modifications,
+              filter_type: this.filterType,
+              elastomeric: this.elastomeric,
+              image_urls: this.imageUrls,
+              where_to_buy_urls: this.whereToBuyUrls,
+              author_ids: [this.currentUser.id],
+            }
           }
-        }
-      )
-        .then(response => {
-          let data = response.data
-          // whatever you want
+        )
+          .then(response => {
+            let data = response.data
+            // whatever you want
 
-          this.$router.push({
-            name: 'Masks',
+            this.$router.push({
+              name: 'Masks',
+            })
           })
-        })
-        .catch(error => {
-          this.message = "Failed to create mask."
-          // whatever you want
-        })
+          .catch(error => {
+            this.message = "Failed to update mask."
+            // whatever you want
+          })
+      } else {
+        // create
+        await axios.post(
+          `/masks.json`, {
+            mask: {
+              unique_internal_model_code: this.uniqueInternalModelCode,
+              modifications: this.modifications,
+              filter_type: this.filterType,
+              elastomeric: this.elastomeric,
+              image_urls: this.imageUrls,
+              where_to_buy_urls: this.whereToBuyUrls,
+              author_ids: [this.currentUser.id],
+            }
+          }
+        )
+          .then(response => {
+            let data = response.data
+            // whatever you want
+
+            this.$router.push({
+              name: 'Masks',
+            })
+          })
+          .catch(error => {
+            this.message = "Failed to create mask."
+            // whatever you want
+          })
+      }
+
     },
     update(event, property, index) {
       if (index !== null) {
@@ -366,6 +431,9 @@ export default {
   .edit-facial-measurements {
     display: flex;
     flex-direction: row;
+  }
+  th, td {
+    padding: 0.5em;
   }
   @media(max-width: 700px) {
     img {

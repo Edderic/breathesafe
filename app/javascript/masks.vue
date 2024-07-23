@@ -11,21 +11,29 @@
     <div class='main'>
       <table>
         <thead>
-          <tr>
+          <tr >
             <th>Image</th>
             <th>Unique Model Code</th>
             <th>Filter Type</th>
             <th>Elastomeric</th>
+            <th>Purchasing URLs</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for='m in masks'>
+          <tr v-for='m in masks' @click='viewMask(m.id)'>
             <td>
               <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
             </td>
             <td>{{m.uniqueInternalModelCode}}</td>
             <td>{{m.filterType}}</td>
             <td>{{m.elastomeric}}</td>
+            <td>
+              <ul>
+                <li v-for='w in m.whereToBuyUrls'>
+                  <a :href="getAbsoluteHref(w)" target='_blank'>{{w}}</a>
+                </li>
+              </ul>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -100,10 +108,23 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    getAbsoluteHref(href) {
+      return `//${href}`
+    },
     newMask() {
       this.$router.push(
         {
           name: "AddMask"
+        }
+      )
+    },
+    viewMask(id) {
+      this.$router.push(
+        {
+          name: "ViewMask",
+          params: {
+            id: id
+          }
         }
       )
     },
@@ -285,5 +306,9 @@ export default {
     .edit-facial-measurements {
       flex-direction: column;
     }
+  }
+  tbody tr:hover {
+    cursor: pointer;
+
   }
 </style>
