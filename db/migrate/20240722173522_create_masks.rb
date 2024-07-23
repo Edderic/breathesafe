@@ -5,9 +5,9 @@ class CreateMasks < ActiveRecord::Migration[7.0]
       t.json :modifications
       t.string :filter_type
       t.boolean :elastomeric
-      t.string :image_urls
-      t.string :author_ids
-      t.string :where_to_buy_urls
+      t.string :image_urls, array: true, default: []
+      t.integer :author_ids, array: true, default: []
+      t.string :where_to_buy_urls, array: true, default: []
 
       t.timestamps
     end

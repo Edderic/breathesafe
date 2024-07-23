@@ -9,12 +9,24 @@
     <CircularButton text="+" @click="newMask"/>
 
     <div class='main'>
-      <p class='narrow-p'>
-        Demographic data will be used to assess sampling bias and this data will only
-        be reported in aggregate. If a category has less than 5 types of
-        people, individuals will be grouped in a "not enough data/prefer not to
-        disclose" group to preserve privacy.
-      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Unique Model Code</th>
+            <th>Filter Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for='m in masks'>
+            <td>
+              <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
+            </td>
+            <td>{{m.uniqueInternalModelCode}}</td>
+            <td>{{m.filterType}}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -44,6 +56,7 @@ export default {
   data() {
     return {
       errorMessages: [],
+      masks: []
     }
   },
   props: {
@@ -94,136 +107,26 @@ export default {
     },
     async loadStuff() {
       // TODO: load the profile for the current user
-      this.loadProfile()
-      this.loadFacialMeasurements()
+      await this.loadMasks()
     },
-    async loadFacialMeasurements() {
+    async loadMasks() {
       // TODO: make this more flexible so parents can load data of their children
       await axios.get(
-        `/users/${this.currentUser.id}/facial_measurements.json`,
+        `/masks.json`,
       )
         .then(response => {
           let data = response.data
-          if (response.data.facial_measurements) {
-            this.facialMeasurements = deepSnakeToCamel(data.facial_measurements)
+          if (response.data.masks) {
+            this.masks = deepSnakeToCamel(data.masks)
           }
 
-          if (this.facialMeasurements.length == 0) {
-            this.facialMeasurements.push({
-              source: 'caliper/tape',
-                faceWidth: 0,
-                noseBridgeHeight: 0,
-                nasalRootBreadth: 0,
-                noseProtrusion: 0,
-                lipWidth: 0,
-                jawWidth: 0,
-                faceDepth: 0,
-                faceLength: 0,
-                lowerFaceLength: 0,
-                bitragionMentonArc: 0,
-                bitragionSubnasaleArc: 0,
-                cheekFullness: 'medium',
-            })
-          }
           // whatever you want
         })
         .catch(error => {
-          this.message = "Failed to load profile."
+          this.message = "Failed to load masks."
           // whatever you want
         })
     },
-    async saveProfile(tabToShow) {
-      await this.updateProfile()
-      this.$router.push({
-        name: "RespiratorUser",
-        params: {
-          id: this.currentUser.id,
-        },
-        query: {
-          tabToShow: tabToShow
-        }
-      })
-    },
-    runFacialMeasurementValidations() {
-      let quantitativeMeasurements = [
-        'faceWidth', 'noseBridgeHeight', 'nasalRootBreadth', 'lipWidth',
-        'noseProtrusion', 'jawWidth', 'faceDepth', 'faceLength',
-        'lowerFaceLength', 'bitragionSubnasaleArc', 'bitragionMentonArc'
-      ]
-
-      let negativeOrZero = [];
-
-      for(let q of quantitativeMeasurements) {
-        if (this.latestFacialMeasurement[q] <= 0) {
-          this.errorMessages.push({
-            str: `${q} cannot be zero or negative.`,
-          })
-        }
-      }
-    },
-    async saveFacialMeasurement() {
-      this.runFacialMeasurementValidations()
-
-      if (this.errorMessages.length > 0) {
-        return;
-      }
-
-      await axios.post(
-        `/users/${this.currentUser.id}/facial_measurements.json`, {
-          source: this.latestFacialMeasurement.source,
-          face_width: this.latestFacialMeasurement.faceWidth,
-          nose_bridge_height: this.latestFacialMeasurement.noseBridgeHeight,
-          nasal_root_breadth: this.latestFacialMeasurement.nasalRootBreadth,
-          lip_width: this.latestFacialMeasurement.lipWidth,
-          nose_protrusion: this.latestFacialMeasurement.noseProtrusion,
-          jaw_width: this.latestFacialMeasurement.jawWidth,
-          face_depth: this.latestFacialMeasurement.faceDepth,
-          face_length: this.latestFacialMeasurement.faceLength,
-          lower_face_length: this.latestFacialMeasurement.lowerFaceLength,
-          bitragion_menton_arc: this.latestFacialMeasurement.bitragionMentonArc,
-          bitragion_subnasale_arc: this.latestFacialMeasurement.bitragionSubnasaleArc,
-          cheek_fullness: this.latestFacialMeasurement.cheekFullness,
-          user_id: this.currentUser.id
-        }
-      )
-        .then(response => {
-          let data = response.data
-          // whatever you want
-        })
-        .catch(error => {
-          this.message = "Failed to create facial measurement."
-          // whatever you want
-        })
-      this.$router.push({
-        name: 'RespiratorUsers',
-      })
-    },
-    setRouteTo(opt) {
-      this.$router.push({
-        name: "RespiratorUser",
-        query: {
-          tabToShow: opt.name
-        }
-      })
-    },
-    selectRaceEthnicity(raceEth) {
-      this.raceEthnicity = raceEth
-    },
-    selectGenderAndSex(genderAndSex) {
-      this.genderAndSex = genderAndSex
-    },
-    setFacialMeasurement(event, whatToSet) {
-      this.latestFacialMeasurement[whatToSet] = event.target.value
-    },
-    setNoseBridgeHeightExampleToShow(opt) {
-      this.noseBridgeHeightExample = opt.name
-    },
-    setCheekFullnessExampleToShow(opt) {
-      this.cheekFullnessExample = opt.name
-    },
-    toggleInfo(infoToShow) {
-      this.infoToShow = infoToShow;
-    }
   }
 }
 </script>
@@ -242,6 +145,14 @@ export default {
     font-size: 24px;
     padding-left: 0.25em;
     padding-right: 0.25em;
+  }
+  .thumbnail {
+    max-width:10em;
+    max-height:10em;
+  }
+
+  td,th {
+    padding: 1em;
   }
   .text-for-other {
     margin: 0 1.25em;

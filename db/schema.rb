@@ -94,9 +94,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_22_173522) do
     t.json "modifications"
     t.string "filter_type"
     t.boolean "elastomeric"
-    t.string "image_urls"
-    t.string "author_ids"
-    t.string "where_to_buy_urls"
+    t.string "image_urls", default: [], array: true
+    t.integer "author_ids", default: [], array: true
+    t.string "where_to_buy_urls", default: [], array: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

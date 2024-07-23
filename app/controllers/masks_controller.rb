@@ -35,9 +35,12 @@ class MasksController < ApplicationController
   end
 
   def index
-    to_render = JSON.parse(
-      Mask.all.to_json
-    )
+    to_render = {
+      masks: JSON.parse(
+        Mask.all.to_json
+      )
+    }
+    message = ""
 
     respond_to do |format|
       format.json do
