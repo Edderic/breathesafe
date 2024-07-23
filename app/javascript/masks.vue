@@ -15,6 +15,7 @@
             <th>Image</th>
             <th>Unique Model Code</th>
             <th>Filter Type</th>
+            <th>Elastomeric</th>
           </tr>
         </thead>
         <tbody>
@@ -24,6 +25,7 @@
             </td>
             <td>{{m.uniqueInternalModelCode}}</td>
             <td>{{m.filterType}}</td>
+            <td>{{m.elastomeric}}</td>
           </tr>
         </tbody>
       </table>
