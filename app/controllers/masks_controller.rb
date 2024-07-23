@@ -77,19 +77,24 @@ class MasksController < ApplicationController
       status = 401
       message = "Unauthorized."
       to_render = {}
-    else
-      to_render = {
-        mask: JSON.parse(Mask.find(params[:id]).to_json)
-      }
     end
 
     mask = Mask.find(params[:id])
-    if mask.update(mask_data)
+
+
+    # TODO: admins should be able to update data no matter who owns it.
+    if !mask.author_ids.include?(current_user.id)
+      status = 401
+      to_render = {}
+      message = 'Unauthorized.'
+    elsif mask.update(mask_data)
       status = 204
       to_render = {}
+      message = ""
     else
       status = 400 # bad request
       to_render = {}
+      message = ""
     end
 
     respond_to do |format|
