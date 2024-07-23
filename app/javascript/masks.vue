@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class='align-items-center'>
     <h2 class='tagline'>Masks</h2>
     <div class='container chunk'>
       <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
