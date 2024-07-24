@@ -38,6 +38,7 @@ Rails.application.routes.draw do
   post 'masks', to: 'masks#create'
   get 'masks/:id', to: 'masks#show'
   put 'masks/:id', to: 'masks#update'
+  delete 'masks/:id', to: 'masks#delete'
 
   controller :pages do
     get :qr_code_generator

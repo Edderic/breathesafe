@@ -104,6 +104,36 @@ class MasksController < ApplicationController
     end
   end
 
+  def delete
+    # TODO: For now, only current user can access facial measurements
+    # Later on, parents should be able to view / edit their children's data
+    unless current_user
+      status = 401
+      message = "Unauthorized."
+      to_render = {}
+    end
+
+    mask = Mask.find(params[:id])
+
+
+    # TODO: admins should be able to update data no matter who owns it.
+    if !mask.author_ids.include?(current_user.id)
+      status = 401
+      to_render = {}
+      message = 'Unauthorized.'
+    elsif mask.delete
+      status = 200
+      to_render = {}
+      message = ""
+    end
+
+    respond_to do |format|
+      format.json do
+        render json: to_render.to_json, status: status, message: message
+      end
+    end
+  end
+
   def mask_data
     params.require(:mask).permit(
       :unique_internal_model_code,

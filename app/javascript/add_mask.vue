@@ -70,7 +70,10 @@
       </table>
       <br>
 
-      <Button text="Save" @click='saveMask'/>
+      <div class="row">
+        <Button class='button' text="Delete" @click='deleteMask'/>
+        <Button class='button' text="Save" @click='saveMask'/>
+      </div>
     </div>
   </div>
 </template>
@@ -217,9 +220,30 @@ export default {
 
         })
         .catch(error => {
-          this.message = "Failed to load mask."
+          this.messages.push({
+            str: "Failed to load mask."
+          })
           // whatever you want
         })
+    },
+    async deleteMask() {
+      if (this.$route.params.id) {
+        await axios.delete(
+          `/masks/${this.$route.params.id}.json`
+        )
+          .then(response => {
+            let data = response.data
+
+            this.$router.push({
+              name: 'Masks',
+            })
+          })
+          .catch(error => {
+            this.messages.push({
+              str: "Failed to delete mask."
+            })
+          })
+      }
     },
     async saveMask() {
       this.runValidations()
@@ -251,8 +275,9 @@ export default {
             })
           })
           .catch(error => {
-            this.message = "Failed to update mask."
-            // whatever you want
+            this.messages.push({
+              str: "Failed to update mask."
+            })
           })
       } else {
         // create
@@ -278,8 +303,9 @@ export default {
             })
           })
           .catch(error => {
-            this.message = "Failed to create mask."
-            // whatever you want
+            this.messages.push({
+              str: "Failed to create mask."
+            })
           })
       }
 
@@ -335,10 +361,9 @@ export default {
     flex-direction: row;
   }
 
-  .row button {
+  .row .button {
     width: 100%;
-    padding-top: 1em;
-    padding-bottom: 1em;
+    margin: 1em;
   }
 
 
