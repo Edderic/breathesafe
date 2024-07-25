@@ -11,13 +11,14 @@
         <tbody>
           <tr>
             <th>Unique Internal Model Code</th>
-            <td colspan=2><input class='full-width' type="text" v-model='uniqueInternalModelCode'></td>
+            <td colspan=2><input class='full-width' type="text" v-model='uniqueInternalModelCode' :disabled="!userCanEdit"></td>
           </tr>
           <tr>
             <th>Filter type</th>
-            <td>
+            <td colspan=2>
               <select
                   v-model="filterType"
+                  :disabled="!userCanEdit"
                   >
                   <option>cloth</option>
                   <option>surgical</option>
@@ -31,9 +32,10 @@
 
           <tr>
             <th>Elastomeric</th>
-            <td>
+            <td colspan='2'>
               <select
                   v-model="elastomeric"
+                  :disabled="!userCanEdit"
                   >
                   <option>true</option>
                   <option>false</option>
@@ -49,36 +51,40 @@
           <tr>
             <th>Image URL</th>
             <th>Image</th>
-            <th>Delete</th>
+            <th v-if='userCanEdit'>Delete</th>
           </tr>
           <tr v-for="(imageUrl, index) in imageUrls">
 
             <td colspan='1'>
-              <input class='input-list' type="text" :value='imageUrl' @change="update($event, 'imageUrls', index)">
+              <input class='input-list' type="text" :value='imageUrl' @change="update($event, 'imageUrls', index)"
+                  :disabled="!userCanEdit"
+              >
             </td>
             <td>
               <img class='preview' :src="imageUrl" :alt="maskImageAlt(index)">
             </td>
             <td>
-              <CircularButton text="x" @click="deleteImageUrl(index)"/>
+              <CircularButton text="x" @click="deleteImageUrl(index)" v-if='userCanEdit'/>
             </td>
           </tr>
           <tr>
             <th>Purchasing URLs</th>
             <td class='justify-content-center' colspan=2>
-              <CircularButton text="+" @click="addPurchasingUrl"/>
+              <CircularButton text="+" @click="addPurchasingUrl" v-if='userCanEdit'/>
             </td>
           </tr>
           <tr>
             <th colspan='2'>Purchasing URL</th>
-            <th>Delete</th>
+            <th v-if='userCanEdit'>Delete</th>
           </tr>
           <tr v-for="(purchasingUrl, index) in whereToBuyUrls">
             <td colspan='2'>
-              <input class='input-list almost-full-width' type="text" :value='purchasingUrl' @change="update($event, 'whereToBuyUrls', index)">
+              <input class='input-list almost-full-width' type="text" :value='purchasingUrl' @change="update($event, 'whereToBuyUrls', index)"
+                  :disabled="!userCanEdit"
+              >
             </td>
             <td>
-              <CircularButton text="x" @click="deletePurchasingUrl(index)"/>
+              <CircularButton text="x" @click="deletePurchasingUrl(index)" v-if='userCanEdit'/>
             </td>
           </tr>
         </tbody>
@@ -86,8 +92,8 @@
       <br>
 
       <div class="row">
-        <Button class='button' text="Delete" @click='deleteMask'/>
-        <Button class='button' text="Save" @click='saveMask'/>
+        <Button class='button' text="Delete" @click='deleteMask' v-if='userCanEdit'/>
+        <Button class='button' text="Save" @click='saveMask' v-if='userCanEdit'/>
       </div>
       <br>
       <br>
@@ -151,9 +157,19 @@ export default {
           'message'
         ]
     ),
+    editMode() {
+      return this.authorIds.includes(this.currentUser.id)
+    },
+    userCanEdit() {
+      return this.authorIds.includes(this.currentUser.id)
+    },
     tagline() {
       if (this.$route.params.id) {
-        return "Edit Mask"
+        if (this.userCanEdit) {
+          return "Edit Mask"
+        } else {
+          return "View Mask"
+        }
       } else {
         return "Create Mask"
       }
@@ -178,6 +194,9 @@ export default {
       return `Image #${index} for ${this.uniqueInternalModelCode}`
     },
     addImageUrl() {
+      if (!this.userCanEdit) {
+        return
+      }
       this.imageUrls.push('')
     },
     addPurchasingUrl() {
@@ -379,7 +398,7 @@ export default {
   }
   .input-list {
     margin-left: 6em;
-    min-width: 30em;
+    min-width: 20em;
   }
 
   .menu {
