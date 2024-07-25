@@ -63,7 +63,7 @@
             <td>
               <img class='preview' :src="imageUrl" :alt="maskImageAlt(index)">
             </td>
-            <td>
+            <td class='text-align-center'>
               <CircularButton text="x" @click="deleteImageUrl(index)" v-if='createOrEdit'/>
             </td>
           </tr>
@@ -93,8 +93,10 @@
       <br>
 
       <div class="row">
-        <Button class='button' text="Delete" @click='deleteMask' v-if='deletable'/>
-        <Button class='button' text="Save" @click='saveMask' v-if='createOrEdit'/>
+        <Button class='button' text="Edit" @click='editMode = true' v-if='!editMode && userCanEdit'/>
+        <Button class='button' text="Delete" @click='deleteMask' v-if='deletable && editMode'/>
+        <Button class='button' text="Save" @click='saveMask' v-if='createOrEdit && editMode'/>
+        <Button class='button' text="Cancel" @click='editMode = false' v-if='createOrEdit && editMode'/>
       </div>
       <br>
       <br>
@@ -127,6 +129,7 @@ export default {
   },
   data() {
     return {
+      editMode: false,
       id: null,
       uniqueInternalModelCode: '',
       modifications: {},
@@ -159,17 +162,17 @@ export default {
           'message'
         ]
     ),
+    currentUserIsAuthor() {
+      return this.authorIds.includes(this.currentUser.id)
+    },
     deletable() {
-      return !!this.id
+      return !!this.id && this.currentUserIsAuthor
     },
     whereToBuyUrlsColspan() {
       if (this.userCanEdit) {
         return 2
       }
      return 3
-    },
-    editMode() {
-      return this.authorIds.includes(this.currentUser.id)
     },
     userCanEdit() {
       if (!this.currentUser) {
@@ -180,7 +183,7 @@ export default {
     },
     mode() {
       if (this.$route.params.id) {
-        if (this.userCanEdit) {
+        if (this.userCanEdit && this.editMode) {
           return 'Edit'
         } else {
           return 'View'
@@ -190,7 +193,7 @@ export default {
       }
     },
     createOrEdit() {
-      return this.mode == 'Create' || this.mode == 'Edit'
+      return (this.mode == 'Create' || this.mode == 'Edit') && this.editMode
     },
     tagline() {
       return `${this.mode} Mask`
@@ -268,6 +271,7 @@ export default {
           // whatever you want
           let mask = deepSnakeToCamel(data.mask)
           let items = [
+            'id',
             'uniqueInternalModelCode',
             'modifications',
             'filterType',
@@ -371,7 +375,11 @@ export default {
             })
           })
       }
-
+    },
+    visitMasks() {
+      this.$router.push({
+        name: 'Masks',
+      })
     },
     update(event, property, index) {
       if (index !== null) {
