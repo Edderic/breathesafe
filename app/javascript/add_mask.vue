@@ -11,14 +11,14 @@
         <tbody>
           <tr>
             <th>Unique Internal Model Code</th>
-            <td colspan=2><input class='full-width' type="text" v-model='uniqueInternalModelCode' :disabled="!userCanEdit"></td>
+            <td colspan=2><input class='full-width has-minimal-width' type="text" v-model='uniqueInternalModelCode' :disabled="!createOrEdit"></td>
           </tr>
           <tr>
             <th>Filter type</th>
             <td colspan=2>
               <select
                   v-model="filterType"
-                  :disabled="!userCanEdit"
+                  :disabled="!createOrEdit"
                   >
                   <option>cloth</option>
                   <option>surgical</option>
@@ -35,14 +35,14 @@
             <td colspan='2'>
               <select
                   v-model="elastomeric"
-                  :disabled="!userCanEdit"
+                  :disabled="!createOrEdit"
                   >
                   <option>true</option>
                   <option>false</option>
               </select>
             </td>
           </tr>
-          <tr>
+          <tr v-if='createOrEdit'>
             <th>image URLs</th>
             <td class='justify-content-center' colspan=2>
               <CircularButton text="+" @click="addImageUrl"/>
@@ -57,31 +57,32 @@
 
             <td colspan='1'>
               <input class='input-list' type="text" :value='imageUrl' @change="update($event, 'imageUrls', index)"
-                  :disabled="!userCanEdit"
+                  :disabled="!createOrEdit"
               >
             </td>
             <td>
               <img class='preview' :src="imageUrl" :alt="maskImageAlt(index)">
             </td>
             <td>
-              <CircularButton text="x" @click="deleteImageUrl(index)" v-if='userCanEdit'/>
+              <CircularButton text="x" @click="deleteImageUrl(index)" v-if='createOrEdit'/>
             </td>
           </tr>
-          <tr>
+          <tr v-if='createOrEdit'>
             <th>Purchasing URLs</th>
             <td class='justify-content-center' colspan=2>
-              <CircularButton text="+" @click="addPurchasingUrl" v-if='userCanEdit'/>
+              <CircularButton text="+" @click="addPurchasingUrl" v-if='createOrEdit'/>
             </td>
           </tr>
           <tr>
             <th colspan='2'>Purchasing URL</th>
             <th v-if='userCanEdit'>Delete</th>
           </tr>
-          <tr v-for="(purchasingUrl, index) in whereToBuyUrls">
-            <td colspan='2'>
+          <tr v-for="(purchasingUrl, index) in whereToBuyUrls" class='text-align-center'>
+            <td :colspan='whereToBuyUrlsColspan' >
               <input class='input-list almost-full-width' type="text" :value='purchasingUrl' @change="update($event, 'whereToBuyUrls', index)"
-                  :disabled="!userCanEdit"
+                  v-if="createOrEdit"
               >
+              <a :href="purchasingUrl" v-if="!createOrEdit">{{purchasingUrl}}</a>
             </td>
             <td>
               <CircularButton text="x" @click="deletePurchasingUrl(index)" v-if='userCanEdit'/>
@@ -93,7 +94,7 @@
 
       <div class="row">
         <Button class='button' text="Delete" @click='deleteMask' v-if='userCanEdit'/>
-        <Button class='button' text="Save" @click='saveMask' v-if='userCanEdit'/>
+        <Button class='button' text="Save" @click='saveMask' v-if='createOrEdit'/>
       </div>
       <br>
       <br>
@@ -157,22 +158,38 @@ export default {
           'message'
         ]
     ),
+    whereToBuyUrlsColspan() {
+      if (this.userCanEdit) {
+        return 2
+      }
+     return 3
+    },
     editMode() {
       return this.authorIds.includes(this.currentUser.id)
     },
     userCanEdit() {
+      if (!this.currentUser) {
+        return false
+      }
+
       return this.authorIds.includes(this.currentUser.id)
     },
-    tagline() {
+    mode() {
       if (this.$route.params.id) {
         if (this.userCanEdit) {
-          return "Edit Mask"
+          return 'Edit'
         } else {
-          return "View Mask"
+          return 'View'
         }
       } else {
-        return "Create Mask"
+        return 'Create'
       }
+    },
+    createOrEdit() {
+      return this.mode == 'Create' || this.mode == 'Edit'
+    },
+    tagline() {
+      return `${this.mode} Mask`
     },
     messages() {
       return this.errorMessages;
@@ -187,6 +204,8 @@ export default {
     if (this.$route.params.id) {
       this.loadMask()
     }
+
+    this.authorIds = [this.currentUser.id]
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
@@ -376,6 +395,10 @@ export default {
     padding-left: 0.25em;
     padding-right: 0.25em;
   }
+
+  .has-minimal-width {
+    min-width: 25em;
+  }
   .text-for-other {
     margin: 0 1.25em;
   }
@@ -454,6 +477,10 @@ export default {
   .tagline {
     text-align: center;
     font-weight: bold;
+  }
+
+  .text-align-center {
+    text-align: center;
   }
 
   .align-items-center {
