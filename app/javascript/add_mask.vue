@@ -187,7 +187,7 @@ export default {
       this.imageUrls.splice(index, 1);
     },
     deletePurchasingUrl(index) {
-      this.purchasingUrls.splice(index, 1);
+      this.whereToBuyUrls.splice(index, 1);
     },
     newMask() {
       this.$router.push(
@@ -488,7 +488,7 @@ export default {
   }
 
   img.preview {
-    max-width:20em;
+    max-width:10em;
   }
   .edit-facial-measurements {
     display: flex;
