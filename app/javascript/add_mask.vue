@@ -96,7 +96,7 @@
         <Button class='button' text="Edit" @click='editMode = true' v-if='!editMode && userCanEdit'/>
         <Button class='button' text="Delete" @click='deleteMask' v-if='deletable && editMode'/>
         <Button class='button' text="Save" @click='saveMask' v-if='createOrEdit && editMode'/>
-        <Button class='button' text="Cancel" @click='editMode = false' v-if='createOrEdit && editMode'/>
+        <Button class='button' text="Cancel" @click='handleCancel' v-if='createOrEdit && editMode'/>
       </div>
       <br>
       <br>
@@ -210,6 +210,9 @@ export default {
     }
     if (this.$route.params.id) {
       this.loadMask()
+    } else {
+      // must be in creation mode
+      this.editMode = true
     }
 
     this.authorIds = [this.currentUser.id]
@@ -233,6 +236,17 @@ export default {
     },
     deletePurchasingUrl(index) {
       this.whereToBuyUrls.splice(index, 1);
+    },
+    handleCancel() {
+      if (this.mode == 'Create') {
+        this.$router.push(
+          {
+            name: "Masks"
+          }
+        )
+      } else {
+        this.editMode = false
+      }
     },
     newMask() {
       this.$router.push(

@@ -1,14 +1,22 @@
 <template>
   <div>
     <h2 class='tagline'>Respirator Users</h2>
+
+    <div class='container chunk'>
+      <ClosableMessage @onclose='messages = []' :messages='messages'/>
+      <br>
+    </div>
+
     <div class='main'>
       <div class='centered'>
         <table>
           <thead>
             <tr>
               <th>Name</th>
-              <th>Race &amp; Ethnicity</th>
-              <th>Gender</th>
+              <th>Race &amp; Ethnicity filled out</th>
+              <th>Gender filled out</th>
+              <th>Has Facial Measurements</th>
+              <th>Ready to add Fit Testing Data</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -18,10 +26,16 @@
                 {{firstName}} {{lastName}}
               </td>
               <td>
-                {{raceEthnicity}}
+                {{!raceEthnicityIncomplete}}
               </td>
               <td>
-                {{genderAndSex}}
+                {{!genderAndSexIncomplete}}
+              </td>
+              <td>
+                {{!facialMeasurementsIncomplete}}
+              </td>
+              <td>
+                {{readyToAddFitTestingData}}
               </td>
               <td>
                 <Button @click="edit(profileId)" text='Edit' />
@@ -35,7 +49,9 @@
 </template>
 
 <script>
+import axios from 'axios';
 import Button from './button.vue'
+import ClosableMessage from './closable_message.vue'
 import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
@@ -44,10 +60,13 @@ import { useMainStore } from './stores/main_store';
 export default {
   name: 'RespiratorUsers',
   components: {
-    Button
+    Button,
+    ClosableMessage
   },
   data() {
     return {
+      messages: [],
+      facialMeasurementsLength: 0
     }
   },
   props: {
@@ -74,6 +93,30 @@ export default {
           'genderAndSex',
         ]
     ),
+    readyToAddFitTestingData() {
+      let numerator = !this.nameIncomplete
+        + !this.raceEthnicityIncomplete
+        + !this.genderAndSexIncomplete
+        + !this.facialMeasurementsIncomplete
+
+      let rounded = Math.round(
+        numerator / 4 * 100
+      )
+
+      return `${rounded}%`
+    },
+    nameIncomplete() {
+      return !!this.firstName && !!this.lastName
+    },
+    raceEthnicityIncomplete() {
+      return !this.raceEthnicity
+    },
+    genderAndSexIncomplete() {
+      return !this.genderAndSex
+    },
+    facialMeasurementsIncomplete() {
+      return this.facialMeasurementsLength == 0
+    }
   },
   async created() {
     await this.getCurrentUser()
@@ -88,7 +131,28 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile']),
     async loadStuff() {
-      await this.loadProfile()
+      this.loadProfile()
+      this.loadFacialMeasurements(this.currentUser.id)
+    },
+    async loadFacialMeasurements(userId) {
+      await axios.get(
+        `/users/${userId}/facial_measurements.json`,
+      )
+        .then(response => {
+          let data = response.data
+          if (response.data.facial_measurements) {
+            this.facialMeasurementsLength = response.data.facial_measurements.length
+          } else {
+            this.facialMeasurementsLength = 0
+          }
+        })
+        .catch(error => {
+          this.messages.push({
+            str: "Failed to load facial measurements."
+          })
+          // whatever you want
+        })
+
     },
     edit(profileId) {
       this.$router.push({
@@ -109,6 +173,10 @@ export default {
   }
   p {
     margin: 1em;
+  }
+
+  th, td {
+    padding: 0.5em;
   }
 
   .quote {

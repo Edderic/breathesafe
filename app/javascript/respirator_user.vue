@@ -297,6 +297,10 @@
 
 
     </div>
+    <br>
+    <br>
+    <br>
+
   </div>
 </template>
 
@@ -486,12 +490,12 @@ export default {
     async loadStuff() {
       // TODO: load the profile for the current user
       this.loadProfile()
-      this.loadFacialMeasurements()
+      this.loadFacialMeasurements(this.currentUser.id)
     },
-    async loadFacialMeasurements() {
+    async loadFacialMeasurements(userId) {
       // TODO: make this more flexible so parents can load data of their children
       await axios.get(
-        `/users/${this.currentUser.id}/facial_measurements.json`,
+        `/users/${userId}/facial_measurements.json`,
       )
         .then(response => {
           let data = response.data
