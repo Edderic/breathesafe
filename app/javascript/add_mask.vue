@@ -11,7 +11,7 @@
         <tbody>
           <tr>
             <th>Unique Internal Model Code</th>
-            <td><input type="text" v-model='uniqueInternalModelCode'></td>
+            <td colspan=2><input class='full-width' type="text" v-model='uniqueInternalModelCode'></td>
           </tr>
           <tr>
             <th>Filter type</th>
@@ -31,22 +31,33 @@
 
           <tr>
             <th>Elastomeric</th>
-            <select
-                v-model="elastomeric"
-                >
-                <option>true</option>
-                <option>false</option>
-            </select>
+            <td>
+              <select
+                  v-model="elastomeric"
+                  >
+                  <option>true</option>
+                  <option>false</option>
+              </select>
+            </td>
           </tr>
           <tr>
             <th>image URLs</th>
-            <td>
+            <td class='justify-content-center' colspan=2>
               <CircularButton text="+" @click="addImageUrl"/>
             </td>
           </tr>
+          <tr>
+            <th>Image URL</th>
+            <th>Image</th>
+            <th>Delete</th>
+          </tr>
           <tr v-for="(imageUrl, index) in imageUrls">
-            <td colspan='2'>
+
+            <td colspan='1'>
               <input class='input-list' type="text" :value='imageUrl' @change="update($event, 'imageUrls', index)">
+            </td>
+            <td>
+              <img class='preview' :src="imageUrl" :alt="maskImageAlt(index)">
             </td>
             <td>
               <CircularButton text="x" @click="deleteImageUrl(index)"/>
@@ -54,13 +65,17 @@
           </tr>
           <tr>
             <th>Purchasing URLs</th>
-            <td>
+            <td class='justify-content-center' colspan=2>
               <CircularButton text="+" @click="addPurchasingUrl"/>
             </td>
           </tr>
+          <tr>
+            <th colspan='2'>Purchasing URL</th>
+            <th>Delete</th>
+          </tr>
           <tr v-for="(purchasingUrl, index) in whereToBuyUrls">
             <td colspan='2'>
-              <input class='input-list' type="text" :value='purchasingUrl' @change="update($event, 'whereToBuyUrls', index)">
+              <input class='input-list almost-full-width' type="text" :value='purchasingUrl' @change="update($event, 'whereToBuyUrls', index)">
             </td>
             <td>
               <CircularButton text="x" @click="deletePurchasingUrl(index)"/>
@@ -74,6 +89,9 @@
         <Button class='button' text="Delete" @click='deleteMask'/>
         <Button class='button' text="Save" @click='saveMask'/>
       </div>
+      <br>
+      <br>
+
     </div>
   </div>
 </template>
@@ -156,6 +174,9 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
+    maskImageAlt(index) {
+      return `Image #${index} for ${this.uniqueInternalModelCode}`
+    },
     addImageUrl() {
       this.imageUrls.push('')
     },
@@ -340,10 +361,22 @@ export default {
     margin: 0 1.25em;
   }
 
+  .justify-content-center {
+    display: flex;
+    justify-content: center;
+  }
+
   .justify-items-center {
+    display: flex;
     justify-items: center;
   }
 
+  .almost-full-width {
+    width: 90%;
+  }
+  .full-width {
+    width: 100%;
+  }
   .input-list {
     margin-left: 6em;
     min-width: 30em;
@@ -452,6 +485,10 @@ export default {
   }
   img {
     max-width: 30em;
+  }
+
+  img.preview {
+    max-width:20em;
   }
   .edit-facial-measurements {
     display: flex;
