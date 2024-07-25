@@ -93,7 +93,7 @@
       <br>
 
       <div class="row">
-        <Button class='button' text="Delete" @click='deleteMask' v-if='userCanEdit'/>
+        <Button class='button' text="Delete" @click='deleteMask' v-if='deletable'/>
         <Button class='button' text="Save" @click='saveMask' v-if='createOrEdit'/>
       </div>
       <br>
@@ -127,6 +127,7 @@ export default {
   },
   data() {
     return {
+      id: null,
       uniqueInternalModelCode: '',
       modifications: {},
       filterType: 'N95',
@@ -158,6 +159,9 @@ export default {
           'message'
         ]
     ),
+    deletable() {
+      return !!this.id
+    },
     whereToBuyUrlsColspan() {
       if (this.userCanEdit) {
         return 2
