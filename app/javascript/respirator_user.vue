@@ -5,6 +5,14 @@
       <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
       <br>
     </div>
+    <div class='centered'>
+      <span>Percent Completed:</span>
+      <span>&nbsp;
+      {{readyToAddFitTestingDataPercentage}}
+      </span>
+
+    </div>
+      <br>
 
     <div class='menu row'>
       <TabSet
@@ -45,7 +53,7 @@
 
       <br>
 
-      <Button text="Save" @click='saveProfile("Demographics")'/>
+      <Button text="Save and continue" @click='saveProfile("Demographics")'/>
     </div>
 
     <div class='main' v-if='tabToShow=="Demographics"'>
@@ -73,7 +81,7 @@
 
       <br>
 
-      <Button text="Save" @click='saveProfile("FacialMeasurements")'/>
+      <Button text="Save and continue" @click='saveProfile("FacialMeasurements")'/>
     </div>
 
     <div class="edit-facial-measurements" v-if='tabToShow=="FacialMeasurements"'>
@@ -402,6 +410,7 @@ export default {
         useProfileStore,
         [
           'profileId',
+          'readyToAddFitTestingDataPercentage'
         ]
     ),
     ...mapWritableState(
@@ -432,6 +441,18 @@ export default {
     },
     messages() {
       return this.errorMessages;
+    },
+    readyToAddFitTestingData() {
+      let numerator = !this.nameIncomplete
+        + !this.raceEthnicityIncomplete
+        + !this.genderAndSexIncomplete
+        + !this.facialMeasurementsIncomplete
+
+      let rounded = Math.round(
+        numerator / 4 * 100
+      )
+
+      return `${rounded}%`
     },
     sortedFacialMeasurements() {
       return this.facialMeasurements.sort((a, b) => {
