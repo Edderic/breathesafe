@@ -13,6 +13,7 @@ export const useProfileStore = defineStore('profile', {
     currentUser: undefined,
     firstName: "",
     lastName: "",
+    facialMeasurementsLength: 0,
     heightMeters: "",
     externalAPIToken: "",
     measurementUnits: {
@@ -42,8 +43,52 @@ export const useProfileStore = defineStore('profile', {
   getters: {
     // ...mapState(useMainStore, ['currentUser']),
     // ...mapWritableState(useMainStore, ['message']),
+    nameComplete() {
+      return !!this.firstName || !!this.lastName
+    },
+    raceEthnicityComplete() {
+      return !!this.raceEthnicity
+    },
+    genderAndSexComplete() {
+      return !!this.genderAndSex
+    },
+    facialMeasurementsComplete() {
+      return this.facialMeasurementsLength > 0
+    },
+    readyToAddFitTestingDataPercentage() {
+      let numerator = this.nameComplete
+        + this.raceEthnicityComplete
+        + this.genderAndSexComplete
+        + this.facialMeasurementsComplete
+
+      let rounded = Math.round(
+        numerator / 4 * 100
+      )
+
+      return `${rounded}%`
+    },
   },
   actions: {
+    async loadFacialMeasurements(userId) {
+      await axios.get(
+        `/users/${userId}/facial_measurements.json`,
+      )
+        .then(response => {
+          let data = response.data
+          if (response.data.facial_measurements) {
+            this.facialMeasurementsLength = response.data.facial_measurements.length
+          } else {
+            this.facialMeasurementsLength = 0
+          }
+        })
+        .catch(error => {
+          this.messages.push({
+            str: "Failed to load facial measurements."
+          })
+          // whatever you want
+        })
+
+    },
     async loadProfile() {
       setupCSRF();
 

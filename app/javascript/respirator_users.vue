@@ -26,16 +26,16 @@
                 {{firstName}} {{lastName}}
               </td>
               <td>
-                {{!raceEthnicityIncomplete}}
+                {{raceEthnicityComplete}}
               </td>
               <td>
-                {{!genderAndSexIncomplete}}
+                {{genderAndSexComplete}}
               </td>
               <td>
-                {{!facialMeasurementsIncomplete}}
+                {{facialMeasurementsComplete}}
               </td>
               <td>
-                {{readyToAddFitTestingData}}
+                {{readyToAddFitTestingDataPercentage}}
               </td>
               <td>
                 <Button @click="edit(profileId)" text='Edit' />
@@ -82,6 +82,12 @@ export default {
         useProfileStore,
         [
           'profileId',
+          'readyToAddFitTestingDataPercentage',
+          'nameComplete',
+          'genderAndSexComplete',
+          'raceEthnicityComplete',
+          'facialMeasurementsComplete',
+          'loadFacialMeasurements',
         ]
     ),
     ...mapWritableState(
@@ -93,27 +99,6 @@ export default {
           'genderAndSex',
         ]
     ),
-    readyToAddFitTestingData() {
-      let numerator = !this.nameIncomplete
-        + !this.raceEthnicityIncomplete
-        + !this.genderAndSexIncomplete
-        + !this.facialMeasurementsIncomplete
-
-      let rounded = Math.round(
-        numerator / 4 * 100
-      )
-
-      return `${rounded}%`
-    },
-    nameIncomplete() {
-      return !!this.firstName && !!this.lastName
-    },
-    raceEthnicityIncomplete() {
-      return !this.raceEthnicity
-    },
-    genderAndSexIncomplete() {
-      return !this.genderAndSex
-    },
     facialMeasurementsIncomplete() {
       return this.facialMeasurementsLength == 0
     }
@@ -133,26 +118,6 @@ export default {
     async loadStuff() {
       this.loadProfile()
       this.loadFacialMeasurements(this.currentUser.id)
-    },
-    async loadFacialMeasurements(userId) {
-      await axios.get(
-        `/users/${userId}/facial_measurements.json`,
-      )
-        .then(response => {
-          let data = response.data
-          if (response.data.facial_measurements) {
-            this.facialMeasurementsLength = response.data.facial_measurements.length
-          } else {
-            this.facialMeasurementsLength = 0
-          }
-        })
-        .catch(error => {
-          this.messages.push({
-            str: "Failed to load facial measurements."
-          })
-          // whatever you want
-        })
-
     },
     edit(profileId) {
       this.$router.push({
