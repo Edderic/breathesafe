@@ -51,7 +51,7 @@
           <tr>
             <th>Image URL</th>
             <th>Image</th>
-            <th v-if='userCanEdit'>Delete</th>
+            <th v-if='userCanEdit && editMode'>Delete</th>
           </tr>
           <tr v-for="(imageUrl, index) in imageUrls">
 
@@ -60,11 +60,11 @@
                   :disabled="!createOrEdit"
               >
             </td>
-            <td>
+            <td :colspan='imagePrevColspan' class='text-align-center'>
               <img class='preview' :src="imageUrl" :alt="maskImageAlt(index)">
             </td>
-            <td class='text-align-center'>
-              <CircularButton text="x" @click="deleteImageUrl(index)" v-if='createOrEdit'/>
+            <td class='text-align-center' v-if='createOrEdit'>
+              <CircularButton text="x" @click="deleteImageUrl(index)" />
             </td>
           </tr>
           <tr v-if='createOrEdit'>
@@ -75,7 +75,7 @@
           </tr>
           <tr>
             <th colspan='2'>Purchasing URL</th>
-            <th v-if='userCanEdit'>Delete</th>
+            <th v-if='userCanEdit && editMode'>Delete</th>
           </tr>
           <tr v-for="(purchasingUrl, index) in whereToBuyUrls" class='text-align-center'>
             <td :colspan='whereToBuyUrlsColspan' >
@@ -85,7 +85,7 @@
               <a :href="purchasingUrl" v-if="!createOrEdit">{{purchasingUrl}}</a>
             </td>
             <td>
-              <CircularButton text="x" @click="deletePurchasingUrl(index)" v-if='userCanEdit'/>
+              <CircularButton text="x" @click="deletePurchasingUrl(index)" v-if='userCanEdit && editMode'/>
             </td>
           </tr>
         </tbody>
@@ -173,6 +173,12 @@ export default {
         return 2
       }
      return 3
+    },
+    imagePrevColspan() {
+      if (this.editMode) {
+        return 1
+      }
+     return 2
     },
     userCanEdit() {
       if (!this.currentUser) {
