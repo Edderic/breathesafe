@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_07_26_005530) do
+ActiveRecord::Schema[7.0].define(version: 2024_07_26_015854) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -98,18 +98,18 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_26_005530) do
     t.string "where_to_buy_urls", default: [], array: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "filter_types", default: [], array: true
-    t.jsonb "filtration_efficiencies"
     t.string "strap_type"
     t.string "mass_grams"
     t.string "height_mm"
     t.string "width_mm"
     t.string "depth_mm"
     t.boolean "has_gasket"
-    t.jsonb "pressure_drops"
     t.float "cost_us_dollars"
     t.string "sources", default: [], array: true
     t.text "notes"
+    t.string "filter_type"
+    t.jsonb "filtration_efficiencies", default: []
+    t.jsonb "pressure_drops", default: []
   end
 
   create_table "population_states", force: :cascade do |t|
