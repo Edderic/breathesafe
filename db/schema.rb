@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_07_26_015854) do
+ActiveRecord::Schema[7.0].define(version: 2024_07_26_234500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -92,7 +92,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_26_015854) do
   create_table "masks", force: :cascade do |t|
     t.string "unique_internal_model_code"
     t.json "modifications"
-    t.boolean "seal"
     t.string "image_urls", default: [], array: true
     t.integer "author_ids", default: [], array: true
     t.string "where_to_buy_urls", default: [], array: true
@@ -110,6 +109,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_26_015854) do
     t.string "filter_type"
     t.jsonb "filtration_efficiencies", default: []
     t.jsonb "pressure_drops", default: []
+    t.string "seal"
   end
 
   create_table "population_states", force: :cascade do |t|

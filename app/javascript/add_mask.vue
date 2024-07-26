@@ -13,35 +13,6 @@
             <th>Unique Internal Model Code</th>
             <td colspan=2><input class='full-width has-minimal-width' type="text" v-model='uniqueInternalModelCode' :disabled="!createOrEdit"></td>
           </tr>
-          <tr>
-            <th>Filter type</th>
-            <td colspan=2>
-              <select
-                  v-model="filterType"
-                  :disabled="!createOrEdit"
-                  >
-                  <option>cloth</option>
-                  <option>surgical</option>
-                  <option>KN95</option>
-                  <option>N95</option>
-                  <option>N99</option>
-                  <option>P100</option>
-              </select>
-            </td>
-          </tr>
-
-          <tr>
-            <th>Seal</th>
-            <td colspan='2'>
-              <select
-                  v-model="seal"
-                  :disabled="!createOrEdit"
-                  >
-                  <option>not elastomeric</option>
-                  <option>elastomeric</option>
-              </select>
-            </td>
-          </tr>
           <tr v-if='createOrEdit'>
             <th>image URLs</th>
             <td class='justify-content-center' colspan=2>
@@ -65,6 +36,48 @@
             </td>
             <td class='text-align-center' v-if='createOrEdit'>
               <CircularButton text="x" @click="deleteImageUrl(index)" />
+            </td>
+          </tr>
+          <tr>
+            <th>Filter type</th>
+            <td colspan=1 class='text-align-center'>
+              <select
+                  v-model="filterType"
+                  :disabled="!createOrEdit"
+                  >
+                  <option>cloth</option>
+                  <option>surgical</option>
+                  <option>KN95</option>
+                  <option>N95</option>
+                  <option>N99</option>
+                  <option>P100</option>
+              </select>
+            </td>
+          </tr>
+
+          <tr>
+            <th>Seal</th>
+            <td :colspan='1' class='text-align-center'>
+              <select
+                  v-model="seal"
+                  :disabled="!createOrEdit"
+                  >
+                  <option>not elastomeric</option>
+                  <option>elastomeric</option>
+              </select>
+            </td>
+          </tr>
+
+          <tr>
+            <th>Strap type</th>
+            <td colspan='1' class='text-align-center'>
+              <select
+                  v-model="strapType"
+                  :disabled="!createOrEdit"
+                  >
+                  <option>ear loop</option>
+                  <option>headband</option>
+              </select>
             </td>
           </tr>
           <tr v-if='createOrEdit'>
@@ -161,6 +174,7 @@ export default {
       modifications: {},
       filterType: 'N95',
       filtrationEfficiencies: [],
+      strapType: 'headband',
       seal: 'not elastomeric',
       imageUrls: [],
       authorIds: [],
@@ -212,6 +226,12 @@ export default {
         return 2
       }
      return 3
+    },
+    sealColspan() {
+      if (this.editMode) {
+        return 2
+      }
+     return 1
     },
     imagePrevColspan() {
       if (this.editMode) {
@@ -345,7 +365,9 @@ export default {
             'elastomeric',
             'imageUrls',
             'whereToBuyUrls',
-            'authorIds'
+            'authorIds',
+            'strapType',
+            'seal'
           ]
 
           for(let item of items) {
@@ -387,6 +409,7 @@ export default {
       }
 
       if (this.$route.params.id) {
+
         await axios.put(
           `/masks/${this.$route.params.id}.json`, {
             mask: {
@@ -394,10 +417,11 @@ export default {
               modifications: this.modifications,
               filtration_efficiencies: this.filtrationEfficienciesRuby,
               filter_type: this.filterType,
-              elastomeric: this.elastomeric,
+              seal: this.seal,
               image_urls: this.imageUrls,
               where_to_buy_urls: this.whereToBuyUrls,
               author_ids: [this.currentUser.id],
+              strap_type: this.strapType,
             }
           }
         )
@@ -415,6 +439,7 @@ export default {
             })
           })
       } else {
+
         // create
         await axios.post(
           `/masks.json`, {
