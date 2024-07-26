@@ -138,11 +138,22 @@ class MasksController < ApplicationController
     params.require(:mask).permit(
       :unique_internal_model_code,
       :filter_type,
-      :elastomeric,
+      :seal,
+      :strap_type,
+      :mass_grams,
+      :height_mm,
+      :width_mm,
+      :depth_mm,
+      :has_gasket,
+      :cost_us_dollars,
+      :notes,
+      sources: [],
       image_urls: [],
       author_ids: [],
       where_to_buy_urls: [],
       modifications: {},
+      filtration_efficiencies: {},
+      pressure_drops: {},
     )
   end
 end
