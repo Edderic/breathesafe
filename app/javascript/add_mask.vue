@@ -80,6 +80,19 @@
               </select>
             </td>
           </tr>
+
+          <tr>
+            <th>Has gasket</th>
+            <td colspan='1' class='text-align-center'>
+              <select
+                  v-model="hasGasket"
+                  :disabled="!createOrEdit"
+                  >
+                  <option>true</option>
+                  <option>false</option>
+              </select>
+            </td>
+          </tr>
           <tr v-if='createOrEdit'>
             <th>Filtration Efficiencies</th>
             <td class='justify-content-center' colspan=2>
@@ -168,6 +181,7 @@ export default {
   },
   data() {
     return {
+      hasGasket: false,
       editMode: false,
       id: null,
       uniqueInternalModelCode: '',
@@ -363,6 +377,7 @@ export default {
             'filterType',
             'filtrationEfficiencies',
             'elastomeric',
+            'hasGasket',
             'imageUrls',
             'whereToBuyUrls',
             'authorIds',
@@ -418,6 +433,7 @@ export default {
               filtration_efficiencies: this.filtrationEfficienciesRuby,
               filter_type: this.filterType,
               seal: this.seal,
+              has_gasket: this.hasGasket,
               image_urls: this.imageUrls,
               where_to_buy_urls: this.whereToBuyUrls,
               author_ids: [this.currentUser.id],
@@ -447,6 +463,7 @@ export default {
               unique_internal_model_code: this.uniqueInternalModelCode,
               modifications: this.modifications,
               filter_type: this.filterType,
+              has_gasket: this.hasGasket,
               elastomeric: this.elastomeric,
               image_urls: this.imageUrls,
               where_to_buy_urls: this.whereToBuyUrls,
