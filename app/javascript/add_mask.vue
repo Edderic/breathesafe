@@ -74,12 +74,18 @@
             </td>
           </tr>
           <tr>
-            <th colspan='2'>Filtration Efficiency</th>
+            <th colspan='1'>Filtration Efficiency</th>
+            <th colspan='1'>Source</th>
             <th v-if='userCanEdit && editMode'>Delete</th>
           </tr>
           <tr v-for="(f, index) in filtrationEfficiencies" class='text-align-center'>
-            <td colspan=2>
-              <input class='input-list almost-full-width' type="text" :value='f.filtrationEfficiency' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiency')"
+            <td colspan=1>
+              <input type="text" :value='f.filtrationEfficiency' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiency')"
+                  :disabled="mode != 'Create' && mode != 'Edit'"
+              >
+            </td>
+            <td>
+              <input class='input-list' type="text" :value='f.source' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'source')"
                   :disabled="mode != 'Create' && mode != 'Edit'"
               >
             </td>
@@ -504,7 +510,6 @@ export default {
     width: 100%;
   }
   .input-list {
-    margin-left: 6em;
     min-width: 20em;
   }
 
