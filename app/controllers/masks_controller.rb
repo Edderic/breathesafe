@@ -152,7 +152,10 @@ class MasksController < ApplicationController
       author_ids: [],
       where_to_buy_urls: [],
       modifications: {},
-      filtration_efficiencies: {},
+      filtration_efficiencies: [
+        :filtration_efficiency,
+        :source
+      ],
       pressure_drops: {},
     )
   end

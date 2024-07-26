@@ -31,14 +31,14 @@
           </tr>
 
           <tr>
-            <th>Elastomeric</th>
+            <th>Seal</th>
             <td colspan='2'>
               <select
-                  v-model="elastomeric"
+                  v-model="seal"
                   :disabled="!createOrEdit"
                   >
-                  <option>true</option>
-                  <option>false</option>
+                  <option>not elastomeric</option>
+                  <option>elastomeric</option>
               </select>
             </td>
           </tr>
@@ -65,6 +65,26 @@
             </td>
             <td class='text-align-center' v-if='createOrEdit'>
               <CircularButton text="x" @click="deleteImageUrl(index)" />
+            </td>
+          </tr>
+          <tr v-if='createOrEdit'>
+            <th>Filtration Efficiencies</th>
+            <td class='justify-content-center' colspan=2>
+              <CircularButton text="+" @click="addFiltrationEfficiency" v-if='createOrEdit'/>
+            </td>
+          </tr>
+          <tr>
+            <th colspan='2'>Filtration Efficiency</th>
+            <th v-if='userCanEdit && editMode'>Delete</th>
+          </tr>
+          <tr v-for="(f, index) in filtrationEfficiencies" class='text-align-center'>
+            <td colspan=2>
+              <input class='input-list almost-full-width' type="text" :value='f.filtrationEfficiency' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiency')"
+                  v-if="createOrEdit"
+              >
+            </td>
+            <td>
+              <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='userCanEdit && editMode'/>
             </td>
           </tr>
           <tr v-if='createOrEdit'>
@@ -134,7 +154,8 @@ export default {
       uniqueInternalModelCode: '',
       modifications: {},
       filterType: 'N95',
-      elastomeric: false,
+      filtrationEfficiencies: [],
+      seal: 'not elastomeric',
       imageUrls: [],
       authorIds: [],
       whereToBuyUrls: [],
@@ -162,6 +183,18 @@ export default {
           'message'
         ]
     ),
+    filtrationEfficienciesRuby() {
+      let collection = []
+      for(let f of this.filtrationEfficiencies) {
+        collection.push({
+          'source': f.source,
+          'filtration_efficiency': f.filtrationEfficiency
+        })
+
+      }
+
+      return collection
+    },
     currentUserIsAuthor() {
       return this.authorIds.includes(this.currentUser.id)
     },
@@ -227,6 +260,13 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser']),
     maskImageAlt(index) {
       return `Image #${index} for ${this.uniqueInternalModelCode}`
+    },
+    addFiltrationEfficiency() {
+      this.filtrationEfficiencies.push({
+        'filtrationEfficiency': 1,
+        'source': ''
+      })
+
     },
     addImageUrl() {
       if (!this.userCanEdit) {
@@ -295,6 +335,7 @@ export default {
             'uniqueInternalModelCode',
             'modifications',
             'filterType',
+            'filtrationEfficiencies',
             'elastomeric',
             'imageUrls',
             'whereToBuyUrls',
@@ -345,6 +386,7 @@ export default {
             mask: {
               unique_internal_model_code: this.uniqueInternalModelCode,
               modifications: this.modifications,
+              filtration_efficiencies: this.filtrationEfficienciesRuby,
               filter_type: this.filterType,
               elastomeric: this.elastomeric,
               image_urls: this.imageUrls,
@@ -406,6 +448,16 @@ export default {
         this[property][index] = event.target.value
       } else {
         this[property] = event.target.value
+      }
+    },
+    deleteArrayOfObj(event, property, index) {
+      if (index !== null) {
+        this[property].splice(index, 1)
+      }
+    },
+    updateArrayOfObj(event, property, index, nestedProp) {
+      if (index !== null) {
+        this[property][index][nestedProp] = parseFloat(event.target.value)
       }
     }
   }

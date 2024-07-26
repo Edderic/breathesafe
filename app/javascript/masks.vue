@@ -15,7 +15,8 @@
             <th>Image</th>
             <th>Unique Model Code</th>
             <th>Filter Type</th>
-            <th>Elastomeric</th>
+            <th>Seal</th>
+            <th>Filtration Efficiencies</th>
             <th>Purchasing URLs</th>
           </tr>
         </thead>
@@ -26,7 +27,14 @@
             </td>
             <td>{{m.uniqueInternalModelCode}}</td>
             <td>{{m.filterType}}</td>
-            <td>{{m.elastomeric}}</td>
+            <td>{{m.seal}}</td>
+            <td>
+              <ul>
+                <li v-for='f in m.filtrationEfficiencies'>
+                  {{f.filtrationEfficiency}}
+                </li>
+              </ul>
+            </td>
             <td>
               <ul>
                 <li v-for='w in m.whereToBuyUrls'>
