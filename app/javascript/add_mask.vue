@@ -80,7 +80,7 @@
           <tr v-for="(f, index) in filtrationEfficiencies" class='text-align-center'>
             <td colspan=2>
               <input class='input-list almost-full-width' type="text" :value='f.filtrationEfficiency' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiency')"
-                  v-if="createOrEdit"
+                  :disabled="mode != 'Create' && mode != 'Edit'"
               >
             </td>
             <td>
