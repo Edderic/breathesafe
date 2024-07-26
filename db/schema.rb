@@ -92,13 +92,13 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_26_005530) do
   create_table "masks", force: :cascade do |t|
     t.string "unique_internal_model_code"
     t.json "modifications"
-    t.string "filter_type"
     t.boolean "seal"
     t.string "image_urls", default: [], array: true
     t.integer "author_ids", default: [], array: true
     t.string "where_to_buy_urls", default: [], array: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "filter_types", default: [], array: true
     t.jsonb "filtration_efficiencies"
     t.string "strap_type"
     t.string "mass_grams"
@@ -108,7 +108,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_26_005530) do
     t.boolean "has_gasket"
     t.jsonb "pressure_drops"
     t.float "cost_us_dollars"
-    t.string "source"
+    t.string "sources", default: [], array: true
     t.text "notes"
   end
 
