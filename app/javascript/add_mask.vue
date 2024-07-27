@@ -96,6 +96,11 @@
       <table v-if='tabToShow == "Effectiveness"'>
         <tbody>
           <tr>
+            <td>
+              <h3>Filter Media</h3>
+            </td>
+          </tr>
+          <tr>
             <th>Filter type</th>
             <td colspan=1 class='text-align-center'>
               <select
@@ -108,45 +113,6 @@
                   <option>N95</option>
                   <option>N99</option>
                   <option>P100</option>
-              </select>
-            </td>
-          </tr>
-
-          <tr>
-            <th>Seal</th>
-            <td :colspan='1' class='text-align-center'>
-              <select
-                  v-model="seal"
-                  :disabled="!createOrEdit"
-                  >
-                  <option>not elastomeric</option>
-                  <option>elastomeric</option>
-              </select>
-            </td>
-          </tr>
-
-          <tr>
-            <th>Strap type</th>
-            <td colspan='1' class='text-align-center'>
-              <select
-                  v-model="strapType"
-                  :disabled="!createOrEdit"
-                  >
-                  <option>ear loop</option>
-                  <option>headband</option>
-              </select>
-            </td>
-          </tr>
-
-          <tr>
-            <th>Has gasket</th>
-            <td colspan='1' class='text-align-center'>
-              <select
-                  v-model="hasGasket"
-                  :disabled="!createOrEdit"
-                  >
-                  <option>true</option>
-                  <option>false</option>
               </select>
             </td>
           </tr>
@@ -177,44 +143,89 @@
               <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='userCanEdit && editMode'/>
             </td>
           </tr>
-          </tbody>
-        </table>
-
-        <table v-if='tabToShow == "Dimensions"'>
-          <tbody>
-            <tr>
-              <th>Mass (grams)</th>
-              <td>
-                <input type="number" v-model="massGrams" :disabled="!createOrEdit">
-              </td>
-            </tr>
-            <tr>
-              <th>Height (mm)</th>
-              <td>
-                <input type="number" v-model="heightMm" :disabled="!createOrEdit">
-
-              </td>
-            </tr>
-            <tr>
-              <th>Width (mm)</th>
-              <td>
-                <input type="number" v-model="widthMm" :disabled="!createOrEdit">
-
-              </td>
-            </tr>
-            <tr>
-              <th>Depth (mm)</th>
-              <td>
-                <input type="number" v-model="depthMm" :disabled="!createOrEdit">
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <table v-if='tabToShow == "Effectiveness"'>
-          <tbody>
         </tbody>
       </table>
+
+    <table v-if='tabToShow == "Effectiveness"'>
+      <tbody>
+        <tr>
+          <td>
+            <h3>Factors that affect fit</h3>
+          </td>
+        </tr>
+        <tr>
+          <th>Seal</th>
+          <td :colspan='1' class='text-align-center'>
+            <select
+                v-model="seal"
+                :disabled="!createOrEdit"
+                >
+                <option>not elastomeric</option>
+                <option>elastomeric</option>
+            </select>
+          </td>
+        </tr>
+
+        <tr>
+          <th>Strap type</th>
+          <td colspan='1' class='text-align-center'>
+            <select
+                v-model="strapType"
+                :disabled="!createOrEdit"
+                >
+                <option>ear loop</option>
+                <option>headband</option>
+            </select>
+          </td>
+        </tr>
+
+        <tr>
+          <th>Has gasket</th>
+          <td colspan='1' class='text-align-center'>
+            <select
+                v-model="hasGasket"
+                :disabled="!createOrEdit"
+                >
+                <option>true</option>
+                <option>false</option>
+            </select>
+          </td>
+        </tr>
+
+        </tbody>
+      </table>
+
+      <table v-if='tabToShow == "Dimensions"'>
+        <tbody>
+          <tr>
+            <th>Mass (grams)</th>
+            <td>
+              <input type="number" v-model="massGrams" :disabled="!createOrEdit">
+            </td>
+          </tr>
+          <tr>
+            <th>Height (mm)</th>
+            <td>
+              <input type="number" v-model="heightMm" :disabled="!createOrEdit">
+
+            </td>
+          </tr>
+          <tr>
+            <th>Width (mm)</th>
+            <td>
+              <input type="number" v-model="widthMm" :disabled="!createOrEdit">
+
+            </td>
+          </tr>
+          <tr>
+            <th>Depth (mm)</th>
+            <td>
+              <input type="number" v-model="depthMm" :disabled="!createOrEdit">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
       <br>
 
       <div class="row">
