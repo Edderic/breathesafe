@@ -198,6 +198,41 @@
         </tbody>
       </table>
 
+
+      <table v-if='tabToShow == "Breatheability"'>
+        <tbody>
+          <tr v-if='createOrEdit'>
+            <th>Pressure drops</th>
+            <td class='justify-content-center' colspan=2>
+              <CircularButton text="+" @click="addPressureDrop" v-if='createOrEdit'/>
+            </td>
+          </tr>
+          <tr>
+            <th colspan='1'>Pressure Drop (Pascal) under 85 Liters per minute (LPM)</th>
+            <th colspan='1'>Source (e.g. URL)</th>
+            <th v-if='userCanEdit && editMode'>Delete</th>
+          </tr>
+          <tr v-for="(p, index) in pressureDrops" class='text-align-center'>
+            <td colspan=1>
+              <input type="number" :value='p.pressureDropPa' @change="updateArrayOfObj($event, 'pressureDrops', index, 'pressureDropPa')"
+                  :disabled="mode != 'Create' && mode != 'Edit'"
+              >
+            </td>
+            <td>
+              <input type='text' class='input-list'
+                     :value='p.source'
+                     @change="updateArrayOfObj($event, 'pressureDrops', index, 'source')"
+
+                     :disabled="mode != 'Create' && mode != 'Edit'"
+              >
+            </td>
+            <td>
+              <CircularButton text="x" @click="deleteArrayOfObj($event, 'pressureDrops', index)" v-if='userCanEdit && editMode'/>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
       <table v-if='tabToShow == "Dimensions"'>
         <tbody>
           <tr>
@@ -296,6 +331,7 @@ export default {
       modifications: {},
       filterType: 'N95',
       filtrationEfficiencies: [],
+      pressureDrops: [],
       filterChangeCostUsDollars: 0,
       strapType: 'headband',
       seal: 'not elastomeric',
@@ -332,6 +368,18 @@ export default {
         collection.push({
           'source': f.source,
           'filtration_efficiency_percent': f.filtrationEfficiencyPercent
+        })
+
+      }
+
+      return collection
+    },
+    pressureDropsRuby() {
+      let collection = []
+      for(let f of this.pressureDrops) {
+        collection.push({
+          'source': f.source,
+          'pressure_drop_pa': parseFloat(f.pressureDropPa)
         })
 
       }
@@ -400,6 +448,7 @@ export default {
         modifications: this.modifications,
         filter_type: this.filterType,
         filtration_efficiencies: this.filtrationEfficienciesRuby,
+        pressure_drops: this.pressureDropsRuby,
         filter_change_cost_us_dollars: this.filterChangeCostUsDollars,
         has_gasket: this.hasGasket,
         elastomeric: this.elastomeric,
@@ -445,6 +494,13 @@ export default {
     addFiltrationEfficiency() {
       this.filtrationEfficiencies.push({
         'filtrationEfficiency': 1,
+        'source': ''
+      })
+
+    },
+    addPressureDrop() {
+      this.pressureDrops.push({
+        'pressureDrop': 0,
         'source': ''
       })
 
@@ -518,6 +574,7 @@ export default {
             'modifications',
             'filterType',
             'filtrationEfficiencies',
+            'pressureDrops',
             'initialCostUsDollars',
             'filterChangeCostUsDollars',
             'elastomeric',

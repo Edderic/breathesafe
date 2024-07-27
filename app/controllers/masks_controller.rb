@@ -157,7 +157,10 @@ class MasksController < ApplicationController
         :filtration_efficiency_percent,
         :source
       ],
-      pressure_drops: {},
+      pressure_drops: [
+        :pressure_drop_pa,
+        :source
+      ]
     )
   end
 end
