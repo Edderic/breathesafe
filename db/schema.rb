@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_07_26_234500) do
+ActiveRecord::Schema[7.0].define(version: 2024_07_27_005318) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -103,13 +103,14 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_26_234500) do
     t.string "width_mm"
     t.string "depth_mm"
     t.boolean "has_gasket"
-    t.float "cost_us_dollars"
+    t.float "initial_cost_us_dollars"
     t.string "sources", default: [], array: true
     t.text "notes"
     t.string "filter_type"
     t.jsonb "filtration_efficiencies", default: []
     t.jsonb "pressure_drops", default: []
     t.string "seal"
+    t.float "filter_change_cost_us_dollars"
   end
 
   create_table "population_states", force: :cascade do |t|
