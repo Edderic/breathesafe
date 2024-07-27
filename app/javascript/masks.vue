@@ -31,7 +31,7 @@
             <td>
               <ul>
                 <li v-for='f in m.filtrationEfficiencies'>
-                  {{f.filtrationEfficiency}}
+                  {{f.filtrationEfficiencyPercent}}
                 </li>
               </ul>
             </td>
