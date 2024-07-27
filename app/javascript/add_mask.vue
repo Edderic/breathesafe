@@ -6,8 +6,14 @@
       <br>
     </div>
 
+    <TabSet
+      :options='tabToShowOptions'
+      @update='setRouteTo'
+      :tabToShow='tabToShow'
+    />
+
     <div class='main'>
-      <table>
+        <table v-if='tabToShow == "Basic Info"'>
         <tbody>
           <tr>
             <th>Unique Internal Model Code</th>
@@ -36,6 +42,67 @@
             </td>
             <td class='text-align-center' v-if='createOrEdit'>
               <CircularButton text="x" @click="deleteImageUrl(index)" />
+            </td>
+          </tr>
+          <tr v-if='createOrEdit'>
+            <th>Purchasing URLs</th>
+            <td class='justify-content-center' colspan=2>
+              <CircularButton text="+" @click="addPurchasingUrl" v-if='createOrEdit'/>
+            </td>
+          </tr>
+          <tr>
+            <th colspan='2'>Purchasing URL</th>
+            <th v-if='userCanEdit && editMode'>Delete</th>
+          </tr>
+          <tr v-for="(purchasingUrl, index) in whereToBuyUrls" class='text-align-center'>
+            <td :colspan='whereToBuyUrlsColspan' >
+              <input class='input-list almost-full-width' type="text" :value='purchasingUrl' @change="update($event, 'whereToBuyUrls', index)"
+                  v-if="createOrEdit"
+              >
+              <a :href="purchasingUrl" v-if="!createOrEdit">{{purchasingUrl}}</a>
+            </td>
+            <td>
+              <CircularButton text="x" @click="deletePurchasingUrl(index)" v-if='userCanEdit && editMode'/>
+            </td>
+          </tr>
+          <tr>
+            <th>Initial cost (US Dollars)</th>
+            <td colspan=1 class='text-align-center'>
+
+              <input type="number"
+                v-model='initialCostUsDollars'
+                :disabled="!createOrEdit"
+              >
+            </td>
+          </tr>
+          <tr>
+            <th>Filter change cost (US Dollars)</th>
+            <td colspan=1 class='text-align-center'>
+
+              <input type="number"
+                v-model='filterChangeCostUsDollars'
+                :disabled="!createOrEdit"
+              >
+            </td>
+          </tr>
+          <tr>
+            <th>Notes</th>
+            <td><textarea id="notes" name="notes" cols="30" rows="10" v-model='notes' :disabled=!createOrEdit></textarea></td>
+          </tr>
+          <tr>
+            <th>Filter type</th>
+            <td colspan=1 class='text-align-center'>
+              <select
+                  v-model="filterType"
+                  :disabled="!createOrEdit"
+                  >
+                  <option>cloth</option>
+                  <option>surgical</option>
+                  <option>KN95</option>
+                  <option>N95</option>
+                  <option>N99</option>
+                  <option>P100</option>
+              </select>
             </td>
           </tr>
           <tr>
@@ -93,6 +160,23 @@
               </select>
             </td>
           </tr>
+          </tbody>
+        </table>
+
+        <table v-if='tabToShow == "Dimensions"'>
+          <tbody>
+            <tr>
+              <th>Mass (grams)</th>
+              <td>
+                <input type="number" v-model="massGrams">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table v-if='tabToShow == "Effectiveness"'>
+          <tbody>
+
           <tr v-if='createOrEdit'>
             <th>Filtration Efficiencies</th>
             <td class='justify-content-center' colspan=2>
@@ -117,27 +201,6 @@
             </td>
             <td>
               <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='userCanEdit && editMode'/>
-            </td>
-          </tr>
-          <tr v-if='createOrEdit'>
-            <th>Purchasing URLs</th>
-            <td class='justify-content-center' colspan=2>
-              <CircularButton text="+" @click="addPurchasingUrl" v-if='createOrEdit'/>
-            </td>
-          </tr>
-          <tr>
-            <th colspan='2'>Purchasing URL</th>
-            <th v-if='userCanEdit && editMode'>Delete</th>
-          </tr>
-          <tr v-for="(purchasingUrl, index) in whereToBuyUrls" class='text-align-center'>
-            <td :colspan='whereToBuyUrlsColspan' >
-              <input class='input-list almost-full-width' type="text" :value='purchasingUrl' @change="update($event, 'whereToBuyUrls', index)"
-                  v-if="createOrEdit"
-              >
-              <a :href="purchasingUrl" v-if="!createOrEdit">{{purchasingUrl}}</a>
-            </td>
-            <td>
-              <CircularButton text="x" @click="deletePurchasingUrl(index)" v-if='userCanEdit && editMode'/>
             </td>
           </tr>
         </tbody>
@@ -181,6 +244,24 @@ export default {
   },
   data() {
     return {
+      notes: '',
+      massGrams: 0,
+      tabToShow: "Basic Info",
+      tabToShowOptions: [
+        {
+          text: "Basic Info",
+        },
+        {
+          text: "Dimensions",
+        },
+        {
+          text: "Effectiveness",
+        },
+        {
+          text: "Breatheability",
+        },
+      ],
+      initialCostUsDollars: 0,
       hasGasket: false,
       editMode: false,
       id: null,
@@ -188,6 +269,7 @@ export default {
       modifications: {},
       filterType: 'N95',
       filtrationEfficiencies: [],
+      filterChangeCostUsDollars: 0,
       strapType: 'headband',
       seal: 'not elastomeric',
       imageUrls: [],
@@ -280,6 +362,23 @@ export default {
     messages() {
       return this.errorMessages;
     },
+    toSave() {
+      return {
+        notes: this.notes,
+        mass_grams: this.massGrams,
+        unique_internal_model_code: this.uniqueInternalModelCode,
+        modifications: this.modifications,
+        filter_type: this.filterType,
+        filtration_efficiencies: this.filtrationEfficienciesRuby,
+        filter_change_cost_us_dollars: this.filterChangeCostUsDollars,
+        has_gasket: this.hasGasket,
+        elastomeric: this.elastomeric,
+        image_urls: this.imageUrls,
+        where_to_buy_urls: this.whereToBuyUrls,
+        author_ids: [this.currentUser.id],
+        initial_cost_us_dollars: this.initialCostUsDollars
+      }
+    }
   },
   async created() {
     await this.getCurrentUser()
@@ -294,7 +393,19 @@ export default {
       this.editMode = true
     }
 
+    // TODO: this should only be done when created
     this.authorIds = [this.currentUser.id]
+
+
+    this.$watch(
+      () => this.$route.query,
+      (toQuery, fromQuery) => {
+        if (toQuery['tabToShow'] && (["AddMask", "ViewMask"].includes(this.$route.name))) {
+          this.tabToShow = toQuery['tabToShow']
+        }
+      }
+    )
+
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
@@ -373,10 +484,14 @@ export default {
           let items = [
             'id',
             'uniqueInternalModelCode',
+            'massGrams',
             'modifications',
             'filterType',
             'filtrationEfficiencies',
+            'initialCostUsDollars',
+            'filterChangeCostUsDollars',
             'elastomeric',
+            'notes',
             'hasGasket',
             'imageUrls',
             'whereToBuyUrls',
@@ -427,18 +542,7 @@ export default {
 
         await axios.put(
           `/masks/${this.$route.params.id}.json`, {
-            mask: {
-              unique_internal_model_code: this.uniqueInternalModelCode,
-              modifications: this.modifications,
-              filtration_efficiencies: this.filtrationEfficienciesRuby,
-              filter_type: this.filterType,
-              seal: this.seal,
-              has_gasket: this.hasGasket,
-              image_urls: this.imageUrls,
-              where_to_buy_urls: this.whereToBuyUrls,
-              author_ids: [this.currentUser.id],
-              strap_type: this.strapType,
-            }
+            mask: this.toSave
           }
         )
           .then(response => {
@@ -459,16 +563,7 @@ export default {
         // create
         await axios.post(
           `/masks.json`, {
-            mask: {
-              unique_internal_model_code: this.uniqueInternalModelCode,
-              modifications: this.modifications,
-              filter_type: this.filterType,
-              has_gasket: this.hasGasket,
-              elastomeric: this.elastomeric,
-              image_urls: this.imageUrls,
-              where_to_buy_urls: this.whereToBuyUrls,
-              author_ids: [this.currentUser.id],
-            }
+            mask: this.toSave
           }
         )
           .then(response => {
@@ -485,6 +580,14 @@ export default {
             })
           })
       }
+    },
+    setRouteTo(opt) {
+      this.$router.push({
+        name: this.$route.name,
+        query: {
+          tabToShow: opt.name
+        }
+      })
     },
     visitMasks() {
       this.$router.push({
