@@ -154,7 +154,7 @@ class MasksController < ApplicationController
       where_to_buy_urls: [],
       modifications: {},
       filtration_efficiencies: [
-        :filtration_efficiency,
+        :filtration_efficiency_percent,
         :source
       ],
       pressure_drops: {},

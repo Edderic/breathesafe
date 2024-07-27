@@ -124,19 +124,22 @@
             </td>
           </tr>
           <tr>
-            <th colspan='1'>Filtration Efficiency</th>
-            <th colspan='1'>Source</th>
+            <th colspan='1'>Filtration Efficiency (Percent)</th>
+            <th colspan='1'>Source (e.g. URL)</th>
             <th v-if='userCanEdit && editMode'>Delete</th>
           </tr>
           <tr v-for="(f, index) in filtrationEfficiencies" class='text-align-center'>
             <td colspan=1>
-              <input type="number" :value='f.filtrationEfficiency' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiency')"
+              <input type="number" :value='f.filtrationEfficiencyPercent' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyPercent')"
                   :disabled="mode != 'Create' && mode != 'Edit'"
               >
             </td>
             <td>
-              <input class='input-list' type="text" :value='f.source' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'source')"
-                  :disabled="mode != 'Create' && mode != 'Edit'"
+              <input type='text' class='input-list'
+                     :value='f.source'
+                     @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'source')"
+
+                     :disabled="mode != 'Create' && mode != 'Edit'"
               >
             </td>
             <td>
@@ -276,13 +279,13 @@ export default {
           text: "Basic Info",
         },
         {
-          text: "Dimensions",
-        },
-        {
           text: "Effectiveness",
         },
         {
           text: "Breatheability",
+        },
+        {
+          text: "Dimensions",
         },
       ],
       initialCostUsDollars: 0,
@@ -328,7 +331,7 @@ export default {
       for(let f of this.filtrationEfficiencies) {
         collection.push({
           'source': f.source,
-          'filtration_efficiency': f.filtrationEfficiency
+          'filtration_efficiency_percent': f.filtrationEfficiencyPercent
         })
 
       }
@@ -638,7 +641,7 @@ export default {
     },
     updateArrayOfObj(event, property, index, nestedProp) {
       if (index !== null) {
-        this[property][index][nestedProp] = parseFloat(event.target.value)
+        this[property][index][nestedProp] = event.target.value
       }
     }
   }
