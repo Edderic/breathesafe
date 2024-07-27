@@ -13,7 +13,7 @@
     />
 
     <div class='main'>
-        <table v-if='tabToShow == "Basic Info"'>
+      <table v-if='tabToShow == "Basic Info"'>
         <tbody>
           <tr>
             <th>Unique Internal Model Code</th>
@@ -87,24 +87,14 @@
           </tr>
           <tr>
             <th>Notes</th>
-            <td><textarea id="notes" name="notes" cols="30" rows="10" v-model='notes' :disabled=!createOrEdit></textarea></td>
+            <td><textarea id="notes" name="notes" cols="30" rows="5" v-model='notes' :disabled=!createOrEdit></textarea></td>
           </tr>
-          <tr>
-            <th>Filter type</th>
-            <td colspan=1 class='text-align-center'>
-              <select
-                  v-model="filterType"
-                  :disabled="!createOrEdit"
-                  >
-                  <option>cloth</option>
-                  <option>surgical</option>
-                  <option>KN95</option>
-                  <option>N95</option>
-                  <option>N99</option>
-                  <option>P100</option>
-              </select>
-            </td>
-          </tr>
+
+        </tbody>
+      </table>
+
+      <table v-if='tabToShow == "Effectiveness"'>
+        <tbody>
           <tr>
             <th>Filter type</th>
             <td colspan=1 class='text-align-center'>
@@ -160,22 +150,6 @@
               </select>
             </td>
           </tr>
-          </tbody>
-        </table>
-
-        <table v-if='tabToShow == "Dimensions"'>
-          <tbody>
-            <tr>
-              <th>Mass (grams)</th>
-              <td>
-                <input type="number" v-model="massGrams">
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <table v-if='tabToShow == "Effectiveness"'>
-          <tbody>
 
           <tr v-if='createOrEdit'>
             <th>Filtration Efficiencies</th>
@@ -190,7 +164,7 @@
           </tr>
           <tr v-for="(f, index) in filtrationEfficiencies" class='text-align-center'>
             <td colspan=1>
-              <input type="text" :value='f.filtrationEfficiency' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiency')"
+              <input type="number" :value='f.filtrationEfficiency' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiency')"
                   :disabled="mode != 'Create' && mode != 'Edit'"
               >
             </td>
@@ -203,6 +177,42 @@
               <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='userCanEdit && editMode'/>
             </td>
           </tr>
+          </tbody>
+        </table>
+
+        <table v-if='tabToShow == "Dimensions"'>
+          <tbody>
+            <tr>
+              <th>Mass (grams)</th>
+              <td>
+                <input type="number" v-model="massGrams" :disabled="!createOrEdit">
+              </td>
+            </tr>
+            <tr>
+              <th>Height (mm)</th>
+              <td>
+                <input type="number" v-model="heightMm" :disabled="!createOrEdit">
+
+              </td>
+            </tr>
+            <tr>
+              <th>Width (mm)</th>
+              <td>
+                <input type="number" v-model="widthMm" :disabled="!createOrEdit">
+
+              </td>
+            </tr>
+            <tr>
+              <th>Depth (mm)</th>
+              <td>
+                <input type="number" v-model="depthMm" :disabled="!createOrEdit">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table v-if='tabToShow == "Effectiveness"'>
+          <tbody>
         </tbody>
       </table>
       <br>
@@ -246,6 +256,9 @@ export default {
     return {
       notes: '',
       massGrams: 0,
+      widthMm: 0,
+      heightMm: 0,
+      depthMm: 0,
       tabToShow: "Basic Info",
       tabToShowOptions: [
         {
@@ -366,6 +379,9 @@ export default {
       return {
         notes: this.notes,
         mass_grams: this.massGrams,
+        width_mm: this.widthMm,
+        height_mm: this.heightMm,
+        depth_mm: this.depthMm,
         unique_internal_model_code: this.uniqueInternalModelCode,
         modifications: this.modifications,
         filter_type: this.filterType,
@@ -497,7 +513,10 @@ export default {
             'whereToBuyUrls',
             'authorIds',
             'strapType',
-            'seal'
+            'seal',
+            'widthMm',
+            'heightMm',
+            'depthMm',
           ]
 
           for(let item of items) {
