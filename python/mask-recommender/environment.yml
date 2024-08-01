@@ -21,4 +21,6 @@ dependencies:
   - pip:
     - mediapipe
     - levenshtein
+  - selenium
   - tqdm
+
