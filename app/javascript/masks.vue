@@ -4,14 +4,22 @@
       <h2 class='tagline'>Masks</h2>
       <CircularButton text="+" @click="newMask"/>
     </div>
+
+    <div class='row'>
+      <input type="text" v-model='search'>
+      <SearchIcon height='2em' width='2em'/>
+    </div>
+
     <div class='container chunk'>
       <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
       <br>
     </div>
 
 
+
+
     <div class='main grid'>
-      <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in masks' @click='viewMask(m.id)'>
+      <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in displayables' @click='viewMask(m.id)'>
         <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
         <div class='description'>
           <span>
@@ -34,6 +42,7 @@ import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
+import SearchIcon from './search_icon.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
@@ -46,13 +55,15 @@ export default {
     Button,
     CircularButton,
     ClosableMessage,
+    SearchIcon,
     SurveyQuestion,
     TabSet
   },
   data() {
     return {
       errorMessages: [],
-      masks: []
+      masks: [],
+      search: ""
     }
   },
   props: {
@@ -76,6 +87,14 @@ export default {
           'message'
         ]
     ),
+    displayables() {
+      if (this.search == "") {
+        return this.masks
+      } else {
+        let lowerSearch = this.search.toLowerCase()
+        return this.masks.filter((mask) => mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
+      }
+    },
     messages() {
       return this.errorMessages;
     },
@@ -203,11 +222,6 @@ export default {
     flex-direction: row;
   }
 
-  .row button {
-    width: 100%;
-    padding-top: 1em;
-    padding-bottom: 1em;
-  }
 
 
   .flex-dir-col {
