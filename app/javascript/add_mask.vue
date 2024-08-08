@@ -136,7 +136,9 @@
             </td>
           </tr>
           <tr>
-            <th colspan='1'>Filtration Efficiency (Percent)</th>
+            <th colspan='1' v-show='createOrEdit'>Filtration Efficiency (Percent)</th>
+            <th colspan='1' v-show='!createOrEdit'>Filtration Efficiency</th>
+
             <th colspan='1'>Source</th>
             <th class='notes' colspan='1'>Notes</th>
             <th v-if='userCanEdit && editMode'>Delete</th>
@@ -144,8 +146,17 @@
           <tr v-for="(f, index) in filtrationEfficiencies" class='text-align-center'>
             <td colspan=1>
               <input type="number" :value='f.filtrationEfficiencyPercent' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyPercent')"
-                  :disabled="mode != 'Create' && mode != 'Edit'"
+                  v-show="createOrEdit"
               >
+              <ColoredCell
+                  class='risk-score'
+                  :colorScheme="colorInterpolationScheme"
+                  :maxVal=1
+                  :value='1 - f.filtrationEfficiencyPercent / 100'
+                  :text='percentText(f.filtrationEfficiencyPercent)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                  :title='f.filtrationEfficiencyPercent'
+                  />
             </td>
             <td>
               <input type='text' class='input-list'
@@ -291,8 +302,10 @@
 <script>
 import axios from 'axios';
 import Button from './button.vue'
+import { binValue, getColor, gradeColorMapping, riskColorInterpolationScheme } from './colors';
 import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
+import ColoredCell from './colored_cell.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
 import SurveyQuestion from './survey_question.vue'
@@ -307,6 +320,7 @@ export default {
     Button,
     CircularButton,
     ClosableMessage,
+    ColoredCell,
     SurveyQuestion,
     TabSet
   },
@@ -371,6 +385,12 @@ export default {
           'message'
         ]
     ),
+    colorInterpolationScheme() {
+      return riskColorInterpolationScheme
+    },
+    riskColorScheme() {
+      return riskColorInterpolationScheme
+    },
     filtrationEfficienciesRuby() {
       let collection = []
       for(let f of this.filtrationEfficiencies) {
@@ -498,6 +518,9 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
+    percentText(num) {
+      return `${num}%`
+    },
     maskImageAlt(index) {
       return `Image #${index} for ${this.uniqueInternalModelCode}`
     },
@@ -774,6 +797,11 @@ export default {
     margin: 1em;
   }
 
+  .risk-score {
+    border-radius: 100%;
+    width: 5em;
+    height: 5em;
+  }
 
   .flex-dir-col {
     display: flex;
