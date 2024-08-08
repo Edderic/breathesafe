@@ -674,6 +674,7 @@ export function filterEvents(search, events, placeType) {
   return collection
 }
 
+
 function r(val, numDigits) {
   const factor = 10**numDigits
   return Math.round(val * factor) / factor

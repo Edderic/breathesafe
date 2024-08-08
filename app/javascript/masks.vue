@@ -15,7 +15,7 @@
             <th>Image</th>
             <th>Unique Model Code</th>
             <th>Filter Type</th>
-            <th>Seal</th>
+            <th>Style</th>
             <th>Filtration Efficiencies</th>
             <th>Purchasing URLs</th>
           </tr>
@@ -27,7 +27,7 @@
             </td>
             <td>{{m.uniqueInternalModelCode}}</td>
             <td>{{m.filterType}}</td>
-            <td>{{m.seal}}</td>
+            <td>{{m.style}}</td>
             <td>
               <ul>
                 <li v-for='f in m.filtrationEfficiencies'>
@@ -38,7 +38,7 @@
             <td>
               <ul>
                 <li v-for='w in m.whereToBuyUrls'>
-                  <a :href="getAbsoluteHref(w)" target='_blank'>{{w}}</a>
+                  <a :href="getAbsoluteHref(w)" target='_blank'>{{shortHandHref(w)}}</a>
                 </li>
               </ul>
             </td>
@@ -117,7 +117,16 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     getAbsoluteHref(href) {
-      return `//${href}`
+      // TODO: make sure this works for all
+      return `${href}`
+    },
+    shortHandHref(href) {
+      let matches =  href.match(/(?<=https:\/\/)([\w\.-]+)/)
+      if (matches) {
+        return matches[0]
+      }
+
+      return ""
     },
     newMask() {
       this.$router.push(
