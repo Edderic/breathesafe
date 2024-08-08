@@ -87,11 +87,13 @@ masks.each.with_index do |mask, j|
   headers.each.with_index do |header, index|
     if header == 'uimc_lower'
       next
+    elsif ['where_to_buy_url_1', 'where_to_buy_url_2', 'where_to_buy_url_3'].include?(header) && mask[index].blank?
+      next
     elsif ['filtration_efficiency_percent', 'filtration_efficiency_source', 'filtration_efficiency_notes'].include?(header)
       filtration_efficiency[header] = mask[index]
-    elsif ['breathability_pascals', 'breathability_source', 'breathability_notes'].include?(header)
+    elsif ['breathability_pascals', 'breathability_pascals_source', 'breathability_pascals_notes'].include?(header)
       breathability[header] = mask[index]
-    elsif ['where_to_buy_url_1', 'where_to_buy_url_2', 'where_to_buy_url_3'].include?(header)
+    elsif ['where_to_buy_url_1', 'where_to_buy_url_2', 'where_to_buy_url_3'].include?(header) && mask[index].present?
       where_to_buy_urls << mask[index]
     elsif header == 'image_url'
       mask_data["#{header}s"] = [mask[index]]
@@ -101,7 +103,8 @@ masks.each.with_index do |mask, j|
   end
 
   mask_data['filtration_efficiencies'] = [filtration_efficiency]
-  mask_data['breathability'] = [filtration_efficiency]
+  mask_data['breathability'] = [breathability]
+  mask_data['where_to_buy_urls'] = where_to_buy_urls
 
   Mask.create!(**mask_data)
 end
