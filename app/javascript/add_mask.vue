@@ -164,7 +164,7 @@
                   class='risk-score'
                   :colorScheme="colorInterpolationScheme"
                   :maxVal=1
-                  :value='1 - f.filtrationEfficiencyPercent / 100'
+                  :value='filtrationEfficiencyValue(f.filtrationEfficiencyPercent)'
                   :text='percentText(f.filtrationEfficiencyPercent)'
                   :exception='exceptionObject'
                   :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
@@ -346,6 +346,7 @@ export default {
           b: '200',
         },
         value: undefined,
+        text: '?'
       },
       exceptionDollarObject: {
         color: {
@@ -553,6 +554,13 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
+    filtrationEfficiencyValue(percent) {
+      if (percent) {
+        return 1 - percent / 100
+      }
+
+      return undefined
+    },
     dollarText(num) {
       if (num) {
         return `$${num}`

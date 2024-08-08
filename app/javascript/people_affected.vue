@@ -62,7 +62,6 @@
 </template>
 
 <script>
-import ColoredCell from './colored_cell.vue'
 import CircularButton from './circular_button.vue'
 import DrillDownSection from './drill_down_section.vue'
 import PersonIcon from './person_icon.vue'
@@ -79,7 +78,6 @@ export default {
   name: 'PeopleAffected',
   components: {
     CircularButton,
-    ColoredCell,
     DrillDownSection,
     PersonIcon
   },
