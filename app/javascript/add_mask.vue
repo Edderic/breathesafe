@@ -136,8 +136,8 @@
             </td>
             <td>
               <input type='text' class='input-list'
-                     :value='f.source'
-                     @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'source')"
+                     :value='f.filtrationEfficiencySource'
+                     @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencySource')"
 
                      :disabled="mode != 'Create' && mode != 'Edit'"
               >
@@ -157,14 +157,19 @@
           </td>
         </tr>
         <tr>
-          <th>Seal</th>
+          <th>Style</th>
           <td :colspan='1' class='text-align-center'>
             <select
-                v-model="seal"
+                v-model="style"
                 :disabled="!createOrEdit"
                 >
-                <option>not elastomeric</option>
-                <option>elastomeric</option>
+                <option>Bifold</option>
+                <option>Bifold &amp; Gasket</option>
+                <option>Boat</option>
+                <option>Cotton + High Filtration Efficiency Material</option>
+                <option>Cup</option>
+                <option>Duckbill</option>
+                <option>Elastomeric</option>
             </select>
           </td>
         </tr>
@@ -182,19 +187,6 @@
           </td>
         </tr>
 
-        <tr>
-          <th>Has gasket</th>
-          <td colspan='1' class='text-align-center'>
-            <select
-                v-model="hasGasket"
-                :disabled="!createOrEdit"
-                >
-                <option>true</option>
-                <option>false</option>
-            </select>
-          </td>
-        </tr>
-
         </tbody>
       </table>
 
@@ -204,7 +196,7 @@
           <tr v-if='createOrEdit'>
             <th>Pressure drops</th>
             <td class='justify-content-center' colspan=2>
-              <CircularButton text="+" @click="addPressureDrop" v-if='createOrEdit'/>
+              <CircularButton text="+" @click="addBreathability" v-if='createOrEdit'/>
             </td>
           </tr>
           <tr>
@@ -212,22 +204,22 @@
             <th colspan='1'>Source (e.g. URL)</th>
             <th v-if='userCanEdit && editMode'>Delete</th>
           </tr>
-          <tr v-for="(p, index) in pressureDrops" class='text-align-center'>
+          <tr v-for="(p, index) in breathability" class='text-align-center'>
             <td colspan=1>
-              <input type="number" :value='p.pressureDropPa' @change="updateArrayOfObj($event, 'pressureDrops', index, 'pressureDropPa')"
+              <input type="number" :value='p.breathabilityPascals' @change="updateArrayOfObj($event, 'breathability', index, 'breathabilityPascals')"
                   :disabled="mode != 'Create' && mode != 'Edit'"
               >
             </td>
             <td>
               <input type='text' class='input-list'
-                     :value='p.source'
-                     @change="updateArrayOfObj($event, 'pressureDrops', index, 'source')"
+                     :value='p.breathabilitySource'
+                     @change="updateArrayOfObj($event, 'breathability', index, 'breathabilitySource')"
 
                      :disabled="mode != 'Create' && mode != 'Edit'"
               >
             </td>
             <td>
-              <CircularButton text="x" @click="deleteArrayOfObj($event, 'pressureDrops', index)" v-if='userCanEdit && editMode'/>
+              <CircularButton text="x" @click="deleteArrayOfObj($event, 'breathability', index)" v-if='userCanEdit && editMode'/>
             </td>
           </tr>
         </tbody>
@@ -331,10 +323,10 @@ export default {
       modifications: {},
       filterType: 'N95',
       filtrationEfficiencies: [],
-      pressureDrops: [],
+      breathability: [],
       filterChangeCostUsDollars: 0,
       strapType: 'headband',
-      seal: 'not elastomeric',
+      style: '',
       imageUrls: [],
       authorIds: [],
       whereToBuyUrls: [],
@@ -366,7 +358,7 @@ export default {
       let collection = []
       for(let f of this.filtrationEfficiencies) {
         collection.push({
-          'source': f.source,
+          'filtration_efficiency_source': f.filtrationEfficiencySource,
           'filtration_efficiency_percent': f.filtrationEfficiencyPercent
         })
 
@@ -374,12 +366,12 @@ export default {
 
       return collection
     },
-    pressureDropsRuby() {
+    breathabilityRuby() {
       let collection = []
-      for(let f of this.pressureDrops) {
+      for(let f of this.breathability) {
         collection.push({
-          'source': f.source,
-          'pressure_drop_pa': parseFloat(f.pressureDropPa)
+          'breathability_source': f.breathabilitySource,
+          'breathability_pascals': parseFloat(f.breathabilityPascals)
         })
 
       }
@@ -448,10 +440,9 @@ export default {
         modifications: this.modifications,
         filter_type: this.filterType,
         filtration_efficiencies: this.filtrationEfficienciesRuby,
-        pressure_drops: this.pressureDropsRuby,
+        breathability: this.breathabilityRuby,
         filter_change_cost_us_dollars: this.filterChangeCostUsDollars,
-        has_gasket: this.hasGasket,
-        elastomeric: this.elastomeric,
+        style: this.style,
         image_urls: this.imageUrls,
         where_to_buy_urls: this.whereToBuyUrls,
         author_ids: [this.currentUser.id],
@@ -493,15 +484,15 @@ export default {
     },
     addFiltrationEfficiency() {
       this.filtrationEfficiencies.push({
-        'filtrationEfficiency': 1,
-        'source': ''
+        'filtrationEfficiencyPercent': 1,
+        'filtrationEfficiencySource': ''
       })
 
     },
-    addPressureDrop() {
-      this.pressureDrops.push({
-        'pressureDrop': 0,
-        'source': ''
+    addBreathability() {
+      this.breathability.push({
+        'breathabilityPascals': 0,
+        'breathabilitySource': ''
       })
 
     },
@@ -574,17 +565,16 @@ export default {
             'modifications',
             'filterType',
             'filtrationEfficiencies',
-            'pressureDrops',
+            'breathability',
             'initialCostUsDollars',
             'filterChangeCostUsDollars',
             'elastomeric',
             'notes',
-            'hasGasket',
             'imageUrls',
             'whereToBuyUrls',
             'authorIds',
             'strapType',
-            'seal',
+            'style',
             'widthMm',
             'heightMm',
             'depthMm',

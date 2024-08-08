@@ -138,7 +138,7 @@ class MasksController < ApplicationController
     params.require(:mask).permit(
       :unique_internal_model_code,
       :filter_type,
-      :seal,
+      :style,
       :strap_type,
       :mass_grams,
       :height_mm,
@@ -155,11 +155,11 @@ class MasksController < ApplicationController
       modifications: {},
       filtration_efficiencies: [
         :filtration_efficiency_percent,
-        :source
+        :filtration_efficiency_source
       ],
-      pressure_drops: [
-        :pressure_drop_pa,
-        :source
+      breathability: [
+        :breathability_pascals,
+        :breathability_source
       ]
     )
   end
