@@ -108,12 +108,12 @@
       <table v-if='tabToShow == "Effectiveness"'>
         <tbody>
           <tr>
-            <td>
+            <td colspan=3>
               <h3>Filter Media</h3>
             </td>
           </tr>
           <tr>
-            <th>Filter type</th>
+            <th colspan=2>Filter type</th>
             <td colspan=1 class='text-align-center'>
               <select
                   v-model="filterType"
@@ -137,7 +137,7 @@
           </tr>
           <tr>
             <th colspan='1'>Filtration Efficiency (Percent)</th>
-            <th colspan='1'>Source (e.g. URL)</th>
+            <th colspan='1'>Source</th>
             <th class='notes' colspan='1'>Notes</th>
             <th v-if='userCanEdit && editMode'>Delete</th>
           </tr>
@@ -152,8 +152,9 @@
                      :value='f.filtrationEfficiencySource'
                      @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencySource')"
 
-                     :disabled="mode != 'Create' && mode != 'Edit'"
+                     v-show="createOrEdit"
               >
+              <a :href="f.filtrationEfficiencySource">link</a>
             </td>
               <td class='notes'>{{f.filtrationEfficiencyNotes}}</td>
             <td>
@@ -166,12 +167,12 @@
     <table v-if='tabToShow == "Effectiveness"'>
       <tbody>
         <tr>
-          <td>
+          <td colspan='3'>
             <h3>Factors that affect fit</h3>
           </td>
         </tr>
         <tr>
-          <th>Style</th>
+          <th colspan='2'>Style</th>
           <td :colspan='1' class='text-align-center'>
             <select
                 v-model="style"
@@ -189,7 +190,7 @@
         </tr>
 
         <tr>
-          <th>Strap type</th>
+          <th colspan='2'>Strap type</th>
           <td colspan='1' class='text-align-center'>
             <select
                 v-model="strapType"
