@@ -108,9 +108,11 @@ ActiveRecord::Schema[7.0].define(version: 2024_07_27_005318) do
     t.text "notes"
     t.string "filter_type"
     t.jsonb "filtration_efficiencies", default: []
-    t.jsonb "pressure_drops", default: []
-    t.string "seal"
+    t.jsonb "breathability", default: []
+    t.string "style"
     t.float "filter_change_cost_us_dollars"
+    t.string "age_range"
+    t.string "color"
   end
 
   create_table "population_states", force: :cascade do |t|
