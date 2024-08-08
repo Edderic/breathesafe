@@ -126,6 +126,7 @@
           <tr>
             <th colspan='1'>Filtration Efficiency (Percent)</th>
             <th colspan='1'>Source (e.g. URL)</th>
+            <th class='notes' colspan='1'>Notes</th>
             <th v-if='userCanEdit && editMode'>Delete</th>
           </tr>
           <tr v-for="(f, index) in filtrationEfficiencies" class='text-align-center'>
@@ -142,6 +143,7 @@
                      :disabled="mode != 'Create' && mode != 'Edit'"
               >
             </td>
+              <td class='notes'>{{f.filtrationEfficiencyNotes}}</td>
             <td>
               <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='userCanEdit && editMode'/>
             </td>
@@ -202,6 +204,7 @@
           <tr>
             <th colspan='1'>Pressure Drop (Pascal) under 85 Liters per minute (LPM)</th>
             <th colspan='1'>Source (e.g. URL)</th>
+            <th class='notes' colspan='1'>Notes</th>
             <th v-if='userCanEdit && editMode'>Delete</th>
           </tr>
           <tr v-for="(p, index) in breathability" class='text-align-center'>
@@ -212,12 +215,13 @@
             </td>
             <td>
               <input type='text' class='input-list'
-                     :value='p.breathabilitySource'
+                     :value='p.breathabilityPascalsSource'
                      @change="updateArrayOfObj($event, 'breathability', index, 'breathabilitySource')"
 
                      :disabled="mode != 'Create' && mode != 'Edit'"
               >
             </td>
+            <td class='notes'>{{p.breathabilityPascalsNotes}}</td>
             <td>
               <CircularButton text="x" @click="deleteArrayOfObj($event, 'breathability', index)" v-if='userCanEdit && editMode'/>
             </td>
@@ -358,6 +362,7 @@ export default {
       let collection = []
       for(let f of this.filtrationEfficiencies) {
         collection.push({
+          'filtration_efficiency_notes': f.filtrationEfficiencyNotes,
           'filtration_efficiency_source': f.filtrationEfficiencySource,
           'filtration_efficiency_percent': f.filtrationEfficiencyPercent
         })
@@ -370,7 +375,8 @@ export default {
       let collection = []
       for(let f of this.breathability) {
         collection.push({
-          'breathability_source': f.breathabilitySource,
+          'breathability_pascals_notes': f.breathabilityPascalsNotes,
+          'breathability_pascals_source': f.breathabilityPascalsSource,
           'breathability_pascals': parseFloat(f.breathabilityPascals)
         })
 
@@ -814,6 +820,9 @@ export default {
     max-width: 40em;
   }
 
+  .notes {
+    max-width: 20em;
+  }
 
   .call-to-actions {
     display: flex;
