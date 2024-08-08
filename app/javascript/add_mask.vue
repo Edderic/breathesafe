@@ -83,8 +83,20 @@
 
               <input type="number"
                 v-model='initialCostUsDollars'
-                :disabled="!createOrEdit"
+                v-show="createOrEdit"
               >
+
+              <ColoredCell
+                  v-show='!createOrEdit'
+                  class='risk-score'
+                  :colorScheme="colorInterpolationScheme"
+                  :maxVal=1
+                  :value='initialCostUsDollars'
+                  :exception='exceptionDollarObject'
+                  :text='dollarText(initialCostUsDollars)'
+                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                  :title='dollarText(initialCostUsDollars)'
+                  />
             </td>
           </tr>
           <tr>
@@ -154,6 +166,7 @@
                   :maxVal=1
                   :value='1 - f.filtrationEfficiencyPercent / 100'
                   :text='percentText(f.filtrationEfficiencyPercent)'
+                  :exception='exceptionObject'
                   :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
                   :title='f.filtrationEfficiencyPercent'
                   />
@@ -326,6 +339,23 @@ export default {
   },
   data() {
     return {
+      exceptionObject: {
+        color: {
+          r: '200',
+          g: '200',
+          b: '200',
+        },
+        value: undefined,
+      },
+      exceptionDollarObject: {
+        color: {
+          r: '200',
+          g: '200',
+          b: '200',
+        },
+        value: 0,
+        text: '?'
+      },
       notes: '',
       massGrams: 0,
       widthMm: 0,
@@ -387,6 +417,11 @@ export default {
     ),
     colorInterpolationScheme() {
       return riskColorInterpolationScheme
+    },
+    dollarCost() {
+      if (this.initialCostUsDollars != 0) {
+        return this.initialCostUsDollars / 1000
+      }
     },
     riskColorScheme() {
       return riskColorInterpolationScheme
@@ -518,8 +553,19 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
+    dollarText(num) {
+      if (num) {
+        return `$${num}`
+      }
+
+      return '?'
+    },
     percentText(num) {
-      return `${num}%`
+      if (num) {
+        return `${num}%`
+      }
+
+      return "?"
     },
     maskImageAlt(index) {
       return `Image #${index} for ${this.uniqueInternalModelCode}`

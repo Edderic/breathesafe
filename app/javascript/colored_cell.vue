@@ -27,7 +27,6 @@
           return this.backgroundColor
         }
 
-
         if (this.exception && this.exception.value == this.value) {
           const color = this.exception.color
           return `rgb(${color.r}, ${color.g}, ${color.b})`
