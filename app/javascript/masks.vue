@@ -13,11 +13,17 @@
     <div class='main grid'>
       <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in masks' @click='viewMask(m.id)'>
         <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
-        <div>
-          {{m.uniqueInternalModelCode}}
+        <div class='description'>
+          <span>
+            {{m.uniqueInternalModelCode}}
+          </span>
         </div>
       </div>
     </div>
+
+    <br>
+    <br>
+
   </div>
 </template>
 
@@ -156,6 +162,10 @@ export default {
   }
 
   .card {
+    padding: 1em 0;
+  }
+
+  .card .description {
     padding: 1em 0;
   }
 
