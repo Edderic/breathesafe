@@ -17,7 +17,12 @@
         <tbody>
           <tr>
             <th>Unique Internal Model Code</th>
-            <td colspan=2><input class='full-width has-minimal-width' type="text" v-model='uniqueInternalModelCode' :disabled="!createOrEdit"></td>
+            <td colspan=2>
+              <input class='full-width has-minimal-width' type="text" v-model='uniqueInternalModelCode' v-show="createOrEdit">
+              <span class='full-width has-minimal-width ' v-show="!createOrEdit">
+                {{uniqueInternalModelCode }}
+              </span>
+            </td>
           </tr>
           <tr v-if='createOrEdit'>
             <th>image URLs</th>
@@ -25,13 +30,19 @@
               <CircularButton text="+" @click="addImageUrl"/>
             </td>
           </tr>
-          <tr>
+          <tr v-show='createOrEdit'>
             <th>Image URL</th>
             <th>Image</th>
             <th v-if='userCanEdit && editMode'>Delete</th>
           </tr>
-          <tr v-for="(imageUrl, index) in imageUrls">
 
+          <tr v-show='!createOrEdit' v-for="(imageUrl, index) in imageUrls">
+            <td :colspan='3' class='text-align-center'>
+              <img class='preview' :src="imageUrl" :alt="maskImageAlt(index)">
+            </td>
+          </tr>
+
+          <tr v-show='createOrEdit' v-for="(imageUrl, index) in imageUrls">
             <td colspan='1'>
               <input class='input-list' type="text" :value='imageUrl' @change="update($event, 'imageUrls', index)"
                   :disabled="!createOrEdit"
@@ -44,6 +55,7 @@
               <CircularButton text="x" @click="deleteImageUrl(index)" />
             </td>
           </tr>
+
           <tr v-if='createOrEdit'>
             <th>Purchasing URLs</th>
             <td class='justify-content-center' colspan=2>
@@ -857,7 +869,7 @@ export default {
   }
 
   img.preview {
-    max-width:10em;
+    max-width:20em;
   }
   .edit-facial-measurements {
     display: flex;
@@ -865,6 +877,7 @@ export default {
   }
   th, td {
     padding: 0.5em;
+    text-align: center;
   }
   @media(max-width: 700px) {
     img {
