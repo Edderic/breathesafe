@@ -1,50 +1,22 @@
 <template>
-  <div class='align-items-center'>
-    <h2 class='tagline'>Masks</h2>
+  <div class='align-items-center flex-dir-col'>
+    <div class='flex align-items-center row'>
+      <h2 class='tagline'>Masks</h2>
+      <CircularButton text="+" @click="newMask"/>
+    </div>
     <div class='container chunk'>
       <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
       <br>
     </div>
 
-    <CircularButton text="+" @click="newMask"/>
 
-    <div class='main'>
-      <table>
-        <thead>
-          <tr >
-            <th>Image</th>
-            <th>Unique Model Code</th>
-            <th>Filter Type</th>
-            <th>Style</th>
-            <th>Filtration Efficiencies</th>
-            <th>Purchasing URLs</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for='m in masks' @click='viewMask(m.id)'>
-            <td>
-              <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
-            </td>
-            <td>{{m.uniqueInternalModelCode}}</td>
-            <td>{{m.filterType}}</td>
-            <td>{{m.style}}</td>
-            <td>
-              <ul>
-                <li v-for='f in m.filtrationEfficiencies'>
-                  {{f.filtrationEfficiencyPercent}}
-                </li>
-              </ul>
-            </td>
-            <td>
-              <ul>
-                <li v-for='w in m.whereToBuyUrls'>
-                  <a :href="getAbsoluteHref(w)" target='_blank'>{{shortHandHref(w)}}</a>
-                </li>
-              </ul>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class='main grid'>
+      <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in masks' @click='viewMask(m.id)'>
+        <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
+        <div>
+          {{m.uniqueInternalModelCode}}
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -172,12 +144,19 @@ export default {
 </script>
 
 <style scoped>
+  .flex {
+    display: flex;
+  }
   .main {
     display: flex;
     flex-direction: column;
   }
   .add-facial-measurements-button {
     margin: 1em auto;
+  }
+
+  .card {
+    padding: 1em 0;
   }
 
   input[type='number'] {
@@ -260,7 +239,6 @@ export default {
 
   .align-items-center {
     display: flex;
-    flex-direction: column;
     align-items: center;
   }
 
@@ -296,7 +274,7 @@ export default {
     grid-template-rows: auto;
   }
 
-  .centered {
+  .justify-content-center {
     display: flex;
     justify-content: center;
   }
@@ -326,6 +304,11 @@ export default {
   }
   tbody tr:hover {
     cursor: pointer;
+  }
 
+  .grid {
+    display: grid;
+    grid-template-columns: 33% 33% 33%;
+    grid-template-rows: auto;
   }
 </style>
