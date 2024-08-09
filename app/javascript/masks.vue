@@ -117,14 +117,6 @@ export default {
       // TODO: make sure this works for all
       return `${href}`
     },
-    shortHandHref(href) {
-      let matches =  href.match(/(?<=https:\/\/)([\w\.-]+)/)
-      if (matches) {
-        return matches[0]
-      }
-
-      return ""
-    },
     newMask() {
       this.$router.push(
         {

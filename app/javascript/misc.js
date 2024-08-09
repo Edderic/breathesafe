@@ -293,6 +293,15 @@ export const hourToIndex = {
   '12 AM': 23,
 }
 
+export function shortHandHref(href) {
+  let matches =  href.match(/(?<=https:\/\/)([\w\.-]+)/)
+  if (matches) {
+    return matches[0]
+  }
+
+  return ""
+}
+
 export function oneInFormat(ratio) {
   if (1 / ratio >= 10) {
     return round(1 / ratio, 0)

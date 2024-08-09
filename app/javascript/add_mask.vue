@@ -63,7 +63,7 @@
                 <input class='input-list almost-full-width' type="text" :value='purchasingUrl' @change="update($event, 'whereToBuyUrls', index)"
                     v-if="createOrEdit"
                 >
-                <a :href="purchasingUrl" v-if="!createOrEdit">{{purchasingUrl}}</a>
+                <a :href="purchasingUrl" v-if="!createOrEdit">{{shortHand(purchasingUrl)}}</a>
               </td>
               <td>
                 <CircularButton text="x" @click="deletePurchasingUrl(index)" v-if='userCanEdit && editMode'/>
@@ -338,7 +338,7 @@ import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import ColoredCell from './colored_cell.vue'
 import TabSet from './tab_set.vue'
-import { deepSnakeToCamel } from './misc.js'
+import { deepSnakeToCamel, shortHandHref } from './misc.js'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
@@ -572,6 +572,9 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
+    shortHand(href) {
+      return shortHandHref(href)
+    },
     filtrationEfficiencyValue(percent) {
       if (percent) {
         return 1 - percent / 100
