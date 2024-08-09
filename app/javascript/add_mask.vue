@@ -13,110 +13,118 @@
     />
 
     <div class='main'>
-      <table v-if='tabToShow == "Basic Info"'>
-        <tbody>
-          <tr>
-            <th>Unique Internal Model Code</th>
-            <td colspan=2>
-              <input class='full-width has-minimal-width' type="text" v-model='uniqueInternalModelCode' v-show="createOrEdit">
-              <span class='full-width has-minimal-width ' v-show="!createOrEdit">
-                {{uniqueInternalModelCode }}
-              </span>
-            </td>
-          </tr>
-          <tr v-if='createOrEdit'>
-            <th>image URLs</th>
-            <td class='justify-content-center' colspan=2>
-              <CircularButton text="+" @click="addImageUrl"/>
-            </td>
-          </tr>
-          <tr v-show='createOrEdit'>
-            <th>Image URL</th>
-            <th>Image</th>
-            <th v-if='userCanEdit && editMode'>Delete</th>
-          </tr>
+      <div class='grid'>
+        <table v-if='tabToShow == "Basic Info"'>
+          <tbody>
+            <tr v-if='createOrEdit'>
+              <th>image URLs</th>
+              <td class='justify-content-center' colspan=2>
+                <CircularButton text="+" @click="addImageUrl"/>
+              </td>
+            </tr>
+            <tr v-show='createOrEdit'>
+              <th>Image URL</th>
+              <th>Image</th>
+              <th v-if='userCanEdit && editMode'>Delete</th>
+            </tr>
 
-          <tr v-show='!createOrEdit' v-for="(imageUrl, index) in imageUrls">
-            <td :colspan='3' class='text-align-center'>
-              <img class='preview' :src="imageUrl" :alt="maskImageAlt(index)">
-            </td>
-          </tr>
+            <tr v-show='!createOrEdit' v-for="(imageUrl, index) in imageUrls">
+              <td :colspan='3' class='text-align-center'>
+                <img class='preview' :src="imageUrl" :alt="maskImageAlt(index)">
+              </td>
+            </tr>
 
-          <tr v-show='createOrEdit' v-for="(imageUrl, index) in imageUrls">
-            <td colspan='1'>
-              <input class='input-list' type="text" :value='imageUrl' @change="update($event, 'imageUrls', index)"
+            <tr v-show='createOrEdit' v-for="(imageUrl, index) in imageUrls">
+              <td colspan='1'>
+                <input class='input-list' type="text" :value='imageUrl' @change="update($event, 'imageUrls', index)"
+                    :disabled="!createOrEdit"
+                >
+              </td>
+              <td :colspan='imagePrevColspan' class='text-align-center'>
+                <img class='preview' :src="imageUrl" :alt="maskImageAlt(index)">
+              </td>
+              <td class='text-align-center' v-if='createOrEdit'>
+                <CircularButton text="x" @click="deleteImageUrl(index)" />
+              </td>
+            </tr>
+
+            <tr v-if='createOrEdit'>
+              <th>Purchasing URLs</th>
+              <td class='justify-content-center' colspan=2>
+                <CircularButton text="+" @click="addPurchasingUrl" v-if='createOrEdit'/>
+              </td>
+            </tr>
+            <tr>
+              <th colspan='2'>Purchasing URL</th>
+              <th v-if='userCanEdit && editMode'>Delete</th>
+            </tr>
+            <tr v-for="(purchasingUrl, index) in whereToBuyUrls" class='text-align-center'>
+              <td :colspan='whereToBuyUrlsColspan' >
+                <input class='input-list almost-full-width' type="text" :value='purchasingUrl' @change="update($event, 'whereToBuyUrls', index)"
+                    v-if="createOrEdit"
+                >
+                <a :href="purchasingUrl" v-if="!createOrEdit">{{purchasingUrl}}</a>
+              </td>
+              <td>
+                <CircularButton text="x" @click="deletePurchasingUrl(index)" v-if='userCanEdit && editMode'/>
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+        <table v-if='tabToShow == "Basic Info"'>
+
+          <tbody>
+            <tr>
+              <th>Unique Internal Model Code</th>
+              <td colspan=2>
+                <input class='full-width has-minimal-width' type="text" v-model='uniqueInternalModelCode' v-show="createOrEdit">
+                <span class='full-width has-minimal-width ' v-show="!createOrEdit">
+                  {{uniqueInternalModelCode }}
+                </span>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Initial cost (US Dollars)</th>
+              <td colspan=1 class='text-align-center'>
+
+                <input type="number"
+                  v-model='initialCostUsDollars'
+                  v-show="createOrEdit"
+                >
+
+                <ColoredCell
+                    v-show='!createOrEdit'
+                    class='risk-score'
+                    :colorScheme="colorInterpolationScheme"
+                    :maxVal=1
+                    :value='initialCostUsDollars'
+                    :exception='exceptionDollarObject'
+                    :text='dollarText(initialCostUsDollars)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                    :title='dollarText(initialCostUsDollars)'
+                    />
+              </td>
+            </tr>
+            <tr>
+              <th>Filter change cost (US Dollars)</th>
+              <td colspan=1 class='text-align-center'>
+
+                <input type="number"
+                  v-model='filterChangeCostUsDollars'
                   :disabled="!createOrEdit"
-              >
-            </td>
-            <td :colspan='imagePrevColspan' class='text-align-center'>
-              <img class='preview' :src="imageUrl" :alt="maskImageAlt(index)">
-            </td>
-            <td class='text-align-center' v-if='createOrEdit'>
-              <CircularButton text="x" @click="deleteImageUrl(index)" />
-            </td>
-          </tr>
+                >
+              </td>
+            </tr>
+            <tr>
+              <th>Notes</th>
+              <td><textarea id="notes" name="notes" cols="30" rows="5" v-model='notes' :disabled=!createOrEdit></textarea></td>
+            </tr>
 
-          <tr v-if='createOrEdit'>
-            <th>Purchasing URLs</th>
-            <td class='justify-content-center' colspan=2>
-              <CircularButton text="+" @click="addPurchasingUrl" v-if='createOrEdit'/>
-            </td>
-          </tr>
-          <tr>
-            <th colspan='2'>Purchasing URL</th>
-            <th v-if='userCanEdit && editMode'>Delete</th>
-          </tr>
-          <tr v-for="(purchasingUrl, index) in whereToBuyUrls" class='text-align-center'>
-            <td :colspan='whereToBuyUrlsColspan' >
-              <input class='input-list almost-full-width' type="text" :value='purchasingUrl' @change="update($event, 'whereToBuyUrls', index)"
-                  v-if="createOrEdit"
-              >
-              <a :href="purchasingUrl" v-if="!createOrEdit">{{purchasingUrl}}</a>
-            </td>
-            <td>
-              <CircularButton text="x" @click="deletePurchasingUrl(index)" v-if='userCanEdit && editMode'/>
-            </td>
-          </tr>
-          <tr>
-            <th>Initial cost (US Dollars)</th>
-            <td colspan=1 class='text-align-center'>
-
-              <input type="number"
-                v-model='initialCostUsDollars'
-                v-show="createOrEdit"
-              >
-
-              <ColoredCell
-                  v-show='!createOrEdit'
-                  class='risk-score'
-                  :colorScheme="colorInterpolationScheme"
-                  :maxVal=1
-                  :value='initialCostUsDollars'
-                  :exception='exceptionDollarObject'
-                  :text='dollarText(initialCostUsDollars)'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                  :title='dollarText(initialCostUsDollars)'
-                  />
-            </td>
-          </tr>
-          <tr>
-            <th>Filter change cost (US Dollars)</th>
-            <td colspan=1 class='text-align-center'>
-
-              <input type="number"
-                v-model='filterChangeCostUsDollars'
-                :disabled="!createOrEdit"
-              >
-            </td>
-          </tr>
-          <tr>
-            <th>Notes</th>
-            <td><textarea id="notes" name="notes" cols="30" rows="5" v-model='notes' :disabled=!createOrEdit></textarea></td>
-          </tr>
-
-        </tbody>
-      </table>
-
+          </tbody>
+        </table>
+      </div>
       <table v-if='tabToShow == "Effectiveness"'>
         <tbody>
           <tr>
@@ -133,10 +141,20 @@
                   >
                   <option>cloth</option>
                   <option>surgical</option>
-                  <option>KN95</option>
-                  <option>N95</option>
-                  <option>N99</option>
-                  <option>P100</option>
+                  <option value="">ASTM Lvl 3</option>
+                  <option value="">CE</option>
+                  <option value="">E100</option>
+                  <option value="">FFP2 Rated</option>
+                  <option value="">KF80</option>
+                  <option value="">KF94</option>
+                  <option value="">KN95</option>
+                  <option value="">KN95?</option>
+                  <option value="">N100</option>
+                  <option value="">N95</option>
+                  <option value="">Non-Rated</option>
+                  <option value="">P95</option>
+                  <option value="">P99</option>
+                  <option value="">PM2.5</option>
               </select>
             </td>
           </tr>
@@ -220,8 +238,8 @@
                 v-model="strapType"
                 :disabled="!createOrEdit"
                 >
-                <option>ear loop</option>
-                <option>headband</option>
+                <option>Earloop</option>
+                <option>Headstrap</option>
             </select>
           </td>
         </tr>
@@ -933,9 +951,9 @@ export default {
     justify-content:space-between;
   }
 
-  .main {
+  .grid {
     display: grid;
-    grid-template-columns: 100%;
+    grid-template-columns: 50% 50%;
     grid-template-rows: auto;
   }
 
@@ -975,4 +993,10 @@ export default {
       flex-direction: column;
     }
   }
+  @media(max-width: 1000px) {
+    .grid {
+      grid-template-columns: 100%;
+    }
+  }
+
 </style>
