@@ -141,20 +141,19 @@
                   >
                   <option>cloth</option>
                   <option>surgical</option>
-                  <option value="">ASTM Lvl 3</option>
-                  <option value="">CE</option>
-                  <option value="">E100</option>
-                  <option value="">FFP2 Rated</option>
-                  <option value="">KF80</option>
-                  <option value="">KF94</option>
-                  <option value="">KN95</option>
-                  <option value="">KN95?</option>
-                  <option value="">N100</option>
-                  <option value="">N95</option>
-                  <option value="">Non-Rated</option>
-                  <option value="">P95</option>
-                  <option value="">P99</option>
-                  <option value="">PM2.5</option>
+                  <option>ASTM Lvl 3</option>
+                  <option>CE</option>
+                  <option>E100</option>
+                  <option>FFP2 Rated</option>
+                  <option>KF80</option>
+                  <option>KF94</option>
+                  <option>KN95</option>
+                  <option>N100</option>
+                  <option>N95</option>
+                  <option>Non-Rated</option>
+                  <option>P95</option>
+                  <option>P99</option>
+                  <option>PM2.5</option>
               </select>
             </td>
           </tr>
