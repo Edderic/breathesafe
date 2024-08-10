@@ -167,10 +167,6 @@
                 <span v-show='!createOrEdit'>{{strapType}}</span>
               </td>
             </tr>
-            <tr>
-              <th>Notes</th>
-              <td><textarea id="notes" name="notes" cols="30" rows="5" v-model='notes' :disabled=!createOrEdit></textarea></td>
-            </tr>
 
           </tbody>
         </table>
