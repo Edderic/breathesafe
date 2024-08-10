@@ -184,7 +184,7 @@
                     :colorScheme="massColorScheme"
                     :maxVal=1
                     :value='massGrams'
-                    :exception='exceptionObject'
+                    :exception='exceptionObjectBlank'
                     :text='massText(massGrams)'
                     :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
                     :title='massText(massGrams)'
@@ -349,6 +349,15 @@ export default {
   },
   data() {
     return {
+      exceptionObjectBlank: {
+        color: {
+          r: '200',
+          g: '200',
+          b: '200',
+        },
+        value: '',
+        text: '?'
+      },
       exceptionObject: {
         color: {
           r: '200',
