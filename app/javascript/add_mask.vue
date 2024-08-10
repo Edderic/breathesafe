@@ -195,14 +195,34 @@
               <th>Height (mm)</th>
               <td>
                 <input type="number" v-model="heightMm" v-show="createOrEdit">
-                <span v-show='!createOrEdit'>{{heightMm}}</span>
+                <ColoredCell
+                    v-show='!createOrEdit'
+                    class='risk-score'
+                    :colorScheme="heightColorScheme"
+                    :maxVal=1
+                    :value='heightMm'
+                    :exception='exceptionObjectBlank'
+                    :text='distanceText(heightMm, "mm")'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                    :title='distanceText(heightMm, "mm")'
+                    />
               </td>
             </tr>
             <tr>
               <th>Width (mm)</th>
               <td>
                 <input type="number" v-model="widthMm" v-show="createOrEdit">
-                <span v-show='!createOrEdit'>{{widthMm}}</span>
+                <ColoredCell
+                    v-show='!createOrEdit'
+                    class='risk-score'
+                    :colorScheme="widthColorScheme"
+                    :maxVal=1
+                    :value='widthMm'
+                    :exception='exceptionObjectBlank'
+                    :text='distanceText(widthMm, "mm")'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                    :title='distanceText(widthMm, "mm")'
+                    />
               </td>
             </tr>
             <tr>
@@ -330,7 +350,7 @@ import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import ColoredCell from './colored_cell.vue'
 import TabSet from './tab_set.vue'
-import { deepSnakeToCamel, shortHandHref } from './misc.js'
+import { deepSnakeToCamel, shortHandHref, round } from './misc.js'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
@@ -444,6 +464,20 @@ export default {
       return genColorSchemeBounds(minimum, maximum, numObjects)
     },
 
+    widthColorScheme() {
+      const minimum = 67
+      const maximum = 184
+      const numObjects = 6
+
+      return genColorSchemeBounds(minimum, maximum, numObjects)
+    },
+    heightColorScheme() {
+      const minimum = 55
+      const maximum = 145
+      const numObjects = 6
+
+      return genColorSchemeBounds(minimum, maximum, numObjects)
+    },
     massColorScheme() {
       const minimum = 10
       const maximum = 200
@@ -606,6 +640,16 @@ export default {
     dollarText(num) {
       if (num) {
         return `$${num}`
+      }
+
+      return '?'
+    },
+    distanceText(num, unitAbbrev) {
+      if (!!unitAbbrev) {
+        unitAbbrev = 'mm'
+      }
+      if (num) {
+        return `${round(num, 0)} ${unitAbbrev}`
       }
 
       return '?'
