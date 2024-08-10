@@ -97,7 +97,7 @@
                 <ColoredCell
                     v-show='!createOrEdit'
                     class='risk-score'
-                    :colorScheme="colorInterpolationScheme"
+                    :colorScheme="costColorScheme"
                     :maxVal=1
                     :value='initialCostUsDollars'
                     :exception='exceptionDollarObject'
@@ -174,15 +174,52 @@
 
           </tbody>
         </table>
+
+        <table v-if='tabToShow == "Basic Info"'>
+          <tbody>
+            <tr>
+              <th>Mass (grams)</th>
+              <td>
+                <input type="number" v-model="massGrams" v-show="createOrEdit">
+
+                <ColoredCell
+                    v-show='!createOrEdit'
+                    class='risk-score'
+                    :colorScheme="massColorScheme"
+                    :maxVal=1
+                    :value='massGrams'
+                    :exception='exceptionObject'
+                    :text='massText(massGrams)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                    :title='massText(massGrams)'
+                    />
+              </td>
+            </tr>
+            <tr>
+              <th>Height (mm)</th>
+              <td>
+                <input type="number" v-model="heightMm" v-show="createOrEdit">
+                <span v-show='!createOrEdit'>{{heightMm}}</span>
+              </td>
+            </tr>
+            <tr>
+              <th>Width (mm)</th>
+              <td>
+                <input type="number" v-model="widthMm" v-show="createOrEdit">
+                <span v-show='!createOrEdit'>{{widthMm}}</span>
+              </td>
+            </tr>
+            <tr>
+              <th>Depth (mm)</th>
+              <td>
+                <input type="number" v-model="depthMm" :disabled="!createOrEdit">
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <table v-if='tabToShow == "Effectiveness"'>
         <tbody>
-          <tr>
-            <td colspan=3>
-              <h3>Filter Media</h3>
-            </td>
-          </tr>
-
           <tr v-if='createOrEdit'>
             <th>Filtration Efficiencies</th>
             <td class='justify-content-center' colspan=2>
@@ -232,12 +269,6 @@
 
     <table v-if='tabToShow == "Effectiveness"'>
       <tbody>
-        <tr>
-          <td colspan='3'>
-            <h3>Factors that affect fit</h3>
-          </td>
-        </tr>
-
 
         </tbody>
       </table>
@@ -279,36 +310,6 @@
         </tbody>
       </table>
 
-      <table v-if='tabToShow == "Dimensions"'>
-        <tbody>
-          <tr>
-            <th>Mass (grams)</th>
-            <td>
-              <input type="number" v-model="massGrams" :disabled="!createOrEdit">
-            </td>
-          </tr>
-          <tr>
-            <th>Height (mm)</th>
-            <td>
-              <input type="number" v-model="heightMm" :disabled="!createOrEdit">
-
-            </td>
-          </tr>
-          <tr>
-            <th>Width (mm)</th>
-            <td>
-              <input type="number" v-model="widthMm" :disabled="!createOrEdit">
-
-            </td>
-          </tr>
-          <tr>
-            <th>Depth (mm)</th>
-            <td>
-              <input type="number" v-model="depthMm" :disabled="!createOrEdit">
-            </td>
-          </tr>
-        </tbody>
-      </table>
 
       <br>
 
@@ -328,7 +329,7 @@
 <script>
 import axios from 'axios';
 import Button from './button.vue'
-import { binValue, getColor, gradeColorMapping, riskColorInterpolationScheme } from './colors';
+import { assignBoundsToColorScheme, binValue, colorPaletteFall, genColorSchemeBounds, riskColorInterpolationScheme } from './colors';
 import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import ColoredCell from './colored_cell.vue'
@@ -429,6 +430,26 @@ export default {
           'message'
         ]
     ),
+
+    costColorScheme() {
+      const minimum = 0.5
+      const maximum = 90 // flo mask
+      const numObjects = 6
+
+      return genColorSchemeBounds(minimum, maximum, numObjects)
+    },
+
+    massColorScheme() {
+      const minimum = 10
+      const maximum = 200
+      const numObjects = 6
+
+      return genColorSchemeBounds(minimum, maximum, numObjects)
+    },
+    massGramsScaled() {
+      // scale to between 0 and 1
+      return this.massGrams / 209
+    },
     colorInterpolationScheme() {
       return riskColorInterpolationScheme
     },
@@ -580,6 +601,13 @@ export default {
     dollarText(num) {
       if (num) {
         return `$${num}`
+      }
+
+      return '?'
+    },
+    massText(num) {
+      if (num) {
+        return `${num} g`
       }
 
       return '?'
@@ -951,7 +979,7 @@ export default {
 
   .grid {
     display: grid;
-    grid-template-columns: 50% 50%;
+    grid-template-columns: 33% 33% 33%;
     grid-template-rows: auto;
   }
 

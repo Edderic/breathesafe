@@ -151,6 +151,20 @@ export const colorSchemeFall = [
   },
 ]
 
+export function genColorSchemeBounds(minimum, maximum, numObjects, palette) {
+  if (palette == undefined) {
+    palette = paletteFall
+  }
+
+  const evenSpacedBounds = genEvenSpacedBounds(minimum, maximum, numObjects)
+
+  const scheme = convColorListToCutpoints(
+    JSON.parse(JSON.stringify(palette)).reverse()
+  )
+
+  return assignBoundsToScheme(scheme, evenSpacedBounds)
+}
+
 export function minutesToRemovalScheme() {
   const minimum = 0
   const maximum = 120
