@@ -228,7 +228,18 @@
             <tr>
               <th>Depth (mm)</th>
               <td>
-                <input type="number" v-model="depthMm" :disabled="!createOrEdit">
+                <input type="number" v-model="depthMm" v-show="createOrEdit">
+                <ColoredCell
+                    v-show='!createOrEdit'
+                    class='risk-score'
+                    :colorScheme="depthColorScheme"
+                    :maxVal=1
+                    :value='depthMm'
+                    :exception='exceptionObjectBlank'
+                    :text='distanceText(depthMm, "mm")'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                    :title='distanceText(depthMm, "mm")'
+                    />
               </td>
             </tr>
           </tbody>
@@ -467,6 +478,13 @@ export default {
     widthColorScheme() {
       const minimum = 67
       const maximum = 184
+      const numObjects = 6
+
+      return genColorSchemeBounds(minimum, maximum, numObjects)
+    },
+    depthColorScheme() {
+      const minimum = 8
+      const maximum = 50
       const numObjects = 6
 
       return genColorSchemeBounds(minimum, maximum, numObjects)
