@@ -153,6 +153,20 @@
                 <span v-show='!createOrEdit'>{{style}}</span>
               </td>
             </tr>
+
+            <tr>
+              <th colspan='1'>Strap type</th>
+              <td colspan='1' class='text-align-center'>
+                <select
+                    v-model="strapType"
+                    v-show="createOrEdit"
+                    >
+                    <option>Earloop</option>
+                    <option>Headstrap</option>
+                </select>
+                <span v-show='!createOrEdit'>{{strapType}}</span>
+              </td>
+            </tr>
             <tr>
               <th>Notes</th>
               <td><textarea id="notes" name="notes" cols="30" rows="5" v-model='notes' :disabled=!createOrEdit></textarea></td>
@@ -224,18 +238,6 @@
           </td>
         </tr>
 
-        <tr>
-          <th colspan='2'>Strap type</th>
-          <td colspan='1' class='text-align-center'>
-            <select
-                v-model="strapType"
-                :disabled="!createOrEdit"
-                >
-                <option>Earloop</option>
-                <option>Headstrap</option>
-            </select>
-          </td>
-        </tr>
 
         </tbody>
       </table>
