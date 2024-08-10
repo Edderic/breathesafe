@@ -108,16 +108,6 @@
               </td>
             </tr>
             <tr>
-              <th>Filter change cost (US Dollars)</th>
-              <td colspan=1 class='text-align-center'>
-
-                <input type="number"
-                  v-model='filterChangeCostUsDollars'
-                  :disabled="!createOrEdit"
-                >
-              </td>
-            </tr>
-            <tr>
               <th>Notes</th>
               <td><textarea id="notes" name="notes" cols="30" rows="5" v-model='notes' :disabled=!createOrEdit></textarea></td>
             </tr>
