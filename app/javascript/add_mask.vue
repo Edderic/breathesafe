@@ -74,6 +74,11 @@
         </table>
         <table v-if='tabToShow == "Basic Info"'>
 
+          <thead>
+            <tr>
+              <th colspan=2><h3>Basic Info</h3></th>
+            </tr>
+          </thead>
           <tbody>
             <tr>
               <th>Unique Internal Model Code</th>
@@ -172,6 +177,11 @@
         </table>
 
         <table v-if='tabToShow == "Basic Info"'>
+          <thead>
+            <tr>
+              <th colspan=2><h3>Dimensions</h3></th>
+            </tr>
+          </thead>
           <tbody>
             <tr>
               <th>Mass (grams)</th>
@@ -422,9 +432,6 @@ export default {
         },
         {
           text: "Breatheability",
-        },
-        {
-          text: "Dimensions",
         },
       ],
       initialCostUsDollars: 0,
