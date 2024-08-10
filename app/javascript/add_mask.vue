@@ -107,6 +107,52 @@
                     />
               </td>
             </tr>
+
+            <tr>
+              <th >Filter type</th>
+              <td colspan=1 class='text-align-center'>
+                <select
+                    v-model="filterType"
+                    v-show="createOrEdit"
+                    >
+                    <option>cloth</option>
+                    <option>surgical</option>
+                    <option>ASTM Lvl 3</option>
+                    <option>CE</option>
+                    <option>E100</option>
+                    <option>FFP2 Rated</option>
+                    <option>KF80</option>
+                    <option>KF94</option>
+                    <option>KN95</option>
+                    <option>N100</option>
+                    <option>N95</option>
+                    <option>Non-Rated</option>
+                    <option>P95</option>
+                    <option>P99</option>
+                    <option>PM2.5</option>
+                </select>
+
+                <span v-show='!createOrEdit'>{{filterType}}</span>
+              </td>
+            </tr>
+            <tr>
+              <th >Style</th>
+              <td colspan='1' class='text-align-center'>
+                <select
+                    v-model="style"
+                    v-show="createOrEdit"
+                    >
+                    <option>Bifold</option>
+                    <option>Bifold &amp; Gasket</option>
+                    <option>Boat</option>
+                    <option>Cotton + High Filtration Efficiency Material</option>
+                    <option>Cup</option>
+                    <option>Duckbill</option>
+                    <option>Elastomeric</option>
+                </select>
+                <span v-show='!createOrEdit'>{{style}}</span>
+              </td>
+            </tr>
             <tr>
               <th>Notes</th>
               <td><textarea id="notes" name="notes" cols="30" rows="5" v-model='notes' :disabled=!createOrEdit></textarea></td>
@@ -120,31 +166,6 @@
           <tr>
             <td colspan=3>
               <h3>Filter Media</h3>
-            </td>
-          </tr>
-          <tr>
-            <th colspan=2>Filter type</th>
-            <td colspan=1 class='text-align-center'>
-              <select
-                  v-model="filterType"
-                  :disabled="!createOrEdit"
-                  >
-                  <option>cloth</option>
-                  <option>surgical</option>
-                  <option>ASTM Lvl 3</option>
-                  <option>CE</option>
-                  <option>E100</option>
-                  <option>FFP2 Rated</option>
-                  <option>KF80</option>
-                  <option>KF94</option>
-                  <option>KN95</option>
-                  <option>N100</option>
-                  <option>N95</option>
-                  <option>Non-Rated</option>
-                  <option>P95</option>
-                  <option>P99</option>
-                  <option>PM2.5</option>
-              </select>
             </td>
           </tr>
 
@@ -200,23 +221,6 @@
         <tr>
           <td colspan='3'>
             <h3>Factors that affect fit</h3>
-          </td>
-        </tr>
-        <tr>
-          <th colspan='2'>Style</th>
-          <td :colspan='1' class='text-align-center'>
-            <select
-                v-model="style"
-                :disabled="!createOrEdit"
-                >
-                <option>Bifold</option>
-                <option>Bifold &amp; Gasket</option>
-                <option>Boat</option>
-                <option>Cotton + High Filtration Efficiency Material</option>
-                <option>Cup</option>
-                <option>Duckbill</option>
-                <option>Elastomeric</option>
-            </select>
           </td>
         </tr>
 
