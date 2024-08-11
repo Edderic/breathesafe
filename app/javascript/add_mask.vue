@@ -13,40 +13,38 @@
     />
 
     <div class='main'>
-      <div class='grid'>
+      <div :class='{ grid: true, view: mode == "View"}'>
         <table v-if='tabToShow == "Basic Info"'>
           <tbody>
+            <tr>
+              <td>
+                <h3>Image</h3>
+              </td>
+            </tr>
             <tr v-if='createOrEdit'>
               <th>image URLs</th>
               <td class='justify-content-center' colspan=2>
                 <CircularButton text="+" @click="addImageUrl"/>
               </td>
             </tr>
-            <tr v-show='createOrEdit'>
+            <tr v-show='createOrEdit' v-for='(imageUrl, index) in imageUrls'>
               <th>Image URL</th>
-              <th>Image</th>
-              <th v-if='userCanEdit && editMode'>Delete</th>
-            </tr>
-
-            <tr v-show='!createOrEdit' v-for="(imageUrl, index) in imageUrls">
-              <td :colspan='3' class='text-align-center'>
-                <img class='preview' :src="imageUrl" :alt="maskImageAlt(index)">
-              </td>
-            </tr>
-
-            <tr v-show='createOrEdit' v-for="(imageUrl, index) in imageUrls">
-              <td colspan='1'>
+              <td>
                 <input class='input-list' type="text" :value='imageUrl' @change="update($event, 'imageUrls', index)"
-                    :disabled="!createOrEdit"
+                    v-show="createOrEdit"
                 >
-              </td>
-              <td :colspan='imagePrevColspan' class='text-align-center'>
-                <img class='preview' :src="imageUrl" :alt="maskImageAlt(index)">
               </td>
               <td class='text-align-center' v-if='createOrEdit'>
                 <CircularButton text="x" @click="deleteImageUrl(index)" />
               </td>
             </tr>
+
+            <tr v-for="(imageUrl, index) in imageUrls">
+              <td :colspan='3' class='text-align-center'>
+                <img class='preview' :src="imageUrl" :alt="maskImageAlt(index)">
+              </td>
+            </tr>
+
 
             <tr v-if='createOrEdit'>
               <th>Purchasing URLs</th>
@@ -254,100 +252,112 @@
             </tr>
           </tbody>
         </table>
+        <table v-if='tabToShow == "Basic Info"'>
+          <tbody>
+            <tr v-if='createOrEdit'>
+              <th>Filtration Efficiencies</th>
+              <td class='justify-content-center' colspan='1'>
+                <CircularButton text="+" @click="addFiltEffAndBreathability" v-if='createOrEdit'/>
+              </td>
+            </tr>
+          </tbody>
+
+          <tbody v-for="(f, index) in filtrationEfficiencies" class='text-align-center'>
+            <tr>
+              <td>
+                <h3>Filtration & Breathability</h3>
+              </td>
+            </tr>
+            <tr>
+              <th colspan='2' v-show='createOrEdit'>Filtration Efficiency (Percent)</th>
+              <th colspan='2' v-show='!createOrEdit'>Filtration Efficiency</th>
+            </tr>
+
+            <tr>
+              <td colspan='2'>
+                <input type="number" :value='f.filtrationEfficiencyPercent' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyPercent')"
+                       v-show="createOrEdit"
+                       >
+                       <ColoredCell
+                           v-show='!createOrEdit'
+                           class='risk-score'
+                           :colorScheme="colorInterpolationScheme"
+                           :maxVal=1
+                           :value='filtrationEfficiencyValue(f.filtrationEfficiencyPercent)'
+                           :text='percentText(f.filtrationEfficiencyPercent)'
+                           :exception='exceptionObject'
+                           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                           :title='f.filtrationEfficiencyPercent'
+                           />
+              </td>
+            </tr>
+
+            <tr>
+              <th colspan='2' v-show='createOrEdit'>Breathability (Pa)</th>
+              <th colspan='2' v-show='!createOrEdit'>Breathability</th>
+            </tr>
+
+            <tr>
+              <td colspan='2'>
+                <input type="number" :value='breathability[index].breathabilityPascals' @change="updateArrayOfObj($event, 'breathability', index, 'breathabilityPascals')"
+                       v-show="createOrEdit"
+                       >
+                       <ColoredCell
+                           class='risk-score'
+                           v-show='!createOrEdit'
+                           :colorScheme="breathabilityInterpolationScheme"
+                           :maxVal=1
+                           :value='breathability[index].breathabilityPascals'
+                           :text='breathabilityText(breathability[index].breathabilityPascals)'
+                           :exception='exceptionObject'
+                           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                           :title='breathabilityText(breathability[index].breathabilityPascals)'
+                           />
+              </td>
+            </tr>
+
+            <tr>
+              <th colspan='2'>Source</th>
+            </tr>
+
+            <tr>
+              <td colspan='2'>
+                <input type='text' class='input-list'
+                       :value='f.filtrationEfficiencySource'
+                       @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencySource')"
+
+                       v-show="createOrEdit"
+                       >
+                       <a v-show='!createOrEdit' :href="f.filtrationEfficiencySource">link</a>
+              </td>
+
+            </tr>
+
+            <tr>
+              <th class='notes' colspan='2'>Notes</th>
+            </tr>
+
+            <tr>
+              <td colspan='2' class='notes' v-show='!createOrEdit'>{{f.filtrationEfficiencyNotes}}</td>
+              <td colspan='2' v-show='createOrEdit'>
+                <textarea cols="30" rows="10" @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyNotes')"></textarea>
+              </td>
+            </tr>
+
+            <tr class='text-align-center'>
+              <td colspan='2'>
+                <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='userCanEdit && editMode'/>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <table v-if='tabToShow == "Effectiveness"'>
-        <tbody>
-          <tr v-if='createOrEdit'>
-            <th>Filtration Efficiencies</th>
-            <td class='justify-content-center' colspan=2>
-              <CircularButton text="+" @click="addFiltrationEfficiency" v-if='createOrEdit'/>
-            </td>
-          </tr>
-          <tr>
-            <th colspan='1' v-show='createOrEdit'>Filtration Efficiency (Percent)</th>
-            <th colspan='1' v-show='!createOrEdit'>Filtration Efficiency</th>
 
-            <th colspan='1'>Source</th>
-            <th class='notes' colspan='1'>Notes</th>
-            <th v-if='userCanEdit && editMode'>Delete</th>
-          </tr>
-          <tr v-for="(f, index) in filtrationEfficiencies" class='text-align-center'>
-            <td colspan=1>
-              <input type="number" :value='f.filtrationEfficiencyPercent' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyPercent')"
-                  v-show="createOrEdit"
-              >
-              <ColoredCell
-                  class='risk-score'
-                  :colorScheme="colorInterpolationScheme"
-                  :maxVal=1
-                  :value='filtrationEfficiencyValue(f.filtrationEfficiencyPercent)'
-                  :text='percentText(f.filtrationEfficiencyPercent)'
-                  :exception='exceptionObject'
-                  :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                  :title='f.filtrationEfficiencyPercent'
-                  />
-            </td>
-            <td>
-              <input type='text' class='input-list'
-                     :value='f.filtrationEfficiencySource'
-                     @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencySource')"
-
-                     v-show="createOrEdit"
-              >
-              <a :href="f.filtrationEfficiencySource">link</a>
-            </td>
-              <td class='notes'>{{f.filtrationEfficiencyNotes}}</td>
-            <td>
-              <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='userCanEdit && editMode'/>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-    <table v-if='tabToShow == "Effectiveness"'>
+    <table v-if='tabToShow == "Basic Info"'>
       <tbody>
 
         </tbody>
       </table>
-
-
-      <table v-if='tabToShow == "Breatheability"'>
-        <tbody>
-          <tr v-if='createOrEdit'>
-            <th>Pressure drops</th>
-            <td class='justify-content-center' colspan=2>
-              <CircularButton text="+" @click="addBreathability" v-if='createOrEdit'/>
-            </td>
-          </tr>
-          <tr>
-            <th colspan='1'>Pressure Drop (Pascal) under 85 Liters per minute (LPM)</th>
-            <th colspan='1'>Source (e.g. URL)</th>
-            <th class='notes' colspan='1'>Notes</th>
-            <th v-if='userCanEdit && editMode'>Delete</th>
-          </tr>
-          <tr v-for="(p, index) in breathability" class='text-align-center'>
-            <td colspan=1>
-              <input type="number" :value='p.breathabilityPascals' @change="updateArrayOfObj($event, 'breathability', index, 'breathabilityPascals')"
-                  :disabled="mode != 'Create' && mode != 'Edit'"
-              >
-            </td>
-            <td>
-              <input type='text' class='input-list'
-                     :value='p.breathabilityPascalsSource'
-                     @change="updateArrayOfObj($event, 'breathability', index, 'breathabilitySource')"
-
-                     :disabled="mode != 'Create' && mode != 'Edit'"
-              >
-            </td>
-            <td class='notes'>{{p.breathabilityPascalsNotes}}</td>
-            <td>
-              <CircularButton text="x" @click="deleteArrayOfObj($event, 'breathability', index)" v-if='userCanEdit && editMode'/>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-
       <br>
 
       <div class="row">
@@ -427,12 +437,6 @@ export default {
         {
           text: "Basic Info",
         },
-        {
-          text: "Effectiveness",
-        },
-        {
-          text: "Breatheability",
-        },
       ],
       initialCostUsDollars: 0,
       hasGasket: false,
@@ -446,7 +450,7 @@ export default {
       filterChangeCostUsDollars: 0,
       strapType: 'headband',
       style: '',
-      imageUrls: [],
+      imageUrls: [''],
       authorIds: [],
       whereToBuyUrls: [],
       errorMessages: [],
@@ -506,6 +510,13 @@ export default {
     massColorScheme() {
       const minimum = 10
       const maximum = 200
+      const numObjects = 6
+
+      return genColorSchemeBounds(minimum, maximum, numObjects)
+    },
+    breathabilityInterpolationScheme() {
+      const minimum = 46
+      const maximum = 468
       const numObjects = 6
 
       return genColorSchemeBounds(minimum, maximum, numObjects)
@@ -686,6 +697,13 @@ export default {
 
       return '?'
     },
+    breathabilityText(num) {
+      if (num) {
+        return `${num} pa`
+      }
+
+      return "?"
+    },
     percentText(num) {
       if (num) {
         return `${num}%`
@@ -695,6 +713,10 @@ export default {
     },
     maskImageAlt(index) {
       return `Image #${index} for ${this.uniqueInternalModelCode}`
+    },
+    addFiltEffAndBreathability() {
+      this.addFiltrationEfficiency()
+      this.addBreathability()
     },
     addFiltrationEfficiency() {
       this.filtrationEfficiencies.push({
@@ -747,7 +769,7 @@ export default {
           unique_internal_model_code: '',
           modifications: {},
           type: '',
-          image_urls: [],
+          image_urls: [''],
           author_ids: [],
           where_to_buy_urls: [],
         }
@@ -843,9 +865,10 @@ export default {
             let data = response.data
             // whatever you want
 
-            this.$router.push({
-              name: 'Masks',
-            })
+            this.mode = 'View'
+            // this.$router.push({
+              // name: 'Masks',
+            // })
           })
           .catch(error => {
             this.messages.push({
@@ -1057,6 +1080,10 @@ export default {
     grid-template-rows: auto;
   }
 
+  .grid.view {
+    grid-template-columns: 25% 25% 25% 25%;
+  }
+
   .centered {
     display: flex;
     justify-content: center;
@@ -1091,6 +1118,11 @@ export default {
 
     .edit-facial-measurements {
       flex-direction: column;
+    }
+  }
+  @media(max-width: 1300px) {
+    .grid {
+      grid-template-columns: 50% 50%;
     }
   }
   @media(max-width: 1000px) {
