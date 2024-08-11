@@ -155,7 +155,8 @@ class MasksController < ApplicationController
       modifications: {},
       filtration_efficiencies: [
         :filtration_efficiency_percent,
-        :filtration_efficiency_source
+        :filtration_efficiency_source,
+        :filtration_efficiency_notes
       ],
       breathability: [
         :breathability_pascals,
