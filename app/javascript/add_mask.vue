@@ -10,6 +10,7 @@
       :options='tabToShowOptions'
       @update='setRouteTo'
       :tabToShow='tabToShow'
+        v-show='createOrEdit'
     />
 
     <div class='main'>
@@ -1107,6 +1108,17 @@ export default {
     padding: 0.5em;
     text-align: center;
   }
+
+  @media(max-width: 1300px) {
+    .grid.view {
+      grid-template-columns: 50% 50%;
+    }
+  }
+  @media(max-width: 1000px) {
+    .grid {
+      grid-template-columns: 100%;
+    }
+  }
   @media(max-width: 700px) {
     img {
       width: 100vw;
@@ -1119,14 +1131,8 @@ export default {
     .edit-facial-measurements {
       flex-direction: column;
     }
-  }
-  @media(max-width: 1300px) {
-    .grid {
-      grid-template-columns: 50% 50%;
-    }
-  }
-  @media(max-width: 1000px) {
-    .grid {
+
+    .grid.view {
       grid-template-columns: 100%;
     }
   }
