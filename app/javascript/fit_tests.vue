@@ -120,7 +120,7 @@ export default {
     newFitTest() {
       this.$router.push(
         {
-          name: "AddFitTest"
+          name: "NewFitTest"
         }
       )
     },

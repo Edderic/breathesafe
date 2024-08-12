@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/masks/new', component: AddMask, name: 'AddMask' },
     { path: '/masks/:id', component: AddMask, name: 'ViewMask' },
     { path: '/respirator_user/:id', component: RespiratorUser, name: 'RespiratorUser' },
-    { path: '/respirator_user/:id/fit_tests/new', component: FitTest, name: 'NewFitTest' },
+    { path: '/fit_tests/new', component: FitTest, name: 'NewFitTest' },
     { path: '/fit_tests', component: FitTests, name: 'FitTests' },
     { path: '/venues', component: Venues, name: 'Venues' },
     { path: '/analytics/:id', component: Analytics, name: 'Analytics' },
