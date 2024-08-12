@@ -1,13 +1,16 @@
 <template>
   <div class='align-items-center flex-dir-col'>
     <div class='flex align-items-center row'>
-      <h2 class='tagline'>Fit Tests</h2>
-      <CircularButton text="+" @click="newFitTest"/>
+      <h2 class='tagline'>{{pageTitle}}</h2>
     </div>
 
-    <div class='row'>
-      <input type="text" v-model='search'>
-      <SearchIcon height='2em' width='2em'/>
+
+    <div class='menu row'>
+      <TabSet
+        :options='tabToShowOptions'
+        @update='setRouteTo'
+        :tabToShow='tabToShow'
+      />
     </div>
 
     <div class='container chunk'>
@@ -15,18 +18,73 @@
       <br>
     </div>
 
+    <div v-show='tabToShow == "Mask"'>
+      <h3 class='text-align-center'>Search for and pick a mask</h3>
+
+      <div class='row justify-content-center'>
+        <input type="text" @change='updateSearch'>
+        <SearchIcon height='2em' width='2em'/>
+      </div>
 
 
-
-    <div class='main grid'>
-      <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in displayables' @click='viewMask(m.id)'>
-        <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
-        <div class='description'>
-          <span>
-            {{m.uniqueInternalModelCode}}
-          </span>
+      <div :class='{main: true, grid: true, selectedMask: maskHasBeenSelected}'>
+        <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in selectDisplayables' @click='selectMask(m.id)'>
+          <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
+          <div class='description'>
+            <span>
+              {{m.uniqueInternalModelCode}}
+            </span>
+          </div>
         </div>
       </div>
+
+      <table>
+        <tbody>
+          <tr>
+            <th>Selected Mask</th>
+            <td>{{selectedMask.uniqueInternalModelCode}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div v-show='tabToShow == "Comfort"' class='justify-content-center flex-dir-col'>
+      <table>
+        <tbody>
+          <tr>
+            <th>Selected Mask</th>
+            <td>{{selectedMask.uniqueInternalModelCode}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <SurveyQuestion
+        question="How comfortable is the position of the mask on the nose?"
+        :answer_options="['Uncomfortable', 'Unsure', 'Comfortable']"
+        @update="selectComfortNose"
+        :selected="comfort['How comfortable is the position of the mask on the nose?']"
+      />
+
+      <SurveyQuestion
+        question="Is there adequate room for eye protection?"
+        :answer_options="['Inadequate', 'Adequate', 'Not applicable']"
+        @update="selectComfortEyeProtection"
+        :selected="comfort['Is there adequate room for eye protection?']"
+      />
+
+      <SurveyQuestion
+        question="Is there enough room to talk?"
+        :answer_options="['Not enough', 'Unsure', 'Enough']"
+        @update="selectComfortEnoughRoomToTalk"
+        :selected="comfort['Is there enough room to talk?']"
+      />
+
+      <SurveyQuestion
+        question="How comfortable is the position of the mask on face and cheeks?"
+        :answer_options="['Uncomfortable', 'Unsure', 'Comfortable']"
+        @update="selectComfortFaceAndCheeks"
+        :selected="comfort['How comfortable is the position of the mask on face and cheeks?']"
+      />
     </div>
 
     <br>
@@ -61,8 +119,30 @@ export default {
   },
   data() {
     return {
+      tabToShow: 'Mask',
+      tabToShowOptions: [
+        {
+          text: "Mask",
+        },
+        {
+          text: "Comfort",
+        },
+        {
+          text: "User Seal Checks"
+        },
+        {
+          text: "Fit Testing"
+        }
+      ],
       errorMessages: [],
       masks: [],
+      selectedMask: {},
+      comfort: {
+        "How comfortable is the position of the mask on the nose?": null,
+        "Is there adequate room for eye protection?": null,
+        "Is there enough room to talk?": null,
+        "How comfortable is the position of the mask on face and cheeks?": null
+      },
       search: ""
     }
   },
@@ -87,6 +167,14 @@ export default {
           'message'
         ]
     ),
+    maskHasBeenSelected() {
+      return 'id' in this.selectedMask
+    },
+    pageTitle() {
+      if (this.$route.name == 'NewFitTest') {
+        return "Add New Fit Testing"
+      }
+    },
     displayables() {
       if (this.search == "") {
         return this.masks
@@ -94,6 +182,14 @@ export default {
         let lowerSearch = this.search.toLowerCase()
         return this.masks.filter((mask) => mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
       }
+    },
+    selectDisplayables() {
+      let lengthToDisplay = 6
+      if (this.displayables.length < 6) {
+        lengthToDisplay = this.displayables.length
+      }
+
+      return this.displayables.slice(0, lengthToDisplay)
     },
     messages() {
       return this.errorMessages;
@@ -109,10 +205,30 @@ export default {
       // Currently, this.loadStuff() assumes We're loading the profile for the current user
       this.loadStuff()
     }
+
+    let toQuery = this.$route.query
+
+    if (toQuery['tabToShow'] && (this.$route.name == "NewFitTest")) {
+      this.tabToShow = toQuery['tabToShow']
+    }
+
+    // TODO: add param watchers
+    this.$watch(
+      () => this.$route.query,
+      (toQuery, fromQuery) => {
+        if (toQuery['tabToShow'] && (this.$route.name == "NewFitTest")) {
+          this.tabToShow = toQuery['tabToShow']
+        }
+      }
+    )
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    updateSearch(event) {
+      this.selectedMask = {}
+      this.search = event.target.value
+    },
     getAbsoluteHref(href) {
       // TODO: make sure this works for all
       return `${href}`
@@ -124,15 +240,9 @@ export default {
         }
       )
     },
-    viewMask(id) {
-      this.$router.push(
-        {
-          name: "ViewMask",
-          params: {
-            id: id
-          }
-        }
-      )
+    selectMask(id) {
+      this.selectedMask = this.masks.filter((m) => m.id == id)[0]
+      this.search = this.selectedMask.uniqueInternalModelCode
     },
     async loadStuff() {
       // TODO: load the profile for the current user
@@ -156,6 +266,30 @@ export default {
           // whatever you want
         })
     },
+
+    selectComfortNose(value) {
+      this['comfort']['How comfortable is the position of the mask on the nose?'] = value
+    },
+    selectComfortEyeProtection(value) {
+      this['comfort']['Is there adequate room for eye protection?'] = value
+    },
+    selectComfortEnoughRoomToTalk(value) {
+      this['comfort']['Is there enough room to talk?'] = value
+    },
+    selectComfortFaceAndCheeks(value) {
+      this['comfort']['How comfortable is the position of the mask on face and cheeks?'] = value
+    },
+    selectGeneralComfort(value) {
+      this['comfort']['How comfortable is this mask/respirator?'] = value
+    },
+    setRouteTo(opt) {
+      this.$router.push({
+        name: "NewFitTest",
+        query: {
+          tabToShow: opt.name
+        }
+      })
+    },
   }
 }
 </script>
@@ -174,6 +308,10 @@ export default {
 
   .card {
     padding: 1em 0;
+  }
+
+  .card:hover {
+    cursor: pointer;
   }
 
   .card .description {
@@ -284,7 +422,7 @@ export default {
     justify-content:space-between;
   }
 
-  .main {
+  .main, .grid.selectedMask {
     display: grid;
     grid-template-columns: 100%;
     grid-template-rows: auto;
@@ -326,5 +464,9 @@ export default {
     display: grid;
     grid-template-columns: 33% 33% 33%;
     grid-template-rows: auto;
+  }
+
+  .text-align-center {
+    text-align: center;
   }
 </style>
