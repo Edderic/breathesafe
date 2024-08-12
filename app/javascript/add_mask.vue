@@ -310,7 +310,7 @@
                            :maxVal=1
                            :value='breathability[index].breathabilityPascals'
                            :text='breathabilityText(breathability[index].breathabilityPascals)'
-                           :exception='exceptionObject'
+                           :exception='exceptionObjectBlank'
                            :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
                            :title='breathabilityText(breathability[index].breathabilityPascals)'
                            />
