@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_08_13_031151) do
+ActiveRecord::Schema[7.0].define(version: 2024_08_13_141351) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -97,6 +97,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_13_031151) do
     t.jsonb "protection_factors"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "facial_measurement_id", null: false
+    t.index ["facial_measurement_id"], name: "index_fit_tests_on_facial_measurement_id"
     t.index ["mask_id"], name: "index_fit_tests_on_mask_id"
   end
 
@@ -125,6 +127,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_13_031151) do
     t.string "age_range"
     t.string "color"
     t.boolean "has_exhalation_valve"
+    t.bigint "author_id", null: false
+    t.index ["author_id"], name: "index_masks_on_author_id"
   end
 
   create_table "population_states", force: :cascade do |t|
@@ -202,7 +206,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_13_031151) do
   end
 
   add_foreign_key "facial_measurements", "users"
+  add_foreign_key "fit_tests", "facial_measurements"
   add_foreign_key "fit_tests", "masks"
+  add_foreign_key "masks", "users", column: "author_id"
   add_foreign_key "profiles", "users"
   add_foreign_key "user_carbon_dioxide_monitors", "users"
 end
