@@ -87,6 +87,45 @@
       />
     </div>
 
+
+    <div v-show='tabToShow == "User Seal Checks"' class='justify-content-center flex-dir-col align-content-center'>
+      <table>
+        <tbody>
+          <tr>
+            <th>Selected Mask</th>
+            <td>{{selectedMask.uniqueInternalModelCode}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <a class='text-align-center' href="//cdc.gov/niosh/docs/2018-130/pdfs/2018-130.pdf" target='_blank'>What are user seal checks?</a>
+      <h4>While performing a *positive-pressure* user seal check, </h4>
+
+      <SurveyQuestion
+        question="...how much air movement on your face along the seal of the facepiece did you feel?"
+        :answer_options="['A lot of air movement', 'Some air movement', 'No air movement']"
+        @update="selectPositivePressureAirMovement"
+        :selected="userSealChecks['positive']['...how much air movement on your face along the seal of the facepiece did you feel?']"
+      />
+
+      <SurveyQuestion
+        question="...how much did your glasses fog up?"
+        :answer_options="['A lot', 'A little', 'Not at all', 'Not applicable']"
+        @update="selectPositivePressureGlassesFoggingUp"
+        :selected="userSealChecks['positive']['...how much did your glasses fog up?']"
+      />
+
+      <SurveyQuestion
+        question="...how much pressure build up was there?"
+        :answer_options="['Substantial', 'Only a little', 'No pressure build up']"
+        @update="selectPositivePressureBuildUp"
+        :selected="userSealChecks['positive']['...how much pressure build up was there?']"
+      />
+    </div>
+
+    <br>
+    <br>
+
     <br>
     <br>
 
@@ -119,6 +158,15 @@ export default {
   },
   data() {
     return {
+      selectedPressureCheckOption: 'Positive',
+      pressureCheckOptions: [
+        {
+          'text': 'Positive',
+        },
+        {
+          'text': 'Negative',
+        }
+      ],
       tabToShow: 'Mask',
       tabToShowOptions: [
         {
@@ -142,6 +190,12 @@ export default {
         "Is there adequate room for eye protection?": null,
         "Is there enough room to talk?": null,
         "How comfortable is the position of the mask on face and cheeks?": null
+      },
+      userSealChecks: {
+        'positive': {
+          "...how much air movement on your face along the seal of the facepiece did you feel?": null,
+        },
+        'negative': {}
       },
       search: ""
     }
@@ -267,6 +321,18 @@ export default {
         })
     },
 
+    selectPositivePressureAirMovement(value) {
+      this['userSealChecks']['positive']['...how much air movement on your face along the seal of the facepiece did you feel?'] = value
+    },
+    selectPositivePressureGlassesFoggingUp(value) {
+      this['userSealChecks']['positive']['...how much did your glasses fog up?'] = value
+    },
+    selectPositivePressureBuildUp(value) {
+      this['userSealChecks']['positive']['...how much pressure build up was there?'] = value
+    },
+    selectNegativePressure(value) {
+      this['userSealChecks']['While performing a negative user seal check, did you notice any leakage?'] = value
+    },
     selectComfortNose(value) {
       this['comfort']['How comfortable is the position of the mask on the nose?'] = value
     },
@@ -428,6 +494,11 @@ export default {
     grid-template-rows: auto;
   }
 
+  .align-content-center {
+    display: flex;
+    align-content: center;
+  }
+
   .justify-content-center {
     display: flex;
     justify-content: center;
@@ -468,5 +539,9 @@ export default {
 
   .text-align-center {
     text-align: center;
+  }
+
+  p {
+    max-width: 50em;
   }
 </style>
