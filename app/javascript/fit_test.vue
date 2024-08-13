@@ -236,7 +236,7 @@ export default {
     showPositiveUserSealCheck() {
       return this.selectedMask &&
         'hasExhalationValve' in this.selectedMask &&
-        this.selectedMask['hasExhalationValve'] == true
+        this.selectedMask['hasExhalationValve'] == false
     },
     maskHasBeenSelected() {
       return 'id' in this.selectedMask
