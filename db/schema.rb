@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_08_12_011903) do
+ActiveRecord::Schema[7.0].define(version: 2024_08_13_031151) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -124,6 +124,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_12_011903) do
     t.float "filter_change_cost_us_dollars"
     t.string "age_range"
     t.string "color"
+    t.boolean "has_exhalation_valve"
   end
 
   create_table "population_states", force: :cascade do |t|
