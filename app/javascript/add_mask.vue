@@ -172,6 +172,14 @@
               </td>
             </tr>
 
+            <tr>
+              <th>Has exhalation valve</th>
+              <td v-show='!createOrEdit'>{{hasExhalationValve}}</td>
+              <td v-show="createOrEdit">
+                <input type="text" v-model='hasExhalationValve'>
+              </td>
+            </tr>
+
           </tbody>
         </table>
 
@@ -401,6 +409,7 @@ export default {
   },
   data() {
     return {
+      hasExhalationValve: false,
       exceptionObjectBlank: {
         color: {
           r: '200',
@@ -625,6 +634,7 @@ export default {
         modifications: this.modifications,
         filter_type: this.filterType,
         filtration_efficiencies: this.filtrationEfficienciesRuby,
+        has_exhalation_valve: this.hasExhalationValve,
         breathability: this.breathabilityRuby,
         filter_change_cost_us_dollars: this.filterChangeCostUsDollars,
         style: this.style,
@@ -796,25 +806,26 @@ export default {
           // whatever you want
           let mask = deepSnakeToCamel(data.mask)
           let items = [
-            'id',
-            'uniqueInternalModelCode',
-            'massGrams',
-            'modifications',
+            'authorIds',
+            'breathability',
+            'depthMm',
+            'elastomeric',
+            'filterChangeCostUsDollars',
             'filterType',
             'filtrationEfficiencies',
-            'breathability',
-            'initialCostUsDollars',
-            'filterChangeCostUsDollars',
-            'elastomeric',
-            'notes',
+            'hasExhalationValve',
+            'heightMm',
+            'id',
             'imageUrls',
-            'whereToBuyUrls',
-            'authorIds',
+            'initialCostUsDollars',
+            'massGrams',
+            'modifications',
+            'notes',
             'strapType',
             'style',
+            'uniqueInternalModelCode',
+            'whereToBuyUrls',
             'widthMm',
-            'heightMm',
-            'depthMm',
           ]
 
           for(let item of items) {
