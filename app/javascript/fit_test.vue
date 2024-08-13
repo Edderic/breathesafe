@@ -99,28 +99,40 @@
       </table>
 
       <a class='text-align-center' href="//cdc.gov/niosh/docs/2018-130/pdfs/2018-130.pdf" target='_blank'>What are user seal checks?</a>
-      <h4>While performing a *positive-pressure* user seal check, </h4>
+      <div v-show="showPositiveUserSealCheck">
+        <h4>While performing a *positive-pressure* user seal check, </h4>
 
-      <SurveyQuestion
-        question="...how much air movement on your face along the seal of the facepiece did you feel?"
-        :answer_options="['A lot of air movement', 'Some air movement', 'No air movement']"
-        @update="selectPositivePressureAirMovement"
-        :selected="userSealChecks['positive']['...how much air movement on your face along the seal of the facepiece did you feel?']"
-      />
+        <SurveyQuestion
+            question="...how much air movement on your face along the seal of the mask did you feel?"
+            :answer_options="['A lot of air movement', 'Some air movement', 'No air movement']"
+            @update="selectPositivePressureAirMovement"
+            :selected="userSealChecks['positive']['...how much air movement on your face along the seal of the mask did you feel?']"
+            />
 
-      <SurveyQuestion
-        question="...how much did your glasses fog up?"
-        :answer_options="['A lot', 'A little', 'Not at all', 'Not applicable']"
-        @update="selectPositivePressureGlassesFoggingUp"
-        :selected="userSealChecks['positive']['...how much did your glasses fog up?']"
-      />
+        <SurveyQuestion
+            question="...how much did your glasses fog up?"
+            :answer_options="['A lot', 'A little', 'Not at all', 'Not applicable']"
+            @update="selectPositivePressureGlassesFoggingUp"
+            :selected="userSealChecks['positive']['...how much did your glasses fog up?']"
+            />
 
-      <SurveyQuestion
-        question="...how much pressure build up was there?"
-        :answer_options="['Substantial', 'Only a little', 'No pressure build up']"
-        @update="selectPositivePressureBuildUp"
-        :selected="userSealChecks['positive']['...how much pressure build up was there?']"
-      />
+        <SurveyQuestion
+            question="...how much pressure build up was there?"
+            :answer_options="['Substantial', 'Only a little', 'No pressure build up']"
+            @update="selectPositivePressureBuildUp"
+            :selected="userSealChecks['positive']['...how much pressure build up was there?']"
+            />
+      </div>
+
+      <div v-show="!showPositiveUserSealCheck">
+        <h4>While performing a *negative-pressure* user seal check, </h4>
+        <SurveyQuestion
+            question="...how much air passed between your face and the mask?"
+            :answer_options="['A lot of air', 'Some air', 'None']"
+            @update="selectNegativePressureAirMovement"
+            :selected="userSealChecks['negative']['...how much air passed between your face and the mask?']"
+            />
+      </div>
     </div>
 
     <br>
@@ -193,7 +205,7 @@ export default {
       },
       userSealChecks: {
         'positive': {
-          "...how much air movement on your face along the seal of the facepiece did you feel?": null,
+          "...how much air movement on your face along the seal of the mask did you feel?": null,
         },
         'negative': {}
       },
@@ -221,6 +233,11 @@ export default {
           'message'
         ]
     ),
+    showPositiveUserSealCheck() {
+      return this.selectedMask &&
+        'hasExhalationValve' in this.selectedMask &&
+        this.selectedMask['hasExhalationValve'] == true
+    },
     maskHasBeenSelected() {
       return 'id' in this.selectedMask
     },
@@ -322,7 +339,10 @@ export default {
     },
 
     selectPositivePressureAirMovement(value) {
-      this['userSealChecks']['positive']['...how much air movement on your face along the seal of the facepiece did you feel?'] = value
+      this['userSealChecks']['positive']['...how much air movement on your face along the seal of the mask did you feel?'] = value
+    },
+    selectNegativePressureAirMovement(value) {
+      this['userSealChecks']['negative']['...how much air movement on your face along the seal of the mask did you feel?'] = value
     },
     selectPositivePressureGlassesFoggingUp(value) {
       this['userSealChecks']['positive']['...how much did your glasses fog up?'] = value
