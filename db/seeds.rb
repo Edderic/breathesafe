@@ -97,6 +97,8 @@ masks.each.with_index do |mask, j|
       where_to_buy_urls << mask[index]
     elsif header == 'image_url'
       mask_data["#{header}s"] = [mask[index]]
+    elsif header == 'has_exhalation_valve'
+      mask_data[header] = ActiveModel::Type::Boolean.new.cast(mask[index].downcase)
     else
       mask_data[header] = mask[index]
     end
