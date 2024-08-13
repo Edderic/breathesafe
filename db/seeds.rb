@@ -113,5 +113,7 @@ def import_mask_data
 
     Mask.create!(**mask_data)
   end
-
 end
+
+import_mask_data
+
