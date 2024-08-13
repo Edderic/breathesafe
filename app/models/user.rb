@@ -8,6 +8,8 @@ class User < ApplicationRecord
 
   has_one :profile
   has_many :events, foreign_key: 'author_id'
+  has_many :masks, foreign_key: 'author_id'
+  has_many :facial_measurements, foreign_key: 'author_id'
 
   def carbon_dioxide_monitors
     CarbonDioxideMonitor.find_by_sql("select c.* from carbon_dioxide_monitors as c inner join user_carbon_dioxide_monitors as uc on (c.serial = uc.serial) where uc.user_id = #{self.id}")

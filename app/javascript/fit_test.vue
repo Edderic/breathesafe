@@ -88,7 +88,7 @@
     </div>
 
 
-    <div v-show='tabToShow == "User Seal Checks"' class='justify-content-center flex-dir-col align-content-center'>
+    <div v-show='tabToShow == "User Seal Check"' class='justify-content-center flex-dir-col align-content-center'>
       <table>
         <tbody>
           <tr>
@@ -106,21 +106,21 @@
             question="...how much air movement on your face along the seal of the mask did you feel?"
             :answer_options="['A lot of air movement', 'Some air movement', 'No air movement']"
             @update="selectPositivePressureAirMovement"
-            :selected="userSealChecks['positive']['...how much air movement on your face along the seal of the mask did you feel?']"
+            :selected="userSealCheck['positive']['...how much air movement on your face along the seal of the mask did you feel?']"
             />
 
         <SurveyQuestion
             question="...how much did your glasses fog up?"
             :answer_options="['A lot', 'A little', 'Not at all', 'Not applicable']"
             @update="selectPositivePressureGlassesFoggingUp"
-            :selected="userSealChecks['positive']['...how much did your glasses fog up?']"
+            :selected="userSealCheck['positive']['...how much did your glasses fog up?']"
             />
 
         <SurveyQuestion
             question="...how much pressure build up was there?"
             :answer_options="['Substantial', 'Only a little', 'No pressure build up']"
             @update="selectPositivePressureBuildUp"
-            :selected="userSealChecks['positive']['...how much pressure build up was there?']"
+            :selected="userSealCheck['positive']['...how much pressure build up was there?']"
             />
       </div>
 
@@ -128,11 +128,17 @@
         <h4>While performing a *negative-pressure* user seal check, </h4>
         <SurveyQuestion
             question="...how much air passed between your face and the mask?"
-            :answer_options="['A lot of air', 'Some air', 'None']"
+            :answer_options="['A lot of air', 'Some air', 'Unnoticeable']"
             @update="selectNegativePressureAirMovement"
-            :selected="userSealChecks['negative']['...how much air passed between your face and the mask?']"
+            :selected="userSealCheck['negative']['...how much air passed between your face and the mask?']"
             />
       </div>
+    </div>
+
+    <br>
+
+    <div class='row'>
+      <Button class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
     </div>
 
     <br>
@@ -170,6 +176,8 @@ export default {
   },
   data() {
     return {
+      id: 0,
+      mode: 'Create',
       selectedPressureCheckOption: 'Positive',
       pressureCheckOptions: [
         {
@@ -188,7 +196,7 @@ export default {
           text: "Comfort",
         },
         {
-          text: "User Seal Checks"
+          text: "User Seal Check"
         },
         {
           text: "Fit Testing"
@@ -203,11 +211,15 @@ export default {
         "Is there enough room to talk?": null,
         "How comfortable is the position of the mask on face and cheeks?": null
       },
-      userSealChecks: {
+      userSealCheck: {
         'positive': {
           "...how much air movement on your face along the seal of the mask did you feel?": null,
+          '...how much did your glasses fog up?': null,
+          '...how much pressure build up was there?': null
         },
-        'negative': {}
+        'negative': {
+          '...how much air passed between your face and the mask?': null
+        }
       },
       search: ""
     }
@@ -233,6 +245,16 @@ export default {
           'message'
         ]
     ),
+    toSave() {
+      return {
+        comfort: this.comfort,
+        mask_id: this.selectedMask.id,
+        user_seal_check: this.userSealCheck,
+      }
+    },
+    createOrEdit() {
+      return (this.mode == 'Create' || this.mode == 'Edit')
+    },
     showPositiveUserSealCheck() {
       return this.selectedMask &&
         'hasExhalationValve' in this.selectedMask &&
@@ -279,6 +301,11 @@ export default {
 
     let toQuery = this.$route.query
 
+    if ((this.$route.name == "NewFitTest" || this.$route.name == "EditFitTest") && 'id' in this.$route.params) {
+      this.id = this.$route.params.id
+    }
+
+
     if (toQuery['tabToShow'] && (this.$route.name == "NewFitTest")) {
       this.tabToShow = toQuery['tabToShow']
     }
@@ -287,8 +314,17 @@ export default {
     this.$watch(
       () => this.$route.query,
       (toQuery, fromQuery) => {
-        if (toQuery['tabToShow'] && (this.$route.name == "NewFitTest")) {
+        if (toQuery['tabToShow'] && ((this.$route.name == "NewFitTest") || (this.$route.name == "EditFitTest"))) {
           this.tabToShow = toQuery['tabToShow']
+        }
+      }
+    )
+
+    this.$watch(
+      () => this.$route.params,
+      (toParams, fromParams) => {
+        if (toParams['id'] && ((this.$route.name == "NewFitTest") || (this.$route.name == "EditFitTest"))) {
+          this.id = toParams['id']
         }
       }
     )
@@ -338,20 +374,138 @@ export default {
         })
     },
 
+    validateComfort() {
+      let missingValue = []
+
+      for (const [key, value] of Object.entries(this.comfort)) {
+        if (value == null) {
+          this.errorMessages.push(
+            {
+              str: `Please fill out: "${key}"`
+            }
+          )
+        }
+      }
+    },
+    validateMask() {
+      if (!('id' in this.selectedMask)) {
+        this.errorMessages.push(
+          {
+            str: "Please select a mask."
+          }
+        )
+      }
+    },
+
+    async saveFitTest(targetTabToShow) {
+      if (this.id) {
+
+        await axios.put(
+          `/fit_tests/${this.id}.json`, {
+            fit_test: this.toSave
+          }
+        )
+          .then(response => {
+            let data = response.data
+            // whatever you want
+
+            // this.mode = 'View'
+            this.$router.push({
+              path: `/fit_tests/${this.id}`,
+              query: {
+                tabToShow: targetTabToShow
+              },
+              force: true
+            })
+          })
+          .catch(error => {
+            //  TODO: actually use the error message
+            this.errorMessages.push({
+              str: "Failed to update fit test."
+            })
+          })
+      } else {
+
+        // create
+        await axios.post(
+          `/fit_tests.json`, {
+            fit_test: this.toSave
+          }
+        )
+          .then(response => {
+            let data = response.data
+
+            // TODO: could get the id from data
+            // We could save it
+            // whatever you want
+
+            this.id = response.data.fit_test.id
+
+            this.$router.push({
+              name: 'EditFitTest',
+              params: {
+                id: this.id
+              },
+              query: this.$route.query,
+              force: true
+            })
+          })
+          .catch(error => {
+            //  TODO: actually use the error message
+            this.errorMessages.push({
+              str: "Failed to create fit test."
+            })
+          })
+      }
+    },
+    async validateAndSaveFitTest() {
+      // this.runValidations()
+
+      this.errorMessages = []
+
+      if (this.errorMessages.length > 0) {
+        return;
+      }
+
+      if (this.tabToShow == 'Mask') {
+        this.validateMask()
+
+        if (this.errorMessages.length == 0) {
+          await this.saveFitTest('Comfort')
+        } else {
+          return
+        }
+
+        return
+      }
+
+      else if (this.tabToShow == 'Comfort') {
+        this.validateMask()
+        this.validateComfort()
+
+        if (this.errorMessages.length == 0) {
+          await this.saveFitTest('User Seal Check')
+        } else {
+          return
+        }
+      }
+
+    },
+
     selectPositivePressureAirMovement(value) {
-      this['userSealChecks']['positive']['...how much air movement on your face along the seal of the mask did you feel?'] = value
+      this['userSealCheck']['positive']['...how much air movement on your face along the seal of the mask did you feel?'] = value
     },
     selectNegativePressureAirMovement(value) {
-      this['userSealChecks']['negative']['...how much air movement on your face along the seal of the mask did you feel?'] = value
+      this['userSealCheck']['negative']['...how much air passed between your face and the mask?'] = value
     },
     selectPositivePressureGlassesFoggingUp(value) {
-      this['userSealChecks']['positive']['...how much did your glasses fog up?'] = value
+      this['userSealCheck']['positive']['...how much did your glasses fog up?'] = value
     },
     selectPositivePressureBuildUp(value) {
-      this['userSealChecks']['positive']['...how much pressure build up was there?'] = value
+      this['userSealCheck']['positive']['...how much pressure build up was there?'] = value
     },
     selectNegativePressure(value) {
-      this['userSealChecks']['While performing a negative user seal check, did you notice any leakage?'] = value
+      this['userSealCheck']['While performing a negative user seal check, did you notice any leakage?'] = value
     },
     selectComfortNose(value) {
       this['comfort']['How comfortable is the position of the mask on the nose?'] = value

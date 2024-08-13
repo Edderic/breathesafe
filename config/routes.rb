@@ -40,6 +40,12 @@ Rails.application.routes.draw do
   put 'masks/:id', to: 'masks#update'
   delete 'masks/:id', to: 'masks#delete'
 
+  get 'fit_tests', to: 'fit_tests#index'
+  post 'fit_tests', to: 'fit_tests#create'
+  get 'fit_tests/:id', to: 'fit_tests#show'
+  put 'fit_tests/:id', to: 'fit_tests#update'
+  delete 'fit_tests/:id', to: 'fit_tests#delete'
+
   controller :pages do
     get :qr_code_generator
     get :qr_code_download
