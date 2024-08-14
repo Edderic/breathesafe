@@ -135,6 +135,146 @@
       </div>
     </div>
 
+    <div v-show='tabToShow == "QLFT"' class='justify-content-center flex-dir-col align-content-center'>
+      <div class='grid qlft'>
+        <table>
+          <tbody>
+            <tr>
+              <th>Selected Mask</th>
+              <td>{{selectedMask.uniqueInternalModelCode}}</td>
+            </tr>
+
+            <tr>
+              <th>Procedure</th>
+              <td>
+                <select v-model='results.qualitative.procedure'>
+                  <option>Skipping</option>
+                  <option>Full OSHA</option>
+                </select>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Solution</th>
+              <td>
+                <select v-model='results.qualitative.aerosol.type'>
+                  <option>Not applicable</option>
+                  <option>Isoamyl Acetate</option>
+                  <option>Saccharin</option>
+                  <option>Bitrex</option>
+                  <option>Irritant Smoke</option>
+                </select>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Notes</th>
+              <td>
+                <textarea id="" name="" cols="30" rows="10" v-model='results.qualitative.aerosol.notes'></textarea>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class='Instructions' v-show='results.qualitative.aerosol.type == "Saccharin"'>
+          <p v-for='text in saccharinInstructions'>
+            {{text}}
+          </p>
+        </div>
+
+
+
+        <table>
+          <tbody>
+            <tr v-for='ex in results.qualitative.exercises'>
+              <th>{{ex.name}}</th>
+              <td>
+                <CircularButton text="?" @click="showDescription(ex.name)"/>
+              </td>
+              <td>
+                <select v-model='ex.result'>
+                  <option>Pass</option>
+                  <option>Fail</option>
+                  <option>Not applicable</option>
+                </select>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div v-show='tabToShow == "QNFT"' class='justify-content-center flex-dir-col align-content-center'>
+      <div class='grid qlft'>
+        <table>
+          <tbody>
+            <tr>
+              <th>Selected Mask</th>
+              <td>{{selectedMask.uniqueInternalModelCode}}</td>
+            </tr>
+            <tr>
+              <th>Aerosol</th>
+              <td>
+                <select v-model='results.quantitative.aerosol.type'>
+                  <option>Ambient</option>
+                  <option>Salt</option>
+                  <option>Smoke</option>
+                </select>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Initial count (particles / cm3)</th>
+              <td>
+                <input type='number' v-model='results.quantitative.aerosol.initial_count'>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Procedure</th>
+              <td>
+                <select v-model='results.quantitative.procedure'>
+                  <option>Skipping</option>
+                  <option>Full OSHA</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th>Notes</th>
+              <td>
+                <textarea id="" name="" cols="30" rows="10" v-model='results.quantitative.aerosol.notes'></textarea>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table>
+          <thead>
+            <th>Exercise</th>
+            <td></td>
+            <th>Fit Factor</th>
+          </thead>
+
+          <tbody>
+            <tr v-for='ex in results.quantitative.exercises'>
+              <th>{{ex.name}}</th>
+              <td>
+                <CircularButton text="?" @click="showDescription(ex.name)"/>
+              </td>
+              <td>
+                <input type="number" v-model='ex.fit_factor'>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+
+
+    </div>
+
     <br>
 
     <div class='row'>
