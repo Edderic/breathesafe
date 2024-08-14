@@ -13,6 +13,15 @@
       />
     </div>
 
+    <div class='menu row'>
+      <TabSet
+        v-if='tabToShow == "QLFT"'
+        :options='secondaryTabToShowOptions'
+        @update='setSecondaryTab'
+        :tabToShow='secondaryTabToShow'
+      />
+    </div>
+
     <div class='container chunk'>
       <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
       <br>
@@ -137,7 +146,7 @@
 
     <div v-show='tabToShow == "QLFT"' class='justify-content-center flex-dir-col align-content-center'>
       <div class='grid qlft'>
-        <table>
+        <table v-show='secondaryTabToShow == "Choose Procedure"'>
           <tbody>
             <tr>
               <th>Selected Mask</th>
@@ -176,7 +185,7 @@
           </tbody>
         </table>
 
-        <div class='Instructions' v-show='results.qualitative.aerosol.type == "Saccharin"'>
+        <div class='Instructions' v-show='results.qualitative.aerosol.type == "Saccharin" && secondaryTabToShow == "Instructions" && tabToShow == "QLFT"'>
           <p v-for='text in saccharinInstructions'>
             {{text}}
           </p>
@@ -184,7 +193,7 @@
 
 
 
-        <table>
+        <table v-show='secondaryTabToShow == "Results"'>
           <tbody>
             <tr v-for='ex in results.qualitative.exercises'>
               <th>{{ex.name}}</th>
@@ -656,6 +665,9 @@ export default {
       (toQuery, fromQuery) => {
         if (toQuery['tabToShow'] && ((this.$route.name == "NewFitTest") || (this.$route.name == "EditFitTest"))) {
           this.tabToShow = toQuery['tabToShow']
+        }
+        if (toQuery['secondaryTabToShow'] && ((this.$route.name == "NewFitTest") || (this.$route.name == "EditFitTest"))) {
+          this.secondaryTabToShow = toQuery['secondaryTabToShow']
         }
       }
     )
