@@ -328,6 +328,18 @@ export default {
         }
       ],
       tabToShow: 'Mask',
+      secondaryTabToShow: 'Choose Procedure',
+      secondaryTabToShowOptions: [
+        {
+          text: 'Choose Procedure'
+        },
+        {
+          text: 'Instructions'
+        },
+        {
+          text: 'Results'
+        },
+      ],
       tabToShowOptions: [
         {
           text: "Mask",
