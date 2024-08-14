@@ -595,11 +595,11 @@ export default {
         this.selectedMask['hasExhalationValve'] == false
     },
     maskHasBeenSelected() {
-      return 'id' in this.selectedMask
+      return !!this.selectedMask && this.selectedMask['id'] != 0
     },
     pageTitle() {
       if (this.$route.name == 'NewFitTest') {
-        return "Add New Fit Testing"
+        return "Add Fit Testing Results"
       }
     },
     displayables() {
