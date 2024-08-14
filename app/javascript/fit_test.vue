@@ -583,6 +583,7 @@ export default {
         comfort: this.comfort,
         mask_id: this.selectedMask.id,
         user_seal_check: this.userSealCheck,
+        results: this.results
       }
     },
     createOrEdit() {
