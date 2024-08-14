@@ -703,6 +703,7 @@ export default {
     async loadStuff() {
       // TODO: load the profile for the current user
       await this.loadMasks()
+      await this.loadFitTest()
     },
     async loadMasks() {
       // TODO: make this more flexible so parents can load data of their children
@@ -721,6 +722,30 @@ export default {
           this.message = "Failed to load masks."
           // whatever you want
         })
+    },
+    async loadFitTest() {
+      // TODO: make this more flexible so parents can load data of their children
+      if (this.id) {
+        await axios.get(
+          `/fit_tests/${this.id}.json`,
+        )
+          .then(response => {
+            let data = response.data
+            let fitTestData = response.data.fit_test
+
+            this.id = fitTestData.id
+            this.selectMask(fitTestData.mask_id)
+            this.comfort = fitTestData.comfort
+            this.userSealCheck = fitTestData.user_seal_check
+            this.results = fitTestData.results
+
+            // whatever you want
+          })
+          .catch(error => {
+            this.message = "Failed to load masks."
+            // whatever you want
+          })
+      }
     },
 
     validateComfort() {
