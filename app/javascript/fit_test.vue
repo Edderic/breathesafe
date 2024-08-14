@@ -672,6 +672,15 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    showDescription(name) {
+      this.errorMessages = []
+
+      this.errorMessages.push(
+        {
+          str: this.oshaExercises[name].description
+        }
+      )
+    },
     updateSearch(event) {
       this.selectedMask = {}
       this.search = event.target.value
