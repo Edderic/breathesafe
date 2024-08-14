@@ -345,10 +345,13 @@ export default {
           text: "Mask",
         },
         {
-          text: "Comfort",
+          text: "User Seal Check"
         },
         {
-          text: "User Seal Check"
+          text: "QLFT"
+        },
+        {
+          text: "QNFT"
         },
         {
           text: "Fit Testing"
