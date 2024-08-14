@@ -625,24 +625,30 @@ export default {
   async created() {
     await this.getCurrentUser()
 
+    let toQuery = this.$route.query
+    let toParams = this.$route.params
+
     if (!this.currentUser) {
       signIn.call(this)
     } else {
       // TODO: a parent might input data on behalf of their children.
       // Currently, this.loadStuff() assumes We're loading the profile for the current user
-      this.loadStuff()
+
+      if (this.$route.name == "EditFitTest") {
+        // pull the data
+        if ('tabToShow' in toQuery) {
+          this.tabToShow = toQuery['tabToShow']
+        }
+      }
+
+      if (toParams['id'] && ((this.$route.name == "NewFitTest") || (this.$route.name == "EditFitTest"))) {
+        this.id = toParams['id']
+      }
+
+      await this.loadStuff()
+
     }
 
-    let toQuery = this.$route.query
-
-    if ((this.$route.name == "NewFitTest" || this.$route.name == "EditFitTest") && 'id' in this.$route.params) {
-      this.id = this.$route.params.id
-    }
-
-
-    if (toQuery['tabToShow'] && (this.$route.name == "NewFitTest")) {
-      this.tabToShow = toQuery['tabToShow']
-    }
 
     // TODO: add param watchers
     this.$watch(
