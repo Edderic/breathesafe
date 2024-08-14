@@ -761,8 +761,55 @@ export default {
         }
       }
     },
+    validateUserSealCheck() {
+      let missingValue = []
+
+      let branch = 'positive'
+
+      if (this.showPositiveUserSealCheck) {
+        branch = 'positive'
+      } else {
+        branch = 'negative'
+      }
+
+      for (const [key, value] of Object.entries(this.userSealCheck[branch])) {
+        if (value == null) {
+          this.errorMessages.push(
+            {
+              str: `Please fill out: "${key}"`
+            }
+          )
+        }
+      }
+    },
+
+    validateQLFT() {
+      if (!this.results.qualitative.procedure) {
+        this.errorMessages.push(
+          {
+            str: `Please choose a procedure.`
+          }
+        )
+
+        return
+      }
+
+      if (this.results.qualitative.procedure == 'Full OSHA') {
+        for (const [key, value] of Object.entries(this.results.qualitative.exercises)) {
+          debugger
+
+          if (value == null) {
+            this.errorMessages.push(
+              {
+                str: `Please fill out: "${key}"`
+              }
+            )
+          }
+        }
+      }
+    },
     validateMask() {
-      if (!('id' in this.selectedMask)) {
+      if (this.selectedMask.id == 0) {
         this.errorMessages.push(
           {
             str: "Please select a mask."
