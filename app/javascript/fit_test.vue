@@ -846,6 +846,11 @@ export default {
             })
           })
       } else {
+        this.validateMask()
+
+        if (this.errorMessages.length > 0) {
+          return
+        }
 
         // create
         await axios.post(
@@ -892,7 +897,7 @@ export default {
         this.validateMask()
 
         if (this.errorMessages.length == 0) {
-          await this.saveFitTest('Comfort')
+          await this.saveFitTest('User Seal Check')
         } else {
           return
         }
@@ -900,8 +905,32 @@ export default {
         return
       }
 
+      else if (this.tabToShow == 'User Seal Check') {
+        this.validateMask()
+        this.validateUserSealCheck()
+
+        if (this.errorMessages.length == 0) {
+          await this.saveFitTest('QLFT')
+        } else {
+          return
+        }
+      }
+
+      else if (this.tabToShow == 'QLFT') {
+        this.validateMask()
+        this.validateUserSealCheck()
+        this.validateQLFT()
+
+        if (this.errorMessages.length == 0) {
+          await this.saveFitTest('QNFT')
+        } else {
+          return
+        }
+      }
+
       else if (this.tabToShow == 'Comfort') {
         this.validateMask()
+        this.validateUserSealCheck()
         this.validateComfort()
 
         if (this.errorMessages.length == 0) {
@@ -945,9 +974,18 @@ export default {
     },
     setRouteTo(opt) {
       this.$router.push({
-        name: "NewFitTest",
+        name: this.$route.name,
         query: {
-          tabToShow: opt.name
+          tabToShow: opt.name,
+        }
+      })
+    },
+    setSecondaryTab(opt) {
+      this.$router.push({
+        name: this.$route.name,
+        query: {
+          tabToShow: this.$route.query.tabToShow,
+          secondaryTabToShow: opt.name
         }
       })
     },
@@ -1129,6 +1167,12 @@ export default {
   .grid {
     display: grid;
     grid-template-columns: 33% 33% 33%;
+    grid-template-rows: auto;
+  }
+
+  .grid.qlft {
+    display: grid;
+    grid-template-columns: 50% 50%;
     grid-template-rows: auto;
   }
 
