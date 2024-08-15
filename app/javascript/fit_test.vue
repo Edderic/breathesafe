@@ -163,20 +163,17 @@
               </td>
             </tr>
 
-            <tr>
+            <tr v-show='qualitativeAerosolProcedure != "Skipping"'>
               <th>Solution</th>
               <td>
                 <select v-model='qualitativeAerosolType'>
-                  <option>Not applicable</option>
-                  <option>Isoamyl Acetate</option>
                   <option>Saccharin</option>
                   <option>Bitrex</option>
-                  <option>Irritant Smoke</option>
                 </select>
               </td>
             </tr>
 
-            <tr>
+            <tr v-show='qualitativeAerosolProcedure != "Skipping"'>
               <th>Notes</th>
               <td>
                 <textarea id="" name="" cols="30" rows="10" v-model='qualitativeAerosolNotes'></textarea>
@@ -191,11 +188,20 @@
           </p>
         </div>
 
+        <div class='instructions' v-show='secondaryTabToShow == "Choose Procedure" && tabToShow == "QLFT" && qualitativeAerosolProcedure == "Skipping"'>
+          <p>
+            Qualitative fit testing can be skipped if:
+            <ul>
+              <li>user seal check failed from the previous step</li>
+              <li>user seal check passed and you are going to do quantitative fit testing (QNFT)</li>
+            </ul>
+          </p>
+        </div>
 
 
         <table v-show='secondaryTabToShow == "Results"'>
           <tbody>
-            <tr v-for='ex in results.qualitative.exercises'>
+            <tr v-for='ex in qualExercises'>
               <th>{{ex.name}}</th>
               <td>
                 <CircularButton text="?" @click="showDescription(ex.name)"/>
@@ -514,22 +520,11 @@ export default {
           ],
         }
       },
-      errorMessages: [],
-      masks: [],
-      qualitativeAerosolProcedure: 'Not applicable',
-      qualitativeAerosolType: 'Saccharin',
-      qualitativeAerosolNotes: '',
-      quantitativeAerosolType: 'Ambient',
-      quantitativeAerosolInitialCount: 0,
-      quantitativeAerosolNotes: '',
-
       results: {
-        'qualitative': {
-          procedure: null,
-          aerosol: {
-            type: 'Saccharin',
-            notes: ''
-          },
+        qualitative: {
+          procedure: 'Skipping',
+          aerosolType: 'Saccharin',
+          notes: "",
           exercises: [
             {
               name: 'Normal breathing',
@@ -563,39 +558,36 @@ export default {
               name: 'Normal breathing',
               result: null
             }
-          ]
+          ],
         },
-        'quantitative': {
-          procedure: 'Full OSHA',
-          aerosol: {
-            type: 'Ambient',
-            initial_count: 0,
-            notes: ''
-          },
+        quantitative: {
+          procedure: 'Not applicable',
+          aerosolType: 'Saccharin',
+          notes: "",
           exercises: [
             {
               name: 'Normal breathing',
-              fit_factor: null
+              result: null
             },
             {
               name: 'Deep breathing',
-              fit_factor: null
+              result: null
             },
             {
               name: 'Turning head side to side',
-              fit_factor: null
+              result: null
             },
             {
               name: 'Moving head up and down',
-              fit_factor: null
+              result: null
             },
             {
               name: 'Talking',
-              fit_factor: null
+              result: null
             },
             {
               name: 'Rainbow passage',
-              fit_factor: null
+              result: null
             },
             {
               name: 'Grimace',
@@ -603,15 +595,99 @@ export default {
             },
             {
               name: 'Bending over',
-              fit_factor: null
+              result: null
             },
             {
               name: 'Normal breathing',
-              fit_factor: null
+              result: null
             }
-          ]
+          ],
         }
       },
+      errorMessages: [],
+      masks: [],
+      qualitativeAerosolProcedure: 'Skipping',
+      qualitativeAerosolType: 'Saccharin',
+      qualitativeAerosolNotes: '',
+      quantitativeAerosolType: 'Ambient',
+      quantitativeAerosolInitialCount: 0,
+      quantitativeAerosolNotes: '',
+      qualExercises: [
+        {
+          name: 'Normal breathing',
+          result: null
+        },
+        {
+          name: 'Deep breathing',
+          result: null
+        },
+        {
+          name: 'Turning head side to side',
+          result: null
+        },
+        {
+          name: 'Moving head up and down',
+          result: null
+        },
+        {
+          name: 'Talking',
+          result: null
+        },
+        {
+          name: 'Rainbow passage',
+          result: null
+        },
+        {
+          name: 'Bending over',
+          result: null
+        },
+        {
+          name: 'Normal breathing',
+          result: null
+        }
+      ],
+
+      quantitativeAerosolProcedure: 'Not applicable',
+      quantitativeAerosolType: 'Saccharin',
+      quantitativeAerosolNotes: '',
+      quantExercises: [
+        {
+          name: 'Normal breathing',
+          result: null
+        },
+        {
+          name: 'Deep breathing',
+          result: null
+        },
+        {
+          name: 'Turning head side to side',
+          result: null
+        },
+        {
+          name: 'Moving head up and down',
+          result: null
+        },
+        {
+          name: 'Talking',
+          result: null
+        },
+        {
+          name: 'Rainbow passage',
+          result: null
+        },
+        {
+          name: 'Grimace',
+          fit_factor: null
+        },
+        {
+          name: 'Bending over',
+          result: null
+        },
+        {
+          name: 'Normal breathing',
+          result: null
+        }
+      ],
       selectedMask: {
         id: 0,
         uniqueInternalModelCode: '',
@@ -667,7 +743,9 @@ export default {
         comfort: this.comfort,
         mask_id: this.selectedMask.id,
         user_seal_check: this.userSealCheck,
-        results: this.results
+        results: this.results,
+
+
       }
     },
     createOrEdit() {
@@ -1274,7 +1352,7 @@ export default {
 
   .instructions {
     overflow: scroll;
-    height: 32em;
+    max-height: 32em;
 
   }
 
