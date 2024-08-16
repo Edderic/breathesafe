@@ -156,24 +156,24 @@
             <tr>
               <th>Procedure</th>
               <td>
-                <select v-model='qualitativeAerosolProcedure'>
+                <select v-model='qualitativeProcedure'>
                   <option>Skipping</option>
                   <option>Full OSHA</option>
                 </select>
               </td>
             </tr>
 
-            <tr v-show='qualitativeAerosolProcedure != "Skipping"'>
+            <tr v-show='qualitativeProcedure != "Skipping"'>
               <th>Solution</th>
               <td>
-                <select v-model='qualitativeAerosolType'>
+                <select v-model='qualitativeAerosolSolution'>
                   <option>Saccharin</option>
                   <option>Bitrex</option>
                 </select>
               </td>
             </tr>
 
-            <tr v-show='qualitativeAerosolProcedure != "Skipping"'>
+            <tr v-show='qualitativeProcedure != "Skipping"'>
               <th>Notes</th>
               <td>
                 <textarea id="" name="" cols="30" rows="10" v-model='qualitativeAerosolNotes'></textarea>
@@ -182,13 +182,13 @@
           </tbody>
         </table>
 
-        <div class='instructions' v-show='secondaryTabToShow == "Choose Procedure" && tabToShow == "QLFT" && qualitativeAerosolProcedure == "Full OSHA"'>
+        <div class='instructions' v-show='secondaryTabToShow == "Choose Procedure" && tabToShow == "QLFT" && qualitativeProcedure == "Full OSHA"'>
           <p v-for='text in instructionParagraphs'>
             {{text}}
           </p>
         </div>
 
-        <div class='instructions' v-show='secondaryTabToShow == "Choose Procedure" && tabToShow == "QLFT" && qualitativeAerosolProcedure == "Skipping"'>
+        <div class='instructions' v-show='secondaryTabToShow == "Choose Procedure" && tabToShow == "QLFT" && qualitativeProcedure == "Skipping"'>
           <p>
             Qualitative fit testing can be skipped if:
             <ul>
@@ -201,7 +201,7 @@
 
         <table v-show='secondaryTabToShow == "Results"'>
           <tbody>
-            <tr v-for='ex in qualExercises'>
+            <tr v-for='ex in qualitativeExercises'>
               <th>{{ex.name}}</th>
               <td>
                 <CircularButton text="?" @click="showDescription(ex.name)"/>
@@ -228,10 +228,21 @@
               <th>Selected Mask</th>
               <td>{{selectedMask.uniqueInternalModelCode}}</td>
             </tr>
+
+            <tr>
+              <th>Procedure</th>
+              <td>
+                <select v-model='quantitativeProcedure'>
+                  <option>Skipping</option>
+                  <option>Full OSHA</option>
+                </select>
+              </td>
+            </tr>
+
             <tr>
               <th>Aerosol</th>
               <td>
-                <select v-model='quantitativeAerosolType'>
+                <select v-model='quantitativeAerosolSolution'>
                   <option>Ambient</option>
                   <option>Salt</option>
                   <option>Smoke</option>
@@ -246,15 +257,6 @@
               </td>
             </tr>
 
-            <tr>
-              <th>Procedure</th>
-              <td>
-                <select v-model='quantitativeProcedure'>
-                  <option>Skipping</option>
-                  <option>Full OSHA</option>
-                </select>
-              </td>
-            </tr>
             <tr>
               <th>Notes</th>
               <td>
@@ -272,7 +274,7 @@
           </thead>
 
           <tbody>
-            <tr v-for='ex in results.quantitative.exercises'>
+            <tr v-for='ex in quantitativeExercises'>
               <th>{{ex.name}}</th>
               <td>
                 <CircularButton text="?" @click="showDescription(ex.name)"/>
@@ -520,99 +522,16 @@ export default {
           ],
         }
       },
-      results: {
-        qualitative: {
-          procedure: 'Skipping',
-          aerosolType: 'Saccharin',
-          notes: "",
-          exercises: [
-            {
-              name: 'Normal breathing',
-              result: null
-            },
-            {
-              name: 'Deep breathing',
-              result: null
-            },
-            {
-              name: 'Turning head side to side',
-              result: null
-            },
-            {
-              name: 'Moving head up and down',
-              result: null
-            },
-            {
-              name: 'Talking',
-              result: null
-            },
-            {
-              name: 'Rainbow passage',
-              result: null
-            },
-            {
-              name: 'Bending over',
-              result: null
-            },
-            {
-              name: 'Normal breathing',
-              result: null
-            }
-          ],
-        },
-        quantitative: {
-          procedure: 'Not applicable',
-          aerosolType: 'Saccharin',
-          notes: "",
-          exercises: [
-            {
-              name: 'Normal breathing',
-              result: null
-            },
-            {
-              name: 'Deep breathing',
-              result: null
-            },
-            {
-              name: 'Turning head side to side',
-              result: null
-            },
-            {
-              name: 'Moving head up and down',
-              result: null
-            },
-            {
-              name: 'Talking',
-              result: null
-            },
-            {
-              name: 'Rainbow passage',
-              result: null
-            },
-            {
-              name: 'Grimace',
-              fit_factor: null
-            },
-            {
-              name: 'Bending over',
-              result: null
-            },
-            {
-              name: 'Normal breathing',
-              result: null
-            }
-          ],
-        }
-      },
       errorMessages: [],
       masks: [],
-      qualitativeAerosolProcedure: 'Skipping',
-      qualitativeAerosolType: 'Saccharin',
+      qualitativeProcedure: 'Skipping',
+      qualitativeAerosolSolution: 'Saccharin',
       qualitativeAerosolNotes: '',
-      quantitativeAerosolType: 'Ambient',
+      quantitativeAerosolSolution: 'Ambient',
+      quantitativeAerosolProcedure: 'Not applicable',
       quantitativeAerosolInitialCount: 0,
       quantitativeAerosolNotes: '',
-      qualExercises: [
+      originalQualitativeExercises: [
         {
           name: 'Normal breathing',
           result: null
@@ -646,11 +565,7 @@ export default {
           result: null
         }
       ],
-
-      quantitativeAerosolProcedure: 'Not applicable',
-      quantitativeAerosolType: 'Saccharin',
-      quantitativeAerosolNotes: '',
-      quantExercises: [
+      qualitativeExercises: [
         {
           name: 'Normal breathing',
           result: null
@@ -676,16 +591,88 @@ export default {
           result: null
         },
         {
-          name: 'Grimace',
-          fit_factor: null
-        },
-        {
           name: 'Bending over',
           result: null
         },
         {
           name: 'Normal breathing',
           result: null
+        }
+      ],
+      originalQuantitativeExercises: [
+        {
+          name: 'Normal breathing',
+          fit_factor: null
+        },
+        {
+          name: 'Deep breathing',
+          fit_factor: null
+        },
+        {
+          name: 'Turning head side to side',
+          fit_factor: null
+        },
+        {
+          name: 'Moving head up and down',
+          fit_factor: null
+        },
+        {
+          name: 'Talking',
+          fit_factor: null
+        },
+        {
+          name: 'Rainbow passage',
+          fit_factor: null
+        },
+        {
+          name: 'Grimace',
+          fit_factor: null
+        },
+        {
+          name: 'Bending over',
+          fit_factor: null
+        },
+        {
+          name: 'Normal breathing',
+          fit_factor: null
+        }
+      ],
+      quantitativeExercises: [
+        {
+          name: 'Normal breathing',
+          fit_factor: null
+        },
+        {
+          name: 'Deep breathing',
+          fit_factor: null
+        },
+        {
+          name: 'Turning head side to side',
+          fit_factor: null
+        },
+        {
+          name: 'Moving head up and down',
+          fit_factor: null
+        },
+        {
+          name: 'Talking',
+          fit_factor: null
+        },
+        {
+          name: 'Rainbow passage',
+          fit_factor: null
+        },
+        {
+          name: 'Grimace',
+          fit_factor: null
+        },
+        {
+          name: 'Bending over',
+          fit_factor: null
+        },
+        {
+          name: 'Normal breathing',
+          fit_factor: null
         }
       ],
       selectedMask: {
@@ -734,8 +721,57 @@ export default {
         ]
     ),
     instructionParagraphs() {
-      if (this.fitTestingInstructions[this.qualitativeAerosolType]) {
-        return this.fitTestingInstructions[this.qualitativeAerosolType].paragraphs
+      if (this.fitTestingInstructions[this.qualitativeAerosolSolution]) {
+        return this.fitTestingInstructions[this.qualitativeAerosolSolution].paragraphs
+      }
+    },
+    quantitativeExercisesToSave() {
+      if (this.quantitativeExercises.length == 0) {
+        return this
+      }
+    },
+    results() {
+      // TODO: if this.qualitativeExercises is blank, add null results to it
+      // TODO: if this.quantitativeExercises is blank, add null results to it
+      let qualExerToSave = this.qualitativeExercises
+      if (this.qualitativeExercises == null) {
+        qualExerToSave = this.originalQualitativeExercises
+      }
+
+      let quantExerToSave = this.quantitativeExercises
+      if (this.quantitativeExercises == null) {
+        quantExerToSave = this.originalQuantitativeExercises
+      }
+
+      let qualAerSolToSave = this.qualitativeAerosolSolution
+      if (this.qualitativeAerosolSolution == null) {
+        qualAerSolToSave = 'Saccharin'
+      }
+
+      let quantAerSolToSave = this.quantitativeAerosolSolution
+      if (this.quantitativeAerosolSolution == null) {
+        quantAerSolToSave = 'Ambient'
+      }
+
+
+
+      return {
+        'qualitative': {
+          'exercises': qualExerToSave,
+          'procedure': this.qualitativeProcedure,
+          'aerosol': {
+            solution: qualAerSolToSave,
+          },
+          'notes': this.qualitativeNotes,
+        },
+        'quantitative': {
+          'exercises': quantExerToSave,
+          'procedure': this.quantitativeProcedure,
+          'aerosol': {
+            solution: quantAerSolToSave,
+          },
+          'notes': this.quantitativeNotes,
+        }
       }
     },
     toSave() {
@@ -744,8 +780,6 @@ export default {
         mask_id: this.selectedMask.id,
         user_seal_check: this.userSealCheck,
         results: this.results,
-
-
       }
     },
     createOrEdit() {
@@ -904,7 +938,55 @@ export default {
             this.selectMask(fitTestData.mask_id)
             this.comfort = fitTestData.comfort
             this.userSealCheck = fitTestData.user_seal_check
-            this.results = fitTestData.results
+            let results = fitTestData.results
+
+            if (!(('exercises' in results.qualitative))) {
+              this.qualitativeExercise = [
+                {
+                  name: 'Normal breathing',
+                  result: null
+                },
+                {
+                  name: 'Deep breathing',
+                  result: null
+                },
+                {
+                  name: 'Turning head side to side',
+                  result: null
+                },
+                {
+                  name: 'Moving head up and down',
+                  result: null
+                },
+                {
+                  name: 'Talking',
+                  result: null
+                },
+                {
+                  name: 'Rainbow passage',
+                  result: null
+                },
+                {
+                  name: 'Bending over',
+                  result: null
+                },
+                {
+                  name: 'Normal breathing',
+                  result: null
+                }
+              ]
+            }
+            else {
+              this.qualitativeExercises = results.qualitativeExercises
+            }
+            this.qualitativeAerosolSolution = results.qualitativeAerosolSolution
+            this.qualitativeNotes = results.qualitativeNotes
+            this.qualitativeProcedure = results.qualitativeProcedure
+
+            this.quantitativeExercises = results.quantitativeExercises
+            this.quantitativeAerosolSolution = results.quantitativeAerosolSolution
+            this.quantitativeNotes = results.quantitativeNotes
+            this.quantitativeProcedure = results.quantitativeProcedure
 
             // whatever you want
           })
@@ -950,8 +1032,8 @@ export default {
       }
     },
 
-    validateQLFT() {
-      if (!this.results.qualitative.procedure) {
+    validateQLFT(part) {
+      if (!this.qualitativeProcedure) {
         this.errorMessages.push(
           {
             str: `Please choose a procedure.`
@@ -961,12 +1043,49 @@ export default {
         return
       }
 
-      if (this.results.qualitative.procedure == 'Full OSHA') {
-        for (const [key, value] of Object.entries(this.results.qualitative.exercises)) {
-          if (value == null) {
+      if (this.qualitativeProcedure == 'Full OSHA' && part == 'Results') {
+        let failCount = 0
+
+        for (const [key, value] of Object.entries(this.qualitativeExercises)) {
+          // Quit early if there is a failure
+          if (value['result'] == 'Fail') {
+            return
+          }
+
+          if (value['result'] == null) {
             this.errorMessages.push(
               {
-                str: `Please fill out: "${key}"`
+                str: `Please fill out: "${value['name']}"`
+              }
+            )
+          }
+        }
+      }
+    },
+    validateQNFT(part) {
+      if (!this.quantitativeProcedure) {
+        this.errorMessages.push(
+          {
+            str: `Please choose a QNFT procedure.`
+          }
+        )
+
+        return
+      }
+
+      if (this.qualitativeProcedure == 'Full OSHA' && part == 'Results') {
+        let failCount = 0
+
+        for (const [key, value] of Object.entries(this.qualitativeExercises)) {
+          // Quit early if there is a failure
+          if (value['result'] == 'Fail') {
+            return
+          }
+
+          if (value['result'] == null) {
+            this.errorMessages.push(
+              {
+                str: `Please fill out: "${value['name']}"`
               }
             )
           }
@@ -983,7 +1102,7 @@ export default {
       }
     },
 
-    async saveFitTest(targetTabToShow) {
+    async saveFitTest(query) {
       if (this.id) {
 
         await axios.put(
@@ -998,9 +1117,7 @@ export default {
             // this.mode = 'View'
             this.$router.push({
               path: `/fit_tests/${this.id}`,
-              query: {
-                tabToShow: targetTabToShow
-              },
+              query: query,
               force: true
             })
           })
@@ -1062,7 +1179,9 @@ export default {
         this.validateMask()
 
         if (this.errorMessages.length == 0) {
-          await this.saveFitTest('User Seal Check')
+          await this.saveFitTest({
+            tabToShow: 'User Seal Check'
+          })
         } else {
           return
         }
@@ -1075,19 +1194,84 @@ export default {
         this.validateUserSealCheck()
 
         if (this.errorMessages.length == 0) {
-          await this.saveFitTest('QLFT')
+          await this.saveFitTest({
+            tabToShow: 'QLFT',
+            secondaryTabToShow: 'Choose Procedure'
+          })
         } else {
           return
         }
       }
 
-      else if (this.tabToShow == 'QLFT') {
+      else if (this.tabToShow == 'QLFT' && this.secondaryTabToShow == 'Choose Procedure') {
+        this.validateMask()
+        this.validateUserSealCheck()
+        this.validateQLFT('Choose Procedure')
+
+        if (this.qualitativeProcedure == 'Skipping') {
+          await this.saveFitTest(
+            {
+              tabToShow: 'QNFT',
+              secondaryTabToShow: 'Choose Procedure'
+            }
+          )
+        }
+        else if (this.errorMessages.length == 0) {
+          await this.saveFitTest(
+            {
+              tabToShow: 'QLFT',
+              secondaryTabToShow: 'Results'
+            }
+          )
+        } else {
+          return
+        }
+      }
+
+      else if (this.tabToShow == 'QLFT' && this.secondaryTabToShow == 'Results') {
+        this.validateMask()
+        this.validateUserSealCheck()
+        this.validateQLFT('Results')
+
+        if (this.errorMessages.length == 0) {
+          await this.saveFitTest(
+            {
+              tabToShow: 'QNFT',
+              secondaryTabToShow: 'Choose Procedure'
+            }
+          )
+        } else {
+          return
+        }
+      }
+      else if (this.tabToShow == 'QNFT' && this.secondaryTabToShow != 'Results') {
         this.validateMask()
         this.validateUserSealCheck()
         this.validateQLFT()
 
         if (this.errorMessages.length == 0) {
-          await this.saveFitTest('QNFT')
+          await this.saveFitTest(
+            {
+              tabToShow: 'QNFT',
+              secondaryTabToShow: 'Results'
+            }
+          )
+        } else {
+          return
+        }
+      }
+
+      else if (this.tabToShow == 'QNFT' && this.secondaryTabToShow == 'Results') {
+        this.validateMask()
+        this.validateUserSealCheck()
+        this.validateQLFT()
+
+        if (this.errorMessages.length == 0) {
+          await this.saveFitTest(
+            {
+              tabToShow: 'Comfort',
+            }
+          )
         } else {
           return
         }
@@ -1096,10 +1280,12 @@ export default {
       else if (this.tabToShow == 'Comfort') {
         this.validateMask()
         this.validateUserSealCheck()
-        this.validateComfort()
+        // this.validateComfort()
 
         if (this.errorMessages.length == 0) {
-          await this.saveFitTest('User Seal Check')
+          this.$router.push({
+            name: 'FitTests'
+          })
         } else {
           return
         }
