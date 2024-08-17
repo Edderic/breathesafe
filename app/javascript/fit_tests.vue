@@ -38,6 +38,7 @@
             <td>{{f.updatedAt}}</td>
             <td>{{f.userSealCheckStatus}}</td>
             <td>{{f.qualitativeStatus}}</td>
+            <td>{{f.quantitativeStatus}}</td>
           </tr>
         </tbody>
       </table>
