@@ -152,7 +152,8 @@ class FitTestsController < ApplicationController
           'procedure',
           'notes',
           aerosol: [
-            :solution
+            :solution,
+            :initial_count_per_cm3
           ],
           exercises: [
             'name',

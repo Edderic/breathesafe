@@ -15,7 +15,7 @@
 
     <div class='menu row'>
       <TabSet
-        v-if='tabToShow == "QLFT"'
+        v-if='tabToShow == "QLFT" || tabToShow == "QNFT"'
         :options='secondaryTabToShowOptions'
         @update='setSecondaryTab'
         :tabToShow='secondaryTabToShow'
@@ -127,7 +127,7 @@
 
         <SurveyQuestion
             question="...how much pressure build up was there?"
-            :answer_options="['Substantial', 'Only a little', 'No pressure build up']"
+            :answer_options="['As expected', 'Less than expected', 'No pressure build up']"
             @update="selectPositivePressureBuildUp"
             :selected="userSealCheck['positive']['...how much pressure build up was there?']"
             />
@@ -182,7 +182,8 @@
           </tbody>
         </table>
 
-        <div class='instructions' v-show='secondaryTabToShow == "Choose Procedure" && tabToShow == "QLFT" && qualitativeProcedure == "Full OSHA"'>
+        <div class='instructions' v-show='secondaryTabToShow == "Choose Procedure" && (tabToShow == "QLFT") && qualitativeProcedure == "Full OSHA"'>
+          <h3>{{instructionTitle}}</h3>
           <p v-for='text in instructionParagraphs'>
             {{text}}
           </p>
@@ -200,29 +201,51 @@
 
 
         <table v-show='secondaryTabToShow == "Results"'>
-          <tbody>
-            <tr v-for='ex in qualitativeExercises'>
-              <th>{{ex.name}}</th>
-              <td>
-                <CircularButton text="?" @click="showDescription(ex.name)"/>
-              </td>
-              <td>
-                <select v-model='ex.result'>
-                  <option>Pass</option>
-                  <option>Fail</option>
-                  <option>Not applicable</option>
-                </select>
-              </td>
-            </tr>
-
+          <tbody >
+            <template v-for='(ex, index) in qualitativeExercises' >
+              <tr v-if='index < 4'>
+                <th>{{ex.name}}</th>
+                <td>
+                  <CircularButton text="?" @click="showDescription(ex.name)"/>
+                </td>
+                <td>
+                  <select v-model='ex.result'>
+                    <option>Pass</option>
+                    <option>Fail</option>
+                    <option>Not applicable</option>
+                  </select>
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
+
+        <table v-show='secondaryTabToShow == "Results"'>
+          <tbody class='qlft'>
+            <template v-for='(ex, index) in qualitativeExercises' >
+              <tr v-if='index >= 4'>
+                <th>{{ex.name}}</th>
+                <td>
+                  <CircularButton text="?" @click="showDescription(ex.name)"/>
+                </td>
+                <td>
+                  <select v-model='ex.result'>
+                    <option>Pass</option>
+                    <option>Fail</option>
+                    <option>Not applicable</option>
+                  </select>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+
       </div>
     </div>
 
     <div v-show='tabToShow == "QNFT"' class='justify-content-center flex-dir-col align-content-center'>
       <div class='grid qlft'>
-        <table>
+        <table v-show='secondaryTabToShow == "Choose Procedure"'>
           <tbody>
             <tr>
               <th>Selected Mask</th>
@@ -239,25 +262,23 @@
               </td>
             </tr>
 
-            <tr>
+            <tr v-show='quantitativeProcedure != "Skipping"'>
               <th>Aerosol</th>
               <td>
                 <select v-model='quantitativeAerosolSolution'>
                   <option>Ambient</option>
-                  <option>Salt</option>
-                  <option>Smoke</option>
                 </select>
               </td>
             </tr>
 
-            <tr>
+            <tr v-show='quantitativeProcedure != "Skipping"'>
               <th>Initial count (particles / cm3)</th>
               <td>
-                <input type='number' v-model='quantitativeInitialCount'>
+                <input type='number' v-model='initialCountPerCm3'>
               </td>
             </tr>
 
-            <tr>
+            <tr v-show='quantitativeProcedure != "Skipping"'>
               <th>Notes</th>
               <td>
                 <textarea id="" name="" cols="30" rows="10" v-model='quantitativeAerosolNotes'></textarea>
@@ -266,28 +287,56 @@
           </tbody>
         </table>
 
-        <table>
-          <thead>
-            <th>Exercise</th>
-            <td></td>
-            <th>Fit Factor</th>
-          </thead>
+        <div class='instructions' v-if='secondaryTabToShow == "Choose Procedure" && tabToShow == "QNFT" && quantitativeProcedure == "Skipping"'>
+          <p>
+            Quantitative fit testing can be skipped if:
+            <ul>
+              <li>user seal check failed from the previous step</li>
+              <li>user seal check passed but you are skipping qualitative fit testing (QLFT)</li>
+            </ul>
+          </p>
+        </div>
 
-          <tbody>
-            <tr v-for='ex in quantitativeExercises'>
-              <th>{{ex.name}}</th>
-              <td>
-                <CircularButton text="?" @click="showDescription(ex.name)"/>
-              </td>
-              <td>
-                <input type="number" v-model='ex.fit_factor'>
-              </td>
-            </tr>
+        <div class='instructions' v-show='quantitativeProcedure != "Skipping" && secondaryTabToShow != "Results"'>
+          <h3>{{instructionTitle}}</h3>
+          <p v-for='text in instructionParagraphs'>
+            {{text}}
+          </p>
+        </div>
 
+        <table v-show='secondaryTabToShow == "Results"'>
+          <tbody >
+            <template v-for='(ex, index) in quantitativeExercises' >
+              <tr v-if='index < 4'>
+                <th>{{ex.name}}</th>
+                <td>
+                  <CircularButton text="?" @click="showDescription(ex.name)"/>
+                </td>
+                <td>
+                  <input type="number" v-model='ex.fit_factor'>
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
-      </div>
 
+        <table v-show='secondaryTabToShow == "Results"'>
+          <tbody >
+            <template v-for='(ex, index) in quantitativeExercises' >
+              <tr v-if='index >= 4'>
+                <th>{{ex.name}}</th>
+                <td>
+                  <CircularButton text="?" @click="showDescription(ex.name)"/>
+                </td>
+                <td>
+                  <input type="number" v-model='ex.fit_factor'>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+
+      </div>
 
 
     </div>
@@ -335,6 +384,8 @@ export default {
     return {
       id: 0,
       mode: 'Create',
+      initialCountPerCm3: null,
+      quantitativeProcedure: 'Skipping',
       selectedPressureCheckOption: 'Positive',
       pressureCheckOptions: [
         {
@@ -396,130 +447,164 @@ export default {
         }
       },
       fitTestingInstructions: {
-        Saccharin: {
-          paragraphs: [
-            'The entire screening and testing procedure shall be explained to the test subject prior to the conduct of the screening test.',
+        QNFT: {
+          'Ambient': {
+            'title': 'AMBIENT AEROSOL CONDENSATION NUCLEI COUNTER (CNC) QUANTITATIVE FIT TESTING PROTOCOL.',
+            'paragraphs': [
+              "The ambient aerosol condensation nuclei counter (CNC) quantitative fit testing (PortaCount®) protocol quantitatively fit tests respirators with the use of a probe. The probed respirator is only used for quantitative fit tests. A probed respirator has a special sampling device, installed on the respirator, that allows the probe to sample the air from inside the mask. A probed respirator is required for each make, style, model, and size that the employer uses and can be obtained from the respirator manufacturer or distributor. The primary CNC instrument manufacturer, TSI Incorporated, also provides probe attachments (TSI mask sampling adapters) that permit fit testing in an employee's own respirator. A minimum fit factor pass level of at least 100 is necessary for a half-mask respirator (elastomeric or filtering facepiece), and a minimum fit factor pass level of at least 500 is required for a full-facepiece elastomeric respirator. The entire screening and testing procedure shall be explained to the test subject prior to the conduct of the screening test.",
 
-            '(a) Taste threshold screening. The saccharin taste threshold screening, performed without wearing a respirator, is intended to determine whether the individual being tested can detect the taste of saccharin.',
+              "(a) PortaCount® Fit Test Requirements. (1) Check the respirator to make sure the sampling probe and line are properly attached to the facepiece and that the respirator is fitted with a particulate filter capable of preventing significant penetration by the ambient particles used for the fit test (e.g., NIOSH 42 CFR 84 series 100, series 99, or series 95 particulate filter) per manufacturer's instruction.",
 
-            '(1) During threshold screening as well as during fit testing, subjects shall wear an enclosure about the head and shoulders that is approximately 12 inches in diameter by 14 inches tall with at least the front portion clear and that allows free movements of the head when a respirator is worn. An enclosure substantially similar to the 3M hood assembly, parts # FT 14 and # FT 15 combined, is adequate.',
+              "(2) Instruct the person to be tested to don the respirator for five minutes before the fit test starts. This purges the ambient particles trapped inside the respirator and permits the wearer to make certain the respirator is comfortable. This individual shall already have been trained on how to wear the respirator properly.",
 
-            "(2) The test enclosure shall have a 3⁄4 -inch (1.9 cm) hole in front of the test subject's nose and mouth area to accommodate the nebulizer nozzle.",
+              "(3) Check the following conditions for the adequacy of the respirator fit: Chin properly placed; Adequate strap tension, not overly tightened; Fit across nose bridge; Respirator of proper size to span distance from nose to chin; Tendency of the respirator to slip; Self-observation in a mirror to evaluate fit and respirator position.",
 
-            '(3) The test subject shall don the test enclosure. Throughout the threshold screening test, the test subject shall breathe through his/her slightly open mouth with tongue extended. The subject is instructed to report when he/she detects a sweet taste.',
+              "(4) Have the person wearing the respirator do a user seal check. If leakage is detected, determine the cause. If leakage is from a poorly fitting facepiece, try another size of the same model respirator, or another model of respirator.",
 
-            '(4) Using a DeVilbiss Model 40 Inhalation Medication Nebulizer or equivalent, the test conductor shall spray the threshold check solution into the enclosure. The nozzle is directed away from the nose and mouth of the person. This nebulizer shall be clearly marked to distinguish it from the fit test solution nebulizer.',
+              "(5) Follow the manufacturer's instructions for operating the Portacount® and proceed with the test.",
 
-            '(5) The threshold check solution is prepared by dissolving 0.83 gram of sodium saccharin USP in 100 ml of warm water. It can be prepared by putting 1 ml of the fit test solution (see (b)(5) below) in 100 ml of distilled water.',
+              "(6) The test subject shall be instructed to perform the exercises in section I. A. 14. of this appendix.",
 
-            '(6) To produce the aerosol, the nebulizer bulb is firmly squeezed so that it collapses completely, then released and allowed to fully expand.',
+              "(7) After the test exercises, the test subject shall be questioned by the test conductor regarding the comfort of the respirator upon completion of the protocol. If it has become unacceptable, another model of respirator shall be tried.",
 
-            '(7) Ten squeezes are repeated rapidly and then the test subject is asked whether the saccharin can be tasted. If the test subject reports tasting the sweet taste during the ten squeezes, the screening test is completed. The taste threshold is noted as ten regardless of the number of squeezes actually completed.',
+              "(b) PortaCount® Test Instrument.",
 
-            '(8) If the first response is negative, ten more squeezes are repeated rapidly and the test subject is again asked whether the saccharin is tasted. If the test subject reports tasting the sweet taste during the second ten squeezes, the screening test is completed. The taste threshold is noted as twenty regardless of the number of squeezes actually completed.',
+              "(1) The PortaCount® will automatically stop and calculate the overall fit factor for the entire set of exercises. The overall fit factor is what counts. The Pass or Fail message will indicate whether or not the test was successful. If the test was a Pass, the fit test is over.",
 
-            '(9) If the second response is negative, ten more squeezes are repeated rapidly and the test subject is again asked whether the saccharin is tasted. If the test subject reports tasting the sweet taste during the third set of ten squeezes, the screening test is completed. The taste threshold is noted as thirty regardless of the number of squeezes actually completed.',
+              "(2) Since the pass or fail criterion of the PortaCount® is user programmable, the test operator shall ensure that the pass or fail criterion meet the requirements for minimum respirator performance in this Appendix.",
 
-            '(10) The test conductor will take note of the number of squeezes required to solicit a taste response.',
-
-            '(11) If the saccharin is not tasted after 30 squeezes (step 10), the test subject is unable to taste saccharin and may not perform the saccharin fit test.',
-
-            'Note to paragraph 3(a): If the test subject eats or drinks something sweet before the screening test, he/she may be unable to taste the weak saccharin solution.',
-
-            '(12) If a taste response is elicited, the test subject shall be asked to take note of the taste for reference in the fit test.',
-
-            '(13) Correct use of the nebulizer means that approximately 1 ml of liquid is used at a time in the nebulizer body.',
-
-            '(14) The nebulizer shall be thoroughly rinsed in water, shaken dry, and refilled at least each morning and afternoon or at least every four hours.',
-
-            '(b) Saccharin solution aerosol fit test procedure.',
-
-            '(1) The test subject may not eat, drink (except plain water), smoke, or chew gum for 15 minutes before the test.',
-
-            '(2) The fit test uses the same enclosure described in 3. (a) above.',
-
-            '(3) The test subject shall don the enclosure while wearing the respirator selected in section I. A. of this appendix. The respirator shall be properly adjusted and equipped with a particulate filter(s).',
-
-            '(4) A second DeVilbiss Model 40 Inhalation Medication Nebulizer or equivalent is used to spray the fit test solution into the enclosure. This nebulizer shall be clearly marked to distinguish it from the screening test solution nebulizer.',
-
-            '(5) The fit test solution is prepared by adding 83 grams of sodium saccharin to 100 ml of warm water.',
-
-            '(6) As before, the test subject shall breathe through the slightly open mouth with tongue extended, and report if he/she tastes the sweet taste of saccharin.',
-
-            '(7) The nebulizer is inserted into the hole in the front of the enclosure and an initial concentration of saccharin fit test solution is sprayed into the enclosure using the same number of squeezes (either 10, 20 or 30 squeezes) based on the number of squeezes required to elicit a taste response as noted during the screening test. A minimum of 10 squeezes is required.',
-
-            '(8) After generating the aerosol, the test subject shall be instructed to perform the exercises in section I. A. 14. of this appendix.',
-
-            '(9) Every 30 seconds the aerosol concentration shall be replenished using one half the original number of squeezes used initially (e.g., 5, 10 or 15).',
-
-            '(10) The test subject shall indicate to the test conductor if at any time during the fit test the taste of saccharin is detected. If the test subject does not report tasting the saccharin, the test is passed.',
-
-            '(11) If the taste of saccharin is detected, the fit is deemed unsatisfactory and the test is failed. A different respirator shall be tried and the entire test procedure is repeated (taste threshold screening and fit testing).',
-
-            '(12) Since the nebulizer has a tendency to clog during use, the test operator must make periodic checks of the nebulizer to ensure that it is not clogged. If clogging is found at the end of the test session, the test is invalid.',
-          ],
+              "(3) A record of the test needs to be kept on file, assuming the fit test was successful. The record must contain the test subject's name; overall fit factor; make, model, style, and size of respirator used; and date tested.",
+            ]
+          }
         },
-        Bitrex: {
-          paragraphs: [
-            "The Bitrex™ (Denatonium benzoate) solution aerosol QLFT protocol uses the published saccharin test protocol because that protocol is widely accepted. Bitrex is routinely used as a taste aversion agent in household liquids which children should not be drinking and is endorsed by the American Medical Association, the National Safety Council, and the American Association of Poison Control Centers. The entire screening and testing procedure shall be explained to the test subject prior to the conduct of the screening test.",
+        QLFT: {
+          Saccharin: {
+            'title': 'SACCHARIN SOLUTION AEROSOL PROTOCOL',
+            paragraphs: [
+              'The entire screening and testing procedure shall be explained to the test subject prior to the conduct of the screening test.',
 
-            "(a) Taste Threshold Screening.",
+              '(a) Taste threshold screening. The saccharin taste threshold screening, performed without wearing a respirator, is intended to determine whether the individual being tested can detect the taste of saccharin.',
 
-            "The Bitrex taste threshold screening, performed without wearing a respirator, is intended to determine whether the individual being tested can detect the taste of Bitrex.",
+              '(1) During threshold screening as well as during fit testing, subjects shall wear an enclosure about the head and shoulders that is approximately 12 inches in diameter by 14 inches tall with at least the front portion clear and that allows free movements of the head when a respirator is worn. An enclosure substantially similar to the 3M hood assembly, parts # FT 14 and # FT 15 combined, is adequate.',
 
-            "(1) During threshold screening as well as during fit testing, subjects shall wear an enclosure about the head and shoulders that is approximately 12 inches (30.5 cm) in diameter by 14 inches (35.6 cm) tall. The front portion of the enclosure shall be clear from the respirator and allow free movement of the head when a respirator is worn. An enclosure substantially similar to the 3M hood assembly, parts # FT 14 and # FT 15 combined, is adequate.",
+              "(2) The test enclosure shall have a 3⁄4 -inch (1.9 cm) hole in front of the test subject's nose and mouth area to accommodate the nebulizer nozzle.",
 
-            "(2) The test enclosure shall have a 3⁄4 inch (1.9 cm) hole in front of the test subject's nose and mouth area to accommodate the nebulizer nozzle.",
+              '(3) The test subject shall don the test enclosure. Throughout the threshold screening test, the test subject shall breathe through his/her slightly open mouth with tongue extended. The subject is instructed to report when he/she detects a sweet taste.',
 
-            "(3) The test subject shall don the test enclosure. Throughout the threshold screening test, the test subject shall breathe through his or her slightly open mouth with tongue extended. The subject is instructed to report when he/she detects a bitter taste.",
+              '(4) Using a DeVilbiss Model 40 Inhalation Medication Nebulizer or equivalent, the test conductor shall spray the threshold check solution into the enclosure. The nozzle is directed away from the nose and mouth of the person. This nebulizer shall be clearly marked to distinguish it from the fit test solution nebulizer.',
 
-            "(4) Using a DeVilbiss Model 40 Inhalation Medication Nebulizer or equivalent, the test conductor shall spray the Threshold Check Solution into the enclosure. This Nebulizer shall be clearly marked to distinguish it from the fit test solution nebulizer.",
+              '(5) The threshold check solution is prepared by dissolving 0.83 gram of sodium saccharin USP in 100 ml of warm water. It can be prepared by putting 1 ml of the fit test solution (see (b)(5) below) in 100 ml of distilled water.',
 
-            "(5) The Threshold Check Solution is prepared by adding 13.5 milligrams of Bitrex to 100 ml of 5% salt (NaCl) solution in distilled water.",
+              '(6) To produce the aerosol, the nebulizer bulb is firmly squeezed so that it collapses completely, then released and allowed to fully expand.',
 
-            "(6) To produce the aerosol, the nebulizer bulb is firmly squeezed so that the bulb collapses completely, and is then released and allowed to fully expand.",
+              '(7) Ten squeezes are repeated rapidly and then the test subject is asked whether the saccharin can be tasted. If the test subject reports tasting the sweet taste during the ten squeezes, the screening test is completed. The taste threshold is noted as ten regardless of the number of squeezes actually completed.',
 
-            "(7) An initial ten squeezes are repeated rapidly and then the test subject is asked whether the Bitrex can be tasted. If the test subject reports tasting the bitter taste during the ten squeezes, the screening test is completed. The taste threshold is noted as ten regardless of the number of squeezes actually completed.",
+              '(8) If the first response is negative, ten more squeezes are repeated rapidly and the test subject is again asked whether the saccharin is tasted. If the test subject reports tasting the sweet taste during the second ten squeezes, the screening test is completed. The taste threshold is noted as twenty regardless of the number of squeezes actually completed.',
 
-            "(8) If the first response is negative, ten more squeezes are repeated rapidly and the test subject is again asked whether the Bitrex is tasted. If the test subject reports tasting the bitter taste during the second ten squeezes, the screening test is completed. The taste threshold is noted as twenty regardless of the number of squeezes actually completed.",
+              '(9) If the second response is negative, ten more squeezes are repeated rapidly and the test subject is again asked whether the saccharin is tasted. If the test subject reports tasting the sweet taste during the third set of ten squeezes, the screening test is completed. The taste threshold is noted as thirty regardless of the number of squeezes actually completed.',
 
-            "(9) If the second response is negative, ten more squeezes are repeated rapidly and the test subject is again asked whether the Bitrex is tasted. If the test subject reports tasting the bitter taste during the third set of ten squeezes, the screening test is completed. The taste threshold is noted as thirty regardless of the number of squeezes actually completed.",
+              '(10) The test conductor will take note of the number of squeezes required to solicit a taste response.',
 
-            "(10) The test conductor will take note of the number of squeezes required to solicit a taste response.",
+              '(11) If the saccharin is not tasted after 30 squeezes (step 10), the test subject is unable to taste saccharin and may not perform the saccharin fit test.',
 
-            "(11) If the Bitrex is not tasted after 30 squeezes (step 10), the test subject is unable to taste Bitrex and may not perform the Bitrex fit test.",
+              'Note to paragraph 3(a): If the test subject eats or drinks something sweet before the screening test, he/she may be unable to taste the weak saccharin solution.',
 
-            "(12) If a taste response is elicited, the test subject shall be asked to take note of the taste for reference in the fit test.",
+              '(12) If a taste response is elicited, the test subject shall be asked to take note of the taste for reference in the fit test.',
 
-            "(13) Correct use of the nebulizer means that approximately 1 ml of liquid is used at a time in the nebulizer body.",
+              '(13) Correct use of the nebulizer means that approximately 1 ml of liquid is used at a time in the nebulizer body.',
 
-            "(14) The nebulizer shall be thoroughly rinsed in water, shaken to dry, and refilled at least each morning and afternoon or at least every four hours.",
+              '(14) The nebulizer shall be thoroughly rinsed in water, shaken dry, and refilled at least each morning and afternoon or at least every four hours.',
 
-            "(b) Bitrex Solution Aerosol Fit Test Procedure.",
+              '(b) Saccharin solution aerosol fit test procedure.',
 
-            "(1) The test subject may not eat, drink (except plain water), smoke, or chew gum for 15 minutes before the test.",
+              '(1) The test subject may not eat, drink (except plain water), smoke, or chew gum for 15 minutes before the test.',
 
-            "(2) The fit test uses the same enclosure as that described in 4. (a) above.",
+              '(2) The fit test uses the same enclosure described in 3. (a) above.',
 
-            "(3) The test subject shall don the enclosure while wearing the respirator selected according to section I. A. of this appendix. The respirator shall be properly adjusted and equipped with any type particulate filter(s).",
+              '(3) The test subject shall don the enclosure while wearing the respirator selected in section I. A. of this appendix. The respirator shall be properly adjusted and equipped with a particulate filter(s).',
 
-            "(4) A second DeVilbiss Model 40 Inhalation Medication Nebulizer or equivalent is used to spray the fit test solution into the enclosure. This nebulizer shall be clearly marked to distinguish it from the screening test solution nebulizer.",
+              '(4) A second DeVilbiss Model 40 Inhalation Medication Nebulizer or equivalent is used to spray the fit test solution into the enclosure. This nebulizer shall be clearly marked to distinguish it from the screening test solution nebulizer.',
 
-            "(5) The fit test solution is prepared by adding 337.5 mg of Bitrex to 200 ml of a 5% salt (NaCl) solution in warm water.",
+              '(5) The fit test solution is prepared by adding 83 grams of sodium saccharin to 100 ml of warm water.',
 
-            "(6) As before, the test subject shall breathe through his or her slightly open mouth with tongue extended, and be instructed to report if he/she tastes the bitter taste of Bitrex.",
+              '(6) As before, the test subject shall breathe through the slightly open mouth with tongue extended, and report if he/she tastes the sweet taste of saccharin.',
 
-            "(7) The nebulizer is inserted into the hole in the front of the enclosure and an initial concentration of the fit test solution is sprayed into the enclosure using the same number of squeezes (either 10, 20 or 30 squeezes) based on the number of squeezes required to elicit a taste response as noted during the screening test.",
+              '(7) The nebulizer is inserted into the hole in the front of the enclosure and an initial concentration of saccharin fit test solution is sprayed into the enclosure using the same number of squeezes (either 10, 20 or 30 squeezes) based on the number of squeezes required to elicit a taste response as noted during the screening test. A minimum of 10 squeezes is required.',
 
-            "(8) After generating the aerosol, the test subject shall be instructed to perform the exercises in section I. A. 14. of this appendix.",
+              '(8) After generating the aerosol, the test subject shall be instructed to perform the exercises in section I. A. 14. of this appendix.',
 
-            "(9) Every 30 seconds the aerosol concentration shall be replenished using one half the number of squeezes used initially (e.g., 5, 10 or 15).",
+              '(9) Every 30 seconds the aerosol concentration shall be replenished using one half the original number of squeezes used initially (e.g., 5, 10 or 15).',
 
-            "(10) The test subject shall indicate to the test conductor if at any time during the fit test the taste of Bitrex is detected. If the test subject does not report tasting the Bitrex, the test is passed.",
+              '(10) The test subject shall indicate to the test conductor if at any time during the fit test the taste of saccharin is detected. If the test subject does not report tasting the saccharin, the test is passed.',
 
-            "(11) If the taste of Bitrex is detected, the fit is deemed unsatisfactory and the test is failed. A different respirator shall be tried and the entire test procedure is repeated (taste threshold screening and fit testing).",
+              '(11) If the taste of saccharin is detected, the fit is deemed unsatisfactory and the test is failed. A different respirator shall be tried and the entire test procedure is repeated (taste threshold screening and fit testing).',
 
-          ],
+              '(12) Since the nebulizer has a tendency to clog during use, the test operator must make periodic checks of the nebulizer to ensure that it is not clogged. If clogging is found at the end of the test session, the test is invalid.',
+            ],
+          },
+            Bitrex: {
+              title: ' BITREX™ (DENATONIUM BENZOATE) SOLUTION AEROSOL QUALITATIVE FIT TEST PROTOCOL',
+              paragraphs: [
+                "The Bitrex™ (Denatonium benzoate) solution aerosol QLFT protocol uses the published saccharin test protocol because that protocol is widely accepted. Bitrex is routinely used as a taste aversion agent in household liquids which children should not be drinking and is endorsed by the American Medical Association, the National Safety Council, and the American Association of Poison Control Centers. The entire screening and testing procedure shall be explained to the test subject prior to the conduct of the screening test.",
+
+                "(a) Taste Threshold Screening.",
+
+                "The Bitrex taste threshold screening, performed without wearing a respirator, is intended to determine whether the individual being tested can detect the taste of Bitrex.",
+
+                "(1) During threshold screening as well as during fit testing, subjects shall wear an enclosure about the head and shoulders that is approximately 12 inches (30.5 cm) in diameter by 14 inches (35.6 cm) tall. The front portion of the enclosure shall be clear from the respirator and allow free movement of the head when a respirator is worn. An enclosure substantially similar to the 3M hood assembly, parts # FT 14 and # FT 15 combined, is adequate.",
+
+                "(2) The test enclosure shall have a 3⁄4 inch (1.9 cm) hole in front of the test subject's nose and mouth area to accommodate the nebulizer nozzle.",
+
+                "(3) The test subject shall don the test enclosure. Throughout the threshold screening test, the test subject shall breathe through his or her slightly open mouth with tongue extended. The subject is instructed to report when he/she detects a bitter taste.",
+
+                "(4) Using a DeVilbiss Model 40 Inhalation Medication Nebulizer or equivalent, the test conductor shall spray the Threshold Check Solution into the enclosure. This Nebulizer shall be clearly marked to distinguish it from the fit test solution nebulizer.",
+
+                "(5) The Threshold Check Solution is prepared by adding 13.5 milligrams of Bitrex to 100 ml of 5% salt (NaCl) solution in distilled water.",
+
+                "(6) To produce the aerosol, the nebulizer bulb is firmly squeezed so that the bulb collapses completely, and is then released and allowed to fully expand.",
+
+                "(7) An initial ten squeezes are repeated rapidly and then the test subject is asked whether the Bitrex can be tasted. If the test subject reports tasting the bitter taste during the ten squeezes, the screening test is completed. The taste threshold is noted as ten regardless of the number of squeezes actually completed.",
+
+                "(8) If the first response is negative, ten more squeezes are repeated rapidly and the test subject is again asked whether the Bitrex is tasted. If the test subject reports tasting the bitter taste during the second ten squeezes, the screening test is completed. The taste threshold is noted as twenty regardless of the number of squeezes actually completed.",
+
+                "(9) If the second response is negative, ten more squeezes are repeated rapidly and the test subject is again asked whether the Bitrex is tasted. If the test subject reports tasting the bitter taste during the third set of ten squeezes, the screening test is completed. The taste threshold is noted as thirty regardless of the number of squeezes actually completed.",
+
+                "(10) The test conductor will take note of the number of squeezes required to solicit a taste response.",
+
+                "(11) If the Bitrex is not tasted after 30 squeezes (step 10), the test subject is unable to taste Bitrex and may not perform the Bitrex fit test.",
+
+                "(12) If a taste response is elicited, the test subject shall be asked to take note of the taste for reference in the fit test.",
+
+                "(13) Correct use of the nebulizer means that approximately 1 ml of liquid is used at a time in the nebulizer body.",
+
+                "(14) The nebulizer shall be thoroughly rinsed in water, shaken to dry, and refilled at least each morning and afternoon or at least every four hours.",
+
+                "(b) Bitrex Solution Aerosol Fit Test Procedure.",
+
+                "(1) The test subject may not eat, drink (except plain water), smoke, or chew gum for 15 minutes before the test.",
+
+                "(2) The fit test uses the same enclosure as that described in 4. (a) above.",
+
+                "(3) The test subject shall don the enclosure while wearing the respirator selected according to section I. A. of this appendix. The respirator shall be properly adjusted and equipped with any type particulate filter(s).",
+
+                "(4) A second DeVilbiss Model 40 Inhalation Medication Nebulizer or equivalent is used to spray the fit test solution into the enclosure. This nebulizer shall be clearly marked to distinguish it from the screening test solution nebulizer.",
+
+                "(5) The fit test solution is prepared by adding 337.5 mg of Bitrex to 200 ml of a 5% salt (NaCl) solution in warm water.",
+
+                "(6) As before, the test subject shall breathe through his or her slightly open mouth with tongue extended, and be instructed to report if he/she tastes the bitter taste of Bitrex.",
+
+                "(7) The nebulizer is inserted into the hole in the front of the enclosure and an initial concentration of the fit test solution is sprayed into the enclosure using the same number of squeezes (either 10, 20 or 30 squeezes) based on the number of squeezes required to elicit a taste response as noted during the screening test.",
+
+                "(8) After generating the aerosol, the test subject shall be instructed to perform the exercises in section I. A. 14. of this appendix.",
+
+                "(9) Every 30 seconds the aerosol concentration shall be replenished using one half the number of squeezes used initially (e.g., 5, 10 or 15).",
+
+                "(10) The test subject shall indicate to the test conductor if at any time during the fit test the taste of Bitrex is detected. If the test subject does not report tasting the Bitrex, the test is passed.",
+
+                "(11) If the taste of Bitrex is detected, the fit is deemed unsatisfactory and the test is failed. A different respirator shall be tried and the entire test procedure is repeated (taste threshold screening and fit testing).",
+
+              ],
+            }
         }
       },
       errorMessages: [],
@@ -553,10 +638,6 @@ export default {
           result: null
         },
         {
-          name: 'Rainbow passage',
-          result: null
-        },
-        {
           name: 'Bending over',
           result: null
         },
@@ -587,10 +668,6 @@ export default {
           result: null
         },
         {
-          name: 'Rainbow passage',
-          result: null
-        },
-        {
           name: 'Bending over',
           result: null
         },
@@ -618,10 +695,6 @@ export default {
         },
         {
           name: 'Talking',
-          fit_factor: null
-        },
-        {
-          name: 'Rainbow passage',
           fit_factor: null
         },
         {
@@ -656,10 +729,6 @@ export default {
         },
         {
           name: 'Talking',
-          fit_factor: null
-        },
-        {
-          name: 'Rainbow passage',
           fit_factor: null
         },
         {
@@ -720,15 +789,51 @@ export default {
           'message'
         ]
     ),
-    instructionParagraphs() {
-      if (this.fitTestingInstructions[this.qualitativeAerosolSolution]) {
-        return this.fitTestingInstructions[this.qualitativeAerosolSolution].paragraphs
+    qualitativeHasAFailure() {
+      for(let q of this.qualitativeExercises) {
+        if (q.result == 'Fail') {
+          return true
+        }
+      }
+
+      return false
+    },
+    userSealCheckPassed() {
+      return (this.userSealCheck.positive["...how much air movement on your face along the seal of the mask did you feel?"] == 'No air movement') &&
+        (
+          (
+            this.userSealCheck.positive["...how much did your glasses fog up?"] == 'Not applicable'
+          ) ||
+          (
+            this.userSealCheck.positive["...how much did your glasses fog up?"] == 'Not at all'
+          )
+        ) &&
+        (this.userSealCheck.positive["...how much pressure build up was there?"] == 'As expected')
+
+    },
+    aerosol() {
+
+      if (this.tabToShow == "QLFT") {
+        return this.qualitativeAerosolSolution
+      } else if (this.tabToShow == "QNFT"){
+        return this.quantitativeAerosolSolution
+      } else {
+        return
       }
     },
-    quantitativeExercisesToSave() {
-      if (this.quantitativeExercises.length == 0) {
-        return this
+    instructionTitle() {
+      if (!this.aerosol) {
+        return
       }
+
+      return this.fitTestingInstructions[this.tabToShow][this.aerosol].title
+    },
+    instructionParagraphs() {
+      if (!this.aerosol) {
+        return
+      }
+
+      return this.fitTestingInstructions[this.tabToShow][this.aerosol].paragraphs
     },
     results() {
       // TODO: if this.qualitativeExercises is blank, add null results to it
@@ -768,6 +873,7 @@ export default {
           'exercises': quantExerToSave,
           'procedure': this.quantitativeProcedure,
           'aerosol': {
+            'initial_count_per_cm3': this.initialCountPerCm3,
             solution: quantAerSolToSave,
           },
           'notes': this.quantitativeNotes,
@@ -832,11 +938,16 @@ export default {
       // TODO: a parent might input data on behalf of their children.
       // Currently, this.loadStuff() assumes We're loading the profile for the current user
 
-      if (this.$route.name == "EditFitTest") {
+      if (this.$route.name == "EditFitTest" || this.$route.name == 'NewFitTest') {
         // pull the data
         if ('tabToShow' in toQuery) {
           this.tabToShow = toQuery['tabToShow']
         }
+
+        if (toQuery['secondaryTabToShow'] && ((this.$route.name == "NewFitTest") || (this.$route.name == "EditFitTest"))) {
+          this.secondaryTabToShow = toQuery['secondaryTabToShow']
+        }
+
       }
 
       if (toParams['id'] && ((this.$route.name == "NewFitTest") || (this.$route.name == "EditFitTest"))) {
@@ -940,53 +1051,16 @@ export default {
             this.userSealCheck = fitTestData.user_seal_check
             let results = fitTestData.results
 
-            if (!(('exercises' in results.qualitative))) {
-              this.qualitativeExercise = [
-                {
-                  name: 'Normal breathing',
-                  result: null
-                },
-                {
-                  name: 'Deep breathing',
-                  result: null
-                },
-                {
-                  name: 'Turning head side to side',
-                  result: null
-                },
-                {
-                  name: 'Moving head up and down',
-                  result: null
-                },
-                {
-                  name: 'Talking',
-                  result: null
-                },
-                {
-                  name: 'Rainbow passage',
-                  result: null
-                },
-                {
-                  name: 'Bending over',
-                  result: null
-                },
-                {
-                  name: 'Normal breathing',
-                  result: null
-                }
-              ]
-            }
-            else {
-              this.qualitativeExercises = results.qualitativeExercises
-            }
-            this.qualitativeAerosolSolution = results.qualitativeAerosolSolution
-            this.qualitativeNotes = results.qualitativeNotes
-            this.qualitativeProcedure = results.qualitativeProcedure
+            this.qualitativeAerosolSolution = results.qualitative.aerosol.solution
+            this.qualitativeNotes = results.qualitative.notes
+            this.qualitativeProcedure = results.qualitative.procedure
+            this.qualitativeExercises = results.qualitative.exercises
 
-            this.quantitativeExercises = results.quantitativeExercises
-            this.quantitativeAerosolSolution = results.quantitativeAerosolSolution
-            this.quantitativeNotes = results.quantitativeNotes
-            this.quantitativeProcedure = results.quantitativeProcedure
+            this.quantitativeExercises = results.quantitative.exercises
+            this.quantitativeAerosolSolution = results.quantitative.aerosol.solution
+            this.quantitativeNotes = results.quantitative.notes
+            this.quantitativeProcedure = results.quantitative.procedure
+            this.initialCountPerCm3 = results.quantitative.aerosol.initial_count_per_cm3
 
             // whatever you want
           })
@@ -1030,13 +1104,14 @@ export default {
           )
         }
       }
+
     },
 
     validateQLFT(part) {
       if (!this.qualitativeProcedure) {
         this.errorMessages.push(
           {
-            str: `Please choose a procedure.`
+            str: `Please choose a QLFT procedure.`
           }
         )
 
@@ -1198,9 +1273,22 @@ export default {
             tabToShow: 'QLFT',
             secondaryTabToShow: 'Choose Procedure'
           })
+
+          // Save first before potentially displaying this message
+          if (!this.userSealCheckPassed) {
+            this.errorMessages.push(
+              {
+                str: "User seal check failed. You may skip adding qualitative or quantitative fit testing data, along with comfort data if you wish, by clicking here.",
+                to: {
+                  'name': 'FitTests'
+                }
+              }
+            )
+          }
         } else {
           return
         }
+
       }
 
       else if (this.tabToShow == 'QLFT' && this.secondaryTabToShow == 'Choose Procedure') {
@@ -1240,6 +1328,19 @@ export default {
               secondaryTabToShow: 'Choose Procedure'
             }
           )
+
+
+          if (this.qualitativeHasAFailure) {
+            this.errorMessages.push(
+              {
+                str: "QLFT has a failure. You may skip adding quantitative fit testing data and comfort data if you wish, by clicking here.",
+                to: {
+                  'name': 'FitTests'
+                }
+              }
+            )
+
+          }
         } else {
           return
         }
