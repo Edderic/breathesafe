@@ -47,7 +47,7 @@ class FitTestsController < ApplicationController
     # TODO: if admin, could see all, with name?
     to_render = {
       fit_tests: JSON.parse(
-        FitTest.all.to_json
+        FitTest.viewable(current_user).to_json
       )
     }
     message = ""

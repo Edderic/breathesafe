@@ -369,6 +369,7 @@ import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
+import { FitTest } from './fit_testing.js'
 
 export default {
   name: 'FitTest',
@@ -789,6 +790,11 @@ export default {
           'message'
         ]
     ),
+    fitTest() {
+      return FitTest({
+        userSealCheck: this.userSealCheck
+      })
+    },
     missingDataUserSealCheck() {
       let missingValues = []
 
@@ -818,17 +824,7 @@ export default {
       return false
     },
     userSealCheckPassed() {
-      return (this.userSealCheck.positive["...how much air movement on your face along the seal of the mask did you feel?"] == 'No air movement') &&
-        (
-          (
-            this.userSealCheck.positive["...how much did your glasses fog up?"] == 'Not applicable'
-          ) ||
-          (
-            this.userSealCheck.positive["...how much did your glasses fog up?"] == 'Not at all'
-          )
-        ) &&
-        (this.userSealCheck.positive["...how much pressure build up was there?"] == 'As expected')
-
+      return this.fitTest.userSealCheckPassed
     },
     aerosol() {
 

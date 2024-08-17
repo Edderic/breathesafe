@@ -16,17 +16,31 @@
     </div>
 
 
-
-
-    <div class='main grid'>
-      <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in displayables' @click='viewMask(m.id)'>
-        <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
-        <div class='description'>
-          <span>
-            {{m.uniqueInternalModelCode}}
-          </span>
-        </div>
-      </div>
+    <div class='main'>
+      <table>
+        <thead>
+          <th>Image</th>
+          <th>Mask</th>
+          <th>Created at</th>
+          <th>Updated at</th>
+          <th>User Seal Check</th>
+          <th>QLFT</th>
+          <th>QNFT</th>
+          <th>Comfort</th>
+        </thead>
+        <tbody>
+          <tr v-for='f in fit_tests'>
+            <td>
+              <img :src="f.imageUrls[0]" alt="" class='thumbnail'>
+            </td>
+            <td>{{f.uniqueInternalModelCode}}</td>
+            <td>{{f.createdAt}}</td>
+            <td>{{f.updatedAt}}</td>
+            <td>{{f.userSealCheckStatus}}</td>
+            <td>{{f.qualitativeStatus}}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <br>
@@ -48,9 +62,10 @@ import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
+import { FitTest } from './fit_testing.js';
 
 export default {
-  name: 'Masks',
+  name: 'FitTests',
   components: {
     Button,
     CircularButton,
@@ -63,7 +78,8 @@ export default {
     return {
       errorMessages: [],
       masks: [],
-      search: ""
+      search: "",
+      fit_tests: []
     }
   },
   props: {
@@ -113,6 +129,9 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    userSealCheckPassed() {
+      return ftUserSealCheckPassed(this.userSealCheck)
+    },
     getAbsoluteHref(href) {
       // TODO: make sure this works for all
       return `${href}`
@@ -136,23 +155,24 @@ export default {
     },
     async loadStuff() {
       // TODO: load the profile for the current user
-      await this.loadMasks()
+      await this.loadFitTests()
     },
-    async loadMasks() {
+    async loadFitTests() {
       // TODO: make this more flexible so parents can load data of their children
       await axios.get(
-        `/masks.json`,
+        `/fit_tests.json`,
       )
         .then(response => {
           let data = response.data
-          if (response.data.masks) {
-            this.masks = deepSnakeToCamel(data.masks)
+          if (response.data.fit_tests) {
+
+            this.fit_tests = data.fit_tests.map((ft) => new FitTest(ft))
           }
 
           // whatever you want
         })
         .catch(error => {
-          this.message = "Failed to load masks."
+          this.message = "Failed to load fit tests."
           // whatever you want
         })
     },
@@ -327,4 +347,10 @@ export default {
     grid-template-columns: 33% 33% 33%;
     grid-template-rows: auto;
   }
+
+  .thumbnail {
+    max-width:10em;
+    max-height:10em;
+  }
+
 </style>
