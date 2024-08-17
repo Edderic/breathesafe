@@ -1107,6 +1107,35 @@ export default {
 
     },
 
+    validatePresenceOfInitialCountPerCM3() {
+      if (!this.initialCountPerCm3) {
+            this.errorMessages.push(
+              {
+                str: "Please fill out initial count per cm3.",
+                to: {
+                  'name': 'EditFitTest',
+                  params: {
+                    id: this.$route.params.id
+                  },
+                  query: {
+                    tabToShow: 'QNFT',
+                    secondaryTabToShow: 'Choose Procedure',
+                  }
+                }
+              }
+            )
+      }
+    },
+    validateValueOfInitialCountPerCM3() {
+      if (this.initialCountPerCm3 < 1000) {
+          this.errorMessages.push(
+            {
+              str: "Initial particle count too low. Please take this test at an environment where the number of particles per cubic centimeter is greater than 1000.",
+            }
+          )
+
+      }
+    },
     validateQLFT(part) {
       if (!this.qualitativeProcedure) {
         this.errorMessages.push(
@@ -1148,19 +1177,32 @@ export default {
         return
       }
 
-      if (this.qualitativeProcedure == 'Full OSHA' && part == 'Results') {
+      if (this.quantitativeProcedure != 'Skipping') {
+        this.validatePresenceOfInitialCountPerCM3()
+        this.validateValueOfInitialCountPerCM3()
+      }
+
+      if (this.quantitativeProcedure == 'Full OSHA' && this.secondaryTabToShow == 'Results') {
         let failCount = 0
 
-        for (const [key, value] of Object.entries(this.qualitativeExercises)) {
+        for (const [key, value] of Object.entries(this.quantitativeExercises)) {
           // Quit early if there is a failure
-          if (value['result'] == 'Fail') {
-            return
-          }
+          // if (value['result'] == 'Fail') {
+            // return
+          // }
 
-          if (value['result'] == null) {
+          if (value['fit_factor'] == null) {
             this.errorMessages.push(
               {
                 str: `Please fill out: "${value['name']}"`
+              }
+            )
+          }
+
+          if (value['fit_factor'] < 0) {
+            this.errorMessages.push(
+              {
+                str: `Cannot have a negative fit factor for "${value['name']}"`
               }
             )
           }
@@ -1350,6 +1392,10 @@ export default {
         this.validateUserSealCheck()
         this.validateQLFT()
 
+        this.validatePresenceOfInitialCountPerCM3()
+        this.validateValueOfInitialCountPerCM3()
+
+
         if (this.errorMessages.length == 0) {
           await this.saveFitTest(
             {
@@ -1366,6 +1412,7 @@ export default {
         this.validateMask()
         this.validateUserSealCheck()
         this.validateQLFT()
+        this.validateQNFT()
 
         if (this.errorMessages.length == 0) {
           await this.saveFitTest(
