@@ -789,6 +789,25 @@ export default {
           'message'
         ]
     ),
+    missingDataUserSealCheck() {
+      let missingValues = []
+
+      let branch = 'positive'
+
+      if (this.showPositiveUserSealCheck) {
+        branch = 'positive'
+      } else {
+        branch = 'negative'
+      }
+
+      for (const [key, value] of Object.entries(this.userSealCheck[branch])) {
+        if (value == null) {
+          missingValue.push(key)
+        }
+      }
+
+      return missingValues
+    },
     qualitativeHasAFailure() {
       for(let q of this.qualitativeExercises) {
         if (q.result == 'Fail') {
@@ -1071,6 +1090,17 @@ export default {
       }
     },
 
+    validateQLFTorQNFTExists() {
+      // if user seal check passed, then we should have qualitative procedure be not "Skipping"
+      // OR quantitative procedure be not "Skipping"
+      if (this.userSealCheckPassed && this.qualitativeProcedure == 'Skipping' && this.quantitativeProcedure == 'Skipping') {
+        this.errorMessages.push(
+          {
+            str: `Since User Seal Check passed, cannot skip QLFT and QNFT. Please do the procedures in one of those sections and fill out the data accordingly.`
+          }
+        )
+      }
+    },
     validateComfort() {
       let missingValue = []
 
@@ -1085,26 +1115,13 @@ export default {
       }
     },
     validateUserSealCheck() {
-      let missingValue = []
-
-      let branch = 'positive'
-
-      if (this.showPositiveUserSealCheck) {
-        branch = 'positive'
-      } else {
-        branch = 'negative'
-      }
-
-      for (const [key, value] of Object.entries(this.userSealCheck[branch])) {
-        if (value == null) {
+      for (let key of this.missingDataUserSealCheck) {
           this.errorMessages.push(
             {
               str: `Please fill out: "${key}"`
             }
           )
-        }
       }
-
     },
 
     validatePresenceOfInitialCountPerCM3() {
@@ -1394,6 +1411,7 @@ export default {
 
         this.validatePresenceOfInitialCountPerCM3()
         this.validateValueOfInitialCountPerCM3()
+        this.validateQLFTorQNFTExists()
 
 
         if (this.errorMessages.length == 0) {
@@ -1413,6 +1431,7 @@ export default {
         this.validateUserSealCheck()
         this.validateQLFT()
         this.validateQNFT()
+        this.validateQLFTorQNFTExists()
 
         if (this.errorMessages.length == 0) {
           await this.saveFitTest(
@@ -1428,12 +1447,19 @@ export default {
       else if (this.tabToShow == 'Comfort') {
         this.validateMask()
         this.validateUserSealCheck()
-        // this.validateComfort()
+        this.validateQLFTorQNFTExists()
+        this.validateComfort()
 
         if (this.errorMessages.length == 0) {
           this.$router.push({
             name: 'FitTests'
           })
+
+          this.errorMessages.push(
+            {
+              str: 'Successfully edited a fit test'
+            }
+          )
         } else {
           return
         }
