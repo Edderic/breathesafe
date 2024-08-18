@@ -34,10 +34,16 @@
             </td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.uniqueInternalModelCode}}</td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.shortHandCreatedAt}}</td>
-            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User Seal Check"})'>{{f.userSealCheckStatus}}</td>
-            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QLFT"})'>{{f.qualitativeStatus}}</td>
-            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QNFT"})'>{{f.quantitativeStatus}}</td>
-            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})'>{{f.comfortStatus}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User Seal Check"})'>
+              <ColoredCell class='status' :text='f.userSealCheckStatus' :backgroundColor='statusColor(f.userSealCheckStatus)'/>
+            </td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QLFT"})'>
+              <ColoredCell class='status' :text='f.qualitativeStatus' :backgroundColor='statusColor(f.qualitativeStatus)'/>
+            </td>
+            <td class='status' @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QNFT"})'>{{f.quantitativeStatus}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})'>
+              <ColoredCell class='status' :text='f.comfortStatus' :backgroundColor='statusColor(f.comfortStatus)'/>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -56,6 +62,8 @@ import axios from 'axios';
 import Button from './button.vue'
 import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
+import { userSealCheckColorMapping } from './colors.js'
+import ColoredCell from './colored_cell.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
 import SearchIcon from './search_icon.vue'
@@ -72,6 +80,7 @@ export default {
     Button,
     CircularButton,
     ClosableMessage,
+    ColoredCell,
     SearchIcon,
     SurveyQuestion,
     TabSet
@@ -131,6 +140,10 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    statusColor(status) {
+      let color = userSealCheckColorMapping[status]
+      return `rgb(${color.r}, ${color.g}, ${color.b})`
+    },
     setRouteTo(name, params, query) {
       this.$router.push(
         {
@@ -371,4 +384,7 @@ export default {
     text-align: center;
   }
 
+  .status {
+    padding: 0.5em;
+  }
 </style>

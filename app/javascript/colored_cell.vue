@@ -1,6 +1,6 @@
 <template>
   <div
-    :style="{ backgroundColor: cellColor }"
+    :style="{ backgroundColor: cellColor, padding: padding }"
   >
     <slot>
       {{ display }}
@@ -9,7 +9,7 @@
 </template>
 
 <script>
-  import { gradeColorMapping, getColor, interpolateRgb } from './colors';
+  import { getColor, interpolateRgb } from './colors';
 
   export default {
     computed: {
@@ -41,7 +41,8 @@
       'text': String,
       'colorScheme': Object,
       'exception': Object,
-      'backgroundColor': String
+      'backgroundColor': String,
+      'padding': String
     }
   }
 </script>

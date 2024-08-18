@@ -12,6 +12,33 @@ export const toggleCSS = {
   'cursor': 'help',
 }
 
+export const userSealCheckColorMapping = {
+  'Passed': {
+    name: 'green',
+    r: 87,
+    g: 195,
+    b: 40
+  },
+  'Skipped': {
+    name: 'yellow',
+    r: 255,
+    g: 233,
+    b: 56
+  },
+  'Failed': {
+    name: 'red',
+    r: 219,
+    g: 21,
+    b: 0
+  },
+  'Incomplete': {
+    name: 'gray',
+    r: 150,
+    g: 150,
+    b: 150
+  }
+}
+
 const paletteFall = [
   {
     name: 'darkRed',
