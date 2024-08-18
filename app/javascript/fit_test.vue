@@ -821,7 +821,7 @@ export default {
 
       for (const [key, value] of Object.entries(this.userSealCheck[branch])) {
         if (value == null) {
-          missingValue.push(key)
+          missingValues.push(key)
         }
       }
 
