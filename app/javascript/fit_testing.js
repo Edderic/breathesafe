@@ -14,6 +14,21 @@ export class FitTest {
     this.comfort = data.comfort
     this.qualitativeExercises = this.qualitative.exercises
     this.quantitativeExercises = this.quantitative.exercises
+
+    this.comfortQuestions = {
+      "How comfortable is the position of the mask on the nose?": {
+        'passingAnswers': ['Comfortable']
+      },
+      "Is there adequate room for eye protection?": {
+        'passingAnswers': ['Adequate', 'Not applicable']
+      },
+      "Is there enough room to talk?": {
+        'passingAnswers': ['Enough']
+      },
+      "How comfortable is the position of the mask on face and cheeks?": {
+        'passingAnswers': ['Comfortable']
+      },
+    }
   }
 
   get shortHandCreatedAt() {
@@ -50,21 +65,16 @@ export class FitTest {
   }
 
   get comfortStatus() {
-    if (
-      (this.comfort["How comfortable is the position of the mask on the nose?"] == 'Comfortable') &&
-      (
-        (this.comfort["Is there adequate room for eye protection?"] == 'Adequate') ||
-        (this.comfort["Is there adequate room for eye protection?"] == 'Not applicable')
-      ) &&
-      (
-        this.comfort["Is there enough room to talk?"] == 'Enough'
-      ) && (
-        this.comfort["How comfortable is the position of the mask on face and cheeks?"] == 'Comfortable'
-      )
-    ) {
+    let collector = true
+    for (const [ question, value ] of Object.entries(this.comfortQuestions)) {
+      if (this.comfort[question] == null) {
+        return 'Incomplete'
+      }
+      collector = collector && value['passingAnswers'].includes(this.comfort[question])
+    }
+
+    if (collector) {
       return 'Passed'
-    } else {
-      return 'Failed'
     }
   }
 

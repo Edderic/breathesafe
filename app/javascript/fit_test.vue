@@ -1750,4 +1750,8 @@ export default {
   h3 {
     padding: 1em;
   }
+
+  input[type='number'] {
+    width: 6em;
+  }
 </style>
