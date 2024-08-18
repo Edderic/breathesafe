@@ -9,6 +9,7 @@ export class FitTest {
     this.userSealCheck = data.user_seal_check;
     this.qualitative = data.results.qualitative;
     this.quantitative = data.results.quantitative;
+    this.comfort = data.comfort
     this.qualitativeExercises = this.qualitative.exercises
     this.quantitativeExercises = this.quantitative.exercises
   }
@@ -24,6 +25,25 @@ export class FitTest {
         )
       ) &&
       (this.userSealCheck.positive["...how much pressure build up was there?"] == 'As expected')
+  }
+
+  get comfortStatus() {
+    if (
+      (this.comfort["How comfortable is the position of the mask on the nose?"] == 'Comfortable') &&
+      (
+        (this.comfort["Is there adequate room for eye protection"] == 'Adequate') ||
+        (this.comfort["Is there adequate room for eye protection"] == 'Not applicable')
+      ) &&
+      (
+        this.comfort["Is there enough room to talk?"] == 'Enough'
+      ) && (
+        this.comfort["How comfortable is the position of the mask on face and cheeks?"] == 'Comfortable'
+      )
+    ) {
+      return 'Passed'
+    } else {
+      return 'Failed'
+    }
   }
 
   get userSealCheckStatus() {

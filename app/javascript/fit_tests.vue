@@ -39,6 +39,7 @@
             <td>{{f.userSealCheckStatus}}</td>
             <td>{{f.qualitativeStatus}}</td>
             <td>{{f.quantitativeStatus}}</td>
+            <td>{{f.comfortStatus}}</td>
           </tr>
         </tbody>
       </table>
