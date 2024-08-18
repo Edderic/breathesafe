@@ -28,7 +28,7 @@
           <th>Comfort</th>
         </thead>
         <tbody>
-          <tr v-for='f in fit_tests'>
+          <tr v-for='f in displayables'>
             <td>
               <img :src="f.imageUrls[0]" alt="" class='thumbnail'>
             </td>
@@ -107,10 +107,10 @@ export default {
     ),
     displayables() {
       if (this.search == "") {
-        return this.masks
+        return this.fit_tests
       } else {
         let lowerSearch = this.search.toLowerCase()
-        return this.masks.filter((mask) => mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
+        return this.fit_tests.filter((fit_test) => fit_test.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
       }
     },
     messages() {
@@ -365,6 +365,10 @@ export default {
   .thumbnail {
     max-width:10em;
     max-height:10em;
+  }
+
+  .text-align-center {
+    text-align: center;
   }
 
 </style>
