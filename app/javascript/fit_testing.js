@@ -121,17 +121,30 @@ export class FitTest {
   }
 
   get qualitativeStatus() {
-    if (this.qualitative.procedure == "Skipped") {
+    if (this.qualitative.procedure == "Skipping") {
       return "Skipped"
     }
-
-    if (this.qualitativePassed) {
-      return 'Passed'
-    } else {
+    // if No failures but some questions are unfilled
+    // Incomplete
+    if (this.qualitativeFailed) {
       return 'Failed'
+    } else if (!this.qualitativeFailed && this.qualitativeHasUnanswered) {
+      return 'Incomplete'
+    } else {
+      return 'Complete'
     }
   }
 
+  get qualitativeHasUnanswered() {
+    let counter = 0;
+    for(let q of this.qualitativeExercises) {
+      if (q.result == null) {
+        return true
+      }
+    }
+
+    return false
+  }
   get qualitativeFailed() {
     for(let q of this.qualitativeExercises) {
       if (q.result == 'Fail') {

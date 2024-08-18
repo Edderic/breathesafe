@@ -396,7 +396,7 @@ export default {
       id: 0,
       mode: 'View',
       initialCountPerCm3: null,
-      quantitativeProcedure: 'Skipping',
+      quantitativeProcedure: null,
       selectedPressureCheckOption: 'Positive',
       pressureCheckOptions: [
         {
@@ -620,7 +620,7 @@ export default {
       },
       errorMessages: [],
       masks: [],
-      qualitativeProcedure: 'Skipping',
+      qualitativeProcedure: null,
       qualitativeAerosolSolution: 'Saccharin',
       qualitativeAerosolNotes: '',
       quantitativeAerosolSolution: 'Ambient',
