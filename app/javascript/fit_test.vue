@@ -1331,7 +1331,6 @@ export default {
     },
     async validateAndSaveFitTest() {
       // this.runValidations()
-
       this.errorMessages = []
 
       if (this.tabToShow == 'Mask') {

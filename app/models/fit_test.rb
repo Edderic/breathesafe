@@ -13,6 +13,8 @@ class FitTest < ApplicationRecord
         INNER JOIN masks m
         ON (m.id = ft.mask_id)
         WHERE fm.user_id = #{user.id}
+
+        ORDER BY updated_at DESC
       SQL
     )
 
