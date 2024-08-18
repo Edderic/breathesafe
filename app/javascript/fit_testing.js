@@ -44,6 +44,8 @@ export class FitTest {
           )
         ) &&
         (this.userSealCheck.positive["...how much pressure build up was there?"] == 'As expected')
+    } else {
+      return (this.userSealCheck['negative']['...how much air passed between your face and the mask?'] == 'Unnoticeable')
     }
   }
 

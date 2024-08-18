@@ -805,7 +805,8 @@ export default {
         user_seal_check: this.userSealCheck,
         results: this.results,
         comfort: this.comfort,
-        uniqueInternalModelCode: this.selectedMask.uniqueInternalModelCode
+        uniqueInternalModelCode: this.selectedMask.uniqueInternalModelCode,
+        has_exhalation_valve: this.selectedMask['hasExhalationValve']
       })
     },
     missingDataUserSealCheck() {
