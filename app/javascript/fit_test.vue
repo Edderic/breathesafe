@@ -1307,12 +1307,17 @@ export default {
 
             this.id = response.data.fit_test.id
 
+            // We assume that the user hits save first at the "Mask" section.
+            // It might not be always the case, but good enough
+
             this.$router.push({
               name: 'EditFitTest',
               params: {
                 id: this.id
               },
-              query: this.$route.query,
+              query: {
+                tabToShow: 'User Seal Check'
+              },
               force: true
             })
           })
