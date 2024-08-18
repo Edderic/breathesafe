@@ -41,6 +41,8 @@
           </tr>
         </tbody>
       </table>
+
+      <h3 class='text-align-center' v-show='fit_tests.length == 0'>No fit tests to show. Use the (+) sign above to add fit testing data.</h3>
     </div>
 
     <br>
