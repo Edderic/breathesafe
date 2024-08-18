@@ -69,12 +69,43 @@ export class FitTest {
   }
 
   get userSealCheckStatus() {
-    if (this.usePositivePressureUserSealCheck) {
-      // if no failure yet and some are null, then user isn't done filling out
-      let nullCount = 0
+    let nullCount = 0
 
+    if (this.usePositivePressureUserSealCheck) {
+      if (
+        (
+          (this.userSealCheck.positive["...how much air movement on your face along the seal of the mask did you feel?"] != null) &&
+          (this.userSealCheck.positive["...how much air movement on your face along the seal of the mask did you feel?"] != 'No air movement')
+        ) || (
+          (this.userSealCheck.positive["...how much did your glasses fog up?"] != null) &&
+          (
+            (this.userSealCheck.positive["...how much did your glasses fog up?"] != 'Not at all') &&
+            (this.userSealCheck.positive["...how much did your glasses fog up?"] != 'Not applicable')
+          )
+        ) || (
+          (this.userSealCheck.positive["...how much pressure build up was there?"] != null) &&
+          (this.userSealCheck.positive["...how much pressure build up was there?"] != 'As expected')
+        )
+      ) {
+        return 'Failed'
+      }
+      // otherwise lets check for  missing values
       for (const [key, value] of Object.entries(this.userSealCheck.positive)) {
-        if (value == 'Fail') {
+        if (value == null) {
+          nullCount += 1
+        }
+      }
+
+      if (nullCount > 0) {
+        return 'Incomplete'
+      }
+
+      return 'Passed'
+    } else {
+      // use negative pressure
+
+      for (const [key, value] of Object.entries(this.userSealCheck.negative)) {
+        if (value != 'Unnoticeable') {
           return 'Failed'
         } else if (value == null) {
           nullCount += 1
@@ -86,11 +117,6 @@ export class FitTest {
       }
 
       return 'Passed'
-    }
-    if (this.userSealCheckPassed) {
-      return 'Passed'
-    } else {
-      return 'Failed'
     }
   }
 
