@@ -1,4 +1,4 @@
-import {round} from './misc.js'
+import {round, shorthandDate} from './misc.js'
 
 export class FitTest {
   constructor(data) {
@@ -13,6 +13,10 @@ export class FitTest {
     this.comfort = data.comfort
     this.qualitativeExercises = this.qualitative.exercises
     this.quantitativeExercises = this.quantitative.exercises
+  }
+
+  get shortHandCreatedAt() {
+    return shorthandDate(this.createdAt)
   }
 
   get userSealCheckPassed() {

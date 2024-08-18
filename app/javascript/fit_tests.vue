@@ -22,7 +22,6 @@
           <th>Image</th>
           <th>Mask</th>
           <th>Created at</th>
-          <th>Updated at</th>
           <th>User Seal Check</th>
           <th>QLFT</th>
           <th>QNFT</th>
@@ -34,8 +33,7 @@
               <img :src="f.imageUrls[0]" alt="" class='thumbnail'>
             </td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.uniqueInternalModelCode}}</td>
-            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.createdAt}}</td>
-            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.updatedAt}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.shortHandCreatedAt}}</td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User Seal Check"})'>{{f.userSealCheckStatus}}</td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QLFT"})'>{{f.qualitativeStatus}}</td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QNFT"})'>{{f.quantitativeStatus}}</td>
