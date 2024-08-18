@@ -2,6 +2,7 @@ import {round} from './misc.js'
 
 export class FitTest {
   constructor(data) {
+    this.id = data.id
     this.uniqueInternalModelCode = data.unique_internal_model_code
     this.imageUrls = data.image_urls
     this.createdAt = data.created_at

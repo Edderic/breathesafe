@@ -36,7 +36,7 @@
             <td>{{f.uniqueInternalModelCode}}</td>
             <td>{{f.createdAt}}</td>
             <td>{{f.updatedAt}}</td>
-            <td>{{f.userSealCheckStatus}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User Seal Check"})'>{{f.userSealCheckStatus}}</td>
             <td>{{f.qualitativeStatus}}</td>
             <td>{{f.quantitativeStatus}}</td>
             <td>{{f.comfortStatus}}</td>
@@ -131,6 +131,15 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    setRouteTo(name, params, query) {
+      this.$router.push(
+        {
+          name: name,
+          params: params,
+          query: query
+        }
+      )
+    },
     userSealCheckPassed() {
       return ftUserSealCheckPassed(this.userSealCheck)
     },
