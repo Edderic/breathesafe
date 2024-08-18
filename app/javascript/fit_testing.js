@@ -176,6 +176,13 @@ export class FitTest {
       fitFactorsInverted += 1 / ex.fit_factor
     }
 
+
+    if (this.quantitativeExercises.length - fitFactorCount > 0) {
+      // there are still some exercises that haven't been done. OSHA protocol
+      // expects users to finish every single exercise to get the overall HMFF
+      return 'Incomplete'
+    }
+
     return `${round(fitFactorCount / fitFactorsInverted, 1)} HMFF`
   }
 };
