@@ -33,12 +33,12 @@
             <td>
               <img :src="f.imageUrls[0]" alt="" class='thumbnail'>
             </td>
-            <td>{{f.uniqueInternalModelCode}}</td>
-            <td>{{f.createdAt}}</td>
-            <td>{{f.updatedAt}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.uniqueInternalModelCode}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.createdAt}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.updatedAt}}</td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User Seal Check"})'>{{f.userSealCheckStatus}}</td>
-            <td>{{f.qualitativeStatus}}</td>
-            <td>{{f.quantitativeStatus}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QLFT"})'>{{f.qualitativeStatus}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QNFT"})'>{{f.quantitativeStatus}}</td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})'>{{f.comfortStatus}}</td>
           </tr>
         </tbody>
