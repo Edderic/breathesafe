@@ -150,7 +150,10 @@ export default {
     newFitTest() {
       this.$router.push(
         {
-          name: "NewFitTest"
+          name: "NewFitTest",
+          query: {
+            mode: 'Edit'
+          }
         }
       )
     },

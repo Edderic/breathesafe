@@ -352,7 +352,7 @@
     <br>
 
     <div class='row'>
-      <Button class='button' text="View Mode" @click='mode = "View"' v-if='createOrEdit'/>
+      <Button class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
       <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
       <Button class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
     </div>
@@ -966,10 +966,18 @@ export default {
       // TODO: a parent might input data on behalf of their children.
       // Currently, this.loadStuff() assumes We're loading the profile for the current user
 
+      if (this.$route.name == 'NewFitTest') {
+        this.mode = 'Create'
+      }
+
       if (this.$route.name == "EditFitTest" || this.$route.name == 'NewFitTest') {
         // pull the data
         if ('tabToShow' in toQuery) {
           this.tabToShow = toQuery['tabToShow']
+        }
+
+        if ('mode' in toQuery) {
+          this.mode = toQuery['mode']
         }
 
         if (toQuery['secondaryTabToShow'] && ((this.$route.name == "NewFitTest") || (this.$route.name == "EditFitTest"))) {
@@ -991,11 +999,18 @@ export default {
     this.$watch(
       () => this.$route.query,
       (toQuery, fromQuery) => {
-        if (toQuery['tabToShow'] && ((this.$route.name == "NewFitTest") || (this.$route.name == "EditFitTest"))) {
-          this.tabToShow = toQuery['tabToShow']
-        }
-        if (toQuery['secondaryTabToShow'] && ((this.$route.name == "NewFitTest") || (this.$route.name == "EditFitTest"))) {
-          this.secondaryTabToShow = toQuery['secondaryTabToShow']
+        if (((this.$route.name == "NewFitTest") || (this.$route.name == "EditFitTest"))) {
+          if (toQuery['tabToShow']) {
+            this.tabToShow = toQuery['tabToShow']
+          }
+
+          if (toQuery['mode']) {
+            this.mode = toQuery['mode']
+          }
+
+          if (toQuery['secondaryTabToShow']) {
+            this.secondaryTabToShow = toQuery['secondaryTabToShow']
+          }
         }
       }
     )
@@ -1313,10 +1328,6 @@ export default {
       // this.runValidations()
 
       this.errorMessages = []
-
-      if (this.errorMessages.length > 0) {
-        return;
-      }
 
       if (this.tabToShow == 'Mask') {
         this.validateMask()

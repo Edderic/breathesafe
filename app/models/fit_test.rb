@@ -25,7 +25,7 @@ class FitTest < ApplicationRecord
         if !ev[col]
           ev[col] = []
         elsif col == "image_urls"
-          ev[col] = JSON.parse(ev['image_urls'].gsub("{","[").gsub("}","]").gsub('\\',''))
+          ev[col] = [ev['image_urls'].gsub("{","").gsub("}","").gsub('"', '')]
         else
           ev[col] = JSON.parse(ev[col])
         end
