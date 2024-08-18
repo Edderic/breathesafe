@@ -31,7 +31,7 @@
       <h3 class='text-align-center'>Search for and pick a mask</h3>
 
       <div class='row justify-content-center'>
-        <input type="text" @change='updateSearch'>
+        <input type="text" @change='updateSearch' :disabled='!createOrEdit'>
         <SearchIcon height='2em' width='2em'/>
       </div>
 
@@ -72,6 +72,7 @@
         :answer_options="['Uncomfortable', 'Unsure', 'Comfortable']"
         @update="selectComfortNose"
         :selected="comfort['How comfortable is the position of the mask on the nose?']"
+        :disabled="!createOrEdit"
       />
 
       <SurveyQuestion
@@ -79,6 +80,7 @@
         :answer_options="['Inadequate', 'Adequate', 'Not applicable']"
         @update="selectComfortEyeProtection"
         :selected="comfort['Is there adequate room for eye protection?']"
+        :disabled="!createOrEdit"
       />
 
       <SurveyQuestion
@@ -86,6 +88,7 @@
         :answer_options="['Not enough', 'Unsure', 'Enough']"
         @update="selectComfortEnoughRoomToTalk"
         :selected="comfort['Is there enough room to talk?']"
+        :disabled="!createOrEdit"
       />
 
       <SurveyQuestion
@@ -93,6 +96,7 @@
         :answer_options="['Uncomfortable', 'Unsure', 'Comfortable']"
         @update="selectComfortFaceAndCheeks"
         :selected="comfort['How comfortable is the position of the mask on face and cheeks?']"
+        :disabled="!createOrEdit"
       />
     </div>
 
@@ -116,6 +120,7 @@
             :answer_options="['A lot of air movement', 'Some air movement', 'No air movement']"
             @update="selectPositivePressureAirMovement"
             :selected="userSealCheck['positive']['...how much air movement on your face along the seal of the mask did you feel?']"
+            :disabled="!createOrEdit"
             />
 
         <SurveyQuestion
@@ -123,6 +128,7 @@
             :answer_options="['A lot', 'A little', 'Not at all', 'Not applicable']"
             @update="selectPositivePressureGlassesFoggingUp"
             :selected="userSealCheck['positive']['...how much did your glasses fog up?']"
+            :disabled="!createOrEdit"
             />
 
         <SurveyQuestion
@@ -130,6 +136,7 @@
             :answer_options="['As expected', 'Less than expected', 'No pressure build up']"
             @update="selectPositivePressureBuildUp"
             :selected="userSealCheck['positive']['...how much pressure build up was there?']"
+            :disabled="!createOrEdit"
             />
       </div>
 
@@ -140,6 +147,7 @@
             :answer_options="['A lot of air', 'Some air', 'Unnoticeable']"
             @update="selectNegativePressureAirMovement"
             :selected="userSealCheck['negative']['...how much air passed between your face and the mask?']"
+            :disabled="!createOrEdit"
             />
       </div>
     </div>
@@ -156,7 +164,7 @@
             <tr>
               <th>Procedure</th>
               <td>
-                <select v-model='qualitativeProcedure'>
+                <select v-model='qualitativeProcedure' :disabled='!createOrEdit'>
                   <option>Skipping</option>
                   <option>Full OSHA</option>
                 </select>
@@ -166,7 +174,7 @@
             <tr v-show='qualitativeProcedure != "Skipping"'>
               <th>Solution</th>
               <td>
-                <select v-model='qualitativeAerosolSolution'>
+                <select v-model='qualitativeAerosolSolution' :disabled='!createOrEdit'>
                   <option>Saccharin</option>
                   <option>Bitrex</option>
                 </select>
@@ -176,7 +184,7 @@
             <tr v-show='qualitativeProcedure != "Skipping"'>
               <th>Notes</th>
               <td>
-                <textarea id="" name="" cols="30" rows="10" v-model='qualitativeAerosolNotes'></textarea>
+                <textarea id="" name="" cols="30" rows="10" v-model='qualitativeAerosolNotes' :disabled='!createOrEdit'></textarea>
               </td>
             </tr>
           </tbody>
@@ -209,7 +217,7 @@
                   <CircularButton text="?" @click="showDescription(ex.name)"/>
                 </td>
                 <td>
-                  <select v-model='ex.result'>
+                  <select v-model='ex.result' :disabled='!createOrEdit'>
                     <option>Pass</option>
                     <option>Fail</option>
                     <option>Not applicable</option>
@@ -229,7 +237,7 @@
                   <CircularButton text="?" @click="showDescription(ex.name)"/>
                 </td>
                 <td>
-                  <select v-model='ex.result'>
+                  <select v-model='ex.result' :disabled='!createOrEdit'>
                     <option>Pass</option>
                     <option>Fail</option>
                     <option>Not applicable</option>
@@ -255,7 +263,7 @@
             <tr>
               <th>Procedure</th>
               <td>
-                <select v-model='quantitativeProcedure'>
+                <select v-model='quantitativeProcedure' :disabled='!createOrEdit'>
                   <option>Skipping</option>
                   <option>Full OSHA</option>
                 </select>
@@ -265,7 +273,7 @@
             <tr v-show='quantitativeProcedure != "Skipping"'>
               <th>Aerosol</th>
               <td>
-                <select v-model='quantitativeAerosolSolution'>
+                <select v-model='quantitativeAerosolSolution' :disabled='!createOrEdit'>
                   <option>Ambient</option>
                 </select>
               </td>
@@ -274,14 +282,14 @@
             <tr v-show='quantitativeProcedure != "Skipping"'>
               <th>Initial count (particles / cm3)</th>
               <td>
-                <input type='number' v-model='initialCountPerCm3'>
+                <input type='number' v-model='initialCountPerCm3' :disabled='!createOrEdit'>
               </td>
             </tr>
 
             <tr v-show='quantitativeProcedure != "Skipping"'>
               <th>Notes</th>
               <td>
-                <textarea id="" name="" cols="30" rows="10" v-model='quantitativeAerosolNotes'></textarea>
+                <textarea id="" name="" cols="30" rows="10" v-model='quantitativeAerosolNotes' :disabled='!createOrEdit' ></textarea>
               </td>
             </tr>
           </tbody>
@@ -313,7 +321,7 @@
                   <CircularButton text="?" @click="showDescription(ex.name)"/>
                 </td>
                 <td>
-                  <input type="number" v-model='ex.fit_factor'>
+                  <input type="number" v-model='ex.fit_factor' :disabled='!createOrEdit'>
                 </td>
               </tr>
             </template>
@@ -329,7 +337,7 @@
                   <CircularButton text="?" @click="showDescription(ex.name)"/>
                 </td>
                 <td>
-                  <input type="number" v-model='ex.fit_factor'>
+                  <input type="number" v-model='ex.fit_factor' :disabled='!createOrEdit'>
                 </td>
               </tr>
             </template>
@@ -344,6 +352,8 @@
     <br>
 
     <div class='row'>
+      <Button class='button' text="View Mode" @click='mode = "View"' v-if='createOrEdit'/>
+      <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
       <Button class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
     </div>
 
@@ -384,7 +394,7 @@ export default {
   data() {
     return {
       id: 0,
-      mode: 'Create',
+      mode: 'View',
       initialCountPerCm3: null,
       quantitativeProcedure: 'Skipping',
       selectedPressureCheckOption: 'Positive',
@@ -791,8 +801,11 @@ export default {
         ]
     ),
     fitTest() {
-      return FitTest({
-        userSealCheck: this.userSealCheck
+      return new FitTest({
+        user_seal_check: this.userSealCheck,
+        results: this.results,
+        comfort: this.comfort,
+        uniqueInternalModelCode: this.selectedMask.uniqueInternalModelCode
       })
     },
     missingDataUserSealCheck() {
@@ -918,7 +931,7 @@ export default {
       if (this.$route.name == 'NewFitTest') {
         return "Add Fit Testing Results"
       } else if (this.$route.name == 'EditFitTest') {
-        return "Edit Fit Testing Results"
+        return `${this.mode} Fit Testing Results`
       }
     },
     displayables() {
@@ -1447,6 +1460,12 @@ export default {
         this.validateComfort()
 
         if (this.errorMessages.length == 0) {
+          await this.saveFitTest(
+            {
+              tabToShow: 'Comfort',
+            }
+          )
+
           this.$router.push({
             name: 'FitTests'
           })

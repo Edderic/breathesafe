@@ -32,8 +32,8 @@ export class FitTest {
     if (
       (this.comfort["How comfortable is the position of the mask on the nose?"] == 'Comfortable') &&
       (
-        (this.comfort["Is there adequate room for eye protection"] == 'Adequate') ||
-        (this.comfort["Is there adequate room for eye protection"] == 'Not applicable')
+        (this.comfort["Is there adequate room for eye protection?"] == 'Adequate') ||
+        (this.comfort["Is there adequate room for eye protection?"] == 'Not applicable')
       ) &&
       (
         this.comfort["Is there enough room to talk?"] == 'Enough'

@@ -39,7 +39,7 @@
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User Seal Check"})'>{{f.userSealCheckStatus}}</td>
             <td>{{f.qualitativeStatus}}</td>
             <td>{{f.quantitativeStatus}}</td>
-            <td>{{f.comfortStatus}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})'>{{f.comfortStatus}}</td>
           </tr>
         </tbody>
       </table>

@@ -2,7 +2,7 @@
   <div class='centered flex-dir-col'>
     <h3>{{question}}</h3>
     <div v-for="re in questionWithAnswerOptions">
-      <input type="radio" :id="re.questionAndAnswerOption" :value="re.answerOption" @change='send(re.answerOption)' :checked="isChecked(re.answerOption)"/>
+      <input type="radio" :id="re.questionAndAnswerOption" :value="re.answerOption" @change='send(re.answerOption)' :checked="isChecked(re.answerOption)" :disabled='disabled'/>
       <label :for="re.questionAndAnswerOption">{{re.answerOption}}</label>
     </div>
   </div>
@@ -28,6 +28,7 @@ export default {
     question: String,
     answer_options: Array,
     selected: String,
+    disabled: Boolean
   },
   computed: {
     questionWithAnswerOptions() {
