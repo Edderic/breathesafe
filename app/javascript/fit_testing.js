@@ -75,6 +75,8 @@ export class FitTest {
 
     if (collector) {
       return 'Passed'
+    } else {
+      return 'Failed'
     }
   }
 
