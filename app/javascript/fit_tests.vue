@@ -16,7 +16,7 @@
     </div>
 
 
-    <div class='main'>
+    <div class='main scrollable'>
       <table>
         <thead>
           <th>Image</th>
@@ -395,5 +395,16 @@ export default {
 
   .status {
     padding: 0.5em;
+  }
+
+  .scrollable {
+    overflow-y: auto;
+    height: 75vh;
+    width: 100%;
+  }
+  table th{
+    position: sticky;
+    top: 0;
+    background-color: #eee;
   }
 </style>
