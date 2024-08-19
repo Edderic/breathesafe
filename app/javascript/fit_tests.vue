@@ -40,7 +40,9 @@
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QLFT"})'>
               <ColoredCell class='status' :text='f.qualitativeStatus' :backgroundColor='statusColor(f.qualitativeStatus)'/>
             </td>
-            <td class='status' @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QNFT"})'>{{f.quantitativeStatus}}</td>
+            <td class='status' @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QNFT"})'>
+              <ColoredCell class='status' :text='f.quantitativeStatus' :backgroundColor='quantitativeStatusColor(f.quantitativeStatus)'/>
+            </td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})'>
               <ColoredCell class='status' :text='f.comfortStatus' :backgroundColor='statusColor(f.comfortStatus)'/>
             </td>
@@ -62,7 +64,7 @@ import axios from 'axios';
 import Button from './button.vue'
 import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
-import { userSealCheckColorMapping } from './colors.js'
+import { userSealCheckColorMapping, genColorSchemeBounds, getColor, fitFactorColorScheme } from './colors.js'
 import ColoredCell from './colored_cell.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
@@ -140,6 +142,13 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    quantitativeStatusColor(status) {
+      let hmff;
+      if (status.includes("HMFF")) {
+        hmff = parseFloat(status.split(' ')[0])
+        return getColor(fitFactorColorScheme, hmff)
+      }
+    },
     statusColor(status) {
       let color = userSealCheckColorMapping[status]
       return `rgb(${color.r}, ${color.g}, ${color.b})`
