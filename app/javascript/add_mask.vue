@@ -32,7 +32,7 @@
               <th>Image URL</th>
               <td>
                 <input class='input-list' type="text" :value='imageUrl' @change="update($event, 'imageUrls', index)"
-                    v-show="createOrEdit"
+                    v-show="createOrEdit" placeholder="e.g. https://examplemask.com/mask1.jpg"
                 >
               </td>
               <td class='text-align-center' v-if='createOrEdit'>
@@ -82,7 +82,7 @@
             <tr>
               <th>Unique Internal Model Code</th>
               <td colspan=2>
-                <input class='full-width has-minimal-width' type="text" v-model='uniqueInternalModelCode' v-show="createOrEdit">
+                <input class='full-width has-minimal-width' type="text" v-model='uniqueInternalModelCode' v-show="createOrEdit" placeholder="e.g. Flo Mask Adults S/M Nose with Pro filter">
                 <span class='full-width has-minimal-width ' v-show="!createOrEdit">
                   {{uniqueInternalModelCode }}
                 </span>
@@ -92,7 +92,6 @@
             <tr>
               <th>Initial cost (US Dollars)</th>
               <td colspan=1 class='text-align-center'>
-
                 <input type="number"
                   v-model='initialCostUsDollars'
                   v-show="createOrEdit"
@@ -796,6 +795,12 @@ export default {
           str: "Please provide an image URL so one image can be displayed."
         })
       }
+
+      if (!this.uniqueInternalModelCode) {
+        this.errorMessages.push({
+          str: "Please provide a Unique Internal Model Code"
+        })
+      }
     },
     async loadMask() {
       await axios.get(
@@ -883,9 +888,11 @@ export default {
             // })
           })
           .catch(error => {
-            this.messages.push({
-              str: "Failed to update mask."
-            })
+            for(let errorMessage of error.response.data.messages) {
+              this.messages.push({
+                str: errorMessage
+              })
+            }
           })
       } else {
 
@@ -898,15 +905,23 @@ export default {
           .then(response => {
             let data = response.data
             // whatever you want
+            this.mode = 'View'
 
-            this.$router.push({
-              name: 'Masks',
-            })
+            this.$router.push(
+              {
+                name: 'ViewMask',
+                params: {
+                  id: data.mask.id
+                }
+              }
+            )
           })
           .catch(error => {
-            this.messages.push({
-              str: "Failed to create mask."
-            })
+            for(let errorMessage of error.response.data.messages) {
+              this.messages.push({
+                str: errorMessage
+              })
+            }
           })
       }
     },

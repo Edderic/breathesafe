@@ -4,27 +4,26 @@ class MasksController < ApplicationController
   def create
     if unauthorized?
       status = 401
-      message = "Unauthorized."
+      messages = ["Unauthorized."]
       mask = {}
     else
+      hashed_mask_data = mask_data.to_hash
+      hashed_mask_data[:author_id] = current_user.id
+      mask = Mask.create(hashed_mask_data)
 
-      mask = Mask.create(
-        mask_data
-      )
-
-      if mask
+      if mask.errors.full_messages.size == 0
         status = 201
-        message = ""
+        messages = []
       else
         status = 422
-        message = "Mask creation failed."
+        messages = mask.errors.full_messages
         mask = {}
       end
     end
 
     to_render = {
       mask: mask,
-      message: message
+      messages: messages
     }
 
     respond_to do |format|
@@ -40,11 +39,11 @@ class MasksController < ApplicationController
         Mask.all.to_json
       )
     }
-    message = ""
+    messages = []
 
     respond_to do |format|
       format.json do
-        render json: to_render.to_json, status: status, message: message
+        render json: to_render.to_json, status: status, messages: messages
       end
     end
   end
@@ -54,7 +53,7 @@ class MasksController < ApplicationController
     # Later on, parents should be able to view / edit their children's data
     unless current_user
       status = 401
-      message = "Unauthorized."
+      messages = ["Unauthorized."]
       to_render = {}
     else
       to_render = {
@@ -65,7 +64,7 @@ class MasksController < ApplicationController
 
     respond_to do |format|
       format.json do
-        render json: to_render.to_json, status: status, message: message
+        render json: to_render.to_json, status: status, messages: messages
       end
     end
   end
@@ -75,7 +74,7 @@ class MasksController < ApplicationController
     # Later on, parents should be able to view / edit their children's data
     unless current_user
       status = 401
-      message = "Unauthorized."
+      messages = ["Unauthorized."]
       to_render = {}
     end
 
@@ -86,20 +85,20 @@ class MasksController < ApplicationController
     if !mask.author_ids.include?(current_user.id)
       status = 401
       to_render = {}
-      message = 'Unauthorized.'
+      messages = 'Unauthorized.'
     elsif mask.update(mask_data)
       status = 204
       to_render = {}
-      message = ""
+      messages = ""
     else
       status = 400 # bad request
       to_render = {}
-      message = ""
+      messages = ""
     end
 
     respond_to do |format|
       format.json do
-        render json: to_render.to_json, status: status, message: message
+        render json: to_render.to_json, status: status, messages: messages
       end
     end
   end
@@ -109,7 +108,7 @@ class MasksController < ApplicationController
     # Later on, parents should be able to view / edit their children's data
     unless current_user
       status = 401
-      message = "Unauthorized."
+      messages = ["Unauthorized."]
       to_render = {}
     end
 
@@ -120,16 +119,16 @@ class MasksController < ApplicationController
     if !mask.author_ids.include?(current_user.id)
       status = 401
       to_render = {}
-      message = 'Unauthorized.'
+      messages = ['Unauthorized.']
     elsif mask.delete
       status = 200
       to_render = {}
-      message = ""
+      messages = []
     end
 
     respond_to do |format|
       format.json do
-        render json: to_render.to_json, status: status, message: message
+        render json: to_render.to_json, status: status, messages: messages
       end
     end
   end
