@@ -35,6 +35,10 @@
         <SearchIcon height='2em' width='2em'/>
       </div>
 
+      <h3 v-show="selectDisplayables.length == 0" class='text-align-center'>Not able to find the mask?
+        <router-link :to="{name: 'AddMask'}"> Click here to add information about the mask. </router-link>
+      </h3>
+
 
       <div :class='{main: true, grid: true, selectedMask: maskHasBeenSelected}'>
         <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in selectDisplayables' @click='selectMask(m.id)'>
