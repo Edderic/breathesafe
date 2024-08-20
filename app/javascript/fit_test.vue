@@ -271,6 +271,15 @@
             </tr>
 
             <tr v-show='quantitativeProcedure != "Skipping"'>
+              <th>Testing mode</th>
+              <td>
+                <select v-model='quantitativeTestingMode' :disabled='!createOrEdit'>
+                  <option>N99</option>
+                </select>
+              </td>
+            </tr>
+
+            <tr v-show='quantitativeProcedure != "Skipping"'>
               <th>Aerosol</th>
               <td>
                 <select v-model='quantitativeAerosolSolution' :disabled='!createOrEdit'>
@@ -397,6 +406,7 @@ export default {
       mode: 'View',
       initialCountPerCm3: null,
       quantitativeProcedure: null,
+      quantitativeTestingMode: 'N99',
       selectedPressureCheckOption: 'Positive',
       pressureCheckOptions: [
         {
@@ -887,8 +897,6 @@ export default {
         quantAerSolToSave = 'Ambient'
       }
 
-
-
       return {
         'qualitative': {
           'exercises': qualExerToSave,
@@ -899,6 +907,7 @@ export default {
           'notes': this.qualitativeNotes,
         },
         'quantitative': {
+          'testing_mode': this.quantitativeTestingMode,
           'exercises': quantExerToSave,
           'procedure': this.quantitativeProcedure,
           'aerosol': {
@@ -1100,6 +1109,7 @@ export default {
             this.qualitativeProcedure = results.qualitative.procedure
             this.qualitativeExercises = results.qualitative.exercises
 
+            this.quantitativeTestingMode = results.quantitative.testing_mode
             this.quantitativeExercises = results.quantitative.exercises
             this.quantitativeAerosolSolution = results.quantitative.aerosol.solution
             this.quantitativeNotes = results.quantitative.notes
@@ -1208,6 +1218,15 @@ export default {
         }
       }
     },
+    validatePresenceOfTestingMode() {
+      if (!this.quantitativeTestingMode) {
+        this.errorMessages.push(
+          {
+            str: `Please choose a QNFT testing mode.`
+          }
+        )
+      }
+    },
     validateQNFT(part) {
       if (!this.quantitativeProcedure) {
         this.errorMessages.push(
@@ -1222,6 +1241,7 @@ export default {
       if (this.quantitativeProcedure != 'Skipping') {
         this.validatePresenceOfInitialCountPerCM3()
         this.validateValueOfInitialCountPerCM3()
+        this.validatePresenceOfTestingMode()
       }
 
       if (this.quantitativeProcedure == 'Full OSHA' && this.secondaryTabToShow == 'Results') {
