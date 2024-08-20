@@ -24,7 +24,7 @@
           <th>Created at</th>
           <th>User Seal Check</th>
           <th>QLFT</th>
-          <th>QNFT</th>
+          <th>QNFT N99</th>
           <th>Comfort</th>
         </thead>
         <tbody>
