@@ -85,15 +85,15 @@ class MasksController < ApplicationController
     if !mask.author_ids.include?(current_user.id)
       status = 401
       to_render = {}
-      messages = 'Unauthorized.'
+      messages = ['Unauthorized.']
     elsif mask.update(mask_data)
       status = 204
       to_render = {}
-      messages = ""
+      messages = []
     else
       status = 400 # bad request
       to_render = {}
-      messages = ""
+      messages = []
     end
 
     respond_to do |format|
