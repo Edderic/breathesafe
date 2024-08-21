@@ -82,7 +82,7 @@ class MasksController < ApplicationController
 
 
     # TODO: admins should be able to update data no matter who owns it.
-    if !mask.author_ids.include?(current_user.id)
+    if mask.author_id != current_user.id
       status = 401
       to_render = {}
       messages = ['Unauthorized.']
@@ -116,7 +116,7 @@ class MasksController < ApplicationController
 
 
     # TODO: admins should be able to update data no matter who owns it.
-    if !mask.author_ids.include?(current_user.id)
+    if mask.author_id != current_user.id
       status = 401
       to_render = {}
       messages = ['Unauthorized.']
