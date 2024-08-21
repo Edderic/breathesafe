@@ -263,7 +263,7 @@
         <table v-if='tabToShow == "Filtration & Breathability" || mode=="Show"'>
           <tbody>
             <tr v-if='newOrEdit'>
-              <th>Filtration Efficiencies</th>
+              <th>Filtration &amp; Breathability</th>
               <td class='justify-content-center' colspan='1'>
                 <CircularButton text="+" @click="addFiltEffAndBreathability" v-if='newOrEdit'/>
               </td>
@@ -354,7 +354,7 @@
 
             <tr class='text-align-center'>
               <td colspan='2'>
-                <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='userCanEdit && editMode'/>
+                <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='userCanEdit && mode == "Edit"'/>
               </td>
             </tr>
           </tbody>
@@ -611,7 +611,7 @@ export default {
         return false
       }
 
-      return this.authorIds.includes(this.currentUser.id)
+      return this.authorId == this.currentUser.id
     },
     newOrEdit() {
       return (this.mode == 'New' || this.mode == 'Edit')
