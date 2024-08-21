@@ -439,10 +439,10 @@ export default {
       mode: 'New',
       notes: '',
       authorId: 0,
-      massGrams: 0,
-      widthMm: 0,
-      heightMm: 0,
-      depthMm: 0,
+      massGrams: null,
+      widthMm: null,
+      heightMm: null,
+      depthMm: null,
       tabToShow: "Basic Info",
       tabToShowOptions: [
         {
