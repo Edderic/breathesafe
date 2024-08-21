@@ -45,7 +45,7 @@ import FAQs from '../faqs.vue';
 import Disclaimer from '../disclaimer.vue';
 import Venues from '../map_events.vue'
 import Landing from '../landing.vue'
-import AddMask from '../add_mask.vue'
+import Mask from '../add_mask.vue'
 import FitTest from '../fit_test.vue'
 import FitTests from '../fit_tests.vue'
 import Masks from '../masks.vue'
@@ -73,8 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/', component: Landing, name: 'Landing' },
     { path: '/respirator_users', component: RespiratorUsers, name: 'RespiratorUsers' },
     { path: '/masks', component: Masks, name: 'Masks' },
-    { path: '/masks/new', component: AddMask, name: 'AddMask' },
-    { path: '/masks/:id', component: AddMask, name: 'ViewMask' },
+    { path: '/masks/new', component: Mask, name: 'NewMask' },
+    { path: '/masks/:id', component: Mask, name: 'ShowMask' },
+    { path: '/masks/:id/edit', component: Mask, name: 'EditMask' },
     { path: '/respirator_user/:id', component: RespiratorUser, name: 'RespiratorUser' },
     { path: '/fit_tests/new', component: FitTest, name: 'NewFitTest' },
     { path: '/fit_tests/:id', component: FitTest, name: 'EditFitTest' },

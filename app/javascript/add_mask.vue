@@ -10,32 +10,32 @@
       :options='tabToShowOptions'
       @update='setRouteTo'
       :tabToShow='tabToShow'
-        v-show='createOrEdit'
+        v-show='newOrEdit'
     />
 
     <div class='main'>
-      <div :class='{ grid: true, view: mode == "View"}'>
-        <table v-if='tabToShow == "Basic Info"'>
+      <div :class='{ grid: true, view: mode == "Show"}'>
+        <table v-if='tabToShow == "Image & Purchasing" || mode=="Show"'>
           <tbody>
             <tr>
               <td>
                 <h3>Image</h3>
               </td>
             </tr>
-            <tr v-if='createOrEdit'>
+            <tr v-if='newOrEdit'>
               <th>image URLs</th>
               <td class='justify-content-center' colspan=2>
                 <CircularButton text="+" @click="addImageUrl"/>
               </td>
             </tr>
-            <tr v-show='createOrEdit' v-for='(imageUrl, index) in imageUrls'>
+            <tr v-show='newOrEdit' v-for='(imageUrl, index) in imageUrls'>
               <th>Image URL</th>
               <td>
                 <input class='input-list' type="text" :value='imageUrl' @change="update($event, 'imageUrls', index)"
-                    v-show="createOrEdit" placeholder="e.g. https://examplemask.com/mask1.jpg"
+                    v-show="newOrEdit" placeholder="e.g. https://examplemask.com/mask1.jpg"
                 >
               </td>
-              <td class='text-align-center' v-if='createOrEdit'>
+              <td class='text-align-center' v-if='newOrEdit'>
                 <CircularButton text="x" @click="deleteImageUrl(index)" />
               </td>
             </tr>
@@ -47,10 +47,10 @@
             </tr>
 
 
-            <tr v-if='createOrEdit'>
+            <tr v-if='newOrEdit'>
               <th>Purchasing URLs</th>
               <td class='justify-content-center' colspan=2>
-                <CircularButton text="+" @click="addPurchasingUrl" v-if='createOrEdit'/>
+                <CircularButton text="+" @click="addPurchasingUrl" v-if='newOrEdit'/>
               </td>
             </tr>
             <tr>
@@ -60,9 +60,9 @@
             <tr v-for="(purchasingUrl, index) in whereToBuyUrls" class='text-align-center'>
               <td :colspan='whereToBuyUrlsColspan' >
                 <input class='input-list almost-full-width' type="text" :value='purchasingUrl' @change="update($event, 'whereToBuyUrls', index)"
-                    v-if="createOrEdit"
+                    v-if="newOrEdit"
                 >
-                <a :href="purchasingUrl" v-if="!createOrEdit">{{shortHand(purchasingUrl)}}</a>
+                <a :href="purchasingUrl" v-if="!newOrEdit">{{shortHand(purchasingUrl)}}</a>
               </td>
               <td>
                 <CircularButton text="x" @click="deletePurchasingUrl(index)" v-if='userCanEdit && editMode'/>
@@ -71,7 +71,7 @@
           </tbody>
 
         </table>
-        <table v-if='tabToShow == "Basic Info"'>
+        <table v-if='tabToShow == "Basic Info" || mode=="Show"'>
 
           <thead>
             <tr>
@@ -82,8 +82,8 @@
             <tr>
               <th>Unique Internal Model Code</th>
               <td colspan=2>
-                <input class='full-width has-minimal-width' type="text" v-model='uniqueInternalModelCode' v-show="createOrEdit" placeholder="e.g. Flo Mask Adults S/M Nose with Pro filter">
-                <span class='full-width has-minimal-width ' v-show="!createOrEdit">
+                <input class='full-width has-minimal-width' type="text" v-model='uniqueInternalModelCode' v-show="newOrEdit" placeholder="e.g. Flo Mask Adults S/M Nose with Pro filter">
+                <span class='full-width has-minimal-width ' v-show="!newOrEdit">
                   {{uniqueInternalModelCode }}
                 </span>
               </td>
@@ -94,11 +94,11 @@
               <td colspan=1 class='text-align-center'>
                 <input type="number"
                   v-model='initialCostUsDollars'
-                  v-show="createOrEdit"
+                  v-show="newOrEdit"
                 >
 
                 <ColoredCell
-                    v-show='!createOrEdit'
+                    v-show='!newOrEdit'
                     class='risk-score'
                     :colorScheme="costColorScheme"
                     :maxVal=1
@@ -116,7 +116,7 @@
               <td colspan=1 class='text-align-center'>
                 <select
                     v-model="filterType"
-                    v-show="createOrEdit"
+                    v-show="newOrEdit"
                     >
                     <option>cloth</option>
                     <option>surgical</option>
@@ -135,7 +135,7 @@
                     <option>PM2.5</option>
                 </select>
 
-                <span v-show='!createOrEdit'>{{filterType}}</span>
+                <span v-show='!newOrEdit'>{{filterType}}</span>
               </td>
             </tr>
             <tr>
@@ -143,7 +143,7 @@
               <td colspan='1' class='text-align-center'>
                 <select
                     v-model="style"
-                    v-show="createOrEdit"
+                    v-show="newOrEdit"
                     >
                     <option>Bifold</option>
                     <option>Bifold &amp; Gasket</option>
@@ -153,7 +153,7 @@
                     <option>Duckbill</option>
                     <option>Elastomeric</option>
                 </select>
-                <span v-show='!createOrEdit'>{{style}}</span>
+                <span v-show='!newOrEdit'>{{style}}</span>
               </td>
             </tr>
 
@@ -162,19 +162,19 @@
               <td colspan='1' class='text-align-center'>
                 <select
                     v-model="strapType"
-                    v-show="createOrEdit"
+                    v-show="newOrEdit"
                     >
                     <option>Earloop</option>
                     <option>Headstrap</option>
                 </select>
-                <span v-show='!createOrEdit'>{{strapType}}</span>
+                <span v-show='!newOrEdit'>{{strapType}}</span>
               </td>
             </tr>
 
             <tr>
               <th>Has exhalation valve</th>
-              <td v-show='!createOrEdit'>{{hasExhalationValve}}</td>
-              <td v-show="createOrEdit">
+              <td v-show='!newOrEdit'>{{hasExhalationValve}}</td>
+              <td v-show="newOrEdit">
                 <input type="text" v-model='hasExhalationValve'>
               </td>
             </tr>
@@ -182,7 +182,7 @@
           </tbody>
         </table>
 
-        <table v-if='tabToShow == "Basic Info"'>
+        <table v-if='tabToShow == "Dimensions" || mode=="Show"'>
           <thead>
             <tr>
               <th colspan=2><h3>Dimensions</h3></th>
@@ -192,10 +192,10 @@
             <tr>
               <th>Mass (grams)</th>
               <td>
-                <input type="number" v-model="massGrams" v-show="createOrEdit">
+                <input type="number" v-model="massGrams" v-show="newOrEdit">
 
                 <ColoredCell
-                    v-show='!createOrEdit'
+                    v-show='!newOrEdit'
                     class='risk-score'
                     :colorScheme="massColorScheme"
                     :maxVal=1
@@ -210,9 +210,9 @@
             <tr>
               <th>Height (mm)</th>
               <td>
-                <input type="number" v-model="heightMm" v-show="createOrEdit">
+                <input type="number" v-model="heightMm" v-show="newOrEdit">
                 <ColoredCell
-                    v-show='!createOrEdit'
+                    v-show='!newOrEdit'
                     class='risk-score'
                     :colorScheme="heightColorScheme"
                     :maxVal=1
@@ -227,9 +227,9 @@
             <tr>
               <th>Width (mm)</th>
               <td>
-                <input type="number" v-model="widthMm" v-show="createOrEdit">
+                <input type="number" v-model="widthMm" v-show="newOrEdit">
                 <ColoredCell
-                    v-show='!createOrEdit'
+                    v-show='!newOrEdit'
                     class='risk-score'
                     :colorScheme="widthColorScheme"
                     :maxVal=1
@@ -244,9 +244,9 @@
             <tr>
               <th>Depth (mm)</th>
               <td>
-                <input type="number" v-model="depthMm" v-show="createOrEdit">
+                <input type="number" v-model="depthMm" v-show="newOrEdit">
                 <ColoredCell
-                    v-show='!createOrEdit'
+                    v-show='!newOrEdit'
                     class='risk-score'
                     :colorScheme="depthColorScheme"
                     :maxVal=1
@@ -260,12 +260,12 @@
             </tr>
           </tbody>
         </table>
-        <table v-if='tabToShow == "Basic Info"'>
+        <table v-if='tabToShow == "Filtration & Breathability" || mode=="Show"'>
           <tbody>
-            <tr v-if='createOrEdit'>
+            <tr v-if='newOrEdit'>
               <th>Filtration Efficiencies</th>
               <td class='justify-content-center' colspan='1'>
-                <CircularButton text="+" @click="addFiltEffAndBreathability" v-if='createOrEdit'/>
+                <CircularButton text="+" @click="addFiltEffAndBreathability" v-if='newOrEdit'/>
               </td>
             </tr>
           </tbody>
@@ -277,17 +277,17 @@
               </td>
             </tr>
             <tr>
-              <th colspan='2' v-show='createOrEdit'>Filtration Efficiency (Percent)</th>
-              <th colspan='2' v-show='!createOrEdit'>Filtration Efficiency</th>
+              <th colspan='2' v-show='newOrEdit'>Filtration Efficiency (Percent)</th>
+              <th colspan='2' v-show='!newOrEdit'>Filtration Efficiency</th>
             </tr>
 
             <tr>
               <td colspan='2'>
                 <input type="number" :value='f.filtrationEfficiencyPercent' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyPercent')"
-                       v-show="createOrEdit"
+                       v-show="newOrEdit"
                        >
                        <ColoredCell
-                           v-show='!createOrEdit'
+                           v-show='!newOrEdit'
                            class='risk-score'
                            :colorScheme="colorInterpolationScheme"
                            :maxVal=1
@@ -301,18 +301,18 @@
             </tr>
 
             <tr>
-              <th colspan='2' v-show='createOrEdit'>Breathability (Pa)</th>
-              <th colspan='2' v-show='!createOrEdit'>Breathability</th>
+              <th colspan='2' v-show='newOrEdit'>Breathability (Pa)</th>
+              <th colspan='2' v-show='!newOrEdit'>Breathability</th>
             </tr>
 
             <tr>
               <td colspan='2'>
                 <input type="number" :value='breathability[index].breathabilityPascals' @change="updateArrayOfObj($event, 'breathability', index, 'breathabilityPascals')"
-                       v-show="createOrEdit"
+                       v-show="newOrEdit"
                        >
                        <ColoredCell
                            class='risk-score'
-                           v-show='!createOrEdit'
+                           v-show='!newOrEdit'
                            :colorScheme="breathabilityInterpolationScheme"
                            :maxVal=1
                            :value='breathability[index].breathabilityPascals'
@@ -334,9 +334,9 @@
                        :value='f.filtrationEfficiencySource'
                        @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencySource')"
 
-                       v-show="createOrEdit"
+                       v-show="newOrEdit"
                        >
-                       <a v-show='!createOrEdit' :href="f.filtrationEfficiencySource">link</a>
+                       <a v-show='!newOrEdit' :href="f.filtrationEfficiencySource">link</a>
               </td>
 
             </tr>
@@ -346,8 +346,8 @@
             </tr>
 
             <tr>
-              <td colspan='2' class='notes' v-show='!createOrEdit'>{{f.filtrationEfficiencyNotes}}</td>
-              <td colspan='2' v-show='createOrEdit'>
+              <td colspan='2' class='notes' v-show='!newOrEdit'>{{f.filtrationEfficiencyNotes}}</td>
+              <td colspan='2' v-show='newOrEdit'>
                 <textarea cols="30" rows="10" @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyNotes')"></textarea>
               </td>
             </tr>
@@ -368,11 +368,11 @@
       </table>
       <br>
 
-      <div class="row">
-        <Button class='button' text="Edit" @click='editMode = true' v-if='!editMode && userCanEdit'/>
-        <Button class='button' text="Delete" @click='deleteMask' v-if='deletable && editMode'/>
-        <Button class='button' text="Save" @click='saveMask' v-if='createOrEdit && editMode'/>
-        <Button class='button' text="Cancel" @click='handleCancel' v-if='createOrEdit && editMode'/>
+      <div class="row justify-content-center">
+        <Button class='button' text="Edit" @click='mode = "Edit"' v-if='mode == "Show"'/>
+        <Button class='button' text="Delete" @click='deleteMask' v-if='deletable && (mode == "Show")'/>
+        <Button class='button' text="Save" @click='saveMask' v-if='mode == "New" || mode == "Edit"'/>
+        <Button class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New" || mode == "Edit")'/>
       </div>
       <br>
       <br>
@@ -397,7 +397,7 @@ import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 
 export default {
-  name: 'AddMask',
+  name: 'Mask',
   components: {
     Button,
     CircularButton,
@@ -436,7 +436,9 @@ export default {
         value: 0,
         text: '?'
       },
+      mode: 'New',
       notes: '',
+      authorId: 0,
       massGrams: 0,
       widthMm: 0,
       heightMm: 0,
@@ -445,6 +447,15 @@ export default {
       tabToShowOptions: [
         {
           text: "Basic Info",
+        },
+        {
+          text: "Image & Purchasing",
+        },
+        {
+          text: "Dimensions",
+        },
+        {
+          text: "Filtration & Breathability",
         },
       ],
       initialCostUsDollars: 0,
@@ -602,19 +613,8 @@ export default {
 
       return this.authorIds.includes(this.currentUser.id)
     },
-    mode() {
-      if (this.$route.params.id) {
-        if (this.userCanEdit && this.editMode) {
-          return 'Edit'
-        } else {
-          return 'View'
-        }
-      } else {
-        return 'Create'
-      }
-    },
-    createOrEdit() {
-      return (this.mode == 'Create' || this.mode == 'Edit') && this.editMode
+    newOrEdit() {
+      return (this.mode == 'New' || this.mode == 'Edit')
     },
     tagline() {
       return `${this.mode} Mask`
@@ -650,21 +650,39 @@ export default {
     if (!this.currentUser) {
       signIn.call(this)
     }
-    if (this.$route.params.id) {
+    if (this.$route.name == 'NewMask') {
+      this.mode = 'New'
+    } else if (this.$route.name == 'ShowMask') {
+      this.mode = 'Show'
+    } else if (this.$route.name == 'EditMask')
+      this.mode = 'Edit'
+
+    if (['Edit', 'Show'].includes(this.mode)) {
       this.loadMask()
-    } else {
-      // must be in creation mode
-      this.editMode = true
     }
 
-    // TODO: this should only be done when created
-    this.authorIds = [this.currentUser.id]
+    let toQuery = this.$route.query
 
+    if (toQuery['tabToShow'] && (["NewMask", "ShowMask", "EditMask"].includes(this.$route.name))) {
+      this.tabToShow = toQuery['tabToShow']
+    }
 
+    this.$watch(
+      () => this.$route.name,
+      (toName, fromName) => {
+        if (toName == "NewMask") {
+          this.mode = 'New'
+        } else if (toName == "ShowMask") {
+          this.mode = 'Show'
+        } else if (toName == 'EditMask') {
+          this.mode = 'Edit'
+        }
+      }
+    )
     this.$watch(
       () => this.$route.query,
       (toQuery, fromQuery) => {
-        if (toQuery['tabToShow'] && (["AddMask", "ViewMask"].includes(this.$route.name))) {
+        if (toQuery['tabToShow'] && (["NewMask", "ShowMask", "EditMask"].includes(this.$route.name))) {
           this.tabToShow = toQuery['tabToShow']
         }
       }
@@ -758,22 +776,23 @@ export default {
       this.whereToBuyUrls.splice(index, 1);
     },
     handleCancel() {
-      if (this.mode == 'Create') {
+      if (this.mode == 'New') {
         this.$router.push(
           {
             name: "Masks"
           }
         )
       } else {
-        this.editMode = false
+        this.mode = 'Show'
       }
     },
     newMask() {
       this.$router.push(
         {
-          name: "AddMask"
+          name: "NewMask"
         }
       )
+
       this.masks.push(
         {
           unique_internal_model_code: '',
@@ -811,6 +830,7 @@ export default {
           // whatever you want
           let mask = deepSnakeToCamel(data.mask)
           let items = [
+            'authorId',
             'authorIds',
             'breathability',
             'depthMm',
@@ -871,7 +891,9 @@ export default {
         return;
       }
 
-      if (this.$route.params.id) {
+      let maskId = this.$route.params.id;
+
+      if (maskId) {
 
         await axios.put(
           `/masks/${this.$route.params.id}.json`, {
@@ -882,10 +904,15 @@ export default {
             let data = response.data
             // whatever you want
 
-            this.mode = 'View'
-            // this.$router.push({
-              // name: 'Masks',
-            // })
+            this.$router.push({
+              name: 'ShowMask',
+              params: {
+                id: maskId
+              }
+            })
+
+            debugger
+            this.mode = 'Show'
           })
           .catch(error => {
             for(let errorMessage of error.response.data.messages) {
@@ -905,16 +932,16 @@ export default {
           .then(response => {
             let data = response.data
             // whatever you want
-            this.mode = 'View'
-
             this.$router.push(
               {
-                name: 'ViewMask',
+                name: 'ShowMask',
                 params: {
                   id: data.mask.id
                 }
               }
             )
+
+            this.mode = 'Show'
           })
           .catch(error => {
             for(let errorMessage of error.response.data.messages) {
@@ -1017,6 +1044,7 @@ export default {
   .row .button {
     width: 100%;
     margin: 1em;
+    max-width: 10em;
   }
 
   .risk-score {

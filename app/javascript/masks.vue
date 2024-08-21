@@ -120,14 +120,14 @@ export default {
     newMask() {
       this.$router.push(
         {
-          name: "AddMask"
+          name: "NewMask"
         }
       )
     },
     viewMask(id) {
       this.$router.push(
         {
-          name: "ViewMask",
+          name: "ShowMask",
           params: {
             id: id
           }
@@ -174,6 +174,11 @@ export default {
 
   .card {
     padding: 1em 0;
+  }
+
+  .card:hover {
+    cursor: pointer;
+    background-color: rgb(230,230,230);
   }
 
   .card .description {
