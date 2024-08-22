@@ -2,6 +2,7 @@
   <div class='footer row'>
     <router-link class='link' :to="{'name': 'TermsOfService'}">Terms of Service</router-link>
     <router-link class='link' :to="{'name': 'PrivacyPolicy'}">Privacy Policy</router-link>
+    <router-link class='link' :to="{'name': 'ConsentForm'}">Consent Form</router-link>
   </div>
 </template>
 
