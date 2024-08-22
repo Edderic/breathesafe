@@ -269,7 +269,9 @@
         disclose / too small sample size" group.
         </p>
 
-        <p>This study may go on indefinitely. If for any reason you want your data deleted, you may do so. See data deletion section above.</p>
+        <p>This study may go on indefinitely. If for any reason you want your data deleted, you may do so. See
+<router-link :to="tocPath('leave-study')"> Can participants choose to leave the study?</router-link>
+        section above for details.</p>
 
         <div id='compensation'>
           <br>
@@ -290,9 +292,9 @@
 
         <p>Your participation in this study is voluntary. You may decide not to
         be in this study. Even if you consent to participate, you have the
-        right to withdraw and delete your data at any time. See the <router-link :to="tocPath('leave-study')">
-        Can participants choose to leave the study?
-      </router-link> section for details.
+        right to withdraw and delete your data at any time. See the
+
+        <router-link :to="tocPath('leave-study')">Can participants choose to leave the study?</router-link> section for details.
 </p>
 
         <div id='reach-out'>
