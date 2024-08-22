@@ -41,6 +41,7 @@ import Vue3Geolocation from 'vue3-geolocation';
 import Analytics from '../analytics.vue'
 import App from '../app.vue';
 import AddMeasurements from '../add_measurements.vue';
+import ConsentForm from '../consent_form.vue'
 import FAQs from '../faqs.vue';
 import Disclaimer from '../disclaimer.vue';
 import Venues from '../map_events.vue'
@@ -90,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/faqs', component: FAQs, name: 'FAQs' },
     { path: '/disclaimer', component: Disclaimer, name: 'Disclaimer' },
     { path: '/terms_of_service', component: TermsOfService, name: 'TermsOfService' },
+    { path: '/consent_form', component: ConsentForm, name: 'ConsentForm' },
     { path: '/privacy', component: PrivacyPolicy, name: 'PrivacyPolicy' },
   ]
 
