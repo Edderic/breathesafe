@@ -37,7 +37,7 @@
         type="checkbox"
       >
 
-      By signing up, you agree to our <router-link :to="{'name': 'TermsOfService'}">Terms of Service</router-link>, <router-link :to="{'name': 'Disclaimer'}">Disclaimer</router-link>
+      By signing up, you agree to our <router-link :to="{'name': 'TermsOfService'}">Terms of Service</router-link>, <router-link :to="{'name': 'ConsentForm'}">Consent form</router-link>, <router-link :to="{'name': 'Disclaimer'}">Disclaimer</router-link>
       </div>
 
 
