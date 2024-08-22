@@ -40,8 +40,8 @@
         What are the benefits of participating in this study?
       </router-link>
 
-      <router-link :to="tocPath('benefits')">
-        What are the benefits of participating in this study?
+      <router-link :to="tocPath('confidentiality')">
+        How will participants' information be kept confidential?
       </router-link>
 
       <router-link :to="tocPath('compensation')">
