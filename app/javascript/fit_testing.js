@@ -31,6 +31,10 @@ export class FitTest {
     }
   }
 
+  get quantitativeTestingMode() {
+    return this.quantitative.testing_mode;
+  }
+
   get shortHandCreatedAt() {
     return shorthandDate(this.createdAt)
   }
@@ -195,6 +199,6 @@ export class FitTest {
       return 'Incomplete'
     }
 
-    return `${round(fitFactorCount / fitFactorsInverted, 1)} HMFF`
+    return `${round(fitFactorCount / fitFactorsInverted, 1)} (${this.quantitativeTestingMode})`
   }
 };

@@ -150,6 +150,7 @@ class FitTestsController < ApplicationController
       results: [
         quantitative: [
           'procedure',
+          'testing_mode',
           'notes',
           aerosol: [
             :solution,

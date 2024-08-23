@@ -278,6 +278,7 @@
               <th>Testing mode</th>
               <td>
                 <select v-model='quantitativeTestingMode' :disabled='!createOrEdit'>
+                  <option>N95</option>
                   <option>N99</option>
                 </select>
               </td>

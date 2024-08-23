@@ -24,7 +24,7 @@
           <th>Created at</th>
           <th>User Seal Check</th>
           <th>QLFT</th>
-          <th>QNFT N99</th>
+          <th>QNFT HMFF</th>
           <th>Comfort</th>
         </thead>
         <tbody>
@@ -144,7 +144,7 @@ export default {
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     quantitativeStatusColor(status) {
       let hmff;
-      if (status.includes("HMFF")) {
+      if (status.includes("N")) {
         hmff = parseFloat(status.split(' ')[0])
         return getColor(fitFactorColorScheme, hmff)
       }
