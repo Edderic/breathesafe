@@ -63,7 +63,7 @@
 
     <div v-show='tabToShow == "Facial Hair"'>
 
-      <p class='narrow-p'>Facial hair in between the facepiece and the face (e.g. beard) can increase seal leakage. If you don't have facial hair, please select "0mm" for the following question. If you do have a beard, please use a caliper or tape measure to estimate beard length.</p>
+      <p class='narrow-p'>Having a beard can increase seal leakage. If you don't have one, please select "0mm" for the following question. If you do have one, please use a caliper or tape measure to estimate beard length.</p>
 
       <SurveyQuestion
         question="How long is your beard?"
