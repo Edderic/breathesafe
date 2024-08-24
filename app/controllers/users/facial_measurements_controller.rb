@@ -45,7 +45,7 @@ class Users::FacialMeasurementsController < ApplicationController
       }
     else
       to_render = {
-        facial_measurements: JSON.parse(FacialMeasurement.where(user_id: current_user.id).to_json)
+        facial_measurements: JSON.parse(FacialMeasurement.where(user_id: current_user.id).to_json),
         messages: []
       }
     end
