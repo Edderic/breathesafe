@@ -29,23 +29,23 @@ class Users::ProfilesController < ApplicationController
   def create
     if unauthorized?
       status = 401
-      message = "Unauthorized."
+      messages = ["Unauthorized."]
     else
       measurement_system = "imperial"
       profile = Profile.create(user: current_user, measurement_system: measurement_system)
 
-      if profile
-        status = 201
-        message = ""
-      else
+      if profile.errors.full_messages.size > 0
         status = 422
-        message = "Profile creation failed."
+        messages = profile.errors.full_messages
+      else
+        status = 201
+        messages = []
       end
     end
 
     to_render = {
       profile: profile,
-      message: message
+      messages: messages
     }
 
     respond_to do |format|
@@ -64,16 +64,16 @@ class Users::ProfilesController < ApplicationController
       status = 200
 
       if profile.update(profile_data)
-        message = "Successfully updated."
+        messages = []
       else
-        message = "Did not update."
+        messages = ["Did not update."]
         status = 422
       end
     end
 
     to_render = {
       profile: profile,
-      message: message
+      messages: messages
     }
 
     respond_to do |format|
