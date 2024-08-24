@@ -560,8 +560,12 @@ export default {
           // whatever you want
         })
         .catch(error => {
-          this.message = "Failed to load profile."
-          // whatever you want
+          for(let errorMessage of error.response.data.messages) {
+            this.messages.push({
+              str: errorMessage
+            })
+          }
+        // whatever you want
         })
     },
     async saveProfile(tabToShow) {
@@ -681,6 +685,10 @@ export default {
 
   .justify-items-center {
     justify-items: center;
+  }
+
+  .justify-content-center {
+    justify-content: center;
   }
 
   .menu {

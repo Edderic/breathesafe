@@ -18,7 +18,7 @@ export const useMainStore = defineStore('main', {
     focusSubTab: "Analytics",
     signedIn: false,
     currentUser: undefined,
-    message: '',
+    messages: [],
     whereabouts: {lat: 51.093048, lng: 6.842120},
   }),
   getters: {
@@ -31,6 +31,13 @@ export const useMainStore = defineStore('main', {
     }
   },
   actions: {
+    addMessages(ms) {
+      for(let m of ms) {
+        this.messages.push({
+          str: m
+        })
+      }
+    },
     centerMapTo(id) {
       this.openedMarkerId = id
 
