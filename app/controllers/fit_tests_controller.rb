@@ -147,6 +147,10 @@ class FitTestsController < ApplicationController
     params.require(:fit_test).permit(
       :fit_test_id,
       :mask_id,
+      facial_hair: [
+        :beard_length_mm,
+
+      ]
       results: [
         quantitative: [
           'procedure',

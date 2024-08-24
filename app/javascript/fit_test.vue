@@ -61,6 +61,18 @@
       </table>
     </div>
 
+    <div v-show='tabToShow == "Facial Hair"'>
+
+      <SurveyQuestion
+        question="How long is your beard? (Choose 0mm if you do not have one.)"
+        :answer_options="beardLengthOptions"
+        @update="selectBeardLength"
+        :selected="facialHair['beard_length_mm']"
+        :disabled="!createOrEdit"
+      />
+
+    </div>
+
     <div v-show='tabToShow == "Comfort"' class='justify-content-center flex-dir-col'>
       <table>
         <tbody>
@@ -412,6 +424,13 @@ export default {
       initialCountPerCm3: null,
       quantitativeProcedure: null,
       quantitativeTestingMode: 'N99',
+      facialHair:
+        beard_length_mm: '0mm',
+      },
+      facialHairLengthMm: 'N99',
+      beardLengthOptions: [
+        '0mm', '1.5mm', '3mm', '6mm', '9mm', '>10mm'
+      ],
       selectedPressureCheckOption: 'Positive',
       pressureCheckOptions: [
         {
@@ -434,6 +453,9 @@ export default {
       tabToShowOptions: [
         {
           text: "Mask",
+        },
+        {
+          text: "Facial Hair"
         },
         {
           text: "User Seal Check"
@@ -929,6 +951,7 @@ export default {
         mask_id: this.selectedMask.id,
         user_seal_check: this.userSealCheck,
         results: this.results,
+        facial_hair: this.facial_hair
       }
     },
     createOrEdit() {
@@ -1107,6 +1130,7 @@ export default {
             this.selectMask(fitTestData.mask_id)
             this.comfort = fitTestData.comfort
             this.userSealCheck = fitTestData.user_seal_check
+            this.facialHair = fitTestData.facial_hair
             let results = fitTestData.results
 
             this.qualitativeAerosolSolution = results.qualitative.aerosol.solution
@@ -1537,6 +1561,9 @@ export default {
     },
     selectNegativePressure(value) {
       this['userSealCheck']['While performing a negative user seal check, did you notice any leakage?'] = value
+    },
+    selectBeardLength(value) {
+      this['facialHair']['beard_length'] = value
     },
     selectComfortNose(value) {
       this['comfort']['How comfortable is the position of the mask on the nose?'] = value
