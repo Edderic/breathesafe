@@ -36,6 +36,7 @@
               <input
                   type='text'
                   v-model='firstName'
+                  :disabled='mode == "View"'
               >
             </td>
           </tr>
@@ -45,6 +46,7 @@
               <input
                   type='text'
                   v-model='lastName'
+                  :disabled='mode == "View"'
               >
             </td>
           </tr>
@@ -53,7 +55,12 @@
 
       <br>
 
-      <Button text="Save and continue" @click='saveProfile("Demographics")'/>
+      <div class='row'>
+        <Button class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+        <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-if='mode == "View"'/>
+
+        <Button class='button' text="Save and Continue" @click='saveProfile("Demographics")' v-if='mode != "View"'/>
+      </div>
     </div>
 
     <div class='main' v-if='tabToShow=="Demographics"'>
@@ -68,20 +75,28 @@
         :answer_options="race_ethnicity_options"
         @update="selectRaceEthnicity"
         :selected="raceEthnicity"
+        :disabled='mode == "View"'
       />
       <SurveyQuestion
         :question="genderSexQuestion"
         :answer_options="gender_and_sex_options"
         @update="selectGenderAndSex"
         :selected="genderAndSex"
+        :disabled='mode == "View"'
       />
       <div>
-        <input class='text-for-other' type="text" v-model='otherGender'>
+        <input class='text-for-other' type="text" v-model='otherGender'
+        :disabled='mode == "View"'
+        >
       </div>
 
       <br>
 
-      <Button text="Save and continue" @click='saveProfile("FacialMeasurements")'/>
+      <div class='row justify-content-center'>
+        <Button class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+        <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-if='mode == "View"'/>
+        <Button text="Save and continue" @click='saveProfile("FacialMeasurements")' v-if='mode != "View"'/>
+      </div>
     </div>
 
     <div class="edit-facial-measurements" v-if='tabToShow=="FacialMeasurements"'>
@@ -337,6 +352,7 @@ export default {
   data() {
     return {
       errorMessages: [],
+      mode: 'Edit',
       cheekFullnessExample: 'Hallow/gaunt',
       noseBridgeHeightExample: 'Low',
       noseBridgeHeightOptions: [
