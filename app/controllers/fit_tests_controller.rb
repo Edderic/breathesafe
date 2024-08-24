@@ -149,8 +149,8 @@ class FitTestsController < ApplicationController
       :mask_id,
       facial_hair: [
         :beard_length_mm,
-
-      ]
+        :beard_cover_technique
+      ],
       results: [
         quantitative: [
           'procedure',
@@ -193,10 +193,6 @@ class FitTestsController < ApplicationController
         "Is there enough room to talk?",
         "How comfortable is the position of the mask on face and cheeks?"
       ],
-      facial_hair: [
-      ],
-      protection_factors: [
-      ]
     )
   end
 end

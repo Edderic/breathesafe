@@ -73,14 +73,14 @@
         :disabled="!createOrEdit"
       />
 
-      <p class='narrow-p'>To improve the seal for those with beards without shaving or trimming the beard itself, one could cover the beard with an elastic band, as shown <a href="https://www.youtube.com/watch?v=pBMSydda5WY">in this video</a>.
+      <p class='narrow-p'>Beard Cover Technique: To improve the seal for those with beards without shaving or trimming the beard itself, one could cover the beard with an elastic band, as shown <a href="https://www.youtube.com/watch?v=pBMSydda5WY">in this video</a>.
       </p>
 
       <SurveyQuestion
         question="If you do have a beard, are you using the beard cover technique?"
         :answer_options="['Yes', 'No', 'Not applicable']"
-        @update="selectBeardLength"
-        :selected="facialHair['beard_length_mm']"
+        @update="selectBeardCoverTechnique"
+        :selected="facialHair['beard_cover_technique']"
         :disabled="!createOrEdit"
       />
     </div>
@@ -438,7 +438,7 @@ export default {
       quantitativeTestingMode: 'N99',
       facialHair: {
         beard_length_mm: '0mm',
-        beard_cover_technique: 'no',
+        beard_cover_technique: 'No',
       },
       beardLengthOptions: [
         '0mm', '1.5mm', '3mm', '6mm', '9mm', '>10mm'
@@ -963,7 +963,7 @@ export default {
         mask_id: this.selectedMask.id,
         user_seal_check: this.userSealCheck,
         results: this.results,
-        facial_hair: this.facial_hair
+        facial_hair: this.facialHair
       }
     },
     createOrEdit() {
@@ -1143,6 +1143,13 @@ export default {
             this.comfort = fitTestData.comfort
             this.userSealCheck = fitTestData.user_seal_check
             this.facialHair = fitTestData.facial_hair
+            if (!this.facialHair) {
+              this.facialHair = {
+                beard_length_mm: '0mm',
+                beard_cover_technique: 'No',
+              }
+            }
+
             let results = fitTestData.results
 
             this.qualitativeAerosolSolution = results.qualitative.aerosol.solution
@@ -1378,7 +1385,7 @@ export default {
                 id: this.id
               },
               query: {
-                tabToShow: 'User Seal Check'
+                tabToShow: 'Facial Hair'
               },
               force: true
             })
@@ -1400,13 +1407,25 @@ export default {
 
         if (this.errorMessages.length == 0) {
           await this.saveFitTest({
-            tabToShow: 'User Seal Check'
+            tabToShow: 'Facial Hair'
           })
         } else {
           return
         }
 
         return
+      }
+
+      else if (this.tabToShow == 'Facial Hair') {
+        this.validateMask()
+
+        if (this.errorMessages.length == 0) {
+          await this.saveFitTest({
+            tabToShow: 'User Seal Check'
+          })
+        } else {
+          return
+        }
       }
 
       else if (this.tabToShow == 'User Seal Check') {
