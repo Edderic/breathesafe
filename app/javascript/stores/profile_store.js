@@ -70,6 +70,9 @@ export const useProfileStore = defineStore('profile', {
   },
   actions: {
     async loadFacialMeasurements(userId) {
+
+      let mainStore = useMainStore()
+
       await axios.get(
         `/users/${userId}/facial_measurements.json`,
       )
@@ -82,10 +85,7 @@ export const useProfileStore = defineStore('profile', {
           }
         })
         .catch(error => {
-          this.messages.push({
-            str: "Failed to load facial measurements."
-          })
-          // whatever you want
+          mainStore.addMessages(error.response.data.messages)
         })
 
     },
@@ -99,7 +99,10 @@ export const useProfileStore = defineStore('profile', {
       let hasProfile = false
 
       if (!currentUser) {
-        this.message = "No current user found. Using defaults."
+        mainStore.addMessages([
+          "No current user found. Using defaults."
+        ])
+
         this.systemOfMeasurement = "imperial"
         this.measurementUnits = getMeasurementUnits(this.systemOfMeasurement)
 
@@ -134,7 +137,7 @@ export const useProfileStore = defineStore('profile', {
           // whatever you want
         })
         .catch(error => {
-          this.message = "Failed to load profile."
+          mainStore.addMessages(error.response.data.messages)
           // whatever you want
         })
 
@@ -165,11 +168,10 @@ export const useProfileStore = defineStore('profile', {
         toSave
       )
         .then(response => {
-          this.message = data.message
           // whatever you want
         })
         .catch(error => {
-          this.message = "Failed to load profile."
+          mainStore.addMessages(error.response.data.messages)
           // whatever you want
         })
     },
@@ -199,11 +201,11 @@ export const useProfileStore = defineStore('profile', {
         toSave
       )
         .then(response => {
-          this.message = response.data.message
+          mainStore.addMessages(response.data.messages)
           this.status = 'saved'
         })
         .catch(error => {
-          this.message = "Failed to load profile."
+          mainStore.addMessages(error.response.data.messages)
           // whatever you want
         })
     },
@@ -229,7 +231,7 @@ export const useProfileStore = defineStore('profile', {
         })
         .catch(error => {
           console.log(error)
-          this.message = "Failed to load carbon dioxide monitors."
+          mainStore.addMessages(error.response.data.messages)
           // whatever you want
         })
     },
@@ -260,7 +262,7 @@ export const useProfileStore = defineStore('profile', {
           }
         })
         .catch(error => {
-          mainStore.setMessage(error)
+          mainStore.addMessages(error.response.data.messages)
           // whatever you want
         })
     }
