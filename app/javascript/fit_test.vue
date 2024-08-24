@@ -1,5 +1,5 @@
 <template>
-  <div class='align-items-center flex-dir-col'>
+  <div class='align-items-center flex-dir-col top-container'>
     <div class='flex align-items-center row'>
       <h2 class='tagline'>{{pageTitle}}</h2>
     </div>
@@ -63,14 +63,26 @@
 
     <div v-show='tabToShow == "Facial Hair"'>
 
+      <p class='narrow-p'>Facial hair in between the facepiece and the face (e.g. beard) can increase seal leakage. If you don't have facial hair, please select "0mm" for the following question. If you do have a beard, please use a caliper or tape measure to estimate beard length.</p>
+
       <SurveyQuestion
-        question="How long is your beard? (Choose 0mm if you do not have one.)"
+        question="How long is your beard?"
         :answer_options="beardLengthOptions"
         @update="selectBeardLength"
         :selected="facialHair['beard_length_mm']"
         :disabled="!createOrEdit"
       />
 
+      <p class='narrow-p'>To improve the seal for those with beards without shaving or trimming the beard itself, one could cover the beard with an elastic band, as shown <a href="https://www.youtube.com/watch?v=pBMSydda5WY">in this video</a>.
+      </p>
+
+      <SurveyQuestion
+        question="If you do have a beard, are you using the beard cover technique?"
+        :answer_options="['Yes', 'No', 'Not applicable']"
+        @update="selectBeardLength"
+        :selected="facialHair['beard_length_mm']"
+        :disabled="!createOrEdit"
+      />
     </div>
 
     <div v-show='tabToShow == "Comfort"' class='justify-content-center flex-dir-col'>
@@ -424,10 +436,10 @@ export default {
       initialCountPerCm3: null,
       quantitativeProcedure: null,
       quantitativeTestingMode: 'N99',
-      facialHair:
+      facialHair: {
         beard_length_mm: '0mm',
+        beard_cover_technique: 'no',
       },
-      facialHairLengthMm: 'N99',
       beardLengthOptions: [
         '0mm', '1.5mm', '3mm', '6mm', '9mm', '>10mm'
       ],
@@ -1563,7 +1575,10 @@ export default {
       this['userSealCheck']['While performing a negative user seal check, did you notice any leakage?'] = value
     },
     selectBeardLength(value) {
-      this['facialHair']['beard_length'] = value
+      this['facialHair']['beard_length_mm'] = value
+    },
+    selectBeardCoverTechnique(value) {
+      this['facialHair']['beard_cover_technique'] = value
     },
     selectComfortNose(value) {
       this['comfort']['How comfortable is the position of the mask on the nose?'] = value
@@ -1667,7 +1682,6 @@ export default {
   }
   p {
 
-    margin: 1em;
   }
 
   select {
@@ -1805,5 +1819,10 @@ export default {
 
   input[type='number'] {
     width: 6em;
+  }
+
+  .top-container > div {
+    padding-left: 1em;
+    padding-right: 1em;
   }
 </style>
