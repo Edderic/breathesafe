@@ -4,7 +4,7 @@ class Users::FacialMeasurementsController < ApplicationController
   def create
     if unauthorized?
       status = 401
-      message = "Unauthorized."
+      messages = ["Unauthorized."]
       facial_measurement = {}
     else
 
@@ -12,19 +12,19 @@ class Users::FacialMeasurementsController < ApplicationController
         facial_measurement_data
       )
 
-      if facial_measurement
-        status = 201
-        message = ""
-      else
+      if facial_measurement.errors.full_messages
         status = 422
-        message = "Facial measurement creation failed."
+        messages = facial_measurement.errors.full_messages
+      else
+        status = 201
+        messages = []
         facial_measurement = {}
       end
     end
 
     to_render = {
       facial_measurement: facial_measurement,
-      message: message
+      messages: messages
     }
 
     respond_to do |format|
@@ -39,18 +39,21 @@ class Users::FacialMeasurementsController < ApplicationController
     # Later on, parents should be able to view / edit their children's data
     unless current_user
       status = 401
-      message = "Unauthorized."
-      to_render = {}
+      messages = ["Unauthorized."]
+      to_render = {
+        messages: messages
+      }
     else
       to_render = {
         facial_measurements: JSON.parse(FacialMeasurement.where(user_id: current_user.id).to_json)
+        messages: []
       }
     end
 
 
     respond_to do |format|
       format.json do
-        render json: to_render.to_json, status: status, message: message
+        render json: to_render.to_json, status: status
       end
     end
   end
