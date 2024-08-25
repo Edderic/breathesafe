@@ -740,7 +740,7 @@ export default {
   }
 
   input[type='number'] {
-    min-width: 2em;
+    max-width: 2.5em;
     font-size: 24px;
     padding-left: 0.25em;
     padding-right: 0.25em;
@@ -879,4 +879,5 @@ export default {
       flex-direction: column;
     }
   }
+
 </style>
