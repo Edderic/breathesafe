@@ -21,6 +21,13 @@
         :tabToShow='tabToShow'
       />
     </div>
+    <div class='menu row' v-show="tabToShow == 'Facial Measurements' && mode != 'View'">
+      <TabSet
+        :options='facialMeasurementParts'
+        @update='setSecondaryRouteTo'
+        :tabToShow='secondaryTab'
+      />
+    </div>
 
     <div class='main justify-items-center' v-if='tabToShow=="Name"'>
       <p class='narrow-p '>
@@ -119,7 +126,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
               <th>
                 <label for="source">Source</label>
               </th>
@@ -133,7 +140,7 @@
                 </select>
               </td>
             </tr>
-            <tr>
+            <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
               <th>
                 <label for="faceWidth">Face Width <b>(B)</b> (mm) </label>
               </th>
@@ -148,7 +155,7 @@
               </td>
             </tr>
 
-            <tr>
+            <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
               <th>
                 <label for="jawWidth">Jaw Width <b>(C)</b> (mm)</label>
               </th>
@@ -162,7 +169,7 @@
                     >
               </td>
             </tr>
-            <tr>
+            <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
               <th>
                 <label for="faceDepth">Face Depth <b>(P)</b> (mm)</label>
               </th>
@@ -176,7 +183,7 @@
                     >
               </td>
             </tr>
-            <tr>
+            <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
               <th>
                 <label for="faceLength">Face Length <b>(D)</b> (mm)</label>
               </th>
@@ -190,7 +197,7 @@
                     >
               </td>
             </tr>
-            <tr>
+            <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
               <th>
                 <label for="lowerFaceLength">Lower Face Length <b>(E)</b> (mm)</label>
               </th>
@@ -204,7 +211,7 @@
                     >
               </td>
             </tr>
-            <tr>
+            <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
               <th>
                 <label for="bitragionMentonArc">Bitragion Menton Arc <b>(K)</b> (mm)</label>
               </th>
@@ -219,7 +226,7 @@
               </td>
             </tr>
 
-            <tr>
+            <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
               <th>
                 <label for="bitragionSubnasaleArc">Bitragion Subnasale Arc <b>(L)</b> (mm)</label>
               </th>
@@ -234,7 +241,7 @@
               </td>
             </tr>
 
-            <tr>
+            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
               <th>
                 <label for="noseProtrusion">Nose Protrusion <b>(M)</b> (mm)</label>
               </th>
@@ -249,7 +256,7 @@
               </td>
             </tr>
 
-            <tr>
+            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
               <th>
                 <label for="nasalRootBreadth">Nasal Root Breadth <b>(H)</b> (mm)</label>
               </th>
@@ -264,7 +271,7 @@
               </td>
             </tr>
 
-            <tr>
+            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
               <th>
                 <label for="noseBridgeHeight">Nose Bridge Height <b>(H)</b> (mm)</label>
               </th>
@@ -279,7 +286,7 @@
               </td>
             </tr>
 
-            <tr>
+            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
               <th>
                 <label for="lipWidth">Lip Width <b>(J)</b> (mm)</label>
               </th>
@@ -299,7 +306,7 @@
 
         <br>
 
-        <table>
+        <table v-show="secondaryTab == 'Part III' || mode == 'View'">
           <thead>
             <tr>
               <th colspan='3'>Qualitative Measurements</th>
@@ -370,6 +377,19 @@ export default {
   },
   data() {
     return {
+      facialMeasurementParts: [
+        {
+          text: "Part I",
+        },
+        {
+          text: "Part II",
+        },
+        {
+          text: "Part III"
+        }
+      ],
+      secondaryTab: 'Part I',
+
       errorMessages: [],
       mode: 'Edit',
       cheekFullnessExample: 'Hallow/gaunt',
@@ -512,6 +532,10 @@ export default {
       this.tabToShow = toQuery['tabToShow']
     }
 
+    if (toQuery['secondaryTab'] && (this.$route.name == "RespiratorUser")) {
+      this.secondaryTab = toQuery['secondaryTab']
+    }
+
     // TODO: add param watchers
     this.$watch(
       () => this.$route.query,
@@ -519,12 +543,25 @@ export default {
         if (toQuery['tabToShow'] && (this.$route.name == "RespiratorUser")) {
           this.tabToShow = toQuery['tabToShow']
         }
+
+        if (toQuery['secondaryTab'] && (this.$route.name == "RespiratorUser")) {
+          this.secondaryTab = toQuery['secondaryTab']
+        }
       }
     )
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    setSecondaryRouteTo(opt) {
+      this.$router.push({
+        name: "RespiratorUser",
+        query: {
+          tabToShow: 'Facial Measurements',
+          secondaryTab: opt.name
+        }
+      })
+    },
     addFacialMeasurement() {
       this.facialMeasurements.push(
         {
