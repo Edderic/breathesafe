@@ -55,12 +55,6 @@
 
       <br>
 
-      <div class='row'>
-        <Button class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
-        <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-if='mode == "View"'/>
-
-        <Button class='button' text="Save and Continue" @click='saveProfile("Demographics")' v-if='mode != "View"'/>
-      </div>
     </div>
 
     <div class='main' v-if='tabToShow=="Demographics"'>
@@ -91,15 +85,9 @@
       </div>
 
       <br>
-
-      <div class='row justify-content-center'>
-        <Button class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
-        <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-if='mode == "View"'/>
-        <Button text="Save and continue" @click='saveProfile("FacialMeasurements")' v-if='mode != "View"'/>
-      </div>
     </div>
 
-    <div class="edit-facial-measurements" v-if='tabToShow=="FacialMeasurements"'>
+    <div class="edit-facial-measurements" v-if='tabToShow=="Facial Measurements"'>
 
 
 
@@ -139,6 +127,7 @@
                 <select
                     v-if='latestFacialMeasurement'
                     :value="latestFacialMeasurement.source"
+                    :disabled="mode == 'View'"
                     >
                     <option>caliper/tape</option>
                 </select>
@@ -154,6 +143,7 @@
                     type='number'
                     :value="latestFacialMeasurement.faceWidth"
                     @change='setFacialMeasurement($event, "faceWidth")'
+                    :disabled="mode == 'View'"
                     >
               </td>
             </tr>
@@ -168,6 +158,7 @@
                     type='number'
                     :value="latestFacialMeasurement.jawWidth"
                     @change='setFacialMeasurement($event, "jawWidth")'
+                    :disabled="mode == 'View'"
                     >
               </td>
             </tr>
@@ -181,6 +172,7 @@
                     type='number'
                     :value="latestFacialMeasurement.faceDepth"
                     @change='setFacialMeasurement($event, "faceDepth")'
+                    :disabled="mode == 'View'"
                     >
               </td>
             </tr>
@@ -194,6 +186,21 @@
                     type='number'
                     :value="latestFacialMeasurement.faceLength"
                     @change='setFacialMeasurement($event, "faceLength")'
+                    :disabled="mode == 'View'"
+                    >
+              </td>
+            </tr>
+            <tr>
+              <th>
+                <label for="lowerFaceLength">Lower Face Length <b>(E)</b> (mm)</label>
+              </th>
+              <td>
+                <input
+                    v-if='latestFacialMeasurement'
+                    type='number'
+                    :value="latestFacialMeasurement.lowerFaceLength"
+                    @change='setFacialMeasurement($event, "lowerFaceLength")'
+                    :disabled="mode == 'View'"
                     >
               </td>
             </tr>
@@ -207,6 +214,7 @@
                     type='number'
                     :value="latestFacialMeasurement.bitragionMentonArc"
                     @change='setFacialMeasurement($event, "bitragionMentonArc")'
+                    :disabled="mode == 'View'"
                     >
               </td>
             </tr>
@@ -221,6 +229,7 @@
                     type='number'
                     :value="latestFacialMeasurement.bitragionSubnasaleArc"
                     @change='setFacialMeasurement($event, "bitragionSubnasaleArc")'
+                    :disabled="mode == 'View'"
                     >
               </td>
             </tr>
@@ -235,6 +244,7 @@
                     type='number'
                     :value="latestFacialMeasurement.noseProtrusion"
                     @change='setFacialMeasurement($event, "noseProtrusion")'
+                    :disabled="mode == 'View'"
                     >
               </td>
             </tr>
@@ -249,6 +259,7 @@
                     type='number'
                     :value="latestFacialMeasurement.nasalRootBreadth"
                     @change='setFacialMeasurement($event, "nasalRootBreadth")'
+                    :disabled="mode == 'View'"
                     >
               </td>
             </tr>
@@ -263,6 +274,7 @@
                     type='number'
                     :value="latestFacialMeasurement.noseBridgeHeight"
                     @change='setFacialMeasurement($event, "noseBridgeHeight")'
+                    :disabled="mode == 'View'"
                     >
               </td>
             </tr>
@@ -276,6 +288,7 @@
                     v-if='latestFacialMeasurement'
                     type='number'
                     :value="latestFacialMeasurement.lipWidth"
+                    :disabled="mode == 'View'"
                     @change='setFacialMeasurement($event, "lipWidth")'
                     >
               </td>
@@ -305,6 +318,7 @@
                     v-if='latestFacialMeasurement'
                     :value="latestFacialMeasurement.cheekFullness"
                     @change='setFacialMeasurement($event, "cheekFullness")'
+                    :disabled="mode == 'View'"
                     >
                     <option>hollow/gaunt</option>
                     <option>medium</option>
@@ -315,10 +329,15 @@
           </tbody>
         </table>
 
-        <Button text="Save" @click='saveFacialMeasurement'/>
       </div>
 
 
+    </div>
+
+    <div class='row justify-content-center'>
+      <Button class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+      <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-if='mode == "View"'/>
+      <Button text="Save and continue" @click='save()' v-if='mode != "View"'/>
     </div>
     <br>
     <br>
@@ -386,7 +405,7 @@ export default {
           text: "Demographics",
         },
         {
-          text: "FacialMeasurements"
+          text: "Facial Measurements"
         }
       ],
       race_ethnicity_question: "Which race or ethnicity best describes you?",
@@ -567,6 +586,16 @@ export default {
           }
         // whatever you want
         })
+    },
+    async save() {
+      if (this.tabToShow == "Name") {
+        await this.saveProfile("Demographics")
+      } else if (this.tabToShow == "Demographics") {
+        await this.saveProfile("Facial Measurements")
+      } else {
+        // must be in Facial Measurements
+        await this.saveFacialMeasurement()
+      }
     },
     async saveProfile(tabToShow) {
       await this.updateProfile()
