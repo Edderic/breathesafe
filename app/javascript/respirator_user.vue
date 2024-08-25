@@ -2,7 +2,7 @@
   <div>
     <h2 class='tagline'>Respirator User</h2>
     <div class='container chunk'>
-      <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
+      <ClosableMessage @onclose='messages = []' :messages='messages'/>
       <br>
     </div>
     <div class='centered'>
@@ -471,7 +471,7 @@ export default {
     ...mapWritableState(
         useMainStore,
         [
-          'message'
+          'messages'
         ]
     ),
     ...mapWritableState(
@@ -493,9 +493,6 @@ export default {
     },
     latestFacialMeasurement() {
       return this.facialMeasurements[this.facialMeasurements.length - 1];
-    },
-    messages() {
-      return this.errorMessages;
     },
     readyToAddFitTestingData() {
       let numerator = !this.nameIncomplete
@@ -551,7 +548,7 @@ export default {
     )
   },
   methods: {
-    ...mapActions(useMainStore, ['getCurrentUser']),
+    ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     setSecondaryRouteTo(opt) {
       this.$router.push({
@@ -624,15 +621,47 @@ export default {
         // whatever you want
         })
     },
+    validateFacialMeasurementsPart(parts) {
+      let messages = [];
+      parts.forEach((d) => {
+        if (this.latestFacialMeasurement[d] == null || this.latestFacialMeasurement[d] == "" || this.latestFacialMeasurement[d] == 0) {
+          messages.push(`${d} must be a positive number.`)
+        }
+      })
+
+      this.addMessages(messages);
+    },
     async save() {
       if (this.tabToShow == "Name") {
         await this.saveProfile("Demographics")
       } else if (this.tabToShow == "Demographics") {
         await this.saveProfile("Facial Measurements")
       } else {
-        // must be in Facial Measurements
+        if (this.secondaryTab == 'Part I') {
+          this.validateFacialMeasurementsPart(['source', 'faceWidth', 'jawWidth', 'faceDepth']);
+
+          if (this.messages.length == 0) {
+            this.setSecondaryRouteTo({name: 'Part II'})
+          }
+        }
+        else if (this.secondaryTab == 'Part II') {
+          this.validateFacialMeasurementsPart(['faceLength', 'lowerFaceLength', 'bitragionMentonArc', 'bitragionSubnasaleArc']);
+          if (this.messages.length == 0) {
+            this.setSecondaryRouteTo({name: 'Part III'})
+          }
+        }
+        else if (this.secondaryTab == 'Part III') {
+          this.validateFacialMeasurementsPart(['noseProtrusion', 'nasalRootBreadth', 'noseBridgeHeight', 'lipWidth']);
+
+          if (this.messages.length == 0) {
+            this.$router.push({
+              name: 'RespiratorUsers',
+            })
+          }
+        }
         await this.saveFacialMeasurement()
       }
+        // must be in Facial Measurements
     },
     async saveProfile(tabToShow) {
       await this.updateProfile()
@@ -664,11 +693,11 @@ export default {
       }
     },
     async saveFacialMeasurement() {
-      this.runFacialMeasurementValidations()
+      // this.runFacialMeasurementValidations()
 
-      if (this.errorMessages.length > 0) {
-        return;
-      }
+      // if (this.errorMessages.length > 0) {
+        // return;
+      // }
 
       await axios.post(
         `/users/${this.currentUser.id}/facial_measurements.json`, {
@@ -693,12 +722,9 @@ export default {
           // whatever you want
         })
         .catch(error => {
-          this.message = "Failed to create facial measurement."
+          this.addMessages(error.response.data.messages)
           // whatever you want
         })
-      this.$router.push({
-        name: 'RespiratorUsers',
-      })
     },
     setRouteTo(opt) {
       this.$router.push({

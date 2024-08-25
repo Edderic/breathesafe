@@ -7,18 +7,16 @@ class Users::FacialMeasurementsController < ApplicationController
       messages = ["Unauthorized."]
       facial_measurement = {}
     else
-
       facial_measurement = FacialMeasurement.create(
         facial_measurement_data
       )
 
-      if facial_measurement.errors.full_messages
+      if facial_measurement.errors.full_messages.size > 0
         status = 422
         messages = facial_measurement.errors.full_messages
       else
         status = 201
         messages = []
-        facial_measurement = {}
       end
     end
 
