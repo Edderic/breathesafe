@@ -911,7 +911,6 @@ export default {
               }
             })
 
-            debugger
             this.mode = 'Show'
           })
           .catch(error => {

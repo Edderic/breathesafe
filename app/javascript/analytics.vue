@@ -1040,16 +1040,12 @@ export default {
       return await this.showAnalysis(
         this.$route.params.id,
         function() {
-          debugger
-
           this.$router.push({
             name: 'SignIn',
             query: {'attempt-name': 'Analytics', 'params-id': this.$route.params.id }
           })
         }.bind(this),
         function() {
-          debugger
-
           this.$router.push({
             name: 'SignIn',
             query: {'attempt-name': 'Venues'}

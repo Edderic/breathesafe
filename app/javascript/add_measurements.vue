@@ -1039,7 +1039,6 @@
         this.authorId = this.currentUser.id
         if (!event) {
           debugger
-
         }
         this.placeData = event.placeData
         this.roomName = event.roomName

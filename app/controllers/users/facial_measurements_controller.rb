@@ -58,8 +58,6 @@ class Users::FacialMeasurementsController < ApplicationController
       status = 422
       message = ["Not managed by current user"]
     else
-      debugger
-
       to_render = {
         facial_measurements: JSON.parse(FacialMeasurement.where(user_id: params['user_id']).to_json),
         messages: []
