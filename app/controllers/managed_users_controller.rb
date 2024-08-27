@@ -33,10 +33,13 @@ class ManagedUsersController < ApplicationController
       status = 422
     else
       ActiveRecord::Base.transaction do
-        user = User.create!(
+        user = User.new(
           email: "#{SecureRandom.uuid}@fake.com",
           password: SecureRandom.uuid
         )
+
+        user.skip_confirmation!
+        user.save!
 
         profile = Profile.create!(
           user_id: user.id,
@@ -60,14 +63,9 @@ class ManagedUsersController < ApplicationController
 
         status = 201
 
-        respond_to do |format|
-          format.json do
-            render json: to_render.to_json, status: status
-          end
-        end
       rescue ActiveRecord::StatementInvalid
         to_render = {
-          profile: {},
+          managed_user: {},
           messages: ['Something went wrong']
         }
 

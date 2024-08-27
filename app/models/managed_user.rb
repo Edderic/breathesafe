@@ -15,7 +15,11 @@ class ManagedUser < ApplicationRecord
             SELECT fm.*
             FROM latest_facial_measurements lfm
             INNER JOIN facial_measurements fm
-            ON (fm.user_id = lfm.user_id)
+            ON (
+              fm.user_id = lfm.user_id
+              AND lfm.latest_created_at = fm.created_at
+            )
+
           )
 
 
@@ -45,7 +49,10 @@ class ManagedUser < ApplicationRecord
           ), latest_facial_measurements_for_users AS (
             SELECT fm.* FROM latest_facial_measurements lfm
             INNER JOIN facial_measurements fm
-            ON (fm.user_id = lfm.user_id)
+            ON (
+              fm.user_id = lfm.user_id
+              AND lfm.latest_created_at = fm.created_at
+            )
           )
 
 

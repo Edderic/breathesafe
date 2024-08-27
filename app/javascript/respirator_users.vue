@@ -57,7 +57,7 @@ import axios from 'axios';
 import Button from './button.vue'
 import ClosableMessage from './closable_message.vue'
 import CircularButton from './circular_button.vue'
-import { deepSnakeToCamel } from './misc.js'
+import { deepSnakeToCamel, setupCSRF } from './misc.js'
 import { RespiratorUser } from './respirator_user.js'
 import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
@@ -128,6 +128,8 @@ export default {
       let managedUsers = [];
       let managedUser = {};
 
+      setupCSRF();
+
       await axios.get(
         `/managed_users.json`,
       )
@@ -157,25 +159,26 @@ export default {
     },
 
     async newUser() {
+      setupCSRF();
+
       let managedUsers;
       let managedUser;
+
+      debugger
 
       await axios.post(
         `/managed_users.json`,
       )
         .then(response => {
           let data = response.data
-          if (response.data.managed_users) {
-            managedUsers = response.data.managed_users
+          if (response.data.managed_user) {
+            managedUser = deepSnakeToCamel(response.data.managed_user)
 
-            for(let managedUserData of managedUsers) {
-              managedUser = deepSnakeToCamel(data.profile)
-              this.managedUsers.push(
-                new RespiratorUser(
-                  managedUser
-                )
+            this.managedUsers.push(
+              new RespiratorUser(
+                managedUser
               )
-            }
+            )
           }
         })
         .catch(error => {

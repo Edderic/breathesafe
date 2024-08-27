@@ -8,7 +8,7 @@
     <div class='centered'>
       <span>Percent Completed:</span>
       <span>&nbsp;
-      {{readyToAddFitTestingDataPercentage}}
+      {{managedUser.readyToAddFitTestingDataPercentage}}
       </span>
 
     </div>
@@ -466,7 +466,6 @@ export default {
         useProfileStore,
         [
           'profileId',
-          'readyToAddFitTestingDataPercentage'
         ]
     ),
     ...mapWritableState(
@@ -551,8 +550,6 @@ export default {
       })
     },
     async loadStuff() {
-      // TODO: load the profile for the current user
-
       this.loadManagedUser(this.$route.params.id)
       this.loadFacialMeasurements(this.$route.params.id)
     },
