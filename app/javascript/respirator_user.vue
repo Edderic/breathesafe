@@ -696,14 +696,8 @@ export default {
       }
     },
     async saveFacialMeasurement() {
-      // this.runFacialMeasurementValidations()
-
-      // if (this.errorMessages.length > 0) {
-        // return;
-      // }
-
       await axios.post(
-        `/users/${this.currentUser.id}/facial_measurements.json`, {
+        `/users/${this.$route.params.id}/facial_measurements.json`, {
           source: this.latestFacialMeasurement.source,
           face_width: this.latestFacialMeasurement.faceWidth,
           nose_bridge_height: this.latestFacialMeasurement.noseBridgeHeight,
@@ -717,7 +711,7 @@ export default {
           bitragion_menton_arc: this.latestFacialMeasurement.bitragionMentonArc,
           bitragion_subnasale_arc: this.latestFacialMeasurement.bitragionSubnasaleArc,
           cheek_fullness: this.latestFacialMeasurement.cheekFullness,
-          user_id: this.currentUser.id
+          user_id: this.$route.params.id
         }
       )
         .then(response => {

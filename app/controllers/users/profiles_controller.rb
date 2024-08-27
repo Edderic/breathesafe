@@ -27,9 +27,12 @@ class Users::ProfilesController < ApplicationController
   end
 
   def create
-    if unauthorized?
+    if current_user.nil?
       status = 401
       messages = ["Unauthorized."]
+    elsif !current_user.manages?(User.find(params['user_id']))
+      status = 422
+      message = ["User #{params['user_id']} is not managed by user #{current_user.id}"]
     else
       measurement_system = "imperial"
       profile = Profile.create(user: current_user, measurement_system: measurement_system)
@@ -59,7 +62,7 @@ class Users::ProfilesController < ApplicationController
     if current_user.nil?
       status = 401
       message = ["Not signed in."]
-    elsif ManagedUser.where( manager_id: current_user.id, managed_id: params['user_id']).size == 0
+    elsif !current_user.manages?(User.find(params['user_id']))
       status = 422
       message = ["User #{params['user_id']} is not managed by user #{current_user.id}"]
     else

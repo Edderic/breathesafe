@@ -2,11 +2,22 @@ class Users::FacialMeasurementsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def create
+    for_user = User.find(params['user_id'])
+
     if unauthorized?
       status = 401
       messages = ["Unauthorized."]
       facial_measurement = {}
+
+    elsif !current_user.manages?(
+        for_user
+      )
+      status = 422
+      message = ["Not managed by current user."]
     else
+      # TODO: check that current_user is authorized to create a facial
+      # measurement for given user_id
+
       facial_measurement = FacialMeasurement.create(
         facial_measurement_data
       )
@@ -33,17 +44,24 @@ class Users::FacialMeasurementsController < ApplicationController
   end
 
   def show
-    # TODO: For now, only current user can access facial measurements
-    # Later on, parents should be able to view / edit their children's data
-    unless current_user
+    # TODO: check that the current user has access to data for particular user_id
+    if !current_user
       status = 401
       messages = ["Unauthorized."]
       to_render = {
         messages: messages
       }
+
+    elsif !current_user.manages?(
+        User.find(params['user_id'])
+      )
+      status = 422
+      message = ["Not managed by current user"]
     else
+      debugger
+
       to_render = {
-        facial_measurements: JSON.parse(FacialMeasurement.where(user_id: current_user.id).to_json),
+        facial_measurements: JSON.parse(FacialMeasurement.where(user_id: params['user_id']).to_json),
         messages: []
       }
     end
