@@ -48,6 +48,7 @@ Rails.application.routes.draw do
 
   post 'managed_users',to: 'managed_users#create'
   get 'managed_users',to: 'managed_users#index'
+  get 'managed_users/:id',to: 'managed_users#show'
 
   controller :pages do
     get :qr_code_generator

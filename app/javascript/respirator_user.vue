@@ -42,7 +42,7 @@
             <td>
               <input
                   type='text'
-                  v-model='firstName'
+                  v-model='managedUser.firstName'
                   :disabled='mode == "View"'
               >
             </td>
@@ -52,7 +52,7 @@
             <td>
               <input
                   type='text'
-                  v-model='lastName'
+                  v-model='managedUser.lastName'
                   :disabled='mode == "View"'
               >
             </td>
@@ -75,14 +75,14 @@
         :question="raceEthnicityQuestion"
         :answer_options="race_ethnicity_options"
         @update="selectRaceEthnicity"
-        :selected="raceEthnicity"
+        :selected="managedUser.raceEthnicity"
         :disabled='mode == "View"'
       />
       <SurveyQuestion
         :question="genderSexQuestion"
         :answer_options="gender_and_sex_options"
         @update="selectGenderAndSex"
-        :selected="genderAndSex"
+        :selected="managedUser.genderAndSex"
         :disabled='mode == "View"'
       />
       <div>
@@ -359,11 +359,12 @@ import Button from './button.vue'
 import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import TabSet from './tab_set.vue'
-import { deepSnakeToCamel } from './misc.js'
+import { deepSnakeToCamel, setupCSRF } from './misc.js'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
+import { useManagedUserStore } from './stores/managed_users_store';
 import { useMainStore } from './stores/main_store';
 
 export default {
@@ -475,36 +476,26 @@ export default {
         ]
     ),
     ...mapWritableState(
+      useManagedUserStore,
+      ['managedUser']
+    ),
+    ...mapWritableState(
         useProfileStore,
         [
           'firstName',
           'lastName',
-          'raceEthnicity',
-          'genderAndSex',
           'otherGender'
         ]
     ),
 
     genderSexQuestion() {
-      return `Which is ${this.firstName}'s gender?`;
+      return `Which is ${this.managedUser.firstName}'s gender?`;
     },
     raceEthnicityQuestion() {
-      return `Which race or ethnicity best describes ${this.firstName}?`;
+      return `Which race or ethnicity best describes ${this.managedUser.firstName}?`;
     },
     latestFacialMeasurement() {
       return this.facialMeasurements[this.facialMeasurements.length - 1];
-    },
-    readyToAddFitTestingData() {
-      let numerator = !this.nameIncomplete
-        + !this.raceEthnicityIncomplete
-        + !this.genderAndSexIncomplete
-        + !this.facialMeasurementsIncomplete
-
-      let rounded = Math.round(
-        numerator / 4 * 100
-      )
-
-      return `${rounded}%`
     },
     sortedFacialMeasurements() {
       return this.facialMeasurements.sort((a, b) => {
@@ -549,7 +540,7 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
-    ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    ...mapActions(useManagedUserStore, ['loadManagedUser']),
     setSecondaryRouteTo(opt) {
       this.$router.push({
         name: "RespiratorUser",
@@ -559,28 +550,11 @@ export default {
         }
       })
     },
-    addFacialMeasurement() {
-      this.facialMeasurements.push(
-        {
-          source: 'caliper/tape',
-          faceWidth: 0,
-          noseBridgeHeight: 0,
-          nasalRootBreadth: 0,
-          jawWidth: 0,
-          faceDepth: 0,
-          faceLength: 0,
-          lowerFaceLength: 0,
-          bitragionMentonArc: 0,
-          bitragionSubnasaleArc: 0,
-          cheekFullness: 'medium',
-
-        }
-      )
-    },
     async loadStuff() {
       // TODO: load the profile for the current user
-      this.loadProfile()
-      this.loadFacialMeasurements(this.currentUser.id)
+
+      this.loadManagedUser(this.$route.params.id)
+      this.loadFacialMeasurements(this.$route.params.id)
     },
     async loadFacialMeasurements(userId) {
       // TODO: make this more flexible so parents can load data of their children
@@ -664,16 +638,45 @@ export default {
         // must be in Facial Measurements
     },
     async saveProfile(tabToShow) {
-      await this.updateProfile()
+      await this.updateProfile(this.$route.params.id)
       this.$router.push({
         name: "RespiratorUser",
         params: {
-          id: this.currentUser.id,
+          id: this.$route.params.id,
         },
         query: {
           tabToShow: tabToShow
         }
       })
+    },
+    async updateProfile(id) {
+      setupCSRF();
+
+      if (!id) {
+        id = currentUser.id
+      }
+
+      let toSave = {
+        'profile': {
+          'first_name': this.managedUser.firstName,
+          'last_name': this.managedUser.lastName,
+          'race_ethnicity': this.managedUser.raceEthnicity,
+          'gender_and_sex': this.managedUser.genderAndSex,
+        }
+      }
+
+      await axios.put(
+        `/users/${id}/profile.json`,
+        toSave
+      )
+        .then(response => {
+          this.addMessages(response.data.messages)
+          this.status = 'saved'
+        })
+        .catch(error => {
+          this.addMessages(error.response.data.messages)
+          // whatever you want
+        })
     },
     runFacialMeasurementValidations() {
       let quantitativeMeasurements = [
@@ -735,10 +738,10 @@ export default {
       })
     },
     selectRaceEthnicity(raceEth) {
-      this.raceEthnicity = raceEth
+      this.managedUser.raceEthnicity = raceEth
     },
     selectGenderAndSex(genderAndSex) {
-      this.genderAndSex = genderAndSex
+      this.managedUser.genderAndSex = genderAndSex
     },
     setFacialMeasurement(event, whatToSet) {
       this.latestFacialMeasurement[whatToSet] = event.target.value

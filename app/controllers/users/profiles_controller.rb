@@ -56,11 +56,17 @@ class Users::ProfilesController < ApplicationController
   end
 
   def update
-    if unauthorized?
+    if current_user.nil?
       status = 401
-      message = "Unauthorized."
+      message = ["Not signed in."]
+    elsif ManagedUser.where( manager_id: current_user.id, managed_id: params['user_id']).size == 0
+      status = 422
+      message = ["User #{params['user_id']} is not managed by user #{current_user.id}"]
     else
-      profile = current_user.profile
+      managed_users = ManagedUser.for_manager_and_managed( manager_id: current_user.id, managed_id: params['user_id'])
+
+      profile = Profile.find_by(id: managed_users[0]['profile_id'])
+
       status = 200
 
       if profile.update(profile_data)

@@ -42,7 +42,7 @@
                 {{r.readyToAddFitTestingDataPercentage}}
               </td>
               <td>
-                <Button @click="edit(r.profileId)" text='Edit' />
+                <Button @click="edit(r.managedId)" text='Edit' />
               </td>
             </tr>
           </tbody>
@@ -186,46 +186,6 @@ export default {
           }
         // whatever you want
         })
-      // RespiratorUsers store
-      // respirator_users: []
-
-      // create a new user
-      //   adds to the respirator_users object
-
-      // create a profile
-      // create a row in Permissions, from_user: X, to_user: Y, what: "canCreateUpdateDelete"
-      // load users
-
-      // Edit respirator_user
-      // have a context_user as a parameter
-      // Editing the context user should load the user
-      // Saving for context_user profile
-      // Saving for context_user facial_measurements
-
-      // For fit test, if user has access to other users, have a users tab
-      // Have an option to select the user
-      // Test updating the user
-
-      // user_a.hasAdminAccessFor(user_b)
-      // user_a.admin_access_for_users
-      // user_a.can_create_fit_test?(user_b)
-      // user_a.can_update_fit_test?(user_b)
-      // user_a.can_view_fit_test?(user_b)
-      // user_a.can_delete_fit_test?(user_b)
-      // user_a.can_update_profile?(user_b)
-      // user_a.can_view_profile?(user_b)
-      // user_a.can_delete_profile?(user_b)
-      // user_a.can_create_facial_measurements?(user_b)
-      // user_a.can_update_facial_measurements?(user_b)
-      // user_a.can_view_facial_measurements?(user_b)
-      // user_a.can_delete_facial_measurements?(user_b)
-      //
-      // create a row in the permissions table that represents that current
-      // user can
-      // - add fit tests on behalf of new user
-      // - edit fit tests on behalf of new user
-      // - edit facial measurements on behalf of new user
-      // -
     },
     edit(profileId) {
       this.$router.push({

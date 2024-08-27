@@ -2,14 +2,11 @@ export class RespiratorUser {
   constructor(user) {
     this.user = user
     this.profileId = user.profileId
-  }
+    let toAssign = ['firstName', 'lastName', 'raceEthnicity', 'genderAndSex', 'userId', 'managedId'];
+    for (let x of toAssign) {
+      this[x] = user[x]
+    }
 
-  get firstName() {
-    return this.user.firstName
-  }
-
-  get lastName() {
-    return this.user.lastName
   }
 
   get raceEthnicityComplete() {
