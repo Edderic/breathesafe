@@ -46,6 +46,9 @@ Rails.application.routes.draw do
   put 'fit_tests/:id', to: 'fit_tests#update'
   delete 'fit_tests/:id', to: 'fit_tests#delete'
 
+  post 'managed_users',to: 'managed_users#create'
+  get 'managed_users',to: 'managed_users#index'
+
   controller :pages do
     get :qr_code_generator
     get :qr_code_download
