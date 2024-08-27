@@ -89,13 +89,18 @@ export const useProfileStore = defineStore('profile', {
         })
 
     },
-    async loadProfile() {
+    async loadProfile(id) {
       setupCSRF();
 
       let mainStore = useMainStore()
       await mainStore.getCurrentUser();
-      let prevalenceStore = usePrevalenceStore()
       let currentUser = mainStore.currentUser
+
+      if (!id) {
+        id = currentUser.id
+      }
+
+      let prevalenceStore = usePrevalenceStore()
       let hasProfile = false
 
       if (!currentUser) {
@@ -110,7 +115,7 @@ export const useProfileStore = defineStore('profile', {
       }
 
       await axios.get(
-        `/users/${currentUser.id}/profile.json`,
+        `/users/${id}/profile.json`,
       )
         .then(response => {
           let data = response.data
@@ -142,15 +147,18 @@ export const useProfileStore = defineStore('profile', {
         })
 
       if (!hasProfile) {
-        await this.createProfile()
+        await this.createProfile(id)
       }
     },
-    async createProfile() {
+    async createProfile(id) {
       setupCSRF();
 
       let mainStore = useMainStore()
       let prevalenceStore = usePrevalenceStore()
       let currentUser = mainStore.currentUser
+      if (!id) {
+        id = currentUser.id
+      }
 
       let toSave = {
         'profile': {
@@ -164,7 +172,7 @@ export const useProfileStore = defineStore('profile', {
       }
 
       await axios.post(
-        `/users/${currentUser.id}/profile.json`,
+        `/users/${id}/profile.json`,
         toSave
       )
         .then(response => {
@@ -175,12 +183,15 @@ export const useProfileStore = defineStore('profile', {
           // whatever you want
         })
     },
-    async updateProfile() {
+    async updateProfile(id) {
       setupCSRF();
 
       let mainStore = useMainStore()
       let prevalenceStore = usePrevalenceStore()
       let currentUser = mainStore.currentUser
+      if (!id) {
+        id = currentUser.id
+      }
 
       let toSave = {
         'profile': {
@@ -197,7 +208,7 @@ export const useProfileStore = defineStore('profile', {
       }
 
       await axios.put(
-        `/users/${currentUser.id}/profile.json`,
+        `/users/${id}/profile.json`,
         toSave
       )
         .then(response => {
