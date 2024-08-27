@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_08_13_175647) do
+ActiveRecord::Schema[7.0].define(version: 2024_08_27_023733) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -100,6 +100,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_13_175647) do
     t.bigint "facial_measurement_id", null: false
     t.index ["facial_measurement_id"], name: "index_fit_tests_on_facial_measurement_id"
     t.index ["mask_id"], name: "index_fit_tests_on_mask_id"
+  end
+
+  create_table "managed_users", force: :cascade do |t|
+    t.bigint "manager_id", null: false
+    t.bigint "managed_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["managed_id"], name: "index_managed_users_on_managed_id"
+    t.index ["manager_id"], name: "index_managed_users_on_manager_id"
   end
 
   create_table "masks", force: :cascade do |t|
@@ -208,6 +217,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_13_175647) do
   add_foreign_key "facial_measurements", "users"
   add_foreign_key "fit_tests", "facial_measurements"
   add_foreign_key "fit_tests", "masks"
+  add_foreign_key "managed_users", "users", column: "managed_id"
+  add_foreign_key "managed_users", "users", column: "manager_id"
   add_foreign_key "masks", "users", column: "author_id"
   add_foreign_key "profiles", "users"
   add_foreign_key "user_carbon_dioxide_monitors", "users"
