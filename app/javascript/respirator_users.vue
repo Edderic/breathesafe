@@ -1,6 +1,10 @@
 <template>
   <div>
-    <h2 class='tagline'>Respirator Users</h2>
+    <div class='flex align-items-center justify-content-center row'>
+      <h2 class='tagline'>Respirator Users</h2>
+      <CircularButton text="+" @click="newUser"/>
+    </div>
+
 
     <div class='container chunk'>
       <ClosableMessage @onclose='messages = []' :messages='messages'/>
@@ -21,24 +25,24 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr v-for='r in managedUsers'>
               <td>
-                {{firstName}} {{lastName}}
+                {{r.firstName}} {{r.lastName}}
               </td>
               <td>
-                {{raceEthnicityComplete}}
+                {{r.raceEthnicityComplete}}
               </td>
               <td>
-                {{genderAndSexComplete}}
+                {{r.genderAndSexComplete}}
               </td>
               <td>
-                {{facialMeasurementsComplete}}
+                {{r.facialMeasurementsComplete}}
               </td>
               <td>
-                {{readyToAddFitTestingDataPercentage}}
+                {{r.readyToAddFitTestingDataPercentage}}
               </td>
               <td>
-                <Button @click="edit(profileId)" text='Edit' />
+                <Button @click="edit(r.profileId)" text='Edit' />
               </td>
             </tr>
           </tbody>
@@ -52,6 +56,9 @@
 import axios from 'axios';
 import Button from './button.vue'
 import ClosableMessage from './closable_message.vue'
+import CircularButton from './circular_button.vue'
+import { deepSnakeToCamel } from './misc.js'
+import { RespiratorUser } from './respirator_user.js'
 import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
@@ -61,10 +68,12 @@ export default {
   name: 'RespiratorUsers',
   components: {
     Button,
+    CircularButton,
     ClosableMessage
   },
   data() {
     return {
+      managedUsers: [],
       messages: [],
       facialMeasurementsLength: 0
     }
@@ -116,8 +125,107 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile']),
     async loadStuff() {
-      this.loadProfile()
-      this.loadFacialMeasurements(this.currentUser.id)
+      let managedUsers = [];
+      let managedUser = {};
+
+      await axios.get(
+        `/managed_users.json`,
+      )
+        .then(response => {
+          let data = response.data
+          if (response.data.managed_users) {
+            managedUsers = response.data.managed_users
+
+            for(let managedUserData of managedUsers) {
+              managedUser = deepSnakeToCamel(managedUserData)
+              this.managedUsers.push(
+                new RespiratorUser(
+                  managedUser
+                )
+              )
+            }
+          }
+        })
+        .catch(error => {
+          for(let errorMessage of error.response.data.messages) {
+            this.messages.push({
+              str: errorMessage
+            })
+          }
+        // whatever you want
+        })
+    },
+
+    async newUser() {
+      let managedUsers;
+      let managedUser;
+
+      await axios.post(
+        `/managed_users.json`,
+      )
+        .then(response => {
+          let data = response.data
+          if (response.data.managed_users) {
+            managedUsers = response.data.managed_users
+
+            for(let managedUserData of managedUsers) {
+              managedUser = deepSnakeToCamel(data.profile)
+              this.managedUsers.push(
+                new RespiratorUser(
+                  managedUser
+                )
+              )
+            }
+          }
+        })
+        .catch(error => {
+          for(let errorMessage of error.response.data.messages) {
+            this.messages.push({
+              str: errorMessage
+            })
+          }
+        // whatever you want
+        })
+      // RespiratorUsers store
+      // respirator_users: []
+
+      // create a new user
+      //   adds to the respirator_users object
+
+      // create a profile
+      // create a row in Permissions, from_user: X, to_user: Y, what: "canCreateUpdateDelete"
+      // load users
+
+      // Edit respirator_user
+      // have a context_user as a parameter
+      // Editing the context user should load the user
+      // Saving for context_user profile
+      // Saving for context_user facial_measurements
+
+      // For fit test, if user has access to other users, have a users tab
+      // Have an option to select the user
+      // Test updating the user
+
+      // user_a.hasAdminAccessFor(user_b)
+      // user_a.admin_access_for_users
+      // user_a.can_create_fit_test?(user_b)
+      // user_a.can_update_fit_test?(user_b)
+      // user_a.can_view_fit_test?(user_b)
+      // user_a.can_delete_fit_test?(user_b)
+      // user_a.can_update_profile?(user_b)
+      // user_a.can_view_profile?(user_b)
+      // user_a.can_delete_profile?(user_b)
+      // user_a.can_create_facial_measurements?(user_b)
+      // user_a.can_update_facial_measurements?(user_b)
+      // user_a.can_view_facial_measurements?(user_b)
+      // user_a.can_delete_facial_measurements?(user_b)
+      //
+      // create a row in the permissions table that represents that current
+      // user can
+      // - add fit tests on behalf of new user
+      // - edit fit tests on behalf of new user
+      // - edit facial measurements on behalf of new user
+      // -
     },
     edit(profileId) {
       this.$router.push({
@@ -200,5 +308,18 @@ export default {
     .call-to-actions {
       height: 14em;
     }
+  }
+
+  .row {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .align-items-center {
+    align-items: center;
+  }
+
+  .justify-content-center {
+    justify-content: center;
   }
 </style>
