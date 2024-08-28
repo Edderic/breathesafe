@@ -35,7 +35,7 @@ export const useManagedUserStore = defineStore('managedUsers', {
         })
 
     },
-    async deleteManagedUser(managedUserId) {
+    async deleteManagedUser(managedUserId, successCallback, failureCallback) {
       setupCSRF();
       let mainStore = useMainStore()
 
@@ -49,6 +49,7 @@ export const useManagedUserStore = defineStore('managedUsers', {
             let data = response.data
             this.managedUser = {}
             this.managedUsers = this.managedUsers.filter((m) => m.managedUserId != managedUserId)
+
           })
           .catch(error => {
             if (error && error.response && error.response.data && error.response.data.messages) {
@@ -56,10 +57,14 @@ export const useManagedUserStore = defineStore('managedUsers', {
             } else {
               mainStore.addMessages(["Something went wrong."])
             }
+
+
           })
 
+          successCallback()
       }
       else {
+        failureCallback()
         //some code
       }
 

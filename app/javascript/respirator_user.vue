@@ -542,11 +542,18 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useManagedUserStore, ['deleteManagedUser', 'loadManagedUser']),
     async deleteUser(id) {
-      await this.deleteManagedUser(id)
-      this.$router.push(
-        {
-          name: 'RespiratorUsers'
-        }
+      await this.deleteManagedUser(
+        id,
+        function () {
+          this.$router.push(
+            {
+              name: 'RespiratorUsers'
+            }
+          )
+        }.bind(this),
+        function () {
+          // do nothing
+        }.bind(this)
       )
 
     },
