@@ -55,7 +55,7 @@
           <tbody>
             <tr>
               <th>Selected User</th>
-              <td>{{selectedUser.firstName + " " + selectedUser.lastName}}</td>
+              <td>{{selectedUser.fullName}}</td>
             </tr>
           </tbody>
         </table>
@@ -903,6 +903,11 @@ export default {
           'managedUsers'
         ]
     ),
+    managedUsersWhoCanAddFitTestData() {
+      return this.managedUsers.filter((u) => {
+        return u.readyToAddFitTestingDataPercentage == '100%'}
+      )
+    },
     fitTest() {
       return new FitTest({
         user_seal_check: this.userSealCheck,
@@ -1040,10 +1045,10 @@ export default {
     },
     userDisplayables() {
       if (this.searchUser == "") {
-        return this.managedUsers
+        return this.managedUsersWhoCanAddFitTestData
       } else {
         let lowerSearch = this.searchUser.toLowerCase()
-        return this.managedUsers.filter((user) => user.fullName.toLowerCase().match(lowerSearch))
+        return this.managedUsersWhoCanAddFitTestData.filter((user) => user.fullName.toLowerCase().match(lowerSearch))
       }
     },
     maskDisplayables() {
