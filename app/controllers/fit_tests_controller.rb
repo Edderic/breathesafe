@@ -2,16 +2,23 @@ class FitTestsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def create
+    user = User.find(user_data[:id])
+
+    fit_test = {}
+
     if unauthorized?
       status = 401
-      message = "Unauthorized."
-      fit_test = {}
+      messages = ["Unauthorized."]
+    elsif !current_user.manages?(user)
+      status = 422
+      messages = ["Unauthorized."]
     else
+      # assumes there is facial measurement information
       latest_facial_measurement = FacialMeasurement.latest(user)
 
       unless latest_facial_measurement
         status = 422
-        message = "No facial measurements added yet. Please add facial measurements before adding a fit test."
+        messages = ["No facial measurements added yet. Please add facial measurements before adding a fit test."]
       else
         fit_test = FitTest.create(
           fit_test_data.merge(
@@ -21,10 +28,10 @@ class FitTestsController < ApplicationController
 
         if fit_test
           status = 201
-          message = ""
+          messages = []
         else
           status = 422
-          message = "FitTest creation failed."
+          messages = fit_test.errors.full_messages
           fit_test = {}
         end
       end
@@ -32,7 +39,7 @@ class FitTestsController < ApplicationController
 
     to_render = {
       fit_test: fit_test,
-      message: message
+      messages: messages
     }
 
     respond_to do |format|
@@ -43,98 +50,100 @@ class FitTestsController < ApplicationController
   end
 
   def index
-    # TODO: should only be scoped to the current user
-    # TODO: if admin, could see all, with name?
+    if unauthorized?
+      status = 401
+      messages = ["Unauthorized."]
+    elsif !current_user.manages?(user)
+      messages = ["Unauthorized."]
+      status = 422
+    end
+
     to_render = {
       fit_tests: JSON.parse(
         FitTest.viewable(current_user).to_json
       )
+
+      messages: []
     }
-    message = ""
 
     respond_to do |format|
       format.json do
-        render json: to_render.to_json, status: status, message: message
+        render json: to_render.to_json, status: status
       end
     end
   end
 
   def show
-    # TODO: For now, only current user can access facial measurements
-    # Later on, parents should be able to view / edit their children's data
-    unless current_user
+    to_render = {}
+    messages = []
+
+    if !current_user
       status = 401
-      message = "Unauthorized."
-      to_render = {}
+      messages = ["Unauthorized."]
+
+    elsif !current_user.manages?(user)
+      messages = ["Unauthorized."]
     else
       to_render = {
-        fit_test: JSON.parse(FitTest.find(params[:id]).to_json)
+        fit_test: JSON.parse(FitTest.find(params[:id]).to_json),
+        messages: messages
       }
     end
 
-
     respond_to do |format|
       format.json do
-        render json: to_render.to_json, status: status, message: message
+        render json: to_render.to_json, status: status
       end
     end
   end
 
   def update
-    # TODO: For now, only current user can access facial measurements
-    # Later on, parents should be able to view / edit their children's data
-    unless current_user
-      status = 401
-      message = "Unauthorized."
-      to_render = {}
-    end
-
     fit_test = FitTest.find(params[:id])
 
-    # TODO: admins should be able to update data no matter who owns it.
-    if fit_test.facial_measurement.user_id != current_user.id
+    if !current_user
       status = 401
+      messages = ["Unauthorized."]
       to_render = {}
-      message = 'Unauthorized.'
+    elsif current_user.manages?(user)
+      status = 401
+      messages = ['Unauthorized.']
     elsif fit_test.update(fit_test_data)
       status = 204
-      to_render = {}
-      message = ""
+      messages = []
     else
       status = 400 # bad request
-      to_render = {}
-      message = ""
+      messages = []
     end
+
+    to_render = {
+      messages: messages
+    }
 
     respond_to do |format|
       format.json do
-        render json: to_render.to_json, status: status, message: message
+        render json: to_render.to_json, status: status
       end
     end
   end
 
   def delete
-    # TODO: For now, only current user can access facial measurements
-    # Later on, parents should be able to view / edit their children's data
-    unless current_user
-      status = 401
-      message = "Unauthorized."
-      to_render = {}
-    end
-
     fit_test = FitTest.find(params[:id])
 
-
-    # TODO: admins should be able to update data no matter who owns it.
-    if !fit_test.author_ids.include?(current_user.id)
+    if !current_user
       status = 401
+      messages = ["Unauthorized."]
       to_render = {}
-      message = 'Unauthorized.'
+    elsif current_user.manages?(user)
+      status = 401
+      messages = ['Unauthorized.']
     elsif fit_test.delete
       status = 200
-      to_render = {}
-      message = ""
+      messages = []
     end
+
+    to_render = {
+      messages: messages
+    }
 
     respond_to do |format|
       format.json do
@@ -196,7 +205,7 @@ class FitTestsController < ApplicationController
     )
   end
 
-  def user
+  def user_data
     params.require(:user).permit(:id)
   end
 end
