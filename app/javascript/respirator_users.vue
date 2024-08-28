@@ -5,6 +5,10 @@
       <CircularButton text="+" @click="newUser"/>
     </div>
 
+    <div class='row justify-content-center'>
+      <input type="text" v-model='search'>
+      <SearchIcon height='2em' width='2em'/>
+    </div>
 
     <div class='container chunk'>
       <ClosableMessage @onclose='messages = []' :messages='messages'/>
@@ -24,7 +28,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for='r in managedUsers' @click="edit(r.managedId)" text='Edit'>
+            <tr v-for='r in displayables' @click="edit(r.managedId)" text='Edit'>
               <td>
                 {{r.firstName}} {{r.lastName}}
               </td>
@@ -59,18 +63,21 @@ import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
+import SearchIcon from './search_icon.vue'
 
 export default {
   name: 'RespiratorUsers',
   components: {
     Button,
     CircularButton,
-    ClosableMessage
+    ClosableMessage,
+    SearchIcon
   },
   data() {
     return {
       managedUsers: [],
-      facialMeasurementsLength: 0
+      facialMeasurementsLength: 0,
+      search: ""
     }
   },
   props: {
@@ -104,6 +111,20 @@ export default {
           'genderAndSex',
         ]
     ),
+    displayables() {
+      if (this.search == "") {
+        return this.managedUsers
+      } else {
+        let lowerSearch = this.search.toLowerCase()
+        return this.managedUsers.filter(
+          function(mu) {
+            return mu.firstName.toLowerCase().match(lowerSearch)
+              || mu.lastName.toLowerCase().match(lowerSearch)
+
+          }
+        )
+      }
+    },
     facialMeasurementsIncomplete() {
       return this.facialMeasurementsLength == 0
     }
