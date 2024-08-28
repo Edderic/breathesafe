@@ -11,7 +11,7 @@
     </div>
 
     <div class='container chunk'>
-      <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
+      <ClosableMessage @onclose='messages = []' :messages='messages'/>
       <br>
     </div>
 
@@ -91,7 +91,7 @@ export default {
   },
   data() {
     return {
-      errorMessages: [],
+      messages: [],
       masks: [],
       search: "",
       fit_tests: []
@@ -115,7 +115,7 @@ export default {
     ...mapWritableState(
         useMainStore,
         [
-          'message'
+          'messages'
         ]
     ),
     displayables() {
@@ -125,9 +125,6 @@ export default {
         let lowerSearch = this.search.toLowerCase()
         return this.fit_tests.filter((fit_test) => fit_test.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
       }
-    },
-    messages() {
-      return this.errorMessages;
     },
   },
   async created() {

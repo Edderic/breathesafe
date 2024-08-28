@@ -459,6 +459,7 @@
       <Button class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
       <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
       <Button class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
+      <Button class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
     </div>
 
     <br>
@@ -476,7 +477,7 @@ import Button from './button.vue'
 import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import TabSet from './tab_set.vue'
-import { deepSnakeToCamel } from './misc.js'
+import { deepSnakeToCamel, setupCSRF } from './misc.js'
 import SearchIcon from './search_icon.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
@@ -1202,8 +1203,14 @@ export default {
       )
     },
     selectMask(id) {
-      this.selectedMask = this.masks.filter((m) => m.id == id)[0]
-      this.searchMask = this.selectedMask.uniqueInternalModelCode
+      if (!id) {
+        this.selectedMask = {
+          uniqueInternalModelCode: null
+        }
+      } else {
+        this.selectedMask = this.masks.filter((m) => m.id == id)[0]
+        this.searchMask = this.selectedMask.uniqueInternalModelCode
+      }
     },
     selectUser(id) {
       this.selectedUser = this.managedUsers.filter((m) => m.managedId == id)[0]
@@ -1224,13 +1231,38 @@ export default {
           if (response.data.masks) {
             this.masks = deepSnakeToCamel(data.masks)
           }
-
-          // whatever you want
         })
         .catch(error => {
-          this.message = "Failed to load masks."
-          // whatever you want
+          if (error && error.response && error.response.data && error.response.data.messages) {
+            this.addMessages(error.response.data.messages)
+          } else {
+            this.addMessages([error.message])
+          }
         })
+    },
+    async deleteFitTest() {
+      setupCSRF();
+      let answer = window.confirm("Are you sure you want to delete data?");
+
+      if (answer) {
+        await axios.delete(
+          `/fit_tests/${this.$route.params.id}`,
+        )
+          .then(response => {
+            let data = response.data
+            this.$router.push({
+              'name': 'FitTests'
+            })
+
+          })
+          .catch(error => {
+            if (error && error.response && error.response.data && error.response.data.messages) {
+              this.addMessages(error.response.data.messages)
+            } else {
+              this.addMessages([error.message])
+            }
+          })
+      }
     },
     async loadFitTest() {
       // TODO: make this more flexible so parents can load data of their children

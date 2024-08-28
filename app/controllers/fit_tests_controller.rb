@@ -133,7 +133,7 @@ class FitTestsController < ApplicationController
       status = 401
       messages = ["Unauthorized."]
       to_render = {}
-    elsif current_user.manages?(fit_test_user)
+    elsif !current_user.manages?(fit_test_user)
       status = 401
       messages = ['Unauthorized.']
     elsif fit_test.delete
@@ -147,7 +147,7 @@ class FitTestsController < ApplicationController
 
     respond_to do |format|
       format.json do
-        render json: to_render.to_json, status: status, message: message
+        render json: to_render.to_json, status: status
       end
     end
   end
