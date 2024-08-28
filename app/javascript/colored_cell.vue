@@ -1,11 +1,11 @@
 <template>
-  <td
+  <div
     :style="{ backgroundColor: cellColor, padding: padding }"
   >
     <slot>
       {{ display }}
     </slot>
-  </td>
+  </div>
 </template>
 
 <script>

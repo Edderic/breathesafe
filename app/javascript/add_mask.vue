@@ -81,7 +81,7 @@
           <tbody>
             <tr>
               <th>Unique Internal Model Code</th>
-              <td colspan=2>
+              <td colspan='1'>
                 <input class='full-width has-minimal-width' type="text" v-model='uniqueInternalModelCode' v-show="newOrEdit" placeholder="e.g. Flo Mask Adults S/M Nose with Pro filter">
                 <span class='full-width has-minimal-width ' v-show="!newOrEdit">
                   {{uniqueInternalModelCode }}
@@ -91,7 +91,7 @@
 
             <tr>
               <th>Initial cost (US Dollars)</th>
-              <td colspan=1 class='text-align-center'>
+              <td colspan='1' class='text-align-center'>
                 <input type="number"
                   v-model='initialCostUsDollars'
                   v-show="newOrEdit"
@@ -113,7 +113,7 @@
 
             <tr>
               <th >Filter type</th>
-              <td colspan=1 class='text-align-center'>
+              <td colspan='1' class='text-align-center'>
                 <select
                     v-model="filterType"
                     v-show="newOrEdit"

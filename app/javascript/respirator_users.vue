@@ -38,7 +38,9 @@
               </td>
               <td @click="visit(r.managedId, 'Facial Measurements')" class='colored-cell' :style="{backgroundColor: backgroundColor(r.facialMeasurementsComplete)}" v-html="checkmarkOrCross(r.facialMeasurementsComplete)">
               </td>
-              <ColoredCell class='colored-cell' :text='r.readyToAddFitTestingDataPercentage' :backgroundColor='statusColor(r.readyToAddFitTestingDataPercentage)'/>
+              <td :style="{backgroundColor: statusColor(r.readyToAddFitTestingDataPercentage)}" class='colored-cell'>
+                {{r.readyToAddFitTestingDataPercentage}}
+              </td>
             </tr>
           </tbody>
         </table>
