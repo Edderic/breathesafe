@@ -42,7 +42,7 @@
                 {{r.facialMeasurementsComplete}}
               </td>
               <td>
-                {{r.readyToAddFitTestingDataPercentage}}
+                <ColoredCell class='status' :text='r.readyToAddFitTestingDataPercentage' :backgroundColor='statusColor(r.readyToAddFitTestingDataPercentage)'/>
               </td>
             </tr>
           </tbody>
@@ -57,7 +57,9 @@ import axios from 'axios';
 import Button from './button.vue'
 import ClosableMessage from './closable_message.vue'
 import CircularButton from './circular_button.vue'
+import ColoredCell from './colored_cell.vue'
 import { deepSnakeToCamel, setupCSRF } from './misc.js'
+import { userSealCheckColorMapping } from './colors.js'
 import { RespiratorUser } from './respirator_user.js'
 import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
@@ -71,6 +73,7 @@ export default {
     Button,
     CircularButton,
     ClosableMessage,
+    ColoredCell,
     SearchIcon
   },
   data() {
@@ -141,6 +144,18 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useProfileStore, ['loadProfile']),
+    statusColor(fitTestingPercent) {
+      let percentage = parseFloat(fitTestingPercent.split("%")[0])
+      let status = 'Passed'
+      if (percentage == 0) {
+        status = "Failed"
+      } else if (percentage > 0 && percentage < 100) {
+        status = "Skipped"
+      }
+
+      let color = userSealCheckColorMapping[status]
+      return `rgb(${color.r}, ${color.g}, ${color.b})`
+    },
     async loadStuff() {
       let managedUsers = [];
       let managedUser = {};
@@ -318,5 +333,9 @@ export default {
   thead th {
     background-color: #eee;
     padding: 1em;
+  }
+
+  .status {
+    padding: 0.5em;
   }
 </style>
