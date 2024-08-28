@@ -37,7 +37,7 @@
         </div>
 
         <h3 v-show="userDisplayables.length == 0" class='text-align-center'>Not able to find the user?
-          <router-link :to="{name: 'NewMask'}"> Click here to add user information. </router-link>
+          <router-link :to="{name: 'RespiratorUsers'}"> Click here to add user information. </router-link>
         </h3>
 
 
