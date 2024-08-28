@@ -17,7 +17,7 @@ export class RespiratorUser {
   }
 
   get facialMeasurementsComplete() {
-    return !!this.user.facialMeasurementsId
+    return !!this.user.facialMeasurementId
   }
 
   get nameComplete() {
