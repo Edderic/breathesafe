@@ -32,18 +32,13 @@
               <td>
                 {{r.firstName}} {{r.lastName}}
               </td>
-              <td>
-                {{r.raceEthnicityComplete}}
+              <td class='colored-cell' :style="{backgroundColor: backgroundColor(r.raceEthnicityComplete)}" v-html="checkmarkOrCross(r.raceEthnicityComplete)">
               </td>
-              <td>
-                {{r.genderAndSexComplete}}
+              <td class='colored-cell' :style="{backgroundColor: backgroundColor(r.genderAndSexComplete)}" v-html="checkmarkOrCross(r.genderAndSexComplete)">
               </td>
-              <td>
-                {{r.facialMeasurementsComplete}}
+              <td class='colored-cell' :style="{backgroundColor: backgroundColor(r.facialMeasurementsComplete)}" v-html="checkmarkOrCross(r.facialMeasurementsComplete)">
               </td>
-              <td>
-                <ColoredCell class='status' :text='r.readyToAddFitTestingDataPercentage' :backgroundColor='statusColor(r.readyToAddFitTestingDataPercentage)'/>
-              </td>
+              <ColoredCell class='colored-cell' :text='r.readyToAddFitTestingDataPercentage' :backgroundColor='statusColor(r.readyToAddFitTestingDataPercentage)'/>
             </tr>
           </tbody>
         </table>
@@ -155,6 +150,25 @@ export default {
 
       let color = userSealCheckColorMapping[status]
       return `rgb(${color.r}, ${color.g}, ${color.b})`
+    },
+    backgroundColor(boolean) {
+      let color;
+
+      if (boolean) {
+        color = userSealCheckColorMapping['Passed']
+
+      } else {
+        color = userSealCheckColorMapping['Failed']
+      }
+
+      return `rgb(${color.r}, ${color.g}, ${color.b}, 0.5)`
+    },
+    checkmarkOrCross(boolean) {
+      if (boolean) {
+        return `&#x2714;`
+      } else {
+        return "&#x2717;"
+      }
     },
     async loadStuff() {
       let managedUsers = [];
@@ -335,7 +349,7 @@ export default {
     padding: 1em;
   }
 
-  .status {
-    padding: 0.5em;
+  .colored-cell {
+    text-align: center;
   }
 </style>

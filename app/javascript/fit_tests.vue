@@ -43,8 +43,8 @@
             <td class='status' @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QNFT"})'>
               <ColoredCell class='status' :text='f.quantitativeStatus' :backgroundColor='quantitativeStatusColor(f.quantitativeStatus)'/>
             </td>
-            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})'>
-              <ColoredCell class='status' :text='f.comfortStatus' :backgroundColor='statusColor(f.comfortStatus)'/>
+            <td >
+              <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})' class='status' :text='f.comfortStatus' :backgroundColor='statusColor(f.comfortStatus)'/>
             </td>
           </tr>
         </tbody>
@@ -395,6 +395,9 @@ export default {
 
   .status {
     padding: 0.5em;
+    min-width: 7em;
+    text-align: center;
+
   }
 
   .scrollable {
