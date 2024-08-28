@@ -23,7 +23,7 @@
     </div>
 
     <div class='container chunk'>
-      <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
+      <ClosableMessage @onclose='messages = []' :messages='messages'/>
       <br>
     </div>
 
@@ -709,7 +709,6 @@ export default {
             }
         }
       },
-      errorMessages: [],
       masks: [],
       qualitativeProcedure: null,
       qualitativeAerosolSolution: 'Saccharin',
@@ -894,7 +893,7 @@ export default {
     ...mapWritableState(
         useMainStore,
         [
-          'message'
+          'messages'
         ]
     ),
     ...mapState(
@@ -1062,9 +1061,6 @@ export default {
 
       return this.maskDisplayables.slice(0, lengthToDisplay)
     },
-    messages() {
-      return this.errorMessages;
-    },
   },
   async created() {
     await this.getCurrentUser()
@@ -1137,13 +1133,13 @@ export default {
     )
   },
   methods: {
-    ...mapActions(useMainStore, ['getCurrentUser']),
+    ...mapActions(useMainStore, ['addMessages', 'getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     showDescription(name) {
-      this.errorMessages = []
+      this.messages = []
 
-      this.errorMessages.push(
+      this.messages.push(
         {
           str: this.oshaExercises[name].description
         }
@@ -1154,7 +1150,7 @@ export default {
         this.selectedMask = {}
         this.searchMask = event.target.value
       } else {
-        this.selectedUser = {}
+        this.selectedUser = new RespiratorUser({})
         this.searchUser = event.target.value
       }
     },
@@ -1250,7 +1246,7 @@ export default {
       // if user seal check passed, then we should have qualitative procedure be not "Skipping"
       // OR quantitative procedure be not "Skipping"
       if (this.userSealCheckPassed && this.qualitativeProcedure == 'Skipping' && this.quantitativeProcedure == 'Skipping') {
-        this.errorMessages.push(
+        this.messages.push(
           {
             str: `Since User Seal Check passed, cannot skip QLFT and QNFT. Please do the procedures in one of those sections and fill out the data accordingly.`
           }
@@ -1262,7 +1258,7 @@ export default {
 
       for (const [key, value] of Object.entries(this.comfort)) {
         if (value == null) {
-          this.errorMessages.push(
+          this.messages.push(
             {
               str: `Please fill out: "${key}"`
             }
@@ -1272,7 +1268,7 @@ export default {
     },
     validateUserSealCheck() {
       for (let key of this.missingDataUserSealCheck) {
-          this.errorMessages.push(
+          this.messages.push(
             {
               str: `Please fill out: "${key}"`
             }
@@ -1282,7 +1278,7 @@ export default {
 
     validatePresenceOfInitialCountPerCM3() {
       if (!this.initialCountPerCm3) {
-            this.errorMessages.push(
+            this.messages.push(
               {
                 str: "Please fill out initial count per cm3.",
                 to: {
@@ -1301,7 +1297,7 @@ export default {
     },
     validateValueOfInitialCountPerCM3() {
       if (this.initialCountPerCm3 < 1000) {
-          this.errorMessages.push(
+          this.messages.push(
             {
               str: "Initial particle count too low. Please take this test at an environment where the number of particles per cubic centimeter is greater than 1000.",
             }
@@ -1311,7 +1307,7 @@ export default {
     },
     validateQLFT(part) {
       if (!this.qualitativeProcedure) {
-        this.errorMessages.push(
+        this.messages.push(
           {
             str: `Please choose a QLFT procedure.`
           }
@@ -1330,7 +1326,7 @@ export default {
           }
 
           if (value['result'] == null) {
-            this.errorMessages.push(
+            this.messages.push(
               {
                 str: `Please fill out: "${value['name']}"`
               }
@@ -1341,7 +1337,7 @@ export default {
     },
     validatePresenceOfTestingMode() {
       if (!this.quantitativeTestingMode) {
-        this.errorMessages.push(
+        this.messages.push(
           {
             str: `Please choose a QNFT testing mode.`
           }
@@ -1350,7 +1346,7 @@ export default {
     },
     validateQNFT(part) {
       if (!this.quantitativeProcedure) {
-        this.errorMessages.push(
+        this.messages.push(
           {
             str: `Please choose a QNFT procedure.`
           }
@@ -1375,7 +1371,7 @@ export default {
           // }
 
           if (value['fit_factor'] == null) {
-            this.errorMessages.push(
+            this.messages.push(
               {
                 str: `Please fill out: "${value['name']}"`
               }
@@ -1383,7 +1379,7 @@ export default {
           }
 
           if (value['fit_factor'] < 0) {
-            this.errorMessages.push(
+            this.messages.push(
               {
                 str: `Cannot have a negative fit factor for "${value['name']}"`
               }
@@ -1394,7 +1390,7 @@ export default {
     },
     validateMask() {
       if (this.selectedMask.id == 0) {
-        this.errorMessages.push(
+        this.messages.push(
           {
             str: "Please select a mask."
           }
@@ -1407,7 +1403,8 @@ export default {
 
         await axios.put(
           `/fit_tests/${this.id}.json`, {
-            fit_test: this.toSave
+            fit_test: this.toSave,
+            user: this.selectedUser.managedId
           }
         )
           .then(response => {
@@ -1423,14 +1420,14 @@ export default {
           })
           .catch(error => {
             //  TODO: actually use the error message
-            this.errorMessages.push({
+            this.messages.push({
               str: "Failed to update fit test."
             })
           })
       } else {
         this.validateMask()
 
-        if (this.errorMessages.length > 0) {
+        if (this.messages.length > 0) {
           return
         }
 
@@ -1465,20 +1462,38 @@ export default {
           })
           .catch(error => {
             //  TODO: actually use the error message
-            this.errorMessages.push({
+            this.messages.push({
               str: "Failed to create fit test."
             })
           })
       }
     },
+    validateUser() {
+      if (!this.selectedUser.fullName) {
+
+        this.addMessages(["Please select a user."])
+      }
+    },
     async validateAndSaveFitTest() {
       // this.runValidations()
-      this.errorMessages = []
+      this.messages = []
 
-      if (this.tabToShow == 'Mask') {
+      if (this.tabToShow == 'User') {
+        this.validateUser()
+
+        if (this.messages.length == 0) {
+          await this.saveFitTest({
+            tabToShow: 'Mask'
+          })
+        } else {
+          return
+        }
+      }
+      else if (this.tabToShow == 'Mask') {
+        this.validateUser()
         this.validateMask()
 
-        if (this.errorMessages.length == 0) {
+        if (this.messages.length == 0) {
           await this.saveFitTest({
             tabToShow: 'Facial Hair'
           })
@@ -1490,9 +1505,10 @@ export default {
       }
 
       else if (this.tabToShow == 'Facial Hair') {
+        this.validateUser()
         this.validateMask()
 
-        if (this.errorMessages.length == 0) {
+        if (this.messages.length == 0) {
           await this.saveFitTest({
             tabToShow: 'User Seal Check'
           })
@@ -1502,10 +1518,11 @@ export default {
       }
 
       else if (this.tabToShow == 'User Seal Check') {
+        this.validateUser()
         this.validateMask()
         this.validateUserSealCheck()
 
-        if (this.errorMessages.length == 0) {
+        if (this.messages.length == 0) {
           await this.saveFitTest({
             tabToShow: 'QLFT',
             secondaryTabToShow: 'Choose Procedure'
@@ -1513,7 +1530,7 @@ export default {
 
           // Save first before potentially displaying this message
           if (!this.userSealCheckPassed) {
-            this.errorMessages.push(
+            this.messages.push(
               {
                 str: "User seal check failed. You may skip adding qualitative or quantitative fit testing data, along with comfort data if you wish, by clicking here.",
                 to: {
@@ -1529,6 +1546,7 @@ export default {
       }
 
       else if (this.tabToShow == 'QLFT' && this.secondaryTabToShow == 'Choose Procedure') {
+        this.validateUser()
         this.validateMask()
         this.validateUserSealCheck()
         this.validateQLFT('Choose Procedure')
@@ -1541,7 +1559,7 @@ export default {
             }
           )
         }
-        else if (this.errorMessages.length == 0) {
+        else if (this.messages.length == 0) {
           await this.saveFitTest(
             {
               tabToShow: 'QLFT',
@@ -1554,11 +1572,12 @@ export default {
       }
 
       else if (this.tabToShow == 'QLFT' && this.secondaryTabToShow == 'Results') {
+        this.validateUser()
         this.validateMask()
         this.validateUserSealCheck()
         this.validateQLFT('Results')
 
-        if (this.errorMessages.length == 0) {
+        if (this.messages.length == 0) {
           await this.saveFitTest(
             {
               tabToShow: 'QNFT',
@@ -1568,7 +1587,7 @@ export default {
 
 
           if (this.qualitativeHasAFailure) {
-            this.errorMessages.push(
+            this.messages.push(
               {
                 str: "QLFT has a failure. You may skip adding quantitative fit testing data and comfort data if you wish, by clicking here.",
                 to: {
@@ -1583,6 +1602,7 @@ export default {
         }
       }
       else if (this.tabToShow == 'QNFT' && this.secondaryTabToShow != 'Results') {
+        this.validateUser()
         this.validateMask()
         this.validateUserSealCheck()
         this.validateQLFT()
@@ -1592,7 +1612,7 @@ export default {
         this.validateQLFTorQNFTExists()
 
 
-        if (this.errorMessages.length == 0) {
+        if (this.messages.length == 0) {
           await this.saveFitTest(
             {
               tabToShow: 'QNFT',
@@ -1605,13 +1625,14 @@ export default {
       }
 
       else if (this.tabToShow == 'QNFT' && this.secondaryTabToShow == 'Results') {
+        this.validateUser()
         this.validateMask()
         this.validateUserSealCheck()
         this.validateQLFT()
         this.validateQNFT()
         this.validateQLFTorQNFTExists()
 
-        if (this.errorMessages.length == 0) {
+        if (this.messages.length == 0) {
           await this.saveFitTest(
             {
               tabToShow: 'Comfort',
@@ -1623,12 +1644,13 @@ export default {
       }
 
       else if (this.tabToShow == 'Comfort') {
+        this.validateUser()
         this.validateMask()
         this.validateUserSealCheck()
         this.validateQLFTorQNFTExists()
         this.validateComfort()
 
-        if (this.errorMessages.length == 0) {
+        if (this.messages.length == 0) {
           await this.saveFitTest(
             {
               tabToShow: 'Comfort',
@@ -1639,7 +1661,7 @@ export default {
             name: 'FitTests'
           })
 
-          this.errorMessages.push(
+          this.messages.push(
             {
               str: 'Successfully edited a fit test'
             }

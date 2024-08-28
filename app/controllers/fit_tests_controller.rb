@@ -7,7 +7,7 @@ class FitTestsController < ApplicationController
       message = "Unauthorized."
       fit_test = {}
     else
-      latest_facial_measurement = FacialMeasurement.latest(current_user)
+      latest_facial_measurement = FacialMeasurement.latest(user)
 
       unless latest_facial_measurement
         status = 422
@@ -194,6 +194,10 @@ class FitTestsController < ApplicationController
         "How comfortable is the position of the mask on face and cheeks?"
       ],
     )
+  end
+
+  def user
+    params.require(:user).permit(:id)
   end
 end
 
