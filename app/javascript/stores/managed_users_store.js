@@ -39,21 +39,29 @@ export const useManagedUserStore = defineStore('managedUsers', {
       setupCSRF();
       let mainStore = useMainStore()
 
-      await axios.delete(
-        `/managed_users/${managedUserId}`,
-      )
-        .then(response => {
-          let data = response.data
-          this.managedUser = {}
-          this.managedUsers = this.managedUsers.filter((m) => m.managedUserId != managedUserId)
-        })
-        .catch(error => {
-          if (error && error.response && error.response.data && error.response.data.messages) {
-            mainStore.addMessages(error.response.data.messages)
-          } else {
-            mainStore.addMessages(["Something went wrong."])
-          }
-        })
+      let answer = window.confirm("Are you sure you want to delete data?");
+
+      if (answer) {
+        await axios.delete(
+          `/managed_users/${managedUserId}`,
+        )
+          .then(response => {
+            let data = response.data
+            this.managedUser = {}
+            this.managedUsers = this.managedUsers.filter((m) => m.managedUserId != managedUserId)
+          })
+          .catch(error => {
+            if (error && error.response && error.response.data && error.response.data.messages) {
+              mainStore.addMessages(error.response.data.messages)
+            } else {
+              mainStore.addMessages(["Something went wrong."])
+            }
+          })
+
+      }
+      else {
+        //some code
+      }
 
     },
   }
