@@ -70,7 +70,6 @@ export default {
   data() {
     return {
       managedUsers: [],
-      messages: [],
       facialMeasurementsLength: 0
     }
   },
@@ -81,6 +80,7 @@ export default {
         useMainStore,
         [
           'currentUser',
+          'messages'
         ]
     ),
     ...mapState(
@@ -118,7 +118,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(useMainStore, ['getCurrentUser']),
+    ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useProfileStore, ['loadProfile']),
     async loadStuff() {
       let managedUsers = [];
@@ -145,11 +145,7 @@ export default {
           }
         })
         .catch(error => {
-          for(let errorMessage of error.response.data.messages) {
-            this.messages.push({
-              str: errorMessage
-            })
-          }
+          this.addMessages(error.response.data.messages)
         // whatever you want
         })
     },
