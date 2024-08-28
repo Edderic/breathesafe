@@ -176,6 +176,7 @@ export default {
 
       let managedUsers;
       let managedUser;
+      let respiratorUser;
 
       await axios.post(
         `/managed_users.json`,
@@ -185,19 +186,31 @@ export default {
           if (response.data.managed_user) {
             managedUser = deepSnakeToCamel(response.data.managed_user)
 
+            respiratorUser = new RespiratorUser(
+              managedUser
+            )
+
             this.managedUsers.push(
-              new RespiratorUser(
-                managedUser
-              )
+              respiratorUser
+            )
+
+            this.$router.push(
+              {
+                'name': 'RespiratorUser',
+                params: {
+                  id: respiratorUser.managedId
+                }
+              }
             )
           }
         })
         .catch(error => {
-          for(let errorMessage of error.response.data.messages) {
-            this.messages.push({
-              str: errorMessage
-            })
+          if (error && error.response && error.response.data && error.response.data.messages) {
+            this.addMessages(error.response.data.messages)
+          } else {
+            this.addMessages['Something went wrong.']
           }
+
         // whatever you want
         })
     },

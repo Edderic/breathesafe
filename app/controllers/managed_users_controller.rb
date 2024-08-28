@@ -57,7 +57,7 @@ class ManagedUsersController < ApplicationController
           managed_user: ManagedUser.for_manager_and_managed(
             manager_id: current_user.id,
             managed_id: user.id
-          ),
+          )[0],
           messages: []
         }
 
