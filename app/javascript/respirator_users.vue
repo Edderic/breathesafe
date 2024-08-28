@@ -156,8 +156,6 @@ export default {
       let managedUsers;
       let managedUser;
 
-      debugger
-
       await axios.post(
         `/managed_users.json`,
       )
