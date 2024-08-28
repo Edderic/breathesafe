@@ -272,17 +272,16 @@
 
           <tbody v-for="(f, index) in filtrationEfficiencies" class='text-align-center'>
             <tr>
-              <td>
+              <td colspan='2'>
                 <h3>Filtration & Breathability</h3>
               </td>
             </tr>
-            <tr>
-              <th colspan='2' v-show='newOrEdit'>Filtration Efficiency (Percent)</th>
-              <th colspan='2' v-show='!newOrEdit'>Filtration Efficiency</th>
-            </tr>
 
             <tr>
-              <td colspan='2'>
+              <th v-show='newOrEdit'>Filtration Efficiency (Percent)</th>
+              <th v-show='!newOrEdit'>Filtration Efficiency</th>
+
+              <td colspan='1'>
                 <input type="number" :value='f.filtrationEfficiencyPercent' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyPercent')"
                        v-show="newOrEdit"
                        >
@@ -294,19 +293,16 @@
                            :value='filtrationEfficiencyValue(f.filtrationEfficiencyPercent)'
                            :text='percentText(f.filtrationEfficiencyPercent)'
                            :exception='exceptionObject'
-                           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%', }"
                            :title='f.filtrationEfficiencyPercent'
                            />
               </td>
             </tr>
 
             <tr>
-              <th colspan='2' v-show='newOrEdit'>Breathability (Pa)</th>
-              <th colspan='2' v-show='!newOrEdit'>Breathability</th>
-            </tr>
-
-            <tr>
-              <td colspan='2'>
+              <th v-show='newOrEdit'>Breathability (Pa)</th>
+              <th v-show='!newOrEdit'>Breathability</th>
+              <td colspan='1'>
                 <input type="number" :value='breathability[index].breathabilityPascals' @change="updateArrayOfObj($event, 'breathability', index, 'breathabilityPascals')"
                        v-show="newOrEdit"
                        >
