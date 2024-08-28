@@ -28,15 +28,15 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for='r in displayables' @click="edit(r.managedId)" text='Edit'>
-              <td>
+            <tr v-for='r in displayables' text='Edit'>
+              <td @click="visit(r.managedId, 'Name')">
                 {{r.firstName}} {{r.lastName}}
               </td>
-              <td class='colored-cell' :style="{backgroundColor: backgroundColor(r.raceEthnicityComplete)}" v-html="checkmarkOrCross(r.raceEthnicityComplete)">
+              <td @click="visit(r.managedId, 'Demographics')" class='colored-cell' :style="{backgroundColor: backgroundColor(r.raceEthnicityComplete)}" v-html="checkmarkOrCross(r.raceEthnicityComplete)">
               </td>
-              <td class='colored-cell' :style="{backgroundColor: backgroundColor(r.genderAndSexComplete)}" v-html="checkmarkOrCross(r.genderAndSexComplete)">
+              <td @click="visit(r.managedId, 'Demographics')" class='colored-cell' :style="{backgroundColor: backgroundColor(r.genderAndSexComplete)}" v-html="checkmarkOrCross(r.genderAndSexComplete)">
               </td>
-              <td class='colored-cell' :style="{backgroundColor: backgroundColor(r.facialMeasurementsComplete)}" v-html="checkmarkOrCross(r.facialMeasurementsComplete)">
+              <td @click="visit(r.managedId, 'Facial Measurements')" class='colored-cell' :style="{backgroundColor: backgroundColor(r.facialMeasurementsComplete)}" v-html="checkmarkOrCross(r.facialMeasurementsComplete)">
               </td>
               <ColoredCell class='colored-cell' :text='r.readyToAddFitTestingDataPercentage' :backgroundColor='statusColor(r.readyToAddFitTestingDataPercentage)'/>
             </tr>
@@ -227,11 +227,14 @@ export default {
         // whatever you want
         })
     },
-    edit(profileId) {
+    visit(profileId, tabToShow) {
       this.$router.push({
         name: 'RespiratorUser',
         params: {
           id: profileId
+        },
+        query: {
+          tabToShow: tabToShow
         }
       })
     }
