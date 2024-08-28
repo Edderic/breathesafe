@@ -110,4 +110,50 @@ class ManagedUsersController < ApplicationController
       end
     end
   end
+
+  def delete
+    messages = []
+
+    if current_user.nil?
+
+      messages = ['Please log in.']
+      status = 422
+    else
+      managed_users = ManagedUser.for_manager_and_managed(
+        manager_id: current_user.id,
+        managed_id: params[:id]
+      )
+
+      ActiveRecord::Base.transaction do
+        facial_measurements = FacialMeasurement.where(user_id: params[:id])
+        fit_tests = FitTest.where(facial_measurement_id: facial_measurements.map(&:id) )
+        fit_tests.destroy_all
+
+        facial_measurements.destroy_all
+
+        profile = Profile.find_by(user_id: params[:id])
+        profile.destroy
+
+        ManagedUser.where(managed_id: params[:id]).destroy_all
+
+        User.find(params[:id]).destroy
+      rescue ActiveRecord::StatementInvalid
+        messages = ['Transaction to delete failed.']
+      end
+
+      status = 200
+    end
+
+    to_render = {
+      managed_users: [],
+      messages: messages
+    }
+
+
+    respond_to do |format|
+      format.json do
+        render json: to_render.to_json, status: status
+      end
+    end
+  end
 end

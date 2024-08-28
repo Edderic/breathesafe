@@ -342,9 +342,10 @@
     </div>
 
     <div class='row justify-content-center'>
-      <Button class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
-      <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-if='mode == "View"'/>
-      <Button text="Save and continue" @click='save()' v-if='mode != "View"'/>
+      <Button class='button' text="View Mode" @click='mode = "View"' v-show='mode == "Edit"'/>
+      <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-show='mode == "View"'/>
+      <Button text="Save and continue" @click='save()' v-show='mode != "View"'/>
+      <Button text="Delete" @click='deleteUser($route.params.id)' v-show='mode == "Edit"'/>
     </div>
     <br>
     <br>
@@ -539,7 +540,16 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
-    ...mapActions(useManagedUserStore, ['loadManagedUser']),
+    ...mapActions(useManagedUserStore, ['deleteManagedUser', 'loadManagedUser']),
+    async deleteUser(id) {
+      await this.deleteManagedUser(id)
+      this.$router.push(
+        {
+          name: 'RespiratorUsers'
+        }
+      )
+
+    },
     setSecondaryRouteTo(opt) {
       this.$router.push({
         name: "RespiratorUser",
