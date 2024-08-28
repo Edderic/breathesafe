@@ -21,11 +21,10 @@
               <th>Gender filled out</th>
               <th>Has Facial Measurements</th>
               <th>Ready to add Fit Testing Data</th>
-              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for='r in managedUsers'>
+            <tr v-for='r in managedUsers' @click="edit(r.managedId)" text='Edit'>
               <td>
                 {{r.firstName}} {{r.lastName}}
               </td>
@@ -40,9 +39,6 @@
               </td>
               <td>
                 {{r.readyToAddFitTestingDataPercentage}}
-              </td>
-              <td>
-                <Button @click="edit(r.managedId)" text='Edit' />
               </td>
             </tr>
           </tbody>
@@ -284,5 +280,10 @@ export default {
 
   .justify-content-center {
     justify-content: center;
+  }
+
+  tbody tr:hover {
+    cursor: pointer;
+    background-color: rgb(230,230,230);
   }
 </style>

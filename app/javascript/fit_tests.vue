@@ -407,4 +407,9 @@ export default {
     top: 0;
     background-color: #eee;
   }
+
+  tbody tr:hover {
+    cursor: pointer;
+    background-color: rgb(230,230,230);
+  }
 </style>
