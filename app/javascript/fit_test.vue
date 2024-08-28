@@ -99,7 +99,19 @@
       </div>
     </div>
 
-    <div v-show='tabToShow == "Facial Hair"'>
+    <div v-show='tabToShow == "Facial Hair"' class='justify-content-center flex-dir-col align-content-center'>
+      <table>
+        <tbody>
+          <tr>
+            <th>Selected User</th>
+            <td>{{selectedUser.fullName}}</td>
+          </tr>
+          <tr>
+            <th>Selected Mask</th>
+            <td>{{selectedMask.uniqueInternalModelCode}}</td>
+          </tr>
+        </tbody>
+      </table>
 
       <p class='narrow-p'>Having a beard can increase seal leakage. If you don't have one, please select "0mm" for the following question. If you do have one, please use a caliper or tape measure to estimate beard length.</p>
 
@@ -126,6 +138,10 @@
     <div v-show='tabToShow == "Comfort"' class='justify-content-center flex-dir-col'>
       <table>
         <tbody>
+          <tr>
+            <th>Selected User</th>
+            <td>{{selectedUser.fullName}}</td>
+          </tr>
           <tr>
             <th>Selected Mask</th>
             <td>{{selectedMask.uniqueInternalModelCode}}</td>
@@ -170,6 +186,10 @@
     <div v-show='tabToShow == "User Seal Check"' class='justify-content-center flex-dir-col align-content-center'>
       <table>
         <tbody>
+          <tr>
+            <th>Selected User</th>
+            <td>{{selectedUser.fullName}}</td>
+          </tr>
           <tr>
             <th>Selected Mask</th>
             <td>{{selectedMask.uniqueInternalModelCode}}</td>
@@ -222,6 +242,10 @@
       <div class='grid qlft'>
         <table v-show='secondaryTabToShow == "Choose Procedure"'>
           <tbody>
+            <tr>
+              <th>Selected User</th>
+              <td>{{selectedUser.fullName}}</td>
+            </tr>
             <tr>
               <th>Selected Mask</th>
               <td>{{selectedMask.uniqueInternalModelCode}}</td>
@@ -321,6 +345,10 @@
       <div class='grid qlft'>
         <table v-show='secondaryTabToShow == "Choose Procedure"'>
           <tbody>
+            <tr>
+              <th>Selected User</th>
+              <td>{{selectedUser.fullName}}</td>
+            </tr>
             <tr>
               <th>Selected Mask</th>
               <td>{{selectedMask.uniqueInternalModelCode}}</td>
@@ -1153,7 +1181,9 @@ export default {
     },
     updateSearch(event, userOrMask) {
       if (userOrMask == 'mask') {
-        this.selectedMask = {}
+        this.selectedMask = {
+          'uniqueInternalModelCode': null
+        }
         this.searchMask = event.target.value
       } else {
         this.selectedUser = new RespiratorUser({})
@@ -1788,7 +1818,7 @@ export default {
   }
 
   td,th {
-    padding: 1em;
+    padding: 0.5em;
   }
   .text-for-other {
     margin: 0 1.25em;
