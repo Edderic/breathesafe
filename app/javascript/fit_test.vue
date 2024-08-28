@@ -453,6 +453,7 @@ import SearchIcon from './search_icon.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
+import { RespiratorUser } from './respirator_user.js';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import { useManagedUserStore } from './stores/managed_users_store';

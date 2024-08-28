@@ -19,6 +19,7 @@
     <div class='main scrollable'>
       <table>
         <thead>
+          <th>Tester</th>
           <th>Image</th>
           <th>Mask</th>
           <th>Created at</th>
@@ -29,6 +30,7 @@
         </thead>
         <tbody>
           <tr v-for='f in displayables'>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User"})'>{{f.firstName + ' ' + f.lastName}}</td>
             <td>
               <img :src="f.imageUrls[0]" alt="" class='thumbnail'>
             </td>

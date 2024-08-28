@@ -6,10 +6,12 @@ class FitTest < ApplicationRecord
 
     fit_tests = FitTest.connection.exec_query(
       <<-SQL
-        SELECT ft.*, m.unique_internal_model_code, m.image_urls, m.has_exhalation_valve, fm.user_id
+        SELECT ft.*, m.unique_internal_model_code, m.image_urls, m.has_exhalation_valve, fm.user_id, p.first_name, p.last_name
         FROM fit_tests ft
         INNER JOIN facial_measurements fm
         ON (fm.id = ft.facial_measurement_id)
+        INNER JOIN profiles p
+        ON (p.user_id = fm.user_id)
         LEFT JOIN masks m
         ON (m.id = ft.mask_id)
         WHERE fm.user_id IN (
@@ -28,10 +30,12 @@ class FitTest < ApplicationRecord
   def self.find_by_id_with_user_id(id)
     fit_tests = FitTest.connection.exec_query(
       <<-SQL
-        SELECT ft.*, m.unique_internal_model_code, m.image_urls, m.has_exhalation_valve, fm.user_id
+        SELECT ft.*, m.unique_internal_model_code, m.image_urls, m.has_exhalation_valve, fm.user_id, p.first_name, p.last_name
         FROM fit_tests ft
         INNER JOIN facial_measurements fm
         ON (fm.id = ft.facial_measurement_id)
+        INNER JOIN profiles p
+        ON (p.user_id = fm.user_id)
         LEFT JOIN masks m
         ON (m.id = ft.mask_id)
         WHERE ft.id = '#{id}'
