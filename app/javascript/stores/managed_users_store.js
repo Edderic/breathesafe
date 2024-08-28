@@ -16,6 +16,41 @@ export const useManagedUserStore = defineStore('managedUsers', {
     // ...mapWritableState(useMainStore, ['message']),
   },
   actions: {
+    async loadManagedUsers() {
+      let mainStore = useMainStore()
+      let managedUsers = [];
+      let managedUser;
+
+      setupCSRF();
+
+      await axios.get(
+        `/managed_users.json`,
+      )
+        .then(response => {
+          let data = response.data
+          if (response.data.managed_users) {
+            managedUsers = response.data.managed_users
+
+            for(let managedUserData of managedUsers) {
+              managedUser = deepSnakeToCamel(managedUserData)
+              this.managedUsers.push(
+                new RespiratorUser(
+                  managedUser
+                )
+              )
+            }
+          }
+        })
+        .catch(error => {
+          debugger;
+          if (error && error.response && error.response.data && error.response.data.messages) {
+            mainStore.addMessages(error.response.data.messages)
+          } else {
+            mainStore.addMessages([error.message])
+          }
+        // whatever you want
+        })
+    },
     async loadManagedUser(managedUserId) {
       setupCSRF();
 

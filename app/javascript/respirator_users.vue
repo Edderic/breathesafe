@@ -61,6 +61,7 @@ import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import SearchIcon from './search_icon.vue'
+import { useManagedUserStore } from './stores/managed_users_store.js'
 
 export default {
   name: 'RespiratorUsers',
@@ -73,7 +74,6 @@ export default {
   },
   data() {
     return {
-      managedUsers: [],
       facialMeasurementsLength: 0,
       search: ""
     }
@@ -88,6 +88,12 @@ export default {
           'messages'
         ]
     ),
+    ...mapWritableState(
+        useMainStore,
+        [
+          'messages'
+        ]
+    ),
     ...mapState(
         useProfileStore,
         [
@@ -98,6 +104,12 @@ export default {
           'raceEthnicityComplete',
           'facialMeasurementsComplete',
           'loadFacialMeasurements',
+        ]
+    ),
+    ...mapWritableState(
+        useManagedUserStore,
+        [
+          'managedUsers'
         ]
     ),
     ...mapWritableState(
@@ -133,12 +145,13 @@ export default {
     if (!this.currentUser) {
       signIn.call(this)
     } else {
-      this.loadStuff()
+      this.loadManagedUsers()
     }
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useProfileStore, ['loadProfile']),
+    ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     statusColor(fitTestingPercent) {
       let percentage = parseFloat(fitTestingPercent.split("%")[0])
       let status = 'Passed'
@@ -169,35 +182,6 @@ export default {
       } else {
         return "&#x2717;"
       }
-    },
-    async loadStuff() {
-      let managedUsers = [];
-      let managedUser = {};
-
-      setupCSRF();
-
-      await axios.get(
-        `/managed_users.json`,
-      )
-        .then(response => {
-          let data = response.data
-          if (response.data.managed_users) {
-            managedUsers = response.data.managed_users
-
-            for(let managedUserData of managedUsers) {
-              managedUser = deepSnakeToCamel(managedUserData)
-              this.managedUsers.push(
-                new RespiratorUser(
-                  managedUser
-                )
-              )
-            }
-          }
-        })
-        .catch(error => {
-          this.addMessages(error.response.data.messages)
-        // whatever you want
-        })
     },
 
     async newUser() {
