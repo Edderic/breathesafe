@@ -17,6 +17,7 @@ export const useManagedUserStore = defineStore('managedUsers', {
   },
   actions: {
     async loadManagedUsers() {
+      this.managedUsers = [];
       let mainStore = useMainStore()
       let managedUsers = [];
       let managedUser;

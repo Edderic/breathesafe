@@ -27,38 +27,76 @@
       <br>
     </div>
 
-    <div v-show='tabToShow == "Mask"'>
-      <h3 class='text-align-center'>Search for and pick a mask</h3>
+    <div v-show='tabToShow == "User"'>
+      <div>
+        <h3 class='text-align-center'>Search for user</h3>
 
-      <div class='row justify-content-center'>
-        <input type="text" @change='updateSearch' :disabled='!createOrEdit'>
-        <SearchIcon height='2em' width='2em'/>
-      </div>
+        <div class='row justify-content-center'>
+          <input type="text" @change='updateSearch($event, "user")' :disabled='!createOrEdit'>
+          <SearchIcon height='2em' width='2em'/>
+        </div>
 
-      <h3 v-show="selectDisplayables.length == 0" class='text-align-center'>Not able to find the mask?
-        <router-link :to="{name: 'NewMask'}"> Click here to add information about the mask. </router-link>
-      </h3>
+        <h3 v-show="userDisplayables.length == 0" class='text-align-center'>Not able to find the user?
+          <router-link :to="{name: 'NewMask'}"> Click here to add user information. </router-link>
+        </h3>
 
 
-      <div :class='{main: true, grid: true, selectedMask: maskHasBeenSelected}'>
-        <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in selectDisplayables' @click='selectMask(m.id)'>
-          <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
-          <div class='description'>
-            <span>
-              {{m.uniqueInternalModelCode}}
-            </span>
+        <div :class='{main: true}'>
+          <div class='text-row pointable flex flex-dir-col align-items-center justify-content-center' v-for='u in userDisplayables' @click='selectUser(u.managedId)'>
+            <div class='description'>
+              <span>
+                {{u.firstName + ' ' + u.lastName}}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <table>
-        <tbody>
-          <tr>
-            <th>Selected Mask</th>
-            <td>{{selectedMask.uniqueInternalModelCode}}</td>
-          </tr>
-        </tbody>
-      </table>
+        <table>
+          <tbody>
+            <tr>
+              <th>Selected User</th>
+              <td>{{selectedUser.firstName + " " + selectedUser.lastName}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div v-show='tabToShow == "Mask"'>
+
+      <div>
+        <h3 class='text-align-center'>Search for and pick a mask</h3>
+
+        <div class='row justify-content-center'>
+          <input type="text" @change='updateSearch($event, "mask")' :disabled='!createOrEdit'>
+          <SearchIcon height='2em' width='2em'/>
+        </div>
+
+        <h3 v-show="selectMaskDisplayables.length == 0" class='text-align-center'>Not able to find the mask?
+          <router-link :to="{name: 'NewMask'}"> Click here to add information about the mask. </router-link>
+        </h3>
+
+
+        <div :class='{main: true, grid: true, selectedMask: maskHasBeenSelected}'>
+          <div class='card pointable flex flex-dir-col align-items-center justify-content-center' v-for='m in selectMaskDisplayables' @click='selectMask(m.id)'>
+            <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
+            <div class='description'>
+              <span>
+                {{m.uniqueInternalModelCode}}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Selected Mask</th>
+              <td>{{selectedMask.uniqueInternalModelCode}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div v-show='tabToShow == "Facial Hair"'>
@@ -417,6 +455,7 @@ import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
+import { useManagedUserStore } from './stores/managed_users_store';
 import { FitTest } from './fit_testing.js'
 
 export default {
@@ -452,7 +491,7 @@ export default {
           'text': 'Negative',
         }
       ],
-      tabToShow: 'Mask',
+      tabToShow: 'User',
       secondaryTabToShow: 'Choose Procedure',
       secondaryTabToShowOptions: [
         {
@@ -463,6 +502,9 @@ export default {
         },
       ],
       tabToShowOptions: [
+        {
+          text: "User",
+        },
         {
           text: "Mask",
         },
@@ -809,6 +851,11 @@ export default {
         uniqueInternalModelCode: '',
         hasExhalationValve: false
       },
+      selectedUser: {
+        firstName: '',
+        lastName: '',
+        id: 0,
+      },
       comfort: {
         "How comfortable is the position of the mask on the nose?": null,
         "Is there adequate room for eye protection?": null,
@@ -825,7 +872,8 @@ export default {
           '...how much air passed between your face and the mask?': null
         }
       },
-      search: ""
+      searchMask: "",
+      searchUser: "",
     }
   },
   props: {
@@ -847,6 +895,12 @@ export default {
         useMainStore,
         [
           'message'
+        ]
+    ),
+    ...mapState(
+        useManagedUserStore,
+        [
+          'managedUsers'
         ]
     ),
     fitTest() {
@@ -984,21 +1038,29 @@ export default {
         return `${this.mode} Fit Testing Results`
       }
     },
-    displayables() {
-      if (this.search == "") {
+    userDisplayables() {
+      if (this.searchUser == "") {
+        return this.managedUsers
+      } else {
+        let lowerSearch = this.searchUser.toLowerCase()
+        return this.managedUsers.filter((user) => user.fullName.toLowerCase().match(lowerSearch))
+      }
+    },
+    maskDisplayables() {
+      if (this.searchMask == "") {
         return this.masks
       } else {
-        let lowerSearch = this.search.toLowerCase()
+        let lowerSearch = this.searchMask.toLowerCase()
         return this.masks.filter((mask) => mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
       }
     },
-    selectDisplayables() {
+    selectMaskDisplayables() {
       let lengthToDisplay = 6
-      if (this.displayables.length < 6) {
-        lengthToDisplay = this.displayables.length
+      if (this.maskDisplayables.length < 6) {
+        lengthToDisplay = this.maskDisplayables.length
       }
 
-      return this.displayables.slice(0, lengthToDisplay)
+      return this.maskDisplayables.slice(0, lengthToDisplay)
     },
     messages() {
       return this.errorMessages;
@@ -1077,6 +1139,7 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     showDescription(name) {
       this.errorMessages = []
 
@@ -1086,9 +1149,14 @@ export default {
         }
       )
     },
-    updateSearch(event) {
-      this.selectedMask = {}
-      this.search = event.target.value
+    updateSearch(event, userOrMask) {
+      if (userOrMask == 'mask') {
+        this.selectedMask = {}
+        this.searchMask = event.target.value
+      } else {
+        this.selectedUser = {}
+        this.searchUser = event.target.value
+      }
     },
     getAbsoluteHref(href) {
       // TODO: make sure this works for all
@@ -1103,12 +1171,17 @@ export default {
     },
     selectMask(id) {
       this.selectedMask = this.masks.filter((m) => m.id == id)[0]
-      this.search = this.selectedMask.uniqueInternalModelCode
+      this.searchMask = this.selectedMask.uniqueInternalModelCode
+    },
+    selectUser(id) {
+      this.selectedUser = this.managedUsers.filter((m) => m.managedId == id)[0]
+      this.searchUser = this.selectedUser.fullName
     },
     async loadStuff() {
       // TODO: load the profile for the current user
-      await this.loadMasks()
-      await this.loadFitTest()
+      this.loadManagedUsers()
+      this.loadMasks()
+      this.loadFitTest()
     },
     async loadMasks() {
       // TODO: make this more flexible so parents can load data of their children
@@ -1651,8 +1724,16 @@ export default {
     padding: 1em 0;
   }
 
-  .card:hover {
+  .pointable:hover {
     cursor: pointer;
+  }
+
+  .text-row {
+    padding: 0.5em;
+  }
+
+  .text-row:hover {
+    background-color: #eee;
   }
 
   .card .description {

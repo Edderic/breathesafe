@@ -8,6 +8,10 @@ export class RespiratorUser {
     }
   }
 
+  get fullName() {
+    return this.firstName + ' ' + this.lastName;
+  }
+
   get raceEthnicityComplete() {
     return !!this.user.raceEthnicity
   }
