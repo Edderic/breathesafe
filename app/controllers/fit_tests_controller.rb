@@ -2,9 +2,8 @@ class FitTestsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def create
-    user = User.find(user_data[:id])
-
     fit_test = {}
+    user = User.find(user_data[:id])
 
     if unauthorized?
       status = 401
@@ -53,17 +52,17 @@ class FitTestsController < ApplicationController
     if unauthorized?
       status = 401
       messages = ["Unauthorized."]
-    elsif !current_user.manages?(user)
-      messages = ["Unauthorized."]
-      status = 422
+      fit_tests = []
+    else
+      fit_tests = JSON.parse(
+        FitTest.viewable(current_user).to_json
+      )
+      messages = []
     end
 
     to_render = {
-      fit_tests: JSON.parse(
-        FitTest.viewable(current_user).to_json
-      )
-
-      messages: []
+      fit_tests: fit_tests,
+      messages: messages
     }
 
     respond_to do |format|
@@ -74,6 +73,7 @@ class FitTestsController < ApplicationController
   end
 
   def show
+    fit_test = FitTest.find_by_id_with_user_id(params[:id])
     to_render = {}
     messages = []
 
@@ -81,11 +81,11 @@ class FitTestsController < ApplicationController
       status = 401
       messages = ["Unauthorized."]
 
-    elsif !current_user.manages?(user)
+    elsif !current_user.manages?(fit_test_user)
       messages = ["Unauthorized."]
     else
       to_render = {
-        fit_test: JSON.parse(FitTest.find(params[:id]).to_json),
+        fit_test: JSON.parse(fit_test.to_json),
         messages: messages
       }
     end
@@ -104,7 +104,7 @@ class FitTestsController < ApplicationController
       status = 401
       messages = ["Unauthorized."]
       to_render = {}
-    elsif current_user.manages?(user)
+    elsif !current_user.manages?(fit_test_user)
       status = 401
       messages = ['Unauthorized.']
     elsif fit_test.update(fit_test_data)
@@ -133,7 +133,7 @@ class FitTestsController < ApplicationController
       status = 401
       messages = ["Unauthorized."]
       to_render = {}
-    elsif current_user.manages?(user)
+    elsif current_user.manages?(fit_test_user)
       status = 401
       messages = ['Unauthorized.']
     elsif fit_test.delete
@@ -207,6 +207,11 @@ class FitTestsController < ApplicationController
 
   def user_data
     params.require(:user).permit(:id)
+  end
+
+  def fit_test_user
+    fit_test = FitTest.find(params[:id])
+    return fit_test.facial_measurement.user
   end
 end
 

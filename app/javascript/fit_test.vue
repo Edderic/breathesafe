@@ -846,7 +846,7 @@ export default {
         }
       ],
       selectedMask: {
-        id: 0,
+        id: null,
         uniqueInternalModelCode: '',
         hasExhalationValve: false
       },
@@ -1174,8 +1174,7 @@ export default {
       this.searchUser = this.selectedUser.fullName
     },
     async loadStuff() {
-      // TODO: load the profile for the current user
-      this.loadManagedUsers()
+      await this.loadManagedUsers()
       this.loadMasks()
       this.loadFitTest()
     },
@@ -1232,6 +1231,8 @@ export default {
             this.quantitativeNotes = results.quantitative.notes
             this.quantitativeProcedure = results.quantitative.procedure
             this.initialCountPerCm3 = results.quantitative.aerosol.initial_count_per_cm3
+
+            this.selectUser(fitTestData.user_id)
 
             // whatever you want
           })
@@ -1404,7 +1405,9 @@ export default {
         await axios.put(
           `/fit_tests/${this.id}.json`, {
             fit_test: this.toSave,
-            user: this.selectedUser.managedId
+            user: {
+              id: this.selectedUser.managedId
+            }
           }
         )
           .then(response => {
@@ -1425,8 +1428,6 @@ export default {
             })
           })
       } else {
-        this.validateMask()
-
         if (this.messages.length > 0) {
           return
         }
@@ -1434,7 +1435,10 @@ export default {
         // create
         await axios.post(
           `/fit_tests.json`, {
-            fit_test: this.toSave
+            fit_test: this.toSave,
+            user: {
+              id: this.selectedUser.managedId
+            }
           }
         )
           .then(response => {
@@ -1462,9 +1466,13 @@ export default {
           })
           .catch(error => {
             //  TODO: actually use the error message
-            this.messages.push({
-              str: "Failed to create fit test."
-            })
+            if (error && error.response && error.response.data && error.response.data.messages) {
+              this.addMessages(error.response.data.messages)
+            } else {
+              this.addMessages(
+                [error.message]
+              )
+            }
           })
       }
     },

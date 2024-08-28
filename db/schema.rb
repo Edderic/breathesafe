@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_08_27_023733) do
+ActiveRecord::Schema[7.0].define(version: 2024_08_28_154404) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -90,7 +90,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_27_023733) do
   end
 
   create_table "fit_tests", force: :cascade do |t|
-    t.bigint "mask_id", null: false
+    t.bigint "mask_id"
     t.jsonb "user_seal_check"
     t.jsonb "comfort"
     t.jsonb "facial_hair"
