@@ -393,7 +393,7 @@ export default {
       secondaryTab: 'Part I',
 
       errorMessages: [],
-      mode: 'Edit',
+      mode: 'View',
       cheekFullnessExample: 'Hallow/gaunt',
       noseBridgeHeightExample: 'Low',
       noseBridgeHeightOptions: [
@@ -418,7 +418,7 @@ export default {
           text: 'Rounded/full'
         }
       ],
-      tabToShow: 'Demographics',
+      tabToShow: 'Name',
       tabToShowOptions: [
         {
           text: "Name",
