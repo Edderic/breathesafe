@@ -301,4 +301,9 @@ export default {
     cursor: pointer;
     background-color: rgb(230,230,230);
   }
+
+  thead th {
+    background-color: #eee;
+    padding: 1em;
+  }
 </style>
