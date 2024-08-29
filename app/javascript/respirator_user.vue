@@ -621,6 +621,17 @@ export default {
         // whatever you want
         })
     },
+    validateYearOfBirth() {
+      let messages = [];
+
+      let fullYear = (new Date()).getFullYear()
+
+      if (this.managedUser.yearOfBirth && this.managedUser.yearOfBirth > fullYear) {
+        messages.push("Year of birth cannot in the future")
+      }
+
+      this.addMessages(messages);
+    },
     validateFacialMeasurementsPart(parts) {
       let messages = [];
       parts.forEach((d) => {
@@ -635,7 +646,11 @@ export default {
       if (this.tabToShow == "Name") {
         await this.saveProfile("Demographics")
       } else if (this.tabToShow == "Demographics") {
-        await this.saveProfile("Facial Measurements")
+        this.validateYearOfBirth()
+
+        if (this.messages.length == 0) {
+          await this.saveProfile("Facial Measurements")
+        }
       } else {
         if (this.secondaryTab == 'Part I') {
           this.validateFacialMeasurementsPart(['source', 'faceWidth', 'jawWidth', 'faceDepth']);

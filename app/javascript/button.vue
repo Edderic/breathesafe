@@ -1,5 +1,5 @@
 <template>
-  <div :class='{button: true, major: major, selected: selected, shadow: sidePadded, "side-padded": true}' :style='{"background-color": backgroundColor}'>
+  <div :class='{button: true, major: major, selected: selected, shadow: sidePadded, "side-padded": true}' :style='{"background-color": backgroundColor}' @mouseover='hover = true' @mouseleave='hover = false'>
 {{text}}
   <slot></slot>
 </div>
@@ -11,7 +11,9 @@ export default {
   components: {
   },
   data() {
-    return {}
+    return {
+      hover: false
+    }
   },
   props: {
     disabled: {
@@ -34,7 +36,7 @@ export default {
   },
   computed: {
     backgroundColor() {
-      if (this.disabled) {
+      if (this.disabled || this.hover) {
         return '#eee'
       } else if (this.major) {
         return 'rgb(219, 21, 0)'
@@ -68,7 +70,6 @@ export default {
     text-align: center;
     font-size: 1.5em;
     color: white;
-    background-color: ;
   }
   .button:hover {
     cursor: pointer;
