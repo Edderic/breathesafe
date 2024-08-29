@@ -94,6 +94,7 @@ class Users::ProfilesController < ApplicationController
 
   def profile_data
     params.require(:profile).permit(
+      "year_of_birth",
       "race_ethnicity",
       "gender_and_sex",
       "other_gender",
