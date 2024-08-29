@@ -366,7 +366,7 @@
 
       <div class="row justify-content-center">
         <Button class='button' text="Edit" @click='mode = "Edit"' v-if='mode == "Show"'/>
-        <Button class='button' text="Delete" @click='deleteMask' v-if='deletable && (mode == "Show")'/>
+        <Button class='button' text="Delete" @click='deleteMask' v-if='deletable && (mode != "Show")'/>
         <Button class='button' text="Save" @click='saveMask' v-if='mode == "New" || mode == "Edit"'/>
         <Button class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New" || mode == "Edit")'/>
       </div>
@@ -579,10 +579,10 @@ export default {
       return collection
     },
     currentUserIsAuthor() {
-      return this.authorIds.includes(this.currentUser.id)
+      return this.authorId == this.currentUser.id
     },
     deletable() {
-      return !!this.id && this.currentUserIsAuthor
+      return !!this.id && this.userCanEdit
     },
     whereToBuyUrlsColspan() {
       if (this.userCanEdit) {
@@ -607,7 +607,7 @@ export default {
         return false
       }
 
-      return this.authorId == this.currentUser.id
+      return this.currentUserIsAuthor
     },
     newOrEdit() {
       return (this.mode == 'New' || this.mode == 'Edit')
@@ -635,7 +635,7 @@ export default {
         style: this.style,
         image_urls: this.imageUrls,
         where_to_buy_urls: this.whereToBuyUrls,
-        author_ids: [this.currentUser.id],
+        author_id: this.currentUser.id,
         initial_cost_us_dollars: this.initialCostUsDollars
       }
     }
@@ -795,7 +795,7 @@ export default {
           modifications: {},
           type: '',
           image_urls: [''],
-          author_ids: [],
+          author_id: null,
           where_to_buy_urls: [],
         }
       )
@@ -862,7 +862,9 @@ export default {
         })
     },
     async deleteMask() {
-      if (this.$route.params.id) {
+      let answer = window.confirm("Are you sure you want to delete data?");
+
+      if (answer && this.$route.params.id) {
         await axios.delete(
           `/masks/${this.$route.params.id}.json`
         )
@@ -936,13 +938,15 @@ export default {
               }
             )
 
+            this.id = data.mask.id
+            this.authorId = data.mask.author_id
             this.mode = 'Show'
           })
           .catch(error => {
-            for(let errorMessage of error.response.data.messages) {
-              this.messages.push({
-                str: errorMessage
-              })
+            if (error.message) {
+              this.addMessage([error.message])
+            } else {
+              this.addMessage(error.response.data.messages)
             }
           })
       }
