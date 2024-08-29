@@ -381,11 +381,25 @@
       <br>
 
     </div>
-    <div class='main' v-show='displayTab == "Fit Testing"'>
-      <HorizontalStackedBar
-          :values="{'hi': 10, 'hello': 20}"
-          :colors='["red", "green"]'
-      />
+    <div class='main grid' v-show='displayTab == "Fit Testing"'>
+      <div>
+        <h3 class='title'>Race &amp; Ethnicity Counts</h3>
+        <HorizontalStackedBar
+            :values="raceEthnicityAggregates"
+        />
+      </div>
+      <div>
+        <h3 class='title'>Gender Counts</h3>
+        <HorizontalStackedBar
+            :values="genderSexAggregates"
+        />
+      </div>
+      <div>
+        <h3 class='title'>Age Counts</h3>
+        <HorizontalStackedBar
+            :values="ageAggregates"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -419,6 +433,39 @@ export default {
   },
   data() {
     return {
+      raceEthnicityAggregates: {},
+      raceEthnicityOptions: [
+        'american_indian_or_alaskan_native_count',
+        'asian_pacific_islander_count',
+        'black_african_american_count',
+        'hispanic_count',
+        'white_caucasian_count',
+        'multiple_ethnicity_other_count',
+        'prefer_not_to_disclose_race_ethnicity_count'
+      ],
+      ageAggregates: {},
+      ageOptions: [
+        'age_between_2_and_4',
+        'age_between_4_and_6',
+        'age_between_6_and_8',
+        'age_between_8_and_10',
+        'age_between_10_and_12',
+        'age_between_12_and_14',
+        'age_between_14_and_18',
+        'age_adult',
+        'prefer_not_to_disclose_age_count'
+      ],
+      genderSexAggregates: {},
+      genderSexOptions: [
+        'cisgender_male_count',
+        'cisgender_female_count',
+        'mtf_transgender_count',
+        'ftm_transgender_count',
+        'intersex_count',
+        'other_gender_sex_count',
+        'prefer_not_to_disclose_gender_sex_count'
+
+      ],
       hasExhalationValve: false,
       exceptionObjectBlank: {
         color: {
@@ -684,6 +731,10 @@ export default {
       this.tabToShow = toQuery['tabToShow']
     }
 
+    if (toQuery['displayTab'] && (["NewMask", "ShowMask", "EditMask"].includes(this.$route.name))) {
+      this.displayTab = toQuery['displayTab']
+    }
+
     this.$watch(
       () => this.$route.name,
       (toName, fromName) => {
@@ -850,33 +901,29 @@ export default {
           let data = response.data
           // whatever you want
           let mask = deepSnakeToCamel(data.mask)
-          let items = [
-            'authorId',
-            'authorIds',
-            'breathability',
-            'depthMm',
-            'elastomeric',
-            'filterChangeCostUsDollars',
-            'filterType',
-            'filtrationEfficiencies',
-            'hasExhalationValve',
-            'heightMm',
-            'id',
-            'imageUrls',
-            'initialCostUsDollars',
-            'massGrams',
-            'modifications',
-            'notes',
-            'strapType',
-            'style',
-            'uniqueInternalModelCode',
-            'whereToBuyUrls',
-            'widthMm',
-          ]
 
-          for(let item of items) {
-            this[item] = mask[item]
+          for(let k in mask) {
+            this[k] = mask[k]
           }
+
+          this.raceEthnicityAggregates = {}
+
+          for(let k of this.raceEthnicityOptions) {
+            this.raceEthnicityAggregates[k] = data.mask[k]
+          }
+
+          this.genderSexAggregates = {}
+
+          for(let k of this.genderSexOptions) {
+            this.genderSexAggregates[k] = data.mask[k]
+          }
+
+          this.ageAggregates = {}
+
+          for(let k of this.ageOptions) {
+            this.ageAggregates[k] = data.mask[k]
+          }
+
 
         })
         .catch(error => {
@@ -1172,6 +1219,10 @@ export default {
     grid-template-columns: 25% 25% 25% 25%;
   }
 
+  .grid.dual {
+    grid-template-columns: 50% 50%;
+  }
+
   .centered {
     display: flex;
     justify-content: center;
@@ -1224,4 +1275,7 @@ export default {
     }
   }
 
+  .title {
+    text-align: center;
+  }
 </style>

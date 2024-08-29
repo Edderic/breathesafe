@@ -3,9 +3,6 @@ class Mask < ApplicationRecord
   validates_presence_of :unique_internal_model_code
   validates_uniqueness_of :unique_internal_model_code
 
-  def self.query_string
-  end
-
   def self.with_aggregations(mask_id=nil)
     if mask_id
       mask_id_clause = "WHERE m.id = #{mask_id}"
@@ -161,7 +158,7 @@ class Mask < ApplicationRecord
               THEN 1
             ELSE 0
             END
-          ) AS prefer_not_to_disclose_age
+          ) AS prefer_not_to_disclose_age_count
 
         FROM masks m
         LEFT JOIN fit_tests ft
@@ -229,7 +226,7 @@ class Mask < ApplicationRecord
 
       age_options.each do |a|
         if r[a] < threshold
-          r['prefer_not_to_disclose_age'] += r[a]
+          r['prefer_not_to_disclose_age_count'] += r[a]
           r[a] = 0
         end
       end
