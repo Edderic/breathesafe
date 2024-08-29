@@ -1,6 +1,5 @@
 export class RespiratorUser {
   constructor(user) {
-    debugger;
     this.user = user
     this.profileId = user.profileId
 
