@@ -35,9 +35,7 @@ class MasksController < ApplicationController
 
   def index
     to_render = {
-      masks: JSON.parse(
-        Mask.all.to_json
-      )
+      masks: Mask.with_privacy_aggregations
     }
     messages = []
 
@@ -57,10 +55,9 @@ class MasksController < ApplicationController
       to_render = {}
     else
       to_render = {
-        mask: JSON.parse(Mask.find(params[:id]).to_json)
+        mask: Mask.with_privacy_aggregations(params[:id])[0]
       }
     end
-
 
     respond_to do |format|
       format.json do

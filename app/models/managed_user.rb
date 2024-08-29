@@ -19,9 +19,7 @@ class ManagedUser < ApplicationRecord
               fm.user_id = lfm.user_id
               AND lfm.latest_created_at = fm.created_at
             )
-
           )
-
 
           SELECT
             mu.*,

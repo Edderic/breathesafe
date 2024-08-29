@@ -8,12 +8,19 @@
 
     <TabSet
       :options='tabToShowOptions'
+      @update='setDisplay'
+      :tabToShow='displayTab'
+      v-show='mode == "Show"'
+    />
+
+    <TabSet
+      :options='tabEditOptions'
       @update='setRouteTo'
       :tabToShow='tabToShow'
         v-show='newOrEdit'
     />
 
-    <div class='main'>
+    <div class='main' v-show="displayTab == 'Misc. Info'">
       <div :class='{ grid: true, view: mode == "Show"}'>
         <table v-if='tabToShow == "Image & Purchasing" || mode=="Show"'>
           <tbody>
@@ -32,12 +39,12 @@
               <th>Image URL</th>
               <td>
                 <input class='input-list' type="text" :value='imageUrl' @change="update($event, 'imageUrls', index)"
-                    v-show="newOrEdit" placeholder="e.g. https://examplemask.com/mask1.jpg"
-                >
+                                          v-show="newOrEdit" placeholder="e.g. https://examplemask.com/mask1.jpg"
+                                                             >
               </td>
-              <td class='text-align-center' v-if='newOrEdit'>
-                <CircularButton text="x" @click="deleteImageUrl(index)" />
-              </td>
+                <td class='text-align-center' v-if='newOrEdit'>
+                  <CircularButton text="x" @click="deleteImageUrl(index)" />
+                </td>
             </tr>
 
             <tr v-for="(imageUrl, index) in imageUrls">
@@ -60,13 +67,13 @@
             <tr v-for="(purchasingUrl, index) in whereToBuyUrls" class='text-align-center'>
               <td :colspan='whereToBuyUrlsColspan' >
                 <input class='input-list almost-full-width' type="text" :value='purchasingUrl' @change="update($event, 'whereToBuyUrls', index)"
-                    v-if="newOrEdit"
-                >
-                <a :href="purchasingUrl" v-if="!newOrEdit">{{shortHand(purchasingUrl)}}</a>
+                                                            v-if="newOrEdit"
+                                                            >
+                                                            <a :href="purchasingUrl" v-if="!newOrEdit">{{shortHand(purchasingUrl)}}</a>
               </td>
-              <td>
-                <CircularButton text="x" @click="deletePurchasingUrl(index)" v-if='userCanEdit && editMode'/>
-              </td>
+                <td>
+                  <CircularButton text="x" @click="deletePurchasingUrl(index)" v-if='userCanEdit && editMode'/>
+                </td>
             </tr>
           </tbody>
 
@@ -93,21 +100,21 @@
               <th>Initial cost (US Dollars)</th>
               <td colspan='1' class='text-align-center'>
                 <input type="number"
-                  v-model='initialCostUsDollars'
-                  v-show="newOrEdit"
-                >
+                       v-model='initialCostUsDollars'
+                       v-show="newOrEdit"
+                       >
 
-                <ColoredCell
-                    v-show='!newOrEdit'
-                    class='risk-score'
-                    :colorScheme="costColorScheme"
-                    :maxVal=1
-                    :value='initialCostUsDollars'
-                    :exception='exceptionDollarObject'
-                    :text='dollarText(initialCostUsDollars)'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                    :title='dollarText(initialCostUsDollars)'
-                    />
+                       <ColoredCell
+                           v-show='!newOrEdit'
+                           class='risk-score'
+                           :colorScheme="costColorScheme"
+                           :maxVal=1
+                           :value='initialCostUsDollars'
+                           :exception='exceptionDollarObject'
+                           :text='dollarText(initialCostUsDollars)'
+                           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                           :title='dollarText(initialCostUsDollars)'
+                           />
               </td>
             </tr>
 
@@ -357,8 +364,8 @@
         </table>
       </div>
 
-    <table v-if='tabToShow == "Basic Info"'>
-      <tbody>
+      <table v-if='tabToShow == "Basic Info"'>
+        <tbody>
 
         </tbody>
       </table>
@@ -366,13 +373,19 @@
 
       <div class="row justify-content-center">
         <Button class='button' text="Edit" @click='mode = "Edit"' v-if='mode == "Show"'/>
-        <Button class='button' text="Delete" @click='deleteMask' v-if='deletable && (mode != "Show")'/>
-        <Button class='button' text="Save" @click='saveMask' v-if='mode == "New" || mode == "Edit"'/>
-        <Button class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New" || mode == "Edit")'/>
+          <Button class='button' text="Delete" @click='deleteMask' v-if='deletable && (mode != "Show")'/>
+            <Button class='button' text="Save" @click='saveMask' v-if='mode == "New" || mode == "Edit"'/>
+              <Button class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New" || mode == "Edit")'/>
       </div>
       <br>
       <br>
 
+    </div>
+    <div class='main' v-show='displayTab == "Fit Testing"'>
+      <HorizontalStackedBar
+          :values="{'hi': 10, 'hello': 20}"
+          :colors='["red", "green"]'
+      />
     </div>
   </div>
 </template>
@@ -384,6 +397,7 @@ import { assignBoundsToColorScheme, binValue, colorPaletteFall, genColorSchemeBo
 import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import ColoredCell from './colored_cell.vue'
+import HorizontalStackedBar from './horizontal_stacked_bar.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel, shortHandHref, round } from './misc.js'
 import SurveyQuestion from './survey_question.vue'
@@ -399,6 +413,7 @@ export default {
     CircularButton,
     ClosableMessage,
     ColoredCell,
+    HorizontalStackedBar,
     SurveyQuestion,
     TabSet
   },
@@ -440,7 +455,16 @@ export default {
       heightMm: null,
       depthMm: null,
       tabToShow: "Basic Info",
+      displayTab: "Misc. Info",
       tabToShowOptions: [
+        {
+          text: "Misc. Info",
+        },
+        {
+          text: "Fit Testing",
+        },
+      ],
+      tabEditOptions: [
         {
           text: "Basic Info",
         },
@@ -490,7 +514,7 @@ export default {
     ...mapWritableState(
         useMainStore,
         [
-          'message'
+          'messages'
         ]
     ),
 
@@ -615,9 +639,6 @@ export default {
     tagline() {
       return `${this.mode} Mask`
     },
-    messages() {
-      return this.errorMessages;
-    },
     toSave() {
       return {
         notes: this.notes,
@@ -681,12 +702,16 @@ export default {
         if (toQuery['tabToShow'] && (["NewMask", "ShowMask", "EditMask"].includes(this.$route.name))) {
           this.tabToShow = toQuery['tabToShow']
         }
+
+        if (toQuery['displayTab'] && (["NewMask", "ShowMask", "EditMask"].includes(this.$route.name))) {
+          this.displayTab = toQuery['displayTab']
+        }
       }
     )
 
   },
   methods: {
-    ...mapActions(useMainStore, ['getCurrentUser']),
+    ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     shortHand(href) {
       return shortHandHref(href)
     },
@@ -855,10 +880,11 @@ export default {
 
         })
         .catch(error => {
-          this.messages.push({
-            str: "Failed to load mask."
-          })
-          // whatever you want
+          if (error.message) {
+            this.addMessages([error.message])
+          } else {
+            this.addMessages(error.response.data.messages)
+          }
         })
     },
     async deleteMask() {
@@ -944,12 +970,20 @@ export default {
           })
           .catch(error => {
             if (error.message) {
-              this.addMessage([error.message])
+              this.addMessages([error.message])
             } else {
-              this.addMessage(error.response.data.messages)
+              this.addMessages(error.response.data.messages)
             }
           })
       }
+    },
+    setDisplay(opt) {
+      this.$router.push({
+        name: this.$route.name,
+        query: {
+          displayTab: opt.name
+        }
+      })
     },
     setRouteTo(opt) {
       this.$router.push({

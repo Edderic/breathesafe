@@ -449,7 +449,6 @@ export default {
         "Multiple ethnicity / Other",
         "Prefer not to disclose",
       ],
-      sex_assigned_at_birth_question: "What is your sex assigned at birth?",
       gender_and_sex_options: [
         "Cisgender male",
         "Cisgender female",
