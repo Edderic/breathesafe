@@ -1,7 +1,9 @@
 <template>
   <div class='centered flex-dir-col'>
     <h3>{{question}}</h3>
-    <div v-for="re in questionWithAnswerOptions">
+    <input v-show="question_type == 'number'" type="number" :value="value" @change='send($event)' :disabled='disabled' class='number' :placeholder='placeholder'/>
+
+    <div v-for="re in questionWithAnswerOptions" v-show="question_type == 'radio'" >
       <input type="radio" :id="re.questionAndAnswerOption" :value="re.answerOption" @change='send(re.answerOption)' :checked="isChecked(re.answerOption)" :disabled='disabled'/>
       <label :for="re.questionAndAnswerOption">{{re.answerOption}}</label>
     </div>
@@ -25,8 +27,17 @@ export default {
     }
   },
   props: {
+    value: Number,
+    placeholder: String,
     question: String,
-    answer_options: Array,
+    question_type: {
+      type: String,
+      default: 'radio'
+    },
+    answer_options: {
+      type: Array,
+      default: []
+    },
     selected: String,
     disabled: Boolean
   },
@@ -131,5 +142,9 @@ export default {
     .call-to-actions {
       height: 14em;
     }
+  }
+
+  .number {
+    width: 5em;
   }
 </style>

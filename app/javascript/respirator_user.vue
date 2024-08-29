@@ -91,6 +91,15 @@
         >
       </div>
 
+      <SurveyQuestion
+        :question="yearOfBirthQuestion"
+        :value="managedUser.yearOfBirth"
+        question_type="number"
+        @update="selectYearOfBirth"
+        :disabled='mode == "View"'
+        placeholder='yyyy'
+      />
+
       <br>
     </div>
 
@@ -489,7 +498,10 @@ export default {
     ),
 
     genderSexQuestion() {
-      return `Which is ${this.managedUser.firstName}'s gender?`;
+      return `What is ${this.managedUser.firstName}'s gender?`;
+    },
+    yearOfBirthQuestion() {
+      return `What is ${this.managedUser.firstName}'s year of birth? (Leave blank if ${this.managedUser.firstName} prefers not to disclose)`;
     },
     raceEthnicityQuestion() {
       return `Which race or ethnicity best describes ${this.managedUser.firstName}?`;
@@ -676,6 +688,7 @@ export default {
           'last_name': this.managedUser.lastName,
           'race_ethnicity': this.managedUser.raceEthnicity,
           'gender_and_sex': this.managedUser.genderAndSex,
+          'year_of_birth': this.managedUser.yearOfBirth,
         }
       }
 
@@ -750,6 +763,9 @@ export default {
     },
     selectGenderAndSex(genderAndSex) {
       this.managedUser.genderAndSex = genderAndSex
+    },
+    selectYearOfBirth(event) {
+      this.managedUser.yearOfBirth = parseInt(event.target.value)
     },
     setFacialMeasurement(event, whatToSet) {
       this.latestFacialMeasurement[whatToSet] = event.target.value
