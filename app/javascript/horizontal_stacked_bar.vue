@@ -34,7 +34,7 @@ export default {
       let collection = []
 
       for(var i = 0; i < dictLength; i++) {
-        collection.push(this.colors[i % (dictLength - 1)])
+        collection.push(this.colors[i % this.colors.length])
       }
 
       return collection
