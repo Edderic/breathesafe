@@ -13,7 +13,7 @@ class Mask < ApplicationRecord
     Mask.connection.exec_query(
       <<-SQL
         WITH fit_test_counts_per_mask AS (
-          SELECT m.id as mask_id, COUNT(*) AS fit_test_count
+          SELECT m.id as mask_id, COUNT(ft.id) AS fit_test_count
           FROM masks m
           LEFT JOIN fit_tests ft
           ON (ft.mask_id = m.id)
@@ -27,12 +27,14 @@ class Mask < ApplicationRecord
           ON (fm.id = ft.facial_measurement_id)
           GROUP BY m.id
         ), unique_fit_testers_per_mask AS (
-          SELECT m.id AS mask_id, fm.user_id, MIN(ft.created_at) AS created_at
+          SELECT m.id AS mask_id,
+            fm.user_id,
+            MIN(ft.created_at) AS created_at
           FROM masks m
-          LEFT JOIN fit_tests ft
-          ON (ft.mask_id = m.id)
-          LEFT JOIN facial_measurements fm
-          ON (fm.id = ft.facial_measurement_id)
+          INNER JOIN fit_tests ft
+            ON (ft.mask_id = m.id)
+          INNER JOIN facial_measurements fm
+            ON (fm.id = ft.facial_measurement_id)
           GROUP BY 1, 2
         ), demographic_breakdown AS (
           SELECT m.id,
@@ -169,7 +171,7 @@ class Mask < ApplicationRecord
               END
             ) AS age_adult,
             SUM(
-              CASE WHEN p.year_of_birth IS NULL
+              CASE WHEN p.year_of_birth IS NULL AND p.user_id IS NOT NULL
                 THEN 1
               ELSE 0
               END

@@ -383,6 +383,12 @@
     </div>
     <div class='grid bar-charts' v-show='displayTab == "Fit Testing"'>
       <div class='card'>
+        <h3 class='title'>Counts</h3>
+        <HorizontalStackedBar
+            :values="basicAggregates"
+        />
+      </div>
+      <div class='card'>
         <h3 class='title'>Race &amp; Ethnicity Counts</h3>
         <HorizontalStackedBar
             :values="raceEthnicityAggregates"
@@ -433,6 +439,11 @@ export default {
   },
   data() {
     return {
+      basicAggregates: {},
+      basicOptions: [
+        'fit_test_count',
+        'unique_fit_testers_count'
+      ],
       raceEthnicityAggregates: {},
       raceEthnicityOptions: [
         'american_indian_or_alaskan_native_count',
@@ -904,6 +915,12 @@ export default {
 
           for(let k in mask) {
             this[k] = mask[k]
+          }
+
+          this.basicAggregates = {}
+
+          for(let k of this.basicOptions) {
+            this.basicAggregates[k] = data.mask[k]
           }
 
           this.raceEthnicityAggregates = {}
