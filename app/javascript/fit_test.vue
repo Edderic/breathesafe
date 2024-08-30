@@ -1218,7 +1218,7 @@ export default {
     },
     async loadStuff() {
       await this.loadManagedUsers()
-      this.loadMasks()
+      await this.loadMasks()
       this.loadFitTest()
     },
     async loadMasks() {
@@ -1275,6 +1275,7 @@ export default {
             let fitTestData = response.data.fit_test
 
             this.id = fitTestData.id
+
             this.selectMask(fitTestData.mask_id)
             this.comfort = fitTestData.comfort
             this.userSealCheck = fitTestData.user_seal_check
@@ -1346,7 +1347,7 @@ export default {
     },
 
     validatePresenceOfInitialCountPerCM3() {
-      if (!this.initialCountPerCm3) {
+      if (!this.initialCountPerCm3 && this.quantitativeProcedure != 'Skipping') {
             this.messages.push(
               {
                 str: "Please fill out initial count per cm3.",
@@ -1365,7 +1366,7 @@ export default {
       }
     },
     validateValueOfInitialCountPerCM3() {
-      if (this.initialCountPerCm3 < 1000) {
+      if (this.initialCountPerCm3 < 1000 && this.quantitativeProcedure != 'Skipping') {
           this.messages.push(
             {
               str: "Initial particle count too low. Please take this test at an environment where the number of particles per cubic centimeter is greater than 1000.",
@@ -1689,12 +1690,20 @@ export default {
 
 
         if (this.messages.length == 0) {
-          await this.saveFitTest(
-            {
-              tabToShow: 'QNFT',
-              secondaryTabToShow: 'Results'
-            }
-          )
+          if (this.quantitativeProcedure == 'Skipping') {
+            await this.saveFitTest(
+              {
+                tabToShow: 'Comfort',
+              }
+            )
+          } else {
+            await this.saveFitTest(
+              {
+                tabToShow: 'QNFT',
+                secondaryTabToShow: 'Results'
+              }
+            )
+          }
         } else {
           return
         }

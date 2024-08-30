@@ -381,20 +381,20 @@
       <br>
 
     </div>
-    <div class='main grid' v-show='displayTab == "Fit Testing"'>
-      <div>
+    <div class='grid bar-charts' v-show='displayTab == "Fit Testing"'>
+      <div class='card'>
         <h3 class='title'>Race &amp; Ethnicity Counts</h3>
         <HorizontalStackedBar
             :values="raceEthnicityAggregates"
         />
       </div>
-      <div>
+      <div class='card'>
         <h3 class='title'>Gender Counts</h3>
         <HorizontalStackedBar
             :values="genderSexAggregates"
         />
       </div>
-      <div>
+      <div class='card'>
         <h3 class='title'>Age Counts</h3>
         <HorizontalStackedBar
             :values="ageAggregates"
@@ -1277,5 +1277,11 @@ export default {
 
   .title {
     text-align: center;
+  }
+  .card {
+    padding: 1em;
+  }
+  .bar-charts {
+    grid-template-columns: 50% 50%;
   }
 </style>

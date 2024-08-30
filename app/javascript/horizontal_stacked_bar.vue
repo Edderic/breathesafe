@@ -85,5 +85,6 @@ export default {
   .v-ticks {
     font-weight: bold;
     padding: 1em;
+    text-align: end;
   }
 </style>

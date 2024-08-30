@@ -149,7 +149,7 @@ export class FitTest {
     } else if (!this.qualitativeFailed && this.qualitativeHasUnanswered) {
       return 'Incomplete'
     } else {
-      return 'Complete'
+      return 'Passed'
     }
   }
 
