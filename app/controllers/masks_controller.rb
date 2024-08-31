@@ -108,26 +108,30 @@ class MasksController < ApplicationController
     end
 
     mask = Mask.find(params[:id])
-
-    mask_with_aggregations = Mask.with_aggregations(mask_id=mask_id)[0]
+    mask_with_aggregations = Mask.with_aggregations(mask_id=mask.id)[0]
 
     if mask.author_id != current_user.id
       status = 401
-      to_render = {}
       messages = ['Current user is not the Mask author.']
-    elsif mask_with_aggregations['fit_test_count']
+      to_render = {
+        messages: messages
+      }
+    elsif mask_with_aggregations['fit_test_count'] > 0
       status = 401
-      to_render = {}
-      messages = ['Cannot delete a mask that already has a Fit Test assigned to it.']
+      to_render = {
+        messages: ['Cannot delete a mask that already has a Fit Test assigned to it.']
+      }
     elsif mask.delete
       status = 200
-      to_render = {}
       messages = []
+      to_render = {
+        messages: messages
+      }
     end
 
     respond_to do |format|
       format.json do
-        render json: to_render.to_json, status: status, messages: messages
+        render json: to_render.to_json, status: status
       end
     end
   end

@@ -969,9 +969,10 @@ export default {
             })
           })
           .catch(error => {
-            this.messages.push({
-              str: "Failed to delete mask."
-            })
+            if (error.message) {
+              this.addMessages([error.message])
+            }
+              this.addMessages(error.response.data.messages)
           })
       }
     },
