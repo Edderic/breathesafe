@@ -82,7 +82,7 @@ class MasksController < ApplicationController
     if mask.author_id != current_user.id
       status = 401
       to_render = {}
-      messages = ['Unauthorized.']
+      messages = ["Current user is not the author."]
     elsif mask.update(mask_data)
       status = 204
       to_render = {}
@@ -101,8 +101,6 @@ class MasksController < ApplicationController
   end
 
   def delete
-    # TODO: For now, only current user can access facial measurements
-    # Later on, parents should be able to view / edit their children's data
     unless current_user
       status = 401
       messages = ["Unauthorized."]
@@ -111,12 +109,16 @@ class MasksController < ApplicationController
 
     mask = Mask.find(params[:id])
 
+    mask_with_aggregations = Mask.with_aggregations(mask_id=mask_id)[0]
 
-    # TODO: admins should be able to update data no matter who owns it.
     if mask.author_id != current_user.id
       status = 401
       to_render = {}
-      messages = ['Unauthorized.']
+      messages = ['Current user is not the Mask author.']
+    elsif mask_with_aggregations['fit_test_count']
+      status = 401
+      to_render = {}
+      messages = ['Cannot delete a mask that already has a Fit Test assigned to it.']
     elsif mask.delete
       status = 200
       to_render = {}
