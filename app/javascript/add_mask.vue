@@ -689,7 +689,7 @@ export default {
         return false
       }
 
-      return this.currentUserIsAuthor
+      return this.currentUserIsAuthor && this.basicAggregates.fit_test_count == 0
     },
     newOrEdit() {
       return (this.mode == 'New' || this.mode == 'Edit')
@@ -753,10 +753,13 @@ export default {
           this.mode = 'New'
         } else if (toName == "ShowMask") {
           this.mode = 'Show'
+          this.loadMask()
         } else if (toName == 'EditMask') {
           this.mode = 'Edit'
+          this.loadMask()
         }
       }
+
     )
     this.$watch(
       () => this.$route.query,
