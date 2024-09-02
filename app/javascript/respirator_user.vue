@@ -105,11 +105,14 @@
 
     <div class="edit-facial-measurements" v-if='tabToShow=="Facial Measurements"'>
 
-
-
       <img v-if='infoToShow == "quantitativeGuide"' class="adaptive-wide" src="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8587533/bin/bmjgh-2021-005537f01.jpg" alt="Depiction of different measurements">
 
-      <div v-show='infoToShow == "cheekFullness"' class='align-items-center'>
+      <div class='left-pane' v-if='infoToShow == "sourceGuide"' >
+        <p >For measuring straight lines (e.g. face width (B), face length (D), etc.), we recommend a digital caliper such as <a href="https://www.amazon.com/gp/product/B00JALAIIE/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1">this</a>.</p>
+        <p >For measuring curves (e.g. bitragion subnasale arc (L) and bitragion menton arc (K)), we recommend a tape measure such as <a href="https://www.amazon.com/gp/product/B00JALAIIE/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1">this</a>.</p>
+      </div>
+
+      <div v-if='infoToShow == "cheekFullness"' class='align-items-center'>
         <p class='left-pane'>Select options below to get an understanding of different types of cheek fullness:</p>
         <TabSet
           :options='cheekFullnessOptions'
@@ -120,14 +123,13 @@
         <img class='left-pane-image' v-if='cheekFullnessExample == "Medium"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-neutral.png" alt="medium-ful cheeks">
         <img class='left-pane-image' v-if='cheekFullnessExample == "Rounded/full"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-rounded.png" alt="rounded cheeks">
       </div>
-      <br>
 
       <div class='flex-dir-col'>
         <br>
         <table>
           <thead>
             <tr>
-              <th colspan='1'>Quantitative Measurements</th>
+              <th colspan='2'>Quantitative Measurements</th>
               <th>
                 <CircularButton text="?" @click="toggleInfo('quantitativeGuide')" :highlight="infoToShow == 'quantitativeGuide'"/>
               </th>
@@ -140,6 +142,9 @@
                 <label for="source">Source</label>
               </th>
               <td>
+                <CircularButton text="?" @click="toggleInfo('sourceGuide')" :highlight="infoToShow == 'sourceGuide'"/>
+              </td>
+              <td>
                 <select
                     v-if='latestFacialMeasurement'
                     :value="latestFacialMeasurement.source"
@@ -149,8 +154,10 @@
                 </select>
               </td>
             </tr>
+          </tbody>
+          <tbody>
             <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
-              <th>
+              <th colspan="2">
                 <label for="faceWidth">Face Width <b>(B)</b> (mm) </label>
               </th>
               <td>
@@ -165,7 +172,7 @@
             </tr>
 
             <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
-              <th>
+              <th colspan="2">
                 <label for="jawWidth">Jaw Width <b>(C)</b> (mm)</label>
               </th>
               <td>
@@ -179,7 +186,7 @@
               </td>
             </tr>
             <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
-              <th>
+              <th colspan="2">
                 <label for="faceDepth">Face Depth <b>(P)</b> (mm)</label>
               </th>
               <td>
@@ -193,7 +200,7 @@
               </td>
             </tr>
             <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
-              <th>
+              <th colspan="2">
                 <label for="faceLength">Face Length <b>(D)</b> (mm)</label>
               </th>
               <td>
@@ -207,7 +214,7 @@
               </td>
             </tr>
             <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
-              <th>
+              <th colspan="2">
                 <label for="lowerFaceLength">Lower Face Length <b>(E)</b> (mm)</label>
               </th>
               <td>
@@ -221,7 +228,7 @@
               </td>
             </tr>
             <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
-              <th>
+              <th colspan="2">
                 <label for="bitragionMentonArc">Bitragion Menton Arc <b>(K)</b> (mm)</label>
               </th>
               <td>
@@ -236,7 +243,7 @@
             </tr>
 
             <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
-              <th>
+              <th colspan="2">
                 <label for="bitragionSubnasaleArc">Bitragion Subnasale Arc <b>(L)</b> (mm)</label>
               </th>
               <td>
@@ -251,7 +258,7 @@
             </tr>
 
             <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
-              <th>
+              <th colspan="2">
                 <label for="noseProtrusion">Nose Protrusion <b>(M)</b> (mm)</label>
               </th>
               <td>
@@ -266,7 +273,7 @@
             </tr>
 
             <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
-              <th>
+              <th colspan="2">
                 <label for="nasalRootBreadth">Nasal Root Breadth <b>(H)</b> (mm)</label>
               </th>
               <td>
@@ -281,7 +288,7 @@
             </tr>
 
             <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
-              <th>
+              <th colspan="2">
                 <label for="noseBridgeHeight">Nose Bridge Height <b>(H)</b> (mm)</label>
               </th>
               <td>
@@ -296,7 +303,7 @@
             </tr>
 
             <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
-              <th>
+              <th colspan="2">
                 <label for="lipWidth">Lip Width <b>(J)</b> (mm)</label>
               </th>
               <td>
@@ -349,6 +356,8 @@
 
 
     </div>
+
+    <br>
 
     <div class='row justify-content-center'>
       <Button class='button' text="View Mode" @click='mode = "View"' v-show='mode == "Edit"'/>
@@ -889,7 +898,7 @@ export default {
   .left-pane-image {
 
   }
-  p.left-pane {
+  .left-pane {
     max-width: 50%;
   }
 
@@ -932,6 +941,7 @@ export default {
   .edit-facial-measurements {
     display: flex;
     flex-direction: row;
+    max-width:50em;
   }
   @media(max-width: 700px) {
     img {
