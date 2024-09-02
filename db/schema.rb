@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_08_29_003713) do
+ActiveRecord::Schema[7.0].define(version: 2024_09_02_031458) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -140,6 +140,18 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_29_003713) do
     t.index ["author_id"], name: "index_masks_on_author_id"
   end
 
+  create_table "measurement_devices", force: :cascade do |t|
+    t.string "manufacturer"
+    t.string "measurement_device_type"
+    t.string "model"
+    t.string "serial"
+    t.text "notes"
+    t.bigint "owner_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["owner_id"], name: "index_measurement_devices_on_owner_id"
+  end
+
   create_table "population_states", force: :cascade do |t|
     t.integer "population"
     t.string "name"
@@ -221,6 +233,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_29_003713) do
   add_foreign_key "managed_users", "users", column: "managed_id"
   add_foreign_key "managed_users", "users", column: "manager_id"
   add_foreign_key "masks", "users", column: "author_id"
+  add_foreign_key "measurement_devices", "users", column: "owner_id"
   add_foreign_key "profiles", "users"
   add_foreign_key "user_carbon_dioxide_monitors", "users"
 end
