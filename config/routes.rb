@@ -51,6 +51,11 @@ Rails.application.routes.draw do
   get 'managed_users/:id',to: 'managed_users#show'
   delete 'managed_users/:id',to: 'managed_users#delete'
 
+  post 'measurement_devices',to: 'measurement_devices#create'
+  get 'measurement_devices',to: 'measurement_devices#index'
+  get 'measurement_devices/:id',to: 'measurement_devices#show'
+  delete 'measurement_devices/:id',to: 'measurement_devices#delete'
+
   controller :pages do
     get :qr_code_generator
     get :qr_code_download
