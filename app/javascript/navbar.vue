@@ -34,6 +34,7 @@
 
     <div class='row spaced-between main fixed-nav-bar-bottom' v-if='showSubNavBar == "RespiratorRecommender"'>
       <div class='vertical-centered bunched-vertically-in-the-middle'>
+        <router-link class='desktop clickable side-padding' :to='{ name: "MeasurementDevices"}' @click='toggleShowSubNavBar("MeasurementDevices")'>Measurement Devices</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "RespiratorUsers"}' @click='toggleShowSubNavBar("RespiratorRecommender")'>Users</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "Masks"}' @click='toggleShowSubNavBar("Masks")'>Masks</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "FitTests"}' @click='toggleShowSubNavBar("FitTests")'>Fit Tests</router-link>

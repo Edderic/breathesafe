@@ -16,6 +16,11 @@
     </div>
 
     <div class='main'>
+        <p class='narrow'>
+
+Do you have a quantitative fit testing (QNFT) device? If so, please add information below so we could understand more about how fit testing data is generated, for quality control purposes. When fit testing, these devices will show up as selectable options. In terms of reporting, e.g. a research paper, aggregate data might be reported. For example, "QNFT results in Breathesafe's data set had 200 entries, and QNFT devices were mostly done using TSI 8020A. Median calibration date was 2013 (11 years ago), and min and max are 2009 and 2018."
+
+        </p>
       <div class='centered'>
         <table>
           <thead>
@@ -66,7 +71,7 @@ import SearchIcon from './search_icon.vue'
 import { useManagedUserStore } from './stores/managed_users_store.js'
 
 export default {
-  name: 'RespiratorUsers',
+  name: 'MeasurementDevices',
   components: {
     Button,
     CircularButton,
@@ -292,9 +297,8 @@ export default {
   }
 
   .main {
-    display: grid;
-    grid-template-columns: 100%;
-    grid-template-rows: auto;
+    display: flex;
+    align-items: center;
   }
 
   .centered {
@@ -340,5 +344,9 @@ export default {
 
   .colored-cell {
     text-align: center;
+  }
+
+  .narrow {
+    max-width: 50em;
   }
 </style>
