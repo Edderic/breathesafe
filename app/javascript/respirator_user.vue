@@ -288,7 +288,7 @@
               </td>
             </tr>
             <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
-              <th colspan='2'>Curved Measurement Guide</th>
+              <th colspan='2'>Curved Measurements</th>
               <td>
                 <CircularButton text="?" @click="toggleInfo('curvedMeasurementsGuide')" :highlight="infoToShow == 'curvedMeasurementsGuide'"/>
               </td>
