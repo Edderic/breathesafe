@@ -107,9 +107,19 @@
 
       <img v-if='infoToShow == "quantitativeGuide"' class="adaptive-wide" src="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8587533/bin/bmjgh-2021-005537f01.jpg" alt="Depiction of different measurements">
 
-      <div class='left-pane' v-if='infoToShow == "sourceGuide"' >
-        <p >For measuring straight lines (e.g. face width (B), face length (D), etc.), we recommend a digital caliper such as <a href="https://www.amazon.com/gp/product/B00JALAIIE/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1">this</a>.</p>
-        <p >For measuring curves (e.g. bitragion subnasale arc (L) and bitragion menton arc (K)), we recommend a tape measure such as <a href="https://www.amazon.com/gp/product/B00JALAIIE/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1">this</a>.</p>
+      <div class='left-pane' v-if='infoToShow == "straightLineMeasurementsGuide"' >
+        <p >For measuring straight lines (e.g. face width (B), face length (D), etc.), we recommend a digital caliper such as <a href="https://www.amazon.com/gp/product/B00JALAIIE/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1" target='_blank'>this</a>.</p>
+        <a href="https://www.amazon.com/gp/product/B00JALAIIE/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1" target='_blank'>
+          <img class='left-pane-image' src="https://c.media-amazon.com/images/I/6194IWMjJEL._SX522_.jpg" alt='iGaging 6" Digital External Outside Caliper OD for Woodworking'>
+        </a>
+      </div>
+
+      <div class='left-pane' v-if='infoToShow == "curvedMeasurementsGuide"' >
+        <p >For measuring curves (e.g. bitragion subnasale arc (L) and bitragion menton arc (K)), we recommend a tape measure such as <a href="https://www.amazon.com/dp/B0BGHCTL45?ref=ppx_yo2ov_dt_b_fed_asin_title">this</a>.</p>
+
+        <a href="https://www.amazon.com/dp/B0BGHCTL45?ref=ppx_yo2ov_dt_b_fed_asin_title" target='_blank'>
+          <img class='left-pane-image' src="https://c.media-amazon.com/images/I/71Cwjwnqc6L._SL1500_.jpg" alt='Tape Measure, iBayam Soft Ruler Measuring Tape for Body Weight Loss Fabric Sewing Tailor Cloth Vinyl Measurement Craft Supplies, 60-Inch Double Scale Ruler, 2-Pack White, Blue'>
+        </a>
       </div>
 
       <div v-if='infoToShow == "cheekFullness"' class='align-items-center'>
@@ -129,32 +139,20 @@
         <table>
           <thead>
             <tr>
-              <th colspan='2'>Quantitative Measurements</th>
+              <th colspan='2'>
+                <label for="source" >Measurements Guide</label>
+              </th>
               <th>
                 <CircularButton text="?" @click="toggleInfo('quantitativeGuide')" :highlight="infoToShow == 'quantitativeGuide'"/>
               </th>
-              <th></th>
+            </tr>
+            <tr  v-show='secondaryTab != "Part III"'>
+              <th colspan='2'>Straight-line Measurements</th>
+              <td>
+                <CircularButton text="?" @click="toggleInfo('straightLineMeasurementsGuide')" :highlight="infoToShow == 'straightLineMeasurementsGuide'"/>
+              </td>
             </tr>
           </thead>
-          <tbody>
-            <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
-              <th>
-                <label for="source">Source</label>
-              </th>
-              <td>
-                <CircularButton text="?" @click="toggleInfo('sourceGuide')" :highlight="infoToShow == 'sourceGuide'"/>
-              </td>
-              <td>
-                <select
-                    v-if='latestFacialMeasurement'
-                    :value="latestFacialMeasurement.source"
-                    :disabled="mode == 'View'"
-                    >
-                    <option>caliper/tape</option>
-                </select>
-              </td>
-            </tr>
-          </tbody>
           <tbody>
             <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
               <th colspan="2">
@@ -199,7 +197,8 @@
                     >
               </td>
             </tr>
-            <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
+
+            <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
               <th colspan="2">
                 <label for="faceLength">Face Length <b>(D)</b> (mm)</label>
               </th>
@@ -213,7 +212,8 @@
                     >
               </td>
             </tr>
-            <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
+
+            <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
               <th colspan="2">
                 <label for="lowerFaceLength">Lower Face Length <b>(E)</b> (mm)</label>
               </th>
@@ -227,37 +227,8 @@
                     >
               </td>
             </tr>
-            <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
-              <th colspan="2">
-                <label for="bitragionMentonArc">Bitragion Menton Arc <b>(K)</b> (mm)</label>
-              </th>
-              <td>
-                <input
-                    v-if='latestFacialMeasurement'
-                    type='number'
-                    :value="latestFacialMeasurement.bitragionMentonArc"
-                    @change='setFacialMeasurement($event, "bitragionMentonArc")'
-                    :disabled="mode == 'View'"
-                    >
-              </td>
-            </tr>
 
             <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
-              <th colspan="2">
-                <label for="bitragionSubnasaleArc">Bitragion Subnasale Arc <b>(L)</b> (mm)</label>
-              </th>
-              <td>
-                <input
-                    v-if='latestFacialMeasurement'
-                    type='number'
-                    :value="latestFacialMeasurement.bitragionSubnasaleArc"
-                    @change='setFacialMeasurement($event, "bitragionSubnasaleArc")'
-                    :disabled="mode == 'View'"
-                    >
-              </td>
-            </tr>
-
-            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
               <th colspan="2">
                 <label for="noseProtrusion">Nose Protrusion <b>(M)</b> (mm)</label>
               </th>
@@ -272,7 +243,7 @@
               </td>
             </tr>
 
-            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
+            <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
               <th colspan="2">
                 <label for="nasalRootBreadth">Nasal Root Breadth <b>(H)</b> (mm)</label>
               </th>
@@ -287,7 +258,7 @@
               </td>
             </tr>
 
-            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
+            <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
               <th colspan="2">
                 <label for="noseBridgeHeight">Nose Bridge Height <b>(H)</b> (mm)</label>
               </th>
@@ -302,7 +273,7 @@
               </td>
             </tr>
 
-            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
+            <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
               <th colspan="2">
                 <label for="lipWidth">Lip Width <b>(J)</b> (mm)</label>
               </th>
@@ -316,6 +287,42 @@
                     >
               </td>
             </tr>
+            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
+              <th colspan='2'>Curved Measurement Guide</th>
+              <td>
+                <CircularButton text="?" @click="toggleInfo('curvedMeasurementsGuide')" :highlight="infoToShow == 'curvedMeasurementsGuide'"/>
+              </td>
+            </tr>
+            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
+              <th colspan="2">
+                <label for="bitragionMentonArc">Bitragion Menton Arc <b>(K)</b> (mm)</label>
+              </th>
+              <td>
+                <input
+                    v-if='latestFacialMeasurement'
+                    type='number'
+                    :value="latestFacialMeasurement.bitragionMentonArc"
+                    @change='setFacialMeasurement($event, "bitragionMentonArc")'
+                    :disabled="mode == 'View'"
+                    >
+              </td>
+            </tr>
+
+            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
+              <th colspan="2">
+                <label for="bitragionSubnasaleArc">Bitragion Subnasale Arc <b>(L)</b> (mm)</label>
+              </th>
+              <td>
+                <input
+                    v-if='latestFacialMeasurement'
+                    type='number'
+                    :value="latestFacialMeasurement.bitragionSubnasaleArc"
+                    @change='setFacialMeasurement($event, "bitragionSubnasaleArc")'
+                    :disabled="mode == 'View'"
+                    >
+              </td>
+            </tr>
+
 
           </tbody>
         </table>
@@ -603,7 +610,7 @@ export default {
 
           if (this.facialMeasurements.length == 0) {
             this.facialMeasurements.push({
-              source: 'caliper/tape',
+              source: 'caliper for straight lines & tape measure for curves',
                 faceWidth: 0,
                 noseBridgeHeight: 0,
                 nasalRootBreadth: 0,
@@ -896,7 +903,7 @@ export default {
   }
 
   .left-pane-image {
-
+    max-width: 24em;
   }
   .left-pane {
     max-width: 50%;
