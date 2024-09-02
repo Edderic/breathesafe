@@ -1,13 +1,7 @@
 <template>
   <div>
     <div class='flex align-items-center justify-content-center row'>
-      <h2 class='tagline'>Measurement Devices</h2>
-      <CircularButton text="+" @click="newDevice"/>
-    </div>
-
-    <div class='row justify-content-center'>
-      <input type="text" v-model='search'>
-      <SearchIcon height='2em' width='2em'/>
+      <h2 class='tagline'>Measurement Device</h2>
     </div>
 
     <div class='container chunk'>
@@ -23,29 +17,28 @@ Do you have a quantitative fit testing (QNFT) device? If so, please add informat
         </p>
       <div class='centered'>
         <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Race &amp; Ethnicity filled out</th>
-              <th>Gender filled out</th>
-              <th>Has Facial Measurements</th>
-              <th>Ready to add Fit Testing Data</th>
-            </tr>
-          </thead>
           <tbody>
-            <tr v-for='r in displayables' text='Edit'>
-              <td @click="visit(r.managedId, 'Name')">
-                {{r.firstName}} {{r.lastName}}
-              </td>
-              <td @click="visit(r.managedId, 'Demographics')" class='colored-cell' :style="{backgroundColor: backgroundColor(r.raceEthnicityComplete)}" v-html="checkmarkOrCross(r.raceEthnicityComplete)">
-              </td>
-              <td @click="visit(r.managedId, 'Demographics')" class='colored-cell' :style="{backgroundColor: backgroundColor(r.genderAndSexComplete)}" v-html="checkmarkOrCross(r.genderAndSexComplete)">
-              </td>
-              <td @click="visit(r.managedId, 'Facial Measurements')" class='colored-cell' :style="{backgroundColor: backgroundColor(r.facialMeasurementsComplete)}" v-html="checkmarkOrCross(r.facialMeasurementsComplete)">
-              </td>
-              <td :style="{backgroundColor: statusColor(r.readyToAddFitTestingDataPercentage)}" class='colored-cell'>
-                {{r.readyToAddFitTestingDataPercentage}}
-              </td>
+            <tr>
+              <th>Measurement Device Type</th>
+              <select v-model='quantitativeTestingMode' :disabled='!createOrEdit'>
+                <option>QNFT</option>
+              </select>
+            </tr>
+            <tr>
+              <th>Manufacturer</th>
+              <input type="text" placeholder="TSI" v-model='measurement_device.manufacturer'>
+            </tr>
+            <tr>
+              <th>Model</th>
+              <input type="text" placeholder="8020A" v-model='measurement_device.model'>
+            </tr>
+            <tr>
+              <th>Serial</th>
+              <input type="text" placeholder="" v-model='measurement_device.serial'>
+            </tr>
+            <tr>
+              <th>Notes</th>
+              <textarea type="textarea" rows=5 columns=80  v-model='measurement_device.notes'>{{ measurement_device.notes }}</textarea>
             </tr>
           </tbody>
         </table>
@@ -67,22 +60,24 @@ import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
-import SearchIcon from './search_icon.vue'
 import { useManagedUserStore } from './stores/managed_users_store.js'
 
 export default {
-  name: 'MeasurementDevices',
+  name: 'MeasurementDevice',
   components: {
     Button,
     CircularButton,
     ClosableMessage,
     ColoredCell,
-    SearchIcon
   },
   data() {
     return {
-      facialMeasurementsLength: 0,
-      search: ""
+      measurement_device: {
+        manufacturer: '',
+        model: '',
+        serial: '',
+        notes: ''
+      }
     }
   },
   props: {
@@ -130,10 +125,10 @@ export default {
     ),
     displayables() {
       if (this.search == "") {
-        return this.measurementDevices
+        return this.measurementDevice
       } else {
         let lowerSearch = this.search.toLowerCase()
-        return this.measurementDevices.filter(
+        return this.measurementDevice.filter(
           function(mu) {
             return mu.firstName.toLowerCase().match(lowerSearch)
               || mu.lastName.toLowerCase().match(lowerSearch)
@@ -191,45 +186,6 @@ export default {
       }
     },
 
-    async newDevice() {
-      setupCSRF();
-
-      let measurementDevices;
-      let measurementDevice;
-      let respiratorUser;
-
-      await axios.post(
-        `/measurement_devices.json`,
-      )
-        .then(response => {
-          let data = response.data
-          if (response.data.measurement_device) {
-            measurementDevice = deepSnakeToCamel(response.data.measurement_device)
-
-            this.measurementDevices.push(
-              measurementDevice
-            )
-
-            this.$router.push(
-              {
-                'name': 'MeasurementDevice',
-                params: {
-                  id: measurementDevice.id
-                }
-              }
-            )
-          }
-        })
-        .catch(error => {
-          if (error && error.response && error.response.data && error.response.data.messages) {
-            this.addMessages(error.response.data.messages)
-          } else {
-            this.addMessages['Something went wrong.']
-          }
-
-        // whatever you want
-        })
-    },
     visit(profileId, tabToShow) {
       this.$router.push({
         name: 'RespiratorUser',
