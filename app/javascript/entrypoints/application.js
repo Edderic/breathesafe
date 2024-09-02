@@ -49,6 +49,7 @@ import Landing from '../landing.vue'
 import Mask from '../add_mask.vue'
 import FitTest from '../fit_test.vue'
 import FitTests from '../fit_tests.vue'
+import MeasurementDevices from '../measurement_devices.vue'
 import Masks from '../masks.vue'
 import Profile from '../profile.vue'
 import PrivacyPolicy from '../privacy_policy.vue'
@@ -81,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/fit_tests/new', component: FitTest, name: 'NewFitTest' },
     { path: '/fit_tests/:id', component: FitTest, name: 'EditFitTest' },
     { path: '/fit_tests', component: FitTests, name: 'FitTests' },
+    { path: '/measurement_devices', component: MeasurementDevices, name: 'MeasurementDevices' },
     { path: '/venues', component: Venues, name: 'Venues' },
     { path: '/analytics/:id', component: Analytics, name: 'Analytics' },
     { path: '/signin', component: SignIn, name: 'SignIn' },
