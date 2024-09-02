@@ -668,7 +668,7 @@ export default {
         }
       } else {
         if (this.secondaryTab == 'Part I') {
-          this.validateFacialMeasurementsPart(['source', 'faceWidth', 'jawWidth', 'faceDepth']);
+          this.validateFacialMeasurementsPart(['faceWidth', 'jawWidth', 'faceDepth']);
 
           if (this.messages.length == 0) {
             this.setSecondaryRouteTo({name: 'Part II'})
@@ -906,7 +906,6 @@ export default {
     max-width: 24em;
   }
   .left-pane {
-    max-width: 50%;
   }
 
   p.narrow-p {
@@ -946,9 +945,10 @@ export default {
     max-width: 30em;
   }
   .edit-facial-measurements {
-    display: flex;
-    flex-direction: row;
-    max-width:50em;
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: auto;
+    max-width: 53em;
   }
   @media(max-width: 700px) {
     img {
