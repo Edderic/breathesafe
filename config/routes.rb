@@ -54,6 +54,7 @@ Rails.application.routes.draw do
   post 'measurement_devices',to: 'measurement_devices#create'
   get 'measurement_devices',to: 'measurement_devices#index'
   get 'measurement_devices/:id',to: 'measurement_devices#show'
+  put 'measurement_devices/:id',to: 'measurement_devices#update'
   delete 'measurement_devices/:id',to: 'measurement_devices#delete'
 
   controller :pages do

@@ -25,26 +25,29 @@ Do you have a quantitative fit testing (QNFT) device? If so, please add informat
         <table>
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Race &amp; Ethnicity filled out</th>
-              <th>Gender filled out</th>
-              <th>Has Facial Measurements</th>
-              <th>Ready to add Fit Testing Data</th>
+              <th>Type</th>
+              <th>Manufacturer</th>
+              <th>Model</th>
+              <th>Serial</th>
+              <th>Notes</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for='r in displayables' text='Edit'>
-              <td @click="visit(r.managedId, 'Name')">
-                {{r.firstName}} {{r.lastName}}
+            <tr v-for='r in measurement_devices' text='Edit' @click='visit(r.id)'>
+              <td >
+                {{r.measurement_device_type}}
               </td>
-              <td @click="visit(r.managedId, 'Demographics')" class='colored-cell' :style="{backgroundColor: backgroundColor(r.raceEthnicityComplete)}" v-html="checkmarkOrCross(r.raceEthnicityComplete)">
+              <td >
+                {{r.manufacturer}}
               </td>
-              <td @click="visit(r.managedId, 'Demographics')" class='colored-cell' :style="{backgroundColor: backgroundColor(r.genderAndSexComplete)}" v-html="checkmarkOrCross(r.genderAndSexComplete)">
+              <td >
+                {{r.model}}
               </td>
-              <td @click="visit(r.managedId, 'Facial Measurements')" class='colored-cell' :style="{backgroundColor: backgroundColor(r.facialMeasurementsComplete)}" v-html="checkmarkOrCross(r.facialMeasurementsComplete)">
+              <td >
+                {{r.serial}}
               </td>
-              <td :style="{backgroundColor: statusColor(r.readyToAddFitTestingDataPercentage)}" class='colored-cell'>
-                {{r.readyToAddFitTestingDataPercentage}}
+              <td >
+                {{r.notes}}
               </td>
             </tr>
           </tbody>
@@ -81,8 +84,7 @@ export default {
   },
   data() {
     return {
-      facialMeasurementsLength: 0,
-      search: ""
+      measurement_devices: []
     }
   },
   props: {
@@ -152,7 +154,7 @@ export default {
     if (!this.currentUser) {
       signIn.call(this)
     } else {
-      this.loadManagedUsers()
+      this.loadMeasurementDevices()
     }
   },
   methods: {
@@ -200,15 +202,31 @@ export default {
         }
       )
     },
-    visit(profileId, tabToShow) {
+
+    async loadMeasurementDevices() {
+      await axios.get(
+        `/measurement_devices.json`,
+      )
+        .then(response => {
+          let data = response.data
+          if (response.data.measurement_devices) {
+            this.measurement_devices = data.measurement_devices
+          }
+        })
+        .catch(error => {
+          if (error && error.response && error.response.data && error.response.data.messages) {
+            this.addMessages(error.response.data.messages)
+          } else {
+            this.addMessages([error.message])
+          }
+        })
+    },
+    visit(id) {
       this.$router.push({
-        name: 'RespiratorUser',
+        name: 'ShowMeasurementDevice',
         params: {
-          id: profileId
+          id: id
         },
-        query: {
-          tabToShow: tabToShow
-        }
       })
     }
   }

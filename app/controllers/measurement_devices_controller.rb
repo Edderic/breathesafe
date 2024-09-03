@@ -8,7 +8,7 @@ class MeasurementDevicesController < ApplicationController
       measurement_device = {}
     else
       hashed_measurement_device_data = measurement_device_data.to_hash
-      hashed_measurement_device_data[:author_id] = current_user.id
+      hashed_measurement_device_data[:owner_id] = current_user.id
       measurement_device = MeasurementDevice.create(hashed_measurement_device_data)
 
       if measurement_device.errors.full_messages.size == 0
@@ -58,7 +58,7 @@ class MeasurementDevicesController < ApplicationController
       to_render = {}
     end
 
-    measurement_device = MeasurementDevice.find(params[:id])[0]
+    measurement_device = MeasurementDevice.find(params[:id])
 
     unless current_user.manages?(measurement_device.owner)
       measurement_device = {}
@@ -99,13 +99,17 @@ class MeasurementDevicesController < ApplicationController
       messages = []
     else
       status = 400 # bad request
-      to_render = {}
       messages = []
     end
 
+    to_render = {
+      messages: messages,
+      measurement_device: measurement_device
+    }
+
     respond_to do |format|
       format.json do
-        render json: to_render.to_json, status: status, messages: messages
+        render json: to_render.to_json, status: status
       end
     end
   end
@@ -117,16 +121,22 @@ class MeasurementDevicesController < ApplicationController
       to_render = {}
     end
 
-    measurement_device = MeasurementDevice.find(params[:id])
-    measurement_device_with_aggregations = MeasurementDevice.with_aggregations(measurement_device_id=measurement_device.id)[0]
+    measurement_device_data = MeasurementDevice.viewable(
+      current_user,
+      params[:id]
+    )[0]
 
-    if measurement_device.owner_id != current_user.id
+    debugger
+
+    measurement_device = MeasurementDevice.find(measurement_device_data['id'])
+
+    if measurement_device['owner_id'] != current_user.id
       status = 401
       messages = ['Current user is not the MeasurementDevice author.']
       to_render = {
         messages: messages
       }
-    elsif measurement_device_with_aggregations['fit_test_count'] > 0
+    elsif measurement_device_data['num_fit_tests'] > 0
       status = 401
       to_render = {
         messages: ['Cannot delete a measurement_device that already has a Fit Test assigned to it.']
@@ -148,33 +158,11 @@ class MeasurementDevicesController < ApplicationController
 
   def measurement_device_data
     params.require(:measurement_device).permit(
-      :author_id,
-      :unique_internal_model_code,
-      :filter_type,
-      :style,
-      :strap_type,
-      :mass_grams,
-      :height_mm,
-      :width_mm,
-      :depth_mm,
-      :has_gasket,
-      :has_exhalation_valve,
-      :initial_cost_us_dollars,
-      :filter_change_cost_us_dollars,
-      :notes,
-      sources: [],
-      image_urls: [],
-      where_to_buy_urls: [],
-      modifications: {},
-      filtration_efficiencies: [
-        :filtration_efficiency_percent,
-        :filtration_efficiency_source,
-        :filtration_efficiency_notes
-      ],
-      breathability: [
-        :breathability_pascals,
-        :breathability_source
-      ]
+      :measurement_device_type,
+      :model,
+      :manufacturer,
+      :serial,
+      :notes
     )
   end
 end

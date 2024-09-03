@@ -7,7 +7,13 @@ import { useMainStore } from './main_store'
 // the first argument is a unique id of the store across your application
 export const useMeasurementDeviceStore = defineStore('measurementDevices', {
   state: () => ({
-    measurementDevice: {},
+    measurement_device: {
+      device_type: '',
+      manufacturer: '',
+      model: '',
+      serial: '',
+      notes: ''
+    },
     measurementDevices: []
   }),
   getters: {
@@ -32,7 +38,7 @@ export const useMeasurementDeviceStore = defineStore('measurementDevices', {
             measurementDevices = response.data.measurement_devices
 
             for(let measurementDeviceData of measurementDevices) {
-              measurementDevice = deepSnakeToCamel(measurementDeviceData)
+              measurementDevice = measurementDeviceData
               this.measurementDevices.push(
                 measurementDevice
               )
@@ -59,7 +65,7 @@ export const useMeasurementDeviceStore = defineStore('measurementDevices', {
       )
         .then(response => {
           let data = response.data
-          this.measurementDevice = deepSnakeToCamel(response.data.measurement_devices[0])
+          this.measurement_device = response.data.measurement_device
         })
         .catch(error => {
           mainStore.addMessages(error.response.data.messages)

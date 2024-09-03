@@ -20,7 +20,7 @@ Do you have a quantitative fit testing (QNFT) device? If so, please add informat
           <tbody>
             <tr>
               <th>Measurement Device Type</th>
-              <select v-model='quantitativeTestingMode' :disabled='mode == "Show"'>
+              <select v-model='measurement_device.device_type' :disabled='mode == "Show"'>
                 <option>QNFT</option>
               </select>
             </tr>
@@ -45,6 +45,7 @@ Do you have a quantitative fit testing (QNFT) device? If so, please add informat
             <tr>
               <th>Notes</th>
               <textarea type="textarea" rows=5 columns=80  v-model='measurement_device.notes'
+                placeholder="e.g. Calibration dates, and results, if possible."
                 :disabled='mode == "Show"'
                 >{{ measurement_device.notes }}</textarea>
             </tr>
@@ -54,7 +55,7 @@ Do you have a quantitative fit testing (QNFT) device? If so, please add informat
       </div>
         <div class="row justify-content-center">
           <Button class='button' text="Edit" @click='mode = "Edit"' v-if='mode == "Show"'/>
-          <Button class='button' text="Delete" @click='deleteMeasurementDevice' v-if='deletable && (mode != "Show")'/>
+          <Button class='button' text="Delete" @click='deleteMeasurementDevice' v-if='mode == "Edit" '/>
           <Button class='button' text="Save" @click='saveMeasurementDevice' v-if='mode == "New" || mode == "Edit"'/>
           <Button class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New" || mode == "Edit")'/>
         </div>
@@ -76,6 +77,7 @@ import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import { useManagedUserStore } from './stores/managed_users_store.js'
+import { useMeasurementDeviceStore } from './stores/measurement_devices_store.js'
 
 export default {
   name: 'MeasurementDevice',
@@ -87,12 +89,6 @@ export default {
   },
   data() {
     return {
-      measurement_device: {
-        manufacturer: '',
-        model: '',
-        serial: '',
-        notes: ''
-      },
       mode: 'Edit'
     }
   },
@@ -103,7 +99,6 @@ export default {
         useMainStore,
         [
           'currentUser',
-          'messages'
         ]
     ),
     ...mapWritableState(
@@ -112,75 +107,49 @@ export default {
           'messages'
         ]
     ),
-    ...mapState(
-        useProfileStore,
-        [
-          'profileId',
-          'readyToAddFitTestingDataPercentage',
-          'nameComplete',
-          'genderAndSexComplete',
-          'raceEthnicityComplete',
-          'facialMeasurementsComplete',
-          'loadFacialMeasurements',
-        ]
-    ),
     ...mapWritableState(
-        useManagedUserStore,
+        useMeasurementDeviceStore,
         [
-          'managedUsers'
+          'measurement_device'
         ]
     ),
-    ...mapWritableState(
-        useProfileStore,
-        [
-          'firstName',
-          'lastName',
-          'raceEthnicity',
-          'genderAndSex',
-        ]
-    ),
-    displayables() {
-      if (this.search == "") {
-        return this.measurementDevice
-      } else {
-        let lowerSearch = this.search.toLowerCase()
-        return this.measurementDevice.filter(
-          function(mu) {
-            return mu.firstName.toLowerCase().match(lowerSearch)
-              || mu.lastName.toLowerCase().match(lowerSearch)
-
-          }
-        )
-      }
-    },
-    facialMeasurementsIncomplete() {
-      return this.facialMeasurementsLength == 0
-    }
   },
   async created() {
     await this.getCurrentUser()
 
     if (!this.currentUser) {
       signIn.call(this)
-    } else {
+    } else if (this.$route.params.id){
+      this.id = this.$route.params.id
+      this.loadMeasurementDevice(this.id)
     }
 
     if (this.$route.name == "NewMeasurementDevice") {
       this.mode = "New"
     }
+    else if (this.$route.name == "ShowMeasurementDevice") {
+      this.mode = "Show"
+    }
+
     this.$watch(
       () => this.$route.params,
       (toParams, fromParams) => {
         if (this.$route.name == "NewMeasurementDevice") {
           this.mode = "New"
         }
+        else if (this.$route.name == "ShowMeasurementDevice") {
+          this.mode = "Show"
+        }
+        if (toParams['id'] && this.$route.name == "ShowMeasurementDevice") {
+          this.id = toParams.id
+          this.loadMeasurementDevice(this.id)
+        }
       }
     )
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
-    ...mapActions(useProfileStore, ['loadProfile']),
-    ...mapActions(useManagedUserStore, ['loadManagedUsers']),
+    ...mapActions(useMeasurementDeviceStore, ['loadMeasurementDevice']),
     handleCancel() {
       if (this.mode == 'New') {
         this.$router.push(
@@ -192,6 +161,115 @@ export default {
         this.mode = 'Show'
       }
     },
+    runValidations() {
+      let arrayOfProperties = [
+        'device_type',
+        'manufacturer',
+        'model',
+      ]
+
+      for(let a of arrayOfProperties) {
+        if (!this.measurement_device[a]) {
+          this.addMessages([`Please select a ${a}.`])
+        }
+      }
+    },
+    async deleteMeasurementDevice() {
+      setupCSRF();
+
+      if (this.id) {
+        await axios.delete(
+          `/measurement_devices/${this.id}.json`, {
+            measurement_device: this.measurement_device,
+          }
+        )
+          .then(response => {
+            this.$router.push({
+              path: `/measurement_devices`,
+              force: true
+            })
+          })
+          .catch(error => {
+            if (error && error.response && error.response.data && error.response.data.messages) {
+              this.addMessages(error.response.data.messages)
+            } else {
+              this.addMessages(
+                [error.message]
+              )
+            }
+          })
+      }
+    },
+    async saveMeasurementDevice() {
+      this.runValidations()
+
+      if (this.messages.length > 0) {
+        return
+      }
+
+      setupCSRF();
+
+      if (this.id) {
+        await axios.put(
+          `/measurement_devices/${this.id}.json`, {
+            measurement_device: this.measurement_device,
+          }
+        )
+          .then(response => {
+            let data = response.data
+            // whatever you want
+
+            // this.mode = 'Show'
+            this.$router.push({
+              path: `/measurement_devices/${this.id}`,
+              force: true
+            })
+          })
+          .catch(error => {
+            //  TODO: actually use the error message
+            this.messages.push({
+              str: "Failed to update fit test."
+            })
+          })
+      } else {
+        if (this.messages.length > 0) {
+          return
+        }
+
+        // create
+        await axios.post(
+          `/measurement_devices.json`, {
+            measurement_device: this.measurement_device,
+          }
+        )
+          .then(response => {
+            let data = response.data
+
+            // TODO: could get the id from data
+            // We could save it
+            // whatever you want
+
+            this.id = response.data.measurement_device.id
+
+            // We assume that the user hits save first at the "Mask" section.
+            // It might not be always the case, but good enough
+
+            this.$router.push({
+              name: 'MeasurementDevices',
+            })
+          })
+          .catch(error => {
+            //  TODO: actually use the error message
+            if (error && error.response && error.response.data && error.response.data.messages) {
+              this.addMessages(error.response.data.messages)
+            } else {
+              this.addMessages(
+                [error.message]
+              )
+            }
+          })
+      }
+    }
   }
 }
 </script>
