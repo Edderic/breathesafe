@@ -1,6 +1,6 @@
 <template>
   <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em' class='round button'>
-    <circle cx="40" cy="40" r="40" :fill="computedBackgroundColor"/>
+    <circle cx="40" cy="40" r="40" :fill="computedBackgroundColor" class='circle' @mouseover='hover = true' @mouseleave='hover = false'/>
 
     <slot v-if='!text'></slot>
     <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class='tilted-header'>{{text}}</text>
@@ -13,7 +13,9 @@ export default {
   components: {
   },
   data() {
-    return {}
+    return {
+      hover: false
+    }
   },
   props: {
     text: String,
@@ -28,8 +30,8 @@ export default {
   },
   computed: {
     computedBackgroundColor() {
-      if (this.highlight) {
-        return 'rgb(240, 240, 240)'
+      if (this.highlight || this.hover) {
+        return '#eee'
       } else {
         return this.backgroundColor
       }
@@ -53,7 +55,8 @@ export default {
     margin-right: 1em;
   }
 
-  .button:hover {
+  .circle:hover {
     cursor: pointer;
+    background-color: #eee;
   }
 </style>
