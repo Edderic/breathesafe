@@ -46,7 +46,7 @@
         </table>
       </div>
 
-      <h3 class='empty-sign' v-show='displayables.length == 0' class='text-align-center'>
+      <h3 class='empty-sign text-align-center' v-show='displayables.length == 0' >
         No managed users to show. Use the (+) button above to add users you can add fit test data for.
       </h3>
     </div>

@@ -404,6 +404,7 @@ export default {
     height: 75vh;
     width: 100%;
   }
+
   table th{
     position: sticky;
     top: 0;
