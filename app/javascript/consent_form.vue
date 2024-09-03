@@ -44,6 +44,10 @@
         How will participants' information be kept confidential?
       </router-link>
 
+      <router-link :to="tocPath('data-use-over-time')">
+        How long will the data be used?
+      </router-link>
+
       <router-link :to="tocPath('compensation')">
         Are participants compensated in this study?
       </router-link>
@@ -84,6 +88,9 @@
         </div>
       </div>
 
+      <div>
+        <p>Last updated: Sept. 03, 2024</p>
+      </div>
         <div id='invitation-to-participate'>
           <br>
           <br>
@@ -208,8 +215,20 @@
           <br>
           <h4>Can participants choose to leave the study?</h4>
         </div>
-        <p>Participants may be able to delete their data anytime using this button (TODO). That will delete user information such as email, password, demographics, and fit testing data.
-          Deletion of data, however, will have no effect on aggregated results for published research.
+        <p>Participants may be able to delete their data by visiting the
+        <router-link :to='{name: "RespiratorUsers"}'>
+          Respirator Users
+        </router-link> section, and clicking on an individual they have access
+        to, click "Edit" and then click "Delete." This functionality is
+        availabel for people who have gone through the registration process.
+        That will delete user information such as email, password,
+        demographics, and fit testing data. Users will have the ability to
+        delete their data and have their data not contribute to research until
+        publication (which is TBD). Deletion of data in the future will have no
+        effect to the state of previously published research, but may alter
+        existing statistical machine learning models that are being used at the
+        time on the web application.
+
         </p>
 
         <div id='risks-harms'>
@@ -299,7 +318,7 @@
 
         <p>Your participation in this study is voluntary. You may decide not to
         be in this study. Even if you consent to participate, you have the
-        right to withdraw and delete your data at any time. See the
+        right to withdraw and delete your data later on. See the
 
         <router-link :to="tocPath('leave-study')">Can participants choose to leave the study?</router-link> section for details.
 </p>
