@@ -45,6 +45,10 @@
           </tbody>
         </table>
       </div>
+
+      <h3 v-show='displayables.length == 0'>
+        No managed users to show. Use the (+) sign above to add users you can add fit test data for.
+      </h3>
     </div>
   </div>
 </template>
