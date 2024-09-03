@@ -5,11 +5,6 @@
       <CircularButton text="+" @click="newDevice"/>
     </div>
 
-    <div class='row justify-content-center'>
-      <input type="text" v-model='search'>
-      <SearchIcon height='2em' width='2em'/>
-    </div>
-
     <div class='container chunk'>
       <ClosableMessage @onclose='messages = []' :messages='messages'/>
       <br>
@@ -59,16 +54,11 @@ Do you have a quantitative fit testing (QNFT) device? If so, please add informat
 
 <script>
 import axios from 'axios';
-import Button from './button.vue'
 import ClosableMessage from './closable_message.vue'
 import CircularButton from './circular_button.vue'
-import ColoredCell from './colored_cell.vue'
-import { deepSnakeToCamel, setupCSRF } from './misc.js'
-import { userSealCheckColorMapping } from './colors.js'
-import { RespiratorUser } from './respirator_user.js'
+import { setupCSRF } from './misc.js'
 import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
-import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import SearchIcon from './search_icon.vue'
 import { useManagedUserStore } from './stores/managed_users_store.js'
@@ -76,10 +66,8 @@ import { useManagedUserStore } from './stores/managed_users_store.js'
 export default {
   name: 'MeasurementDevices',
   components: {
-    Button,
     CircularButton,
     ClosableMessage,
-    ColoredCell,
     SearchIcon
   },
   data() {
@@ -103,18 +91,6 @@ export default {
           'messages'
         ]
     ),
-    ...mapState(
-        useProfileStore,
-        [
-          'profileId',
-          'readyToAddFitTestingDataPercentage',
-          'nameComplete',
-          'genderAndSexComplete',
-          'raceEthnicityComplete',
-          'facialMeasurementsComplete',
-          'loadFacialMeasurements',
-        ]
-    ),
     ...mapWritableState(
         useManagedUserStore,
         [
@@ -130,23 +106,6 @@ export default {
           'genderAndSex',
         ]
     ),
-    displayables() {
-      if (this.search == "") {
-        return this.measurementDevices
-      } else {
-        let lowerSearch = this.search.toLowerCase()
-        return this.measurementDevices.filter(
-          function(mu) {
-            return mu.firstName.toLowerCase().match(lowerSearch)
-              || mu.lastName.toLowerCase().match(lowerSearch)
-
-          }
-        )
-      }
-    },
-    facialMeasurementsIncomplete() {
-      return this.facialMeasurementsLength == 0
-    }
   },
   async created() {
     await this.getCurrentUser()
@@ -161,38 +120,6 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
-    statusColor(fitTestingPercent) {
-      let percentage = parseFloat(fitTestingPercent.split("%")[0])
-      let status = 'Passed'
-      if (percentage == 0) {
-        status = "Failed"
-      } else if (percentage > 0 && percentage < 100) {
-        status = "Skipped"
-      }
-
-      let color = userSealCheckColorMapping[status]
-      return `rgb(${color.r}, ${color.g}, ${color.b})`
-    },
-    backgroundColor(boolean) {
-      let color;
-
-      if (boolean) {
-        color = userSealCheckColorMapping['Passed']
-
-      } else {
-        color = userSealCheckColorMapping['Failed']
-      }
-
-      return `rgb(${color.r}, ${color.g}, ${color.b}, 0.5)`
-    },
-    checkmarkOrCross(boolean) {
-      if (boolean) {
-        return `&#x2714;`
-      } else {
-        return "&#x2717;"
-      }
-    },
-
     async newDevice() {
       setupCSRF();
 
