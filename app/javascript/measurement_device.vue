@@ -20,7 +20,7 @@ Do you have a quantitative fit testing (QNFT) device? If so, please add informat
           <tbody>
             <tr>
               <th>Measurement Device Type</th>
-              <select v-model='measurement_device.device_type' :disabled='mode == "Show"'>
+              <select v-model='measurement_device.measurement_device_type' :disabled='mode == "Show"'>
                 <option>QNFT</option>
               </select>
             </tr>
@@ -163,7 +163,7 @@ export default {
     },
     runValidations() {
       let arrayOfProperties = [
-        'device_type',
+        'measurement_device_type',
         'manufacturer',
         'model',
       ]
