@@ -163,8 +163,19 @@ export default {
     if (!this.currentUser) {
       signIn.call(this)
     } else {
-      this.loadManagedUsers()
     }
+
+    if (this.$route.name == "NewMeasurementDevice") {
+      this.mode = "New"
+    }
+    this.$watch(
+      () => this.$route.params,
+      (toParams, fromParams) => {
+        if (this.$route.name == "NewMeasurementDevice") {
+          this.mode = "New"
+        }
+      }
+    )
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
