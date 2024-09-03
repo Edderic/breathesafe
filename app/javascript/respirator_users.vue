@@ -15,7 +15,7 @@
       <br>
     </div>
 
-    <div class='main'>
+    <div :class='{main: true, scrollable: managedUsers.length == 0}'>
       <div class='centered'>
         <table>
           <thead>
@@ -46,7 +46,7 @@
         </table>
       </div>
 
-      <h3 class='empty-sign text-align-center' v-show='displayables.length == 0' >
+      <h3 class='text-align-center' v-show='displayables.length == 0' >
         No managed users to show. Use the (+) button above to add users you can add fit test data for.
       </h3>
     </div>
@@ -353,4 +353,10 @@ export default {
   .empty-sign {
     margin-top: 25em;
   }
+
+  .scrollable {
+    overflow-y: auto;
+    height: 75vh;
+  }
+
 </style>
