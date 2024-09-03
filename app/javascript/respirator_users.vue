@@ -46,8 +46,8 @@
         </table>
       </div>
 
-      <h3 v-show='displayables.length == 0'>
-        No managed users to show. Use the (+) sign above to add users you can add fit test data for.
+      <h3 v-show='displayables.length == 0' class='text-align-center'>
+        No managed users to show. Use the (+) button above to add users you can add fit test data for.
       </h3>
     </div>
   </div>
@@ -345,4 +345,9 @@ export default {
   .colored-cell {
     text-align: center;
   }
+
+  .text-align-center {
+    text-align: center;
+  }
+
 </style>
