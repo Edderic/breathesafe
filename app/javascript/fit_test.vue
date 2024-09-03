@@ -368,7 +368,9 @@
               <th>Device</th>
               <td>
                 <select v-model='quantitativeFitTestingDeviceId' :disabled='!createOrEdit'>
-                  <option v-for='d in measurementDevices' :value='d.id'>{{d.manufacturer + " " + d.model + " " + d.serial}}</option>
+                  <option v-for='d in measurementDevices' :value='d.id'>
+                  {{deviceInfo(d)}}
+                  </option>
                 </select>
               </td>
             </tr>
@@ -1190,6 +1192,13 @@ export default {
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     ...mapActions(useMeasurementDeviceStore, ['loadMeasurementDevices']),
+    deviceInfo(d) {
+      let message = '';
+      if (d.remove_from_service) {
+        message = "- REMOVED FROM SERVICE"
+      }
+      return `${d.manufacturer} ${d.model} ${d.serial} ${message}`
+    },
     showDescription(name) {
       this.messages = []
 

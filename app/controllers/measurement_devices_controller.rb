@@ -160,7 +160,8 @@ class MeasurementDevicesController < ApplicationController
       :model,
       :manufacturer,
       :serial,
-      :notes
+      :notes,
+      :remove_from_service
     )
   end
 end

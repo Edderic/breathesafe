@@ -25,10 +25,11 @@ Do you have a quantitative fit testing (QNFT) device? If so, please add informat
               <th>Model</th>
               <th>Serial</th>
               <th>Notes</th>
+              <th>Removed from service</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for='r in measurement_devices' text='Edit' @click='visit(r.id)'>
+            <tr v-for='r in measurementDevices' text='Edit' @click='visit(r.id)'>
               <td >
                 {{r.measurement_device_type}}
               </td>
@@ -43,6 +44,9 @@ Do you have a quantitative fit testing (QNFT) device? If so, please add informat
               </td>
               <td >
                 {{r.notes}}
+              </td>
+              <td >
+                {{r.remove_from_service}}
               </td>
             </tr>
           </tbody>
@@ -62,6 +66,7 @@ import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useMainStore } from './stores/main_store';
 import SearchIcon from './search_icon.vue'
 import { useManagedUserStore } from './stores/managed_users_store.js'
+import { useMeasurementDeviceStore } from './stores/measurement_devices_store.js'
 
 export default {
   name: 'MeasurementDevices',
@@ -91,6 +96,12 @@ export default {
           'messages'
         ]
     ),
+    ...mapState(
+        useMeasurementDeviceStore,
+        [
+          'measurementDevices'
+        ]
+    ),
     ...mapWritableState(
         useManagedUserStore,
         [
@@ -110,6 +121,7 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
+    ...mapActions(useMeasurementDeviceStore, ['loadMeasurementDevices']),
     async newDevice() {
       setupCSRF();
 
@@ -120,24 +132,6 @@ export default {
       )
     },
 
-    async loadMeasurementDevices() {
-      await axios.get(
-        `/measurement_devices.json`,
-      )
-        .then(response => {
-          let data = response.data
-          if (response.data.measurement_devices) {
-            this.measurement_devices = data.measurement_devices
-          }
-        })
-        .catch(error => {
-          if (error && error.response && error.response.data && error.response.data.messages) {
-            this.addMessages(error.response.data.messages)
-          } else {
-            this.addMessages([error.message])
-          }
-        })
-    },
     visit(id) {
       this.$router.push({
         name: 'ShowMeasurementDevice',

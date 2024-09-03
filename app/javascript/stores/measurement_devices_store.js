@@ -23,35 +23,21 @@ export const useMeasurementDeviceStore = defineStore('measurementDevices', {
   },
   actions: {
     async loadMeasurementDevices() {
-      this.measurementDevices = [];
-      let mainStore = useMainStore()
-      let measurementDevices = [];
-      let measurementDevice;
-
-      setupCSRF();
-
       await axios.get(
         `/measurement_devices.json`,
       )
         .then(response => {
           let data = response.data
           if (response.data.measurement_devices) {
-            measurementDevices = response.data.measurement_devices
-
-            for(let measurementDeviceData of measurementDevices) {
-              this.measurementDevices.push(
-                measurementDeviceData
-              )
-            }
+            this.measurementDevices = data.measurement_devices
           }
         })
         .catch(error => {
           if (error && error.response && error.response.data && error.response.data.messages) {
-            mainStore.addMessages(error.response.data.messages)
+            this.addMessages(error.response.data.messages)
           } else {
-            mainStore.addMessages([error.message])
+            this.addMessages([error.message])
           }
-        // whatever you want
         })
     },
     async loadMeasurementDevice(measurementDeviceId) {
@@ -84,7 +70,7 @@ export const useMeasurementDeviceStore = defineStore('measurementDevices', {
           .then(response => {
             let data = response.data
             this.measurementDevice = {}
-            this.measurementDevices = this.measurementDevices.filter((m) => m.measurementDeviceId != measurementDeviceId)
+            this.measurementDevices = this.measurementDevices.filter((m) => m.measurement_device_id != measurementDeviceId)
 
           })
           .catch(error => {

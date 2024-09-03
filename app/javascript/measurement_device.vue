@@ -64,6 +64,14 @@ Do you have a quantitative fit testing (QNFT) device? If so, please add informat
                 >{{ measurement_device.notes }}</textarea>
               </td>
             </tr>
+            <tr>
+              <th>Removed from service</th>
+              <td>
+                <input type="checkbox" v-model='measurement_device.remove_from_service'
+                  :disabled='mode == "Show"'
+                >
+              </td>
+            </tr>
           </tbody>
         </table>
 
