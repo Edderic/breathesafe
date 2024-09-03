@@ -1064,6 +1064,7 @@ export default {
     },
     toSave() {
       return {
+        quantitative_fit_testing_device_id: this.quantitativeFitTestingDeviceId,
         comfort: this.comfort,
         mask_id: this.selectedMask.id,
         user_seal_check: this.userSealCheck,
@@ -1711,10 +1712,12 @@ export default {
         }
       }
       else if (this.tabToShow == 'QNFT' && this.secondaryTabToShow != 'Results') {
+        debugger
         this.validateUser()
         this.validateMask()
         this.validateUserSealCheck()
         this.validateQLFT()
+        this.validatePresenceOfDevice()
 
         this.validatePresenceOfInitialCountPerCM3()
         this.validateValueOfInitialCountPerCM3()

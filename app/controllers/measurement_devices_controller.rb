@@ -126,8 +126,6 @@ class MeasurementDevicesController < ApplicationController
       params[:id]
     )[0]
 
-    debugger
-
     measurement_device = MeasurementDevice.find(measurement_device_data['id'])
 
     if measurement_device['owner_id'] != current_user.id

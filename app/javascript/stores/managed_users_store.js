@@ -43,7 +43,6 @@ export const useManagedUserStore = defineStore('managedUsers', {
           }
         })
         .catch(error => {
-          debugger;
           if (error && error.response && error.response.data && error.response.data.messages) {
             mainStore.addMessages(error.response.data.messages)
           } else {

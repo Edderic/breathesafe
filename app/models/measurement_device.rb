@@ -12,7 +12,7 @@ class MeasurementDevice < ApplicationRecord
           SELECT md.id, COUNT(ft.id) as num_fit_tests
           FROM measurement_devices md
           LEFT JOIN fit_tests ft
-            ON (ft.quantitative_fit_testing_device_id = ft.id)
+            ON (ft.quantitative_fit_testing_device_id = md.id)
           WHERE owner_id = #{user.id}
           GROUP BY md.id
         )
