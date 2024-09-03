@@ -108,33 +108,11 @@
         be severely diminished.
 
         To find masks that fit well, there is still a bunch of trial and error
-        involved.
-
-        Existing approaches of testing masks like the <a
-          href="https://www.armbrustusa.com/pages/mask-testing/">Armbrust</a>
-        and <a
-                href="https://docs.google.com/spreadsheets/d/1M0mdNLpTWEGcluK6hh5LjjcFixwmOG853Ff45d3O-L0/edit?gid=1976839763#gid=1976839763">MaskNerd</a>
-        mask testing
-        databases focus on filtration efficiency and breathability, but do not
-        provide an easy way for people to find masks that would fit their face.
-        On the other hand, <a
-          href="https://www.testtheplanet.org/">TestThePlanet</a> focuses on
-        fit testing of masks on some sample of testers, but also does not help people find masks that fit their individual faces. Fit is highly individual.
-        Amanda Abbott <a href="">has created the PDX respirator repository</a>
-        which has elastomeric respirators and disposable masks, and has a
-        functional recommender system. However, the performance of it is
-        quantitatively unknown. There is an iPhone app called <a
-          href="https://apps.apple.com/us/app/fit-mask/id1578496578">Fit
-          Mask</a> that uses the iPhone camera to do 3D scanning of the face.
-        It estimates two measurements and then makes some mask recommendations.
-        However, some users have said that they’ve gotten very inaccurate
-        results, since the app rounds to the nearest inch.  The hope for this
-        project is that using facial features, a diverse sample of faces, and a
-        large enough sample size, we can create "fit profiles" for a bunch of
-        masks, so that when someone does come to the app with the intention of
-        finding a mask that fits their face, they can do so in an easy way. We
-        envision doing this project in two phases.
-
+        involved. We want to make the search for masks that do both (high
+        filtration efficiency and good fit) simpler and easier. For more
+        details, please see the <a
+        href="https://docs.google.com/document/d/1XZ2foY_cpDYImOBE5P048byj1jqLZ5JHdif6rfx3HAU/edit#heading=h.akrinhrxttzu">Respirator
+        Recommender proposal</a>.
 
         </p>
 
@@ -230,18 +208,25 @@
           <br>
           <h4>Can participants choose to leave the study?</h4>
         </div>
-        <p>Participants may be able to delete their data anytime using this button (TODO). That will delete user information such as email, password, demographics, and fit testing data.</p>
+        <p>Participants may be able to delete their data anytime using this button (TODO). That will delete user information such as email, password, demographics, and fit testing data.
+          Deletion of data, however, will have no effect on aggregated results for published research.
+        </p>
 
         <div id='risks-harms'>
           <br>
           <br>
           <h4>What are the risks and harms of participating in the study?</h4>
         </div>
-        <p>Sensitive data like facial measurements will be stored in a database. Breathesafe LLC will follow best security practices to prevent malicious actors from accessing said database. Example of such actions are:
+        <p>Sensitive data like facial measurements will be stored in a database.
+        Data such as the following will be collected:
         <ul>
-          <li>using https to prevent man-in-the-middle attacks.</li>
-          <li>admins will be using password managers and two factor authentication</li>
-          <li>number of admins will be as small as possible to limit risk</li>
+          <li>first name</li>
+          <li>last name</li>
+          <li>email</li>
+          <li>facial measurement data - to create a recommendation system tailored to the individual.</li>
+          <li>selfies - to validate facial measurement inference from photos.</li>
+          <li>fit testing measurement tools used (e.g. PortaCount)</li>
+          <li>fit testing results (e.g. pass/fail for Qualitative Fit Testing, fit factors for Quantitative Fit Testing)</li>
         </ul>
         </p>
 
@@ -272,6 +257,28 @@
         <p>This study may go on indefinitely. If for any reason you want your data deleted, you may do so. See
 <router-link :to="tocPath('leave-study')"> Can participants choose to leave the study?</router-link>
         section above for details.</p>
+
+        <p>
+        Breathesafe LLC will follow best security practices to prevent malicious actors from accessing said database. Example of such actions are:
+        <ul>
+          <li>using https to prevent man-in-the-middle attacks.</li>
+          <li>admins will be using password managers and two factor authentication</li>
+          <li>number of admins will be as small as possible to limit risk</li>
+        </ul>
+        </p>
+
+        <p>Users could also choose to be anonymous when signing up. They are
+        free to use fake names to decrease the risk of their biometric data
+        identifying them in the small but non-zero chance that a hacker gets a
+        hold of the database.</p>
+
+        <div id='data-use-over-time'>
+          <br>
+          <br>
+          <h4>How long will the data be used?</h4>
+        </div>
+
+        <p>Data could be stored indefinitely. Models might get refined over time, which uses the data.</p>
 
         <div id='compensation'>
           <br>
