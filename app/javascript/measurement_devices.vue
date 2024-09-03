@@ -97,15 +97,6 @@ export default {
           'managedUsers'
         ]
     ),
-    ...mapWritableState(
-        useProfileStore,
-        [
-          'firstName',
-          'lastName',
-          'raceEthnicity',
-          'genderAndSex',
-        ]
-    ),
   },
   async created() {
     await this.getCurrentUser()
@@ -118,7 +109,6 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
-    ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     async newDevice() {
       setupCSRF();

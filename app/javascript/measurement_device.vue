@@ -12,7 +12,12 @@
     <div class='main'>
         <p class='narrow'>
 
-Do you have a quantitative fit testing (QNFT) device? If so, please add information below so we could understand more about how fit testing data is generated, for quality control purposes. When fit testing, these devices will show up as selectable options. In terms of reporting, e.g. a research paper, aggregate data might be reported. For example, "QNFT results in Breathesafe's data set had 200 entries, and QNFT devices were mostly done using TSI 8020A. Median calibration date was 2013 (11 years ago), and min and max are 2009 and 2018."
+Do you have a quantitative fit testing (QNFT) device? If so, please add information below so we could understand more about how fit testing data is generated, for quality control purposes. When fit testing, these devices will show up as selectable options.
+
+        </p>
+
+        <p class='narrow'>
+        In terms of reporting, e.g. a research paper, aggregate data might be reported. For example, "QNFT results in Breathesafe's data set had 200 entries, and QNFT devices were mostly done using TSI 8020A. Median calibration date was 2013 (11 years ago), and min and max are 2009 and 2018."
 
         </p>
       <div class='centered'>
@@ -20,34 +25,44 @@ Do you have a quantitative fit testing (QNFT) device? If so, please add informat
           <tbody>
             <tr>
               <th>Measurement Device Type</th>
-              <select v-model='measurement_device.measurement_device_type' :disabled='mode == "Show"'>
-                <option>QNFT</option>
-              </select>
+              <td>
+                <select v-model='measurement_device.measurement_device_type' :disabled='mode == "Show"'>
+                  <option>QNFT</option>
+                </select>
+              </td>
             </tr>
             <tr>
               <th>Manufacturer</th>
-              <input type="text" placeholder="e.g. TSI" v-model='measurement_device.manufacturer'
-                :disabled='mode == "Show"'
-              >
+              <td>
+                <input type="text" placeholder="e.g. TSI" v-model='measurement_device.manufacturer'
+                  :disabled='mode == "Show"'
+                >
+              </td>
             </tr>
             <tr>
               <th>Model</th>
-              <input type="text" placeholder="e.g. 8020A" v-model='measurement_device.model'
-                :disabled='mode == "Show"'
-              >
+              <td>
+                <input type="text" placeholder="e.g. 8020A" v-model='measurement_device.model'
+                  :disabled='mode == "Show"'
+                >
+              </td>
             </tr>
             <tr>
               <th>Serial</th>
-              <input type="text" placeholder="" v-model='measurement_device.serial'
-                :disabled='mode == "Show"'
-              >
+              <td>
+                <input type="text" placeholder="" v-model='measurement_device.serial'
+                  :disabled='mode == "Show"'
+                >
+              </td>
             </tr>
             <tr>
               <th>Notes</th>
+              <td>
               <textarea type="textarea" rows=5 columns=80  v-model='measurement_device.notes'
                 placeholder="e.g. Calibration dates, and results, if possible."
                 :disabled='mode == "Show"'
                 >{{ measurement_device.notes }}</textarea>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -126,6 +141,15 @@ export default {
 
     if (this.$route.name == "NewMeasurementDevice") {
       this.mode = "New"
+      this.measurement_device = {
+        id: null,
+        device_type: '',
+        anufacturer: '',
+        model: '',
+        serial: '',
+        notes: ''
+      }
+
     }
     else if (this.$route.name == "ShowMeasurementDevice") {
       this.mode = "Show"

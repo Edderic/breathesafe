@@ -8,6 +8,7 @@ import { useMainStore } from './main_store'
 export const useMeasurementDeviceStore = defineStore('measurementDevices', {
   state: () => ({
     measurement_device: {
+      id: null,
       device_type: '',
       manufacturer: '',
       model: '',
