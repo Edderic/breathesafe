@@ -242,6 +242,7 @@
           <li>first name</li>
           <li>last name</li>
           <li>email</li>
+          <li>IP address - for quality control purposes.</li>
           <li>facial measurement data - to create a recommendation system tailored to the individual.</li>
           <li>selfies - to validate facial measurement inference from photos.</li>
           <li>fit testing measurement tools used (e.g. PortaCount)</li>
