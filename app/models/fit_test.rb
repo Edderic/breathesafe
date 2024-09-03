@@ -24,7 +24,7 @@ class FitTest < ApplicationRecord
       SQL
     )
 
-    self.json_parse(fit_tests, ["comfort", "results", "user_seal_check", "image_urls"])
+    self.json_parse(fit_tests, ["facial_hair", "comfort", "results", "user_seal_check", "image_urls"])
   end
 
   def self.find_by_id_with_user_id(id)
@@ -44,7 +44,7 @@ class FitTest < ApplicationRecord
       SQL
     )
 
-    self.json_parse(fit_tests, ["comfort", "results", "user_seal_check", "image_urls"])[0]
+    self.json_parse(fit_tests, ["facial_hair", "comfort", "results", "user_seal_check", "image_urls"])[0]
   end
 
   def self.json_parse(events, columns)

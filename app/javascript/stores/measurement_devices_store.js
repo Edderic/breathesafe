@@ -38,15 +38,13 @@ export const useMeasurementDeviceStore = defineStore('measurementDevices', {
             measurementDevices = response.data.measurement_devices
 
             for(let measurementDeviceData of measurementDevices) {
-              measurementDevice = measurementDeviceData
               this.measurementDevices.push(
-                measurementDevice
+                measurementDeviceData
               )
             }
           }
         })
         .catch(error => {
-          debugger;
           if (error && error.response && error.response.data && error.response.data.messages) {
             mainStore.addMessages(error.response.data.messages)
           } else {

@@ -364,6 +364,15 @@
               </td>
             </tr>
 
+            <tr>
+              <th>Device</th>
+              <td>
+                <select v-model='quantitativeFitTestingDeviceId' :disabled='!createOrEdit'>
+                  <option v-for='d in measurementDevices' :value='d.id'>{{d.manufacturer + " " + d.model + " " + d.serial}}</option>
+                </select>
+              </td>
+            </tr>
+
             <tr v-show='quantitativeProcedure != "Skipping"'>
               <th>Testing mode</th>
               <td>
@@ -486,6 +495,7 @@ import { RespiratorUser } from './respirator_user.js';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import { useManagedUserStore } from './stores/managed_users_store';
+import { useMeasurementDeviceStore } from './stores/measurement_devices_store';
 import { FitTest } from './fit_testing.js'
 
 export default {
@@ -504,6 +514,7 @@ export default {
       mode: 'View',
       initialCountPerCm3: null,
       quantitativeProcedure: null,
+      quantitativeFitTestingDeviceId: null,
       quantitativeTestingMode: 'N99',
       facialHair: {
         beard_length_mm: '0mm',
@@ -926,6 +937,12 @@ export default {
           'messages'
         ]
     ),
+    ...mapWritableState(
+        useMeasurementDeviceStore,
+        [
+          'measurementDevices'
+        ]
+    ),
     ...mapState(
         useManagedUserStore,
         [
@@ -1171,6 +1188,7 @@ export default {
     ...mapActions(useMainStore, ['addMessages', 'getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
+    ...mapActions(useMeasurementDeviceStore, ['loadMeasurementDevices']),
     showDescription(name) {
       this.messages = []
 
@@ -1219,7 +1237,8 @@ export default {
     async loadStuff() {
       await this.loadManagedUsers()
       await this.loadMasks()
-      this.loadFitTest()
+      await this.loadFitTest()
+      await this.loadMeasurementDevices()
     },
     async loadMasks() {
       // TODO: make this more flexible so parents can load data of their children
@@ -1414,6 +1433,18 @@ export default {
         )
       }
     },
+    validatePresenceOfDevice() {
+      if (!this.quantitativeFitTestingDeviceId) {
+        this.messages.push(
+          {
+            str: `Please choose a quantitative fit testing device. If you'd like to add one not currently listed, see "Measurement Devices" section'`,
+            to: {
+              name: "MeasurementDevices"
+            }
+          }
+        )
+      }
+    },
     validateQNFT(part) {
       if (!this.quantitativeProcedure) {
         this.messages.push(
@@ -1429,6 +1460,7 @@ export default {
         this.validatePresenceOfInitialCountPerCM3()
         this.validateValueOfInitialCountPerCM3()
         this.validatePresenceOfTestingMode()
+        this.validatePresenceOfDevice()
       }
 
       if (this.quantitativeProcedure == 'Full OSHA' && this.secondaryTabToShow == 'Results') {
