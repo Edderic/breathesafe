@@ -20,29 +20,44 @@ Do you have a quantitative fit testing (QNFT) device? If so, please add informat
           <tbody>
             <tr>
               <th>Measurement Device Type</th>
-              <select v-model='quantitativeTestingMode' :disabled='!createOrEdit'>
+              <select v-model='quantitativeTestingMode' :disabled='mode == "Show"'>
                 <option>QNFT</option>
               </select>
             </tr>
             <tr>
               <th>Manufacturer</th>
-              <input type="text" placeholder="TSI" v-model='measurement_device.manufacturer'>
+              <input type="text" placeholder="e.g. TSI" v-model='measurement_device.manufacturer'
+                :disabled='mode == "Show"'
+              >
             </tr>
             <tr>
               <th>Model</th>
-              <input type="text" placeholder="8020A" v-model='measurement_device.model'>
+              <input type="text" placeholder="e.g. 8020A" v-model='measurement_device.model'
+                :disabled='mode == "Show"'
+              >
             </tr>
             <tr>
               <th>Serial</th>
-              <input type="text" placeholder="" v-model='measurement_device.serial'>
+              <input type="text" placeholder="" v-model='measurement_device.serial'
+                :disabled='mode == "Show"'
+              >
             </tr>
             <tr>
               <th>Notes</th>
-              <textarea type="textarea" rows=5 columns=80  v-model='measurement_device.notes'>{{ measurement_device.notes }}</textarea>
+              <textarea type="textarea" rows=5 columns=80  v-model='measurement_device.notes'
+                :disabled='mode == "Show"'
+                >{{ measurement_device.notes }}</textarea>
             </tr>
           </tbody>
         </table>
+
       </div>
+        <div class="row justify-content-center">
+          <Button class='button' text="Edit" @click='mode = "Edit"' v-if='mode == "Show"'/>
+          <Button class='button' text="Delete" @click='deleteMeasurementDevice' v-if='deletable && (mode != "Show")'/>
+          <Button class='button' text="Save" @click='saveMeasurementDevice' v-if='mode == "New" || mode == "Edit"'/>
+          <Button class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New" || mode == "Edit")'/>
+        </div>
     </div>
   </div>
 </template>
@@ -77,7 +92,8 @@ export default {
         model: '',
         serial: '',
         notes: ''
-      }
+      },
+      mode: 'Edit'
     }
   },
   props: {
@@ -154,49 +170,17 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
-    statusColor(fitTestingPercent) {
-      let percentage = parseFloat(fitTestingPercent.split("%")[0])
-      let status = 'Passed'
-      if (percentage == 0) {
-        status = "Failed"
-      } else if (percentage > 0 && percentage < 100) {
-        status = "Skipped"
-      }
-
-      let color = userSealCheckColorMapping[status]
-      return `rgb(${color.r}, ${color.g}, ${color.b})`
-    },
-    backgroundColor(boolean) {
-      let color;
-
-      if (boolean) {
-        color = userSealCheckColorMapping['Passed']
-
+    handleCancel() {
+      if (this.mode == 'New') {
+        this.$router.push(
+          {
+            name: "MeasurementDevices"
+          }
+        )
       } else {
-        color = userSealCheckColorMapping['Failed']
-      }
-
-      return `rgb(${color.r}, ${color.g}, ${color.b}, 0.5)`
-    },
-    checkmarkOrCross(boolean) {
-      if (boolean) {
-        return `&#x2714;`
-      } else {
-        return "&#x2717;"
+        this.mode = 'Show'
       }
     },
-
-    visit(profileId, tabToShow) {
-      this.$router.push({
-        name: 'RespiratorUser',
-        params: {
-          id: profileId
-        },
-        query: {
-          tabToShow: tabToShow
-        }
-      })
-    }
   }
 }
 </script>

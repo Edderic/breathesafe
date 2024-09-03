@@ -66,12 +66,13 @@ class MeasurementDevicesController < ApplicationController
     end
 
     to_render = {
-      measurement_device: measurement_device
+      measurement_device: measurement_device,
       messages: messages
     }
+
     respond_to do |format|
       format.json do
-        render json: to_render.to_json, status: status,
+        render json: to_render.to_json, status: status
       end
     end
   end

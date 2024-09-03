@@ -194,41 +194,11 @@ export default {
     async newDevice() {
       setupCSRF();
 
-      let measurementDevices;
-      let measurementDevice;
-      let respiratorUser;
-
-      await axios.post(
-        `/measurement_devices.json`,
+      this.$router.push(
+        {
+          'name': 'NewMeasurementDevice',
+        }
       )
-        .then(response => {
-          let data = response.data
-          if (response.data.measurement_device) {
-            measurementDevice = deepSnakeToCamel(response.data.measurement_device)
-
-            this.measurementDevices.push(
-              measurementDevice
-            )
-
-            this.$router.push(
-              {
-                'name': 'MeasurementDevice',
-                params: {
-                  id: measurementDevice.id
-                }
-              }
-            )
-          }
-        })
-        .catch(error => {
-          if (error && error.response && error.response.data && error.response.data.messages) {
-            this.addMessages(error.response.data.messages)
-          } else {
-            this.addMessages['Something went wrong.']
-          }
-
-        // whatever you want
-        })
     },
     visit(profileId, tabToShow) {
       this.$router.push({

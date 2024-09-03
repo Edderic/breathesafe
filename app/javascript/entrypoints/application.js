@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/fit_tests/:id', component: FitTest, name: 'EditFitTest' },
     { path: '/fit_tests', component: FitTests, name: 'FitTests' },
     { path: '/measurement_devices', component: MeasurementDevices, name: 'MeasurementDevices' },
+    { path: '/measurement_devices/new', component: MeasurementDevice, name: 'NewMeasurementDevice' },
     { path: '/measurement_device', component: MeasurementDevice, name: 'MeasurementDevice' },
     { path: '/venues', component: Venues, name: 'Venues' },
     { path: '/analytics/:id', component: Analytics, name: 'Analytics' },
