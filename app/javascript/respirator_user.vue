@@ -668,20 +668,24 @@ export default {
         }
       } else {
         if (this.secondaryTab == 'Part I') {
-          this.validateFacialMeasurementsPart(['faceWidth', 'jawWidth', 'faceDepth']);
+          this.validateFacialMeasurementsPart(['faceWidth', 'jawWidth', 'faceDepth', 'faceLength', 'lowerFaceLength']);
 
           if (this.messages.length == 0) {
             this.setSecondaryRouteTo({name: 'Part II'})
           }
         }
         else if (this.secondaryTab == 'Part II') {
-          this.validateFacialMeasurementsPart(['faceLength', 'lowerFaceLength', 'bitragionMentonArc', 'bitragionSubnasaleArc']);
+          this.validateFacialMeasurementsPart(['noseProtrusion', 'nasalRootBreadth', 'noseBridgeHeight', 'lipWidth']);
           if (this.messages.length == 0) {
             this.setSecondaryRouteTo({name: 'Part III'})
           }
         }
         else if (this.secondaryTab == 'Part III') {
-          this.validateFacialMeasurementsPart(['noseProtrusion', 'nasalRootBreadth', 'noseBridgeHeight', 'lipWidth']);
+          this.validateFacialMeasurementsPart(['bitragionMentonArc', 'bitragionSubnasaleArc']);
+
+          if (!this.latestFacialMeasurement.cheekFullness) {
+            thhis.addMessages('cheekFulness must not be blank')
+          }
 
           if (this.messages.length == 0) {
             this.$router.push({
