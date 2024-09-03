@@ -1238,8 +1238,8 @@ export default {
     async loadStuff() {
       await this.loadManagedUsers()
       await this.loadMasks()
-      await this.loadFitTest()
       await this.loadMeasurementDevices()
+      await this.loadFitTest()
     },
     async loadMasks() {
       // TODO: make this more flexible so parents can load data of their children
@@ -1308,6 +1308,8 @@ export default {
             }
 
             let results = fitTestData.results
+
+            this.quantitativeFitTestingDeviceId = fitTestData.quantitative_fit_testing_device_id
 
             this.qualitativeAerosolSolution = results.qualitative.aerosol.solution
             this.qualitativeNotes = results.qualitative.notes
@@ -1712,7 +1714,6 @@ export default {
         }
       }
       else if (this.tabToShow == 'QNFT' && this.secondaryTabToShow != 'Results') {
-        debugger
         this.validateUser()
         this.validateMask()
         this.validateUserSealCheck()
