@@ -359,7 +359,6 @@ export default {
 
   tbody tr:hover {
     cursor: pointer;
-    background-color: rgb(230,230,230);
   }
 
   thead th {
