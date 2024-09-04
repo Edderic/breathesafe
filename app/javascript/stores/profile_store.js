@@ -96,6 +96,10 @@ export const useProfileStore = defineStore('profile', {
       await mainStore.getCurrentUser();
       let currentUser = mainStore.currentUser
 
+      if (!currentUser) {
+        return
+      }
+
       if (!id) {
         id = currentUser.id
       }
