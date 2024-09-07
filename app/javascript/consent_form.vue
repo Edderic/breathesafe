@@ -89,7 +89,7 @@
       </div>
 
       <div>
-        <p>Last updated: Sept. 03, 2024</p>
+        <p>Last updated: Sept. 6, 2024</p>
       </div>
         <div id='invitation-to-participate'>
           <br>

@@ -951,6 +951,9 @@ export default {
           'managedUsers'
         ]
     ),
+    acceptableRouteName() {
+      return ["EditFitTest", "ViewFitTest", "NewFitTest"].includes(this.$route.name)
+    },
     managedUsersWhoCanAddFitTestData() {
       return this.managedUsers.filter((u) => {
         return u.readyToAddFitTestingDataPercentage == '100%'}
@@ -1133,7 +1136,7 @@ export default {
         this.mode = 'Create'
       }
 
-      if (this.$route.name == "EditFitTest" || this.$route.name == 'NewFitTest') {
+      if (this.acceptableRouteName) {
         // pull the data
         if ('tabToShow' in toQuery) {
           this.tabToShow = toQuery['tabToShow']
@@ -1143,13 +1146,13 @@ export default {
           this.mode = toQuery['mode']
         }
 
-        if (toQuery['secondaryTabToShow'] && ((this.$route.name == "NewFitTest") || (this.$route.name == "EditFitTest"))) {
+        if (toQuery['secondaryTabToShow'] && this.acceptableRouteName) {
           this.secondaryTabToShow = toQuery['secondaryTabToShow']
         }
 
       }
 
-      if (toParams['id'] && ((this.$route.name == "NewFitTest") || (this.$route.name == "EditFitTest"))) {
+      if (toParams['id'] && this.acceptableRouteName) {
         this.id = toParams['id']
       }
 
@@ -1162,7 +1165,7 @@ export default {
     this.$watch(
       () => this.$route.query,
       (toQuery, fromQuery) => {
-        if (((this.$route.name == "NewFitTest") || (this.$route.name == "EditFitTest"))) {
+        if (["EditFitTest", "ViewFitTest", "NewFitTest"].includes(this.$route.name)) {
           if (toQuery['tabToShow']) {
             this.tabToShow = toQuery['tabToShow']
           }
@@ -1181,7 +1184,7 @@ export default {
     this.$watch(
       () => this.$route.params,
       (toParams, fromParams) => {
-        if (toParams['id'] && ((this.$route.name == "NewFitTest") || (this.$route.name == "EditFitTest"))) {
+        if (toParams['id'] && this.acceptableRouteName) {
           this.id = toParams['id']
         }
       }
