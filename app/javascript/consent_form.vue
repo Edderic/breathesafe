@@ -220,7 +220,7 @@
           Respirator Users
         </router-link> section, and clicking on an individual they have access
         to, click "Edit" and then click "Delete." This functionality is
-        availabel for people who have gone through the registration process.
+        available for people who have gone through the registration process.
         That will delete user information such as email, password,
         demographics, and fit testing data. Users will have the ability to
         delete their data and have their data not contribute to research until
@@ -306,10 +306,7 @@
           <h4>Are participants compensated in this study?</h4>
         </div>
 
-        <p>Breathesafe LLC applied for a grant for this project. If that goes
-        through, it is possible that some volunteers with qualitative and
-        quantitative fit testing devices may get some compensation for testing
-        equipment and labor.</p>
+        <p>Participation in this study is on a voluntary basis and participants will not be compensated.</p>
 
         <div id='participant-rights'>
           <br>
