@@ -1575,7 +1575,7 @@ export default {
                 id: this.id
               },
               query: {
-                tabToShow: 'Facial Hair'
+                tabToShow: 'Mask'
               },
               force: true
             })
