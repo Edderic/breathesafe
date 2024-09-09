@@ -2,7 +2,7 @@
   <div class='align-items-center'>
     <h2 class='tagline'>{{tagline}}</h2>
     <div class='container chunk'>
-      <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
+      <ClosableMessage @onclose='messages = []' :messages='messages'/>
       <br>
     </div>
 
@@ -546,7 +546,7 @@ export default {
       filtrationEfficiencies: [],
       breathability: [],
       filterChangeCostUsDollars: 0,
-      strapType: 'headband',
+      strapType: 'Headstrap',
       style: '',
       imageUrls: [''],
       authorIds: [],
@@ -715,7 +715,8 @@ export default {
         image_urls: this.imageUrls,
         where_to_buy_urls: this.whereToBuyUrls,
         author_id: this.currentUser.id,
-        initial_cost_us_dollars: this.initialCostUsDollars
+        initial_cost_us_dollars: this.initialCostUsDollars,
+        strap_type: this.strapType
       }
     }
   },

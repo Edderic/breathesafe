@@ -9,6 +9,7 @@ class MasksController < ApplicationController
     else
       hashed_mask_data = mask_data.to_hash
       hashed_mask_data[:author_id] = current_user.id
+
       mask = Mask.create(hashed_mask_data)
 
       if mask.errors.full_messages.size == 0
