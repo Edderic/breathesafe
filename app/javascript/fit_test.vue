@@ -1482,19 +1482,6 @@ export default {
         let failCount = 0
 
         for (const [key, value] of Object.entries(this.quantitativeExercises)) {
-          // Quit early if there is a failure
-          // if (value['result'] == 'Fail') {
-            // return
-          // }
-
-          if (value['fit_factor'] == null) {
-            this.messages.push(
-              {
-                str: `Please fill out: "${value['name']}"`
-              }
-            )
-          }
-
           if (value['fit_factor'] < 0) {
             this.messages.push(
               {
