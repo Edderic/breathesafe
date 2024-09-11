@@ -215,53 +215,19 @@
               </td>
             </tr>
             <tr>
-              <th>Height (mm)</th>
+              <th>Perimeter (mm)</th>
               <td>
-                <input type="number" v-model="heightMm" v-show="newOrEdit">
+                <input type="number" v-model="perimeterMm" v-show="newOrEdit">
                 <ColoredCell
                     v-show='!newOrEdit'
                     class='risk-score'
                     :colorScheme="heightColorScheme"
                     :maxVal=1
-                    :value='heightMm'
+                    :value='perimeterMm'
                     :exception='exceptionObjectBlank'
-                    :text='distanceText(heightMm, "mm")'
+                    :text='distanceText(perimeterMm, "mm")'
                     :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                    :title='distanceText(heightMm, "mm")'
-                    />
-              </td>
-            </tr>
-            <tr>
-              <th>Width (mm)</th>
-              <td>
-                <input type="number" v-model="widthMm" v-show="newOrEdit">
-                <ColoredCell
-                    v-show='!newOrEdit'
-                    class='risk-score'
-                    :colorScheme="widthColorScheme"
-                    :maxVal=1
-                    :value='widthMm'
-                    :exception='exceptionObjectBlank'
-                    :text='distanceText(widthMm, "mm")'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                    :title='distanceText(widthMm, "mm")'
-                    />
-              </td>
-            </tr>
-            <tr>
-              <th>Depth (mm)</th>
-              <td>
-                <input type="number" v-model="depthMm" v-show="newOrEdit">
-                <ColoredCell
-                    v-show='!newOrEdit'
-                    class='risk-score'
-                    :colorScheme="depthColorScheme"
-                    :maxVal=1
-                    :value='depthMm'
-                    :exception='exceptionObjectBlank'
-                    :text='distanceText(depthMm, "mm")'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                    :title='distanceText(depthMm, "mm")'
+                    :title='distanceText(perimeterMm, "mm")'
                     />
               </td>
             </tr>
@@ -512,6 +478,7 @@ export default {
       widthMm: null,
       heightMm: null,
       depthMm: null,
+      perimeterMm: null,
       tabToShow: "Basic Info",
       displayTab: "Misc. Info",
       tabToShowOptions: [
@@ -702,6 +669,7 @@ export default {
         notes: this.notes,
         mass_grams: this.massGrams,
         width_mm: this.widthMm,
+        perimeter_mm: this.perimeterMm,
         height_mm: this.heightMm,
         depth_mm: this.depthMm,
         unique_internal_model_code: this.uniqueInternalModelCode,

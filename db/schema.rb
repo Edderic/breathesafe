@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_09_03_161555) do
+ActiveRecord::Schema[7.0].define(version: 2024_09_11_000441) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -139,6 +139,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_03_161555) do
     t.string "color"
     t.boolean "has_exhalation_valve"
     t.bigint "author_id", null: false
+    t.float "perimeter_mm"
     t.index ["author_id"], name: "index_masks_on_author_id"
   end
 

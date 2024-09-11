@@ -148,6 +148,7 @@ class MasksController < ApplicationController
       :height_mm,
       :width_mm,
       :depth_mm,
+      :perimeter_mm,
       :has_gasket,
       :has_exhalation_valve,
       :initial_cost_us_dollars,
