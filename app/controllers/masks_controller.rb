@@ -153,11 +153,11 @@ class MasksController < ApplicationController
       :has_exhalation_valve,
       :initial_cost_us_dollars,
       :filter_change_cost_us_dollars,
+      :modifications,
       :notes,
       sources: [],
       image_urls: [],
       where_to_buy_urls: [],
-      modifications: {},
       filtration_efficiencies: [
         :filtration_efficiency_percent,
         :filtration_efficiency_source,
