@@ -197,8 +197,21 @@ export default {
   props: {
   },
   computed: {
+    fakeCo2Readings() {
+      let stuff = [];
+      let oldDate = new Date();
+
+      for(var i = 0; i < 120; i++) {
+        stuff.push({
+          timestamp: oldDate.getTime() + i * 60000
+        })
+      }
+
+      return stuff
+    },
     baseCase() {
       let curve = genConcCurve({
+        co2Readings: this.fakeCo2Readings,
         roomUsableVolumeCubicMeters: 10,
         c0: 0,
         generationRate: 1.6,
@@ -216,6 +229,7 @@ export default {
     },
     largerVol() {
       let curve = genConcCurve({
+        co2Readings: this.fakeCo2Readings,
         roomUsableVolumeCubicMeters: 20,
         c0: 0,
         generationRate: 1.6,
@@ -233,6 +247,7 @@ export default {
     },
     highNADR() {
       let curve = genConcCurve({
+        co2Readings: this.fakeCo2Readings,
         roomUsableVolumeCubicMeters: 10,
         c0: 0,
         generationRate: 1.6,
