@@ -275,7 +275,16 @@ export default {
     },
 
     incorporatingACH() {
+      let co2Readings = []
+      let oldDate = new Date();
+
+      for(var i = 0; i < 180; i++) {
+        co2Readings.push({
+          timestamp: oldDate.getTime() + i * 60000
+        })
+      }
       let curve = genConcCurve({
+        co2Readings: co2Readings,
         roomUsableVolumeCubicMeters: 10,
         c0: 0,
         generationRate: 1.6,
