@@ -221,7 +221,7 @@
                 <ColoredCell
                     v-show='!newOrEdit'
                     class='risk-score'
-                    :colorScheme="heightColorScheme"
+                    :colorScheme="perimColorScheme"
                     :maxVal=1
                     :value='perimeterMm'
                     :exception='exceptionObjectBlank'
@@ -379,7 +379,7 @@
 <script>
 import axios from 'axios';
 import Button from './button.vue'
-import { assignBoundsToColorScheme, binValue, colorPaletteFall, genColorSchemeBounds, riskColorInterpolationScheme } from './colors';
+import { assignBoundsToColorScheme, binValue, colorPaletteFall, genColorSchemeBounds, riskColorInterpolationScheme, perimeterColorScheme } from './colors';
 import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import ColoredCell from './colored_cell.vue'
@@ -542,6 +542,9 @@ export default {
           'messages'
         ]
     ),
+    perimColorScheme() {
+      return perimeterColorScheme();
+    },
 
     costColorScheme() {
       const minimum = 0.5
