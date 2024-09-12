@@ -32,7 +32,9 @@
           <tr v-for='f in displayables'>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User"})'>{{f.firstName + ' ' + f.lastName}}</td>
             <td>
-              <img :src="f.imageUrls[0]" alt="" class='thumbnail'>
+              <router-link :to="{name: 'ShowMask', params: { id: f.maskId}}">
+                <img :src="f.imageUrls[0]" alt="" class='thumbnail'>
+              </router-link>
             </td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.uniqueInternalModelCode}}</td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.shortHandCreatedAt}}</td>

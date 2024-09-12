@@ -16,6 +16,7 @@ export class FitTest {
     this.quantitativeExercises = this.quantitative.exercises
     this.firstName = data.first_name
     this.lastName = data.last_name
+    this.maskId = data.mask_id
 
     this.comfortQuestions = {
       "How comfortable is the position of the mask on the nose?": {

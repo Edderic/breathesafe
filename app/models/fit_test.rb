@@ -6,7 +6,7 @@ class FitTest < ApplicationRecord
 
     fit_tests = FitTest.connection.exec_query(
       <<-SQL
-        SELECT ft.*, m.unique_internal_model_code, m.image_urls, m.has_exhalation_valve, fm.user_id, p.first_name, p.last_name
+        SELECT ft.*, m.id as mask_id, m.unique_internal_model_code, m.image_urls, m.has_exhalation_valve, fm.user_id, p.first_name, p.last_name
         FROM fit_tests ft
         INNER JOIN facial_measurements fm
         ON (fm.id = ft.facial_measurement_id)
