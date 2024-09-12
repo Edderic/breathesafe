@@ -21,7 +21,7 @@
     />
 
     <div class='main' v-show="displayTab == 'Misc. Info'">
-      <div :class='{ grid: true, view: mode == "Show"}'>
+      <div :class='{ grid: true, view: mode == "Show" && filtrationEfficiencies.length > 0}'>
         <table v-if='tabToShow == "Image & Purchasing" || mode=="Show"'>
           <tbody>
             <tr>
