@@ -29,9 +29,15 @@
         <div class='description row'>
           <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/tape-measure.png" alt="tape measure" class='tape-measure'>
 
-          <span>
-            {{m.perimeterMm}} mm
-          </span>
+           <ColoredCell
+               class='risk-score'
+               :colorScheme="perimColorScheme"
+               :maxVal=450
+               :value='m.perimeterMm'
+               :text="`${m.perimeterMm} mm`"
+               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
+               :exception='exceptionMissingObject'
+               />
         </div>
       </div>
     </div>
@@ -47,11 +53,13 @@ import axios from 'axios';
 import Button from './button.vue'
 import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
+import ColoredCell from './colored_cell.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
 import SearchIcon from './search_icon.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
+import { perimeterColorScheme } from './colors.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
@@ -61,6 +69,7 @@ export default {
   components: {
     Button,
     CircularButton,
+    ColoredCell,
     ClosableMessage,
     SearchIcon,
     SurveyQuestion,
@@ -68,6 +77,15 @@ export default {
   },
   data() {
     return {
+      exceptionMissingObject: {
+        color: {
+          r: '200',
+          g: '200',
+          b: '200',
+        },
+        value: '',
+        text: '?'
+      },
       errorMessages: [],
       masks: [],
       search: ""
@@ -94,6 +112,10 @@ export default {
           'message'
         ]
     ),
+
+    perimColorScheme() {
+      return perimeterColorScheme()
+    },
     displayables() {
       if (this.search == "") {
         return this.masks
@@ -343,5 +365,11 @@ export default {
   .tape-measure {
     margin-right: 0.5em;
     max-width: 1.5em;
+  }
+
+  .risk-score {
+    width: 5em;
+    height: 2em;
+    font-size: 0.75em;
   }
 </style>

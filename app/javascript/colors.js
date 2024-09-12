@@ -98,6 +98,14 @@ export function riskToGrade(risk) {
   }
 }
 
+export function perimeterColorScheme() {
+  const minimum = 300;
+  const maximum = 430
+  const numObjects = 6
+
+  return genColorSchemeBounds(minimum, maximum, numObjects)
+}
+
 export const colorPaletteFall = paletteFall
 
 
