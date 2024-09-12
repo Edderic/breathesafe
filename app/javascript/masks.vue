@@ -26,6 +26,13 @@
             {{m.uniqueInternalModelCode}}
           </span>
         </div>
+        <div class='description row'>
+          <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/tape-measure.png" alt="tape measure" class='tape-measure'>
+
+          <span>
+            {{m.perimeterMm}} mm
+          </span>
+        </div>
       </div>
     </div>
 
@@ -331,5 +338,10 @@ export default {
     display: grid;
     grid-template-columns: 33% 33% 33%;
     grid-template-rows: auto;
+  }
+
+  .tape-measure {
+    margin-right: 0.5em;
+    max-width: 1.5em;
   }
 </style>
