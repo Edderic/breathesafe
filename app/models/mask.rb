@@ -3,6 +3,20 @@ class Mask < ApplicationRecord
   validates_presence_of :unique_internal_model_code
   validates_uniqueness_of :unique_internal_model_code
 
+  def self.find_payable_on(date)
+    masks = Mask.all
+
+    masks.select do |m|
+      m.payable_datetimes.any? do |dts|
+        if dts['end_datetime']
+          dts['start_datetime'].to_datetime < date && dts['end_datetime'].to_datetime >= date
+        else
+          dts['start_datetime'].to_datetime < date
+        end
+      end
+    end
+  end
+
   def self.with_aggregations(mask_id=nil)
     if mask_id
       mask_id_clause = "WHERE m.id = #{mask_id}"
