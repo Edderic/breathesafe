@@ -23,6 +23,7 @@
           <th>Image</th>
           <th>Mask</th>
           <th>Created at</th>
+          <th>Beard Length</th>
           <th>User Seal Check</th>
           <th>QLFT</th>
           <th>QNFT HMFF</th>
@@ -38,6 +39,7 @@
             </td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.uniqueInternalModelCode}}</td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.shortHandCreatedAt}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Facial Hair"})'>{{f.facialHair.beard_length_mm}}</td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User Seal Check"})'>
               <ColoredCell class='status' :text='f.userSealCheckStatus' :backgroundColor='statusColor(f.userSealCheckStatus)'/>
             </td>
