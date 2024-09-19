@@ -1,5 +1,5 @@
 <template>
-  <div class='align-items-center flex-dir-col'>
+  <div class='align-items-center flex-dir-col sticky'>
     <div class='flex align-items-center row'>
       <h2 class='tagline'>Masks</h2>
       <CircularButton text="+" @click="newMask"/>
@@ -360,6 +360,8 @@ export default {
     display: grid;
     grid-template-columns: 33% 33% 33%;
     grid-template-rows: auto;
+    overflow-y: auto;
+    height: 75vh;
   }
 
   .tape-measure {
@@ -371,5 +373,9 @@ export default {
     width: 5em;
     height: 2em;
     font-size: 0.75em;
+  }
+  .sticky {
+    position: fixed;
+    top: 3em;
   }
 </style>
