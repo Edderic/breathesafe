@@ -231,7 +231,7 @@ export default {
   }
 
   .card .description {
-    padding: 1em 0;
+    padding: 1em;
   }
 
   input[type='number'] {
