@@ -26,10 +26,13 @@
             {{m.uniqueInternalModelCode}}
           </span>
         </div>
-        <div class='description row'>
-          <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/tape-measure.png" alt="tape measure" class='tape-measure'>
-
-           <ColoredCell
+        <table>
+          <tr>
+            <td>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/tape-measure.png" alt="tape measure" class='tape-measure' title="Perimeter of the mask, measured in millimeters, defined as the distance that covers the face">
+            </td>
+            <td>
+              <ColoredCell
                class='risk-score'
                :colorScheme="perimColorScheme"
                :maxVal=450
@@ -38,7 +41,22 @@
                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
                :exception='exceptionMissingObject'
                />
-        </div>
+            </td>
+          </tr>
+          <tr>
+            <td title="Unique number of fit testers" >
+              <PersonIcon
+                backgroundColor='rgb(150,150,150)'
+                amount='1'
+              />
+            </td>
+            <td>
+              <span>
+                {{m.uniqueFitTestersCount}}
+              </span>
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
 
@@ -54,6 +72,7 @@ import Button from './button.vue'
 import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import ColoredCell from './colored_cell.vue'
+import PersonIcon from './person_icon.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
 import SearchIcon from './search_icon.vue'
@@ -71,6 +90,7 @@ export default {
     CircularButton,
     ColoredCell,
     ClosableMessage,
+    PersonIcon,
     SearchIcon,
     SurveyQuestion,
     TabSet
@@ -226,7 +246,6 @@ export default {
   }
 
   td,th {
-    padding: 1em;
   }
   .text-for-other {
     margin: 0 1.25em;
