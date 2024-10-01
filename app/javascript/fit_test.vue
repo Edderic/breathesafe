@@ -359,6 +359,7 @@
               <td>
                 <select v-model='quantitativeProcedure' :disabled='!createOrEdit'>
                   <option>Skipping</option>
+                  <option>OSHA Fast Filtering Face Piece Respirators</option>
                   <option>Full OSHA</option>
                 </select>
               </td>
@@ -430,7 +431,7 @@
         <table v-show='secondaryTabToShow == "Results"'>
           <tbody >
             <template v-for='(ex, index) in quantitativeExercises' >
-              <tr v-if='index < 4'>
+              <tr v-if='index < numExercisesHalf'>
                 <th>{{ex.name}}</th>
                 <td>
                   <CircularButton text="?" @click="showDescription(ex.name)"/>
@@ -446,7 +447,7 @@
         <table v-show='secondaryTabToShow == "Results"'>
           <tbody >
             <template v-for='(ex, index) in quantitativeExercises' >
-              <tr v-if='index >= 4'>
+              <tr v-if='index >= numExercisesHalf'>
                 <th>{{ex.name}}</th>
                 <td>
                   <CircularButton text="?" @click="showDescription(ex.name)"/>
@@ -567,6 +568,20 @@ export default {
           text: "Comfort",
         },
       ],
+      oshaFastFFRExercises: {
+        'Bending over': {
+          'description': 'The test subject shall bend at the waist, as if going to touch his/her toes for 50 seconds and inhale 2 times at the bottom.',
+        },
+        'Talking': {
+          'description': 'The subject shall talk out loud slowly and loud enough so as to be heard clearly by the test conductor. The subject can read from a prepared text such as the Rainbow Passage, count backward from 100, or recite a memorized poem or song.  Rainbow Passage: When the sunlight strikes raindrops in the air, they act like a prism and form a rainbow. The rainbow is a division of white light into many beautiful colors. These take the shape of a long round arch, with its path high above, and its two ends apparently beyond the horizon. There is, according to legend, a boiling pot of gold at one end. People look, but no one ever finds it. When a man looks for something beyond reach, his friends say he is looking for the pot of gold at the end of the rainbow.'
+        },
+        'Head side-to-side': {
+          'description': "The test subject shall stand in place, slowly turning his/her head from side to side for 30 seconds and inhale 2 times at each extreme."
+        },
+        'Head up-and-down': {
+          'description': "The test subject shall stand in place, slowly moving his/her head up and down for 39 seconds and inhale 2 times at each extreme."
+        }
+      },
       oshaExercises: {
         'Normal breathing': {
           'description': 'In a normal standing position, without talking, the subject shall breathe normally.'
@@ -854,7 +869,7 @@ export default {
           fit_factor: null
         }
       ],
-      quantitativeExercises: [
+      quantitativeExercisesFullOsha: [
         {
           name: 'Normal breathing',
           fit_factor: null
@@ -887,6 +902,26 @@ export default {
           name: 'Normal breathing',
           fit_factor: null
         }
+      ],
+      quantitativeExercisesOSHAFastFFR: [
+        {
+          name: 'Bending over',
+          fit_factor: null
+        },
+        {
+          name: 'Talking',
+          fit_factor: null
+        },
+
+        {
+          name: 'Turning head side to side',
+          fit_factor: null
+        },
+
+        {
+          name: 'Moving head up and down',
+          fit_factor: null
+        },
       ],
       selectedMask: {
         id: null,
@@ -951,6 +986,17 @@ export default {
           'managedUsers'
         ]
     ),
+    numExercisesHalf() {
+      return this.quantitativeExercises.length / 2;
+    },
+    quantitativeExercises() {
+      // Has a "name" field
+      if (this.quantitativeProcedure == 'Full OSHA') {
+        return this.quantitativeExercisesFullOsha
+      }
+
+      return this.quantitativeExercisesOSHAFastFFR
+    },
     acceptableRouteName() {
       return ["EditFitTest", "ViewFitTest", "NewFitTest"].includes(this.$route.name)
     },
@@ -1195,6 +1241,15 @@ export default {
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     ...mapActions(useMeasurementDeviceStore, ['loadMeasurementDevices']),
+    setQuantitativeExercises(exercises) {
+      // Has a "name" field
+      if (this.quantitativeProcedure == 'Full OSHA') {
+        this.quantitativeExercisesFullOsha = exercises
+        return
+      }
+
+      this.quantitativeExercisesOSHAFastFFR = exercises
+    },
     deviceInfo(d) {
       let message = '';
       if (d.remove_from_service) {
@@ -1329,10 +1384,11 @@ export default {
             this.qualitativeExercises = results.qualitative.exercises
 
             this.quantitativeTestingMode = results.quantitative.testing_mode
-            this.quantitativeExercises = results.quantitative.exercises
             this.quantitativeAerosolSolution = results.quantitative.aerosol.solution
             this.quantitativeNotes = results.quantitative.notes
             this.quantitativeProcedure = results.quantitative.procedure
+
+            this.setQuantitativeExercises(results.quantitative.exercises)
             this.initialCountPerCm3 = results.quantitative.aerosol.initial_count_per_cm3
 
             this.selectUser(fitTestData.user_id)
@@ -2037,6 +2093,12 @@ export default {
   .grid.qlft {
     display: grid;
     grid-template-columns: 50% 50%;
+    grid-template-rows: auto;
+  }
+
+  .grid.qlft.one-col {
+    display: grid;
+    grid-template-columns: 100%;
     grid-template-rows: auto;
   }
 
