@@ -2,7 +2,7 @@
   <div class='align-items-center flex-dir-col sticky'>
     <div class='flex align-items-center row'>
       <h2 class='tagline'>Masks</h2>
-      <CircularButton text="+" @click="newMask"/>
+      <CircularButton text="+" @click="newMask" v-show="currentUser"/>
     </div>
 
     <div class='row'>
@@ -149,15 +149,9 @@ export default {
     },
   },
   async created() {
-    await this.getCurrentUser()
-
-    if (!this.currentUser) {
-      signIn.call(this)
-    } else {
-      // TODO: a parent might input data on behalf of their children.
-      // Currently, this.loadStuff() assumes We're loading the profile for the current user
-      this.loadStuff()
-    }
+    // TODO: a parent might input data on behalf of their children.
+    // Currently, this.loadStuff() assumes We're loading the profile for the current user
+    this.loadStuff()
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
