@@ -338,7 +338,7 @@
       <br>
 
       <div class="row justify-content-center">
-        <Button class='button' text="Edit" @click='mode = "Edit"' v-if='mode == "Show"'/>
+        <Button class='button' text="Edit" @click='mode = "Edit"' v-if='mode == "Show" && currentUser'/>
         <Button class='button' text="Delete" @click='deleteMask' v-if='deletable && (mode != "Show")'/>
         <Button class='button' text="Save" @click='saveMask' v-if='mode == "New" || mode == "Edit"'/>
         <Button class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New" || mode == "Edit")'/>
@@ -692,11 +692,6 @@ export default {
     }
   },
   async created() {
-    await this.getCurrentUser()
-
-    if (!this.currentUser) {
-      signIn.call(this)
-    }
     if (this.$route.name == 'NewMask') {
       this.mode = 'New'
     } else if (this.$route.name == 'ShowMask') {

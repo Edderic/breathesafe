@@ -50,15 +50,11 @@ class MasksController < ApplicationController
   def show
     # TODO: For now, only current user can access facial measurements
     # Later on, parents should be able to view / edit their children's data
-    unless current_user
-      status = 401
-      messages = ["Unauthorized."]
-      to_render = {}
-    else
-      to_render = {
-        mask: Mask.with_privacy_aggregations(params[:id])[0]
-      }
-    end
+    status = 200
+    messages = []
+    to_render = {
+      mask: Mask.with_privacy_aggregations(params[:id])[0]
+    }
 
     respond_to do |format|
       format.json do
