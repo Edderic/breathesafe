@@ -338,10 +338,10 @@
       <br>
 
       <div class="row justify-content-center">
-        <Button class='button' text="Edit" @click='mode = "Edit"' v-if='mode == "Show" && currentUser'/>
-        <Button class='button' text="Delete" @click='deleteMask' v-if='deletable && (mode != "Show")'/>
-        <Button class='button' text="Save" @click='saveMask' v-if='mode == "New" || mode == "Edit"'/>
-        <Button class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New" || mode == "Edit")'/>
+        <Button class='button' text="Edit" @click='mode = "Edit"' v-if='mode == "Show" && canUpdate'/>
+        <Button class='button' text="Delete" @click='deleteMask' v-if='deletable && (mode != "Show") && canUpdate'/>
+        <Button class='button' text="Save" @click='saveMask' v-if='(mode == "New" || mode == "Edit") && canUpdate'/>
+        <Button class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New" || mode == "Edit") && canUpdate'/>
       </div>
       <br>
       <br>
@@ -542,6 +542,9 @@ export default {
           'messages'
         ]
     ),
+    canUpdate() {
+      return !!this.currentUser && ((this.authorId == this.currentUser.id) || this.currentUser.admin)
+    },
     perimColorScheme() {
       return perimeterColorScheme();
     },
@@ -692,6 +695,8 @@ export default {
     }
   },
   async created() {
+    this.getCurrentUser();
+
     if (this.$route.name == 'NewMask') {
       this.mode = 'New'
     } else if (this.$route.name == 'ShowMask') {
