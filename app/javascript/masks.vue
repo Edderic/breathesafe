@@ -8,6 +8,14 @@
     <div class='row'>
       <input type="text" v-model='search'>
       <SearchIcon height='2em' width='2em'/>
+
+      <button id='search-icon'>
+        <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80"
+          width="2em" height="2em"
+          @click='setDisplay("filter")' v-if="display != 'filter'">
+          <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' fill='#aaa'/>
+        </svg>
+      </button>
     </div>
 
     <div class='container chunk'>
@@ -210,6 +218,12 @@ export default {
   .main {
     display: flex;
     flex-direction: column;
+  }
+
+  button {
+    display: flex;
+    cursor: pointer;
+    padding: 0.25em;
   }
   .add-facial-measurements-button {
     margin: 1em auto;
