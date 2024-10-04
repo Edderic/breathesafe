@@ -9,7 +9,7 @@
       <input type="text" v-model='search'>
       <SearchIcon height='2em' width='2em'/>
 
-      <button class='icon' @click='showSearchParameters'>
+      <button class='icon' @click='showPopup = true'>
         <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80"
           width="2em" height="2em"
           @click='setDisplay("filter")' v-if="display != 'filter'">
@@ -24,7 +24,7 @@
     </div>
 
     <div class='container chunk'>
-      <Popup>
+      <Popup v-show='showPopup' @onclose='showPopup = false'>
         <div  style='padding: 1em;'>
           <div>Sort by:</div>
 
@@ -53,7 +53,10 @@
                     amount='1'
                   />
                 </td>
-                <td>Unique number of fit testers</td>
+                <td @click='sortBy("uniqueFitTestersCount")'>Unique number of fit testers</td>
+                <td>
+                  <SortingStatus :status='sortingStatus("uniqueFitTestersCount")'/>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -148,6 +151,7 @@ export default {
   },
   data() {
     return {
+      showPopup: false,
       exceptionMissingObject: {
         color: {
           r: '200',
