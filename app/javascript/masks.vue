@@ -15,6 +15,7 @@
           @click='setDisplay("filter")' v-if="display != 'filter'">
           <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' fill='#aaa'/>
         </svg>
+
       </button>
     </div>
 
@@ -28,8 +29,6 @@
         <div  style='padding: 1em;'>
           <div>Sort by:</div>
           <br>
-
-
           <table>
             <thead>
               <tr>
@@ -62,6 +61,18 @@
               </tr>
             </tbody>
           </table>
+          <br>
+
+          <div>Filter for:</div>
+          <br>
+          <div>Strap type</div>
+          <table>
+            <tr>
+              <td><input type="checkbox" :checked='filterForEarloop' @click='filterFor("Earloop")'>Earloop</td>
+              <td><input type="checkbox" :checked='filterForHeadstrap' @click='filterFor("Headstrap")'>Headstrap</td>
+            </tr>
+          </table>
+
 
         </div>
       </Popup>
@@ -153,6 +164,8 @@ export default {
   },
   data() {
     return {
+      filterForEarloop: true,
+      filterForHeadstrap: true,
       showPopup: false,
       exceptionMissingObject: {
         color: {
@@ -200,7 +213,18 @@ export default {
         return this.masks
       } else {
         let lowerSearch = this.search.toLowerCase()
-        return this.masks.filter((mask) => mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
+        let filterForHeadstrap = this.filterForHeadstrap
+        let filterForEarloop = this.filterForEarloop
+
+        return this.masks.filter(
+          function(mask) {
+            return mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch)
+              && (
+                (filterForHeadstrap && mask.strapType == 'Headstrap')
+                || (filterForEarloop && mask.strapType == 'Earloop')
+              )
+          }
+        )
       }
     },
     sortedDisplayables() {
@@ -242,6 +266,9 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    filterFor(string) {
+      this['filterFor' + string] = !this['filterFor' + string]
+    },
     sortingStatus(field) {
       if (this.sortByField == field) {
         return this.sortByStatus
