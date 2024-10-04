@@ -39,23 +39,23 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr @click='sortBy("perimeterMm")'>
                 <td>
                   <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/tape-measure.png" alt="tape measure" class='tape-measure' title="Perimeter of the mask, measured in millimeters, defined as the distance that covers the face">
                 </td>
-                <td @click='sortBy("perimeterMm")'>Perimeter</td>
+                <td >Perimeter</td>
                 <td>
                   <SortingStatus :status='sortingStatus("perimeterMm")'/>
                 </td>
               </tr>
-              <tr>
+              <tr @click='sortBy("uniqueFitTestersCount")'>
                 <td>
                   <PersonIcon
                     backgroundColor='rgb(150,150,150)'
                     amount='1'
                   />
                 </td>
-                <td @click='sortBy("uniqueFitTestersCount")'>Unique number of fit testers</td>
+                <td >Unique number of fit testers</td>
                 <td>
                   <SortingStatus :status='sortingStatus("uniqueFitTestersCount")'/>
                 </td>
