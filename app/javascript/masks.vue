@@ -27,8 +27,7 @@
     <div class='container chunk'>
       <Popup v-show='showPopup' @onclose='showPopup = false'>
         <div  style='padding: 1em;'>
-          <div>Sort by:</div>
-          <br>
+          <h3>Sort by:</h3>
           <table>
             <thead>
               <tr>
@@ -63,7 +62,7 @@
           </table>
           <br>
 
-          <div>Filter for:</div>
+          <h3>Filter for:</h3>
           <br>
           <div>Strap type</div>
           <table>
@@ -250,6 +249,17 @@ export default {
     this.search = this.$route.query.search || ''
     this.sortByStatus = this.$route.query.sortByStatus
     this.sortByField = this.$route.query.sortByField
+    if (this.$route.query.filterForEarloop == undefined) {
+      this.filterForEarloop = true
+    } else {
+      this.filterForEarloop = this.$route.query.filterForEarloop == 'true'
+    }
+
+    if (this.$route.query.filterForHeadstrap == undefined) {
+      this.filterForHeadstrap = true
+    } else {
+      this.filterForHeadstrap = this.$route.query.filterForHeadstrap == 'true'
+    }
 
     this.$watch(
       () => this.$route.query,
@@ -258,6 +268,17 @@ export default {
         this.sortByStatus = toQuery.sortByStatus
         this.sortByField = toQuery.sortByField
         // react to route changes...
+        if (this.$route.query.filterForEarloop == undefined) {
+          this.filterForEarloop = true
+        } else {
+          this.filterForEarloop = this.$route.query.filterForEarloop == 'true'
+        }
+
+        if (this.$route.query.filterForHeadstrap == undefined) {
+          this.filterForHeadstrap = true
+        } else {
+          this.filterForHeadstrap = this.$route.query.filterForHeadstrap == 'true'
+        }
       }
     )
 
@@ -267,7 +288,23 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     filterFor(string) {
-      this['filterFor' + string] = !this['filterFor' + string]
+      let filterForString = ('filterFor' + string)
+      let newQuery = {}
+      newQuery[filterForString] = !this['filterFor' + string]
+
+      let combinedQuery = Object.assign(
+        JSON.parse(
+          JSON.stringify(this.$route.query)
+        ),
+        newQuery
+      )
+
+      this.$router.push(
+        {
+          name: 'Masks',
+          query: combinedQuery
+        }
+      )
     },
     sortingStatus(field) {
       if (this.sortByField == field) {
