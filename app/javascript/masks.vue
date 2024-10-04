@@ -6,7 +6,7 @@
     </div>
 
     <div class='row'>
-      <input type="text" v-model='search'>
+      <input type="text" @change='updateSearch'>
       <SearchIcon height='2em' width='2em'/>
 
       <button class='icon' @click='showPopup = true'>
@@ -27,6 +27,8 @@
       <Popup v-show='showPopup' @onclose='showPopup = false'>
         <div  style='padding: 1em;'>
           <div>Sort by:</div>
+          <br>
+
 
           <table>
             <thead>
@@ -221,6 +223,18 @@ export default {
   async created() {
     // TODO: a parent might input data on behalf of their children.
     // Currently, this.loadStuff() assumes We're loading the profile for the current user
+    if (this.$route.query.search) {
+      this.search = this.$route.query.search
+    }
+
+    this.$watch(
+      () => this.$route.query,
+      (toQuery, previousQuery) => {
+        this.search = toQuery.search
+        // react to route changes...
+      }
+    )
+
     this.loadStuff()
   },
   methods: {
@@ -266,6 +280,14 @@ export default {
           }
         }
       )
+    },
+    updateSearch(event) {
+      this.$router.push({
+        name: 'Masks',
+        query: {
+          search: event.target.value
+        }
+      })
     },
     async loadStuff() {
       // TODO: load the profile for the current user
