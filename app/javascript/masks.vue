@@ -463,6 +463,7 @@ export default {
   }
   tbody tr:hover {
     cursor: pointer;
+    background-color: rgb(230,230,230);
   }
 
   .grid {
@@ -491,4 +492,5 @@ export default {
   th, td {
     text-align: center;
   }
+
 </style>
