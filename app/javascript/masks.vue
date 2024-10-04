@@ -167,7 +167,7 @@ export default {
       masks: [],
       search: "",
       sortByField: undefined,
-      sortByStatus: 'ascending',
+      sortByStatus: 'ascending'
     }
   },
   props: {
@@ -223,14 +223,16 @@ export default {
   async created() {
     // TODO: a parent might input data on behalf of their children.
     // Currently, this.loadStuff() assumes We're loading the profile for the current user
-    if (this.$route.query.search) {
-      this.search = this.$route.query.search
-    }
+    this.search = this.$route.query.search || ''
+    this.sortByStatus = this.$route.query.sortByStatus
+    this.sortByField = this.$route.query.sortByField
 
     this.$watch(
       () => this.$route.query,
       (toQuery, previousQuery) => {
         this.search = toQuery.search
+        this.sortByStatus = toQuery.sortByStatus
+        this.sortByField = toQuery.sortByField
         // react to route changes...
       }
     )
@@ -248,17 +250,33 @@ export default {
       }
     },
     sortBy(field) {
+      let query = {
+        sortByField: field
+      }
+
       if (this.sortByField != field) {
-        this.sortByField = field
-        this.sortByStatus = 'ascending'
+        query['sortByStatus'] = 'ascending'
       } else {
         if (this.sortByStatus == 'ascending') {
-          this.sortByStatus = 'descending'
+          query['sortByStatus'] = 'descending'
         } else if (this.sortByStatus == 'descending') {
-          this.sortByStatus = 'ascending'
+          query['sortByStatus'] = 'ascending'
         }
       }
 
+      let combinedQuery = Object.assign(
+        JSON.parse(
+          JSON.stringify(this.$route.query)
+        ),
+        query
+      )
+
+      this.$router.push(
+        {
+          name: 'Masks',
+          query: combinedQuery
+        }
+      )
     },
     getAbsoluteHref(href) {
       // TODO: make sure this works for all
@@ -282,11 +300,19 @@ export default {
       )
     },
     updateSearch(event) {
+      let newQuery = {
+        search: event.target.value
+      }
+
+      let combinedQuery = Object.assign(
+        JSON.parse(
+          JSON.stringify(this.$route.query)
+        ),
+        newQuery
+      )
       this.$router.push({
         name: 'Masks',
-        query: {
-          search: event.target.value
-        }
+        query: combinedQuery
       })
     },
     async loadStuff() {
