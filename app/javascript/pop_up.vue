@@ -1,15 +1,8 @@
 <template>
-  <div class='closable-container' v-if='messages.length > 0'>
+  <div class='closable-container'>
     <CircularButton @click='close' class='close' :style='{bottom: bottom, left: left}' text='x'/>
     <div class='slot-wrapper'>
-      <p v-for='message in messages'>
-        <router-link v-if='!!message.to' :to='message.to'>
-          {{message.str}}
-        </router-link>
-        <span v-else>
-          {{message.str}}
-        </span>
-      </p>
+      <slot></slot>
     </div>
   </div>
 </template>
@@ -18,7 +11,7 @@
 import CircularButton from './circular_button.vue'
 
 export default {
-  name: 'ClosableMessage',
+  name: 'Popup',
   components: {
     CircularButton
   },

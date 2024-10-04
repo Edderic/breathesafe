@@ -9,7 +9,7 @@
       <input type="text" v-model='search'>
       <SearchIcon height='2em' width='2em'/>
 
-      <button id='search-icon'>
+      <button class='icon' @click='showSearchParameters'>
         <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80"
           width="2em" height="2em"
           @click='setDisplay("filter")' v-if="display != 'filter'">
@@ -23,11 +23,50 @@
       <br>
     </div>
 
+    <div class='container chunk'>
+      <Popup>
+        <div  style='padding: 1em;'>
+          <div>Sort by:</div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>icon</th>
+                <th>field</th>
+                <th>status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/tape-measure.png" alt="tape measure" class='tape-measure' title="Perimeter of the mask, measured in millimeters, defined as the distance that covers the face">
+                </td>
+                <td @click='sortBy("perimeterMm")'>Perimeter</td>
+                <td>
+                  <SortingStatus :status='sortingStatus("perimeterMm")'/>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <PersonIcon
+                    backgroundColor='rgb(150,150,150)'
+                    amount='1'
+                  />
+                </td>
+                <td>Unique number of fit testers</td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+      </Popup>
+    </div>
+
 
 
 
     <div class='main grid'>
-      <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in displayables' @click='viewMask(m.id)'>
+      <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in sortedDisplayables' @click='viewMask(m.id)'>
         <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
         <div class='description'>
           <span>
@@ -81,9 +120,11 @@ import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import ColoredCell from './colored_cell.vue'
 import PersonIcon from './person_icon.vue'
+import Popup from './pop_up.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
 import SearchIcon from './search_icon.vue'
+import SortingStatus from './sorting_status.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { perimeterColorScheme } from './colors.js'
@@ -98,8 +139,10 @@ export default {
     CircularButton,
     ColoredCell,
     ClosableMessage,
+    Popup,
     PersonIcon,
     SearchIcon,
+    SortingStatus,
     SurveyQuestion,
     TabSet
   },
@@ -116,7 +159,9 @@ export default {
       },
       errorMessages: [],
       masks: [],
-      search: ""
+      search: "",
+      sortByField: undefined,
+      sortByStatus: 'ascending',
     }
   },
   props: {
@@ -152,6 +197,19 @@ export default {
         return this.masks.filter((mask) => mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
       }
     },
+    sortedDisplayables() {
+      if (this.sortByStatus == 'ascending') {
+        return this.displayables.sort(function(a, b) {
+          return parseInt(a[this.sortByField] || 0)  - parseInt(b[this.sortByField] || 0)
+        }.bind(this))
+      } else if (this.sortByStatus == 'descending') {
+        return this.displayables.sort(function(a, b) {
+          return parseInt(b[this.sortByField] || 0) - parseInt(a[this.sortByField] || 0)
+        }.bind(this))
+      } else {
+        return this.displayables
+      }
+    },
     messages() {
       return this.errorMessages;
     },
@@ -164,6 +222,26 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    sortingStatus(field) {
+      if (this.sortByField == field) {
+        return this.sortByStatus
+      } else {
+        return ''
+      }
+    },
+    sortBy(field) {
+      if (this.sortByField != field) {
+        this.sortByField = field
+        this.sortByStatus = 'ascending'
+      } else {
+        if (this.sortByStatus == 'ascending') {
+          this.sortByStatus = 'descending'
+        } else if (this.sortByStatus == 'descending') {
+          this.sortByStatus = 'ascending'
+        }
+      }
+
+    },
     getAbsoluteHref(href) {
       // TODO: make sure this works for all
       return `${href}`
@@ -404,5 +482,9 @@ export default {
   .sticky {
     position: fixed;
     top: 3em;
+  }
+
+  th, td {
+    text-align: center;
   }
 </style>
