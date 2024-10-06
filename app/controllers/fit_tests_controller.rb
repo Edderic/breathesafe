@@ -15,24 +15,25 @@ class FitTestsController < ApplicationController
       # assumes there is facial measurement information
       latest_facial_measurement = FacialMeasurement.latest(user)
 
-      unless latest_facial_measurement
-        status = 422
-        messages = ["No facial measurements added yet. Please add facial measurements before adding a fit test."]
-      else
-        fit_test = FitTest.create(
-          fit_test_data.merge(
-            facial_measurement_id: latest_facial_measurement.id,
-          )
-        )
+      fm_id = nil
 
-        if fit_test
-          status = 201
-          messages = []
-        else
-          status = 422
-          messages = fit_test.errors.full_messages
-          fit_test = {}
-        end
+      if latest_facial_measurement
+        fm_id = latest_facial_measurement.id
+      end
+
+      fit_test = FitTest.create(
+        fit_test_data.merge(
+          facial_measurement_id: fm_id,
+        )
+      )
+
+      if fit_test
+        status = 201
+        messages = []
+      else
+        status = 422
+        messages = fit_test.errors.full_messages
+        fit_test = {}
       end
     end
 
