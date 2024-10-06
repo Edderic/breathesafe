@@ -31,6 +31,10 @@
       >
     </div>
 
+    <div class='container row' v-if='!registered'>
+      <Button @click="signIn" text='Sign In'/>
+    </div>
+
     <div class='container' v-if='!registered'>
       <input
         v-model='agreeTOSMedicalDisclaimerPrivacyPolicy'
@@ -45,7 +49,6 @@
       <Button @click="signUp" text='Sign up' :disabled='!agreeTOSMedicalDisclaimerPrivacyPolicy'/>
       <br>
 
-      <Button @click="signIn" text='Sign In'/>
     </div>
   </form>
 </template>
