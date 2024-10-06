@@ -5,11 +5,13 @@
       <ClosableMessage @onclose='messages = []' :messages='messages'/>
       <br>
     </div>
-    <div class='centered'>
-      <span>Percent Completed:</span>
-      <span>&nbsp;
-      {{managedUser.readyToAddFitTestingDataPercentage}}
-      </span>
+    <div class='centered align-items-center'>
+      <div>
+        <span>User: {{managedUser.fullName}}</span>
+      </div>
+      <div>
+        <span>Percent Completed: {{managedUser.readyToAddFitTestingDataPercentage}}</span>
+      </div>
 
     </div>
       <br>
@@ -371,6 +373,7 @@
       <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-show='mode == "View"'/>
       <Button text="Save and continue" @click='save()' v-show='mode != "View"'/>
       <Button text="Delete" @click='deleteUser($route.params.id)' v-show='mode == "Edit"'/>
+      <Button text="Apply" @click='applyFacialMeasurements' v-show='mode == "View"'/>
     </div>
     <br>
     <br>
@@ -568,6 +571,31 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useManagedUserStore, ['deleteManagedUser', 'loadManagedUser']),
+
+    async applyFacialMeasurements() {
+      let answer = window.confirm(`This will apply this set of facial measurements to existing (and future) fit tests for ${this.managedUser.fullName}. Are you sure?`);
+
+      if (answer) {
+        await axios.delete(
+          `/fit_tests/${this.$route.params.id}`,
+        )
+          .then(response => {
+            let data = response.data
+            this.$router.push({
+              'name': 'FitTests'
+            })
+
+          })
+          .catch(error => {
+            if (error && error.response && error.response.data && error.response.data.messages) {
+              this.addMessages(error.response.data.messages)
+            } else {
+              this.addMessages([error.message])
+            }
+          })
+      }
+    },
+
     async deleteUser(id) {
       await this.deleteManagedUser(
         id,
