@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_10_06_022521) do
+ActiveRecord::Schema[7.0].define(version: 2024_10_06_025400) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -97,7 +97,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_06_022521) do
     t.jsonb "results"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "facial_measurement_id", null: false
+    t.bigint "facial_measurement_id"
     t.bigint "quantitative_fit_testing_device_id"
     t.bigint "user_id"
     t.index ["facial_measurement_id"], name: "index_fit_tests_on_facial_measurement_id"
