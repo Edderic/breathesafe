@@ -12,7 +12,7 @@
       <button class='icon' @click='showPopup = true'>
         <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="8 10 70 70"
           width="2em" height="2em"
-          @click='setDisplay("filter")' v-if="display != 'filter'">
+          >
           <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' fill='#aaa'/>
         </svg>
 
