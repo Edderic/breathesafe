@@ -1001,9 +1001,7 @@ export default {
       return ["EditFitTest", "ViewFitTest", "NewFitTest"].includes(this.$route.name)
     },
     managedUsersWhoCanAddFitTestData() {
-      return this.managedUsers.filter((u) => {
-        return u.readyToAddFitTestingDataPercentage == '100%'}
-      )
+      return this.managedUsers
     },
     fitTest() {
       return new FitTest({
