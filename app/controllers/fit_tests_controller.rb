@@ -24,6 +24,7 @@ class FitTestsController < ApplicationController
       fit_test = FitTest.create(
         fit_test_data.merge(
           facial_measurement_id: fm_id,
+          user_id: user.id
         )
       )
 
@@ -213,7 +214,7 @@ class FitTestsController < ApplicationController
 
   def fit_test_user
     fit_test = FitTest.find(params[:id])
-    return fit_test.facial_measurement.user
+    return fit_test.user
   end
 end
 

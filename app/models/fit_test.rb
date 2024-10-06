@@ -1,6 +1,7 @@
 class FitTest < ApplicationRecord
   belongs_to :mask, optional: true
-  belongs_to :facial_measurement
+  belongs_to :facial_measurement, optional: true
+  belongs_to :user
 
   def self.viewable(user)
 
@@ -8,13 +9,13 @@ class FitTest < ApplicationRecord
       <<-SQL
         SELECT ft.*, m.id as mask_id, m.unique_internal_model_code, m.image_urls, m.has_exhalation_valve, fm.user_id, p.first_name, p.last_name
         FROM fit_tests ft
-        INNER JOIN facial_measurements fm
+        LEFT JOIN facial_measurements fm
         ON (fm.id = ft.facial_measurement_id)
-        INNER JOIN profiles p
-        ON (p.user_id = fm.user_id)
+        LEFT JOIN profiles p
+        ON (p.user_id = ft.user_id)
         LEFT JOIN masks m
         ON (m.id = ft.mask_id)
-        WHERE fm.user_id IN (
+        WHERE ft.user_id IN (
           SELECT mu.managed_id
           FROM managed_users mu
           WHERE mu.manager_id = '#{user.id}'
