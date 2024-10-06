@@ -208,7 +208,7 @@ export default {
       return perimeterColorScheme()
     },
     displayables() {
-      if (this.search == "") {
+      if (this.search == "" || this.search == undefined) {
         return this.masks
       } else {
         let lowerSearch = this.search.toLowerCase()
@@ -264,7 +264,7 @@ export default {
     this.$watch(
       () => this.$route.query,
       (toQuery, previousQuery) => {
-        this.search = toQuery.search
+        this.search = toQuery.search || ''
         this.sortByStatus = toQuery.sortByStatus
         this.sortByField = toQuery.sortByField
         // react to route changes...
