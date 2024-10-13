@@ -340,8 +340,8 @@
       <div class="row justify-content-center">
         <Button class='button' text="Edit" @click='mode = "Edit"' v-if='mode == "Show" && canUpdate'/>
         <Button class='button' text="Delete" @click='deleteMask' v-if='deletable && (mode != "Show") && canUpdate'/>
-        <Button class='button' text="Save" @click='saveMask' v-if='(mode == "New" || mode == "Edit") && canUpdate'/>
-        <Button class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New" || mode == "Edit") && canUpdate'/>
+        <Button class='button' text="Save" @click='saveMask' v-if='(mode == "New") || ((mode == "Edit") && canUpdate)'/>
+        <Button class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New") || ((mode == "Edit") && canUpdate)'/>
       </div>
       <br>
       <br>
@@ -868,13 +868,13 @@ export default {
     },
     runValidations() {
       if (this.imageUrls.length <= 0) {
-        this.errorMessages.push({
+        this.messages.push({
           str: "Please provide an image URL so one image can be displayed."
         })
       }
 
       if (!this.uniqueInternalModelCode) {
-        this.errorMessages.push({
+        this.messages.push({
           str: "Please provide a Unique Internal Model Code"
         })
       }
@@ -951,7 +951,7 @@ export default {
     async saveMask() {
       this.runValidations()
 
-      if (this.errorMessages.length > 0) {
+      if (this.messages.length > 0) {
         return;
       }
 
