@@ -12,7 +12,6 @@
 
 ActiveRecord::Schema[7.0].define(version: 2024_10_06_025400) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
 
   create_table "carbon_dioxide_monitors", force: :cascade do |t|
@@ -62,8 +61,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_06_025400) do
     t.float "total_ach"
     t.integer "maximum_occupancy"
     t.integer "approved_by_id"
-    t.integer "initial_co2"
     t.jsonb "sensor_readings"
+    t.integer "initial_co2"
     t.string "status"
     t.boolean "sensor_data_from_external_api", default: false
     t.index ["author_id"], name: "index_events_on_author_id"
