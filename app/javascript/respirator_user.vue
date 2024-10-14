@@ -373,7 +373,7 @@
       <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-show='mode == "View"'/>
       <Button text="Save and continue" @click='save()' v-show='mode != "View"'/>
       <Button text="Delete" @click='deleteUser($route.params.id)' v-show='mode == "Edit"'/>
-      <Button text="Apply" @click='applyFacialMeasurements' v-show='mode == "View"'/>
+      <Button text="Apply to Fit Tests" @click='applyFacialMeasurements' v-show='mode == "View"'/>
     </div>
     <br>
     <br>
@@ -576,8 +576,9 @@ export default {
       let answer = window.confirm(`This will apply this set of facial measurements to existing (and future) fit tests for ${this.managedUser.fullName}. Are you sure?`);
 
       if (answer) {
-        await axios.delete(
-          `/fit_tests/${this.$route.params.id}`,
+        // post facial measurements to fit test
+        await axios.post(
+          `/facial_measurements/${this.latestFacialMeasurement.id}/fit_tests`,
         )
           .then(response => {
             let data = response.data
@@ -806,6 +807,10 @@ export default {
         .then(response => {
           let data = response.data
           // whatever you want
+          // TODO: when saving we wanna get the latest facial measurement
+          // e.g. get updated list of latest facial measurements
+          debugger
+
         })
         .catch(error => {
           this.addMessages(error.response.data.messages)

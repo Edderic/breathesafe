@@ -57,6 +57,8 @@ Rails.application.routes.draw do
   put 'measurement_devices/:id',to: 'measurement_devices#update'
   delete 'measurement_devices/:id',to: 'measurement_devices#delete'
 
+  post 'facial_measurements/:facial_measurement_id/fit_tests', to: 'facial_measurements_fit_tests#create'
+
   controller :pages do
     get :qr_code_generator
     get :qr_code_download
