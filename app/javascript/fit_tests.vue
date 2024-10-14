@@ -33,7 +33,7 @@
           <tr v-for='f in displayables'>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User"})'>{{f.firstName + ' ' + f.lastName}}</td>
             <td>
-              <router-link :to="{name: 'ShowMask', params: { id: f.maskId}}">
+              <router-link :to="showMask(f)">
                 <img :src="f.imageUrls[0]" alt="" class='thumbnail'>
               </router-link>
             </td>
@@ -145,6 +145,12 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    showMask(f) {
+      if (f && f.maskId) {
+        return {name: 'ShowMask', params: { id: f.maskId}}
+      }
+      return ""
+    },
     quantitativeStatusColor(status) {
       let hmff;
       if (status.includes("N")) {
