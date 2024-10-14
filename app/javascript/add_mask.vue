@@ -697,8 +697,16 @@ export default {
   async created() {
     this.getCurrentUser();
 
-    if (this.$route.name == 'NewMask') {
+    if (this.$route.name == 'NewMask' && this.currentUser) {
       this.mode = 'New'
+    } else if (this.$route.name == 'NewMask' && !this.currentUser) {
+      // visit the URL
+      this.$router.push({
+        name: 'SignIn',
+        query: {
+          'attempt-name': 'NewMask'
+        }
+      })
     } else if (this.$route.name == 'ShowMask') {
       this.mode = 'Show'
     } else if (this.$route.name == 'EditMask')
