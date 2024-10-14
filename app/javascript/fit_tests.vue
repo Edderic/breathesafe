@@ -28,6 +28,7 @@
           <th>QLFT</th>
           <th>QNFT HMFF</th>
           <th>Comfort</th>
+          <th>Has facial measurement data</th>
         </thead>
         <tbody>
           <tr v-for='f in displayables'>
@@ -52,6 +53,9 @@
             <td >
               <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})' class='status' :text='f.comfortStatus' :backgroundColor='statusColor(f.comfortStatus)'/>
             </td>
+            <td >
+              <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})' class='status' :text='f.facialMeasurementPresence' :backgroundColor='facialMeasPresenceColorMappingStatus(f.facialMeasurementPresence)'/>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -70,7 +74,7 @@ import axios from 'axios';
 import Button from './button.vue'
 import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
-import { userSealCheckColorMapping, genColorSchemeBounds, getColor, fitFactorColorScheme } from './colors.js'
+import { facialMeasurementsPresenceColorMapping, userSealCheckColorMapping, genColorSchemeBounds, getColor, fitFactorColorScheme } from './colors.js'
 import ColoredCell from './colored_cell.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
@@ -158,6 +162,11 @@ export default {
         return getColor(fitFactorColorScheme, hmff)
       }
     },
+    facialMeasPresenceColorMappingStatus(status) {
+      let color = facialMeasurementsPresenceColorMapping[status]
+
+      return `rgb(${color.r}, ${color.g}, ${color.b})`
+    },
     statusColor(status) {
       let color = userSealCheckColorMapping[status]
       return `rgb(${color.r}, ${color.g}, ${color.b})`
@@ -210,7 +219,6 @@ export default {
         .then(response => {
           let data = response.data
           if (response.data.fit_tests) {
-
             this.fit_tests = data.fit_tests.map((ft) => new FitTest(ft))
           }
 

@@ -573,7 +573,7 @@ export default {
     ...mapActions(useManagedUserStore, ['deleteManagedUser', 'loadManagedUser']),
 
     async applyFacialMeasurements() {
-      let answer = window.confirm(`This will apply this set of facial measurements to existing (and future) fit tests for ${this.managedUser.fullName}. Are you sure?`);
+      let answer = window.confirm(`This will apply this set of facial measurements to existing fit tests for ${this.managedUser.fullName}, overriding past facial measurements. Are you sure?`);
 
       if (answer) {
         // post facial measurements to fit test
@@ -640,18 +640,18 @@ export default {
           if (this.facialMeasurements.length == 0) {
             this.facialMeasurements.push({
               source: 'caliper for straight lines & tape measure for curves',
-                faceWidth: 0,
-                noseBridgeHeight: 0,
-                nasalRootBreadth: 0,
-                noseProtrusion: 0,
-                lipWidth: 0,
-                jawWidth: 0,
-                faceDepth: 0,
-                faceLength: 0,
-                lowerFaceLength: 0,
-                bitragionMentonArc: 0,
-                bitragionSubnasaleArc: 0,
-                cheekFullness: 'medium',
+                faceWidth: undefined,
+                noseBridgeHeight: undefined,
+                nasalRootBreadth: undefined,
+                noseProtrusion: undefined,
+                lipWidth: undefined,
+                jawWidth: undefined,
+                faceDepth: undefined,
+                faceLength: undefined,
+                lowerFaceLength: undefined,
+                bitragionMentonArc: undefined,
+                bitragionSubnasaleArc: undefined,
+                cheekFullness: undefined,
             })
           }
           // whatever you want
@@ -697,32 +697,31 @@ export default {
         }
       } else {
         if (this.secondaryTab == 'Part I') {
-          this.validateFacialMeasurementsPart(['faceWidth', 'jawWidth', 'faceDepth', 'faceLength', 'lowerFaceLength']);
-
           if (this.messages.length == 0) {
-            this.setSecondaryRouteTo({name: 'Part II'})
+            await this.saveFacialMeasurement(function() {
+              this.setSecondaryRouteTo({name: 'Part II'})
+            }.bind(this))
           }
         }
         else if (this.secondaryTab == 'Part II') {
-          this.validateFacialMeasurementsPart(['noseProtrusion', 'nasalRootBreadth', 'noseBridgeHeight', 'lipWidth']);
           if (this.messages.length == 0) {
-            this.setSecondaryRouteTo({name: 'Part III'})
+            await this.saveFacialMeasurement(function() {
+              this.setSecondaryRouteTo({name: 'Part III'})
+            }.bind(this))
           }
         }
         else if (this.secondaryTab == 'Part III') {
-          this.validateFacialMeasurementsPart(['bitragionMentonArc', 'bitragionSubnasaleArc']);
-
-          if (!this.latestFacialMeasurement.cheekFullness) {
-            thhis.addMessages('cheekFulness must not be blank')
-          }
-
           if (this.messages.length == 0) {
-            this.$router.push({
-              name: 'RespiratorUsers',
-            })
+            await this.saveFacialMeasurement(function() {
+              this.mode = 'View'
+              this.addMessages(["Successfully saved the last step of facial measurements."])
+
+              this.setSecondaryRouteTo({name: 'Part III'})
+            }.bind(this))
+
+
           }
         }
-        await this.saveFacialMeasurement()
       }
         // must be in Facial Measurements
     },
@@ -785,7 +784,7 @@ export default {
         }
       }
     },
-    async saveFacialMeasurement() {
+    async saveFacialMeasurement(successCallback) {
       await axios.post(
         `/users/${this.$route.params.id}/facial_measurements.json`, {
           source: this.latestFacialMeasurement.source,
@@ -806,11 +805,11 @@ export default {
       )
         .then(response => {
           let data = response.data
+
+          successCallback()
           // whatever you want
           // TODO: when saving we wanna get the latest facial measurement
           // e.g. get updated list of latest facial measurements
-          debugger
-
         })
         .catch(error => {
           this.addMessages(error.response.data.messages)

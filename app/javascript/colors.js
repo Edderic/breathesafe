@@ -12,6 +12,27 @@ export const toggleCSS = {
   'cursor': 'help',
 }
 
+export const facialMeasurementsPresenceColorMapping = {
+  'Complete': {
+    name: 'green',
+    r: 87,
+    g: 195,
+    b: 40
+  },
+  'Partially missing': {
+    name: 'yellow',
+    r: 255,
+    g: 233,
+    b: 56
+  },
+  'Completely missing': {
+    name: 'red',
+    r: 219,
+    g: 21,
+    b: 0
+  },
+}
+
 export const userSealCheckColorMapping = {
   'Passed': {
     name: 'green',
