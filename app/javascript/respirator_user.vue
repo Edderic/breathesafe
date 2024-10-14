@@ -373,7 +373,7 @@
       <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-show='mode == "View"'/>
       <Button text="Save and continue" @click='save()' v-show='mode != "View"'/>
       <Button text="Delete" @click='deleteUser($route.params.id)' v-show='mode == "Edit"'/>
-      <Button text="Apply to Fit Tests" @click='applyFacialMeasurements' v-show='mode == "View"'/>
+      <Button text="Apply Retroactively to Fit Tests" @click='applyFacialMeasurements' v-show='mode == "View"'/>
     </div>
     <br>
     <br>
