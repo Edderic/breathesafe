@@ -23,7 +23,7 @@
         :tabToShow='tabToShow'
       />
     </div>
-    <div class='menu row' v-show="tabToShow == 'Facial Measurements' && mode != 'View'">
+    <div class='menu row' v-show="tabToShow == 'Facial Measurements'">
       <TabSet
         :options='facialMeasurementParts'
         @update='setSecondaryRouteTo'
@@ -107,22 +107,32 @@
 
     <div class="edit-facial-measurements" v-if='tabToShow=="Facial Measurements"'>
 
-      <img v-if='infoToShow == "quantitativeGuide"' class="adaptive-wide" src="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8587533/bin/bmjgh-2021-005537f01.jpg" alt="Depiction of different measurements">
-
-      <div class='left-pane' v-if='infoToShow == "straightLineMeasurementsGuide"' >
-        <p >For measuring straight lines (e.g. face width (B), face length (D), etc.), we recommend a digital caliper such as <a href="https://www.amazon.com/gp/product/B00JALAIIE/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1" target='_blank'>this</a>.</p>
-        <a href="https://www.amazon.com/gp/product/B00JALAIIE/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1" target='_blank'>
-          <img class='left-pane-image' src="https://c.media-amazon.com/images/I/6194IWMjJEL._SX522_.jpg" alt='iGaging 6" Digital External Outside Caliper OD for Woodworking'>
+      <div class='left-pane' >
+        <p v-if='infoToShow == "straightLineMeasurementsGuide"' >For measuring straight lines (e.g. face width (B), face length (D), etc.), we recommend a digital caliper such as <a href="https://www.amazon.com/gp/product/B00JALAIIE/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1" target='_blank'>this</a>.</p>
+        <a href="https://www.amazon.com/gp/product/B00JALAIIE/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1" target='_blank' v-if='infoToShow == "straightLineMeasurementsGuide"' >
+          <img class='left-pane-image' src="https://c.media-amazon.com/images/I/6194IWMjJEL._SX522_.jpg" alt='iGaging 6" Digital External Outside Caliper OD for Woodworking' v-if='infoToShow == "straightLineMeasurementsGuide"' >
         </a>
+
+        <p v-show='infoToShow == "curvedMeasurementsGuide"'>For measuring curves (e.g. bitragion subnasale arc (L) and bitragion menton arc (K)), we recommend a tape measure such as <a href="https://www.amazon.com/dp/B0BGHCTL45?ref=ppx_yo2ov_dt_b_fed_asin_title">this</a>.</p>
+
+        <a v-show='infoToShow == "curvedMeasurementsGuide"' href="https://www.amazon.com/dp/B0BGHCTL45?ref=ppx_yo2ov_dt_b_fed_asin_title" target='_blank'>
+          <img class='left-pane-image' src="https://c.media-amazon.com/images/I/71Cwjwnqc6L._SL1500_.jpg" alt='Tape Measure, iBayam Soft Ruler Measuring Tape for Body Weight Loss Fabric Sewing Tailor Cloth Vinyl Measurement Craft Supplies, 60-Inch Double Scale Ruler, 2-Pack White, Blue' v-show='infoToShow == "curvedMeasurementsGuide"'>
+        </a>
+
+        <img class='left-pane-image' :src="imgUrl('face_width')" alt='face width measurement' v-if='infoToShow == "faceWidth"'>
+        <img class='left-pane-image' :src="imgUrl('jaw_width')" alt='jaw width measurement' v-if='infoToShow == "jawWidth"'>
+        <img class='left-pane-image' :src="imgUrl('face_depth')" alt='face depth measurement' v-if='infoToShow == "faceDepth"'>
+        <img class='left-pane-image' :src="imgUrl('face_length')" alt='face length measurement' v-if='infoToShow == "faceLength"'>
+        <img class='left-pane-image' :src="imgUrl('lower_face_length')" alt='lower face length measurement' v-if='infoToShow == "lowerFaceLength"'>
+        <img class='left-pane-image' :src="imgUrl('nose_protrusion')" alt='nose protrusion measurement' v-if='infoToShow == "noseProtrusion"'>
+        <img class='left-pane-image' :src="imgUrl('nasal_root_breadth')" alt='nasal root breadth measurement' v-if='infoToShow == "nasalRootBreadth"'>
+        <img class='left-pane-image' :src="imgUrl('nose_bridge_height')" alt='nose bridge height measurement' v-if='infoToShow == "noseBridgeHeight"'>
+        <img class='left-pane-image' :src="imgUrl('lip_width')" alt='lip width measurement' v-if='infoToShow == "lipWidth"'>
+        <img class='left-pane-image' :src="imgUrl('bitragion_menton_arc')" alt='bitragion menton arc measurement' v-if='infoToShow == "bitragionMentonArc"'>
+        <img class='left-pane-image' :src="imgUrl('bitragion_subnasale_arc')" alt='bitragion subnasale arc measurement' v-if='infoToShow == "bitragionSubnasaleArc"'>
       </div>
 
-      <div class='left-pane' v-if='infoToShow == "curvedMeasurementsGuide"' >
-        <p >For measuring curves (e.g. bitragion subnasale arc (L) and bitragion menton arc (K)), we recommend a tape measure such as <a href="https://www.amazon.com/dp/B0BGHCTL45?ref=ppx_yo2ov_dt_b_fed_asin_title">this</a>.</p>
 
-        <a href="https://www.amazon.com/dp/B0BGHCTL45?ref=ppx_yo2ov_dt_b_fed_asin_title" target='_blank'>
-          <img class='left-pane-image' src="https://c.media-amazon.com/images/I/71Cwjwnqc6L._SL1500_.jpg" alt='Tape Measure, iBayam Soft Ruler Measuring Tape for Body Weight Loss Fabric Sewing Tailor Cloth Vinyl Measurement Craft Supplies, 60-Inch Double Scale Ruler, 2-Pack White, Blue'>
-        </a>
-      </div>
 
       <div v-if='infoToShow == "cheekFullness"' class='align-items-center'>
         <p class='left-pane'>Select options below to get an understanding of different types of cheek fullness:</p>
@@ -131,35 +141,31 @@
           @update='setCheekFullnessExampleToShow'
           :tabToShow="cheekFullnessExample"
         />
-        <img class='left-pane-image' v-if='cheekFullnessExample == "Hallow/gaunt"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-hollow.png" alt="hallow/gaunt cheeks">
-        <img class='left-pane-image' v-if='cheekFullnessExample == "Medium"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-neutral.png" alt="medium-ful cheeks">
-        <img class='left-pane-image' v-if='cheekFullnessExample == "Rounded/full"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-rounded.png" alt="rounded cheeks">
+        <img class='left-pane-image' v-if='cheekFullnessExample == "Hallow/gaunt"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-hollow.jpg" alt="hallow/gaunt cheeks">
+        <img class='left-pane-image' v-if='cheekFullnessExample == "Medium"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-neutral.jpg" alt="medium-ful cheeks">
+        <img class='left-pane-image' v-if='cheekFullnessExample == "Rounded/full"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-rounded.jpg" alt="rounded cheeks">
       </div>
 
-      <div class='flex-dir-col'>
+      <div class='flex-dir-col' v-show="secondaryTab == 'Part I'">
         <br>
         <table>
           <thead>
             <tr>
-              <th colspan='2'>
-                <label for="source" >Measurements Guide</label>
-              </th>
-              <th>
-                <CircularButton text="?" @click="toggleInfo('quantitativeGuide')" :highlight="infoToShow == 'quantitativeGuide'"/>
-              </th>
-            </tr>
-            <tr  v-show='secondaryTab != "Part III"'>
-              <th colspan='2'>Straight-line Measurements</th>
+              <th colspan='2'><h3>Straight-line Measurements (Part I)</h3></th>
               <td>
                 <CircularButton text="?" @click="toggleInfo('straightLineMeasurementsGuide')" :highlight="infoToShow == 'straightLineMeasurementsGuide'"/>
               </td>
             </tr>
           </thead>
           <tbody>
-            <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
-              <th colspan="2">
-                <label for="faceWidth">Face Width <b>(B)</b> (mm) </label>
+            <tr>
+              <th colspan="1">
+                <label for="faceWidth">Face Width (mm) </label>
               </th>
+              <td>
+                <CircularButton text="?" @click="toggleInfo('faceWidth')" :highlight="infoToShow == 'faceWidth'"/>
+              </td>
+
               <td>
                 <input
                     v-if='latestFacialMeasurement'
@@ -171,10 +177,13 @@
               </td>
             </tr>
 
-            <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
-              <th colspan="2">
+            <tr>
+              <th colspan="1">
                 <label for="jawWidth">Jaw Width <b>(C)</b> (mm)</label>
               </th>
+              <td>
+                <CircularButton text="?" @click="toggleInfo('jawWidth')" :highlight="infoToShow == 'jawWidth'"/>
+              </td>
               <td>
                 <input
                     v-if='latestFacialMeasurement'
@@ -186,9 +195,12 @@
               </td>
             </tr>
             <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
-              <th colspan="2">
+              <th colspan="1">
                 <label for="faceDepth">Face Depth <b>(P)</b> (mm)</label>
               </th>
+              <td>
+                <CircularButton text="?" @click="toggleInfo('faceDepth')" :highlight="infoToShow == 'faceDepth'"/>
+              </td>
               <td>
                 <input
                     v-if='latestFacialMeasurement'
@@ -201,9 +213,12 @@
             </tr>
 
             <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
-              <th colspan="2">
+              <th colspan="1">
                 <label for="faceLength">Face Length <b>(D)</b> (mm)</label>
               </th>
+              <td>
+                <CircularButton text="?" @click="toggleInfo('faceLength')" :highlight="infoToShow == 'faceLength'"/>
+              </td>
               <td>
                 <input
                     v-if='latestFacialMeasurement'
@@ -216,9 +231,12 @@
             </tr>
 
             <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
-              <th colspan="2">
+              <th colspan="1">
                 <label for="lowerFaceLength">Lower Face Length <b>(E)</b> (mm)</label>
               </th>
+              <td>
+                <CircularButton text="?" @click="toggleInfo('lowerFaceLength')" :highlight="infoToShow == 'lowerFaceLength'"/>
+              </td>
               <td>
                 <input
                     v-if='latestFacialMeasurement'
@@ -230,75 +248,122 @@
               </td>
             </tr>
 
-            <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
-              <th colspan="2">
-                <label for="noseProtrusion">Nose Protrusion <b>(M)</b> (mm)</label>
-              </th>
-              <td>
-                <input
-                    v-if='latestFacialMeasurement'
-                    type='number'
-                    :value="latestFacialMeasurement.noseProtrusion"
-                    @change='setFacialMeasurement($event, "noseProtrusion")'
-                    :disabled="mode == 'View'"
-                    >
-              </td>
-            </tr>
 
-            <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
-              <th colspan="2">
-                <label for="nasalRootBreadth">Nasal Root Breadth <b>(H)</b> (mm)</label>
-              </th>
-              <td>
-                <input
-                    v-if='latestFacialMeasurement'
-                    type='number'
-                    :value="latestFacialMeasurement.nasalRootBreadth"
-                    @change='setFacialMeasurement($event, "nasalRootBreadth")'
-                    :disabled="mode == 'View'"
-                    >
-              </td>
-            </tr>
+            </tbody>
+          </table>
+          </div>
+          <div class='flex-dir-col'  v-show="secondaryTab == 'Part II'">
+            <br>
 
-            <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
-              <th colspan="2">
-                <label for="noseBridgeHeight">Nose Bridge Height <b>(H)</b> (mm)</label>
-              </th>
-              <td>
-                <input
-                    v-if='latestFacialMeasurement'
-                    type='number'
-                    :value="latestFacialMeasurement.noseBridgeHeight"
-                    @change='setFacialMeasurement($event, "noseBridgeHeight")'
-                    :disabled="mode == 'View'"
-                    >
-              </td>
-            </tr>
+            <table>
+              <tbody>
+              <tr>
+                <th colspan='2' ><h3>Straight-line Measurements (Part II)</h3></th>
+                <td>
+                  <CircularButton text="?" @click="toggleInfo('straightLineMeasurementsGuide')" :highlight="infoToShow == 'straightLineMeasurementsGuide'"/>
+                </td>
+              </tr>
+              <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
+                <th colspan="1">
+                  <label for="noseProtrusion">Nose Protrusion <b>(M)</b> (mm)</label>
+                </th>
 
-            <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
-              <th colspan="2">
-                <label for="lipWidth">Lip Width <b>(J)</b> (mm)</label>
-              </th>
-              <td>
-                <input
-                    v-if='latestFacialMeasurement'
-                    type='number'
-                    :value="latestFacialMeasurement.lipWidth"
-                    :disabled="mode == 'View'"
-                    @change='setFacialMeasurement($event, "lipWidth")'
-                    >
-              </td>
-            </tr>
-            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
-              <th colspan='2'>Curved Measurements</th>
+                <td>
+                  <CircularButton text="?" @click="toggleInfo('noseProtrusion')" :highlight="infoToShow == 'noseProtrusion'"/>
+                </td>
+                <td>
+                  <input
+                      v-if='latestFacialMeasurement'
+                      type='number'
+                      :value="latestFacialMeasurement.noseProtrusion"
+                      @change='setFacialMeasurement($event, "noseProtrusion")'
+                      :disabled="mode == 'View'"
+                      >
+                </td>
+              </tr>
+
+              <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
+                <th colspan="1">
+                  <label for="nasalRootBreadth">Nasal Root Breadth <b>(H)</b> (mm)</label>
+                </th>
+
+                <td>
+                  <CircularButton text="?" @click="toggleInfo('nasalRootBreadth')" :highlight="infoToShow == 'nasalRootBreadth'"/>
+                </td>
+                <td>
+                  <input
+                      v-if='latestFacialMeasurement'
+                      type='number'
+                      :value="latestFacialMeasurement.nasalRootBreadth"
+                      @change='setFacialMeasurement($event, "nasalRootBreadth")'
+                      :disabled="mode == 'View'"
+                      >
+                </td>
+              </tr>
+
+              <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
+                <th colspan="1">
+                  <label for="noseBridgeHeight">Nose Bridge Height <b>(H)</b> (mm)</label>
+                </th>
+                <td>
+                  <CircularButton text="?" @click="toggleInfo('noseBridgeHeight')" :highlight="infoToShow == 'noseBridgeHeight'"/>
+                </td>
+                <td>
+                  <input
+                      v-if='latestFacialMeasurement'
+                      type='number'
+                      :value="latestFacialMeasurement.noseBridgeHeight"
+                      @change='setFacialMeasurement($event, "noseBridgeHeight")'
+                      :disabled="mode == 'View'"
+                      >
+                </td>
+              </tr>
+
+              <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
+                <th colspan="1">
+                  <label for="lipWidth">Lip Width <b>(J)</b> (mm)</label>
+                </th>
+                <td>
+                  <CircularButton text="?" @click="toggleInfo('lipWidth')" :highlight="infoToShow == 'lipWidth'"/>
+                </td>
+                <td>
+                  <input
+                      v-if='latestFacialMeasurement'
+                      type='number'
+                      :value="latestFacialMeasurement.lipWidth"
+                      :disabled="mode == 'View'"
+                      @change='setFacialMeasurement($event, "lipWidth")'
+                      >
+                </td>
+              </tr>
+
+
+
+
+            </tbody>
+          </table>
+        </div>
+
+        <div class='flex-dir-col'>
+
+        <br>
+
+        <table v-show="secondaryTab == 'Part III'" >
+          <tbody>
+
+            <tr>
+              <th colspan='2'><h3>Curved Measurements</h3></th>
               <td>
                 <CircularButton text="?" @click="toggleInfo('curvedMeasurementsGuide')" :highlight="infoToShow == 'curvedMeasurementsGuide'"/>
               </td>
             </tr>
             <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
-              <th colspan="2">
+              <th colspan="1">
                 <label for="bitragionMentonArc">Bitragion Menton Arc <b>(K)</b> (mm)</label>
               </th>
+              <td>
+                <CircularButton text="?" @click="toggleInfo('bitragionMentonArc')" :highlight="infoToShow == 'bitragionMentonArc'"/>
+              </td>
               <td>
                 <input
                     v-if='latestFacialMeasurement'
@@ -311,9 +376,12 @@
             </tr>
 
             <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
-              <th colspan="2">
+              <th colspan="1">
                 <label for="bitragionSubnasaleArc">Bitragion Subnasale Arc <b>(L)</b> (mm)</label>
               </th>
+              <td>
+                <CircularButton text="?" @click="toggleInfo('bitragionSubnasaleArc')" :highlight="infoToShow == 'bitragionSubnasaleArc'"/>
+              </td>
               <td>
                 <input
                     v-if='latestFacialMeasurement'
@@ -324,19 +392,16 @@
                     >
               </td>
             </tr>
-
-
           </tbody>
         </table>
 
-        <br>
-
-        <table v-show="secondaryTab == 'Part III' || mode == 'View'">
+        <table v-show="secondaryTab == 'Part III'">
           <thead>
             <tr>
-              <th colspan='3'>Qualitative Measurements</th>
+              <th colspan='3'><h3>Qualitative Measurements</h3></th>
             </tr>
           </thead>
+
           <tbody>
             <tr>
               <th>
@@ -407,6 +472,19 @@ export default {
   },
   data() {
     return {
+      measurementDict: {
+        'faceWidth': 'face_width',
+        'jawWidth': 'jaw_width',
+        'faceDepth': 'face_depth',
+        'faceLength': 'face_length',
+        'lowerFaceLength': 'lower_face_length',
+        'noseProtrusion': 'nose_protrusion',
+        'nasalRootBreadth': 'nasal_root_breadth',
+        'noseBridgeHeight': 'nose_bridge_height',
+        'lipWidth': 'lip_width',
+        'bitragionMentonArc': 'bitragion_menton_arc',
+        'bitragionSubnasaleArc': 'bitragion_subnasale_arc',
+      },
       facialMeasurementParts: [
         {
           text: "Part I",
@@ -478,7 +556,7 @@ export default {
         "Other"
       ],
       facialMeasurements: [],
-      infoToShow: "quantitativeGuide"
+      infoToShow: "straightLineMeasurementsGuide"
     }
   },
   props: {
@@ -571,6 +649,9 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useManagedUserStore, ['deleteManagedUser', 'loadManagedUser']),
+    imgUrl(part) {
+      return `https://breathesafe.s3.us-east-2.amazonaws.com/images/breathesafe-facial-measurements-examples/${part}.jpg`
+    },
 
     async applyFacialMeasurements() {
       let answer = window.confirm(`This will apply this set of facial measurements to existing fit tests for ${this.managedUser.fullName}, overriding past facial measurements. Are you sure?`);
@@ -942,6 +1023,7 @@ export default {
     max-width: 24em;
   }
   .left-pane {
+    text-align: center;
   }
 
   p.narrow-p {
@@ -984,7 +1066,7 @@ export default {
     display: grid;
     grid-template-columns: 50% 50%;
     grid-template-rows: auto;
-    max-width: 53em;
+    min-width: 53em;
   }
   @media(max-width: 700px) {
     img {
