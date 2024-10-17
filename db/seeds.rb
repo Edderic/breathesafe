@@ -115,5 +115,16 @@ def import_mask_data
   end
 end
 
-import_mask_data
+# import_mask_data
+#
+def assign_user_id_when_facial
+  fit_tests = FitTest.all
 
+  fit_tests.each do |f|
+    if f.facial_measurement && f.facial_measurement.user_id
+      f.update(user_id: f.facial_measurement.user_id)
+    end
+  end
+end
+
+assign_user_id_when_facial
