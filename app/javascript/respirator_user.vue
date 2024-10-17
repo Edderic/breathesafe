@@ -130,20 +130,19 @@
         <img class='left-pane-image' :src="imgUrl('lip_width')" alt='lip width measurement' v-if='infoToShow == "lipWidth"'>
         <img class='left-pane-image' :src="imgUrl('bitragion_menton_arc')" alt='bitragion menton arc measurement' v-if='infoToShow == "bitragionMentonArc"'>
         <img class='left-pane-image' :src="imgUrl('bitragion_subnasale_arc')" alt='bitragion subnasale arc measurement' v-if='infoToShow == "bitragionSubnasaleArc"'>
-      </div>
 
 
-
-      <div v-if='infoToShow == "cheekFullness"' class='align-items-center'>
-        <p class='left-pane'>Select options below to get an understanding of different types of cheek fullness:</p>
+        <p v-if='infoToShow == "cheekFullness"' class='left-pane'>Select options below to get an understanding of different types of cheek fullness:</p>
         <TabSet
+
           :options='cheekFullnessOptions'
           @update='setCheekFullnessExampleToShow'
           :tabToShow="cheekFullnessExample"
+          v-if='infoToShow == "cheekFullness"'
         />
-        <img class='left-pane-image' v-if='cheekFullnessExample == "Hallow/gaunt"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-hollow.jpg" alt="hallow/gaunt cheeks">
-        <img class='left-pane-image' v-if='cheekFullnessExample == "Medium"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-neutral.jpg" alt="medium-ful cheeks">
-        <img class='left-pane-image' v-if='cheekFullnessExample == "Rounded/full"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-rounded.jpg" alt="rounded cheeks">
+        <img class='left-pane-image' v-if='infoToShow == "cheekFullness" && cheekFullnessExample == "Hallow/gaunt"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-hollow.png" alt="hallow/gaunt cheeks">
+        <img class='left-pane-image' v-if='infoToShow == "cheekFullness" && cheekFullnessExample == "Medium"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-neutral.png" alt="medium-ful cheeks">
+        <img class='left-pane-image' v-if='infoToShow == "cheekFullness" && cheekFullnessExample == "Rounded/full"' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/cheeks-rounded.png" alt="rounded cheeks">
       </div>
 
       <div class='flex-dir-col' v-show="secondaryTab == 'Part I'">
