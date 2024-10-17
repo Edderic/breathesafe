@@ -178,7 +178,7 @@
 
             <tr>
               <th colspan="1">
-                <label for="jawWidth">Jaw Width <b>(C)</b> (mm)</label>
+                <label for="jawWidth">Jaw Width (mm)</label>
               </th>
               <td>
                 <CircularButton text="?" @click="toggleInfo('jawWidth')" :highlight="infoToShow == 'jawWidth'"/>
@@ -195,7 +195,7 @@
             </tr>
             <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
               <th colspan="1">
-                <label for="faceDepth">Face Depth <b>(P)</b> (mm)</label>
+                <label for="faceDepth">Face Depth (mm)</label>
               </th>
               <td>
                 <CircularButton text="?" @click="toggleInfo('faceDepth')" :highlight="infoToShow == 'faceDepth'"/>
@@ -213,7 +213,7 @@
 
             <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
               <th colspan="1">
-                <label for="faceLength">Face Length <b>(D)</b> (mm)</label>
+                <label for="faceLength">Face Length (mm)</label>
               </th>
               <td>
                 <CircularButton text="?" @click="toggleInfo('faceLength')" :highlight="infoToShow == 'faceLength'"/>
@@ -231,7 +231,7 @@
 
             <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
               <th colspan="1">
-                <label for="lowerFaceLength">Lower Face Length <b>(E)</b> (mm)</label>
+                <label for="lowerFaceLength">Lower Face Length (mm)</label>
               </th>
               <td>
                 <CircularButton text="?" @click="toggleInfo('lowerFaceLength')" :highlight="infoToShow == 'lowerFaceLength'"/>
@@ -264,7 +264,7 @@
               </tr>
               <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
                 <th colspan="1">
-                  <label for="noseProtrusion">Nose Protrusion <b>(M)</b> (mm)</label>
+                  <label for="noseProtrusion">Nose Protrusion (mm)</label>
                 </th>
 
                 <td>
@@ -283,7 +283,7 @@
 
               <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
                 <th colspan="1">
-                  <label for="nasalRootBreadth">Nasal Root Breadth <b>(H)</b> (mm)</label>
+                  <label for="nasalRootBreadth">Nasal Root Breadth (mm)</label>
                 </th>
 
                 <td>
@@ -302,7 +302,7 @@
 
               <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
                 <th colspan="1">
-                  <label for="noseBridgeHeight">Nose Bridge Height <b>(H)</b> (mm)</label>
+                  <label for="noseBridgeHeight">Nose Bridge Height (mm)</label>
                 </th>
                 <td>
                   <CircularButton text="?" @click="toggleInfo('noseBridgeHeight')" :highlight="infoToShow == 'noseBridgeHeight'"/>
@@ -320,7 +320,7 @@
 
               <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
                 <th colspan="1">
-                  <label for="lipWidth">Lip Width <b>(J)</b> (mm)</label>
+                  <label for="lipWidth">Lip Width (mm)</label>
                 </th>
                 <td>
                   <CircularButton text="?" @click="toggleInfo('lipWidth')" :highlight="infoToShow == 'lipWidth'"/>
@@ -358,7 +358,7 @@
             </tr>
             <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
               <th colspan="1">
-                <label for="bitragionMentonArc">Bitragion Menton Arc <b>(K)</b> (mm)</label>
+                <label for="bitragionMentonArc">Bitragion Menton Arc (mm)</label>
               </th>
               <td>
                 <CircularButton text="?" @click="toggleInfo('bitragionMentonArc')" :highlight="infoToShow == 'bitragionMentonArc'"/>
@@ -376,7 +376,7 @@
 
             <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
               <th colspan="1">
-                <label for="bitragionSubnasaleArc">Bitragion Subnasale Arc <b>(L)</b> (mm)</label>
+                <label for="bitragionSubnasaleArc">Bitragion Subnasale Arc (mm)</label>
               </th>
               <td>
                 <CircularButton text="?" @click="toggleInfo('bitragionSubnasaleArc')" :highlight="infoToShow == 'bitragionSubnasaleArc'"/>
