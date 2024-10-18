@@ -208,23 +208,23 @@ export default {
       return perimeterColorScheme()
     },
     displayables() {
-      if (this.search == "" || this.search == undefined) {
-        return this.masks
-      } else {
-        let lowerSearch = this.search.toLowerCase()
-        let filterForHeadstrap = this.filterForHeadstrap
-        let filterForEarloop = this.filterForEarloop
-
-        return this.masks.filter(
-          function(mask) {
-            return mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch)
-              && (
-                (filterForHeadstrap && mask.strapType == 'Headstrap')
-                || (filterForEarloop && mask.strapType == 'Earloop')
-              )
-          }
-        )
+      if (this.search == undefined) {
+        this.search = ""
       }
+
+      let lowerSearch = this.search.toLowerCase()
+      let filterForHeadstrap = this.filterForHeadstrap
+      let filterForEarloop = this.filterForEarloop
+
+      return this.masks.filter(
+        function(mask) {
+          return (lowerSearch == "" || mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
+            && (
+              (filterForHeadstrap && mask.strapType == 'Headstrap')
+              || (filterForEarloop && mask.strapType == 'Earloop')
+            )
+        }
+      )
     },
     sortedDisplayables() {
       if (this.sortByStatus == 'ascending') {
