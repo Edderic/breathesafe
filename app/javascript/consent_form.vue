@@ -93,7 +93,7 @@
       </div>
 
       <div>
-        <p>Last updated: Sept. 6, 2024</p>
+        <p>Last updated: Oct. 26, 2024</p>
       </div>
         <div id='invitation-to-participate'>
           <br>
@@ -315,6 +315,7 @@
           <li>last name</li>
           <li>email</li>
           <li>IP address - for quality control purposes.</li>
+          <li>home address (optional) - If you need financial assistance with buying equipment for testing purposes. Breathesafe LLC can order equipment on your behalf and send them your way. See the <a href="#compensation">compensation</a> section for details.</li>
           <li>facial measurement data - to create a recommendation system tailored to the individual.</li>
           <li>selfies - to validate facial measurement inference from photos.</li>
           <li>fit testing measurement tools used (e.g. PortaCount)</li>
@@ -378,7 +379,18 @@
           <h4>Are participants compensated in this study?</h4>
         </div>
 
-        <p>Participation in this study is on a voluntary basis and participants will not be compensated.</p>
+        <p>Participation in this study is on a voluntary basis. However, if you need financial assistance with getting the equipment or labor, please let us know by emailing <a href='subject=Mask Recommender Financial Assistance Question'>info@breathesafe.xyz</a>.
+        </p>
+
+        <p>Here are things we can help with:</p>
+
+        <ul>
+          <li>buying facial measurement tools: caliper / tape</li>
+          <li>buying masks</li>
+          <li>buying probes</li>
+          <li>buying qualitative fit testing equipment</li>
+          <li>paying for your time to do the testing</li>
+        </ul>
 
         <div id='participant-rights'>
           <br>
