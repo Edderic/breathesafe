@@ -16,6 +16,7 @@ dependencies:
   - pre_commit
   - autopep8
   - opencv
+  - openpyxl
   - protobuf=3.20
   - pip
   - pip:

@@ -130,6 +130,7 @@
         <img class='left-pane-image' :src="imgUrl('lip_width')" alt='lip width measurement' v-if='infoToShow == "lipWidth"'>
         <img class='left-pane-image' :src="imgUrl('bitragion_menton_arc')" alt='bitragion menton arc measurement' v-if='infoToShow == "bitragionMentonArc"'>
         <img class='left-pane-image' :src="imgUrl('bitragion_subnasale_arc')" alt='bitragion subnasale arc measurement' v-if='infoToShow == "bitragionSubnasaleArc"'>
+        <img class='left-pane-image' :src="imgUrl('head_circumference')" alt='head circumference measurement' v-if='infoToShow == "headCircumference"'>
 
 
         <p v-if='infoToShow == "cheekFullness"' class='left-pane'>Select options below to get an understanding of different types of cheek fullness:</p>
@@ -356,6 +357,7 @@
                 <CircularButton text="?" @click="toggleInfo('curvedMeasurementsGuide')" :highlight="infoToShow == 'curvedMeasurementsGuide'"/>
               </td>
             </tr>
+
             <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
               <th colspan="1">
                 <label for="bitragionMentonArc">Bitragion Menton Arc (mm)</label>
@@ -387,6 +389,24 @@
                     type='number'
                     :value="latestFacialMeasurement.bitragionSubnasaleArc"
                     @change='setFacialMeasurement($event, "bitragionSubnasaleArc")'
+                    :disabled="mode == 'View'"
+                    >
+              </td>
+            </tr>
+
+            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
+              <th colspan="1">
+                <label for="headCircumference">Head Circumference (mm)</label>
+              </th>
+              <td>
+                <CircularButton text="?" @click="toggleInfo('headCircumference')" :highlight="infoToShow == 'headCircumference'"/>
+              </td>
+              <td>
+                <input
+                    v-if='latestFacialMeasurement'
+                    type='number'
+                    :value="latestFacialMeasurement.headCircumference"
+                    @change='setFacialMeasurement($event, "headCircumference")'
                     :disabled="mode == 'View'"
                     >
               </td>
@@ -732,6 +752,7 @@ export default {
                 bitragionMentonArc: undefined,
                 bitragionSubnasaleArc: undefined,
                 cheekFullness: undefined,
+                headCircumference: undefined,
             })
           }
           // whatever you want
@@ -880,6 +901,7 @@ export default {
           bitragion_menton_arc: this.latestFacialMeasurement.bitragionMentonArc,
           bitragion_subnasale_arc: this.latestFacialMeasurement.bitragionSubnasaleArc,
           cheek_fullness: this.latestFacialMeasurement.cheekFullness,
+          head_circumference: this.latestFacialMeasurement.headCircumference,
           user_id: this.$route.params.id
         }
       )
