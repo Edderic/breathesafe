@@ -87,6 +87,7 @@ class Users::FacialMeasurementsController < ApplicationController
       "bitragion_menton_arc",
       "bitragion_subnasale_arc",
       "cheek_fullness",
+      "head_circumference",
       "user_id"
     )
   end

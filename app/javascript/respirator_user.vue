@@ -888,21 +888,23 @@ export default {
     async saveFacialMeasurement(successCallback) {
       await axios.post(
         `/users/${this.$route.params.id}/facial_measurements.json`, {
-          source: this.latestFacialMeasurement.source,
-          face_width: this.latestFacialMeasurement.faceWidth,
-          nose_bridge_height: this.latestFacialMeasurement.noseBridgeHeight,
-          nasal_root_breadth: this.latestFacialMeasurement.nasalRootBreadth,
-          lip_width: this.latestFacialMeasurement.lipWidth,
-          nose_protrusion: this.latestFacialMeasurement.noseProtrusion,
-          jaw_width: this.latestFacialMeasurement.jawWidth,
-          face_depth: this.latestFacialMeasurement.faceDepth,
-          face_length: this.latestFacialMeasurement.faceLength,
-          lower_face_length: this.latestFacialMeasurement.lowerFaceLength,
-          bitragion_menton_arc: this.latestFacialMeasurement.bitragionMentonArc,
-          bitragion_subnasale_arc: this.latestFacialMeasurement.bitragionSubnasaleArc,
-          cheek_fullness: this.latestFacialMeasurement.cheekFullness,
-          head_circumference: this.latestFacialMeasurement.headCircumference,
-          user_id: this.$route.params.id
+          facial_measurement: {
+            source: this.latestFacialMeasurement.source,
+            face_width: this.latestFacialMeasurement.faceWidth,
+            nose_bridge_height: this.latestFacialMeasurement.noseBridgeHeight,
+            nasal_root_breadth: this.latestFacialMeasurement.nasalRootBreadth,
+            lip_width: this.latestFacialMeasurement.lipWidth,
+            nose_protrusion: this.latestFacialMeasurement.noseProtrusion,
+            jaw_width: this.latestFacialMeasurement.jawWidth,
+            face_depth: this.latestFacialMeasurement.faceDepth,
+            face_length: this.latestFacialMeasurement.faceLength,
+            lower_face_length: this.latestFacialMeasurement.lowerFaceLength,
+            bitragion_menton_arc: this.latestFacialMeasurement.bitragionMentonArc,
+            bitragion_subnasale_arc: this.latestFacialMeasurement.bitragionSubnasaleArc,
+            cheek_fullness: this.latestFacialMeasurement.cheekFullness,
+            head_circumference: this.latestFacialMeasurement.headCircumference,
+            user_id: this.$route.params.id
+          }
         }
       )
         .then(response => {
