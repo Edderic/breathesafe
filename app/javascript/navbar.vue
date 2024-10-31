@@ -12,8 +12,8 @@
       </div>
 
       <div class='vertical-centered'>
-        <a class='desktop clickable side-padding' @click='toggleShowSubNavBar("Venues")'>Venues</a>
-        <a class='desktop clickable side-padding' @click='toggleShowSubNavBar("RespiratorRecommender")'>Respirators</a>
+        <a class='desktop clickable side-padding' href='' @click.prevent='toggleShowSubNavBar("Venues")'>Venues</a>
+        <a class='desktop clickable side-padding' href='' @click.prevent='toggleShowSubNavBar("RespiratorRecommender")'>Respirators</a>
         <router-link class='desktop clickable side-padding' :to='{ name: "Profile"}' v-if='signedIn' @click='showSubNavBar = null'>Profile</router-link>
         <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn @click='showSubNavBar = null'>Sign up/Sign in</router-link>
         <a class='desktop clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn"  >Sign out</a>
