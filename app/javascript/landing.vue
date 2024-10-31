@@ -12,7 +12,7 @@
         <router-link :to='{ name: "Venues" }'>
           <Button text='Find Safer Venues' major='true'/>
         </router-link>
-        <router-link :to='{ name: "RespiratorUsers"}'>
+        <router-link :to='{ name: "Masks", query: { sortByField:"uniqueFitTestersCount", "sortByStatus":"descending" }}'>
           <Button text='Find Respirators' major='true'/>
         </router-link>
       </div>
