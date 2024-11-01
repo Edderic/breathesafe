@@ -916,7 +916,7 @@ export default {
           // e.g. get updated list of latest facial measurements
         })
         .catch(error => {
-          this.addMessages(error.response.data.messages)
+          this.addMessages([error.response.data.messages])
           // whatever you want
         })
     },
