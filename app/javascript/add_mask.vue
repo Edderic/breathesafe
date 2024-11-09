@@ -13,9 +13,11 @@
       v-show='mode == "Show"'
     />
 
-    <select class='navigator' id="tabToShowSelect" name="tabToShowSelect" v-show='newOrEdit' @change='setRouteTo'>
+    <select class='navigator hide-when-not-mobile' id="tabToShowSelect" name="tabToShowSelect" v-show='newOrEdit' @change='setRouteTo'>
       <option v-for='option in tabEditOptions' :value="option.text">{{option.text}}</option>
     </select>
+    <br>
+
 
     <TabSet
       class='hide-when-mobile'
@@ -30,15 +32,6 @@
         <table v-if='tabToShow == "Image & Purchasing" || mode=="Show"'>
           <tbody>
             <tr>
-              <td>
-                <h3>Image</h3>
-              </td>
-            </tr>
-            <tr v-if='newOrEdit'>
-              <th>image URLs</th>
-              <td class='justify-content-center' colspan=2>
-                <CircularButton text="+" @click="addImageUrl"/>
-              </td>
             </tr>
             <tr v-show='newOrEdit' v-for='(imageUrl, index) in imageUrls'>
               <th>Image URL</th>
@@ -47,9 +40,6 @@
                                           v-show="newOrEdit" placeholder="e.g. https://examplemask.com/mask1.jpg"
                                                              >
               </td>
-                <td class='text-align-center' v-if='newOrEdit'>
-                  <CircularButton text="x" @click="deleteImageUrl(index)" />
-                </td>
             </tr>
 
             <tr v-for="(imageUrl, index) in imageUrls">
@@ -86,9 +76,6 @@
         <table v-if='tabToShow == "Basic Info" || mode=="Show"'>
 
           <thead>
-            <tr>
-              <th colspan=2><h3>Basic Info</h3></th>
-            </tr>
           </thead>
           <tbody>
             <tr>
@@ -196,9 +183,6 @@
 
         <table v-if='tabToShow == "Dimensions" || mode=="Show"'>
           <thead>
-            <tr>
-              <th colspan=2><h3>Dimensions</h3></th>
-            </tr>
           </thead>
           <tbody>
             <tr>
@@ -241,7 +225,6 @@
         <table v-if='tabToShow == "Filtration & Breathability" || mode=="Show"'>
           <tbody>
             <tr v-if='newOrEdit'>
-              <th>Filtration &amp; Breathability</th>
               <td class='justify-content-center' colspan='1'>
                 <CircularButton text="+" @click="addFiltEffAndBreathability" v-if='newOrEdit'/>
               </td>
@@ -342,11 +325,11 @@
       </table>
       <br>
 
-      <div class="row justify-content-center">
+      <div class="buttons justify-content-center">
         <Button class='button' text="Edit" @click='mode = "Edit"' v-if='mode == "Show" && canUpdate'/>
         <Button class='button' text="Delete" @click='deleteMask' v-if='deletable && (mode != "Show") && canUpdate'/>
-        <Button class='button' text="Save" @click='saveMask' v-if='(mode == "New") || ((mode == "Edit") && canUpdate)'/>
         <Button class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New") || ((mode == "Edit") && canUpdate)'/>
+        <Button class='button' text="Save" @click='saveMask' v-if='(mode == "New") || ((mode == "Edit") && canUpdate)'/>
       </div>
       <br>
       <br>
@@ -1294,6 +1277,29 @@ export default {
 
     .hide-when-mobile {
       display: none;
+    }
+
+    .buttons, tr {
+      display:flex;
+      flex-direction: column;
+    }
+
+    input {
+      width: 95vw;
+    }
+
+    select {
+      width: 97vw;
+    }
+  }
+
+  @media(min-width: 700px) {
+    .hide-when-not-mobile {
+      display: none;
+    }
+
+    .buttons {
+      flex-direction: row;
     }
   }
 
