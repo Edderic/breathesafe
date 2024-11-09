@@ -67,7 +67,9 @@
                                                             <a :href="purchasingUrl" v-if="!newOrEdit">{{shortHand(purchasingUrl)}}</a>
               </td>
                 <td>
-                  <CircularButton text="x" @click="deletePurchasingUrl(index)" v-if='userCanEdit && editMode'/>
+                  <CircularButton text="x" @click="deletePurchasingUrl(index)" v-show='this.mode == "New" || userCanEdit'/>
+                </td>
+                <td>
                 </td>
             </tr>
           </tbody>
