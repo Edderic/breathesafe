@@ -28,7 +28,7 @@
     <br>
 
     <div class='main' v-show="displayTab == 'Misc. Info'">
-      <div :class='{ grid: true, view: mode == "Show" && filtrationEfficiencies.length > 0}'>
+      <div :class='{ grid: true, view: mode == "Show", edit: mode != "Show" }'>
         <table v-if='tabToShow == "Image & Purchasing" || mode=="Show"'>
           <tbody>
             <tr>
@@ -67,7 +67,7 @@
                                                             <a :href="purchasingUrl" v-if="!newOrEdit">{{shortHand(purchasingUrl)}}</a>
               </td>
                 <td>
-                  <CircularButton text="x" @click="deletePurchasingUrl(index)" v-show='this.mode == "New" || userCanEdit'/>
+                  <CircularButton text="x" @click="deletePurchasingUrl(index)" v-show='["New", "Edit"].includes(this.mode) && userCanEdit'/>
                 </td>
                 <td>
                 </td>
@@ -227,7 +227,7 @@
         <table v-if='tabToShow == "Filtration & Breathability" || mode=="Show"'>
           <tbody>
             <tr v-if='newOrEdit'>
-              <td class='justify-content-center' colspan='1'>
+              <td colspan='2'>
                 <CircularButton text="+" @click="addFiltEffAndBreathability" v-if='newOrEdit'/>
               </td>
             </tr>
@@ -313,7 +313,7 @@
 
             <tr class='text-align-center'>
               <td colspan='2'>
-                <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='this.mode == "New" || buserCanEdit && mode == "Edit"'/>
+                <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='this.mode == "New" || userCanEdit && mode == "Edit"'/>
               </td>
             </tr>
           </tbody>
@@ -1204,6 +1204,12 @@ export default {
   .label-input {
     align-items:center;
     justify-content:space-between;
+  }
+
+  .grid.edit {
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: auto;
   }
 
   .grid {
