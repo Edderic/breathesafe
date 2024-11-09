@@ -13,7 +13,12 @@
       v-show='mode == "Show"'
     />
 
+    <select class='navigator' id="tabToShowSelect" name="tabToShowSelect" v-show='newOrEdit' @change='setRouteTo'>
+      <option v-for='option in tabEditOptions' :value="option.text">{{option.text}}</option>
+    </select>
+
     <TabSet
+      class='hide-when-mobile'
       :options='tabEditOptions'
       @update='setRouteTo'
       :tabToShow='tabToShow'
@@ -1034,10 +1039,17 @@ export default {
       })
     },
     setRouteTo(opt) {
+      let tabToShow = '';
+      if ('target' in opt && 'value' in opt.target) {
+        tabToShow = opt.target.value
+      } else {
+        tabToShow = opt.name
+      }
+
       this.$router.push({
         name: this.$route.name,
         query: {
-          tabToShow: opt.name
+          tabToShow: tabToShow
         }
       })
     },
@@ -1248,6 +1260,11 @@ export default {
     text-align: center;
   }
 
+  .navigator {
+    font-size: 1.5em;
+    width: 90vw;
+  }
+
   @media(max-width: 1300px) {
     .grid.view {
       grid-template-columns: 50% 50%;
@@ -1273,6 +1290,10 @@ export default {
 
     .grid.view {
       grid-template-columns: 100%;
+    }
+
+    .hide-when-mobile {
+      display: none;
     }
   }
 
