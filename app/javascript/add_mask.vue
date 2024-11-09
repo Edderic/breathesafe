@@ -313,7 +313,7 @@
 
             <tr class='text-align-center'>
               <td colspan='2'>
-                <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='userCanEdit && mode == "Edit"'/>
+                <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='this.mode == "New" || buserCanEdit && mode == "Edit"'/>
               </td>
             </tr>
           </tbody>
@@ -333,6 +333,8 @@
         <Button class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New") || ((mode == "Edit") && canUpdate)'/>
         <Button class='button' text="Save" @click='saveMask' v-if='(mode == "New") || ((mode == "Edit") && canUpdate)'/>
       </div>
+
+      <br>
       <br>
       <br>
 
