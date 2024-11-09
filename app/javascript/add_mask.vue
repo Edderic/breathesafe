@@ -16,7 +16,6 @@
     <select class='navigator hide-when-not-mobile' id="tabToShowSelect" name="tabToShowSelect" v-show='newOrEdit' @change='setRouteTo'>
       <option v-for='option in tabEditOptions' :value="option.text">{{option.text}}</option>
     </select>
-    <br>
 
 
     <TabSet
@@ -26,6 +25,7 @@
       :tabToShow='tabToShow'
         v-show='newOrEdit'
     />
+    <br>
 
     <div class='main' v-show="displayTab == 'Misc. Info'">
       <div :class='{ grid: true, view: mode == "Show" && filtrationEfficiencies.length > 0}'>
@@ -1102,9 +1102,6 @@ export default {
   .almost-full-width {
     width: 90%;
   }
-  .full-width {
-    width: 100%;
-  }
   .input-list {
     min-width: 20em;
   }
@@ -1249,7 +1246,6 @@ export default {
 
   .navigator {
     font-size: 1.5em;
-    width: 90vw;
   }
 
   @media(max-width: 1300px) {
@@ -1286,14 +1282,19 @@ export default {
     .buttons, tr {
       display:flex;
       flex-direction: column;
+      align-items: center;
     }
 
-    input {
+    .button, input {
       width: 95vw;
     }
 
     select {
       width: 97vw;
+    }
+
+    .navigator {
+      width: 98vw;
     }
   }
 
