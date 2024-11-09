@@ -49,6 +49,10 @@
       <router-link class='mobile-row clickable side-padding' :to='{ name: "Venues"}'>Add Venues</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "AddMeasurements"}' v-if='signedIn'>Add Measurements</router-link>
       <h2 class='vertical-centered'>Respirator</h2>
+      <router-link class='mobile-row clickable side-padding' :to='{ name: "MeasurementDevices"}' @click='toggleShowSubNavBar("MeasurementDevices")'>Measurement Devices</router-link>
+      <router-link class='mobile-row clickable side-padding' :to='{ name: "RespiratorUsers"}' @click='toggleShowSubNavBar("RespiratorRecommender")'>Users</router-link>
+      <router-link class='mobile-row clickable side-padding' :to='{ name: "Masks", query: { sortByField:"uniqueFitTestersCount", "sortByStatus":"descending"}}' @click='toggleShowSubNavBar("Masks")'>Masks</router-link>
+      <router-link class='mobile-row clickable side-padding' :to='{ name: "FitTests"}' @click='toggleShowSubNavBar("FitTests")'>Fit Tests</router-link>
 
       <h2 class='vertical-centered'>Misc</h2>
 
