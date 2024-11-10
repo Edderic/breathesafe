@@ -255,6 +255,10 @@ export default {
       position: fixed;
       top: 3em;
     }
+
+    .fixed-nav-bar-bottom {
+      display: none;
+    }
   }
 
   @media (min-width: 800px) {
