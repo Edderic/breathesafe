@@ -6,7 +6,7 @@
     </div>
 
     <div class='row'>
-      <input type="text" @change='updateSearch'>
+      <input id='search' type="text" @change='updateSearch'>
       <SearchIcon height='2em' width='2em'/>
 
       <button class='icon' @click='showPopup = true'>
@@ -560,10 +560,25 @@ export default {
     display: flex;
     flex-direction: row;
   }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 33% 33% 33%;
+    grid-template-rows: auto;
+    overflow-y: auto;
+    height: 75vh;
+  }
+
+  @media(max-width: 700px) {
+    .grid {
+      grid-template-columns: 50% 50%;
+    }
+  }
   @media(max-width: 700px) {
     img {
       width: 100vw;
     }
+
 
     .call-to-actions {
       height: 14em;
@@ -573,17 +588,18 @@ export default {
       flex-direction: column;
     }
   }
+  @media(max-width: 700px) {
+    .grid {
+      grid-template-columns: 100%;
+    }
+
+    #search {
+      width: 75vw;
+    }
+  }
   tbody tr:hover {
     cursor: pointer;
     background-color: rgb(230,230,230);
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: 33% 33% 33%;
-    grid-template-rows: auto;
-    overflow-y: auto;
-    height: 75vh;
   }
 
   .tape-measure {
