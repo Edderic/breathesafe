@@ -1,5 +1,5 @@
 <template>
-  <button id='search-icon'>
+  <button class='icon' id='search-icon'>
     <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" :height='height' :width='width'>
       <circle :cx="cx" :cy="cy" r="25" :fill="strokeColor"/>
       <circle :cx="cx" :cy="cy" r="20" fill="rgb(230, 230, 230)"/>
@@ -47,5 +47,10 @@ export default {
     padding: 0.25em;
   }
 
+  @media(max-width: 700px) {
+    .icon {
+      padding: 1em;
+    }
+  }
 </style>
 

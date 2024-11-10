@@ -594,7 +594,12 @@ export default {
     }
 
     #search {
-      width: 75vw;
+      width: 70vw;
+      padding: 1em;
+    }
+
+    .icon {
+      padding: 1em;
     }
   }
   tbody tr:hover {

@@ -6,7 +6,7 @@
     </div>
 
     <div class='row justify-content-center'>
-      <input type="text" v-model='search'>
+      <input id='search' type="text" v-model='search'>
       <SearchIcon height='2em' width='2em'/>
     </div>
 
@@ -23,7 +23,7 @@
               <th>Name</th>
               <th>Race &amp; Ethnicity filled out</th>
               <th>Gender filled out</th>
-              <th>Has Facial Measurements</th>
+              <th>Has Facial Data</th>
               <th>Ready to add Fit Testing Data</th>
             </tr>
           </thead>
@@ -316,6 +316,11 @@ export default {
 
     .call-to-actions {
       height: 14em;
+    }
+
+    #search {
+      width: 75vw;
+      padding: 1em;
     }
   }
 
