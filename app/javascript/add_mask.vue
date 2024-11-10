@@ -28,7 +28,7 @@
     <br>
 
     <div class='main' v-show="displayTab == 'Misc. Info'">
-      <div :class='{ grid: true, view: mode == "Show", edit: mode != "Show" }'>
+      <div :class='{ grid: true, view: mode == "Show", edit: mode != "Show", triple: columnCount == 3, quad: columnCount == 4}'>
         <table v-if='tabToShow == "Image & Purchasing" || mode=="Show"'>
           <tbody>
             <tr>
@@ -78,6 +78,9 @@
         <table v-if='tabToShow == "Basic Info" || mode=="Show"'>
 
           <thead>
+             <tr>
+               <th colspan=2><h3>Basic Info</h3></th>
+             </tr>
           </thead>
           <tbody>
             <tr>
@@ -185,6 +188,9 @@
 
         <table v-if='tabToShow == "Dimensions" || mode=="Show"'>
           <thead>
+             <tr>
+               <th colspan=2><h3>Dimensions</h3></th>
+             </tr>
           </thead>
           <tbody>
             <tr>
@@ -534,6 +540,12 @@ export default {
           'messages'
         ]
     ),
+    columnCount() {
+      if (this.filtrationEfficiencies.length > 0) {
+        return 4
+      }
+      return 3
+    },
     canUpdate() {
       return !!this.currentUser && ((this.authorId == this.currentUser.id) || this.currentUser.admin)
     },
@@ -1218,8 +1230,20 @@ export default {
     grid-template-rows: auto;
   }
 
-  .grid.view {
+  .grid.view.quad {
     grid-template-columns: 25% 25% 25% 25%;
+  }
+
+  .grid.view.triple {
+    grid-template-columns: 33% 33% 33%;
+  }
+
+  .grid.view.dual {
+    grid-template-columns: 50% 50%;
+  }
+
+  .grid.view.single {
+    grid-template-columns: 33% 33%;
   }
 
   .grid.dual {
@@ -1255,12 +1279,13 @@ export default {
   }
 
   @media(max-width: 1300px) {
-    .grid.view {
+    .grid.view, .grid.view.quad {
       grid-template-columns: 50% 50%;
     }
+
   }
   @media(max-width: 1000px) {
-    .grid {
+    .grid.triple, .grid.view.triple, .grid.view.quad {
       grid-template-columns: 100%;
     }
   }
@@ -1285,7 +1310,7 @@ export default {
       display: none;
     }
 
-    .buttons, tr {
+    .buttons, .edit tr {
       display:flex;
       flex-direction: column;
       align-items: center;
