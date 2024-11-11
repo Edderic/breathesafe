@@ -1093,6 +1093,11 @@ export default {
     grid-template-rows: auto;
     min-width: 53em;
   }
+
+  .buttons {
+    display: flex;
+    flex-direction: row;
+  }
   @media(max-width: 700px) {
     img {
       width: 100vw;
