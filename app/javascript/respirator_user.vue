@@ -39,7 +39,7 @@
         Adding names could help you distinguish among individuals who you'd be inputting data for.
         This data will not be shared publicly.
       </p>
-      <table>
+      <table class='questions'>
         <tbody>
           <tr>
             <td>What is first name of the individual you'll be adding data for?</td>
@@ -1115,6 +1115,17 @@ export default {
 
     .buttons {
       flex-direction: column;
+    }
+
+    tr {
+      display: flex;
+      flex-direction: column;
+      margin: 1em 0;
+    }
+
+    input {
+      width: 90vw;
+      padding: 1em;
     }
   }
 

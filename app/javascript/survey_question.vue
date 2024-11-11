@@ -154,6 +154,8 @@ export default {
 
     .number {
       width: 95vw;
+      padding-top: 1em;
+      padding-bottom: 1em;
     }
   }
 
