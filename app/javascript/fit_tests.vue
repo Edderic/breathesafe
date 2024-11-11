@@ -6,7 +6,7 @@
     </div>
 
     <div class='row'>
-      <input type="text" v-model='search'>
+      <input id='search' type="text" v-model='search'>
       <SearchIcon height='2em' width='2em'/>
     </div>
 
@@ -16,7 +16,7 @@
     </div>
 
 
-    <div class='main scrollable'>
+    <div class='main scrollable desktopView'>
       <table>
         <thead>
           <th>Tester</th>
@@ -53,15 +53,75 @@
             <td >
               <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})' class='status' :text='f.comfortStatus' :backgroundColor='statusColor(f.comfortStatus)'/>
             </td>
-            <td >
-              <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})' class='status' :text='f.facialMeasurementPresence' :backgroundColor='facialMeasPresenceColorMappingStatus(f.facialMeasurementPresence)'/>
-            </td>
+              <td >
+                <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})' class='status' :text='f.facialMeasurementPresence' :backgroundColor='facialMeasPresenceColorMappingStatus(f.facialMeasurementPresence)'/>
+              </td>
           </tr>
         </tbody>
       </table>
-
-      <h3 class='text-align-center' v-show='fit_tests.length == 0'>No fit tests to show. Use the (+) sign above to add fit testing data.</h3>
     </div>
+    <div class='main scrollable mobileView'>
+      <div>
+        <div v-for='f in displayables' class='card'>
+          <table>
+            <tr>
+              <td rowspan='2' colspan='2'>
+                <router-link :to="showMask(f)">
+                  <img :src="f.imageUrls[0]" alt="" class='thumbnail'>
+                </router-link>
+              </td>
+              <th>Tester</th>
+              <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User"})'>{{f.firstName + ' ' + f.lastName}}</td>
+            </tr>
+            <tr>
+              <th>Mask</th>
+              <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.uniqueInternalModelCode}}</td>
+            </tr>
+
+            <tr>
+              <th>Created at</th>
+              <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.shortHandCreatedAt}}</td>
+              <th>Beard length</th>
+              <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Facial Hair"})'>{{f.facialHair.beard_length_mm}}</td>
+            </tr>
+
+            <tr>
+              <th>User Seal Check</th>
+              <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User Seal Check"})'>
+                <ColoredCell class='status' :text='f.userSealCheckStatus' :backgroundColor='statusColor(f.userSealCheckStatus)'/>
+              </td>
+              <th>QLFT</th>
+              <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QLFT"})'>
+                <ColoredCell class='status' :text='f.qualitativeStatus' :backgroundColor='statusColor(f.qualitativeStatus)'/>
+              </td>
+            </tr>
+
+            <tr>
+              <th>QNFT</th>
+              <td class='status' @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QNFT"})'>
+                <ColoredCell class='status' :text='f.quantitativeStatus' :backgroundColor='quantitativeStatusColor(f.quantitativeStatus)'/>
+              </td>
+
+              <th>Comfort</th>
+              <td >
+                <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})' class='status' :text='f.comfortStatus' :backgroundColor='statusColor(f.comfortStatus)'/>
+              </td>
+            </tr>
+
+            <tr>
+              <th colspan='2'>Facial Measurements</th>
+              <td colspan='2'>
+                <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})' class='status' :text='f.facialMeasurementPresence' :backgroundColor='facialMeasPresenceColorMappingStatus(f.facialMeasurementPresence)'/>
+              </td>
+            </tr>
+          </table>
+
+
+
+        </div>
+      </div>
+    </div>
+
 
     <br>
     <br>
@@ -247,6 +307,8 @@ export default {
 
   .card {
     padding: 1em 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
   }
 
   .card .description {
@@ -378,9 +440,80 @@ export default {
     display: flex;
     flex-direction: row;
   }
+
+  .thumbnail {
+    max-width:10em;
+    max-height:10em;
+  }
+
+  table th{
+    position: sticky;
+    top: 0;
+    background-color: #eee;
+  }
+
+  .status {
+    padding: 0.5em;
+    min-width: 7em;
+    text-align: center;
+  }
+
+  tbody tr:hover {
+    cursor: pointer;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: auto;
+  }
+
+  .text-align-center {
+    text-align: center;
+  }
+
+  .scrollable {
+    overflow-y: auto;
+    height: 75vh;
+    width: 100%;
+  }
+
+  tbody tr:hover {
+    cursor: pointer;
+    background-color: rgb(230,230,230);
+  }
+
+  .padded {
+    padding: 0.5em;
+  }
+
+  .mobileView {
+    display: none;
+  }
+
   @media(max-width: 700px) {
+    #search {
+      width: 70vw;
+      padding: 1em;
+    }
+
+    .status {
+      min-width: 3em;
+    }
+
+    .mobileView {
+      display: flex;
+    }
+
+    .desktopView {
+      display: none;
+    }
+
+    table th {
+      position: static;
+    }
     img {
-      width: 100vw;
+      width: 50vw;
     }
 
     .call-to-actions {
@@ -390,47 +523,10 @@ export default {
     .edit-facial-measurements {
       flex-direction: column;
     }
-  }
-  tbody tr:hover {
-    cursor: pointer;
-  }
 
-  .grid {
-    display: grid;
-    grid-template-columns: 33% 33% 33%;
-    grid-template-rows: auto;
-  }
-
-  .thumbnail {
-    max-width:10em;
-    max-height:10em;
-  }
-
-  .text-align-center {
-    text-align: center;
-  }
-
-  .status {
-    padding: 0.5em;
-    min-width: 7em;
-    text-align: center;
-
-  }
-
-  .scrollable {
-    overflow-y: auto;
-    height: 75vh;
-    width: 100%;
-  }
-
-  table th{
-    position: sticky;
-    top: 0;
-    background-color: #eee;
-  }
-
-  tbody tr:hover {
-    cursor: pointer;
-    background-color: rgb(230,230,230);
+    .thumbnail {
+      max-width: 50vw;
+      max-height: none;
+    }
   }
 </style>
