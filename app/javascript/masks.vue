@@ -601,6 +601,11 @@ export default {
     .icon {
       padding: 1em;
     }
+
+    .thumbnail {
+      max-width:70vw;
+      max-height:none;
+    }
   }
   tbody tr:hover {
     cursor: pointer;
