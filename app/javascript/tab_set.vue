@@ -1,7 +1,11 @@
 <template>
-    <div class='menu row'>
+    <div class='menu row' id='tabToShow'>
       <Button v-for="o in options" :class="{ tab: true }" @click='setTabThenTrigger(o)' shadow='true' :text='o.text' :selected="tabToShow==o.text"/>
     </div>
+
+    <select id='tabToShowMobile' name="tabToShowSelect" @change='setTabThenTrigger'>
+      <option v-for='option in options' :value="option.text">{{option.text}}</option>
+    </select>
 </template>
 
 <script>
@@ -27,8 +31,13 @@ export default {
   },
   methods: {
     setTabThenTrigger(option) {
+      let val = option.text
+      if (option['target'] && option['target']['value']) {
+        val = option['target']['value']
+      }
+
       this.$emit('update', {
-        'name': option.text
+        'name': val
       })
     }
   }
@@ -141,9 +150,17 @@ export default {
   img {
     width: 30em;
   }
+  #tabToShowMobile {
+    font-size: 1.5em;
+  }
   .edit-facial-measurements {
     display: flex;
     flex-direction: row;
+  }
+  @media(min-width: 700px) {
+    #tabToShowMobile {
+      display: none;
+    }
   }
   @media(max-width: 700px) {
     img {
@@ -156,6 +173,10 @@ export default {
 
     .edit-facial-measurements {
       flex-direction: column;
+    }
+
+    #tabToShow {
+      display: none;
     }
   }
 </style>

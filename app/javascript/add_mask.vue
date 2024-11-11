@@ -10,20 +10,15 @@
       :options='tabToShowOptions'
       @update='setDisplay'
       :tabToShow='displayTab'
-      v-show='mode == "Show"'
+      v-if='mode == "Show"'
     />
-
-    <select class='navigator hide-when-not-mobile' id="tabToShowSelect" name="tabToShowSelect" v-show='newOrEdit' @change='setRouteTo'>
-      <option v-for='option in tabEditOptions' :value="option.text">{{option.text}}</option>
-    </select>
-
 
     <TabSet
       class='hide-when-mobile'
       :options='tabEditOptions'
       @update='setRouteTo'
       :tabToShow='tabToShow'
-        v-show='newOrEdit'
+        v-if='newOrEdit && displayTab != "Fit Testing"'
     />
     <br>
 

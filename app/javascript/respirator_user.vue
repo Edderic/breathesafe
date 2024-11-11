@@ -18,11 +18,13 @@
 
     <div class='menu row'>
       <TabSet
+        class='tabToShowNotMobile'
         :options='tabToShowOptions'
         @update='setRouteTo'
         :tabToShow='tabToShow'
       />
     </div>
+
     <div class='menu row' v-show="tabToShow == 'Facial Measurements'">
       <TabSet
         :options='facialMeasurementParts'
