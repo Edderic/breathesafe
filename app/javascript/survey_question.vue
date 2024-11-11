@@ -1,5 +1,5 @@
 <template>
-  <div class='centered flex-dir-col'>
+  <div class='question centered flex-dir-col'>
     <h3>{{question}}</h3>
     <input v-show="question_type == 'number'" type="number" :value="value" @change='send($event)' :disabled='disabled' class='number' :placeholder='placeholder'/>
 
@@ -134,6 +134,11 @@ export default {
   img {
     width: 30em;
   }
+
+  .question {
+    padding-left: 1em;
+  }
+
   @media(max-width: 700px) {
     img {
       width: 100vw;
