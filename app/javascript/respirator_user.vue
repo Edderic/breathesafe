@@ -454,7 +454,7 @@
 
     <br>
 
-    <div class='row justify-content-center'>
+    <div class='buttons justify-content-center'>
       <Button class='button' text="View Mode" @click='mode = "View"' v-show='mode == "Edit"'/>
       <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-show='mode == "View"'/>
       <Button text="Save and continue" @click='save()' v-show='mode != "View"'/>
@@ -1103,6 +1103,10 @@ export default {
     }
 
     .edit-facial-measurements {
+      flex-direction: column;
+    }
+
+    .buttons {
       flex-direction: column;
     }
   }

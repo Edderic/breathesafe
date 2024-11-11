@@ -84,6 +84,9 @@ export default {
     text-shadow: 1px 1px 2px black;
   }
 
-  @media(max-width: 800px) {
+  @media(max-width: 700px) {
+    .button {
+      margin: 0.5em 0;
+    }
   }
 </style>

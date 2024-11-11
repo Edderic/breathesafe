@@ -1311,10 +1311,6 @@ export default {
       align-items: center;
     }
 
-    .buttons .button {
-      margin: 0.5em 0;
-    }
-
     .button, input {
       width: 95vw;
     }
