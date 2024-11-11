@@ -1108,7 +1108,9 @@ export default {
     }
 
     .edit-facial-measurements {
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 100%;
+      min-width: auto;
     }
 
     .buttons {
