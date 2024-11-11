@@ -139,6 +139,10 @@ export default {
     padding-left: 1em;
   }
 
+  .number {
+    width: 5em;
+  }
+
   @media(max-width: 700px) {
     img {
       width: 100vw;
@@ -147,9 +151,11 @@ export default {
     .call-to-actions {
       height: 14em;
     }
+
+    .number {
+      width: 95vw;
+    }
   }
 
-  .number {
-    width: 5em;
-  }
+
 </style>
