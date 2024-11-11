@@ -41,7 +41,7 @@
       </p>
       <table class='questions'>
         <tbody>
-          <tr>
+          <tr class='canConvertToColumn'>
             <td>What is first name of the individual you'll be adding data for?</td>
             <td>
               <input
@@ -51,7 +51,7 @@
               >
             </td>
           </tr>
-          <tr>
+          <tr class='canConvertToColumn'>
             <td>What is the last name of the individual you'll be adding data for?</td>
             <td>
               <input
@@ -1117,7 +1117,7 @@ export default {
       flex-direction: column;
     }
 
-    tr {
+    .canConvertToColumn {
       display: flex;
       flex-direction: column;
       margin: 1em 0;
