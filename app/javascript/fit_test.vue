@@ -2121,7 +2121,7 @@ export default {
       width: 100vw;
     }
 
-    .instructions p {
+    .instructions p, h4 {
       padding: 1em;
     }
 
