@@ -61,7 +61,7 @@
       </table>
     </div>
     <div class='main scrollable mobileView'>
-      <div>
+      <div class='grid'>
         <div v-for='f in displayables' class='card'>
           <table>
             <tr>
@@ -306,6 +306,7 @@ export default {
   }
 
   .card {
+    cursor: pointer;
     padding: 1em 0;
     border-top: 1px solid #eee;
     border-bottom: 1px solid #eee;
@@ -491,10 +492,51 @@ export default {
     display: none;
   }
 
-  @media(max-width: 700px) {
+  @media(max-width: 1450px) {
     #search {
       width: 70vw;
       padding: 1em;
+    }
+
+    .status {
+      min-width: 3em;
+    }
+
+    .mobileView {
+      display: flex;
+    }
+
+    .desktopView {
+      display: none;
+    }
+
+    table th {
+      position: static;
+    }
+    img {
+      width: 50vw;
+    }
+
+    .call-to-actions {
+      height: 14em;
+    }
+
+    .edit-facial-measurements {
+      flex-direction: column;
+    }
+
+    .thumbnail {
+      max-height: none;
+    }
+  }
+  @media(max-width: 950px) {
+    #search {
+      width: 70vw;
+      padding: 1em;
+    }
+
+    .grid {
+      grid-template-columns: 100%;
     }
 
     .status {
