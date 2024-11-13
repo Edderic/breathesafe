@@ -467,7 +467,7 @@
 
     <br>
 
-    <div class='row'>
+    <div class='row buttons'>
       <Button class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
       <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
       <Button class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
@@ -1921,6 +1921,7 @@ export default {
   }
 
   .pointable:hover {
+    background-color: #eee;
     cursor: pointer;
   }
 
@@ -2022,6 +2023,7 @@ export default {
 
   p.narrow-p {
     max-width: 40em;
+    padding: 1em;
   }
 
 
@@ -2064,19 +2066,6 @@ export default {
   .edit-facial-measurements {
     display: flex;
     flex-direction: row;
-  }
-  @media(max-width: 700px) {
-    img {
-      width: 100vw;
-    }
-
-    .call-to-actions {
-      height: 14em;
-    }
-
-    .edit-facial-measurements {
-      flex-direction: column;
-    }
   }
   tbody tr:hover {
     cursor: pointer;
@@ -2126,5 +2115,30 @@ export default {
   .top-container > div {
     padding-left: 1em;
     padding-right: 1em;
+  }
+  @media(max-width: 700px) {
+    img {
+      width: 100vw;
+    }
+
+    .instructions p {
+      padding: 1em;
+    }
+
+    .call-to-actions {
+      height: 14em;
+    }
+
+    .edit-facial-measurements {
+      flex-direction: column;
+    }
+
+    .buttons {
+      flex-direction: column;
+      width: 95vw;
+    }
+    .grid.qlft {
+      grid-template-columns: 100%;
+    }
   }
 </style>

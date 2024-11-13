@@ -3,7 +3,7 @@
       <Button v-for="o in options" :class="{ tab: true }" @click='setTabThenTrigger(o)' shadow='true' :text='o.text' :selected="tabToShow==o.text"/>
     </div>
 
-    <select id='tabToShowMobile' name="tabToShowSelect" @change='setTabThenTrigger'>
+    <select id='tabToShowMobile' :value="tabToShow" name="tabToShowSelect" @change='setTabThenTrigger'>
       <option v-for='option in options' :value="option.text">{{option.text}}</option>
     </select>
 </template>
