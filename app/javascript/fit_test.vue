@@ -603,7 +603,10 @@ export default {
           'description': 'The test subject shall grimace by smiling or frowning. (This applies only to QNFT testing; it is not performed for QLFT)',
         },
         'Bending over': {
-          'description': 'The test subject shall bend at the waist as if he/she were to touch his/her toes. Jogging in place shall be substituted for this exercise in those test environments such as shroud type QNFT or QLFT units that do not permit bending over at the waist.'
+          'description': 'The test subject shall bend at the waist as if he/she were to touch his/her toes. Jogging in place shall be substituted for this exercise in those test environments such as shroud type QNFT or QLFT units that do not permit bending over at the waist.',
+        },
+        'Normal breathing (SEALED)': {
+          'description': 'The purpose of this exercise is to get an estimate of filtration efficiency of the mask material. The test subject shall seal the mask to their face using their hands as best as they can. For each hand, the tester can create a letter C. With the thumb and pointer finger holding the C position, squeeze the edges of the mask to the face. If the test subject feels that all air is going through the filter (i.e. no gaps), then you can enter the associated fit factor here. Otherwise, leave blank'
         }
       },
       fitTestingInstructions: {
@@ -901,6 +904,10 @@ export default {
         {
           name: 'Normal breathing',
           fit_factor: null
+        },
+        {
+          name: 'Normal breathing (SEALED)',
+          fit_factor: null
         }
       ],
       quantitativeExercisesOSHAFastFFR: [
@@ -922,6 +929,10 @@ export default {
           name: 'Moving head up and down',
           fit_factor: null
         },
+        {
+          name: 'Normal breathing (SEALED)',
+          fit_factor: null
+        }
       ],
       selectedMask: {
         id: null,

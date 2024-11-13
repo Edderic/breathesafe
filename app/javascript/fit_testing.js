@@ -189,8 +189,16 @@ export class FitTest {
     // quantify HMFF
     let fitFactorsInverted = 0
     let fitFactorCount = 0
+    let sealingExercise = 0
 
     for (let ex of this.quantitativeExercises) {
+      if (ex.name.includes("SEALED")) {
+        sealingExercise = 1
+        continue
+        // skip the SEALED exercise which is for measuring filtration
+        // efficiency of the mask.
+      }
+
       if (!!ex.fit_factor) {
         fitFactorCount += 1
       }
@@ -199,7 +207,7 @@ export class FitTest {
     }
 
 
-    if (this.quantitativeExercises.length - fitFactorCount > 0) {
+    if (this.quantitativeExercises.length - fitFactorCount - sealingExercise > 0) {
       // there are still some exercises that haven't been done. OSHA protocol
       // expects users to finish every single exercise to get the overall HMFF
       return 'Incomplete'

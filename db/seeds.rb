@@ -127,4 +127,34 @@ def assign_user_id_when_facial
   end
 end
 
-assign_user_id_when_facial
+# assign_user_id_when_facial
+#
+#
+#
+def add_filtration_efficiency_seal_check_exercise_to_qnft
+  fts = FitTest.all
+  fts.each do |ft|
+    results =  ft.results
+    if results['quantitative'] && results['quantitative']['aerosol'] && results['quantitative']['aerosol']['initial_count_per_cm3'].present?
+      quantitative = results['quantitative']
+      exercises = quantitative['exercises']
+
+      if exercises.any? {|e| e['name'].match("SEALED") }
+        next
+      else
+        exercises << {
+          'name' => 'Normal breathing (SEALED)',
+          'fit_factor' => nil
+        }
+
+        quantitative['exercises'] = exercises
+
+        results['quantitative'] = quantitative
+
+        ft.update(results: results)
+      end
+    end
+  end
+end
+
+add_filtration_efficiency_seal_check_exercise_to_qnft
