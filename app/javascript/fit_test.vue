@@ -1039,6 +1039,9 @@ export default {
     missingDataUserSealCheck() {
       let missingValues = []
 
+      if (this.userSealCheck['sizing']["What do you think about the sizing of this mask relative to your face?"] == undefined) {
+        missingValues.push("What do you think about the sizing of this mask relative to your face?")
+      }
       let branch = 'positive'
 
       if (this.showPositiveUserSealCheck) {
