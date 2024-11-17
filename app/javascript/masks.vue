@@ -220,8 +220,11 @@ export default {
         function(mask) {
           return (lowerSearch == "" || mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
             && (
-              (filterForHeadstrap && mask.strapType == 'Headstrap')
-              || (filterForEarloop && mask.strapType == 'Earloop')
+              (mask.strapType == "") ||
+              (
+                (filterForHeadstrap && mask.strapType == 'Headstrap')
+                || (filterForEarloop && mask.strapType == 'Earloop')
+              )
             )
         }
       )
