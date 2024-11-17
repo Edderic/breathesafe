@@ -58,16 +58,12 @@ export class FitTest {
   }
 
   get userSealCheckPassed() {
+    if (this.userSealCheck['sizing']["What do you think about the sizing of this mask relative to your face?"] != "Somewhere in-between too small and too big") {
+      // Either too big or too small
+      return false
+    }
     if (this.usePositivePressureUserSealCheck) {
       return (this.userSealCheck.positive["...how much air movement on your face along the seal of the mask did you feel?"] == 'No air movement') &&
-        (
-          (
-            this.userSealCheck.positive["...how much did your glasses fog up?"] == 'Not applicable'
-          ) ||
-          (
-            this.userSealCheck.positive["...how much did your glasses fog up?"] == 'Not at all'
-          )
-        ) &&
         (this.userSealCheck.positive["...how much pressure build up was there?"] == 'As expected')
     } else {
       return (this.userSealCheck['negative']['...how much air passed between your face and the mask?'] == 'Unnoticeable')

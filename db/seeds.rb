@@ -157,4 +157,20 @@ def add_filtration_efficiency_seal_check_exercise_to_qnft
   end
 end
 
-add_filtration_efficiency_seal_check_exercise_to_qnft
+# add_filtration_efficiency_seal_check_exercise_to_qnft
+#
+def add_too_big_too_small_user_seal_check_question
+  fts = FitTest.all
+  fts.each do |ft|
+    user_seal_check = ft.user_seal_check
+    unless user_seal_check.key?('sizing')
+      user_seal_check['sizing'] = {
+        "What do you think about the sizing of this mask relative to your face?" => nil
+      }
+
+      ft.update(user_seal_check: user_seal_check)
+    end
+  end
+end
+
+add_too_big_too_small_user_seal_check_question

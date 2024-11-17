@@ -197,6 +197,16 @@
         </tbody>
       </table>
 
+      <div>
+        <SurveyQuestion
+            question="What do you think about the sizing of this mask relative to your face?"
+            :answer_options="['Too big', 'Somewhere in-between too small and too big', 'Too small']"
+            @update="selectSizingUserSealCheck"
+            :selected="userSealCheck['sizing']['What do you think about the sizing of this mask relative to your face?']"
+            :disabled="!createOrEdit"
+            />
+      </div>
+
       <a class='text-align-center' href="//cdc.gov/niosh/docs/2018-130/pdfs/2018-130.pdf" target='_blank'>What are user seal checks?</a>
       <div v-show="showPositiveUserSealCheck">
         <h4>While performing a *positive-pressure* user seal check, </h4>
@@ -951,6 +961,9 @@ export default {
         "How comfortable is the position of the mask on face and cheeks?": null
       },
       userSealCheck: {
+        'sizing': {
+          "What do you think about the sizing of this mask relative to your face?": null
+        },
         'positive': {
           "...how much air movement on your face along the seal of the mask did you feel?": null,
           '...how much did your glasses fog up?': null,
@@ -1858,6 +1871,9 @@ export default {
 
     },
 
+    selectSizingUserSealCheck(value) {
+      this['userSealCheck']['sizing']['What do you think about the sizing of this mask relative to your face?'] = value
+    },
     selectPositivePressureAirMovement(value) {
       this['userSealCheck']['positive']['...how much air movement on your face along the seal of the mask did you feel?'] = value
     },

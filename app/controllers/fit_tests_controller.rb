@@ -197,6 +197,9 @@ class FitTestsController < ApplicationController
         ],
         'negative': [
           '...how much air passed between your face and the mask?'
+        ],
+        'sizing': [
+          "What do you think about the sizing of this mask relative to your face?"
         ]
       ],
       comfort: [
