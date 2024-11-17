@@ -45,9 +45,9 @@ class Mask < ApplicationRecord
             fm.user_id,
             MIN(ft.created_at) AS created_at
           FROM masks m
-          INNER JOIN fit_tests ft
+          LEFT JOIN fit_tests ft
             ON (ft.mask_id = m.id)
-          INNER JOIN facial_measurements fm
+          LEFT JOIN facial_measurements fm
             ON (fm.id = ft.facial_measurement_id)
           GROUP BY 1, 2
         ), demographic_breakdown AS (
@@ -201,8 +201,8 @@ class Mask < ApplicationRecord
         )
 
         SELECT * FROM demographic_breakdown
-          INNER JOIN fit_test_counts_per_mask ON (fit_test_counts_per_mask.mask_id = demographic_breakdown.id)
-          INNER JOIN unique_fit_tester_counts_per_mask
+          LEFT JOIN fit_test_counts_per_mask ON (fit_test_counts_per_mask.mask_id = demographic_breakdown.id)
+          LEFT JOIN unique_fit_tester_counts_per_mask
             ON (unique_fit_tester_counts_per_mask.mask_id = demographic_breakdown.id)
 
       SQL
