@@ -164,9 +164,7 @@ export default {
           this.$router.push(obj);
         }
         else {
-          this.$router.push({
-            name: 'Venues'
-          });
+          this.$router.go(-1);
         }
       })
       .catch(error => {
