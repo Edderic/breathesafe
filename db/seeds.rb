@@ -173,4 +173,26 @@ def add_too_big_too_small_user_seal_check_question
   end
 end
 
-add_too_big_too_small_user_seal_check_question
+# add_too_big_too_small_user_seal_check_question
+
+def add_targeted_masks
+  masks = Mask.where("perimeter_mm IS NOT NULL")
+  masks.each do |m|
+    if [224, 265, 230].include?(m.id)
+      m.update(
+        payable_datetimes: []
+      )
+    else
+      m.update(
+        payable_datetimes: [
+          {
+            start_datetime: DateTime.now,
+            end_datetime: 5.months.from_now
+          }
+        ]
+      )
+    end
+  end
+end
+
+add_targeted_masks
