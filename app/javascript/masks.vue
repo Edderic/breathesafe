@@ -82,6 +82,7 @@
 
     <div class='main grid'>
       <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in sortedDisplayables' @click='viewMask(m.id)'>
+
         <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
         <div class='description'>
           <span>
@@ -103,6 +104,19 @@
                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
                :exception='exceptionMissingObject'
                />
+            </td>
+            <td rowspan='2' class='targeted'  v-if='m.isTargeted'>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
+                <circle cx="40" cy="40" r="30" fill="rgb(150, 29, 2)"/>
+
+                <circle cx="40" cy="40" r="25" fill="white"/>
+
+                <circle cx="40" cy="40" r="20" fill="rgb(150, 29, 2)"/>
+
+                <circle cx="40" cy="40" r="15" fill="white"/>
+
+                <circle cx="40" cy="40" r="10" fill="rgb(150, 29, 2)"/>
+              </svg>
             </td>
           </tr>
           <tr>
@@ -146,6 +160,8 @@ import { perimeterColorScheme } from './colors.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
+import { Respirator } from './masks.js'
+
 
 export default {
   name: 'Masks',
@@ -394,7 +410,11 @@ export default {
         .then(response => {
           let data = response.data
           if (response.data.masks) {
-            this.masks = deepSnakeToCamel(data.masks)
+            this.masks = []
+
+            for (let m of data.masks) {
+              this.masks.push(new Respirator(m))
+            }
           }
 
           // whatever you want
@@ -572,6 +592,34 @@ export default {
     height: 75vh;
   }
 
+  .targeted {
+    padding-left: 5em;
+  }
+
+  tbody tr:hover {
+    cursor: pointer;
+    background-color: rgb(230,230,230);
+  }
+
+  .tape-measure {
+    margin-right: 0.5em;
+    max-width: 1.5em;
+  }
+
+  .risk-score {
+    width: 5em;
+    height: 3em;
+    font-size: 1em;
+  }
+  .sticky {
+    position: fixed;
+    top: 3em;
+  }
+
+  th, td {
+    text-align: center;
+  }
+
   @media(max-width: 700px) {
     .grid {
       grid-template-columns: 50% 50%;
@@ -609,29 +657,10 @@ export default {
       max-width:70vw;
       max-height:none;
     }
-  }
-  tbody tr:hover {
-    cursor: pointer;
-    background-color: rgb(230,230,230);
-  }
 
-  .tape-measure {
-    margin-right: 0.5em;
-    max-width: 1.5em;
-  }
-
-  .risk-score {
-    width: 5em;
-    height: 2em;
-    font-size: 0.75em;
-  }
-  .sticky {
-    position: fixed;
-    top: 3em;
-  }
-
-  th, td {
-    text-align: center;
+    .targeted {
+      padding-left: 50vw;
+    }
   }
 
 </style>

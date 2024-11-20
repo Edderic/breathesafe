@@ -3,9 +3,37 @@ import {
 } from './colors.js';
 import { round } from './misc.js'
 
+import { deepSnakeToCamel } from './misc.js'
+
 import {
   maskToPenetrationFactor
 } from  './misc';
+
+export class Respirator {
+  constructor(mask) {
+    this._mask = deepSnakeToCamel(mask)
+    for(let k in this._mask) {
+      this[k] = this._mask[k]
+    }
+  }
+
+  get isTargeted() {
+    let currentDate = new Date()
+
+    if (this.payableDatetimes.length > 0) {
+      for (let range of this.payableDatetimes) {
+        let startDatetime = new Date(range.startDatetime)
+        let endDatetime = new Date(range.endDatetime)
+
+        if (currentDate > startDatetime && currentDate < endDatetime) {
+          return true
+        }
+      }
+    }
+
+    return false
+  }
+}
 
 export const MASKS = [
   {
