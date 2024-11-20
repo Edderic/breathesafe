@@ -64,6 +64,15 @@
 
           <h3>Filter for:</h3>
           <br>
+          <div>Targeted Masks (for Testers)</div>
+          <table>
+            <tr>
+              <td><input type="checkbox" :checked='filterForTargeted' @click='filterFor("Targeted")'>Targeted</td>
+              <td><input type="checkbox" :checked='filterForNotTargeted' @click='filterFor("NotTargeted")'>Not Targeted</td>
+            </tr>
+          </table>
+
+          <br>
           <div>Strap type</div>
           <table>
             <tr>
@@ -181,6 +190,8 @@ export default {
     return {
       filterForEarloop: true,
       filterForHeadstrap: true,
+      filterForTargeted: true,
+      filterForNotTargeted: true,
       showPopup: false,
       exceptionMissingObject: {
         color: {
@@ -231,6 +242,8 @@ export default {
       let lowerSearch = this.search.toLowerCase()
       let filterForHeadstrap = this.filterForHeadstrap
       let filterForEarloop = this.filterForEarloop
+      let filterForTargeted = this.filterForTargeted
+      let filterForNotTargeted = this.filterForNotTargeted
 
       return this.masks.filter(
         function(mask) {
@@ -241,6 +254,9 @@ export default {
                 (filterForHeadstrap && mask.strapType == 'Headstrap')
                 || (filterForEarloop && mask.strapType == 'Earloop')
               )
+            ) && (
+              (mask.isTargeted && filterForTargeted) ||
+              (!mask.isTargeted && filterForNotTargeted)
             )
         }
       )
@@ -268,16 +284,15 @@ export default {
     this.search = this.$route.query.search || ''
     this.sortByStatus = this.$route.query.sortByStatus
     this.sortByField = this.$route.query.sortByField
-    if (this.$route.query.filterForEarloop == undefined) {
-      this.filterForEarloop = true
-    } else {
-      this.filterForEarloop = this.$route.query.filterForEarloop == 'true'
-    }
 
-    if (this.$route.query.filterForHeadstrap == undefined) {
-      this.filterForHeadstrap = true
-    } else {
-      this.filterForHeadstrap = this.$route.query.filterForHeadstrap == 'true'
+    let filterCriteria = ["Earloop", "Headstrap", "Targeted", "NotTargeted"];
+    for(let filt of filterCriteria) {
+      let specificFilt = 'filterFor' + filt
+      if (this.$route.query[specificFilt] == undefined) {
+        this[specificFilt] = true
+      } else {
+        this[specificFilt] = this.$route.query[specificFilt] == 'true'
+      }
     }
 
     this.$watch(
@@ -287,16 +302,13 @@ export default {
         this.sortByStatus = toQuery.sortByStatus
         this.sortByField = toQuery.sortByField
         // react to route changes...
-        if (this.$route.query.filterForEarloop == undefined) {
-          this.filterForEarloop = true
-        } else {
-          this.filterForEarloop = this.$route.query.filterForEarloop == 'true'
-        }
-
-        if (this.$route.query.filterForHeadstrap == undefined) {
-          this.filterForHeadstrap = true
-        } else {
-          this.filterForHeadstrap = this.$route.query.filterForHeadstrap == 'true'
+        for(let filt of filterCriteria) {
+          let specificFilt = 'filterFor' + filt
+          if (this.$route.query[specificFilt] == undefined) {
+            this[specificFilt] = true
+          } else {
+            this[specificFilt] = this.$route.query[specificFilt] == 'true'
+          }
         }
       }
     )
