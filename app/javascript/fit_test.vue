@@ -484,12 +484,6 @@
       <Button class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
     </div>
 
-    <br>
-    <br>
-
-    <br>
-    <br>
-
   </div>
 </template>
 
@@ -2142,10 +2136,15 @@ export default {
     width: 6em;
   }
 
+  .top-container {
+    margin-bottom: 5em;
+  }
   .top-container > div {
     padding-left: 1em;
     padding-right: 1em;
   }
+
+
   @media(max-width: 700px) {
     img {
       width: 100vw;
@@ -2163,10 +2162,11 @@ export default {
       flex-direction: column;
     }
 
-    .buttons {
+    .row.buttons {
       flex-direction: column;
       width: 95vw;
     }
+
     .grid.qlft {
       grid-template-columns: 100%;
     }
