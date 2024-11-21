@@ -1,5 +1,5 @@
 <template>
-  <form class='wide border-showing' action="">
+  <form class='top-container wide border-showing' action="">
     <br>
     <br>
     <br>
@@ -47,7 +47,6 @@
 
     <div class='container row' v-if='!registered'>
       <Button @click="signUp" text='Sign up' :disabled='!agreeTOSMedicalDisclaimerPrivacyPolicy'/>
-      <br>
 
     </div>
   </form>
@@ -208,5 +207,26 @@ export default {
 
   button {
     padding: 1em 3em;
+  }
+
+  @media(max-width: 700px) {
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input {
+      width: 95vw;
+      font-size: 2em;
+    }
+
+    .button {
+      width: 93vw;
+    }
+
+    .top-container {
+      margin-bottom: 4em;
+    }
   }
 </style>
