@@ -1,5 +1,5 @@
 <template>
-  <div class='col'>
+  <div class='navbar-top-container'>
 
     <div class='row spaced-between main fixed-nav-bar'>
       <div class='left row vertical-centered'>
@@ -250,7 +250,7 @@ export default {
     .mobile {
       display: inline-block;
     }
-    .col {
+    .navbar-top-container {
       display: flex;
       z-index: 999;
       flex-direction: column;
@@ -262,6 +262,10 @@ export default {
 
     .fixed-nav-bar-bottom {
       display: none;
+    }
+
+    .mobile-col {
+      max-height: 86vh;
     }
   }
 

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class='top-container'>
     <h2 class='tagline'>Find Clean Air Indoors</h2>
     <div class='main'>
       <div class='centered'>
@@ -108,6 +108,10 @@ export default {
 
   img {
     width: 30em;
+  }
+
+  .top-container {
+    margin-bottom: 5em;
   }
   @media(max-width: 700px) {
     img {
