@@ -239,6 +239,10 @@ export default {
     cursor: pointer;
   }
 
+  .mobile-col {
+    overflow: auto;
+    max-height: 100vh;
+  }
   @media (max-width: 800px) {
     .desktop {
       display: none;

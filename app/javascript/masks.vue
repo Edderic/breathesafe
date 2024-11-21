@@ -673,6 +673,11 @@ export default {
     .targeted {
       padding-left: 50vw;
     }
+
+    .main {
+      overflow: auto;
+      height: 65vh;
+    }
   }
 
 </style>

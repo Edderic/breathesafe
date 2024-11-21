@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class='top-container'>
     <div class='flex align-items-center justify-content-center row'>
       <h2 class='tagline'>Measurement Devices</h2>
       <CircularButton text="+" @click="newDevice"/>
@@ -11,13 +11,50 @@
     </div>
 
     <div class='main'>
-        <p class='narrow'>
+      <p class='narrow'>
 
 Do you have a quantitative fit testing (QNFT) device? If so, please add information below so we could understand more about how fit testing data is generated, for quality control purposes. When fit testing, these devices will show up as selectable options. In terms of reporting, e.g. a research paper, aggregate data might be reported. For example, "QNFT results in Breathesafe's data set had 200 entries, and QNFT devices were mostly done using TSI 8020A. Median calibration date was 2013 (11 years ago), and min and max are 2009 and 2018."
 
-        </p>
-      <div class='centered'>
-        <table>
+      </p>
+
+      <div class='centered cards'>
+        <table class='mobile-card'
+          v-for='r in measurementDevices' text='Edit' @click='visit(r.id)'>
+          <tr>
+            <th>Type</th>
+            <td>
+                {{r.measurement_device_type}}
+            </td>
+            <th>Manufacturer</th>
+            <td>
+                {{r.manufacturer}}
+            </td>
+          </tr>
+          <tr>
+            <th>Model</th>
+            <td>
+                {{r.model}}
+            </td>
+            <th>Serial</th>
+            <td>
+              {{r.serial}}
+            </td>
+          </tr>
+          <tr>
+            <th>Notes</th>
+            <td colspan='3'>
+                {{r.notes}}
+            </td>
+          </tr>
+          <tr>
+            <th>Removed from service</th>
+            <td colspan='3'>
+                {{r.remove_from_service}}
+            </td>
+          </tr>
+        </table>
+
+        <table class='card'>
           <thead>
             <tr>
               <th>Type</th>
@@ -204,15 +241,6 @@ export default {
   img {
     width: 30em;
   }
-  @media(max-width: 700px) {
-    img {
-      width: 100vw;
-    }
-
-    .call-to-actions {
-      height: 14em;
-    }
-  }
 
   .row {
     display: flex;
@@ -243,5 +271,40 @@ export default {
 
   .narrow {
     max-width: 50em;
+  }
+
+  th {
+    background-color: #eee;
+  }
+
+  .mobile-card {
+    display: none;
+    cursor: pointer;
+  }
+
+  @media(max-width: 700px) {
+    img {
+      width: 100vw;
+    }
+
+    .call-to-actions {
+      height: 14em;
+    }
+
+    .card {
+      display: none;
+    }
+    .mobile-card {
+      display: block;
+    }
+
+    .cards {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-container {
+      margin-bottom: 5em;
+    }
   }
 </style>

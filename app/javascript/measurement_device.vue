@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class='top-container'>
     <div class='flex align-items-center justify-content-center row'>
       <h2 class='tagline'>Measurement Device</h2>
     </div>
@@ -76,7 +76,7 @@ Do you have a quantitative fit testing (QNFT) device? If so, please add informat
         </table>
 
       </div>
-        <div class="row justify-content-center">
+        <div class="buttons justify-content-center">
           <Button class='button' text="Edit" @click='mode = "Edit"' v-if='mode == "Show"'/>
           <Button class='button' text="Delete" @click='deleteMeasurementDevice' v-if='mode == "Edit" '/>
           <Button class='button' text="Save" @click='saveMeasurementDevice' v-if='mode == "New" || mode == "Edit"'/>
@@ -366,15 +366,6 @@ export default {
   img {
     width: 30em;
   }
-  @media(max-width: 700px) {
-    img {
-      width: 100vw;
-    }
-
-    .call-to-actions {
-      height: 14em;
-    }
-  }
 
   .row {
     display: flex;
@@ -404,5 +395,22 @@ export default {
 
   .narrow {
     max-width: 50em;
+  }
+
+  @media(max-width: 700px) {
+    .top-container {
+      margin-bottom: 10em;
+    }
+    img {
+      width: 100vw;
+    }
+
+    .call-to-actions {
+      height: 14em;
+    }
+
+    .buttons .button {
+      width: 95vw;
+    }
   }
 </style>

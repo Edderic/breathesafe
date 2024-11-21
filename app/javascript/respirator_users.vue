@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class='top-container'>
     <div class='flex align-items-center justify-content-center row'>
       <h2 class='tagline'>Respirator Users</h2>
       <CircularButton text="+" @click="newUser"/>
@@ -308,6 +308,9 @@ export default {
 
   img {
     width: 30em;
+  }
+  .top-container {
+    height: 100vh;
   }
   @media(max-width: 700px) {
     img {
