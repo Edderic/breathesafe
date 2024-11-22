@@ -77,7 +77,7 @@
         </h3>
 
 
-        <div :class='{main: true, grid: true, selectedMask: maskHasBeenSelected}'>
+        <div :class='{main: true, grid: true, selectedMask: maskHasBeenSelected, oneCol: !!selectedMask.uniqueInternalModelCode}'>
           <div class='card pointable flex flex-dir-col align-items-center justify-content-center' v-for='m in selectMaskDisplayables' @click='selectMask(m.id)'>
             <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
             <div class='description'>
@@ -2067,7 +2067,7 @@ export default {
 
   .main, .grid.selectedMask {
     display: grid;
-    grid-template-columns: 100%;
+    grid-template-columns: 33% 33% 33%;
     grid-template-rows: auto;
   }
 
@@ -2144,6 +2144,12 @@ export default {
     padding-right: 1em;
   }
 
+  .grid.selectedMask.oneCol {
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: auto;
+  }
+
 
   @media(max-width: 700px) {
     img {
@@ -2170,5 +2176,12 @@ export default {
     .grid.qlft {
       grid-template-columns: 100%;
     }
+
+    .main, .grid.selectedMask, .grid.selectedMask.oneCol {
+      display: grid;
+      grid-template-columns: 100%;
+      grid-template-rows: auto;
+    }
+
   }
 </style>
