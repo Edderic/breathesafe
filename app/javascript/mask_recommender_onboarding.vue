@@ -14,6 +14,10 @@
         Timeline
       </router-link>
 
+      <router-link :to="tocPath('expected-time-commitment')">
+        Time Commitment
+      </router-link>
+
       <router-link :to="tocPath('expected-equipment')">
         Expected Equipment
       </router-link>
@@ -26,44 +30,52 @@
         Adding Measurement Devices
       </router-link>
 
-      <router-link :to="tocPath('adding-respirator-users')">
-        Adding Respirator Users
+      <router-link :to="tocPath('adding-respirator-users-name')">
+        Adding Respirator Users: Name Tab
       </router-link>
 
-      <router-link :to="tocPath('how-long-study')">
-        How long will you be in this study?
+      <router-link :to="tocPath('adding-respirator-users-demographics')">
+        Adding Respirator Users: Demographics Tab
       </router-link>
 
-      <router-link :to="tocPath('leave-study')">
-        Can participants choose to leave the study?
+      <router-link :to="tocPath('adding-respirator-users-facial-measurements')">
+        Adding Respirator Users: Facial Measurements Tab
       </router-link>
 
-      <router-link :to="tocPath('risks-harms')">
-        What are the risks and harms of participating in the study?
+      <router-link :to="tocPath('adding-fit-tests')">
+        Adding Fit Tests for a Respirator User
       </router-link>
 
-      <router-link :to="tocPath('benefits')">
-        What are the benefits of participating in this study?
+      <router-link :to="tocPath('adding-fit-tests-selecting-a-user')">
+        Adding Fit Tests: Selecting a User
       </router-link>
 
-      <router-link :to="tocPath('confidentiality')">
-        How will participants' information be kept confidential?
+      <router-link :to="tocPath('adding-fit-tests-searching-for-a-mask')">
+        Adding Fit Tests: Searching for a mask
       </router-link>
 
-      <router-link :to="tocPath('data-use-over-time')">
-        How long will the data be used?
+      <router-link :to="tocPath('adding-fit-tests-facial-hair')">
+        Adding Fit Tests: Facial Hair Information
       </router-link>
 
-      <router-link :to="tocPath('compensation')">
-        Are participants compensated in this study?
+      <router-link :to="tocPath('adding-fit-tests-user-seal-check')">
+        Adding Fit Tests: User Seal Check
       </router-link>
 
-      <router-link :to="tocPath('participant-rights')">
-        What are the rights of the participants?
+      <router-link :to="tocPath('adding-fit-tests-qlft')">
+        Adding Fit Tests: Qualitative Fit Testing (QLFT)
       </router-link>
 
-      <router-link :to="tocPath('reach-out')">
-        Whom do participants contact for questions?
+      <router-link :to="tocPath('adding-fit-tests-comfort')">
+        Adding Fit Tests: Comfort Questions
+      </router-link>
+
+      <router-link :to="tocPath('fit-testing-results')">
+        Fit Testing Results
+      </router-link>
+
+      <router-link :to="tocPath('adding-fit-tests-qnft')">
+        Adding Fit Tests: Quantitative Fit Testing (QNFT)
       </router-link>
       <br>
       <br>
@@ -95,6 +107,36 @@
         </ul>
 
         <p>For collecting fit testing and facial measurement data, Breathesafe LLC hopes to have fit testers be done in 4 months after they get the fit testing equipment and masks from us. Collecting selfies will be done at a later time. You can opt in to this later on, which is voluntary and not required for participation in the former.</p>
+
+        <p>As mentioned in the <router-link :to='tocPath("expected-equipment")'>Expected equipment</router-link> section below, there are 46 masks. I am hoping that for most testers, they will be done in about 4 months after receiving the equipment. Some of these masks are going to be too small or too big. For those, you will be able to quickly mark masks as way too small or way too big and would not have to go through the full qualitative or quantitative fit testing procedure. It will take about 30 seconds or less to mark a mask as such in the
+        <router-link :to="{name: 'NewFitTest'}">Adding a Fit Test page</router-link>.
+        </p>
+
+        <div id='expected-time-commitment'>
+          <br>
+          <br>
+          <h4>Time Commitment</h4>
+        </div>
+
+        <p>
+        For qualitative fit testers, you will go through the OSHA set of exercises:
+
+        </p>
+
+        <ul>
+          <li>Normal breathing #1</li>
+          <li>Deep breathing</li>
+          <li>Turning head side-to-side</li>
+          <li>Moving head up-and-down</li>
+          <li>Talking</li>
+          <li>Bending over</li>
+          <li>Normal breathing #2</li>
+        </ul>
+
+        <p>Each exercise takes a minute to do. Filling out the fit testing data in <router-link :to="{name: 'NewFitTest'}">Adding a Fit Test page</router-link> takes about a couple of minutes max. So in total that's about 9 minutes per mask. Let's say that about 1/3 of the masks are obviously too small / too big for you. That translates to 46 masks / 3  =~ 15 masks. For those masks, let's say you took a minute to fill out the <router-link :to="{name: 'NewFitTest'}">Adding a Fit Test page</router-link>. So that's 15 minutes of your time. And then for those masks you do decide to qualitatively test, that translates to (46 - 15) masks = 31 masks. 31 masks x 10 minutes / mask = 310 minutes. So for the data collection for Phase I, that translates to about 310 minutes + 15 minutes = 325 minutes of your time. To get all the testing done in 4 months, that averages to 325 minutes / 4 months = 81.25 minutes / month, or 1.35 hours per month.
+
+
+        </p>
 
         <div id='expected-equipment'>
           <br>
@@ -201,10 +243,10 @@
         <router-link :to="{'name': 'MeasurementDevices'}">Measurement Devices</router-link>
         Data is meant for diagnosing potential calibration issues.</p>
 
-        <div id='adding-respirator-users'>
+        <div id='adding-respirator-users-name'>
           <br>
           <br>
-          <h4>Adding respirator users</h4>
+          <h4>Adding Respirator Users: Name Tab</h4>
         </div>
 
 
@@ -213,271 +255,321 @@
         <div class='center'>
           <figure>
             <router-link :to='{name: "RespiratorUsers"}'>
-              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/respirator-users.png" alt='Respirator users page'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/respirator-users-empty.png" alt='Respirator users'>
             </router-link>
             <figcaption>Respirator Users</figcaption>
           </figure>
-
         </div>
 
-        <p>
-        You can contribute valuable data by submitting <a
-          href="https://www.cdc.gov/niosh/docs/2018-130/pdfs/2018-130.pdf"
-          target='_blank'>user seal check</a> information. If you know that a
-        mask does not fit your face and has obvious leaks, you could contribute
-        this data in the User Seal Check section of "Adding a Fit Test".
-        </p>
+        <p>Clicking on the plus button will let you create a Respirator User, which will take you the Name tab:</p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "RespiratorUsers"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/respirator-user-name.png" alt='Adding a new Respirator User. Page is asking about the name of the user'>
+            </router-link>
+            <figcaption>Adding a new Respirator User: Name tab</figcaption>
+          </figure>
+        </div>
+
+        <p>You can fill out the name of the user you'll be adding info for (e.g. yourself, members in your household, etc.)</p>
+
 
         <p>Clicking on the plus button will allow you to add data about people of interest (e.g. yourself, your kids, your partner).</p>
 
-        The following are <strong>optional</strong>:
+        <div id='adding-respirator-users-demographics'>
+          <br>
+          <br>
+          <h4>Adding Respirator Users: Demographics Tab</h4>
+        </div>
 
-        <div class='grid-images'>
-          <figure>
-            <a href="https://tsi.com/discontinued-products/portacount%C2%AE-respirator-fit-tester-8038/" target='_blank'>
-              <img class='left-pane-image' src="https://tsi.com/getmetafile/a296129e-5e8d-48d6-a3a7-05a2d5195987/8038_01" alt='PortaCount'>
-            </a>
-            <figcaption>A Quantitative Fit Testing device such as a PortaCount</figcaption>
-          </figure>
+        <p>After filling out a name, demographic questions will be asked next:</p>
 
-          <figure>
-            <a href="https://www.youtube.com/watch?v=Syj_zeNtLGI" target='_blank'>
-              <img class='left-pane-image' src="https://profittesting.com/cdn/shop/articles/MelFitTest4blog2.jpg?v=1634512473" alt='Tape Measure, iBayam Soft Ruler Measuring Tape for Body Weight Loss Fabric Sewing Tailor Cloth Vinyl Measurement Craft Supplies, 60-Inch Double Scale Ruler, 2-Pack White, Blue'>
-            </a>
-            <figcaption>Qualitative Fit Testing equipment</figcaption>
-          </figure>
 
+        <div class='center'>
           <figure>
-            <a href="https://www.verizon.com/smartphones/apple-iphone-14/" target='_blank'>
-              <img class='left-pane-image' src="https://ss7.vzw.com/is/image/VerizonWireless/iphone-14-midnight-fall22-a?wid=930&hei=930&fmt=webp" alt='An iPhone'>
-            </a>
-            <figcaption>A device equipped with a camera</figcaption>
+            <router-link :to='{name: "RespiratorUsers"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/respirator-user-demog.png" alt='Adding a new Respirator User. Page is asking about demographics'>
+            </router-link>
+            <figcaption>Adding a new Respirator User: Demographics Questions Tab</figcaption>
           </figure>
         </div>
 
-        <h5>Phase 1: manual measurements of facial features (using caliper/tape) </h5>
-
-        <p>
-        You will be asked to give information about demographics and facial measurements <router-link :to='{name: "RespiratorUsers"}'>here</router-link>.
-        Once that is filled out, you can add the following fit testing data <router-link :to='{name: "NewFitTest"}'> here</router-link>:
-        </p>
-
-        <ul>
-          <li>user seal check</li>
-          <li>qualitative fit testing (if applicable)</li>
-          <li>quantitative fit testing (if applicable)</li>
-          <li>comfort</li>
-        </ul>
-
-        <p>
-        You will be guided by the UI. Clicking on the "Save and Continue" button will validate the information being saved and will show helpful error messages and general messages. For example, if a user fails the user seal check section, they don't need to add qualitative or quantitative fit testing data (as it is assumed that they will most likely fail either of those more stringent tests).
-        </p>
-
-        <h5>Phase 2: automated inference of facial measurements via selfies </h5>
-
-        <p>Getting facial measurements via caliper and tape can be a bit tedious and could deter adoption of said recommender system. Breathesafe LLC will attempt to simplify this process by inferring facial measurements via selfies. You will be given the opportunity to share selfies to this project to assess and improve the performance of a facial measurement system based on selfies. Given your facial measurements that were taken from phase 1 using caliper and tape, we will assess and improve the accuracy of said inference system.
-        </p>
-
-
-        <div id='how-long-study'>
+        <div id='adding-respirator-users-facial-measurements'>
           <br>
           <br>
-          <h4>How long will you be in this study?</h4>
+          <h4>Adding Respirator Users: Facial Measurements Tab</h4>
         </div>
 
-        In terms of adding data to the system, it can vary, depending on
-        whether or not you have access to qualitative fit testing (QLFT) or
-        quantitative fit testing (QNFT) devices.
-        <table>
-          <thead>
-            <tr>
-              <th>Steps</th>
-              <th>Time commitment</th>
-              <th>Frequency</th>
-              <th>Necessity</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Answering demographics questions</td>
-              <td>1 minute</td>
-              <td>once</td>
-              <td>Necessary</td>
-            </tr>
-            <tr>
-              <td>Adding facial measurements manually</td>
-              <td>3 minutes</td>
-              <td>once, or over the years</td>
-              <td>Necessary</td>
-            </tr>
-            <tr>
-              <td>Adding user seal check data</td>
-              <td>1 minute</td>
-              <td>per mask</td>
-              <td>Necessary</td>
-            </tr>
-            <tr>
-              <td>Adding qualitative fit testing data</td>
-              <td>10 minutes</td>
-              <td>per mask</td>
-              <td>Depends on you having access to QLFT tools</td>
-            </tr>
-            <tr>
-              <td>Adding quantitative fit testing data</td>
-              <td>10 minutes</td>
-              <td>per mask</td>
-              <td>Depends on you having access to a QNFT device</td>
-            </tr>
-            <tr>
-              <td>Adding comfort data</td>
-              <td>1 minute</td>
-              <td>per mask</td>
-              <td>Can be skipped if user seal check fails.</td>
-            </tr>
-          </tbody>
-        </table>
+        <p>After anwering demographics questions, you will then be asked for facial measurement information:</p>
 
-        <div id='leave-study'>
-          <br>
-          <br>
-          <h4>Can participants choose to leave the study?</h4>
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "RespiratorUsers"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/respirator-user-facial-measurements-1.png" alt='Adding a new Respirator User. Facial Measurements Part I'>
+            </router-link>
+            <figcaption>Adding a new Respirator User: Facial Measurements Tab</figcaption>
+          </figure>
         </div>
-        <p>Participants may be able to delete their data by visiting the
+
+        <p>Clicking on the question mark buttons will show you what a particular measurement means:</p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "RespiratorUsers"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/respirator-user-facial-measurements-2.png" alt='Adding a new Respirator User. Facial Measurements Part I'>
+            </router-link>
+            <figcaption>Adding a new Respirator User: User clicked on "Face width" question mark button</figcaption>
+          </figure>
+        </div>
+
+        <p>There are three sections. Please fill them out to the best of your ability. In <strong>Edit Mode</strong>, you will have a <strong>Save and continue</strong> button. Make sure to click on that to save the data. It will save your progress. Once you are done adding data for a Respirator User, you should see a notice that says the last step was successfully saved:</p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "RespiratorUsers"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/respirator-user-done.png" alt='Adding a new Respirator User. Last step successfully saved'>
+            </router-link>
+            <figcaption>Adding a new Respirator User: Last step successfully saved</figcaption>
+          </figure>
+        </div>
+
+        <p>Going to the
+            <router-link :to='{name: "RespiratorUsers"}'>
+              Respirator Users
+            </router-link> page shows that information for the user has been completed (for Phase I):
+        </p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "RespiratorUsers"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/respirator-user-complete.png" alt='Added a new Respirator User. User is ready for fit testing'>
+            </router-link>
+            <figcaption>Added a new Respirator User. User is ready for fit testing</figcaption>
+          </figure>
+        </div>
+
+        <div id='adding-fit-tests'>
+          <br>
+          <br>
+          <h4>Adding Fit Tests</h4>
+        </div>
+
+        <p>You can visit the Fit Tests section by clicking on this
+        <router-link :to='{name: FitTests}'>
+        link
+        </router-link>. You'll see something like this:
+        </p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/fit-tests-empty.png" alt='Fit Tests Page. Initially Empty'>
+            </router-link>
+            <figcaption>Fit Tests page. Initially empty.</figcaption>
+          </figure>
+        </div>
+
+        <p>You will be able to add qualitative fit testing (QLFT) and quantitative fit testing (QNFT) data for the
         <router-link :to='{name: "RespiratorUsers"}'>
-          Respirator Users
-        </router-link> section, and clicking on an individual they have access
-        to, click "Edit" and then click "Delete." This functionality is
-        available for people who have gone through the registration process.
-        That will delete user information such as email, password,
-        demographics, and fit testing data. Users will have the ability to
-        delete their data and have their data not contribute to research until
-        publication (which is TBD). Deletion of data in the future will have no
-        effect to the state of previously published research, but may alter
-        existing statistical machine learning models that are being used at the
-        time on the web application.
+              Respirator Users
+            </router-link>
+        you created in the earlier step. Clicking on the plus button will let you add a fit test. The first thing that will be asked is for the testing administrator to select a user that was created in the
 
-        </p>
 
-        <div id='risks-harms'>
+        <router-link :to='{name: "RespiratorUsers"}'>
+              Respirator Users
+            </router-link>
+        section</p>
+        <div id='adding-fit-tests-selecting-a-user'>
           <br>
           <br>
-          <h4>What are the risks and harms of participating in the study?</h4>
-        </div>
-        <p>Sensitive data like facial measurements will be stored in a database.
-        Data such as the following will be collected:
-        <ul>
-          <li>first name</li>
-          <li>last name</li>
-          <li>email</li>
-          <li>IP address - for quality control purposes.</li>
-          <li>home address (optional) - If you need financial assistance with buying equipment for testing purposes. Breathesafe LLC can order equipment on your behalf and send them your way. See the <a href="#compensation">compensation</a> section for details.</li>
-          <li>facial measurement data - to create a recommendation system tailored to the individual.</li>
-          <li>selfies - to validate facial measurement inference from photos.</li>
-          <li>fit testing measurement tools used (e.g. PortaCount)</li>
-          <li>fit testing results (e.g. pass/fail for Qualitative Fit Testing, fit factors for Quantitative Fit Testing)</li>
-        </ul>
-        </p>
-
-        <div id='benefits'>
-          <br>
-          <br>
-          <h4>What are the benefits of participating in this study?</h4>
+          <h4>Adding Respirator Users: Selecting a user</h4>
         </div>
 
-        <p>One direct benefit is one might be able to find a mask that has overall high protection (combination of fit and high filtration efficiency), if they haven't aready. Another benefit is gaining a sense of accomplishment in helping others find masks that offer high protection for their faces by providing data that will be used to improve performance of a personalized recommender system.</p>
-
-        <div id='confidentiality'>
-          <br>
-          <br>
-          <h4>How will participants' information be kept confidential?</h4>
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-select-a-user.png" alt='Selecting a user'>
+            </router-link>
+            <figcaption>Adding a Fit Test: Selecting a user</figcaption>
+          </figure>
         </div>
 
-        <p> In terms
-        of data publicly displayed on this web app, we will only show
-        aggregate data about users, such as demographic information and fit
-        test results for each mask. We will maintain privacy of individual fit
-        testing information along with demographics. We will preserve privacy
-        of individuals in the aggregation of the data: if a demographic has
-        less than 5 people in it, they will be grouped in the "Prefer not to
-        disclose / too small sample size" group.
-        </p>
+        <p>Clicking on the user of interest will list the user as a <strong>Selected user</strong>.  </p>
 
-        <p>This study may go on indefinitely. If for any reason you want your data deleted, you may do so. See
-<router-link :to="tocPath('leave-study')"> Can participants choose to leave the study?</router-link>
-        section above for details.</p>
-
+        <div id='adding-fit-tests-searching-for-a-mask'>
+          <br>
+          <br>
+          <h4>Adding Respirator Users: Searching for a mask</h4>
+        </div>
         <p>
-        Breathesafe LLC will follow best security practices to prevent malicious actors from accessing said database. Example of such actions are:
-        <ul>
-          <li>using https to prevent man-in-the-middle attacks.</li>
-          <li>admins will be using password managers and two factor authentication</li>
-          <li>number of admins will be as small as possible to limit risk</li>
-        </ul>
-        </p>
+        Hitting <strong>Save &amp; Continue</strong>, the testing administrator will be able to search for a mask to be tested: </p>
 
-        <p>Users could also choose to be anonymous when signing up. They are
-        free to use fake names to decrease the risk of their biometric data
-        identifying them in the small but non-zero chance that a hacker gets a
-        hold of the database.</p>
 
-        <div id='data-use-over-time'>
-          <br>
-          <br>
-          <h4>How long will the data be used?</h4>
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-search-for-mask.png" alt='Searching for a mask'>
+            </router-link>
+            <figcaption>Adding a Fit Test: Searching for a mask</figcaption>
+          </figure>
         </div>
 
-        <p>Data could be stored indefinitely. Models might get refined over time, which uses the data.</p>
+        <p>Testing administrator can then select a mask for testing:</p>
 
-        <div id='compensation'>
-          <br>
-          <br>
-          <h4>Are participants compensated in this study?</h4>
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-select-a-mask.png" alt='Selecting a mask'>
+            </router-link>
+            <figcaption>Adding a Fit Test: Selecting a mask</figcaption>
+          </figure>
         </div>
 
-        <p>Participation in this study is on a voluntary basis. However, if you need financial assistance with getting the equipment or labor, please let us know by emailing <a href='subject=Mask Recommender Financial Assistance Question'>info@breathesafe.xyz</a>.
-        </p>
+        <p>After that, a user will be asked questions about facial hair:</p>
 
-        <p>Here are things we can help with:</p>
-
-        <ul>
-          <li>buying facial measurement tools: caliper / tape</li>
-          <li>buying masks</li>
-          <li>buying probes</li>
-          <li>buying qualitative fit testing equipment</li>
-          <li>paying for your time to do the testing</li>
-        </ul>
-
-        <div id='participant-rights'>
+        <div id='adding-fit-tests-facial-hair'>
           <br>
           <br>
-          <h4> What are the rights of the participants? </h4>
+          <h4>Adding Respirator Users: Facial Hair Information</h4>
         </div>
 
-        <p>Your participation in this study is voluntary. You may decide not to
-        be in this study. Even if you consent to participate, you have the
-        right to withdraw and delete your data later on. See the
-
-        <router-link :to="tocPath('leave-study')">Can participants choose to leave the study?</router-link> section for details.
-</p>
-
-        <div id='reach-out'>
-          <br>
-          <br>
-          <h4>Whom do participants contact for questions?</h4>
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-facial-hair-questions.png" alt='Facial Hair questions'>
+            </router-link>
+            <figcaption>Adding a Fit Test: Facial Hair Questions</figcaption>
+          </figure>
         </div>
 
-        <p>You may reach out to <a href="mailto:info@breathesafe.xyz?subject=Mask Recommender Question">info@breathesafe.xyz</a>. For general questions and discussion, you could also join this <a href="https://discord.com/channels/1220937763751465001/1249885817724473485">Discord group</a>.</p>
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
+        <div id='adding-fit-tests-user-seal-check'>
+          <br>
+          <br>
+          <h4>Adding Respirator Users: User Seal Check</h4>
+        </div>
+        <p>After that, user seal check questions will be asked:</p>
 
-      <div></div>
-      <br>
-      <br>
-      <br>
-      <br>
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-user-seal-check.png" alt='User seal check questions'>
+            </router-link>
+            <figcaption>Adding a Fit Test: User Seal Check Questions</figcaption>
+          </figure>
+        </div>
+
+        <p>If the mask is obviously too big or too small, or if the tester detects leaks, the testing administrator will be notified that the tester doesn't have to proceed with adding more data. i.e. The qualitative/quantitative fit testing and comfort questions in the sections following this won't need to be answered:</p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-user-seal-check-failed.png" alt='User seal check failed'>
+            </router-link>
+            <figcaption>Adding a Fit Test: User Seal Check Failed</figcaption>
+          </figure>
+        </div>
+
+        <div id='adding-fit-tests-qlft'>
+          <br>
+          <br>
+          <h4> Adding Fit Tests: Qualitative Fit Testing (QLFT) </h4>
+        </div>
+
+        <p>If the User Seal Check does pass, the user can then add QLFT and/or QNFT data. First, the user will be asked about if they wanna add QLFT testing results:</p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-qlft-choose-procedure.png" alt='QLFT: Choose Procedure'>
+            </router-link>
+            <figcaption>Adding a Fit Test: QLFT: Choose Procedure</figcaption>
+          </figure>
+        </div>
+
+        <p>Currently, only Full OSHA protocol is supported:</p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-choose-full-osha.png" alt='QLFT: Choose Full OSHA'>
+            </router-link>
+            <figcaption>Adding a Fit Test: QLFT: Choose Full OSHA</figcaption>
+          </figure>
+        </div>
+
+        <p>User can select saccharin or bitrex for the solution, and the instructions about the procedure updates accordingly.</p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-qlft-osha-procedures.png" alt='QLFT: OSHA exercises list'>
+            </router-link>
+            <figcaption>Adding a Fit Test: QLFT: OSHA Exercises list</figcaption>
+          </figure>
+        </div>
+
+        <p>Testing administrator proceed to run the qualitative testing procedure and add the data there. If there are questions about what the exercise entails, the testing administrator can click on the question mark buttons to get an explanation:</p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-explainer-button.png" alt='QLFT: Explainer button'>
+            </router-link>
+            <figcaption>Adding a Fit Test: QLFT: OSHA Exercises list: Explainer for Normal Breathing Exercise</figcaption>
+          </figure>
+        </div>
+
+        <p>After filling those out, the user can add quantitative fit testing data if they choose. But most likely, if the user did a qualitative fit test, they probably won't add quantitative fit testing data at the same session, so the testing administrator can choose "Skipping" for the QNFT procedure:</p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-qnft-choose-procedure.png" alt='QNFT: Choose Procedure: Skipping'>
+            </router-link>
+            <figcaption>Adding a Fit Test: QNFT: Choose Procedure: Skipping</figcaption>
+          </figure>
+        </div>
+
+
+        <div id='adding-fit-tests-comfort'>
+          <br>
+          <br>
+          <h4>Adding Respirator Users: Comfort Questions</h4>
+        </div>
+        <p>The user will then be asked questions about comfort:</p>
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-comfort.png" alt='Comfort questions'>
+            </router-link>
+            <figcaption>Adding a Fit Test: Comfort Questions</figcaption>
+          </figure>
+        </div>
+
+
+        <div id='fit-testing-results'>
+          <br>
+          <br>
+          <h4>Fit Testing Results</h4>
+        </div>
+        <p>After that, you'll be taken to the Fit Tests page. After doing this for many masks, you'll see your results displayed like so:</p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/fit-test-results.png" alt='Fit Test Results'>
+            </router-link>
+            <figcaption>Fit Test Results</figcaption>
+          </figure>
+        </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
 
     </div>
   </div>
@@ -554,8 +646,15 @@ export default {
     max-width: 15em;
   }
 
+  figure {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+  }
+
   img {
-    max-width: 500px;
+    max-width: 700px;
   }
 
   .tos-header {
@@ -598,6 +697,10 @@ export default {
     .main {
       width: 75vw;
       margin-left: 0;
+    }
+
+    img {
+      max-width: 90vw;
     }
 
   }
