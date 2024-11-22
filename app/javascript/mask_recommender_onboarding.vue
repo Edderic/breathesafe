@@ -74,9 +74,6 @@
         Fit Testing Results
       </router-link>
 
-      <router-link :to="tocPath('adding-fit-tests-qnft')">
-        Adding Fit Tests: Quantitative Fit Testing (QNFT)
-      </router-link>
       <br>
       <br>
       <br>
