@@ -49,6 +49,7 @@ import Landing from '../landing.vue'
 import Mask from '../add_mask.vue'
 import FitTest from '../fit_test.vue'
 import FitTests from '../fit_tests.vue'
+import MaskRecommenderOnboarding from '../mask_recommender_onboarding.vue'
 import MeasurementDevices from '../measurement_devices.vue'
 import MeasurementDevice from '../measurement_device.vue'
 import Masks from '../masks.vue'
@@ -84,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/fit_tests/:id/edit', component: FitTest, name: 'EditFitTest' },
     { path: '/fit_tests/:id', component: FitTest, name: 'ViewFitTest' },
     { path: '/fit_tests', component: FitTests, name: 'FitTests' },
+    { path: '/onboarding', component: MaskRecommenderOnboarding, name: 'MaskRecommenderOnboarding' },
     { path: '/measurement_devices', component: MeasurementDevices, name: 'MeasurementDevices' },
     { path: '/measurement_devices/new', component: MeasurementDevice, name: 'NewMeasurementDevice' },
     { path: '/measurement_devices/:id', component: MeasurementDevice, name: 'ShowMeasurementDevice' },
