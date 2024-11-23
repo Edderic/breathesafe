@@ -141,7 +141,7 @@
           <h4>Expected equipment</h4>
         </div>
 
-        <p>For volunteers who have received a set of masks from Breathesafe LLC, by now, I assume you have the following equipment:</p>
+        <p>For volunteers who want to  receive a set of masks from Breathesafe LLC, I can also provide the following equipment if you don’t have it:</p>
 
         <ul>
           <li>Qualitative Fit Testing Kit OR Quantitative Fit Testing Device</li>
