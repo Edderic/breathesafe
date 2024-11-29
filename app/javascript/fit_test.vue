@@ -1475,10 +1475,22 @@ export default {
       }
     },
     validateValueOfInitialCountPerCM3() {
-      if (this.initialCountPerCm3 < 1000 && this.quantitativeProcedure != 'Skipping') {
+      let n99ModeAmbientCountCriteria = this.initialCountPerCm3 < 1000 && this.quantitativeProcedure != 'Skipping' && this.quantitativeTestingMode == 'N99'
+      let n95ModeAmbientCountCriteria = this.initialCountPerCm3 < 70 && this.quantitativeProcedure != 'Skipping' && this.quantitativeTestingMode == 'N95'
+
+      let cutoffs = {
+        'N95': {
+          'minimumCutoff': 70
+        },
+        'N99': {
+          'minimumCutoff': 1000
+        }
+      }
+
+      if (n99ModeAmbientCountCriteria || n95ModeAmbientCountCriteria) {
           this.messages.push(
             {
-              str: "Initial particle count too low. Please take this test at an environment where the number of particles per cubic centimeter is greater than 1000.",
+              str: `Initial particle count too low. Please take this test at an environment where the number of particles per cubic centimeter is greater than ${cutoffs[this.quantitativeTestingMode]['minimumCutoff']}.`,
             }
           )
 
