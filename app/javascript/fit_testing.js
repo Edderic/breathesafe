@@ -20,6 +20,7 @@ export class FitTest {
     this.facialHair = data.facial_hair
     this.facialMeasurementId = data.facial_measurement_id
     this.facialMeasurementPresence = data.facial_measurement_presence
+    this.userId = data.user_id
 
     this.comfortQuestions = {
       "How comfortable is the position of the mask on the nose?": {

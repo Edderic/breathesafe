@@ -6,6 +6,12 @@
     </div>
 
     <div class='row'>
+      <select v-model="managedUserId">
+        <option v-for='m in managedUsers' :value="m.managedId">{{m.firstName + ' ' + m.lastName}}</option>
+      </select>
+    </div>
+
+    <div class='row'>
       <input id='search' type="text" v-model='search'>
       <SearchIcon height='2em' width='2em'/>
     </div>
@@ -144,6 +150,7 @@ import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
+import { useManagedUserStore } from './stores/managed_users_store.js';
 import { FitTest } from './fit_testing.js';
 
 export default {
@@ -162,7 +169,8 @@ export default {
       messages: [],
       masks: [],
       search: "",
-      fit_tests: []
+      fit_tests: [],
+      managedUserId: undefined
     }
   },
   props: {
@@ -172,6 +180,12 @@ export default {
         useMainStore,
         [
           'currentUser',
+        ]
+    ),
+    ...mapState(
+        useManagedUserStore,
+        [
+          'managedUsers',
         ]
     ),
     ...mapState(
@@ -186,13 +200,37 @@ export default {
           'messages'
         ]
     ),
-    displayables() {
-      if (this.search == "") {
-        return this.fit_tests
-      } else {
-        let lowerSearch = this.search.toLowerCase()
-        return this.fit_tests.filter((fit_test) => fit_test.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
+    managedUser() {
+
+      if (this.managedUserId) {
+        return this.managedUsers.filter(function(m) {
+          debugger
+
+          return m.managedId == this.managedUserId
+        }.bind(this))
       }
+
+      // TODO: handle case where there is no managed user
+      return this.managedUsers[0]
+    },
+    displayables() {
+      let lowerSearch = this.search.toLowerCase()
+      return this.fit_tests.filter(
+        function(fit_test) {
+          let managedUserIdCriteria = true;
+          let lowerSearchCriteria = true;
+
+          if (this.managedUserId) {
+            managedUserIdCriteria = fit_test.userId == this.managedUserId;
+          }
+
+          if (lowerSearch != "") {
+            lowerSearchCriteria = fit_test.uniqueInternalModelCode.toLowerCase().match(lowerSearch)
+          }
+
+          return lowerSearchCriteria && managedUserIdCriteria
+        }.bind(this)
+      )
     },
   },
   async created() {
@@ -208,6 +246,7 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
+    ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     showMask(f) {
       if (f && f.maskId) {
@@ -269,6 +308,7 @@ export default {
     },
     async loadStuff() {
       // TODO: load the profile for the current user
+      await this.loadManagedUsers()
       await this.loadFitTests()
     },
     async loadFitTests() {
