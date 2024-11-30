@@ -22,6 +22,10 @@
 
     <SortFilterPopup
       :showPopup='showPopup'
+      :filterForEarloop='filterForEarloop'
+      :filterForHeadstrap='filterForHeadstrap'
+      :sortByField='sortByField'
+      :sortByStatus='sortByStatus'
       @filterFor='filterFor'
       @sortBy='filterFor'
       @hideSortFilterPopUp='hideSortFilterPopUp'
@@ -318,7 +322,25 @@ export default {
         if (toQuery['managedId']) {
           this.managedId = parseInt(toQuery.managedId)
         }
+
+        // setup search, filtering, sorting variables
+        // TODO: might be better off that this is in some function for reusability purposes
+        this.search = this.$route.query.search || ''
+        this.sortByStatus = this.$route.query.sortByStatus
+
+        this.sortByField = this.$route.query.sortByField
+
+        let filterCriteria = ["Earloop", "Headstrap", "Targeted", "NotTargeted"];
+        for(let filt of filterCriteria) {
+          let specificFilt = 'filterFor' + filt
+          if (this.$route.query[specificFilt] == undefined) {
+            this[specificFilt] = true
+          } else {
+            this[specificFilt] = this.$route.query[specificFilt] == 'true'
+          }
+        }
       }
+
     }
 
 
@@ -337,6 +359,20 @@ export default {
             }
             if (toQuery['managedId']) {
               this.managedId = parseInt(toQuery.managedId)
+            }
+
+            this.search = this.$route.query.search || ''
+            this.sortByStatus = this.$route.query.sortByStatus
+            this.sortByField = this.$route.query.sortByField
+
+            let filterCriteria = ["Earloop", "Headstrap", "Targeted", "NotTargeted"];
+            for(let filt of filterCriteria) {
+              let specificFilt = 'filterFor' + filt
+              if (this.$route.query[specificFilt] == undefined) {
+                this[specificFilt] = true
+              } else {
+                this[specificFilt] = this.$route.query[specificFilt] == 'true'
+              }
             }
           }
         }
