@@ -21,10 +21,9 @@
     </div>
 
 
-    <div class='row'>
-      <input id='search' type="text" v-model='search'>
-      <SearchIcon height='2em' width='2em'/>
-    </div>
+    <SearchSortFilterSection
+      @updateSearch='updateSearch'
+    />
 
     <div class='container chunk'>
       <ClosableMessage @onclose='messages = []' :messages='messages'/>
@@ -156,7 +155,7 @@ import ColoredCell from './colored_cell.vue'
 import MaskCards from './mask_card.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
-import SearchIcon from './search_icon.vue'
+import SearchSortFilterSection from './search_sort_filter_section.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
@@ -174,7 +173,7 @@ export default {
     ClosableMessage,
     ColoredCell,
     MaskCards,
-    SearchIcon,
+    SearchSortFilterSection,
     SurveyQuestion,
     TabSet
   },
@@ -252,11 +251,19 @@ export default {
       return sortedDisplayableMasks.bind(this)(this.untestedDisplayables)
     },
     untested() {
-      this.testedAndUntested.filter( function(t) { return ((t.managedId == this.managedUser.managedId) && (t.count == 0)) }.bind(this))
       return this.testedAndUntested.filter(
         function(t) {
+          let lowerSearch = this.search.toLowerCase()
+
+          let lowerSearchCriteria = true;
+
+          if (lowerSearch != "") {
+            lowerSearchCriteria = t.uniqueInternalModelCode.toLowerCase().match(lowerSearch)
+          }
+
           return ((t.managedId == this.managedUser.managedId)
             && (t.count == 0)
+            && lowerSearchCriteria
           )
         }.bind(this)
       )
@@ -330,6 +337,9 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    updateSearch(search) {
+      this.search = search.value
+    },
     setManagedUser(event) {
       let query = JSON.parse(JSON.stringify(this.$route.query))
 
