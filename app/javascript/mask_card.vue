@@ -1,5 +1,5 @@
 <template>
-    <div class='main grid'>
+    <div class='masks'>
       <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in cards' @click='viewMask(m.id)'>
 
         <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
@@ -352,10 +352,6 @@ export default {
   .flex {
     display: flex;
   }
-  .main {
-    display: flex;
-    flex-direction: column;
-  }
 
   button {
     display: flex;
@@ -482,11 +478,6 @@ export default {
     justify-content:space-between;
   }
 
-  .main {
-    display: grid;
-    grid-template-columns: 100%;
-    grid-template-rows: auto;
-  }
 
   .justify-content-center {
     display: flex;
@@ -504,7 +495,7 @@ export default {
     flex-direction: row;
   }
 
-  .grid {
+  .masks {
     display: grid;
     grid-template-columns: 33% 33% 33%;
     grid-template-rows: auto;
@@ -541,11 +532,6 @@ export default {
   }
 
   @media(max-width: 700px) {
-    .grid {
-      grid-template-columns: 50% 50%;
-    }
-  }
-  @media(max-width: 700px) {
     img {
       width: 100vw;
     }
@@ -560,8 +546,10 @@ export default {
     }
   }
   @media(max-width: 700px) {
-    .grid {
+    .masks {
       grid-template-columns: 100%;
+      overflow: auto;
+      height: 65vh;
     }
 
     #search {
@@ -582,10 +570,6 @@ export default {
       padding-left: 50vw;
     }
 
-    .main {
-      overflow: auto;
-      height: 65vh;
-    }
   }
 
 </style>
