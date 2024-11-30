@@ -20,9 +20,17 @@
       </select>
     </div>
 
+    <SortFilterPopup
+      :showPopup='showPopup'
+      @filterFor='filterFor'
+      @sortBy='filterFor'
+      @hideSortFilterPopUp='hideSortFilterPopUp'
+    />
+
 
     <SearchSortFilterSection
       @updateSearch='updateSearch'
+      @toggleShowPopup='toggleShowPopup'
     />
 
     <div class='container chunk'>
@@ -155,6 +163,7 @@ import ColoredCell from './colored_cell.vue'
 import MaskCards from './mask_card.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
+import SortFilterPopup from './sort_filter_popup.vue'
 import SearchSortFilterSection from './search_sort_filter_section.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
@@ -173,6 +182,7 @@ export default {
     ClosableMessage,
     ColoredCell,
     MaskCards,
+    SortFilterPopup,
     SearchSortFilterSection,
     SurveyQuestion,
     TabSet
@@ -194,6 +204,7 @@ export default {
       fit_tests: [],
       tabToShow: "Tested",
       managedUserId: undefined,
+      showPopup: false,
       sortByField: undefined,
       sortByStatus: undefined,
       filterForEarloop: true,
@@ -337,6 +348,20 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    toggleShowPopup(showPopup) {
+      this.showPopup = showPopup
+    },
+    hideSortFilterPopUp() {
+      this.showPopup = false
+    },
+    filterFor(args) {
+      this.$router.push(
+        {
+          name: 'FitTests',
+          query: args.query
+        }
+      )
+    },
     updateSearch(search) {
       this.search = search.value
     },

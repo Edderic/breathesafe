@@ -3,7 +3,7 @@
     <input id='search' type="text" @change='updateSearch'>
     <SearchIcon height='2em' width='2em'/>
 
-    <button class='icon' @click='showPopup = true'>
+    <button class='icon' @click='toggleShowPopup'>
       <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="8 10 70 70"
                                                                                    width="2em" height="2em"
                                                                                                >
@@ -34,7 +34,6 @@ export default {
       filterForHeadstrap: true,
       filterForTargeted: true,
       filterForNotTargeted: true,
-      showPopup: false,
       exceptionMissingObject: {
         color: {
           r: '200',
@@ -52,10 +51,16 @@ export default {
     }
   },
   props: {
+    showPopup: {
+      default: false
+    },
   },
   computed: {
   },
   methods: {
+    toggleShowPopup() {
+      this.$emit('toggleShowPopup', !this.showPopup)
+    },
     filterFor(string) {
       let filterForString = ('filterFor' + string)
       let newQuery = {}
