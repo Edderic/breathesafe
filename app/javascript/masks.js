@@ -222,6 +222,67 @@ export class Mask {
   }
 }
 
+export function sortedDisplayableMasks(displayables) {
+  /*
+   * Assumptions
+   *   'this' has the following
+   *     - sortByStatus
+   *     - sortByField
+   *     - displayables
+   */
+  if (this.sortByStatus == 'ascending') {
+    return displayables.sort(function(a, b) {
+      return parseInt(a[this.sortByField] || 0)  - parseInt(b[this.sortByField] || 0)
+    }.bind(this))
+  } else if (this.sortByStatus == 'descending') {
+    return displayables.sort(function(a, b) {
+      return parseInt(b[this.sortByField] || 0) - parseInt(a[this.sortByField] || 0)
+    }.bind(this))
+  } else {
+    return displayables
+  }
+}
+
+export function displayableMasks(masks) {
+  /*
+   * Displayables
+   *
+   * Assumptions:
+   *   'this' has the following
+   *      search: string
+   *      filterForHeadstrap: string
+   *      filterForEarloop: string
+   *      filterForTargeted: string
+   *      filterForNotTargeted: string
+   */
+
+  if (this.search == undefined) {
+    this.search = ""
+  }
+
+  let lowerSearch = this.search.toLowerCase()
+  let filterForHeadstrap = this.filterForHeadstrap
+  let filterForEarloop = this.filterForEarloop
+  let filterForTargeted = this.filterForTargeted
+  let filterForNotTargeted = this.filterForNotTargeted
+
+  return masks.filter(
+    function(mask) {
+      return (lowerSearch == "" || mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
+        && (
+          (mask.strapType == "") ||
+          (
+            (filterForHeadstrap && mask.strapType == 'Headstrap')
+            || (filterForEarloop && mask.strapType == 'Earloop')
+          )
+        ) && (
+          (mask.isTargeted && filterForTargeted) ||
+          (!mask.isTargeted && filterForNotTargeted)
+        )
+    }
+  )
+}
+
 export class MaskingBarChart {
   constructor(activityGroups) {
     this.activityGroups = activityGroups

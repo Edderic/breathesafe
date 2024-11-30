@@ -1920,11 +1920,15 @@ export default {
       this['comfort']['How comfortable is this mask/respirator?'] = value
     },
     setRouteTo(opt) {
+      let query = this.$route.query
+
+      query = Object.assign(query, {
+        tabToShow: opt.name
+      })
+
       this.$router.push({
         name: this.$route.name,
-        query: {
-          tabToShow: opt.name,
-        }
+        query: query
       })
     },
     setSecondaryTab(opt) {

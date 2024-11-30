@@ -3,6 +3,42 @@ class Mask < ApplicationRecord
   validates_presence_of :unique_internal_model_code
   validates_uniqueness_of :unique_internal_model_code
 
+  def self.find_targeted_but_untested_masks(manager_id)
+    results = Mask.connection.exec_query(
+      <<-SQL
+      WITH scoped_to_manager AS (
+        SELECT * FROM managed_users WHERE manager_id = #{manager_id}
+      ), targeted_masks AS (
+        SELECT * FROM masks
+        WHERE JSON_ARRAY_LENGTH(payable_datetimes) > 0
+      ), fit_tests_grouped_by_managed_id_and_mask_id AS (
+        SELECT user_id, mask_id FROM fit_tests
+        INNER JOIN scoped_to_manager
+        ON (scoped_to_manager.managed_id = fit_tests.user_id)
+        GROUP BY 1,2
+      ), user_mask_cross_join AS (
+        SELECT scoped_to_manager.managed_id, targeted_masks.id as mask_id, fit_tests.id as fit_test_id
+        FROM scoped_to_manager
+          CROSS JOIN targeted_masks
+          LEFT JOIN fit_tests
+            ON scoped_to_manager.managed_id = fit_tests.user_id
+            AND targeted_masks.id = fit_tests.mask_id
+      ), cross_join AS (
+        SELECT managed_id, mask_id, COUNT(DISTINCT fit_test_id)
+        FROM user_mask_cross_join
+
+        GROUP BY 1,2
+      )
+
+      SELECT cross_join.*, masks.* FROM cross_join
+      INNER JOIN masks ON masks.id = cross_join.mask_id
+      SQL
+    )
+
+    json_parsed = JSON.parse(results.to_json)
+    FitTest.json_parse(json_parsed, ['image_urls'])
+  end
+
   def self.find_payable_on(date)
     masks = Mask.all
 

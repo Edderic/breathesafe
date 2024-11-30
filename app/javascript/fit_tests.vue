@@ -5,11 +5,21 @@
       <CircularButton text="+" @click="newFitTest"/>
     </div>
 
+    <div class='menu row'>
+      <TabSet
+        :options='tabToShowOptions'
+        @update='setTabTo'
+        :tabToShow='tabToShow'
+      />
+    </div>
+
     <div class='row'>
-      <select v-model="managedUserId">
+      <label >For:</label>
+      <select :value="managedId" @change='setManagedUser'>
         <option v-for='m in managedUsers' :value="m.managedId">{{m.firstName + ' ' + m.lastName}}</option>
       </select>
     </div>
+
 
     <div class='row'>
       <input id='search' type="text" v-model='search'>
@@ -21,8 +31,9 @@
       <br>
     </div>
 
+    <MaskCards :cards='sortedDisplayables' v-show='tabToShow == "Untested"'/>
 
-    <div class='main scrollable desktopView'>
+    <div class='main scrollable desktopView' v-show='tabToShow == "Tested"'>
       <table>
         <thead>
           <th>Tester</th>
@@ -66,7 +77,7 @@
         </tbody>
       </table>
     </div>
-    <div class='main scrollable mobileView'>
+    <div class='main scrollable mobileView' v-show='tabToShow == "Tested"'>
       <div class='grid'>
         <div v-for='f in displayables' class='card'>
           <table>
@@ -142,6 +153,7 @@ import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import { facialMeasurementsPresenceColorMapping, userSealCheckColorMapping, genColorSchemeBounds, getColor, fitFactorColorScheme } from './colors.js'
 import ColoredCell from './colored_cell.vue'
+import MaskCards from './mask_card.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
 import SearchIcon from './search_icon.vue'
@@ -152,6 +164,7 @@ import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import { useManagedUserStore } from './stores/managed_users_store.js';
 import { FitTest } from './fit_testing.js';
+import { displayableMasks, sortedDisplayableMasks } from './masks.js'
 
 export default {
   name: 'FitTests',
@@ -160,17 +173,34 @@ export default {
     CircularButton,
     ClosableMessage,
     ColoredCell,
+    MaskCards,
     SearchIcon,
     SurveyQuestion,
     TabSet
   },
   data() {
     return {
+      tabToShowOptions: [
+        {
+          text: "Tested",
+        },
+        {
+          text: "Untested",
+        }
+      ],
+      testedAndUntested: [],
       messages: [],
       masks: [],
       search: "",
       fit_tests: [],
-      managedUserId: undefined
+      tabToShow: "Tested",
+      managedUserId: undefined,
+      sortByField: undefined,
+      sortByStatus: undefined,
+      filterForEarloop: true,
+      filterForHeadstrap: true,
+      filterForTargeted: true,
+      filterForNotTargeted: true,
     }
   },
   props: {
@@ -201,17 +231,35 @@ export default {
         ]
     ),
     managedUser() {
-
-      if (this.managedUserId) {
+      if (this.managedId && this.managedUsers.length > 0) {
         return this.managedUsers.filter(function(m) {
-          debugger
 
-          return m.managedId == this.managedUserId
-        }.bind(this))
+          return m.managedId == this.managedId
+        }.bind(this))[0]
+      } else if (this.managedUsers.length > 0) {
+        return this.managedUsers[0]
       }
 
-      // TODO: handle case where there is no managed user
-      return this.managedUsers[0]
+      return {
+        managedId: 0
+      }
+
+    },
+    untestedDisplayables() {
+      return displayableMasks.bind(this)(this.untested)
+    },
+    sortedDisplayables() {
+      return sortedDisplayableMasks.bind(this)(this.untestedDisplayables)
+    },
+    untested() {
+      this.testedAndUntested.filter( function(t) { return ((t.managedId == this.managedUser.managedId) && (t.count == 0)) }.bind(this))
+      return this.testedAndUntested.filter(
+        function(t) {
+          return ((t.managedId == this.managedUser.managedId)
+            && (t.count == 0)
+          )
+        }.bind(this)
+      )
     },
     displayables() {
       let lowerSearch = this.search.toLowerCase()
@@ -220,8 +268,8 @@ export default {
           let managedUserIdCriteria = true;
           let lowerSearchCriteria = true;
 
-          if (this.managedUserId) {
-            managedUserIdCriteria = fit_test.userId == this.managedUserId;
+          if (this.managedId) {
+            managedUserIdCriteria = fit_test.userId == this.managedId;
           }
 
           if (lowerSearch != "") {
@@ -236,18 +284,69 @@ export default {
   async created() {
     await this.getCurrentUser()
 
+    let toQuery = this.$route.query
+
+
     if (!this.currentUser) {
       signIn.call(this)
     } else {
       // TODO: a parent might input data on behalf of their children.
       // Currently, this.loadStuff() assumes We're loading the profile for the current user
       this.loadStuff()
+      if (this.$route.name == 'FitTests' ) {
+        if (toQuery['tabToShow']) {
+          this.tabToShow = toQuery.tabToShow
+        }
+        if (toQuery['managedId']) {
+          this.managedId = parseInt(toQuery.managedId)
+        }
+      }
     }
+
+
+    this.$watch(
+      () => this.$route.query,
+      (toQuery, fromQuery) => {
+        if (!this.currentUser) {
+          signIn.call(this)
+        } else {
+          // TODO: a parent might input data on behalf of their children.
+          // Currently, this.loadStuff() assumes We're loading the profile for the current user
+          this.loadStuff()
+          if (this.$route.name == 'FitTests' ) {
+            if (toQuery['tabToShow']) {
+              this.tabToShow = toQuery.tabToShow
+            }
+            if (toQuery['managedId']) {
+              this.managedId = parseInt(toQuery.managedId)
+            }
+          }
+        }
+
+      }
+    )
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    setManagedUser(event) {
+      let query = JSON.parse(JSON.stringify(this.$route.query))
+
+      query = Object.assign(query,
+        {
+          'managedId': parseInt(event.target.value)
+        }
+      )
+
+      this.setRouteTo(
+        'FitTests',
+        this.$route.params,
+        query
+      )
+
+
+    },
     showMask(f) {
       if (f && f.maskId) {
         return {name: 'ShowMask', params: { id: f.maskId}}
@@ -270,7 +369,22 @@ export default {
       let color = userSealCheckColorMapping[status]
       return `rgb(${color.r}, ${color.g}, ${color.b})`
     },
+    setTabTo(opt) {
+      let query = JSON.parse(JSON.stringify(this.$route.query))
+
+      let someQuery = Object.assign(query,
+        {
+          tabToShow: opt.name,
+        }
+      )
+
+      this.$router.push({
+        name: this.$route.name,
+        query: someQuery
+      })
+    },
     setRouteTo(name, params, query) {
+
       this.$router.push(
         {
           name: name,
@@ -320,6 +434,9 @@ export default {
           let data = response.data
           if (response.data.fit_tests) {
             this.fit_tests = data.fit_tests.map((ft) => new FitTest(ft))
+          }
+          if (response.data.tested_and_untested) {
+            this.testedAndUntested = deepSnakeToCamel(data.tested_and_untested)
           }
 
           // whatever you want
@@ -401,7 +518,8 @@ export default {
     margin: 1em;
   }
 
-  select {
+  select, label {
+    margin: 1em;
     padding: 0.25em;
   }
 
