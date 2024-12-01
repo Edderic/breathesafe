@@ -36,9 +36,9 @@
         :filterForNotTargeted='filterForNotTargeted'
         :sortByField='sortByField'
         :sortByStatus='sortByStatus'
+        @hideSortFilterPopUp='hideSortFilterPopUp'
         @filterFor='filterFor'
         @sortBy='filterFor'
-        @hideSortFilterPopUp='false'
       />
     </div>
 
@@ -47,6 +47,7 @@
 
     <MaskCards
       :cards='sortedDisplayables'
+      :showUniqueNumFitTesters='true'
     />
 
     <br>
@@ -195,6 +196,9 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    hideSortFilterPopUp() {
+      this.showPopup = false
+    },
     filterFor(args) {
       this.$router.push(
         {

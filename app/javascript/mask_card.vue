@@ -24,7 +24,18 @@
                :exception='exceptionMissingObject'
                />
             </td>
-            <td rowspan='2' class='targeted'  v-if='m.isTargeted'>
+            <td v-show='showUniqueNumFitTesters' title="Unique number of fit testers" >
+              <PersonIcon
+                backgroundColor='rgb(150,150,150)'
+                amount='1'
+              />
+            </td>
+            <td v-show='showUniqueNumFitTesters'>
+              <span>
+                {{m.uniqueFitTestersCount}}
+              </span>
+            </td>
+            <td rowspan='1' class='targeted'  v-if='m.isTargeted'>
               <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
                 <circle cx="40" cy="40" r="30" fill="rgb(150, 29, 2)"/>
 
@@ -36,19 +47,6 @@
 
                 <circle cx="40" cy="40" r="10" fill="rgb(150, 29, 2)"/>
               </svg>
-            </td>
-          </tr>
-          <tr v-show='showUniqueNumFitTesters'>
-            <td title="Unique number of fit testers" >
-              <PersonIcon
-                backgroundColor='rgb(150,150,150)'
-                amount='1'
-              />
-            </td>
-            <td>
-              <span>
-                {{m.uniqueFitTestersCount}}
-              </span>
             </td>
           </tr>
         </table>
@@ -506,10 +504,6 @@ export default {
     height: 75vh;
   }
 
-  .targeted {
-    padding-left: 5em;
-  }
-
   tbody tr:hover {
     cursor: pointer;
     background-color: rgb(230,230,230);
@@ -531,6 +525,8 @@ export default {
   }
 
   th, td {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
     text-align: center;
   }
 
@@ -567,10 +563,6 @@ export default {
     .thumbnail {
       max-width:70vw;
       max-height:none;
-    }
-
-    .targeted {
-      padding-left: 50vw;
     }
 
   }

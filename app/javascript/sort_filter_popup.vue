@@ -1,6 +1,6 @@
 <template>
   <div>
-  <Popup @onclose='hidePopup' v-show='showPopup'>
+  <Popup @onclose='hidePopup' v-if='showPopup'>
     <div  style='padding: 1em;'>
       <h3>Sort by:</h3>
       <table>
@@ -137,9 +137,6 @@ export default {
   methods: {
     hidePopup() {
       this.$emit('hideSortFilterPopUp', true)
-    },
-    toggleShowPopup() {
-      this.$emit('hideSortFilterPopUp', !this.showPopup)
     },
     filterFor(string) {
       let filterForString = ('filterFor' + string)
