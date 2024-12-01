@@ -25,125 +25,29 @@
     </div>
 
     <div class='container chunk'>
-      <Popup v-show='showPopup' @onclose='showPopup = false'>
-        <div  style='padding: 1em;'>
-          <h3>Sort by:</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>icon</th>
-                <th>field</th>
-                <th>status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr @click='sortBy("perimeterMm")'>
-                <td>
-                  <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/tape-measure.png" alt="tape measure" class='tape-measure' title="Perimeter of the mask, measured in millimeters, defined as the distance that covers the face">
-                </td>
-                <td >Perimeter</td>
-                <td>
-                  <SortingStatus :status='sortingStatus("perimeterMm")'/>
-                </td>
-              </tr>
-              <tr @click='sortBy("uniqueFitTestersCount")'>
-                <td>
-                  <PersonIcon
-                    backgroundColor='rgb(150,150,150)'
-                    amount='1'
-                  />
-                </td>
-                <td >Unique number of fit testers</td>
-                <td>
-                  <SortingStatus :status='sortingStatus("uniqueFitTestersCount")'/>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <br>
-
-          <h3>Filter for:</h3>
-          <br>
-          <div>Targeted Masks (for Testers)</div>
-          <table>
-            <tr>
-              <td><input type="checkbox" :checked='filterForTargeted' @click='filterFor("Targeted")'>Targeted</td>
-              <td><input type="checkbox" :checked='filterForNotTargeted' @click='filterFor("NotTargeted")'>Not Targeted</td>
-            </tr>
-          </table>
-
-          <br>
-          <div>Strap type</div>
-          <table>
-            <tr>
-              <td><input type="checkbox" :checked='filterForEarloop' @click='filterFor("Earloop")'>Earloop</td>
-              <td><input type="checkbox" :checked='filterForHeadstrap' @click='filterFor("Headstrap")'>Headstrap</td>
-            </tr>
-          </table>
-
-
-        </div>
-      </Popup>
+      <SortFilterPopup
+        :showPopup='showPopup'
+        :showTargetedOptions='true'
+        :showUniqueNumberFitTesters='true'
+        :showFitTesting='tabToShow == "Tested"'
+        :filterForEarloop='filterForEarloop'
+        :filterForHeadstrap='filterForHeadstrap'
+        :filterForTargeted='filterForTargeted'
+        :filterForNotTargeted='filterForNotTargeted'
+        :sortByField='sortByField'
+        :sortByStatus='sortByStatus'
+        @filterFor='filterFor'
+        @sortBy='filterFor'
+        @hideSortFilterPopUp='false'
+      />
     </div>
 
 
 
 
-    <div class='main grid'>
-      <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in sortedDisplayables' @click='viewMask(m.id)'>
-
-        <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
-        <div class='description'>
-          <span>
-            {{m.uniqueInternalModelCode}}
-          </span>
-        </div>
-        <table>
-          <tr>
-            <td>
-              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/tape-measure.png" alt="tape measure" class='tape-measure' title="Perimeter of the mask, measured in millimeters, defined as the distance that covers the face">
-            </td>
-            <td>
-              <ColoredCell
-               class='risk-score'
-               :colorScheme="perimColorScheme"
-               :maxVal=450
-               :value='m.perimeterMm'
-               :text="`${m.perimeterMm} mm`"
-               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
-               :exception='exceptionMissingObject'
-               />
-            </td>
-            <td rowspan='2' class='targeted'  v-if='m.isTargeted'>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
-                <circle cx="40" cy="40" r="30" fill="rgb(150, 29, 2)"/>
-
-                <circle cx="40" cy="40" r="25" fill="white"/>
-
-                <circle cx="40" cy="40" r="20" fill="rgb(150, 29, 2)"/>
-
-                <circle cx="40" cy="40" r="15" fill="white"/>
-
-                <circle cx="40" cy="40" r="10" fill="rgb(150, 29, 2)"/>
-              </svg>
-            </td>
-          </tr>
-          <tr>
-            <td title="Unique number of fit testers" >
-              <PersonIcon
-                backgroundColor='rgb(150,150,150)'
-                amount='1'
-              />
-            </td>
-            <td>
-              <span>
-                {{m.uniqueFitTestersCount}}
-              </span>
-            </td>
-          </tr>
-        </table>
-      </div>
-    </div>
+    <MaskCards
+      :cards='sortedDisplayables'
+    />
 
     <br>
     <br>
@@ -157,19 +61,21 @@ import Button from './button.vue'
 import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import ColoredCell from './colored_cell.vue'
+import MaskCards from './mask_card.vue'
 import PersonIcon from './person_icon.vue'
 import Popup from './pop_up.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
 import SearchIcon from './search_icon.vue'
 import SortingStatus from './sorting_status.vue'
+import SortFilterPopup from './sort_filter_popup.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { perimeterColorScheme } from './colors.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
-import { Respirator } from './masks.js'
+import { Respirator, displayableMasks, sortedDisplayableMasks } from './masks.js'
 
 
 export default {
@@ -179,9 +85,11 @@ export default {
     CircularButton,
     ColoredCell,
     ClosableMessage,
+    MaskCards,
     Popup,
     PersonIcon,
     SearchIcon,
+    SortFilterPopup,
     SortingStatus,
     SurveyQuestion,
     TabSet
@@ -235,44 +143,10 @@ export default {
       return perimeterColorScheme()
     },
     displayables() {
-      if (this.search == undefined) {
-        this.search = ""
-      }
-
-      let lowerSearch = this.search.toLowerCase()
-      let filterForHeadstrap = this.filterForHeadstrap
-      let filterForEarloop = this.filterForEarloop
-      let filterForTargeted = this.filterForTargeted
-      let filterForNotTargeted = this.filterForNotTargeted
-
-      return this.masks.filter(
-        function(mask) {
-          return (lowerSearch == "" || mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
-            && (
-              (mask.strapType == "") ||
-              (
-                (filterForHeadstrap && mask.strapType == 'Headstrap')
-                || (filterForEarloop && mask.strapType == 'Earloop')
-              )
-            ) && (
-              (mask.isTargeted && filterForTargeted) ||
-              (!mask.isTargeted && filterForNotTargeted)
-            )
-        }
-      )
+      return displayableMasks.bind(this)(this.masks)
     },
     sortedDisplayables() {
-      if (this.sortByStatus == 'ascending') {
-        return this.displayables.sort(function(a, b) {
-          return parseInt(a[this.sortByField] || 0)  - parseInt(b[this.sortByField] || 0)
-        }.bind(this))
-      } else if (this.sortByStatus == 'descending') {
-        return this.displayables.sort(function(a, b) {
-          return parseInt(b[this.sortByField] || 0) - parseInt(a[this.sortByField] || 0)
-        }.bind(this))
-      } else {
-        return this.displayables
-      }
+      return sortedDisplayableMasks.bind(this)(this.displayables)
     },
     messages() {
       return this.errorMessages;
@@ -295,6 +169,8 @@ export default {
       }
     }
 
+    this.loadStuff()
+
     this.$watch(
       () => this.$route.query,
       (toQuery, previousQuery) => {
@@ -310,32 +186,24 @@ export default {
             this[specificFilt] = this.$route.query[specificFilt] == 'true'
           }
         }
+
+        this.loadStuff()
       }
     )
 
-    this.loadStuff()
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
-    filterFor(string) {
-      let filterForString = ('filterFor' + string)
-      let newQuery = {}
-      newQuery[filterForString] = !this['filterFor' + string]
-
-      let combinedQuery = Object.assign(
-        JSON.parse(
-          JSON.stringify(this.$route.query)
-        ),
-        newQuery
-      )
-
+    filterFor(args) {
       this.$router.push(
         {
           name: 'Masks',
-          query: combinedQuery
+          query: args.query
         }
       )
+
+      // this.$router.go(0)
     },
     sortingStatus(field) {
       if (this.sortByField == field) {
