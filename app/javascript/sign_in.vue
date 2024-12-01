@@ -138,9 +138,10 @@ export default {
         // whatever you want
         this.loadProfile()
 
-        if (this.$route.query['attempt-name']) {
+        let attemptName = this.$route.query['attempt-name'];
+
+        if (attemptName && attemptName != 'SignIn') {
           let query = JSON.parse(JSON.stringify(this.$route.query))
-          let attemptName = this.$route.query['attempt-name']
           delete query['attempt-name']
 
           let params = {}

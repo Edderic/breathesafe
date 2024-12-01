@@ -1,4 +1,4 @@
-export function signIn() {
+export async function signIn() {
   if (!this.currentUser) {
     let query = JSON.parse(JSON.stringify(this.$route.query))
 
@@ -8,7 +8,7 @@ export function signIn() {
       query[`params-${k}`] = this.$route.params[k]
     }
 
-    this.$router.push({
+    await this.$router.push({
       name: 'SignIn',
       query: query
     })
