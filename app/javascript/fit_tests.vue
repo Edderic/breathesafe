@@ -319,13 +319,13 @@ export default {
     let toQuery = this.$route.query
 
 
-    if (!this.currentUser) {
-      signIn.call(this)
-    } else {
-      // TODO: a parent might input data on behalf of their children.
-      // Currently, this.loadStuff() assumes We're loading the profile for the current user
-      this.loadStuff()
-      if (this.$route.name == 'FitTests' ) {
+    if (this.$route.name == 'FitTests' ) {
+      if (!this.currentUser) {
+        signIn.call(this)
+      } else {
+        // TODO: a parent might input data on behalf of their children.
+        // Currently, this.loadStuff() assumes We're loading the profile for the current user
+        this.loadStuff()
         if (toQuery['tabToShow']) {
           this.tabToShow = toQuery.tabToShow
         }
@@ -350,20 +350,19 @@ export default {
           }
         }
       }
-
     }
 
 
     this.$watch(
       () => this.$route.query,
       (toQuery, fromQuery) => {
-        if (!this.currentUser) {
-          signIn.call(this)
-        } else {
-          // TODO: a parent might input data on behalf of their children.
-          // Currently, this.loadStuff() assumes We're loading the profile for the current user
-          this.loadStuff()
-          if (this.$route.name == 'FitTests' ) {
+        if (this.$route.name == 'FitTests' ) {
+          if (!this.currentUser) {
+            signIn.call(this)
+          } else {
+            // TODO: a parent might input data on behalf of their children.
+            // Currently, this.loadStuff() assumes We're loading the profile for the current user
+            this.loadStuff()
             if (toQuery['tabToShow']) {
               this.tabToShow = toQuery.tabToShow
             }
