@@ -211,7 +211,7 @@ export default {
       masks: [],
       search: "",
       fit_tests: [],
-      tabToShow: "Tested",
+      tabToShow: "Untested",
       managedUserId: undefined,
       showPopup: false,
       sortByField: undefined,
