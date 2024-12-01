@@ -87,35 +87,6 @@ export default {
         return ''
       }
     },
-    sortBy(field) {
-      let query = {
-        sortByField: field
-      }
-
-      if (this.sortByField != field) {
-        query['sortByStatus'] = 'ascending'
-      } else {
-        if (this.sortByStatus == 'ascending') {
-          query['sortByStatus'] = 'descending'
-        } else if (this.sortByStatus == 'descending') {
-          query['sortByStatus'] = 'ascending'
-        }
-      }
-
-      let combinedQuery = Object.assign(
-        JSON.parse(
-          JSON.stringify(this.$route.query)
-        ),
-        query
-      )
-
-      this.$router.push(
-        {
-          name: 'Masks',
-          query: combinedQuery
-        }
-      )
-    },
     updateSearch(event) {
       let newQuery = {
         search: event.target.value
