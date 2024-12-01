@@ -429,7 +429,7 @@
       </div>
 
       <p>
-      Please visit the <router-link :to="{'name': 'MaskRecommenderOnboarding'}">onboarding page</router-link> to learn more about details.
+      Please visit the <router-link to="/onboarding#toc">onboarding page</router-link> to learn more about details.
       </p>
       <br>
       <br>
