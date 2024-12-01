@@ -37,7 +37,7 @@
 
 
     <SearchSortFilterSection
-      @updateSearch='updateSearch'
+      @updateSearch='filterFor'
       @toggleShowPopup='toggleShowPopup'
     />
 
@@ -199,10 +199,10 @@ export default {
     return {
       tabToShowOptions: [
         {
-          text: "Tested",
+          text: "Untested",
         },
         {
-          text: "Untested",
+          text: "Tested",
         }
       ],
       testedAndUntested: [],
@@ -406,9 +406,6 @@ export default {
           query: args.query
         }
       )
-    },
-    updateSearch(search) {
-      this.search = search.value
     },
     setManagedUser(event) {
       let query = JSON.parse(JSON.stringify(this.$route.query))

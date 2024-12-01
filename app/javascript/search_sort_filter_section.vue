@@ -128,11 +128,7 @@ export default {
         newQuery
       )
 
-      this.$emit('updateSearch', { value: event.target.value })
-      // this.$router.push({
-        // name: 'Masks',
-        // query: combinedQuery
-      // })
+      this.$emit('updateSearch', { query: combinedQuery })
     },
   }
 }
