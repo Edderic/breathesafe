@@ -63,6 +63,10 @@
       <router-link :to="tocPath('reach-out')">
         Whom do participants contact for questions?
       </router-link>
+
+      <router-link :to="tocPath('onboarding')">
+        Do you have more details about the data collection process?
+      </router-link>
       <br>
       <br>
       <br>
@@ -93,7 +97,7 @@
       </div>
 
       <div>
-        <p>Last updated: Oct. 26, 2024</p>
+        <p>Last updated: Dec. 01, 2024</p>
       </div>
         <div id='invitation-to-participate'>
           <br>
@@ -418,6 +422,21 @@
       <br>
       <br>
 
+      <div id='onboarding'>
+        <br>
+        <br>
+        <h4>Do you have more details about the data collection process?</h4>
+      </div>
+
+      <p>
+      Please visit the <router-link :to="{'name': 'MaskRecommenderOnboarding'}">onboarding page</router-link> to learn more about details.
+      </p>
+      <br>
+      <br>
+      <br>
+      <br>
+      <br>
+
       <div></div>
       <br>
       <br>
@@ -494,19 +513,13 @@ export default {
     max-width: 15em;
   }
 
-  @media(min-width: 750px) {
+  @media(min-width: 1200px) {
     .toc-button {
       display: none;
     }
 
   }
-
-  @media(max-width: 1000px) {
-    .left-pane-image {
-      max-width: 10em;
-    }
-  }
-  @media(max-width: 750px) {
+  @media(max-width: 1200px) {
     .left-pane-image {
       max-width: 8em;
     }
