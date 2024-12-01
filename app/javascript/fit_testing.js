@@ -171,6 +171,40 @@ export class FitTest {
     return !this.qualitativeFailed
   }
 
+  get quantitativeStatusNumeric() {
+    if (this.quantitative.procedure == "Skipped") {
+      return -1
+    }
+
+    // quantify HMFF
+    let fitFactorsInverted = 0
+    let fitFactorCount = 0
+    let sealingExercise = 0
+
+    for (let ex of this.quantitativeExercises) {
+      if (ex.name.includes("SEALED")) {
+        sealingExercise = 1
+        continue
+        // skip the SEALED exercise which is for measuring filtration
+        // efficiency of the mask.
+      }
+
+      if (!!ex.fit_factor) {
+        fitFactorCount += 1
+      }
+
+      fitFactorsInverted += 1 / ex.fit_factor
+    }
+
+
+    if (this.quantitativeExercises.length - fitFactorCount - sealingExercise > 0) {
+      // there are still some exercises that haven't been done. OSHA protocol
+      // expects users to finish every single exercise to get the overall HMFF
+      return 0
+    }
+
+    return round(fitFactorCount / fitFactorsInverted, 1)
+  }
   get quantitativeStatus() {
     if (this.quantitative.procedure == "Skipped") {
       return "Skipped"

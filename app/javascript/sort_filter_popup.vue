@@ -33,10 +33,10 @@
               <SortingStatus :status='sortingStatus("uniqueFitTestersCount")'/>
             </td>
           </tr>
-          <tr @click='sortBy("quantitativeStatus")' v-if='showFitTesting'>
+          <tr @click='sortBy("quantitativeStatusNumeric")' v-if='showFitTesting'>
             <td colspan='2'>QNFT HMFF</td>
             <td>
-              <SortingStatus :status='sortingStatus("quantitativeStatus")'/>
+              <SortingStatus :status='sortingStatus("quantitativeStatusNumeric")'/>
             </td>
           </tr>
         </tbody>
