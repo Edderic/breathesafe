@@ -21,7 +21,7 @@
               <SortingStatus :status='sortingStatus("perimeterMm")'/>
             </td>
           </tr>
-          <tr @click='sortBy("uniqueFitTestersCount")'>
+          <tr @click='sortBy("uniqueFitTestersCount")' v-if='showUniqueNumberFitTesters'>
             <td>
               <PersonIcon
                 backgroundColor='rgb(150,150,150)'
@@ -31,6 +31,12 @@
             <td >Unique number of fit testers</td>
             <td>
               <SortingStatus :status='sortingStatus("uniqueFitTestersCount")'/>
+            </td>
+          </tr>
+          <tr @click='sortBy("quantitativeStatus")' v-if='showFitTesting'>
+            <td colspan='2'>QNFT HMFF</td>
+            <td>
+              <SortingStatus :status='sortingStatus("quantitativeStatus")'/>
             </td>
           </tr>
         </tbody>
@@ -92,6 +98,12 @@ export default {
     }
   },
   props: {
+    showFitTesting: {
+      default: false
+    },
+    showUniqueNumberFitTesters: {
+      default: true
+    },
     showTargetedOptions: {
       default: true
     },

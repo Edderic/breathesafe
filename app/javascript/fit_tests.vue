@@ -24,6 +24,7 @@
       :showPopup='showPopup'
       :showTargetedOptions='false'
       :showUniqueNumberFitTesters='false'
+      :showFitTesting='tabToShow == "Tested"'
       :filterForEarloop='filterForEarloop'
       :filterForHeadstrap='filterForHeadstrap'
       :filterForTargeted='filterForTargeted'
