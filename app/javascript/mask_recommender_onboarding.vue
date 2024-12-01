@@ -665,19 +665,13 @@ export default {
   }
 
 
-  @media(min-width: 750px) {
+  @media(min-width: 1200px) {
     .toc-button {
       display: none;
     }
-
   }
 
-  @media(max-width: 1000px) {
-    .left-pane-image {
-      max-width: 10em;
-    }
-  }
-  @media(max-width: 750px) {
+  @media(max-width: 1200px) {
     .left-pane-image {
       max-width: 8em;
     }
