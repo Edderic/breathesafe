@@ -23,6 +23,7 @@
     <SortFilterPopup
       :showPopup='showPopup'
       :showTargetedOptions='false'
+      :showUniqueNumberFitTesters='false'
       :filterForEarloop='filterForEarloop'
       :filterForHeadstrap='filterForHeadstrap'
       :filterForTargeted='filterForTargeted'
@@ -62,7 +63,7 @@
           <th>Has facial measurement data</th>
         </thead>
         <tbody>
-          <tr v-for='f in displayables'>
+          <tr v-for='f in sortedFitTests'>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User"})'>{{f.firstName + ' ' + f.lastName}}</td>
             <td>
               <router-link :to="showMask(f)">
@@ -93,7 +94,7 @@
     </div>
     <div class='main scrollable mobileView' v-show='tabToShow == "Tested"'>
       <div class='grid'>
-        <div v-for='f in displayables' class='card'>
+        <div v-for='f in sortedFitTests' class='card'>
           <table>
             <tr>
               <td rowspan='2' colspan='2'>
@@ -307,6 +308,9 @@ export default {
         }.bind(this)
       )
     },
+    sortedFitTests() {
+      return sortedDisplayableMasks.bind(this)(this.displayables)
+    }
   },
   async created() {
     await this.getCurrentUser()
