@@ -12,8 +12,8 @@
         <router-link :to='{ name: "Venues" }'>
           <Button text='Find Safer Venues' major='true'/>
         </router-link>
-        <router-link :to='{ name: "Masks", query: { sortByField:"uniqueFitTestersCount", "sortByStatus":"descending", "filterForTargeted": "true", "filterForNotTargeted": "false" }}'>
-          <Button text='Find Respirators' major='true'/>
+        <router-link :to='{ name: "ConsentForm" }'>
+          <Button text='Improve Mask Recommender' major='true'/>
         </router-link>
       </div>
 
