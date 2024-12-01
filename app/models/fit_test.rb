@@ -6,7 +6,7 @@ class FitTest < ApplicationRecord
   def self.viewable(user)
     fit_tests = FitTest.connection.exec_query(
       <<-SQL
-        SELECT ft.*, m.id as mask_id, m.unique_internal_model_code, m.image_urls, m.has_exhalation_valve, m.strap_type, fm.user_id AS fm_user_id, p.first_name, p.last_name,
+        SELECT ft.*, m.id as mask_id, m.unique_internal_model_code, m.image_urls, m.has_exhalation_valve, m.strap_type, m.perimeter_mm, fm.user_id AS fm_user_id, p.first_name, p.last_name,
           #{self.facial_measurement_presence}
 
         FROM fit_tests ft
