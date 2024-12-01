@@ -38,7 +38,7 @@
               </svg>
             </td>
           </tr>
-          <tr>
+          <tr v-show='showUniqueNumFitTesters'>
             <td title="Unique number of fit testers" >
               <PersonIcon
                 backgroundColor='rgb(150,150,150)'
@@ -117,6 +117,9 @@ export default {
   props: {
     cards: {
       default: []
+    },
+    showUniqueNumFitTesters: {
+      default: false
     }
   },
   computed: {
