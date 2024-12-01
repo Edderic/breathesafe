@@ -1,26 +1,19 @@
 import {round, shorthandDate} from './misc.js'
+import { deepSnakeToCamel } from './misc.js'
 
 export class FitTest {
   constructor(data) {
     this.id = data.id
-    this.uniqueInternalModelCode = data.unique_internal_model_code
-    this.hasExhalationValve = data.has_exhalation_valve
-    this.imageUrls = data.image_urls
-    this.createdAt = data.created_at
-    this.updatedAt = data.updated_at
-    this.userSealCheck = data.user_seal_check;
+
+    this._fit_test = deepSnakeToCamel(data)
+    for(let k in this._fit_test) {
+      this[k] = this._fit_test[k]
+    }
+
     this.qualitative = data.results.qualitative;
     this.quantitative = data.results.quantitative;
-    this.comfort = data.comfort
     this.qualitativeExercises = this.qualitative.exercises
     this.quantitativeExercises = this.quantitative.exercises
-    this.firstName = data.first_name
-    this.lastName = data.last_name
-    this.maskId = data.mask_id
-    this.facialHair = data.facial_hair
-    this.facialMeasurementId = data.facial_measurement_id
-    this.facialMeasurementPresence = data.facial_measurement_presence
-    this.userId = data.user_id
 
     this.comfortQuestions = {
       "How comfortable is the position of the mask on the nose?": {

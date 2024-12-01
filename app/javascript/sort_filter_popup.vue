@@ -38,9 +38,9 @@
       <br>
 
       <h3>Filter for:</h3>
-      <br>
-      <div>Targeted Masks (for Testers)</div>
-      <table>
+      <br v-if='showTargetedOptions'>
+      <div v-if='showTargetedOptions'>Targeted Masks (for Testers)</div>
+      <table v-if='showTargetedOptions'>
         <tr>
           <td><input id='targeted' type="checkbox" :checked='filterForTargeted' @click='filterFor("Targeted")'><label for="targeted">Targeted</label></td>
           <td><input id='not_targeted' type="checkbox" :checked='filterForNotTargeted' @click='filterFor("NotTargeted")'><label for="not_targeted">Not Targeted</label></td>
@@ -89,11 +89,18 @@ export default {
   data() {
     return {
       search: "",
-      sortByField: undefined,
-      sortByStatus: 'ascending'
     }
   },
   props: {
+    showTargetedOptions: {
+      default: true
+    },
+    sortByField: {
+      default: undefined
+    },
+    sortByStatus: {
+      default: 'ascending'
+    },
     showPopup: {
       default: false
     },

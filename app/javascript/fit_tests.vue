@@ -14,7 +14,7 @@
     </div>
 
     <div class='row'>
-      <label >For:</label>
+      <label >By:</label>
       <select :value="managedId" @change='setManagedUser'>
         <option v-for='m in managedUsers' :value="m.managedId">{{m.firstName + ' ' + m.lastName}}</option>
       </select>
@@ -22,8 +22,11 @@
 
     <SortFilterPopup
       :showPopup='showPopup'
+      :showTargetedOptions='false'
       :filterForEarloop='filterForEarloop'
       :filterForHeadstrap='filterForHeadstrap'
+      :filterForTargeted='filterForTargeted'
+      :filterForNotTargeted='filterForNotTargeted'
       :sortByField='sortByField'
       :sortByStatus='sortByStatus'
       @filterFor='filterFor'
@@ -285,8 +288,10 @@ export default {
     },
     displayables() {
       let lowerSearch = this.search.toLowerCase()
-      return this.fit_tests.filter(
+
+      return displayableMasks.bind(this)(this.fit_tests).filter(
         function(fit_test) {
+
           let managedUserIdCriteria = true;
           let lowerSearchCriteria = true;
 
