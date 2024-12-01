@@ -80,7 +80,10 @@
 
     </div>
 
-    <div class='margined main'>
+    <div class='margined main' id='onboarding'>
+      <br>
+      <br>
+
       <h2>Onboarding for Mask Recommender Based on Facial Features</h2>
 
       <div>
