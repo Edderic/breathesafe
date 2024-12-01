@@ -34,6 +34,7 @@
 
     <div class='row spaced-between main fixed-nav-bar-bottom' v-if='showSubNavBar == "RespiratorRecommender"'>
       <div class='vertical-centered bunched-vertically-in-the-middle'>
+        <router-link class='desktop clickable side-padding' :to='{ name: "ConsentForm"}' @click='toggleShowSubNavBar("ConsentForm")'>Consent Form</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "MaskRecommenderOnboarding"}' @click='toggleShowSubNavBar("MaskRecommenderOnboarding")'>Onboarding</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "MeasurementDevices"}' @click='toggleShowSubNavBar("MeasurementDevices")'>Measurement Devices</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "RespiratorUsers"}' @click='toggleShowSubNavBar("RespiratorRecommender")'>Users</router-link>
@@ -50,6 +51,7 @@
       <router-link class='mobile-row clickable side-padding' :to='{ name: "Venues"}'>Add Venues</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "AddMeasurements"}' v-if='signedIn'>Add Measurements</router-link>
       <h2 class='vertical-centered'>Respirator</h2>
+      <router-link class='mobile-row clickable side-padding' :to='{ name: "ConsentForm"}' @click='toggleShowSubNavBar("ConsentForm")'>Consent Form</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "MaskRecommenderOnboarding"}' @click='toggleShowSubNavBar("MaskRecommenderOnboarding")'>Onboarding</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "MeasurementDevices"}' @click='toggleShowSubNavBar("MeasurementDevices")'>Measurement Devices</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "RespiratorUsers"}' @click='toggleShowSubNavBar("RespiratorRecommender")'>Users</router-link>
