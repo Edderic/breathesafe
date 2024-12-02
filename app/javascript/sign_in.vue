@@ -32,7 +32,7 @@
     </div>
 
     <div class='container row' v-if='!registered'>
-      <Button @click="signIn" text='Sign In'/>
+      <Button shadow='true' @click="signIn" text='Sign In'/>
     </div>
 
     <div class='container' v-if='!registered'>
@@ -46,7 +46,7 @@
 
 
     <div class='container row' v-if='!registered'>
-      <Button @click="signUp" text='Sign up' :disabled='!agreeTOSMedicalDisclaimerPrivacyPolicy'/>
+      <Button shadow='true' @click="signUp" text='Sign up' :disabled='!agreeTOSMedicalDisclaimerPrivacyPolicy'/>
 
     </div>
   </form>
