@@ -47,7 +47,7 @@
       <br>
     </div>
 
-    <MaskCards :cards='sortedDisplayables' v-if='tabToShow == "Untested"' @newFitTestWithSize='newFitTestWithSize'/>
+    <MaskCards :cards='sortedDisplayables' v-if='tabToShow == "Untested"' :managedUser='managedUser' @newFitTestWithSize='newFitTestWithSize' @newFitTestForUser='newFitTestForUser'/>
 
     <div class='main scrollable desktopView' v-if='tabToShow == "Tested"'>
       <table>
@@ -206,6 +206,7 @@ export default {
           text: "Tested",
         }
       ],
+      managedId: 0,
       testedAndUntested: [],
       messages: [],
       masks: [],
@@ -250,13 +251,16 @@ export default {
     ),
     managedUser() {
       if (this.managedId && this.managedUsers.length > 0) {
+
         return this.managedUsers.filter(function(m) {
 
           return m.managedId == this.managedId
         }.bind(this))[0]
       } else if (this.managedUsers.length > 0) {
+
         return this.managedUsers[0]
       }
+
 
       return {
         managedId: 0
@@ -270,6 +274,10 @@ export default {
       return sortedDisplayableMasks.bind(this)(this.untestedDisplayables)
     },
     untested() {
+      if (!this.managedUser) {
+        return []
+      }
+
       return this.testedAndUntested.filter(
         function(t) {
           let lowerSearch = this.search.toLowerCase()
@@ -317,89 +325,72 @@ export default {
 
     let toQuery = this.$route.query
 
-
-    if (this.$route.name == 'FitTests' ) {
-      if (!this.currentUser) {
-        signIn.call(this)
-      } else {
-        // TODO: a parent might input data on behalf of their children.
-        // Currently, this.loadStuff() assumes We're loading the profile for the current user
-        this.loadStuff()
-        if (toQuery['tabToShow']) {
-          this.tabToShow = toQuery.tabToShow
-        }
-        if (toQuery['managedId']) {
-          this.managedId = parseInt(toQuery.managedId)
-        }
-
-        // setup search, filtering, sorting variables
-        // TODO: might be better off that this is in some function for reusability purposes
-        this.search = this.$route.query.search || ''
-        this.sortByStatus = this.$route.query.sortByStatus
-
-        this.sortByField = this.$route.query.sortByField
-
-        let filterCriteria = ["Earloop", "Headstrap", "Targeted", "NotTargeted"];
-        for(let filt of filterCriteria) {
-          let specificFilt = 'filterFor' + filt
-          if (this.$route.query[specificFilt] == undefined) {
-            this[specificFilt] = true
-          } else {
-            this[specificFilt] = this.$route.query[specificFilt] == 'true'
-          }
-        }
-      }
-    }
-
+    await this.loadWatch(toQuery, {})
 
     this.$watch(
       () => this.$route.query,
-      (toQuery, fromQuery) => {
-        if (this.$route.name == 'FitTests' ) {
-          if (!this.currentUser) {
-            signIn.call(this)
-          } else {
-            // TODO: a parent might input data on behalf of their children.
-            // Currently, this.loadStuff() assumes We're loading the profile for the current user
-            this.loadStuff()
-            if (toQuery['tabToShow']) {
-              this.tabToShow = toQuery.tabToShow
-            }
-            if (toQuery['managedId']) {
-              this.managedId = parseInt(toQuery.managedId)
-            }
-
-            this.search = this.$route.query.search || ''
-            this.sortByStatus = this.$route.query.sortByStatus
-            this.sortByField = this.$route.query.sortByField
-
-            let filterCriteria = ["Earloop", "Headstrap", "Targeted", "NotTargeted"];
-            for(let filt of filterCriteria) {
-              let specificFilt = 'filterFor' + filt
-              if (this.$route.query[specificFilt] == undefined) {
-                this[specificFilt] = true
-              } else {
-                this[specificFilt] = this.$route.query[specificFilt] == 'true'
-              }
-            }
-          }
-        }
-
-      }
+      this.loadWatch
     )
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    async loadWatch(toQuery, fromQuery) {
+      if (this.$route.name == 'FitTests' ) {
+        if (!this.currentUser) {
+          signIn.call(this)
+        } else {
+          // TODO: a parent might input data on behalf of their children.
+          // Currently, this.loadStuff() assumes We're loading the profile for the current user
+          await this.loadStuff()
+          if (toQuery['tabToShow']) {
+            this.tabToShow = toQuery.tabToShow
+          }
+          if (toQuery['managedId']) {
+            this.managedId = parseInt(toQuery.managedId)
+          }
+
+          // setup search, filtering, sorting variables
+          // TODO: might be better off that this is in some function for reusability purposes
+          this.search = this.$route.query.search || ''
+          this.sortByStatus = this.$route.query.sortByStatus
+
+          this.sortByField = this.$route.query.sortByField
+
+          let filterCriteria = ["Earloop", "Headstrap", "Targeted", "NotTargeted"];
+          for(let filt of filterCriteria) {
+            let specificFilt = 'filterFor' + filt
+            if (this.$route.query[specificFilt] == undefined) {
+              this[specificFilt] = true
+            } else {
+              this[specificFilt] = this.$route.query[specificFilt] == 'true'
+            }
+          }
+        }
+      }
+    },
+    newFitTestForUser(args) {
+      this.$router.push(
+        {
+          name: "NewFitTest",
+          query: {
+            mode: 'Edit',
+            userId: args.userId,
+            maskId: args.maskId
+          }
+        }
+      )
+    },
     newFitTestWithSize(args) {
       this.$router.push(
         {
           name: "NewFitTest",
           query: {
             mode: 'Edit',
-            userId: this.managedId,
-            maskId: args.maskId
+            userId: args.userId,
+            maskId: args.maskId,
+            size: args.size
           }
         }
       )

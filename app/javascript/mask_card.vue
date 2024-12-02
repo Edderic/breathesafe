@@ -3,11 +3,11 @@
       <div class='align-items-center justify-content-center'>
         <h3>{{selectedMask.uniqueInternalModelCode}}</h3>
       </div>
-      <Button class='button' @click='viewMask'>See details about Mask</Button>
-      <Button class='button' @click='newFitTestWithSize("small")'>Mark Too Small</Button>
-      <Button class='button'>Mark Too Big</Button>
-      <Button class='button'>Add Fit Test Data</Button>
-      <Button class='button'>Cancel</Button>
+      <Button shadow='true' :class="{ tab: true }"  class='button' @click='viewMask'>See details about Mask</Button>
+      <Button shadow='true' :class="{ tab: true }"  class='button' @click='newFitTestWithSize("Too small")'>Mark Too Small</Button>
+      <Button shadow='true' :class="{ tab: true }"  class='button' @click='newFitTestWithSize("Too big")'>Mark Too Big</Button>
+      <Button shadow='true' :class="{ tab: true }"  class='button' @click='newFitTestForUser()'>Add Fit Test Data</Button>
+      <Button shadow='true' :class="{ tab: true }"  class='button' @click='showPopup = false'>Cancel</Button>
     </Popup>
 
     <div class='masks'>
@@ -126,6 +126,11 @@ export default {
     }
   },
   props: {
+    managedUser: {
+      default: {
+        managedId: 0
+      }
+    },
     cards: {
       default: []
     },
@@ -241,7 +246,10 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     newFitTestWithSize(size) {
-      this.$emit('newFitTestWithSize', {size: size, maskId: this.selectedMask.id})
+      this.$emit('newFitTestWithSize', {size: size, maskId: this.selectedMask.id, userId: this.managedUser.managedId})
+    },
+    newFitTestForUser() {
+      this.$emit('newFitTestForUser', {maskId: this.selectedMask.id, userId: this.managedUser.managedId})
     },
     selectMask(id) {
       this.showPopup = true

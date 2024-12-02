@@ -77,7 +77,7 @@
         </h3>
 
 
-        <div :class='{main: true, grid: true, selectedMask: maskHasBeenSelected, oneCol: !!selectedMask.uniqueInternalModelCode}'>
+        <div :class='{main: true, grid: true, selectedMask: maskHasBeenSelected}'>
           <div class='card pointable flex flex-dir-col align-items-center justify-content-center' v-for='m in selectMaskDisplayables' @click='selectMask(m.id)'>
             <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
             <div class='description'>
@@ -478,10 +478,10 @@
     <br>
 
     <div class='row buttons'>
-      <Button class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
-      <Button class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
-      <Button class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
-      <Button class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
+      <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+      <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
+      <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
+      <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
     </div>
 
   </div>
@@ -1201,29 +1201,39 @@ export default {
         this.mode = 'Create'
       }
 
-      if (this.$route.query.userId) {
+      if (this.$route.name == 'NewFitTest' && this.$route.query.userId && this.$route.query.maskId) {
+        // handle quick way to add too small / too big
+        await this.loadMasks()
         await this.loadManagedUsers()
         let managedUser = this.managedUsers.filter((m) => m.managedId == parseInt(this.$route.query.userId))[0]
+        this.selectedMask = this.masks.filter((m) => m.maskId == parseInt(this.$route.query.maskId))[0]
+
+        let successCallback = undefined;
+        let tabToShow = 'Facial Hair'
+
+        if (this.$route.query.size) {
+          this.userSealCheck["sizing"]["What do you think about the sizing of this mask relative to your face?"] = this.$route.query.size
+
+          successCallback = function () {
+            this.$router.push({
+              name: 'FitTests',
+              query: {
+                managedId: managedUser.managedId
+              }
+            })
+          }.bind(this)
+        }
+
         if (managedUser) {
           this.selectedUser = managedUser
+
           await this.saveFitTest(
             {
-              tabToShow: 'Mask'
-            }
+              tabToShow: tabToShow
+            },
+            successCallback
           )
         }
-      }
-
-      if (this.$route.query.maskId) {
-        await this.loadMasks()
-        debugger
-
-        this.selectedMask = this.masks.filter((m) => m.maskId == parseInt(this.$route.query.maskId))[0]
-        await this.saveFitTest(
-          {
-            tabToShow: 'Facial Hair'
-          }
-        )
       }
 
       if (this.acceptableRouteName) {
@@ -1614,9 +1624,12 @@ export default {
       }
     },
 
-    async saveFitTest(query) {
-      if (this.id) {
+    async saveFitTest(query, successCallback) {
+      if (!tabToShow) {
+        tabToShow = 'Mask'
+      }
 
+      if (this.id) {
         await axios.put(
           `/fit_tests/${this.id}.json`, {
             fit_test: this.toSave,
@@ -1630,6 +1643,7 @@ export default {
             // whatever you want
 
             // this.mode = 'View'
+
             this.$router.push({
               path: `/fit_tests/${this.id}`,
               query: query,
@@ -1668,16 +1682,18 @@ export default {
             // We assume that the user hits save first at the "Mask" section.
             // It might not be always the case, but good enough
 
-            this.$router.push({
-              name: 'EditFitTest',
-              params: {
-                id: this.id
-              },
-              query: {
-                tabToShow: 'Mask'
-              },
-              force: true
-            })
+            if (!!successCallback) {
+              successCallback()
+            } else {
+              this.$router.push({
+                name: 'EditFitTest',
+                params: {
+                  id: this.id
+                },
+                query: query,
+                force: true
+              })
+            }
           })
           .catch(error => {
             //  TODO: actually use the error message
