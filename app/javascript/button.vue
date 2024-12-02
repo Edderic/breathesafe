@@ -1,5 +1,5 @@
 <template>
-  <div :class='{button: true, major: major, selected: selected, shadow: sidePadded, "side-padded": true}' :style='{"background-color": backgroundColor}' @mouseover='hover = true' @mouseleave='hover = false'>
+  <div :class='{button: true, major: major, selected: selected, shadow: shadow, "side-padded": true}' :style='{"background-color": backgroundColor}' @mouseover='hover = true' @mouseleave='hover = false'>
 {{text}}
   <slot></slot>
 </div>
