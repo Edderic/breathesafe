@@ -1945,7 +1945,7 @@ export default {
       this['comfort']['How comfortable is this mask/respirator?'] = value
     },
     setRouteTo(opt) {
-      let query = this.$route.query
+      let query = JSON.parse(JSON.stringify(this.$route.query))
 
       query = Object.assign(query, {
         tabToShow: opt.name
