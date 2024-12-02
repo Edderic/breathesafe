@@ -1,4 +1,4 @@
-import {round, shorthandDate} from './misc.js'
+import {round, shorthandDate, isNullOrBlank } from './misc.js'
 import { deepSnakeToCamel } from './misc.js'
 
 export class FitTest {
@@ -56,6 +56,7 @@ export class FitTest {
       // Either too big or too small
       return false
     }
+
     if (this.usePositivePressureUserSealCheck) {
       return (this.userSealCheck.positive["...how much air movement on your face along the seal of the mask did you feel?"] == 'No air movement') &&
         (this.userSealCheck.positive["...how much pressure build up was there?"] == 'As expected')
@@ -67,7 +68,7 @@ export class FitTest {
   get comfortStatus() {
     let collector = true
     for (const [ question, value ] of Object.entries(this.comfortQuestions)) {
-      if (this.comfort[question] == null) {
+      if (isNullOrBlank(this.comfort[question])) {
         return 'Incomplete'
       }
       collector = collector && value['passingAnswers'].includes(this.comfort[question])
@@ -82,37 +83,47 @@ export class FitTest {
 
   get userSealCheckStatus() {
     let nullCount = 0
+    let sizingQuestion = this.userSealCheck['sizing']["What do you think about the sizing of this mask relative to your face?"]
+
+    if ( sizingQuestion == "Too small" || sizingQuestion == 'Too big') {
+      return 'Failed'
+    }
 
     if (this.usePositivePressureUserSealCheck) {
+      // Fail the sizing question, -> Failed
+      // One question failed -> Fail
+      // All questions unanswered or blank -> incomplete
+      // No questions failed but there is a blank -> incomplete
+      // All questions answered and no failure -> pass
+      //
+      // So we can count the number of blanks
+      // Scenario 1: all questions unanswered or blank -> Incomplete
       if (
         (
-          (this.userSealCheck.positive["...how much air movement on your face along the seal of the mask did you feel?"] != null) &&
+          (!isNullOrBlank(this.userSealCheck.positive["...how much air movement on your face along the seal of the mask did you feel?"])) &&
           (this.userSealCheck.positive["...how much air movement on your face along the seal of the mask did you feel?"] != 'No air movement')
         ) || (
-          (this.userSealCheck.positive["...how much did your glasses fog up?"] != null) &&
+          !isNullOrBlank(this.userSealCheck.positive["...how much did your glasses fog up?"]) &&
           (
             (this.userSealCheck.positive["...how much did your glasses fog up?"] != 'Not at all') &&
             (this.userSealCheck.positive["...how much did your glasses fog up?"] != 'Not applicable')
           )
         ) || (
-          (this.userSealCheck.positive["...how much pressure build up was there?"] != null) &&
+          !isNullOrBlank(this.userSealCheck.positive["...how much pressure build up was there?"]) &&
           (this.userSealCheck.positive["...how much pressure build up was there?"] != 'As expected')
         )
       ) {
-        return 'Failed'
-      }
-      // otherwise lets check for  missing values
-      for (const [key, value] of Object.entries(this.userSealCheck.positive)) {
-        if (value == null) {
-          nullCount += 1
-        }
-      }
-
-      if (nullCount > 0) {
+          return 'Failed'
+      } else if (
+        isNullOrBlank(this.userSealCheck.positive["...how much air movement on your face along the seal of the mask did you feel?"]) ||
+          isNullOrBlank(this.userSealCheck.positive["...how much did your glasses fog up?"]) ||
+          isNullOrBlank(this.userSealCheck.positive["...how much pressure build up was there?"])
+      ) {
         return 'Incomplete'
+      } else {
+        return 'Passed'
       }
 
-      return 'Passed'
     } else {
       // use negative pressure
 

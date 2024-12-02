@@ -1,5 +1,5 @@
 <template>
-    <Popup class='popup' v-show='!!selectedMask.id && showPopup' @onclose='showPopup = false'>
+    <Popup class='popup' v-show='!!selectedMask.id && showPopup && !viewMaskOnClick' @onclose='showPopup = false'>
       <div class='align-items-center justify-content-center'>
         <h3>{{selectedMask.uniqueInternalModelCode}}</h3>
       </div>
@@ -126,6 +126,9 @@ export default {
     }
   },
   props: {
+    viewMaskOnClick: {
+      default: true
+    },
     managedUser: {
       default: {
         managedId: 0
@@ -254,6 +257,15 @@ export default {
     selectMask(id) {
       this.showPopup = true
       this.selectedMask = this.masks.filter((m) => m.id == id)[0]
+
+      if (this.viewMaskOnClick) {
+        this.$router.push({
+          name: 'ShowMask',
+          params: {
+            id: this.selectedMask.id
+          }
+        })
+      }
     },
     filterFor(string) {
       let filterForString = ('filterFor' + string)

@@ -260,6 +260,10 @@ export const susceptibleBreathingActivityToFactor = {
   }
 }
 
+export function isNullOrBlank(string) {
+  return string == "" || string == undefined
+}
+
 export function isValidDate(date) {
 	return date instanceof Date && !isNaN(date);
 }

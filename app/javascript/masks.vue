@@ -48,6 +48,7 @@
     <MaskCards
       :cards='sortedDisplayables'
       :showUniqueNumFitTesters='true'
+      :viewMaskOnClick='true'
     />
 
     <br>
