@@ -1,9 +1,10 @@
-name: facemesh_gen
+name: mask_recommender
 channels:
   - conda-forge
 dependencies:
-  - python=3.10
+  - python
   - beautifulsoup4
+  - clang
   - jupyter
   - jupyterlab
   - pandas
@@ -12,14 +13,18 @@ dependencies:
   - matplotlib
   - scikit-learn
   - jupyter_contrib_nbextensions
-  - pytest
   - pre_commit
+  - blas
+  - libopenblas
+  - pytest
   - autopep8
   - opencv
   - openpyxl
-  - protobuf=3.20
+  - protobuf
+  - pymc
   - pip
   - pip:
+    - "--editable=git+https://github.com/pymc-devs/pytensor.git"
     - mediapipe
     - levenshtein
   - selenium
