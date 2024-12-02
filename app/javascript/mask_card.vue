@@ -1,6 +1,17 @@
 <template>
+    <Popup class='popup' v-show='!!selectedMask.id && showPopup' @onclose='showPopup = false'>
+      <div class='align-items-center justify-content-center'>
+        <h3>{{selectedMask.uniqueInternalModelCode}}</h3>
+      </div>
+      <Button class='button' @click='viewMask'>See details about Mask</Button>
+      <Button class='button' @click='newFitTestWithSize("small")'>Mark Too Small</Button>
+      <Button class='button'>Mark Too Big</Button>
+      <Button class='button'>Add Fit Test Data</Button>
+      <Button class='button'>Cancel</Button>
+    </Popup>
+
     <div class='masks'>
-      <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in cards' @click='viewMask(m.id)'>
+      <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in cards' @click='selectMask(m.id)'>
 
         <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
         <div class='description'>
@@ -91,6 +102,8 @@ export default {
   },
   data() {
     return {
+      selectedMaskId: undefined,
+      selectedMask: { uniqueInternalModelCode: ''},
       filterForEarloop: true,
       filterForHeadstrap: true,
       filterForTargeted: true,
@@ -227,6 +240,13 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    newFitTestWithSize(size) {
+      this.$emit('newFitTestWithSize', {size: size, maskId: this.selectedMask.id})
+    },
+    selectMask(id) {
+      this.showPopup = true
+      this.selectedMask = this.masks.filter((m) => m.id == id)[0]
+    },
     filterFor(string) {
       let filterForString = ('filterFor' + string)
       let newQuery = {}
@@ -293,7 +313,20 @@ export default {
         }
       )
     },
-    viewMask(id) {
+    viewMask() {
+      this.$router.push(
+        {
+          name: "ShowMask",
+          params: {
+            id: this.selectedMask.id
+          }
+        }
+      )
+
+    },
+    viewMaskOrAddFitTest(id) {
+      // if () {
+      // }
       this.$router.push(
         {
           name: "ShowMask",
@@ -530,6 +563,13 @@ export default {
     text-align: center;
   }
 
+  .popup {
+    top: 3em;
+  }
+
+  .button {
+    margin: 1em;
+  }
   @media(max-width: 700px) {
     img {
       width: 100vw;

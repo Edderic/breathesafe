@@ -1201,6 +1201,31 @@ export default {
         this.mode = 'Create'
       }
 
+      if (this.$route.query.userId) {
+        await this.loadManagedUsers()
+        let managedUser = this.managedUsers.filter((m) => m.managedId == parseInt(this.$route.query.userId))[0]
+        if (managedUser) {
+          this.selectedUser = managedUser
+          await this.saveFitTest(
+            {
+              tabToShow: 'Mask'
+            }
+          )
+        }
+      }
+
+      if (this.$route.query.maskId) {
+        await this.loadMasks()
+        debugger
+
+        this.selectedMask = this.masks.filter((m) => m.maskId == parseInt(this.$route.query.maskId))[0]
+        await this.saveFitTest(
+          {
+            tabToShow: 'Facial Hair'
+          }
+        )
+      }
+
       if (this.acceptableRouteName) {
         // pull the data
         if ('tabToShow' in toQuery) {

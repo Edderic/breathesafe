@@ -47,9 +47,9 @@
       <br>
     </div>
 
-    <MaskCards :cards='sortedDisplayables' v-show='tabToShow == "Untested"'/>
+    <MaskCards :cards='sortedDisplayables' v-if='tabToShow == "Untested"' @newFitTestWithSize='newFitTestWithSize'/>
 
-    <div class='main scrollable desktopView' v-show='tabToShow == "Tested"'>
+    <div class='main scrollable desktopView' v-if='tabToShow == "Tested"'>
       <table>
         <thead>
           <th>Tester</th>
@@ -212,7 +212,6 @@ export default {
       search: "",
       fit_tests: [],
       tabToShow: "Untested",
-      managedUserId: undefined,
       showPopup: false,
       sortByField: undefined,
       sortByStatus: undefined,
@@ -393,6 +392,18 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    newFitTestWithSize(args) {
+      this.$router.push(
+        {
+          name: "NewFitTest",
+          query: {
+            mode: 'Edit',
+            userId: this.managedId,
+            maskId: args.maskId
+          }
+        }
+      )
+    },
     toggleShowPopup(showPopup) {
       this.showPopup = showPopup
     },
