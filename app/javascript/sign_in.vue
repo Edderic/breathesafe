@@ -41,7 +41,7 @@
         type="checkbox"
       >
 
-      By signing up, you agree to our <router-link :to="{'name': 'TermsOfService'}">Terms of Service</router-link>, <router-link :to="{'name': 'ConsentForm'}">Consent form</router-link>, <router-link :to="{'name': 'Disclaimer'}">Disclaimer</router-link>
+      By signing up, you agree to our <router-link :to="{'name': 'TermsOfService'}">Terms of Service</router-link>, <router-link :to="{'name': 'ConsentForm'}">Consent form</router-link>, <router-link :to="{'name': 'Disclaimer'}">Disclaimer</router-link>, and <router-link :to="{'name': 'PrivacyPolicy'}">Privacy Policy</router-link>.
       </div>
 
 
@@ -89,6 +89,7 @@ export default {
     },
     signUp() {
       if (!this.agreeTOSMedicalDisclaimerPrivacyPolicy) {
+        this.message = "Please check the box saying that you agree with the Terms of Service, Consent Form, Disclaimer"
         return
       }
 
