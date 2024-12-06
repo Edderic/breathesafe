@@ -70,23 +70,61 @@ class ParticipantProgress
           SELECT *,
             #{demographics_present_counts}
           FROM profile_with_demog_fields_present
+        ), targeted_masks AS (
+          SELECT * FROM masks
+          WHERE json_array_length(payable_datetimes) > 0
+        ), targeted_fit_tests AS (
+          SELECT targeted_masks.id,
+          fit_tests.user_id
+
+          FROM targeted_masks
+          INNER JOIN fit_tests
+          ON targeted_masks.id = fit_tests.mask_id
+        ), targeted_mask_counts AS (
+          SELECT user_id, id, COUNT(*) AS num_fit_tests_per_mask
+          FROM targeted_fit_tests
+          GROUP BY 1, 2
+        ), total_unique_masks_fit_tested AS (
+          SELECT user_id, COUNT(id) AS num_targeted_unique_masks_fit_tested
+          FROM targeted_mask_counts
+          GROUP BY 1
+        ), managers_who_are_study_participants AS (
+          SELECT users.* FROM users
+          INNER JOIN profiles
+          ON profiles.user_id = users.id
+          WHERE profiles.study_start_datetime IS NOT NULL
+        ), targeted_masks_count AS (
+          SELECT COUNT(*) AS num_targeted_masks
+          FROM targeted_masks
+
         )
+
+
+
 
 
         SELECT
         p.first_name,
         p.last_name,
+        num_targeted_masks,
+        total_unique_masks_fit_tested.num_targeted_unique_masks_fit_tested,
+        ROUND((num_targeted_unique_masks_fit_tested::float / num_targeted_masks * 100)::numeric, 2) AS fit_testing_percent_complete,
         CASE WHEN demog_present_counts IS NULL THEN 0 ELSE demog_present_counts END AS demog_present_counts,
         CASE WHEN fm_present_counts IS NULL THEN 0 ELSE fm_present_counts END AS fm_present_counts,
         ROUND(CAST(CASE WHEN fm_present_counts IS NULL THEN 0 ELSE fm_present_counts END::float / #{FacialMeasurement::COLUMNS.size} * 100 AS NUMERIC), 2) AS fm_percent_complete,
         ROUND(CAST(CASE WHEN demog_present_counts IS NULL THEN 0 ELSE demog_present_counts END::float / #{Profile::STRING_DEMOG_FIELDS.size + Profile::NUM_DEMOG_FIELDS.size} * 100 AS NUMERIC), 2) AS demog_percent_complete,
         managed_users.*, fm.created_at, fm.updated_at
 
-        FROM managed_users
-        LEFT JOIN profile_with_demog_fields_present_count p ON
-          managed_users.managed_id = p.user_id
+        FROM managers_who_are_study_participants
+        LEFT JOIN managed_users
+          ON managed_users.manager_id = managers_who_are_study_participants.id
+        LEFT JOIN profile_with_demog_fields_present_count p
+          ON managed_users.managed_id = p.user_id
         LEFT JOIN latest_facial_measurement_with_present_counts fm
           ON fm.user_id = managed_users.managed_id
+        LEFT JOIN total_unique_masks_fit_tested
+          ON total_unique_masks_fit_tested.user_id = managed_users.managed_id
+        CROSS JOIN targeted_masks_count
 
 
       SQL
