@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_10_27_032849) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_06_154756) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -76,7 +76,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_27_032849) do
     t.integer "jaw_width"
     t.integer "face_depth"
     t.integer "face_length"
-    t.string "lower_face_length"
+    t.float "lower_face_length"
     t.integer "bitragion_menton_arc"
     t.integer "bitragion_subnasale_arc"
     t.string "cheek_fullness"
@@ -189,6 +189,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_27_032849) do
     t.string "gender_and_sex"
     t.string "other_gender"
     t.integer "year_of_birth"
+    t.datetime "study_start_datetime"
+    t.datetime "study_goal_end_datetime"
     t.index ["user_id"], name: "index_profiles_on_user_id"
   end
 
