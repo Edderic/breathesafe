@@ -29,4 +29,24 @@ class User < ApplicationRecord
       false
     end
   end
+
+  def apply_study_datetimes(start_datetime:nil, goal_end_datetime: nil)
+    if start_datetime.nil?
+      start_datetime = DateTime.now
+    end
+
+    profile = self.profile
+    profile.update(
+      study_start_datetime: start_datetime,
+      study_goal_end_datetime: goal_end_datetime
+    )
+
+    # TODO: Assume that there is a MaskToUser table that tells us which masks
+    # have not yet been tested by that user.
+    #
+    # Assign the current set of targeted masks to this user, along with
+    # the managed users of this user.
+    # If we don't do this and just assume that everyone has the same set of
+    # targeted masks, it's simpler, but not flexible and could give wrong data
+  end
 end
