@@ -195,4 +195,10 @@ def add_targeted_masks
   end
 end
 
-add_targeted_masks
+# add_targeted_masks
+#
+def retroactively_add_study_start_datetimes_to_profile
+  manager_ids = ActiveRecord::Base.connection.exec_query( "SELECT DISTINCT(manager_id) FROM managed_users").rows.flatten
+
+  User.where('id in (?)', manager_ids)
+end
