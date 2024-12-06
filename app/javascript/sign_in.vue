@@ -39,9 +39,12 @@
       <input
         v-model='agreeTOSMedicalDisclaimerPrivacyPolicy'
         type="checkbox"
+        id='agreePolicies'
       >
 
-      By signing up, you agree to our <router-link :to="{'name': 'TermsOfService'}">Terms of Service</router-link>, <router-link :to="{'name': 'ConsentForm'}">Consent form</router-link>, <router-link :to="{'name': 'Disclaimer'}">Disclaimer</router-link>, and <router-link :to="{'name': 'PrivacyPolicy'}">Privacy Policy</router-link>.
+      <label for="agreePolicies">
+        By signing up, you agree to our <router-link :to="{'name': 'TermsOfService'}">Terms of Service</router-link>, <router-link :to="{'name': 'ConsentForm'}">Consent form</router-link>, <router-link :to="{'name': 'Disclaimer'}">Disclaimer</router-link>, and <router-link :to="{'name': 'PrivacyPolicy'}">Privacy Policy</router-link>.
+        </label>
       </div>
 
 
@@ -229,6 +232,10 @@ export default {
 
     .top-container {
       margin-bottom: 4em;
+    }
+
+    input[type='checkbox'] {
+      transform: scale(2)
     }
   }
 </style>
