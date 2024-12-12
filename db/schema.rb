@@ -10,10 +10,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_06_154756) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_11_145603) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
+
+  create_table "addresses", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "start_datetime"
+    t.string "address_line_1"
+    t.string "address_line_2"
+    t.string "address_line_3"
+    t.string "town_city"
+    t.string "state"
+    t.string "country"
+    t.string "zipcode"
+    t.string "phone_number"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_addresses_on_user_id"
+  end
 
   create_table "carbon_dioxide_monitors", force: :cascade do |t|
     t.string "name"
@@ -237,6 +253,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_06_154756) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  add_foreign_key "addresses", "users"
   add_foreign_key "facial_measurements", "users"
   add_foreign_key "fit_tests", "facial_measurements"
   add_foreign_key "fit_tests", "masks"
