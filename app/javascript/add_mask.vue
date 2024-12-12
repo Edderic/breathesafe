@@ -329,10 +329,10 @@
       <br>
 
       <div class="buttons justify-content-center">
-        <Button class='button' text="Edit" @click='mode = "Edit"' v-if='mode == "Show" && canUpdate'/>
-        <Button class='button' text="Delete" @click='deleteMask' v-if='deletable && (mode != "Show") && canUpdate'/>
-        <Button class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New") || ((mode == "Edit") && canUpdate)'/>
-        <Button class='button' text="Save" @click='saveMask' v-if='(mode == "New") || ((mode == "Edit") && canUpdate)'/>
+        <Button shadow='true' class='button' text="Edit" @click='mode = "Edit"' v-if='mode == "Show" && canUpdate'/>
+        <Button shadow='true' class='button' text="Delete" @click='deleteMask' v-if='deletable && (mode != "Show") && canUpdate'/>
+        <Button shadow='true' class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New") || ((mode == "Edit") && canUpdate)'/>
+        <Button shadow='true' class='button' text="Save" @click='saveMask' v-if='(mode == "New") || ((mode == "Edit") && canUpdate)'/>
       </div>
 
       <br>
