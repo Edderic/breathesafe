@@ -108,7 +108,7 @@
 
         <p>For collecting fit testing and facial measurement data, Breathesafe LLC hopes to have fit testers be done in 4 months after they get the fit testing equipment and masks from us. Collecting selfies will be done at a later time. You can opt in to this later on, which is voluntary and not required for participation in the former.</p>
 
-        <p>As mentioned in the <router-link :to='tocPath("expected-equipment")'>Expected equipment</router-link> section below, there are 46 masks. I am hoping that for most testers, they will be done in about 4 months after receiving the equipment. Some of these masks are going to be too small or too big. For those, you will be able to quickly mark masks as way too small or way too big and would not have to go through the full qualitative or quantitative fit testing procedure. It will take about 30 seconds or less to mark a mask as such in the
+        <p>As mentioned in the <router-link :to='tocPath("expected-equipment")'>Expected equipment</router-link> section below, there are 44 masks. I am hoping that for most testers, they will be done in about 4 months after receiving the equipment. Some of these masks are going to be too small or too big. For those, you will be able to quickly mark masks as way too small or way too big and would not have to go through the full qualitative or quantitative fit testing procedure. It will take about 30 seconds or less to mark a mask as such in the
         <router-link :to="{name: 'NewFitTest'}">Adding a Fit Test page</router-link>.
         </p>
 
