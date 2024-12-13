@@ -1,4 +1,4 @@
-class EventsController < ApplicationController
+class VentilationRecordsController < ApplicationController
   skip_forgery_protection
   # TODO: Might want to rename this to index?
   def new
@@ -67,7 +67,7 @@ class EventsController < ApplicationController
           sensor_data_from_external_api = true
         end
 
-        event = Event.create(
+        event = VentilationRecord.create(
           status: 'draft',
           sensor_data_from_external_api: sensor_data_from_external_api,
           author_id: user.id,
@@ -130,7 +130,7 @@ class EventsController < ApplicationController
 
   def index
     # TODO: if current user is nil, only show events that are public
-    events = Event.can_be_accessed_by(current_user)
+    events = VentilationRecord.can_be_accessed_by(current_user)
     respond_to do |format|
       format.json do
         render json: {
@@ -144,7 +144,7 @@ class EventsController < ApplicationController
     if !current_user or !current_user.admin?
       status = :unprocessable_entity
     else
-      if Event.find(params['id']).update(approved_by_id: current_user.id)
+      if VentilationRecord.find(params['id']).update(approved_by_id: current_user.id)
         status = 201
       else
         status = :unprocessable_entity
@@ -165,7 +165,7 @@ class EventsController < ApplicationController
     if !current_user || (current_user.id != event_data[:author_id] && !current_user.admin?)
       status = :unprocessable_entity
     else
-      event = Event.find(params[:id])
+      event = VentilationRecord.find(params[:id])
       if event.update(event_data)
         status = 200
       end
@@ -185,7 +185,7 @@ class EventsController < ApplicationController
     if !current_user
       status = :unprocessable_entity
     else
-      event = Event.create(event_data)
+      event = VentilationRecord.create(event_data)
 
       if event
         status = 201
