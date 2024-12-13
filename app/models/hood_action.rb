@@ -1,0 +1,2 @@
+class HoodAction < Action
+end

@@ -1,0 +1,2 @@
+class SolutionAction < Action
+end
