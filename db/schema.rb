@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_11_145603) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_13_024914) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -48,41 +48,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_11_145603) do
     t.integer "deaths_cumulative"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-  end
-
-  create_table "events", force: :cascade do |t|
-    t.jsonb "portable_air_cleaners"
-    t.float "room_width_meters"
-    t.float "room_length_meters"
-    t.float "room_height_meters"
-    t.string "room_name"
-    t.float "room_usable_volume_factor"
-    t.jsonb "place_data"
-    t.jsonb "activity_groups"
-    t.float "ventilation_co2_ambient_ppm"
-    t.string "ventilation_co2_measurement_device_name"
-    t.string "ventilation_co2_measurement_device_model"
-    t.string "ventilation_co2_measurement_device_serial"
-    t.float "ventilation_co2_steady_state_ppm"
-    t.text "ventilation_notes"
-    t.datetime "start_datetime"
-    t.string "duration"
-    t.string "private"
-    t.integer "author_id", null: false
-    t.jsonb "occupancy"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.float "ventilation_ach"
-    t.float "portable_ach"
-    t.float "room_usable_volume_cubic_meters"
-    t.float "total_ach"
-    t.integer "maximum_occupancy"
-    t.integer "approved_by_id"
-    t.integer "initial_co2"
-    t.jsonb "sensor_readings"
-    t.string "status"
-    t.boolean "sensor_data_from_external_api", default: false
-    t.index ["author_id"], name: "index_events_on_author_id"
   end
 
   create_table "facial_measurements", force: :cascade do |t|
@@ -251,6 +216,41 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_11_145603) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
+  end
+
+  create_table "ventilation_records", force: :cascade do |t|
+    t.jsonb "portable_air_cleaners"
+    t.float "room_width_meters"
+    t.float "room_length_meters"
+    t.float "room_height_meters"
+    t.string "room_name"
+    t.float "room_usable_volume_factor"
+    t.jsonb "place_data"
+    t.jsonb "activity_groups"
+    t.float "ventilation_co2_ambient_ppm"
+    t.string "ventilation_co2_measurement_device_name"
+    t.string "ventilation_co2_measurement_device_model"
+    t.string "ventilation_co2_measurement_device_serial"
+    t.float "ventilation_co2_steady_state_ppm"
+    t.text "ventilation_notes"
+    t.datetime "start_datetime"
+    t.string "duration"
+    t.string "private"
+    t.integer "author_id", null: false
+    t.jsonb "occupancy"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.float "ventilation_ach"
+    t.float "portable_ach"
+    t.float "room_usable_volume_cubic_meters"
+    t.float "total_ach"
+    t.integer "maximum_occupancy"
+    t.integer "approved_by_id"
+    t.integer "initial_co2"
+    t.jsonb "sensor_readings"
+    t.string "status"
+    t.boolean "sensor_data_from_external_api", default: false
+    t.index ["author_id"], name: "index_ventilation_records_on_author_id"
   end
 
   add_foreign_key "addresses", "users"
