@@ -79,6 +79,59 @@ class DigitalCaliperActor
     )
   end
 
+  def self.replace_battery(
+    uuid:,
+    datetime: nil
+  )
+    # Parameters:
+    #   uuid: uuid
+    #   batteries: {
+    #     'batteries': 2AA / not-applicable,
+    #   }
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    if cost.nil?
+      cost = {
+        'material_cost' => 5,
+        'labor_hours' => 0.02
+      }
+    end
+
+    Action.create(
+      type: 'DigitalCaliperAction',
+      name: 'ReplaceBattery',
+      datetime: datetime,
+      metadata: {
+        'uuid' => uuid,
+        'cost' => cost
+      }
+    )
+  end
+  def self.mark_as_needing_battery_replacement(
+    uuid:,
+    datetime: nil
+  )
+    # Parameters:
+    #   uuid: uuid
+    #   batteries: {
+    #     'batteries': 2AA / not-applicable,
+    #   }
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    Action.create(
+      type: 'DigitalCaliperAction',
+      name: 'MarkAsNeedingBatteryReplacement',
+      datetime: datetime,
+      metadata: {
+        'uuid' => uuid
+      }
+    )
+  end
+
   def self.add_batteries(
     uuid:,
     cost:,
