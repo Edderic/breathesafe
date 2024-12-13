@@ -1,0 +1,2 @@
+class DigitalCaliperAction < Action
+end
