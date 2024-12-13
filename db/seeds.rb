@@ -24,7 +24,7 @@ def set_can_post_via_external_api
 end
 
 def ensure_co2_timestamp_exists
-  events = Event.all
+  events = VentilationRecord.all
 
   # Refactor the data. Use more precise language
   events.each do |e|
