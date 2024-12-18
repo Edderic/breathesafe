@@ -1,0 +1,2 @@
+class TapeMeasure < ApplicationRecord
+end
