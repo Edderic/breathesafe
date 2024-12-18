@@ -1,0 +1,2 @@
+class UserAction < Action
+end
