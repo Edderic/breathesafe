@@ -1,12 +1,8 @@
 class UserActor
   def self.create(
-    uuid: nil,
+    uuid:,
     datetime: nil
   )
-    if uuid.nil?
-      uuid = SecureRandom.uuid
-    end
-
     if datetime.nil?
       datetime = DateTime.now
     end
@@ -16,12 +12,37 @@ class UserActor
       name: 'CreateUser',
       datetime: datetime,
       metadata: {
-        'uuid': SecureRandom.uuid
+        'uuid': uuid
       }
     )
   end
 
   def self.mark_interested_in_study(
+    uuid:,
+    datetime: nil,
+    study_name: nil
+  )
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    if study_name.nil?
+      study_name = 'Mask Recommender Based on Facial Features'
+    end
+
+    Action.create(
+      type: 'UserAction',
+      name: 'MarkInterestedInStudy',
+      datetime: datetime,
+      metadata: {
+        'uuid': uuid,
+        'study': study_name
+
+      }
+    )
+  end
+
+  def self.mark_high_risk(
     uuid:,
     datetime: nil
   )
@@ -31,20 +52,18 @@ class UserActor
 
     Action.create(
       type: 'UserAction',
-      name: 'MarkInterested',
+      name: 'MarkHighRisk',
       datetime: datetime,
       metadata: {
         'uuid': uuid,
-        'study': {
-          study: 'Mask Recommender Based on Facial Features'
-        }
+        'health_status': 'high_risk'
       }
     )
   end
 
   def self.accept_into_study(
     uuid:,
-    study: nil,
+    study_name: nil,
     datetime: nil
   )
 
@@ -52,8 +71,8 @@ class UserActor
       datetime = DateTime.now
     end
 
-    if study.nil?
-      study = 'Mask Recommender Based on Facial Features'
+    if study_name.nil?
+      study_name = 'Mask Recommender Based on Facial Features'
     end
 
     Action.create(
@@ -62,14 +81,39 @@ class UserActor
       datetime: datetime,
       metadata: {
         'uuid': uuid,
-        'study': {
-          study: study,
-        }
+        'study': study_name
       }
     )
   end
 
   def self.remove_from_study(
+    uuid:,
+    reason:,
+    study_name: nil,
+    datetime: nil
+  )
+
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    if study_name.nil?
+      study_name = 'Mask Recommender Based on Facial Features'
+    end
+
+    Action.create(
+      type: 'UserAction',
+      name: 'RemoveFromStudy',
+      datetime: datetime,
+      metadata: {
+        'uuid': uuid,
+        'study': study_name,
+        'reason': reason
+      }
+    )
+  end
+
+  def self.finish_study(
     uuid:,
     study: nil,
     datetime: nil
@@ -85,20 +129,21 @@ class UserActor
 
     Action.create(
       type: 'UserAction',
-      name: 'RemoveFromStudy',
+      name: 'FinishStudy',
       datetime: datetime,
       metadata: {
         'uuid': uuid,
-        'study': {
+        'study': [
           study: study,
-        }
+        ]
       }
     )
   end
 
   def self.set_address(
     uuid:,
-    address:
+    address:,
+    address_coordinate:,
     datetime: nil
   )
     if datetime.nil?
@@ -110,8 +155,9 @@ class UserActor
       datetime: datetime,
       name: 'SetAddress',
       metadata: {
-        'uuid': uuid,
-        'address': address
+        'uuid' => uuid,
+        'address' => address,
+        'address_coordinate' => address_coordinate
       }
     )
   end
@@ -152,6 +198,155 @@ class UserActor
       datetime: datetime,
       metadata: {
         'uuid': uuid,
+      }
+    )
+  end
+
+  def self.acknowledged_have_received_mask_kit(
+    uuid:,
+    mask_kit_uuid:,
+    datetime: nil
+  )
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    Action.create(
+      type: 'UserAction',
+      name: 'AcknowledgedHaveReceivedMaskKit',
+      datetime: datetime,
+      metadata: {
+        'user_uuid': user_uuid,
+        'mask_kit_uuid': mask_kit_uuid,
+      }
+    )
+  end
+
+  def self.acknowledged_have_received_facial_measurement_kit(
+    user_uuid:,
+    facial_measurement_kit_uuid:,
+    datetime: nil
+  )
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    Action.create(
+      type: 'UserAction',
+      name: 'AcknowledgedHaveReceivedFacialMeasurementKit',
+      datetime: datetime,
+      metadata: {
+        'user_uuid': user_uuid,
+        'facial_measurement_kit_uuid': facial_measurement_kit_uuid,
+      }
+    )
+  end
+
+  def self.acknowledged_have_received_qualitative_fit_testing_kit(
+    user_uuid:,
+    qualitative_fit_testing_kit_uuid:,
+    datetime: nil
+  )
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    Action.create(
+      type: 'UserAction',
+      name: 'AcknowledgedHaveReceivedQualitativeFitTestingKit',
+      datetime: datetime,
+      metadata: {
+        'user_uuid': user_uuid,
+        'qualitative_fit_testing_kit_uuid': qualitative_fit_testing_kit_uuid,
+      }
+    )
+  end
+
+  def self.set_goal_end_date(
+    uuid:,
+    end_date: nil,
+    datetime: nil,
+    study_name: nil
+  )
+
+    if study_name.nil?
+      study_name = "Mask Recommender Based on Facial Features"
+    end
+
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    if end_date.nil?
+      end_date = datetime + 4.months
+    end
+
+    Action.create(
+      type: 'UserAction',
+      name: 'SetGoalEndDate',
+      datetime: datetime,
+      metadata: {
+        'uuid' => uuid,
+        'study' => {
+          'study_name' => study_name,
+          'goal_end_date' => end_date
+        }
+      }
+    )
+  end
+
+  def self.set_study_qualifications(
+    uuid:,
+    study_qualifications:,
+    study_name: nil,
+    datetime: nil
+  )
+    if study_name.nil?
+      study_name = "Mask Recommender Based on Facial Features"
+    end
+
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    Action.create(
+      type: 'UserAction',
+      name: 'SetStudyQualifications',
+      datetime: datetime,
+      metadata: {
+        'uuid'=> uuid,
+        'study' => {
+          'study_name' => study_name,
+          'qualifications' => study_qualifications
+        }
+      }
+    )
+  end
+
+  def self.request_for_equipment(
+    uuid:,
+    equipment_request:,
+    study_name: nil,
+    datetime: nil
+  )
+    if study_name.nil?
+      study_name = "Mask Recommender Based on Facial Features"
+    end
+
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    Action.create(
+      type: 'UserAction',
+      name: 'RequestForEquipment',
+      datetime: datetime,
+      metadata: {
+        'uuid'=> uuid,
+        'study' => {
+          'study_name' => study_name,
+          'equipment_request' => equipment_request
+        }
       }
     )
   end
