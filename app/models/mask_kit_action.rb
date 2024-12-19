@@ -1,0 +1,2 @@
+class MaskKitAction < Action
+end
