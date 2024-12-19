@@ -80,12 +80,26 @@ class SolutionActor
     )
   end
 
-  def self.create_allegro_solution(
+  def self.create_allegro_fit_test_solution(
     uuid:,
-    datetime: nil
+    datetime: nil,
+    how: nil,
+    flavor_type: nil
   )
     if datetime.nil?
       datetime = DateTime.now
+    end
+
+    if flavor_type.nil?
+      flavor_type = 'saccharin'
+    end
+
+    if how.nil?
+      how = {
+            method: 'purchase',
+            url: 'https://www.industrialsafetyproducts.com/allegro-2040-12k-sweet-saccharin-test-solution-only-6-box/'
+        }
+
     end
 
     self.create(
@@ -93,21 +107,55 @@ class SolutionActor
         concentration_type: 'fit test',
         volume_level_proportion: 1,
         volume: {
-            amount: 100,
+            amount: 15,
             measurement_units: 'mL'
         },
-        how: {
-            method: 'DIY',
-            url: 'https://ph.health.mil/PHC%20Resource%20Library/cv19-do-it-yourself-respiratory-fit-testing.pdf'
-        },
+        how: how,
         cost: {
-          'material_cost': 4,
+          'material_cost': 20.99,
           'time_cost': {
-                'amount': 2,
+                'amount': 0,
                 'measurement_unit': 'minutes'
            }
         },
-        flavor_type: 'saccharin',
+        flavor_type: flavor_type,
+        datetime: datetime
+    )
+  end
+
+  def self.create_allegro_sensitivity_solution(
+    uuid:,
+    datetime: nil,
+    flavor_type: nil
+  )
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    if flavor_type.nil?
+      flavor_type = 'saccharin'
+    end
+
+    self.create(
+        uuid: uuid,
+        concentration_type: 'sensitivity',
+        volume_level_proportion: 1,
+        volume: {
+            amount: 15,
+            measurement_units: 'mL'
+        },
+        how: {
+            method: 'purchase',
+            url: 'https://www.industrialsafetyproducts.com/allegro-2040-saccharin-fit-test-kit/'
+        },
+        cost: {
+          'material_cost': 22.29,
+          'time_cost': {
+                'amount': 0,
+                'measurement_unit': 'minutes'
+           }
+        },
+        flavor_type: flavor_type,
         datetime: datetime
     )
   end
