@@ -134,40 +134,6 @@ class HoodActor
       }
     )
   end
-
-  def self.add_to_qlft_kit(uuid:, qlft_kit_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    Action.create(
-      type: 'HoodAction',
-      name: 'AssociateWithQLFTKit',
-      datetime: datetime,
-      metadata: {
-        'uuid' => uuid,
-        'qlft_kit_id' => qlft_kit_uuid,
-        'datetime' => datetime
-      }
-    )
-  end
-
-  def self.remove_from_qlft_kit(uuid:, qlft_kit_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    Action.create(
-      type: 'HoodAction',
-      name: 'DissociateWithQLFTKit',
-      datetime: datetime,
-      metadata: {
-        'uuid' => uuid,
-        'qlft_kit_id' => qlft_kit_uuid,
-        'datetime' => datetime
-      }
-    )
-  end
 end
 
 
