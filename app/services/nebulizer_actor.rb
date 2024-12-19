@@ -1,5 +1,6 @@
 class NebulizerActor
   def self.create(
+    uuid: nil,
     weight: nil,
     model: nil,
     how: nil,
@@ -29,6 +30,10 @@ class NebulizerActor
     #
     if datetime.nil?
       datetime = DateTime.now
+    end
+
+    if uuid.nil?
+      uuid = SecureRandom.UUID
     end
 
     if weight.nil?
@@ -71,7 +76,7 @@ class NebulizerActor
       name: 'CreateNebulizer',
       datetime: datetime,
       metadata: {
-        'uuid' => SecureRandom.uuid,
+        'uuid' => uuid,
         'model' => model,
         'how' => how,
         'weight' => weight,
@@ -83,8 +88,9 @@ class NebulizerActor
 
   def self.add_batteries(
     uuid:,
-    cost:,
-    batteries: nil,
+    cost: nil,
+    weight: nil,
+    amount: nil,
     datetime: nil
   )
     # Parameters:
@@ -105,6 +111,14 @@ class NebulizerActor
       }
     end
 
+    if amount.nil?
+      amount = {
+        'quantity' => 2,
+        'type' => 'AA',
+      }
+
+    end
+
     Action.create(
       type: 'NebulizerAction',
       name: 'AddBatteries',
@@ -112,10 +126,8 @@ class NebulizerActor
       metadata: {
         'uuid' => uuid,
         'weight' => weight,
+        'amount' => amount,
         'cost' => cost,
-        'power_supply' => {
-          'batteries' => batteries
-        }
       }
     )
   end
@@ -208,6 +220,7 @@ class NebulizerActor
     )
   end
 
+  # TODO: replace because similar functionality exists
   def self.add_to_qlft_kit(uuid:, qlft_kit_uuid:, datetime: nil)
     if datetime.nil?
       datetime = DateTime.now
@@ -225,6 +238,7 @@ class NebulizerActor
     )
   end
 
+  # TODO: replace because similar functionality exists
   def self.remove_from_qlft_kit(uuid:, qlft_kit_uuid:, datetime: nil)
     if datetime.nil?
       datetime = DateTime.now
