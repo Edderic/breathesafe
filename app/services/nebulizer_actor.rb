@@ -81,7 +81,9 @@ class NebulizerActor
         'how' => how,
         'weight' => weight,
         'cost' => cost,
-        'power_supply' => power_supply
+        'power_supply' => power_supply,
+        'batteries' => [],
+        'sanitization' => []
       }
     )
   end
