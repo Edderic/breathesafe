@@ -1,9 +1,61 @@
 class HoodActor
+  MODELS = {
+    Allegro: {
+      model: 'Allegro',
+      how: {
+        method: 'purchase',
+        url: 'https://www.industrialsafetyproducts.com/allegro-saccharin-fit-test-kit-2040/'
+      },
+      weight: {
+        'amount': 100,
+        'measurement_unit': 'g',
+      },
+      cost: {
+        'material_cost': 65,
+        'labor_hours': 0
+      }
+    },
+    DIY: {
+      model: 'DIY',
+      weight: {
+        amount: 20,
+        measurement_unit: 'g'
+      },
+      how: {
+        'method' => 'diy',
+        'url' => '',
+        'notes' => "2.5 gallon Ziploc bag with a hole port for the nebulizer, reinforced with cardboard and tape."
+      },
+      cost: {
+        'material_cost' => 0.5,
+        'labor_hours' => 0.05
+      }
+
+    }
+  }
+
+  def self.preset_create(uuid:, model:, datetime: nil)
+    metadata = JSON.parse(MODELS[model].to_json)
+
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    metadata['uuid'] = uuid
+
+    Action.create(
+      type: 'HoodAction',
+      name: 'CreateHood',
+      datetime: datetime,
+      metadata: metadata
+    )
+  end
+
   def self.create(
     weight: nil,
-    model: nil,
-    how: nil,
-    cost: nil,
+    model: ,
+    how:,
+    cost: ,
     datetime: nil
   )
     # Parameters:
@@ -23,33 +75,6 @@ class HoodActor
     #
     if datetime.nil?
       datetime = DateTime.now
-    end
-
-    if weight.nil?
-      weight = {
-        'amount' => 0.05,
-        'measuring_unit' => 'lb'
-      }
-    end
-
-    if model.nil?
-      model = 'DIY'
-    end
-
-    if cost.nil?
-      cost = {
-        'material_cost' => 0.5,
-        'labor_hours' => 0.05
-      }
-    end
-
-    if how.nil?
-      how = {
-        'method' => 'diy',
-        'url' => '',
-        'notes' => "2.5 gallon Ziploc bag with a hole port for the nebulizer, reinforced with cardboard and tape."
-      }
-
     end
 
     Action.create(
