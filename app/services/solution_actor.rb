@@ -8,155 +8,130 @@
 # So the cost of water to generate sensitivity solution is about 4 cents
 #
 class SolutionActor
-  def self.create_default_sensitivity_solution(
-    uuid:,
-    datetime: nil
-  )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    self.create_default_solution(
-        uuid: uuid,
-        concentration_type: 'sensitivity',
-        cost: {
-          'material_cost': 0.04,
-          'time_cost': {
-                'amount': 1,
-                'measurement_unit': 'minute'
-           }
-        },
-        datetime: datetime
-    )
-  end
-
-  def self.create_default_fit_test_solution(
-    uuid:,
-    datetime: nil
-  )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    self.create_default_solution(
-        uuid: uuid,
-        concentration_type: 'fit test',
-        cost: {
-          'material_cost': 4,
-          'time_cost': {
-                'amount': 2,
-                'measurement_unit': 'minutes'
-           }
-        },
-        datetime: datetime
-    )
-  end
-
-  def self.create_default_solution(
-    uuid:,
-    concentration_type:,
-    cost:,
-    datetime: nil
-  )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    self.create(
-        uuid: uuid,
-        concentration_type: concentration_type,
-        volume_level_proportion: 1,
-        volume: {
-            amount: 100,
+  MODELS = {
+    'Allegro' => {
+      'fit_test' => {
+        'saccharin' => {
+          concentration_type: 'fit test',
+          volume_level_proportion: 1,
+          volume: {
+            amount: 15,
             measurement_units: 'mL'
-        },
-        how: {
-            method: 'DIY',
-            url: 'https://ph.health.mil/PHC%20Resource%20Library/cv19-do-it-yourself-respiratory-fit-testing.pdf'
-        },
-        cost: cost,
-        flavor_type: 'saccharin',
-        datetime: datetime
-    )
-  end
-
-  def self.create_allegro_fit_test_solution(
-    uuid:,
-    datetime: nil,
-    how: nil,
-    flavor_type: nil
-  )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    if flavor_type.nil?
-      flavor_type = 'saccharin'
-    end
-
-    if how.nil?
-      how = {
+          },
+          how: {
             method: 'purchase',
             url: 'https://www.industrialsafetyproducts.com/allegro-2040-12k-sweet-saccharin-test-solution-only-6-box/'
+          },
+          cost: {
+            'material_cost': 20.99,
+            'time_cost': {
+              'amount': 0,
+              'measurement_unit': 'minutes'
+            }
+          },
+          flavor_type: 'saccharin',
+        },
+        'bitrex' => {
         }
-
-    end
-
-    self.create(
-        uuid: uuid,
-        concentration_type: 'fit test',
-        volume_level_proportion: 1,
-        volume: {
+      },
+      'sensitivity' => {
+        'saccharin' => {
+          concentration_type: 'sensitivity',
+          volume_level_proportion: 1,
+          volume: {
             amount: 15,
             measurement_units: 'mL'
+          },
+          how: {
+            method: 'purchase',
+            url: 'https://www.industrialsafetyproducts.com/allegro-2040-saccharin-fit-test-kit/'
+          },
+          cost: {
+            'material_cost': 22.29,
+            'time_cost': {
+              'amount': 0,
+              'measurement_unit': 'minutes'
+            }
+          },
+          flavor_type: 'saccharin',
         },
-        how: how,
-        cost: {
-          'material_cost': 20.99,
-          'time_cost': {
-                'amount': 0,
-                'measurement_unit': 'minutes'
-           }
+        'bitrex' => {
+        }
+      },
+    },
+    'DIY' => {
+      'fit_test' => {
+        'saccharin' => {
+          volume_level_proportion: 1,
+          volume: {
+            amount: 100,
+            measurement_units: 'mL'
+          },
+          how: {
+            method: 'DIY',
+            url: 'https://ph.health.mil/PHC%20Resource%20Library/cv19-do-it-yourself-respiratory-fit-testing.pdf'
+          },
+          concentration_type: 'fit test',
+          cost: {
+            'material_cost': 4,
+            'time_cost': {
+              'amount': 2,
+              'measurement_unit': 'minutes'
+            }
+          },
         },
-        flavor_type: flavor_type,
-        datetime: datetime
-    )
-  end
+        'bitrex' => {
+        },
+      },
+      'sensitivity' => {
+        'saccharin' => {
+          volume_level_proportion: 1,
+          volume: {
+            amount: 100,
+            measurement_units: 'mL'
+          },
+          how: {
+            method: 'DIY',
+            url: 'https://ph.health.mil/PHC%20Resource%20Library/cv19-do-it-yourself-respiratory-fit-testing.pdf'
+          },
+          concentration_type: 'sensitivity',
+          cost: {
+            'material_cost': 0.04,
+            'time_cost': {
+                  'amount': 1,
+                  'measurement_unit': 'minute'
+             }
+          },
+          flavor_type: 'saccharin'
+        },
+        'bitrex' => {
+        },
+      },
+    }
+  }
 
-  def self.create_allegro_sensitivity_solution(
+  def self.preset_create(
     uuid:,
-    datetime: nil,
-    flavor_type: nil
+    model:,
+    flavor_type:,
+    concentration_type:,
+    datetime: nil
+
   )
     if datetime.nil?
       datetime = DateTime.now
     end
 
-    if flavor_type.nil?
-      flavor_type = 'saccharin'
-    end
+    metadata = JSON.parse(MODELS[model][concentration_type][flavor_type].to_json)
 
-    self.create(
-        uuid: uuid,
-        concentration_type: 'sensitivity',
-        volume_level_proportion: 1,
-        volume: {
-            amount: 15,
-            measurement_units: 'mL'
-        },
-        how: {
-            method: 'purchase',
-            url: 'https://www.industrialsafetyproducts.com/allegro-2040-saccharin-fit-test-kit/'
-        },
-        cost: {
-          'material_cost': 22.29,
-          'time_cost': {
-                'amount': 0,
-                'measurement_unit': 'minutes'
-           }
-        },
-        flavor_type: flavor_type,
-        datetime: datetime
+    metadata['uuid'] = uuid
+    metadata['model'] = model
+
+    Action.create(
+      type: 'SolutionAction',
+      name: 'CreateSolution',
+      datetime: datetime,
+      metadata: metadata
     )
   end
 

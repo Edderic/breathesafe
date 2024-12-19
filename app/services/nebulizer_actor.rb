@@ -1,4 +1,71 @@
 class NebulizerActor
+  MODELS = {
+    "Mayluck Portable Nebulizer" => {
+      'model' => "Mayluck Portable Nebulizer",
+      'weight' => {
+        'amount' => 286,
+        'measurement_unit' => 'g'
+      },
+      'cost' => {
+        'material_cost' => 38,
+        'time_cost' => 0
+      },
+
+      'power_supply' => {
+        'batteries' => '2 AA',
+        'batteries_present' => false,
+        'can_be_usb_powered' => true
+      },
+      'batteries' => [],
+      'how' => {
+        'method' => 'buy',
+        'url' => 'https://www.amazon.com/dp/B0D5YR5QWZ'
+      }
+    },
+    "Allegro" => {
+      'model' => "Allegro",
+      'weight' => {
+        'amount' => 74,
+        'measurement_unit' => 'g'
+      },
+      'cost' => {
+        'material_cost' => 43, # 170 - 40 (cost of fit test + sensitivity)
+        'time_cost' => 0
+      },
+      'batteries' => [],
+
+      'power_supply' => {
+        'batteries' => 'N/A',
+        'batteries_present' => false,
+        'can_be_usb_powered' => true
+      },
+      'how' => {
+        'method' => 'buy',
+        'url' => 'https://www.amazon.com/dp/B0D5YR5QWZ'
+      }
+
+    }
+  }
+  def self.preset_create(
+    uuid:,
+    model:,
+    datetime: nil
+  )
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    metadata = JSON.parse(MODELS[model].to_json)
+    metadata[uuid] = uuid
+
+    Action.create(
+      type: 'NebulizerAction',
+      name: 'CreateNebulizer',
+      datetime: datetime,
+      metadata: metadata
+    )
+  end
+
   def self.create(
     uuid: nil,
     weight: nil,
@@ -34,41 +101,6 @@ class NebulizerActor
 
     if uuid.nil?
       uuid = SecureRandom.UUID
-    end
-
-    if weight.nil?
-      weight = {
-        'amount' => 0.25,
-        'measuring_unit' => 'lb'
-      }
-    end
-
-    if model.nil?
-      model = 'Mayluck Portable Nebulizer'
-    end
-
-    if cost.nil?
-      cost = {
-        'material_cost' => 38,
-        'time_cost' => 0
-      }
-    end
-
-    if power_supply.nil?
-      # default settings for the Mesh Nebulizer
-      power_supply = {
-        'batteries': '2 AA',
-        'batteries_present': false,
-        'can_be_usb_powered': true
-      }
-    end
-
-    if how.nil?
-      how = {
-        'method': 'buy',
-        'url': 'https://www.amazon.com/dp/B0D5YR5QWZ'
-      }
-
     end
 
     Action.create(
