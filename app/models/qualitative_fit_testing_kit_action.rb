@@ -1,0 +1,2 @@
+class QualitativeFitTestingKitAction < Action
+end
