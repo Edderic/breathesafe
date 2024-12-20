@@ -1,8 +1,16 @@
 class TapeMeasureActor
   def self.create(
-    weight: nil,
-    model: nil,
-    cost: nil,
+    uuid:,
+    weight: {
+        'amount' => 17.2,
+        'measurement_unit' => 'g'
+    },
+    model: 'Perfect Measuring Tape',
+    cost: {
+      'material_cost' => 1.49,
+      'labor_hours' => 0.0
+    },
+    purchase_link: 'https://www.amazon.com/gp/product/B085KGFL1G/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&th=1',
     datetime: nil
   )
     # Parameters:
