@@ -1,5 +1,6 @@
 class DigitalCaliperActor
   def self.create(
+    uuid: nil,
     weight: nil,
     model: nil,
     how: nil,
@@ -30,10 +31,14 @@ class DigitalCaliperActor
       datetime = DateTime.now
     end
 
+    if uuid.nil?
+      uuid = SecureRandom.uuid
+    end
+
     if weight.nil?
       weight = {
-        'amount' => 0.25,
-        'measuring_unit' => 'lb'
+        'amount' => 284,
+        'measurement_unit' => 'g'
       }
     end
 
@@ -69,7 +74,7 @@ class DigitalCaliperActor
       name: 'CreateDigitalCaliper',
       datetime: datetime,
       metadata: {
-        'uuid' => SecureRandom.uuid,
+        'uuid' => uuid,
         'model' => model,
         'how' => how,
         'weight' => weight,
