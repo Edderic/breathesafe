@@ -21,9 +21,13 @@ class ShippingActor
     )
   end
 
-  def self.remove_mask_kit(
+  # Anything can be shippable. The type lets us know what tables should be
+  # joined to e.g. Solution, QualitativeFitTestingKit, Hood
+  # Mask, MaskKit,jj
+  def self.add_item(
     uuid:,
-    mask_kit_uuid:,
+    shippable_uuid:,
+    shippable_type:,
     datetime: nil
   )
     if datetime.nil?
@@ -32,51 +36,12 @@ class ShippingActor
 
     Action.create(
       type: 'ShippingAction',
-      name: 'RemoveMaskKit',
+      name: 'AddItem',
       datetime: datetime,
       metadata: {
         'uuid': uuid,
-        'mask_kit_uuid': mask_kit_uuid
-      }
-    )
-  end
-
-  def self.add_facial_measurement_kit(
-    uuid:,
-    facial_measurement_kit_uuid:,
-    datetime: nil
-  )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    Action.create(
-      type: 'ShippingAction',
-      name: 'AddFacialMeasurementKit',
-      datetime: datetime,
-      metadata: {
-        'uuid': uuid,
-        'facial_measurement_kit_uuid': facial_measurement_kit_uuid
-      }
-    )
-  end
-
-  def self.remove_facial_measurement_kit(
-    uuid:,
-    facial_measurement_kit_uuid:,
-    datetime: nil
-  )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    Action.create(
-      type: 'ShippingAction',
-      name: 'RemoveFacialMeasurementKit',
-      datetime: datetime,
-      metadata: {
-        'uuid': uuid,
-        'facial_measurement_kit_uuid': facial_measurement_kit_uuid
+        'shippable_uuid': shippable_uuid,
+        'shippable_type': shippable_type,
       }
     )
   end
