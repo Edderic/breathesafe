@@ -1,0 +1,2 @@
+class ShippingAction < Action
+end
