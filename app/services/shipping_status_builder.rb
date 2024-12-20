@@ -10,6 +10,8 @@ class ShippingStatusBuilder
           'shippables' => [],
           'purchase_label' => {},
           'send_to_courier' => {},
+          'from_address_uuid' => nil,
+          'to_address_uuid' => nil,
           'delivered' => {},
           'received' => {}
         }
@@ -20,6 +22,14 @@ class ShippingStatusBuilder
         }
       elsif shipping_action.name == 'RemoveItem'
         accum[metadata['uuid']]['shippables'].delete(metadata['shippable_uuid'])
+      elsif shipping_action.name == 'SetFromAddress'
+        accum[metadata['uuid']]['from_address_uuid'] = metadata['from_address_uuid']
+      elsif shipping_action.name == 'SetToAddress'
+        accum[metadata['uuid']]['to_address_uuid'] = metadata['to_address_uuid']
+      elsif shipping_action.name == 'SetSender'
+        accum[metadata['uuid']]['from_user_uuid'] = metadata['sender_uuid']
+      elsif shipping_action.name == 'SetReceiver'
+        accum[metadata['uuid']]['to_user_uuid'] = metadata['receiver_uuid']
       elsif shipping_action.name == 'PurchaseLabel'
         accum[metadata['uuid']]['purchase_label'] = metadata['purchase_label'].merge('datetime' => shipping_action.datetime)
       elsif shipping_action.name == 'SendToCourier'

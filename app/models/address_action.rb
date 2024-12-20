@@ -1,0 +1,2 @@
+class AddressAction < Action
+end

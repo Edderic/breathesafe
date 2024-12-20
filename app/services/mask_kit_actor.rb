@@ -18,19 +18,19 @@ class MaskKitActor
     )
   end
 
-  def self.add_masks(uuid:, mask_uuids:)
+  def self.add_masks(uuid:, mask_uuids:, datetime:)
     Action.create(
       type: 'MaskKitAction',
       name: 'AddMasks',
       datetime: datetime,
       metadata: {
         'uuid': uuid,
-        'mask_uuids': masks
+        'mask_uuids': mask_uuids
       }
     )
   end
 
-  def self.remove_masks(uuid:, mask_uuids:)
+  def self.remove_masks(uuid:, mask_uuids:, datetime:)
     Action.create(
       type: 'MaskKitAction',
       name: 'RemoveMasks',
@@ -42,11 +42,15 @@ class MaskKitActor
     )
   end
 
-  def self.add_default_masks(uuid:)
+  def self.add_default_masks(uuid:, datetime:)
     masks = Mask.where('json_array_length(payable_datetimes) > 0')
 
     masks.each do |m|
-      self.add_masks(uuid: uuid, mask_uuids: masks.id)
+      self.add_masks(
+        uuid: uuid,
+        mask_uuids: m.id,
+        datetime: datetime
+      )
     end
   end
 end

@@ -17,6 +17,28 @@ class UserActor
     )
   end
 
+  def self.set_name(
+    uuid:,
+    first_name:,
+    last_name:,
+    datetime: nil
+  )
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    Action.create(
+      type: 'UserAction',
+      name: 'SetName',
+      datetime: datetime,
+      metadata: {
+        'uuid' => uuid,
+        'first_name' => first_name,
+        'last_name' => last_name
+      }
+    )
+  end
+
   def self.mark_interested_in_study(
     uuid:,
     datetime: nil,
@@ -142,9 +164,9 @@ class UserActor
 
   def self.set_address(
     uuid:,
-    address:,
-    address_coordinate:,
-    datetime: nil
+    address_uuid:,
+    datetime: nil,
+    factory: nil
   )
     if datetime.nil?
       datetime = DateTime.now
@@ -156,14 +178,12 @@ class UserActor
       name: 'SetAddress',
       metadata: {
         'uuid' => uuid,
-        'address' => address,
-        'address_coordinate' => address_coordinate
+        'address_uuid' => address_uuid,
       }
     )
   end
 
-
-  def self.mark_as_needing_qlft_kit(
+  def self.acknowledge_need_qlft_kit(
     uuid:,
     datetime: nil
   )
@@ -173,7 +193,7 @@ class UserActor
 
     Action.create(
       type: 'UserAction',
-      name: 'MarkAsNeedingQLFTKit',
+      name: 'Actk',
       datetime: datetime,
       metadata: {
         'uuid': uuid,

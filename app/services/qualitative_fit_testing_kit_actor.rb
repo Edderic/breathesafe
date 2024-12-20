@@ -94,7 +94,7 @@ class QualitativeFitTestingKitActor
       hood_uuid = SecureRandom.uuid
       HoodActor.preset_create(
         uuid: hood_uuid,
-        model: :DIY,
+        model: 'DIY',
         datetime: datetime + 1.second
       )
 

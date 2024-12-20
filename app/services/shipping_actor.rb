@@ -66,6 +66,46 @@ class ShippingActor
     )
   end
 
+  def self.set_receiver(
+    uuid:,
+    receiver_uuid:,
+    datetime: nil
+  )
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    Action.create(
+      type: 'ShippingAction',
+      name: 'SetReceiver',
+      datetime: datetime,
+      metadata: {
+        'uuid': uuid,
+        'receiver_uuid': receiver_uuid
+      }
+    )
+  end
+
+  def self.set_sender(
+    uuid:,
+    sender_uuid:,
+    datetime: nil
+  )
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    Action.create(
+      type: 'ShippingAction',
+      name: 'SetSender',
+      datetime: datetime,
+      metadata: {
+        'uuid': uuid,
+        'sender_uuid': sender_uuid
+      }
+    )
+  end
+
   def self.set_to_address(
     uuid:,
     to_address_uuid:,

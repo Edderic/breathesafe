@@ -11,22 +11,46 @@ class AddressActor
     ].select{|x| x.present?}.join(', ')
   end
 
-  def self.save_address(uuid:, address:, factory: nil)
-      if factory.nil?
-        factory = RGeo::Geographic.simple_mercator_factory()
-      end
+  def self.create(address:, uuid:nil, factory: nil, datetime: nil)
+    if factory.nil?
+      factory = RGeo::Geographic.simple_mercator_factory()
+    end
 
-      stringified_address = self.stringify_address(address: address)
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    if uuid.nil?
+      uuid = SecureRandom.uuid
+    end
+
+    stringified_address = self.stringify_address(address: address)
+    created_address_actions = AddressAction.where(
+      "name = 'CreateAddress' AND metadata ->> 'stringified_address' = '#{stringified_address}' AND datetime < '#{datetime}'"
+    ).order(:datetime)
+
+    if created_address_actions.count == 0
       search = Geocoder.search(stringified_address)
       search_item = search[0]
       point = factory.point(
         search_item.data['lat'], search_item.data['lon']
       )
 
-      UserActor.set_address(
-        uuid: uuid,
-        address: address,
-        address_coordinate: point.to_s
+      AddressAction.create(
+        name: 'CreateAddress',
+        metadata: {
+          uuid: uuid,
+          stringified_address: stringified_address,
+          address: address,
+          address_coordinate: point.to_s
+        },
       )
+
+    else
+      uuid = created_address_actions[0].metadata['uuid']
+      # find the uuid for this address
+    end
+
+    uuid
   end
 end

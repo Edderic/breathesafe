@@ -16,7 +16,6 @@ class UserStatusBuilder
                 'removal_datetime' => nil
               },
               'qualifications' => {
-                'pod_type' => nil,
                 'hard_to_fit_face' => nil,
                 'country_of_residence' => nil,
               },
@@ -36,17 +35,11 @@ class UserStatusBuilder
               }
             }
           },
-          'address' => {
-            'state' => nil,
-            'country' => nil,
-            'zip_code' => nil,
-            'town_city' => nil,
-            'address_line_1' => nil,
-            'address_line_2' => nil,
-            'address_line_3' => nil,
-          },
-          'address_coordinate' => nil
+          'address_uuid' => nil
         }
+      elsif action.name == 'SetName'
+        accum[action.metadata['uuid']]['first_name'] = action.metadata['first_name']
+        accum[action.metadata['uuid']]['last_name'] = action.metadata['last_name']
       elsif action.name == 'MarkInterestedInStudy'
         study_name = action.metadata['study']
 
@@ -80,21 +73,13 @@ class UserStatusBuilder
             action.metadata['study']['qualifications']
           )
       elsif action.name == 'SetAddress'
-        unless accum[action.metadata['uuid']].key?('address')
-          accum[action.metadata['uuid']]['address'] = {}
-        end
-
-        accum[action.metadata['uuid']]['address'] = \
-          accum[action.metadata['uuid']]['address'].merge(action.metadata['address'])
-        accum[action.metadata['uuid']]['address_coordinate'] = action.metadata['address_coordinate']
+        accum[action.metadata['uuid']]['address_uuid'] = action.metadata['address_uuid']
       elsif action.name == 'RequestForEquipment'
         study_name = action.metadata['study']['study_name']
         equipment_request = action.metadata['study']['equipment_request']
 
         equipment_request.each do |k, v|
-          if v == true
-            accum[action.metadata['uuid']]['studies'][study_name]['equipment'][k]['requested_at'] = action.datetime
-          end
+          accum[action.metadata['uuid']]['studies'][study_name]['equipment'][k]['requested_at'] = action.datetime
         end
       end
 
