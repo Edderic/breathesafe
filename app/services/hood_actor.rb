@@ -1,36 +1,35 @@
 class HoodActor
   MODELS = {
-    Allegro: {
-      model: 'Allegro',
-      how: {
-        method: 'purchase',
-        url: 'https://www.industrialsafetyproducts.com/allegro-saccharin-fit-test-kit-2040/'
+    'Allegro' => {
+      'model' => 'Allegro',
+      'how' => {
+        'method' => 'purchase',
+        'url' => 'https://www.industrialsafetyproducts.com/allegro-saccharin-fit-test-kit-2040/'
       },
-      weight: {
-        'amount': 100,
-        'measurement_unit': 'g',
+      'weight' => {
+        'amount' => 100,
+        'measurement_unit' => 'g',
       },
-      cost: {
-        'material_cost': 65,
-        'labor_hours': 0
+      'cost' =>  {
+        'material_cost' =>  65,
+        'labor_hours' =>  0
       }
     },
-    DIY: {
-      model: 'DIY',
-      weight: {
-        amount: 20,
-        measurement_unit: 'g'
+    'DIY' =>  {
+      'model' =>  'DIY',
+      'weight' =>  {
+        'amount' =>  20,
+        'measurement_unit' =>  'g'
       },
-      how: {
+      'how' =>  {
         'method' => 'diy',
         'url' => '',
         'notes' => "2.5 gallon Ziploc bag with a hole port for the nebulizer, reinforced with cardboard and tape."
       },
-      cost: {
+      'cost' =>  {
         'material_cost' => 0.5,
         'labor_hours' => 0.05
       }
-
     }
   }
 
