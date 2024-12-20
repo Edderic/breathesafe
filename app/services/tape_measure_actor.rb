@@ -32,30 +32,12 @@ class TapeMeasureActor
       datetime = DateTime.now
     end
 
-    if weight.nil?
-      weight = {
-        'amount' => 0.01,
-        'measuring_unit' => 'lb'
-      }
-    end
-
-    if model.nil?
-      model = 'DIY'
-    end
-
-    if cost.nil?
-      cost = {
-        'material_cost' => 0.5,
-        'labor_hours' => 0.0
-      }
-    end
-
     Action.create(
       type: 'TapeMeasureAction',
       name: 'CreateTapeMeasure',
       datetime: datetime,
       metadata: {
-        'uuid' => SecureRandom.uuid,
+        'uuid' => uuid,
         'model' => model,
         'weight' => weight,
         'cost' => cost,
@@ -103,40 +85,6 @@ class TapeMeasureActor
         'uuid' => uuid,
         'cost' => cost,
         'sanitize_notes' => sanitize_notes
-      }
-    )
-  end
-
-  def self.add_to_facial_measurement_kit(uuid:, facial_measurement_kit_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    Action.create(
-      type: 'TapeMeasureAction',
-      name: 'AssociateWithFacialMeasurementKit',
-      datetime: datetime,
-      metadata: {
-        'uuid' => uuid,
-        'facial_measurement_kit_id' => facial_measurement_kit_uuid,
-        'datetime' => datetime
-      }
-    )
-  end
-
-  def self.remove_from_facial_measurement_kit(uuid:, facial_measurement_kit_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    Action.create(
-      type: 'TapeMeasureAction',
-      name: 'DissociateWithFacialMeasurementKit',
-      datetime: datetime,
-      metadata: {
-        'uuid' => uuid,
-        'facial_measurement_kit_id' => facial_measurement_kit_uuid,
-        'datetime' => datetime
       }
     )
   end
