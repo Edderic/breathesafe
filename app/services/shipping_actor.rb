@@ -1,8 +1,7 @@
 class ShippingActor
   def self.create_package(
-    dimensions:,
     uuid: nil,
-    datetime: nil,
+    datetime: nil
   )
     if datetime.nil?
       datetime = DateTime.now
@@ -17,68 +16,7 @@ class ShippingActor
       name: 'CreatePackage',
       datetime: datetime,
       metadata: {
-        'uuid': uuid,
-        'dimensions': dimensions
-      }
-    )
-  end
-
-  def self.add_qualitative_fit_testing_kit(
-    uuid:,
-    qualitative_fit_testing_kit_uuid:,
-    datetime: nil
-  )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    Action.create(
-      type: 'ShippingAction',
-      name: 'AddQualitativeFitTestingKit',
-      datetime: datetime,
-      metadata: {
-        'uuid': uuid,
-        'qualitative_fit_testing_kit_uuid': qualitative_fit_testing_kit_uuid
-      }
-    )
-  end
-
-  def self.remove_qualitative_fit_testing_kit(
-    uuid:,
-    qualitative_fit_testing_kit_uuid:,
-    datetime: nil
-  )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    Action.create(
-      type: 'ShippingAction',
-      name: 'RemoveQualitativeFitTestingKit',
-      datetime: datetime,
-      metadata: {
-        'uuid': uuid,
-        'qualitative_fit_testing_kit_uuid': qualitative_fit_testing_kit_uuid
-      }
-    )
-  end
-
-  def self.add_mask_kit(
-    uuid:,
-    mask_kit_uuid:,
-    datetime: nil
-  )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    Action.create(
-      type: 'ShippingAction',
-      name: 'AddMaskKit',
-      datetime: datetime,
-      metadata: {
-        'uuid': uuid,
-        'mask_kit_uuid': mask_kit_uuid
+        'uuid': uuid
       }
     )
   end
