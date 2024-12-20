@@ -1,10 +1,86 @@
 class QualitativeFitTestingKitActor
-  def self.preset_diy_create(datetime: nil)
+  def self.preset_allegro_create(uuid: nil, datetime: nil)
+    if uuid.nil?
+      uuid = SecureRandom.uuid
+    end
+
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
     ActiveRecord::Base.transaction do
-      if datetime.nil?
-        datetime = DateTime.now
+      kit_uuid = SecureRandom.uuid
+      self.create(uuid: kit_uuid, datetime: datetime)
+
+      nebulizer_uuid = SecureRandom.uuid
+      NebulizerActor.preset_create(
+        model: "Allegro",
+        uuid: nebulizer_uuid,
+        datetime: datetime + 1.second
+      )
+
+      hood_uuid = SecureRandom.uuid
+      HoodActor.preset_create(
+        uuid: hood_uuid,
+        model: 'Allegro',
+        datetime: datetime + 1.second
+      )
+
+      fit_test_solution_uuid = SecureRandom.uuid
+      SolutionActor.preset_create(
+        uuid: fit_test_solution_uuid,
+        model: 'Allegro',
+        flavor_type: 'saccharin',
+        concentration_type: 'fit_test',
+        datetime: datetime + 1.second
+      )
+
+      sensitivity_solution_uuid = SecureRandom.uuid
+      SolutionActor.preset_create(
+        uuid: sensitivity_solution_uuid,
+        model: 'Allegro',
+        flavor_type: 'saccharin',
+        concentration_type: 'sensitivity',
+        datetime: datetime + 1.second
+      )
+
+
+      solution_uuids = [fit_test_solution_uuid, sensitivity_solution_uuid]
+
+      solution_uuids.each do |solution_uuid|
+        self.add_solution(
+          uuid: kit_uuid,
+          solution_uuid: solution_uuid,
+          datetime: datetime + 1.second
+        )
       end
 
+      # Associate those parts with the qualitative fit testing kit
+
+      self.add_hood(
+        uuid: kit_uuid,
+        hood_uuid: hood_uuid,
+        datetime: datetime + 1.second
+      )
+
+      self.add_nebulizer(
+        uuid: kit_uuid,
+        nebulizer_uuid: nebulizer_uuid,
+        datetime: datetime + 1.second
+      )
+    end
+  end
+
+  def self.preset_diy_create(uuid: nil, datetime: nil)
+    if uuid.nil?
+      uuid = SecureRandom.uuid
+    end
+
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    ActiveRecord::Base.transaction do
       kit_uuid = SecureRandom.uuid
       self.create(uuid: kit_uuid, datetime: datetime)
 
