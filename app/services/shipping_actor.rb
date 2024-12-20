@@ -108,7 +108,7 @@ class ShippingActor
 
   def self.send_to_courier(
     uuid:,
-    send_to_courier_details:,
+    details:,
     datetime: nil
   )
     if datetime.nil?
@@ -117,18 +117,17 @@ class ShippingActor
 
     Action.create(
       type: 'ShippingAction',
-      name: 'PurchaseLabel',
+      name: 'SendToCourier',
       datetime: datetime,
       metadata: {
         'uuid': uuid,
-        'send_to_courier_details': send_to_courier_details
+        'details': details
       }
     )
   end
 
-  def self.mark_delivered(
+  def self.deliver(
     uuid:,
-    send_to_courier_details:,
     datetime: nil
   )
     if datetime.nil?
@@ -137,18 +136,16 @@ class ShippingActor
 
     Action.create(
       type: 'ShippingAction',
-      name: 'MarkDelivered',
+      name: 'Deliver',
       datetime: datetime,
       metadata: {
         'uuid': uuid,
-        'status': 'delivered'
       }
     )
   end
 
-  def self.mark_received(
+  def self.receive(
     uuid:,
-    receiver_user_uuid:,
     datetime: nil
   )
     if datetime.nil?
@@ -157,12 +154,10 @@ class ShippingActor
 
     Action.create(
       type: 'ShippingAction',
-      name: 'MarkReceived',
+      name: 'Receive',
       datetime: datetime,
       metadata: {
         'uuid': uuid,
-        'status': 'received',
-        'receiver_user_uuid': receiver_user_uuid
       }
     )
   end
