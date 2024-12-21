@@ -1,15 +1,15 @@
 class CreateQualitativeFitTestingKitJoin < ActiveRecord::Migration[7.0]
   def change
-    create_table :qualitative_fit_testing_kit_join do |t|
+    create_table :qualitative_fit_testing_kit_joins do |t|
       t.uuid :qlft_kit_uuid, null: false
       t.uuid :part_uuid, null: false
-      t.string :type, null: false
+      t.string :part_type, null: false
       t.datetime :refresh_datetime, null: false
 
       t.timestamps
     end
 
-    add_index :qualitative_fit_testing_kit_join,
+    add_index :qualitative_fit_testing_kit_joins,
       [
         :qlft_kit_uuid,
         :part_uuid,
