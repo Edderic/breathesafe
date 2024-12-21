@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_21_014502) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_21_023239) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -27,6 +27,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_014502) do
 
   create_table "address_statuses", force: :cascade do |t|
     t.uuid "uuid", null: false
+    t.datetime "refresh_datetime", null: false
     t.string "address_line_1", null: false
     t.string "address_line_2"
     t.string "address_line_3"
@@ -38,6 +39,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_014502) do
     t.string "stringified_address", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["uuid", "refresh_datetime"], name: "index_address_statuses_on_uuid_and_refresh_datetime", unique: true
   end
 
   create_table "addresses", force: :cascade do |t|
