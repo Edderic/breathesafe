@@ -1,0 +1,2 @@
+class QualitativeFitTestingKitJoin < ApplicationRecord
+end

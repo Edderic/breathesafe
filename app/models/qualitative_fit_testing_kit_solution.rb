@@ -1,0 +1,2 @@
+class QualitativeFitTestingKitSolution < ApplicationRecord
+end
