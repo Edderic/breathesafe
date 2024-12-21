@@ -10,16 +10,32 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_20_205342) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_21_014502) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
+  enable_extension "postgis"
 
   create_table "actions", force: :cascade do |t|
     t.datetime "datetime"
     t.string "name"
     t.string "type"
     t.jsonb "metadata"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "address_statuses", force: :cascade do |t|
+    t.uuid "uuid", null: false
+    t.string "address_line_1", null: false
+    t.string "address_line_2"
+    t.string "address_line_3"
+    t.string "town_city", null: false
+    t.string "country", null: false
+    t.string "state", null: false
+    t.string "zip_code", null: false
+    t.geometry "address_coordinate", limit: {:srid=>0, :type=>"geometry"}
+    t.string "stringified_address", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
