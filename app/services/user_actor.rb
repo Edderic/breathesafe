@@ -165,8 +165,7 @@ class UserActor
   def self.set_address(
     uuid:,
     address_uuid:,
-    datetime: nil,
-    factory: nil
+    datetime: nil
   )
     if datetime.nil?
       datetime = DateTime.now
