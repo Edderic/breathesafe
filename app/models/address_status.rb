@@ -1,0 +1,2 @@
+class AddressStatus < ApplicationRecord
+end
