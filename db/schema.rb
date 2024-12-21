@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_21_044903) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_21_050438) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -238,6 +238,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_044903) do
     t.datetime "study_start_datetime"
     t.datetime "study_goal_end_datetime"
     t.index ["user_id"], name: "index_profiles_on_user_id"
+  end
+
+  create_table "qualitative_fit_testing_kit_join", force: :cascade do |t|
+    t.uuid "qlft_kit_uuid", null: false
+    t.uuid "part_uuid", null: false
+    t.datetime "refresh_datetime", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["qlft_kit_uuid", "part_uuid", "refresh_datetime"], name: "index_qlft_kit_join_on_qlft_kit_uuid_part_uuid_refresh_datetime", unique: true
   end
 
   create_table "solution_statuses", force: :cascade do |t|
