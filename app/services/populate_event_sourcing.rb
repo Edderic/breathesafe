@@ -86,6 +86,11 @@ all_data.each do |email, v|
     datetime: data['user_created_at'].to_datetime
   )
 
+  UserActor.set_address(
+    uuid: email,
+    address_uuid: to_address_uuid
+  )
+
   UserActor.set_name(
     uuid: email,
     first_name: data['first_name'],
@@ -104,18 +109,6 @@ all_data.each do |email, v|
     datetime: data['user_created_at'].to_datetime + 1.second
   )
 
-  address_uuid = AddressActor.create(
-    address: data['address'],
-    datetime: data['user_created_at'].to_datetime + 1.second,
-  )
-
-  UserActor.set_address(
-    uuid: email,
-    address_uuid: address_uuid,
-    datetime:  data['user_created_at'].to_datetime + 1.second,
-    factory: factory
-  )
-
   UserActor.request_for_equipment(
     uuid: email,
     study_name: study_name,
@@ -131,7 +124,7 @@ all_data.each do |email, v|
   )
 
   mask_kit_uuid = SecureRandom.uuid
-  MaskKitActor.add_default_masks(
+  MaskKitActor.create(
     uuid: mask_kit_uuid,
     datetime: data['mask_kit_created_at'].to_datetime
   )
