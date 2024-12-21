@@ -10,7 +10,6 @@ class NebulizerStatusBuilder
         accum[uuid] = metadata
       elsif nebulizer_action.name == 'AddBatteries'
         accum[uuid]['power_supply']['batteries_present'] = true
-        debugger
         new_metadata = JSON.parse(metadata.to_json)
         new_metadata.delete('uuid')
 
