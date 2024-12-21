@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_21_050438) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_21_200027) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -75,6 +75,19 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_050438) do
     t.integer "deaths_cumulative"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "digital_caliper_statuses", force: :cascade do |t|
+    t.uuid "uuid", null: false
+    t.datetime "refresh_datetime", null: false
+    t.jsonb "how"
+    t.jsonb "cost"
+    t.string "model", null: false
+    t.jsonb "weight"
+    t.jsonb "power_supply"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uuid", "refresh_datetime"], name: "index_digital_caliper_statuses_on_uuid_and_refresh_datetime", unique: true
   end
 
   create_table "facial_measurements", force: :cascade do |t|
@@ -240,14 +253,23 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_050438) do
     t.index ["user_id"], name: "index_profiles_on_user_id"
   end
 
-  create_table "qualitative_fit_testing_kit_join", force: :cascade do |t|
+  create_table "qualitative_fit_testing_kit_joins", force: :cascade do |t|
     t.uuid "qlft_kit_uuid", null: false
     t.uuid "part_uuid", null: false
-    t.string "type", null: false
+    t.string "part_type", null: false
     t.datetime "refresh_datetime", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["qlft_kit_uuid", "part_uuid", "refresh_datetime"], name: "index_qlft_kit_join_on_qlft_kit_uuid_part_uuid_refresh_datetime", unique: true
+  end
+
+  create_table "qualitative_fit_testing_kit_statuses", force: :cascade do |t|
+    t.uuid "uuid"
+    t.datetime "refresh_datetime"
+    t.string "type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uuid", "refresh_datetime", "type"], name: "index_qlft_kit_on_uuid_refresh_datetime_type_unique_true", unique: true
   end
 
   create_table "solution_statuses", force: :cascade do |t|
@@ -271,6 +293,17 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_050438) do
     t.string "code"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "tape_measure_statuses", force: :cascade do |t|
+    t.uuid "uuid", null: false
+    t.jsonb "cost"
+    t.string "model", null: false
+    t.jsonb "weight"
+    t.datetime "refresh_datetime", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uuid", "refresh_datetime"], name: "index_tape_measure_statuses_on_uuid_and_refresh_datetime", unique: true
   end
 
   create_table "user_carbon_dioxide_monitors", force: :cascade do |t|
