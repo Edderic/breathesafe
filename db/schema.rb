@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_21_023239) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_21_041531) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -115,6 +115,20 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_023239) do
     t.index ["user_id"], name: "index_fit_tests_on_user_id"
   end
 
+  create_table "hood_statuses", force: :cascade do |t|
+    t.uuid "uuid", null: false
+    t.datetime "refresh_datetime", null: false
+    t.jsonb "how"
+    t.jsonb "cost"
+    t.string "model", null: false
+    t.jsonb "weight"
+    t.jsonb "sanitization"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uuid", "refresh_datetime"], name: "index_hood_statuses_on_uuid_and_refresh_datetime", unique: true
+    t.index ["uuid"], name: "index_hood_statuses_on_uuid"
+  end
+
   create_table "managed_users", force: :cascade do |t|
     t.bigint "manager_id", null: false
     t.bigint "managed_id", null: false
@@ -122,6 +136,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_023239) do
     t.datetime "updated_at", null: false
     t.index ["managed_id"], name: "index_managed_users_on_managed_id"
     t.index ["manager_id"], name: "index_managed_users_on_manager_id"
+  end
+
+  create_table "mask_kit_statuses", force: :cascade do |t|
+    t.uuid "uuid", null: false
+    t.integer "mask_uuid", null: false
+    t.datetime "refresh_datetime", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uuid", "mask_uuid", "refresh_datetime"], name: "index_uuid_mask_uuid_datetime_on_mkst", unique: true
   end
 
   create_table "masks", force: :cascade do |t|
