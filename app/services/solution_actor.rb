@@ -126,6 +126,7 @@ class SolutionActor
 
     metadata['uuid'] = uuid
     metadata['model'] = model
+    metadata['flavor_type'] = flavor_type
 
     Action.create(
       type: 'SolutionAction',
