@@ -243,6 +243,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_050438) do
   create_table "qualitative_fit_testing_kit_join", force: :cascade do |t|
     t.uuid "qlft_kit_uuid", null: false
     t.uuid "part_uuid", null: false
+    t.string "type", null: false
     t.datetime "refresh_datetime", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
