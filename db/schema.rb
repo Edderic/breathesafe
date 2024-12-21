@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_21_043604) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_21_044903) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -238,6 +238,22 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_043604) do
     t.datetime "study_start_datetime"
     t.datetime "study_goal_end_datetime"
     t.index ["user_id"], name: "index_profiles_on_user_id"
+  end
+
+  create_table "solution_statuses", force: :cascade do |t|
+    t.uuid "uuid", null: false
+    t.datetime "refresh_datetime", null: false
+    t.string "model", null: false
+    t.jsonb "flavor_type", null: false
+    t.jsonb "how"
+    t.jsonb "cost"
+    t.jsonb "volume"
+    t.string "concentration_type"
+    t.float "volume_level_proportion"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uuid", "refresh_datetime"], name: "index_solution_statuses_on_uuid_and_refresh_datetime", unique: true
+    t.index ["uuid"], name: "index_solution_statuses_on_uuid"
   end
 
   create_table "states", force: :cascade do |t|
