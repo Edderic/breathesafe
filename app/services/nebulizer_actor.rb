@@ -56,7 +56,7 @@ class NebulizerActor
     end
 
     metadata = JSON.parse(MODELS[model].to_json)
-    metadata[uuid] = uuid
+    metadata['uuid'] = uuid
 
     Action.create(
       type: 'NebulizerAction',
