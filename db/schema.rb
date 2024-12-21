@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_21_041531) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_21_043604) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -189,6 +189,21 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_041531) do
     t.datetime "updated_at", null: false
     t.boolean "remove_from_service", default: false
     t.index ["owner_id"], name: "index_measurement_devices_on_owner_id"
+  end
+
+  create_table "nebulizer_statuses", force: :cascade do |t|
+    t.uuid "uuid", null: false
+    t.datetime "refresh_datetime", null: false
+    t.jsonb "how"
+    t.jsonb "cost"
+    t.string "model", null: false
+    t.jsonb "weight"
+    t.jsonb "batteries"
+    t.jsonb "power_supply"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uuid", "refresh_datetime"], name: "index_nebulizer_statuses_on_uuid_and_refresh_datetime", unique: true
+    t.index ["uuid"], name: "index_nebulizer_statuses_on_uuid"
   end
 
   create_table "population_states", force: :cascade do |t|
