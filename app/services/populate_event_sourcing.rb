@@ -21,6 +21,9 @@ from_address_uuid = AddressActor.create(
   factory: factory
 )
 
+study_uuid = SecureRandom.uuid
+StudyActor.create( uuid: study_uuid, name: 'Mask Recommender Based on Facial Features')
+
 all_data = {
   'briana@brianamontagne.com' => {
     'first_name' => 'Briana',
