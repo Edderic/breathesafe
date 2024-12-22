@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_21_200027) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_22_054209) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -79,6 +79,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_200027) do
 
   create_table "digital_caliper_statuses", force: :cascade do |t|
     t.uuid "uuid", null: false
+    t.uuid "facial_measurement_kit_uuid"
     t.datetime "refresh_datetime", null: false
     t.jsonb "how"
     t.jsonb "cost"
@@ -87,7 +88,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_200027) do
     t.jsonb "power_supply"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["uuid", "refresh_datetime"], name: "index_digital_caliper_statuses_on_uuid_and_refresh_datetime", unique: true
+    t.index ["uuid", "refresh_datetime", "facial_measurement_kit_uuid"], name: "index_dig_cal_sta_on_uuid_refr_fm_kit_uuid", unique: true
+  end
+
+  create_table "facial_measurement_kit_statuses", force: :cascade do |t|
+    t.uuid "uuid", null: false
+    t.datetime "refresh_datetime", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uuid", "refresh_datetime"], name: "index_fmks_on_uuid_refr_datetime__unique_true", unique: true
   end
 
   create_table "facial_measurements", force: :cascade do |t|
@@ -272,6 +281,32 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_200027) do
     t.index ["uuid", "refresh_datetime", "type"], name: "index_qlft_kit_on_uuid_refresh_datetime_type_unique_true", unique: true
   end
 
+  create_table "shipping_status_joins", force: :cascade do |t|
+    t.datetime "refresh_datetime", null: false
+    t.string "shippable_type", null: false
+    t.uuid "shipping_uuid", null: false
+    t.uuid "shippable_uuid", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shipping_uuid", "shippable_uuid", "refresh_datetime"], name: "index_ssj_on_ship_uuid_shippable_uuid_refresh_datetime"
+  end
+
+  create_table "shipping_statuses", force: :cascade do |t|
+    t.uuid "uuid"
+    t.datetime "refresh_datetime", null: false
+    t.uuid "to_user_uuid"
+    t.uuid "from_user_uuid"
+    t.jsonb "received"
+    t.jsonb "delivered"
+    t.uuid "from_address_uuid"
+    t.uuid "to_address_uuid"
+    t.jsonb "purchase_label"
+    t.jsonb "send_to_courier"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uuid", "refresh_datetime"], name: "index_shipping_statuses_on_uuid_and_refresh_datetime", unique: true
+  end
+
   create_table "solution_statuses", force: :cascade do |t|
     t.uuid "uuid", null: false
     t.datetime "refresh_datetime", null: false
@@ -295,15 +330,25 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_200027) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "study_statuses", force: :cascade do |t|
+    t.uuid "uuid", null: false
+    t.string "name", null: false
+    t.datetime "refresh_datetime", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uuid", "name", "refresh_datetime"], name: "index_study_statuses_on_uuid_and_name_and_refresh_datetime", unique: true
+  end
+
   create_table "tape_measure_statuses", force: :cascade do |t|
     t.uuid "uuid", null: false
+    t.uuid "facial_measurement_kit_uuid"
     t.jsonb "cost"
     t.string "model", null: false
     t.jsonb "weight"
     t.datetime "refresh_datetime", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["uuid", "refresh_datetime"], name: "index_tape_measure_statuses_on_uuid_and_refresh_datetime", unique: true
+    t.index ["uuid", "refresh_datetime", "facial_measurement_kit_uuid"], name: "index_tape_mea_sta_on_uuid_refr_fm_kit_uuid", unique: true
   end
 
   create_table "user_carbon_dioxide_monitors", force: :cascade do |t|
@@ -316,7 +361,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_21_200027) do
   end
 
   create_table "user_statuses", force: :cascade do |t|
-    t.uuid "uuid", null: false
+    t.string "uuid", null: false
     t.string "first_name"
     t.string "last_name"
     t.boolean "high_risk"
