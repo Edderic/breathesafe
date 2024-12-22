@@ -1,0 +1,2 @@
+class StudyParticipantAction < Action
+end
