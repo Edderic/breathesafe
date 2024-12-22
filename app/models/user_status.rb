@@ -7,7 +7,7 @@ class UserStatus < ApplicationRecord
     results = UserStatusBuilder.build
 
     results.each do |email, details|
-      UserStatus.create(
+      UserStatus.create!(
         uuid: email,
         high_risk: details['high_risk'],
         first_name: details['first_name'],
