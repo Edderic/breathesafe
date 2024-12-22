@@ -88,4 +88,39 @@ class TapeMeasureActor
       }
     )
   end
+
+  def self.associate_with_facial_measurement_kit(
+    uuid:,
+    facial_measurement_kit_uuid:,
+    datetime: nil
+  )
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    Action.create(
+      type: 'TapeMeasureAction',
+      name: 'AssociateWithFacialMeasurementKit',
+      datetime: datetime,
+      metadata: {
+        'uuid' => uuid,
+        'facial_measurement_kit_uuid' => facial_measurement_kit_uuid
+      }
+    )
+  end
+
+  def self.dissociate_from_facial_measurement_kit(uuid:, datetime: nil)
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    Action.create(
+      type: 'TapeMeasureAction',
+      name: 'DissociateWithFacialMeasurementKit',
+      datetime: datetime,
+      metadata: {
+        'uuid' => uuid
+      }
+    )
+  end
 end
