@@ -101,20 +101,28 @@ all_data.each do |email, v|
     datetime: data['user_created_at'].to_datetime + 1.second
   )
 
-  UserActor.accept_into_study(
-    uuid: email,
+  StudyParticipantActor.create(
+    participant_uuid: email,
+    study_uuid: study_uuid,
+    datetime: data['accepted_into_study_at'].to_datetime - 1.second
+  )
+
+  StudyParticipantActor.accept_into_study(
+    participant_uuid: email,
+    study_uuid: study_uuid,
     datetime: data['accepted_into_study_at'].to_datetime
   )
 
-  UserActor.set_study_qualifications(
-    uuid: email,
+  StudyParticipantActor.set_study_qualifications(
+    participant_uuid: email,
+    study_uuid: study_uuid,
     study_qualifications: data['study_qualifications'],
     datetime: data['user_created_at'].to_datetime + 1.second
   )
 
-  UserActor.request_for_equipment(
-    uuid: email,
-    study_name: study_name,
+  StudyParticipantActor.request_for_equipment(
+    participant_uuid: email,
+    study_uuid: study_uuid,
     equipment_request: data['request_for_equipment']['equipment_request'],
     datetime: data['user_created_at'].to_datetime + 1.second
   )
