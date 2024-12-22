@@ -31,47 +31,17 @@ class FacialMeasurementKitActor
         datetime: datetime + 1.second
       )
 
-      self.add_tape_measure(
-        uuid: kit_uuid,
-        tape_measure_uuid: tape_measure_uuid,
-        datetime: datetime + 2.second
+      TapeMeasureActor.associate_with_facial_measurement_kit(
+        uuid: tape_measure_uuid,
+        facial_measurement_kit_uuid: uuid,
+        datetime: datetime + 2.seconds
       )
 
-      self.add_digital_caliper(
-        uuid: kit_uuid,
-        digital_caliper_uuid: digital_caliper_uuid,
-        datetime: datetime + 2.second
+      DigitalCaliperActor.associate_with_facial_measurement_kit(
+        uuid: digital_caliper_uuid,
+        facial_measurement_kit_uuid: uuid,
+        datetime: datetime + 2.seconds
       )
     end
-  end
-
-  def self.add_tape_measure(uuid:, tape_measure_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    FacialMeasurementKitAction.create(
-      name: 'AddTapeMeasure',
-      datetime: datetime,
-      metadata: {
-        'uuid' => uuid,
-        'tape_measure_uuid' => tape_measure_uuid
-      }
-    )
-  end
-
-  def self.add_digital_caliper(uuid:, digital_caliper_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    FacialMeasurementKitAction.create(
-      name: 'AddDigitalCaliper',
-      datetime: datetime,
-      metadata: {
-        'uuid' => uuid,
-        'digital_caliper_uuid' => digital_caliper_uuid
-      }
-    )
   end
 end
