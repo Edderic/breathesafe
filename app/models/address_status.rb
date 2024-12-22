@@ -9,7 +9,7 @@ class AddressStatus < ApplicationRecord
     current_state.each do |uuid, data|
       data[:uuid] = uuid
       data[:refresh_datetime] = datetime
-      self.create(**data)
+      self.create!(**data)
     end
   end
 end
