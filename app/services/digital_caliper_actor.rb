@@ -260,7 +260,7 @@ class DigitalCaliperActor
     )
   end
 
-  def self.add_to_facial_measurement_kit(uuid:, facial_measurement_kit_uuid:, datetime: nil)
+  def self.associate_with_facial_measurement_kit(uuid:, facial_measurement_kit_uuid:, datetime: nil)
     if datetime.nil?
       datetime = DateTime.now
     end
@@ -271,24 +271,23 @@ class DigitalCaliperActor
       datetime: datetime,
       metadata: {
         'uuid' => uuid,
-        'facial_measurement_kit_id' => facial_measurement_kit_uuid,
+        'facial_measurement_kit_uuid' => facial_measurement_kit_uuid,
         'datetime' => datetime
       }
     )
   end
 
-  def self.remove_from_facial_measurement_kit(uuid:, facial_measurement_kit_uuid:, datetime: nil)
+  def self.dissociate_from_facial_measurement_kit(uuid:, datetime: nil)
     if datetime.nil?
       datetime = DateTime.now
     end
 
     Action.create(
       type: 'DigitalCaliperAction',
-      name: 'DissociateWithFacialMeasurementKit',
+      name: 'DissociateFromFacialMeasurementKit',
       datetime: datetime,
       metadata: {
         'uuid' => uuid,
-        'facial_measurement_kit_id' => facial_measurement_kit_uuid,
         'datetime' => datetime
       }
     )
