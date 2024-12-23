@@ -50,7 +50,7 @@ class StudyParticipantStatusBuilder
         }
       elsif action.name == 'SetStudyQualifications'
         accum[study_uuid][participant_uuid]['qualifications'] = \
-          accum[study_uuid][participant_uuid]['qualifications'].merge(metadata[qualifications])
+          accum[study_uuid][participant_uuid]['qualifications'].merge(metadata['qualifications'])
       elsif action.name == 'RequestForEquipment'
         equipment_request = action.metadata['equipment_request']
 
