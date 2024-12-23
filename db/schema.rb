@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_22_054209) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_23_050705) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -328,6 +328,20 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_22_054209) do
     t.string "code"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "study_participant_statuses", force: :cascade do |t|
+    t.uuid "study_uuid", null: false
+    t.string "participant_uuid", null: false
+    t.datetime "refresh_datetime"
+    t.datetime "interested_datetime"
+    t.datetime "accepted_datetime"
+    t.jsonb "removal_from_study", default: {}
+    t.jsonb "qualifications", default: {}
+    t.jsonb "equipment", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["study_uuid", "participant_uuid", "refresh_datetime"], name: "index_stu_par_sta_on_study_uuid_participant_uuid_refr_dt", unique: true
   end
 
   create_table "study_statuses", force: :cascade do |t|
