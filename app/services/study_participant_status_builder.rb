@@ -13,7 +13,7 @@ class StudyParticipantStatusBuilder
 
       if action.name == 'Create'
         accum[study_uuid] = {}
-        accum[study_uuid][participant_uuid] =
+        accum[study_uuid][participant_uuid] = {
           'interested_datetime' => nil,
           'accepted_datetime' => nil,
           'removal_from_study' => {
@@ -38,8 +38,7 @@ class StudyParticipantStatusBuilder
               'received_at' => nil
             },
           }
-
-
+        }
       elsif action.name == 'MarkInterestedInStudy'
         accum[study_uuid][participant_uuid]['interested_datetime'] = action.datetime
       elsif action.name == 'AcceptIntoStudy'
