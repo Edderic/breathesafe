@@ -6,6 +6,8 @@ class Status
 
     ActiveRecord::Base.transaction do
       UserStatus.refresh!(datetime: datetime)
+      StudyStatus.refresh!(datetime: datetime)
+      StudyParticipantStatus.refresh!(datetime: datetime)
 
       TapeMeasureStatus.refresh!(datetime: datetime)
       DigitalCaliperStatus.refresh!(datetime: datetime)
@@ -26,6 +28,8 @@ class Status
 
   def self.destroy!
     UserStatus.destroy_all
+    StudyStatus.destroy_all
+    StudyParticipantStatus.destroy_all
 
     TapeMeasureStatus.destroy_all
     DigitalCaliperStatus.destroy_all
