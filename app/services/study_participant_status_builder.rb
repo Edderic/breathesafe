@@ -58,6 +58,8 @@ class StudyParticipantStatusBuilder
           accum[study_uuid][participant_uuid]['equipment'][k]['requested_at'] = action.datetime
         end
       end
+
+      accum
     end
   end
 end
