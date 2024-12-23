@@ -117,14 +117,14 @@ all_data.each do |email, v|
     participant_uuid: email,
     study_uuid: study_uuid,
     study_qualifications: data['study_qualifications'],
-    datetime: data['user_created_at'].to_datetime + 1.second
+    datetime: data['accepted_into_study_at'].to_datetime + 1.second
   )
 
   StudyParticipantActor.request_for_equipment(
     participant_uuid: email,
     study_uuid: study_uuid,
     equipment_request: data['request_for_equipment']['equipment_request'],
-    datetime: data['user_created_at'].to_datetime + 1.second
+    datetime: data['accepted_into_study_at'].to_datetime + 1.second
   )
 
   facial_measurement_kit_uuid = SecureRandom.uuid
