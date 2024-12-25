@@ -1,3 +1,5 @@
+require 'csv'
+
 class ShippingActor
   def self.create_package(
     uuid: nil,
@@ -200,6 +202,36 @@ class ShippingActor
         'uuid': uuid,
       }
     )
+  end
+
+  def self.bulk_assign_purchase_labels(csv_string)
+    counter = 0
+    header = []
+    rows = []
+
+    # Build a JSON-like representation of rows
+    CSV.parse(csv_string) do |row|
+      accum = {}
+
+      if counter == 0
+        header = row.map{|r| r.strip}
+      else
+        row.each.with_index do |value, index|
+          accum[header[index]] = value.strip
+        end
+        rows << accum
+      end
+      counter += 1
+    end
+
+    shipping_statuses_add_labels_to = ShippingQuery.\
+      find_shipping_statuses_with_blank_purchase_labels(user_status_names: rows.map{|r| r['name']})
+
+    shipping_statuses_add_labels_to.each do |s|
+      shipping_status_uuid = s['shipping_status_uuid']
+      row = rows.find{ |r| r['name'] == s['first_name'] + ' ' + s['last_name']  }
+      ShippingActor.purchase_label(uuid: shipping_status_uuid, purchase_label: row)
+    end
   end
 end
 
