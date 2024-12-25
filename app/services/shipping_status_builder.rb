@@ -10,6 +10,8 @@ class ShippingStatusBuilder
           'shippables' => [],
           'purchase_label' => {},
           'send_to_courier' => {},
+          'from_user_uuid' => nil,
+          'to_user_uuid' => nil,
           'from_address_uuid' => nil,
           'to_address_uuid' => nil,
           'delivered' => {},

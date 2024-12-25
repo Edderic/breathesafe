@@ -10,9 +10,11 @@ class StudyParticipantStatusBuilder
 
       study_uuid = action.metadata['study_uuid']
       participant_uuid = action.metadata['participant_uuid']
+      if accum[study_uuid].nil?
+        accum[study_uuid] = {}
+      end
 
       if action.name == 'Create'
-        accum[study_uuid] = {}
         accum[study_uuid][participant_uuid] = {
           'interested_datetime' => nil,
           'accepted_datetime' => nil,
@@ -37,6 +39,10 @@ class StudyParticipantStatusBuilder
               'requested_at' => nil,
               'received_at' => nil
             },
+            'money' => {
+              'requested_at' => nil,
+              'received_at' => nil
+            },
           }
         }
       elsif action.name == 'MarkInterestedInStudy'
@@ -52,11 +58,7 @@ class StudyParticipantStatusBuilder
         accum[study_uuid][participant_uuid]['qualifications'] = \
           accum[study_uuid][participant_uuid]['qualifications'].merge(metadata['qualifications'])
       elsif action.name == 'RequestForEquipment'
-        equipment_request = action.metadata['equipment_request']
-
-        equipment_request.each do |k, v|
-          accum[study_uuid][participant_uuid]['equipment'][k]['requested_at'] = action.datetime
-        end
+        accum[study_uuid][participant_uuid]['equipment'] = accum[study_uuid][participant_uuid]['equipment'].merge(action.metadata['equipment_request'])
       end
 
       accum

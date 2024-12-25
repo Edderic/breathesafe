@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_23_050705) do
+ActiveRecord::Schema[7.0].define(version: 2024_12_23_184044) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -294,8 +294,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_23_050705) do
   create_table "shipping_statuses", force: :cascade do |t|
     t.uuid "uuid"
     t.datetime "refresh_datetime", null: false
-    t.uuid "to_user_uuid"
-    t.uuid "from_user_uuid"
+    t.string "to_user_uuid"
+    t.string "from_user_uuid"
     t.jsonb "received"
     t.jsonb "delivered"
     t.uuid "from_address_uuid"
