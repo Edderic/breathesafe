@@ -1,7 +1,6 @@
 require 'selenium-webdriver'
 require 'nokogiri'
 require 'capybara'
-require 'debug'
 require 'dotenv/load'
 require 'csv'
 
