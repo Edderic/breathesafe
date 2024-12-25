@@ -55,11 +55,11 @@ gem "pry-rails"
 gem "geocoder"
 gem "rgeo"
 gem "activerecord-postgis-adapter"
+gem "selenium-webdriver", "~> 4.25.0"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug"
-  gem "selenium-webdriver", "~> 4.25.0"
   gem 'dotenv-rails'
 end
 
