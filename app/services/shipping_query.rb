@@ -1,7 +1,7 @@
 require 'csv'
 
 class ShippingQuery
-  def self.find_users_who_are_waiting_for_a_package
+  def self.find_users_who_are_awaiting_shipping_label
     # Accepted users who do not yet have a purchase label?
     # TODO: find latest refresh datetime and use that
     JSON.parse(
@@ -18,7 +18,7 @@ class ShippingQuery
   end
 
   def self.usps_csv
-    rows = self.find_users_who_are_waiting_for_a_package
+    rows = self.find_users_who_are_awaiting_shipping_label
 
     ::CSV.open("usps_labels_to_create.csv", "wb") do |csv|
       csv << [
@@ -154,4 +154,35 @@ class ShippingQuery
       accum
     end
   end
+
+  def self.find_shipping_statuses_with_blank_purchase_labels(user_status_names:)
+    # TODO
+    # Assumes name is unique, first_name and last_name
+    # Get the address_uuid
+    # Find the latest shipping where address_uuid = to_address_uuid
+    #
+    names = user_status_names.map {|u| "'#{u}'"}.join(', ')
+    JSON.parse(
+      ActiveRecord::Base.connection.exec_query(
+        <<-SQL
+        WITH latest_datetimes AS (
+          SELECT uuid, MAX(refresh_datetime) AS latest_datetime
+          FROM user_statuses
+          GROUP BY 1
+        ), user_st AS (
+          SELECT * FROM latest_datetimes
+          INNER JOIN user_statuses ON user_statuses.refresh_datetime = latest_datetimes.latest_datetime
+            AND user_statuses.uuid = latest_datetimes.uuid
+          WHERE user_statuses.first_name || ' ' || user_statuses.last_name IN (#{names})
+        )
+
+        SELECT shipping_statuses.uuid AS shipping_status_uuid, * FROM user_st
+        LEFT JOIN shipping_statuses ON shipping_statuses.to_address_uuid = user_st.address_uuid
+        WHERE purchase_label = '{}'
+
+        SQL
+      ).to_json
+    )
+  end
 end
+
