@@ -1,16 +1,16 @@
-class VentilationRecord < ApplicationRecord
+class Event < ApplicationRecord
   belongs_to :author, class_name: 'User'
 
   def self.can_be_accessed_by(user)
     # unless user
-      # return VentilationRecord.find_by_sql(
+      # return Event.find_by_sql(
         # <<-SQL
           # select * from events where private = 'public'
         # SQL
       # )
 #
     # end
-    events = VentilationRecord.connection.exec_query(
+    events = Event.connection.exec_query(
       <<-SQL
         select distinct(events.id) as distinct_id, events.*, profiles.user_id, profiles.first_name, profiles.last_name, authors.admin as authored_by_admin
         from events
