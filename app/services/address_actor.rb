@@ -11,7 +11,7 @@ class AddressActor
     ].select{|x| x.present?}.join(', ')
   end
 
-  def self.create(address:, uuid:nil, factory: nil, datetime: nil)
+  def self.find_or_create(address:, uuid:nil, factory: nil, datetime: nil)
     if factory.nil?
       factory = RGeo::Geographic.simple_mercator_factory()
     end
@@ -32,9 +32,14 @@ class AddressActor
     if created_address_actions.count == 0
       search = Geocoder.search(stringified_address)
       search_item = search[0]
-      point = factory.point(
-        search_item.data['lat'], search_item.data['lon']
-      )
+
+      if search_item
+        point = factory.point(
+          search_item.data['lat'], search_item.data['lon']
+        )
+      else
+        point = ""
+      end
 
       AddressAction.create(
         name: 'CreateAddress',
