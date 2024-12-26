@@ -5,7 +5,7 @@ if Rails.env.development?
   require 'dotenv/load'
   require 'csv'
 
-  class USPSScraper
+  class UspsScraper
     def initialize
 
       driver = Selenium::WebDriver.for :chrome
@@ -118,8 +118,10 @@ if Rails.env.development?
     end
   end
 
-  scraper = USPSScraper.new
+  scraper = UspsScraper.new
   scraper.methods
   debugger
-
+else
+  class UspsScraper
+  end
 end
