@@ -130,8 +130,11 @@ class ShippingActor
 
   def self.purchase_label(
     uuid:,
+    name:,
+    email:,
     purchase_label:,
-    datetime: nil
+    datetime: nil,
+    send_mail: true
   )
     if datetime.nil?
       datetime = DateTime.now
@@ -146,6 +149,13 @@ class ShippingActor
         'purchase_label': purchase_label
       }
     )
+
+    if send_mail
+      StudyParticipantMailer.with(
+        user: {'name' => name, 'email' => email},
+        shipping_label: purchase_label
+      ).shipping_label_assigned.deliver_now
+    end
   end
 
   def self.send_to_courier(
@@ -230,7 +240,12 @@ class ShippingActor
     shipping_statuses_add_labels_to.each do |s|
       shipping_status_uuid = s['shipping_status_uuid']
       row = rows.find{ |r| r['name'] == s['first_name'] + ' ' + s['last_name']  }
-      ShippingActor.purchase_label(uuid: shipping_status_uuid, purchase_label: row)
+      ShippingActor.purchase_label(
+        uuid: shipping_status_uuid,
+        email: s['email'],
+        name: s['first_name'],
+        purchase_label: row
+      )
     end
   end
 end

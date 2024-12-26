@@ -170,7 +170,7 @@ class ShippingQuery
           FROM user_statuses
           GROUP BY 1
         ), user_st AS (
-          SELECT * FROM latest_datetimes
+          SELECT user_statuses.uuid AS email, * FROM latest_datetimes
           INNER JOIN user_statuses ON user_statuses.refresh_datetime = latest_datetimes.latest_datetime
             AND user_statuses.uuid = latest_datetimes.uuid
           WHERE user_statuses.first_name || ' ' || user_statuses.last_name IN (#{names})
