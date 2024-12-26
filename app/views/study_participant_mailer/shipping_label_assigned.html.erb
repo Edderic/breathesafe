@@ -1,4 +1,4 @@
-<h1>Hi <%= @user['first_name'] %>!</h1>
+<p>Hi <%= @user['first_name'] %>!</p>
 <p>
   Thank you for your interest in the Mask Recommender based on Facial Features study. I'm happy to announce that a shipping label has been created for your package.
   <br>
@@ -6,12 +6,17 @@
 
 <table>
   <tbody>
-    <th>Ship date</th><td><%= @shipping_label['ship_date']%></td>
-    <th>Label number</th><td>
-      <a href="https://tools.usps.com/go/TrackConfirmAction?tRef=fullpage&tLc=2&text28777=&tLabels=<%= @shipping_label['label_number']%>%2C&tABt=false#">
-        <%= @shipping_label['label_number']%>
-      </a>
-    </td>
+    <tr>
+      <th>Ship date</th><td><%= @shipping_label['ship_date']%></td>
+    </tr>
+    <tr>
+      <th>Label number</th>
+      <td>
+        <a href="https://tools.usps.com/go/TrackConfirmAction?tRef=fullpage&tLc=2&text28777=&tLabels=<%= @shipping_label['label_number']%>%2C&tABt=false#">
+          <%= @shipping_label['label_number']%>
+        </a>
+      </td>
+    </tr>
   </tbody>
 </table>
 
@@ -23,7 +28,11 @@
 
 <p>
 Regards,
+</p>
 
+<p>
 Edderic Ugaddan
+</p>
+<p>
 Breathesafe LLC
 </p>
