@@ -45,5 +45,6 @@ class Status
     AddressStatus.destroy_all
 
     ShippingStatus.destroy_all
+    ShippingStatusJoin.destroy_all
   end
 end
