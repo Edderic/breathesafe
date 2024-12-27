@@ -66,6 +66,19 @@
         Adding Fit Tests: Qualitative Fit Testing (QLFT)
       </router-link>
 
+      <router-link :to="tocPath('running-fit-tests-qlft-setup-equipment')">
+        Running a Qualitative Fit Test: Equipment Setup
+      </router-link>
+
+      <router-link :to="tocPath('running-fit-tests-qlft-sensitivity-check')">
+        Running a Qualitative Fit Test: Sensitivity Check
+      </router-link>
+
+      <router-link :to="tocPath('running-fit-tests-qlft-fit-tests')">
+        Running a Qualitative Fit Test: Fit Tests
+      </router-link>
+
+
       <router-link :to="tocPath('adding-fit-tests-comfort')">
         Adding Fit Tests: Comfort Questions
       </router-link>
@@ -198,6 +211,15 @@
         </ul>
 
         <p>Breathesafe LLC may have provided you qualitative fit testing equipment.</p>
+
+        <figure>
+          <img  class='single-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/breathesafe-facial-measurements-examples/diy_qualitative_fit_testing_kit_2.jpeg" alt='qualitative fit testing equipment with ziploc bag as hood, two bottles of saccharin -- one for sensitivity and another for fit testing, and a battery-powered mesh nebulizer to aerosolize the solutions'>
+          <figcaption>DIY Qualitative Fit Testing equipment</figcaption>
+        </figure>
+
+        <p>For instructions on how to use the qualitative fit testing kit provided to you by Breathesafe LLC, please take a look at the <router-link :to="tocPath('running-fit-tests-qlft')"> Running a Qualitative Fit Test </router-link> section.
+        </p>
+
 
         <p>If you don't have qualitative fit testing equipment, but have access to <strong>quantitative</strong> fit testing equipment, you should have:</p>
         <ul>
@@ -533,6 +555,281 @@
         </div>
 
 
+        <div id='running-fit-tests-qlft-setup-equipment'>
+          <br>
+          <br>
+          <h4> Running Qualitative Fit Tests (QLFT): Equipment Setup</h4>
+        </div>
+
+        <p>You may have been provided a Mayluck Mesh Nebulizer. Open the battery compartment underneath to check that 2 AA batteries are in place.</p>
+
+        <div class='center'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-mayluck-neb-1.jpeg" alt='Mayluck Mesh Nebulizer'>
+            <figcaption>Mayluck Nebulizer</figcaption>
+          </figure>
+        </div>
+
+        <div class='center'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-mayluck-neb-2.jpeg" alt='Mayluck Mesh Nebulizer - Bottom'>
+            <figcaption>Mayluck Nebulizer - Bottom</figcaption>
+          </figure>
+        </div>
+
+        <div class='center'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-mayluck-neb-3.jpeg" alt='Prying open the battery compartment of the Mayluck Mesh Nebulizer'>
+            <figcaption>Prying open the battery compartment of the Mayluck Mesh Nebulizer</figcaption>
+          </figure>
+        </div>
+
+        <div class='center'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-mayluck-neb-4.jpeg" alt='2AA Batteries in the battery compartment'>
+            <figcaption>2AA Batteries in the battery compartment</figcaption>
+          </figure>
+        </div>
+
+        <p>Notice the negative and positive signs on the metal. The negative side should have the side with the thicker ring-end, while the positive side should have the thinner ring-end. </p>
+
+        <p>Next, remove the nozzle cap from the nebulizer:</p>
+        <div class='center'>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-1-removed-nozzle-cap.jpeg" alt='Removing the nozzle cap'>
+            <figcaption>Remove nozzle cap</figcaption>
+          </figure>
+
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-2-remove-nozzle-cap.jpeg" alt='Removed the nozzle cap'>
+            <figcaption>Removed nozzle cap</figcaption>
+          </figure>
+        </div>
+
+        <p>If there is some solution buildup in the middle, please remove said buildup.</p>
+        <div class='center'>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-3-observe-nozzle-buildup.jpeg" alt='Some buildup'>
+            <figcaption>Some builup</figcaption>
+          </figure>
+
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-4-removed-buildup.jpeg" alt='Some buildup'>
+            <figcaption>Removed builup</figcaption>
+          </figure>
+        </div>
+
+        <p>Next, unlock the solution latch </p>
+
+        <div class='center'>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-5-unlock-solution-container.jpeg" alt='Unlock solution latch'>
+            <figcaption>Unlock solution latch Part I</figcaption>
+          </figure>
+
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-6-unlock-solution-container-2.jpeg" alt='Unlock solution latch'>
+            <figcaption>Unlock solution latch Part II</figcaption>
+          </figure>
+        </div>
+
+        <p>Add the sensitivity solution:</p>
+
+        <div class='center'>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-7-unlock-solution-container-3.jpeg" alt='Ready to add solution'>
+            <figcaption>Ready to add solution</figcaption>
+          </figure>
+
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-8-add-sensitivity-solution.jpeg" alt='Adding sensitivity solution'>
+            <figcaption>Adding sensitivity solution</figcaption>
+          </figure>
+        </div>
+        <div class='center'>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-9-6ml.jpeg" alt='Add 6mL of solution'>
+            <figcaption>Add 6mL of solution</figcaption>
+          </figure>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-10-close-and-lock-solution-container.jpeg" alt='Close and lock solution container'>
+            <figcaption>Close and lock solution container</figcaption>
+          </figure>
+        </div>
+
+        <p>Please add in 6 mL of the sensitivity solution.</p>
+
+        <div id='running-fit-tests-qlft-sensitivity-check'>
+          <br>
+          <br>
+          <h4> Running Qualitative Fit Tests (QLFT): Sensitivity Check</h4>
+        </div>
+
+        <p>Qualitative fit testing involves using your sense of taste to detect whether or not a mask meets a particular threshold of protection for your particular face. Since it depends on taste, you should</p>
+        <ul>
+          <li>not consume food or beverages besides water 30 minutes before testing, </li>
+          <li>gargle with water to wash out your tongue and lips prior to performing sensitivity step and after it,</li>
+          <li>gargle with water to wash out your tongue and lips after failing a fit test.</li>
+        </ul>
+
+
+        <div class='center'>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-mouth-lips-rinse.png" alt='Mouth and Lips Rinse'>
+            <figcaption>Mouth and Lips Rinse using Water</figcaption>
+          </figure>
+        </div>
+
+        <p>Don the ziploc bag (hood). Have the nebulizer hole be in front of the face.</p>
+
+        <div class='center'>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-11-don-hood-with-hole-side-in-front.jpeg" alt='Don hood with hole in front'>
+            <figcaption>Don hood with hole in front</figcaption>
+          </figure>
+        </div>
+
+        <p>Zip the ziploc bag to decrease air movement between inside of the bag and outside:</p>
+
+        <div class='center'>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-12-pre-zip-hood.jpeg" alt='Don hood with hole in front'>
+            <figcaption>Don hood with hole in front</figcaption>
+          </figure>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-13-zip-hood.jpeg" alt='Hood zipped'>
+            <figcaption>Hood zipped</figcaption>
+          </figure>
+        </div>
+
+        <p>Insert the nebulizer outlet into the hole in the hood:</p>
+
+        <div class='center'>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-14-insert-nebulizer-nozzle-through-hole.jpeg" alt='Insert nebulizer nozzle through hole'>
+            <figcaption>Insert nebulizer nozzle through hole</figcaption>
+          </figure>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-stick-tongue-out.jpg" alt='Stick tongue out while breathing in'>
+            <figcaption>Stick tongue out while breathing in.</figcaption>
+          </figure>
+        </div>
+
+        <p>While in the hood, have your tongue be slightly out, and breathe in using the mouth. Sticking your tongue out a little bit maximizes the contact of air with the tongue (and should increase sensitivity).</p>
+        <p>Press the button in the middle of the nebulizer to aerosolize the sensitivity solution. For a few seconds, you should see some fine mist coming out of the outlet of the nebulizer.</p>
+        <p>If you can taste the solution, <strong>please make note of the number of button presses you did to be able to taste the saccharin sensitivity solution. This information will be used at the next step.</strong></p>
+
+        <p>However, if you cannot taste the solution, try pressing the button again, and evaluate if you could taste the solution. Try until you've reached 4 presses. <strong>If you've reached 4 presses and still could not taste the solution, please reach out to <a href="mailto:info@breathesafe.xyz?subject=Cannot Taste Sensitivity Solution">info@breathesafe.xyz</a>. Edderic could send you a bitrex solution instead of the saccharin.</strong></p>
+
+        Assuming you have passed the sensitivity threshold check, you can proceed to doing the fit testing exercises.
+
+
+        <div id='running-fit-tests-qlft-fit-tests'>
+          <br>
+          <br>
+          <h4> Running Qualitative Fit Tests (QLFT): Fit Testing using the Fit Test solution</h4>
+        </div>
+
+        <p>This section assumes that you succeeded in tasting the aerosolized sensitivity solution.</p>
+
+        <p>Unlock the solution latch:</p>
+
+        <div class='center'>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-5-unlock-solution-container.jpeg" alt='Unlock solution latch'>
+            <figcaption>Unlock solution latch Part I</figcaption>
+          </figure>
+
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-6-unlock-solution-container-2.jpeg" alt='Unlock solution latch'>
+            <figcaption>Unlock solution latch Part II</figcaption>
+          </figure>
+        </div>
+
+        <p>Dump the sensitivity solution back into the sensitivity solution container. Please add 6mL of the fit test solution into the nebulizer.</p>
+
+        <div class='center'>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-dump-sensitivity-solution-back.jpeg" alt='Dump sensitivity solution back into sensitivity solution container'>
+            <figcaption>Dump sensitivity solution back into sensitivity solution container</figcaption>
+          </figure>
+
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-add-fit-test-solution.jpeg" alt='Unlock solution latch'>
+            <figcaption>Add fit test solution</figcaption>
+          </figure>
+        </div>
+
+
+        <p>
+        Now you may don a mask, don the hood, and insert the nebulizer:
+        </p>
+
+        <div class='center'>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-fit-test-don-mask.jpeg" alt='Wear a mask'>
+            <figcaption>Wear a mask of interest</figcaption>
+          </figure>
+
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-fit-test-don-hood.jpeg" alt='Wear the hood'>
+            <figcaption>Wear the hood</figcaption>
+          </figure>
+        </div>
+        <div class='center'>
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-fit-test-zip-hood.jpeg" alt='Zip the hood'>
+            <figcaption>Zip the hood</figcaption>
+          </figure>
+
+          <figure>
+            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-fit-test-insert-nebulizer-outlet.jpeg" alt='Insert the nebulizer outlet'>
+            <figcaption>Insert the nebulizer outlet into the hole.</figcaption>
+          </figure>
+        </div>
+
+        <p>There are seven exercises:</p>
+        <ul>
+          <li>
+          Normal breathing 1
+          </li>
+          <li>
+          Deep Breathing,
+          </li>
+          <li>
+          Moving head side to side
+          </li>
+
+          <li>
+          Moving head up and down
+          </li>
+
+          <li>
+          Talking
+          </li>
+
+          <li>
+          Bending over
+          </li>
+
+          <li>
+          Normal breathing 2
+          </li>
+        </ul>
+
+        <p>Please see the section on <router-link :to="tocPath('adding-fit-tests-qlft')">
+          OSHA Qualitative Fit Testing exercises here
+          </router-link> to learn how to add data for these exercises.
+        </p>
+
+        <p>Each exercise takes a minute. <strong>At the beginning of each exercise, use the same amount of button presses you did as in the sensitivity step.</strong>  For example, if it only took you one press of a button to detect the sensitivity solution in the earlier step, you should also use just one press of a button with the fit test solution in the nebulizer at the beginning of each exercise. And halfway in (i.e. in the 30-second mark), you should use about half the number of presses that you did for the sensitivity step to keep the concentration levels high. Round up the number of presses (e.g. if the user only needed 1 nebulizer puff in the sensitivity step, they should do round(0.5) = 1 puff in the 30-second mark of a fit test exercise).</p>
+
+        <p>
+        The fit test solution is 100x more concentrated than the sensitivity solution. Succeeding in tasting the sensitivity solution, while not detecting the 100x stronger (fit test) solution while wearing a mask for a particular exercise, implies that the mask has a fit factor of at least 100 for that particular instance of an exercise.  However, there are several exercises. To pass the qualitative fit test, the tester should not be able to taste the fit test solution through <em>all</em> the exercises. If the tester tastes the fit test solution midway, that is considered a failure (i.e. the overall fit factor is less than 100.)
+        </p>
+
+
+
         <div id='adding-fit-tests-comfort'>
           <br>
           <br>
@@ -666,11 +963,19 @@ export default {
   th, td {
     padding: 0.5em;
   }
-
+  .single-image {
+    max-width: 40em;
+  }
 
   @media(min-width: 1200px) {
     .toc-button {
       display: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .single-image {
+      max-width: 20em;
     }
   }
 
