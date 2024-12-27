@@ -217,7 +217,7 @@
           <figcaption>DIY Qualitative Fit Testing equipment</figcaption>
         </figure>
 
-        <p>For instructions on how to use the qualitative fit testing kit provided to you by Breathesafe LLC, please take a look at the <router-link :to="tocPath('running-fit-tests-qlft')"> Running a Qualitative Fit Test </router-link> section.
+        <p>For instructions on how to use the qualitative fit testing kit provided to you by Breathesafe LLC, please take a look at the <router-link :to="tocPath('running-fit-tests-qlft-setup-equipment')"> Running a Qualitative Fit Test </router-link> section.
         </p>
 
 
