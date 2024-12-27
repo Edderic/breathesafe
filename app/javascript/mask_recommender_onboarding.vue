@@ -563,28 +563,22 @@
 
         <p>You may have been provided a Mayluck Mesh Nebulizer. Open the battery compartment underneath to check that 2 AA batteries are in place.</p>
 
-        <div class='center'>
+        <div class='grid even'>
           <figure>
             <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-mayluck-neb-1.jpeg" alt='Mayluck Mesh Nebulizer'>
             <figcaption>Mayluck Nebulizer</figcaption>
           </figure>
-        </div>
 
-        <div class='center'>
           <figure>
             <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-mayluck-neb-2.jpeg" alt='Mayluck Mesh Nebulizer - Bottom'>
             <figcaption>Mayluck Nebulizer - Bottom</figcaption>
           </figure>
-        </div>
 
-        <div class='center'>
           <figure>
             <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-mayluck-neb-3.jpeg" alt='Prying open the battery compartment of the Mayluck Mesh Nebulizer'>
             <figcaption>Prying open the battery compartment of the Mayluck Mesh Nebulizer</figcaption>
           </figure>
-        </div>
 
-        <div class='center'>
           <figure>
             <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-mayluck-neb-4.jpeg" alt='2AA Batteries in the battery compartment'>
             <figcaption>2AA Batteries in the battery compartment</figcaption>
@@ -594,65 +588,64 @@
         <p>Notice the negative and positive signs on the metal. The negative side should have the side with the thicker ring-end, while the positive side should have the thinner ring-end. </p>
 
         <p>Next, remove the nozzle cap from the nebulizer:</p>
-        <div class='center'>
+        <div class='grid even'>
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-1-removed-nozzle-cap.jpeg" alt='Removing the nozzle cap'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-1-removed-nozzle-cap.jpeg" alt='Removing the nozzle cap'>
             <figcaption>Remove nozzle cap</figcaption>
           </figure>
 
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-2-remove-nozzle-cap.jpeg" alt='Removed the nozzle cap'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-2-remove-nozzle-cap.jpeg" alt='Removed the nozzle cap'>
             <figcaption>Removed nozzle cap</figcaption>
           </figure>
         </div>
 
-        <p>If there is some solution buildup in the middle, please remove said buildup.</p>
-        <div class='center'>
+        <p>If there is some solution buildup in the middle, please remove said buildup by running the nozzle through running water.</p>
+        <div class='grid even'>
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-3-observe-nozzle-buildup.jpeg" alt='Some buildup'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-3-observe-nozzle-buildup.jpeg" alt='Some buildup'>
             <figcaption>Some builup</figcaption>
           </figure>
 
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-4-removed-buildup.jpeg" alt='Some buildup'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-4-removed-buildup.jpeg" alt='Some buildup'>
             <figcaption>Removed builup</figcaption>
           </figure>
         </div>
 
         <p>Next, unlock the solution latch </p>
 
-        <div class='center'>
+        <div class='grid even'>
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-5-unlock-solution-container.jpeg" alt='Unlock solution latch'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-5-unlock-solution-container.jpeg" alt='Unlock solution latch'>
             <figcaption>Unlock solution latch Part I</figcaption>
           </figure>
 
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-6-unlock-solution-container-2.jpeg" alt='Unlock solution latch'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-6-unlock-solution-container-2.jpeg" alt='Unlock solution latch'>
             <figcaption>Unlock solution latch Part II</figcaption>
           </figure>
         </div>
 
         <p>Add the sensitivity solution:</p>
 
-        <div class='center'>
+        <div class='grid even'>
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-7-unlock-solution-container-3.jpeg" alt='Ready to add solution'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-7-unlock-solution-container-3.jpeg" alt='Ready to add solution'>
             <figcaption>Ready to add solution</figcaption>
           </figure>
 
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-8-add-sensitivity-solution.jpeg" alt='Adding sensitivity solution'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-8-add-sensitivity-solution.jpeg" alt='Adding sensitivity solution'>
             <figcaption>Adding sensitivity solution</figcaption>
           </figure>
-        </div>
-        <div class='center'>
+
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-9-6ml.jpeg" alt='Add 6mL of solution'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-9-6ml.jpeg" alt='Add 6mL of solution'>
             <figcaption>Add 6mL of solution</figcaption>
           </figure>
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-10-close-and-lock-solution-container.jpeg" alt='Close and lock solution container'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-10-close-and-lock-solution-container.jpeg" alt='Close and lock solution container'>
             <figcaption>Close and lock solution container</figcaption>
           </figure>
         </div>
@@ -691,26 +684,26 @@
 
         <p>Zip the ziploc bag to decrease air movement between inside of the bag and outside:</p>
 
-        <div class='center'>
+        <div class='grid even'>
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-12-pre-zip-hood.jpeg" alt='Don hood with hole in front'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-12-pre-zip-hood.jpeg" alt='Don hood with hole in front'>
             <figcaption>Don hood with hole in front</figcaption>
           </figure>
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-13-zip-hood.jpeg" alt='Hood zipped'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-13-zip-hood.jpeg" alt='Hood zipped'>
             <figcaption>Hood zipped</figcaption>
           </figure>
         </div>
 
         <p>Insert the nebulizer outlet into the hole in the hood:</p>
 
-        <div class='center'>
+        <div class='grid even'>
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-14-insert-nebulizer-nozzle-through-hole.jpeg" alt='Insert nebulizer nozzle through hole'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-14-insert-nebulizer-nozzle-through-hole.jpeg" alt='Insert nebulizer nozzle through hole'>
             <figcaption>Insert nebulizer nozzle through hole</figcaption>
           </figure>
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-stick-tongue-out.jpg" alt='Stick tongue out while breathing in'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-stick-tongue-out.jpg" alt='Stick tongue out while breathing in'>
             <figcaption>Stick tongue out while breathing in.</figcaption>
           </figure>
         </div>
@@ -734,28 +727,28 @@
 
         <p>Unlock the solution latch:</p>
 
-        <div class='center'>
+        <div class='grid even'>
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-5-unlock-solution-container.jpeg" alt='Unlock solution latch'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-5-unlock-solution-container.jpeg" alt='Unlock solution latch'>
             <figcaption>Unlock solution latch Part I</figcaption>
           </figure>
 
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-6-unlock-solution-container-2.jpeg" alt='Unlock solution latch'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-6-unlock-solution-container-2.jpeg" alt='Unlock solution latch'>
             <figcaption>Unlock solution latch Part II</figcaption>
           </figure>
         </div>
 
         <p>Dump the sensitivity solution back into the sensitivity solution container. Please add 6mL of the fit test solution into the nebulizer.</p>
 
-        <div class='center'>
+        <div class='grid even'>
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-dump-sensitivity-solution-back.jpeg" alt='Dump sensitivity solution back into sensitivity solution container'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-dump-sensitivity-solution-back.jpeg" alt='Dump sensitivity solution back into sensitivity solution container'>
             <figcaption>Dump sensitivity solution back into sensitivity solution container</figcaption>
           </figure>
 
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-add-fit-test-solution.jpeg" alt='Unlock solution latch'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-add-fit-test-solution.jpeg" alt='Unlock solution latch'>
             <figcaption>Add fit test solution</figcaption>
           </figure>
         </div>
@@ -765,25 +758,23 @@
         Now you may don a mask, don the hood, and insert the nebulizer:
         </p>
 
-        <div class='center'>
+        <div class='grid even'>
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-fit-test-don-mask.jpeg" alt='Wear a mask'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-fit-test-don-mask.jpeg" alt='Wear a mask'>
             <figcaption>Wear a mask of interest</figcaption>
           </figure>
 
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-fit-test-don-hood.jpeg" alt='Wear the hood'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-fit-test-don-hood.jpeg" alt='Wear the hood'>
             <figcaption>Wear the hood</figcaption>
           </figure>
-        </div>
-        <div class='center'>
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-fit-test-zip-hood.jpeg" alt='Zip the hood'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-fit-test-zip-hood.jpeg" alt='Zip the hood'>
             <figcaption>Zip the hood</figcaption>
           </figure>
 
           <figure>
-            <img class='left-pane-image' src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-fit-test-insert-nebulizer-outlet.jpeg" alt='Insert the nebulizer outlet'>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-fit-test-insert-nebulizer-outlet.jpeg" alt='Insert the nebulizer outlet'>
             <figcaption>Insert the nebulizer outlet into the hole.</figcaption>
           </figure>
         </div>
@@ -825,7 +816,7 @@
         <p>Each exercise takes a minute. <strong>At the beginning of each exercise, use the same amount of button presses you did as in the sensitivity step.</strong>  For example, if it only took you one press of a button to detect the sensitivity solution in the earlier step, you should also use just one press of a button with the fit test solution in the nebulizer at the beginning of each exercise. And halfway in (i.e. in the 30-second mark), you should use about half the number of presses that you did for the sensitivity step to keep the concentration levels high. Round up the number of presses (e.g. if the user only needed 1 nebulizer puff in the sensitivity step, they should do round(0.5) = 1 puff in the 30-second mark of a fit test exercise).</p>
 
         <p>
-        The fit test solution is 100x more concentrated than the sensitivity solution. Succeeding in tasting the sensitivity solution, while not detecting the 100x stronger (fit test) solution while wearing a mask for a particular exercise, implies that the mask has a fit factor of at least 100 for that particular instance of an exercise.  However, there are several exercises. To pass the qualitative fit test, the tester should not be able to taste the fit test solution through <em>all</em> the exercises. If the tester tastes the fit test solution midway, that is considered a failure (i.e. the overall fit factor is less than 100.)
+        The fit test solution is 100x more concentrated than the sensitivity solution. Succeeding in tasting the sensitivity solution, while wearing a mask and not detecting the 100x stronger (fit test) solution for a particular exercise implies that the mask has a fit factor of at least 100 for that particular instance of an exercise.  However, there are several exercises. To pass the qualitative fit test, the tester should not be able to taste the fit test solution through <em>all</em> the exercises. If the tester tastes the fit test solution midway, that is considered a failure (i.e. the overall fit factor is less than 100.)
         </p>
 
 
@@ -912,6 +903,12 @@ export default {
     justify-content: center;
   }
 
+  .grid.even {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: auto;
+  }
+
   .center {
     display: flex;
     justify-content: center;
@@ -973,20 +970,35 @@ export default {
     }
   }
 
-  @media (max-width: 900px) {
-    .single-image {
-      max-width: 20em;
-    }
-  }
 
-  @media(max-width: 1200px) {
-    .left-pane-image {
-      max-width: 8em;
+  @media(min-width: 1201px) {
+    .grid.even {
+      display: grid;
+      grid-template-columns: 50% 50%;
+      grid-template-rows: auto;
     }
+
+    .grid.even img {
+      width: 100%;
+    }
+
+  }
+  @media(max-width: 1200px) {
     .grid {
       display: flex;
       flex-direction: column;
     }
+
+    .grid.even {
+      display: grid;
+      grid-template-columns: 50vw 50vw;
+      grid-template-rows: auto;
+    }
+
+    .grid.even img {
+      width: 100%
+    }
+
 
     .toc {
       position: relative;
@@ -1002,6 +1014,16 @@ export default {
       max-width: 90vw;
     }
 
+  }
+
+  @media (max-width: 900px) {
+    .grid.even {
+      display: grid;
+      grid-template-columns: 100vw;
+    }
+    .single-image {
+      max-width: 20em;
+    }
   }
 
 </style>
