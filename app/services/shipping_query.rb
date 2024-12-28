@@ -17,7 +17,7 @@ class ShippingQuery
     )
   end
 
-  def self.usps_csv
+  def self.usps_csv(shipping_date: nil)
     rows = self.find_users_who_are_awaiting_shipping_label
 
     ::CSV.open("usps_labels_to_create.csv", "wb") do |csv|
@@ -79,7 +79,7 @@ class ShippingQuery
         "Invoice #",
       ]
       rows.each do |row|
-        csv << self.row_generator(row: row)
+        csv << self.row_generator(row: row, shipping_date: shipping_date)
       end
     end
   end
