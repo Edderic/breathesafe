@@ -215,38 +215,28 @@ class ShippingActor
   end
 
   def self.bulk_assign_purchase_labels(csv_string)
-    counter = 0
-    header = []
-    rows = []
+    header = csv['header']
+    rows = csv['rows']
+    csv = CsvHelper.parse(csv_string)
 
-    # Build a JSON-like representation of rows
-    CSV.parse(csv_string) do |row|
-      accum = {}
-
-      if counter == 0
-        header = row.map{|r| r.strip}
-      else
-        row.each.with_index do |value, index|
-          accum[header[index]] = value.strip
-        end
-        rows << accum
-      end
-      counter += 1
-    end
-
-    shipping_statuses_add_labels_to = ShippingQuery.\
-      find_shipping_statuses_with_blank_purchase_labels(user_status_names: rows.map{|r| r['name']})
+    shipping_statuses_add_labels_to = ShippingQuery.find_shipping_statuses_with_blank_purchase_labels(
+      user_status_names: rows.map{|r| r['Recipient First Name'] + ' ' + r['Recipient Last Name']}
+    )
 
     shipping_statuses_add_labels_to.each do |s|
       shipping_status_uuid = s['shipping_status_uuid']
-      row = rows.find{ |r| r['name'] == s['first_name'] + ' ' + s['last_name']  }
-      ShippingActor.purchase_label(
-        uuid: shipping_status_uuid,
-        email: s['email'],
-        name: s['first_name'],
-        purchase_label: row
-      )
+      row = rows.find{|r| r['Recipient First Name'] + ' ' + r['Recipient Last Name']}
+
+      if row.present?
+        ShippingActor.purchase_label(
+          uuid: shipping_status_uuid,
+          email: s['email'],
+          name: s['first_name'],
+          purchase_label: row
+        )
+      else
+        puts("Skipping #{JSON.parse(s.to_json)}")
+      end
     end
   end
 end
-
