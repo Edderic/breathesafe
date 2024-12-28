@@ -1,13 +1,16 @@
-if Rails.env.development?
+if defined?(Rails) && Rails.env.development?
   require 'selenium-webdriver'
   require 'nokogiri'
   require 'capybara'
   require 'dotenv/load'
+  require 'debug'
   require 'csv'
 
   class UspsScraper
     def initialize
+    end
 
+    def bulk_purchase_label
       driver = Selenium::WebDriver.for :chrome
       driver.navigate.to("https://cns.usps.com")
       driver.find_element(:css => '#username').send_keys(ENV['USPS_USERNAME'])
@@ -17,8 +20,7 @@ if Rails.env.development?
 
       debugger
 
-      driver.find_element(:css => '#file-upload-btn').click()
-      sleep 3
+      # Attempt this at least twice
       driver.find_element(:css => '#file-upload-btn').click()
       sleep 3
       driver.find_element(:css => '#select-file-btn').click()
@@ -119,7 +121,7 @@ if Rails.env.development?
   end
 
   scraper = UspsScraper.new
-  scraper.methods
+  scraper.bulk_purchase_label
   debugger
 else
   class UspsScraper
