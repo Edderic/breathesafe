@@ -37,9 +37,13 @@ class ShippingStatusBuilder
       elsif shipping_action.name == 'SendToCourier'
         accum[metadata['uuid']]['send_to_courier'] = metadata['details'].merge('datetime' => shipping_action.datetime)
       elsif shipping_action.name == 'Deliver'
-        accum[metadata['uuid']]['delivered'] = shipping_action.datetime
+        accum[metadata['uuid']]['delivered'] = {
+          'datetime' => shipping_action.datetime
+        }
       elsif shipping_action.name == 'Receive'
-        accum[metadata['uuid']]['received'] = shipping_action.datetime
+        accum[metadata['uuid']]['received'] = {
+          'datetime' => shipping_action.datetime
+        }
       end
 
       accum
