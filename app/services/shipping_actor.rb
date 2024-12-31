@@ -215,9 +215,9 @@ class ShippingActor
   end
 
   def self.bulk_assign_purchase_labels(csv_string)
+    csv = CsvHelper.parse(csv_string)
     header = csv['header']
     rows = csv['rows']
-    csv = CsvHelper.parse(csv_string)
 
     shipping_statuses_add_labels_to = ShippingQuery.find_shipping_statuses_with_blank_purchase_labels(
       user_status_names: rows.map{|r| r['Recipient First Name'] + ' ' + r['Recipient Last Name']}
