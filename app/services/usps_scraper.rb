@@ -21,12 +21,12 @@ if defined?(Rails) && Rails.env.development?
           counter = max_attempts
         rescue Selenium::WebDriver::Error::WebDriverError => e
           counter += 1
-          sleep 5
+          sleep 3
         end
       end
 
       if !success
-        raise UnsuccessfulScrapeError.new(message)
+        debugger
       end
     end
 
@@ -51,13 +51,16 @@ if defined?(Rails) && Rails.env.development?
 
       try(lambda { driver.find_element(:css => '#formik-file-upload-continue-btn').click() }, 'file-upload-continue')
       try(lambda { driver.find_element(:css => '#file-upload-import-btn').click() }, 'file-upload-import-btn')
+
+      debugger
       # Confirm Mapping & Import Labels
       try(lambda { driver.find_element(:css => '#formik-file-upload-continue-btn').click() }, 'file-upload-continue')
       buttons_text = driver.find_elements(:css => "button[type='button']").map{|x| x.text}
       buttons_text
       view_in_label_manager_index = buttons_text.find_index("View In Label Manager")
+      debugger
       view_in_label_manager_button = driver.find_elements(:css => "button[type='button']")[view_in_label_manager_index]
-      view_in_label_manager_button.click
+      try(lambda { view_in_label_manager_button.click }, 'click View In Label Manager')
 
       driver.find_element(:css => "button#add-all-complete-to-cart-btn").click
 
@@ -105,32 +108,22 @@ if defined?(Rails) && Rails.env.development?
       # Proceed to payment
       try(lambda {driver.find_element(:css => '#proceed-to-payment-btn').click()}, '#proceed-to-payment-btn')
       try(lambda {driver.find_element(:css => '#top-agreement .checkbox').click()}, '#top-agreement .checkbox')
-      try(lambda {driver.find_element(:css => '#cc-button').click()}, '#cc-button')
-      try(lambda {driver.find_element(:css => '#cns-agreement-close').click()}, '#cns-agreement-close')
+      try(lambda {driver.find_element(:css => '#cc-button').click()}, 'click #cc-button')
+      try(lambda {driver.find_element(:css => '#continueLink').click()}, 'click #continueLink')
+      try(lambda {driver.find_element(:css => '#cns-agreement-close').click()}, 'click #cns-agreement-close')
 
       # Add all the labels
       # driver.find_element(:css => 'button[data-cy="Label-Actions"]').click()
 
       text_rows_cart = driver.find_elements(:css => "tbody tr").map{|r| r.text.split("\n")}
-      text_rows_cart = driver.find_elements(:css => "tbody tr").map{|r| r.text.split("\n")}
       text_rows_cart
 
       text_rows_cart.each do |cart_row|
         dict[cart_row[2]]['label_number'] = cart_row[-1]
       end
-      text_rows_cart
-
-      text_rows_cart.each do |cart_row|
-        dict[cart_row[2]]['label_number'] = cart_row[-1]
-      end
-
-      try(lambda {driver.find_element(:css => '#pp-button').click()}, '#pp-button')
-      try(lambda {driver.find_element(:css => '#cns-agreement-close').click()}, '#cns-agreement-close')
-
 
 
       # After payment, save the data to note that purchase labels have been created
-      driver.find_elements(:css => "tbody tr").map{|r| r.text.split("\n")}
       text_rows = driver.find_elements(:css => "tbody tr").map{|r| r.text.split("\n")}
 
       ::CSV.open("#{datetime_format}_usps_labels_created.csv", "wb") do |csv|
@@ -147,7 +140,7 @@ if defined?(Rails) && Rails.env.development?
           'label_number',
         ]
         dict.each do |key, value|
-          if value.key?('label_number')
+          if value.key?('label_number') || value.key?(:label_number)
             csv << value.map{|k,v| v}
           end
         end
