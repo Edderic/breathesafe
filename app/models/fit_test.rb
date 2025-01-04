@@ -19,7 +19,7 @@ class FitTest < ApplicationRecord
         WHERE ft.user_id IN (
           SELECT mu.managed_id
           FROM managed_users mu
-          WHERE mu.manager_id = '#{user.id}'
+          WHERE mu.manager_id = #{user.id}
         )
 
         ORDER BY updated_at DESC
@@ -42,7 +42,7 @@ class FitTest < ApplicationRecord
         ON (p.user_id = ft.user_id)
         LEFT JOIN masks m
         ON (m.id = ft.mask_id)
-        WHERE ft.id = '#{id}'
+        WHERE ft.id = #{id}
 
         ORDER BY updated_at DESC
       SQL

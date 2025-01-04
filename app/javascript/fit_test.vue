@@ -1201,6 +1201,7 @@ export default {
         this.mode = 'Create'
       }
 
+
       if (this.$route.name == 'NewFitTest' && this.$route.query.userId && this.$route.query.maskId) {
         // handle quick way to add too small / too big
         await this.loadMasks()
@@ -1327,7 +1328,8 @@ export default {
         }
         this.searchMask = event.target.value
       } else {
-        this.selectedUser = new RespiratorUser({})
+        this.selectedUser = new RespiratorUser({
+        })
         this.searchUser = event.target.value
       }
     },
