@@ -10,10 +10,10 @@ class MaskKitStatusBuilder
           'mask_uuids' => []
         }
       elsif mask_kit_action.name == 'AddMasks'
-        accum[uuid]['mask_uuids'] << mask_kit_action.metadata['mask_uuids']
+        accum[uuid]['mask_uuids'].union(mask_kit_action.metadata['mask_uuids'])
       elsif mask_kit_action.name == 'RemoveMasks'
-        accum[uuid]['mask_uuids'] = accum[uuid]['mask_uuids']\
-          .reject{|mask_uuid| mask_uuids.include?(mask_uuid) }
+        accum[uuid]['mask_uuids'] = \
+          accum[uuid]['mask_uuids'] - mask_kit_action.metadata['mask_uuids']
       end
 
       accum
