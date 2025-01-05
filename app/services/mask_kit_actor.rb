@@ -30,14 +30,15 @@ class MaskKitActor
     )
   end
 
-  def self.remove_masks(uuid:, mask_uuids:, datetime:)
+  def self.remove_masks(uuid:, mask_uuids:, datetime:, by_uuid:)
     Action.create(
       type: 'MaskKitAction',
       name: 'RemoveMasks',
       datetime: datetime,
       metadata: {
         'uuid': uuid,
-        'mask': mask_uuids
+        'mask_uuids': mask_uuids,
+        'by_uuid': by_uuid
       }
     )
   end
