@@ -68,7 +68,8 @@ class Mask < ApplicationRecord
           LEFT JOIN fit_tests ft
           ON (ft.mask_id = m.id)
           GROUP BY m.id
-        ), unique_fit_tester_counts_per_mask AS (
+        ),
+        unique_fit_tester_counts_per_mask AS (
           SELECT m.id AS mask_id, COUNT(DISTINCT fm.user_id) AS unique_fit_testers_count
           FROM masks m
           LEFT JOIN fit_tests ft
