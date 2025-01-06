@@ -15,7 +15,8 @@ class MaskKitStatusBuilder
           'mask_uuids' => []
         }
       elsif mask_kit_action.name == 'AddMasks'
-        accum[uuid]['mask_uuids'].union(mask_kit_action.metadata['mask_uuids'])
+        # Assumption right now is mask_uuids is an item
+        accum[uuid]['mask_uuids'] << mask_kit_action.metadata['mask_uuids']
       elsif mask_kit_action.name == 'RemoveMasks'
         accum[uuid]['mask_uuids'] = \
           accum[uuid]['mask_uuids'] - mask_kit_action.metadata['mask_uuids']
