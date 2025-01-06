@@ -6,7 +6,7 @@
       <Button shadow='true' :class="{ tab: true }"  class='button' @click='viewMask'>See details about Mask</Button>
       <Button shadow='true' :class="{ tab: true }"  class='button' @click='newFitTestWithSize("Too small")'>Mark Too Small</Button>
       <Button shadow='true' :class="{ tab: true }"  class='button' @click='newFitTestWithSize("Too big")'>Mark Too Big</Button>
-      <Button shadow='true' :class="{ tab: true }"  class='button' @click='newFitTestForUser()'>Add Fit Test Data</Button>
+      <Button shadow='true' :class="{ tab: true }"  class='button' @click='markNotIncludedInMaskKit()'>Mark Not Included in Kit</Button>
       <Button shadow='true' :class="{ tab: true }"  class='button' @click='showPopup = false'>Cancel</Button>
     </Popup>
 
@@ -250,6 +250,9 @@ export default {
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     newFitTestWithSize(size) {
       this.$emit('newFitTestWithSize', {size: size, maskId: this.selectedMask.id, userId: this.managedUser.managedId})
+    },
+    markNotIncludedInMaskKit() {
+      this.$emit('markNotIncludedInMaskKit', {maskId: this.selectedMask.id, managedId: this.managedUser.managedId})
     },
     newFitTestForUser() {
       this.$emit('newFitTestForUser', {maskId: this.selectedMask.id, userId: this.managedUser.managedId})
