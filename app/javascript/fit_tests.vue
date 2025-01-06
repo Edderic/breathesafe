@@ -546,7 +546,6 @@ export default {
           if (response.data.tested_and_untested) {
             this.testedAndUntested = deepSnakeToCamel(data.tested_and_untested)
           }
-
           // whatever you want
         })
         .catch(error => {
