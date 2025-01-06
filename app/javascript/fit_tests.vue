@@ -381,22 +381,9 @@ export default {
       )
         .then(response => {
           let data = response.data
-
-          // TODO: refresh the set of masks
-
-          // if (response.data.fit_tests) {
-            // this.fit_tests = data.fit_tests.map((ft) => new FitTest(ft))
-          // }
-          // if (response.data.tested_and_untested) {
-            // this.testedAndUntested = deepSnakeToCamel(data.tested_and_untested)
-          // }
-
-          // whatever you want
         })
         .catch(error => {
           this.message = "Failed to remove mask from mask kit"
-
-          // whatever you want
         })
 
       await this.loadFitTests()
