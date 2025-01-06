@@ -39,8 +39,9 @@ class ParticipantProgress
 
 
   def self.call(manager_id:)
-    ActiveRecord::Base.connection.exec_query(
-      <<-SQL
+    JSON.parse(
+      ActiveRecord::Base.connection.exec_query(
+        <<-SQL
         WITH managed_by_manager AS (
           SELECT * FROM managed_users
           WHERE manager_id = '#{manager_id}'
@@ -153,8 +154,8 @@ class ParticipantProgress
           ON fm.user_id = managed_users.managed_id
         LEFT JOIN total_unique_masks_fit_tested
           ON total_unique_masks_fit_tested.user_id = managed_users.managed_id
-      SQL
+        SQL
+      ).to_json
     )
   end
-
 end
