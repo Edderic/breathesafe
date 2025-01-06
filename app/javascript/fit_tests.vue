@@ -398,6 +398,8 @@ export default {
 
           // whatever you want
         })
+
+      await this.loadFitTests()
     },
     newFitTestForUser(args) {
       this.$router.push(

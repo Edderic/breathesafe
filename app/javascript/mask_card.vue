@@ -377,6 +377,10 @@ export default {
     },
     async loadStuff() {
       // TODO: load the profile for the current user
+      // TODO: take in managed_id from props
+      // Conditionally load here, if no managed_id, just load masks as is?
+      // If managed id exists, only load the masks that have been shipped to this user?
+
       await this.loadMasks()
     },
     async loadMasks() {
