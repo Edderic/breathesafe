@@ -10,7 +10,28 @@
       <Button shadow='true' :class="{ tab: true }"  class='button' @click='toggleMaskCardPopup'>Cancel</Button>
     </Popup>
 
+    <div>
+      <p v-show='cards.length == 0'>
+        This page displays untested masks that have been shipped to the pod that the individual belongs to. This list can be empty when:
+      </p>
+
+      <ul v-show='cards.length == 0'>
+        <li>the pod for this given individual <strong>was not</strong> sent a mask kit from Breathesafe LLC</li>
+        <li>the pod for this individual did receive masks sent by Breathesafe LLC, and the individual provided data by:
+          <ul>
+            <li>Marking the masks as being too big or too small</li>
+            <li>Marking the mask as not having been received by the pod.</li>
+            <li>Testing the mask by going through the qualitative fit testing procedure</li>
+          </ul>
+        </li>
+      </ul>
+
+      <p v-show='cards.length == 0'>
+        If this individual did not receive a mask kit but are expecting to have received one, please contact <a href="mailto:info@breathesafe.xyz">info@breathesafe.xyz</a>. If the individual does have access to masks that were not shipped by Breathesafe LLC, said individual can still add user seal check and fit test data by clicking on the plus button above.
+      </p>
+    </div>
     <div class='masks'>
+
       <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in cards' @click='selectMask(m.id)'>
 
         <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
@@ -602,6 +623,11 @@ export default {
 
   .button {
     margin: 1em;
+  }
+
+  h3 {
+    padding-left: 1em;
+    padding-right: 1em;
   }
   @media(max-width: 700px) {
     img {
