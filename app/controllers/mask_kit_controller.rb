@@ -27,7 +27,7 @@ class MaskKitController < ApplicationController
       status = 401
     else
       results = MaskKitQuery.find_shipped_mask_accessible_to_managed_user(
-        manager_user_id: manager_user_id,
+        managed_user_id: managed_user_id,
         mask_id: mask_id
       )
       if results.count == 1
