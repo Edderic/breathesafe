@@ -1,5 +1,13 @@
 class MaskKitQuery
   def self.managed_by(manager_id:)
+    u = User.find(manager_id)
+
+    where_clause = "    WHERE mu.manager_id = #{manager_id.to_i}"
+
+    if u.admin?
+      where_clause = ""
+    end
+
     results = JSON.parse(
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
@@ -38,7 +46,7 @@ class MaskKitQuery
           ON ftcpmu.mask_id = masks.id
           AND ftcpmu.user_id = mu.managed_id
 
-        WHERE mu.manager_id = #{manager_id.to_i}
+        #{where_clause}
         SQL
       ).to_json
     )
