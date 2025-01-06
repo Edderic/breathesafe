@@ -22,51 +22,36 @@ class MaskKitController < ApplicationController
   def delete
     mask_id = params[:mask_id]
     managed_user_id = params[:managed_user_id]
-    debugger
-    results = JSON.parse(
-      ActiveRecord::Base.connection.exec_query(
-        <<-SQL
-        SELECT *, mks.uuid as mask_kit_uuid
-        FROM masks
-        INNER JOIN mask_kit_statuses mks
-          ON mks.mask_uuid = masks.id
-        INNER JOIN shipping_status_joins ssj
-          ON ssj.shippable_uuid = mks.uuid
-        INNER JOIN shipping_statuses ss
-          ON ss.uuid = ssj.shipping_uuid
-        INNER JOIN users
-          ON users.email = ss.to_user_uuid
-        INNER JOIN managed_users mu
-          ON mu.manager_id = users.id
 
-        WHERE masks.id = #{mask_id}
-          AND mu.managed_id = #{managed_user_id}
-          AND users.admin = false
-        SQL
-      ).to_json
-    )
-
-    if results.count == 1
-      mask_kit_uuid = results[0]['mask_kit_uuid']
-
-      MaskKitAction.create(
-        name: 'RemoveMasks',
-        datetime: DateTime.now,
-        metadata: {
-          uuid: mask_kit_uuid,
-          mask_uuids: [
-            mask_id.to_i
-          ],
-        }
-      )
-
-      MaskKitStatus.where(uuid: mask_kit_uuid).destroy_all
-      MaskKitStatus.refresh!(uuid: mask_kit_uuid)
-
-      status = 200
+    if !current_user.manages?(User.find(managed_user_id))
+      status = 401
     else
-      # https://stackoverflow.com/questions/17884469/what-is-the-http-response-code-for-failed-http-delete-operation
-      status = 405
+      results = MaskKitQuery.find_shipped_mask_accessible_to_managed_user(
+        manager_user_id: manager_user_id,
+        mask_id: mask_id
+      )
+      if results.count == 1
+        mask_kit_uuid = results[0]['mask_kit_uuid']
+
+        MaskKitAction.create(
+          name: 'RemoveMasks',
+          datetime: DateTime.now,
+          metadata: {
+            uuid: mask_kit_uuid,
+            mask_uuids: [
+              mask_id.to_i
+            ],
+          }
+        )
+
+        MaskKitStatus.where(uuid: mask_kit_uuid).destroy_all
+        MaskKitStatus.refresh!(uuid: mask_kit_uuid)
+
+        status = 200
+      else
+        # https://stackoverflow.com/questions/17884469/what-is-the-http-response-code-for-failed-http-delete-operation
+        status = 405
+      end
     end
 
     # TODO:

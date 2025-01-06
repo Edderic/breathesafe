@@ -53,4 +53,29 @@ class MaskKitQuery
       ]
     )
   end
+
+  def self.find_shipped_mask_accessible_to_managed_user(managed_user_id:, mask_id:)
+    results = JSON.parse(
+      ActiveRecord::Base.connection.exec_query(
+        <<-SQL
+        SELECT *, mks.uuid as mask_kit_uuid
+        FROM masks
+        INNER JOIN mask_kit_statuses mks
+          ON mks.mask_uuid = masks.id
+        INNER JOIN shipping_status_joins ssj
+          ON ssj.shippable_uuid = mks.uuid
+        INNER JOIN shipping_statuses ss
+          ON ss.uuid = ssj.shipping_uuid
+        INNER JOIN users
+          ON users.email = ss.to_user_uuid
+        INNER JOIN managed_users mu
+          ON mu.manager_id = users.id
+
+        WHERE masks.id = #{mask_id}
+          AND mu.managed_id = #{managed_user_id}
+          AND users.admin = false
+        SQL
+      ).to_json
+    )
+  end
 end
