@@ -59,6 +59,9 @@ Rails.application.routes.draw do
 
   post 'facial_measurements/:facial_measurement_id/fit_tests', to: 'facial_measurements_fit_tests#create'
 
+  delete 'mask_kit/:managed_user_id/:mask_id/',to: 'mask_kit#delete'
+  get 'mask_kit/:managed_user_id',to: 'mask_kit#index'
+
   controller :pages do
     get :qr_code_generator
     get :qr_code_download
