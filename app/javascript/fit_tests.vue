@@ -47,7 +47,14 @@
       <br>
     </div>
 
-    <MaskCards :viewMaskOnClick='false' :cards='sortedDisplayables' v-if='tabToShow == "Untested"' :managedUser='managedUser' @newFitTestWithSize='newFitTestWithSize' @newFitTestForUser='newFitTestForUser'/>
+    <MaskCards
+      v-if='tabToShow == "Untested"'
+      :viewMaskOnClick='false'
+      :cards='sortedDisplayables'
+      :managedUser='managedUser'
+      @newFitTestWithSize='newFitTestWithSize'
+      @newFitTestForUser='newFitTestForUser'
+      @markNotIncludedInMaskKit='markNotIncludedInMaskKit'/>
 
     <div class='main scrollable desktopView' v-if='tabToShow == "Tested"'>
       <table>
