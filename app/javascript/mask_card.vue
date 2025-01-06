@@ -1,5 +1,5 @@
 <template>
-    <Popup class='popup' v-show='!!selectedMask.id && showPopup && !viewMaskOnClick' @onclose='showPopup = false'>
+    <Popup class='popup' v-show='!!selectedMask.id && showMaskCardPopup && !viewMaskOnClick' @onclose='toggleMaskCardPopup'>
       <div class='align-items-center justify-content-center'>
         <h3>{{selectedMask.uniqueInternalModelCode}}</h3>
       </div>
@@ -7,7 +7,7 @@
       <Button shadow='true' :class="{ tab: true }"  class='button' @click='newFitTestWithSize("Too small")'>Mark Too Small</Button>
       <Button shadow='true' :class="{ tab: true }"  class='button' @click='newFitTestWithSize("Too big")'>Mark Too Big</Button>
       <Button shadow='true' :class="{ tab: true }"  class='button' @click='markNotIncludedInMaskKit()'>Mark Not Included in Kit</Button>
-      <Button shadow='true' :class="{ tab: true }"  class='button' @click='showPopup = false'>Cancel</Button>
+      <Button shadow='true' :class="{ tab: true }"  class='button' @click='toggleMaskCardPopup'>Cancel</Button>
     </Popup>
 
     <div class='masks'>
@@ -139,6 +139,9 @@ export default {
     },
     showUniqueNumFitTesters: {
       default: false
+    },
+    showMaskCardPopup: {
+      default: false
     }
   },
   computed: {
@@ -248,6 +251,9 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    toggleMaskCardPopup() {
+      this.$emit('toggleMaskCardPopup')
+    },
     newFitTestWithSize(size) {
       this.$emit('newFitTestWithSize', {size: size, maskId: this.selectedMask.id, userId: this.managedUser.managedId})
     },
@@ -258,7 +264,7 @@ export default {
       this.$emit('newFitTestForUser', {maskId: this.selectedMask.id, userId: this.managedUser.managedId})
     },
     selectMask(id) {
-      this.showPopup = true
+      this.toggleMaskCardPopup()
       this.selectedMask = this.masks.filter((m) => m.id == id)[0]
 
       if (this.viewMaskOnClick) {

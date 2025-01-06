@@ -52,6 +52,8 @@
       :viewMaskOnClick='false'
       :cards='sortedDisplayables'
       :managedUser='managedUser'
+      :showMaskCardPopup='showMaskCardPopup'
+      @toggleMaskCardPopup='toggleMaskCardPopup'
       @newFitTestWithSize='newFitTestWithSize'
       @newFitTestForUser='newFitTestForUser'
       @markNotIncludedInMaskKit='markNotIncludedInMaskKit'/>
@@ -221,6 +223,7 @@ export default {
       fit_tests: [],
       tabToShow: "Untested",
       showPopup: false,
+      showMaskCardPopup: false,
       sortByField: undefined,
       sortByStatus: undefined,
       filterForEarloop: true,
@@ -343,6 +346,9 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    toggleMaskCardPopup() {
+      this.showMaskCardPopup = !this.showMaskCardPopup
+    },
     async loadWatch(toQuery, fromQuery) {
       if (this.$route.name == 'FitTests' ) {
         if (!this.currentUser) {
@@ -376,17 +382,23 @@ export default {
       }
     },
     async markNotIncludedInMaskKit(args) {
-      await axios.delete(
-        `/mask_kit/${args.managedId}/${args.maskId}.json`,
-      )
-        .then(response => {
-          let data = response.data
-        })
-        .catch(error => {
-          this.message = "Failed to remove mask from mask kit"
-        })
+      let answer = window.confirm(`Are you sure you want to mark this mask as not being included in the mask kit?`);
 
-      await this.loadFitTests()
+      if (answer) {
+        await axios.delete(
+          `/mask_kit/${args.managedId}/${args.maskId}.json`,
+        )
+          .then(response => {
+            let data = response.data
+          })
+          .catch(error => {
+            this.message = "Failed to remove mask from mask kit"
+          })
+
+        await this.loadFitTests()
+
+        this.showMaskCardPopup = false
+      }
     },
     newFitTestForUser(args) {
       this.$router.push(
