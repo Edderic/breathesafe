@@ -296,7 +296,7 @@ export default {
           }
 
           return ((t.managedId == this.managedUser.managedId)
-            && (t.count == 0)
+            && (t.numFitTestsPerMaskUser == 0)
             && lowerSearchCriteria
           )
         }.bind(this)
