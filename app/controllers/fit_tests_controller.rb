@@ -61,7 +61,7 @@ class FitTestsController < ApplicationController
       )
       messages = []
     end
-    tested_and_untested = JSON.parse(Mask.find_targeted_but_untested_masks(current_user.id).to_json)
+    tested_and_untested = MaskKitQuery.managed_by(manager_id: current_user.id)
 
     to_render = {
       fit_tests: fit_tests,
