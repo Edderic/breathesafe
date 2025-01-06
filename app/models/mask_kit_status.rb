@@ -1,10 +1,13 @@
 class MaskKitStatus < ApplicationRecord
-  def self.refresh!(datetime: nil)
+  def self.refresh!(datetime: nil, uuid: nil)
     if datetime.nil?
       datetime = DateTime.now
     end
 
-    results = MaskKitStatusBuilder.build
+    # TODO: builders could take in the datetime, and only build up to that
+    # datetime.
+    # This could let us see the statuses over time
+    results = MaskKitStatusBuilder.build(uuid: uuid)
 
     results.each do |uuid, details|
       details['mask_uuids'].each do |mask_uuid|

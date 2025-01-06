@@ -1,6 +1,11 @@
 class MaskKitStatusBuilder
-  def self.build
-    mask_kit_actions = MaskKitAction.all.order(:datetime)
+  def self.build(uuid: nil)
+    if uuid.present?
+      mask_kit_actions = MaskKitAction.where("metadata ->> 'uuid' = '#{uuid}'").order(:datetime)
+    else
+      mask_kit_actions = MaskKitAction.all.order(:datetime)
+    end
+
     mask_kit_actions.reduce({}) do |accum, mask_kit_action|
       uuid =  mask_kit_action['metadata']['uuid']
 
