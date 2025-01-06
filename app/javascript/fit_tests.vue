@@ -348,8 +348,6 @@ export default {
         if (!this.currentUser) {
           signIn.call(this)
         } else {
-          // TODO: a parent might input data on behalf of their children.
-          // Currently, this.loadStuff() assumes We're loading the profile for the current user
           await this.loadStuff()
           if (toQuery['tabToShow']) {
             this.tabToShow = toQuery.tabToShow
