@@ -20,26 +20,45 @@
         <table>
           <thead>
             <tr>
+              <th>Manager Email</th>
               <th>Name</th>
-              <th>Race &amp; Ethnicity filled out</th>
-              <th>Gender filled out</th>
+              <th>Demographics</th>
               <th>Has Facial Data</th>
-              <th>Ready to add Fit Testing Data</th>
+              <th>Masks that have data</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for='r in displayables' text='Edit'>
+              <td>{{r['managerEmail']}}</td>
               <td @click="visit(r.managedId, 'Name')">
                 {{r.firstName}} {{r.lastName}}
               </td>
-              <td @click="visit(r.managedId, 'Demographics')" class='colored-cell' :style="{backgroundColor: backgroundColor(r.raceEthnicityComplete)}" v-html="checkmarkOrCross(r.raceEthnicityComplete)">
+              <td @click="visit(r.managedId, 'Demographics')" class='colored-cell' >
+                <ColoredCell
+                  :colorScheme="evenlySpacedColorScheme"
+                  :maxVal=1
+                  :value='1 - r.demogPercentComplete / 100'
+                  :text='percentage(r.demogPercentComplete)'
+                  class='color-cell'
+                />
               </td>
-              <td @click="visit(r.managedId, 'Demographics')" class='colored-cell' :style="{backgroundColor: backgroundColor(r.genderAndSexComplete)}" v-html="checkmarkOrCross(r.genderAndSexComplete)">
+              <td @click="visit(r.managedId, 'Facial Measurements')" class='colored-cell' >
+                <ColoredCell
+                  :colorScheme="evenlySpacedColorScheme"
+                  :maxVal=1
+                  :value='1 - r.fmPercentComplete / 100'
+                  :text='percentage(r.fmPercentComplete)'
+                  class='color-cell'
+                />
               </td>
-              <td @click="visit(r.managedId, 'Facial Measurements')" class='colored-cell' :style="{backgroundColor: backgroundColor(r.facialMeasurementsComplete)}" v-html="checkmarkOrCross(r.facialMeasurementsComplete)">
-              </td>
-              <td :style="{backgroundColor: statusColor(r.readyToAddFitTestingDataPercentage)}" class='colored-cell'>
-                {{r.readyToAddFitTestingDataPercentage}}
+              <td class='colored-cell'>
+                <ColoredCell
+                  :colorScheme="evenlySpacedColorScheme"
+                  :maxVal=1
+                  :value='1 - (r.fitTestingPercentComplete || 0) / 100'
+                  :text='percentage(r.fitTestingPercentComplete || 0)'
+                  class='color-cell'
+                />
               </td>
             </tr>
           </tbody>
