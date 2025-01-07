@@ -79,7 +79,7 @@ import ClosableMessage from './closable_message.vue'
 import CircularButton from './circular_button.vue'
 import ColoredCell from './colored_cell.vue'
 import { deepSnakeToCamel, setupCSRF } from './misc.js'
-import { userSealCheckColorMapping } from './colors.js'
+import { userSealCheckColorMapping, riskColorInterpolationScheme, genColorSchemeBounds } from './colors.js'
 import { RespiratorUser } from './respirator_user.js'
 import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
@@ -162,6 +162,9 @@ export default {
     },
     facialMeasurementsIncomplete() {
       return this.facialMeasurementsLength == 0
+    },
+    evenlySpacedColorScheme() {
+      return genColorSchemeBounds(0, 1, 5)
     }
   },
   async created() {
@@ -177,6 +180,9 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
+    percentage(num) {
+      return `${num}%`
+    },
     statusColor(fitTestingPercent) {
       let percentage = parseFloat(fitTestingPercent.split("%")[0])
       let status = 'Passed'
@@ -278,6 +284,12 @@ export default {
 
   th, td {
     padding: 0.5em;
+  }
+
+  .colored-cell {
+    color: white;
+    text-shadow: 1px 1px 2px black;
+
   }
 
   .quote {
