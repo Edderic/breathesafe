@@ -137,6 +137,7 @@ class ParticipantProgress
 
 
         SELECT
+        managers_who_are_study_participants.email as manager_email,
         p.first_name,
         p.last_name,
         num_targeted_masks,
@@ -161,6 +162,8 @@ class ParticipantProgress
           ON fm.user_id = managed_users.managed_id
         LEFT JOIN total_unique_masks_fit_tested
           ON total_unique_masks_fit_tested.user_id = managed_users.managed_id
+
+        #{where}
         SQL
       ).to_json
     )
