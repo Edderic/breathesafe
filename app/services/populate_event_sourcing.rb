@@ -134,10 +134,18 @@ class PopulateEventSourcing
 
       if data['qualitative_fit_testing_kit_created_at']
         qlft_uuid = SecureRandom.uuid
-        QualitativeFitTestingKitActor.preset_diy_create(
-          uuid: qlft_uuid,
-          datetime: data['qualitative_fit_testing_kit_created_at'].to_datetime
-        )
+
+        if data['qualitative_fit_testing_kit_type'] == 'Allegro'
+          QualitativeFitTestingKitActor.preset_allegro_create(
+            uuid: qlft_uuid,
+            datetime: data['qualitative_fit_testing_kit_created_at'].to_datetime
+          )
+        else
+          QualitativeFitTestingKitActor.preset_diy_create(
+            uuid: qlft_uuid,
+            datetime: data['qualitative_fit_testing_kit_created_at'].to_datetime
+          )
+        end
 
         kits << {
           shippable_uuid: qlft_uuid,
