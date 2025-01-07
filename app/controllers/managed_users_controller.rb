@@ -7,7 +7,7 @@ class ManagedUsersController < ApplicationController
       }
       status = 422
     else
-      managed_users = ManagedUser.for_manager_id(manager_id: current_user.id)
+      managed_users = ParticipantProgress.call(manager_id: current_user.id)
 
       to_render = {
         managed_users: managed_users,
