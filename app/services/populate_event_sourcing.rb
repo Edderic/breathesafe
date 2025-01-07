@@ -180,6 +180,13 @@ class PopulateEventSourcing
         datetime: data['package_created_at'].to_datetime + 1.second
       )
 
+      if data['package_received_at']
+        ShippingActor.receive(
+          uuid: shipping_uuid,
+          datetime: data['package_received_at'].to_datetime + 1.second
+        )
+      end
+
       ShippingActor.set_from_address(
         uuid: shipping_uuid,
         from_address_uuid: from_address_uuid,
