@@ -39,6 +39,13 @@ class ParticipantProgress
 
 
   def self.call(manager_id:)
+    user = User.find(manager_id)
+    if user.admin?
+      where = ''
+    else
+      where = "WHERE managed_users.manager_id = #{manager_id}"
+    end
+
     JSON.parse(
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
