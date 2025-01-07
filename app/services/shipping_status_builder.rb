@@ -34,6 +34,10 @@ class ShippingStatusBuilder
         accum[metadata['uuid']]['to_user_uuid'] = metadata['receiver_uuid']
       elsif shipping_action.name == 'PurchaseLabel'
         accum[metadata['uuid']]['purchase_label'] = metadata['purchase_label'].merge('datetime' => shipping_action.datetime)
+        accum[metadata['uuid']]['purchase_label']['label_number'] = accum[metadata['uuid']]['purchase_label']['tracking_id']
+        if accum[metadata['uuid']]['purchase_label'].key?('tracking_id')
+          accum[metadata['uuid']]['purchase_label'].delete('tracking_id')
+        end
       elsif shipping_action.name == 'SendToCourier'
         accum[metadata['uuid']]['send_to_courier'] = metadata['details'].merge('datetime' => shipping_action.datetime)
       elsif shipping_action.name == 'Deliver'
