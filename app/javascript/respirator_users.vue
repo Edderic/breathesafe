@@ -51,14 +51,16 @@
                   class='color-cell'
                 />
               </td>
-              <td class='colored-cell'>
-                <ColoredCell
-                  :colorScheme="evenlySpacedColorScheme"
-                  :maxVal=1
-                  :value='1 - (r.fitTestingPercentComplete || 0) / 100'
-                  :text='percentage(r.fitTestingPercentComplete || 0)'
-                  class='color-cell'
-                />
+              <td class='colored-cell' @click='v'>
+                <router-link :to="{name: 'FitTests', query: {'managedId': r.managedId }}">
+                  <ColoredCell
+                    :colorScheme="evenlySpacedColorScheme"
+                    :maxVal=1
+                    :value='1 - (r.fitTestingPercentComplete || 0) / 100'
+                    :text='percentage(r.fitTestingPercentComplete || 0)'
+                    class='color-cell'
+                  />
+                </router-link>
               </td>
             </tr>
           </tbody>
@@ -396,6 +398,10 @@ export default {
   .scrollable {
     overflow-y: auto;
     height: 75vh;
+  }
+
+  a {
+    color: white;
   }
 
 </style>
