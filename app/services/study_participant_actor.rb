@@ -1,4 +1,24 @@
 class StudyParticipantActor
+  def self.set_snapshot(rows:, datetime:)
+    if datetime.nil?
+      datetime = DateTime.now
+    end
+
+    rows.each do |row|
+      row.delete("id")
+      row.delete("refresh_datetime")
+      row.delete("created_at")
+      row.delete("updated_at")
+
+      Action.create(
+        type: "StudyParticipantAction",
+        name: "SetSnapshot",
+        datetime: datetime,
+        metadata: row
+      )
+    end
+  end
+
   def self.create(
     study_uuid:,
     participant_uuid:,

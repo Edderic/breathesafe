@@ -14,7 +14,10 @@ class StudyParticipantStatusBuilder
         accum[study_uuid] = {}
       end
 
-      if action.name == 'Create'
+      if action.name == 'SetSnapshot'
+        accum[study_uuid][participant_uuid] = metadata
+
+      elsif action.name == 'Create'
         accum[study_uuid][participant_uuid] = {
           'interested_datetime' => nil,
           'accepted_datetime' => nil,
