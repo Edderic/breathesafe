@@ -37,9 +37,9 @@ class MaskKitQuery
           ON ssj.shippable_uuid = mks.uuid
         INNER JOIN shipping_statuses ss
           ON ss.uuid = ssj.shipping_uuid
-        INNER JOIN users
+        LEFT JOIN users
           ON users.email = ss.to_user_uuid
-        INNER JOIN managed_users mu
+        LEFT JOIN managed_users mu
           ON mu.manager_id = users.id
         LEFT JOIN profiles ON profiles.user_id = mu.managed_id
         LEFT JOIN fit_test_counts_per_mask_user ftcpmu
