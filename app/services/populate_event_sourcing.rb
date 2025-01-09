@@ -1,4 +1,64 @@
 class PopulateEventSourcing
+  def self.create_mask_kit(data)
+    mask_kit_uuid = SecureRandom.uuid
+
+    if data['mask_kit_created_at']
+      MaskKitActor.create(
+        uuid: mask_kit_uuid,
+        datetime: data['mask_kit_created_at'].to_datetime
+      )
+
+      MaskKitActor.add_default_masks(
+        uuid: mask_kit_uuid,
+        datetime: data['mask_kit_created_at'].to_datetime + 1.second
+      )
+
+      return {
+        shippable_uuid: mask_kit_uuid,
+        shippable_type: 'MaskKit'
+      }
+    end
+  end
+
+  def self.create_facial_measurement_kit(data)
+    facial_measurement_kit_uuid = SecureRandom.uuid
+
+    if data['facial_measurement_kit_created_at']
+      FacialMeasurementKitActor.preset_create(
+        uuid: facial_measurement_kit_uuid,
+        digital_caliper_model: data['digital_caliper_model'],
+        datetime: data['facial_measurement_kit_created_at'].to_datetime
+      )
+
+      return {
+        shippable_uuid: facial_measurement_kit_uuid,
+        shippable_type: 'FacialMeasurementKit'
+      }
+    end
+  end
+
+  def self.create_qualitative_fit_testing_kit(data)
+    if data['qualitative_fit_testing_kit_created_at']
+      qlft_uuid = SecureRandom.uuid
+
+      if data['qualitative_fit_testing_kit_type'] == 'Allegro'
+        QualitativeFitTestingKitActor.preset_allegro_create(
+          uuid: qlft_uuid,
+          datetime: data['qualitative_fit_testing_kit_created_at'].to_datetime
+        )
+      else
+        QualitativeFitTestingKitActor.preset_diy_create(
+          uuid: qlft_uuid,
+          datetime: data['qualitative_fit_testing_kit_created_at'].to_datetime
+        )
+      end
+
+      return {
+        shippable_uuid: qlft_uuid,
+        shippable_type: 'QualitativeFitTestingKit'
+      }
+    end
+  end
   # Parameters:
   #   all_data: dict,
   #     The key is the email, and the value is some dict about that email
@@ -94,64 +154,11 @@ class PopulateEventSourcing
         datetime: data['accepted_datetime'].to_datetime + 1.second
       )
 
-      if kits.nil?
-        kits = []
-      end
-
-      mask_kit_uuid = SecureRandom.uuid
-      if data['mask_kit_created_at']
-          MaskKitActor.create(
-            uuid: mask_kit_uuid,
-            datetime: data['mask_kit_created_at'].to_datetime
-          )
-
-          MaskKitActor.add_default_masks(
-            uuid: mask_kit_uuid,
-            datetime: data['mask_kit_created_at'].to_datetime + 1.second
-          )
-
-          kits << {
-              shippable_uuid: mask_kit_uuid,
-              shippable_type: 'MaskKit'
-          }
-      end
-
-
-      if data['facial_measurement_kit_created_at']
-        facial_measurement_kit_uuid = SecureRandom.uuid
-        FacialMeasurementKitActor.preset_create(
-          uuid: facial_measurement_kit_uuid,
-          digital_caliper_model: data['digital_caliper_model'],
-          datetime: data['facial_measurement_kit_created_at'].to_datetime
-        )
-
-        kits << {
-          shippable_uuid: facial_measurement_kit_uuid,
-          shippable_type: 'FacialMeasurementKit'
-        }
-      end
-
-
-      if data['qualitative_fit_testing_kit_created_at']
-        qlft_uuid = SecureRandom.uuid
-
-        if data['qualitative_fit_testing_kit_type'] == 'Allegro'
-          QualitativeFitTestingKitActor.preset_allegro_create(
-            uuid: qlft_uuid,
-            datetime: data['qualitative_fit_testing_kit_created_at'].to_datetime
-          )
-        else
-          QualitativeFitTestingKitActor.preset_diy_create(
-            uuid: qlft_uuid,
-            datetime: data['qualitative_fit_testing_kit_created_at'].to_datetime
-          )
-        end
-
-        kits << {
-          shippable_uuid: qlft_uuid,
-          shippable_type: 'QualitativeFitTestingKit'
-        }
-      end
+      kits = [
+        self.create_mask_kit(data),
+        self.create_facial_measurement_kit(data),
+        self.create_qualitative_fit_testing_kit(data)
+      ].compact
 
       shipping_uuid = SecureRandom.uuid
       ShippingActor.create_package(
