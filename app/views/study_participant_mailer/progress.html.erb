@@ -1,0 +1,53 @@
+<p>Hi <%= @to_email %>!</p>
+<p>
+  This is an automated email. Here is the current summary of data collection for your pod:
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tester</th>
+      <th>Demographics</th>
+      <th>Facial Data</th>
+      <th>Masks that have data</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @progresses.each do |progress| %>
+      <tr>
+        <td>
+          <%= "#{progress['first_name']} #{progress['last_name']}"%>
+        </td>
+        <td>
+          <%= progress['demog_percent_complete'] || '0%' %>
+        </td>
+        <td>
+          <%= progress['fm_percent_complete'] || '0%' %>
+        </td>
+        <td>
+          <%= progress['num_targeted_unique_masks_fit_tested'] || '0%'%>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<p>Check out <a href="https://breathesafe.xyz/#/respirator_users">https://breathesafe.xyz/#/respirator_users</a> for more details.</p>
+
+</br>
+</br>
+
+<p>
+I look forward to having you complete the testing.  Please let me know if you have any questions.
+</p>
+
+<p>
+Regards,
+</p>
+
+<p>
+Edderic Ugaddan
+</p>
+<p>
+Breathesafe LLC
+</p>
