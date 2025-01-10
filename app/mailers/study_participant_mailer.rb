@@ -12,6 +12,6 @@ class StudyParticipantMailer < ApplicationMailer
     @progresses = params[:progresses]
     @to_email = params[:to_email]
 
-    mail(to: 'info@breathesafe.xyz', subject: "Mask Recommender: Data Collection Progress")
+    mail(to: @to_email, subject: "Mask Recommender: Data Collection Progress")
   end
 end

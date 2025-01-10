@@ -1,5 +1,5 @@
 class EmailSender
-  def self.progress
+  def self.progress(dry_run: false)
     progresses = ParticipantProgress.call(manager_id: 1)
     still_participating = progresses.select{|p| !p['removed_from_study'] && p['manager_email'] }
 
@@ -13,8 +13,14 @@ class EmailSender
     end
 
     email_with_managed_users_data.each do |email, progresses|
+      to_email = if dry_run
+        'info@breathesafe.xyz'
+      else
+        email
+      end
+
       StudyParticipantMailer.with(
-        to_email: email,
+        to_email: to_email,
         progresses: progresses
       ).progress.deliver_now
     end
