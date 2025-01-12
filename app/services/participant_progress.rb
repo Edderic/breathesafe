@@ -167,7 +167,7 @@ class ParticipantProgress
         LEFT JOIN
           managers_who_are_study_participants
           ON managers_who_are_study_participants.email = lsmc.us_uuid
-        LEFT JOIN managed_users
+        FULL OUTER JOIN managed_users
           ON managed_users.manager_id = managers_who_are_study_participants.id
         LEFT JOIN profile_with_demog_fields_present_count p
           ON managed_users.managed_id = p.user_id
