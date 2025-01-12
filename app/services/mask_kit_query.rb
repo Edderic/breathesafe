@@ -31,11 +31,11 @@ class MaskKitQuery
             0
           END AS num_fit_tests_per_mask_user
         FROM masks
-        INNER JOIN mask_kit_statuses mks
+        LEFT JOIN mask_kit_statuses mks
           ON mks.mask_uuid = masks.id
-        INNER JOIN shipping_status_joins ssj
+        LEFT JOIN shipping_status_joins ssj
           ON ssj.shippable_uuid = mks.uuid
-        INNER JOIN shipping_statuses ss
+        LEFT JOIN shipping_statuses ss
           ON ss.uuid = ssj.shipping_uuid
         LEFT JOIN users
           ON users.email = ss.to_user_uuid
