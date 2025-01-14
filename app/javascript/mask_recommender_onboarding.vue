@@ -709,10 +709,10 @@
         </div>
 
         <p>While in the hood, have your tongue be slightly out, and breathe in using the mouth. Sticking your tongue out a little bit maximizes the contact of air with the tongue (and should increase sensitivity).</p>
-        <p>Press the button in the middle of the nebulizer to aerosolize the sensitivity solution. For a few seconds, you should see some fine mist coming out of the outlet of the nebulizer.</p>
-        <p>If you can taste the solution, <strong>please make note of the number of button presses you did to be able to taste the saccharin sensitivity solution. This information will be used at the next step.</strong></p>
+        <p>Insert the nebulizer nozzle into the hole on the hood. Press the button in the middle of the nebulizer to aerosolize the sensitivity solution. You should be able to see fine mist coming out of the nebulizer and into the hood. You should see a blue light coming out of the nebulizer.  </p>
+        <p>Once you are able to taste the solution, immediately turn off the nebulizer by pressing the button twice. The first button press will make the color green. The second button press will turn off the device. <strong>IMPORTANT: Please make note of how many seconds it took you to know that you are tasting the saccharin sensitivity solution. This information will be used at the next step.</strong></p>
 
-        <p>However, if you cannot taste the solution, try pressing the button again, and evaluate if you could taste the solution. Try until you've reached 4 presses. <strong>If you've reached 4 presses and still could not taste the solution, please reach out to <a href="mailto:info@breathesafe.xyz?subject=Cannot Taste Sensitivity Solution">info@breathesafe.xyz</a>. Edderic could send you a bitrex solution instead of the saccharin.</strong></p>
+        <p>However, if you cannot taste the solution even after 10 seconds of having the sensitivity solution aerosolized in the bag, <strong> please reach out to <a href="mailto:info@breathesafe.xyz?subject=Cannot Taste Sensitivity Solution">info@breathesafe.xyz</a>. Edderic could send you a bitrex solution instead of the saccharin.</strong></p>
 
         Assuming you have passed the sensitivity threshold check, you can proceed to doing the fit testing exercises.
 
@@ -813,7 +813,7 @@
           </router-link> to learn how to add data for these exercises.
         </p>
 
-        <p>Each exercise takes a minute. <strong>At the beginning of each exercise, use the same amount of button presses you did as in the sensitivity step.</strong>  For example, if it only took you one press of a button to detect the sensitivity solution in the earlier step, you should also use just one press of a button with the fit test solution in the nebulizer at the beginning of each exercise. And halfway in (i.e. in the 30-second mark), you should use about half the number of presses that you did for the sensitivity step to keep the concentration levels high. Round up the number of presses (e.g. if the user only needed 1 nebulizer puff in the sensitivity step, they should do round(0.5) = 1 puff in the 30-second mark of a fit test exercise).</p>
+      <p>Each exercise takes a minute. <strong>At the beginning of each exercise, use the same amount of time running the nebulizer as you did as in the sensitivity step. On the other hand, at the 30-second mark, you should use half the amount of time of nebulization as in the sensitivity step.</strong>  For example, if it only took you 2 seconds of running the nebulizer to detect the sensitivity solution in the earlier step, you should run the nebulizer for 2 seconds with the fit test solution in the beginning of each exercise, and run the nebulizer for 1 second at the 30-second mark for each exercise. </p>
 
         <p>
         The fit test solution is 100x more concentrated than the sensitivity solution. Succeeding in tasting the sensitivity solution, while wearing a mask and not detecting the 100x stronger (fit test) solution for a particular exercise implies that the mask has a fit factor of at least 100 for that particular instance of an exercise.  However, there are several exercises. To pass the qualitative fit test, the tester should not be able to taste the fit test solution through <em>all</em> the exercises. If the tester tastes the fit test solution midway, that is considered a failure (i.e. the overall fit factor is less than 100.)
