@@ -11,7 +11,7 @@ def qlft_solution(aerosol_type='Saccharin', solution_type='Fit Test'):
     """
 
 if __name__ == '__main__':
-    amount = 9
+    amount = 8
 
     collection = ""
     for i in range(amount):
