@@ -79,7 +79,8 @@ class PopulateEventSourcing
     from_address_uuid: nil,
     study_uuid: nil,
     sender_uuid: nil,
-    kits: nil
+    kits: nil,
+    send_mail: false
   )
 
     if factory.nil?
@@ -212,7 +213,7 @@ class PopulateEventSourcing
           uuid: shipping_uuid,
           purchase_label: data['purchase_label'],
           datetime: data['package_created_at'].to_datetime + 1.day,
-          send_mail: false
+          send_mail: send_mail
         )
       end
 
