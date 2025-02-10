@@ -167,6 +167,13 @@ export default {
           // TODO: delete the params- query strings
           this.$router.push(obj);
         }
+        else if (this.$router.options.history.state.back == '/' || this.$router.options.history.state.back == '/sign_out') {
+          this.$router.push(
+            {
+              'name': 'RespiratorUsers'
+            }
+          )
+        }
         else {
           this.$router.go(-1);
         }

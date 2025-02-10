@@ -5,6 +5,8 @@ class Users::SessionsController < DeviseController
   prepend_before_action :allow_params_authentication!, only: :create
   prepend_before_action(only: [:create, :destroy]) { request.env["devise.skip_timeout"] = true }
 
+  skip_before_action :verify_authenticity_token, :only => [:destroy, :create]
+
   def get_current_user
     respond_to do |format|
       format.json do
