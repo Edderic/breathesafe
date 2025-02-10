@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-
 class Users::SessionsController < DeviseController
-  skip_before_action :verify_authenticity_token
   prepend_before_action :require_no_authentication, only: [:new, :create, :destroy, :get_current_user]
   prepend_before_action :allow_params_authentication!, only: :create
   prepend_before_action(only: [:create, :destroy]) { request.env["devise.skip_timeout"] = true }
