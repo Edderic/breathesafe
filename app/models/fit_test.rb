@@ -4,9 +4,30 @@ class FitTest < ApplicationRecord
   belongs_to :user
 
   def self.viewable(user)
+    filter_clause = ""
+
+    unless user.admin?
+      filter_clause = <<-SQL
+        WHERE ft.user_id IN (
+          SELECT mu.managed_id
+          FROM managed_users mu
+          WHERE mu.manager_id = #{user.id}
+        )
+      SQL
+    end
+
     fit_tests = FitTest.connection.exec_query(
       <<-SQL
-        SELECT ft.*, m.id as mask_id, m.unique_internal_model_code, m.image_urls, m.has_exhalation_valve, m.strap_type, m.perimeter_mm, fm.user_id AS fm_user_id, p.first_name, p.last_name,
+        SELECT ft.*,
+           m.id as mask_id,
+           m.unique_internal_model_code,
+           m.image_urls,
+           m.has_exhalation_valve,
+           m.strap_type,
+           m.perimeter_mm,
+           fm.user_id AS fm_user_id,
+           p.first_name,
+           p.last_name,
           #{self.facial_measurement_presence}
 
         FROM fit_tests ft
@@ -16,11 +37,7 @@ class FitTest < ApplicationRecord
         ON (p.user_id = ft.user_id)
         LEFT JOIN masks m
         ON (m.id = ft.mask_id)
-        WHERE ft.user_id IN (
-          SELECT mu.managed_id
-          FROM managed_users mu
-          WHERE mu.manager_id = #{user.id}
-        )
+        #{filter_clause}
 
         ORDER BY updated_at DESC
       SQL

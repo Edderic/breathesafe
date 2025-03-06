@@ -298,7 +298,8 @@ export default {
             lowerSearchCriteria = t.uniqueInternalModelCode.toLowerCase().match(lowerSearch)
           }
 
-          return ((t.managedId == this.managedUser.managedId)
+          return (
+            ((t.managedId == this.managedUser.managedId) || (this.currentUser.admin))
             && (t.numFitTestsPerMaskUser == 0)
             && lowerSearchCriteria
           )
@@ -315,7 +316,7 @@ export default {
           let lowerSearchCriteria = true;
 
           if (this.managedId) {
-            managedUserIdCriteria = fit_test.userId == this.managedId;
+            managedUserIdCriteria = (fit_test.userId == this.managedId);
           }
 
           if (lowerSearch != "") {
