@@ -71,7 +71,27 @@ export default {
   computed: {
     ...mapWritableState(useMainStore, ['message', 'currentUser'])
   },
-  created() { },
+  created() {
+   if (this.currentUser) {
+      let attemptName = this.$route.query['attempt-name'];
+      if (attemptName) {
+        this.$router.push({
+          'name': attemptName
+        })
+      }
+    }
+    this.$watch(
+      () => this.$route.query,
+      (toQuery, previousQuery) => {
+        let attemptName = toQuery['attempt-name']
+        if (attemptName && !!this.currentUser) {
+          this.$router.push({
+            'name': attemptName
+          })
+        }
+      }
+    )
+  },
   data() {
     return {
       name: "",
@@ -127,7 +147,6 @@ export default {
       axios.defaults.headers.common['X-CSRF-Token'] = token
       axios.defaults.headers.common['Accept'] = 'application/json'
       let success = false
-
       await axios.post('/users/log_in', {
         user: {
           email: this.email,
