@@ -151,6 +151,7 @@ class ParticipantProgress
         p.first_name,
         p.last_name,
         sps.removal_from_study ->> 'removal_datetime' IS NOT NULL AS removed_from_study,
+        sps.finished_study_datetime IS NOT NULL AS finished_study,
         lss.received ->> 'datetime' as received_datetime,
         num_targeted_masks,
         total_unique_masks_fit_tested.num_targeted_unique_masks_fit_tested,

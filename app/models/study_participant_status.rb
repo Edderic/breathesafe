@@ -3,6 +3,7 @@ class StudyParticipantStatus < ApplicationRecord
     if datetime.nil?
       datetime = DateTime.now
     end
+    datetime = DateTime.now
 
     statuses = StudyParticipantStatusBuilder.build
 

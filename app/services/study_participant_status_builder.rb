@@ -25,6 +25,7 @@ class StudyParticipantStatusBuilder
             'reason' => nil,
             'removal_datetime' => nil
           },
+          'finished_study_datetime' => nil,
           'qualifications' => {
             'hard_to_fit_face' => nil,
             'country_of_residence' => nil,
@@ -57,6 +58,8 @@ class StudyParticipantStatusBuilder
           'reason' => action.metadata['reason'],
           'removal_datetime' => action.datetime
         }
+      elsif action.name == 'FinishStudy'
+        accum[study_uuid][participant_uuid]['finished_study_datetime'] = action.datetime
       elsif action.name == 'SetStudyQualifications'
         accum[study_uuid][participant_uuid]['qualifications'] = \
           accum[study_uuid][participant_uuid]['qualifications'].merge(metadata['qualifications'])

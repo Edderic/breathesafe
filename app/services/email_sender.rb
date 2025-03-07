@@ -1,7 +1,9 @@
 class EmailSender
   def self.progress(dry_run: false)
     progresses = ParticipantProgress.call(manager_id: 1)
-    still_participating = progresses.select{|p| !p['removed_from_study'] && p['manager_email'] }
+    still_participating = progresses.select do |p|
+      !p['removed_from_study'] && !p['finished_study'] && p['manager_email']
+    end
 
     email_with_managed_users_data = still_participating.reduce({}) do |accum, p|
       unless accum.key?(p['manager_email'])
