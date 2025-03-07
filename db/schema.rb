@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_23_184044) do
+ActiveRecord::Schema[7.0].define(version: 2025_03_07_030350) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -341,6 +341,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_23_184044) do
     t.jsonb "equipment", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "finished_study_datetime"
     t.index ["study_uuid", "participant_uuid", "refresh_datetime"], name: "index_stu_par_sta_on_study_uuid_participant_uuid_refr_dt", unique: true
   end
 
