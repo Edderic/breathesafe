@@ -60,6 +60,7 @@
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import { mapActions, mapWritableState } from 'pinia';
+import { refreshCSRF } from './misc.js';
 import Button from './button.vue';
 import axios from 'axios';
 
@@ -143,9 +144,9 @@ export default {
       })
     },
     async signIn() {
-      let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
-      axios.defaults.headers.common['X-CSRF-Token'] = token
-      axios.defaults.headers.common['Accept'] = 'application/json'
+      // let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
+      // axios.defaults.headers.common['X-CSRF-Token'] = token
+      // axios.defaults.headers.common['Accept'] = 'application/json'
       let success = false
       await axios.post('/users/log_in', {
         user: {
@@ -157,6 +158,9 @@ export default {
         if (response.status == 201) {
           success = true
         }
+
+        refreshCSRF();
+
         this.currentUser = response.data
         // whatever you want
         this.loadProfile()
@@ -185,6 +189,7 @@ export default {
 
           // TODO: delete the params- query strings
           this.$router.push(obj);
+
         }
         else if (this.$router.options.history.state.back == '/' || this.$router.options.history.state.back == '/sign_out') {
           this.$router.push(
