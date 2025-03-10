@@ -1389,6 +1389,7 @@ export function displayCADR(systemOfMeasurement, cubicMetersPerHour) {
 
 export function setupCSRF() {
   axios.defaults.headers.common['Accept'] = 'application/json'
+  refreshCSRF();
 }
 
 export function refreshCSRF() {

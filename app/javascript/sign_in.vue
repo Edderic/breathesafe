@@ -60,7 +60,7 @@
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import { mapActions, mapWritableState } from 'pinia';
-import { refreshCSRF } from './misc.js';
+import { setupCSRF } from './misc.js';
 import Button from './button.vue';
 import axios from 'axios';
 
@@ -144,9 +144,6 @@ export default {
       })
     },
     async signIn() {
-      // let token = document.getElementsByName('csrf-token')[0].getAttribute('content')
-      // axios.defaults.headers.common['X-CSRF-Token'] = token
-      // axios.defaults.headers.common['Accept'] = 'application/json'
       let success = false
       await axios.post('/users/log_in', {
         user: {
@@ -159,7 +156,7 @@ export default {
           success = true
         }
 
-        refreshCSRF();
+        setupCSRF();
 
         this.currentUser = response.data
         // whatever you want
