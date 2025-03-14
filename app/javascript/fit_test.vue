@@ -1513,11 +1513,11 @@ export default {
     },
     validateValueOfInitialCountPerCM3() {
       let n99ModeAmbientCountCriteria = this.initialCountPerCm3 < 1000 && this.quantitativeProcedure != 'Skipping' && this.quantitativeTestingMode == 'N99'
-      let n95ModeAmbientCountCriteria = this.initialCountPerCm3 < 70 && this.quantitativeProcedure != 'Skipping' && this.quantitativeTestingMode == 'N95'
+      let n95ModeAmbientCountCriteria = this.initialCountPerCm3 < 30 && this.quantitativeProcedure != 'Skipping' && this.quantitativeTestingMode == 'N95'
 
       let cutoffs = {
         'N95': {
-          'minimumCutoff': 70
+          'minimumCutoff': 30
         },
         'N99': {
           'minimumCutoff': 1000
@@ -1527,7 +1527,7 @@ export default {
       if (n99ModeAmbientCountCriteria || n95ModeAmbientCountCriteria) {
           this.messages.push(
             {
-              str: `Initial particle count too low. Please take this test at an environment where the number of particles per cubic centimeter is greater than ${cutoffs[this.quantitativeTestingMode]['minimumCutoff']}.`,
+              str: `Initial particle count too low. Please take this test at an environment where the number of particles per cubic centimeter is greater than ${cutoffs[this.quantitativeTestingMode]['minimumCutoff']}. Note: For model 8038, the cutoff is 30 particles per cubic centimeter, while for 8020, the cutoff is actually 70 particles per cubic centimeter.`,
             }
           )
 
