@@ -1,4 +1,4 @@
-if defined?(Rails) && Rails.env.development?
+if defined?(Rails) && (Rails.env.development? || Rails.env.test?)
   require 'selenium-webdriver'
   require 'nokogiri'
   require 'capybara'
@@ -67,17 +67,9 @@ if defined?(Rails) && Rails.env.development?
 
       # Scrape the stuff to costs
       datetime_now = DateTime.now
+      datetime_format = get_datetime_format(datetime_now)
 
-      datetime_format = [
-        datetime_now.year,
-        datetime_now.month,
-        datetime_now.day,
-        datetime_now.hour,
-        datetime_now.minute,
-        datetime_now.second
-      ].join('-')
-
-      dict = {}
+      table_dict = {}
       text_rows = driver.find_elements(:css => "tbody tr").map{|r| r.text.split("\n")}
       len_text_rows = text_rows.count
 
@@ -86,7 +78,7 @@ if defined?(Rails) && Rails.env.development?
           next
         end
 
-        dict[row[2]] = {
+        table_dict[row[2]] = {
           ship_date: row[1],
           name: row[2],
           address_line_1: row[3],
@@ -118,33 +110,14 @@ if defined?(Rails) && Rails.env.development?
       text_rows_cart = driver.find_elements(:css => "tbody tr").map{|r| r.text.split("\n")}
       text_rows_cart
 
-      text_rows_cart.each do |cart_row|
-        dict[cart_row[2]]['label_number'] = cart_row[-1]
-      end
+      text_rows_cart.each { |cart_row| table_dict[cart_row[2]]['label_number'] = cart_row[-1] }
 
 
       # After payment, save the data to note that purchase labels have been created
       text_rows = driver.find_elements(:css => "tbody tr").map{|r| r.text.split("\n")}
+      usps_labels_to_create = ::CSV.read("usps_labels_to_create.csv", headers: true).map(&:to_h)
 
-      ::CSV.open("#{datetime_format}_usps_labels_created.csv", "wb") do |csv|
-        csv << [
-          'ship_date',
-          'name',
-          'address_line_1',
-          'address_line_2',
-          'memo',
-          'method',
-          'delivery_estimate',
-          'weight',
-          'value',
-          'label_number',
-        ]
-        dict.each do |key, value|
-          if value.key?('label_number') || value.key?(:label_number)
-            csv << value.map{|k,v| v}
-          end
-        end
-      end
+      self.add_in_weight_and_dimensions(date_time_format, table_dict, usps_labels_to_create)
 
 
       # driver.navigate.to("https://www.shaws.com/")
@@ -171,11 +144,59 @@ if defined?(Rails) && Rails.env.development?
       # @browser.find_element('#username')
       # @browser.find_element('#password')
     end
-  end
 
-  scraper = UspsScraper.new
-  scraper.bulk_purchase_label
-  debugger
+    class << self
+      def get_datetime_format(datetime: DateTime.now)
+        [
+          datetime.year,
+          datetime.month,
+          datetime.day,
+          datetime.hour,
+          datetime.minute,
+          datetime.second
+        ].join('-')
+      end
+
+      def add_in_weight_and_dimensions(
+        datetime_format: ,
+        table_dict:,
+        usps_labels_to_create:
+      )
+
+        ::CSV.open("#{datetime_format}_usps_labels_created.csv", "wb") do |csv|
+          csv << [
+            'ship_date',
+            'name',
+            'address_line_1',
+            'address_line_2',
+            'memo',
+            'method',
+            'delivery_estimate',
+            'weight',
+            'value',
+            'label_number',
+            "length",
+            "width",
+            "height",
+            "package_weight_lb",
+            "package_weight_oz"
+          ]
+          table_dict.each do |key, value|
+            if value.key?('label_number') || value.key?(:label_number)
+              data = usps_labels_to_create.find{|r| "#{r['Recipient First Name']} #{r['Recipient Last Name']}" == value["name"]}
+              cleaned_up_keys = data.reduce({}) do |accum, (k, v)|
+                new_key = k.downcase().gsub(" ", "_").gsub("(", "").gsub(")", "")
+                accum[new_key] = v
+                accum
+              end
+
+              csv << cleaned_up_keys.merge(value)
+            end
+          end
+        end
+      end
+    end
+  end
 else
   class UspsScraper
   end
