@@ -43,7 +43,3 @@ class UspsOrderParser
     end
   end
 end
-
-usps_order_parser = UspsOrderParser.new(filepath: "data/shipping/2025-04-08 USPS.com® - Create Shipping Labels.html")
-orders = usps_order_parser.parse_orders
-
