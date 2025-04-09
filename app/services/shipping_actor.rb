@@ -214,10 +214,11 @@ class ShippingActor
     )
   end
 
-  def self.bulk_assign_purchase_labels(csv_string, only_blank_shipping_labels: true)
-    csv = CsvHelper.parse(csv_string)
-    header = csv[:header]
-    rows = csv[:rows]
+  def self.bulk_assign_purchase_labels(
+    rows:,
+    only_blank_shipping_labels: true,
+    send_mail: true
+  )
     if only_blank_shipping_labels
       shipping_statuses_add_labels_to = ShippingQuery.find_shipping_statuses_with_blank_purchase_labels(
         user_status_names: rows.map{|r| r['name']}
@@ -233,11 +234,13 @@ class ShippingActor
       row = rows.find{|r| r['name'] == s['first_name'] + ' ' + s['last_name']}
 
       if row.present?
+        # TODO: handle creation of a purchase label if it does not exist yet
         ShippingActor.purchase_label(
           uuid: shipping_status_uuid,
           email: s['email'],
           name: s['first_name'],
-          purchase_label: row
+          purchase_label: row,
+          send_mail: send_mail
         )
       else
         puts("Skipping #{JSON.parse(s.to_json)}")
