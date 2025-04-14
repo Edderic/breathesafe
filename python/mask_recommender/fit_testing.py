@@ -59,10 +59,16 @@ def estimate_n95_mode_ff_from_n99_mode_results(
     Paramters:
         filtration_efficiency: float
             Some float between 0 and 1.
+
+        ff_n99: float
+            N99-mode Fit Factor. Between 1 and infinity
     """
 
     if filtration_efficiency < 0 or filtration_efficiency > 1:
         raise ValueError(f"Filtration efficiency {filtration_efficiency} should be between 0 and 1")
+
+    if ff_n99 < 1:
+        raise ValueError(f"N99-mode fit factor {ff_n99} should be at least 1 or greater.")
 
     clean_air_delivery_rate = find_air_delivery_rate_filtered(
         filtration_efficiency=filtration_efficiency,
