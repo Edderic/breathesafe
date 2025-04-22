@@ -152,6 +152,14 @@ heroku pg:backups:download --app breathesafe
 pg_restore --verbose --clean --no-acl --no-owner -h localhost -d breathesafe_development latest.dump
 ```
 
+In one line:
+```bash
+heroku pg:backups:capture --app breathesafe &&\
+heroku pg:backups:download --app breathesafe &&\
+mv latest.dump.1 latest.dump &&\
+pg_restore --verbose --clean --no-acl --no-owner -h localhost -d breathesafe_development latest.dump
+```
+
 ## Sign the URL
 `aws s3 presign s3://breathesafe/data/dumps/mydb.dump`
 
