@@ -299,7 +299,7 @@ export default {
           }
 
           return (
-            ((t.managedId == this.managedUser.managedId) || (this.currentUser.admin))
+            (t.managedId == this.managedId)
             && (t.numFitTestsPerMaskUser == 0)
             && lowerSearchCriteria
           )
