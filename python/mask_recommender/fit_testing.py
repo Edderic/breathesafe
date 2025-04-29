@@ -30,7 +30,13 @@ def find_air_delivery_rate_filtered(
             c_ambient = 10000
         c_mask = c_ambient / ff_n99
 
-    return air_delivery_rate * (c_ambient - c_mask) / (c_ambient * filtration_efficiency)
+    # Could also be written as
+    # air_delivery_rate * overall_exposure_reduction / filtration_efficiency
+    # If overall_exposure_reduction is as high as the filtration efficiency, then
+    # all of the air coming into the mask has been filtered. (i.e.
+    # filtered_air_delivery_rate = air_delivery_rate)
+    overall_exposure_reduction = (c_ambient - c_mask) / c_ambient
+    return air_delivery_rate * overall_exposure_reduction / filtration_efficiency
 
 def estimate_n95_mode_ff(total_air_delivery_rate, clean_air_delivery_rate):
     """
@@ -49,6 +55,11 @@ def estimate_n95_mode_ff(total_air_delivery_rate, clean_air_delivery_rate):
     """
 
     # inhalation
+    # clean_air_delivery_rate = total_air_delivery_rate * overall_exposure_reduction / filtration_efficiency
+    # inhalation_ff = total_air_delivery_rate / (total_air_delivery_rate - total_air_delivery_rate * overall_exposure_reduction / filtration_efficiency)
+    # = 1 / (1 - overall_exposure_reduction / filtration_efficiency)
+
+
     denominator = (total_air_delivery_rate - clean_air_delivery_rate)
 
     if denominator == 0:
