@@ -1,3 +1,7 @@
+import json
+import numpy as np
+import pandas as pd
+
 def find_air_delivery_rate_filtered(
     filtration_efficiency,
     c_ambient=None,
@@ -102,3 +106,477 @@ def estimate_n95_mode_ff_from_n99_mode_results(
         total_air_delivery_rate=total_air_delivery_rate,
         clean_air_delivery_rate=clean_air_delivery_rate
     )
+
+
+def extract_quantitative_exercise(val, index, var):
+    """
+    Meant for cleaning up the fit_tests dataframe. If a quantitative exercise
+    is missing, return np.nan
+
+    Parameters:
+        val: json string
+
+        index: int
+            To parse an array.
+
+        var: string
+            e.g. 'name', 'fit_factor'
+
+    Returns: string or np.nan
+        Returns np.nan if IndexError is encountered
+
+    """
+    try:
+        return json.loads(val)['quantitative']['exercises'][index][var]
+    except IndexError as e:
+        return np.nan
+
+def preprocess_fit_tests(fit_tests):
+    """
+    Parameters:
+        fit_tests: dict
+            {
+                'results': {
+                    'qualitative': {
+                        'aerosol': {
+                            'solution': ...
+                        }
+                        'exercises': [
+                            {
+                                'name': ...
+                                'result': ...
+                            }
+                        ]
+                    },
+                    'quantitative': {
+                        'aerosol': {
+                            'initial_count_per_cm3': ...,
+                            'solution': ...
+                        }
+                        'exercises': [
+                            {
+                                'name': ...
+                                'result': ...
+                            }
+                        ],
+                        'testing_mode': '...',
+                        'procedure': '...'
+                    }
+                }
+            }
+
+    Returns: pd.DataFrame
+        Modified fit_tests, with unnested values.
+    """
+
+    # qualitative
+    fit_tests['qualitative_solution'] = fit_tests['results'].apply(
+        lambda x: json.loads(x)['qualitative']["aerosol"]['solution']
+    )
+    fit_tests['qualitative_normal_breathing_1'] = fit_tests['results'].apply(
+        lambda x: json.loads(x)['qualitative']["exercises"][0]['result']
+    )
+    fit_tests['qualitative_deep_breathing'] = fit_tests['results'].apply(
+        lambda x: json.loads(x)['qualitative']["exercises"][1]['result']
+    )
+    fit_tests['qualitative_head_side_to_side'] = fit_tests['results'].apply(
+        lambda x: json.loads(x)['qualitative']["exercises"][2]['result']
+    )
+    fit_tests['qualitative_head_up_and_down'] = fit_tests['results'].apply(
+        lambda x: json.loads(x)['qualitative']["exercises"][3]['result']
+    )
+    fit_tests['qualitative_talking'] = fit_tests['results'].apply(
+        lambda x: json.loads(x)['qualitative']["exercises"][4]['result']
+    )
+    fit_tests['qualitative_bend_over'] = fit_tests['results'].apply(
+        lambda x: json.loads(x)['qualitative']["exercises"][5]['result']
+    )
+
+    # quantitative
+    fit_tests['qualitative_normal_breathing_2'] = fit_tests['results'].apply(
+        lambda x: json.loads(x)['qualitative']["exercises"][6]['result']
+    )
+    fit_tests['quantitative_solution'] = fit_tests['results'].apply(
+        lambda x: json.loads(x)['quantitative']["aerosol"]['solution']
+    )
+    fit_tests['quantitative_initial_count_per_cm3'] = fit_tests['results'].apply(
+        lambda x: json.loads(x)['quantitative']["aerosol"]['initial_count_per_cm3']
+    )
+    fit_tests['quantitative_testing_mode'] = fit_tests['results'].apply(
+        lambda x: json.loads(x)['quantitative']["testing_mode"]
+    )
+    fit_tests['quantitative_procedure'] = fit_tests['results'].apply(
+        lambda x: json.loads(x)['quantitative']["procedure"]
+    )
+    for i in range(0,10):
+        for var in ['name', 'fit_factor']:
+            fit_tests[f'quantitative_ex_{i}_{var}'] = fit_tests['results'].apply(
+                lambda x: extract_quantitative_exercise(x, index=i, var=var)
+            )
+
+    # count the number of exercises done
+    fit_tests['quantitative_n_exercises'] = \
+        fit_tests['quantitative_ex_0_fit_factor'].notna().astype(int) \
+        + fit_tests['quantitative_ex_1_fit_factor'].notna().astype(int) \
+        + fit_tests['quantitative_ex_2_fit_factor'].notna().astype(int) \
+        + fit_tests['quantitative_ex_3_fit_factor'].notna().astype(int) \
+        + fit_tests['quantitative_ex_4_fit_factor'].notna().astype(int) \
+        + fit_tests['quantitative_ex_5_fit_factor'].notna().astype(int) \
+        + fit_tests['quantitative_ex_6_fit_factor'].notna().astype(int) \
+        + fit_tests['quantitative_ex_7_fit_factor'].notna().astype(int) \
+        + fit_tests['quantitative_ex_8_fit_factor'].notna().astype(int) \
+        + fit_tests['quantitative_ex_9_fit_factor'].notna().astype(int)
+
+
+    # user seal check
+    fit_tests['too_small_or_big'] = fit_tests['user_seal_check'].apply(
+        lambda x: json.loads(x)['sizing']["What do you think about the sizing of this mask relative to your face?"]
+    )
+    fit_tests['usc_negative_air_pressure'] = fit_tests['user_seal_check'].apply(
+        lambda x: json.loads(x)['negative']["...how much air passed between your face and the mask?"]
+    )
+    fit_tests['usc_positive_glasses'] = fit_tests['user_seal_check'].apply(
+        lambda x: json.loads(x)['positive']["...how much did your glasses fog up?"]
+    )
+    fit_tests['usc_positive_build_up'] = fit_tests['user_seal_check'].apply(
+        lambda x: json.loads(x)['positive']["...how much pressure build up was there?"]
+    )
+    fit_tests['usc_positive_air_movement'] = fit_tests['user_seal_check'].apply(
+        lambda x: json.loads(x)['positive']["...how much air movement on your face along the seal of the mask did you feel?"]
+    )
+
+    # facial hair
+    fit_tests['facial_hair_beard_length'] = fit_tests['facial_hair'].apply(
+        lambda x: json.loads(x)["beard_length_mm"]
+    )
+    fit_tests['facial_hair_beard_cover_technique'] = fit_tests['facial_hair'].apply(
+        lambda x: json.loads(x)["beard_cover_technique"]
+    )
+
+    # comfort
+    fit_tests['comfort_talk'] = fit_tests['comfort'].apply(
+        lambda x: json.loads(x)["Is there enough room to talk?"]
+    )
+    fit_tests['comfort_eyes'] = fit_tests['comfort'].apply(
+        lambda x: json.loads(x)["Is there adequate room for eye protection?"]
+    )
+    fit_tests['comfort_nose'] = fit_tests['comfort'].apply(
+        lambda x: json.loads(x)["How comfortable is the position of the mask on the nose?"]
+    )
+
+    fit_tests['comfort_face_cheeks'] = fit_tests['comfort'].apply(
+        lambda x: json.loads(x)["How comfortable is the position of the mask on face and cheeks?"]
+    )
+
+    fit_tests['quantitative_hmff'] = fit_tests.apply(compute_hmff, axis=1)
+
+    fit_tests['facial_hair_short'] = fit_tests['facial_hair_beard_length'].str.contains("0|1.5|3")
+
+    return fit_tests
+
+def compute_hmff(row):
+    """
+    Parameters:
+        row: dict
+    """
+    n = 0
+    denominator = 0
+    for i in range(10):
+        try:
+            val = float(row[f'quantitative_ex_{i}_fit_factor'])
+        except (ValueError, TypeError):
+            continue
+
+        if pd.isna(val) or val == 0:
+            continue
+
+        n += 1
+        # import pdb; pdb.set_trace()
+        try:
+            denominator += 1 / row[f'quantitative_ex_{i}_fit_factor']
+        except ZeroDivisionError as e:
+            import pdb; pdb.set_trace()
+
+    if denominator == 0:
+        return np.nan
+
+    return n / denominator
+
+def assume_ff_1_since_no_fit(df):
+    """
+    Parameters:
+        df: pd.DataFrame
+            These are fit tests that have masks that are way too small / way
+            too big.
+
+    Returns: pd.DataFrame
+        With additional columns:
+            fit_factor_n99,
+            fit_factor_n95,
+            predicted_fit_factor_n95
+            clipped_predicted_fit_factor_n95
+            actual n95 / clipped predicted n95
+    """
+    copy = df[['unique_internal_model_code']].copy()
+    copy['fit_factor_n99'] = np.nan
+    copy['fit_factor_n95'] = 1.0
+    copy['predicted_fit_factor_n95'] = 1.0
+    copy['clipped_predicted_fit_factor_n95'] = 1.0
+    copy['actual n95 / clipped predicted n95'] = 1.0
+
+    return copy
+
+def get_qnft(fit_tests, mode):
+    """
+    Get fit tests that have complete N99 results
+
+    Parameters:
+        fit_tests: pd.DataFrame
+
+        mode: string
+            Either 'N99' or 'N95'
+
+    Returns: pd.DataFrame
+    """
+
+    assert mode in ['N99', 'N95']
+
+    return fit_tests[
+        (fit_tests['quantitative_testing_mode'] == mode) &
+        (fit_tests['quantitative_ex_0_fit_factor'].notna()) & (
+            (
+                fit_tests['quantitative_ex_8_fit_factor'].notna() &
+                (fit_tests['quantitative_procedure'] == 'Full OSHA')
+            ) \
+            | (
+                fit_tests['quantitative_ex_4_fit_factor'].notna() &
+                (fit_tests['quantitative_procedure'] == 'OSHA Fast Filtering Face Piece Respirators')
+            )
+        )
+    ]
+
+def rearrange_data_with_name_and_fit_factor_columns(transpose, mode):
+    names_transpose = transpose[
+        transpose.index.str.contains(f'name_{mode}')
+    ]
+
+    names_transpose.columns = ['name']
+
+    ff_transpose = transpose[
+        transpose.index.str.contains(f'fit_factor_{mode}')
+    ]
+
+    ff_transpose.columns = ['fit_factor']
+
+    return names_transpose.reset_index().merge(
+        ff_transpose.reset_index(),
+        left_index=True,
+        right_index=True
+    )
+
+def get_n95_and_n99_mode_side_by_side(transpose):
+    """
+    Parameters:
+        transpose: pd.DataFrame
+
+            e.g.
+                                                        2
+                unique_internal_model_code_n99	3M 1870+ AURA™
+                quantitative_ex_0_name_n99	Normal breathing
+                quantitative_ex_0_fit_factor_n99	232
+                quantitative_ex_1_name_n99	Deep breathing
+                quantitative_ex_1_fit_factor_n99	253
+                quantitative_ex_2_name_n99	Turning head side to side
+                quantitative_ex_2_fit_factor_n99	116
+                quantitative_ex_3_name_n99	Moving head up and down
+                quantitative_ex_3_fit_factor_n99	151
+                quantitative_ex_4_name_n99	Talking
+                quantitative_ex_4_fit_factor_n99	133
+                quantitative_ex_5_name_n99	Grimace
+                quantitative_ex_5_fit_factor_n99	78
+                quantitative_ex_6_name_n99	Bending over
+                quantitative_ex_6_fit_factor_n99	262
+                quantitative_ex_7_name_n99	Normal breathing
+                quantitative_ex_7_fit_factor_n99	190
+                quantitative_ex_8_name_n99	Normal breathing (SEALED)
+                quantitative_ex_8_fit_factor_n99	292
+                quantitative_ex_9_name_n99	NaN
+                quantitative_ex_9_fit_factor_n99	NaN
+                quantitative_ex_0_name_n95	Bending over
+                quantitative_ex_0_fit_factor_n95	200
+                quantitative_ex_1_name_n95	Talking
+                quantitative_ex_1_fit_factor_n95	200
+                quantitative_ex_2_name_n95	Turning head side to side
+                quantitative_ex_2_fit_factor_n95	200
+                quantitative_ex_3_name_n95	Moving head up and down
+                quantitative_ex_3_fit_factor_n95	200
+                quantitative_ex_4_name_n95	Normal breathing (SEALED)
+                quantitative_ex_4_fit_factor_n95	200
+                quantitative_ex_5_name_n95	NaN
+                quantitative_ex_5_fit_factor_n95	NaN
+                quantitative_ex_6_name_n95	NaN
+                quantitative_ex_6_fit_factor_n95	NaN
+                quantitative_ex_7_name_n95	NaN
+                quantitative_ex_7_fit_factor_n95	NaN
+                quantitative_ex_8_name_n95	NaN
+                quantitative_ex_8_fit_factor_n95	NaN
+                quantitative_ex_9_name_n95	NaN
+                quantitative_ex_9_fit_factor_n95	NaN
+
+    Returns: pd.DataFrame
+        E.g.
+
+                                                             fit_factor_n99     fit_factor_n95   filtration_efficiency
+        unique_internal_model_code	name
+        Drager X-plore 1950 - Small	    Bending over	        83	200	          0.991304
+                                            Talking	                113	200	          0.991304
+                                            Turning head side to side	58	200	          0.991304
+                                            Moving head up and down	58	200	          0.991304
+                                            Normal breathing (SEALED)	114	200	          0.991304
+    """
+    unique_internal_model_code = transpose.loc[
+        'unique_internal_model_code_n99'
+    ].iloc[0]
+
+    n95_and_n99_side_by_side = \
+        rearrange_data_with_name_and_fit_factor_columns(
+            transpose,
+            'n99'
+        )[['name', 'fit_factor']].merge(
+            rearrange_data_with_name_and_fit_factor_columns(
+                transpose,
+                'n95'
+            )[['name', 'fit_factor']],
+        on='name',
+        suffixes=('_n99', '_n95')
+    )
+
+    n95_and_n99_side_by_side[
+        'unique_internal_model_code'
+    ] = unique_internal_model_code
+
+    max_ff = n95_and_n99_side_by_side[
+        'fit_factor_n99'
+    ].max() + 1
+
+    n95_and_n99_side_by_side[
+        'filtration_efficiency'
+    ] = 1 - 1 / max_ff
+
+    return n95_and_n99_side_by_side.set_index(['unique_internal_model_code', 'name'])
+
+def compute_predicted_n95_mode(df, removables=None):
+    """
+    Parameters:
+        df: pd.DataFrame
+            Has the following columns:
+
+            name
+            filtration_efficiency
+            fit_factor_n99
+            fit_factor_n95
+
+    Returns: pd.DataFrame
+        With additional columns:
+            predicted_fit_factor_n95
+            clipped_predicted_fit_factor_n95
+            actual n95 / clipped_predicted_fit_factor_n95
+
+    """
+    if removables is None:
+        removables = ['Normal breathing (SEALED)']
+
+    copy_df = df.reset_index()
+    remove_sealed = copy_df[~copy_df['name'].isin(removables)].copy()
+
+    remove_sealed['predicted_fit_factor_n95'] = remove_sealed.apply(
+        lambda row: estimate_n95_mode_ff_from_n99_mode_results(row['filtration_efficiency'], row['fit_factor_n99']),
+        axis=1
+    )
+
+    remove_sealed['clipped_predicted_fit_factor_n95'] = remove_sealed['predicted_fit_factor_n95']
+
+    remove_sealed.loc[
+        remove_sealed['predicted_fit_factor_n95'] > 200,
+        'clipped_predicted_fit_factor_n95'
+    ] = 200
+
+
+    try:
+        remove_sealed['actual n95 / clipped predicted n95'] = remove_sealed['fit_factor_n95'] / remove_sealed['clipped_predicted_fit_factor_n95']
+    except Exception as e:
+        import pdb; pdb.set_trace()
+    return remove_sealed
+
+def compute_predicted_n95_mode_for_n99_and_n95_data(n99_and_n95_data, removables):
+    """
+    Runs compute_predicted_n95_mode on n99_and_n95_data.
+
+    Parameters:
+        n99_and_n95_data: pd.DataFrame
+
+        removables: list[str]
+            e.g. 'Normal Breathing (SEALED)'
+    """
+    collection = []
+    for i in range(n99_and_n95_data.shape[0]):
+        combos = compute_predicted_n95_mode(
+            get_n95_and_n99_mode_side_by_side(pd.DataFrame([n99_and_n95_data.iloc[i]]).T).dropna(),
+            removables
+        )
+        collection.append(combos)
+
+    return pd.concat(collection)
+
+def add_fit_factor_columns(df):
+    """
+    Parameters:
+        df: pd.DataFrame
+
+            unique_internal_model_code:
+                Makrite 9601-N95
+
+            name:
+                Turning head side to side
+
+            fit_factor_n99: float
+
+            fit_factor_n95: float
+
+            filtration_efficiency: float
+
+            predicted_fit_factor_n95: float
+
+            clipped_predicted_fit_factor_n95: float
+
+            actual n95 / clipped predicted n95:
+    """
+    overall_ffs = pd.DataFrame(
+        df.groupby(['unique_internal_model_code'])['fit_factor_n99'].apply(lambda row: get_hmff(list(row)))
+    )
+
+    overall_ffs['actual_fit_factor_n95'] = df.groupby(
+        ['unique_internal_model_code'])['fit_factor_n95'].apply(lambda row: get_hmff(list(row))
+    )
+
+    overall_ffs['predicted_fit_factor_n95'] = df.groupby(
+        ['unique_internal_model_code']
+    )['clipped_predicted_fit_factor_n95'].apply(lambda row: get_hmff(list(row)))
+
+    overall_ffs['pass_n99'] = overall_ffs['fit_factor_n99'] >= 100
+    overall_ffs['pass_n95_predicted'] = overall_ffs['predicted_fit_factor_n95'] >= 100
+    overall_ffs['pass_n95_actual'] = overall_ffs['actual_fit_factor_n95'] >= 100
+
+    overall_ffs['clipped_predicted_fit_factor_n95'] = overall_ffs['predicted_fit_factor_n95']
+    overall_ffs.loc[
+        overall_ffs['predicted_fit_factor_n95'] > 200,
+        'clipped_predicted_fit_factor_n95'
+    ] = 200
+
+    overall_ffs['actual_ff_n95 / clipped_predicted_ff_n95'] = \
+        (overall_ffs['actual_fit_factor_n95'] / overall_ffs['clipped_predicted_fit_factor_n95'])
+
+    return overall_ffs
+
+def get_hmff(array):
+    return len(array) / (1.0 / np.array(array)).sum()
