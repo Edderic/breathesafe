@@ -1,6 +1,6 @@
 class EmailSender
-  def self.progress(dry_run: false)
-    progresses = ParticipantProgress.call(manager_id: 1)
+  def self.progress(manager_id:, dry_run: false)
+    progresses = ParticipantProgress.call(manager_id: manager_id)
     still_participating = progresses.select do |p|
       !p['removed_from_study'] && !p['finished_study'] && p['manager_email']
     end
