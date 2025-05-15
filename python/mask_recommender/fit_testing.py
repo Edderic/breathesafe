@@ -283,6 +283,8 @@ def compute_hmff(row):
     denominator = 0
     for i in range(10):
         try:
+            if row[f'quantitative_ex_{i}_name'] == 'Normal Breathing (SEALED)':
+                continue
             val = float(row[f'quantitative_ex_{i}_fit_factor'])
         except (ValueError, TypeError):
             continue
