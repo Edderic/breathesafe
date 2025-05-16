@@ -43,6 +43,19 @@ class MaskKitActor
     )
   end
 
+  def self.update_mask_id(uuid:, from_mask_uuid:, to_mask_uuid:,)
+    Action.create(
+      type: 'MaskKitAction',
+      name: 'UpdateMaskId',
+      datetime: datetime,
+      metadata: {
+        'uuid': uuid,
+        'from_mask_uuid': from_mask_uuid,
+        'to_mask_uuid': to_mask_uuid
+      }
+    )
+  end
+
   def self.add_default_masks(uuid:, datetime:)
     masks = Mask.where('json_array_length(payable_datetimes) > 0')
 

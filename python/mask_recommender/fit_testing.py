@@ -271,6 +271,9 @@ def preprocess_fit_tests(fit_tests):
     fit_tests['quantitative_hmff'] = fit_tests.apply(compute_hmff, axis=1)
 
     fit_tests['facial_hair_short'] = fit_tests['facial_hair_beard_length'].str.contains("0|1.5|3")
+    fit_tests['facial_hair_mm'] = fit_tests['facial_hair_beard_length'].str.contains("0|1.5|3")
+
+    fit_tests['facial_hair_beard_length_mm'] = fit_tests['facial_hair_beard_length'].str.strip('mm|>').astype(float)
 
     return fit_tests
 
