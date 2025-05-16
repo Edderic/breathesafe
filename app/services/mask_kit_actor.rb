@@ -43,7 +43,7 @@ class MaskKitActor
     )
   end
 
-  def self.update_mask_id(uuid:, from_mask_uuid:, to_mask_uuid:,)
+  def self.update_mask_id(uuid:, from_mask_uuid:, to_mask_uuid:)
     Action.create(
       type: 'MaskKitAction',
       name: 'UpdateMaskId',
