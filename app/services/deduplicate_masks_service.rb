@@ -15,15 +15,19 @@ class DeduplicateMasksService
         mask_kit_statuses.each do |mks|
           MaskKitActor.update_mask_id(
             uuid: mks.uuid,
-            from_mask_id: from_mask_id,
-            to_mask_id: to_mask_id
+            from_mask_uuid: from_mask_id,
+            to_mask_uuid: to_mask_id
           )
         end
 
         MaskKitStatus.destroy_all
         MaskKitStatus.refresh!
 
-        Mask.find(from_mask_id).destroy
+        mask_to_destroy = Mask.find(from_mask_id)
+        # saveable_mask = Mask.find(to_mask_id)
+        # debugger
+
+        mask_to_destroy.destroy
       end
     end
   end
