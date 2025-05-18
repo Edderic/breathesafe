@@ -263,6 +263,8 @@ export function displayableMasks(masks) {
   let lowerSearch = this.search.toLowerCase()
   let filterForHeadstrap = this.filterForHeadstrap
   let filterForEarloop = this.filterForEarloop
+  let filterForAdjustableHeadstrap = this.filterForAdjustableHeadstrap
+  let filterForAdjustableEarloop = this.filterForAdjustableEarloop
   let filterForTargeted = this.filterForTargeted
   let filterForNotTargeted = this.filterForNotTargeted
 
@@ -274,6 +276,8 @@ export function displayableMasks(masks) {
           (
             (filterForHeadstrap && mask.strapType == 'Headstrap')
             || (filterForEarloop && mask.strapType == 'Earloop')
+            || (filterForAdjustableEarloop && mask.strapType == 'Adjustable Earloop')
+            || (filterForAdjustableHeadstrap && mask.strapType == 'Adjustable Headstrap')
           )
         ) && (
           (mask.isTargeted && filterForTargeted) ||

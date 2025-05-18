@@ -98,6 +98,8 @@ export default {
   },
   data() {
     return {
+      filterForAdjustableEarloop: true,
+      filterForAdjustableHeadstrap: true,
       filterForEarloop: true,
       filterForHeadstrap: true,
       filterForTargeted: true,
@@ -161,7 +163,7 @@ export default {
     this.sortByStatus = this.$route.query.sortByStatus
     this.sortByField = this.$route.query.sortByField
 
-    let filterCriteria = ["Earloop", "Headstrap", "Targeted", "NotTargeted"];
+    let filterCriteria = ["Adjustable Earloop", "Earloop", "Headstrap", "Targeted", "NotTargeted"];
     for(let filt of filterCriteria) {
       let specificFilt = 'filterFor' + filt
       if (this.$route.query[specificFilt] == undefined) {
