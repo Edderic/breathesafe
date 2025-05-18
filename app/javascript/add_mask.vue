@@ -164,7 +164,9 @@
                     v-show="newOrEdit"
                     >
                     <option>Earloop</option>
+                    <option>Adjustable Earloop</option>
                     <option>Headstrap</option>
+                    <option>Adjustable Headstrap</option>
                 </select>
                 <span v-show='!newOrEdit'>{{strapType}}</span>
               </td>
