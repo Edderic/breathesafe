@@ -106,13 +106,13 @@ class ParticipantProgress
 
         ),
         latest_shipping_status_refresh_datetimes AS (
-          SELECT uuid, MAX(refresh_datetime) as refresh_datetime
+          SELECT to_user_uuid, MAX(refresh_datetime) as refresh_datetime
           FROM shipping_statuses
           GROUP BY 1
         ), latest_shipping_statuses AS (
           SELECT ss.* FROM shipping_statuses ss
           INNER JOIN latest_shipping_status_refresh_datetimes lssrd
-          ON lssrd.uuid = ss.uuid
+          ON lssrd.to_user_uuid = ss.to_user_uuid
           AND lssrd.refresh_datetime = ss.refresh_datetime
         ),
         latest_shipping_status_join_refresh AS (
@@ -146,13 +146,12 @@ class ParticipantProgress
         SELECT
         COALESCE(
           managers_who_are_study_participants.email,
-          lss.to_user_uuid
+          lssrd.to_user_uuid
         ) as manager_email,
         p.first_name,
         p.last_name,
         sps.removal_from_study ->> 'removal_datetime' IS NOT NULL AS removed_from_study,
         sps.finished_study_datetime IS NOT NULL AS finished_study,
-        lss.received ->> 'datetime' as received_datetime,
         num_targeted_masks,
         total_unique_masks_fit_tested.num_targeted_unique_masks_fit_tested,
         ROUND((num_targeted_unique_masks_fit_tested::float / num_targeted_masks * 100)::numeric, 2) AS fit_testing_percent_complete,
@@ -162,9 +161,9 @@ class ParticipantProgress
         ROUND(CAST(CASE WHEN demog_present_counts IS NULL THEN 0 ELSE demog_present_counts END::float / #{Profile::STRING_DEMOG_FIELDS.size + Profile::NUM_DEMOG_FIELDS.size} * 100 AS NUMERIC), 2) AS demog_percent_complete,
         managed_users.*, fm.created_at, fm.updated_at
 
-        FROM latest_shipping_statuses lss
+        FROM latest_shipping_status_refresh_datetimes lssrd
         LEFT JOIN latest_sent_masks_counts lsmc
-          ON lss.to_user_uuid = lsmc.us_uuid
+          ON lssrd.to_user_uuid = lsmc.us_uuid
         LEFT JOIN
           managers_who_are_study_participants
           ON managers_who_are_study_participants.email = lsmc.us_uuid
@@ -177,7 +176,7 @@ class ParticipantProgress
         LEFT JOIN total_unique_masks_fit_tested
           ON total_unique_masks_fit_tested.user_id = managed_users.managed_id
         LEFT JOIN study_participant_statuses sps
-          ON sps.participant_uuid = lss.to_user_uuid
+          ON sps.participant_uuid = lssrd.to_user_uuid
 
         #{where}
         ORDER BY manager_email
