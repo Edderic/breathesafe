@@ -180,7 +180,7 @@ import { facialMeasurementsPresenceColorMapping, userSealCheckColorMapping, genC
 import ColoredCell from './colored_cell.vue'
 import MaskCards from './mask_card.vue'
 import TabSet from './tab_set.vue'
-import { deepSnakeToCamel } from './misc.js'
+import { deepSnakeToCamel, setupCSRF } from './misc.js'
 import SortFilterPopup from './sort_filter_popup.vue'
 import SearchSortFilterSection from './search_sort_filter_section.vue'
 import SurveyQuestion from './survey_question.vue'
@@ -383,6 +383,7 @@ export default {
       }
     },
     async markNotIncludedInMaskKit(args) {
+      setupCSRF();
       let answer = window.confirm(`Are you sure you want to mark this mask as not being included in the mask kit?`);
 
       if (answer) {

@@ -46,7 +46,7 @@ class ParticipantProgress
       where = "WHERE managed_users.manager_id = #{manager_id}"
     end
 
-    JSON.parse(
+    result = JSON.parse(
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
         WITH managed_by_manager AS (
@@ -79,9 +79,17 @@ class ParticipantProgress
             #{demographics_present_counts}
           FROM profile_with_demog_fields_present
         ),
+        masks_shipped AS (
+          SELECT to_user_uuid, mask_uuid
+          FROM shipping_statuses ss
+          INNER JOIN shipping_status_joins ssj
+            ON ssj.shipping_uuid = ss.uuid
+          INNER JOIN mask_kit_statuses mks
+            ON mks.uuid = ssj.shippable_uuid
+        ),
         targeted_masks AS (
-          SELECT * FROM masks
-          WHERE json_array_length(payable_datetimes) > 0
+          SELECT * FROM masks_shipped
+          INNER JOIN masks ON masks.id = masks_shipped.mask_uuid
         ), targeted_fit_tests AS (
           SELECT targeted_masks.id,
           fit_tests.user_id
@@ -107,11 +115,7 @@ class ParticipantProgress
         ),
         mask_shipped_counts AS (
           SELECT to_user_uuid, count(*) AS num_targeted_masks
-          FROM shipping_statuses ss
-          INNER JOIN shipping_status_joins ssj
-            ON ssj.shipping_uuid = ss.uuid
-          INNER JOIN mask_kit_statuses mks
-            ON mks.uuid = ssj.shippable_uuid
+          FROM masks_shipped
           GROUP BY 1
         ), sent_masks AS (
             SELECT distinct on (mask_uuid)
@@ -140,6 +144,8 @@ class ParticipantProgress
         num_targeted_masks,
         total_unique_masks_fit_tested.num_targeted_unique_masks_fit_tested,
         ROUND((num_targeted_unique_masks_fit_tested::float / num_targeted_masks * 100)::numeric, 2) AS fit_testing_percent_complete,
+        ROUND((fm_present_counts::float / 12 * 100)::numeric, 2) AS fm_percent_complete,
+        ROUND((demog_present_counts::float / #{Profile::STRING_DEMOG_FIELDS.size + Profile::NUM_DEMOG_FIELDS.size} * 100)::numeric, 2) AS demog_percent_complete,
         managed_users.*, fm.created_at, fm.updated_at
 
         FROM mask_shipped_counts
@@ -162,5 +168,7 @@ class ParticipantProgress
         SQL
       ).to_json
     )
+
+    result
   end
 end
