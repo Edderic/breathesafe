@@ -19,7 +19,7 @@ class MaskKitStatusBuilder
         accum[uuid]['mask_uuids'] << mask_kit_action.metadata['mask_uuids']
       elsif mask_kit_action.name == 'RemoveMasks'
         accum[uuid]['mask_uuids'] = \
-          accum[uuid]['mask_uuids'] - [mask_kit_action.metadata['mask_uuids']]
+          accum[uuid]['mask_uuids'] - mask_kit_action.metadata['mask_uuids']
       elsif mask_kit_action.name == 'UpdateMaskId'
         accum[uuid]['mask_uuids'] -= [mask_kit_action.metadata['from_mask_uuid']]
         accum[uuid]['mask_uuids'] += [mask_kit_action.metadata['to_mask_uuid']]

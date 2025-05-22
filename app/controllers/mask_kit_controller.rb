@@ -30,8 +30,8 @@ class MaskKitController < ApplicationController
         managed_user_id: managed_user_id,
         mask_id: mask_id
       )
-      if results.count == 1
-        mask_kit_uuid = results[0]['mask_kit_uuid']
+      results.each do |res|
+        mask_kit_uuid = res['mask_kit_uuid']
 
         MaskKitAction.create(
           name: 'RemoveMasks',
@@ -46,12 +46,10 @@ class MaskKitController < ApplicationController
 
         MaskKitStatus.where(uuid: mask_kit_uuid).destroy_all
         MaskKitStatus.refresh!(uuid: mask_kit_uuid)
-
-        status = 200
-      else
-        # https://stackoverflow.com/questions/17884469/what-is-the-http-response-code-for-failed-http-delete-operation
-        status = 405
       end
+
+
+      status = 200
     end
 
     # TODO:
