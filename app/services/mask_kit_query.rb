@@ -23,7 +23,9 @@ class MaskKitQuery
           ON (ft.mask_id = m.id)
           GROUP BY m.id, user_id
         )
-        SELECT masks.*,
+        SELECT
+          distinct on (masks.id)
+          masks.*,
           users.email,
           profiles.first_name,
           profiles.last_name,
