@@ -78,7 +78,8 @@ class ParticipantProgress
           SELECT *,
             #{demographics_present_counts}
           FROM profile_with_demog_fields_present
-        ), targeted_masks AS (
+        ),
+        targeted_masks AS (
           SELECT * FROM masks
           WHERE json_array_length(payable_datetimes) > 0
         ), targeted_fit_tests AS (
@@ -103,50 +104,34 @@ class ParticipantProgress
         ), targeted_masks_count AS (
           SELECT COUNT(*) AS num_targeted_masks
           FROM targeted_masks
-
         ),
-        latest_shipping_status_refresh_datetimes AS (
-          SELECT to_user_uuid, MAX(refresh_datetime) as refresh_datetime
-          FROM shipping_statuses
+        mask_shipped_counts AS (
+          SELECT to_user_uuid, count(*) AS num_targeted_masks
+          FROM shipping_statuses ss
+          INNER JOIN shipping_status_joins ssj
+            ON ssj.shipping_uuid = ss.uuid
+          INNER JOIN mask_kit_statuses mks
+            ON mks.uuid = ssj.shippable_uuid
           GROUP BY 1
-        ), latest_shipping_statuses AS (
-          SELECT ss.* FROM shipping_statuses ss
-          INNER JOIN latest_shipping_status_refresh_datetimes lssrd
-          ON lssrd.to_user_uuid = ss.to_user_uuid
-          AND lssrd.refresh_datetime = ss.refresh_datetime
-        ),
-        latest_shipping_status_join_refresh AS (
-            SELECT shipping_uuid, shippable_uuid, MAX(refresh_datetime) AS refresh_datetime
-            FROM shipping_status_joins
-            GROUP BY 1,2
-        ), latest_shipping_status_joins AS (
-            SELECT ssj.* FROM shipping_status_joins ssj
-            INNER JOIN latest_shipping_status_join_refresh
-            ON ssj.shipping_uuid = latest_shipping_status_join_refresh.shipping_uuid
-                AND ssj.shippable_uuid = latest_shipping_status_join_refresh.shippable_uuid
-                AND ssj.refresh_datetime = latest_shipping_status_join_refresh.refresh_datetime
-        ), latest_sent_masks AS (
-            SELECT us.uuid as us_uuid,
+        ), sent_masks AS (
+            SELECT distinct on (mask_uuid)
+                us.uuid as us_uuid,
                 mask_uuid
             FROM user_statuses us
             LEFT JOIN shipping_statuses ss
             ON ss.to_user_uuid = us.uuid
-            LEFT JOIN latest_shipping_status_joins lssj
-            ON lssj.shipping_uuid = ss.uuid
+            LEFT JOIN shipping_status_joins ssj
+            ON ssj.shipping_uuid = ss.uuid
             LEFT JOIN mask_kit_statuses mks
-            ON mks.uuid = lssj.shippable_uuid
-            WHERE lssj.shippable_type = 'MaskKit'
-        ), latest_sent_masks_counts AS (
-            SELECT us_uuid, COUNT(mask_uuid) AS num_targeted_masks
-            FROM latest_sent_masks
-            GROUP BY 1
+            ON mks.uuid = ssj.shippable_uuid
+            WHERE ssj.shippable_type = 'MaskKit'
         )
 
 
         SELECT
         COALESCE(
           managers_who_are_study_participants.email,
-          lssrd.to_user_uuid
+          mask_shipped_counts.to_user_uuid
         ) as manager_email,
         p.first_name,
         p.last_name,
@@ -155,18 +140,12 @@ class ParticipantProgress
         num_targeted_masks,
         total_unique_masks_fit_tested.num_targeted_unique_masks_fit_tested,
         ROUND((num_targeted_unique_masks_fit_tested::float / num_targeted_masks * 100)::numeric, 2) AS fit_testing_percent_complete,
-        CASE WHEN demog_present_counts IS NULL THEN 0 ELSE demog_present_counts END AS demog_present_counts,
-        CASE WHEN fm_present_counts IS NULL THEN 0 ELSE fm_present_counts END AS fm_present_counts,
-        ROUND(CAST(CASE WHEN fm_present_counts IS NULL THEN 0 ELSE fm_present_counts END::float / #{FacialMeasurement::COLUMNS.size} * 100 AS NUMERIC), 2) AS fm_percent_complete,
-        ROUND(CAST(CASE WHEN demog_present_counts IS NULL THEN 0 ELSE demog_present_counts END::float / #{Profile::STRING_DEMOG_FIELDS.size + Profile::NUM_DEMOG_FIELDS.size} * 100 AS NUMERIC), 2) AS demog_percent_complete,
         managed_users.*, fm.created_at, fm.updated_at
 
-        FROM latest_shipping_status_refresh_datetimes lssrd
-        LEFT JOIN latest_sent_masks_counts lsmc
-          ON lssrd.to_user_uuid = lsmc.us_uuid
+        FROM mask_shipped_counts
         LEFT JOIN
           managers_who_are_study_participants
-          ON managers_who_are_study_participants.email = lsmc.us_uuid
+          ON managers_who_are_study_participants.email = mask_shipped_counts.to_user_uuid
         FULL OUTER JOIN managed_users
           ON managed_users.manager_id = managers_who_are_study_participants.id
         LEFT JOIN profile_with_demog_fields_present_count p
@@ -176,7 +155,7 @@ class ParticipantProgress
         LEFT JOIN total_unique_masks_fit_tested
           ON total_unique_masks_fit_tested.user_id = managed_users.managed_id
         LEFT JOIN study_participant_statuses sps
-          ON sps.participant_uuid = lssrd.to_user_uuid
+          ON sps.participant_uuid = mask_shipped_counts.to_user_uuid
 
         #{where}
         ORDER BY manager_email
