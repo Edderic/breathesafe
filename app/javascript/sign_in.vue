@@ -144,6 +144,8 @@ export default {
       })
     },
     async signIn() {
+      setupCSRF();
+
       let success = false
       await axios.post('/users/log_in', {
         user: {
@@ -156,7 +158,6 @@ export default {
           success = true
         }
 
-        setupCSRF();
 
         this.currentUser = response.data
         // whatever you want
