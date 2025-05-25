@@ -127,7 +127,7 @@ def extract_quantitative_exercise(val, index, var):
 
     """
     try:
-        return json.loads(val)['quantitative']['exercises'][index][var]
+        return val['quantitative']['exercises'][index][var]
     except IndexError as e:
         return np.nan
 
@@ -171,42 +171,42 @@ def preprocess_fit_tests(fit_tests):
 
     # qualitative
     fit_tests['qualitative_solution'] = fit_tests['results'].apply(
-        lambda x: json.loads(x)['qualitative']["aerosol"]['solution']
+        lambda x: x['qualitative']["aerosol"]['solution']
     )
     fit_tests['qualitative_normal_breathing_1'] = fit_tests['results'].apply(
-        lambda x: json.loads(x)['qualitative']["exercises"][0]['result']
+        lambda x: x['qualitative']["exercises"][0]['result']
     )
     fit_tests['qualitative_deep_breathing'] = fit_tests['results'].apply(
-        lambda x: json.loads(x)['qualitative']["exercises"][1]['result']
+        lambda x: x['qualitative']["exercises"][1]['result']
     )
     fit_tests['qualitative_head_side_to_side'] = fit_tests['results'].apply(
-        lambda x: json.loads(x)['qualitative']["exercises"][2]['result']
+        lambda x: x['qualitative']["exercises"][2]['result']
     )
     fit_tests['qualitative_head_up_and_down'] = fit_tests['results'].apply(
-        lambda x: json.loads(x)['qualitative']["exercises"][3]['result']
+        lambda x: x['qualitative']["exercises"][3]['result']
     )
     fit_tests['qualitative_talking'] = fit_tests['results'].apply(
-        lambda x: json.loads(x)['qualitative']["exercises"][4]['result']
+        lambda x: x['qualitative']["exercises"][4]['result']
     )
     fit_tests['qualitative_bend_over'] = fit_tests['results'].apply(
-        lambda x: json.loads(x)['qualitative']["exercises"][5]['result']
+        lambda x: x['qualitative']["exercises"][5]['result']
     )
 
     # quantitative
     fit_tests['qualitative_normal_breathing_2'] = fit_tests['results'].apply(
-        lambda x: json.loads(x)['qualitative']["exercises"][6]['result']
+        lambda x: x['qualitative']["exercises"][6]['result']
     )
     fit_tests['quantitative_solution'] = fit_tests['results'].apply(
-        lambda x: json.loads(x)['quantitative']["aerosol"]['solution']
+        lambda x: x['quantitative']["aerosol"]['solution']
     )
     fit_tests['quantitative_initial_count_per_cm3'] = fit_tests['results'].apply(
-        lambda x: json.loads(x)['quantitative']["aerosol"]['initial_count_per_cm3']
+        lambda x: x['quantitative']["aerosol"]['initial_count_per_cm3']
     )
     fit_tests['quantitative_testing_mode'] = fit_tests['results'].apply(
-        lambda x: json.loads(x)['quantitative']["testing_mode"]
+        lambda x: x['quantitative']["testing_mode"]
     )
     fit_tests['quantitative_procedure'] = fit_tests['results'].apply(
-        lambda x: json.loads(x)['quantitative']["procedure"]
+        lambda x: x['quantitative']["procedure"]
     )
     for i in range(0,10):
         for var in ['name', 'fit_factor']:
@@ -230,42 +230,42 @@ def preprocess_fit_tests(fit_tests):
 
     # user seal check
     fit_tests['too_small_or_big'] = fit_tests['user_seal_check'].apply(
-        lambda x: json.loads(x)['sizing']["What do you think about the sizing of this mask relative to your face?"]
+        lambda x: x['sizing']["What do you think about the sizing of this mask relative to your face?"]
     )
     fit_tests['usc_negative_air_pressure'] = fit_tests['user_seal_check'].apply(
-        lambda x: json.loads(x)['negative']["...how much air passed between your face and the mask?"]
+        lambda x: x['negative']["...how much air passed between your face and the mask?"]
     )
     fit_tests['usc_positive_glasses'] = fit_tests['user_seal_check'].apply(
-        lambda x: json.loads(x)['positive']["...how much did your glasses fog up?"]
+        lambda x: x['positive']["...how much did your glasses fog up?"]
     )
     fit_tests['usc_positive_build_up'] = fit_tests['user_seal_check'].apply(
-        lambda x: json.loads(x)['positive']["...how much pressure build up was there?"]
+        lambda x: x['positive']["...how much pressure build up was there?"]
     )
     fit_tests['usc_positive_air_movement'] = fit_tests['user_seal_check'].apply(
-        lambda x: json.loads(x)['positive']["...how much air movement on your face along the seal of the mask did you feel?"]
+        lambda x: x['positive']["...how much air movement on your face along the seal of the mask did you feel?"]
     )
 
     # facial hair
     fit_tests['facial_hair_beard_length'] = fit_tests['facial_hair'].apply(
-        lambda x: json.loads(x)["beard_length_mm"]
+        lambda x: x["beard_length_mm"]
     )
     fit_tests['facial_hair_beard_cover_technique'] = fit_tests['facial_hair'].apply(
-        lambda x: json.loads(x)["beard_cover_technique"]
+        lambda x: x["beard_cover_technique"]
     )
 
     # comfort
     fit_tests['comfort_talk'] = fit_tests['comfort'].apply(
-        lambda x: json.loads(x)["Is there enough room to talk?"]
+        lambda x: x["Is there enough room to talk?"]
     )
     fit_tests['comfort_eyes'] = fit_tests['comfort'].apply(
-        lambda x: json.loads(x)["Is there adequate room for eye protection?"]
+        lambda x: x["Is there adequate room for eye protection?"]
     )
     fit_tests['comfort_nose'] = fit_tests['comfort'].apply(
-        lambda x: json.loads(x)["How comfortable is the position of the mask on the nose?"]
+        lambda x: x["How comfortable is the position of the mask on the nose?"]
     )
 
     fit_tests['comfort_face_cheeks'] = fit_tests['comfort'].apply(
-        lambda x: json.loads(x)["How comfortable is the position of the mask on face and cheeks?"]
+        lambda x: x["How comfortable is the position of the mask on face and cheeks?"]
     )
 
     fit_tests['quantitative_hmff'] = fit_tests.apply(compute_hmff, axis=1)
