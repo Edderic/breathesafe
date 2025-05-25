@@ -585,3 +585,53 @@ def add_fit_factor_columns(df):
 
 def get_hmff(array):
     return len(array) / (1.0 / np.array(array)).sum()
+
+def convert_n99_mode_scores_to_n95_mode(row):
+    """
+    Parameters:
+        df: pd.DataFrame
+            Made up of N99-mode results
+
+            Has the following columns:
+                quantitative_n_ex_1_name,
+                quantitative_n_ex_1_fit_factor,
+                ...
+                quantitative_n_ex_9_name,
+                quantitative_n_ex_9_fit_factor,
+
+                quantitative_n_exercises
+
+                max_n99_ff
+    """
+
+    denominator = 0
+    numerator = 0
+
+    filtration_efficiency_estimate_at_normal_breathing = 1 - 1  / row['max_n99_ff']
+
+    for i in range(row['quantitative_n_exercises']):
+        if row[f'quantitative_ex_{i}_name'] in ['Normal Breathing (SEALED)', 'Talking']:
+            continue
+
+        if row[f'quantitative_ex_{i}_fit_factor'] is None:
+            continue
+
+        numerator += 1
+        # FF = 1 / (1 - FE)
+        # 1 - FE = 1 / FF
+        # 1 - 1 / FF = FE
+
+        exposure_reduction = 1 - 1 / row[f'quantitative_ex_{i}_fit_factor']
+        # row['max_']
+        # filtrationc
+        n95_ff = 1 / (1 - (exposure_reduction / filtration_efficiency_estimate_at_normal_breathing))
+
+        denominator += 1 / n95_ff
+
+    if numerator == 0:
+        return np.nan
+
+    assert numerator / denominator >= 1
+
+    return numerator / denominator * 2
+
