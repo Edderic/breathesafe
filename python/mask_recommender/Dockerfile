@@ -10,7 +10,8 @@ COPY .breathesafe
 RUN source ${LAMBDA_TASK_ROOT}/.breathesafe
 
 # Copy function code
-COPY fit_testing.py ${LAMBDA_TASK_ROOT}
+COPY models/fit_predictor.pkl ${LAMBDA_TASK_ROOT}
+COPY models/mask_dummies_and_predictors.pkl ${LAMBDA_TASK_ROOT}
 COPY recommender.py ${LAMBDA_TASK_ROOT}
 
 # Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
