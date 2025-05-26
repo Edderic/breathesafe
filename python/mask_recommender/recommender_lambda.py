@@ -16,15 +16,25 @@ def handler(event, context):
         event: dict
         context: dict
     """
+    model_filename = './models/fit_predictor.pkl'
+
+    if 'model_filename' in event:
+        model_filename = event['model_filename']
+
+    mask_dummies_and_predictors_filename = './models/mask_dummies_and_predictors.pkl'
+    if 'mask_dummies_and_predictors_filename' in event:
+        mask_dummies_and_predictors_filename = event['mask_dummies_and_predictors_filename']
+
     recommendations = recommend(
         event,
-        model_filename='./models/fit_predictor.pkl',
-        mask_dummies_and_predictors_filename='./models/mask_dummies_and_predictors.pkl'
+        model_filename=model_filename,
+        mask_dummies_and_predictors_filename=mask_dummies_and_predictors_filename
     )
     version = '0.1.0'
 
     return {
         'statusCode': 200,
-        'body': json.dumps(recommendations),
+        'body': recommendations.to_json(),
         'version': version
     }
+
