@@ -1,0 +1,11 @@
+s3fs
+fsspec
+boto3
+pandas
+numpy
+tqdm
+scikit-learn
+matplotlib
+pyarrow
+psycopg2-binary
+
