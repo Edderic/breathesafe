@@ -16,7 +16,11 @@ def handler(event, context):
         event: dict
         context: dict
     """
-    recommendations = recommend(event)
+    recommendations = recommend(
+        event,
+        model_filename='./models/fit_predictor.pkl',
+        mask_dummies_and_predictors_filename='./models/mask_dummies_and_predictors.pkl'
+    )
     version = '0.1.0'
 
     return {
