@@ -10,6 +10,7 @@ COPY .breathesafe ${LAMBDA_TASK_ROOT}
 RUN source ${LAMBDA_TASK_ROOT}/.breathesafe
 
 # Copy function code
+COPY recommender_lambda.py ${LAMBDA_TASK_ROOT}
 COPY models/fit_predictor.pkl ${LAMBDA_TASK_ROOT}
 COPY models/mask_dummies_and_predictors.pkl ${LAMBDA_TASK_ROOT}
 COPY recommender.py ${LAMBDA_TASK_ROOT}
