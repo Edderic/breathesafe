@@ -62,6 +62,8 @@ Rails.application.routes.draw do
   delete 'mask_kit/:managed_user_id/:mask_id/',to: 'mask_kit#delete'
   get 'mask_kit/:managed_user_id',to: 'mask_kit#index'
 
+  post 'mask_recommender', to: 'mask_recommender#create'
+
   controller :pages do
     get :qr_code_generator
     get :qr_code_download

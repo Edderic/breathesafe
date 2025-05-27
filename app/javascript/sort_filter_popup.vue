@@ -2,6 +2,23 @@
   <div>
   <Popup @onclose='hidePopup' v-if='showPopup'>
     <div  style='padding: 1em;'>
+      <h3>Recommend:</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Measurement</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for='(value, key, index) in facialMeasurements'>
+            <th>{{value.eng}}</th>
+            <td>
+              <input class='num' type="number" :value='value.value' @change="updateFacialMeasurement($event, key)">
+            </td>
+          </tr>
+        </tbody>
+      </table>
       <h3>Sort by:</h3>
       <table>
         <thead>
@@ -12,6 +29,18 @@
           </tr>
         </thead>
         <tbody>
+          <tr @click='sortBy("probaFit")'>
+            <td>
+              <PersonIcon
+                backgroundColor='rgb(150,150,150)'
+                amount='1'
+              />
+            </td>
+            <td >Probability of Fit</td>
+            <td>
+              <SortingStatus :status='sortingStatus("probaFit")'/>
+            </td>
+          </tr>
           <tr @click='sortBy("perimeterMm")'>
             <td>
               <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/tape-measure.png" alt="tape measure" class='tape-measure' title="Perimeter of the mask, measured in millimeters, defined as the distance that covers the face">
@@ -98,6 +127,26 @@ export default {
     }
   },
   props: {
+    facialMeasurements: {
+      default: {
+        'bitragionSubnasaleArc': {
+          'eng': "Bitragion subnasale arc (mm)",
+          'value': 230
+        },
+        'faceWidth': {
+          'eng': "Face width (mm)",
+          'value': 155
+        },
+        'noseProtrusion': {
+          'eng': "Nose protrusion (mm)",
+          'value': 25
+        },
+        'beardLength': {
+          'eng': "Beard length (mm)",
+          'value': 0
+        },
+      }
+    },
     showFitTesting: {
       default: false
     },
@@ -137,6 +186,9 @@ export default {
   methods: {
     hidePopup() {
       this.$emit('hideSortFilterPopUp', true)
+    },
+    updateFacialMeasurement(event, key) {
+      this.$emit('updateFacialMeasurement', event, key)
     },
     filterFor(string) {
       let filterForString = ('filterFor' + string)
@@ -382,6 +434,10 @@ export default {
 
   th, td {
     text-align: center;
+  }
+
+  .num {
+    width: 3em;
   }
 
   @media(max-width: 700px) {

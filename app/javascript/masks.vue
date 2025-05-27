@@ -36,9 +36,11 @@
         :filterForNotTargeted='filterForNotTargeted'
         :sortByField='sortByField'
         :sortByStatus='sortByStatus'
+        :facialMeasurements='facialMeasurements'
         @hideSortFilterPopUp='hideSortFilterPopUp'
         @filterFor='filterFor'
         @sortBy='filterFor'
+        @updateFacialMeasurement='triggerRouterForFacialMeasurementUpdate'
       />
     </div>
 
@@ -118,7 +120,12 @@ export default {
       masks: [],
       search: "",
       sortByField: undefined,
-      sortByStatus: 'ascending'
+      sortByStatus: 'ascending',
+      facialHairBeardLengthMm: 0,
+      noseProtrusionMm: 27,
+      faceWidthMm: 155,
+      bitragionSubnasaleArcMm: 220
+
     }
   },
   props: {
@@ -142,6 +149,26 @@ export default {
           'message'
         ]
     ),
+    facialMeasurements() {
+      return {
+        'bitragionSubnasaleArcMm': {
+          'eng': "Bitragion subnasale arc (mm)",
+          'value': this.bitragionSubnasaleArcMm
+        },
+        'faceWidthMm': {
+          'eng': "Face width (mm)",
+          'value': this.faceWidthMm
+        },
+        'noseProtrusionMm': {
+          'eng': "Nose protrusion (mm)",
+          'value': this.noseProtrusionMm
+        },
+        'facialHairBeardLengthMm': {
+          'eng': "Beard length (mm)",
+          'value': this.facialHairBeardLengthMm
+        },
+      }
+    },
 
     perimColorScheme() {
       return perimeterColorScheme()
@@ -156,49 +183,52 @@ export default {
       return this.errorMessages;
     },
   },
+
   async created() {
     // TODO: a parent might input data on behalf of their children.
     // Currently, this.loadStuff() assumes We're loading the profile for the current user
-    this.search = this.$route.query.search || ''
-    this.sortByStatus = this.$route.query.sortByStatus
-    this.sortByField = this.$route.query.sortByField
-
-    let filterCriteria = ["Adjustable Earloop", "Earloop", "Headstrap", "Targeted", "NotTargeted"];
-    for(let filt of filterCriteria) {
-      let specificFilt = 'filterFor' + filt
-      if (this.$route.query[specificFilt] == undefined) {
-        this[specificFilt] = true
-      } else {
-        this[specificFilt] = this.$route.query[specificFilt] == 'true'
-      }
-    }
-
-    this.loadStuff()
+    this.load.bind(this)(this.$route.query, undefined)
 
     this.$watch(
       () => this.$route.query,
-      (toQuery, previousQuery) => {
-        this.search = toQuery.search || ''
-        this.sortByStatus = toQuery.sortByStatus
-        this.sortByField = toQuery.sortByField
-        // react to route changes...
-        for(let filt of filterCriteria) {
-          let specificFilt = 'filterFor' + filt
-          if (this.$route.query[specificFilt] == undefined) {
-            this[specificFilt] = true
-          } else {
-            this[specificFilt] = this.$route.query[specificFilt] == 'true'
-          }
-        }
-
-        this.loadStuff()
-      }
+      this.load.bind(this)
     )
 
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    load(toQuery, previousQuery) {
+      this.search = toQuery.search || ''
+      this.sortByStatus = toQuery.sortByStatus
+      this.sortByField = toQuery.sortByField
+      let facialMeasurements = [
+        'bitragionSubnasaleArcMm',
+        'faceWidthMm',
+        'noseProtrusionMm',
+        'facialHairBeardLengthMm',
+      ]
+
+      for (let facialMeasurement of facialMeasurements) {
+        this[facialMeasurement] = toQuery[facialMeasurement] || this[facialMeasurement]
+      }
+
+      let filterCriteria = ["Adjustable Earloop", "Earloop", "Adjustable Headstrap", "Headstrap", "Targeted", "NotTargeted"];
+      for(let filt of filterCriteria) {
+        let specificFilt = 'filterFor' + filt
+        if (toQuery[specificFilt] == undefined) {
+          this[specificFilt] = true
+        } else {
+          this[specificFilt] = toQuery[specificFilt] == 'true'
+        }
+      }
+
+      if ('bitragionSubnasaleArcMm' in toQuery || 'faceWidthMm' in toQuery || 'noseProtrusionMm' in toQuery || 'facialHairBeardLengthMm' in toQuery) {
+        this.updateFacialMeasurement()
+      } else {
+        this.loadMasks()
+      }
+    },
     hideSortFilterPopUp() {
       this.showPopup = false
     },
@@ -284,6 +314,53 @@ export default {
         name: 'Masks',
         query: combinedQuery
       })
+    },
+
+    triggerRouterForFacialMeasurementUpdate(event, key) {
+      let newQuery = {}
+
+      newQuery[key] = event.target.value
+
+      let combinedQuery = Object.assign(
+        JSON.parse(
+          JSON.stringify(this.$route.query)
+        ),
+        newQuery
+      )
+      this.$router.push({
+        name: 'Masks',
+        query: combinedQuery
+      })
+    },
+    async updateFacialMeasurement() {
+      await axios.post(
+        `/mask_recommender.json`,
+        {
+          'facial_measurements': {
+            'bitragion_subnasale_arc': this.bitragionSubnasaleArcMm,
+            'face_width': this.faceWidthMm,
+            'nose_protrusion': this.noseProtrusionMm,
+            'facial_hair_beard_length_mm': this.facialHairBeardLengthMm,
+          }
+        }
+      )
+        .then(response => {
+          let data = response.data
+          if (data) {
+            this.masks = []
+
+            for (let m of data) {
+              this.masks.push(new Respirator(m))
+            }
+          }
+
+          // whatever you want
+        })
+        .catch(error => {
+          this.message = "Failed to load mask recommendations."
+          // whatever you want
+        })
+
     },
     async loadStuff() {
       // TODO: load the profile for the current user

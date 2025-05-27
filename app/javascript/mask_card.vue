@@ -42,6 +42,12 @@
         </div>
         <table>
           <tr>
+            <th>Proba Fit</th>
+            <td rowspan='1' v-if='m.probaFit'>
+              {{Math.round(m.probaFit * 100, 4)}}%
+            </td>
+          </tr>
+          <tr>
             <td>
               <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/tape-measure.png" alt="tape measure" class='tape-measure' title="Perimeter of the mask, measured in millimeters, defined as the distance that covers the face">
             </td>
