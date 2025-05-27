@@ -44,7 +44,15 @@
           <tr>
             <th>Proba Fit</th>
             <td rowspan='1' v-if='m.probaFit'>
-              {{Math.round(m.probaFit * 100, 4)}}%
+              <ColoredCell
+               class='risk-score'
+               :colorScheme="fitColorScheme"
+               :maxVal=1
+               :value='m.probaFit'
+               :text="`${Math.round(m.probaFit * 100, 3)}%`"
+               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
+               :exception='exceptionMissingObject'
+               />
             </td>
           </tr>
           <tr>
@@ -102,6 +110,7 @@ import PersonIcon from './person_icon.vue'
 import Popup from './pop_up.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
+import { assignBoundsToColorScheme, colorPaletteFall, convertColorListToCutpoints, generateEvenSpacedBounds } from './colors.js'
 import SearchIcon from './search_icon.vue'
 import SortingStatus from './sorting_status.vue'
 import SurveyQuestion from './survey_question.vue'
@@ -193,6 +202,19 @@ export default {
 
     perimColorScheme() {
       return perimeterColorScheme()
+    },
+
+    fitColorScheme() {
+      const minimum = 0
+      const maximum = 1
+      const numObjects = 6
+      const evenSpacedBounds = generateEvenSpacedBounds(minimum, maximum, numObjects)
+
+      const scheme = convertColorListToCutpoints(
+        JSON.parse(JSON.stringify(colorPaletteFall))
+      )
+
+      return assignBoundsToColorScheme(scheme, evenSpacedBounds)
     },
     displayables() {
       if (this.search == undefined) {
