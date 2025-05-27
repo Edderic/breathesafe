@@ -58,6 +58,7 @@ gem "activerecord-postgis-adapter"
 gem "selenium-webdriver", "~> 4.25.0"
 gem "capybara"
 gem 'aws-sdk-lambda'
+gem 'oj'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
