@@ -31,6 +31,8 @@
         :showUniqueNumberFitTesters='true'
         :showFitTesting='tabToShow == "Tested"'
         :filterForEarloop='filterForEarloop'
+        :filterForAdjustableEarloop='filterForAdjustableEarloop'
+        :filterForAdjustableHeadstrap='filterForAdjustableHeadstrap'
         :filterForHeadstrap='filterForHeadstrap'
         :filterForTargeted='filterForTargeted'
         :filterForNotTargeted='filterForNotTargeted'
@@ -209,7 +211,15 @@ export default {
         this[facialMeasurement] = toQuery[facialMeasurement] || this[facialMeasurement]
       }
 
-      let filterCriteria = ["Adjustable Earloop", "Earloop", "Adjustable Headstrap", "Headstrap", "Targeted", "NotTargeted"];
+      let filterCriteria = [
+        "AdjustableEarloop",
+        "Earloop",
+        "AdjustableHeadstrap",
+        "Headstrap",
+        "Targeted",
+        "NotTargeted"
+      ];
+
       for(let filt of filterCriteria) {
         let specificFilt = 'filterFor' + filt
         if (toQuery[specificFilt] == undefined) {

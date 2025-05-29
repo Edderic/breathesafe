@@ -85,9 +85,15 @@
       <br>
       <div>Strap type</div>
       <table>
-        <tr>
+        <tr class='checkboxes'>
+          <td><input id='toggleAdjustableEarloop' type="checkbox" :checked='filterForAdjustableEarloop' @click='filterFor("AdjustableEarloop")'>
+            <label for="toggleAdjustableEarloop">Adjustable Earloop</label>
+          </td>
           <td><input id='toggleEarloop' type="checkbox" :checked='filterForEarloop' @click='filterFor("Earloop")'>
             <label for="toggleEarloop">Earloop</label>
+          </td>
+          <td><input id='toggleAdjustableHeadstrap' type="checkbox" :checked='filterForAdjustableHeadstrap' @click='filterFor("AdjustableHeadstrap")'>
+            <label for="toggleAdjustableHeadstrap">Adjustable Headstrap</label>
           </td>
           <td><input id='toggleHeadstrap' type="checkbox" :checked='filterForHeadstrap' @click='filterFor("Headstrap")'>
             <label for="toggleHeadstrap">
@@ -164,6 +170,12 @@ export default {
     },
     showPopup: {
       default: false
+    },
+    filterForAdjustableHeadstrap: {
+      default: true
+    },
+    filterForAdjustableEarloop: {
+      default: true
     },
     filterForEarloop: {
       default: true
@@ -438,6 +450,11 @@ export default {
 
   .num {
     width: 3em;
+  }
+
+  tr.checkboxes td {
+    display: flex;
+    flex-direction: row;
   }
 
   @media(max-width: 700px) {
