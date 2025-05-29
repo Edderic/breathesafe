@@ -258,13 +258,27 @@ class Mask < ApplicationRecord
       else
         x['image_urls'] = []
       end
+
+      if x['breathability']
+        x['breathability'] = JSON.parse(x['breathability'])
+      end
+
+      if x['filtration_efficiencies']
+        x['filtration_efficiencies'] = JSON.parse(x['filtration_efficiencies'])
+      end
+
+      if x['where_to_buy_urls']
+        x['where_to_buy_urls'] = x['where_to_buy_urls'].gsub(/{|}/, "")
+      else
+        x['where_to_buy_urls'] = ""
+      end
     end
+    debugger
     result
   end
 
   def self.with_privacy_aggregations(mask_ids=nil)
     aggregations = self.with_aggregations(mask_ids=mask_ids)
-
     race_ethnicity_options = [
       'american_indian_or_alaskan_native_count',
       'asian_pacific_islander_count',
@@ -298,7 +312,12 @@ class Mask < ApplicationRecord
     hash = {}
 
     aggregations.each do |r|
+      r['prefer_not_to_disclose_race_ethnicity_count'] ||= 0
+      r['prefer_not_to_disclose_gender_sex_count'] ||= 0
+      r['prefer_not_to_disclose_age_count'] ||= 0
+
       race_ethnicity_options.each do |re|
+        r[re] ||= 0
         if r[re] < threshold
           r['prefer_not_to_disclose_race_ethnicity_count'] += r[re]
           r[re] = 0
@@ -306,6 +325,8 @@ class Mask < ApplicationRecord
       end
 
       gender_sex_options.each do |gs|
+        r[gs] ||= 0
+
         if r[gs] < threshold
           r['prefer_not_to_disclose_gender_sex_count'] += r[gs]
           r[gs] = 0
@@ -313,6 +334,8 @@ class Mask < ApplicationRecord
       end
 
       age_options.each do |a|
+        r[a] ||= 0
+
         if r[a] < threshold
           r['prefer_not_to_disclose_age_count'] += r[a]
           r[a] = 0
