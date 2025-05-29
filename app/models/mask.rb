@@ -53,14 +53,14 @@ class Mask < ApplicationRecord
     end
   end
 
-  def self.with_aggregations(mask_id=nil)
-    if mask_id
-      mask_id_clause = "WHERE m.id = #{mask_id}"
+  def self.with_aggregations(mask_ids=nil)
+    if mask_ids
+      mask_id_clause = Mask.sanitize_sql_array(["WHERE m.id IN (?)", mask_ids])
     else
       mask_id_clause = ""
     end
 
-    Mask.connection.exec_query(
+    result = Mask.connection.exec_query(
       <<-SQL
         WITH fit_test_counts_per_mask AS (
           SELECT m.id as mask_id, COUNT(ft.id) AS fit_test_count
@@ -237,17 +237,33 @@ class Mask < ApplicationRecord
           GROUP BY m.id
         )
 
-        SELECT * FROM demographic_breakdown
+        SELECT masks.id,
+          masks.*,
+          demographic_breakdown.*,
+          fit_test_counts_per_mask.*,
+          unique_fit_tester_counts_per_mask.*
+        FROM
+          masks LEFT JOIN demographic_breakdown
+            ON masks.id = demographic_breakdown.id
           LEFT JOIN fit_test_counts_per_mask ON (fit_test_counts_per_mask.mask_id = demographic_breakdown.id)
           LEFT JOIN unique_fit_tester_counts_per_mask
             ON (unique_fit_tester_counts_per_mask.mask_id = demographic_breakdown.id)
 
       SQL
-    )
+    ).to_a
+
+    result.each do |x|
+      if x['image_urls']
+        x['image_urls'] = [x['image_urls'].gsub(/{|}/, "")]
+      else
+        x['image_urls'] = []
+      end
+    end
+    result
   end
 
-  def self.with_privacy_aggregations(mask_id=nil)
-    aggregations = self.with_aggregations(mask_id=mask_id)
+  def self.with_privacy_aggregations(mask_ids=nil)
+    aggregations = self.with_aggregations(mask_ids=mask_ids)
 
     race_ethnicity_options = [
       'american_indian_or_alaskan_native_count',
@@ -306,8 +322,8 @@ class Mask < ApplicationRecord
       hash[r['id']] = r
     end
 
-    if mask_id
-      masks = Mask.where(id: mask_id)
+    if mask_ids
+      masks = Mask.where(id: mask_ids)
     else
       masks = Mask.all
     end
