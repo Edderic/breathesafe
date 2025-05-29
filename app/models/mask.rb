@@ -272,8 +272,10 @@ class Mask < ApplicationRecord
       else
         x['where_to_buy_urls'] = ""
       end
+
+      x['payable_datetimes'] = JSON.parse(x['payable_datetimes'])
     end
-    debugger
+
     result
   end
 
