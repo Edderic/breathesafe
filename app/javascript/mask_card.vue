@@ -43,6 +43,7 @@
         <table>
           <tr>
             <th>Proba Fit</th>
+            <td rowspan='1' v-if='!m.probaFit'>Please see "R" button above</td>
             <td rowspan='1' v-if='m.probaFit'>
               <ColoredCell
                class='risk-score'
@@ -56,43 +57,13 @@
             </td>
           </tr>
           <tr>
-            <td>
-              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/tape-measure.png" alt="tape measure" class='tape-measure' title="Perimeter of the mask, measured in millimeters, defined as the distance that covers the face">
-            </td>
-            <td>
-              <ColoredCell
-               class='risk-score'
-               :colorScheme="perimColorScheme"
-               :maxVal=450
-               :value='m.perimeterMm'
-               :text="`${m.perimeterMm} mm`"
-               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
-               :exception='exceptionMissingObject'
-               />
-            </td>
-            <td v-show='showUniqueNumFitTesters' title="Unique number of fit testers" >
-              <PersonIcon
-                backgroundColor='rgb(150,150,150)'
-                amount='1'
-              />
-            </td>
+            <th>
+              # testers
+            </th>
             <td v-show='showUniqueNumFitTesters'>
               <span>
                 {{m.uniqueFitTestersCount}}
               </span>
-            </td>
-            <td rowspan='1' class='targeted'  v-if='m.isTargeted'>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 80 80" height='3em' width='3em'>
-                <circle cx="40" cy="40" r="30" fill="rgb(150, 29, 2)"/>
-
-                <circle cx="40" cy="40" r="25" fill="white"/>
-
-                <circle cx="40" cy="40" r="20" fill="rgb(150, 29, 2)"/>
-
-                <circle cx="40" cy="40" r="15" fill="white"/>
-
-                <circle cx="40" cy="40" r="10" fill="rgb(150, 29, 2)"/>
-              </svg>
             </td>
           </tr>
         </table>
