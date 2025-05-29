@@ -254,9 +254,9 @@ class Mask < ApplicationRecord
 
     result.each do |x|
       if x['image_urls']
-        x['image_urls'] = [x['image_urls'].gsub(/{|}/, "")]
+        x['image_urls'] = [x['image_urls'].gsub(/{|}/, "").gsub(/\"/, "")]
       else
-        x['image_urls'] = []
+        x['image_urls'] = [""]
       end
 
       if x['breathability']
