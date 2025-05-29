@@ -232,11 +232,11 @@ export function sortedDisplayableMasks(displayables) {
    */
   if (this.sortByStatus == 'ascending') {
     return displayables.sort(function(a, b) {
-      return parseInt(a[this.sortByField] || 0)  - parseInt(b[this.sortByField] || 0)
+      return parseFloat(a[this.sortByField] || 0)  - parseFloat(b[this.sortByField] || 0)
     }.bind(this))
   } else if (this.sortByStatus == 'descending') {
     return displayables.sort(function(a, b) {
-      return parseInt(b[this.sortByField] || 0) - parseInt(a[this.sortByField] || 0)
+      return parseFloat(b[this.sortByField] || 0) - parseFloat(a[this.sortByField] || 0)
     }.bind(this))
   } else {
     return displayables

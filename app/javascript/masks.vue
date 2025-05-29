@@ -185,7 +185,7 @@ export default {
   async created() {
     // TODO: a parent might input data on behalf of their children.
     // Currently, this.loadStuff() assumes We're loading the profile for the current user
-    this.load.bind(this)(this.$route.query, undefined)
+    await this.load.bind(this)(this.$route.query, undefined)
 
     this.$watch(
       () => this.$route.query,
@@ -196,7 +196,7 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
-    load(toQuery, previousQuery) {
+    async load(toQuery, previousQuery) {
       this.search = toQuery.search || ''
       this.sortByStatus = toQuery.sortByStatus
       this.sortByField = toQuery.sortByField
@@ -229,10 +229,13 @@ export default {
         }
       }
 
+      await this.loadData(toQuery)
+    },
+    async loadData(toQuery) {
       if ('bitragionSubnasaleArcMm' in toQuery || 'faceWidthMm' in toQuery || 'noseProtrusionMm' in toQuery || 'facialHairBeardLengthMm' in toQuery) {
-        this.updateFacialMeasurement()
+        await this.updateFacialMeasurement()
       } else {
-        this.loadMasks()
+        await this.loadMasks()
       }
     },
     hideSortFilterPopUp() {
