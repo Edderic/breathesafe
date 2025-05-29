@@ -163,10 +163,6 @@ export default {
           'eng': "Nose protrusion (mm)",
           'value': this.noseProtrusionMm
         },
-        'facialHairBeardLengthMm': {
-          'eng': "Beard length (mm)",
-          'value': this.facialHairBeardLengthMm
-        },
       }
     },
 
