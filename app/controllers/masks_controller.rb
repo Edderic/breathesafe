@@ -53,7 +53,7 @@ class MasksController < ApplicationController
     status = 200
     messages = []
     to_render = {
-      mask: Mask.with_privacy_aggregations(params[:id])[0]
+      mask: Mask.with_privacy_aggregations([params[:id]])[0]
     }
 
     respond_to do |format|
