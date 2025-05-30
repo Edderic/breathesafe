@@ -69,6 +69,32 @@ class Mask < ApplicationRecord
           ON (ft.mask_id = m.id)
           GROUP BY m.id
         ),
+
+        exercise_results AS (
+            SELECT id,
+             user_id,
+             mask_id,
+             results -> 'quantitative' ->> 'testing_mode' AS testing_mode,
+             jsonb_array_elements(results -> 'quantitative' -> 'exercises') as exercise_result
+            FROM fit_tests
+        ), unnested AS (
+            SELECT *, exercise_result ->> 'name' AS name,
+                (exercise_result ->> 'fit_factor') AS fit_factor
+            FROM exercise_results
+        ), filtered AS (
+            SELECT *
+            FROM unnested
+            WHERE name = 'Normal breathing (SEALED)'
+            AND testing_mode = 'N99'
+            AND fit_factor IS NOT NULL
+        ), average_fit_factors AS (
+            SELECT mask_id, AVG(fit_factor::numeric) AS avg_fit_factor
+             FROM filtered
+            GROUP BY 1
+        ), average_filtration_efficiencies AS (
+
+          SELECT *, 1 - 1 / avg_fit_factor AS avg_filtration_efficiency FROM average_fit_factors
+        ),
         unique_fit_tester_counts_per_mask AS (
           SELECT m.id AS mask_id, COUNT(DISTINCT fm.user_id) AS unique_fit_testers_count
           FROM masks m
@@ -241,13 +267,16 @@ class Mask < ApplicationRecord
           masks.*,
           demographic_breakdown.*,
           fit_test_counts_per_mask.*,
-          unique_fit_tester_counts_per_mask.*
+          unique_fit_tester_counts_per_mask.*,
+          average_filtration_efficiencies.*
         FROM
           masks LEFT JOIN demographic_breakdown
             ON masks.id = demographic_breakdown.id
           LEFT JOIN fit_test_counts_per_mask ON (fit_test_counts_per_mask.mask_id = demographic_breakdown.id)
           LEFT JOIN unique_fit_tester_counts_per_mask
             ON (unique_fit_tester_counts_per_mask.mask_id = demographic_breakdown.id)
+          LEFT JOIN average_filtration_efficiencies
+            ON masks.id = average_filtration_efficiencies.mask_id
 
       SQL
     ).to_a

@@ -66,6 +66,20 @@
               </span>
             </td>
           </tr>
+          <tr>
+            <th>Avg. N99-mode FF (SEALED)</th>
+            <td>
+              <ColoredCell
+               class='risk-score'
+               :colorScheme="fitFactorColorScheme"
+               :maxVal=1000
+               :value='m.avgFitFactor'
+               :text="m.avgFitFactor"
+               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
+               :exception='exceptionMissingObject'
+               />
+            </td>
+          </tr>
         </table>
       </div>
     </div>
@@ -175,6 +189,18 @@ export default {
       return perimeterColorScheme()
     },
 
+    fitFactorColorScheme() {
+      const minimum = 1
+      const maximum = 100
+      const numObjects = 6
+      const evenSpacedBounds = generateEvenSpacedBounds(minimum, maximum, numObjects)
+
+      const scheme = convertColorListToCutpoints(
+        JSON.parse(JSON.stringify(colorPaletteFall))
+      )
+
+      return assignBoundsToColorScheme(scheme, evenSpacedBounds)
+    },
     fitColorScheme() {
       const minimum = 0
       const maximum = 1

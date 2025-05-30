@@ -136,6 +136,7 @@ class MasksController < ApplicationController
   def mask_data
     params.require(:mask).permit(
       :author_id,
+      :average_filtration_efficiency,
       :unique_internal_model_code,
       :filter_type,
       :style,

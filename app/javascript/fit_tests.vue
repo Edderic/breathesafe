@@ -20,21 +20,6 @@
       </select>
     </div>
 
-    <SortFilterPopup
-      :showPopup='showPopup'
-      :showTargetedOptions='false'
-      :showUniqueNumberFitTesters='false'
-      :showFitTesting='tabToShow == "Tested"'
-      :filterForEarloop='filterForEarloop'
-      :filterForHeadstrap='filterForHeadstrap'
-      :filterForTargeted='filterForTargeted'
-      :filterForNotTargeted='filterForNotTargeted'
-      :sortByField='sortByField'
-      :sortByStatus='sortByStatus'
-      @filterFor='filterFor'
-      @sortBy='filterFor'
-      @hideSortFilterPopUp='hideSortFilterPopUp'
-    />
 
 
     <SearchSortFilterSection
@@ -181,7 +166,7 @@ import ColoredCell from './colored_cell.vue'
 import MaskCards from './mask_card.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel, setupCSRF } from './misc.js'
-import SortFilterPopup from './sort_filter_popup.vue'
+// import SortFilterPopup from './sort_filter_popup.vue'
 import SearchSortFilterSection from './search_sort_filter_section.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
@@ -200,7 +185,7 @@ export default {
     ClosableMessage,
     ColoredCell,
     MaskCards,
-    SortFilterPopup,
+    // SortFilterPopup,
     SearchSortFilterSection,
     SurveyQuestion,
     TabSet

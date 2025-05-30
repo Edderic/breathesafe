@@ -615,7 +615,7 @@ export default {
     }
 
     #search {
-      width: 63vw;
+      width: 53vw;
       padding: 1em;
     }
 
