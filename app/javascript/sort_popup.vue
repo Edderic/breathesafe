@@ -48,7 +48,7 @@ import { Respirator, displayableMasks, sortedDisplayableMasks } from './masks.js
 
 
 export default {
-  name: 'SortFilterPopup',
+  name: 'SortPopup',
   components: {
     Popup,
     PersonIcon,

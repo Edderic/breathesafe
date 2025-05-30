@@ -2,37 +2,6 @@
   <div>
   <Popup @onclose='hidePopup' v-if='showPopup'>
     <div  style='padding: 1em;'>
-      <h3>Sort by:</h3>
-      <table class='sort-table'>
-        <thead>
-          <tr>
-            <th>field</th>
-            <th>status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr @click='sortBy("probaFit")'>
-            <th >Probability of Fit</th>
-            <td>
-              <SortingStatus :status='sortingStatus("probaFit")'/>
-            </td>
-          </tr>
-          <tr @click='sortBy("uniqueFitTestersCount")' v-if='showUniqueNumberFitTesters'>
-            <th ># testers</th>
-            <td>
-              <SortingStatus :status='sortingStatus("uniqueFitTestersCount")'/>
-            </td>
-          </tr>
-          <tr @click='sortBy("perimeterMm")'>
-            <th >Perimeter</th>
-            <td>
-              <SortingStatus :status='sortingStatus("perimeterMm")'/>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <br>
-
       <h3>Filter for:</h3>
       <br v-if='showTargetedOptions'>
       <div v-if='showTargetedOptions'>Targeted Masks (for Testers)</div>
@@ -82,7 +51,7 @@ import { Respirator, displayableMasks, sortedDisplayableMasks } from './masks.js
 
 
 export default {
-  name: 'SortFilterPopup',
+  name: 'FilterPopup',
   components: {
     Popup,
     PersonIcon,
@@ -102,12 +71,6 @@ export default {
     },
     showTargetedOptions: {
       default: true
-    },
-    sortByField: {
-      default: undefined
-    },
-    sortByStatus: {
-      default: 'ascending'
     },
     showPopup: {
       default: false
@@ -158,40 +121,6 @@ export default {
       this.$emit('filterFor', {
         query: combinedQuery
       })
-    },
-    sortingStatus(field) {
-      if (this.sortByField == field) {
-        return this.sortByStatus
-      } else {
-        return ''
-      }
-    },
-    sortBy(field) {
-      let query = {
-        sortByField: field
-      }
-
-      if (this.sortByField != field) {
-        query['sortByStatus'] = 'ascending'
-      } else {
-        if (this.sortByStatus == 'ascending') {
-          query['sortByStatus'] = 'descending'
-        } else if (this.sortByStatus == 'descending') {
-          query['sortByStatus'] = 'ascending'
-        }
-      }
-
-      let combinedQuery = Object.assign(
-        JSON.parse(
-          JSON.stringify(this.$route.query)
-        ),
-        query
-      )
-
-      this.$emit('filterFor', {
-        query: combinedQuery
-      })
-
     },
   }
 }
