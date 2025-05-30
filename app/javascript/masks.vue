@@ -46,7 +46,7 @@
         @sortBy='filterFor'
       />
 
-      <SortFilterPopup
+      <FilterPopup
         :showPopup='showPopup == "Filter"'
         :showTargetedOptions='true'
         :showUniqueNumberFitTesters='true'
@@ -94,7 +94,7 @@ import { deepSnakeToCamel } from './misc.js'
 import RecommendPopup from './recommend_popup.vue'
 import SearchIcon from './search_icon.vue'
 import SortingStatus from './sorting_status.vue'
-import SortFilterPopup from './sort_filter_popup.vue'
+import FilterPopup from './filter_popup.vue'
 import SortPopup from './sort_popup.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
@@ -112,12 +112,12 @@ export default {
     CircularButton,
     ColoredCell,
     ClosableMessage,
+    FilterPopup,
     MaskCards,
     Popup,
     PersonIcon,
     RecommendPopup,
     SearchIcon,
-    SortFilterPopup,
     SortPopup,
     SortingStatus,
     SurveyQuestion,
