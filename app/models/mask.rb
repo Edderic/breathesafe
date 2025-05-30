@@ -268,9 +268,9 @@ class Mask < ApplicationRecord
       end
 
       if x['where_to_buy_urls']
-        x['where_to_buy_urls'] = x['where_to_buy_urls'].gsub(/{|}/, "")
+        x['where_to_buy_urls'] = [x['where_to_buy_urls'].gsub(/{|}/, "")]
       else
-        x['where_to_buy_urls'] = ""
+        x['where_to_buy_urls'] = [""]
       end
 
       x['payable_datetimes'] = JSON.parse(x['payable_datetimes'])
