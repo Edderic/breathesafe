@@ -7,15 +7,18 @@
 
     <div class='row'>
       <input id='search' type="text" @change='updateSearch'>
-      <SearchIcon height='2em' width='2em'/>
+      <SearchIcon height='2em' width='1em'/>
 
-      <button class='icon' @click='showPopup = true'>
+      <button class='icon' @click='showPopup = "Recommend"'>
+        R
+      </button>
+
+      <button class='icon' @click='showPopup = "Filter"'>
         <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="8 10 70 70"
           width="2em" height="2em"
           >
           <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' fill='#aaa'/>
         </svg>
-
       </button>
     </div>
 
@@ -25,8 +28,15 @@
     </div>
 
     <div class='container chunk'>
+      <RecommendPopup
+        :showPopup='showPopup == "Recommend"'
+        :facialMeasurements='facialMeasurements'
+        @hidePopUp='showPopup = false'
+        @updateFacialMeasurement='triggerRouterForFacialMeasurementUpdate'
+      />
+
       <SortFilterPopup
-        :showPopup='showPopup'
+        :showPopup='showPopup == "Filter"'
         :showTargetedOptions='true'
         :showUniqueNumberFitTesters='true'
         :showFitTesting='tabToShow == "Tested"'
@@ -38,8 +48,7 @@
         :filterForNotTargeted='filterForNotTargeted'
         :sortByField='sortByField'
         :sortByStatus='sortByStatus'
-        :facialMeasurements='facialMeasurements'
-        @hideSortFilterPopUp='hideSortFilterPopUp'
+        @hidePopUp='showPopup = false'
         @filterFor='filterFor'
         @sortBy='filterFor'
         @updateFacialMeasurement='triggerRouterForFacialMeasurementUpdate'
@@ -72,6 +81,7 @@ import PersonIcon from './person_icon.vue'
 import Popup from './pop_up.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
+import RecommendPopup from './recommend_popup.vue'
 import SearchIcon from './search_icon.vue'
 import SortingStatus from './sorting_status.vue'
 import SortFilterPopup from './sort_filter_popup.vue'
@@ -94,6 +104,7 @@ export default {
     MaskCards,
     Popup,
     PersonIcon,
+    RecommendPopup,
     SearchIcon,
     SortFilterPopup,
     SortingStatus,
@@ -593,6 +604,12 @@ export default {
     text-align: center;
   }
 
+  .icon {
+      justify-content: center;
+      align-items: center;
+      min-width: 3em;
+  }
+
   @media(max-width: 700px) {
     .grid {
       grid-template-columns: 50% 50%;
@@ -618,7 +635,7 @@ export default {
     }
 
     #search {
-      width: 70vw;
+      width: 63vw;
       padding: 1em;
     }
 

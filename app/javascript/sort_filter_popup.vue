@@ -2,23 +2,6 @@
   <div>
   <Popup @onclose='hidePopup' v-if='showPopup'>
     <div  style='padding: 1em;'>
-      <h3>Recommend:</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Measurement</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for='(value, key, index) in facialMeasurements'>
-            <th>{{value.eng}}</th>
-            <td>
-              <input class='num' type="number" :value='value.value' @change="updateFacialMeasurement($event, key)">
-            </td>
-          </tr>
-        </tbody>
-      </table>
       <h3>Sort by:</h3>
       <table class='sort-table'>
         <thead>
@@ -111,26 +94,6 @@ export default {
     }
   },
   props: {
-    facialMeasurements: {
-      default: {
-        'bitragionSubnasaleArc': {
-          'eng': "Bitragion subnasale arc (mm)",
-          'value': 230
-        },
-        'faceWidth': {
-          'eng': "Face width (mm)",
-          'value': 155
-        },
-        'noseProtrusion': {
-          'eng': "Nose protrusion (mm)",
-          'value': 25
-        },
-        'beardLength': {
-          'eng': "Beard length (mm)",
-          'value': 0
-        },
-      }
-    },
     showFitTesting: {
       default: false
     },
