@@ -368,6 +368,9 @@
         />
       </div>
     </div>
+    <br>
+    <br>
+
   </div>
 </template>
 
@@ -1275,9 +1278,17 @@ export default {
     font-size: 1.5em;
   }
 
+  .bar-charts {
+    grid-template-columns: 50% 50%;
+  }
+
   @media(max-width: 1300px) {
     .grid.view, .grid.view.quad {
       grid-template-columns: 50% 50%;
+    }
+
+    .grid.bar-charts {
+      grid-template-columns: 100%;
     }
 
   }
@@ -1341,8 +1352,5 @@ export default {
   }
   .card {
     padding: 1em;
-  }
-  .bar-charts {
-    grid-template-columns: 50% 50%;
   }
 </style>
