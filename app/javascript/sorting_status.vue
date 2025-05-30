@@ -1,9 +1,9 @@
 <template>
     <div v-if='status == "ascending"'>
-      ⇧
+      Ascending
     </div>
     <div v-if='status == "descending"'>
-      ⇩
+      Descending
     </div>
 </template>
 
