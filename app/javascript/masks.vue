@@ -51,7 +51,6 @@
         @hidePopUp='showPopup = false'
         @filterFor='filterFor'
         @sortBy='filterFor'
-        @updateFacialMeasurement='triggerRouterForFacialMeasurementUpdate'
       />
     </div>
 

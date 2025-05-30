@@ -138,7 +138,7 @@ export default {
   },
   methods: {
     hidePopup() {
-      this.$emit('hideSortFilterPopUp', true)
+      this.$emit('hidePopUp')
     },
     updateFacialMeasurement(event, key) {
       this.$emit('updateFacialMeasurement', event, key)
