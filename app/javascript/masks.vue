@@ -352,6 +352,8 @@ export default {
       let newQuery = {}
 
       newQuery[key] = event.target.value
+      newQuery['sortByField'] = 'probaFit'
+      newQuery['sortByStatus'] = 'descending'
 
       let combinedQuery = Object.assign(
         JSON.parse(
