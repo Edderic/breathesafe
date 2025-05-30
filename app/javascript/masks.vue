@@ -13,6 +13,10 @@
         R
       </button>
 
+      <button class='icon' @click='showPopup = "Sort"'>
+        ⇵
+      </button>
+
       <button class='icon' @click='showPopup = "Filter"'>
         <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="8 10 70 70"
           width="2em" height="2em"
@@ -33,6 +37,13 @@
         :facialMeasurements='facialMeasurements'
         @hidePopUp='showPopup = false'
         @updateFacialMeasurement='triggerRouterForFacialMeasurementUpdate'
+      />
+
+      <SortPopup
+        :showPopup='showPopup == "Sort"'
+        :showUniqueNumberFitTesters='true'
+        @hidePopUp='showPopup = false'
+        @sortBy='filterFor'
       />
 
       <SortFilterPopup
@@ -84,6 +95,7 @@ import RecommendPopup from './recommend_popup.vue'
 import SearchIcon from './search_icon.vue'
 import SortingStatus from './sorting_status.vue'
 import SortFilterPopup from './sort_filter_popup.vue'
+import SortPopup from './sort_popup.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { perimeterColorScheme } from './colors.js'
@@ -106,6 +118,7 @@ export default {
     RecommendPopup,
     SearchIcon,
     SortFilterPopup,
+    SortPopup,
     SortingStatus,
     SurveyQuestion,
     TabSet
