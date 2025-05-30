@@ -42,6 +42,8 @@
       <SortPopup
         :showPopup='showPopup == "Sort"'
         :showUniqueNumberFitTesters='true'
+        :sortByField='sortByField'
+        :sortByStatus='sortByStatus'
         @hidePopUp='showPopup = false'
         @sortBy='filterFor'
       />
@@ -273,42 +275,6 @@ export default {
       )
 
       // this.$router.go(0)
-    },
-    sortingStatus(field) {
-      if (this.sortByField == field) {
-        return this.sortByStatus
-      } else {
-        return ''
-      }
-    },
-    sortBy(field) {
-      let query = {
-        sortByField: field
-      }
-
-      if (this.sortByField != field) {
-        query['sortByStatus'] = 'ascending'
-      } else {
-        if (this.sortByStatus == 'ascending') {
-          query['sortByStatus'] = 'descending'
-        } else if (this.sortByStatus == 'descending') {
-          query['sortByStatus'] = 'ascending'
-        }
-      }
-
-      let combinedQuery = Object.assign(
-        JSON.parse(
-          JSON.stringify(this.$route.query)
-        ),
-        query
-      )
-
-      this.$router.push(
-        {
-          name: 'Masks',
-          query: combinedQuery
-        }
-      )
     },
     getAbsoluteHref(href) {
       // TODO: make sure this works for all
