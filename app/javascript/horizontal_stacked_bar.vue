@@ -58,7 +58,7 @@ export default {
   methods: {
 
     width: function(v) {
-       return `${round(parseFloat(v) / this.normalizer, 0) * this.maxBarWidth}em`
+       return `${round(parseFloat(v) / this.normalizer, 2) * this.maxBarWidth}em`
     },
     color: function(i) {
       return this.colors[i]
