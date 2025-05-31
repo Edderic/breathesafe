@@ -6,13 +6,17 @@
       <table>
         <thead>
           <tr>
-            <th>Measurement</th>
+            <th></th>
+            <th></th>
             <th></th>
           </tr>
         </thead>
-        <tbody>
+        <tbody v-if='explanationToShow == ""'>
           <tr v-for='(value, key, index) in facialMeasurements'>
             <th>{{value.eng}}</th>
+            <td>
+              <CircularButton text='?' @click='show(key)'/>
+            </td>
             <td>
               <input class='num' type="number" :value='value.value' @change="updateFacialMeasurement($event, key)">
             </td>
@@ -21,8 +25,21 @@
       </table>
       <br>
 
+        <div class='explanation justify-content-center' v-if='explanationToShow != ""'>
+          <h2>
+            {{engToShow}}
+          </h2>
+          <div>
+            <img :src="imageToShow" alt="">
+          </div>
+          <p>
+              {{explanationToShow}}
+          </p>
+        </div>
+
       <div class='justify-content-center'>
-        <Button :shadow='true' @click="recommend">Recommend</Button>
+        <Button v-if='keyToShow == ""' :shadow='true' @click="recommend">Recommend</Button>
+        <Button v-if='keyToShow != ""' :shadow='true' @click="keyToShow = ''">Back</Button>
       </div>
     </div>
   </Popup>
@@ -31,6 +48,7 @@
 
 <script>
 import axios from 'axios';
+import CircularButton from './circular_button.vue'
 import Button from './button.vue'
 import PersonIcon from './person_icon.vue'
 import Popup from './pop_up.vue'
@@ -45,6 +63,7 @@ export default {
   name: 'RecommendPopup',
   components: {
     Button,
+    CircularButton,
     Popup,
     PersonIcon,
     SortingStatus
@@ -52,22 +71,29 @@ export default {
   data() {
     return {
       search: "",
+      keyToShow: ""
     }
   },
   props: {
     facialMeasurements: {
       default: {
-        'bitragionSubnasaleArc': {
+        'bitragionSubnasaleArcMm': {
           'eng': "Bitragion subnasale arc (mm)",
-          'value': 230
+          'value': 220,
+          'explanation': "The surface distance between the left and right tragion landmarks across the subnasale landmark at the bottom of the nose",
+          'image_url': "https://nap.nationalacademies.org/openbook/0309103983/xhtml/images/p20012464g30003.jpg"
         },
-        'faceWidth': {
+        'faceWidthMm': {
           'eng': "Face width (mm)",
-          'value': 155
+          'value': 155,
+          'explanation': "",
+          'image_url': ''
         },
-        'noseProtrusion': {
+        'noseProtrusionMm': {
           'eng': "Nose protrusion (mm)",
-          'value': 25
+          'value': 27,
+          'explanation': "The straight-line distance between the pronasale landmark at the tip of the nose and the subnasale landmark under the nose.",
+          'image_url': 'https://nap.nationalacademies.org/openbook/0309103983/xhtml/images/p20012464g33001.jpg'
         },
         'beardLength': {
           'eng': "Beard length (mm)",
@@ -80,10 +106,31 @@ export default {
     },
   },
   computed: {
+    explanationToShow() {
+      if (!this.keyToShow) {
+        return ""
+      }
+      return this.facialMeasurements[this.keyToShow]['explanation']
+    },
+    imageToShow() {
+      if (!this.keyToShow) {
+        return ""
+      }
+      return this.facialMeasurements[this.keyToShow]['image_url']
+    },
+    engToShow() {
+      if (!this.keyToShow) {
+        return ""
+      }
+      return this.facialMeasurements[this.keyToShow]['eng']
+    }
   },
   async created() {
   },
   methods: {
+    show(key) {
+      this.keyToShow = key
+    },
     hidePopup() {
       this.$emit('hidePopUp', true)
     },
@@ -121,6 +168,11 @@ export default {
     padding-right: 0.25em;
   }
 
+  .explanation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
   p {
     margin: 1em;
   }

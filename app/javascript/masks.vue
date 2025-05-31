@@ -180,15 +180,21 @@ export default {
       return {
         'bitragionSubnasaleArcMm': {
           'eng': "Bitragion subnasale arc (mm)",
-          'value': this.bitragionSubnasaleArcMm
+          'value': this.bitragionSubnasaleArcMm,
+          'explanation': "The surface distance between the left and right tragion landmarks across the subnasale landmark at the bottom of the nose",
+          'image_url': "https://nap.nationalacademies.org/openbook/0309103983/xhtml/images/p20012464g30003.jpg"
         },
         'faceWidthMm': {
           'eng': "Face width (mm)",
-          'value': this.faceWidthMm
+          'value': this.faceWidthMm,
+          'explanation': "The maximum horizontal breadth of the face between the zygomatic arches",
+          'image_url': 'https://nap.nationalacademies.org/openbook/0309103983/xhtml/images/p20012464g31003.jpg'
         },
         'noseProtrusionMm': {
           'eng': "Nose protrusion (mm)",
-          'value': this.noseProtrusionMm
+          'value': this.noseProtrusionMm,
+          'explanation': "The straight-line distance between the pronasale landmark at the tip of the nose and the subnasale landmark under the nose.",
+          'image_url': 'https://nap.nationalacademies.org/openbook/0309103983/xhtml/images/p20012464g33001.jpg'
         },
       }
     },
