@@ -23,6 +23,12 @@
               <SortingStatus :status='sortingStatus("uniqueFitTestersCount")'/>
             </td>
           </tr>
+          <tr @click='sortBy("avgFitFactor")'>
+            <th >Avg. N99-mode FF</th>
+            <td>
+              <SortingStatus :status='sortingStatus("avgFitFactor")'/>
+            </td>
+          </tr>
           <tr @click='sortBy("perimeterMm")'>
             <th >Perimeter</th>
             <td>
