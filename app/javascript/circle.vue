@@ -1,8 +1,8 @@
 <template>
-  <div class='pair'>
-    <div class='circle' :style='{"background-color": color}'>&nbsp;</div>
+  <span class='pair' :class='{ selected: selected }'>
+    <div class='circle' :style='{"background-color": color, "border": border }'>&nbsp;</div>
     <div class='text'>{{color}}</div>
-  </div>
+  </span>
 </template>
 
 <script>
@@ -49,9 +49,20 @@
     props: {
       color: {
         default: 'White'
+      },
+      selected: {
+        default: false
       }
     },
     computed: {
+      border() {
+        if (this.selected) {
+          return '2px solid black';
+        }
+        else {
+          return `2px solid ${this.color}`;
+        }
+      }
 
     },
     methods: {
@@ -73,6 +84,13 @@
   }
 
   .text {
+    color: #aaa;
     margin-left: 1em;
+  }
+
+  .selected {
+  }
+  .selected .text {
+    color: black;
   }
 </style>

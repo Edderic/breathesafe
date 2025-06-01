@@ -5,11 +5,13 @@
       <h3>Filter for:</h3>
       <div>Color</div>
       <li v-for='opt in colorOptions' class='filterCheckbox' >
-        <input :id='`color${opt}`' type="checkbox" :checked='isChecked(opt)' @click='filterFor(opt)'>
+        <input :id='`color${opt}`' type="checkbox" :checked='isChecked("Color", opt)' @click='filterFor("Color", opt)'>
         <label class='colorLabel' :for='`color${opt}`'>
           <Circle :color='opt'>{{opt}}</Circle>
         </label>
       </li>
+      <br>
+
       <div>Strap type</div>
       <table>
         <tr class='checkboxes'>
@@ -88,7 +90,7 @@ export default {
     showPopup: {
       default: false
     },
-    filterForAdjustableHeadstrap: {
+    filterForColor: {
       default: true
     },
     filterForAdjustableEarloop: {
@@ -106,45 +108,14 @@ export default {
     filterForNotTargeted: {
       default: true
     },
-
-    filterForWhite: {
-      default: true
-    },
-    filterForBlack: {
-      default: true
-    },
-    filterForBlue:{
-      default: true
-    },
-    filterForGrey:{
-      default: true
-    },
-    filterForGraphics:{
-      default: true
-    },
-    filterForOrange:{
-      default: true
-    },
-    filterForGreen: {
-      default: true
-    },
-    filterForPurple:{
-      default: true
-    },
-    filterForPink: {
-      default: true
-    },
-    filterForMulticolored: {
-      default: true
-    },
   },
   computed: {
   },
   async created() {
   },
   methods: {
-    isChecked(opt) {
-      return this['filterFor' + opt]
+    isChecked(namespace, opt) {
+      return this['filterFor' + namespace] == opt
     },
     hidePopup() {
       this.$emit('hidePopUp')
@@ -152,10 +123,16 @@ export default {
     updateFacialMeasurement(event, key) {
       this.$emit('updateFacialMeasurement', event, key)
     },
-    filterFor(string) {
-      let filterForString = ('filterFor' + string)
+    filterFor(namespace, string) {
+      let filterForString = ('filterFor' + namespace)
       let newQuery = {}
-      newQuery[filterForString] = !this['filterFor' + string]
+      if (this[filterForString] == string) {
+        // remove the filtering
+        // if array
+        newQuery[filterForString] = 'none'
+      } else {
+        newQuery[filterForString] = string
+      }
 
       let combinedQuery = Object.assign(
         JSON.parse(

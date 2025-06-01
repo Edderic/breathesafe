@@ -277,6 +277,7 @@ export function displayableMasks(masks) {
         colorFilter = colorFilter || ((this['filterFor' + c]) && mask.color == c)
       }
 
+
       return (lowerSearch == "" || mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
         && (
           (mask.strapType == "") ||
@@ -290,7 +291,7 @@ export function displayableMasks(masks) {
           (mask.isTargeted && filterForTargeted) ||
           (!mask.isTargeted && filterForNotTargeted)
         ) && (
-          colorFilter
+          (this.filterForColor == "none") || (mask.colors.includes(this.filterForColor))
         )
     }.bind(this)
   )

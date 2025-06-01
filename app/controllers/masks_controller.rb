@@ -153,6 +153,7 @@ class MasksController < ApplicationController
       :filter_change_cost_us_dollars,
       :modifications,
       :notes,
+      colors: [],
       sources: [],
       image_urls: [],
       where_to_buy_urls: [],

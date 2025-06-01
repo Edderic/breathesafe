@@ -111,24 +111,13 @@
             </tr>
 
             <tr>
-              <th>Color</th>
+              <th>Colors</th>
               <td colspan='1' class='text-align-center'>
-                <select
-                    v-model="color"
-                    v-show="newOrEdit"
-                    >
-                    <option>White</option>
-                    <option>Black</option>
-                    <option>Blue</option>
-                    <option>Grey</option>
-                    <option>Graphics</option>
-                    <option>Orange</option>
-                    <option>Green</option>
-                    <option>Purple</option>
-                    <option>Pink</option>
-                </select>
 
-                <span v-show='!newOrEdit'>{{color}}</span>
+              <span v-for='opt in colorOptions' class='filterCheckbox' >
+                <Circle :color='opt' :selected='colors.includes(opt)' :for='`color${opt}`' @click='filterFor("Color", opt)' v-if='newOrEdit || colors.includes(opt)'/>
+              </span>
+
               </td>
             </tr>
 
@@ -399,6 +388,7 @@
 <script>
 import axios from 'axios';
 import Button from './button.vue'
+import Circle from './circle.vue'
 import { assignBoundsToColorScheme, binValue, colorPaletteFall, genColorSchemeBounds, riskColorInterpolationScheme, perimeterColorScheme } from './colors';
 import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
@@ -416,6 +406,7 @@ export default {
   name: 'Mask',
   components: {
     Button,
+    Circle,
     CircularButton,
     ClosableMessage,
     ColoredCell,
@@ -530,6 +521,7 @@ export default {
       uniqueInternalModelCode: '',
       modifications: {},
       color: '',
+      colors: [],
       filterType: 'N95',
       filtrationEfficiencies: [],
       breathability: [],
@@ -543,6 +535,21 @@ export default {
     }
   },
   props: {
+    colorOptions: {
+      default: [
+        'White',
+        'Black',
+        'Blue',
+        'Grey',
+        'Graphics',
+        'Orange',
+        'Green',
+        'Purple',
+        'Pink',
+        'Multicolored',
+      ],
+
+    }
   },
   computed: {
     ...mapState(
@@ -699,7 +706,7 @@ export default {
     },
     toSave() {
       return {
-        color: this.color,
+        colors: this.colors,
         notes: this.notes,
         mass_grams: this.massGrams,
         width_mm: this.widthMm,
@@ -785,6 +792,21 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
+
+    circleStyling(opt ) {
+      if (this.colors.includes(opt)) {
+        return "{'border': '2px solid black'}"
+      } else {
+        return "{'border': '0px solid black'}"
+      }
+    },
+    filterFor(namespace, opt) {
+      if (this.colors.includes(opt)) {
+        this.colors = this.colors.filter(item => item !== opt)
+      } else {
+        this.colors.push(opt)
+      }
+    },
     shortHand(href) {
       return shortHandHref(href)
     },

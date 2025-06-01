@@ -55,16 +55,7 @@
         :showUniqueNumberFitTesters='true'
         :showFitTesting='false'
         :colorOptions='colorOptions'
-        :filterForWhite='filterForWhite'
-        :filterForBlack='filterForBlack'
-        :filterForBlue='filterForBlue'
-        :filterForGrey='filterForGrey'
-        :filterForGraphics='filterForGraphics'
-        :filterForOrange='filterForOrange'
-        :filterForGreen='filterForGreen'
-        :filterForPurple='filterForPurple'
-        :filterForPink='filterForPink'
-        :filterForMulticolored='filterForMulticolored'
+        :filterForColor='filterForColor'
         :filterForEarloop='filterForEarloop'
         :filterForAdjustableEarloop='filterForAdjustableEarloop'
         :filterForAdjustableHeadstrap='filterForAdjustableHeadstrap'
@@ -150,16 +141,7 @@ export default {
         'Pink',
         'Multicolored',
       ],
-      filterForWhite: true,
-      filterForBlack: true,
-      filterForBlue: true,
-      filterForGrey: true,
-      filterForGraphics: true,
-      filterForOrange: true,
-      filterForGreen: true,
-      filterForPurple: true,
-      filterForPink: true,
-      filterForMulticolored: true,
+      filterForColor: 'none',
       filterForAdjustableEarloop: true,
       filterForAdjustableHeadstrap: true,
       filterForEarloop: true,
@@ -275,23 +257,7 @@ export default {
         this[facialMeasurement] = toQuery[facialMeasurement] || this[facialMeasurement]
       }
 
-      let filterCriteria = [
-        "AdjustableEarloop",
-        "Earloop",
-        "AdjustableHeadstrap",
-        "Headstrap",
-        "Targeted",
-        "NotTargeted"
-      ].concat(this.colorOptions);
-
-      for(let filt of filterCriteria) {
-        let specificFilt = 'filterFor' + filt
-        if (toQuery[specificFilt] == undefined) {
-          this[specificFilt] = true
-        } else {
-          this[specificFilt] = toQuery[specificFilt] == 'true'
-        }
-      }
+      this.filterForColor = toQuery['filterForColor']
 
       await this.loadData(toQuery)
     },

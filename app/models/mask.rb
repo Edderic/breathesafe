@@ -303,6 +303,7 @@ class Mask < ApplicationRecord
       end
 
       x['payable_datetimes'] = JSON.parse(x['payable_datetimes'])
+      x['colors'] = JSON.parse(x['colors'])
     end
 
     result
