@@ -11,21 +11,10 @@
 
       <div>Strap type</div>
       <table>
-        <tr class='checkboxes'>
-          <td>
-            <input id='toggleAdjustableEarloop' type="checkbox" :checked='filterForAdjustableEarloop' @click='filterFor("AdjustableEarloop")'>
-            <label for="toggleAdjustableEarloop">Adjustable Earloop</label>
-          </td>
-          <td><input id='toggleEarloop' type="checkbox" :checked='filterForEarloop' @click='filterFor("Earloop")'>
-            <label for="toggleEarloop">Earloop</label>
-          </td>
-          <td><input id='toggleAdjustableHeadstrap' type="checkbox" :checked='filterForAdjustableHeadstrap' @click='filterFor("AdjustableHeadstrap")'>
-            <label for="toggleAdjustableHeadstrap">Adjustable Headstrap</label>
-          </td>
-          <td><input id='toggleHeadstrap' type="checkbox" :checked='filterForHeadstrap' @click='filterFor("Headstrap")'>
-            <label for="toggleHeadstrap">
-            Headstrap
-            </label>
+        <tr class='options'>
+          <td v-for='opt in strapTypes'>
+            <input :id='`toggle${opt}`' type="radio" :checked='filterForStrapType == opt' @click='filterFor("StrapType", opt)'>
+            <label :for='`toggle${opt}`'>{{opt}}</label>
           </td>
         </tr>
       </table>
@@ -75,6 +64,9 @@ export default {
     colorOptions: {
       default: []
     },
+    strapTypes: {
+      default: []
+    },
     showFitTesting: {
       default: false
     },
@@ -90,14 +82,8 @@ export default {
     filterForColor: {
       default: "none"
     },
-    filterForAdjustableEarloop: {
-      default: true
-    },
-    filterForEarloop: {
-      default: true
-    },
-    filterForHeadstrap: {
-      default: true
+    filterForStrapType: {
+      default: "none"
     },
     filterForTargeted: {
       default: true
@@ -349,9 +335,13 @@ export default {
     width: 3em;
   }
 
-  tr.checkboxes td, .filterCheckbox {
+  tr.options td, .filterCheckbox {
     display: flex;
     flex-direction: row;
+  }
+
+  .options:hover {
+    cursor: pointer;
   }
 
   .sort-table {

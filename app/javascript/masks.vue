@@ -55,11 +55,9 @@
         :showUniqueNumberFitTesters='true'
         :showFitTesting='false'
         :colorOptions='colorOptions'
+        :strapTypes='strapTypes'
         :filterForColor='filterForColor'
-        :filterForEarloop='filterForEarloop'
-        :filterForAdjustableEarloop='filterForAdjustableEarloop'
-        :filterForAdjustableHeadstrap='filterForAdjustableHeadstrap'
-        :filterForHeadstrap='filterForHeadstrap'
+        :filterForStrapType='filterForStrapType'
         :filterForTargeted='filterForTargeted'
         :filterForNotTargeted='filterForNotTargeted'
         :sortByField='sortByField'
@@ -141,11 +139,14 @@ export default {
         'Pink',
         'Multicolored',
       ],
+      strapTypes: [
+        'Adjustable Earloop',
+        'Adjustable Headstrap',
+        'Earloop',
+        'Headstrap',
+      ],
       filterForColor: 'none',
-      filterForAdjustableEarloop: true,
-      filterForAdjustableHeadstrap: true,
-      filterForEarloop: true,
-      filterForHeadstrap: true,
+      filterForStrapType: 'none',
       filterForTargeted: true,
       filterForNotTargeted: true,
       showPopup: false,
@@ -258,6 +259,7 @@ export default {
       }
 
       this.filterForColor = toQuery['filterForColor']
+      this.filterForStrapType = toQuery['filterForStrapType']
 
       await this.loadData(toQuery)
     },

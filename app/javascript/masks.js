@@ -282,10 +282,8 @@ export function displayableMasks(masks) {
         && (
           (mask.strapType == "") ||
           (
-            (filterForHeadstrap && mask.strapType == 'Headstrap')
-            || (filterForEarloop && mask.strapType == 'Earloop')
-            || (filterForAdjustableEarloop && mask.strapType == 'Adjustable Earloop')
-            || (filterForAdjustableHeadstrap && mask.strapType == 'Adjustable Headstrap')
+            (this.filterForStrapType == "none") ||
+            mask.strapType == this.filterForStrapType
           )
         ) && (
           (mask.isTargeted && filterForTargeted) ||
