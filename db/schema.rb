@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_03_07_030350) do
+ActiveRecord::Schema[7.0].define(version: 2025_06_01_174445) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -197,6 +197,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_03_07_030350) do
     t.bigint "author_id", null: false
     t.float "perimeter_mm"
     t.json "payable_datetimes", default: []
+    t.jsonb "colors", default: [], null: false
     t.index ["author_id"], name: "index_masks_on_author_id"
   end
 
