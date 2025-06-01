@@ -40,6 +40,7 @@
       />
 
       <SortPopup
+        :masks='masks'
         :showPopup='showPopup == "Sort"'
         :showUniqueNumberFitTesters='true'
         :sortByField='sortByField'
@@ -52,7 +53,18 @@
         :showPopup='showPopup == "Filter"'
         :showTargetedOptions='true'
         :showUniqueNumberFitTesters='true'
-        :showFitTesting='tabToShow == "Tested"'
+        :showFitTesting='false'
+        :colorOptions='colorOptions'
+        :filterForWhite='filterForWhite'
+        :filterForBlack='filterForBlack'
+        :filterForBlue='filterForBlue'
+        :filterForGrey='filterForGrey'
+        :filterForGraphics='filterForGraphics'
+        :filterForOrange='filterForOrange'
+        :filterForGreen='filterForGreen'
+        :filterForPurple='filterForPurple'
+        :filterForPink='filterForPink'
+        :filterForMulticolored='filterForMulticolored'
         :filterForEarloop='filterForEarloop'
         :filterForAdjustableEarloop='filterForAdjustableEarloop'
         :filterForAdjustableHeadstrap='filterForAdjustableHeadstrap'
@@ -63,7 +75,6 @@
         :sortByStatus='sortByStatus'
         @hidePopUp='showPopup = false'
         @filterFor='filterFor'
-        @sortBy='filterFor'
       />
     </div>
 
@@ -127,6 +138,28 @@ export default {
   },
   data() {
     return {
+      colorOptions: [
+        'White',
+        'Black',
+        'Blue',
+        'Grey',
+        'Graphics',
+        'Orange',
+        'Green',
+        'Purple',
+        'Pink',
+        'Multicolored',
+      ],
+      filterForWhite: true,
+      filterForBlack: true,
+      filterForBlue: true,
+      filterForGrey: true,
+      filterForGraphics: true,
+      filterForOrange: true,
+      filterForGreen: true,
+      filterForPurple: true,
+      filterForPink: true,
+      filterForMulticolored: true,
       filterForAdjustableEarloop: true,
       filterForAdjustableHeadstrap: true,
       filterForEarloop: true,
@@ -249,7 +282,7 @@ export default {
         "Headstrap",
         "Targeted",
         "NotTargeted"
-      ];
+      ].concat(this.colorOptions);
 
       for(let filt of filterCriteria) {
         let specificFilt = 'filterFor' + filt

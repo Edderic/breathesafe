@@ -3,10 +3,18 @@
   <Popup @onclose='hidePopup' v-if='showPopup'>
     <div  style='padding: 1em;'>
       <h3>Filter for:</h3>
+      <div>Color</div>
+      <li v-for='opt in colorOptions' class='filterCheckbox' >
+        <input :id='`color${opt}`' type="checkbox" :checked='isChecked(opt)' @click='filterFor(opt)'>
+        <label class='colorLabel' :for='`color${opt}`'>
+          <Circle :color='opt'>{{opt}}</Circle>
+        </label>
+      </li>
       <div>Strap type</div>
       <table>
         <tr class='checkboxes'>
-          <td><input id='toggleAdjustableEarloop' type="checkbox" :checked='filterForAdjustableEarloop' @click='filterFor("AdjustableEarloop")'>
+          <td>
+            <input id='toggleAdjustableEarloop' type="checkbox" :checked='filterForAdjustableEarloop' @click='filterFor("AdjustableEarloop")'>
             <label for="toggleAdjustableEarloop">Adjustable Earloop</label>
           </td>
           <td><input id='toggleEarloop' type="checkbox" :checked='filterForEarloop' @click='filterFor("Earloop")'>
@@ -41,6 +49,7 @@
 
 <script>
 import axios from 'axios';
+import Circle from './circle.vue'
 import PersonIcon from './person_icon.vue'
 import Popup from './pop_up.vue'
 import { deepSnakeToCamel } from './misc.js'
@@ -53,6 +62,7 @@ import { Respirator, displayableMasks, sortedDisplayableMasks } from './masks.js
 export default {
   name: 'FilterPopup',
   components: {
+    Circle,
     Popup,
     PersonIcon,
     SortingStatus
@@ -63,6 +73,9 @@ export default {
     }
   },
   props: {
+    colorOptions: {
+      default: []
+    },
     showFitTesting: {
       default: false
     },
@@ -94,12 +107,45 @@ export default {
       default: true
     },
 
+    filterForWhite: {
+      default: true
+    },
+    filterForBlack: {
+      default: true
+    },
+    filterForBlue:{
+      default: true
+    },
+    filterForGrey:{
+      default: true
+    },
+    filterForGraphics:{
+      default: true
+    },
+    filterForOrange:{
+      default: true
+    },
+    filterForGreen: {
+      default: true
+    },
+    filterForPurple:{
+      default: true
+    },
+    filterForPink: {
+      default: true
+    },
+    filterForMulticolored: {
+      default: true
+    },
   },
   computed: {
   },
   async created() {
   },
   methods: {
+    isChecked(opt) {
+      return this['filterFor' + opt]
+    },
     hidePopup() {
       this.$emit('hidePopUp')
     },
@@ -205,6 +251,13 @@ export default {
     padding: 0.25em;
   }
 
+  ul li {
+    list-style-type: none;
+  }
+
+  .colorLabel {
+    margin-left: 1em;
+  }
   .quote {
     font-style: italic;
     margin: 1em;
@@ -322,7 +375,7 @@ export default {
     width: 3em;
   }
 
-  tr.checkboxes td {
+  tr.checkboxes td, .filterCheckbox {
     display: flex;
     flex-direction: row;
   }

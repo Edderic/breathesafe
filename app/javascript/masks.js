@@ -267,9 +267,16 @@ export function displayableMasks(masks) {
   let filterForAdjustableEarloop = this.filterForAdjustableEarloop
   let filterForTargeted = this.filterForTargeted
   let filterForNotTargeted = this.filterForNotTargeted
+  let filterForWhite = this.filterForWhite
+
 
   return masks.filter(
     function(mask) {
+      let colorFilter = (mask.color == "")
+      for (let c of this.colorOptions) {
+        colorFilter = colorFilter || ((this['filterFor' + c]) && mask.color == c)
+      }
+
       return (lowerSearch == "" || mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
         && (
           (mask.strapType == "") ||
@@ -282,8 +289,10 @@ export function displayableMasks(masks) {
         ) && (
           (mask.isTargeted && filterForTargeted) ||
           (!mask.isTargeted && filterForNotTargeted)
+        ) && (
+          colorFilter
         )
-    }
+    }.bind(this)
   )
 }
 

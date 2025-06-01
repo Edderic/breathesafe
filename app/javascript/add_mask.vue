@@ -111,6 +111,28 @@
             </tr>
 
             <tr>
+              <th>Color</th>
+              <td colspan='1' class='text-align-center'>
+                <select
+                    v-model="color"
+                    v-show="newOrEdit"
+                    >
+                    <option>White</option>
+                    <option>Black</option>
+                    <option>Blue</option>
+                    <option>Grey</option>
+                    <option>Graphics</option>
+                    <option>Orange</option>
+                    <option>Green</option>
+                    <option>Purple</option>
+                    <option>Pink</option>
+                </select>
+
+                <span v-show='!newOrEdit'>{{color}}</span>
+              </td>
+            </tr>
+
+            <tr>
               <th >Filter type</th>
               <td colspan='1' class='text-align-center'>
                 <select
@@ -507,6 +529,7 @@ export default {
       id: null,
       uniqueInternalModelCode: '',
       modifications: {},
+      color: '',
       filterType: 'N95',
       filtrationEfficiencies: [],
       breathability: [],
@@ -676,6 +699,7 @@ export default {
     },
     toSave() {
       return {
+        color: this.color,
         notes: this.notes,
         mass_grams: this.massGrams,
         width_mm: this.widthMm,
