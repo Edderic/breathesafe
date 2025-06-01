@@ -82,6 +82,9 @@
     flex-direction: row;
     align-items: center;
   }
+  .pair:hover {
+    cursor:pointer;
+  }
 
   .text {
     color: #aaa;

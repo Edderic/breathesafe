@@ -4,12 +4,9 @@
     <div  style='padding: 1em;'>
       <h3>Filter for:</h3>
       <div>Color</div>
-      <li v-for='opt in colorOptions' class='filterCheckbox' >
-        <input :id='`color${opt}`' type="checkbox" :checked='isChecked("Color", opt)' @click='filterFor("Color", opt)'>
-        <label class='colorLabel' :for='`color${opt}`'>
-          <Circle :color='opt'>{{opt}}</Circle>
-        </label>
-      </li>
+      <span v-for='opt in colorOptions' class='filterCheckbox' >
+        <Circle :color='opt' :selected='["none", opt].includes(filterForColor)' :for='`color${opt}`' @click='filterFor("Color", opt)'/>
+      </span>
       <br>
 
       <div>Strap type</div>
@@ -91,7 +88,7 @@ export default {
       default: false
     },
     filterForColor: {
-      default: true
+      default: "none"
     },
     filterForAdjustableEarloop: {
       default: true
