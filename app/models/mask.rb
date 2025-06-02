@@ -266,7 +266,7 @@ class Mask < ApplicationRecord
         SELECT masks.id,
           masks.*,
           demographic_breakdown.*,
-          fit_test_counts_per_mask.*,
+          CASE WHEN fit_test_count IS NULL THEN 0 ELSE fit_test_count END AS fit_test_count,
           unique_fit_tester_counts_per_mask.*,
           average_filtration_efficiencies.*
         FROM
