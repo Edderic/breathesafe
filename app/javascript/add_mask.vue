@@ -131,17 +131,21 @@
                     <option>cloth</option>
                     <option>surgical</option>
                     <option>ASTM Lvl 3</option>
+                    <option>ASTM</option>
                     <option>CE</option>
                     <option>E100</option>
                     <option>FFP2 Rated</option>
                     <option>KF80</option>
                     <option>KF94</option>
                     <option>KN95</option>
-                    <option>N100</option>
+                    <option>KN100</option>
                     <option>N95</option>
+                    <option>N99</option>
+                    <option>N100</option>
                     <option>Non-Rated</option>
                     <option>P95</option>
                     <option>P99</option>
+                    <option>P100</option>
                     <option>PM2.5</option>
                 </select>
 
