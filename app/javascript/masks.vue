@@ -258,8 +258,8 @@ export default {
         this[facialMeasurement] = toQuery[facialMeasurement] || this[facialMeasurement]
       }
 
-      this.filterForColor = toQuery['filterForColor']
-      this.filterForStrapType = toQuery['filterForStrapType']
+      this.filterForColor = toQuery['filterForColor'] || 'none'
+      this.filterForStrapType = toQuery['filterForStrapType'] || 'none'
 
       await this.loadData(toQuery)
     },
