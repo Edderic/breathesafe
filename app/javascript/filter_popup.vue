@@ -3,22 +3,28 @@
   <Popup @onclose='hidePopup' v-if='showPopup'>
     <div  style='padding: 1em;'>
       <h3>Filter for:</h3>
-      <div>Color</div>
-      <span v-for='opt in colorOptions' class='filterCheckbox' >
-        <Circle :color='opt' :selected='["none", opt].includes(filterForColor)' :for='`color${opt}`' @click='filterFor("Color", opt)'/>
-      </span>
-      <br>
+      <div class='wide'>
+        <div>
+          <div>Color</div>
+          <span v-for='opt in colorOptions' class='filterCheckbox' >
+            <Circle :color='opt' :selected='["none", opt].includes(filterForColor)' :for='`color${opt}`' @click='filterFor("Color", opt)'/>
+          </span>
+          <br>
+        </div>
 
-      <div>Strap type</div>
-      <table>
-        <tr class='options'>
-          <td v-for='opt in strapTypes'>
-            <input :id='`toggle${opt}`' type="radio" :checked='filterForStrapType == opt' @click='filterFor("StrapType", opt)'>
-            <label :for='`toggle${opt}`'>{{opt}}</label>
-          </td>
-        </tr>
-      </table>
-      <br v-if='showTargetedOptions'>
+        <div>
+          <div>Strap type</div>
+          <table>
+            <tr class='options'>
+              <td v-for='opt in strapTypes'>
+                <input :id='`toggle${opt}`' type="radio" :checked='filterForStrapType == opt' @click='filterFor("StrapType", opt)'>
+                <label :for='`toggle${opt}`'>{{opt}}</label>
+              </td>
+            </tr>
+          </table>
+          <br v-if='showTargetedOptions'>
+        </div>
+      </div>
       <div v-if='showTargetedOptions'>Targeted Masks (for Testers)</div>
       <table v-if='showTargetedOptions'>
         <tr>
@@ -346,6 +352,11 @@ export default {
 
   .sort-table {
     width: 20em;
+  }
+
+  .wide {
+    display: flex;
+    flex-direction: row;
   }
 
   @media(max-width: 700px) {
