@@ -19,7 +19,9 @@
     :showFitTesting='false'
     :colorOptions='colorOptions'
     :strapTypes='strapTypes'
+    :styleTypes='styleTypes'
     :filterForColor='filterForColor'
+    :filterForStyle='filterForStyle'
     :filterForStrapType='filterForStrapType'
     :filterForTargeted='filterForTargeted'
     :filterForNotTargeted='filterForNotTargeted'
@@ -68,6 +70,16 @@ export default {
     }
   },
   props: {
+    styleTypes: {
+      default: [
+       "Boat",
+       "Bifold",
+       "Elastomeric",
+       "Duckbill",
+       "Cup",
+       "Bifold & Gasket",
+      ]
+    },
     strapTypes: {
       default: [
         'Adjustable Earloop',
@@ -95,14 +107,14 @@ export default {
     },
     filterForStrapType: {
       default: 'none'
-    }
+    },
+    filterForStyle: {
+      default: 'none'
+    },
   },
   computed: {
   },
   methods: {
-    toggleShowPopup() {
-      this.$emit('toggleShowPopup', !this.showPopup)
-    },
     filterFor(args) {
       this.$emit('filterFor', args)
     },

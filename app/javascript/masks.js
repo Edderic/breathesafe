@@ -274,6 +274,8 @@ export function displayableMasks(masks) {
           (!mask.isTargeted && filterForNotTargeted)
         ) && (
           (this.filterForColor == "none") || (mask.colors.includes(this.filterForColor))
+        ) && (
+          (this.filterForStyle == "none") || (mask.style == this.filterForStyle)
         )
     }.bind(this)
   )

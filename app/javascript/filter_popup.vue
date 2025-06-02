@@ -13,6 +13,19 @@
         </div>
 
         <div>
+          <div>Style</div>
+          <table>
+            <tr class='options'>
+              <td v-for='opt in styleTypes'>
+                <input :id='`toggle${opt}`' type="radio" :checked='filterForStyle == opt' @click='filterFor("Style", opt)'>
+                <label :for='`toggle${opt}`'>{{opt}}</label>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div>
           <div>Strap type</div>
           <table>
             <tr class='options'>
@@ -22,9 +35,9 @@
               </td>
             </tr>
           </table>
-          <br v-if='showTargetedOptions'>
-        </div>
+          <br>
       </div>
+
       <div v-if='showTargetedOptions'>Targeted Masks (for Testers)</div>
       <table v-if='showTargetedOptions'>
         <tr>
@@ -73,6 +86,9 @@ export default {
     strapTypes: {
       default: []
     },
+    styleTypes: {
+      default: []
+    },
     showFitTesting: {
       default: false
     },
@@ -89,6 +105,9 @@ export default {
       default: "none"
     },
     filterForStrapType: {
+      default: "none"
+    },
+    filterForStyle: {
       default: "none"
     },
     filterForTargeted: {

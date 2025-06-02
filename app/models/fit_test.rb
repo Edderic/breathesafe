@@ -24,6 +24,7 @@ class FitTest < ApplicationRecord
            m.image_urls,
            m.has_exhalation_valve,
            m.strap_type,
+           m.style,
            m.perimeter_mm,
            m.colors,
            fm.user_id AS fm_user_id,

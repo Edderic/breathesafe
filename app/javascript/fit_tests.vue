@@ -26,6 +26,7 @@
       @filterFor='filterFor'
       :filterForColor='filterForColor'
       :filterForStrapType='filterForStrapType'
+      :filterForStyle='filterForStyle'
     />
 
     <div class='container chunk'>
@@ -215,6 +216,7 @@ export default {
       sortByStatus: undefined,
       filterForColor: "none",
       filterForStrapType: "none",
+      filterForStyle: "none",
       filterForTargeted: true,
       filterForNotTargeted: true,
     }
@@ -378,6 +380,7 @@ export default {
 
           this.filterForColor = toQuery['filterForColor'] || 'none'
           this.filterForStrapType = toQuery['filterForStrapType'] || 'none'
+          this.filterForStyle = toQuery['filterForStyle'] || 'none'
         }
       }
     },
