@@ -3,20 +3,37 @@
     <input id='search' type="text" @change='updateSearch'>
     <SearchIcon height='2em' width='2em'/>
 
-    <button class='icon' @click='toggleShowPopup'>
-      <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="8 10 70 70"
-                                                                                   width="2em" height="2em"
-                                                                                               >
-                                                                                               <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' fill='#aaa'/>
-      </svg>
-
-    </button>
+      <button class='icon' @click='showPopup = "Filter"'>
+        <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="8 10 70 70"
+          width="2em" height="2em"
+          >
+          <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' fill='#aaa'/>
+        </svg>
+      </button>
   </div>
+
+  <FilterPopup
+    :showPopup='showPopup == "Filter"'
+    :showTargetedOptions='true'
+    :showUniqueNumberFitTesters='true'
+    :showFitTesting='false'
+    :colorOptions='colorOptions'
+    :strapTypes='strapTypes'
+    :filterForColor='filterForColor'
+    :filterForStrapType='filterForStrapType'
+    :filterForTargeted='filterForTargeted'
+    :filterForNotTargeted='filterForNotTargeted'
+    :sortByField='sortByField'
+    :sortByStatus='sortByStatus'
+    @hidePopUp='showPopup = false'
+    @filterFor='filterFor'
+  />
 </template>
 
 <script>
 import axios from 'axios';
 import Popup from './pop_up.vue'
+import FilterPopup from './filter_popup.vue'
 import { deepSnakeToCamel } from './misc.js'
 import SearchIcon from './search_icon.vue'
 import { mapActions, mapWritableState, mapState } from 'pinia';
@@ -25,13 +42,12 @@ import { mapActions, mapWritableState, mapState } from 'pinia';
 export default {
   name: 'Masks',
   components: {
+    FilterPopup,
     Popup,
     SearchIcon,
   },
   data() {
     return {
-      filterForEarloop: true,
-      filterForHeadstrap: true,
       filterForTargeted: true,
       filterForNotTargeted: true,
       exceptionMissingObject: {
@@ -47,13 +63,39 @@ export default {
       masks: [],
       search: "",
       sortByField: undefined,
-      sortByStatus: 'ascending'
+      sortByStatus: 'ascending',
+      showPopup: '',
     }
   },
   props: {
-    showPopup: {
-      default: false
+    strapTypes: {
+      default: [
+        'Adjustable Earloop',
+        'Adjustable Headstrap',
+        'Earloop',
+        'Headstrap',
+      ],
     },
+    colorOptions: {
+      default: [
+        'White',
+        'Black',
+        'Blue',
+        'Grey',
+        'Graphics',
+        'Orange',
+        'Green',
+        'Purple',
+        'Pink',
+        'Multicolored',
+      ]
+    },
+    filterForColor: {
+      default: 'none'
+    },
+    filterForStrapType: {
+      default: 'none'
+    }
   },
   computed: {
   },
@@ -61,24 +103,8 @@ export default {
     toggleShowPopup() {
       this.$emit('toggleShowPopup', !this.showPopup)
     },
-    filterFor(string) {
-      let filterForString = ('filterFor' + string)
-      let newQuery = {}
-      newQuery[filterForString] = !this['filterFor' + string]
-
-      let combinedQuery = Object.assign(
-        JSON.parse(
-          JSON.stringify(this.$route.query)
-        ),
-        newQuery
-      )
-
-      this.$router.push(
-        {
-          name: 'Masks',
-          query: combinedQuery
-        }
-      )
+    filterFor(args) {
+      this.$emit('filterFor', args)
     },
     sortingStatus(field) {
       if (this.sortByField == field) {

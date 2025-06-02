@@ -250,10 +250,6 @@ export function displayableMasks(masks) {
    * Assumptions:
    *   'this' has the following
    *      search: string
-   *      filterForHeadstrap: string
-   *      filterForEarloop: string
-   *      filterForTargeted: string
-   *      filterForNotTargeted: string
    */
 
   if (this.search == undefined) {
@@ -261,23 +257,11 @@ export function displayableMasks(masks) {
   }
 
   let lowerSearch = this.search.toLowerCase()
-  let filterForHeadstrap = this.filterForHeadstrap
-  let filterForEarloop = this.filterForEarloop
-  let filterForAdjustableHeadstrap = this.filterForAdjustableHeadstrap
-  let filterForAdjustableEarloop = this.filterForAdjustableEarloop
   let filterForTargeted = this.filterForTargeted
   let filterForNotTargeted = this.filterForNotTargeted
-  let filterForWhite = this.filterForWhite
-
 
   return masks.filter(
     function(mask) {
-      let colorFilter = (mask.color == "")
-      for (let c of this.colorOptions) {
-        colorFilter = colorFilter || ((this['filterFor' + c]) && mask.color == c)
-      }
-
-
       return (lowerSearch == "" || mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
         && (
           (mask.strapType == "") ||

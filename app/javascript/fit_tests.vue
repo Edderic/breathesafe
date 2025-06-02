@@ -20,11 +20,12 @@
       </select>
     </div>
 
-
-
     <SearchSortFilterSection
       @updateSearch='filterFor'
       @toggleShowPopup='toggleShowPopup'
+      @filterFor='filterFor'
+      :filterForColor='filterForColor'
+      :filterForStrapType='filterForStrapType'
     />
 
     <div class='container chunk'>
@@ -200,6 +201,7 @@ export default {
           text: "Tested",
         }
       ],
+
       managedId: 0,
       testedAndUntested: [],
       messages: [],
@@ -211,13 +213,27 @@ export default {
       showMaskCardPopup: false,
       sortByField: undefined,
       sortByStatus: undefined,
-      filterForEarloop: true,
-      filterForHeadstrap: true,
+      filterForColor: "none",
+      filterForStrapType: "none",
       filterForTargeted: true,
       filterForNotTargeted: true,
     }
   },
   props: {
+    colorOptions: {
+      default: [
+        'White',
+        'Black',
+        'Blue',
+        'Grey',
+        'Graphics',
+        'Orange',
+        'Green',
+        'Purple',
+        'Pink',
+        'Multicolored',
+      ],
+    }
   },
   computed: {
     ...mapState(
@@ -294,9 +310,11 @@ export default {
     displayables() {
       let lowerSearch = this.search.toLowerCase()
 
-      return displayableMasks.bind(this)(this.fit_tests).filter(
-        function(fit_test) {
 
+      let displayable_fit_tests = displayableMasks.bind(this)(this.fit_tests)
+
+      let results = displayable_fit_tests.filter(
+        function(fit_test) {
           let managedUserIdCriteria = true;
           let lowerSearchCriteria = true;
 
@@ -311,6 +329,9 @@ export default {
           return lowerSearchCriteria && managedUserIdCriteria
         }.bind(this)
       )
+
+      return results
+
     },
     sortedFitTests() {
       return sortedDisplayableMasks.bind(this)(this.displayables)
@@ -355,15 +376,8 @@ export default {
 
           this.sortByField = this.$route.query.sortByField
 
-          let filterCriteria = ["Earloop", "Headstrap", "Targeted", "NotTargeted"];
-          for(let filt of filterCriteria) {
-            let specificFilt = 'filterFor' + filt
-            if (this.$route.query[specificFilt] == undefined) {
-              this[specificFilt] = true
-            } else {
-              this[specificFilt] = this.$route.query[specificFilt] == 'true'
-            }
-          }
+          this.filterForColor = toQuery['filterForColor'] || 'none'
+          this.filterForStrapType = toQuery['filterForStrapType'] || 'none'
         }
       }
     },

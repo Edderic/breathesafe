@@ -25,6 +25,7 @@ class FitTest < ApplicationRecord
            m.has_exhalation_valve,
            m.strap_type,
            m.perimeter_mm,
+           m.colors,
            fm.user_id AS fm_user_id,
            p.first_name,
            p.last_name,
@@ -43,7 +44,7 @@ class FitTest < ApplicationRecord
       SQL
     )
 
-    self.json_parse(fit_tests, ["facial_hair", "comfort", "results", "user_seal_check", "image_urls"])
+    self.json_parse(fit_tests, ["facial_hair", "comfort", "results", "user_seal_check", "image_urls", "colors"])
   end
 
   def self.find_by_id_with_user_id(id)
