@@ -56,7 +56,9 @@
         :showFitTesting='false'
         :colorOptions='colorOptions'
         :strapTypes='strapTypes'
+        :styleTypes='styleTypes'
         :filterForColor='filterForColor'
+        :filterForStyle='filterForStyle'
         :filterForStrapType='filterForStrapType'
         :filterForTargeted='filterForTargeted'
         :filterForNotTargeted='filterForNotTargeted'
@@ -139,6 +141,14 @@ export default {
         'Pink',
         'Multicolored',
       ],
+      styleTypes: [
+       "Boat",
+       "Bifold",
+       "Elastomeric",
+       "Duckbill",
+       "Cup",
+       "Bifold & Gasket",
+      ],
       strapTypes: [
         'Adjustable Earloop',
         'Adjustable Headstrap',
@@ -147,6 +157,7 @@ export default {
       ],
       filterForColor: 'none',
       filterForStrapType: 'none',
+      filterForStyle: 'none',
       filterForTargeted: true,
       filterForNotTargeted: true,
       showPopup: false,
@@ -260,6 +271,7 @@ export default {
 
       this.filterForColor = toQuery['filterForColor'] || 'none'
       this.filterForStrapType = toQuery['filterForStrapType'] || 'none'
+      this.filterForStyle = toQuery['filterForStyle'] || 'none'
 
       await this.loadData(toQuery)
     },
