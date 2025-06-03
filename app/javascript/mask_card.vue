@@ -50,20 +50,10 @@
                :colorScheme="fitColorScheme"
                :maxVal=1
                :value='m.probaFit'
-               :text="`${Math.round(m.probaFit * 100, 3)}%`"
+               :text="`${Math.round(m.probaFit * 100, 3)}% (${m.uniqueFitTestersCount})`"
                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
                :exception='exceptionMissingObject'
                />
-            </td>
-          </tr>
-          <tr>
-            <th>
-              # testers
-            </th>
-            <td v-show='showUniqueNumFitTesters'>
-              <span>
-                {{m.uniqueFitTestersCount}}
-              </span>
             </td>
           </tr>
           <tr>
