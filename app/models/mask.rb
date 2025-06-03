@@ -87,13 +87,14 @@ class Mask < ApplicationRecord
             WHERE name = 'Normal breathing (SEALED)'
             AND testing_mode = 'N99'
             AND fit_factor IS NOT NULL
-        ), average_fit_factors AS (
-            SELECT mask_id, AVG(fit_factor::numeric) AS avg_fit_factor
+        ), average_sealed_fit_factors AS (
+            SELECT mask_id, AVG(fit_factor::numeric) AS avg_sealed_fit_factor, COUNT(fit_factor) AS count_sealed_fit_factor
              FROM filtered
             GROUP BY 1
         ), average_filtration_efficiencies AS (
 
-          SELECT *, 1 - 1 / avg_fit_factor AS avg_filtration_efficiency FROM average_fit_factors
+          SELECT *, 1 - 1 / avg_sealed_fit_factor AS avg_sealed_filtration_efficiency
+          FROM average_sealed_fit_factors
         ),
         unique_fit_tester_counts_per_mask AS (
           SELECT m.id AS mask_id, COUNT(DISTINCT fm.user_id) AS unique_fit_testers_count

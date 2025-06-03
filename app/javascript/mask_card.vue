@@ -63,8 +63,8 @@
                class='risk-score'
                :colorScheme="fitFactorColorScheme"
                :maxVal=1000
-               :value='m.avgFitFactor'
-               :text="m.avgFitFactor"
+               :value='m.avgSealedFitFactor'
+                :text="`${m.avgSealedFitFactor} (${m.countSealedFitFactor})`"
                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
                :exception='exceptionMissingObject'
                />
