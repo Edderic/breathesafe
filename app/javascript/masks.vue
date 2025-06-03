@@ -26,6 +26,7 @@
       </button>
     </div>
 
+    <Spinner v-show="waiting"/>
     <div class='container chunk'>
       <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
       <br>
@@ -100,6 +101,7 @@ import SearchIcon from './search_icon.vue'
 import SortingStatus from './sorting_status.vue'
 import FilterPopup from './filter_popup.vue'
 import SortPopup from './sort_popup.vue'
+import Spinner from './spinner.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { perimeterColorScheme } from './colors.js'
@@ -124,6 +126,7 @@ export default {
     SearchIcon,
     SortPopup,
     SortingStatus,
+    Spinner,
     SurveyQuestion,
     TabSet
   },
@@ -178,7 +181,8 @@ export default {
       facialHairBeardLengthMm: 0,
       noseProtrusionMm: 27,
       faceWidthMm: 155,
-      bitragionSubnasaleArcMm: 220
+      bitragionSubnasaleArcMm: 220,
+      waiting: false
 
     }
   },
@@ -276,11 +280,15 @@ export default {
       await this.loadData(toQuery)
     },
     async loadData(toQuery) {
+      this.waiting = true;
+
       if ('bitragionSubnasaleArcMm' in toQuery || 'faceWidthMm' in toQuery || 'noseProtrusionMm' in toQuery || 'facialHairBeardLengthMm' in toQuery) {
         await this.updateFacialMeasurement()
       } else {
         await this.loadMasks()
       }
+
+      this.waiting = false;
     },
     hideSortFilterPopUp() {
       this.showPopup = false
