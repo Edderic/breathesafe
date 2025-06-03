@@ -15,12 +15,23 @@
       <br>
     </div>
 
+    <Popup v-if='missingFacialMeasurementsForRecommender.length > 0' @onclose='missingFacialMeasurementsForRecommender = []'>
+      <p>
+      User is missing at least one facial measurement needed for mask recommendations:
+      <ul>
+        <router-link class='missing' :to="linkToUserFacialMeasurement" >
+          <li v-for="m in missingFacialMeasurementsForRecommender">{{m}}</li>
+        </router-link>
+      </ul>
+
+      </p>
+    </Popup>
+
     <div :class='{main: true, scrollable: managedUsers.length == 0}'>
       <div class='centered'>
         <table>
           <thead>
             <tr>
-              <th v-if='currentUser.admin'>Manager Email</th>
               <th>Name</th>
               <th>Demographics</th>
               <th>Has Facial Data</th>
@@ -63,12 +74,10 @@
                   />
                 </router-link>
               </td>
-              <td class='colored-cell' @click='v'>
-                <router-link :to="{name: 'Masks', query: recommendQuery(r)}">
+              <td class='colored-cell' @click='maybeRecommend(r)'>
                   <Button :style='`font-size: 1em; background-color: ${backgroundColorForRecommender(r)}`'>
                     Recommend
                   </Button>
-                </router-link>
               </td>
             </tr>
           </tbody>
@@ -88,6 +97,7 @@ import Button from './button.vue'
 import ClosableMessage from './closable_message.vue'
 import CircularButton from './circular_button.vue'
 import ColoredCell from './colored_cell.vue'
+import Popup from './pop_up.vue'
 import { deepSnakeToCamel, setupCSRF } from './misc.js'
 import { userSealCheckColorMapping, riskColorInterpolationScheme, genColorSchemeBounds } from './colors.js'
 import { RespiratorUser } from './respirator_user.js'
@@ -106,12 +116,15 @@ export default {
     CircularButton,
     ClosableMessage,
     ColoredCell,
+    Popup,
     SearchIcon
   },
   data() {
     return {
       facialMeasurementsLength: 0,
-      search: ""
+      missingFacialMeasurementsForRecommender: [],
+      search: "",
+      userId: 0
     }
   },
   props: {
@@ -157,6 +170,15 @@ export default {
           'genderAndSex',
         ]
     ),
+    linkToUserFacialMeasurement() {
+      return {
+        'name': 'RespiratorUser',
+        'params': {'id': this.userId},
+        'query': {
+          'tabToShow': "Facial Measurements"
+        }
+      }
+    },
     displayables() {
       if (this.search == "") {
         return this.managedUsers
@@ -191,6 +213,49 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
+    maybeRecommend(r) {
+      let missing = []
+
+      let measurements = {
+        'bitragionSubnasaleArc': {
+          'eng': 'Bitragion subnasale arc (mm)',
+          'mm': 'bitragionSubnasaleArcMm'
+        },
+        'noseProtrusion': {
+          'eng': 'Nose protrusion (mm)',
+          'mm': 'noseProtrusionMm'
+        },
+        'faceWidth' : {
+          'eng': 'Face width (mm)',
+          'mm': 'faceWidthMm'
+        }
+      }
+
+      for(let key in measurements) {
+        if (!r[key]) {
+          missing.push(measurements[key]['eng'])
+        }
+      }
+
+      if (missing.length > 0) {
+        this.missingFacialMeasurementsForRecommender = missing
+
+        this.userId = r.managedId
+      } else {
+
+        let query = {}
+        for(let key in measurements) {
+            query[measurements[key]['mm']] = r[key]
+        }
+
+        this.$router.push(
+         {
+           name: 'Masks',
+           query: query
+         }
+        )
+      }
+    },
     backgroundColorForRecommender(r) {
       let color;
       if (r.bitragionSubnasaleArc && r.noseProtrusion && r.faceWidth ) {
@@ -365,6 +430,9 @@ export default {
     justify-content: space-around;
   }
 
+  .missing {
+    color: black;
+  }
   img {
     width: 30em;
   }
