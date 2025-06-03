@@ -20,16 +20,17 @@
         <table>
           <thead>
             <tr>
-              <th>Manager Email</th>
+              <th v-if='currentUser.admin'>Manager Email</th>
               <th>Name</th>
               <th>Demographics</th>
               <th>Has Facial Data</th>
               <th>Masks that have data</th>
+              <th>Recommend</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for='r in displayables' text='Edit'>
-              <td>{{r['managerEmail']}}</td>
+              <td v-if='currentUser.admin'>{{r['managerEmail']}}</td>
               <td @click="visit(r.managedId, 'Name')">
                 {{r.firstName}} {{r.lastName}}
               </td>
@@ -62,6 +63,13 @@
                   />
                 </router-link>
               </td>
+              <td class='colored-cell' @click='v'>
+                <router-link :to="{name: 'Masks', query: recommendQuery(r)}">
+                  <Button :style='`font-size: 1em; background-color: ${backgroundColorForRecommender(r)}`'>
+                    Recommend
+                  </Button>
+                </router-link>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -84,6 +92,7 @@ import { deepSnakeToCamel, setupCSRF } from './misc.js'
 import { userSealCheckColorMapping, riskColorInterpolationScheme, genColorSchemeBounds } from './colors.js'
 import { RespiratorUser } from './respirator_user.js'
 import { signIn } from './session.js'
+import { facialMeasurementsPresenceColorMapping } from './colors.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
@@ -182,6 +191,23 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
+    backgroundColorForRecommender(r) {
+      let color;
+      if (r.bitragionSubnasaleArc && r.noseProtrusion && r.faceWidth ) {
+        color = facialMeasurementsPresenceColorMapping['Complete'];
+      } else {
+        color = facialMeasurementsPresenceColorMapping['Completely missing'];
+      }
+      return `rgb(${color.r}, ${color.g}, ${color.b})`
+    },
+    recommendQuery(r) {
+      return {
+        bitragionSubnasaleArcMm: r.bitragionSubnasaleArc,
+        noseProtrusionMm: r.noseProtrusion,
+        faceWidthMm: r.faceWidth,
+      }
+
+    },
     percentage(num) {
       return `${num}%`
     },

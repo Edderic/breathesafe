@@ -139,6 +139,9 @@ class ParticipantProgress
         ) as manager_email,
         p.first_name,
         p.last_name,
+        latest_facial_measurement_with_present.bitragion_subnasale_arc,
+        latest_facial_measurement_with_present.face_width,
+        latest_facial_measurement_with_present.nose_protrusion,
         sps.removal_from_study ->> 'removal_datetime' IS NOT NULL AS removed_from_study,
         sps.finished_study_datetime IS NOT NULL AS finished_study,
         num_targeted_masks,
@@ -154,6 +157,9 @@ class ParticipantProgress
           ON managers_who_are_study_participants.email = mask_shipped_counts.to_user_uuid
         FULL OUTER JOIN managed_users
           ON managed_users.manager_id = managers_who_are_study_participants.id
+
+        LEFT JOIN latest_facial_measurement_with_present ON latest_facial_measurement_with_present.user_id =
+          managed_users.managed_id
         LEFT JOIN profile_with_demog_fields_present_count p
           ON managed_users.managed_id = p.user_id
         LEFT JOIN latest_facial_measurement_with_present_counts fm
