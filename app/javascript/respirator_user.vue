@@ -10,7 +10,7 @@
         <span>User: {{managedUser.fullName}}</span>
       </div>
       <div>
-        <span>Percent Completed: {{managedUser.readyToAddFitTestingDataPercentage}}</span>
+        <span>Percent Completed: {{Math.round((1 - managedUser.missingRatio) * 100, 4)}}%</span>
       </div>
 
     </div>

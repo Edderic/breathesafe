@@ -34,7 +34,7 @@
             <tr>
               <th>Name</th>
               <th>Demographics</th>
-              <th>Has Facial Data</th>
+              <th>Face Measurements</th>
               <th>Masks that have data</th>
               <th>Recommend</th>
             </tr>
@@ -58,7 +58,7 @@
                 <ColoredCell
                   :colorScheme="evenlySpacedColorScheme"
                   :maxVal=1
-                  :value='1 - r.fmPercentComplete / 100'
+                  :value='1- r.fmPercentComplete / 100'
                   :text='percentage(r.fmPercentComplete)'
                   class='color-cell'
                 />

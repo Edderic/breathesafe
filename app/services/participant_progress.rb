@@ -56,21 +56,25 @@ class ParticipantProgress
           SELECT user_id, MAX(created_at) AS created_at
           FROM facial_measurements fm
           GROUP BY 1
-        ), latest_facial_measurement_with_present AS (
+        ), latest_facial_measurements_for_users AS (
           SELECT fm.*,
           #{self.facial_measurements_present_sql}
           FROM facial_measurements fm
           INNER JOIN latest_facial_measurement_created_at lfm
           ON fm.user_id = lfm.user_id
           AND fm.created_at = lfm.created_at
-        ), latest_facial_measurement_with_present_counts AS (
+        ), latest_facial_measurements_for_users_counts AS (
           SELECT id,
            created_at,
            updated_at,
            #{self.facial_measurements_present_counts},
            user_id
-          FROM latest_facial_measurement_with_present
-        ), profile_with_demog_fields_present AS (
+          FROM latest_facial_measurements_for_users
+        ),
+
+        #{FacialMeasurement.missing_ratio_sql},
+
+        profile_with_demog_fields_present AS (
           SELECT *, #{demographics_present_sql}
           FROM profiles
 
@@ -139,15 +143,15 @@ class ParticipantProgress
         ) as manager_email,
         p.first_name,
         p.last_name,
-        latest_facial_measurement_with_present.bitragion_subnasale_arc,
-        latest_facial_measurement_with_present.face_width,
-        latest_facial_measurement_with_present.nose_protrusion,
+        latest_facial_measurements_for_users.bitragion_subnasale_arc,
+        latest_facial_measurements_for_users.face_width,
+        latest_facial_measurements_for_users.nose_protrusion,
         sps.removal_from_study ->> 'removal_datetime' IS NOT NULL AS removed_from_study,
         sps.finished_study_datetime IS NOT NULL AS finished_study,
         num_targeted_masks,
         total_unique_masks_fit_tested.num_targeted_unique_masks_fit_tested,
         ROUND((num_targeted_unique_masks_fit_tested::float / num_targeted_masks * 100)::numeric, 2) AS fit_testing_percent_complete,
-        ROUND((fm_present_counts::float / 12 * 100)::numeric, 2) AS fm_percent_complete,
+        ROUND(((1 - missing_ratio)::numeric * 100)::numeric, 2) AS fm_percent_complete,
         ROUND((demog_present_counts::float / #{Profile::STRING_DEMOG_FIELDS.size + Profile::NUM_DEMOG_FIELDS.size} * 100)::numeric, 2) AS demog_percent_complete,
         managed_users.*, fm.created_at, fm.updated_at
 
@@ -158,11 +162,14 @@ class ParticipantProgress
         FULL OUTER JOIN managed_users
           ON managed_users.manager_id = managers_who_are_study_participants.id
 
-        LEFT JOIN latest_facial_measurement_with_present ON latest_facial_measurement_with_present.user_id =
+        LEFT JOIN latest_facial_measurements_for_users ON latest_facial_measurements_for_users.user_id =
           managed_users.managed_id
+
+        LEFT JOIN facial_measurement_missing_ratio AS fmmr ON (fmmr.id = latest_facial_measurements_for_users.id)
+
         LEFT JOIN profile_with_demog_fields_present_count p
           ON managed_users.managed_id = p.user_id
-        LEFT JOIN latest_facial_measurement_with_present_counts fm
+        LEFT JOIN latest_facial_measurements_for_users_counts fm
           ON fm.user_id = managed_users.managed_id
         LEFT JOIN total_unique_masks_fit_tested
           ON total_unique_masks_fit_tested.user_id = managed_users.managed_id
