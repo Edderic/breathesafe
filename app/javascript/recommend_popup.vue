@@ -13,11 +13,11 @@
         </thead>
         <tbody v-if='explanationToShow == ""'>
           <tr v-for='(value, key, index) in facialMeasurements'>
-            <th>{{value.eng}}</th>
-            <td>
+            <th  v-if='value.use_for_recommender'>{{value.eng}}</th>
+            <td v-if='value.use_for_recommender'>
               <CircularButton text='?' @click='show(key)'/>
             </td>
-            <td>
+            <td v-if='value.use_for_recommender'>
               <input class='num' type="number" :value='value.value' @change="updateFacialMeasurement($event, key)">
             </td>
           </tr>
