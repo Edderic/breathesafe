@@ -121,19 +121,19 @@
           <img class='left-pane-image' src="https://c.media-amazon.com/images/I/71Cwjwnqc6L._SL1500_.jpg" alt='Tape Measure, iBayam Soft Ruler Measuring Tape for Body Weight Loss Fabric Sewing Tailor Cloth Vinyl Measurement Craft Supplies, 60-Inch Double Scale Ruler, 2-Pack White, Blue' v-show='infoToShow == "curvedMeasurementsGuide"'>
         </a>
 
-        <img class='left-pane-image' :src="imgUrl('face_width')" alt='face width measurement' v-if='infoToShow == "faceWidth"'>
-        <img class='left-pane-image' :src="imgUrl('jaw_width')" alt='jaw width measurement' v-if='infoToShow == "jawWidth"'>
-        <img class='left-pane-image' :src="imgUrl('face_depth')" alt='face depth measurement' v-if='infoToShow == "faceDepth"'>
-        <img class='left-pane-image' :src="imgUrl('face_length')" alt='face length measurement' v-if='infoToShow == "faceLength"'>
-        <img class='left-pane-image' :src="imgUrl('lower_face_length')" alt='lower face length measurement' v-if='infoToShow == "lowerFaceLength"'>
-        <img class='left-pane-image' :src="imgUrl('nose_protrusion')" alt='nose protrusion measurement' v-if='infoToShow == "noseProtrusion"'>
-        <img class='left-pane-image' :src="imgUrl('nasal_root_breadth')" alt='nasal root breadth measurement' v-if='infoToShow == "nasalRootBreadth"'>
-        <img class='left-pane-image' :src="imgUrl('nose_bridge_height')" alt='nose bridge height measurement' v-if='infoToShow == "noseBridgeHeight"'>
-        <img class='left-pane-image' :src="imgUrl('lip_width')" alt='lip width measurement' v-if='infoToShow == "lipWidth"'>
-        <img class='left-pane-image' :src="imgUrl('bitragion_menton_arc')" alt='bitragion menton arc measurement' v-if='infoToShow == "bitragionMentonArc"'>
-        <img class='left-pane-image' :src="imgUrl('bitragion_subnasale_arc')" alt='bitragion subnasale arc measurement' v-if='infoToShow == "bitragionSubnasaleArc"'>
-        <img class='left-pane-image' :src="imgUrl('head_circumference')" alt='head circumference measurement' v-if='infoToShow == "headCircumference"'>
+        <div v-for='(value, key, index) in facialMeasurementExplanations'>
 
+          <div v-if='infoToShow == key'>
+            <br>
+            <br>
+            <p>{{value.eng}}</p>
+            <img class='left-pane-image' :src="value.image_url" alt='`${value.eng} measurement`' >
+            <p>{{value.explanation}}</p>
+          </div>
+
+        </div>
+
+        <img class='left-pane-image' :src="imgUrl('face_depth')" alt='face depth measurement' v-if='infoToShow == "faceDepth"'>
 
         <p v-if='infoToShow == "cheekFullness"' class='left-pane'>Select options below to get an understanding of different types of cheek fullness:</p>
         <TabSet
@@ -165,7 +165,7 @@
                 <label for="faceWidth">Face Width (mm) </label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('faceWidth')" :highlight="infoToShow == 'faceWidth'"/>
+                <CircularButton text="?" @click="toggleInfo('faceWidthMm')" :highlight="infoToShow == 'faceWidthMm'"/>
               </td>
 
               <td>
@@ -184,7 +184,7 @@
                 <label for="jawWidth">Jaw Width (mm)</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('jawWidth')" :highlight="infoToShow == 'jawWidth'"/>
+                <CircularButton text="?" @click="toggleInfo('jawWidthMm')" :highlight="infoToShow == 'jawWidthMm'"/>
               </td>
               <td>
                 <input
@@ -219,7 +219,7 @@
                 <label for="faceLength">Face Length (mm)</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('faceLength')" :highlight="infoToShow == 'faceLength'"/>
+                <CircularButton text="?" @click="toggleInfo('faceLengthMm')" :highlight="infoToShow == 'faceLengthMm'"/>
               </td>
               <td>
                 <input
@@ -237,7 +237,7 @@
                 <label for="lowerFaceLength">Lower Face Length (mm)</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('lowerFaceLength')" :highlight="infoToShow == 'lowerFaceLength'"/>
+                <CircularButton text="?" @click="toggleInfo('lowerFaceLengthMm')" :highlight="infoToShow == 'lowerFaceLengthMm'"/>
               </td>
               <td>
                 <input
@@ -271,7 +271,7 @@
                 </th>
 
                 <td>
-                  <CircularButton text="?" @click="toggleInfo('noseProtrusion')" :highlight="infoToShow == 'noseProtrusion'"/>
+                  <CircularButton text="?" @click="toggleInfo('noseProtrusionMm')" :highlight="infoToShow == 'noseProtrusionMm'"/>
                 </td>
                 <td>
                   <input
@@ -290,7 +290,7 @@
                 </th>
 
                 <td>
-                  <CircularButton text="?" @click="toggleInfo('nasalRootBreadth')" :highlight="infoToShow == 'nasalRootBreadth'"/>
+                  <CircularButton text="?" @click="toggleInfo('nasalRootBreadthMm')" :highlight="infoToShow == 'nasalRootBreadthMm'"/>
                 </td>
                 <td>
                   <input
@@ -308,7 +308,7 @@
                   <label for="noseBridgeHeight">Nose Bridge Height (mm)</label>
                 </th>
                 <td>
-                  <CircularButton text="?" @click="toggleInfo('noseBridgeHeight')" :highlight="infoToShow == 'noseBridgeHeight'"/>
+                  <CircularButton text="?" @click="toggleInfo('noseBridgeHeightMm')" :highlight="infoToShow == 'noseBridgeHeightMm'"/>
                 </td>
                 <td>
                   <input
@@ -326,7 +326,7 @@
                   <label for="lipWidth">Lip Width (mm)</label>
                 </th>
                 <td>
-                  <CircularButton text="?" @click="toggleInfo('lipWidth')" :highlight="infoToShow == 'lipWidth'"/>
+                  <CircularButton text="?" @click="toggleInfo('lipWidthMm')" :highlight="infoToShow == 'lipWidthMm'"/>
                 </td>
                 <td>
                   <input
@@ -365,7 +365,7 @@
                 <label for="bitragionMentonArc">Bitragion Menton Arc (mm)</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('bitragionMentonArc')" :highlight="infoToShow == 'bitragionMentonArc'"/>
+                <CircularButton text="?" @click="toggleInfo('bitragionMentonArcMm')" :highlight="infoToShow == 'bitragionMentonArcMm'"/>
               </td>
               <td>
                 <input
@@ -383,7 +383,7 @@
                 <label for="bitragionSubnasaleArc">Bitragion Subnasale Arc (mm)</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('bitragionSubnasaleArc')" :highlight="infoToShow == 'bitragionSubnasaleArc'"/>
+                <CircularButton text="?" @click="toggleInfo('bitragionSubnasaleArcMm')" :highlight="infoToShow == 'bitragionSubnasaleArcMm'"/>
               </td>
               <td>
                 <input
@@ -401,7 +401,7 @@
                 <label for="headCircumference">Head Circumference (mm)</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('headCircumference')" :highlight="infoToShow == 'headCircumference'"/>
+                <CircularButton text="?" @click="toggleInfo('headCircumferenceMm')" :highlight="infoToShow == 'headCircumferenceMm'"/>
               </td>
               <td>
                 <input
@@ -474,6 +474,7 @@ import Button from './button.vue'
 import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import TabSet from './tab_set.vue'
+import { getFacialMeasurements } from './facial_measurements.js'
 import { deepSnakeToCamel, setupCSRF } from './misc.js'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
@@ -613,6 +614,10 @@ export default {
           'otherGender'
         ]
     ),
+
+    facialMeasurementExplanations() {
+      return getFacialMeasurements.bind(this)()
+    },
 
     genderSexQuestion() {
       return `What is ${this.managedUser.firstName}'s gender?`;

@@ -104,6 +104,7 @@ import SortPopup from './sort_popup.vue'
 import Spinner from './spinner.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
+import { getFacialMeasurements } from './facial_measurements.js'
 import { perimeterColorScheme } from './colors.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
@@ -208,26 +209,7 @@ export default {
         ]
     ),
     facialMeasurements() {
-      return {
-        'bitragionSubnasaleArcMm': {
-          'eng': "Bitragion subnasale arc (mm)",
-          'value': this.bitragionSubnasaleArcMm,
-          'explanation': "The surface distance between the left and right tragion landmarks (cartilaginous flap of the ear) across the subnasale landmark at the bottom of the nose",
-          'image_url': "https://nap.nationalacademies.org/openbook/0309103983/xhtml/images/p20012464g30003.jpg"
-        },
-        'faceWidthMm': {
-          'eng': "Face width (mm)",
-          'value': this.faceWidthMm,
-          'explanation': "The maximum horizontal breadth of the face between the zygomatic arches (cheekbones)",
-          'image_url': 'https://nap.nationalacademies.org/openbook/0309103983/xhtml/images/p20012464g31003.jpg'
-        },
-        'noseProtrusionMm': {
-          'eng': "Nose protrusion (mm)",
-          'value': this.noseProtrusionMm,
-          'explanation': "The straight-line distance between the pronasale landmark at the tip of the nose and the subnasale landmark under the nose.",
-          'image_url': 'https://nap.nationalacademies.org/openbook/0309103983/xhtml/images/p20012464g33001.jpg'
-        },
-      }
+      return getFacialMeasurements.bind(this)()
     },
 
     perimColorScheme() {
