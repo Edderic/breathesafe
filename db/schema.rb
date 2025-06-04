@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_06_01_174445) do
+ActiveRecord::Schema[7.0].define(version: 2025_06_04_142529) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -117,6 +117,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_06_01_174445) do
     t.integer "nose_bridge_height"
     t.integer "lip_width"
     t.integer "head_circumference"
+    t.integer "nose_breadth"
     t.index ["user_id"], name: "index_facial_measurements_on_user_id"
   end
 

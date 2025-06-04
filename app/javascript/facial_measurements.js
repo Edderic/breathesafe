@@ -21,6 +21,13 @@ export function getFacialMeasurements() {
       'image_url': 'https://nap.nationalacademies.org/openbook/0309103983/xhtml/images/p20012464g33001.jpg',
       'use_for_recommender': true
     },
+    'noseBreadthMm': {
+      'eng': "Nose breadth (mm)",
+      'value': this.noseProtrusionMm,
+      'explanation': "The straight-line distance between the right and left alare landmarks on the sides of the nostrils. Please use a caliper.",
+      'image_url': 'https://nap.nationalacademies.org/openbook/0309103983/xhtml/images/p20012464g32003.jpg',
+      'use_for_recommender': false
+    },
     'jawWidthMm': {
       'eng': 'Jaw width (mm)',
       'value': this.jawWidthMm,

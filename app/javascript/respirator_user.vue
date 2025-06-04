@@ -267,6 +267,25 @@
               </tr>
               <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
                 <th colspan="1">
+                  <label for="noseProtrusion">Nose Breadth (mm)</label>
+                </th>
+
+                <td>
+                  <CircularButton text="?" @click="toggleInfo('noseBreadthMm')" :highlight="infoToShow == 'noseBreadthMm'"/>
+                </td>
+                <td>
+                  <input
+                      v-if='latestFacialMeasurement'
+                      type='number'
+                      :value="latestFacialMeasurement.noseBreadth"
+                      @change='setFacialMeasurement($event, "noseBreadth")'
+                      :disabled="mode == 'View'"
+                      >
+                </td>
+              </tr>
+
+              <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
+                <th colspan="1">
                   <label for="noseProtrusion">Nose Protrusion (mm)</label>
                 </th>
 
@@ -494,19 +513,6 @@ export default {
   },
   data() {
     return {
-      measurementDict: {
-        'faceWidth': 'face_width',
-        'jawWidth': 'jaw_width',
-        'faceDepth': 'face_depth',
-        'faceLength': 'face_length',
-        'lowerFaceLength': 'lower_face_length',
-        'noseProtrusion': 'nose_protrusion',
-        'nasalRootBreadth': 'nasal_root_breadth',
-        'noseBridgeHeight': 'nose_bridge_height',
-        'lipWidth': 'lip_width',
-        'bitragionMentonArc': 'bitragion_menton_arc',
-        'bitragionSubnasaleArc': 'bitragion_subnasale_arc',
-      },
       facialMeasurementParts: [
         {
           text: "Part I",
@@ -745,22 +751,15 @@ export default {
           }
 
           if (this.facialMeasurements.length == 0) {
-            this.facialMeasurements.push({
-              source: 'caliper for straight lines & tape measure for curves',
-                faceWidth: undefined,
-                noseBridgeHeight: undefined,
-                nasalRootBreadth: undefined,
-                noseProtrusion: undefined,
-                lipWidth: undefined,
-                jawWidth: undefined,
-                faceDepth: undefined,
-                faceLength: undefined,
-                lowerFaceLength: undefined,
-                bitragionMentonArc: undefined,
-                bitragionSubnasaleArc: undefined,
-                cheekFullness: undefined,
-                headCircumference: undefined,
-            })
+            let dictionary = {
+              source: 'caliper for straight lines & tape measure for curves'
+            }
+
+            for (key of this.getFacialMeasurements) {
+              dictionary[key] = undefined
+            }
+
+            this.facialMeasurements.push(dictionary)
           }
           // whatever you want
         })
@@ -875,23 +874,6 @@ export default {
           // whatever you want
         })
     },
-    runFacialMeasurementValidations() {
-      let quantitativeMeasurements = [
-        'faceWidth', 'noseBridgeHeight', 'nasalRootBreadth', 'lipWidth',
-        'noseProtrusion', 'jawWidth', 'faceDepth', 'faceLength',
-        'lowerFaceLength', 'bitragionSubnasaleArc', 'bitragionMentonArc'
-      ]
-
-      let negativeOrZero = [];
-
-      for(let q of quantitativeMeasurements) {
-        if (this.latestFacialMeasurement[q] <= 0) {
-          this.errorMessages.push({
-            str: `${q} cannot be zero or negative.`,
-          })
-        }
-      }
-    },
     async saveFacialMeasurement(successCallback) {
       await axios.post(
         `/users/${this.$route.params.id}/facial_measurements.json`, {
@@ -900,6 +882,7 @@ export default {
             face_width: this.latestFacialMeasurement.faceWidth,
             nose_bridge_height: this.latestFacialMeasurement.noseBridgeHeight,
             nasal_root_breadth: this.latestFacialMeasurement.nasalRootBreadth,
+            nose_breadth: this.latestFacialMeasurement.noseBreadth,
             lip_width: this.latestFacialMeasurement.lipWidth,
             nose_protrusion: this.latestFacialMeasurement.noseProtrusion,
             jaw_width: this.latestFacialMeasurement.jawWidth,

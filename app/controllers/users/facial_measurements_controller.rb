@@ -78,6 +78,7 @@ class Users::FacialMeasurementsController < ApplicationController
       "face_width",
       "nose_bridge_height",
       "nasal_root_breadth",
+      "nose_breadth",
       "nose_protrusion",
       "lip_width",
       "jaw_width",
