@@ -38,6 +38,7 @@
       v-if='tabToShow == "Untested"'
       :viewMaskOnClick='false'
       :cards='sortedDisplayables'
+      :showStats='false'
       :managedUser='managedUser'
       :showMaskCardPopup='showMaskCardPopup'
       @toggleMaskCardPopup='toggleMaskCardPopup'

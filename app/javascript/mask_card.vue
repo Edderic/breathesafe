@@ -40,7 +40,7 @@
             {{m.uniqueInternalModelCode}}
           </span>
         </div>
-        <table>
+        <table v-if='showStats'>
           <tr>
             <th>Proba Fit</th>
             <td rowspan='1' v-if='!m.probaFit'>Please see "R" button above</td>
@@ -153,6 +153,9 @@ export default {
     },
     showMaskCardPopup: {
       default: false
+    },
+    showStats: {
+      default: true
     }
   },
   computed: {

@@ -53,23 +53,8 @@ class Mask < ApplicationRecord
     end
   end
 
-  def self.with_aggregations(mask_ids=nil)
-    if mask_ids
-      mask_id_clause = Mask.sanitize_sql_array(["WHERE m.id IN (?)", mask_ids])
-    else
-      mask_id_clause = ""
-    end
-
-    result = Mask.connection.exec_query(
-      <<-SQL
-        WITH fit_test_counts_per_mask AS (
-          SELECT m.id as mask_id, COUNT(ft.id) AS fit_test_count
-          FROM masks m
-          LEFT JOIN fit_tests ft
-          ON (ft.mask_id = m.id)
-          GROUP BY m.id
-        ),
-
+  def self.average_filtration_efficiencies_sql
+    <<-SQL
         exercise_results AS (
             SELECT id,
              user_id,
@@ -92,10 +77,32 @@ class Mask < ApplicationRecord
              FROM filtered
             GROUP BY 1
         ), average_filtration_efficiencies AS (
-
           SELECT *, 1 - 1 / avg_sealed_fit_factor AS avg_sealed_filtration_efficiency
           FROM average_sealed_fit_factors
+        )
+
+    SQL
+  end
+
+  def self.with_aggregations(mask_ids=nil)
+    if mask_ids
+      mask_id_clause = Mask.sanitize_sql_array(["WHERE m.id IN (?)", mask_ids])
+    else
+      mask_id_clause = ""
+    end
+
+    result = Mask.connection.exec_query(
+      <<-SQL
+        WITH fit_test_counts_per_mask AS (
+          SELECT m.id as mask_id, COUNT(ft.id) AS fit_test_count
+          FROM masks m
+          LEFT JOIN fit_tests ft
+          ON (ft.mask_id = m.id)
+          GROUP BY m.id
         ),
+
+        #{self.average_filtration_efficiencies_sql},
+
         unique_fit_tester_counts_per_mask AS (
           SELECT m.id AS mask_id, COUNT(DISTINCT fm.user_id) AS unique_fit_testers_count
           FROM masks m

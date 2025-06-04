@@ -22,10 +22,13 @@ class MaskKitQuery
           LEFT JOIN fit_tests ft
           ON (ft.mask_id = m.id)
           GROUP BY m.id, user_id
-        )
+        ),
+        #{Mask.average_filtration_efficiencies_sql}
+
         SELECT
           distinct on (masks.id)
           masks.*,
+          average_filtration_efficiencies.*,
           users.email,
           profiles.first_name,
           profiles.last_name,
@@ -37,6 +40,8 @@ class MaskKitQuery
             0
           END AS num_fit_tests_per_mask_user
         FROM masks
+        LEFT JOIN average_filtration_efficiencies
+          ON masks.id = average_filtration_efficiencies.mask_id
         LEFT JOIN mask_kit_statuses mks
           ON mks.mask_uuid = masks.id
         LEFT JOIN shipping_status_joins ssj
@@ -51,6 +56,7 @@ class MaskKitQuery
         LEFT JOIN fit_test_counts_per_mask_user ftcpmu
           ON ftcpmu.mask_id = masks.id
           AND ftcpmu.user_id = mu.managed_id
+
 
         #{where_clause}
         SQL
