@@ -350,6 +350,7 @@
         <Button shadow='true' class='button' text="Delete" @click='deleteMask' v-if='deletable && (mode != "Show") && canUpdate'/>
         <Button shadow='true' class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New") || ((mode == "Edit") && canUpdate)'/>
         <Button shadow='true' class='button' text="Save" @click='saveMask' v-if='(mode == "New") || ((mode == "Edit") && canUpdate)'/>
+        <Button shadow='true' class='button' text="Add Fit Testing Data" v-if='(mode == "Show")' @click='tryAddingFitTest'/>
       </div>
 
       <br>
@@ -405,6 +406,7 @@ import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
+import { useManagedUserStore } from './stores/managed_users_store';
 
 export default {
   name: 'Mask',
@@ -566,6 +568,12 @@ export default {
         useProfileStore,
         [
           'profileId',
+        ]
+    ),
+    ...mapState(
+        useManagedUserStore,
+        [
+          'managedUsers'
         ]
     ),
     ...mapWritableState(
@@ -796,6 +804,7 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
+    ...mapActions(useManagedUserStore, ['loadManagedUsers']),
 
     circleStyling(opt ) {
       if (this.colors.includes(opt)) {
@@ -923,6 +932,28 @@ export default {
           where_to_buy_urls: [],
         }
       )
+    },
+    async tryAddingFitTest() {
+      await this.getCurrentUser()
+
+      if (this.currentUser) {
+        await this.loadManagedUsers()
+        if (this.managedUsers.length == 0) {
+          this.messages.push({
+            str: "Your account does not have any respirator users yet. Please visit the Respirator Users page by clicking on this message, and add at least one.", to: {
+              "name": 'RespiratorUsers'
+            }
+          })
+
+        } else {
+          this.$router.push({
+            'name': 'NewFitTest',
+            'query': {
+              maskId: this.id
+            }
+          })
+        }
+      }
     },
     async loadStuff() {
       // TODO: load the profile for the current user

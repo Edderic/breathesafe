@@ -1191,104 +1191,18 @@ export default {
     let toQuery = this.$route.query
     let toParams = this.$route.params
 
-    if (!this.currentUser) {
-      signIn.call(this)
-    } else {
-      // TODO: a parent might input data on behalf of their children.
-      // Currently, this.loadStuff() assumes We're loading the profile for the current user
-
-      if (this.$route.name == 'NewFitTest') {
-        this.mode = 'Create'
-      }
-
-
-      if (this.$route.name == 'NewFitTest' && this.$route.query.userId && this.$route.query.maskId) {
-        // handle quick way to add too small / too big
-        await this.loadMasks()
-        await this.loadManagedUsers()
-        let managedUser = this.managedUsers.filter((m) => m.managedId == parseInt(this.$route.query.userId))[0]
-        this.selectedMask = this.masks.filter((m) => m.maskId == parseInt(this.$route.query.maskId))[0]
-
-        let successCallback = undefined;
-        let tabToShow = 'Facial Hair'
-
-        if (this.$route.query.size) {
-          this.userSealCheck["sizing"]["What do you think about the sizing of this mask relative to your face?"] = this.$route.query.size
-
-          successCallback = function () {
-            this.$router.push({
-              name: 'FitTests',
-              query: {
-                managedId: managedUser.managedId
-              }
-            })
-          }.bind(this)
-        }
-
-        if (managedUser) {
-          this.selectedUser = managedUser
-
-          await this.saveFitTest(
-            {
-              tabToShow: tabToShow
-            },
-            successCallback
-          )
-        }
-      }
-
-      if (this.acceptableRouteName) {
-        // pull the data
-        if ('tabToShow' in toQuery) {
-          this.tabToShow = toQuery['tabToShow']
-        }
-
-        if ('mode' in toQuery) {
-          this.mode = toQuery['mode']
-        }
-
-        if (toQuery['secondaryTabToShow'] && this.acceptableRouteName) {
-          this.secondaryTabToShow = toQuery['secondaryTabToShow']
-        }
-
-      }
-
-      if (toParams['id'] && this.acceptableRouteName) {
-        this.id = toParams['id']
-      }
-
-      await this.loadStuff()
-
-    }
-
+    await this.loadQuery(toQuery, null)
+    await this.loadParams(toParams, null)
 
     // TODO: add param watchers
     this.$watch(
       () => this.$route.query,
-      (toQuery, fromQuery) => {
-        if (["EditFitTest", "ViewFitTest", "NewFitTest"].includes(this.$route.name)) {
-          if (toQuery['tabToShow']) {
-            this.tabToShow = toQuery['tabToShow']
-          }
-
-          if (toQuery['mode']) {
-            this.mode = toQuery['mode']
-          }
-
-          if (toQuery['secondaryTabToShow']) {
-            this.secondaryTabToShow = toQuery['secondaryTabToShow']
-          }
-        }
-      }
+      this.loadQuery
     )
 
     this.$watch(
       () => this.$route.params,
-      (toParams, fromParams) => {
-        if (toParams['id'] && this.acceptableRouteName) {
-          this.id = toParams['id']
-        }
-      }
+      this.loadParams
     )
   },
   methods: {
@@ -1296,6 +1210,78 @@ export default {
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     ...mapActions(useMeasurementDeviceStore, ['loadMeasurementDevices']),
+    async loadParams(toParams, fromParams) {
+      if (toParams['id'] && this.acceptableRouteName) {
+        this.id = toParams['id']
+      }
+    },
+    async loadQuery(toQuery, fromQuery) {
+      if (!this.currentUser) {
+        signIn.call(this)
+      } else {
+
+        if (this.$route.name == 'NewFitTest') {
+          this.mode = 'Create'
+        }
+
+        if (this.$route.name == 'NewFitTest' && toQuery.userId && toQuery.maskId) {
+          // handle quick way to add too small / too big
+          await this.loadMasks()
+          await this.loadManagedUsers()
+          let managedUser = this.managedUsers.filter((m) => m.managedId == parseInt(toQuery.userId))[0]
+
+          let successCallback = undefined;
+          let tabToShow = 'Facial Hair'
+
+          if (this.$route.query.size) {
+            this.userSealCheck["sizing"]["What do you think about the sizing of this mask relative to your face?"] = toQuery.size
+
+            successCallback = function () {
+              this.$router.push({
+                name: 'FitTests',
+                query: {
+                  managedId: managedUser.managedId
+                }
+              })
+            }.bind(this)
+          }
+
+          if (managedUser) {
+            this.selectedUser = managedUser
+
+            await this.saveFitTest(
+              {
+                tabToShow: tabToShow
+              },
+              successCallback
+            )
+          }
+        }
+
+        if (this.acceptableRouteName) {
+          // pull the data
+          if ('tabToShow' in toQuery) {
+            this.tabToShow = toQuery['tabToShow']
+          }
+
+          if ('mode' in toQuery) {
+            this.mode = toQuery['mode']
+          }
+
+          if (toQuery['secondaryTabToShow'] && this.acceptableRouteName) {
+            this.secondaryTabToShow = toQuery['secondaryTabToShow']
+          }
+
+        }
+
+        await this.loadStuff()
+
+        if (toQuery.maskId) {
+          this.selectedMask = this.masks.filter((m) => m.id == parseInt(toQuery.maskId))[0]
+        }
+      }
+
+    },
     setQuantitativeExercises(exercises) {
       // Has a "name" field
       if (this.quantitativeProcedure == 'Full OSHA') {
