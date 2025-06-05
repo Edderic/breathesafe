@@ -945,7 +945,8 @@ export default {
             }
           })
 
-        } else {
+        }
+        else {
           this.$router.push({
             'name': 'NewFitTest',
             'query': {
@@ -953,6 +954,14 @@ export default {
             }
           })
         }
+      } else {
+        this.$router.push({
+          'name': 'SignIn',
+          'query': {
+            'attempt-name': 'ShowMask',
+            'params-id': this.id
+          }
+        })
       }
     },
     async loadStuff() {

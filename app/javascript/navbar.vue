@@ -119,9 +119,7 @@ export default {
         console.log(response)
         if (response.status == 204 || response.status == 200) {
           this.getCurrentUser();
-          this.$router.push({
-            path: '/'
-          });
+          window.location.href = window.location.origin
         }
 
         // whatever you want
