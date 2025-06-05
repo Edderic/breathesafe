@@ -3,7 +3,7 @@
     <CircularButton @click='close' class='close' :style='{bottom: bottom, left: left}' text='x'/>
     <div class='slot-wrapper'>
       <p v-for='message in messages'>
-        <router-link v-if='!!message.to' :to='message.to'>
+        <router-link v-if='!!message.to' :to='message.to' @click='close'>
           {{message.str}}
         </router-link>
         <span v-else>
