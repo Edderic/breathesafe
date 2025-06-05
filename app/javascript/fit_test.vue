@@ -68,7 +68,7 @@
         <h3 class='text-align-center'>Search for and pick a mask</h3>
 
         <div class='row justify-content-center'>
-          <input type="text" @change='updateSearch($event, "mask")' :disabled='!createOrEdit'>
+          <input type="text" :value='this.selectedMask.uniqueInternalModelCode' @change='updateSearch($event, "mask")' :disabled='!createOrEdit'>
           <SearchIcon height='2em' width='2em'/>
         </div>
 
@@ -77,7 +77,7 @@
         </h3>
 
 
-        <div :class='{main: true, grid: true, selectedMask: maskHasBeenSelected}'>
+        <div :class='{main: true, grid: true, selectedMask: true, oneCol: maskDisplayables.length == 1}'>
           <div class='card pointable flex flex-dir-col align-items-center justify-content-center' v-for='m in selectMaskDisplayables' @click='selectMask(m.id)'>
             <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
             <div class='description'>
@@ -1274,10 +1274,14 @@ export default {
 
         }
 
-        await this.loadStuff()
+        await this.loadManagedUsers()
+        await this.loadMasks()
+        await this.loadMeasurementDevices()
+        await this.loadFitTest()
 
         if (toQuery.maskId) {
           this.selectedMask = this.masks.filter((m) => m.id == parseInt(toQuery.maskId))[0]
+          this.searchMask = this.selectedMask.uniqueInternalModelCode
         }
       }
 
@@ -1336,19 +1340,21 @@ export default {
           uniqueInternalModelCode: null
         }
       } else {
-        this.selectedMask = this.masks.filter((m) => m.id == id)[0]
-        this.searchMask = this.selectedMask.uniqueInternalModelCode
+        let query = JSON.parse(JSON.stringify(this.$route.query))
+
+        let newQuery = Object.assign(query, { maskId: id })
+
+        this.$router.push(
+          {
+            name: this.$route.name,
+            query: newQuery
+          }
+        )
       }
     },
     selectUser(id) {
       this.selectedUser = this.managedUsers.filter((m) => m.managedId == id)[0]
       this.searchUser = this.selectedUser.fullName
-    },
-    async loadStuff() {
-      await this.loadManagedUsers()
-      await this.loadMasks()
-      await this.loadMeasurementDevices()
-      await this.loadFitTest()
     },
     async loadMasks() {
       // TODO: make this more flexible so parents can load data of their children
@@ -1405,7 +1411,7 @@ export default {
 
             this.id = fitTestData.id
 
-            this.selectMask(fitTestData.mask_id)
+            this.selectedMask = this.masks.filter((m) => m.id == fit_test_data.mask_id)[0]
             this.comfort = fitTestData.comfort
             this.userSealCheck = fitTestData.user_seal_check
             this.facialHair = fitTestData.facial_hair
