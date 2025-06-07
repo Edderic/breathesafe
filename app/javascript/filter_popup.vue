@@ -38,14 +38,6 @@
           <br>
       </div>
 
-      <div v-if='showTargetedOptions'>Targeted Masks (for Testers)</div>
-      <table v-if='showTargetedOptions'>
-        <tr>
-          <td><input id='targeted' type="checkbox" :checked='filterForTargeted' @click='filterFor("Targeted")'><label for="targeted">Targeted</label></td>
-          <td><input id='not_targeted' type="checkbox" :checked='filterForNotTargeted' @click='filterFor("NotTargeted")'><label for="not_targeted">Not Targeted</label></td>
-        </tr>
-      </table>
-
       <br>
 
 
