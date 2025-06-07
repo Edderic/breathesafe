@@ -47,7 +47,7 @@
         :x="margin/2"
         :y="height/2"
         text-anchor="middle"
-        transform="rotate(-90, margin/2, height/2)"
+        :transform="`rotate(-90, ${margin/2}, ${height/2})`"
       >
         {{ yLabel }}
       </text>

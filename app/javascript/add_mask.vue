@@ -360,6 +360,20 @@
     </div>
     <div class='grid bar-charts' v-show='displayTab == "Fit Testing"'>
       <div class='card'>
+        <ScatterPlot
+          title="Fit Test Results"
+          xLabel="Face Width (mm)"
+          yLabel="Fit Factor"
+          xAxisName="face_width"
+          yAxisName="fit_factor"
+          :points="fitTestPoints"
+          :width="400"
+          :height="300"
+          :x_lim="[140, 180]"
+          :y_lim="[0, 250]"
+        />
+      </div>
+      <div class='card'>
         <h3 class='title'>Counts</h3>
         <HorizontalStackedBar
             :values="basicAggregates"
@@ -407,6 +421,7 @@ import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import { useManagedUserStore } from './stores/managed_users_store';
+import ScatterPlot from './scatter_plot.vue'
 
 export default {
   name: 'Mask',
@@ -417,6 +432,7 @@ export default {
     ClosableMessage,
     ColoredCell,
     HorizontalStackedBar,
+    ScatterPlot,
     SurveyQuestion,
     TabSet
   },
@@ -538,6 +554,13 @@ export default {
       authorIds: [],
       whereToBuyUrls: [],
       errorMessages: [],
+      fitTestPoints: [
+        { x: 155, y: 100, color: '#4CAF50', borderStyle: 'none' },
+        { x: 160, y: 150, color: '#2196F3', borderStyle: 'none' },
+        { x: 145, y: 80, color: '#FFC107', borderStyle: 'none' },
+        { x: 170, y: 200, color: '#9C27B0', borderStyle: 'none' },
+        { x: 150, y: 120, color: '#F44336', borderStyle: 'none' }
+      ],
     }
   },
   props: {
@@ -1369,7 +1392,7 @@ export default {
   }
 
   .bar-charts {
-    grid-template-columns: 50% 50%;
+    grid-template-columns: 33% 33% 33%;
   }
 
   @media(max-width: 1300px) {
