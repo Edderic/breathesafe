@@ -2,7 +2,8 @@
   <div class='align-items-center flex-dir-col sticky'>
     <div class='flex align-items-center row'>
       <h2 class='tagline'>Masks</h2>
-      <CircularButton text="+" @click="newMask" v-show="currentUser"/>
+      <CircularButton text="+" @click="newMask" />
+      <CircularButton text="?" @click="showPopup = 'Help'"/>
     </div>
 
     <div class='row'>
@@ -38,6 +39,11 @@
         :facialMeasurements='facialMeasurements'
         @hidePopUp='showPopup = false'
         @updateFacialMeasurement='triggerRouterForFacialMeasurementUpdate'
+      />
+
+      <HelpPopup
+        :showPopup='showPopup == "Help"'
+        @hidePopUp='showPopup = false'
       />
 
       <SortPopup
@@ -110,6 +116,7 @@ import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import { Respirator, displayableMasks, sortedDisplayableMasks } from './masks.js'
+import HelpPopup from './help_popup.vue'
 
 
 export default {
@@ -120,6 +127,7 @@ export default {
     ColoredCell,
     ClosableMessage,
     FilterPopup,
+    HelpPopup,
     MaskCards,
     Popup,
     PersonIcon,
@@ -502,6 +510,8 @@ export default {
   .tagline {
     text-align: center;
     font-weight: bold;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
   }
 
   .align-items-center {
