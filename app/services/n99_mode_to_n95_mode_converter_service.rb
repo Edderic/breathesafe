@@ -200,6 +200,7 @@ class N99ModeToN95ModeConverterService
             GROUP BY 1
           ), n95_mode_estimates_and_facial_measurements AS (
             SELECT n95_mode_estimates.*,
+             (facial_hair ->> 'beard_length_mm')::integer as facial_hair_beard_length_mm,
              #{FacialMeasurement::COLUMNS.join(",")}
 
              FROM n95_mode_estimates
