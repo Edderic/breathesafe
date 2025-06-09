@@ -247,7 +247,7 @@ FactoryBot.define do
     association :user
     association :mask
     association :facial_measurement
-    association :quantitative_fit_testing_device, factory: :measurement_device
+    association :quantitative_fit_testing_device, factory: :measurement_device, strategy: :build
 
     user_seal_check do
       {
@@ -396,7 +396,7 @@ FactoryBot.define do
     end
 
     trait :without_quantitative_device do
-      quantitative_fit_testing_device { nil }
+      quantitative_fit_testing_device_id { nil }
     end
 
     trait :without_facial_measurement do
