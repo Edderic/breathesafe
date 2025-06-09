@@ -107,10 +107,10 @@ RSpec.describe N99ModeToN95ModeConverterService do
           ]
         end
 
-        it "does not return the fit test" do
+        it "returns the fit test" do
           results = described_class.call.to_a
-
-          expect(results).to be_empty
+          result = results.first
+          expect(result['qlft_pass']).to be nil
         end
 
       end

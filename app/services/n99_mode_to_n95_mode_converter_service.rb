@@ -117,6 +117,43 @@ class N99ModeToN95ModeConverterService
       )
     end
 
+    def n99_mode_fit_tests_missing_fe
+      ActiveRecord::Base.connection.exec_query(
+        <<-SQL
+          #{n95_mode_estimates_sql}
+          SELECT * FROM n99_mode_fit_tests_missing_fe
+        SQL
+      )
+    end
+
+    def unioned
+      ActiveRecord::Base.connection.exec_query(
+        <<-SQL
+          #{n95_mode_estimates_sql}
+          SELECT * FROM unioned
+        SQL
+      )
+    end
+
+    def n99_fit_tests_at_least_partially_filled
+      ActiveRecord::Base.connection.exec_query(
+        <<-SQL
+          #{n95_mode_estimates_sql}
+          SELECT * FROM n99_fit_tests_at_least_partially_filled
+        SQL
+      )
+    end
+
+    def n99_mode_fit_tests_ids_with_data_but_missing_filtration_efficiency
+
+      ActiveRecord::Base.connection.exec_query(
+        <<-SQL
+          #{n95_mode_estimates_sql}
+          SELECT * FROM n99_mode_fit_tests_ids_with_data_but_missing_filtration_efficiency
+        SQL
+      )
+    end
+
     def n95_mode_estimates_sql
       <<-SQL
           WITH n99_exercises AS (
@@ -132,7 +169,18 @@ class N99ModeToN95ModeConverterService
               SELECT * FROM n99_exercise_name_and_fit_factors
               WHERE exercise_name = 'Normal breathing (SEALED)'
               AND exercise_fit_factor IS NOT NULL
-          ), aaron_sealed_fit_factors AS (
+          ), n99_non_filtration_efficiency_from_exercise AS (
+              SELECT * FROM n99_exercise_name_and_fit_factors
+              WHERE exercise_name != 'Normal breathing (SEALED)'
+              AND exercise_fit_factor IS NOT NULL
+          ), n99_fit_tests_at_least_partially_filled AS (
+              SELECT id, COUNT(*) as num_exercises_filled
+              FROM n99_non_filtration_efficiency_from_exercise
+              WHERE exercise_fit_factor IS NOT NULL
+              GROUP BY 1
+          ),
+
+          aaron_sealed_fit_factors AS (
               SELECT masks.id,
                mask_filtration_efficiencies -> 'filtration_efficiency_notes' AS notes,
                CASE WHEN (mask_filtration_efficiencies ->> 'filtration_efficiency_percent') = '' THEN NULL ELSE (mask_filtration_efficiencies ->> 'filtration_efficiency_percent') END::numeric / 100 AS aaron_filtration_efficiency,
@@ -198,16 +246,34 @@ class N99ModeToN95ModeConverterService
              COUNT(*) / SUM(n95_mode_inverse) * 2 >= 100 AS qlft_pass
             FROM n95_mode_estimate_for_exercises
             GROUP BY 1
-          ), n95_mode_estimates_and_facial_measurements AS (
-            SELECT n95_mode_estimates.*,
-             (facial_hair ->> 'beard_length_mm')::integer as facial_hair_beard_length_mm,
-             #{FacialMeasurement::COLUMNS.join(",")}
+          ),
+          n99_mode_fit_tests_ids_with_data_but_missing_filtration_efficiency AS (
+              SELECT id
+              FROM n99_fit_tests_at_least_partially_filled
 
-             FROM n95_mode_estimates
-              INNER JOIN fit_tests ft
-                ON ft.id = n95_mode_estimates.id
-              LEFT JOIN facial_measurements fm
-                ON ft.facial_measurement_id = fm.id
+              EXCEPT
+
+              SELECT id
+              FROM n99_filtration_efficiency_from_exercises
+          ), n99_mode_fit_test_exercises_with_data_but_missing_filtration_efficiency AS (
+            SELECT * FROM
+            n99_exercise_name_and_fit_factors
+            WHERE id IN (SELECT id FROM n99_mode_fit_tests_ids_with_data_but_missing_filtration_efficiency)
+          ), n99_mode_fit_tests_missing_fe AS (
+            SELECT id,
+              COUNT(*) AS n,
+              NULL::numeric as denominator,
+              NULL::numeric AS n95_mode_hmff,
+              NULL::bool AS qlft_pass
+            FROM n99_mode_fit_test_exercises_with_data_but_missing_filtration_efficiency
+            GROUP BY id
+          ), unioned AS (
+            SELECT
+              id, n, denominator, n95_mode_hmff, qlft_pass
+            FROM n99_mode_fit_tests_missing_fe
+            UNION
+            SELECT id, n, denominator, n95_mode_hmff, qlft_pass
+            FROM n95_mode_estimates
           )
       SQL
     end
@@ -216,8 +282,15 @@ class N99ModeToN95ModeConverterService
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
           #{n95_mode_estimates_sql}
-          SELECT *
-          FROM n95_mode_estimates_and_facial_measurements
+
+          SELECT unioned.*,
+             (facial_hair ->> 'beard_length_mm')::integer as facial_hair_beard_length_mm,
+             #{FacialMeasurement::COLUMNS.join(",")}
+          FROM unioned
+          LEFT JOIN fit_tests ft
+            ON unioned.id = ft.id
+          LEFT JOIN facial_measurements fm
+            ON ft.facial_measurement_id = fm.id
         SQL
       )
     end
