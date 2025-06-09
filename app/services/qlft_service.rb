@@ -58,6 +58,7 @@ class QlftService
 
 
           SELECT qlft_pass_status_maybe_null.*,
+            (facial_hair ->> 'beard_length_mm')::integer as facial_hair_beard_length_mm,
             explicit_pass_count as n,
             NULL as denominator,
             NULL as n95_mode_hmff,
