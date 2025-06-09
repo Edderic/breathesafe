@@ -407,4 +407,64 @@ FactoryBot.define do
       mask { nil }
     end
   end
+
+  factory :measurement_device do
+    association :owner, factory: :user
+    measurement_device_type { "quantitative_fit_testing" }
+    manufacturer { "TSI" }
+    model { "PortaCount Pro+" }
+    sequence(:serial) { |n| "SN#{n}" }
+    notes { "Test device" }
+    remove_from_service { false }
+
+    trait :removed_from_service do
+      remove_from_service { true }
+    end
+
+    trait :with_notes do
+      notes { "Device calibrated on #{Time.current.strftime('%Y-%m-%d')}" }
+    end
+
+    trait :with_fit_tests do
+      after(:create) do |device|
+        create_list(:fit_test, 2, quantitative_fit_testing_device: device)
+      end
+    end
+
+    trait :digital_caliper do
+      measurement_device_type { "digital_caliper" }
+      manufacturer { "Mitutoyo" }
+      model { "500-196-30" }
+    end
+
+    trait :tape_measure do
+      measurement_device_type { "tape_measure" }
+      manufacturer { "Stanley" }
+      model { "PowerLock" }
+    end
+
+    trait :carbon_dioxide_monitor do
+      measurement_device_type { "carbon_dioxide_monitor" }
+      manufacturer { "CO2Meter" }
+      model { "AZ-0004" }
+    end
+
+    trait :nebulizer do
+      measurement_device_type { "nebulizer" }
+      manufacturer { "TSI" }
+      model { "8026" }
+    end
+
+    trait :hood do
+      measurement_device_type { "hood" }
+      manufacturer { "TSI" }
+      model { "8025" }
+    end
+
+    trait :solution do
+      measurement_device_type { "solution" }
+      manufacturer { "TSI" }
+      model { "8038" }
+    end
+  end
 end 
