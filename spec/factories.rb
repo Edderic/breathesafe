@@ -242,4 +242,169 @@ FactoryBot.define do
       cheek_fullness { ["low", "medium", "high"].sample }
     end
   end
+
+  factory :fit_test do
+    association :user
+    association :mask
+    association :facial_measurement
+    association :quantitative_fit_testing_device, factory: :measurement_device
+
+    user_seal_check do
+      {
+        "passed" => true,
+        "notes" => "Good seal observed"
+      }
+    end
+
+    comfort do
+      {
+        "rating" => 4,
+        "notes" => "Comfortable fit"
+      }
+    end
+
+    facial_hair do
+      {
+        "has_facial_hair" => false,
+        "notes" => "Clean shaven"
+      }
+    end
+
+    results do
+      {
+        "quantitative" => {
+          "testing_mode" => "N99",
+          "exercises" => [
+            {
+              "name" => "Normal breathing (SEALED)",
+              "fit_factor" => 200
+            },
+            {
+              "name" => "Deep breathing",
+              "fit_factor" => 150
+            },
+            {
+              "name" => "Talking",
+              "fit_factor" => 100
+            }
+          ]
+        }
+      }
+    end
+
+    trait :with_n95_mode do
+      results do
+        {
+          "quantitative" => {
+            "testing_mode" => "N95",
+            "exercises" => [
+              {
+                "name" => "Normal breathing (SEALED)",
+                "fit_factor" => 100
+              },
+              {
+                "name" => "Deep breathing",
+                "fit_factor" => 75
+              },
+              {
+                "name" => "Talking",
+                "fit_factor" => 50
+              }
+            ]
+          }
+        }
+      end
+    end
+
+    trait :with_failed_seal_check do
+      user_seal_check do
+        {
+          "passed" => false,
+          "notes" => "Poor seal observed"
+        }
+      end
+    end
+
+    trait :with_low_comfort do
+      comfort do
+        {
+          "rating" => 2,
+          "notes" => "Uncomfortable fit"
+        }
+      end
+    end
+
+    trait :with_facial_hair do
+      facial_hair do
+        {
+          "has_facial_hair" => true,
+          "notes" => "Has beard"
+        }
+      end
+    end
+
+    trait :with_custom_exercises do
+      results do
+        {
+          "quantitative" => {
+            "testing_mode" => "N99",
+            "exercises" => [
+              {
+                "name" => "Normal breathing (SEALED)",
+                "fit_factor" => 250
+              },
+              {
+                "name" => "Deep breathing",
+                "fit_factor" => 200
+              },
+              {
+                "name" => "Talking",
+                "fit_factor" => 150
+              },
+              {
+                "name" => "Head movements",
+                "fit_factor" => 180
+              }
+            ]
+          }
+        }
+      end
+    end
+
+    trait :with_failed_fit_factors do
+      results do
+        {
+          "quantitative" => {
+            "testing_mode" => "N99",
+            "exercises" => [
+              {
+                "name" => "Normal breathing (SEALED)",
+                "fit_factor" => 50
+              },
+              {
+                "name" => "Deep breathing",
+                "fit_factor" => 30
+              },
+              {
+                "name" => "Talking",
+                "fit_factor" => 20
+              }
+            ]
+          }
+        }
+      end
+    end
+
+    trait :without_quantitative_device do
+      quantitative_fit_testing_device { nil }
+    end
+
+    trait :without_facial_measurement do
+      facial_measurement { nil }
+    end
+
+    trait :without_mask do
+      mask { nil }
+    end
+  end
 end 
