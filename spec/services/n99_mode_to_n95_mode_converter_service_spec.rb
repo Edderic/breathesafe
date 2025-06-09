@@ -15,23 +15,27 @@ RSpec.describe N99ModeToN95ModeConverterService do
           results: {
             quantitative: {
               testing_mode: 'N99',
-              exercises: [
-                {
-                  name: 'Normal breathing (SEALED)',
-                  fit_factor: 200
-                },
-                {
-                  name: 'Deep breathing',
-                  fit_factor: 150
-                },
-                {
-                  name: 'Talking',
-                  fit_factor: 100
-                }
-              ]
+              exercises: exercises
             }
           }
         )
+      end
+
+      let(:exercises) do
+        [
+          {
+            name: 'Normal breathing (SEALED)',
+            fit_factor: 200
+          },
+          {
+            name: 'Deep breathing',
+            fit_factor: 150
+          },
+          {
+            name: 'Talking',
+            fit_factor: 100
+          }
+        ]
       end
 
       it 'calculates N95 mode estimates correctly' do
@@ -53,6 +57,32 @@ RSpec.describe N99ModeToN95ModeConverterService do
         expect(result['n95_mode_hmff']).to be > 1193
         expect(result['n95_mode_hmff']).to be <= 1194
         expect(result['qlft_pass']).to be_truthy
+      end
+
+      context "when the exercises has a blank fit factor for the sealed exercise" do
+        let(:exercises) do
+          [
+            {
+              name: 'Normal breathing (SEALED)',
+              fit_factor: nil
+            },
+            {
+              name: 'Deep breathing',
+              fit_factor: 150
+            },
+            {
+              name: 'Talking',
+              fit_factor: 100
+            }
+          ]
+        end
+
+        it "does not return the fit test" do
+          results = described_class.call.to_a
+
+          expect(results).to be_empty
+        end
+
       end
 
       context 'with Aaron filtration efficiency data' do
