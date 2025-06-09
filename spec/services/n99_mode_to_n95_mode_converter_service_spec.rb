@@ -42,7 +42,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
         ]
       end
 
-      it "includes facial mesaurements" do
+      it "includes facial measurements" do
         result = described_class.call.to_a.first
 
         FacialMeasurement::COLUMNS.each do |col|
