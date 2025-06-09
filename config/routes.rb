@@ -58,6 +58,7 @@ Rails.application.routes.draw do
   delete 'measurement_devices/:id',to: 'measurement_devices#delete'
 
   post 'facial_measurements/:facial_measurement_id/fit_tests', to: 'facial_measurements_fit_tests#create'
+  get 'facial_measurements_fit_tests', to: 'facial_measurements_fit_tests#index'
 
   delete 'mask_kit/:managed_user_id/:mask_id/',to: 'mask_kit#delete'
   get 'mask_kit/:managed_user_id',to: 'mask_kit#index'
