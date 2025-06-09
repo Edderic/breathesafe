@@ -22,8 +22,20 @@ RSpec.describe N95ModeService do
                 { 'name' => 'Talking', 'fit_factor' => 100 }
               ]
             }
-          }
+         },
+         facial_measurement: facial_measurement
         )
+      end
+
+      let(:facial_measurement) do
+        create(:facial_measurement)
+      end
+
+      it "has the facial_measurement data associated to it" do
+        result = described_class.call.to_a.first
+        FacialMeasurement::COLUMNS.each do |col|
+          expect(result[col]).to eq(facial_measurement.send(col))
+        end
       end
 
       it 'calculates harmonic mean fit factor correctly' do

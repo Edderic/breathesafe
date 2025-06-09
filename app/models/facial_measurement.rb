@@ -13,6 +13,7 @@ class FacialMeasurement < ApplicationRecord
     "nose_bridge_height",
     "lip_width",
     "head_circumference",
+    "nose_breadth"
   ]
 
   belongs_to :user
