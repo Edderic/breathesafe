@@ -195,7 +195,7 @@ class N99ModeToN95ModeConverterService
              COUNT(*) AS n,
              SUM(n95_mode_inverse) AS denominator,
              COUNT(*) / SUM(n95_mode_inverse) * 2 AS n95_mode_hmff,
-             COUNT(*) / SUM(n95_mode_inverse) * 2 > 100 AS qlft_pass
+             COUNT(*) / SUM(n95_mode_inverse) * 2 >= 100 AS qlft_pass
             FROM n95_mode_estimate_for_exercises
             GROUP BY 1
           )
