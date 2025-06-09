@@ -48,6 +48,19 @@ RSpec.describe N95ModeService do
         expect(result['qlft_pass']).to be true # 120 >= 100
       end
 
+      context "when facial measurements are missing" do
+        let(:facial_measurement) do
+          nil
+        end
+
+        it "returns nil for each of the facial measurements" do
+          result = described_class.call.to_a.first
+          FacialMeasurement::COLUMNS.each do |col|
+            expect(result[col]).to be nil
+          end
+        end
+      end
+
       context 'with multiple fit tests for the same mask' do
         let!(:second_fit_test) do
           create(:fit_test,
