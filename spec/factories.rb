@@ -78,4 +78,77 @@ FactoryBot.define do
       colors { ["White", "Black", "Blue"] }
     end
   end
+
+  factory :user do
+    sequence(:email) { |n| "user#{n}@example.com" }
+    password { "password123" }
+    password_confirmation { "password123" }
+    confirmed_at { Time.current }
+    admin { false }
+
+    trait :unconfirmed do
+      confirmed_at { nil }
+      confirmation_sent_at { Time.current }
+    end
+
+    trait :locked do
+      locked_at { Time.current }
+      failed_attempts { 5 }
+    end
+
+    trait :admin do
+      admin { true }
+    end
+
+    trait :with_reset_password do
+      reset_password_token { SecureRandom.hex(20) }
+      reset_password_sent_at { Time.current }
+    end
+
+    trait :with_unlock_token do
+      unlock_token { SecureRandom.hex(20) }
+    end
+
+    trait :with_profile do
+      after(:create) do |user|
+        create(:profile, user: user)
+      end
+    end
+
+    trait :with_facial_measurements do
+      after(:create) do |user|
+        create(:facial_measurement, user: user)
+      end
+    end
+
+    trait :with_fit_tests do
+      after(:create) do |user|
+        create_list(:fit_test, 2, user: user)
+      end
+    end
+
+    trait :with_managed_users do
+      after(:create) do |user|
+        create_list(:managed_user, 2, manager: user)
+      end
+    end
+
+    trait :with_measurement_devices do
+      after(:create) do |user|
+        create_list(:measurement_device, 2, owner: user)
+      end
+    end
+
+    trait :with_carbon_dioxide_monitors do
+      after(:create) do |user|
+        create_list(:user_carbon_dioxide_monitor, 2, user: user)
+      end
+    end
+
+    trait :with_addresses do
+      after(:create) do |user|
+        create_list(:address, 2, user: user)
+      end
+    end
+  end
 end 
