@@ -1,5 +1,5 @@
 class FacialMeasurementsFitTestsController < ApplicationController
-  skip_before_action :verify_authenticity_token
+  before_action :authenticate_user!, on: :create
 
   def create
     # TODO: what happens when the facial measurement id is invalid?
@@ -31,15 +31,29 @@ class FacialMeasurementsFitTestsController < ApplicationController
         status = 401
         messages = ["Unauthorized."]
       end
+    end
 
-      to_render = {
-        messages: messages
-      }
+    to_render = {
+      messages: messages
+    }
 
-      respond_to do |format|
-        format.json do
-          render json: to_render.to_json, status: status
-        end
+    respond_to do |format|
+      format.json do
+        render json: to_render.to_json, status: status
+      end
+    end
+  end
+
+  def index
+    fit_tests_with_facial_measurements = FitTestsWithFacialMeasurementsService.call
+
+    to_render = {
+      fit_tests_with_facial_measurements: fit_tests_with_facial_measurements
+    }
+
+    respond_to do |format|
+      format.json do
+        render json: to_render.to_json, status: :ok
       end
     end
   end
