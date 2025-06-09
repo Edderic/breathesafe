@@ -31,6 +31,7 @@ class N95ModeService
         )
 
         SELECT n95_mode_experimentals.*,
+          (facial_hair ->> 'beard_length_mm')::integer as facial_hair_beard_length_mm,
           #{FacialMeasurement::COLUMNS.join(', ')}
         FROM n95_mode_experimentals
         INNER JOIN fit_tests ON fit_tests.id = n95_mode_experimentals.id
