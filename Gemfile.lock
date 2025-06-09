@@ -125,6 +125,11 @@ GEM
       railties (>= 6.1)
     dry-cli (1.2.0)
     erubi (1.13.0)
+    factory_bot (6.5.3)
+      activesupport (>= 6.1.0)
+    factory_bot_rails (6.4.4)
+      factory_bot (~> 6.5)
+      railties (>= 5.0.0)
     geocoder (1.8.4)
       base64 (>= 0.1.0)
       csv (>= 3.0.0)
@@ -339,6 +344,7 @@ DEPENDENCIES
   debug
   devise
   dotenv-rails
+  factory_bot_rails
   geocoder
   gon
   importmap-rails
