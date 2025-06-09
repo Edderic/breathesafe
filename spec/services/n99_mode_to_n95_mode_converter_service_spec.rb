@@ -50,6 +50,20 @@ RSpec.describe N99ModeToN95ModeConverterService do
         end
       end
 
+      context "when facial measurements are missing" do
+        let(:facial_measurement) do
+          nil
+        end
+
+        it "returns nil for facial measurements " do
+          result = described_class.call.to_a.first
+
+          FacialMeasurement::COLUMNS.each do |col|
+            expect(result[col]).to be nil
+          end
+        end
+      end
+
       it 'calculates N95 mode estimates correctly' do
         result = described_class.call.to_a.first
 
