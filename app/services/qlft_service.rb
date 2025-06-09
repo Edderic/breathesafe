@@ -8,7 +8,10 @@ class QlftService
     #   qlft_pass: boolean.
     #     Whether or not the qualitative fit test passed. A qualitative fit
     #     test passed if all the exercises' fit factors that are non-null /
-    #     non-blank say "Pass" and there is at least one that is a "Pass"
+    #     non-blank say "Pass" and there is at least one that is a "Pass".
+    #     Traditionally, a qualitative fit test passes when ALL exercises
+    #     "Pass", but I'm being more lenient here to be more inclusive of
+    #     kids, who are harder to test than adults.
     #
     #   n: integer or nil.
     #     Always returns a nil, for compatibility with quantitative fit testing

@@ -114,7 +114,6 @@ RSpec.describe QlftService do
 
         it 'returns null for qlft_pass' do
           result = described_class.call.to_a.first
-          debugger
           expect(result['qlft_pass']).to be_nil
         end
       end
@@ -180,7 +179,8 @@ RSpec.describe QlftService do
                 { 'name' => 'Exercise 2', 'result' => 'Pass' }
               ]
             }
-          }
+          },
+          facial_measurement: nil
         )
       end
 
