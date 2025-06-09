@@ -151,4 +151,95 @@ FactoryBot.define do
       end
     end
   end
+
+  factory :facial_measurement do
+    association :user
+    source { "digital_caliper" }
+    face_width { rand(120..160) }
+    jaw_width { rand(100..140) }
+    face_depth { rand(80..120) }
+    face_length { rand(180..220) }
+    lower_face_length { rand(60..80) }
+    bitragion_menton_arc { rand(300..350) }
+    bitragion_subnasale_arc { rand(250..300) }
+    cheek_fullness { "medium" }
+    nasal_root_breadth { rand(15..25) }
+    nose_protrusion { rand(15..25) }
+    nose_bridge_height { rand(10..20) }
+    lip_width { rand(40..60) }
+    head_circumference { rand(500..600) }
+    nose_breadth { rand(30..40) }
+
+    trait :complete do
+      # All measurements are already set by default
+    end
+
+    trait :incomplete do
+      face_width { nil }
+      jaw_width { nil }
+      face_depth { nil }
+      face_length { nil }
+      lower_face_length { nil }
+      bitragion_menton_arc { nil }
+      bitragion_subnasale_arc { nil }
+      nasal_root_breadth { nil }
+      nose_protrusion { nil }
+      nose_bridge_height { nil }
+      lip_width { nil }
+      head_circumference { nil }
+      nose_breadth { nil }
+    end
+
+    trait :with_zero_values do
+      face_width { 0 }
+      jaw_width { 0 }
+      face_depth { 0 }
+      face_length { 0 }
+      lower_face_length { 0 }
+      bitragion_menton_arc { 0 }
+      bitragion_subnasale_arc { 0 }
+      nasal_root_breadth { 0 }
+      nose_protrusion { 0 }
+      nose_bridge_height { 0 }
+      lip_width { 0 }
+      head_circumference { 0 }
+      nose_breadth { 0 }
+    end
+
+    trait :with_minimum_values do
+      face_width { 120 }
+      jaw_width { 100 }
+      face_depth { 80 }
+      face_length { 180 }
+      lower_face_length { 60 }
+      bitragion_menton_arc { 300 }
+      bitragion_subnasale_arc { 250 }
+      nasal_root_breadth { 15 }
+      nose_protrusion { 15 }
+      nose_bridge_height { 10 }
+      lip_width { 40 }
+      head_circumference { 500 }
+      nose_breadth { 30 }
+    end
+
+    trait :with_maximum_values do
+      face_width { 160 }
+      jaw_width { 140 }
+      face_depth { 120 }
+      face_length { 220 }
+      lower_face_length { 80 }
+      bitragion_menton_arc { 350 }
+      bitragion_subnasale_arc { 300 }
+      nasal_root_breadth { 25 }
+      nose_protrusion { 25 }
+      nose_bridge_height { 20 }
+      lip_width { 60 }
+      head_circumference { 600 }
+      nose_breadth { 40 }
+    end
+
+    trait :with_cheek_fullness do
+      cheek_fullness { ["low", "medium", "high"].sample }
+    end
+  end
 end 
