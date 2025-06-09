@@ -18,14 +18,23 @@ class N95ModeService
               ELSE 1 / (exercises ->> 'fit_factor')::numeric END AS inverse_exercise_fit_factor
             FROM n95_exercises, jsonb_array_elements(results -> 'quantitative' -> 'exercises') as exercises
             WHERE exercises ->> 'name' != 'Normal breathing (SEALED)'
+        ), n95_mode_experimentals AS (
+
+            SELECT id,
+              COUNT(*) as n,
+              SUM(inverse_exercise_fit_factor) as denominator,
+              COUNT(*) / SUM(inverse_exercise_fit_factor) as n95_mode_hmff,
+              COUNT(*) / SUM(inverse_exercise_fit_factor) >= 100 AS qlft_pass
+
+            FROM n95_exercise_name_and_fit_factors
+            GROUP BY 1
         )
-        SELECT id,
-          COUNT(*) as n,
-          SUM(inverse_exercise_fit_factor) as denominator,
-          COUNT(*) / SUM(inverse_exercise_fit_factor) as n95_mode_hmff,
-          COUNT(*) / SUM(inverse_exercise_fit_factor) >= 100 AS qlft_pass
-        FROM n95_exercise_name_and_fit_factors
-        GROUP BY 1
+
+        SELECT n95_mode_experimentals.*,
+          #{FacialMeasurement::COLUMNS.join(', ')}
+        FROM n95_mode_experimentals
+        INNER JOIN fit_tests ON fit_tests.id = n95_mode_experimentals.id
+        LEFT JOIN facial_measurements ON fit_tests.facial_measurement_id = facial_measurements.id
       SQL
     )
   end

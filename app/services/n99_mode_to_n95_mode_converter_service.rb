@@ -198,8 +198,16 @@ class N99ModeToN95ModeConverterService
              COUNT(*) / SUM(n95_mode_inverse) * 2 >= 100 AS qlft_pass
             FROM n95_mode_estimate_for_exercises
             GROUP BY 1
-          )
+          ), n95_mode_estimates_and_facial_measurements AS (
+            SELECT n95_mode_estimates.*,
+             #{FacialMeasurement::COLUMNS.join(",")}
 
+             FROM n95_mode_estimates
+              INNER JOIN fit_tests ft
+                ON ft.id = n95_mode_estimates.id
+              LEFT JOIN facial_measurements fm
+                ON ft.facial_measurement_id = fm.id
+          )
       SQL
     end
 
@@ -207,7 +215,8 @@ class N99ModeToN95ModeConverterService
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
           #{n95_mode_estimates_sql}
-          SELECT * FROM n95_mode_estimates
+          SELECT *
+          FROM n95_mode_estimates_and_facial_measurements
         SQL
       )
     end

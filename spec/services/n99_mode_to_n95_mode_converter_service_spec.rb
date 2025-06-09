@@ -21,6 +21,10 @@ RSpec.describe N99ModeToN95ModeConverterService do
         )
       end
 
+      let!(:facial_measurement) do
+        create(:facial_measurement)
+      end
+
       let(:exercises) do
         [
           {
@@ -36,6 +40,14 @@ RSpec.describe N99ModeToN95ModeConverterService do
             fit_factor: 100
           }
         ]
+      end
+
+      it "includes facial mesaurements" do
+        result = described_class.call.to_a.first
+
+        FacialMeasurement::COLUMNS.each do |col|
+          expect(result[col]).to eq(facial_measurement.send(col))
+        end
       end
 
       it 'calculates N95 mode estimates correctly' do
