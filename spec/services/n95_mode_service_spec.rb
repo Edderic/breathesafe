@@ -279,5 +279,65 @@ RSpec.describe N95ModeService do
         expect(result['facial_hair_beard_length_mm']).to be_nil
       end
     end
+
+    context 'with optional mask_id parameter' do
+      let!(:fit_test) do
+        create(:fit_test,
+          user: user,
+          mask: mask,
+          quantitative_fit_testing_device: measurement_device,
+          results: {
+            'quantitative' => {
+              'testing_mode' => 'N95',
+              'exercises' => [
+                { 'name' => 'Normal breathing (SEALED)', 'fit_factor' => 200 },
+                { 'name' => 'Deep breathing', 'fit_factor' => 150 },
+                { 'name' => 'Head moving', 'fit_factor' => 120 },
+                { 'name' => 'Talking', 'fit_factor' => 100 }
+              ]
+            }
+         },
+         facial_measurement: facial_measurement
+        )
+      end
+
+      let(:other_mask) { create(:mask) }
+
+      before do
+        # Create N95 fit test for other_mask
+        create(:fit_test,
+          user: user,
+          mask: other_mask,
+          facial_measurement: facial_measurement,
+          results: {
+            'quantitative' => {
+              'testing_mode' => 'N95',
+              'exercises' => [
+                {
+                  'name' => 'Normal breathing (SEALED)',
+                  'fit_factor' => '180'
+                },
+                {
+                  'name' => 'Bending over',
+                  'fit_factor' => '120'
+                }
+              ]
+            }
+          }
+        )
+      end
+
+      it 'returns all N95 fit tests when no mask_id is provided' do
+        results = described_class.call
+        expect(results.count).to eq(2)
+        expect(results.map { |r| r['mask_id'] }).to match_array([mask.id, other_mask.id])
+      end
+
+      it 'returns only fit tests for the specified mask when mask_id is provided' do
+        results = described_class.call(mask_id: mask.id)
+        expect(results.count).to eq(1)
+        expect(results.first['mask_id']).to eq(mask.id)
+      end
+    end
   end
 end

@@ -1,14 +1,16 @@
 class N95ModeService
-  def self.call
+  def self.call(mask_id: nil)
+    mask_id_clause = mask_id ? "AND mask_id = #{mask_id}" : ""
+
     # Looks for FitTests where testing_mode is 'N95'
     # Computes the harmonic mean fit factor (hmff) for all the exercises,
     # with the exception of Normal breathing (SEALED)
     ActiveRecord::Base.connection.exec_query(
       <<-SQL
-
         WITH n95_exercises AS (
             SELECT * FROM fit_tests
             WHERE results -> 'quantitative' ->> 'testing_mode' = 'N95'
+            #{mask_id_clause}
         ), n95_exercise_name_and_fit_factors AS (
             SELECT n95_exercises.id,
             mask_id,
@@ -31,6 +33,7 @@ class N95ModeService
         )
 
         SELECT n95_mode_experimentals.*,
+          fit_tests.mask_id,
           (facial_hair ->> 'beard_length_mm')::integer as facial_hair_beard_length_mm,
           #{FacialMeasurement::COLUMNS.join(', ')}
         FROM n95_mode_experimentals
