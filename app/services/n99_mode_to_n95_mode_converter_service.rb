@@ -154,11 +154,14 @@ class N99ModeToN95ModeConverterService
       )
     end
 
-    def n95_mode_estimates_sql
+    def n95_mode_estimates_sql(mask_id = nil)
+      mask_id_clause = mask_id ? "AND mask_id = #{mask_id}" : ""
+
       <<-SQL
           WITH n99_exercises AS (
               SELECT * FROM fit_tests
               WHERE results -> 'quantitative' ->> 'testing_mode' = 'N99'
+              #{mask_id_clause}
           ), n99_exercise_name_and_fit_factors AS (
               SELECT n99_exercises.id,
               mask_id,
@@ -278,14 +281,15 @@ class N99ModeToN95ModeConverterService
       SQL
     end
 
-    def call
+    def call(mask_id: nil)
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
-          #{n95_mode_estimates_sql}
+          #{n95_mode_estimates_sql(mask_id)}
 
           SELECT unioned.*,
              (facial_hair ->> 'beard_length_mm')::integer as facial_hair_beard_length_mm,
-             #{FacialMeasurement::COLUMNS.join(",")}
+             #{FacialMeasurement::COLUMNS.join(",")},
+             mask_id
           FROM unioned
           LEFT JOIN fit_tests ft
             ON unioned.id = ft.id

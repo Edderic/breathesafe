@@ -10,6 +10,23 @@ RSpec.describe N99ModeToN95ModeConverterService do
       create(:measurement_device)
     end
 
+    let(:exercises) do
+      [
+        {
+          name: 'Normal breathing (SEALED)',
+          fit_factor: 200
+        },
+        {
+          name: 'Deep breathing',
+          fit_factor: 150
+        },
+        {
+          name: 'Talking',
+          fit_factor: 100
+        }
+      ]
+    end
+
     context 'with N99 fit test data' do
       let!(:fit_test) do
         create(:fit_test,
@@ -27,23 +44,6 @@ RSpec.describe N99ModeToN95ModeConverterService do
 
       let!(:facial_measurement) do
         create(:facial_measurement)
-      end
-
-      let(:exercises) do
-        [
-          {
-            name: 'Normal breathing (SEALED)',
-            fit_factor: 200
-          },
-          {
-            name: 'Deep breathing',
-            fit_factor: 150
-          },
-          {
-            name: 'Talking',
-            fit_factor: 100
-          }
-        ]
       end
 
       it "includes facial measurements" do
@@ -431,6 +431,59 @@ RSpec.describe N99ModeToN95ModeConverterService do
       it 'returns nil for facial_hair_beard_length_mm' do
         result = described_class.call.to_a.first
         expect(result['facial_hair_beard_length_mm']).to be_nil
+      end
+    end
+
+    context 'with mask_id parameter' do
+      let!(:fit_test) do
+        create(:fit_test,
+          mask: mask,
+          user: user,
+          facial_measurement: facial_measurement,
+          results: {
+            quantitative: {
+              testing_mode: 'N99',
+              exercises: exercises
+            }
+          }
+        )
+      end
+      let(:other_mask) { create(:mask) }
+
+      before do
+        # Create N99 fit test for other_mask
+        create(:fit_test,
+          user: user,
+          mask: other_mask,
+          facial_measurement: facial_measurement,
+          results: {
+            'quantitative' => {
+              'testing_mode' => 'N99',
+              'exercises' => [
+                {
+                  'name' => 'Normal breathing (SEALED)',
+                  'fit_factor' => '180'
+                },
+                {
+                  'name' => 'Bending over',
+                  'fit_factor' => '120'
+                }
+              ]
+            }
+          }
+        )
+      end
+
+      it 'returns all N99 fit tests converted to N95 mode when no mask_id is provided' do
+        results = described_class.call
+        expect(results.count).to eq(2)
+        expect(results.map { |r| r['mask_id'] }).to match_array([mask.id, other_mask.id])
+      end
+
+      it 'returns only fit tests for the specified mask when mask_id is provided' do
+        results = described_class.call(mask_id: mask.id)
+        expect(results.count).to eq(1)
+        expect(results.first['mask_id']).to eq(mask.id)
       end
     end
   end
