@@ -66,6 +66,7 @@ class QlftService
             NULL as denominator,
             NULL as n95_mode_hmff,
             #{FacialMeasurement::COLUMNS.join(', ')},
+            '#{self}' AS source,
             mask_id
           FROM qlft_pass_status_maybe_null
           INNER JOIN fit_tests ON fit_tests.id = qlft_pass_status_maybe_null.id

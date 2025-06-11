@@ -251,8 +251,17 @@ FactoryBot.define do
 
     user_seal_check do
       {
-        "passed" => true,
-        "notes" => "Good seal observed"
+        "sizing" => {
+          "What do you think about the sizing of this mask relative to your face?" => "Too small"
+        },
+        "negative" => {
+          "...how much air passed between your face and the mask?" => nil
+        },
+        "positive" => {
+          "...how much did your glasses fog up?" => "A lot",
+          "...how much pressure build up was there?" => "No pressure build up",
+          "...how much air movement on your face along the seal of the mask did you feel?" => "A lot of air movement"
+        }
       }
     end
 
@@ -316,11 +325,55 @@ FactoryBot.define do
       end
     end
 
-    trait :with_failed_seal_check do
+    trait :with_too_small_mask do
       user_seal_check do
         {
-          "passed" => false,
-          "notes" => "Poor seal observed"
+          "sizing" => {
+            "What do you think about the sizing of this mask relative to your face?" => "Too small"
+          },
+          "negative" => {
+            "...how much air passed between your face and the mask?" => nil
+          },
+          "positive" => {
+            "...how much did your glasses fog up?" => "A lot",
+            "...how much pressure build up was there?" => "No pressure build up",
+            "...how much air movement on your face along the seal of the mask did you feel?" => "A lot of air movement"
+          }
+        }
+      end
+    end
+
+    trait :with_just_right_mask do
+      user_seal_check do
+        {
+          "sizing" => {
+            "What do you think about the sizing of this mask relative to your face?" => "Somewhere in-between too small and too big"
+          },
+          "negative" => {
+            "...how much air passed between your face and the mask?" => nil
+          },
+          "positive" => {
+            "...how much did your glasses fog up?" => "Not at all",
+            "...how much pressure build up was there?" => "As expected",
+            "...how much air movement on your face along the seal of the mask did you feel?" => "No air movement"
+          }
+        }
+      end
+    end
+    trait :with_too_large_mask do
+      user_seal_check do
+        {
+          "sizing" => {
+            "What do you think about the sizing of this mask relative to your face?" => "Too big"
+          },
+          "negative" => {
+            "...how much air passed between your face and the mask?" => nil
+          },
+          "positive" => {
+            "...how much did your glasses fog up?" => "A lot",
+            "...how much pressure build up was there?" => "No pressure build up",
+            "...how much air movement on your face along the seal of the mask did you feel?" => "A lot of air movement"
+          }
         }
       end
     end
@@ -467,4 +520,4 @@ FactoryBot.define do
       model { "8038" }
     end
   end
-end 
+end

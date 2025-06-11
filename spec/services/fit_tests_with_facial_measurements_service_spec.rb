@@ -10,11 +10,14 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
     context 'with all types of fit tests' do
       let!(:n95_fit_test) do
         create(:fit_test,
+          # passes user seal check
+          :with_just_right_mask,
           user: user,
           mask: mask,
           quantitative_fit_testing_device: measurement_device,
           facial_measurement: facial_measurement,
           results: {
+            # Passing scores
             'quantitative' => {
               'testing_mode' => 'N95',
               'exercises' => [
@@ -29,6 +32,7 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
 
       let!(:n99_fit_test) do
         create(:fit_test,
+          :with_just_right_mask,
           user: user,
           mask: mask,
           quantitative_fit_testing_device: measurement_device,
@@ -48,6 +52,7 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
 
       let!(:qlft_test) do
         create(:fit_test,
+          :with_just_right_mask,
           user: user,
           mask: mask,
           quantitative_fit_testing_device: measurement_device,
@@ -91,6 +96,7 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
     context 'with failing tests' do
       let!(:failing_n95_test) do
         create(:fit_test,
+          :with_just_right_mask,
           user: user,
           mask: mask,
           quantitative_fit_testing_device: measurement_device,
@@ -110,6 +116,7 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
 
       let!(:failing_qlft_test) do
         create(:fit_test,
+          :with_just_right_mask,
           user: user,
           mask: mask,
           quantitative_fit_testing_device: measurement_device,
@@ -141,6 +148,7 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
     context 'with missing facial measurements' do
       let!(:fit_test_without_measurements) do
         create(:fit_test,
+          :with_just_right_mask,
           user: user,
           mask: mask,
           facial_measurement: nil,

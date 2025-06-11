@@ -23,7 +23,8 @@ class UserSealCheckFacialMeasurementsService
 
           SELECT fit_tests_with_seal_checks.*,
             (facial_hair ->> 'beard_length_mm')::integer as facial_hair_beard_length_mm,
-            #{FacialMeasurement::COLUMNS.join(', ')}
+            #{FacialMeasurement::COLUMNS.join(', ')},
+            '#{self}' AS source
           FROM fit_tests_with_seal_checks
           INNER JOIN fit_tests ON fit_tests.id = fit_tests_with_seal_checks.id
           LEFT JOIN facial_measurements ON fit_tests.facial_measurement_id = facial_measurements.id
