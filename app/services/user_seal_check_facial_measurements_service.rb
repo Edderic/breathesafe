@@ -1,7 +1,7 @@
 class UserSealCheckFacialMeasurementsService
   class << self
     def call(mask_id: nil)
-      mask_id_clause = mask_id ? "AND mask_id = #{mask_id}" : ""
+      mask_id_clause = mask_id ? "AND mask_id = #{mask_id.to_i}" : ""
 
       ActiveRecord::Base.connection.exec_query(
         <<-SQL

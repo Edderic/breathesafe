@@ -154,8 +154,8 @@ class N99ModeToN95ModeConverterService
       )
     end
 
-    def n95_mode_estimates_sql(mask_id = nil)
-      mask_id_clause = mask_id ? "AND mask_id = #{mask_id}" : ""
+    def n95_mode_estimates_sql(mask_id: nil)
+      mask_id_clause = mask_id ? "AND mask_id = #{mask_id.to_i}" : ""
 
       <<-SQL
           WITH n99_exercises AS (
@@ -284,7 +284,7 @@ class N99ModeToN95ModeConverterService
     def call(mask_id: nil)
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
-          #{n95_mode_estimates_sql(mask_id)}
+          #{n95_mode_estimates_sql(mask_id: mask_id)}
 
           SELECT unioned.*,
              (facial_hair ->> 'beard_length_mm')::integer as facial_hair_beard_length_mm,

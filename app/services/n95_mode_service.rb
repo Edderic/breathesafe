@@ -1,6 +1,6 @@
 class N95ModeService
   def self.call(mask_id: nil)
-    mask_id_clause = mask_id ? "AND mask_id = #{mask_id}" : ""
+    mask_id_clause = mask_id ? "AND mask_id = #{mask_id.to_i}" : ""
 
     # Looks for FitTests where testing_mode is 'N95'
     # Computes the harmonic mean fit factor (hmff) for all the exercises,

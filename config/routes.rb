@@ -1,5 +1,3 @@
-
-
 Rails.application.routes.draw do
   devise_for :users, controllers: {
     registrations: 'registrations',
@@ -59,6 +57,7 @@ Rails.application.routes.draw do
 
   post 'facial_measurements/:facial_measurement_id/fit_tests', to: 'facial_measurements_fit_tests#create'
   get 'facial_measurements_fit_tests', to: 'facial_measurements_fit_tests#index'
+  get 'facial_measurements_fit_tests/:mask_id', to: 'facial_measurements_fit_tests#show'
 
   delete 'mask_kit/:managed_user_id/:mask_id/',to: 'mask_kit#delete'
   get 'mask_kit/:managed_user_id',to: 'mask_kit#index'
@@ -70,12 +69,13 @@ Rails.application.routes.draw do
     get :qr_code_download
   end
 
-
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Defines the root path route ("/")
   # root "articles#index"
   resource :csrf_token, only: [:show]
+
+  resources :facial_measurements_fit_tests, only: [:create, :index]
 end
 
 
