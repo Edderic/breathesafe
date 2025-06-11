@@ -22,7 +22,7 @@ class UserSealCheckFacialMeasurementsService
           )
 
           SELECT fit_tests_with_seal_checks.*,
-            (facial_hair ->> 'beard_length_mm')::integer as facial_hair_beard_length_mm,
+            (regexp_replace(facial_hair ->> 'beard_length_mm', '[^0-9]', '', 'g'))::integer as facial_hair_beard_length_mm,
             #{FacialMeasurement::COLUMNS.join(', ')},
             '#{self}' AS source
           FROM fit_tests_with_seal_checks

@@ -21,7 +21,6 @@ class N95ModeService
             FROM n95_exercises, jsonb_array_elements(results -> 'quantitative' -> 'exercises') as exercises
             WHERE exercises ->> 'name' != 'Normal breathing (SEALED)'
         ), n95_mode_experimentals AS (
-
             SELECT id,
               COUNT(*) as n,
               SUM(inverse_exercise_fit_factor) as denominator,
@@ -34,7 +33,7 @@ class N95ModeService
 
         SELECT n95_mode_experimentals.*,
           fit_tests.mask_id,
-          (facial_hair ->> 'beard_length_mm')::integer as facial_hair_beard_length_mm,
+          (regexp_replace(facial_hair ->> 'beard_length_mm', '[^0-9]', '', 'g'))::integer as facial_hair_beard_length_mm,
           '#{self}' AS source,
           #{FacialMeasurement::COLUMNS.join(', ')}
         FROM n95_mode_experimentals

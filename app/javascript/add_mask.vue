@@ -359,18 +359,12 @@
 
     </div>
     <div class='grid bar-charts' v-show='displayTab == "Fit Testing"'>
-      <div class='card'>
+      <div class='card' v-for='s in scatterPlots'>
         <ScatterPlot
           title="Fit Test Results"
-          xLabel="Face Width (mm)"
-          yLabel="Fit Factor"
-          xAxisName="face_width"
-          yAxisName="fit_factor"
-          :points="fitTestPoints"
-          :width="400"
-          :height="300"
-          :x_lim="[140, 180]"
-          :y_lim="[0, 250]"
+          :xLabel="s.xLabel"
+          :yLabel="s.yLabel"
+          :points="s.points"
         />
       </div>
       <div class='card'>
@@ -438,6 +432,7 @@ export default {
   },
   data() {
     return {
+      fitTestsWithFacialMeasurements: [],
       basicAggregates: {},
       basicOptions: [
         'fit_test_count',
@@ -605,6 +600,34 @@ export default {
           'messages'
         ]
     ),
+    scatterData1() {
+      return this.prepareScatterData('bitragionSubnasaleArc', 'faceWidth')
+    },
+    scatterData2() {
+      return this.prepareScatterData('bitragionSubnasaleArc', 'noseProtrusion')
+    },
+    scatterData3() {
+      return this.prepareScatterData('noseProtrusion', 'faceWidth')
+    },
+    scatterPlots() {
+      return [
+        {
+          'xLabel': "Bitragion subnasale arc (mm)",
+          'yLabel': "Face width (mm)",
+          'points': this.scatterData1
+        },
+        {
+          'xLabel': "Bitragion subnasale arc (mm)",
+          'yLabel': "Nose protrusion (mm)",
+          'points': this.scatterData2
+        },
+        {
+          'xLabel': "Nose protrusion (mm)",
+          'yLabel': 'Face width (mm)',
+          'points': this.scatterData3
+        },
+      ]
+    },
     columnCount() {
       if (this.filtrationEfficiencies.length > 0) {
         return 4
@@ -794,6 +817,13 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
+    prepareScatterData(xKey, yKey) {
+      return this.fitTestsWithFacialMeasurements.map(point => ({
+        x: point[xKey],
+        y: point[yKey],
+        color: point.qlftPass ? 'green' : 'red'
+      })).filter(point => point.x != null && point.y != null)
+    },
 
     async load(toQuery, fromQuery, toName, fromName) {
       if (toQuery == {}) {
@@ -821,6 +851,10 @@ export default {
 
       if (['Edit', 'Show'].includes(this.mode)) {
         this.loadMask()
+      }
+
+      if (['Show'].includes(this.mode)) {
+        this.loadFitTestsFacialMeasurements()
       }
 
       if (toQuery['tabToShow'] && (["NewMask", "ShowMask", "EditMask"].includes(toName))) {
@@ -1005,6 +1039,24 @@ export default {
           str: "Please provide a Unique Internal Model Code"
         })
       }
+    },
+    async loadFitTestsFacialMeasurements() {
+      await axios.get(
+        `/facial_measurements_fit_tests/${this.$route.params.id}.json`
+      )
+        .then(response => {
+          let data = response.data
+          // whatever you want
+          this.fitTestsWithFacialMeasurements = deepSnakeToCamel(data.fit_tests_with_facial_measurements)
+
+        })
+        .catch(error => {
+          if (error.message) {
+            this.addMessages([error.message])
+          } else {
+            this.addMessages(error.response.data.messages)
+          }
+        })
     },
     async loadMask() {
       await axios.get(

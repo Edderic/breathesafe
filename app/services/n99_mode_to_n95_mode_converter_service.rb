@@ -287,10 +287,10 @@ class N99ModeToN95ModeConverterService
           #{n95_mode_estimates_sql(mask_id: mask_id)}
 
           SELECT unioned.*,
-             (facial_hair ->> 'beard_length_mm')::integer as facial_hair_beard_length_mm,
-             #{FacialMeasurement::COLUMNS.join(",")},
+            (regexp_replace(facial_hair ->> 'beard_length_mm', '[^0-9]', '', 'g'))::integer as facial_hair_beard_length_mm,
+            #{FacialMeasurement::COLUMNS.join(",")},
             '#{self}' AS source,
-             mask_id
+            mask_id
           FROM unioned
           LEFT JOIN fit_tests ft
             ON unioned.id = ft.id

@@ -339,5 +339,89 @@ RSpec.describe N95ModeService do
         expect(results.first['mask_id']).to eq(mask.id)
       end
     end
+
+    context 'when beard_length_mm is "1mm"' do
+      let!(:fit_test) do
+        create(:fit_test,
+          user: user,
+          mask: mask,
+          facial_measurement: facial_measurement,
+          quantitative_fit_testing_device: measurement_device,
+          facial_hair: { beard_length_mm: "1mm" },
+          results: {
+            'quantitative' => {
+              'testing_mode' => 'N95',
+              'exercises' => [
+                {
+                  'name' => 'Normal breathing',
+                  'fit_factor' => '200'
+                }
+              ]
+            }
+          }
+        )
+      end
+
+      it 'returns 0 for facial_hair_beard_length_mm' do
+        result = described_class.call(mask_id: mask.id).to_a.first
+        expect(result['facial_hair_beard_length_mm']).to eq(1)
+      end
+    end
+
+    context 'when beard_length_mm is "5mm"' do
+      let!(:fit_test) do
+        create(:fit_test,
+          user: user,
+          mask: mask,
+          facial_measurement: facial_measurement,
+          quantitative_fit_testing_device: measurement_device,
+          facial_hair: { beard_length_mm: "5mm" },
+          results: {
+            'quantitative' => {
+              'testing_mode' => 'N95',
+              'exercises' => [
+                {
+                  'name' => 'Normal breathing',
+                  'fit_factor' => '200'
+                }
+              ]
+            }
+          }
+        )
+      end
+
+      it 'returns 5 for facial_hair_beard_length_mm' do
+        result = described_class.call(mask_id: mask.id).to_a.first
+        expect(result['facial_hair_beard_length_mm']).to eq(5)
+      end
+    end
+
+    context 'when beard_length_mm is nil' do
+      let!(:fit_test) do
+        create(:fit_test,
+          user: user,
+          mask: mask,
+          facial_measurement: facial_measurement,
+          quantitative_fit_testing_device: measurement_device,
+          facial_hair: { beard_length_mm: nil },
+          results: {
+            'quantitative' => {
+              'testing_mode' => 'N95',
+              'exercises' => [
+                {
+                  'name' => 'Normal breathing',
+                  'fit_factor' => '200'
+                }
+              ]
+            }
+          }
+        )
+      end
+
+      it 'returns nil for facial_hair_beard_length_mm' do
+        result = described_class.call(mask_id: mask.id).to_a.first
+        expect(result['facial_hair_beard_length_mm']).to be_nil
+      end
+    end
   end
 end
