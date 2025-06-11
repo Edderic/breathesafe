@@ -766,50 +766,16 @@ export default {
   },
   async created() {
     this.getCurrentUser();
-
-    if (this.$route.name == 'NewMask' && this.currentUser) {
-      this.mode = 'New'
-    } else if (this.$route.name == 'NewMask' && !this.currentUser) {
-      // visit the URL
-      this.$router.push({
-        name: 'SignIn',
-        query: {
-          'attempt-name': 'NewMask'
-        }
-      })
-    } else if (this.$route.name == 'ShowMask') {
-      this.mode = 'Show'
-    } else if (this.$route.name == 'EditMask')
-      this.mode = 'Edit'
-
-    if (['Edit', 'Show'].includes(this.mode)) {
-      this.loadMask()
-    }
-
     let toQuery = this.$route.query
+    let toName = this.$route.name
 
-    if (toQuery['tabToShow'] && (["NewMask", "ShowMask", "EditMask"].includes(this.$route.name))) {
-      this.tabToShow = toQuery['tabToShow']
-    }
-
-    if (toQuery['displayTab'] && (["NewMask", "ShowMask", "EditMask"].includes(this.$route.name))) {
-      this.displayTab = toQuery['displayTab']
-    }
+    await this.load(toQuery, {}, toName, {})
 
     this.$watch(
       () => this.$route.name,
       (toName, fromName) => {
-        if (toName == "NewMask") {
-          this.mode = 'New'
-        } else if (toName == "ShowMask") {
-          this.mode = 'Show'
-          this.loadMask()
-        } else if (toName == 'EditMask') {
-          this.mode = 'Edit'
-          this.loadMask()
-        }
+          this.load({}, {}, toName, {})
       }
-
     )
     this.$watch(
       () => this.$route.query,
@@ -829,6 +795,42 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
 
+    async load(toQuery, fromQuery, toName, fromName) {
+      if (toQuery == {}) {
+        toQuery = this.$route.query
+      }
+
+      if (toName == {}) {
+        toName = this.$route.name
+      }
+
+      if (toName == 'NewMask' && this.currentUser) {
+        this.mode = 'New'
+      } else if (toName == 'NewMask' && !this.currentUser) {
+        // visit the URL
+        this.$router.push({
+          name: 'SignIn',
+          query: {
+            'attempt-name': 'NewMask'
+          }
+        })
+      } else if (toName == 'ShowMask') {
+        this.mode = 'Show'
+      } else if (toName == 'EditMask')
+        this.mode = 'Edit'
+
+      if (['Edit', 'Show'].includes(this.mode)) {
+        this.loadMask()
+      }
+
+      if (toQuery['tabToShow'] && (["NewMask", "ShowMask", "EditMask"].includes(toName))) {
+        this.tabToShow = toQuery['tabToShow']
+      }
+
+      if (toQuery['displayTab'] && (["NewMask", "ShowMask", "EditMask"].includes(toName))) {
+        this.displayTab = toQuery['displayTab']
+      }
+    },
     circleStyling(opt ) {
       if (this.colors.includes(opt)) {
         return "{'border': '2px solid black'}"
