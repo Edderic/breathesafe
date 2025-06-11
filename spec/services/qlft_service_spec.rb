@@ -6,6 +6,14 @@ RSpec.describe QlftService do
   let(:measurement_device) { create(:measurement_device, :digital_caliper) }
   let(:facial_measurement) { create(:facial_measurement, :complete, user: user) }
 
+  let(:exercises) do
+    [
+      { 'name' => 'Exercise 1', 'result' => 'Pass' },
+      { 'name' => 'Exercise 2', 'result' => 'Pass' },
+      { 'name' => 'Exercise 3', 'result' => 'Pass' }
+    ]
+  end
+
   describe '.call' do
     context 'with passing qualitative fit test' do
       let!(:fit_test) do
@@ -20,14 +28,6 @@ RSpec.describe QlftService do
             }
           }
         )
-      end
-
-      let(:exercises) do
-        [
-          { 'name' => 'Exercise 1', 'result' => 'Pass' },
-          { 'name' => 'Exercise 2', 'result' => 'Pass' },
-          { 'name' => 'Exercise 3', 'result' => 'Pass' }
-        ]
       end
 
       it 'returns passing result with facial measurements' do
@@ -284,6 +284,59 @@ RSpec.describe QlftService do
       it 'returns nil for facial_hair_beard_length_mm' do
         result = described_class.call.to_a.first
         expect(result['facial_hair_beard_length_mm']).to be_nil
+      end
+    end
+
+    context 'with optional mask_id parameter' do
+      let(:other_mask) { create(:mask) }
+
+      let!(:fit_test) do
+        create(:fit_test,
+          user: user,
+          mask: mask,
+          quantitative_fit_testing_device: measurement_device,
+          facial_measurement: facial_measurement,
+          results: {
+            'qualitative' => {
+              'exercises' => exercises
+            }
+          }
+        )
+      end
+
+      before do
+        # Create qualitative fit test for other_mask
+        create(:fit_test,
+          user: user,
+          mask: other_mask,
+          facial_measurement: facial_measurement,
+          results: {
+            'qualitative' => {
+              'exercises' => [
+                {
+                  'name' => 'Normal breathing',
+                  'result' => 'Pass'
+                },
+                {
+                  'name' => 'Bending over',
+                  'result' => 'Pass'
+                }
+              ]
+            }
+          }
+        )
+      end
+
+      it 'returns all qualitative fit tests when no mask_id is provided' do
+        results = described_class.call
+        expect(results.count).to eq(2)
+        expect(results.map { |r| r['mask_id'] }).to match_array([mask.id, other_mask.id])
+      end
+
+      it 'returns only fit tests for the specified mask when mask_id is provided' do
+        results = described_class.call(mask_id: mask.id)
+        expect(results.count).to eq(1)
+        expect(results.first['mask_id']).to eq(mask.id)
       end
     end
   end

@@ -25,12 +25,15 @@ class QlftService
     #     Always returns a nil, for compatibility with quantitative fit testing
     #     results
     #
-    def call
+    def call(mask_id: nil)
+      mask_id_clause = mask_id ? "AND mask_id = #{mask_id}" : ""
+
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
           WITH qlft_exercises AS (
             SELECT * FROM fit_tests
             WHERE results -> 'qualitative' IS NOT NULL
+            #{mask_id_clause}
           ), qlft_exercise_results AS (
             SELECT qlft_exercises.id,
               exercises ->> 'name' AS exercise_name,
@@ -62,7 +65,8 @@ class QlftService
             explicit_pass_count as n,
             NULL as denominator,
             NULL as n95_mode_hmff,
-            #{FacialMeasurement::COLUMNS.join(', ')}
+            #{FacialMeasurement::COLUMNS.join(', ')},
+            mask_id
           FROM qlft_pass_status_maybe_null
           INNER JOIN fit_tests ON fit_tests.id = qlft_pass_status_maybe_null.id
           LEFT JOIN facial_measurements ON fit_tests.facial_measurement_id = facial_measurements.id
