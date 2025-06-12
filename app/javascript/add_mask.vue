@@ -7,6 +7,7 @@
         <br>
       </div>
         <TabSet
+          class='tab-set'
           :options='tabToShowOptions'
           @update='setDisplay'
           :tabToShow='displayTab'
@@ -14,7 +15,7 @@
         />
 
         <TabSet
-          class='hide-when-mobile'
+          class='tab-set hide-when-mobile'
           :options='tabEditOptions'
           @update='setRouteTo'
           :tabToShow='tabToShow'
@@ -764,8 +765,16 @@ export default {
       return (this.mode == 'New' || this.mode == 'Edit')
     },
     tagline() {
-      // let displayable =
-      return `${this.mode} - ${this.uniqueInternalModelCode}`
+      let displayable = ""
+
+      if (this.mode.includes('Show')) {
+        displayable = this.uniqueInternalModelCode
+      } else if (this.mode.includes("New")) {
+        displayable = this.mode
+      } else {
+        displayable = `${this.mode}: ${this.uniqueInternalModelCode}`
+      }
+      return displayable
     },
     toSave() {
       return {
@@ -1291,9 +1300,7 @@ export default {
   }
 
   .menu {
-    justify-content:center;
-    min-width: 500px;
-
+    justify-content: space-between;
     margin-top: 0;
     margin-bottom: 0;
   }
@@ -1349,7 +1356,7 @@ export default {
   .tagline {
     text-align: center;
     font-weight: bold;
-    margin-right: 1em;
+    margin-right: 2em;
   }
 
   .text-align-center {
@@ -1466,6 +1473,11 @@ export default {
 
   .main-section {
     margin-top: 5em;
+  }
+
+  .tab-set {
+    margin-left: 2em;
+    margin-right: 2em;
   }
 
   @media(max-width: 1300px) {

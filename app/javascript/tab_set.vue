@@ -65,9 +65,10 @@ export default {
 
   .menu {
     justify-content:center;
-    min-width: 500px;
     background-color: #eee;
     margin-top: 0;
+    margin-left: 2em;
+    margin-right: 2em;
     margin-bottom: 0;
   }
   .row {
