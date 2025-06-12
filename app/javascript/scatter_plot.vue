@@ -24,7 +24,7 @@
         text-anchor="start"
         class="axis-limit"
       >
-        {{ x_lim[0] }}
+        {{ x_lim[0] !== null ? x_lim[0] : computedXLim[0] }}
       </text>
       <text
         :x="width - margin"
@@ -32,7 +32,7 @@
         text-anchor="end"
         class="axis-limit"
       >
-        {{ x_lim[1] }}
+        {{ x_lim[1] !== null ? x_lim[1] : computedXLim[1] }}
       </text>
 
       <!-- Y-axis -->
@@ -58,7 +58,7 @@
         text-anchor="end"
         class="axis-limit"
       >
-        {{ y_lim[0] }}
+        {{ y_lim[0] !== null ? y_lim[0] : computedYLim[0] }}
       </text>
       <text
         :x="margin/1.25"
@@ -66,7 +66,7 @@
         text-anchor="end"
         class="axis-limit"
       >
-        {{ y_lim[1] }}
+        {{ y_lim[1] !== null ? y_lim[1] : computedYLim[1] }}
       </text>
 
       <!-- Data points -->
@@ -159,29 +159,40 @@ export default {
     }
   },
   computed: {
+    computedXLim() {
+      if (this.points.length === 0) return [0, 0]
+      const xValues = this.points.map(p => p.x)
+      const xMin = Math.min(...xValues)
+      const xMax = Math.max(...xValues)
+      const xRange = xMax - xMin
+      const padding = xRange * 0.1
+      return [xMin - padding, xMax + padding]
+    },
+    computedYLim() {
+      if (this.points.length === 0) return [0, 0]
+      const yValues = this.points.map(p => p.y)
+      const yMin = Math.min(...yValues)
+      const yMax = Math.max(...yValues)
+      const yRange = yMax - yMin
+      const padding = yRange * 0.1
+      return [yMin - padding, yMax + padding]
+    },
     normalizedPoints() {
       if (this.points.length === 0) return []
 
-      // Find min and max values for both axes
-      const xValues = this.points.map(p => p.x)
-      const yValues = this.points.map(p => p.y)
+      // Use computed limits if not provided
+      const xMin = this.x_lim[0] !== null ? this.x_lim[0] : this.computedXLim[0]
+      const xMax = this.x_lim[1] !== null ? this.x_lim[1] : this.computedXLim[1]
+      const yMin = this.y_lim[0] !== null ? this.y_lim[0] : this.computedYLim[0]
+      const yMax = this.y_lim[1] !== null ? this.y_lim[1] : this.computedYLim[1]
 
-      // Use provided limits if available, otherwise use data min/max
-      const xMin = this.x_lim[0] !== null ? this.x_lim[0] : Math.min(...xValues)
-      const xMax = this.x_lim[1] !== null ? this.x_lim[1] : Math.max(...xValues)
-      const yMin = this.y_lim[0] !== null ? this.y_lim[0] : Math.min(...yValues)
-      const yMax = this.y_lim[1] !== null ? this.y_lim[1] : Math.max(...yValues)
-
-      // Add some padding to the ranges if using data min/max
       const xRange = xMax - xMin
       const yRange = yMax - yMin
-      const xPadding = this.x_lim[0] === null ? xRange * 0.1 : 0
-      const yPadding = this.y_lim[0] === null ? yRange * 0.1 : 0
 
       return this.points.map(point => ({
         ...point,
-        x: (point.x - (xMin - xPadding)) / (xRange + 2 * xPadding),
-        y: (point.y - (yMin - yPadding)) / (yRange + 2 * yPadding)
+        x: (point.x - xMin) / xRange,
+        y: (point.y - yMin) / yRange
       }))
     }
   },

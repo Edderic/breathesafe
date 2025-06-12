@@ -361,7 +361,7 @@
     <div class='grid bar-charts' v-show='displayTab == "Fit Testing"'>
       <div class='card' v-for='s in scatterPlots'>
         <ScatterPlot
-          title="Fit Test Results"
+          :title="s.title"
           :xLabel="s.xLabel"
           :yLabel="s.yLabel"
           :points="s.points"
@@ -613,17 +613,20 @@ export default {
       return [
         {
           'xLabel': "Bitragion subnasale arc (mm)",
+          'title': "Bitragion subnasale arc (mm) vs. Face width (mm)",
           'yLabel': "Face width (mm)",
-          'points': this.scatterData1
+          'points': this.scatterData1,
         },
         {
           'xLabel': "Bitragion subnasale arc (mm)",
+          'title': "Bitragion subnasale arc (mm) vs. Nose protrusion (mm)",
           'yLabel': "Nose protrusion (mm)",
           'points': this.scatterData2
         },
         {
           'xLabel': "Nose protrusion (mm)",
           'yLabel': 'Face width (mm)',
+          'title': "Nose protrusion (mm) vs. Face width (mm)",
           'points': this.scatterData3
         },
       ]
@@ -821,7 +824,7 @@ export default {
       return this.fitTestsWithFacialMeasurements.map(point => ({
         x: point[xKey],
         y: point[yKey],
-        color: point.qlftPass ? 'green' : 'red'
+        color: point.qlftPass ? 'rgba(0, 255, 0, 1)' : 'rgba(255, 0, 0, 1)'
       })).filter(point => point.x != null && point.y != null)
     },
 
