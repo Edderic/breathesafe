@@ -81,6 +81,39 @@
           :stroke-dasharray="point.borderStyle || 'none'"
         />
       </g>
+
+      <!-- Cross-hair -->
+      <g v-if="crossHairPoint">
+        <!-- Vertical line -->
+        <line
+          :x1="getX(normalizeCrossHair(crossHairPoint.x, 'x'))"
+          :y1="margin"
+          :x2="getX(normalizeCrossHair(crossHairPoint.x, 'x'))"
+          :y2="height - margin"
+          stroke="blue"
+          stroke-width="1"
+          stroke-dasharray="4"
+        />
+        <!-- Horizontal line -->
+        <line
+          :x1="margin"
+          :y1="getY(normalizeCrossHair(crossHairPoint.y, 'y'))"
+          :x2="width - margin"
+          :y2="getY(normalizeCrossHair(crossHairPoint.y, 'y'))"
+          stroke="blue"
+          stroke-width="1"
+          stroke-dasharray="4"
+        />
+        <!-- Center point -->
+        <circle
+          :cx="getX(normalizeCrossHair(crossHairPoint.x, 'x'))"
+          :cy="getY(normalizeCrossHair(crossHairPoint.y, 'y'))"
+          :r="pointRadius * 1.5"
+          fill="none"
+          stroke="blue"
+          stroke-width="2"
+        />
+      </g>
     </svg>
   </div>
 </template>
@@ -98,14 +131,6 @@ export default {
       required: true
     },
     yLabel: {
-      type: String,
-      required: true
-    },
-    xAxisName: {
-      type: String,
-      required: true
-    },
-    yAxisName: {
       type: String,
       required: true
     },
@@ -156,6 +181,16 @@ export default {
     defaultColor: {
       type: String,
       default: '#4CAF50'
+    },
+    crossHairPoint: {
+      type: Object,
+      default: null,
+      validator: (point) => {
+        return point === null || (
+          typeof point.x === 'number' &&
+          typeof point.y === 'number'
+        )
+      }
     }
   },
   computed: {
@@ -177,9 +212,68 @@ export default {
       const padding = yRange * 0.1
       return [yMin - padding, yMax + padding]
     },
+    xMin() {
+      return this.x_lim[0] !== null ? this.x_lim[0] : this.computedXLim[0]
+    },
+    xMax() {
+      return this.x_lim[1] !== null ? this.x_lim[1] : this.computedXLim[1]
+    },
+    yMin() {
+      return this.y_lim[0] !== null ? this.y_lim[0] : this.computedYLim[0]
+    },
+
+    yMax() {
+      return this.y_lim[1] !== null ? this.y_lim[1] : this.computedYLim[1]
+    },
+
+    xRange() {
+      return this.xMax - this.xMin
+    },
+
+    yRange() {
+      return this.yMax - this.yMin
+    },
+
+
     normalizedPoints() {
       if (this.points.length === 0) return []
+      // Use computed limits if not provided
 
+      return this.points.map(
+        function(point) {
+          let newPoint = this.normalize(point)
+          newPoint.color = point.color
+
+          return newPoint
+        }.bind(this)
+      )
+    }
+  },
+  methods: {
+    getX(x) {
+      return this.margin + (this.width - 2 * this.margin) * x
+    },
+    getY(y) {
+      return this.height - this.margin - (this.height - 2 * this.margin) * y
+    },
+
+    normalizeCrossHair(value, whichOne) {
+      const xMin = this.x_lim[0] !== null ? this.x_lim[0] : this.computedXLim[0]
+      const xMax = this.x_lim[1] !== null ? this.x_lim[1] : this.computedXLim[1]
+      const yMin = this.y_lim[0] !== null ? this.y_lim[0] : this.computedYLim[0]
+      const yMax = this.y_lim[1] !== null ? this.y_lim[1] : this.computedYLim[1]
+
+      const xRange = xMax - xMin
+      const yRange = yMax - yMin
+
+      // Determine if this is an x or y value based on the value range
+      if (whichOne == 'x') {
+        return (value - xMin) / xRange
+      } else {
+        return (value - yMin) / yRange
+      }
+    },
+    normalize(point) {
       // Use computed limits if not provided
       const xMin = this.x_lim[0] !== null ? this.x_lim[0] : this.computedXLim[0]
       const xMax = this.x_lim[1] !== null ? this.x_lim[1] : this.computedXLim[1]
@@ -189,19 +283,17 @@ export default {
       const xRange = xMax - xMin
       const yRange = yMax - yMin
 
-      return this.points.map(point => ({
-        ...point,
+      // Determine if this is an x or y value based on the value range
+      // if (value >= xMin && value <= xMax) {
+        // return (value - xMin) / xRange
+      // } else {
+        // return (value - yMin) / yRange
+      // }
+
+      return {
         x: (point.x - xMin) / xRange,
         y: (point.y - yMin) / yRange
-      }))
-    }
-  },
-  methods: {
-    getX(x) {
-      return this.margin + (this.width - 2 * this.margin) * x
-    },
-    getY(y) {
-      return this.height - this.margin - (this.height - 2 * this.margin) * y
+      }
     }
   }
 }

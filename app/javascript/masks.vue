@@ -189,7 +189,7 @@ export default {
       sortByStatus: 'ascending',
       facialHairBeardLengthMm: 0,
       noseProtrusionMm: 27,
-      faceWidthMm: 155,
+      faceWidthMm: 135,
       bitragionSubnasaleArcMm: 220,
       waiting: false
 

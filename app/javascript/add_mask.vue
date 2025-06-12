@@ -6,23 +6,35 @@
         <ClosableMessage @onclose='messages = []' :messages='messages'/>
         <br>
       </div>
-        <TabSet
-          class='tab-set'
-          :options='tabToShowOptions'
-          @update='setDisplay'
-          :tabToShow='displayTab'
-          v-if='mode == "Show"'
-        />
+      <TabSet
+        class='tab-set'
+        :options='tabToShowOptions'
+        @update='setDisplay'
+        :tabToShow='displayTab'
+        v-if='mode == "Show"'
+      />
 
-        <TabSet
-          class='tab-set hide-when-mobile'
-          :options='tabEditOptions'
-          @update='setRouteTo'
-          :tabToShow='tabToShow'
-            v-if='newOrEdit && displayTab != "Fit Testing"'
-        />
+      <TabSet
+        class='tab-set hide-when-mobile'
+        :options='tabEditOptions'
+        @update='setRouteTo'
+        :tabToShow='tabToShow'
+          v-if='newOrEdit && displayTab != "Fit Testing"'
+      />
+      <button class='icon' @click='showPopup = "Recommend"'>
+        R
+      </button>
+
       <br>
     </div>
+
+    <RecommendPopup
+      class='contextualizePopup'
+      :showPopup='showPopup == "Recommend"'
+      :facialMeasurements='facialMeasurements'
+      @hidePopUp='showPopup = false'
+      @updateFacialMeasurement='triggerRouterForFacialMeasurementUpdate'
+    />
 
     <div class='main main-section' v-show="displayTab == 'Misc. Info'">
       <div :class='{ grid: true, view: mode == "Show", edit: mode != "Show", triple: columnCount == 3, quad: columnCount == 4}'>
@@ -367,6 +379,7 @@
           :xLabel="s.xLabel"
           :yLabel="s.yLabel"
           :points="s.points"
+          :crossHairPoint="s.crossHairPoint"
         />
       </div>
       <div class='card'>
@@ -411,8 +424,10 @@ import ColoredCell from './colored_cell.vue'
 import HorizontalStackedBar from './horizontal_stacked_bar.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel, shortHandHref, round } from './misc.js'
+import RecommendPopup from './recommend_popup.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
+import { getFacialMeasurements } from './facial_measurements.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
@@ -428,12 +443,17 @@ export default {
     ClosableMessage,
     ColoredCell,
     HorizontalStackedBar,
+    RecommendPopup,
     ScatterPlot,
     SurveyQuestion,
     TabSet
   },
   data() {
     return {
+      noseProtrusionMm: 27,
+      faceWidthMm: 137,
+      bitragionSubnasaleArcMm: 230,
+      showPopup: false,
       fitTestsWithFacialMeasurements: [],
       basicAggregates: {},
       basicOptions: [
@@ -602,6 +622,9 @@ export default {
           'messages'
         ]
     ),
+    facialMeasurements() {
+      return getFacialMeasurements.bind(this)()
+    },
     scatterData1() {
       return this.prepareScatterData('bitragionSubnasaleArc', 'faceWidth')
     },
@@ -618,20 +641,42 @@ export default {
           'title': "Bitragion subnasale arc (mm) vs. Face width (mm)",
           'yLabel': "Face width (mm)",
           'points': this.scatterData1,
+          'crossHairPoint': this.crossHairPoint1
         },
         {
           'xLabel': "Bitragion subnasale arc (mm)",
           'title': "Bitragion subnasale arc (mm) vs. Nose protrusion (mm)",
           'yLabel': "Nose protrusion (mm)",
-          'points': this.scatterData2
+          'points': this.scatterData2,
+          'crossHairPoint': this.crossHairPoint2
         },
         {
           'xLabel': "Nose protrusion (mm)",
           'yLabel': 'Face width (mm)',
           'title': "Nose protrusion (mm) vs. Face width (mm)",
-          'points': this.scatterData3
+          'points': this.scatterData3,
+          'crossHairPoint': this.crossHairPoint3
         },
       ]
+    },
+    crossHairPoint1() {
+      const bitragionSubnasaleArc = parseFloat(this.bitragionSubnasaleArcMm)
+      const faceWidth = parseFloat(this.faceWidthMm)
+
+      if (isNaN(bitragionSubnasaleArc) || isNaN(faceWidth)) return null
+      return { x: bitragionSubnasaleArc, y: faceWidth }
+    },
+    crossHairPoint2() {
+      const bitragionSubnasaleArc = parseFloat(this.bitragionSubnasaleArcMm)
+      const noseProtrusion = parseFloat(this.noseProtrusionMm)
+      if (isNaN(bitragionSubnasaleArc) || isNaN(noseProtrusion)) return null
+      return { x: bitragionSubnasaleArc, y: noseProtrusion }
+    },
+    crossHairPoint3() {
+      const noseProtrusion = parseFloat(this.noseProtrusionMm)
+      const faceWidth = parseFloat(this.faceWidthMm)
+      if (isNaN(noseProtrusion) || isNaN(faceWidth)) return null
+      return { x: noseProtrusion, y: faceWidth }
     },
     columnCount() {
       if (this.filtrationEfficiencies.length > 0) {
@@ -817,13 +862,7 @@ export default {
     this.$watch(
       () => this.$route.query,
       (toQuery, fromQuery) => {
-        if (toQuery['tabToShow'] && (["NewMask", "ShowMask", "EditMask"].includes(this.$route.name))) {
-          this.tabToShow = toQuery['tabToShow']
-        }
-
-        if (toQuery['displayTab'] && (["NewMask", "ShowMask", "EditMask"].includes(this.$route.name))) {
-          this.displayTab = toQuery['displayTab']
-        }
+        this.load(toQuery, fromQuery, toName, {})
       }
     )
 
@@ -831,6 +870,22 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
+    triggerRouterForFacialMeasurementUpdate(event, key) {
+      let newQuery = {}
+
+      newQuery[key] = event.target.value
+
+      let combinedQuery = Object.assign(
+        JSON.parse(
+          JSON.stringify(this.$route.query)
+        ),
+        newQuery
+      )
+      this.$router.push({
+        name: 'ShowMask',
+        query: combinedQuery
+      })
+    },
     prepareScatterData(xKey, yKey) {
       return this.fitTestsWithFacialMeasurements.map(point => ({
         x: point[xKey],
@@ -840,6 +895,19 @@ export default {
     },
 
     async load(toQuery, fromQuery, toName, fromName) {
+      await this.getCurrentUser();
+
+      let facialMeasurements = [
+        'bitragionSubnasaleArcMm',
+        'faceWidthMm',
+        'noseProtrusionMm',
+        'facialHairBeardLengthMm',
+      ]
+
+      for (let facialMeasurement of facialMeasurements) {
+        this[facialMeasurement] = toQuery[facialMeasurement] || this[facialMeasurement]
+      }
+
       if (toQuery == {}) {
         toQuery = this.$route.query
       }
@@ -1480,6 +1548,14 @@ export default {
     margin-right: 2em;
   }
 
+  .contextualizePopup  {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 10em;
+  }
+
   @media(max-width: 1300px) {
     .grid.view, .grid.view.quad {
       grid-template-columns: 50% 50%;
@@ -1499,6 +1575,9 @@ export default {
     }
     .main-section {
       margin-top: 12em;
+    }
+
+    .contextualizePopup {
     }
   }
   @media(max-width: 700px) {
