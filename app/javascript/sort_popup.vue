@@ -24,7 +24,7 @@
             </td>
           </tr>
           <tr @click='sortBy("avgSealedFitFactor")'>
-            <th >Avg. N99-mode FF</th>
+            <th>Filtration reduction factor</th>
             <td>
               <SortingStatus :status='sortingStatus("avgSealedFitFactor")'/>
             </td>

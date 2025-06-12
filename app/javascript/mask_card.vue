@@ -57,7 +57,7 @@
             </td>
           </tr>
           <tr>
-            <th>Avg. N99-mode FF (SEALED)</th>
+            <th>Filtration reduction factor</th>
             <td>
               <ColoredCell
                class='risk-score'

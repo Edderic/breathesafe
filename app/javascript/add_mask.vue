@@ -21,7 +21,7 @@
         :tabToShow='tabToShow'
           v-if='newOrEdit && displayTab != "Fit Testing"'
       />
-      <Button id='contextualize-button' class='icon' @click='showPopup = "Contextualize"'>
+      <Button v-show='displayTab == "Fit Testing"' id='contextualize-button' class='icon' @click='showPopup = "Contextualize"'>
         Contextualize
       </Button>
 
@@ -533,13 +533,13 @@ export default {
       depthMm: null,
       perimeterMm: null,
       tabToShow: "Basic Info",
-      displayTab: "Misc. Info",
+      displayTab: "Fit Testing",
       tabToShowOptions: [
         {
-          text: "Misc. Info",
+          text: "Fit Testing",
         },
         {
-          text: "Fit Testing",
+          text: "Misc. Info",
         },
       ],
       tabEditOptions: [
