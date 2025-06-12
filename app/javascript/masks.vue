@@ -76,13 +76,11 @@
       />
     </div>
 
-
-
-
     <MaskCards
       :cards='sortedDisplayables'
       :showUniqueNumFitTesters='true'
       :viewMaskOnClick='true'
+      :facialMeasurements='facialMeasurements'
     />
 
     <br>

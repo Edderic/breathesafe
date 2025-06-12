@@ -137,6 +137,9 @@ export default {
     }
   },
   props: {
+    facialMeasurements: {
+      default: {}
+    },
     viewMaskOnClick: {
       default: true
     },
@@ -305,13 +308,19 @@ export default {
     selectMask(id) {
       this.toggleMaskCardPopup()
       this.selectedMask = this.masks.filter((m) => m.id == id)[0]
+      // query: this.facialMeasurements
+      let query = { }
+      for (let facialMeasurement in this.facialMeasurements) {
+        query[facialMeasurement] = this.facialMeasurements[facialMeasurement]['value']
+      }
 
       if (this.viewMaskOnClick) {
         this.$router.push({
           name: 'ShowMask',
           params: {
             id: this.selectedMask.id
-          }
+          },
+          query: query
         })
       }
     },
@@ -387,7 +396,7 @@ export default {
           name: "ShowMask",
           params: {
             id: this.selectedMask.id
-          }
+          },
         }
       )
 
