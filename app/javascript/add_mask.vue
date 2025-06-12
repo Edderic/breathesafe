@@ -1,28 +1,29 @@
 <template>
   <div class='align-items-center'>
-    <h2 class='tagline'>{{tagline}}</h2>
-    <div class='container chunk'>
-      <ClosableMessage @onclose='messages = []' :messages='messages'/>
+    <div class='header'>
+      <h2 class='tagline'>{{tagline}}</h2>
+      <div class='container chunk'>
+        <ClosableMessage @onclose='messages = []' :messages='messages'/>
+        <br>
+      </div>
+        <TabSet
+          :options='tabToShowOptions'
+          @update='setDisplay'
+          :tabToShow='displayTab'
+          v-if='mode == "Show"'
+        />
+
+        <TabSet
+          class='hide-when-mobile'
+          :options='tabEditOptions'
+          @update='setRouteTo'
+          :tabToShow='tabToShow'
+            v-if='newOrEdit && displayTab != "Fit Testing"'
+        />
       <br>
     </div>
 
-    <TabSet
-      :options='tabToShowOptions'
-      @update='setDisplay'
-      :tabToShow='displayTab'
-      v-if='mode == "Show"'
-    />
-
-    <TabSet
-      class='hide-when-mobile'
-      :options='tabEditOptions'
-      @update='setRouteTo'
-      :tabToShow='tabToShow'
-        v-if='newOrEdit && displayTab != "Fit Testing"'
-    />
-    <br>
-
-    <div class='main' v-show="displayTab == 'Misc. Info'">
+    <div class='main main-section' v-show="displayTab == 'Misc. Info'">
       <div :class='{ grid: true, view: mode == "Show", edit: mode != "Show", triple: columnCount == 3, quad: columnCount == 4}'>
         <table v-if='tabToShow == "Image & Purchasing" || mode=="Show"'>
           <tbody>
@@ -358,7 +359,7 @@
       <br>
 
     </div>
-    <div class='grid bar-charts' v-show='displayTab == "Fit Testing"'>
+    <div class='grid bar-charts main-section' v-show='displayTab == "Fit Testing"'>
       <div class='card' v-for='s in scatterPlots'>
         <ScatterPlot
           :title="s.title"
@@ -763,7 +764,8 @@ export default {
       return (this.mode == 'New' || this.mode == 'Edit')
     },
     tagline() {
-      return `${this.mode} Mask`
+      // let displayable =
+      return `${this.mode} - ${this.uniqueInternalModelCode}`
     },
     toSave() {
       return {
@@ -1291,7 +1293,7 @@ export default {
   .menu {
     justify-content:center;
     min-width: 500px;
-    background-color: #eee;
+
     margin-top: 0;
     margin-bottom: 0;
   }
@@ -1347,6 +1349,7 @@ export default {
   .tagline {
     text-align: center;
     font-weight: bold;
+    margin-right: 1em;
   }
 
   .text-align-center {
@@ -1452,6 +1455,19 @@ export default {
     grid-template-columns: 33% 33% 33%;
   }
 
+  .header {
+    width: 90vw;
+    position: fixed;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    margin-top: 1em;
+  }
+
+  .main-section {
+    margin-top: 5em;
+  }
+
   @media(max-width: 1300px) {
     .grid.view, .grid.view.quad {
       grid-template-columns: 50% 50%;
@@ -1465,6 +1481,12 @@ export default {
   @media(max-width: 1000px) {
     .grid.triple, .grid.view.triple, .grid.view.quad {
       grid-template-columns: 100%;
+    }
+    .header {
+      flex-direction: column;
+    }
+    .main-section {
+      margin-top: 12em;
     }
   }
   @media(max-width: 700px) {
