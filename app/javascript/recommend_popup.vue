@@ -2,7 +2,8 @@
   <div>
   <Popup @onclose='hidePopup' v-if='showPopup'>
     <div  style='padding: 1em;'>
-      <h3>Recommend:</h3>
+      <h3>{{title}}:</h3>
+      <p>{{explanation}}</p>
       <table>
         <thead>
           <tr>
@@ -25,20 +26,20 @@
       </table>
       <br>
 
-        <div class='explanation justify-content-center' v-if='explanationToShow != ""'>
-          <h2>
-            {{engToShow}}
-          </h2>
-          <div>
-            <img :src="imageToShow" alt="">
-          </div>
-          <p>
-              {{explanationToShow}}
-          </p>
+      <div class='explanation justify-content-center' v-if='explanationToShow != ""'>
+        <h2>
+          {{engToShow}}
+        </h2>
+        <div>
+          <img :src="imageToShow" alt="">
         </div>
+        <p>
+            {{explanationToShow}}
+        </p>
+      </div>
 
       <div class='justify-content-center'>
-        <Button v-if='keyToShow == ""' :shadow='true' @click="recommend">Recommend</Button>
+        <Button v-if='!hideButton && keyToShow == ""' :shadow='true' @click="recommend">{{title}}</Button>
         <Button v-if='keyToShow != ""' :shadow='true' @click="keyToShow = ''">Back</Button>
       </div>
     </div>
@@ -75,6 +76,16 @@ export default {
     }
   },
   props: {
+    hideButton: {
+      default: false
+    },
+    title: {
+      default: 'Recommend'
+    },
+
+    explanation: {
+      default: ''
+    },
     facialMeasurements: {
       default: {
         'bitragionSubnasaleArcMm': {

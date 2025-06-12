@@ -27,7 +27,7 @@ export default {
     major: Boolean,
     shadow: {
       type: Boolean,
-      default: false
+      default: true
     },
     selected: {
       type: Boolean,

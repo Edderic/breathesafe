@@ -21,19 +21,22 @@
         :tabToShow='tabToShow'
           v-if='newOrEdit && displayTab != "Fit Testing"'
       />
-      <button class='icon' @click='showPopup = "Recommend"'>
-        R
-      </button>
+      <Button id='contextualize-button' class='icon' @click='showPopup = "Contextualize"'>
+        Contextualize
+      </Button>
 
       <br>
     </div>
 
     <RecommendPopup
       class='contextualizePopup'
-      :showPopup='showPopup == "Recommend"'
+      title='Contextualize'
+      :showPopup='showPopup == "Contextualize"'
       :facialMeasurements='facialMeasurements'
+      :hideButton='true'
       @hidePopUp='showPopup = false'
       @updateFacialMeasurement='triggerRouterForFacialMeasurementUpdate'
+       explanation="Facial measurement graphs display fit testing results, where green points denote passing a fit test, and red points denote failing a fit test. You can input your facial measurements to see if this mask probably fits your face. The closer you are to green points, the higher the likelihood. If your measurements are not close to anyone else's, then the recommender fit probability might not be accurate."
     />
 
     <div class='main main-section' v-show="displayTab == 'Misc. Info'">
@@ -1425,6 +1428,7 @@ export default {
     text-align: center;
     font-weight: bold;
     margin-right: 2em;
+    margin-bottom: 0;
   }
 
   .text-align-center {
@@ -1536,7 +1540,7 @@ export default {
     background-color: white;
     display: flex;
     justify-content: center;
-    margin-top: 1em;
+    padding-top: 1em;
   }
 
   .main-section {
@@ -1554,6 +1558,11 @@ export default {
     justify-content: center;
     width: 100%;
     margin-top: 10em;
+  }
+
+  #contextualize-button {
+    margin-left: 2em;
+    margin-right: 2em;
   }
 
   @media(max-width: 1300px) {
@@ -1575,9 +1584,6 @@ export default {
     }
     .main-section {
       margin-top: 12em;
-    }
-
-    .contextualizePopup {
     }
   }
   @media(max-width: 700px) {
@@ -1607,8 +1613,17 @@ export default {
       align-items: center;
     }
 
-    .button, input {
+    input {
       width: 95vw;
+    }
+
+    #contextualize-button {
+      margin-left: 0em;
+      margin-right: 0em;
+    }
+
+    .main-section {
+      margin-top: 15em;
     }
 
     select {
