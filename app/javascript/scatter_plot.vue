@@ -24,7 +24,7 @@
         text-anchor="start"
         class="axis-limit"
       >
-        {{ x_lim[0] !== null ? x_lim[0] : computedXLim[0] }}
+        {{ (x_lim[0] !== null ? x_lim[0] : computedXLim[0]).toFixed(1) }}
       </text>
       <text
         :x="width - margin"
@@ -32,7 +32,7 @@
         text-anchor="end"
         class="axis-limit"
       >
-        {{ x_lim[1] !== null ? x_lim[1] : computedXLim[1] }}
+        {{ (x_lim[1] !== null ? x_lim[1] : computedXLim[1]).toFixed(1) }}
       </text>
 
       <!-- Y-axis -->
@@ -58,7 +58,7 @@
         text-anchor="end"
         class="axis-limit"
       >
-        {{ y_lim[0] !== null ? y_lim[0] : computedYLim[0] }}
+        {{ (y_lim[0] !== null ? y_lim[0] : computedYLim[0]).toFixed(1) }}
       </text>
       <text
         :x="margin/1.25"
@@ -66,7 +66,7 @@
         text-anchor="end"
         class="axis-limit"
       >
-        {{ y_lim[1] !== null ? y_lim[1] : computedYLim[1] }}
+        {{ (y_lim[1] !== null ? y_lim[1] : computedYLim[1]).toFixed(1) }}
       </text>
 
       <!-- Data points -->
