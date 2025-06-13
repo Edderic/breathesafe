@@ -43,8 +43,7 @@
         <table v-if='showStats'>
           <tr>
             <th>Proba Fit</th>
-            <td rowspan='1' v-if='!m.probaFit'>Please see "R" button above</td>
-            <td rowspan='1' v-if='m.probaFit'>
+            <td rowspan='1'>
               <ColoredCell
                class='risk-score'
                :colorScheme="fitColorScheme"

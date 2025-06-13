@@ -260,11 +260,12 @@ export default {
       this.waiting = true;
 
       // update this call
-      if ('bitragionSubnasaleArcMm' in toQuery || 'faceWidthMm' in toQuery || 'noseProtrusionMm' in toQuery || 'facialHairBeardLengthMm' in toQuery) {
+      // if ('bitragionSubnasaleArcMm' in toQuery || 'faceWidthMm' in toQuery || 'noseProtrusionMm' in toQuery || 'facialHairBeardLengthMm' in toQuery) {
+        this.updateFacialMeasurements(toQuery)
         await this.updateFacialMeasurement()
-      } else {
-        await this.loadMasks()
-      }
+      // } else {
+        // await this.loadMasks()
+      // }
 
       this.waiting = false;
     },
