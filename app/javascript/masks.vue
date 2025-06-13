@@ -7,7 +7,7 @@
     </div>
 
     <div class='row'>
-      <input id='search' type="text" @change='updateSearch'>
+      <input id='search' type="text" :value='search' @change='updateSearch'>
       <SearchIcon height='2em' width='1em'/>
 
       <button class='icon' @click='showPopup = "Recommend"'>
@@ -181,7 +181,6 @@ export default {
       },
       errorMessages: [],
       masks: [],
-      search: "",
       sortByField: undefined,
       sortByStatus: 'ascending',
       facialHairBeardLengthMm: 0,
@@ -230,6 +229,7 @@ export default {
     ...mapState(
         useMasksStore,
         [
+          'search',
           'sortByStatus',
           'sortByField',
           'filterForColor',
@@ -274,8 +274,7 @@ export default {
       'setFilterQuery'
     ]),
     async load(toQuery, previousQuery) {
-      this.search = toQuery.search || ''
-
+      this.setFilterQuery(toQuery, 'search')
       this.setFilterQuery(toQuery, 'sortByStatus')
       this.setFilterQuery(toQuery, 'sortByField')
       this.setFilterQuery(toQuery, 'filterForColor')
