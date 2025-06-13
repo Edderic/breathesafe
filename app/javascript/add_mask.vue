@@ -456,8 +456,6 @@ export default {
     return {
       noseProtrusionMm: null,
       faceWidthMm: null,
-      bitragionSubnasaleArcMm: null,
-      facialHairBeardLengthMm: null,
       showPopup: false,
       fitTestsWithFacialMeasurements: [],
       basicAggregates: {},
@@ -674,21 +672,21 @@ export default {
       ]
     },
     crossHairPoint1() {
-      const bitragionSubnasaleArc = parseFloat(this.bitragionSubnasaleArcMm)
-      const faceWidth = parseFloat(this.faceWidthMm)
+      const bitragionSubnasaleArc = parseFloat(this.getFacialMeasurement('bitragionSubnasaleArcMm'))
+      const faceWidth = parseFloat(this.getFacialMeasurement('faceWidthMm'))
 
       if (isNaN(bitragionSubnasaleArc) || isNaN(faceWidth)) return null
       return { x: bitragionSubnasaleArc, y: faceWidth }
     },
     crossHairPoint2() {
-      const bitragionSubnasaleArc = parseFloat(this.bitragionSubnasaleArcMm)
-      const noseProtrusion = parseFloat(this.noseProtrusionMm)
+      const bitragionSubnasaleArc = parseFloat(this.getFacialMeasurement('bitragionSubnasaleArcMm'))
+      const noseProtrusion = parseFloat(this.getFacialMeasurement('noseProtrusionMm'))
       if (isNaN(bitragionSubnasaleArc) || isNaN(noseProtrusion)) return null
       return { x: bitragionSubnasaleArc, y: noseProtrusion }
     },
     crossHairPoint3() {
-      const noseProtrusion = parseFloat(this.noseProtrusionMm)
-      const faceWidth = parseFloat(this.faceWidthMm)
+      const noseProtrusion = parseFloat(this.getFacialMeasurement('noseProtrusionMm'))
+      const faceWidth = parseFloat(this.getFacialMeasurement('faceWidthMm'))
       if (isNaN(noseProtrusion) || isNaN(faceWidth)) return null
       return { x: noseProtrusion, y: faceWidth }
     },
@@ -884,7 +882,7 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
-    ...mapActions(useFacialMeasurementStore, ['updateFromRouteQuery']),
+    ...mapActions(useFacialMeasurementStore, ['getFacialMeasurement', 'updateFacialMeasurements']),
     triggerRouterForFacialMeasurementUpdate(event, key) {
       let newQuery = {}
 
@@ -912,7 +910,7 @@ export default {
     async load(toQuery, fromQuery, toName, fromName) {
       await this.getCurrentUser();
 
-      this.updateFromRouteQuery(toQuery)
+      this.updateFacialMeasurements(toQuery)
 
       if (toQuery == {}) {
         toQuery = this.$route.query

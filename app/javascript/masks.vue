@@ -112,6 +112,7 @@ import { getFacialMeasurements } from './facial_measurements.js'
 import { perimeterColorScheme } from './colors.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
+import { useFacialMeasurementStore } from './stores/facial_measurement_store.js';
 import { useMainStore } from './stores/main_store';
 import { Respirator, displayableMasks, sortedDisplayableMasks } from './masks.js'
 import HelpPopup from './help_popup.vue'
@@ -186,9 +187,6 @@ export default {
       sortByField: undefined,
       sortByStatus: 'ascending',
       facialHairBeardLengthMm: 0,
-      noseProtrusionMm: 27,
-      faceWidthMm: 135,
-      bitragionSubnasaleArcMm: 220,
       waiting: false
 
     }
@@ -246,20 +244,11 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    ...mapActions(useFacialMeasurementStore, ['updateFacialMeasurements', 'getFacialMeasurement']),
     async load(toQuery, previousQuery) {
       this.search = toQuery.search || ''
       this.sortByStatus = toQuery.sortByStatus
       this.sortByField = toQuery.sortByField
-      let facialMeasurements = [
-        'bitragionSubnasaleArcMm',
-        'faceWidthMm',
-        'noseProtrusionMm',
-        'facialHairBeardLengthMm',
-      ]
-
-      for (let facialMeasurement of facialMeasurements) {
-        this[facialMeasurement] = toQuery[facialMeasurement] || this[facialMeasurement]
-      }
 
       this.filterForColor = toQuery['filterForColor'] || 'none'
       this.filterForStrapType = toQuery['filterForStrapType'] || 'none'
@@ -270,6 +259,7 @@ export default {
     async loadData(toQuery) {
       this.waiting = true;
 
+      // update this call
       if ('bitragionSubnasaleArcMm' in toQuery || 'faceWidthMm' in toQuery || 'noseProtrusionMm' in toQuery || 'facialHairBeardLengthMm' in toQuery) {
         await this.updateFacialMeasurement()
       } else {
@@ -352,9 +342,9 @@ export default {
         `/mask_recommender.json`,
         {
           'facial_measurements': {
-            'bitragion_subnasale_arc': this.bitragionSubnasaleArcMm,
-            'face_width': this.faceWidthMm,
-            'nose_protrusion': this.noseProtrusionMm,
+            'bitragion_subnasale_arc': this.getFacialMeasurement('bitragionSubnasaleArcMm'),
+            'face_width': this.getFacialMeasurement('faceWidthMm'),
+            'nose_protrusion': this.getFacialMeasurement('noseProtrusionMm'),
             'facial_hair_beard_length_mm': this.facialHairBeardLengthMm,
           }
         }

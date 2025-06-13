@@ -19,7 +19,7 @@
               <CircularButton text='?' @click='show(key)'/>
             </td>
             <td v-if='value.use_for_recommender'>
-              <input class='num' type="number" :value='value.value' @change="updateFacialMeasurement($event, key)">
+              <input class='num' type="number" :value='getFacialMeasurement(key)' @change="update($event, key)">
             </td>
           </tr>
         </tbody>
@@ -54,6 +54,7 @@ import Button from './button.vue'
 import PersonIcon from './person_icon.vue'
 import Popup from './pop_up.vue'
 import { deepSnakeToCamel } from './misc.js'
+import { getFacialMeasurements } from './facial_measurements.js'
 import SortingStatus from './sorting_status.vue'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useMainStore } from './stores/main_store';
@@ -87,37 +88,14 @@ export default {
     explanation: {
       default: ''
     },
-    facialMeasurements: {
-      default: {
-        'bitragionSubnasaleArcMm': {
-          'eng': "Bitragion subnasale arc (mm)",
-          'value': 220,
-          'explanation': "The surface distance between the left and right tragion landmarks across the subnasale landmark at the bottom of the nose",
-          'image_url': "https://nap.nationalacademies.org/openbook/0309103983/xhtml/images/p20012464g30003.jpg"
-        },
-        'faceWidthMm': {
-          'eng': "Face width (mm)",
-          'value': 155,
-          'explanation': "",
-          'image_url': ''
-        },
-        'noseProtrusionMm': {
-          'eng': "Nose protrusion (mm)",
-          'value': 27,
-          'explanation': "The straight-line distance between the pronasale landmark at the tip of the nose and the subnasale landmark under the nose.",
-          'image_url': 'https://nap.nationalacademies.org/openbook/0309103983/xhtml/images/p20012464g33001.jpg'
-        },
-        'beardLength': {
-          'eng': "Beard length (mm)",
-          'value': 0
-        },
-      }
-    },
     showPopup: {
       default: false
     },
   },
   computed: {
+    facialMeasurements() {
+      return getFacialMeasurements()
+    },
     explanationToShow() {
       if (!this.keyToShow) {
         return ""
@@ -138,18 +116,32 @@ export default {
     }
   },
   async created() {
+    this.load(this.$route.query, {})
+    this.$watch(
+      () => this.$route.query,
+      (toQuery, fromQuery) => {
+          this.load.bind(this)
+      }
+    )
   },
   methods: {
-    ...mapActions(useFacialMeasurementStore, ['updateFacialMeasurements']),
+    ...mapActions(useFacialMeasurementStore, ['getFacialMeasurement', 'updateFacialMeasurement']),
+    load(toQuery, fromQuery) {
+      for (let facialMeasurement in this.facialMeasurements) {
+        if (toQuery[facialMeasurement]) {
+          this.updateFacialMeasurement(facialMeasurement, toQuery[facialMeasurement])
+        }
+      }
+    },
     show(key) {
       this.keyToShow = key
     },
     hidePopup() {
       this.$emit('hidePopUp', true)
     },
-    updateFacialMeasurement(event, key) {
+    update(event, key) {
       this.$emit('updateFacialMeasurement', event, key)
-      this.updateFacialMeasurements({ [key]: parseFloat(event.target.value) })
+      this.updateFacialMeasurement(key, event.target.value)
     },
     recommend() {
       let event = {
