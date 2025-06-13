@@ -28,7 +28,7 @@ export const useMasksStore = defineStore('masks', {
 
     setFilterQuery(query, key) {
       if (key == 'search') {
-        this[key] = query[key]
+        this[key] = query[key] || ''
       } else if (query[key]) {
         this[key] = query[key]
       }
