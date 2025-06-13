@@ -436,6 +436,7 @@ import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import { useManagedUserStore } from './stores/managed_users_store';
 import ScatterPlot from './scatter_plot.vue'
+import { useFacialMeasurementStore } from './stores/facial_measurement_store'
 
 export default {
   name: 'Mask',
@@ -453,9 +454,10 @@ export default {
   },
   data() {
     return {
-      noseProtrusionMm: 27,
-      faceWidthMm: 137,
-      bitragionSubnasaleArcMm: 230,
+      noseProtrusionMm: null,
+      faceWidthMm: null,
+      bitragionSubnasaleArcMm: null,
+      facialHairBeardLengthMm: null,
       showPopup: false,
       fitTestsWithFacialMeasurements: [],
       basicAggregates: {},
@@ -623,6 +625,15 @@ export default {
         useMainStore,
         [
           'messages'
+        ]
+    ),
+    ...mapState(
+        useFacialMeasurementStore,
+        [
+          'bitragionSubnasaleArcMm',
+          'faceWidthMm',
+          'noseProtrusionMm',
+          'facialHairBeardLengthMm'
         ]
     ),
     facialMeasurements() {
@@ -873,6 +884,7 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
+    ...mapActions(useFacialMeasurementStore, ['updateFromRouteQuery']),
     triggerRouterForFacialMeasurementUpdate(event, key) {
       let newQuery = {}
 
@@ -900,16 +912,7 @@ export default {
     async load(toQuery, fromQuery, toName, fromName) {
       await this.getCurrentUser();
 
-      let facialMeasurements = [
-        'bitragionSubnasaleArcMm',
-        'faceWidthMm',
-        'noseProtrusionMm',
-        'facialHairBeardLengthMm',
-      ]
-
-      for (let facialMeasurement of facialMeasurements) {
-        this[facialMeasurement] = toQuery[facialMeasurement] || this[facialMeasurement]
-      }
+      this.updateFromRouteQuery(toQuery)
 
       if (toQuery == {}) {
         toQuery = this.$route.query

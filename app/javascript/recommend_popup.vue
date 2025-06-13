@@ -58,6 +58,7 @@ import SortingStatus from './sorting_status.vue'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useMainStore } from './stores/main_store';
 import { Respirator, displayableMasks, sortedDisplayableMasks } from './masks.js'
+import { useFacialMeasurementStore } from './stores/facial_measurement_store'
 
 
 export default {
@@ -139,6 +140,7 @@ export default {
   async created() {
   },
   methods: {
+    ...mapActions(useFacialMeasurementStore, ['updateFacialMeasurements']),
     show(key) {
       this.keyToShow = key
     },
@@ -147,6 +149,7 @@ export default {
     },
     updateFacialMeasurement(event, key) {
       this.$emit('updateFacialMeasurement', event, key)
+      this.updateFacialMeasurements({ [key]: parseFloat(event.target.value) })
     },
     recommend() {
       let event = {
