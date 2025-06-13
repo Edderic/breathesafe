@@ -195,7 +195,7 @@ export default {
   },
   computed: {
     computedXLim() {
-      if (this.points.length === 0) return [0, 0]
+      if (this.pointsWithCrossHairPoint.length === 0) return [0, 0]
       const xValues = this.points.map(p => p.x)
       const xMin = Math.min(...xValues)
       const xMax = Math.max(...xValues)
@@ -204,13 +204,26 @@ export default {
       return [xMin - padding, xMax + padding]
     },
     computedYLim() {
-      if (this.points.length === 0) return [0, 0]
+      if (this.pointsWithCrossHairPoint.length === 0) return [0, 0]
       const yValues = this.points.map(p => p.y)
       const yMin = Math.min(...yValues)
       const yMax = Math.max(...yValues)
       const yRange = yMax - yMin
       const padding = yRange * 0.1
       return [yMin - padding, yMax + padding]
+    },
+    pointsWithCrossHairPoint() {
+      this.points.push(
+        {
+          x: this.crossHairPoint.x,
+          y: this.crossHairPoint.y,
+          color: 'rgba(255,255,255,0)',
+          borderColor: 'white',
+          borderWidth: 0
+        }
+      )
+
+      return this.points
     },
     xMin() {
       return this.x_lim[0] !== null ? this.x_lim[0] : this.computedXLim[0]
@@ -243,6 +256,7 @@ export default {
         function(point) {
           let newPoint = this.normalize(point)
           newPoint.color = point.color
+          newPoint.borderColor = point.borderColor
 
           return newPoint
         }.bind(this)
