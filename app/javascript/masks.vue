@@ -181,8 +181,6 @@ export default {
       },
       errorMessages: [],
       masks: [],
-      sortByField: undefined,
-      sortByStatus: 'ascending',
       facialHairBeardLengthMm: 0,
       waiting: false,
       masks: [],
