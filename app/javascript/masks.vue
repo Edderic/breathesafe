@@ -53,7 +53,7 @@
         :sortByField='sortByField'
         :sortByStatus='sortByStatus'
         @hidePopUp='showPopup = false'
-        @sortBy='filterFor'
+        @sortBy='updateQuery'
       />
 
       <FilterPopup
@@ -72,7 +72,7 @@
         :sortByField='sortByField'
         :sortByStatus='sortByStatus'
         @hidePopUp='showPopup = false'
-        @filterFor='filterFor'
+        @filterFor='updateQuery'
       />
     </div>
 
@@ -116,6 +116,7 @@ import { useFacialMeasurementStore } from './stores/facial_measurement_store.js'
 import { useMainStore } from './stores/main_store';
 import { Respirator, displayableMasks, sortedDisplayableMasks } from './masks.js'
 import HelpPopup from './help_popup.vue'
+import { useMasksStore } from './stores/masks_store'
 
 
 export default {
@@ -166,9 +167,6 @@ export default {
         'Earloop',
         'Headstrap',
       ],
-      filterForColor: 'none',
-      filterForStrapType: 'none',
-      filterForStyle: 'none',
       filterForTargeted: true,
       filterForNotTargeted: true,
       showPopup: false,
@@ -187,8 +185,25 @@ export default {
       sortByField: undefined,
       sortByStatus: 'ascending',
       facialHairBeardLengthMm: 0,
-      waiting: false
-
+      waiting: false,
+      masks: [],
+      messages: [],
+      tagline: 'Masks',
+      strapTypeOptions: [
+        'Earloop',
+        'Adjustable Earloop',
+        'Headstrap',
+        'Adjustable Headstrap',
+      ],
+      styleOptions: [
+        'Bifold',
+        'Bifold & Gasket',
+        'Boat',
+        'Cotton + High Filtration Efficiency Material',
+        'Cup',
+        'Duckbill',
+        'Elastomeric',
+      ],
     }
   },
   props: {
@@ -210,6 +225,16 @@ export default {
         useMainStore,
         [
           'message'
+        ]
+    ),
+    ...mapState(
+        useMasksStore,
+        [
+          'sortByStatus',
+          'sortByField',
+          'filterForColor',
+          'filterForStrapType',
+          'filterForStyle'
         ]
     ),
     facialMeasurements() {
@@ -245,42 +270,33 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     ...mapActions(useFacialMeasurementStore, ['updateFacialMeasurements', 'getFacialMeasurement']),
+    ...mapActions(useMasksStore, [
+      'setFilterQuery'
+    ]),
     async load(toQuery, previousQuery) {
       this.search = toQuery.search || ''
-      this.sortByStatus = toQuery.sortByStatus
-      this.sortByField = toQuery.sortByField
 
-      this.filterForColor = toQuery['filterForColor'] || 'none'
-      this.filterForStrapType = toQuery['filterForStrapType'] || 'none'
-      this.filterForStyle = toQuery['filterForStyle'] || 'none'
+      this.setFilterQuery(toQuery, 'sortByStatus')
+      this.setFilterQuery(toQuery, 'sortByField')
+      this.setFilterQuery(toQuery, 'filterForColor')
+      this.setFilterQuery(toQuery, 'filterForStrapType')
+      this.setFilterQuery(toQuery, 'filterForStyle')
 
       await this.loadData(toQuery)
     },
     async loadData(toQuery) {
       this.waiting = true;
 
-      // update this call
-      // if ('bitragionSubnasaleArcMm' in toQuery || 'faceWidthMm' in toQuery || 'noseProtrusionMm' in toQuery || 'facialHairBeardLengthMm' in toQuery) {
-        this.updateFacialMeasurements(toQuery)
-        await this.updateFacialMeasurement()
-      // } else {
-        // await this.loadMasks()
-      // }
+      this.updateFacialMeasurements(toQuery)
+      await this.updateFacialMeasurement()
 
       this.waiting = false;
     },
     hideSortFilterPopUp() {
       this.showPopup = false
     },
-    filterFor(args) {
-      this.$router.push(
-        {
-          name: 'Masks',
-          query: args.query
-        }
-      )
-
-      // this.$router.go(0)
+    resetFilters() {
+      this.resetFilters()
     },
     getAbsoluteHref(href) {
       // TODO: make sure this works for all
@@ -318,6 +334,10 @@ export default {
         name: 'Masks',
         query: combinedQuery
       })
+    },
+    updateQuery(args) {
+      args['name'] = 'Masks'
+      this.$router.push(args)
     },
 
     triggerRouterForFacialMeasurementUpdate(event, key) {
@@ -393,6 +413,14 @@ export default {
           this.message = "Failed to load masks."
           // whatever you want
         })
+    },
+    sortBy(field) {
+      if (this.sortByField == field) {
+        this.setSortByStatus(this.sortByStatus == 'ascending' ? 'descending' : 'ascending')
+      } else {
+        this.setSortByField(field)
+        this.setSortByStatus('ascending')
+      }
     },
   }
 }
