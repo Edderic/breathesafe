@@ -1,6 +1,6 @@
 <template>
-  <div class='popup'>
-    <div class='content'>
+  <div class='popup' @click='close'>
+    <div class='content' @click.stop>
       <CircularButton @click='close' class='close' text='x'/>
       <div class='slot-wrapper'>
         <slot></slot>
