@@ -42,7 +42,7 @@
         </tr>
 
         <tr>
-          <th>Filtration reduction factor</th>
+          <th>Filtration factor</th>
           <td>An estimate of filtration efficiency. <strong>If you have your mask sealed to your face (i.e. great fit)</strong>, this metric captures how many times cleaner the air is that you're breathing in with the mask, compared to not wearing one. <strong>If you don't have a good seal, then you are getting lower than this protection factor.</strong> For example, assuming you have a great fit, and this is 100, then the air you're breathing in should be close to 100 times cleaner of particulates, in the 0.02 - 1 micron range. This is measured by a PortaCount with normal breathing rates. Multiple results from the same mask are averaged.</td>
         </tr>
       </table>

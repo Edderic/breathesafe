@@ -78,6 +78,23 @@ class Mask < ApplicationRecord
 
         #{self.average_filtration_efficiencies_sql},
 
+        breathability_measurements AS (
+            SELECT m.id, b ->> 'breathability_pascals' as breathability_pascals,
+                b ->> 'breathability_pascals_notes' as breathability_pascals_notes
+            FROM masks m, jsonb_array_elements(
+                  CASE
+                    WHEN jsonb_typeof(breathability) = 'array' THEN breathability
+                    ELSE jsonb_build_array(breathability)
+                  END
+            ) AS b
+        ), breathability_aggregates AS (
+            SELECT id,
+              COUNT(*) AS count_breathability,
+              AVG(breathability_pascals::numeric) AS avg_breathability_pa
+            FROM breathability_measurements
+            GROUP BY 1
+        ),
+
         unique_fit_tester_counts_per_mask AS (
           SELECT m.id AS mask_id, COUNT(DISTINCT fm.user_id) AS unique_fit_testers_count
           FROM masks m
@@ -252,7 +269,9 @@ class Mask < ApplicationRecord
           CASE WHEN fit_test_count IS NULL THEN 0 ELSE fit_test_count END AS fit_test_count,
           unique_fit_tester_counts_per_mask.*,
           avg_sealed_ffs.avg_sealed_ff AS avg_sealed_fit_factor,
-          avg_sealed_ffs.count_sealed_fit_factor
+          avg_sealed_ffs.count_sealed_fit_factor,
+          breathability_aggregates.avg_breathability_pa,
+          count_breathability
         FROM
           masks LEFT JOIN demographic_breakdown
             ON masks.id = demographic_breakdown.id
@@ -261,6 +280,8 @@ class Mask < ApplicationRecord
             ON (unique_fit_tester_counts_per_mask.mask_id = demographic_breakdown.id)
           LEFT JOIN avg_sealed_ffs
             ON masks.id = avg_sealed_ffs.mask_id
+          LEFT JOIN breathability_aggregates
+            ON masks.id = breathability_aggregates.id
 
       SQL
     ).to_a

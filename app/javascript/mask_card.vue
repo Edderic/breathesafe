@@ -56,7 +56,7 @@
             </td>
           </tr>
           <tr>
-            <th>Filtration reduction factor</th>
+            <th>Filtration factor</th>
             <td>
               <ColoredCell
                class='risk-score'
@@ -64,6 +64,20 @@
                :maxVal=1000
                :value='m.avgSealedFitFactor'
                 :text="`${Math.round(m.avgSealedFitFactor)} (${m.countSealedFitFactor})`"
+               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
+               :exception='exceptionMissingObject'
+               />
+            </td>
+          </tr>
+          <tr>
+            <th>Breathability</th>
+            <td>
+              <ColoredCell
+               class='risk-score'
+               :colorScheme="breathabilityColorScheme"
+               :maxVal=250
+               :value='m.avgBreathabilityPa'
+                :text="`${Math.round(m.avgBreathabilityPa)} pa (${m.countBreathability})`"
                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
                :exception='exceptionMissingObject'
                />
@@ -182,6 +196,19 @@ export default {
 
     perimColorScheme() {
       return perimeterColorScheme()
+    },
+
+    breathabilityColorScheme() {
+      const minimum = 50
+      const maximum = 250
+      const numObjects = 6
+      const evenSpacedBounds = generateEvenSpacedBounds(minimum, maximum, numObjects)
+
+      const scheme = convertColorListToCutpoints(
+        JSON.parse(JSON.stringify(colorPaletteFall))
+      ).toReversed()
+
+      return assignBoundsToColorScheme(scheme, evenSpacedBounds)
     },
 
     fitFactorColorScheme() {
