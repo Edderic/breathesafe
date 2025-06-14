@@ -12,8 +12,12 @@
       </div>
 
       <div class='vertical-centered'>
-        <a class='desktop clickable side-padding' href='' @click.prevent='toggleShowSubNavBar("Venues")'>Venues</a>
-        <a class='desktop clickable side-padding' href='' @click.prevent='toggleShowSubNavBar("RespiratorRecommender")'>Respirators</a>
+        <router-link class='desktop clickable side-padding' :to='{ name: "MaskRecommenderOnboarding"}' @click='toggleShowSubNavBar("MaskRecommenderOnboarding")'>Onboarding</router-link>
+        <router-link class='desktop clickable side-padding' :to='{ name: "MeasurementDevices"}' @click='toggleShowSubNavBar("MeasurementDevices")'>Measurement Devices</router-link>
+        <router-link class='desktop clickable side-padding' :to='{ name: "RespiratorUsers"}' @click='toggleShowSubNavBar("RespiratorRecommender")'>Users</router-link>
+        <router-link class='desktop clickable side-padding' :to='{ name: "Masks"}' @click='toggleShowSubNavBar("Masks")'>Masks</router-link>
+        <router-link class='desktop clickable side-padding' :to='{ name: "FitTests"}' @click='toggleShowSubNavBar("FitTests")'>Fit Tests</router-link>
+
         <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn @click='showSubNavBar = null'>Sign up/Sign in</router-link>
         <a class='desktop clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn"  >Sign out</a>
 
@@ -21,35 +25,14 @@
       </div>
     </div>
 
-    <div class='row spaced-between main fixed-nav-bar-bottom' v-if='showSubNavBar == "Venues"'>
-      <div class='vertical-centered bunched-vertically-in-the-middle'>
-        <router-link class='desktop clickable side-padding' to='/faqs' @click='toggleShowSubNavBar("Venues")'>FAQs</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "Venues"}' @click='toggleShowSubNavBar("Venues")'>Find Venues</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "AddMeasurements"}' v-if='signedIn' @click='toggleShowSubNavBar("Venues")'>Add Venue Measurements</router-link>
-        <router-link class='mobile-row clickable side-padding' :to='{ name: "Profile"}' v-if='signedIn'>Profile</router-link>
-
-        <Accordion class='mobile' @click='toggleMobileCol'/>
-      </div>
-    </div>
-
     <div class='row spaced-between main fixed-nav-bar-bottom' v-if='showSubNavBar == "RespiratorRecommender"'>
       <div class='vertical-centered bunched-vertically-in-the-middle'>
-        <router-link class='desktop clickable side-padding' :to='{ name: "ConsentForm"}' @click='toggleShowSubNavBar("ConsentForm")'>Consent Form</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "MaskRecommenderOnboarding"}' @click='toggleShowSubNavBar("MaskRecommenderOnboarding")'>Onboarding</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "MeasurementDevices"}' @click='toggleShowSubNavBar("MeasurementDevices")'>Measurement Devices</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "RespiratorUsers"}' @click='toggleShowSubNavBar("RespiratorRecommender")'>Users</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "Masks"}' @click='toggleShowSubNavBar("Masks")'>Masks</router-link>
-        <router-link class='desktop clickable side-padding' :to='{ name: "FitTests"}' @click='toggleShowSubNavBar("FitTests")'>Fit Tests</router-link>
 
         <Accordion class='mobile' @click='toggleMobileCol'/>
       </div>
     </div>
 
     <div class='mobile-col' v-if="showMobile()">
-      <h2 class='vertical-centered'>Venues</h2>
-      <router-link class='mobile-row clickable side-padding' to='/faqs'>FAQs</router-link>
-      <router-link class='mobile-row clickable side-padding' :to='{ name: "Venues"}'>Add Venues</router-link>
-      <router-link class='mobile-row clickable side-padding' :to='{ name: "AddMeasurements"}' v-if='signedIn'>Add Measurements</router-link>
       <h2 class='vertical-centered'>Respirator</h2>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "ConsentForm"}' @click='toggleShowSubNavBar("ConsentForm")'>Consent Form</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "MaskRecommenderOnboarding"}' @click='toggleShowSubNavBar("MaskRecommenderOnboarding")'>Onboarding</router-link>

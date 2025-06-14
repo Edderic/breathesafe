@@ -1,5 +1,6 @@
 <template>
   <div class='footer row'>
+    <router-link class='link' :to='{ name: "ConsentForm"}' @click='toggleShowSubNavBar("ConsentForm")'>Consent Form</router-link>
     <router-link class='link' :to="{'name': 'TermsOfService'}">Terms of Service</router-link>
     <router-link class='link' :to="{'name': 'PrivacyPolicy'}">Privacy Policy</router-link>
   </div>
