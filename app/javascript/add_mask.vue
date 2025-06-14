@@ -860,21 +860,16 @@ export default {
   },
   async created() {
     this.getCurrentUser();
+
     let toQuery = this.$route.query
     let toName = this.$route.name
 
     await this.load(toQuery, {}, toName, {})
 
     this.$watch(
-      () => this.$route.name,
-      (toName, fromName) => {
-          this.load({}, {}, toName, {})
-      }
-    )
-    this.$watch(
       () => this.$route.query,
       (toQuery, fromQuery) => {
-        this.load(toQuery, fromQuery, toName, {})
+        this.load(toQuery, fromQuery, "", {})
       }
     )
 
@@ -907,17 +902,19 @@ export default {
       })).filter(point => point.x != null && point.y != null)
     },
 
-    async load(toQuery, fromQuery, toName, fromName) {
+    async load(toQuery, fromQuery) {
+      let toName = this.$route.name
+      let isMaskPage = (["NewMask", "ShowMask", "EditMask"].includes(toName))
+      if (!isMaskPage) {
+        return
+      }
+
       await this.getCurrentUser();
 
       this.updateFacialMeasurements(toQuery)
 
       if (toQuery == {}) {
         toQuery = this.$route.query
-      }
-
-      if (toName == {}) {
-        toName = this.$route.name
       }
 
       if (toName == 'NewMask' && this.currentUser) {
@@ -943,11 +940,11 @@ export default {
         this.loadFitTestsFacialMeasurements()
       }
 
-      if (toQuery['tabToShow'] && (["NewMask", "ShowMask", "EditMask"].includes(toName))) {
+      if (toQuery['tabToShow'] && isMaskPage) {
         this.tabToShow = toQuery['tabToShow']
       }
 
-      if (toQuery['displayTab'] && (["NewMask", "ShowMask", "EditMask"].includes(toName))) {
+      if (toQuery['displayTab'] && isMaskPage) {
         this.displayTab = toQuery['displayTab']
       }
     },
@@ -1185,8 +1182,12 @@ export default {
         })
         .catch(error => {
           if (error.message) {
+            debugger
+
             this.addMessages([error.message])
           } else {
+            debugger
+
             this.addMessages(error.response.data.messages)
           }
         })

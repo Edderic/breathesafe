@@ -10,8 +10,6 @@ class FitTestsWithFacialMeasurementsService
 
       results.reject {|r| r['qlft_pass'].nil? }
 
-      # Scenario 1:
-      # Training the algorithm
       # For most people, if user seal check failed, then we assume QLFT fails.
       # And they would not include data for QLFT, N95 mode, N99 mode
       # There will generally be only one QLFT entry per user-mask combo.
