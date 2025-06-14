@@ -22,7 +22,7 @@
         <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="8 10 70 70"
           width="2em" height="2em"
           >
-          <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' fill='#aaa'/>
+          <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' :fill='filterButtonColor'/>
         </svg>
       </button>
     </div>
@@ -250,6 +250,14 @@ export default {
     },
     messages() {
       return this.errorMessages;
+    },
+    filterButtonColor() {
+      return this.hasActiveFilters ? 'red' : '#aaa'
+    },
+    hasActiveFilters() {
+      return this.filterForColor !== 'none' ||
+             this.filterForStrapType !== 'none' ||
+             this.filterForStyle !== 'none'
     },
   },
 
