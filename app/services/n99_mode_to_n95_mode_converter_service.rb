@@ -154,15 +154,14 @@ class N99ModeToN95ModeConverterService
       )
     end
 
-    def n95_mode_estimates_sql(mask_id: nil)
-      mask_id_clause = mask_id ? "AND mask_id = #{mask_id.to_i}" : ""
-
+    def avg_sealed_ffs_sql(mask_id_clause)
       <<-SQL
-          WITH n99_exercises AS (
+          n99_exercises AS (
               SELECT * FROM fit_tests
               WHERE results -> 'quantitative' ->> 'testing_mode' = 'N99'
               #{mask_id_clause}
-          ), n99_exercise_name_and_fit_factors AS (
+          ),
+          n99_exercise_name_and_fit_factors AS (
               SELECT n99_exercises.id,
               mask_id,
               exercises ->> 'name' AS exercise_name,
@@ -201,10 +200,20 @@ class N99ModeToN95ModeConverterService
             UNION
             SELECT mask_id, exercise_name, exercise_fit_factor FROM n99_filtration_efficiency_from_exercises
           ), avg_sealed_ffs AS (
-            SELECT mask_id, AVG(exercise_fit_factor) AS avg_sealed_ff
+            SELECT mask_id, AVG(exercise_fit_factor) AS avg_sealed_ff, COUNT(*) AS count_sealed_fit_factor
             FROM combined_fe_estimates
             GROUP BY 1
-          ), avg_sealed_ffs_as_exercise AS (
+          )
+      SQL
+    end
+
+    def n95_mode_estimates_sql(mask_id: nil)
+      mask_id_clause = mask_id ? "AND mask_id = #{mask_id.to_i}" : ""
+
+      <<-SQL
+          WITH
+          #{avg_sealed_ffs_sql(mask_id_clause)},
+          avg_sealed_ffs_as_exercise AS (
             SELECT mask_id, 'averaged_sealed_ff' AS exercise_name, avg_sealed_ff AS exercise_fit_factor
             FROM avg_sealed_ffs
           ),

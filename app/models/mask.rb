@@ -55,32 +55,7 @@ class Mask < ApplicationRecord
 
   def self.average_filtration_efficiencies_sql
     <<-SQL
-        exercise_results AS (
-            SELECT id,
-             user_id,
-             mask_id,
-             results -> 'quantitative' ->> 'testing_mode' AS testing_mode,
-             jsonb_array_elements(results -> 'quantitative' -> 'exercises') as exercise_result
-            FROM fit_tests
-        ), unnested AS (
-            SELECT *, exercise_result ->> 'name' AS name,
-                (exercise_result ->> 'fit_factor') AS fit_factor
-            FROM exercise_results
-        ), filtered AS (
-            SELECT *
-            FROM unnested
-            WHERE name = 'Normal breathing (SEALED)'
-            AND testing_mode = 'N99'
-            AND fit_factor IS NOT NULL
-        ), average_sealed_fit_factors AS (
-            SELECT mask_id, AVG(fit_factor::numeric) AS avg_sealed_fit_factor, COUNT(fit_factor) AS count_sealed_fit_factor
-             FROM filtered
-            GROUP BY 1
-        ), average_filtration_efficiencies AS (
-          SELECT *, 1 - 1 / avg_sealed_fit_factor AS avg_sealed_filtration_efficiency
-          FROM average_sealed_fit_factors
-        )
-
+        #{N99ModeToN95ModeConverterService.avg_sealed_ffs_sql("")}
     SQL
   end
 
@@ -276,15 +251,16 @@ class Mask < ApplicationRecord
           demographic_breakdown.*,
           CASE WHEN fit_test_count IS NULL THEN 0 ELSE fit_test_count END AS fit_test_count,
           unique_fit_tester_counts_per_mask.*,
-          average_filtration_efficiencies.*
+          avg_sealed_ffs.avg_sealed_ff AS avg_sealed_fit_factor,
+          avg_sealed_ffs.count_sealed_fit_factor
         FROM
           masks LEFT JOIN demographic_breakdown
             ON masks.id = demographic_breakdown.id
           LEFT JOIN fit_test_counts_per_mask ON (fit_test_counts_per_mask.mask_id = demographic_breakdown.id)
           LEFT JOIN unique_fit_tester_counts_per_mask
             ON (unique_fit_tester_counts_per_mask.mask_id = demographic_breakdown.id)
-          LEFT JOIN average_filtration_efficiencies
-            ON masks.id = average_filtration_efficiencies.mask_id
+          LEFT JOIN avg_sealed_ffs
+            ON masks.id = avg_sealed_ffs.mask_id
 
       SQL
     ).to_a
