@@ -1,8 +1,10 @@
 <template>
-  <div class='closable-container'>
-    <CircularButton @click='close' class='close' :style='{bottom: bottom, left: left}' text='x'/>
-    <div class='slot-wrapper'>
-      <slot></slot>
+  <div class='popup'>
+    <div class='content'>
+      <CircularButton @click='close' class='close' text='x'/>
+      <div class='slot-wrapper'>
+        <slot></slot>
+      </div>
     </div>
   </div>
 </template>
@@ -28,11 +30,10 @@ export default {
   computed: {
     bottom() {
       return `15px`
-
     },
 
     left() {
-      return `${400 - 40}px`
+      return `0`
     }
 
   }, methods: {
@@ -45,26 +46,41 @@ export default {
 </script>
 
 <style scoped>
-  .closable-container {
-    width: 400px;
-    font-weight: bold;
-    background-color: #ffffd6;
-
-    position: absolute;
-    margin-left: auto;
-    margin-right: auto;
+  .popup {
+    position: fixed;
+    top: 0;
     left: 0;
-    right: 0;
-    z-index:999;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .content {
+    background-color: white;
+    padding: 2em;
+    border-radius: 8px;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    margin: 2em;
+    position: relative;
   }
 
   .close {
-    position: relative;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1001;
+    margin-left: 0;
+    margin-right: 0;
   }
 
   .slot-wrapper {
     position: relative;
-    top: -30px;
   }
 
   p {

@@ -1,6 +1,6 @@
 <template>
-  <div v-if="showPopup" class="help-popup">
-    <div class="help-content">
+  <div v-if="showPopup" class="popup">
+    <div class="content">
       <h2>Help Guide</h2>
 
       <div class="section">
@@ -65,7 +65,7 @@ export default {
 </script>
 
 <style scoped>
-.help-popup {
+.popup {
   position: fixed;
   top: 0;
   left: 0;
@@ -78,7 +78,7 @@ export default {
   z-index: 1000;
 }
 
-.help-content {
+.content {
   background-color: white;
   padding: 2em;
   border-radius: 8px;
