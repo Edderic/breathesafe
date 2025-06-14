@@ -25,13 +25,6 @@
       </div>
     </div>
 
-    <div class='row spaced-between main fixed-nav-bar-bottom' v-if='showSubNavBar == "RespiratorRecommender"'>
-      <div class='vertical-centered bunched-vertically-in-the-middle'>
-
-        <Accordion class='mobile' @click='toggleMobileCol'/>
-      </div>
-    </div>
-
     <div class='mobile-col' v-if="showMobile()">
       <h2 class='vertical-centered'>Respirator</h2>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "ConsentForm"}' @click='toggleShowSubNavBar("ConsentForm")'>Consent Form</router-link>
