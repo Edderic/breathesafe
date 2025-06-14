@@ -1554,6 +1554,18 @@ export default {
     margin-right: 2em;
   }
 
+  .title {
+    text-align: center;
+  }
+  .card {
+    padding: 1em;
+  }
+
+  .filterCheckbox {
+    display: flex;
+    justify-content: center;
+  }
+
   .contextualizePopup  {
     position: fixed;
     display: flex;
@@ -1645,12 +1657,5 @@ export default {
     .buttons {
       flex-direction: row;
     }
-  }
-
-  .title {
-    text-align: center;
-  }
-  .card {
-    padding: 1em;
   }
 </style>
