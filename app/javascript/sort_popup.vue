@@ -17,16 +17,22 @@
               <SortingStatus :status='sortingStatus("probaFit")'/>
             </td>
           </tr>
+          <tr @click='sortBy("avgSealedFitFactor")'>
+            <th>Filtration factor</th>
+            <td>
+              <SortingStatus :status='sortingStatus("avgSealedFitFactor")'/>
+            </td>
+          </tr>
+          <tr @click='sortBy("avgBreathabilityPa")'>
+            <th>Breathability</th>
+            <td>
+              <SortingStatus :status='sortingStatus("avgBreathabilityPa")'/>
+            </td>
+          </tr>
           <tr @click='sortBy("uniqueFitTestersCount")' v-if='showUniqueNumberFitTesters'>
             <th ># testers</th>
             <td>
               <SortingStatus :status='sortingStatus("uniqueFitTestersCount")'/>
-            </td>
-          </tr>
-          <tr @click='sortBy("avgSealedFitFactor")'>
-            <th>Filtration reduction factor</th>
-            <td>
-              <SortingStatus :status='sortingStatus("avgSealedFitFactor")'/>
             </td>
           </tr>
           <tr @click='sortBy("perimeterMm")'>

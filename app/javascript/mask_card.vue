@@ -218,13 +218,15 @@ export default {
 
     breathabilityColorScheme() {
       const minimum = 50
-      const maximum = 250
+      const maximum = 400
       const numObjects = 6
       const evenSpacedBounds = generateEvenSpacedBounds(minimum, maximum, numObjects)
 
+      let copyColorPaletteFall = JSON.parse(JSON.stringify(colorPaletteFall)).reverse()
+
       const scheme = convertColorListToCutpoints(
-        JSON.parse(JSON.stringify(colorPaletteFall))
-      ).toReversed()
+        copyColorPaletteFall
+      )
 
       return assignBoundsToColorScheme(scheme, evenSpacedBounds)
     },
@@ -636,6 +638,8 @@ export default {
     width: 5em;
     height: 3em;
     font-size: 1em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
   }
   .sticky {
     position: fixed;
