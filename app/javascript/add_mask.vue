@@ -11,7 +11,7 @@
         :options='tabToShowOptions'
         @update='setDisplay'
         :tabToShow='displayTab'
-        v-if='mode == "Show"'
+        v-if='showMode'
       />
 
       <TabSet
@@ -19,7 +19,7 @@
         :options='tabEditOptions'
         @update='setRouteTo'
         :tabToShow='tabToShow'
-          v-if='newOrEdit && displayTab != "Fit Testing"'
+          v-if='newOrEditMode'
       />
       <Button v-show='displayTab == "Fit Testing"' id='contextualize-button' class='icon' @click='showPopup = "Contextualize"'>
         Contextualize
@@ -40,16 +40,16 @@
     />
 
     <div class='main main-section' v-show="displayTab == 'Misc. Info'">
-      <div :class='{ grid: true, view: mode == "Show", edit: mode != "Show", triple: columnCount == 3, quad: columnCount == 4}'>
-        <table v-if='tabToShow == "Image & Purchasing" || mode=="Show"'>
+      <div :class='{ grid: true, view: showMode, edit: !showMode, triple: columnCount == 3, quad: columnCount == 4}'>
+        <table v-if='tabToShow == "Image & Purchasing" || showMode'>
           <tbody>
             <tr>
             </tr>
-            <tr v-show='newOrEdit' v-for='(imageUrl, index) in imageUrls'>
+            <tr v-show='newOrEditMode' v-for='(imageUrl, index) in imageUrls'>
               <th>Image URL</th>
               <td>
                 <input class='input-list' type="text" :value='imageUrl' @change="update($event, 'imageUrls', index)"
-                                          v-show="newOrEdit" placeholder="e.g. https://examplemask.com/mask1.jpg"
+                                          v-show="newOrEditMode" placeholder="e.g. https://examplemask.com/mask1.jpg"
                                                              >
               </td>
             </tr>
@@ -61,10 +61,10 @@
             </tr>
 
 
-            <tr v-if='newOrEdit'>
+            <tr v-if='newOrEditMode'>
               <th>Purchasing URLs</th>
               <td class='justify-content-center' colspan=2>
-                <CircularButton text="+" @click="addPurchasingUrl" v-if='newOrEdit'/>
+                <CircularButton text="+" @click="addPurchasingUrl" v-if='newOrEditMode'/>
               </td>
             </tr>
             <tr>
@@ -74,12 +74,12 @@
             <tr v-for="(purchasingUrl, index) in whereToBuyUrls" class='text-align-center'>
               <td :colspan='whereToBuyUrlsColspan' >
                 <input class='input-list almost-full-width' type="text" :value='purchasingUrl' @change="update($event, 'whereToBuyUrls', index)"
-                                                            v-if="newOrEdit"
+                                                            v-if="newOrEditMode"
                                                             >
-                                                            <a :href="purchasingUrl" v-if="!newOrEdit">{{shortHand(purchasingUrl)}}</a>
+                                                            <a :href="purchasingUrl" v-if="!newOrEditMode">{{shortHand(purchasingUrl)}}</a>
               </td>
                 <td>
-                  <CircularButton text="x" @click="deletePurchasingUrl(index)" v-show='["New", "Edit"].includes(this.mode) && userCanEdit'/>
+                  <CircularButton text="x" @click="deletePurchasingUrl(index)" v-show='newOrEditMode && userCanEdit'/>
                 </td>
                 <td>
                 </td>
@@ -87,7 +87,7 @@
           </tbody>
 
         </table>
-        <table v-if='tabToShow == "Basic Info" || mode=="Show"'>
+        <table v-if='tabToShow == "Basic Info" || showMode'>
 
           <thead>
              <tr>
@@ -98,8 +98,8 @@
             <tr>
               <th>Unique Internal Model Code</th>
               <td colspan='1'>
-                <input class='full-width has-minimal-width' type="text" v-model='uniqueInternalModelCode' v-show="newOrEdit" placeholder="e.g. Flo Mask Adults S/M Nose with Pro filter">
-                <span class='full-width has-minimal-width ' v-show="!newOrEdit">
+                <input class='full-width has-minimal-width' type="text" v-model='uniqueInternalModelCode' v-show="newOrEditMode" placeholder="e.g. Flo Mask Adults S/M Nose with Pro filter">
+                <span class='full-width has-minimal-width ' v-show="!newOrEditMode">
                   {{uniqueInternalModelCode }}
                 </span>
               </td>
@@ -110,11 +110,11 @@
               <td colspan='1' class='text-align-center'>
                 <input type="number"
                        v-model='initialCostUsDollars'
-                       v-show="newOrEdit"
+                       v-show="newOrEditMode"
                        >
 
                        <ColoredCell
-                           v-show='!newOrEdit'
+                           v-show='!newOrEditMode'
                            class='risk-score'
                            :colorScheme="costColorScheme"
                            :maxVal=1
@@ -132,7 +132,7 @@
               <td colspan='1' class='text-align-center'>
 
               <span v-for='opt in colorOptions' class='filterCheckbox' >
-                <Circle :color='opt' :selected='colors.includes(opt)' :for='`color${opt}`' @click='filterFor("Color", opt)' v-if='newOrEdit || colors.includes(opt)'/>
+                <Circle :color='opt' :selected='colors.includes(opt)' :for='`color${opt}`' @click='filterFor("Color", opt)' v-if='newOrEditMode || colors.includes(opt)'/>
               </span>
 
               </td>
@@ -143,7 +143,7 @@
               <td colspan='1' class='text-align-center'>
                 <select
                     v-model="filterType"
-                    v-show="newOrEdit"
+                    v-show="newOrEditMode"
                     >
                     <option>cloth</option>
                     <option>surgical</option>
@@ -166,7 +166,7 @@
                     <option>PM2.5</option>
                 </select>
 
-                <span v-show='!newOrEdit'>{{filterType}}</span>
+                <span v-show='!newOrEditMode'>{{filterType}}</span>
               </td>
             </tr>
             <tr>
@@ -174,7 +174,7 @@
               <td colspan='1' class='text-align-center'>
                 <select
                     v-model="style"
-                    v-show="newOrEdit"
+                    v-show="newOrEditMode"
                     >
                     <option>Bifold</option>
                     <option>Bifold &amp; Gasket</option>
@@ -184,7 +184,7 @@
                     <option>Duckbill</option>
                     <option>Elastomeric</option>
                 </select>
-                <span v-show='!newOrEdit'>{{style}}</span>
+                <span v-show='!newOrEditMode'>{{style}}</span>
               </td>
             </tr>
 
@@ -193,21 +193,21 @@
               <td colspan='1' class='text-align-center'>
                 <select
                     v-model="strapType"
-                    v-show="newOrEdit"
+                    v-show="newOrEditMode"
                     >
                     <option>Earloop</option>
                     <option>Adjustable Earloop</option>
                     <option>Headstrap</option>
                     <option>Adjustable Headstrap</option>
                 </select>
-                <span v-show='!newOrEdit'>{{strapType}}</span>
+                <span v-show='!newOrEditMode'>{{strapType}}</span>
               </td>
             </tr>
 
             <tr>
               <th>Has exhalation valve</th>
-              <td v-show='!newOrEdit'>{{hasExhalationValve}}</td>
-              <td v-show="newOrEdit">
+              <td v-show='!newOrEditMode'>{{hasExhalationValve}}</td>
+              <td v-show="newOrEditMode">
                 <input type="text" v-model='hasExhalationValve'>
               </td>
             </tr>
@@ -225,10 +225,10 @@
             <tr>
               <th>Mass (grams)</th>
               <td>
-                <input type="number" v-model="massGrams" v-show="newOrEdit">
+                <input type="number" v-model="massGrams" v-show="newOrEditMode">
 
                 <ColoredCell
-                    v-show='!newOrEdit'
+                    v-show='!newOrEditMode'
                     class='risk-score'
                     :colorScheme="massColorScheme"
                     :maxVal=1
@@ -243,9 +243,9 @@
             <tr>
               <th>Perimeter (mm)</th>
               <td>
-                <input type="number" v-model="perimeterMm" v-show="newOrEdit">
+                <input type="number" v-model="perimeterMm" v-show="newOrEditMode">
                 <ColoredCell
-                    v-show='!newOrEdit'
+                    v-show='!newOrEditMode'
                     class='risk-score'
                     :colorScheme="perimColorScheme"
                     :maxVal=1
@@ -261,9 +261,9 @@
         </table>
         <table v-if='tabToShow == "Filtration & Breathability" || mode=="Show"'>
           <tbody>
-            <tr v-if='newOrEdit'>
+            <tr v-if='newOrEditMode'>
               <td colspan='2'>
-                <CircularButton text="+" @click="addFiltEffAndBreathability" v-if='newOrEdit'/>
+                <CircularButton text="+" @click="addFiltEffAndBreathability" v-if='newOrEditMode'/>
               </td>
             </tr>
           </tbody>
@@ -276,15 +276,15 @@
             </tr>
 
             <tr>
-              <th v-show='newOrEdit'>Filtration Efficiency (Percent)</th>
-              <th v-show='!newOrEdit'>Filtration Efficiency</th>
+              <th v-show='newOrEditMode'>Filtration Efficiency (Percent)</th>
+              <th v-show='!newOrEditMode'>Filtration Efficiency</th>
 
               <td colspan='1'>
                 <input type="number" :value='f.filtrationEfficiencyPercent' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyPercent')"
-                       v-show="newOrEdit"
+                       v-show="newOrEditMode"
                        >
                        <ColoredCell
-                           v-show='!newOrEdit'
+                           v-show='!newOrEditMode'
                            class='risk-score'
                            :colorScheme="colorInterpolationScheme"
                            :maxVal=1
@@ -298,15 +298,15 @@
             </tr>
 
             <tr>
-              <th v-show='newOrEdit'>Breathability (Pa)</th>
-              <th v-show='!newOrEdit'>Breathability</th>
+              <th v-show='newOrEditMode'>Breathability (Pa)</th>
+              <th v-show='!newOrEditMode'>Breathability</th>
               <td colspan='1'>
                 <input type="number" :value='breathability[index].breathabilityPascals' @change="updateArrayOfObj($event, 'breathability', index, 'breathabilityPascals')"
-                       v-show="newOrEdit"
+                       v-show="newOrEditMode"
                        >
                        <ColoredCell
                            class='risk-score'
-                           v-show='!newOrEdit'
+                           v-show='!newOrEditMode'
                            :colorScheme="breathabilityInterpolationScheme"
                            :maxVal=1
                            :value='breathability[index].breathabilityPascals'
@@ -328,9 +328,9 @@
                        :value='f.filtrationEfficiencySource'
                        @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencySource')"
 
-                       v-show="newOrEdit"
+                       v-show="newOrEditMode"
                        >
-                       <a v-show='!newOrEdit' :href="f.filtrationEfficiencySource">link</a>
+                       <a v-show='!newOrEditMode' :href="f.filtrationEfficiencySource">link</a>
               </td>
 
             </tr>
@@ -340,15 +340,15 @@
             </tr>
 
             <tr>
-              <td colspan='2' class='notes' v-show='!newOrEdit'>{{f.filtrationEfficiencyNotes}}</td>
-              <td colspan='2' v-show='newOrEdit'>
+              <td colspan='2' class='notes' v-show='!newOrEditMode'>{{f.filtrationEfficiencyNotes}}</td>
+              <td colspan='2' v-show='newOrEditMode'>
                 <textarea cols="30" rows="10" @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyNotes')"></textarea>
               </td>
             </tr>
 
             <tr class='text-align-center'>
               <td colspan='2'>
-                <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='this.mode == "New" || userCanEdit && mode == "Edit"'/>
+                <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='newMode || userCanEdit && editMode'/>
               </td>
             </tr>
           </tbody>
@@ -363,11 +363,11 @@
       <br>
 
       <div class="buttons justify-content-center">
-        <Button shadow='true' class='button' text="Edit" @click='mode = "Edit"' v-if='mode == "Show" && canUpdate'/>
-        <Button shadow='true' class='button' text="Delete" @click='deleteMask' v-if='deletable && (mode != "Show") && canUpdate'/>
-        <Button shadow='true' class='button' text="Cancel" @click='handleCancel' v-if='(mode == "New") || ((mode == "Edit") && canUpdate)'/>
-        <Button shadow='true' class='button' text="Save" @click='saveMask' v-if='(mode == "New") || ((mode == "Edit") && canUpdate)'/>
-        <Button shadow='true' class='button' text="Add Fit Testing Data" v-if='(mode == "Show")' @click='tryAddingFitTest'/>
+        <Button shadow='true' class='button' text="Edit" @click='switchToEditMode' v-if='showMode && canUpdate'/>
+        <Button shadow='true' class='button' text="Delete" @click='deleteMask' v-if='deletable && !showMode && canUpdate'/>
+        <Button shadow='true' class='button' text="Cancel" @click='handleCancel' v-if='newOrEditMode && canUpdate'/>
+        <Button shadow='true' class='button' text="Save" @click='saveMask' v-if='newOrEditMode && canUpdate'/>
+        <Button shadow='true' class='button' text="Add Fit Testing Data" v-if='showMode' @click='tryAddingFitTest'/>
       </div>
 
       <br>
@@ -558,7 +558,6 @@ export default {
       ],
       initialCostUsDollars: 0,
       hasGasket: false,
-      editMode: false,
       id: null,
       uniqueInternalModelCode: '',
       modifications: {},
@@ -818,15 +817,24 @@ export default {
 
       return this.currentUserIsAuthor && this.basicAggregates.fit_test_count == 0
     },
-    newOrEdit() {
-      return (this.mode == 'New' || this.mode == 'Edit')
+    newMode() {
+      return this.$route.name == 'NewMask'
+    },
+    editMode() {
+      return this.$route.name == 'EditMask'
+    },
+    newOrEditMode() {
+      return this.newMode || this.editMode
+    },
+    showMode() {
+      return this.mode == 'Show'
     },
     tagline() {
       let displayable = ""
 
-      if (this.mode.includes('Show')) {
+      if (this.showMode) {
         displayable = this.uniqueInternalModelCode
-      } else if (this.mode.includes("New")) {
+      } else if (this.newMode) {
         displayable = this.mode
       } else {
         displayable = `${this.mode}: ${this.uniqueInternalModelCode}`
@@ -893,6 +901,16 @@ export default {
         name: 'ShowMask',
         query: combinedQuery
       })
+    },
+    switchToEditMode() {
+      this.$router.push(
+        {
+          "name": "EditMask",
+          'query': {
+            "displayTab": this.displayTab
+          }
+        }
+      )
     },
     prepareScatterData(xKey, yKey) {
       return this.fitTestsWithFacialMeasurements.map(point => ({
@@ -1047,14 +1065,18 @@ export default {
       this.whereToBuyUrls.splice(index, 1);
     },
     handleCancel() {
-      if (this.mode == 'New') {
+      if (this.newMode) {
         this.$router.push(
           {
             name: "Masks"
           }
         )
       } else {
-        this.mode = 'Show'
+        this.$router.push(
+          {
+            name: "ShowMask",
+          }
+        )
       }
     },
     newMask() {
@@ -1105,10 +1127,6 @@ export default {
           }
         })
       }
-    },
-    async loadStuff() {
-      // TODO: load the profile for the current user
-
     },
     runValidations() {
       if (this.imageUrls.length <= 0) {
@@ -1283,15 +1301,22 @@ export default {
           })
       }
     },
-    setDisplay(opt) {
+    setDisplay(opt, name) {
+      if (!name) {
+        name = this.$route.name
+      }
+
       this.$router.push({
-        name: this.$route.name,
+        name: name,
         query: {
           displayTab: opt.name
         }
       })
     },
+
     setRouteTo(opt) {
+      let routeName = this.$route.name
+
       let tabToShow = '';
       if ('target' in opt && 'value' in opt.target) {
         tabToShow = opt.target.value
@@ -1299,11 +1324,20 @@ export default {
         tabToShow = opt.name
       }
 
+      let newQuery = {
+        tabToShow: tabToShow
+      }
+
+      let combinedQuery = Object.assign(
+        JSON.parse(
+          JSON.stringify(this.$route.query)
+        ),
+        newQuery
+      )
+
       this.$router.push({
-        name: this.$route.name,
-        query: {
-          tabToShow: tabToShow
-        }
+        name: routeName,
+        query: combinedQuery
       })
     },
     visitMasks() {
