@@ -30,7 +30,7 @@
         If this individual did not receive a mask kit but are expecting to have received one, please contact <a href="mailto:info@breathesafe.xyz">info@breathesafe.xyz</a>. If the individual does have access to masks that were not shipped by Breathesafe LLC, said individual can still add user seal check and fit test data by clicking on the plus button above.
       </p>
     </div>
-    <div class='masks'>
+    <div class='masks' :style='gridTemplateColumns'>
 
       <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in cards' @click='selectMask(m.id)'>
 
@@ -194,6 +194,24 @@ export default {
         ]
     ),
 
+    gridTemplateColumns() {
+      let gridTemplateColumns = ""
+
+      if (this.cards.length <=1) {
+        gridTemplateColumns = "100%"
+      }
+      else if (this.cards.length ==2) {
+        gridTemplateColumns = "50% 50%"
+      }
+      else {
+        gridTemplateColumns = "33% 33% 33%"
+      }
+
+      return {
+        'grid-template-columns': gridTemplateColumns
+      }
+    },
+
     perimColorScheme() {
       return perimeterColorScheme()
     },
@@ -234,46 +252,6 @@ export default {
       )
 
       return assignBoundsToColorScheme(scheme, evenSpacedBounds)
-    },
-    displayables() {
-      if (this.search == undefined) {
-        this.search = ""
-      }
-
-      let lowerSearch = this.search.toLowerCase()
-      let filterForHeadstrap = this.filterForHeadstrap
-      let filterForEarloop = this.filterForEarloop
-      let filterForTargeted = this.filterForTargeted
-      let filterForNotTargeted = this.filterForNotTargeted
-
-      return this.masks.filter(
-        function(mask) {
-          return (lowerSearch == "" || mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
-            && (
-              (mask.strapType == "") ||
-              (
-                (filterForHeadstrap && mask.strapType == 'Headstrap')
-                || (filterForEarloop && mask.strapType == 'Earloop')
-              )
-            ) && (
-              (mask.isTargeted && filterForTargeted) ||
-              (!mask.isTargeted && filterForNotTargeted)
-            )
-        }
-      )
-    },
-    sortedDisplayables() {
-      if (this.sortByStatus == 'ascending') {
-        return this.displayables.sort(function(a, b) {
-          return parseInt(a[this.sortByField] || 0)  - parseInt(b[this.sortByField] || 0)
-        }.bind(this))
-      } else if (this.sortByStatus == 'descending') {
-        return this.displayables.sort(function(a, b) {
-          return parseInt(b[this.sortByField] || 0) - parseInt(a[this.sortByField] || 0)
-        }.bind(this))
-      } else {
-        return this.displayables
-      }
     },
     messages() {
       return this.errorMessages;

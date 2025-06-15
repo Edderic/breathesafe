@@ -21,7 +21,7 @@
         :tabToShow='tabToShow'
           v-if='newOrEditMode'
       />
-      <Button v-show='displayTab == "Fit Testing"' id='contextualize-button' class='icon' @click='showPopup = "Contextualize"'>
+      <Button v-show='!newMode && displayTab == "Fit Testing"' id='contextualize-button' class='icon' @click='showPopup = "Contextualize"'>
         Contextualize
       </Button>
 
@@ -87,8 +87,8 @@
           </tbody>
 
         </table>
-        <table v-if='tabToShow == "Basic Info" || showMode'>
 
+        <table v-if='tabToShow == "Basic Info"'>
           <thead>
              <tr>
                <th colspan=2><h3>Basic Info</h3></th>
@@ -98,7 +98,7 @@
             <tr>
               <th>Unique Internal Model Code</th>
               <td colspan='1'>
-                <input class='full-width has-minimal-width' type="text" v-model='uniqueInternalModelCode' v-show="newOrEditMode" placeholder="e.g. Flo Mask Adults S/M Nose with Pro filter">
+                <input class='full-width has-minimal-width' type="text" v-model='uniqueInternalModelCode' v-if="newOrEditMode" placeholder="e.g. Flo Mask Adults S/M Nose with Pro filter">
                 <span class='full-width has-minimal-width ' v-show="!newOrEditMode">
                   {{uniqueInternalModelCode }}
                 </span>
@@ -375,7 +375,7 @@
       <br>
 
     </div>
-    <div class='grid bar-charts main-section' v-show='displayTab == "Fit Testing"'>
+    <div class='grid bar-charts main-section' v-show='showMode &&  displayTab == "Fit Testing"'>
       <div class='card' v-for='s in scatterPlots'>
         <ScatterPlot
           :title="s.title"
@@ -827,7 +827,7 @@ export default {
       return this.newMode || this.editMode
     },
     showMode() {
-      return this.mode == 'Show'
+      return this.$route.name == 'ShowMask'
     },
     tagline() {
       let displayable = ""
@@ -937,6 +937,7 @@ export default {
 
       if (toName == 'NewMask' && this.currentUser) {
         this.mode = 'New'
+        this.displayTab = 'Misc. Info'
       } else if (toName == 'NewMask' && !this.currentUser) {
         // visit the URL
         this.$router.push({
