@@ -28,7 +28,7 @@ class MaskKitQuery
         SELECT
           distinct on (masks.id)
           masks.*,
-          average_filtration_efficiencies.*,
+          avg_sealed_ffs.*,
           users.email,
           profiles.first_name,
           profiles.last_name,
@@ -40,8 +40,8 @@ class MaskKitQuery
             0
           END AS num_fit_tests_per_mask_user
         FROM masks
-        LEFT JOIN average_filtration_efficiencies
-          ON masks.id = average_filtration_efficiencies.mask_id
+        LEFT JOIN avg_sealed_ffs
+          ON masks.id = avg_sealed_ffs.mask_id
         LEFT JOIN mask_kit_statuses mks
           ON mks.mask_uuid = masks.id
         LEFT JOIN shipping_status_joins ssj
