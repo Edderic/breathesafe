@@ -62,7 +62,6 @@ class FitTestsController < ApplicationController
       messages = []
     end
     tested_and_untested = MaskKitQuery.managed_by(manager_id: current_user.id)
-
     to_render = {
       fit_tests: fit_tests,
       tested_and_untested: tested_and_untested,

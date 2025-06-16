@@ -2,7 +2,7 @@ class FitTest < ApplicationRecord
   belongs_to :mask, optional: true
   belongs_to :facial_measurement, optional: true
   belongs_to :user
-  belongs_to :quantitative_fit_testing_device, class_name: 'MeasurementDevice'
+  belongs_to :quantitative_fit_testing_device, class_name: 'MeasurementDevice', optional: true
 
   def self.viewable(user)
     filter_clause = ""

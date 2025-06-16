@@ -418,17 +418,72 @@ export default {
       )
     },
     newFitTestWithSize(args) {
-      this.$router.push(
+      setupCSRF();
+      axios.post(
+        '/fit_tests.json',
         {
-          name: "NewFitTest",
-          query: {
-            mode: 'Edit',
-            userId: args.userId,
-            maskId: args.maskId,
-            size: args.size
+          fit_test: {
+            mask_id: args.maskId,
+            facial_hair: {
+              "beard_length_mm": "0mm",
+              "beard_cover_technique": "No"
+            },
+            user_seal_check: {
+              sizing: {
+                "What do you think about the sizing of this mask relative to your face?": args.size
+              },
+              "negative": {"...how much air passed between your face and the mask?": null},
+              "positive": {"...how much did your glasses fog up?": "A lot", "...how much pressure build up was there?": "No pressure build up", "...how much air movement on your face along the seal of the mask did you feel?": "A lot of air movement"}},
+            comfort: {
+              "Is there enough room to talk?": null,
+              "Is there adequate room for eye protection?": null,
+              "How comfortable is the position of the mask on the nose?": null,
+              "How comfortable is the position of the mask on face and cheeks?": null
+            },
+            quantitative_fit_testing_device_id: null,
+            results: {
+              "qualitative":  {
+                "aerosol": {"solution": "Saccharin"},
+                "exercises":  [
+                  {"name": "Normal breathing", "result": null},
+                  {"name": "Deep breathing", "result": null},
+                  {"name": "Turning head side to side", "result": null},
+                  {"name": "Moving head up and down", "result": null},
+                  {"name": "Talking", "result": null},
+                  {"name": "Bending over", "result": null},
+                  {"name": "Normal breathing", "result": null}
+                ],
+                "procedure": null
+              },
+              "quantitative":  {
+                "aerosol": {"solution": "Ambient", "initial_count_per_cm3": null},
+                "exercises":  [
+                  {"name": "Bending over", "fit_factor": null},
+                  {"name": "Talking", "fit_factor": null},
+                  {"name": "Turning head side to side", "fit_factor": null},
+                  {"name": "Moving head up and down", "fit_factor": null},
+                  {"name": "Normal breathing (SEALED)", "fit_factor": null}],
+                "procedure": null,
+                "testing_mode": "N99"
+              }
+            },
+          },
+          user: {
+            id: args.userId
           }
         }
       )
+      .then(response => {
+        if (response.status === 201) {
+          this.loadFitTests();
+          this.showMaskCardPopup = false;
+        } else {
+          this.message = "Failed to create fit test.";
+        }
+      })
+      .catch(error => {
+        this.message = "Failed to create fit test.";
+      });
     },
     toggleShowPopup(showPopup) {
       this.showPopup = showPopup

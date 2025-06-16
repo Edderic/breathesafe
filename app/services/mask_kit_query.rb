@@ -4,6 +4,19 @@ class MaskKitQuery
     # I should be able to view my untested and tested masks.
     # - Add Shipping Status, Shipping Status Joins, Mask Kit Status for myself,
     # and others I've tseted.
+    #
+    # Multiple
+    #
+    # Sent, Untested masks
+    #   use manager_id joined with the shipping status
+    #
+    # Not sent, Untested masks
+    #   for each mask, count the number of fit tests by an individual (managed_id)
+    #
+    # Admin usage:
+    #   On behalf of a user, (sent & untested), make changes
+    #   On behalf of a user, (not sent & untested), make changes
+    #
     u = User.find(manager_id)
 
     where_clause = "    WHERE mu.manager_id = #{manager_id.to_i}"
@@ -26,7 +39,6 @@ class MaskKitQuery
         #{Mask.average_filtration_efficiencies_sql}
 
         SELECT
-          distinct on (masks.id)
           masks.*,
           avg_sealed_ffs.*,
           users.email,
