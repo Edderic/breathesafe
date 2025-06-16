@@ -388,7 +388,7 @@
       <div class='card'>
         <h3 class='title'>Counts</h3>
         <HorizontalStackedBar
-            :values="basicAggregates"
+            :values="basicAggregatesWithFitTestPassCount"
         />
       </div>
       <div class='card'>
@@ -461,7 +461,8 @@ export default {
       basicAggregates: {},
       basicOptions: [
         'fit_test_count',
-        'unique_fit_testers_count'
+        'unique_fit_testers_count',
+        'fit_test_pass_count'
       ],
       raceEthnicityAggregates: {},
       raceEthnicityOptions: [
@@ -635,6 +636,21 @@ export default {
     ),
     facialMeasurements() {
       return getFacialMeasurements.bind(this)()
+    },
+    fitTestPassCount() {
+      let count = 0;
+      for(let fitTest of this.fitTestsWithFacialMeasurements) {
+        if (fitTest['qlftPass']) {
+          count += 1
+        }
+      }
+      return count
+    },
+
+    basicAggregatesWithFitTestPassCount() {
+      let copy = JSON.parse(JSON.stringify(this.basicAggregates))
+      copy['fit_test_pass_count'] = this.fitTestPassCount
+      return copy
     },
     scatterData1() {
       return this.prepareScatterData('bitragionSubnasaleArc', 'faceWidth')
@@ -916,7 +932,7 @@ export default {
       return this.fitTestsWithFacialMeasurements.map(point => ({
         x: point[xKey],
         y: point[yKey],
-        color: point.qlftPass ? 'rgba(0, 255, 0, 1)' : 'rgba(255, 0, 0, 1)'
+        color: point.qlftPass ? 'rgba(0, 255, 0, 0.7)' : 'rgba(255, 0, 0, 0.7)'
       })).filter(point => point.x != null && point.y != null)
     },
 

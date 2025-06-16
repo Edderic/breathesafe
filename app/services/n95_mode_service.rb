@@ -35,6 +35,7 @@ class N95ModeService
           fit_tests.mask_id,
           (regexp_replace(facial_hair ->> 'beard_length_mm', '[^0-9]', '', 'g'))::integer as facial_hair_beard_length_mm,
           '#{self}' AS source,
+          fit_tests.user_id,
           #{FacialMeasurement::COLUMNS.join(', ')}
         FROM n95_mode_experimentals
         INNER JOIN fit_tests ON fit_tests.id = n95_mode_experimentals.id

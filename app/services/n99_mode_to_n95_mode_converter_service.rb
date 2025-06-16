@@ -299,7 +299,8 @@ class N99ModeToN95ModeConverterService
             (regexp_replace(facial_hair ->> 'beard_length_mm', '[^0-9]', '', 'g'))::integer as facial_hair_beard_length_mm,
             #{FacialMeasurement::COLUMNS.join(",")},
             '#{self}' AS source,
-            mask_id
+            mask_id,
+            ft.user_id
           FROM unioned
           LEFT JOIN fit_tests ft
             ON unioned.id = ft.id

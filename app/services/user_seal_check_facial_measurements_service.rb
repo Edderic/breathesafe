@@ -24,7 +24,8 @@ class UserSealCheckFacialMeasurementsService
           SELECT fit_tests_with_seal_checks.*,
             (regexp_replace(facial_hair ->> 'beard_length_mm', '[^0-9]', '', 'g'))::integer as facial_hair_beard_length_mm,
             #{FacialMeasurement::COLUMNS.join(', ')},
-            '#{self}' AS source
+            '#{self}' AS source,
+            fit_tests.user_id
           FROM fit_tests_with_seal_checks
           INNER JOIN fit_tests ON fit_tests.id = fit_tests_with_seal_checks.id
           LEFT JOIN facial_measurements ON fit_tests.facial_measurement_id = facial_measurements.id
