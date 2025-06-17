@@ -409,11 +409,7 @@ export default {
       this.$router.push(
         {
           name: "NewFitTest",
-          query: {
-            mode: 'Edit',
-            userId: args.userId,
-            maskId: args.maskId
-          }
+          query: args
         }
       )
     },
