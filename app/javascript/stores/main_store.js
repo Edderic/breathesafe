@@ -12,6 +12,7 @@ export const useMainStore = defineStore('main', {
   state: () => ({
     center: {lat: 51.093048, lng: 6.842120},
     openedMarkerId: null,
+    waiting: false,
     markers: [],
     zoom: 2,
     focusTab: 'maps',
@@ -28,9 +29,15 @@ export const useMainStore = defineStore('main', {
       }
 
       return state.currentUser.admin
+    },
+    isWaiting(state) {
+      return state.waiting
     }
   },
   actions: {
+    setWaiting(value) {
+      this.waiting = value
+    },
     addMessages(ms) {
       for(let m of ms) {
         this.messages.push({

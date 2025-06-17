@@ -353,7 +353,7 @@ export default {
     )
   },
   methods: {
-    ...mapActions(useMainStore, ['getCurrentUser']),
+    ...mapActions(useMainStore, ['getCurrentUser', 'setWaiting']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     toggleMaskCardPopup() {
@@ -386,6 +386,7 @@ export default {
       }
     },
     async markNotIncludedInMaskKit(args) {
+      this.setWaiting(true);
       setupCSRF();
       let answer = window.confirm(`Are you sure you want to mark this mask as not being included in the mask kit?`);
 
@@ -398,6 +399,8 @@ export default {
           })
           .catch(error => {
             this.message = "Failed to remove mask from mask kit"
+          }).finally(() => {
+            this.setWaiting(false)
           })
 
         await this.loadFitTests()
@@ -415,6 +418,7 @@ export default {
     },
     newFitTestWithSize(args) {
       setupCSRF();
+      this.setWaiting(true);
       axios.post(
         '/fit_tests.json',
         {
@@ -479,6 +483,8 @@ export default {
       })
       .catch(error => {
         this.message = "Failed to create fit test.";
+      }).finally(() => {
+        this.setWaiting(false);
       });
     },
     toggleShowPopup(showPopup) {

@@ -27,7 +27,6 @@
       </button>
     </div>
 
-    <Spinner v-show="waiting"/>
     <div class='container chunk'>
       <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
       <br>
@@ -105,7 +104,6 @@ import SearchIcon from './search_icon.vue'
 import SortingStatus from './sorting_status.vue'
 import FilterPopup from './filter_popup.vue'
 import SortPopup from './sort_popup.vue'
-import Spinner from './spinner.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { getFacialMeasurements } from './facial_measurements.js'
@@ -135,7 +133,6 @@ export default {
     SearchIcon,
     SortPopup,
     SortingStatus,
-    Spinner,
     SurveyQuestion,
     TabSet
   },
@@ -210,6 +207,7 @@ export default {
         useMainStore,
         [
           'currentUser',
+          'isWaiting'
         ]
     ),
     ...mapState(
@@ -273,7 +271,7 @@ export default {
 
   },
   methods: {
-    ...mapActions(useMainStore, ['getCurrentUser']),
+    ...mapActions(useMainStore, ['getCurrentUser', 'setWaiting']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     ...mapActions(useFacialMeasurementStore, ['updateFacialMeasurements', 'getFacialMeasurement']),
     ...mapActions(useMasksStore, [
@@ -290,12 +288,12 @@ export default {
       await this.loadData(toQuery)
     },
     async loadData(toQuery) {
-      this.waiting = true;
+      this.setWaiting(true);
 
       this.updateFacialMeasurements(toQuery)
       await this.updateFacialMeasurement()
 
-      this.waiting = false;
+      this.setWaiting(false);
     },
     hideSortFilterPopUp() {
       this.showPopup = false

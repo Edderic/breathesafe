@@ -3,6 +3,7 @@
   <div class='column'>
     <NavBar></NavBar>
 
+    <Spinner v-show="isWaiting"/>
     <div class='router-view-container'>
       <router-view></router-view>
     </div>
@@ -15,6 +16,7 @@
 // Have a VueX store that maintains state across components
 import Footer from './footer.vue';
 import NavBar from './navbar.vue';
+import Spinner from './spinner.vue'
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
 import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
@@ -23,11 +25,13 @@ export default {
   name: 'App',
   components: {
     Footer,
+    Spinner,
     NavBar,
   },
   computed: {
     ...mapStores(useMainStore),
-    ...mapWritableState(useMainStore, ['center', 'zoom'])
+    ...mapWritableState(useMainStore, ['center', 'zoom']),
+    ...mapState(useMainStore, ['isWaiting'])
 
   },
   data() {
