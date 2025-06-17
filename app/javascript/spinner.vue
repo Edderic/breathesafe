@@ -26,7 +26,7 @@
   .spinner-background {
     background-color: rgba(128,128,128,0.5);
     position: absolute;
-    z-index: 1000;
+    z-index: 9999;
     display: flex;
     justify-content: center;
     align-items: center;
