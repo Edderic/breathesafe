@@ -1565,7 +1565,7 @@ export default {
       }
     },
     validatePresenceOfDevice() {
-      if (!this.quantitativeFitTestingDeviceId) {
+      if (this.quantitativeProcedure != 'Skipping' && !this.quantitativeFitTestingDeviceId) {
         this.messages.push(
           {
             str: `Please choose a quantitative fit testing device. If you'd like to add one not currently listed, see "Measurement Devices" section'`,
