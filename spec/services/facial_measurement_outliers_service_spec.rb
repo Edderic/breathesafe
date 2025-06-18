@@ -114,7 +114,24 @@ RSpec.describe FacialMeasurementOutliersService do
         )
       end
 
-      it 'calculates z-scores' do
+      let!(:facial_measurement_not_associated_to_fit_test) do
+        create(:facial_measurement,
+          user: other_user,
+          face_width: 1000,
+          jaw_width: 1000,
+          face_depth: 1000,
+          face_length: 1000,
+          lower_face_length: 1000,
+          bitragion_menton_arc: 1000,
+          bitragion_subnasale_arc: 1000,
+          nasal_root_breadth: 1000,
+          nose_protrusion: 1000,
+          nose_bridge_height: 1000,
+          lip_width: 1000
+        )
+      end
+
+      it 'calculates z-scores and ignores facial measurements not associated to a fit test' do
         results = described_class.call.to_a
         measurements_list = [:face_width, :jaw_width, :face_depth]
 
@@ -125,7 +142,7 @@ RSpec.describe FacialMeasurementOutliersService do
         expected_first_measurement_zscores = zscores.find {|m| m[:id] == first_measurement['id']}
 
         measurements_list.each do |m|
-          puts("m: #{m}, first_measurement_zscore: #{first_measurement["#{m}_z_score"]}, expected: #{expected_first_measurement_zscores["#{m}_z_score"]}")
+          # puts("m: #{m}, first_measurement_zscore: #{first_measurement["#{m}_z_score"]}, expected: #{expected_first_measurement_zscores["#{m}_z_score"]}")
           expect(first_measurement["#{m}_z_score"]).to be_within(0.03)\
             .of(expected_first_measurement_zscores["#{m}_z_score"])
         end
