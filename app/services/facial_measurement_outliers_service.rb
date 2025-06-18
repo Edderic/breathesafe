@@ -21,22 +21,42 @@ class FacialMeasurementOutliersService
       end.join(",")
     end
 
-    def call
-      ActiveRecord::Base.connection.exec_query(
-        <<-SQL
-        WITH measurement_stats AS (
+    def dedup_sql
+      # Represent a user only once
+      <<-SQL
+      facial_measurements_deduped AS (
+        SELECT * FROM facial_measurements fm
+        WHERE id IN (
+          SELECT facial_measurement_id
+          FROM fit_tests
+        )
+      )
+      SQL
+    end
+
+    def measurement_stats_sql
+      <<-SQL
+        measurement_stats AS (
           SELECT
             1
             id,
             #{avg_stddev_cols}
-          FROM facial_measurements fm
-          INNER JOIN fit_tests ft on ft.facial_measurement_id = fm.id
+          FROM facial_measurements_deduped fm
           GROUP BY 1
         )
+      SQL
+    end
+
+    def call
+      ActiveRecord::Base.connection.exec_query(
+        <<-SQL
+        WITH
+        #{dedup_sql},
+        #{measurement_stats_sql}
+
         SELECT
           fm.id,
           fm.user_id,
-          fm.face_width,
           #{zscore_cols}
         FROM facial_measurements fm
         CROSS JOIN measurement_stats ms
