@@ -1194,15 +1194,16 @@ export default {
     await this.loadQuery(toQuery, null)
     await this.loadParams(toParams, null)
 
-    // TODO: add param watchers
-    this.$watch(
-      () => this.$route.query,
-      this.loadQuery
-    )
 
     this.$watch(
       () => this.$route.params,
       this.loadParams
+    )
+
+    // TODO: add param watchers
+    this.$watch(
+      () => this.$route.query,
+      this.loadQuery
     )
   },
   methods: {
@@ -1264,7 +1265,7 @@ export default {
             this.tabToShow = toQuery['tabToShow']
           }
 
-          if ('mode' in toQuery) {
+          if (toQuery['mode']) {
             this.mode = toQuery['mode']
           }
 
@@ -1401,9 +1402,10 @@ export default {
     },
     async loadFitTest() {
       // TODO: make this more flexible so parents can load data of their children
-      if (this.id) {
+      if (['EditFitTest', 'ViewFitTest'].includes(this.$route.name) && this.$route.params.id) {
+
         await axios.get(
-          `/fit_tests/${this.id}.json`,
+          `/fit_tests/${this.$route.params.id}.json`,
         )
           .then(response => {
             let data = response.data
@@ -1411,7 +1413,7 @@ export default {
 
             this.id = fitTestData.id
 
-            this.selectedMask = this.masks.filter((m) => m.id == fit_test_data.mask_id)[0]
+            this.selectedMask = this.masks.filter((m) => m.id == fitTestData.mask_id)[0]
             this.comfort = fitTestData.comfort
             this.userSealCheck = fitTestData.user_seal_check
             this.facialHair = fitTestData.facial_hair
