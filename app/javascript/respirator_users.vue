@@ -117,9 +117,9 @@
         <br>
       </div>
 
-      <div class='main'>
+      <div class='main facial-measurements-table-container'>
         <div class='centered'>
-          <table v-if='facialMeasurementsData.length > 0'>
+          <table v-if='facialMeasurementsData.length > 0' class='facial-measurements-table'>
             <thead>
               <tr>
                 <th v-if='currentUser.admin'>Manager Email</th>
@@ -706,6 +706,40 @@ export default {
 
   a {
     color: white;
+  }
+
+  .facial-measurements-table-container {
+    max-height: 70vh;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .facial-measurements-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .facial-measurements-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #eee;
+  }
+
+  .facial-measurements-table th {
+    padding: 1em;
+    background-color: #eee;
+    border-bottom: 2px solid #ddd;
+    font-weight: bold;
+  }
+
+  .facial-measurements-table td {
+    padding: 0.5em;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .facial-measurements-table tbody tr:hover {
+    background-color: rgb(240, 240, 240);
   }
 
 </style>
