@@ -70,6 +70,8 @@ export default {
     text-align: center;
     font-size: 1.5em;
     color: white;
+    display: flex;
+    align-items: center;
   }
   .button:hover {
     cursor: pointer;
