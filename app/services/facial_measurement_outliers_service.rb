@@ -44,8 +44,7 @@ class FacialMeasurementOutliersService
     end
 
     def call
-      ActiveRecord::Base.connection.exec_query(
-        <<-SQL
+      sql = <<-SQL
         WITH
         #{dedup_sql},
         #{measurement_stats_sql}
@@ -73,7 +72,12 @@ class FacialMeasurementOutliersService
         )
         ORDER BY p.last_name, p.first_name
         SQL
-      )
+      
+      Rails.logger.info "FacialMeasurementOutliersService SQL: #{sql}"
+      result = ActiveRecord::Base.connection.exec_query(sql)
+      Rails.logger.info "FacialMeasurementOutliersService result columns: #{result.columns}"
+      Rails.logger.info "FacialMeasurementOutliersService result count: #{result.count}"
+      result
     end
   end
 end

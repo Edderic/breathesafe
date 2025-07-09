@@ -505,7 +505,7 @@ export default {
 
       // For z-scores, use a different color scheme
       if (this.facialMeasurementView === 'Z-Score') {
-        return genColorSchemeBounds(-3, 3, 6);
+        return genColorSchemeBounds(-2.5, 2.5, 6);
       }
 
       return schemes[col] || this.evenlySpacedColorScheme;
@@ -513,33 +513,36 @@ export default {
     getValueForColumn(row, col) {
       if (this.facialMeasurementView === 'Z-Score') {
         const zScoreCol = `${col}_z_score`;
-        return row[zScoreCol];
+        const value = row[zScoreCol];
+        console.log(`Getting z-score for ${col}:`, { zScoreCol, value, type: typeof value });
+        return value === null || value === undefined ? null : parseFloat(value);
       } else {
-        return row[col];
+        const value = row[col];
+        return value === null || value === undefined ? null : parseFloat(value);
       }
     },
-    getDisplayValueForColumn(row, col) {
+        getDisplayValueForColumn(row, col) {
       const value = this.getValueForColumn(row, col);
-      if (value === null || value === undefined) {
+      if (value === null || value === undefined || isNaN(value)) {
         return 'N/A';
       }
-
+      
       if (this.facialMeasurementView === 'Z-Score') {
         return value.toFixed(2);
       } else {
         return `${value} mm`;
       }
     },
-    getExceptionForColumn(row, col) {
+        getExceptionForColumn(row, col) {
       const value = this.getValueForColumn(row, col);
-      if (value === null || value === undefined) {
+      if (value === null || value === undefined || isNaN(value)) {
         return {
           value: null,
           text: 'N/A',
           color: { r: 128, g: 128, b: 128 }
         };
       }
-
+      
       // For z-scores, highlight outliers
       if (this.facialMeasurementView === 'Z-Score') {
         if (Math.abs(value) > 2) {
@@ -550,13 +553,19 @@ export default {
           };
         }
       }
-
+      
       return null;
     },
     async loadFacialMeasurementsData() {
       try {
         const response = await axios.get('/managed_users/facial_measurements.json');
+        console.log('Facial measurements response:', response.data);
         this.facialMeasurementsData = response.data.facial_measurements;
+        
+        if (this.facialMeasurementsData.length > 0) {
+          console.log('First row columns:', Object.keys(this.facialMeasurementsData[0]));
+          console.log('Sample z-score columns:', this.facialMeasurementColumns.map(col => `${col}_z_score`));
+        }
       } catch (error) {
         this.addMessages(['Failed to load facial measurements data.']);
         console.error(error);
