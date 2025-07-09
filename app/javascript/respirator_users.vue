@@ -128,7 +128,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for='row in facialMeasurementsData'>
+              <tr v-for='row in filteredFacialMeasurementsData'>
                 <td v-if='currentUser.admin'>{{row.manager_email}}</td>
                 <td>{{row.full_name}}</td>
                 <td v-for='col in facialMeasurementColumns' class='colored-cell'>
@@ -147,6 +147,9 @@
 
         <h3 class='text-align-center' v-show='facialMeasurementsData.length == 0'>
           Loading facial measurements data...
+        </h3>
+        <h3 class='text-align-center' v-show='facialMeasurementsData.length > 0 && filteredFacialMeasurementsData.length == 0'>
+          No facial measurements found matching your search.
         </h3>
       </div>
     </div>
@@ -312,6 +315,18 @@ export default {
         'nose_breadth': 'Nose Breadth'
       };
       return names;
+    },
+    filteredFacialMeasurementsData() {
+      if (this.search === "") {
+        return this.facialMeasurementsData;
+      } else {
+        const lowerSearch = this.search.toLowerCase();
+        return this.facialMeasurementsData.filter(row => {
+          const name = (row.full_name || '').toLowerCase();
+          const managerEmail = (row.manager_email || '').toLowerCase();
+          return name.includes(lowerSearch) || managerEmail.includes(lowerSearch);
+        });
+      }
     }
   },
   async created() {
@@ -526,7 +541,7 @@ export default {
       if (value === null || value === undefined || isNaN(value)) {
         return 'N/A';
       }
-      
+
       if (this.facialMeasurementView === 'Z-Score') {
         return value.toFixed(2);
       } else {
@@ -542,7 +557,7 @@ export default {
           color: { r: 128, g: 128, b: 128 }
         };
       }
-      
+
       // For z-scores, highlight outliers
       if (this.facialMeasurementView === 'Z-Score') {
         if (Math.abs(value) > 2) {
@@ -553,7 +568,7 @@ export default {
           };
         }
       }
-      
+
       return null;
     },
     async loadFacialMeasurementsData() {
@@ -561,7 +576,7 @@ export default {
         const response = await axios.get('/managed_users/facial_measurements.json');
         console.log('Facial measurements response:', response.data);
         this.facialMeasurementsData = response.data.facial_measurements;
-        
+
         if (this.facialMeasurementsData.length > 0) {
           console.log('First row columns:', Object.keys(this.facialMeasurementsData[0]));
           console.log('Sample z-score columns:', this.facialMeasurementColumns.map(col => `${col}_z_score`));
@@ -740,6 +755,12 @@ export default {
 
   .facial-measurements-table tbody tr:hover {
     background-color: rgb(240, 240, 240);
+  }
+
+  #facial-measurements-search {
+    width: 75vw;
+    padding: 1em;
+    margin-bottom: 1em;
   }
 
 </style>
