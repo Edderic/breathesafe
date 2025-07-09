@@ -1,16 +1,27 @@
 <template>
   <div class='top-container'>
-    <div class='flex align-items-center justify-content-center row'>
-      <h2 class='tagline'>Respirator Users</h2>
-      <CircularButton text="+" @click="newUser"/>
-    </div>
+    <div class='justify-content-center'>
+      <div class='flex align-items-center row'>
+        <h2 class='tagline'>Respirator Users</h2>
+        <CircularButton text="+" @click="newUser"/>
+      </div>
 
-    <div class='menu row'>
-      <TabSet
-        :options='tabToShowOptions'
-        @update='setTabToShow'
-        :tabToShow='tabToShow'
-      />
+      <div class='menu row'>
+        <TabSet
+          :options='tabToShowOptions'
+          @update='setTabToShow'
+          :tabToShow='tabToShow'
+        />
+      </div>
+
+      <div class='menu row' v-if='facialMeasurementsData.length > 0'>
+        <TabSet
+          :options='facialMeasurementViewOptions'
+          @update='setFacialMeasurementView'
+          :tabToShow='facialMeasurementView'
+        />
+      </div>
+
     </div>
 
     <div v-if='tabToShow == "Overview"'>
@@ -104,14 +115,6 @@
       <div class='container chunk'>
         <ClosableMessage @onclose='messages = []' :messages='messages'/>
         <br>
-      </div>
-
-      <div class='menu row'>
-        <TabSet
-          :options='facialMeasurementViewOptions'
-          @update='setFacialMeasurementView'
-          :tabToShow='facialMeasurementView'
-        />
       </div>
 
       <div class='main'>
@@ -278,7 +281,7 @@ export default {
     facialMeasurementColumns() {
       return [
         'face_width',
-        'jaw_width', 
+        'jaw_width',
         'face_depth',
         'face_length',
         'lower_face_length',
@@ -499,12 +502,12 @@ export default {
         'head_circumference': genColorSchemeBounds(500, 600, 6),
         'nose_breadth': genColorSchemeBounds(25, 40, 6)
       };
-      
+
       // For z-scores, use a different color scheme
       if (this.facialMeasurementView === 'Z-Score') {
         return genColorSchemeBounds(-3, 3, 6);
       }
-      
+
       return schemes[col] || this.evenlySpacedColorScheme;
     },
     getValueForColumn(row, col) {
@@ -520,7 +523,7 @@ export default {
       if (value === null || value === undefined) {
         return 'N/A';
       }
-      
+
       if (this.facialMeasurementView === 'Z-Score') {
         return value.toFixed(2);
       } else {
@@ -536,7 +539,7 @@ export default {
           color: { r: 128, g: 128, b: 128 }
         };
       }
-      
+
       // For z-scores, highlight outliers
       if (this.facialMeasurementView === 'Z-Score') {
         if (Math.abs(value) > 2) {
@@ -547,7 +550,7 @@ export default {
           };
         }
       }
-      
+
       return null;
     },
     async loadFacialMeasurementsData() {
@@ -661,6 +664,7 @@ export default {
   }
 
   .justify-content-center {
+    display: flex;
     justify-content: center;
   }
 
