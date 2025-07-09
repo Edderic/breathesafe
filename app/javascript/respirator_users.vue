@@ -5,88 +5,147 @@
       <CircularButton text="+" @click="newUser"/>
     </div>
 
-    <div class='row justify-content-center'>
-      <input id='search' type="text" v-model='search'>
-      <SearchIcon height='2em' width='2em'/>
+    <div class='menu row'>
+      <TabSet
+        :options='tabToShowOptions'
+        @update='setTabToShow'
+        :tabToShow='tabToShow'
+      />
     </div>
 
-    <div class='container chunk'>
-      <ClosableMessage @onclose='messages = []' :messages='messages'/>
-      <br>
-    </div>
+    <div v-if='tabToShow == "Overview"'>
+      <div class='row justify-content-center'>
+        <input id='search' type="text" v-model='search'>
+        <SearchIcon height='2em' width='2em'/>
+      </div>
 
-    <Popup v-if='missingFacialMeasurementsForRecommender.length > 0' @onclose='missingFacialMeasurementsForRecommender = []'>
-      <p>
-      User is missing at least one facial measurement needed for mask recommendations:
-      <ul>
-        <router-link class='missing' :to="linkToUserFacialMeasurement" >
-          <li v-for="m in missingFacialMeasurementsForRecommender">{{m}}</li>
-        </router-link>
-      </ul>
+      <div class='container chunk'>
+        <ClosableMessage @onclose='messages = []' :messages='messages'/>
+        <br>
+      </div>
 
-      </p>
-    </Popup>
+      <Popup v-if='missingFacialMeasurementsForRecommender.length > 0' @onclose='missingFacialMeasurementsForRecommender = []'>
+        <p>
+        User is missing at least one facial measurement needed for mask recommendations:
+        <ul>
+          <router-link class='missing' :to="linkToUserFacialMeasurement" >
+            <li v-for="m in missingFacialMeasurementsForRecommender">{{m}}</li>
+          </router-link>
+        </ul>
 
-    <div :class='{main: true, scrollable: managedUsers.length == 0}'>
-      <div class='centered'>
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Demographics</th>
-              <th>Face Measurements</th>
-              <th>Masks that have data</th>
-              <th>Recommend</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for='r in displayables' text='Edit'>
-              <td v-if='currentUser.admin'>{{r['managerEmail']}}</td>
-              <td @click="visit(r.managedId, 'Name')">
-                {{r.firstName}} {{r.lastName}}
-              </td>
-              <td @click="visit(r.managedId, 'Demographics')" class='colored-cell' >
-                <ColoredCell
-                  :colorScheme="evenlySpacedColorScheme"
-                  :maxVal=1
-                  :value='1 - r.demogPercentComplete / 100'
-                  :text='percentage(r.demogPercentComplete)'
-                  class='color-cell'
-                />
-              </td>
-              <td @click="visit(r.managedId, 'Facial Measurements')" class='colored-cell' >
-                <ColoredCell
-                  :colorScheme="evenlySpacedColorScheme"
-                  :maxVal=1
-                  :value='1- r.fmPercentComplete / 100'
-                  :text='percentage(r.fmPercentComplete)'
-                  class='color-cell'
-                />
-              </td>
-              <td class='colored-cell' @click='v'>
-                <router-link :to="{name: 'FitTests', query: {'managedId': r.managedId }}">
+        </p>
+      </Popup>
+
+      <div :class='{main: true, scrollable: managedUsers.length == 0}'>
+        <div class='centered'>
+          <table>
+            <thead>
+              <tr>
+                <th v-if='currentUser.admin'>Manager Email</th>
+                <th>Name</th>
+                <th>Demographics</th>
+                <th>Face Measurements</th>
+                <th>Masks that have data</th>
+                <th>Recommend</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for='r in displayables' text='Edit'>
+                <td v-if='currentUser.admin'>{{r['managerEmail']}}</td>
+                <td @click="visit(r.managedId, 'Name')">
+                  {{r.firstName}} {{r.lastName}}
+                </td>
+                <td @click="visit(r.managedId, 'Demographics')" class='colored-cell' >
                   <ColoredCell
                     :colorScheme="evenlySpacedColorScheme"
                     :maxVal=1
-                    :value='1 - (r.fitTestingPercentComplete || 0) / 100'
-                    :text='percentage(r.fitTestingPercentComplete || 0)'
+                    :value='1 - r.demogPercentComplete / 100'
+                    :text='percentage(r.demogPercentComplete)'
                     class='color-cell'
                   />
-                </router-link>
-              </td>
-              <td class='colored-cell' @click='maybeRecommend(r)'>
-                  <Button :style='`font-size: 1em; background-color: ${backgroundColorForRecommender(r)}`'>
-                    Recommend
-                  </Button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+                <td @click="visit(r.managedId, 'Facial Measurements')" class='colored-cell' >
+                  <ColoredCell
+                    :colorScheme="evenlySpacedColorScheme"
+                    :maxVal=1
+                    :value='1- r.fmPercentComplete / 100'
+                    :text='percentage(r.fmPercentComplete)'
+                    class='color-cell'
+                  />
+                </td>
+                <td class='colored-cell' @click='v'>
+                  <router-link :to="{name: 'FitTests', query: {'managedId': r.managedId }}">
+                    <ColoredCell
+                      :colorScheme="evenlySpacedColorScheme"
+                      :maxVal=1
+                      :value='1 - (r.fitTestingPercentComplete || 0) / 100'
+                      :text='percentage(r.fitTestingPercentComplete || 0)'
+                      class='color-cell'
+                    />
+                  </router-link>
+                </td>
+                <td class='colored-cell' @click='maybeRecommend(r)'>
+                    <Button :style='`font-size: 1em; background-color: ${backgroundColorForRecommender(r)}`'>
+                      Recommend
+                    </Button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class='text-align-center' v-show='displayables.length == 0' >
+          No managed users to show. Use the (+) button above to add users you can add fit test data for.
+        </h3>
+      </div>
+    </div>
+
+    <div v-if='tabToShow == "Facial Measurements"'>
+      <div class='container chunk'>
+        <ClosableMessage @onclose='messages = []' :messages='messages'/>
+        <br>
       </div>
 
-      <h3 class='text-align-center' v-show='displayables.length == 0' >
-        No managed users to show. Use the (+) button above to add users you can add fit test data for.
-      </h3>
+      <div class='menu row'>
+        <TabSet
+          :options='facialMeasurementViewOptions'
+          @update='setFacialMeasurementView'
+          :tabToShow='facialMeasurementView'
+        />
+      </div>
+
+      <div class='main'>
+        <div class='centered'>
+          <table v-if='facialMeasurementsData.length > 0'>
+            <thead>
+              <tr>
+                <th v-if='currentUser.admin'>Manager Email</th>
+                <th>Name</th>
+                <th v-for='col in facialMeasurementColumns'>{{columnDisplayNames[col]}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for='row in facialMeasurementsData'>
+                <td v-if='currentUser.admin'>{{row.manager_email}}</td>
+                <td>{{row.full_name}}</td>
+                <td v-for='col in facialMeasurementColumns' class='colored-cell'>
+                  <ColoredCell
+                    :colorScheme="getColorSchemeForColumn(col)"
+                    :value='getValueForColumn(row, col)'
+                    :text='getDisplayValueForColumn(row, col)'
+                    :exception='getExceptionForColumn(row, col)'
+                    class='color-cell'
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class='text-align-center' v-show='facialMeasurementsData.length == 0'>
+          Loading facial measurements data...
+        </h3>
+      </div>
     </div>
   </div>
 </template>
@@ -108,6 +167,7 @@ import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import SearchIcon from './search_icon.vue'
 import { useManagedUserStore } from './stores/managed_users_store.js'
+import TabSet from './tab_set.vue'
 
 export default {
   name: 'RespiratorUsers',
@@ -117,14 +177,18 @@ export default {
     ClosableMessage,
     ColoredCell,
     Popup,
-    SearchIcon
+    SearchIcon,
+    TabSet
   },
   data() {
     return {
       facialMeasurementsLength: 0,
       missingFacialMeasurementsForRecommender: [],
       search: "",
-      userId: 0
+      userId: 0,
+            tabToShow: "Overview",
+      facialMeasurementView: "Absolute",
+      facialMeasurementsData: []
     }
   },
   props: {
@@ -198,6 +262,53 @@ export default {
     },
     evenlySpacedColorScheme() {
       return genColorSchemeBounds(0, 1, 5)
+    },
+    tabToShowOptions() {
+      return [
+        { text: 'Overview' },
+        { text: 'Facial Measurements' }
+      ];
+    },
+    facialMeasurementViewOptions() {
+      return [
+        { text: 'Absolute' },
+        { text: 'Z-Score' }
+      ];
+    },
+    facialMeasurementColumns() {
+      return [
+        'face_width',
+        'jaw_width', 
+        'face_depth',
+        'face_length',
+        'lower_face_length',
+        'bitragion_menton_arc',
+        'bitragion_subnasale_arc',
+        'nasal_root_breadth',
+        'nose_protrusion',
+        'nose_bridge_height',
+        'lip_width',
+        'head_circumference',
+        'nose_breadth'
+      ];
+    },
+    columnDisplayNames() {
+      const names = {
+        'face_width': 'Face Width',
+        'jaw_width': 'Jaw Width',
+        'face_depth': 'Face Depth',
+        'face_length': 'Face Length',
+        'lower_face_length': 'Lower Face Length',
+        'bitragion_menton_arc': 'Bitragion Menton Arc',
+        'bitragion_subnasale_arc': 'Bitragion Subnasale Arc',
+        'nasal_root_breadth': 'Nasal Root Breadth',
+        'nose_protrusion': 'Nose Protrusion',
+        'nose_bridge_height': 'Nose Bridge Height',
+        'lip_width': 'Lip Width',
+        'head_circumference': 'Head Circumference',
+        'nose_breadth': 'Nose Breadth'
+      };
+      return names;
     }
   },
   async created() {
@@ -361,8 +472,94 @@ export default {
           tabToShow: tabToShow
         }
       })
+    },
+    setTabToShow(option) {
+      this.tabToShow = option.name;
+      if (this.tabToShow === 'Facial Measurements') {
+        this.loadFacialMeasurementsData();
+      }
+    },
+    setFacialMeasurementView(option) {
+      this.facialMeasurementView = option.name;
+    },
+    getColorSchemeForColumn(col) {
+      // Define color schemes for different measurement ranges
+      const schemes = {
+        'face_width': genColorSchemeBounds(120, 180, 6),
+        'jaw_width': genColorSchemeBounds(120, 170, 6),
+        'face_depth': genColorSchemeBounds(100, 150, 6),
+        'face_length': genColorSchemeBounds(100, 150, 6),
+        'lower_face_length': genColorSchemeBounds(60, 120, 6),
+        'bitragion_menton_arc': genColorSchemeBounds(200, 300, 6),
+        'bitragion_subnasale_arc': genColorSchemeBounds(200, 300, 6),
+        'nasal_root_breadth': genColorSchemeBounds(15, 25, 6),
+        'nose_protrusion': genColorSchemeBounds(20, 40, 6),
+        'nose_bridge_height': genColorSchemeBounds(15, 30, 6),
+        'lip_width': genColorSchemeBounds(40, 60, 6),
+        'head_circumference': genColorSchemeBounds(500, 600, 6),
+        'nose_breadth': genColorSchemeBounds(25, 40, 6)
+      };
+      
+      // For z-scores, use a different color scheme
+      if (this.facialMeasurementView === 'Z-Score') {
+        return genColorSchemeBounds(-3, 3, 6);
+      }
+      
+      return schemes[col] || this.evenlySpacedColorScheme;
+    },
+    getValueForColumn(row, col) {
+      if (this.facialMeasurementView === 'Z-Score') {
+        const zScoreCol = `${col}_z_score`;
+        return row[zScoreCol];
+      } else {
+        return row[col];
+      }
+    },
+    getDisplayValueForColumn(row, col) {
+      const value = this.getValueForColumn(row, col);
+      if (value === null || value === undefined) {
+        return 'N/A';
+      }
+      
+      if (this.facialMeasurementView === 'Z-Score') {
+        return value.toFixed(2);
+      } else {
+        return `${value} mm`;
+      }
+    },
+    getExceptionForColumn(row, col) {
+      const value = this.getValueForColumn(row, col);
+      if (value === null || value === undefined) {
+        return {
+          value: null,
+          text: 'N/A',
+          color: { r: 128, g: 128, b: 128 }
+        };
+      }
+      
+      // For z-scores, highlight outliers
+      if (this.facialMeasurementView === 'Z-Score') {
+        if (Math.abs(value) > 2) {
+          return {
+            value: value,
+            text: value.toFixed(2),
+            color: { r: 255, g: 0, b: 0 }
+          };
+        }
+      }
+      
+      return null;
+    },
+    async loadFacialMeasurementsData() {
+      try {
+        const response = await axios.get('/managed_users/facial_measurements.json');
+        this.facialMeasurementsData = response.data.facial_measurements;
+      } catch (error) {
+        this.addMessages(['Failed to load facial measurements data.']);
+        console.error(error);
+      }
     }
-  }
+     }
 }
 </script>
 

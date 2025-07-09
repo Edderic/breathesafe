@@ -156,4 +156,27 @@ class ManagedUsersController < ApplicationController
       end
     end
   end
+
+  def facial_measurements
+    if unauthorized?
+      status = 401
+      messages = ["Unauthorized."]
+      facial_measurements = []
+    else
+      facial_measurements = FacialMeasurementOutliersService.call
+      messages = []
+      status = 200
+    end
+
+    to_render = {
+      facial_measurements: facial_measurements,
+      messages: messages
+    }
+
+    respond_to do |format|
+      format.json do
+        render json: to_render.to_json, status: status
+      end
+    end
+  end
 end

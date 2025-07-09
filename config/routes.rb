@@ -46,6 +46,7 @@ Rails.application.routes.draw do
 
   post 'managed_users',to: 'managed_users#create'
   get 'managed_users',to: 'managed_users#index'
+  get 'managed_users/facial_measurements',to: 'managed_users#facial_measurements'
   get 'managed_users/:id',to: 'managed_users#show'
   delete 'managed_users/:id',to: 'managed_users#delete'
 

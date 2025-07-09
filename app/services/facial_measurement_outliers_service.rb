@@ -26,10 +26,6 @@ class FacialMeasurementOutliersService
       <<-SQL
       facial_measurements_deduped AS (
         SELECT * FROM facial_measurements fm
-        WHERE id IN (
-          SELECT facial_measurement_id
-          FROM fit_tests
-        )
       )
       SQL
     end
@@ -57,9 +53,25 @@ class FacialMeasurementOutliersService
         SELECT
           fm.id,
           fm.user_id,
-          #{zscore_cols}
+          u.email as user_email,
+          p.first_name,
+          p.last_name,
+          (p.first_name || ' ' || p.last_name) as full_name,
+          manager.email as manager_email,
+          #{zscore_cols},
+          #{FacialMeasurement::COLUMNS.join(', ')}
         FROM facial_measurements fm
+        INNER JOIN users u ON u.id = fm.user_id
+        INNER JOIN profiles p ON p.user_id = fm.user_id
+        INNER JOIN managed_users mu ON mu.managed_id = fm.user_id
+        INNER JOIN users manager ON manager.id = mu.manager_id
         CROSS JOIN measurement_stats ms
+        WHERE fm.id IN (
+          SELECT MAX(fm2.id)
+          FROM facial_measurements fm2
+          GROUP BY fm2.user_id
+        )
+        ORDER BY p.last_name, p.first_name
         SQL
       )
     end
