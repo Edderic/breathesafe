@@ -48,9 +48,9 @@
       </Popup>
 
       <div :class='{main: true, scrollable: managedUsers.length == 0}'>
-        <div class='centered'>
-          <table>
-            <thead>
+        <div class='centered facial-measurements-table-container'>
+          <table class='facial-measurements-table'>
+            <thead class='facial-measurements-header'>
               <tr>
                 <th v-if='currentUser.admin'>Manager Email</th>
                 <th>Name</th>
@@ -734,7 +734,7 @@ export default {
     border-collapse: collapse;
   }
 
-  .facial-measurements-table thead {
+  .facial-measurements-table thead, .facial-measurements-header {
     position: sticky;
     top: 0;
     z-index: 10;
