@@ -1,6 +1,6 @@
 <template>
   <div class='top-container'>
-    <div class='justify-content-center'>
+    <div class='justify-content-center align-items-center'>
       <div class='flex align-items-center row'>
         <h2 class='tagline'>Respirator Users</h2>
         <CircularButton text="+" @click="newUser"/>
@@ -14,7 +14,7 @@
         />
       </div>
 
-      <div class='menu row' v-if='facialMeasurementsData.length > 0'>
+      <div class='menu row' v-if='facialMeasurementsData.length > 0 && tabToShow == "Facial Measurements"'>
         <TabSet
           :options='facialMeasurementViewOptions'
           @update='setFacialMeasurementView'
@@ -22,13 +22,13 @@
         />
       </div>
 
-    </div>
-
-    <div v-if='tabToShow == "Overview"'>
       <div class='row justify-content-center'>
         <input id='search' type="text" v-model='search'>
         <SearchIcon height='2em' width='2em'/>
       </div>
+    </div>
+
+    <div v-if='tabToShow == "Overview"'>
 
       <div class='container chunk'>
         <ClosableMessage @onclose='messages = []' :messages='messages'/>
