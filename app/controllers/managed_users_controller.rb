@@ -163,7 +163,7 @@ class ManagedUsersController < ApplicationController
       messages = ["Unauthorized."]
       facial_measurements = []
     else
-      facial_measurements = FacialMeasurementOutliersService.call
+      facial_measurements = FacialMeasurementOutliersService.call(manager_id: current_user.id)
       messages = []
       status = 200
     end

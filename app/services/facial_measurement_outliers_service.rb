@@ -24,30 +24,69 @@ class FacialMeasurementOutliersService
     def dedup_sql
       # Represent a user only once
       <<-SQL
-      facial_measurements_deduped AS (
+      latest_facial_measurement_ids AS (
+        SELECT user_id, MAX(id) AS id FROM facial_measurements fm
+        GROUP BY 1
+      ),
+      latest_facial_measurements_per_user AS (
         SELECT * FROM facial_measurements fm
+        WHERE id in (
+          SELECT id FROM latest_facial_measurement_ids
+        )
       )
+
       SQL
     end
 
-    def measurement_stats_sql
+    def measurement_stats_sql(manager_id: nil)
+      # Calculate stats from measurements that have fit tests, matching get_zscores function
+      # Use DISTINCT to avoid counting the same measurement multiple times
       <<-SQL
         measurement_stats AS (
           SELECT
             1
             id,
             #{avg_stddev_cols}
-          FROM facial_measurements_deduped fm
+          FROM (
+            SELECT DISTINCT fm.id, fm.face_width, fm.jaw_width, fm.face_depth, fm.face_length,
+                   fm.lower_face_length, fm.bitragion_menton_arc, fm.bitragion_subnasale_arc,
+                   fm.nasal_root_breadth, fm.nose_protrusion, fm.nose_bridge_height,
+                   fm.lip_width, fm.head_circumference, fm.nose_breadth
+            FROM latest_facial_measurements_per_user fm
+            INNER JOIN fit_tests ft ON ft.user_id = fm.user_id
+          ) fm_distinct
           GROUP BY 1
         )
       SQL
     end
 
-    def call
+    def call(manager_id: nil)
+      manager_filter = manager_id ? "INNER JOIN managed_users mu ON mu.managed_id = fm.user_id AND mu.manager_id = #{manager_id}" : ""
+
+      # Debug: Check what measurements are being used for stats
+      stats_query = <<-SQL
+        SELECT COUNT(*) as count, AVG(face_width) as avg_face_width, STDDEV_POP(face_width) as stddev_face_width
+        FROM facial_measurements fm
+        INNER JOIN fit_tests ft ON ft.facial_measurement_id = fm.id
+      SQL
+
+      # Debug: Show specific measurements used in service stats
+      specific_stats_query = <<-SQL
+        SELECT fm.id, fm.user_id, fm.face_width
+        FROM facial_measurements fm
+        INNER JOIN fit_tests ft ON ft.facial_measurement_id = fm.id
+        ORDER BY fm.id
+      SQL
+      specific_stats = ActiveRecord::Base.connection.exec_query(specific_stats_query).to_a
+      puts "Service stats measurements:"
+      specific_stats.each do |m|
+        puts "  ID: #{m['id']}, User: #{m['user_id']}, face_width: #{m['face_width']}"
+      end
+
       sql = <<-SQL
         WITH
         #{dedup_sql},
-        #{measurement_stats_sql}
+        #{measurement_stats_sql(manager_id: manager_id)}
 
         SELECT
           fm.id,
@@ -56,27 +95,19 @@ class FacialMeasurementOutliersService
           p.first_name,
           p.last_name,
           (p.first_name || ' ' || p.last_name) as full_name,
-          manager.email as manager_email,
+          #{manager_id ? "manager.email as manager_email," : "NULL as manager_email,"}
           #{zscore_cols},
           #{FacialMeasurement::COLUMNS.join(', ')}
-        FROM facial_measurements fm
+        FROM latest_facial_measurements_per_user fm
         INNER JOIN users u ON u.id = fm.user_id
         INNER JOIN profiles p ON p.user_id = fm.user_id
-        INNER JOIN managed_users mu ON mu.managed_id = fm.user_id
-        INNER JOIN users manager ON manager.id = mu.manager_id
+        #{manager_id ? "INNER JOIN users manager ON manager.id = #{manager_id}" : ""}
+        #{manager_filter}
         CROSS JOIN measurement_stats ms
-        WHERE fm.id IN (
-          SELECT MAX(fm2.id)
-          FROM facial_measurements fm2
-          GROUP BY fm2.user_id
-        )
         ORDER BY p.last_name, p.first_name
         SQL
-      
-      Rails.logger.info "FacialMeasurementOutliersService SQL: #{sql}"
+
       result = ActiveRecord::Base.connection.exec_query(sql)
-      Rails.logger.info "FacialMeasurementOutliersService result columns: #{result.columns}"
-      Rails.logger.info "FacialMeasurementOutliersService result count: #{result.count}"
       result
     end
   end

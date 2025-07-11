@@ -1,7 +1,9 @@
 <template>
-  <div class='align-items-center'>
+  <div class='main-container align-items-center'>
     <div class='header'>
-      <h2 class='tagline'>{{tagline}}</h2>
+      <div class='header-row'>
+        <h2 class='tagline'>{{tagline}}</h2>
+      </div>
       <div class='container chunk'>
         <ClosableMessage @onclose='messages = []' :messages='messages'/>
         <br>
@@ -44,8 +46,12 @@
         <table v-if='tabToShow == "Image & Purchasing" || showMode'>
           <tbody>
             <tr>
+              <td colspan='3'>
+                <CircularButton text="?" @click="showHelp = true" v-if='newOrEditMode'/>
+              </td>
             </tr>
             <tr v-show='newOrEditMode' v-for='(imageUrl, index) in imageUrls'>
+              <td></td>
               <th>Image URL</th>
               <td>
                 <input class='input-list' type="text" :value='imageUrl' @change="update($event, 'imageUrls', index)"
@@ -62,13 +68,13 @@
 
 
             <tr v-if='newOrEditMode'>
-              <th>Purchasing URLs</th>
-              <td class='justify-content-center' colspan=2>
+              <th colspan='2'>Purchasing URLs</th>
+              <td >
                 <CircularButton text="+" @click="addPurchasingUrl" v-if='newOrEditMode'/>
               </td>
             </tr>
-            <tr>
-              <th colspan='2'>Purchasing URL</th>
+            <tr v-if='whereToBuyUrls.length > 0'>
+              <th colspan='2' >Purchasing URL</th>
               <th v-if='userCanEdit && editMode'>Delete</th>
             </tr>
             <tr v-for="(purchasingUrl, index) in whereToBuyUrls" class='text-align-center'>
@@ -91,7 +97,9 @@
         <table v-if='tabToShow == "Basic Info"'>
           <thead>
              <tr>
-               <th colspan=2><h3>Basic Info</h3></th>
+               <td colspan='2'>
+                <CircularButton text="?" @click="showHelp = true" v-if='newOrEditMode'/>
+               </td>
              </tr>
           </thead>
           <tbody>
@@ -218,10 +226,30 @@
         <table v-if='tabToShow == "Dimensions" || mode=="Show"'>
           <thead>
              <tr>
-               <th colspan=2><h3>Dimensions</h3></th>
+               <th colspan=1><h3>Dimensions</h3></th>
+               <td>
+                <CircularButton text="?" @click="showHelp = true" v-if='newOrEditMode'/>
+               </td>
              </tr>
           </thead>
           <tbody>
+            <tr>
+              <th>Perimeter (mm)</th>
+              <td>
+                <input type="number" v-model="perimeterMm" v-show="newOrEditMode">
+                <ColoredCell
+                    v-show='!newOrEditMode'
+                    class='risk-score'
+                    :colorScheme="perimColorScheme"
+                    :maxVal=1
+                    :value='perimeterMm'
+                    :exception='exceptionObjectBlank'
+                    :text='distanceText(perimeterMm, "mm")'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                    :title='distanceText(perimeterMm, "mm")'
+                    />
+              </td>
+            </tr>
             <tr>
               <th>Mass (grams)</th>
               <td>
@@ -237,23 +265,6 @@
                     :text='massText(massGrams)'
                     :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
                     :title='massText(massGrams)'
-                    />
-              </td>
-            </tr>
-            <tr>
-              <th>Perimeter (mm)</th>
-              <td>
-                <input type="number" v-model="perimeterMm" v-show="newOrEditMode">
-                <ColoredCell
-                    v-show='!newOrEditMode'
-                    class='risk-score'
-                    :colorScheme="perimColorScheme"
-                    :maxVal=1
-                    :value='perimeterMm'
-                    :exception='exceptionObjectBlank'
-                    :text='distanceText(perimeterMm, "mm")'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                    :title='distanceText(perimeterMm, "mm")'
                     />
               </td>
             </tr>
