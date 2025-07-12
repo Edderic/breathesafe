@@ -31,79 +31,77 @@ class FacialMeasurementOutliersService
         <<-SQL
           CASE
             WHEN fm.#{col} IS NULL THEN NULL
-            WHEN ms.stddev_#{col} = 0 THEN NULL
+            WHEN ms.stddev_#{col} = 0 OR ms.stddev_#{col} IS NULL THEN NULL
             ELSE (fm.#{col} - ms.avg_#{col}) / ms.stddev_#{col}
           END as #{col}_z_score
         SQL
       end.join(",")
     end
 
-    def dedup_sql
-      # Represent a user only once
-      <<-SQL
-      latest_facial_measurement_ids AS (
-        SELECT user_id, MAX(id) AS id FROM facial_measurements fm
-        GROUP BY 1
-      ),
-      latest_facial_measurements_per_user AS (
-        SELECT * FROM facial_measurements fm
-        WHERE id in (
-          SELECT id FROM latest_facial_measurement_ids
-        )
-      )
+    def bounds_filter_cols(lower_bound_id: nil, upper_bound_id: nil)
+      return FacialMeasurement::COLUMNS.map { |col| "fm.#{col}" }.join(", ") if lower_bound_id.nil? && upper_bound_id.nil?
+      
+      FacialMeasurement::COLUMNS.map do |col|
+        conditions = []
+        
+        if lower_bound_id
+          conditions << "fm.#{col} >= lb.#{col}"
+        end
+        
+        if upper_bound_id
+          conditions << "fm.#{col} <= ub.#{col}"
+        end
+        
+        if conditions.any?
+          <<-SQL
+            CASE
+              WHEN #{conditions.join(" AND ")} THEN fm.#{col}
+              ELSE NULL
+            END as #{col}
+          SQL
+        else
+          "fm.#{col}"
+        end
+      end.join(", ")
+    end
 
+    def latest_measurements_sql
+      <<-SQL
+        latest_facial_measurements AS (
+          SELECT DISTINCT ON (user_id) *
+          FROM facial_measurements
+          ORDER BY user_id, created_at DESC
+        )
       SQL
     end
 
-    def measurement_stats_sql(manager_id: nil)
-      # Calculate stats from measurements that have fit tests, matching get_zscores function
-      # Use DISTINCT to avoid counting the same measurement multiple times
+    def measurement_stats_sql(manager_id: nil, lower_bound_id: nil, upper_bound_id: nil)
+      manager_filter = manager_id ? "INNER JOIN managed_users mu ON mu.managed_id = fm.user_id AND mu.manager_id = #{manager_id}" : ""
+      lower_bound_join = lower_bound_id ? "LEFT JOIN facial_measurements lb ON lb.id = #{lower_bound_id}" : ""
+      upper_bound_join = upper_bound_id ? "LEFT JOIN facial_measurements ub ON ub.id = #{upper_bound_id}" : ""
+      
       <<-SQL
         measurement_stats AS (
           SELECT
-            1
-            id,
-            #{avg_stddev_cols}
-          FROM (
-            SELECT DISTINCT fm.id, fm.face_width, fm.jaw_width, fm.face_depth, fm.face_length,
-                   fm.lower_face_length, fm.bitragion_menton_arc, fm.bitragion_subnasale_arc,
-                   fm.nasal_root_breadth, fm.nose_protrusion, fm.nose_bridge_height,
-                   fm.lip_width, fm.head_circumference, fm.nose_breadth
-            FROM latest_facial_measurements_per_user fm
-            INNER JOIN fit_tests ft ON ft.user_id = fm.user_id
-          ) fm_distinct
-          GROUP BY 1
+            1 as id,
+            #{avg_stddev_cols(lower_bound_id: lower_bound_id, upper_bound_id: upper_bound_id)}
+          FROM latest_facial_measurements fm
+          #{lower_bound_join}
+          #{upper_bound_join}
+          #{manager_filter}
         )
       SQL
     end
 
-    def call(manager_id: nil)
+    def call(manager_id: nil, facial_measurement_id_of_lower_bound: nil, facial_measurement_id_of_upper_bound: nil)
       manager_filter = manager_id ? "INNER JOIN managed_users mu ON mu.managed_id = fm.user_id AND mu.manager_id = #{manager_id}" : ""
-
-      # Debug: Check what measurements are being used for stats
-      stats_query = <<-SQL
-        SELECT COUNT(*) as count, AVG(face_width) as avg_face_width, STDDEV_POP(face_width) as stddev_face_width
-        FROM facial_measurements fm
-        INNER JOIN fit_tests ft ON ft.facial_measurement_id = fm.id
-      SQL
-
-      # Debug: Show specific measurements used in service stats
-      specific_stats_query = <<-SQL
-        SELECT fm.id, fm.user_id, fm.face_width
-        FROM facial_measurements fm
-        INNER JOIN fit_tests ft ON ft.facial_measurement_id = fm.id
-        ORDER BY fm.id
-      SQL
-      specific_stats = ActiveRecord::Base.connection.exec_query(specific_stats_query).to_a
-      puts "Service stats measurements:"
-      specific_stats.each do |m|
-        puts "  ID: #{m['id']}, User: #{m['user_id']}, face_width: #{m['face_width']}"
-      end
-
+      lower_bound_join = facial_measurement_id_of_lower_bound ? "LEFT JOIN facial_measurements lb ON lb.id = #{facial_measurement_id_of_lower_bound}" : ""
+      upper_bound_join = facial_measurement_id_of_upper_bound ? "LEFT JOIN facial_measurements ub ON ub.id = #{facial_measurement_id_of_upper_bound}" : ""
+      
       sql = <<-SQL
         WITH
-        #{dedup_sql},
-        #{measurement_stats_sql(manager_id: manager_id)}
+        #{latest_measurements_sql},
+        #{measurement_stats_sql(manager_id: manager_id, lower_bound_id: facial_measurement_id_of_lower_bound, upper_bound_id: facial_measurement_id_of_upper_bound)}
 
         SELECT
           fm.id,
@@ -114,11 +112,13 @@ class FacialMeasurementOutliersService
           (p.first_name || ' ' || p.last_name) as full_name,
           #{manager_id ? "manager.email as manager_email," : "NULL as manager_email,"}
           #{zscore_cols},
-          #{FacialMeasurement::COLUMNS.join(', ')}
-        FROM latest_facial_measurements_per_user fm
+          #{bounds_filter_cols(lower_bound_id: facial_measurement_id_of_lower_bound, upper_bound_id: facial_measurement_id_of_upper_bound)}
+        FROM latest_facial_measurements fm
         INNER JOIN users u ON u.id = fm.user_id
         INNER JOIN profiles p ON p.user_id = fm.user_id
         #{manager_id ? "INNER JOIN users manager ON manager.id = #{manager_id}" : ""}
+        #{lower_bound_join}
+        #{upper_bound_join}
         #{manager_filter}
         CROSS JOIN measurement_stats ms
         ORDER BY p.last_name, p.first_name
