@@ -4,6 +4,7 @@
       <div class='flex align-items-center row'>
         <h2 class='tagline'>Respirator Users</h2>
         <CircularButton text="+" @click="newUser"/>
+        <CircularButton text="?" @click="showHelp = true"/>
       </div>
 
       <div class='menu row'>
@@ -31,6 +32,44 @@
     <div v-if='tabToShow == "Overview"'>
       <RespiratorUsersOverview :search="search" />
     </div>
+
+    <Popup v-if='showHelp' @onclose='showHelp = false'>
+      <div v-if='tabToShow == "Overview"'>
+        <h3>Overview Tab Help</h3>
+        <p>This page is meant for people who are trying to contribute data to Breathesafe for research.</p>
+
+        <h4>Getting Started:</h4>
+        <ul>
+          <li><strong>Create a new user:</strong> Click the "+" button to create a new user that you manage. You'll be asked questions about demographics and facial measurements, which help develop the mask recommender algorithm.</li>
+        </ul>
+
+        <h4>Using the Table:</h4>
+        <ul>
+          <li><strong>Click on cells:</strong> Clicking on a particular cell will take you to the associated section for that user (demographics, facial measurements, etc.)</li>
+          <li><strong>Recommend button:</strong> Click the "Recommend" button for a particular user to get mask recommendations using their facial measurements</li>
+          <li><strong>Missing measurements:</strong> If a user is missing required facial measurements (face width, nose protrusion, or bitragion subnasale arc), you'll see a popup asking you to complete those measurements first</li>
+        </ul>
+      </div>
+
+      <div v-if='tabToShow == "Facial Measurements"'>
+        <h3>Facial Measurements Tab Help</h3>
+        <p>This view is meant for quality control purposes.</p>
+
+        <h4>Understanding Z-Scores:</h4>
+        <ul>
+          <li><strong>What are Z-scores:</strong> Z-scores measure how much of an outlier the given data is (e.g., close to -2 or 2)</li>
+          <li><strong>When to be concerned:</strong> If values are close to -2 or 2, there might be a significant measurement error</li>
+          <li><strong>Important note:</strong> It's possible that there's actually nothing wrong with the data, but there's also a possibility that the user just measured incorrectly</li>
+          <li><strong>Recommendation:</strong> Please re-measure if values are close to -2 or 2</li>
+        </ul>
+
+        <h4>Using the View:</h4>
+        <ul>
+          <li><strong>Switch between views:</strong> Use the "Absolute" and "Z-Score" tabs to see measurements in different formats</li>
+          <li><strong>Search:</strong> Use the search box to filter users by name or manager email</li>
+        </ul>
+      </div>
+    </Popup>
 
     <div v-if='tabToShow == "Facial Measurements"'>
       <div class='container chunk'>
@@ -114,7 +153,8 @@ export default {
       search: "",
       tabToShow: "Overview",
       facialMeasurementView: "Absolute",
-      facialMeasurementsData: []
+      facialMeasurementsData: [],
+      showHelp: false
     }
   },
   props: {
@@ -236,6 +276,14 @@ export default {
         this.loadFacialMeasurementsData();
       }
     }
+  },
+  mounted() {
+    // Add keyboard event listener for Escape key
+    document.addEventListener('keydown', this.handleKeydown);
+  },
+  beforeUnmount() {
+    // Remove keyboard event listener
+    document.removeEventListener('keydown', this.handleKeydown);
   },
   watch: {
     '$route': {
@@ -410,7 +458,7 @@ export default {
     getDisplayValueForColumn(row, col) {
       const value = this.getValueForColumn(row, col);
       console.log(`getDisplayValueForColumn for ${col}:`, { value, isNull: value === null, isUndefined: value === undefined, isNaN: isNaN(value) });
-      
+
       if (value === null || value === undefined || isNaN(value)) {
         return 'N/A';
       }
@@ -443,6 +491,11 @@ export default {
       }
 
       return null;
+    },
+    handleKeydown(event) {
+      if (event.key === 'Escape' && this.showHelp) {
+        this.showHelp = false;
+      }
     },
     async loadFacialMeasurementsData() {
       try {
@@ -507,6 +560,7 @@ export default {
   .tagline {
     text-align: center;
     font-weight: bold;
+    margin: 0.5em;
   }
 
   .call-to-actions {
