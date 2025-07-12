@@ -84,6 +84,7 @@ import ClosableMessage from './closable_message.vue'
 import CircularButton from './circular_button.vue'
 import ColoredCell from './colored_cell.vue'
 import Popup from './pop_up.vue'
+import { genColorSchemeBounds } from './colors';
 import { deepSnakeToCamel, setupCSRF } from './misc.js'
 import { userSealCheckColorMapping, riskColorInterpolationScheme } from './colors.js'
 import { RespiratorUser } from './respirator_user.js'
@@ -318,12 +319,33 @@ export default {
       if (this.tabToShow === 'Facial Measurements') {
         this.loadFacialMeasurementsData();
       }
+
+      // Update URL query parameter to reflect current tab
+      const query = { ...this.$route.query };
+      if (this.tabToShow === 'Overview') {
+        query.tab = 'overview';
+      } else if (this.tabToShow === 'Facial Measurements') {
+        query.tab = 'facial_measurements';
+      }
+
+      this.$router.replace({ query });
     },
     handleRoute() {
       // Handle the facial measurements route
       if (this.$route.hash === '#/respirator_users/facial_measurements') {
         this.tabToShow = 'Facial Measurements';
         this.loadFacialMeasurementsData();
+      }
+
+      // Handle query parameter for tab selection
+      if (this.$route.query.tab) {
+        const tab = this.$route.query.tab;
+        if (tab === 'overview') {
+          this.tabToShow = 'Overview';
+        } else if (tab === 'facial_measurements') {
+          this.tabToShow = 'Facial Measurements';
+          this.loadFacialMeasurementsData();
+        }
       }
     },
     setFacialMeasurementView(option) {
