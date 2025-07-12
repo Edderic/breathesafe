@@ -29,86 +29,7 @@
     </div>
 
     <div v-if='tabToShow == "Overview"'>
-
-      <div class='container chunk'>
-        <ClosableMessage @onclose='messages = []' :messages='messages'/>
-        <br>
-      </div>
-
-      <Popup v-if='missingFacialMeasurementsForRecommender.length > 0' @onclose='missingFacialMeasurementsForRecommender = []'>
-        <p>
-        User is missing at least one facial measurement needed for mask recommendations:
-        <ul>
-          <router-link class='missing' :to="linkToUserFacialMeasurement" >
-            <li v-for="m in missingFacialMeasurementsForRecommender">{{m}}</li>
-          </router-link>
-        </ul>
-
-        </p>
-      </Popup>
-
-      <div :class='{main: true, scrollable: managedUsers.length == 0}'>
-        <div class='centered facial-measurements-table-container'>
-          <table class='facial-measurements-table'>
-            <thead class='facial-measurements-header'>
-              <tr>
-                <th v-if='currentUser.admin'>Manager Email</th>
-                <th>Name</th>
-                <th>Demographics</th>
-                <th>Face Measurements</th>
-                <th>Masks that have data</th>
-                <th>Recommend</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for='r in displayables' text='Edit'>
-                <td v-if='currentUser.admin'>{{r['managerEmail']}}</td>
-                <td @click="visit(r.managedId, 'Name')">
-                  {{r.firstName}} {{r.lastName}}
-                </td>
-                <td @click="visit(r.managedId, 'Demographics')" class='colored-cell' >
-                  <ColoredCell
-                    :colorScheme="evenlySpacedColorScheme"
-                    :maxVal=1
-                    :value='1 - r.demogPercentComplete / 100'
-                    :text='percentage(r.demogPercentComplete)'
-                    class='color-cell'
-                  />
-                </td>
-                <td @click="visit(r.managedId, 'Facial Measurements')" class='colored-cell' >
-                  <ColoredCell
-                    :colorScheme="evenlySpacedColorScheme"
-                    :maxVal=1
-                    :value='1- r.fmPercentComplete / 100'
-                    :text='percentage(r.fmPercentComplete)'
-                    class='color-cell'
-                  />
-                </td>
-                <td class='colored-cell' @click='v'>
-                  <router-link :to="{name: 'FitTests', query: {'managedId': r.managedId }}">
-                    <ColoredCell
-                      :colorScheme="evenlySpacedColorScheme"
-                      :maxVal=1
-                      :value='1 - (r.fitTestingPercentComplete || 0) / 100'
-                      :text='percentage(r.fitTestingPercentComplete || 0)'
-                      class='color-cell'
-                    />
-                  </router-link>
-                </td>
-                <td class='colored-cell' @click='maybeRecommend(r)'>
-                    <Button :style='`font-size: 1em; background-color: ${backgroundColorForRecommender(r)}`'>
-                      Recommend
-                    </Button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3 class='text-align-center' v-show='displayables.length == 0' >
-          No managed users to show. Use the (+) button above to add users you can add fit test data for.
-        </h3>
-      </div>
+      <RespiratorUsersOverview :search="search" />
     </div>
 
     <div v-if='tabToShow == "Facial Measurements"'>
@@ -164,16 +85,16 @@ import CircularButton from './circular_button.vue'
 import ColoredCell from './colored_cell.vue'
 import Popup from './pop_up.vue'
 import { deepSnakeToCamel, setupCSRF } from './misc.js'
-import { userSealCheckColorMapping, riskColorInterpolationScheme, genColorSchemeBounds } from './colors.js'
+import { userSealCheckColorMapping, riskColorInterpolationScheme } from './colors.js'
 import { RespiratorUser } from './respirator_user.js'
 import { signIn } from './session.js'
-import { facialMeasurementsPresenceColorMapping } from './colors.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import SearchIcon from './search_icon.vue'
 import { useManagedUserStore } from './stores/managed_users_store.js'
 import TabSet from './tab_set.vue'
+import RespiratorUsersOverview from './respirator_users_overview.vue'
 
 export default {
   name: 'RespiratorUsers',
@@ -181,18 +102,16 @@ export default {
     Button,
     CircularButton,
     ClosableMessage,
-    ColoredCell,
     Popup,
     SearchIcon,
-    TabSet
+    TabSet,
+    RespiratorUsersOverview
   },
   data() {
     return {
       facialMeasurementsLength: 0,
-      missingFacialMeasurementsForRecommender: [],
       search: "",
-      userId: 0,
-            tabToShow: "Overview",
+      tabToShow: "Overview",
       facialMeasurementView: "Absolute",
       facialMeasurementsData: []
     }
@@ -225,12 +144,7 @@ export default {
           'loadFacialMeasurements',
         ]
     ),
-    ...mapWritableState(
-        useManagedUserStore,
-        [
-          'managedUsers'
-        ]
-    ),
+
     ...mapWritableState(
         useProfileStore,
         [
@@ -240,35 +154,11 @@ export default {
           'genderAndSex',
         ]
     ),
-    linkToUserFacialMeasurement() {
-      return {
-        'name': 'RespiratorUser',
-        'params': {'id': this.userId},
-        'query': {
-          'tabToShow': "Facial Measurements"
-        }
-      }
-    },
-    displayables() {
-      if (this.search == "") {
-        return this.managedUsers
-      } else {
-        let lowerSearch = this.search.toLowerCase()
-        return this.managedUsers.filter(
-          function(mu) {
-            return mu.firstName.toLowerCase().match(lowerSearch)
-              || mu.lastName.toLowerCase().match(lowerSearch)
 
-          }
-        )
-      }
-    },
     facialMeasurementsIncomplete() {
       return this.facialMeasurementsLength == 0
     },
-    evenlySpacedColorScheme() {
-      return genColorSchemeBounds(0, 1, 5)
-    },
+
     tabToShowOptions() {
       return [
         { text: 'Overview' },
@@ -336,75 +226,21 @@ export default {
       signIn.call(this)
     } else {
       this.loadManagedUsers()
+      this.handleRoute()
+    }
+  },
+  watch: {
+    '$route': {
+      handler() {
+        this.handleRoute();
+      },
+      immediate: false
     }
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useProfileStore, ['loadProfile']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
-    maybeRecommend(r) {
-      let missing = []
-
-      let measurements = {
-        'bitragionSubnasaleArc': {
-          'eng': 'Bitragion subnasale arc (mm)',
-          'mm': 'bitragionSubnasaleArcMm'
-        },
-        'noseProtrusion': {
-          'eng': 'Nose protrusion (mm)',
-          'mm': 'noseProtrusionMm'
-        },
-        'faceWidth' : {
-          'eng': 'Face width (mm)',
-          'mm': 'faceWidthMm'
-        }
-      }
-
-      for(let key in measurements) {
-        if (!r[key]) {
-          missing.push(measurements[key]['eng'])
-        }
-      }
-
-      if (missing.length > 0) {
-        this.missingFacialMeasurementsForRecommender = missing
-
-        this.userId = r.managedId
-      } else {
-
-        let query = {}
-        for(let key in measurements) {
-            query[measurements[key]['mm']] = r[key]
-        }
-
-        this.$router.push(
-         {
-           name: 'Masks',
-           query: query
-         }
-        )
-      }
-    },
-    backgroundColorForRecommender(r) {
-      let color;
-      if (r.bitragionSubnasaleArc && r.noseProtrusion && r.faceWidth ) {
-        color = facialMeasurementsPresenceColorMapping['Complete'];
-      } else {
-        color = facialMeasurementsPresenceColorMapping['Completely missing'];
-      }
-      return `rgb(${color.r}, ${color.g}, ${color.b})`
-    },
-    recommendQuery(r) {
-      return {
-        bitragionSubnasaleArcMm: r.bitragionSubnasaleArc,
-        noseProtrusionMm: r.noseProtrusion,
-        faceWidthMm: r.faceWidth,
-      }
-
-    },
-    percentage(num) {
-      return `${num}%`
-    },
     statusColor(fitTestingPercent) {
       let percentage = parseFloat(fitTestingPercent.split("%")[0])
       let status = 'Passed'
@@ -480,20 +316,17 @@ export default {
         // whatever you want
         })
     },
-    visit(profileId, tabToShow) {
-      this.$router.push({
-        name: 'RespiratorUser',
-        params: {
-          id: profileId
-        },
-        query: {
-          tabToShow: tabToShow
-        }
-      })
-    },
+
     setTabToShow(option) {
       this.tabToShow = option.name;
       if (this.tabToShow === 'Facial Measurements') {
+        this.loadFacialMeasurementsData();
+      }
+    },
+    handleRoute() {
+      // Handle the facial measurements route
+      if (this.$route.hash === '#/respirator_users/facial_measurements') {
+        this.tabToShow = 'Facial Measurements';
         this.loadFacialMeasurementsData();
       }
     },
