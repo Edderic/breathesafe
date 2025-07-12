@@ -65,6 +65,7 @@ group :development, :test do
   gem "debug"
   gem 'dotenv-rails'
   gem 'factory_bot_rails'
+  gem 'rubocop-rspec_rails'
 end
 
 group :development do

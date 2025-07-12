@@ -1,11 +1,28 @@
 class FacialMeasurementOutliersService
   class << self
-    def avg_stddev_cols
+    def avg_stddev_cols(lower_bound_id: nil, upper_bound_id: nil)
       FacialMeasurement::COLUMNS.map do |col|
-        <<-SQL
-        AVG(#{col}) AS avg_#{col},
-        STDDEV_POP(#{col}) stddev_#{col}
-        SQL
+        bounds_conditions = []
+        
+        if lower_bound_id
+          bounds_conditions << "fm.#{col} >= lb.#{col}"
+        end
+        
+        if upper_bound_id
+          bounds_conditions << "fm.#{col} <= ub.#{col}"
+        end
+        
+        if bounds_conditions.any?
+          <<-SQL
+          AVG(CASE WHEN #{bounds_conditions.join(" AND ")} THEN fm.#{col} ELSE NULL END) AS avg_#{col},
+          STDDEV_POP(CASE WHEN #{bounds_conditions.join(" AND ")} THEN fm.#{col} ELSE NULL END) AS stddev_#{col}
+          SQL
+        else
+          <<-SQL
+          AVG(fm.#{col}) AS avg_#{col},
+          STDDEV_POP(fm.#{col}) AS stddev_#{col}
+          SQL
+        end
       end.join(",")
     end
 
