@@ -92,7 +92,7 @@ import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import SearchIcon from './search_icon.vue'
-import { useManagedUserStore } from './stores/managed_users_store.js'
+
 import TabSet from './tab_set.vue'
 import RespiratorUsersOverview from './respirator_users_overview.vue'
 
@@ -225,7 +225,6 @@ export default {
     if (!this.currentUser) {
       signIn.call(this)
     } else {
-      this.loadManagedUsers()
       this.handleRoute()
     }
   },
@@ -240,7 +239,6 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useProfileStore, ['loadProfile']),
-    ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     statusColor(fitTestingPercent) {
       let percentage = parseFloat(fitTestingPercent.split("%")[0])
       let status = 'Passed'
@@ -276,7 +274,6 @@ export default {
     async newUser() {
       setupCSRF();
 
-      let managedUsers;
       let managedUser;
       let respiratorUser;
 
@@ -292,9 +289,8 @@ export default {
               managedUser
             )
 
-            this.managedUsers.push(
-              respiratorUser
-            )
+            // The overview component will handle adding the user to its data
+            // since it manages its own data fetching
 
             this.$router.push(
               {
