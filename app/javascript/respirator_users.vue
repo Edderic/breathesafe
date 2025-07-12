@@ -103,6 +103,7 @@ export default {
     Button,
     CircularButton,
     ClosableMessage,
+    ColoredCell,
     Popup,
     SearchIcon,
     TabSet,
@@ -110,7 +111,6 @@ export default {
   },
   data() {
     return {
-      facialMeasurementsLength: 0,
       search: "",
       tabToShow: "Overview",
       facialMeasurementView: "Absolute",
@@ -156,10 +156,9 @@ export default {
         ]
     ),
 
-    facialMeasurementsIncomplete() {
-      return this.facialMeasurementsLength == 0
+    evenlySpacedColorScheme() {
+      return genColorSchemeBounds(0, 1, 5)
     },
-
     tabToShowOptions() {
       return [
         { text: 'Overview' },
@@ -221,17 +220,27 @@ export default {
     }
   },
   async created() {
+    console.log('RespiratorUsers component created');
     await this.getCurrentUser()
+    console.log('Current user loaded:', this.currentUser);
 
     if (!this.currentUser) {
+      console.log('No current user, redirecting to sign in');
       signIn.call(this)
     } else {
+      console.log('Calling handleRoute');
       this.handleRoute()
+      // If we're already on the facial measurements tab, load the data
+      if (this.tabToShow === 'Facial Measurements') {
+        console.log('Tab is Facial Measurements, loading data');
+        this.loadFacialMeasurementsData();
+      }
     }
   },
   watch: {
     '$route': {
       handler() {
+        console.log('Route changed, calling handleRoute');
         this.handleRoute();
       },
       immediate: false
@@ -331,8 +340,15 @@ export default {
       this.$router.replace({ query });
     },
     handleRoute() {
+      console.log('handleRoute called with:', {
+        hash: this.$route.hash,
+        query: this.$route.query,
+        currentTab: this.tabToShow
+      });
+
       // Handle the facial measurements route
       if (this.$route.hash === '#/respirator_users/facial_measurements') {
+        console.log('Setting tab to Facial Measurements from hash');
         this.tabToShow = 'Facial Measurements';
         this.loadFacialMeasurementsData();
       }
@@ -340,9 +356,12 @@ export default {
       // Handle query parameter for tab selection
       if (this.$route.query.tab) {
         const tab = this.$route.query.tab;
+        console.log('Processing query tab:', tab);
         if (tab === 'overview') {
+          console.log('Setting tab to Overview');
           this.tabToShow = 'Overview';
         } else if (tab === 'facial_measurements') {
+          console.log('Setting tab to Facial Measurements from query');
           this.tabToShow = 'Facial Measurements';
           this.loadFacialMeasurementsData();
         }
@@ -384,11 +403,14 @@ export default {
         return value === null || value === undefined ? null : parseFloat(value);
       } else {
         const value = row[col];
+        console.log(`Getting value for ${col}:`, { value, type: typeof value, availableKeys: Object.keys(row) });
         return value === null || value === undefined ? null : parseFloat(value);
       }
     },
-        getDisplayValueForColumn(row, col) {
+    getDisplayValueForColumn(row, col) {
       const value = this.getValueForColumn(row, col);
+      console.log(`getDisplayValueForColumn for ${col}:`, { value, isNull: value === null, isUndefined: value === undefined, isNaN: isNaN(value) });
+      
       if (value === null || value === undefined || isNaN(value)) {
         return 'N/A';
       }
@@ -399,7 +421,7 @@ export default {
         return `${value} mm`;
       }
     },
-        getExceptionForColumn(row, col) {
+    getExceptionForColumn(row, col) {
       const value = this.getValueForColumn(row, col);
       if (value === null || value === undefined || isNaN(value)) {
         return {
@@ -424,17 +446,20 @@ export default {
     },
     async loadFacialMeasurementsData() {
       try {
+        console.log('Loading facial measurements data...');
         const response = await axios.get('/managed_users/facial_measurements.json');
         console.log('Facial measurements response:', response.data);
         this.facialMeasurementsData = response.data.facial_measurements;
+        console.log('Facial measurements data loaded:', this.facialMeasurementsData.length, 'rows');
 
         if (this.facialMeasurementsData.length > 0) {
           console.log('First row columns:', Object.keys(this.facialMeasurementsData[0]));
           console.log('Sample z-score columns:', this.facialMeasurementColumns.map(col => `${col}_z_score`));
+          console.log('First row data:', this.facialMeasurementsData[0]);
         }
       } catch (error) {
+        console.error('Error loading facial measurements data:', error);
         this.addMessages(['Failed to load facial measurements data.']);
-        console.error(error);
       }
     }
      }
