@@ -4,7 +4,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
   describe '.call' do
     let(:mask) { create(:mask) }
     let(:user) { create(:user) }
-    let(:facial_measurement) { create(:facial_measurement, user: user) }
+    let(:facial_measurement) { create(:facial_measurement, user: user, face_width: 140, jaw_width: 120, face_depth: 110) }
 
     let(:measurement_device) do
       create(:measurement_device)
@@ -484,6 +484,114 @@ RSpec.describe N99ModeToN95ModeConverterService do
         results = described_class.call(mask_id: mask.id)
         expect(results.count).to eq(1)
         expect(results.first['mask_id']).to eq(mask.id)
+      end
+    end
+
+    context "with z-score computation" do
+      let(:facial_measurement) { create(:facial_measurement, user: user, face_width: 140, jaw_width: 120, face_depth: 110) }
+      
+      let!(:fit_test) do
+        create(:fit_test,
+          mask: mask,
+          user: user,
+          facial_measurement: facial_measurement,
+          results: {
+            quantitative: {
+              testing_mode: 'N99',
+              exercises: exercises
+            }
+          }
+        )
+      end
+
+      it "computes z-scores for facial measurements" do
+        result = described_class.call.to_a.first
+        FacialMeasurement::COLUMNS.each do |col|
+          z_score_col = "#{col}_z_score"
+          expect(result).to have_key(z_score_col)
+          # With only one measurement, stddev will be 0, so z-score should be nil
+          expect(result[z_score_col]).to be_nil
+        end
+      end
+    end
+
+    context "with multiple users for z-score calculation" do
+      let(:user2) { create(:user) }
+      let!(:facial_measurement2) do
+        create(:facial_measurement,
+          user: user2,
+          face_width: 150,  # Different value for z-score calculation
+          jaw_width: 130,
+          face_depth: 120
+        )
+      end
+
+      let!(:fit_test2) do
+        create(:fit_test,
+          mask: mask,
+          user: user2,
+          facial_measurement: facial_measurement2,
+          results: {
+            quantitative: {
+              testing_mode: 'N99',
+              exercises: exercises
+            }
+          }
+        )
+      end
+
+      let!(:fit_test1) do
+        create(:fit_test,
+          mask: mask,
+          user: user,
+          facial_measurement: facial_measurement,
+          results: {
+            quantitative: {
+              testing_mode: 'N99',
+              exercises: exercises
+            }
+          }
+        )
+      end
+
+      it 'computes z-scores based on population statistics' do
+        results = described_class.call.to_a
+        expect(results.length).to eq(2)
+
+        # Find the result for the original user
+        original_result = results.find { |r| r['user_id'] == user.id }
+
+        # The z-scores should be computed based on the population of 2 users
+        # For face_width: values are 140, 150
+        # Mean = 145, StdDev = sqrt(sum((x-mean)^2)/n) = sqrt(50/2) = 5
+        # Original user (140) should have z-score = (140-145)/5 = -1.0
+        expect(original_result['face_width_z_score']).to be_within(0.1).of(-1.0)
+      end
+    end
+
+    context "when facial measurements are missing" do
+      let(:facial_measurement) { nil }
+      
+      let!(:fit_test) do
+        create(:fit_test,
+          mask: mask,
+          user: user,
+          facial_measurement: facial_measurement,
+          results: {
+            quantitative: {
+              testing_mode: 'N99',
+              exercises: exercises
+            }
+          }
+        )
+      end
+
+      it "returns nil for z-score columns" do
+        result = described_class.call.to_a.first
+        FacialMeasurement::COLUMNS.each do |col|
+          z_score_col = "#{col}_z_score"
+          expect(result[z_score_col]).to be_nil
+        end
       end
     end
   end
