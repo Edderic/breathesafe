@@ -7,7 +7,23 @@ class N95ModeService
     # with the exception of Normal breathing (SEALED)
     ActiveRecord::Base.connection.exec_query(
       <<-SQL
-        WITH n95_exercises AS (
+        WITH latest_facial_measurements AS (
+          SELECT DISTINCT ON (user_id) *
+          FROM facial_measurements
+          ORDER BY user_id, created_at DESC
+        ),
+        measurement_stats AS (
+          SELECT
+            1 as id,
+            #{FacialMeasurement::COLUMNS.map do |col|
+              <<-SQL
+                AVG(fm.#{col}) AS avg_#{col},
+                STDDEV_POP(fm.#{col}) AS stddev_#{col}
+              SQL
+            end.join(',')}
+          FROM latest_facial_measurements fm
+        ),
+        n95_exercises AS (
             SELECT * FROM fit_tests
             WHERE results -> 'quantitative' ->> 'testing_mode' = 'N95'
             #{mask_id_clause}
@@ -36,10 +52,20 @@ class N95ModeService
           (regexp_replace(facial_hair ->> 'beard_length_mm', '[^0-9]', '', 'g'))::integer as facial_hair_beard_length_mm,
           '#{self}' AS source,
           fit_tests.user_id,
-          #{FacialMeasurement::COLUMNS.join(', ')}
+          #{FacialMeasurement::COLUMNS.join(', ')},
+          #{FacialMeasurement::COLUMNS.map do |col|
+            <<-SQL
+              CASE
+                WHEN facial_measurements.#{col} IS NULL THEN NULL
+                WHEN ms.stddev_#{col} = 0 OR ms.stddev_#{col} IS NULL THEN NULL
+                ELSE (facial_measurements.#{col} - ms.avg_#{col}) / ms.stddev_#{col}
+              END as #{col}_z_score
+            SQL
+          end.join(',')}
         FROM n95_mode_experimentals
         INNER JOIN fit_tests ON fit_tests.id = n95_mode_experimentals.id
         LEFT JOIN facial_measurements ON fit_tests.facial_measurement_id = facial_measurements.id
+        CROSS JOIN measurement_stats ms
       SQL
     )
   end
