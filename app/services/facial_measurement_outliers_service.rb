@@ -2,6 +2,22 @@
 
 class FacialMeasurementOutliersService
   class << self
+    def measurement_stats_sql_without_bounds
+      <<-SQL
+        measurement_stats AS (
+          SELECT
+            1 as id,
+            #{FacialMeasurement::COLUMNS.map do |col|
+              <<-SQL
+                AVG(fm.#{col}) AS avg_#{col},
+                STDDEV_POP(fm.#{col}) AS stddev_#{col}
+              SQL
+            end.join(',')}
+          FROM latest_facial_measurements fm
+        )
+      SQL
+    end
+
     def avg_stddev_cols(lower_bound_id: nil, upper_bound_id: nil)
       FacialMeasurement::COLUMNS.map do |col|
         bounds_conditions = []

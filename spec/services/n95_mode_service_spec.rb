@@ -37,12 +37,12 @@ RSpec.describe N95ModeService do
 
       it "computes z-scores for facial measurements" do
         result = described_class.call.to_a.first
-        
+
         # Check that z-score columns exist
         FacialMeasurement::COLUMNS.each do |col|
           z_score_col = "#{col}_z_score"
           expect(result).to have_key(z_score_col)
-          
+
           # If the measurement value exists, z-score should be computed
           if facial_measurement.send(col).present?
             # With only one measurement, stddev will be 0, so z-score should be null
@@ -113,18 +113,18 @@ RSpec.describe N95ModeService do
       context 'with multiple users for z-score calculation' do
         let(:user2) { create(:user) }
         let(:user3) { create(:user) }
-        
+
         let!(:facial_measurement2) do
-          create(:facial_measurement, 
+          create(:facial_measurement,
             user: user2,
             face_width: 150,  # Different value for z-score calculation
             jaw_width: 130,
             face_depth: 120
           )
         end
-        
+
         let!(:facial_measurement3) do
-          create(:facial_measurement, 
+          create(:facial_measurement,
             user: user3,
             face_width: 160,  # Another different value
             jaw_width: 140,
@@ -175,10 +175,10 @@ RSpec.describe N95ModeService do
         it 'computes z-scores based on population statistics' do
           results = described_class.call.to_a
           expect(results.length).to eq(3)
-          
+
           # Find the result for the original user
           original_result = results.find { |r| r['user_id'] == user.id }
-          
+
           # The z-scores should be computed based on the population of 3 users
           # For face_width: values are 140, 150, 160
           # Mean = 150, StdDev = sqrt(sum((x-mean)^2)/n) = sqrt(200/3) ≈ 8.16

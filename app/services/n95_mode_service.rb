@@ -7,22 +7,10 @@ class N95ModeService
     # with the exception of Normal breathing (SEALED)
     ActiveRecord::Base.connection.exec_query(
       <<-SQL
-        WITH latest_facial_measurements AS (
-          SELECT DISTINCT ON (user_id) *
-          FROM facial_measurements
-          ORDER BY user_id, created_at DESC
-        ),
-        measurement_stats AS (
-          SELECT
-            1 as id,
-            #{FacialMeasurement::COLUMNS.map do |col|
-              <<-SQL
-                AVG(fm.#{col}) AS avg_#{col},
-                STDDEV_POP(fm.#{col}) AS stddev_#{col}
-              SQL
-            end.join(',')}
-          FROM latest_facial_measurements fm
-        ),
+        WITH
+        #{FacialMeasurementOutliersService.latest_measurements_sql},
+        #{FacialMeasurementOutliersService.measurement_stats_sql_without_bounds}
+        ,
         n95_exercises AS (
             SELECT * FROM fit_tests
             WHERE results -> 'quantitative' ->> 'testing_mode' = 'N95'
