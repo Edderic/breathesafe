@@ -30,7 +30,9 @@ class QlftService
 
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
-          WITH qlft_exercises AS (
+          WITH #{FacialMeasurementOutliersService.latest_measurements_sql},
+          #{FacialMeasurementOutliersService.measurement_stats_sql_without_bounds},
+          qlft_exercises AS (
             SELECT * FROM fit_tests
             WHERE results -> 'qualitative' IS NOT NULL
             #{mask_id_clause}
@@ -66,12 +68,22 @@ class QlftService
             NULL as denominator,
             NULL as n95_mode_hmff,
             #{FacialMeasurement::COLUMNS.join(', ')},
+            #{FacialMeasurement::COLUMNS.map do |col|
+              <<-SQL
+                CASE
+                  WHEN facial_measurements.#{col} IS NULL THEN NULL
+                  WHEN ms.stddev_#{col} = 0 OR ms.stddev_#{col} IS NULL THEN NULL
+                  ELSE (facial_measurements.#{col} - ms.avg_#{col}) / ms.stddev_#{col}
+                END as #{col}_z_score
+              SQL
+            end.join(',')},
             '#{self}' AS source,
             fit_tests.user_id,
             mask_id
           FROM qlft_pass_status_maybe_null
           INNER JOIN fit_tests ON fit_tests.id = qlft_pass_status_maybe_null.id
           LEFT JOIN facial_measurements ON fit_tests.facial_measurement_id = facial_measurements.id
+          CROSS JOIN measurement_stats ms
         SQL
       )
     end
