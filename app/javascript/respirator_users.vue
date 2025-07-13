@@ -1,6 +1,6 @@
 <template>
   <div class='top-container'>
-    <div class='justify-content-center align-items-center'>
+    <div class='header justify-content-center align-items-center'>
       <div class='flex align-items-center row'>
         <h2 class='tagline'>Respirator Users</h2>
         <CircularButton text="+" @click="newUser"/>
@@ -571,6 +571,9 @@ export default {
   }
   .call-to-actions a {
     text-decoration: none;
+  }
+  .header {
+    margin-top: 1.5em;
   }
 
   .main {
