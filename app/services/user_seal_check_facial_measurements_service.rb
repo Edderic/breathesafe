@@ -26,6 +26,10 @@ class UserSealCheckFacialMeasurementsService
 
           SELECT fit_tests_with_seal_checks.*,
             (regexp_replace(facial_hair ->> 'beard_length_mm', '[^0-9]', '', 'g'))::integer as facial_hair_beard_length_mm,
+            masks.unique_internal_model_code,
+            masks.perimeter_mm,
+            masks.strap_type,
+            masks.style,
             #{FacialMeasurement::COLUMNS.join(', ')},
             #{FacialMeasurement::COLUMNS.map do |col|
               <<-SQL
@@ -40,6 +44,7 @@ class UserSealCheckFacialMeasurementsService
             fit_tests.user_id
           FROM fit_tests_with_seal_checks
           INNER JOIN fit_tests ON fit_tests.id = fit_tests_with_seal_checks.id
+          INNER JOIN masks ON fit_tests.mask_id = masks.id
           LEFT JOIN facial_measurements ON fit_tests.facial_measurement_id = facial_measurements.id
           CROSS JOIN measurement_stats ms
         SQL

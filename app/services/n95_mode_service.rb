@@ -19,9 +19,15 @@ class N95ModeService
             SELECT n95_exercises.id,
             mask_id,
             exercises ->> 'name' AS exercise_name,
-            (exercises ->> 'fit_factor')::numeric as exercise_fit_factor,
-            CASE WHEN (exercises ->> 'fit_factor')::numeric IS NULL THEN NULL
-              ELSE 1 / (exercises ->> 'fit_factor')::numeric END AS inverse_exercise_fit_factor
+            CASE 
+              WHEN exercises ->> 'fit_factor' = '' THEN NULL
+              ELSE (exercises ->> 'fit_factor')::numeric 
+            END as exercise_fit_factor,
+            CASE 
+              WHEN exercises ->> 'fit_factor' = '' THEN NULL
+              WHEN (exercises ->> 'fit_factor')::numeric IS NULL THEN NULL
+              ELSE 1 / (exercises ->> 'fit_factor')::numeric 
+            END AS inverse_exercise_fit_factor
             FROM n95_exercises, jsonb_array_elements(results -> 'quantitative' -> 'exercises') as exercises
             WHERE exercises ->> 'name' != 'Normal breathing (SEALED)'
         ), n95_mode_experimentals AS (
@@ -40,6 +46,10 @@ class N95ModeService
           (regexp_replace(facial_hair ->> 'beard_length_mm', '[^0-9]', '', 'g'))::integer as facial_hair_beard_length_mm,
           '#{self}' AS source,
           fit_tests.user_id,
+          masks.unique_internal_model_code,
+          masks.perimeter_mm,
+          masks.strap_type,
+          masks.style,
           #{FacialMeasurement::COLUMNS.join(', ')},
           #{FacialMeasurement::COLUMNS.map do |col|
             <<-SQL
@@ -52,6 +62,7 @@ class N95ModeService
           end.join(',')}
         FROM n95_mode_experimentals
         INNER JOIN fit_tests ON fit_tests.id = n95_mode_experimentals.id
+        INNER JOIN masks ON fit_tests.mask_id = masks.id
         LEFT JOIN facial_measurements ON fit_tests.facial_measurement_id = facial_measurements.id
         CROSS JOIN measurement_stats ms
       SQL

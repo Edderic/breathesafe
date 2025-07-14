@@ -67,6 +67,10 @@ class QlftService
             explicit_pass_count as n,
             NULL as denominator,
             NULL as n95_mode_hmff,
+            masks.unique_internal_model_code,
+            masks.perimeter_mm,
+            masks.strap_type,
+            masks.style,
             #{FacialMeasurement::COLUMNS.join(', ')},
             #{FacialMeasurement::COLUMNS.map do |col|
               <<-SQL
@@ -82,6 +86,7 @@ class QlftService
             mask_id
           FROM qlft_pass_status_maybe_null
           INNER JOIN fit_tests ON fit_tests.id = qlft_pass_status_maybe_null.id
+          INNER JOIN masks ON fit_tests.mask_id = masks.id
           LEFT JOIN facial_measurements ON fit_tests.facial_measurement_id = facial_measurements.id
           CROSS JOIN measurement_stats ms
         SQL

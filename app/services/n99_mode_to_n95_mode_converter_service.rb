@@ -165,7 +165,10 @@ class N99ModeToN95ModeConverterService
               SELECT n99_exercises.id,
               mask_id,
               exercises ->> 'name' AS exercise_name,
-              (exercises ->> 'fit_factor')::numeric as exercise_fit_factor
+              CASE 
+                WHEN exercises ->> 'fit_factor' = '' THEN NULL
+                ELSE (exercises ->> 'fit_factor')::numeric 
+              END as exercise_fit_factor
               FROM n99_exercises, jsonb_array_elements(results -> 'quantitative' -> 'exercises') as exercises
           ), n99_filtration_efficiency_from_exercises AS (
               SELECT * FROM n99_exercise_name_and_fit_factors
@@ -376,6 +379,10 @@ class N99ModeToN95ModeConverterService
 
           SELECT unioned.*,
             (regexp_replace(facial_hair ->> 'beard_length_mm', '[^0-9]', '', 'g'))::integer as facial_hair_beard_length_mm,
+            masks.unique_internal_model_code,
+            masks.perimeter_mm,
+            masks.strap_type,
+            masks.style,
             #{FacialMeasurement::COLUMNS.join(",")},
             #{FacialMeasurement::COLUMNS.map do |col|
               <<-SQL
@@ -392,6 +399,7 @@ class N99ModeToN95ModeConverterService
           FROM unioned
           LEFT JOIN fit_tests ft
             ON unioned.id = ft.id
+          INNER JOIN masks ON ft.mask_id = masks.id
           LEFT JOIN facial_measurements fm
             ON ft.facial_measurement_id = fm.id
           CROSS JOIN measurement_stats ms
