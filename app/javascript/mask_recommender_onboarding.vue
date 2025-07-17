@@ -42,6 +42,10 @@
         Adding Respirator Users: Facial Measurements Tab
       </router-link>
 
+      <router-link :to="tocPath('adding-masks')">
+        Adding Masks
+      </router-link>
+
       <router-link :to="tocPath('adding-fit-tests')">
         Adding Fit Tests for a Respirator User
       </router-link>
@@ -819,6 +823,23 @@
         The fit test solution is 100x more concentrated than the sensitivity solution. Succeeding in tasting the sensitivity solution, while wearing a mask and not detecting the 100x stronger (fit test) solution for a particular exercise implies that the mask has a fit factor of at least 100 for that particular instance of an exercise.  However, there are several exercises. To pass the qualitative fit test, the tester should not be able to taste the fit test solution through <em>all</em> the exercises. If the tester tastes the fit test solution midway, that is considered a failure (i.e. the overall fit factor is less than 100.)
         </p>
 
+
+
+        <div id='adding-masks'>
+          <br>
+          <br>
+          <h4>Adding Masks</h4>
+        </div>
+        <p>If you are trying to add fit testing data for a mask, but could not find the mask in the system, you can add it by visiting <router-link :to='{name: "NewMask"}'>this link</router-link>.</p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-comfort.png" alt='Comfort questions'>
+            </router-link>
+            <figcaption>Adding a Fit Test: Comfort Questions</figcaption>
+          </figure>
+        </div>
 
 
         <div id='adding-fit-tests-comfort'>

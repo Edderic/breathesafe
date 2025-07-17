@@ -24,6 +24,7 @@ seaborn = "*"
 matplotlib = "*"
 importlib_metadata = "*"
 pymc = "*"
+requests = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = '*'

@@ -216,10 +216,10 @@ def get_facial_measurements_with_fit_tests(endpoint):
         # Make HTTP request to the Rails endpoint
         response = requests.get(endpoint, timeout=30)
         response.raise_for_status()  # Raise an exception for bad status codes
-        
+
         # Parse the JSON response
         data = response.json()
-        
+
         # Extract the fit_tests_with_facial_measurements from the response
         # Based on the Rails controller, the response structure is:
         # {"fit_tests_with_facial_measurements": [...]}
@@ -232,7 +232,7 @@ def get_facial_measurements_with_fit_tests(endpoint):
                 return data
             else:
                 raise ValueError(f"Unexpected response format. Expected 'fit_tests_with_facial_measurements' key or list, got: {type(data)}")
-                
+
     except requests.exceptions.RequestException as e:
         print(f"Error making HTTP request to {endpoint}: {e}")
         raise
@@ -263,6 +263,8 @@ def generate_mask_params(mask_ids, bn):
     return mask_params
 
 def train():
+    import pdb; pdb.set_trace()
+
     endpoint = 'https://breathesafe.xyz/facial_measurements_fit_tests.json'
 
     facial_measurements_with_fit_tests = get_facial_measurements_with_fit_tests(endpoint)

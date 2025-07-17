@@ -2,7 +2,7 @@ import pytest
 from ..inference import Factor
 import pandas as pd
 
-def test_factor():
+def test_factor_times_factor():
     """
     A -> B -> C
 

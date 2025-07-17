@@ -425,6 +425,55 @@
     <br>
 
   </div>
+  <Popup v-if="showHelp && tabToShow == 'Basic Info'" @onclose="this.showHelp = false">
+  <h3>Basic Info</h3>
+  <table>
+    <tr>
+      <th>Unique Internal Model code</th>
+      <td>This is the name of the mask. For example: Zimi 9541 w/ Headstraps, w/ exhalation valve.</td>
+    </tr>
+    <tr>
+      <th>Colors</th>
+      <td>You can select the color(s) of this mask. This can help people find masks that match their outfit. If none of the options match, please email <a mailto="info@breathesafe.xyz">info@breathesafe.xyz</a> and I can add a color for you.</td>
+    </tr>
+    <tr>
+      <th>Strap type</th>
+      <td>
+        <strong>Earloop</strong> and <strong>Headstrap</strong> options are assumed to be not adjustable. If the mask comes with adjustable ones, you can pick <strong>Adjustable Earloop</strong> and <strong>Adjustable Headstrap</strong> accordingly.
+      </td>
+    </tr>
+  </table>
+  </Popup>
+
+  <Popup v-if="showHelp && tabToShow == 'Image & Purchasing'" @onclose="this.showHelp = false">
+  <h3>Image & Purchasing</h3>
+
+  <table>
+    <tr>
+      <th>Image URL</th>
+      <td>This link will be used to display the image for the mask.</td>
+    </tr>
+    <tr>
+      <th>Purchasing URLs</th>
+      <td>e.g. https://zimiair.com</td>
+    </tr>
+  </table>
+  </Popup>
+
+  <Popup v-if="showHelp && tabToShow == 'Dimensions'" @onclose="this.showHelp = false">
+  <h3>Dimensions</h3>
+
+  <h4>Perimeter (mm)</h4>
+  <p>This is measuring the distance around the section of the mask that seals to the face. <strong>This is used by the mask recommender algorithm in predicting fit for individuals.</strong> Here is an example for bifolds: </p>
+
+  <div class='align-items-center'>
+    <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask_measurements/bifold-highlighted-perimeter.png" alt="bifold mask with the perimeter shown">
+  </div>
+  <p>So the distance in red times 2 is what I consider the perimeter of the mask. For other types of masks (e.g. boat/trifold, cup, etc.), the same idea can be applied -- take a tape measure, start at some point (e.g. by the crease of the nosewire) and wrap around the edges of the mask that is supposed to seal to the face, until you reach the beginning point.</p>
+
+  <h4>Mass (grams)</h4>
+  <p>Useful for people who are looking into elastomeric masks, as they can be heavier than the typical Filtering Facepiece Respirators (FFRs).</p>
+  </Popup>
 </template>
 
 <script>
@@ -439,6 +488,7 @@ import HorizontalStackedBar from './horizontal_stacked_bar.vue'
 import TabSet from './tab_set.vue'
 import { deepSnakeToCamel, shortHandHref, round } from './misc.js'
 import RecommendPopup from './recommend_popup.vue'
+import Popup from './pop_up.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { getFacialMeasurements } from './facial_measurements.js'
@@ -458,6 +508,7 @@ export default {
     ClosableMessage,
     ColoredCell,
     HorizontalStackedBar,
+    Popup,
     RecommendPopup,
     ScatterPlot,
     SurveyQuestion,
@@ -465,6 +516,7 @@ export default {
   },
   data() {
     return {
+      showHelp: false,
       noseProtrusionMm: null,
       faceWidthMm: null,
       showPopup: false,
@@ -723,7 +775,7 @@ export default {
       return 3
     },
     canUpdate() {
-      return !!this.currentUser && ((this.authorId == this.currentUser.id) || this.currentUser.admin)
+      return !!this.currentUser && (this.newMode || (this.authorId == this.currentUser.id) || this.currentUser.admin)
     },
     perimColorScheme() {
       return perimeterColorScheme();
@@ -1399,6 +1451,9 @@ export default {
     display: flex;
     flex-direction: column;
   }
+  .main-container {
+    top:2em;
+  }
   .add-facial-measurements-button {
     margin: 1em auto;
   }
@@ -1492,6 +1547,7 @@ export default {
     text-align: center;
     font-weight: bold;
     margin-right: 2em;
+    margin-top: 0;
     margin-bottom: 0;
   }
 
@@ -1607,6 +1663,13 @@ export default {
     padding-top: 1em;
   }
 
+  .header-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+
   .main-section {
     margin-top: 5em;
   }
@@ -1651,7 +1714,7 @@ export default {
     }
 
   }
-  @media(max-width: 1000px) {
+  @media(max-width: 1170px) {
     .grid.triple, .grid.view.triple, .grid.view.quad {
       grid-template-columns: 100%;
     }
