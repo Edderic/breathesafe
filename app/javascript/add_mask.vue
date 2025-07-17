@@ -160,6 +160,7 @@
                     <option>CE</option>
                     <option>E100</option>
                     <option>FFP2 Rated</option>
+                    <option>FFP3</option>
                     <option>KF80</option>
                     <option>KF94</option>
                     <option>KN95</option>
