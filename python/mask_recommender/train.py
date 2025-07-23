@@ -1,367 +1,212 @@
-import pickle
 import numpy as np
 import pandas as pd
 import requests
-import json
+import pymc as pm
+import arviz as az
+import os
+from pymc.sampling.jax import sample_numpyro_nuts
+from sklearn.preprocessing import StandardScaler
 
-from graphica.ds import BayesianNetwork as BN
-from graphica.random.normal import Normal
-from graphica.random.gamma import Gamma
-from graphica.random.binomial import Binomial
-from graphica.random.deterministic import Deterministic
-from graphica.random.logistic import Logistic
-from graphica.inference.metropolis_hastings import MetropolisHastings
-from graphica.query import Query
+print(pm.__version__)
+os.environ["PYMC_EXPERIMENTAL_JAX"] = "1"
 
-# Define transition function for Metropolis-Hastings
-def transition(particle, mask_ids):
-    # Propose new values for all parameters
-    new_particle = particle.copy()
-
-    # Update beta parameters (Gamma distributed)
-    for param_name in ['beta_face_width', 'beta_face_length', 'beta_bitragion_subnasale_arc',
-                      'beta_nose_protrusion', 'beta_nasal_root_breadth']:
-        current_val = particle.get_value(param_name)
-        # Propose from log-normal to ensure positivity
-        proposal = current_val * np.exp(np.random.normal(0, 0.1))
-        new_particle.set_value(param_name, proposal)
-
-    # Update mask parameters (Normal distributed)
-    for mask_id in mask_ids:
-        for param in ['a', 'b', 'c']:
-            param_name = f'{param}_mask_{mask_id}'
-            current_val = particle.get_value(param_name)
-            proposal = current_val + np.random.normal(0, 0.5)
-            new_particle.set_value(param_name, proposal)
-
-    return new_particle
-
-
+# 1. Data loading function (unchanged)
 def get_facial_measurements_with_fit_tests(endpoint):
-    """
-    Parameters:
-        endpoint: string.
-            URL to hit to get facial measurements with fit tests
-
-    Returns: list[dict]
-        Example:
-        [
-            {
-                "id": 1181,
-                "n": 4,
-                "denominator": "0.07797638898152471153",
-                "n95_mode_hmff": "51.29757933453083568692",
-                "qlft_pass": False,
-                "mask_id": 222,
-                "facial_hair_beard_length_mm": 3,
-                "source": "N95ModeService",
-                "user_id": 99,
-                "unique_internal_model_code": "Makrite 9500S Surgical NIOSH N95 Size Small headstraps",
-                "perimeter_mm": 380,
-                "strap_type": "Headstrap",
-                "style": "Cup",
-                "face_width": 137,
-                "jaw_width": 118,
-                "face_depth": 96,
-                "face_length": 112,
-                "lower_face_length": 64.7,
-                "bitragion_menton_arc": 288,
-                "bitragion_subnasale_arc": 230,
-                "nasal_root_breadth": 15,
-                "nose_protrusion": 27,
-                "nose_bridge_height": 13,
-                "lip_width": 52,
-                "head_circumference": None,
-                "nose_breadth": None,
-                "face_width_z_score": "0.67977799908041970849",
-                "jaw_width_z_score": "0.40297193750449864935",
-                "face_depth_z_score": "-0.12206280173663213955",
-                "face_length_z_score": "0.12165132129189922255",
-                "lower_face_length_z_score": -0.166733715489598,
-                "bitragion_menton_arc_z_score": "0.52873879608511797323",
-                "bitragion_subnasale_arc_z_score": "-0.03212402986150920281",
-                "nasal_root_breadth_z_score": "-0.73659817520074123993",
-                "nose_protrusion_z_score": "-0.13376416563567377767",
-                "nose_bridge_height_z_score": "-0.69576668441348658181",
-                "lip_width_z_score": "0.27068435833971968475",
-                "head_circumference_z_score": None,
-                "nose_breadth_z_score": None
-            },
-            {
-                "id": 267,
-                "n": 4,
-                "denominator": "0.02",
-                "n95_mode_hmff": "200.0",
-                "qlft_pass": True,
-                "mask_id": 336,
-                "facial_hair_beard_length_mm": 0,
-                "source": "N95ModeService",
-                "user_id": 99,
-                "unique_internal_model_code": "Zimi ZM9541 w/Headstraps",
-                "perimeter_mm": 364,
-                "strap_type": "Adjustable Headstrap",
-                "style": "Bifold & Gasket",
-                "face_width": 137,
-                "jaw_width": 118,
-                "face_depth": 96,
-                "face_length": 112,
-                "lower_face_length": 64.7,
-                "bitragion_menton_arc": 288,
-                "bitragion_subnasale_arc": 230,
-                "nasal_root_breadth": 15,
-                "nose_protrusion": 27,
-                "nose_bridge_height": 13,
-                "lip_width": 52,
-                "head_circumference": None,
-                "nose_breadth": None,
-                "face_width_z_score": "0.67977799908041970849",
-                "jaw_width_z_score": "0.40297193750449864935",
-                "face_depth_z_score": "-0.12206280173663213955",
-                "face_length_z_score": "0.12165132129189922255",
-                "lower_face_length_z_score": -0.166733715489598,
-                "bitragion_menton_arc_z_score": "0.52873879608511797323",
-                "bitragion_subnasale_arc_z_score": "-0.03212402986150920281",
-                "nasal_root_breadth_z_score": "-0.73659817520074123993",
-                "nose_protrusion_z_score": "-0.13376416563567377767",
-                "nose_bridge_height_z_score": "-0.69576668441348658181",
-                "lip_width_z_score": "0.27068435833971968475",
-                "head_circumference_z_score": None,
-                "nose_breadth_z_score": None
-            },
-            {
-                "id": 1182,
-                "n": 4,
-                "denominator": "0.07797638898152471153",
-                "n95_mode_hmff": "51.29757933453083568692",
-                "qlft_pass": True,
-                "mask_id": 222,
-                "facial_hair_beard_length_mm": 0,
-                "source": "N95ModeService",
-                "user_id": 100,
-                "unique_internal_model_code": "Makrite 9500S Surgical NIOSH N95 Size Small headstraps",
-                "perimeter_mm": 375,
-                "strap_type": "Headstrap",
-                "style": "Cup",
-                "face_width": 142,
-                "jaw_width": 120,
-                "face_depth": 98,
-                "face_length": 115,
-                "lower_face_length": 66.0,
-                "bitragion_menton_arc": 290,
-                "bitragion_subnasale_arc": 235,
-                "nasal_root_breadth": 16,
-                "nose_protrusion": 28,
-                "nose_bridge_height": 14,
-                "lip_width": 54,
-                "head_circumference": None,
-                "nose_breadth": None,
-                "face_width_z_score": "0.8",
-                "jaw_width_z_score": "0.5",
-                "face_depth_z_score": "0.1",
-                "face_length_z_score": "0.2",
-                "lower_face_length_z_score": 0.1,
-                "bitragion_menton_arc_z_score": "0.6",
-                "bitragion_subnasale_arc_z_score": "0.1",
-                "nasal_root_breadth_z_score": "-0.5",
-                "nose_protrusion_z_score": "0.1",
-                "nose_bridge_height_z_score": "-0.4",
-                "lip_width_z_score": "0.4",
-                "head_circumference_z_score": None,
-                "nose_breadth_z_score": None
-            },
-            {
-                "id": 268,
-                "n": 4,
-                "denominator": "0.02",
-                "n95_mode_hmff": "200.0",
-                "qlft_pass": False,
-                "mask_id": 336,
-                "facial_hair_beard_length_mm": 2,
-                "source": "N95ModeService",
-                "user_id": 101,
-                "unique_internal_model_code": "Zimi ZM9541 w/Headstraps",
-                "perimeter_mm": 370,
-                "strap_type": "Adjustable Headstrap",
-                "style": "Bifold & Gasket",
-                "face_width": 135,
-                "jaw_width": 115,
-                "face_depth": 94,
-                "face_length": 110,
-                "lower_face_length": 63.0,
-                "bitragion_menton_arc": 285,
-                "bitragion_subnasale_arc": 225,
-                "nasal_root_breadth": 14,
-                "nose_protrusion": 26,
-                "nose_bridge_height": 12,
-                "lip_width": 50,
-                "head_circumference": None,
-                "nose_breadth": None,
-                "face_width_z_score": "0.5",
-                "jaw_width_z_score": "0.3",
-                "face_depth_z_score": "-0.2",
-                "face_length_z_score": "0.0",
-                "lower_face_length_z_score": -0.3,
-                "bitragion_menton_arc_z_score": "0.4",
-                "bitragion_subnasale_arc_z_score": "-0.1",
-                "nasal_root_breadth_z_score": "-0.8",
-                "nose_protrusion_z_score": "-0.2",
-                "nose_bridge_height_z_score": "-0.8",
-                "lip_width_z_score": "0.2",
-                "head_circumference_z_score": None,
-                "nose_breadth_z_score": None
-            }
-        ]
-    """
     try:
-        # Make HTTP request to the Rails endpoint
         response = requests.get(endpoint, timeout=30)
-        response.raise_for_status()  # Raise an exception for bad status codes
-
-        # Parse the JSON response
+        response.raise_for_status()
         data = response.json()
-
-        # Extract the fit_tests_with_facial_measurements from the response
-        # Based on the Rails controller, the response structure is:
-        # {"fit_tests_with_facial_measurements": [...]}
         if 'fit_tests_with_facial_measurements' in data:
             return data['fit_tests_with_facial_measurements']
+        elif isinstance(data, list):
+            return data
         else:
-            # If the key doesn't exist, return the entire response as a list
-            # (in case the endpoint returns the array directly)
-            if isinstance(data, list):
-                return data
-            else:
-                raise ValueError(f"Unexpected response format. Expected 'fit_tests_with_facial_measurements' key or list, got: {type(data)}")
-
-    except requests.exceptions.RequestException as e:
-        print(f"Error making HTTP request to {endpoint}: {e}")
-        raise
-    except json.JSONDecodeError as e:
-        print(f"Error parsing JSON response from {endpoint}: {e}")
-        raise
+            raise ValueError(f"Unexpected response format: {type(data)}")
     except Exception as e:
-        print(f"Unexpected error in get_facial_measurements_with_fit_tests: {e}")
+        print(f"Error fetching data: {e}")
         raise
 
+# 2. Main training script
+def main():
+    endpoint = 'https://www.breathesafe.xyz/facial_measurements_fit_tests.json'
+    data = get_facial_measurements_with_fit_tests(endpoint)
+    df = pd.DataFrame(data)
 
-def generate_mask_params(mask_ids, bn):
-    """
-    Add mask-specific parameters
-    """
+    # ... after loading df ...
+    scaler = StandardScaler()
+    facial_features = [
+        'face_width', 'face_length', 'nose_protrusion',
+        'bitragion_subnasale_arc', 'nose_bridge_height', 'nasal_root_breadth', 'perimeter_mm'
+    ]
+    df[facial_features] = scaler.fit_transform(df[facial_features])
 
-    mask_params = {}
-    for mask_id in mask_ids:
-        a = Normal(name=f'a_mask_{mask_id}', mean=0, std=10)
-        b = Normal(name=f'b_mask_{mask_id}', mean=0, std=10)
-        c = Normal(name=f'c_mask_{mask_id}', mean=0, std=10)
+    # Only keep relevant columns
+    features = [
+        'face_width',
+        'face_length',
+        'nose_protrusion',
+        'bitragion_subnasale_arc',
+        'nose_bridge_height',
+        'nasal_root_breadth',
+        'perimeter_mm',
+        'mask_id',
+        'qlft_pass'
+    ]
+    df = df[features]
 
-        bn.add_node(a)
-        bn.add_node(b)
-        bn.add_node(c)
-        mask_params[mask_id] = {'a': a, 'b': b, 'c': c}
+    # Drop rows with missing values
+    df = df.dropna()
 
-    return mask_params
+    # Ensure correct types
+    df['mask_id'] = df['mask_id'].astype(int)
+    df['qlft_pass'] = df['qlft_pass'].astype(int)
+    for col in features:
+        if col != 'mask_id' and col != 'qlft_pass':
+            df[col] = df[col].astype(float)
 
-def train():
-    import pdb; pdb.set_trace()
+    # 3. Train/test split (80/20, randomized)
+    df = df.sample(frac=1).reset_index(drop=True)  # Shuffle
+    n_train = int(0.8 * len(df))
+    train_df = df.iloc[:n_train]
+    test_df = df.iloc[n_train:]
 
-    endpoint = 'https://breathesafe.xyz/facial_measurements_fit_tests.json'
+    # 4. Prepare data for PyMC
+    X_train = train_df[[
+        'face_width',
+        'face_length',
+        'nose_protrusion',
+        'bitragion_subnasale_arc',
+        'nose_bridge_height',
+        'nasal_root_breadth',
+        'perimeter_mm',
+        'mask_id'
+    ]].copy()
+    y_train = train_df['qlft_pass'].values
+    mask_ids = X_train['mask_id'].unique()
+    mask_id_to_idx = {mid: i for i, mid in enumerate(mask_ids)}
+    X_train['mask_idx'] = X_train['mask_id'].map(mask_id_to_idx)
+    mask_idx = X_train['mask_idx'].values
+    perimeter_mm = X_train['perimeter_mm'].values
+    # Facial measurements matrix (n_samples, n_features)
+    facial_X = X_train[[
+        'face_width',
+        'face_length',
+        'nose_protrusion',
+        'bitragion_subnasale_arc',
+        'nose_bridge_height',
+        'nasal_root_breadth'
+    ]].values
 
-    facial_measurements_with_fit_tests = get_facial_measurements_with_fit_tests(endpoint)
+    # 5. Build PyMC model
+    with pm.Model() as model:
+        # Global multipliers for each facial measurement
+        multipliers = pm.Normal('multipliers', mu=0, sigma=5, shape=facial_X.shape[1])
 
-    # Extract unique mask_ids
-    mask_ids = list(set(row['mask_id'] for row in facial_measurements_with_fit_tests))
+        # Mask-level random effects
+        a_mask = pm.Normal('a_mask', mu=0, sigma=2, shape=len(mask_ids))
+        c_mask = pm.Normal('c_mask', mu=0, sigma=5, shape=len(mask_ids))
 
-    # Build Bayesian Network
-    bn = BN()
+        # Compute facial_sum for each sample
+        facial_sum = pm.math.dot(facial_X, multipliers)  # shape (n_samples,)
+        distance = (facial_sum - perimeter_mm) ** 2
 
-    mask_params = generate_mask_params(mask_ids, bn)
+        # Get mask-specific a and c for each sample
+        a = a_mask[mask_idx]
+        c = c_mask[mask_idx]
 
-    # Add beta parameters (Gamma distributed for positive values)
-    beta_face_width = Gamma(name='beta_face_width', shape=2, rate=2)
-    beta_face_length = Gamma(name='beta_face_length', shape=2, rate=2)
-    beta_bitragion_subnasale_arc = Gamma(name='beta_bitragion_subnasale_arc', shape=2, rate=2)
-    beta_nose_protrusion = Gamma(name='beta_nose_protrusion', shape=2, rate=2)
-    beta_nasal_root_breadth = Gamma(name='beta_nasal_root_breadth', shape=2, rate=2)
+        logit_p = a * distance + c
+        p = pm.math.sigmoid(logit_p)
 
-    bn.add_node(beta_face_width)
-    bn.add_node(beta_face_length)
-    bn.add_node(beta_bitragion_subnasale_arc)
-    bn.add_node(beta_nose_protrusion)
-    bn.add_node(beta_nasal_root_breadth)
+        # Likelihood
+        obs = pm.Bernoulli('obs', p=p, observed=y_train)
 
-    # Process each row
-    for row in facial_measurements_with_fit_tests:
-        fit_test_uuid = f"{row['id']}_{row['source']}"
-        mask_id = row['mask_id']
+        # 6. Sample from the posterior
+        trace = sample_numpyro_nuts(1000, tune=1000, target_accept=0.95)
 
-        # Distance calculation
-        distance = Deterministic(
-            callable_func=lambda face_width, beta_face_width, face_length, beta_face_length,
-                                  nose_protrusion, beta_nose_protrusion, bitragion_subnasale_arc,
-                                  beta_bitragion_subnasale_arc, nasal_root_breadth, beta_nasal_root_breadth,
-                                  mask_perimeter: (face_width * beta_face_width +
-                                                  face_length * beta_face_length +
-                                                  nose_protrusion * beta_nose_protrusion +
-                                                  bitragion_subnasale_arc * beta_bitragion_subnasale_arc +
-                                                  nasal_root_breadth * beta_nasal_root_breadth -
-                                                  mask_perimeter),
-            face_width=row['face_width'],
-            face_length=row['face_length'],
-            nose_protrusion=row['nose_protrusion'],
-            bitragion_subnasale_arc=row['bitragion_subnasale_arc'],
-            nasal_root_breadth=row['nasal_root_breadth'],
-            mask_perimeter=row['perimeter_mm'],
-            beta_face_width=beta_face_width,
-            beta_face_length=beta_face_length,
-            beta_nose_protrusion=beta_nose_protrusion,
-            beta_bitragion_subnasale_arc=beta_bitragion_subnasale_arc,
-            beta_nasal_root_breadth=beta_nasal_root_breadth
-        )
+    # 7. Posterior predictive checks and diagnostics
+    print("\nModel summary:")
+    print(az.summary(trace, var_names=['multipliers', 'a_mask', 'c_mask']))
 
-        # Get mask parameters
-        a, b, c = mask_params[mask_id]['a'], mask_params[mask_id]['b'], mask_params[mask_id]['c']
+    # Posterior predictive on train set
+    # with model:
+    #     ppc = pm.sample_posterior_predictive(trace, var_names=['obs'])
+    # az.plot_ppc(az.from_pymc3(posterior_predictive=ppc, model=model, observed_data={'obs': y_train}))
 
-        # Logistic function (quadratic passed to logistic)
-        logistic = Logistic(
-            callable_func=lambda a, b, z, c: a * z**2 + b * z + c,
-            a=a,
-            b=b,
-            c=c,
-            z=distance
-        )
+    # Save trace to disk
+    trace_path = 'pymc_trace.nc'
+    print(f"\nSaving trace to {trace_path}")
+    az.to_netcdf(trace, trace_path)
 
-        # Observed data (convert boolean to int)
-        obs = 1 if row['qlft_pass'] else 0
+    # Diagnostics
+    print("\nModel diagnostics:")
+    print(az.plot_trace(trace, var_names=['multipliers', 'a_mask', 'c_mask']))
+    print(az.plot_energy(trace))
 
-        # Binomial likelihood
-        binomial = Binomial(name=f'fit_test_result_{fit_test_uuid}', n=1, p=logistic)
-        binomial.obs = obs
+    # 8. Evaluate on test set
+    # Prepare test data
+    X_test = test_df[[
+        'face_width',
+        'face_length',
+        'nose_protrusion',
+        'bitragion_subnasale_arc',
+        'nose_bridge_height',
+        'nasal_root_breadth',
+        'perimeter_mm',
+        'mask_id'
+    ]].copy()
+    y_test = test_df['qlft_pass'].values
+    X_test['mask_idx'] = X_test['mask_id'].map(mask_id_to_idx)
+    mask_idx_test = X_test['mask_idx']
 
-        bn.add_node(distance)
-        bn.add_node(logistic)
-        bn.add_node(binomial)
+    # Find rows with NaN mask_idx (unseen mask_id in test set)
+    nan_mask_rows = X_test[mask_idx_test.isna()]
+    if not nan_mask_rows.empty:
+        print("Warning: The following test rows have mask_id not seen in training and will be dropped:")
+        print(nan_mask_rows[['mask_id']])
+        # Drop these rows from test set
+        X_test = X_test[mask_idx_test.notna()]
+        y_test = y_test[mask_idx_test.notna()]
+        mask_idx_test = X_test['mask_idx']
 
-    # Query: condition on all fit test results
-    fit_test_nodes = [node for node in bn.nodes if node.name.startswith('fit_test_result_')]
-    givens = [{node.name: node.obs} for node in fit_test_nodes]
+    # Now safe to convert to int
+    mask_idx_test = mask_idx_test.astype(int).values
 
-    query = Query(
-        outcomes=['beta_face_width', 'beta_face_length', 'beta_bitragion_subnasale_arc',
-                 'beta_nose_protrusion', 'beta_nasal_root_breadth'],
-        givens=givens
-    )
+    perimeter_mm_test = X_test['perimeter_mm'].values
+    facial_X_test = X_test[[
+        'face_width',
+        'face_length',
+        'nose_protrusion',
+        'bitragion_subnasale_arc',
+        'nose_bridge_height',
+        'nasal_root_breadth'
+    ]].values
 
-    # Metropolis-Hastings sampler
-    sampler = MetropolisHastings(
-        network=bn,
-        query=query,
-        transition_function=lambda particle: transition(particle, mask_ids)
-    )
-
-    # Run sampler
-    samples = sampler.sample(n=1000, burn_in=200)
-
+    # Posterior predictive for test set
+    with model:
+        # Use posterior means for multipliers, a_mask, c_mask
+        posterior = trace.posterior
+        mean_multipliers = posterior['multipliers'].mean(dim=('chain', 'draw')).values
+        mean_a_mask = posterior['a_mask'].mean(dim=('chain', 'draw')).values
+        mean_c_mask = posterior['c_mask'].mean(dim=('chain', 'draw')).values
+        facial_sum_test = np.dot(facial_X_test, mean_multipliers)
+        distance_test = (facial_sum_test - perimeter_mm_test) ** 2
+        a_test = mean_a_mask[mask_idx_test]
+        c_test = mean_c_mask[mask_idx_test]
+        logit_p_test = a_test * distance_test + c_test
+        logit_p_test = np.clip(logit_p_test, -20, 20)
+        p_test = 1 / (1 + np.exp(-logit_p_test))
+        y_pred = (p_test > 0.5).astype(int)
+        accuracy = (y_pred == y_test).mean()
+        # Compute PPV and NPV
+        tp = np.sum((y_pred == 1) & (y_test == 1))
+        fp = np.sum((y_pred == 1) & (y_test == 0))
+        tn = np.sum((y_pred == 0) & (y_test == 0))
+        fn = np.sum((y_pred == 0) & (y_test == 1))
+        ppv = tp / (tp + fp) if (tp + fp) > 0 else float('nan')
+        npv = tn / (tn + fn) if (tn + fn) > 0 else float('nan')
+        print(f"\nTest set accuracy: {accuracy:.3f} ({y_pred.sum()} positive predictions out of {len(y_pred)})")
+        print(f"Test set PPV (precision): {ppv:.3f}")
+        print(f"Test set NPV: {npv:.3f}")
 
 if __name__ == '__main__':
-    train()
+    main()
