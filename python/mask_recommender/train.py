@@ -70,12 +70,19 @@ def encode_categorical_variables(df, categorical_cols):
     return encodings
 
 
-def train_model(facial_X, mask_idx, y_train, perimeter_mm, facial_hair_beard_length_mm, strap_type_encoded):
+def train_model(facial_X, mask_idx, y_train, perimeter_mm, facial_hair_beard_length_mm, strap_type_encoded, style_encoded):
     # 5. Build PyMC model
     with pm.Model() as model:
-        # Global multipliers for each facial measurement
-        multipliers = pm.Normal(
-            'multipliers', mu=0, sigma=5, shape=facial_X.shape[1]
+        # Global multipliers for each facial measurement (baseline)
+        global_multipliers = pm.Normal(
+            'global_multipliers', mu=0, sigma=5, shape=facial_X.shape[1]
+        )
+
+        # Style-specific adjustments to multipliers
+        n_styles = len(np.unique(style_encoded))
+        n_facial_features = facial_X.shape[1]
+        style_multiplier_adjustments = pm.Normal(
+            'style_multiplier_adjustments', mu=0, sigma=2, shape=(n_styles, n_facial_features)
         )
 
         # Mask-level random effects
@@ -89,14 +96,22 @@ def train_model(facial_X, mask_idx, y_train, perimeter_mm, facial_hair_beard_len
         # Facial hair
         facial_hair_multiplier = pm.Uniform('facial_hair_multiplier', lower=-10, upper=0)
 
-        # Compute facial_sum for each sample
-        facial_sum = pm.math.dot(facial_X, multipliers)  # shape (n_samples,)
+        # Compute style-specific multipliers for each sample
+        # global_multipliers shape: (n_facial_features,)
+        # style_multiplier_adjustments shape: (n_styles, n_facial_features)
+        # style_encoded shape: (n_samples,)
+        # We need to get the style-specific adjustments for each sample
+        style_adjustments = style_multiplier_adjustments[style_encoded]  # shape: (n_samples, n_facial_features)
+        final_multipliers = global_multipliers + style_adjustments  # shape: (n_samples, n_facial_features)
+
+        # Compute facial_sum for each sample using the final multipliers
+        facial_sum = pm.math.sum(facial_X * final_multipliers, axis=1)  # shape: (n_samples,)
         distance = (facial_sum - perimeter_mm) ** 2
 
         # Get mask-specific a and c for each sample
         a = a_mask[mask_idx]
         c = c_mask[mask_idx]
-
+        
         # Get strap type effect for each sample
         strap_effect = strap_type_effect[strap_type_encoded]
 
@@ -112,7 +127,7 @@ def train_model(facial_X, mask_idx, y_train, perimeter_mm, facial_hair_beard_len
     return model, trace
     # 7. Posterior predictive checks and diagnostics
     print("\nModel summary:")
-    print(az.summary(trace, var_names=['multipliers', 'a_mask', 'c_mask', 'strap_type_effect', 'facial_hair_multiplier']))
+    print(az.summary(trace, var_names=['global_multipliers', 'style_multiplier_adjustments', 'a_mask', 'c_mask', 'strap_type_effect', 'facial_hair_multiplier']))
 
 
 def save_trace(
@@ -126,7 +141,7 @@ def save_trace(
 def show_diagnostics(trace):
     # Diagnostics
     print("\nModel diagnostics:")
-    print(az.plot_trace(trace, var_names=['multipliers', 'a_mask', 'c_mask', 'strap_type_effect', 'facial_hair_multiplier']))
+    print(az.plot_trace(trace, var_names=['global_multipliers', 'style_multiplier_adjustments', 'a_mask', 'c_mask', 'strap_type_effect', 'facial_hair_multiplier']))
     print(az.plot_energy(trace))
 
 
@@ -182,17 +197,24 @@ def evaluate(
 
     # Posterior predictive for test set
     with model:
-        # Use posterior means for multipliers, a_mask, c_mask
+        # Use posterior means for all parameters
         posterior = trace.posterior
-        mean_multipliers = posterior['multipliers'].mean(dim=('chain', 'draw')).values
+        mean_global_multipliers = posterior['global_multipliers'].mean(dim=('chain', 'draw')).values
+        mean_style_adjustments = posterior['style_multiplier_adjustments'].mean(dim=('chain', 'draw')).values
         mean_a_mask = posterior['a_mask'].mean(dim=('chain', 'draw')).values
         mean_c_mask = posterior['c_mask'].mean(dim=('chain', 'draw')).values
         mean_strap_type_effect = posterior['strap_type_effect'].mean(dim=('chain', 'draw')).values
         facial_hair_multiplier = posterior['facial_hair_multiplier'].mean(dim=('chain', 'draw')).values
         facial_hair_beard_length_mm = X_test['facial_hair_beard_length_mm']
         strap_type_encoded_test = X_test['strap_type_encoded'].values
+        style_encoded_test = X_test['style_encoded'].values
 
-        facial_sum_test = np.dot(facial_X_test, mean_multipliers)
+        # Compute style-specific multipliers for test set
+        style_adjustments_test = mean_style_adjustments[style_encoded_test]
+        final_multipliers_test = mean_global_multipliers + style_adjustments_test
+
+        # Compute facial_sum using the final multipliers
+        facial_sum_test = np.sum(facial_X_test * final_multipliers_test, axis=1)
         distance_test = (facial_sum_test - perimeter_mm_test) ** 2
         a_test = mean_a_mask[mask_idx_test]
         c_test = mean_c_mask[mask_idx_test]
@@ -361,8 +383,9 @@ def main():
 
     # Encode strap types
     strap_type_encoded = X_train['strap_type_encoded'].values
+    style_encoded = X_train['style_encoded'].values
 
-    model, trace = train_model(facial_X, mask_idx, y_train, perimeter_mm, facial_hair, strap_type_encoded)
+    model, trace = train_model(facial_X, mask_idx, y_train, perimeter_mm, facial_hair, strap_type_encoded, style_encoded)
 
     # Posterior predictive on train set
     # with model:
