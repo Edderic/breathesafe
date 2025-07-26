@@ -111,7 +111,7 @@ def train_model(facial_X, mask_idx, y_train, perimeter_mm, facial_hair_beard_len
         # Get mask-specific a and c for each sample
         a = a_mask[mask_idx]
         c = c_mask[mask_idx]
-        
+
         # Get strap type effect for each sample
         strap_effect = strap_type_effect[strap_type_encoded]
 
@@ -268,16 +268,16 @@ def main():
             'scalable': True,
             'facial_measurement': True,
         },
-        'nose_bridge_height': {
-            'data_type': float,
-            'scalable': True,
-            'facial_measurement': True,
-        },
-        'nasal_root_breadth': {
-            'data_type': float,
-            'scalable': True,
-            'facial_measurement': True,
-        },
+        # 'nose_bridge_height': {
+        #     'data_type': float,
+        #     'scalable': True,
+        #     'facial_measurement': True,
+        # },
+        # 'nasal_root_breadth': {
+        #     'data_type': float,
+        #     'scalable': True,
+        #     'facial_measurement': True,
+        # },
         'nose_protrusion': {
             'data_type': float,
             'scalable': True,
@@ -445,6 +445,7 @@ def main():
     train_df_copy_with_mask_names[train_df_copy_with_mask_names['unique_internal_model_code'].str.contains('9601')].iloc[1]
     # )
     train_df_copy_with_mask_names[train_df_copy_with_mask_names['unique_internal_model_code'].str.contains('blox')]
+    train_df_copy_with_mask_names[train_df_copy_with_mask_names['unique_internal_model_code'].str.contains('1860s')]
     # What if we split the data into boat & duckbill vs. cup, bifold, bifold +
     # gasket?
 
