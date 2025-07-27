@@ -11,8 +11,11 @@ from sklearn.metrics import log_loss
 print(pm.__version__)
 os.environ["PYMC_EXPERIMENTAL_JAX"] = "1"
 
-# 1. Data loading function (unchanged)
+
 def get_facial_measurements_with_fit_tests(endpoint):
+    """
+    1. Data loading function (unchanged)
+    """
     try:
         response = requests.get(endpoint, timeout=30)
         response.raise_for_status()
@@ -70,7 +73,10 @@ def encode_categorical_variables(df, categorical_cols):
     return encodings
 
 
-def train_model(facial_X, mask_idx, y_train, perimeter_mm, facial_hair_beard_length_mm, strap_type_encoded, style_encoded):
+def train_model(
+    facial_X, mask_idx, y_train, perimeter_mm, facial_hair_beard_length_mm,
+    strap_type_encoded, style_encoded
+):
     # 5. Build PyMC model
     with pm.Model() as model:
         # Global multipliers for each facial measurement (baseline)
@@ -82,30 +88,35 @@ def train_model(facial_X, mask_idx, y_train, perimeter_mm, facial_hair_beard_len
         n_styles = len(np.unique(style_encoded))
         n_facial_features = facial_X.shape[1]
         style_multiplier_adjustments = pm.Normal(
-            'style_multiplier_adjustments', mu=0, sigma=2, shape=(n_styles, n_facial_features)
+            'style_multiplier_adjustments', mu=0, sigma=2,
+            shape=(n_styles, n_facial_features)
         )
-
         # Mask-level random effects
         a_mask = pm.Normal('a_mask', mu=0, sigma=2, shape=len(mask_idx))
         c_mask = pm.Normal('c_mask', mu=0, sigma=5, shape=len(mask_idx))
 
         # Strap type effects
         n_strap_types = len(np.unique(strap_type_encoded))
-        strap_type_effect = pm.Normal('strap_type_effect', mu=0, sigma=1, shape=n_strap_types)
+        strap_type_effect = pm.Normal(
+            'strap_type_effect', mu=0, sigma=1, shape=n_strap_types)
 
         # Facial hair
-        facial_hair_multiplier = pm.Uniform('facial_hair_multiplier', lower=-10, upper=0)
+        facial_hair_multiplier = pm.Uniform(
+            'facial_hair_multiplier', lower=-10, upper=0)
 
         # Compute style-specific multipliers for each sample
         # global_multipliers shape: (n_facial_features,)
         # style_multiplier_adjustments shape: (n_styles, n_facial_features)
         # style_encoded shape: (n_samples,)
         # We need to get the style-specific adjustments for each sample
-        style_adjustments = style_multiplier_adjustments[style_encoded]  # shape: (n_samples, n_facial_features)
-        final_multipliers = global_multipliers + style_adjustments  # shape: (n_samples, n_facial_features)
+        # shape: (n_samples, n_facial_features)
+        style_adjustments = style_multiplier_adjustments[style_encoded]
+        # shape: (n_samples, n_facial_features)
+        final_multipliers = global_multipliers + style_adjustments
 
         # Compute facial_sum for each sample using the final multipliers
-        facial_sum = pm.math.sum(facial_X * final_multipliers, axis=1)  # shape: (n_samples,)
+        # shape: (n_samples,)
+        facial_sum = pm.math.sum(facial_X * final_multipliers, axis=1)
         distance = (facial_sum - perimeter_mm) ** 2
 
         # Get mask-specific a and c for each sample
@@ -115,7 +126,8 @@ def train_model(facial_X, mask_idx, y_train, perimeter_mm, facial_hair_beard_len
         # Get strap type effect for each sample
         strap_effect = strap_type_effect[strap_type_encoded]
 
-        logit_p = a * distance + c + strap_effect + facial_hair_multiplier * facial_hair_beard_length_mm
+        logit_p = a * distance + c + strap_effect \
+            + facial_hair_multiplier * facial_hair_beard_length_mm
         p = pm.math.sigmoid(logit_p)
 
         # Likelihood
@@ -127,7 +139,18 @@ def train_model(facial_X, mask_idx, y_train, perimeter_mm, facial_hair_beard_len
     return model, trace
     # 7. Posterior predictive checks and diagnostics
     print("\nModel summary:")
-    print(az.summary(trace, var_names=['global_multipliers', 'style_multiplier_adjustments', 'a_mask', 'c_mask', 'strap_type_effect', 'facial_hair_multiplier']))
+    print(
+        az.summary(
+            trace,
+            var_names=[
+                'global_multipliers',
+                'style_multiplier_adjustments',
+                'a_mask', 'c_mask',
+                'strap_type_effect',
+                'facial_hair_multiplier'
+            ]
+        )
+    )
 
 
 def save_trace(
@@ -141,7 +164,9 @@ def save_trace(
 def show_diagnostics(trace):
     # Diagnostics
     print("\nModel diagnostics:")
-    print(az.plot_trace(trace, var_names=['global_multipliers', 'style_multiplier_adjustments', 'a_mask', 'c_mask', 'strap_type_effect', 'facial_hair_multiplier']))
+    print(az.plot_trace(trace, var_names=['global_multipliers',
+                                          'style_multiplier_adjustments',
+          'a_mask', 'c_mask', 'strap_type_effect', 'facial_hair_multiplier']))
     print(az.plot_energy(trace))
 
 
@@ -199,12 +224,16 @@ def evaluate(
     with model:
         # Use posterior means for all parameters
         posterior = trace.posterior
-        mean_global_multipliers = posterior['global_multipliers'].mean(dim=('chain', 'draw')).values
-        mean_style_adjustments = posterior['style_multiplier_adjustments'].mean(dim=('chain', 'draw')).values
+        mean_global_multipliers = posterior['global_multipliers'].mean(
+            dim=('chain', 'draw')).values
+        mean_style_adjustments = posterior['style_multiplier_adjustments'].mean(
+            dim=('chain', 'draw')).values
         mean_a_mask = posterior['a_mask'].mean(dim=('chain', 'draw')).values
         mean_c_mask = posterior['c_mask'].mean(dim=('chain', 'draw')).values
-        mean_strap_type_effect = posterior['strap_type_effect'].mean(dim=('chain', 'draw')).values
-        facial_hair_multiplier = posterior['facial_hair_multiplier'].mean(dim=('chain', 'draw')).values
+        mean_strap_type_effect = posterior['strap_type_effect'].mean(
+            dim=('chain', 'draw')).values
+        facial_hair_multiplier = posterior['facial_hair_multiplier'].mean(
+            dim=('chain', 'draw')).values
         facial_hair_beard_length_mm = X_test['facial_hair_beard_length_mm']
         strap_type_encoded_test = X_test['strap_type_encoded'].values
         style_encoded_test = X_test['style_encoded'].values
@@ -214,12 +243,14 @@ def evaluate(
         final_multipliers_test = mean_global_multipliers + style_adjustments_test
 
         # Compute facial_sum using the final multipliers
-        facial_sum_test = np.sum(facial_X_test * final_multipliers_test, axis=1)
+        facial_sum_test = np.sum(
+            facial_X_test * final_multipliers_test, axis=1)
         distance_test = (facial_sum_test - perimeter_mm_test) ** 2
         a_test = mean_a_mask[mask_idx_test]
         c_test = mean_c_mask[mask_idx_test]
         strap_effect_test = mean_strap_type_effect[strap_type_encoded_test]
-        logit_p_test = a_test * distance_test + c_test + strap_effect_test + facial_hair_beard_length_mm * facial_hair_multiplier
+        logit_p_test = a_test * distance_test + c_test + strap_effect_test + \
+            facial_hair_beard_length_mm * facial_hair_multiplier
         logit_p_test = np.clip(logit_p_test, -20, 20)
         y_prob = 1 / (1 + np.exp(-logit_p_test))
         y_pred = (y_prob > 0.5).astype(int)
@@ -231,7 +262,8 @@ def evaluate(
         fn = np.sum((y_pred == 0) & (y_test == 1))
         ppv = tp / (tp + fp) if (tp + fp) > 0 else float('nan')
         npv = tn / (tn + fn) if (tn + fn) > 0 else float('nan')
-        print(f"\n{testing_type} set accuracy: {accuracy:.3f} ({y_pred.sum()} positive predictions out of {len(y_pred)})")
+        print(f"\n{testing_type} set accuracy: {accuracy:.3f} ({
+              y_pred.sum()} positive predictions out of {len(y_pred)})")
         print(f"{testing_type} set PPV (precision): {ppv:.3f}")
         print(f"{testing_type} set NPV: {npv:.3f}")
 
@@ -240,6 +272,7 @@ def evaluate(
         print(f"{testing_type} set log loss: {test_log_loss:.3f}")
 
         return y_pred, y_prob
+
 
 def presum_log_loss(y_true, y_prob):
     return -(y_true * np.log(y_prob) + (1 - y_true) * np.log(1 - y_prob))
@@ -321,7 +354,10 @@ def main():
     ]
 
     # Filter out rows with extreme z-scores for facial measurements
-    facial_measurement_cols = [k for k, v in features_to_type_mapping.items() if v['facial_measurement']]
+    facial_measurement_cols = [
+        k for k,
+        v in features_to_type_mapping.items() if v['facial_measurement']
+    ]
     z_score_cols = [f"{col}_z_score" for col in facial_measurement_cols]
 
     # Check if z-score columns exist in the data
@@ -331,7 +367,8 @@ def main():
         for col in existing_z_score_cols:
             df[col] = pd.to_numeric(df[col], errors='coerce')
 
-        # Create mask for rows to keep (z-scores within ±2.25, excluding NaN values)
+        # Create mask for rows to keep (z-scores within ±2.25,
+        # excluding NaN values)
         keep_mask = pd.Series([True] * len(df), index=df.index)
         for col in existing_z_score_cols:
             # Keep rows where z-score is NaN (missing) or within ±2.25
@@ -340,11 +377,18 @@ def main():
         initial_count = len(df)
         df = df[keep_mask].reset_index(drop=True)
         filtered_count = initial_count - len(df)
-        print(f"Filtered out {filtered_count} rows with extreme z-scores (|z| > 2.25) out of {initial_count} total rows")
+        print(f"Filtered out {filtered_count} rows with extreme " +
+              f"z-scores (|z| > 2.25) out of {initial_count} total rows")
     else:
         print("No z-score columns found in data, skipping z-score filtering")
 
-    unique_internal_model_code_to_mask_id = pd.DataFrame(data).groupby(['unique_internal_model_code', 'mask_id', 'style', 'strap_type']).count().rename(columns={'id': 'count'})[['count']]
+    unique_internal_model_code_to_mask_id = pd.DataFrame(data).groupby(
+        [
+            'unique_internal_model_code',
+            'mask_id',
+            'style',
+            'strap_type'
+        ]).count().rename(columns={'id': 'count'})[['count']]
     unique_internal_model_code_to_mask_id
 
     # Only keep relevant columns
@@ -356,7 +400,6 @@ def main():
 
     # Encode categorical variables
     categorical_cols = ['strap_type', 'style']
-    encodings = encode_categorical_variables(df, categorical_cols)
 
     # Add encoded columns to predictor columns
     for col in categorical_cols:
@@ -375,7 +418,8 @@ def main():
     perimeter_mm = X_train['perimeter_mm'].values
     # Facial measurements matrix (n_samples, n_features)
     facial_measurement_cols = [
-        k for k, v in features_to_type_mapping.items() if v['facial_measurement']
+        k for k, v in features_to_type_mapping.items()
+        if v['facial_measurement']
     ]
 
     facial_X = X_train[facial_measurement_cols].values
@@ -385,7 +429,15 @@ def main():
     strap_type_encoded = X_train['strap_type_encoded'].values
     style_encoded = X_train['style_encoded'].values
 
-    model, trace = train_model(facial_X, mask_idx, y_train, perimeter_mm, facial_hair, strap_type_encoded, style_encoded)
+    model, trace = train_model(
+        facial_X,
+        mask_idx,
+        y_train,
+        perimeter_mm,
+        facial_hair,
+        strap_type_encoded,
+        style_encoded
+        )
 
     # Posterior predictive on train set
     # with model:
@@ -419,35 +471,35 @@ def main():
         testing_type="Test"
     )
 
-
     train_df_copy = train_df.copy()
     train_df_copy['y_pred'] = y_pred_train
     train_df_copy['y_prob'] = y_prob_train
-    train_df_copy['presum_log_loss'] = presum_log_loss(train_df[outcome_variable].values, y_prob_train)
+    train_df_copy['presum_log_loss'] = presum_log_loss(
+        train_df[outcome_variable].values, y_prob_train)
     train_df_copy
 
     train_df_copy_with_mask_names = unique_internal_model_code_to_mask_id\
         .reset_index()\
         .set_index('mask_id')\
-        .merge( train_df_copy, left_index=True, right_on='mask_id')
+        .merge(train_df_copy, left_index=True, right_on='mask_id')
 
     train_df_copy_with_mask_names
 
-    import pdb; pdb.set_trace()
+    import pdb
+    pdb.set_trace()
     # Which mask_ids are harder to make good predictions on?
     #
-    train_df_copy_with_mask_names.columns
-    train_df_copy_with_mask_names.groupby(['unique_internal_model_code', 'strap_type_encoded','style_encoded'])['presum_log_loss'].mean().sort_values()
-    train_df_copy_with_mask_names.groupby('unique_internal_model_code')['presum_log_loss'].mean().sort_values()
+    display_performance_grouped_by_mask(train_df_copy_with_mask_names)
 
-    train_df_copy_with_mask_names[train_df_copy_with_mask_names['unique_internal_model_code'].str.contains('9601')]
-    train_df_copy_with_mask_names[train_df_copy_with_mask_names['unique_internal_model_code'].str.contains('9601')].iloc[0]
-    train_df_copy_with_mask_names[train_df_copy_with_mask_names['unique_internal_model_code'].str.contains('9601')].iloc[1]
-    # )
-    train_df_copy_with_mask_names[train_df_copy_with_mask_names['unique_internal_model_code'].str.contains('blox')]
-    train_df_copy_with_mask_names[train_df_copy_with_mask_names['unique_internal_model_code'].str.contains('1860s')]
-    # What if we split the data into boat & duckbill vs. cup, bifold, bifold +
-    # gasket?
+
+def display_performance_grouped_by_mask(df):
+    return df.groupby(
+        [
+            'unique_internal_model_code',
+            'strap_type_encoded',
+            'style_encoded'
+        ]
+    )['presum_log_loss'].agg(['mean', 'count']).sort_values('mean')
 
 
 if __name__ == '__main__':
