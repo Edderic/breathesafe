@@ -1,0 +1,65 @@
+# .github/workflows/retrain-model.yml
+name: Retrain Mask Recommender Model
+
+on:
+  schedule:
+    # Run every Sunday at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch: # Allow manual triggers
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Fetch latest data and retrain
+      env:
+        API_ENDPOINT: ${{ secrets.RAILS_API_ENDPOINT }}
+      run: |
+        python python/mask_recommender/train.py
+
+    - name: Build Docker image for training
+      run: |
+        docker build -t mask-recommender-training .
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Upload model artifacts to S3
+      run: |
+        aws s3 cp python/mask_recommender/pymc_trace.nc s3://${{ secrets.S3_BUCKET }}/models/pymc_trace_$(date +%Y%m%d_%H%M%S).nc
+        aws s3 cp python/mask_recommender/pymc_trace.nc s3://${{ secrets.S3_BUCKET }}/models/pymc_trace_latest.nc
+
+    - name: Send email notification
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "Mask Recommender Model Updated"
+        to: ${{ secrets.NOTIFICATION_EMAIL }}
+        from: ${{ secrets.EMAIL_USERNAME }}
+        body: |
+          The mask recommender model has been successfully retrained and deployed.
+
+          Model artifacts uploaded to S3:
+          - Latest trace: s3://${{ secrets.S3_BUCKET }}/models/pymc_trace_latest.nc
+          - Timestamped backup: s3://${{ secrets.S3_BUCKET }}/models/pymc_trace_$(date +%Y%m%d_%H%M%S).nc
+
+          The inference Lambda function will automatically use the latest model.
