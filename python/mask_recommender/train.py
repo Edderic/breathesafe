@@ -360,27 +360,7 @@ def main():
     ]
     z_score_cols = [f"{col}_z_score" for col in facial_measurement_cols]
 
-    # Check if z-score columns exist in the data
-    existing_z_score_cols = [col for col in z_score_cols if col in df.columns]
-    if existing_z_score_cols:
-        # Convert z-score columns to numeric, coercing errors to NaN
-        for col in existing_z_score_cols:
-            df[col] = pd.to_numeric(df[col], errors='coerce')
-
-        # Create mask for rows to keep (z-scores within ±2.25,
-        # excluding NaN values)
-        keep_mask = pd.Series([True] * len(df), index=df.index)
-        for col in existing_z_score_cols:
-            # Keep rows where z-score is NaN (missing) or within ±2.25
-            keep_mask &= (df[col].isna() | (df[col].abs() <= 2.25))
-
-        initial_count = len(df)
-        df = df[keep_mask].reset_index(drop=True)
-        filtered_count = initial_count - len(df)
-        print(f"Filtered out {filtered_count} rows with extreme " +
-              f"z-scores (|z| > 2.25) out of {initial_count} total rows")
-    else:
-        print("No z-score columns found in data, skipping z-score filtering")
+    df = filter_outliers(df, z_score_cols)
 
     unique_internal_model_code_to_mask_id = pd.DataFrame(data).groupby(
         [
@@ -500,6 +480,30 @@ def display_performance_grouped_by_mask(df):
             'style_encoded'
         ]
     )['presum_log_loss'].agg(['mean', 'count']).sort_values('mean')
+
+
+def filter_outliers(df, z_score_cols):
+    # Check if z-score columns exist in the data
+    existing_z_score_cols = [col for col in z_score_cols if col in df.columns]
+    if existing_z_score_cols:
+        # Convert z-score columns to numeric, coercing errors to NaN
+        for col in existing_z_score_cols:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+
+        # Create mask for rows to keep (z-scores within ±2.25,
+        # excluding NaN values)
+        keep_mask = pd.Series([True] * len(df), index=df.index)
+        for col in existing_z_score_cols:
+            # Keep rows where z-score is NaN (missing) or within ±2.25
+            keep_mask &= (df[col].isna() | (df[col].abs() <= 2.25))
+
+        initial_count = len(df)
+        df = df[keep_mask].reset_index(drop=True)
+        filtered_count = initial_count - len(df)
+        print(f"Filtered out {filtered_count} rows with extreme " +
+              f"z-scores (|z| > 2.25) out of {initial_count} total rows")
+    else:
+        print("No z-score columns found in data, skipping z-score filtering")
 
 
 if __name__ == '__main__':
