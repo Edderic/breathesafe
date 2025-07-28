@@ -1,19 +1,17 @@
 # .github/workflows/retrain-model.yml
-name: Retrain Mask Recommender Model
+name: Retrain Mask Recommender Model (Production)
 
 on:
-  schedule:
-    # Run every Sunday at 2 AM UTC
-    - cron: '0 2 * * 0'
-  workflow_dispatch: # Allow manual triggers
-  push:
-    tags:
-      - 'retrain-*'  # Manual trigger with retrain tags
+  workflow_run:
+    workflows: ["Retrain Mask Recommender Model (Staging)"]
+    types: [completed]
+    branches: [main]
 
 jobs:
   retrain:
     runs-on: ubuntu-latest
     environment: production  # Use production environment variables
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     
     steps:
     - name: Checkout code
@@ -49,11 +47,11 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
     
-    - name: Upload model artifacts to S3
+    - name: Upload model artifacts to S3 (Production)
       run: |
         # Upload with timestamp for versioning
         aws s3 cp python/mask_recommender/training/pymc_trace.nc s3://${{ secrets.S3_BUCKET }}/models/pymc_trace_$(date +%Y%m%d_%H%M%S).nc
-        # Upload as latest for inference Lambda
+        # Upload as latest for production inference Lambda
         aws s3 cp python/mask_recommender/training/pymc_trace.nc s3://${{ secrets.S3_BUCKET }}/models/pymc_trace_latest.nc
         
         # Upload mask data
@@ -70,11 +68,11 @@ jobs:
         server_port: 587
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "Mask Recommender Model Updated"
+        subject: "Production Mask Recommender Model Updated"
         to: ${{ secrets.NOTIFICATION_EMAIL }}
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
-          The mask recommender model has been successfully retrained and deployed.
+          The mask recommender model has been successfully retrained and deployed to PRODUCTION.
           
           Model artifacts uploaded to S3:
           - Latest trace: s3://${{ secrets.S3_BUCKET }}/models/pymc_trace_latest.nc
@@ -82,7 +80,7 @@ jobs:
           - Mask data: s3://${{ secrets.S3_BUCKET }}/models/mask_data_latest.json
           - Scaler: s3://${{ secrets.S3_BUCKET }}/models/scaler_latest.json
           
-          The inference Lambda function will automatically use the latest model.
+          The production inference Lambda function will automatically use the latest model.
     
     - name: Send failure notification
       uses: dawidd6/action-send-mail@v3
@@ -92,10 +90,10 @@ jobs:
         server_port: 587
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "Mask Recommender Model Training Failed"
+        subject: "Production Mask Recommender Model Training Failed"
         to: ${{ secrets.NOTIFICATION_EMAIL }}
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
-          The mask recommender model training failed.
+          The mask recommender model training in PRODUCTION failed.
           
           Check the GitHub Actions logs for details.

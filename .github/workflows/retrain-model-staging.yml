@@ -6,13 +6,15 @@ on:
     - cron: '0 2 * * 6'
   workflow_dispatch: # Allow manual triggers
   push:
-    tags:
-      - 'staging-retrain-*'  # Manual trigger with staging retrain tags
+    branches: [ main ]
+    paths:
+      - 'python/mask_recommender/training/**'  # Only trigger when training code changes
 
 jobs:
   retrain:
     runs-on: ubuntu-latest
     environment: staging  # Use staging environment variables
+    needs: []  # No dependencies, runs independently
     
     steps:
     - name: Checkout code
