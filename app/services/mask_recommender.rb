@@ -2,8 +2,8 @@ class MaskRecommender
   class << self
     def call(facial_measurements)
       response = AwsLambdaInvokeService.call(
-        function_name: 'mask-recommender',
-        payload: facial_measurements
+        function_name: 'mask-recommender-inference', # New inference function
+        payload: { facial_measurements: facial_measurements }
       )
 
       body = Oj.load(response['body'])
