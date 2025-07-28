@@ -1,0 +1,22 @@
+# RuboCop configuration file
+# See https://rubocop.readthedocs.io/en/stable/configuration/
+
+# Disable Metrics/MethodLength for all Ruby files
+Metrics/MethodLength:
+  Enabled: false
+
+# Inherit from the default configuration
+inherit_from: .rubocop_todo.yml
+
+# Exclude certain directories and files
+AllCops:
+  Exclude:
+    - 'db/schema.rb'
+    - 'db/migrate/*'
+    - 'bin/*'
+    - 'config/initializers/*'
+    - 'vendor/**/*'
+    - 'node_modules/**/*'
+    - 'tmp/**/*'
+    - 'log/**/*'
+    - 'coverage/**/*'
