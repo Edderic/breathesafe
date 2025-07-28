@@ -22,7 +22,14 @@ jobs:
     
     - name: Install dependencies
       run: |
-        pip install -r python/mask_recommender/inference/requirements.txt
+        # Install mamba
+        wget -O Mambaforge.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
+        bash Mambaforge.sh -b -p $HOME/mambaforge
+        source $HOME/mambaforge/bin/activate
+        
+        # Create environment from environment.yml
+        mamba env create -f python/mask_recommender/inference/environment.yml
+        source activate mask-recommender-inference
     
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
