@@ -7,6 +7,7 @@ import os
 from pymc.sampling.jax import sample_numpyro_nuts
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import log_loss
+import json
 
 print(pm.__version__)
 os.environ["PYMC_EXPERIMENTAL_JAX"] = "1"
@@ -278,6 +279,26 @@ def presum_log_loss(y_true, y_prob):
     return -(y_true * np.log(y_prob) + (1 - y_true) * np.log(1 - y_prob))
 
 
+def save_mask_data_for_inference(mask_id_to_idx, df, filename='mask_data.json'):
+    """Save mask metadata needed for inference"""
+    mask_data = {}
+
+    for mask_id, idx in mask_id_to_idx.items():
+        # Get sample data for this mask
+        mask_samples = df[df['mask_id'] == mask_id].iloc[0]
+
+        mask_data[str(mask_id)] = {
+            'style_encoded': int(mask_samples['style_encoded']),
+            'strap_type_encoded': int(mask_samples['strap_type_encoded']),
+            'perimeter_mm': float(mask_samples['perimeter_mm']),
+            'style': mask_samples['style'],
+            'strap_type': mask_samples['strap_type']
+        }
+
+    with open(filename, 'w') as f:
+        json.dump(mask_data, f, indent=2)
+
+
 # 2. Main training script
 def main():
     endpoint = 'https://www.breathesafe.xyz/facial_measurements_fit_tests.json'
@@ -465,11 +486,11 @@ def main():
 
     train_df_copy_with_mask_names
 
-    import pdb
-    pdb.set_trace()
     # Which mask_ids are harder to make good predictions on?
     #
     display_performance_grouped_by_mask(train_df_copy_with_mask_names)
+
+    save_mask_data_for_inference(mask_id_to_idx, df)
 
 
 def display_performance_grouped_by_mask(df):
