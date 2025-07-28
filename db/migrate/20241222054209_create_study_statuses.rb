@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateStudyStatuses < ActiveRecord::Migration[7.0]
   def change
     create_table :study_statuses do |t|
@@ -8,6 +10,6 @@ class CreateStudyStatuses < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    add_index :study_statuses, [:uuid, :name, :refresh_datetime], unique: true
+    add_index :study_statuses, %i[uuid name refresh_datetime], unique: true
   end
 end

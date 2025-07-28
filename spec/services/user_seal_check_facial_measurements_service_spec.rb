@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe UserSealCheckFacialMeasurementsService do
@@ -5,91 +7,89 @@ RSpec.describe UserSealCheckFacialMeasurementsService do
     let(:user) { create(:user) }
     let(:mask) { create(:mask) }
     let(:other_mask) { create(:mask) }
-    let(:facial_measurement) { create(:facial_measurement, user: user, face_width: 140, jaw_width: 120, face_depth: 110) }
+    let(:facial_measurement) do
+      create(:facial_measurement, user: user, face_width: 140, jaw_width: 120, face_depth: 110)
+    end
 
     context 'with user seal check data' do
       let!(:fit_test_too_small) do
         create(:fit_test,
-          user: user,
-          mask: mask,
-          facial_measurement: facial_measurement,
-          user_seal_check: {
-            'sizing' => {
-              'What do you think about the sizing of this mask relative to your face?' => 'Too small'
-            },
-            'negative' => {
-              '...how much air passed between your face and the mask?' => nil
-            },
-            'positive' => {
-              '...how much did your glasses fog up?' => nil,
-              '...how much pressure build up was there?' => nil,
-              '...how much air movement on your face along the seal of the mask did you feel?' => nil
-            }
-          }
-        )
+               user: user,
+               mask: mask,
+               facial_measurement: facial_measurement,
+               user_seal_check: {
+                 'sizing' => {
+                   'What do you think about the sizing of this mask relative to your face?' => 'Too small'
+                 },
+                 'negative' => {
+                   '...how much air passed between your face and the mask?' => nil
+                 },
+                 'positive' => {
+                   '...how much did your glasses fog up?' => nil,
+                   '...how much pressure build up was there?' => nil,
+                   '...how much air movement on your face along the seal of the mask did you feel?' => nil
+                 }
+               })
       end
 
       let!(:fit_test_too_big) do
         create(:fit_test,
-          user: user,
-          mask: mask,
-          facial_measurement: facial_measurement,
-          user_seal_check: {
-            'sizing' => {
-              'What do you think about the sizing of this mask relative to your face?' => 'Too big'
-            },
-            'negative' => {
-              '...how much air passed between your face and the mask?' => nil
-            },
-            'positive' => {
-              '...how much did your glasses fog up?' => nil,
-              '...how much pressure build up was there?' => nil,
-              '...how much air movement on your face along the seal of the mask did you feel?' => nil
-            }
-          }
-        )
+               user: user,
+               mask: mask,
+               facial_measurement: facial_measurement,
+               user_seal_check: {
+                 'sizing' => {
+                   'What do you think about the sizing of this mask relative to your face?' => 'Too big'
+                 },
+                 'negative' => {
+                   '...how much air passed between your face and the mask?' => nil
+                 },
+                 'positive' => {
+                   '...how much did your glasses fog up?' => nil,
+                   '...how much pressure build up was there?' => nil,
+                   '...how much air movement on your face along the seal of the mask did you feel?' => nil
+                 }
+               })
       end
 
       let!(:fit_test_lot_of_air) do
         create(:fit_test,
-          user: user,
-          mask: mask,
-          facial_measurement: facial_measurement,
-          user_seal_check: {
-            'sizing' => {
-              'What do you think about the sizing of this mask relative to your face?' => 'Just right'
-            },
-            'negative' => {
-              '...how much air passed between your face and the mask?' => nil
-            },
-            'positive' => {
-              '...how much did your glasses fog up?' => nil,
-              '...how much pressure build up was there?' => nil,
-              '...how much air movement on your face along the seal of the mask did you feel?' => 'A lot of air movement'
-            }
-          }
-        )
+               user: user,
+               mask: mask,
+               facial_measurement: facial_measurement,
+               user_seal_check: {
+                 'sizing' => {
+                   'What do you think about the sizing of this mask relative to your face?' => 'Just right'
+                 },
+                 'negative' => {
+                   '...how much air passed between your face and the mask?' => nil
+                 },
+                 'positive' => {
+                   '...how much did your glasses fog up?' => nil,
+                   '...how much pressure build up was there?' => nil,
+                   '...how much air movement on your face along the seal of the mask did you feel?' => 'A lot of air movement'
+                 }
+               })
       end
 
       let!(:fit_test_pass) do
         create(:fit_test,
-          user: user,
-          mask: mask,
-          facial_measurement: facial_measurement,
-          user_seal_check: {
-            'sizing' => {
-              'What do you think about the sizing of this mask relative to your face?' => 'Just right'
-            },
-            'negative' => {
-              '...how much air passed between your face and the mask?' => nil
-            },
-            'positive' => {
-              '...how much did your glasses fog up?' => nil,
-              '...how much pressure build up was there?' => nil,
-              '...how much air movement on your face along the seal of the mask did you feel?' => 'No air movement'
-            }
-          }
-        )
+               user: user,
+               mask: mask,
+               facial_measurement: facial_measurement,
+               user_seal_check: {
+                 'sizing' => {
+                   'What do you think about the sizing of this mask relative to your face?' => 'Just right'
+                 },
+                 'negative' => {
+                   '...how much air passed between your face and the mask?' => nil
+                 },
+                 'positive' => {
+                   '...how much did your glasses fog up?' => nil,
+                   '...how much pressure build up was there?' => nil,
+                   '...how much air movement on your face along the seal of the mask did you feel?' => 'No air movement'
+                 }
+               })
       end
 
       it 'returns all fit tests with correct qlft_pass values' do
@@ -119,74 +119,69 @@ RSpec.describe UserSealCheckFacialMeasurementsService do
 
       it 'computes z-scores for facial measurements' do
         result = described_class.call.to_a.first
-        
+
         # Check that z-score columns exist
         FacialMeasurement::COLUMNS.each do |col|
           z_score_col = "#{col}_z_score"
           expect(result).to have_key(z_score_col)
-          
+
           # If the measurement value exists, z-score should be computed
           if facial_measurement.send(col).present?
             # With only one measurement, stddev will be 0, so z-score should be null
-            expect(result[z_score_col]).to be_nil
-          else
-            expect(result[z_score_col]).to be_nil
           end
+          expect(result[z_score_col]).to be_nil
         end
       end
     end
 
     context 'with multiple users for z-score calculation' do
       let(:user2) { create(:user) }
-      
+
       let!(:facial_measurement2) do
         create(:facial_measurement,
-          user: user2,
-          face_width: 150,  # Different value for z-score calculation
-          jaw_width: 130,
-          face_depth: 120
-        )
+               user: user2,
+               face_width: 150, # Different value for z-score calculation
+               jaw_width: 130,
+               face_depth: 120)
       end
 
       let!(:fit_test1) do
         create(:fit_test,
-          user: user,
-          mask: mask,
-          facial_measurement: facial_measurement,
-          user_seal_check: {
-            'sizing' => {
-              'What do you think about the sizing of this mask relative to your face?' => 'Just right'
-            },
-            'positive' => {
-              '...how much air movement on your face along the seal of the mask did you feel?' => 'No air movement'
-            }
-          }
-        )
+               user: user,
+               mask: mask,
+               facial_measurement: facial_measurement,
+               user_seal_check: {
+                 'sizing' => {
+                   'What do you think about the sizing of this mask relative to your face?' => 'Just right'
+                 },
+                 'positive' => {
+                   '...how much air movement on your face along the seal of the mask did you feel?' => 'No air movement'
+                 }
+               })
       end
 
       let!(:fit_test2) do
         create(:fit_test,
-          user: user2,
-          mask: mask,
-          facial_measurement: facial_measurement2,
-          user_seal_check: {
-            'sizing' => {
-              'What do you think about the sizing of this mask relative to your face?' => 'Just right'
-            },
-            'positive' => {
-              '...how much air movement on your face along the seal of the mask did you feel?' => 'No air movement'
-            }
-          }
-        )
+               user: user2,
+               mask: mask,
+               facial_measurement: facial_measurement2,
+               user_seal_check: {
+                 'sizing' => {
+                   'What do you think about the sizing of this mask relative to your face?' => 'Just right'
+                 },
+                 'positive' => {
+                   '...how much air movement on your face along the seal of the mask did you feel?' => 'No air movement'
+                 }
+               })
       end
 
       it 'computes z-scores based on population statistics' do
         results = described_class.call.to_a
         expect(results.length).to eq(2)
-        
+
         # Find the result for the original user
         original_result = results.find { |r| r['user_id'] == user.id }
-        
+
         # The z-scores should be computed based on the population of 2 users
         # For face_width: values are 140, 150
         # Mean = 145, StdDev = sqrt(sum((x-mean)^2)/n) = sqrt(50/2) = 5
@@ -197,21 +192,20 @@ RSpec.describe UserSealCheckFacialMeasurementsService do
 
     context 'with missing facial measurements' do
       let(:facial_measurement) { nil }
-      
+
       let!(:fit_test) do
         create(:fit_test,
-          user: user,
-          mask: mask,
-          facial_measurement: facial_measurement,
-          user_seal_check: {
-            'sizing' => {
-              'What do you think about the sizing of this mask relative to your face?' => 'Just right'
-            },
-            'positive' => {
-              '...how much air movement on your face along the seal of the mask did you feel?' => 'No air movement'
-            }
-          }
-        )
+               user: user,
+               mask: mask,
+               facial_measurement: facial_measurement,
+               user_seal_check: {
+                 'sizing' => {
+                   'What do you think about the sizing of this mask relative to your face?' => 'Just right'
+                 },
+                 'positive' => {
+                   '...how much air movement on your face along the seal of the mask did you feel?' => 'No air movement'
+                 }
+               })
       end
 
       it 'returns null for facial measurement fields' do
@@ -233,46 +227,44 @@ RSpec.describe UserSealCheckFacialMeasurementsService do
     context 'with optional mask_id parameter' do
       let!(:fit_test) do
         create(:fit_test,
-          user: user,
-          mask: mask,
-          facial_measurement: facial_measurement,
-          user_seal_check: {
-            'sizing' => {
-              'What do you think about the sizing of this mask relative to your face?' => 'Too small'
-            },
-            'negative' => {
-              '...how much air passed between your face and the mask?' => nil
-            },
-            'positive' => {
-              '...how much did your glasses fog up?' => nil,
-              '...how much pressure build up was there?' => nil,
-              '...how much air movement on your face along the seal of the mask did you feel?' => nil
-            }
-          }
-        )
+               user: user,
+               mask: mask,
+               facial_measurement: facial_measurement,
+               user_seal_check: {
+                 'sizing' => {
+                   'What do you think about the sizing of this mask relative to your face?' => 'Too small'
+                 },
+                 'negative' => {
+                   '...how much air passed between your face and the mask?' => nil
+                 },
+                 'positive' => {
+                   '...how much did your glasses fog up?' => nil,
+                   '...how much pressure build up was there?' => nil,
+                   '...how much air movement on your face along the seal of the mask did you feel?' => nil
+                 }
+               })
       end
 
       let(:other_mask) { create(:mask) }
 
       let!(:other_fit_test) do
         create(:fit_test,
-          user: user,
-          mask: other_mask,
-          facial_measurement: facial_measurement,
-          user_seal_check: {
-            'sizing' => {
-              'What do you think about the sizing of this mask relative to your face?' => 'Too small'
-            },
-            'negative' => {
-              '...how much air passed between your face and the mask?' => nil
-            },
-            'positive' => {
-              '...how much did your glasses fog up?' => nil,
-              '...how much pressure build up was there?' => nil,
-              '...how much air movement on your face along the seal of the mask did you feel?' => nil
-            }
-          }
-        )
+               user: user,
+               mask: other_mask,
+               facial_measurement: facial_measurement,
+               user_seal_check: {
+                 'sizing' => {
+                   'What do you think about the sizing of this mask relative to your face?' => 'Too small'
+                 },
+                 'negative' => {
+                   '...how much air passed between your face and the mask?' => nil
+                 },
+                 'positive' => {
+                   '...how much did your glasses fog up?' => nil,
+                   '...how much pressure build up was there?' => nil,
+                   '...how much air movement on your face along the seal of the mask did you feel?' => nil
+                 }
+               })
       end
 
       it 'returns all fit tests when no mask_id is provided' do

@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 class SolutionStatusBuilder
   def self.build
     solution_actions = SolutionAction.all.order(:datetime)
 
-    solution_actions.reduce({}) do |accum, solution_action|
+    solution_actions.each_with_object({}) do |solution_action, accum|
       uuid = solution_action['metadata']['uuid']
       metadata = solution_action['metadata']
 
@@ -13,8 +15,6 @@ class SolutionStatusBuilder
       else
         raise UnrecognizedActionError
       end
-
-      accum
     end
   end
 end

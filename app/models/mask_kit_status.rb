@@ -1,8 +1,8 @@
+# frozen_string_literal: true
+
 class MaskKitStatus < ApplicationRecord
   def self.refresh!(datetime: nil, uuid: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     # TODO: builders could take in the datetime, and only build up to that
     # datetime.

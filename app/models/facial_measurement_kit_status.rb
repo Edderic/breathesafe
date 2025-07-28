@@ -1,12 +1,12 @@
+# frozen_string_literal: true
+
 class FacialMeasurementKitStatus < ApplicationRecord
   def self.refresh!(datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     statuses = FacialMeasurementKitStatusBuilder.build
 
-    statuses.each do |uuid, status|
+    statuses.each_key do |uuid|
       FacialMeasurementKitStatus.create!(
         uuid: uuid,
         refresh_datetime: datetime

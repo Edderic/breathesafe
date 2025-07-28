@@ -1,12 +1,10 @@
-class FacialMeasurementKitActor
-  def self.preset_create(uuid: nil, datetime: nil, digital_caliper_model: "8-inch iGaging" )
-    if uuid.nil?
-      uuid = SecureRandom.uuid
-    end
+# frozen_string_literal: true
 
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+class FacialMeasurementKitActor
+  def self.preset_create(uuid: nil, datetime: nil, digital_caliper_model: '8-inch iGaging')
+    uuid = SecureRandom.uuid if uuid.nil?
+
+    datetime = DateTime.now if datetime.nil?
 
     ActiveRecord::Base.transaction do
       kit_uuid = SecureRandom.uuid

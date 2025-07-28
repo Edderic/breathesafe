@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class UserStatusQuery
   def self.find_by_name(name:)
     JSON.parse(

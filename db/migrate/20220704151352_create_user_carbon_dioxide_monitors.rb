@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateUserCarbonDioxideMonitors < ActiveRecord::Migration[7.0]
   def change
     create_table :user_carbon_dioxide_monitors do |t|

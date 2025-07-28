@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'csv'
 
 class ShippingActor
@@ -5,13 +7,9 @@ class ShippingActor
     uuid: nil,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
-    if uuid.nil?
-      uuid = SecureRandom.uuid
-    end
+    uuid = SecureRandom.uuid if uuid.nil?
 
     Action.create(
       type: 'ShippingAction',
@@ -32,9 +30,7 @@ class ShippingActor
     shippable_type:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'ShippingAction',
@@ -43,7 +39,7 @@ class ShippingActor
       metadata: {
         'uuid': uuid,
         'shippable_uuid': shippable_uuid,
-        'shippable_type': shippable_type,
+        'shippable_type': shippable_type
       }
     )
   end
@@ -53,9 +49,7 @@ class ShippingActor
     from_address_uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'ShippingAction',
@@ -73,9 +67,7 @@ class ShippingActor
     receiver_uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'ShippingAction',
@@ -93,9 +85,7 @@ class ShippingActor
     sender_uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'ShippingAction',
@@ -113,9 +103,7 @@ class ShippingActor
     to_address_uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'ShippingAction',
@@ -136,9 +124,7 @@ class ShippingActor
     datetime: nil,
     send_mail: true
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'ShippingAction',
@@ -150,12 +136,12 @@ class ShippingActor
       }
     )
 
-    if send_mail
-      StudyParticipantMailer.with(
-        user: {'name' => name, 'email' => email},
-        shipping_label: purchase_label
-      ).shipping_label_assigned.deliver_now
-    end
+    return unless send_mail
+
+    StudyParticipantMailer.with(
+      user: { 'name' => name, 'email' => email },
+      shipping_label: purchase_label
+    ).shipping_label_assigned.deliver_now
   end
 
   def self.send_to_courier(
@@ -163,9 +149,7 @@ class ShippingActor
     details:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'ShippingAction',
@@ -182,16 +166,14 @@ class ShippingActor
     uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'ShippingAction',
       name: 'Deliver',
       datetime: datetime,
       metadata: {
-        'uuid': uuid,
+        'uuid': uuid
       }
     )
   end
@@ -200,16 +182,14 @@ class ShippingActor
     uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'ShippingAction',
       name: 'Receive',
       datetime: datetime,
       metadata: {
-        'uuid': uuid,
+        'uuid': uuid
       }
     )
   end
@@ -219,19 +199,19 @@ class ShippingActor
     only_blank_shipping_labels: true,
     send_mail: true
   )
-    if only_blank_shipping_labels
-      shipping_statuses_add_labels_to = ShippingQuery.find_shipping_statuses_with_blank_purchase_labels(
-        user_status_names: rows.map{|r| r['name']}
-      )
-    else
-      shipping_statuses_add_labels_to = ShippingQuery.find_shipping_statuses(
-        user_status_names: rows.map{|r| r['name']}
-      )
-    end
+    shipping_statuses_add_labels_to = if only_blank_shipping_labels
+                                        ShippingQuery.find_shipping_statuses_with_blank_purchase_labels(
+                                          user_status_names: rows.map { |r| r['name'] }
+                                        )
+                                      else
+                                        ShippingQuery.find_shipping_statuses(
+                                          user_status_names: rows.map { |r| r['name'] }
+                                        )
+                                      end
 
     shipping_statuses_add_labels_to.each do |s|
       shipping_status_uuid = s['shipping_status_uuid']
-      row = rows.find{|r| r['name'] == s['first_name'] + ' ' + s['last_name']}
+      row = rows.find { |r| r['name'] == "#{s['first_name']} #{s['last_name']}" }
 
       if row.present?
         # TODO: handle creation of a purchase label if it does not exist yet

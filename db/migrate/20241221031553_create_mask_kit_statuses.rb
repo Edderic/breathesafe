@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateMaskKitStatuses < ActiveRecord::Migration[7.0]
   def change
     create_table :mask_kit_statuses do |t|
@@ -8,6 +10,7 @@ class CreateMaskKitStatuses < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    add_index :mask_kit_statuses, [:uuid, :mask_uuid, :refresh_datetime], unique: true, name: 'index_uuid_mask_uuid_datetime_on_mkst'
+    add_index :mask_kit_statuses, %i[uuid mask_uuid refresh_datetime], unique: true,
+                                                                       name: 'index_uuid_mask_uuid_datetime_on_mkst'
   end
 end

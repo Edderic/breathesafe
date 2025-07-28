@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class HoodActor
   MODELS = {
     'Allegro' => {
@@ -8,37 +10,35 @@ class HoodActor
       },
       'weight' => {
         'amount' => 100,
-        'measurement_unit' => 'g',
+        'measurement_unit' => 'g'
       },
-      'cost' =>  {
-        'material_cost' =>  65,
-        'labor_hours' =>  0
+      'cost' => {
+        'material_cost' => 65,
+        'labor_hours' => 0
       }
     },
-    'DIY' =>  {
-      'model' =>  'DIY',
-      'weight' =>  {
-        'amount' =>  20,
-        'measurement_unit' =>  'g'
+    'DIY' => {
+      'model' => 'DIY',
+      'weight' => {
+        'amount' => 20,
+        'measurement_unit' => 'g'
       },
-      'how' =>  {
+      'how' => {
         'method' => 'diy',
         'url' => '',
-        'notes' => "2.5 gallon Ziploc bag with a hole port for the nebulizer, reinforced with cardboard and tape."
+        'notes' => '2.5 gallon Ziploc bag with a hole port for the nebulizer, reinforced with cardboard and tape.'
       },
-      'cost' =>  {
+      'cost' => {
         'material_cost' => 0.5,
         'labor_hours' => 0.05
       }
     }
-  }
+  }.freeze
 
   def self.preset_create(uuid:, model:, datetime: nil)
     metadata = JSON.parse(MODELS[model].to_json)
 
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     metadata['uuid'] = uuid
 
@@ -51,10 +51,7 @@ class HoodActor
   end
 
   def self.create(
-    weight: nil,
-    model: ,
-    how:,
-    cost: ,
+    model:, how:, cost:, weight: nil,
     datetime: nil
   )
     # Parameters:
@@ -72,9 +69,7 @@ class HoodActor
     #     'time_cost':
     #   }
     #
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'HoodAction',
@@ -85,11 +80,10 @@ class HoodActor
         'model' => model,
         'how' => how,
         'weight' => weight,
-        'cost' => cost,
+        'cost' => cost
       }
     )
   end
-
 
   def self.sanitize(
     uuid:,
@@ -110,17 +104,13 @@ class HoodActor
     if cost.nil?
       cost = {
         'material_cost' => 0,
-        'time_cost' => 0,
+        'time_cost' => 0
       }
     end
 
-    if sanitize_notes.nil?
-      sanitize_notes = "Wiped with 99.9% isopropyl alcohol"
-    end
+    sanitize_notes = 'Wiped with 99.9% isopropyl alcohol' if sanitize_notes.nil?
 
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'HoodAction',
@@ -134,5 +124,3 @@ class HoodActor
     )
   end
 end
-
-

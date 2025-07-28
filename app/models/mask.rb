@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Mask < ApplicationRecord
   belongs_to :author, class_name: 'User'
   validates_presence_of :unique_internal_model_code
@@ -55,16 +57,16 @@ class Mask < ApplicationRecord
 
   def self.average_filtration_efficiencies_sql
     <<-SQL
-        #{N99ModeToN95ModeConverterService.avg_sealed_ffs_sql("")}
+        #{N99ModeToN95ModeConverterService.avg_sealed_ffs_sql('')}
     SQL
   end
 
-  def self.with_aggregations(mask_ids=nil)
-    if mask_ids
-      mask_id_clause = Mask.sanitize_sql_array(["WHERE m.id IN (?)", mask_ids])
-    else
-      mask_id_clause = ""
-    end
+  def self.with_aggregations(mask_ids = nil)
+    mask_id_clause = if mask_ids
+                       Mask.sanitize_sql_array(['WHERE m.id IN (?)', mask_ids])
+                     else
+                       ''
+                     end
 
     result = Mask.connection.exec_query(
       <<-SQL
@@ -76,7 +78,7 @@ class Mask < ApplicationRecord
           GROUP BY m.id
         ),
 
-        #{self.average_filtration_efficiencies_sql},
+        #{average_filtration_efficiencies_sql},
 
         breathability_measurements AS (
             SELECT m.id, b ->> 'breathability_pascals' as breathability_pascals,
@@ -287,25 +289,21 @@ class Mask < ApplicationRecord
     ).to_a
 
     result.each do |x|
-      if x['image_urls']
-        x['image_urls'] = [x['image_urls'].gsub(/{|}/, "").gsub(/\"/, "")]
-      else
-        x['image_urls'] = [""]
-      end
+      x['image_urls'] = if x['image_urls']
+                          [x['image_urls'].gsub(/{|}/, '').gsub(/"/, '')]
+                        else
+                          ['']
+                        end
 
-      if x['breathability']
-        x['breathability'] = JSON.parse(x['breathability'])
-      end
+      x['breathability'] = JSON.parse(x['breathability']) if x['breathability']
 
-      if x['filtration_efficiencies']
-        x['filtration_efficiencies'] = JSON.parse(x['filtration_efficiencies'])
-      end
+      x['filtration_efficiencies'] = JSON.parse(x['filtration_efficiencies']) if x['filtration_efficiencies']
 
-      if x['where_to_buy_urls']
-        x['where_to_buy_urls'] = [x['where_to_buy_urls'].gsub(/{|}/, "")]
-      else
-        x['where_to_buy_urls'] = [""]
-      end
+      x['where_to_buy_urls'] = if x['where_to_buy_urls']
+                                 [x['where_to_buy_urls'].gsub(/{|}/, '')]
+                               else
+                                 ['']
+                               end
 
       x['payable_datetimes'] = JSON.parse(x['payable_datetimes'])
       x['colors'] = JSON.parse(x['colors'])
@@ -314,35 +312,35 @@ class Mask < ApplicationRecord
     result
   end
 
-  def self.with_privacy_aggregations(mask_ids=nil)
-    aggregations = self.with_aggregations(mask_ids=mask_ids)
-    race_ethnicity_options = [
-      'american_indian_or_alaskan_native_count',
-      'asian_pacific_islander_count',
-      'black_african_american_count',
-      'hispanic_count',
-      'white_caucasian_count',
-      'multiple_ethnicity_other_count',
+  def self.with_privacy_aggregations(mask_ids = nil)
+    aggregations = with_aggregations(mask_ids = mask_ids)
+    race_ethnicity_options = %w[
+      american_indian_or_alaskan_native_count
+      asian_pacific_islander_count
+      black_african_american_count
+      hispanic_count
+      white_caucasian_count
+      multiple_ethnicity_other_count
     ]
 
-    gender_sex_options = [
-      'cisgender_male_count',
-      'cisgender_female_count',
-      'mtf_transgender_count',
-      'ftm_transgender_count',
-      'intersex_count',
-      'other_gender_sex_count'
+    gender_sex_options = %w[
+      cisgender_male_count
+      cisgender_female_count
+      mtf_transgender_count
+      ftm_transgender_count
+      intersex_count
+      other_gender_sex_count
     ]
 
-    age_options = [
-      'age_between_2_and_4',
-      'age_between_4_and_6',
-      'age_between_6_and_8',
-      'age_between_8_and_10',
-      'age_between_10_and_12',
-      'age_between_12_and_14',
-      'age_between_14_and_18',
-      'age_adult'
+    age_options = %w[
+      age_between_2_and_4
+      age_between_4_and_6
+      age_between_6_and_8
+      age_between_8_and_10
+      age_between_10_and_12
+      age_between_12_and_14
+      age_between_14_and_18
+      age_adult
     ]
 
     threshold = 5
@@ -382,11 +380,11 @@ class Mask < ApplicationRecord
       hash[r['id']] = r
     end
 
-    if mask_ids
-      masks = Mask.where(id: mask_ids)
-    else
-      masks = Mask.all
-    end
+    masks = if mask_ids
+              Mask.where(id: mask_ids)
+            else
+              Mask.all
+            end
 
     masks.map do |m|
       m_data = JSON.parse(m.to_json)
@@ -395,4 +393,3 @@ class Mask < ApplicationRecord
     end
   end
 end
-

@@ -1,10 +1,14 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe N99ModeToN95ModeConverterService do
   describe '.call' do
     let(:mask) { create(:mask) }
     let(:user) { create(:user) }
-    let(:facial_measurement) { create(:facial_measurement, user: user, face_width: 140, jaw_width: 120, face_depth: 110) }
+    let(:facial_measurement) do
+      create(:facial_measurement, user: user, face_width: 140, jaw_width: 120, face_depth: 110)
+    end
 
     let(:measurement_device) do
       create(:measurement_device)
@@ -30,23 +34,22 @@ RSpec.describe N99ModeToN95ModeConverterService do
     context 'with N99 fit test data' do
       let!(:fit_test) do
         create(:fit_test,
-          mask: mask,
-          user: user,
-          facial_measurement: facial_measurement,
-          results: {
-            quantitative: {
-              testing_mode: 'N99',
-              exercises: exercises
-            }
-          }
-        )
+               mask: mask,
+               user: user,
+               facial_measurement: facial_measurement,
+               results: {
+                 quantitative: {
+                   testing_mode: 'N99',
+                   exercises: exercises
+                 }
+               })
       end
 
       let!(:facial_measurement) do
         create(:facial_measurement)
       end
 
-      it "includes facial measurements" do
+      it 'includes facial measurements' do
         result = described_class.call.to_a.first
 
         FacialMeasurement::COLUMNS.each do |col|
@@ -54,12 +57,12 @@ RSpec.describe N99ModeToN95ModeConverterService do
         end
       end
 
-      context "when facial measurements are missing" do
+      context 'when facial measurements are missing' do
         let(:facial_measurement) do
           nil
         end
 
-        it "returns nil for facial measurements " do
+        it 'returns nil for facial measurements ' do
           result = described_class.call.to_a.first
 
           FacialMeasurement::COLUMNS.each do |col|
@@ -89,7 +92,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
         expect(result['qlft_pass']).to be_truthy
       end
 
-      context "when the exercises has a blank fit factor for the sealed exercise" do
+      context 'when the exercises has a blank fit factor for the sealed exercise' do
         let(:exercises) do
           [
             {
@@ -107,12 +110,11 @@ RSpec.describe N99ModeToN95ModeConverterService do
           ]
         end
 
-        it "returns the fit test" do
+        it 'returns the fit test' do
           results = described_class.call.to_a
           result = results.first
           expect(result['qlft_pass']).to be nil
         end
-
       end
 
       context 'with Aaron filtration efficiency data' do
@@ -169,21 +171,20 @@ RSpec.describe N99ModeToN95ModeConverterService do
     context 'when Normal breathing (SEALED) is the only entry' do
       let!(:fit_test) do
         create(:fit_test,
-          mask: mask,
-          user: user,
-          facial_measurement: facial_measurement,
-          results: {
-            quantitative: {
-              testing_mode: 'N99',
-              exercises: [
-                {
-                  name: 'Normal breathing (SEALED)',
-                  fit_factor: 200
-                }
-              ]
-            }
-          }
-        )
+               mask: mask,
+               user: user,
+               facial_measurement: facial_measurement,
+               results: {
+                 quantitative: {
+                   testing_mode: 'N99',
+                   exercises: [
+                     {
+                       name: 'Normal breathing (SEALED)',
+                       fit_factor: 200
+                     }
+                   ]
+                 }
+               })
       end
 
       before do
@@ -208,21 +209,20 @@ RSpec.describe N99ModeToN95ModeConverterService do
     context 'with invalid data' do
       let!(:fit_test) do
         create(:fit_test,
-          mask: mask,
-          user: user,
-          facial_measurement: facial_measurement,
-          results: {
-            quantitative: {
-              testing_mode: 'N99',
-              exercises: [
-                {
-                  name: 'Normal breathing (SEALED)',
-                  fit_factor: nil
-                }
-              ]
-            }
-          }
-        )
+               mask: mask,
+               user: user,
+               facial_measurement: facial_measurement,
+               results: {
+                 quantitative: {
+                   testing_mode: 'N99',
+                   exercises: [
+                     {
+                       name: 'Normal breathing (SEALED)',
+                       fit_factor: nil
+                     }
+                   ]
+                 }
+               })
       end
 
       it 'should return empty' do
@@ -235,29 +235,28 @@ RSpec.describe N99ModeToN95ModeConverterService do
     context 'with a really low score for exercises but high on the normal breathing (sealed)' do
       let!(:fit_test1) do
         create(:fit_test,
-          mask: mask,
-          user: user,
-          facial_measurement: facial_measurement,
-          results: {
-            quantitative: {
-              testing_mode: 'N99',
-              exercises: [
-                {
-                  name: 'Normal breathing (SEALED)',
-                  fit_factor: 200
-                },
-                {
-                  name: 'Normal breathing',
-                  fit_factor: 1.5
-                },
-                {
-                  name: 'Bend over',
-                  fit_factor: 1.5
-                }
-              ]
-            }
-          }
-        )
+               mask: mask,
+               user: user,
+               facial_measurement: facial_measurement,
+               results: {
+                 quantitative: {
+                   testing_mode: 'N99',
+                   exercises: [
+                     {
+                       name: 'Normal breathing (SEALED)',
+                       fit_factor: 200
+                     },
+                     {
+                       name: 'Normal breathing',
+                       fit_factor: 1.5
+                     },
+                     {
+                       name: 'Bend over',
+                       fit_factor: 1.5
+                     }
+                   ]
+                 }
+               })
       end
 
       it 'shows failing qlft' do
@@ -271,63 +270,61 @@ RSpec.describe N99ModeToN95ModeConverterService do
     context 'with multiple fit tests for same mask' do
       let!(:fit_test1) do
         create(:fit_test,
-          mask: mask,
-          user: user,
-          facial_measurement: facial_measurement,
-          results: {
-            quantitative: {
-              testing_mode: 'N99',
-              exercises: [
-                {
-                  name: 'Normal breathing (SEALED)',
-                  fit_factor: 200
-                },
-                {
-                  name: 'Normal breathing',
-                  fit_factor: 1
-                },
-                {
-                  name: 'Side to side',
-                  fit_factor: 1
-                }
-              ]
-            }
-          }
-        )
+               mask: mask,
+               user: user,
+               facial_measurement: facial_measurement,
+               results: {
+                 quantitative: {
+                   testing_mode: 'N99',
+                   exercises: [
+                     {
+                       name: 'Normal breathing (SEALED)',
+                       fit_factor: 200
+                     },
+                     {
+                       name: 'Normal breathing',
+                       fit_factor: 1
+                     },
+                     {
+                       name: 'Side to side',
+                       fit_factor: 1
+                     }
+                   ]
+                 }
+               })
       end
 
       let!(:fit_test2) do
         create(:fit_test,
-          mask: mask,
-          user: user,
-          facial_measurement: facial_measurement,
-          results: {
-            quantitative: {
-              testing_mode: 'N99',
-              exercises: [
-                {
-                  name: 'Normal breathing (SEALED)',
-                  fit_factor: 300
-                },
-                {
-                  name: 'Normal breathing',
-                  fit_factor: 299
-                }
-              ]
-            }
-          }
-        )
+               mask: mask,
+               user: user,
+               facial_measurement: facial_measurement,
+               results: {
+                 quantitative: {
+                   testing_mode: 'N99',
+                   exercises: [
+                     {
+                       name: 'Normal breathing (SEALED)',
+                       fit_factor: 300
+                     },
+                     {
+                       name: 'Normal breathing',
+                       fit_factor: 299
+                     }
+                   ]
+                 }
+               })
       end
 
       it 'returns both' do
         results = described_class.call.to_a
 
-        first_fit_test = results.find{|r| r['id'] == fit_test1.id}
+        first_fit_test = results.find { |r| r['id'] == fit_test1.id }
         expect(first_fit_test['qlft_pass']).to be false
         expect(first_fit_test['n']).to be 2
         expect(first_fit_test['n95_mode_hmff']).to be < 5
 
-        second_fit_test = results.find{|r| r['id'] == fit_test2.id}
+        second_fit_test = results.find { |r| r['id'] == fit_test2.id }
         expect(second_fit_test['qlft_pass']).to be true
         expect(second_fit_test['n']).to be 1
         expect(second_fit_test['n95_mode_hmff']).to be > 200
@@ -339,29 +336,28 @@ RSpec.describe N99ModeToN95ModeConverterService do
     context 'with facial hair data' do
       let!(:fit_test) do
         create(:fit_test,
-          user: user,
-          mask: mask,
-          quantitative_fit_testing_device: measurement_device,
-          facial_measurement: facial_measurement,
-          results: {
-            'quantitative' => {
-              'testing_mode' => 'N99',
-              'exercises' => [
-                {
-                  'name' => 'Normal breathing (SEALED)',
-                  'fit_factor' => '200'
-                },
-                {
-                  'name' => 'Deep breathing',
-                  'fit_factor' => '150'
-                }
-              ]
-            }
-          },
-          facial_hair: {
-            'beard_length_mm' => 5
-          }
-        )
+               user: user,
+               mask: mask,
+               quantitative_fit_testing_device: measurement_device,
+               facial_measurement: facial_measurement,
+               results: {
+                 'quantitative' => {
+                   'testing_mode' => 'N99',
+                   'exercises' => [
+                     {
+                       'name' => 'Normal breathing (SEALED)',
+                       'fit_factor' => '200'
+                     },
+                     {
+                       'name' => 'Deep breathing',
+                       'fit_factor' => '150'
+                     }
+                   ]
+                 }
+               },
+               facial_hair: {
+                 'beard_length_mm' => 5
+               })
       end
 
       it 'includes facial_hair_beard_length_mm in the results' do
@@ -373,27 +369,26 @@ RSpec.describe N99ModeToN95ModeConverterService do
     context 'with missing facial hair data' do
       let!(:fit_test) do
         create(:fit_test,
-          user: user,
-          mask: mask,
-          quantitative_fit_testing_device: measurement_device,
-          facial_measurement: facial_measurement,
-          results: {
-            'quantitative' => {
-              'testing_mode' => 'N99',
-              'exercises' => [
-                {
-                  'name' => 'Normal breathing (SEALED)',
-                  'fit_factor' => '200'
-                },
-                {
-                  'name' => 'Deep breathing',
-                  'fit_factor' => '150'
-                }
-              ]
-            }
-          },
-          facial_hair: nil
-        )
+               user: user,
+               mask: mask,
+               quantitative_fit_testing_device: measurement_device,
+               facial_measurement: facial_measurement,
+               results: {
+                 'quantitative' => {
+                   'testing_mode' => 'N99',
+                   'exercises' => [
+                     {
+                       'name' => 'Normal breathing (SEALED)',
+                       'fit_factor' => '200'
+                     },
+                     {
+                       'name' => 'Deep breathing',
+                       'fit_factor' => '150'
+                     }
+                   ]
+                 }
+               },
+               facial_hair: nil)
       end
 
       it 'returns nil for facial_hair_beard_length_mm' do
@@ -405,27 +400,26 @@ RSpec.describe N99ModeToN95ModeConverterService do
     context 'with empty facial hair beard length' do
       let!(:fit_test) do
         create(:fit_test,
-          user: user,
-          mask: mask,
-          quantitative_fit_testing_device: measurement_device,
-          facial_measurement: facial_measurement,
-          results: {
-            'quantitative' => {
-              'testing_mode' => 'N99',
-              'exercises' => [
-                {
-                  'name' => 'Normal breathing (SEALED)',
-                  'fit_factor' => '200'
-                },
-                {
-                  'name' => 'Deep breathing',
-                  'fit_factor' => '150'
-                }
-              ]
-            }
-          },
-          facial_hair: {}
-        )
+               user: user,
+               mask: mask,
+               quantitative_fit_testing_device: measurement_device,
+               facial_measurement: facial_measurement,
+               results: {
+                 'quantitative' => {
+                   'testing_mode' => 'N99',
+                   'exercises' => [
+                     {
+                       'name' => 'Normal breathing (SEALED)',
+                       'fit_factor' => '200'
+                     },
+                     {
+                       'name' => 'Deep breathing',
+                       'fit_factor' => '150'
+                     }
+                   ]
+                 }
+               },
+               facial_hair: {})
       end
 
       it 'returns nil for facial_hair_beard_length_mm' do
@@ -437,41 +431,39 @@ RSpec.describe N99ModeToN95ModeConverterService do
     context 'with mask_id parameter' do
       let!(:fit_test) do
         create(:fit_test,
-          mask: mask,
-          user: user,
-          facial_measurement: facial_measurement,
-          results: {
-            quantitative: {
-              testing_mode: 'N99',
-              exercises: exercises
-            }
-          }
-        )
+               mask: mask,
+               user: user,
+               facial_measurement: facial_measurement,
+               results: {
+                 quantitative: {
+                   testing_mode: 'N99',
+                   exercises: exercises
+                 }
+               })
       end
       let(:other_mask) { create(:mask) }
 
       before do
         # Create N99 fit test for other_mask
         create(:fit_test,
-          user: user,
-          mask: other_mask,
-          facial_measurement: facial_measurement,
-          results: {
-            'quantitative' => {
-              'testing_mode' => 'N99',
-              'exercises' => [
-                {
-                  'name' => 'Normal breathing (SEALED)',
-                  'fit_factor' => '180'
-                },
-                {
-                  'name' => 'Bending over',
-                  'fit_factor' => '120'
-                }
-              ]
-            }
-          }
-        )
+               user: user,
+               mask: other_mask,
+               facial_measurement: facial_measurement,
+               results: {
+                 'quantitative' => {
+                   'testing_mode' => 'N99',
+                   'exercises' => [
+                     {
+                       'name' => 'Normal breathing (SEALED)',
+                       'fit_factor' => '180'
+                     },
+                     {
+                       'name' => 'Bending over',
+                       'fit_factor' => '120'
+                     }
+                   ]
+                 }
+               })
       end
 
       it 'returns all N99 fit tests converted to N95 mode when no mask_id is provided' do
@@ -487,24 +479,25 @@ RSpec.describe N99ModeToN95ModeConverterService do
       end
     end
 
-    context "with z-score computation" do
-      let(:facial_measurement) { create(:facial_measurement, user: user, face_width: 140, jaw_width: 120, face_depth: 110) }
-      
-      let!(:fit_test) do
-        create(:fit_test,
-          mask: mask,
-          user: user,
-          facial_measurement: facial_measurement,
-          results: {
-            quantitative: {
-              testing_mode: 'N99',
-              exercises: exercises
-            }
-          }
-        )
+    context 'with z-score computation' do
+      let(:facial_measurement) do
+        create(:facial_measurement, user: user, face_width: 140, jaw_width: 120, face_depth: 110)
       end
 
-      it "computes z-scores for facial measurements" do
+      let!(:fit_test) do
+        create(:fit_test,
+               mask: mask,
+               user: user,
+               facial_measurement: facial_measurement,
+               results: {
+                 quantitative: {
+                   testing_mode: 'N99',
+                   exercises: exercises
+                 }
+               })
+      end
+
+      it 'computes z-scores for facial measurements' do
         result = described_class.call.to_a.first
         FacialMeasurement::COLUMNS.each do |col|
           z_score_col = "#{col}_z_score"
@@ -515,43 +508,40 @@ RSpec.describe N99ModeToN95ModeConverterService do
       end
     end
 
-    context "with multiple users for z-score calculation" do
+    context 'with multiple users for z-score calculation' do
       let(:user2) { create(:user) }
       let!(:facial_measurement2) do
         create(:facial_measurement,
-          user: user2,
-          face_width: 150,  # Different value for z-score calculation
-          jaw_width: 130,
-          face_depth: 120
-        )
+               user: user2,
+               face_width: 150, # Different value for z-score calculation
+               jaw_width: 130,
+               face_depth: 120)
       end
 
       let!(:fit_test2) do
         create(:fit_test,
-          mask: mask,
-          user: user2,
-          facial_measurement: facial_measurement2,
-          results: {
-            quantitative: {
-              testing_mode: 'N99',
-              exercises: exercises
-            }
-          }
-        )
+               mask: mask,
+               user: user2,
+               facial_measurement: facial_measurement2,
+               results: {
+                 quantitative: {
+                   testing_mode: 'N99',
+                   exercises: exercises
+                 }
+               })
       end
 
       let!(:fit_test1) do
         create(:fit_test,
-          mask: mask,
-          user: user,
-          facial_measurement: facial_measurement,
-          results: {
-            quantitative: {
-              testing_mode: 'N99',
-              exercises: exercises
-            }
-          }
-        )
+               mask: mask,
+               user: user,
+               facial_measurement: facial_measurement,
+               results: {
+                 quantitative: {
+                   testing_mode: 'N99',
+                   exercises: exercises
+                 }
+               })
       end
 
       it 'computes z-scores based on population statistics' do
@@ -569,24 +559,23 @@ RSpec.describe N99ModeToN95ModeConverterService do
       end
     end
 
-    context "when facial measurements are missing" do
+    context 'when facial measurements are missing' do
       let(:facial_measurement) { nil }
-      
+
       let!(:fit_test) do
         create(:fit_test,
-          mask: mask,
-          user: user,
-          facial_measurement: facial_measurement,
-          results: {
-            quantitative: {
-              testing_mode: 'N99',
-              exercises: exercises
-            }
-          }
-        )
+               mask: mask,
+               user: user,
+               facial_measurement: facial_measurement,
+               results: {
+                 quantitative: {
+                   testing_mode: 'N99',
+                   exercises: exercises
+                 }
+               })
       end
 
-      it "returns nil for z-score columns" do
+      it 'returns nil for z-score columns' do
         result = described_class.call.to_a.first
         FacialMeasurement::COLUMNS.each do |col|
           z_score_col = "#{col}_z_score"

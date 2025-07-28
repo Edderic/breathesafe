@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 class TapeMeasureActor
   def self.create(
     uuid:,
     weight: {
-        'amount' => 17.2,
-        'measurement_unit' => 'g'
+      'amount' => 17.2,
+      'measurement_unit' => 'g'
     },
     model: 'Perfect Measuring Tape',
     cost: {
@@ -28,9 +30,7 @@ class TapeMeasureActor
     #     'time_cost':
     #   }
     #
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'TapeMeasureAction',
@@ -40,11 +40,10 @@ class TapeMeasureActor
         'uuid' => uuid,
         'model' => model,
         'weight' => weight,
-        'cost' => cost,
+        'cost' => cost
       }
     )
   end
-
 
   def self.sanitize(
     uuid:,
@@ -65,17 +64,13 @@ class TapeMeasureActor
     if cost.nil?
       cost = {
         'material_cost' => 0,
-        'time_cost' => 0,
+        'time_cost' => 0
       }
     end
 
-    if sanitize_notes.nil?
-      sanitize_notes = "Wiped with 99.9% isopropyl alcohol"
-    end
+    sanitize_notes = 'Wiped with 99.9% isopropyl alcohol' if sanitize_notes.nil?
 
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'TapeMeasureAction',
@@ -94,9 +89,7 @@ class TapeMeasureActor
     facial_measurement_kit_uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'TapeMeasureAction',
@@ -110,9 +103,7 @@ class TapeMeasureActor
   end
 
   def self.dissociate_from_facial_measurement_kit(uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'TapeMeasureAction',

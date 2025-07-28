@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class FitTest < ApplicationRecord
   belongs_to :mask, optional: true
   belongs_to :facial_measurement, optional: true
@@ -5,7 +7,7 @@ class FitTest < ApplicationRecord
   belongs_to :quantitative_fit_testing_device, class_name: 'MeasurementDevice', optional: true
 
   def self.viewable(user)
-    filter_clause = ""
+    filter_clause = ''
 
     unless user.admin?
       filter_clause = <<-SQL
@@ -31,7 +33,7 @@ class FitTest < ApplicationRecord
            fm.user_id AS fm_user_id,
            p.first_name,
            p.last_name,
-          #{self.facial_measurement_presence}
+          #{facial_measurement_presence}
 
         FROM fit_tests ft
         LEFT JOIN facial_measurements fm
@@ -46,14 +48,14 @@ class FitTest < ApplicationRecord
       SQL
     )
 
-    self.json_parse(fit_tests, ["facial_hair", "comfort", "results", "user_seal_check", "image_urls", "colors"])
+    json_parse(fit_tests, %w[facial_hair comfort results user_seal_check image_urls colors])
   end
 
   def self.find_by_id_with_user_id(id)
     fit_tests = FitTest.connection.exec_query(
       <<-SQL
         SELECT ft.*, m.unique_internal_model_code, m.image_urls, m.has_exhalation_valve, fm.user_id, p.first_name, p.last_name,
-        #{self.facial_measurement_presence}
+        #{facial_measurement_presence}
 
         FROM fit_tests ft
         LEFT JOIN facial_measurements fm
@@ -68,19 +70,19 @@ class FitTest < ApplicationRecord
       SQL
     )
 
-    self.json_parse(fit_tests, ["facial_hair", "comfort", "results", "user_seal_check", "image_urls"])[0]
+    json_parse(fit_tests, %w[facial_hair comfort results user_seal_check image_urls])[0]
   end
 
   def self.json_parse(events, columns)
     events.map do |ev|
       columns.each do |col|
-        if !ev[col]
-          ev[col] = []
-        elsif col == "image_urls"
-          ev[col] = [ev['image_urls'].gsub("{","").gsub("}","").gsub('"', '')]
-        else
-          ev[col] = JSON.parse(ev[col])
-        end
+        ev[col] = if !ev[col]
+                    []
+                  elsif col == 'image_urls'
+                    [ev['image_urls'].gsub('{', '').gsub('}', '').gsub('"', '')]
+                  else
+                    JSON.parse(ev[col])
+                  end
       end
 
       ev

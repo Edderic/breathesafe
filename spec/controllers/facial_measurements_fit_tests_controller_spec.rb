@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
@@ -34,7 +36,7 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
       before { sign_in manager }
 
       it 'returns unauthorized status' do
-        post :create, params: { facial_measurement_id: 999999 }, format: :json
+        post :create, params: { facial_measurement_id: 999_999 }, format: :json
         expect(response).to have_http_status(:unauthorized)
         expect(JSON.parse(response.body)['messages']).to include('No facial measurement found for this id.')
       end
@@ -58,19 +60,17 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
       context 'when user has existing fit tests' do
         let!(:fit_test1) do
           create(:fit_test,
-            :with_just_right_mask,
-            user: user,
-            quantitative_fit_testing_device: measurement_device,
-            facial_measurement: nil
-          )
+                 :with_just_right_mask,
+                 user: user,
+                 quantitative_fit_testing_device: measurement_device,
+                 facial_measurement: nil)
         end
         let!(:fit_test2) do
           create(:fit_test,
-            :with_just_right_mask,
-            user: user,
-            quantitative_fit_testing_device: measurement_device,
-            facial_measurement: nil
-          )
+                 :with_just_right_mask,
+                 user: user,
+                 quantitative_fit_testing_device: measurement_device,
+                 facial_measurement: nil)
         end
 
         it 'assigns facial measurement to all user fit tests' do
@@ -102,65 +102,62 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
 
       let!(:n95_fit_test) do
         create(:fit_test,
-          :with_just_right_mask,
-          user: user,
-          quantitative_fit_testing_device: measurement_device,
-          facial_measurement: facial_measurement,
-          results: {
-            'quantitative' => {
-              'testing_mode' => 'N95',
-              'exercises' => [
-                {
-                  'name' => 'Normal breathing',
-                  'fit_factor' => '200'
-                }
-              ]
-            }
-          }
-        )
+               :with_just_right_mask,
+               user: user,
+               quantitative_fit_testing_device: measurement_device,
+               facial_measurement: facial_measurement,
+               results: {
+                 'quantitative' => {
+                   'testing_mode' => 'N95',
+                   'exercises' => [
+                     {
+                       'name' => 'Normal breathing',
+                       'fit_factor' => '200'
+                     }
+                   ]
+                 }
+               })
       end
 
       let!(:n99_fit_test) do
         create(:fit_test,
-          :with_just_right_mask,
-          user: user,
-          quantitative_fit_testing_device: measurement_device,
-          facial_measurement: facial_measurement,
-          results: {
-            'quantitative' => {
-              'testing_mode' => 'N99',
-              'exercises' => [
-                {
-                  'name' => 'Normal breathing',
-                  'fit_factor' => '200'
-                },
-                {
-                  'name' => 'Normal breathing (SEALED)',
-                  'fit_factor' => '200'
-                }
-              ]
-            }
-          },
-        )
+               :with_just_right_mask,
+               user: user,
+               quantitative_fit_testing_device: measurement_device,
+               facial_measurement: facial_measurement,
+               results: {
+                 'quantitative' => {
+                   'testing_mode' => 'N99',
+                   'exercises' => [
+                     {
+                       'name' => 'Normal breathing',
+                       'fit_factor' => '200'
+                     },
+                     {
+                       'name' => 'Normal breathing (SEALED)',
+                       'fit_factor' => '200'
+                     }
+                   ]
+                 }
+               })
       end
 
       let!(:qlft_fit_test) do
         create(:fit_test,
-          :with_just_right_mask,
-          user: user,
-          quantitative_fit_testing_device: measurement_device,
-          facial_measurement: facial_measurement,
-          results: {
-            'qualitative' => {
-              'exercises' => [
-                {
-                  'name' => 'Normal breathing',
-                  'result' => 'Pass'
-                }
-              ]
-            }
-          }
-        )
+               :with_just_right_mask,
+               user: user,
+               quantitative_fit_testing_device: measurement_device,
+               facial_measurement: facial_measurement,
+               results: {
+                 'qualitative' => {
+                   'exercises' => [
+                     {
+                       'name' => 'Normal breathing',
+                       'result' => 'Pass'
+                     }
+                   ]
+                 }
+               })
       end
 
       it 'returns all fit tests with facial measurements' do
@@ -196,23 +193,22 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
     context 'when user is not authenticated' do
       let!(:n95_fit_test) do
         create(:fit_test,
-          :with_just_right_mask,
-          mask: mask,
-          user: user,
-          quantitative_fit_testing_device: measurement_device,
-          facial_measurement: facial_measurement,
-          results: {
-            'quantitative' => {
-              'testing_mode' => 'N95',
-              'exercises' => [
-                {
-                  'name' => 'Normal breathing',
-                  'fit_factor' => '200'
-                }
-              ]
-            }
-          }
-        )
+               :with_just_right_mask,
+               mask: mask,
+               user: user,
+               quantitative_fit_testing_device: measurement_device,
+               facial_measurement: facial_measurement,
+               results: {
+                 'quantitative' => {
+                   'testing_mode' => 'N95',
+                   'exercises' => [
+                     {
+                       'name' => 'Normal breathing',
+                       'fit_factor' => '200'
+                     }
+                   ]
+                 }
+               })
       end
 
       it 'returns fit tests for the specified mask' do
@@ -246,10 +242,10 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
       end
 
       it 'sanitizes the mask_id parameter' do
-        malicious_mask_id = "1; DROP TABLE users; --"
-        expect {
+        malicious_mask_id = '1; DROP TABLE users; --'
+        expect do
           get :show, params: { mask_id: malicious_mask_id }, format: :json
-        }.not_to raise_error
+        end.not_to raise_error
 
         expect(response).to have_http_status(:ok)
       end
@@ -258,23 +254,22 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
     context 'when user is authenticated' do
       let!(:n95_fit_test) do
         create(:fit_test,
-          :with_just_right_mask,
-          user: user,
-          mask: mask,
-          quantitative_fit_testing_device: measurement_device,
-          facial_measurement: facial_measurement,
-          results: {
-            'quantitative' => {
-              'testing_mode' => 'N95',
-              'exercises' => [
-                {
-                  'name' => 'Normal breathing',
-                  'fit_factor' => '200'
-                }
-              ]
-            }
-          }
-        )
+               :with_just_right_mask,
+               user: user,
+               mask: mask,
+               quantitative_fit_testing_device: measurement_device,
+               facial_measurement: facial_measurement,
+               results: {
+                 'quantitative' => {
+                   'testing_mode' => 'N95',
+                   'exercises' => [
+                     {
+                       'name' => 'Normal breathing',
+                       'fit_factor' => '200'
+                     }
+                   ]
+                 }
+               })
       end
 
       before do

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class FitTestsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
@@ -7,19 +9,17 @@ class FitTestsController < ApplicationController
 
     if unauthorized?
       status = 401
-      messages = ["Unauthorized."]
+      messages = ['Unauthorized.']
     elsif !current_user.manages?(user)
       status = 422
-      messages = ["Unauthorized."]
+      messages = ['Unauthorized.']
     else
       # assumes there is facial measurement information
       latest_facial_measurement = FacialMeasurement.latest(user)
 
       fm_id = nil
 
-      if latest_facial_measurement
-        fm_id = latest_facial_measurement.id
-      end
+      fm_id = latest_facial_measurement.id if latest_facial_measurement
 
       fit_test = FitTest.create(
         fit_test_data.merge(
@@ -53,7 +53,7 @@ class FitTestsController < ApplicationController
   def index
     if unauthorized?
       status = 401
-      messages = ["Unauthorized."]
+      messages = ['Unauthorized.']
       fit_tests = []
     else
       fit_tests = JSON.parse(
@@ -82,10 +82,10 @@ class FitTestsController < ApplicationController
 
     if !current_user
       status = 401
-      messages = ["Unauthorized."]
+      ['Unauthorized.']
 
     elsif !current_user.manages?(fit_test_user)
-      messages = ["Unauthorized."]
+      ['Unauthorized.']
     else
       to_render = {
         fit_test: JSON.parse(fit_test.to_json),
@@ -105,7 +105,7 @@ class FitTestsController < ApplicationController
 
     if !current_user
       status = 401
-      messages = ["Unauthorized."]
+      messages = ['Unauthorized.']
       to_render = {}
     elsif !current_user.manages?(fit_test_user)
       status = 401
@@ -134,7 +134,7 @@ class FitTestsController < ApplicationController
 
     if !current_user
       status = 401
-      messages = ["Unauthorized."]
+      messages = ['Unauthorized.']
       to_render = {}
     elsif !current_user.manages?(fit_test_user)
       status = 401
@@ -160,39 +160,39 @@ class FitTestsController < ApplicationController
       :fit_test_id,
       :mask_id,
       :quantitative_fit_testing_device_id,
-      facial_hair: [
-        'beard_length_mm',
-        'beard_cover_technique'
+      facial_hair: %w[
+        beard_length_mm
+        beard_cover_technique
       ],
       results: [
         quantitative: [
           'procedure',
           'testing_mode',
           'notes',
-          aerosol: [
-            :solution,
-            :initial_count_per_cm3
-          ],
-          exercises: [
-            'name',
-            'fit_factor'
-          ],
+          { aerosol: %i[
+              solution
+              initial_count_per_cm3
+            ],
+            exercises: %w[
+              name
+              fit_factor
+            ] }
         ],
         qualitative: [
           'procedure',
           'notes',
-          aerosol: [
-            :solution
-          ],
-          exercises: [
-            'name',
-            'result'
-          ]
+          { aerosol: [
+              :solution
+            ],
+            exercises: %w[
+              name
+              result
+            ] }
         ]
       ],
       user_seal_check: [
         'positive': [
-          "...how much air movement on your face along the seal of the mask did you feel?",
+          '...how much air movement on your face along the seal of the mask did you feel?',
           '...how much did your glasses fog up?',
           '...how much pressure build up was there?'
         ],
@@ -200,15 +200,15 @@ class FitTestsController < ApplicationController
           '...how much air passed between your face and the mask?'
         ],
         'sizing': [
-          "What do you think about the sizing of this mask relative to your face?"
+          'What do you think about the sizing of this mask relative to your face?'
         ]
       ],
       comfort: [
-        "How comfortable is the position of the mask on the nose?",
-        "Is there adequate room for eye protection?",
-        "Is there enough room to talk?",
-        "How comfortable is the position of the mask on face and cheeks?"
-      ],
+        'How comfortable is the position of the mask on the nose?',
+        'Is there adequate room for eye protection?',
+        'Is there enough room to talk?',
+        'How comfortable is the position of the mask on face and cheeks?'
+      ]
     )
   end
 
@@ -218,8 +218,6 @@ class FitTestsController < ApplicationController
 
   def fit_test_user
     fit_test = FitTest.find(params[:id])
-    return fit_test.user
+    fit_test.user
   end
 end
-
-

@@ -1,8 +1,8 @@
+# frozen_string_literal: true
+
 class AddressQuery
   def self.find_address_of(user_email: nil)
-    if user_email.nil?
-      user_email = 'edderic@gmail.com'
-    end
+    user_email = 'edderic@gmail.com' if user_email.nil?
 
     JSON.parse(
       ActiveRecord::Base.connection.exec_query(

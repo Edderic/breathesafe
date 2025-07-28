@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :mask do
     sequence(:unique_internal_model_code) { |n| "MASK-#{n}" }
@@ -5,22 +7,22 @@ FactoryBot.define do
     image_urls { [] }
     author_ids { [] }
     where_to_buy_urls { [] }
-    strap_type { "Elastic" }
-    mass_grams { "50" }
-    height_mm { "100" }
-    width_mm { "150" }
-    depth_mm { "50" }
+    strap_type { 'Elastic' }
+    mass_grams { '50' }
+    height_mm { '100' }
+    width_mm { '150' }
+    depth_mm { '50' }
     has_gasket { false }
     initial_cost_us_dollars { 10.0 }
     sources { [] }
-    notes { "Test mask" }
-    filter_type { "N95" }
+    notes { 'Test mask' }
+    filter_type { 'N95' }
     filtration_efficiencies { [] }
     breathability { [] }
-    style { "Duckbill" }
+    style { 'Duckbill' }
     filter_change_cost_us_dollars { 5.0 }
-    age_range { "Adult" }
-    color { "White" }
+    age_range { 'Adult' }
+    color { 'White' }
     has_exhalation_valve { false }
     association :author, factory: :user
     perimeter_mm { 300.0 }
@@ -32,8 +34,8 @@ FactoryBot.define do
         [
           {
             filtration_efficiency_percent: 99.9,
-            filtration_efficiency_notes: "Aaron test",
-            filtration_efficiency_source: "https://example.com"
+            filtration_efficiency_notes: 'Aaron test',
+            filtration_efficiency_source: 'https://example.com'
           }
         ]
       end
@@ -45,22 +47,22 @@ FactoryBot.define do
           {
             pressure_drop: 2.5,
             flow_rate: 85,
-            source: "https://example.com"
+            source: 'https://example.com'
           }
         ]
       end
     end
 
     trait :with_images do
-      image_urls { ["https://example.com/mask1.jpg", "https://example.com/mask2.jpg"] }
+      image_urls { ['https://example.com/mask1.jpg', 'https://example.com/mask2.jpg'] }
     end
 
     trait :with_sources do
-      sources { ["https://example.com/source1", "https://example.com/source2"] }
+      sources { ['https://example.com/source1', 'https://example.com/source2'] }
     end
 
     trait :with_where_to_buy do
-      where_to_buy_urls { ["https://example.com/buy1", "https://example.com/buy2"] }
+      where_to_buy_urls { ['https://example.com/buy1', 'https://example.com/buy2'] }
     end
 
     trait :with_payable_datetimes do
@@ -75,14 +77,14 @@ FactoryBot.define do
     end
 
     trait :with_colors do
-      colors { ["White", "Black", "Blue"] }
+      colors { %w[White Black Blue] }
     end
   end
 
   factory :user do
     sequence(:email) { |n| "user#{n}@example.com" }
-    password { "password123" }
-    password_confirmation { "password123" }
+    password { 'password123' }
+    password_confirmation { 'password123' }
     confirmed_at { Time.current }
     admin { false }
 
@@ -154,7 +156,7 @@ FactoryBot.define do
 
   factory :facial_measurement do
     association :user
-    source { "digital_caliper" }
+    source { 'digital_caliper' }
     face_width { rand(120..160) }
     jaw_width { rand(100..140) }
     face_depth { rand(80..120) }
@@ -162,7 +164,7 @@ FactoryBot.define do
     lower_face_length { rand(60..80) }
     bitragion_menton_arc { rand(300..350) }
     bitragion_subnasale_arc { rand(250..300) }
-    cheek_fullness { "medium" }
+    cheek_fullness { 'medium' }
     nasal_root_breadth { rand(15..25) }
     nose_protrusion { rand(15..25) }
     nose_bridge_height { rand(10..20) }
@@ -239,7 +241,7 @@ FactoryBot.define do
     end
 
     trait :with_cheek_fullness do
-      cheek_fullness { ["low", "medium", "high"].sample }
+      cheek_fullness { %w[low medium high].sample }
     end
   end
 
@@ -251,50 +253,50 @@ FactoryBot.define do
 
     user_seal_check do
       {
-        "sizing" => {
-          "What do you think about the sizing of this mask relative to your face?" => "Too small"
+        'sizing' => {
+          'What do you think about the sizing of this mask relative to your face?' => 'Too small'
         },
-        "negative" => {
-          "...how much air passed between your face and the mask?" => nil
+        'negative' => {
+          '...how much air passed between your face and the mask?' => nil
         },
-        "positive" => {
-          "...how much did your glasses fog up?" => "A lot",
-          "...how much pressure build up was there?" => "No pressure build up",
-          "...how much air movement on your face along the seal of the mask did you feel?" => "A lot of air movement"
+        'positive' => {
+          '...how much did your glasses fog up?' => 'A lot',
+          '...how much pressure build up was there?' => 'No pressure build up',
+          '...how much air movement on your face along the seal of the mask did you feel?' => 'A lot of air movement'
         }
       }
     end
 
     comfort do
       {
-        "rating" => 4,
-        "notes" => "Comfortable fit"
+        'rating' => 4,
+        'notes' => 'Comfortable fit'
       }
     end
 
     facial_hair do
       {
-        "has_facial_hair" => false,
-        "notes" => "Clean shaven"
+        'has_facial_hair' => false,
+        'notes' => 'Clean shaven'
       }
     end
 
     results do
       {
-        "quantitative" => {
-          "testing_mode" => "N99",
-          "exercises" => [
+        'quantitative' => {
+          'testing_mode' => 'N99',
+          'exercises' => [
             {
-              "name" => "Normal breathing (SEALED)",
-              "fit_factor" => 200
+              'name' => 'Normal breathing (SEALED)',
+              'fit_factor' => 200
             },
             {
-              "name" => "Deep breathing",
-              "fit_factor" => 150
+              'name' => 'Deep breathing',
+              'fit_factor' => 150
             },
             {
-              "name" => "Talking",
-              "fit_factor" => 100
+              'name' => 'Talking',
+              'fit_factor' => 100
             }
           ]
         }
@@ -304,20 +306,20 @@ FactoryBot.define do
     trait :with_n95_mode do
       results do
         {
-          "quantitative" => {
-            "testing_mode" => "N95",
-            "exercises" => [
+          'quantitative' => {
+            'testing_mode' => 'N95',
+            'exercises' => [
               {
-                "name" => "Normal breathing (SEALED)",
-                "fit_factor" => 100
+                'name' => 'Normal breathing (SEALED)',
+                'fit_factor' => 100
               },
               {
-                "name" => "Deep breathing",
-                "fit_factor" => 75
+                'name' => 'Deep breathing',
+                'fit_factor' => 75
               },
               {
-                "name" => "Talking",
-                "fit_factor" => 50
+                'name' => 'Talking',
+                'fit_factor' => 50
               }
             ]
           }
@@ -328,16 +330,16 @@ FactoryBot.define do
     trait :with_too_small_mask do
       user_seal_check do
         {
-          "sizing" => {
-            "What do you think about the sizing of this mask relative to your face?" => "Too small"
+          'sizing' => {
+            'What do you think about the sizing of this mask relative to your face?' => 'Too small'
           },
-          "negative" => {
-            "...how much air passed between your face and the mask?" => nil
+          'negative' => {
+            '...how much air passed between your face and the mask?' => nil
           },
-          "positive" => {
-            "...how much did your glasses fog up?" => "A lot",
-            "...how much pressure build up was there?" => "No pressure build up",
-            "...how much air movement on your face along the seal of the mask did you feel?" => "A lot of air movement"
+          'positive' => {
+            '...how much did your glasses fog up?' => 'A lot',
+            '...how much pressure build up was there?' => 'No pressure build up',
+            '...how much air movement on your face along the seal of the mask did you feel?' => 'A lot of air movement'
           }
         }
       end
@@ -346,16 +348,16 @@ FactoryBot.define do
     trait :with_just_right_mask do
       user_seal_check do
         {
-          "sizing" => {
-            "What do you think about the sizing of this mask relative to your face?" => "Somewhere in-between too small and too big"
+          'sizing' => {
+            'What do you think about the sizing of this mask relative to your face?' => 'Somewhere in-between too small and too big'
           },
-          "negative" => {
-            "...how much air passed between your face and the mask?" => nil
+          'negative' => {
+            '...how much air passed between your face and the mask?' => nil
           },
-          "positive" => {
-            "...how much did your glasses fog up?" => "Not at all",
-            "...how much pressure build up was there?" => "As expected",
-            "...how much air movement on your face along the seal of the mask did you feel?" => "No air movement"
+          'positive' => {
+            '...how much did your glasses fog up?' => 'Not at all',
+            '...how much pressure build up was there?' => 'As expected',
+            '...how much air movement on your face along the seal of the mask did you feel?' => 'No air movement'
           }
         }
       end
@@ -363,16 +365,16 @@ FactoryBot.define do
     trait :with_too_large_mask do
       user_seal_check do
         {
-          "sizing" => {
-            "What do you think about the sizing of this mask relative to your face?" => "Too big"
+          'sizing' => {
+            'What do you think about the sizing of this mask relative to your face?' => 'Too big'
           },
-          "negative" => {
-            "...how much air passed between your face and the mask?" => nil
+          'negative' => {
+            '...how much air passed between your face and the mask?' => nil
           },
-          "positive" => {
-            "...how much did your glasses fog up?" => "A lot",
-            "...how much pressure build up was there?" => "No pressure build up",
-            "...how much air movement on your face along the seal of the mask did you feel?" => "A lot of air movement"
+          'positive' => {
+            '...how much did your glasses fog up?' => 'A lot',
+            '...how much pressure build up was there?' => 'No pressure build up',
+            '...how much air movement on your face along the seal of the mask did you feel?' => 'A lot of air movement'
           }
         }
       end
@@ -381,8 +383,8 @@ FactoryBot.define do
     trait :with_low_comfort do
       comfort do
         {
-          "rating" => 2,
-          "notes" => "Uncomfortable fit"
+          'rating' => 2,
+          'notes' => 'Uncomfortable fit'
         }
       end
     end
@@ -390,8 +392,8 @@ FactoryBot.define do
     trait :with_facial_hair do
       facial_hair do
         {
-          "has_facial_hair" => true,
-          "notes" => "Has beard"
+          'has_facial_hair' => true,
+          'notes' => 'Has beard'
         }
       end
     end
@@ -399,24 +401,24 @@ FactoryBot.define do
     trait :with_custom_exercises do
       results do
         {
-          "quantitative" => {
-            "testing_mode" => "N99",
-            "exercises" => [
+          'quantitative' => {
+            'testing_mode' => 'N99',
+            'exercises' => [
               {
-                "name" => "Normal breathing (SEALED)",
-                "fit_factor" => 250
+                'name' => 'Normal breathing (SEALED)',
+                'fit_factor' => 250
               },
               {
-                "name" => "Deep breathing",
-                "fit_factor" => 200
+                'name' => 'Deep breathing',
+                'fit_factor' => 200
               },
               {
-                "name" => "Talking",
-                "fit_factor" => 150
+                'name' => 'Talking',
+                'fit_factor' => 150
               },
               {
-                "name" => "Head movements",
-                "fit_factor" => 180
+                'name' => 'Head movements',
+                'fit_factor' => 180
               }
             ]
           }
@@ -427,20 +429,20 @@ FactoryBot.define do
     trait :with_failed_fit_factors do
       results do
         {
-          "quantitative" => {
-            "testing_mode" => "N99",
-            "exercises" => [
+          'quantitative' => {
+            'testing_mode' => 'N99',
+            'exercises' => [
               {
-                "name" => "Normal breathing (SEALED)",
-                "fit_factor" => 50
+                'name' => 'Normal breathing (SEALED)',
+                'fit_factor' => 50
               },
               {
-                "name" => "Deep breathing",
-                "fit_factor" => 30
+                'name' => 'Deep breathing',
+                'fit_factor' => 30
               },
               {
-                "name" => "Talking",
-                "fit_factor" => 20
+                'name' => 'Talking',
+                'fit_factor' => 20
               }
             ]
           }
@@ -463,11 +465,11 @@ FactoryBot.define do
 
   factory :measurement_device do
     association :owner, factory: :user
-    measurement_device_type { "quantitative_fit_testing" }
-    manufacturer { "TSI" }
-    model { "PortaCount Pro+" }
+    measurement_device_type { 'quantitative_fit_testing' }
+    manufacturer { 'TSI' }
+    model { 'PortaCount Pro+' }
     sequence(:serial) { |n| "SN#{n}" }
-    notes { "Test device" }
+    notes { 'Test device' }
     remove_from_service { false }
 
     trait :removed_from_service do
@@ -485,39 +487,39 @@ FactoryBot.define do
     end
 
     trait :digital_caliper do
-      measurement_device_type { "digital_caliper" }
-      manufacturer { "Mitutoyo" }
-      model { "500-196-30" }
+      measurement_device_type { 'digital_caliper' }
+      manufacturer { 'Mitutoyo' }
+      model { '500-196-30' }
     end
 
     trait :tape_measure do
-      measurement_device_type { "tape_measure" }
-      manufacturer { "Stanley" }
-      model { "PowerLock" }
+      measurement_device_type { 'tape_measure' }
+      manufacturer { 'Stanley' }
+      model { 'PowerLock' }
     end
 
     trait :carbon_dioxide_monitor do
-      measurement_device_type { "carbon_dioxide_monitor" }
-      manufacturer { "CO2Meter" }
-      model { "AZ-0004" }
+      measurement_device_type { 'carbon_dioxide_monitor' }
+      manufacturer { 'CO2Meter' }
+      model { 'AZ-0004' }
     end
 
     trait :nebulizer do
-      measurement_device_type { "nebulizer" }
-      manufacturer { "TSI" }
-      model { "8026" }
+      measurement_device_type { 'nebulizer' }
+      manufacturer { 'TSI' }
+      model { '8026' }
     end
 
     trait :hood do
-      measurement_device_type { "hood" }
-      manufacturer { "TSI" }
-      model { "8025" }
+      measurement_device_type { 'hood' }
+      manufacturer { 'TSI' }
+      model { '8025' }
     end
 
     trait :solution do
-      measurement_device_type { "solution" }
-      manufacturer { "TSI" }
-      model { "8038" }
+      measurement_device_type { 'solution' }
+      manufacturer { 'TSI' }
+      model { '8038' }
     end
   end
 end

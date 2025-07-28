@@ -1,20 +1,18 @@
+# frozen_string_literal: true
+
 class QualitativeFitTestingKitActor
   def self.preset_allegro_create(uuid: nil, datetime: nil)
-    if uuid.nil?
-      uuid = SecureRandom.uuid
-    end
+    SecureRandom.uuid if uuid.nil?
 
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     ActiveRecord::Base.transaction do
       kit_uuid = SecureRandom.uuid
-      self.create(uuid: kit_uuid, datetime: datetime)
+      create(uuid: kit_uuid, datetime: datetime)
 
       nebulizer_uuid = SecureRandom.uuid
       NebulizerActor.preset_create(
-        model: "Allegro",
+        model: 'Allegro',
         uuid: nebulizer_uuid,
         datetime: datetime + 1.second
       )
@@ -44,11 +42,10 @@ class QualitativeFitTestingKitActor
         datetime: datetime + 1.second
       )
 
-
       solution_uuids = [fit_test_solution_uuid, sensitivity_solution_uuid]
 
       solution_uuids.each do |solution_uuid|
-        self.add_solution(
+        add_solution(
           uuid: kit_uuid,
           solution_uuid: solution_uuid,
           datetime: datetime + 1.second
@@ -57,13 +54,13 @@ class QualitativeFitTestingKitActor
 
       # Associate those parts with the qualitative fit testing kit
 
-      self.add_hood(
+      add_hood(
         uuid: kit_uuid,
         hood_uuid: hood_uuid,
         datetime: datetime + 1.second
       )
 
-      self.add_nebulizer(
+      add_nebulizer(
         uuid: kit_uuid,
         nebulizer_uuid: nebulizer_uuid,
         datetime: datetime + 1.second
@@ -72,21 +69,17 @@ class QualitativeFitTestingKitActor
   end
 
   def self.preset_diy_create(uuid: nil, datetime: nil)
-    if uuid.nil?
-      uuid = SecureRandom.uuid
-    end
+    SecureRandom.uuid if uuid.nil?
 
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     ActiveRecord::Base.transaction do
       kit_uuid = SecureRandom.uuid
-      self.create(uuid: kit_uuid, datetime: datetime)
+      create(uuid: kit_uuid, datetime: datetime)
 
       nebulizer_uuid = SecureRandom.uuid
       NebulizerActor.preset_create(
-        model: "Mayluck Portable Nebulizer",
+        model: 'Mayluck Portable Nebulizer',
         uuid: nebulizer_uuid,
         datetime: datetime + 1.second
       )
@@ -116,11 +109,10 @@ class QualitativeFitTestingKitActor
         datetime: datetime + 1.second
       )
 
-
       solution_uuids = [fit_test_solution_uuid, sensitivity_solution_uuid]
 
       solution_uuids.each do |solution_uuid|
-        self.add_solution(
+        add_solution(
           uuid: kit_uuid,
           solution_uuid: solution_uuid,
           datetime: datetime + 1.second
@@ -129,18 +121,17 @@ class QualitativeFitTestingKitActor
 
       # Associate those parts with the qualitative fit testing kit
 
-      self.add_hood(
+      add_hood(
         uuid: kit_uuid,
         hood_uuid: hood_uuid,
         datetime: datetime + 1.second
       )
 
-      self.add_nebulizer(
+      add_nebulizer(
         uuid: kit_uuid,
         nebulizer_uuid: nebulizer_uuid,
         datetime: datetime + 1.second
       )
-
     end
   end
 
@@ -148,9 +139,7 @@ class QualitativeFitTestingKitActor
     uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'QualitativeFitTestingKitAction',
@@ -163,9 +152,7 @@ class QualitativeFitTestingKitActor
   end
 
   def self.add_solution(uuid:, solution_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
     Action.create(
       type: 'QualitativeFitTestingKitAction',
       name: 'AddSolution',
@@ -178,9 +165,7 @@ class QualitativeFitTestingKitActor
   end
 
   def self.remove_solution(uuid:, solution_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'QualitativeFitTestingKitAction',
@@ -193,11 +178,8 @@ class QualitativeFitTestingKitActor
     )
   end
 
-
   def self.add_nebulizer(uuid:, nebulizer_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'QualitativeFitTestingKitAction',
@@ -211,9 +193,7 @@ class QualitativeFitTestingKitActor
   end
 
   def self.remove_nebulizer(uuid:, nebulizer_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'QualitativeFitTestingKitAction',
@@ -227,9 +207,7 @@ class QualitativeFitTestingKitActor
   end
 
   def self.add_hood(uuid:, hood_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'QualitativeFitTestingKitAction',
@@ -243,9 +221,7 @@ class QualitativeFitTestingKitActor
   end
 
   def self.remove_hood(uuid:, hood_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'QualitativeFitTestingKitAction',
@@ -259,9 +235,7 @@ class QualitativeFitTestingKitActor
   end
 
   def self.set_address(uuid:, address_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'QualitativeFitTestingKitAction',

@@ -1,8 +1,8 @@
+# frozen_string_literal: true
+
 class DigitalCaliperStatus < ApplicationRecord
-  def self.refresh!(datetime:nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+  def self.refresh!(datetime: nil)
+    datetime = DateTime.now if datetime.nil?
 
     rows = DigitalCaliperStatusBuilder.build
 

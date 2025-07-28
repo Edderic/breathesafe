@@ -1,8 +1,8 @@
+# frozen_string_literal: true
+
 class UserStatus < ApplicationRecord
   def self.refresh!(datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     results = UserStatusBuilder.build
 
@@ -15,7 +15,6 @@ class UserStatus < ApplicationRecord
         address_uuid: details['address_uuid'],
         refresh_datetime: datetime
       )
-
     end
   end
 end

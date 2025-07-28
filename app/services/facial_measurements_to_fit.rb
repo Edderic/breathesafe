@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 class FacialMeasurementsToFit
   def call
     ActiveRecord::Base.connection.exec_query(
       <<-SQL
-        
         WITH n99_exercises AS (
             SELECT * FROM fit_tests
             WHERE results -> 'quantitative' ->> 'testing_mode' = 'N99'

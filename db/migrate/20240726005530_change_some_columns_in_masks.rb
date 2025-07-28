@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ChangeSomeColumnsInMasks < ActiveRecord::Migration[7.0]
   def change
     rename_column :masks, :elastomeric, :seal

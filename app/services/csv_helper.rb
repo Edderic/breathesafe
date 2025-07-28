@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'csv'
 
 class CsvHelper
@@ -10,8 +12,8 @@ class CsvHelper
     CSV.parse(csv_string) do |row|
       accum = {}
 
-      if counter == 0
-        header = row.map{|r| r.strip}
+      if counter.zero?
+        header = row.map(&:strip)
       else
         row.each.with_index do |value, index|
           accum[header[index]] = value.strip

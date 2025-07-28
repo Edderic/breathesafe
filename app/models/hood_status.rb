@@ -1,12 +1,12 @@
+# frozen_string_literal: true
+
 class HoodStatus < ApplicationRecord
   def self.refresh!(datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     status = HoodStatusBuilder.build
 
-    status.each do |uuid, row|
+    status.each_value do |row|
       row[:refresh_datetime] = datetime
       HoodStatus.create!(
         **row

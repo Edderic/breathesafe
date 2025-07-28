@@ -1,64 +1,67 @@
+# frozen_string_literal: true
+
 class PopulateEventSourcing
   def self.create_mask_kit(data)
     mask_kit_uuid = SecureRandom.uuid
 
-    if data['mask_kit_created_at']
-      MaskKitActor.create(
-        uuid: mask_kit_uuid,
-        datetime: data['mask_kit_created_at'].to_datetime
-      )
+    return unless data['mask_kit_created_at']
 
-      MaskKitActor.add_default_masks(
-        uuid: mask_kit_uuid,
-        datetime: data['mask_kit_created_at'].to_datetime + 1.second
-      )
+    MaskKitActor.create(
+      uuid: mask_kit_uuid,
+      datetime: data['mask_kit_created_at'].to_datetime
+    )
 
-      return {
-        shippable_uuid: mask_kit_uuid,
-        shippable_type: 'MaskKit'
-      }
-    end
+    MaskKitActor.add_default_masks(
+      uuid: mask_kit_uuid,
+      datetime: data['mask_kit_created_at'].to_datetime + 1.second
+    )
+
+    {
+      shippable_uuid: mask_kit_uuid,
+      shippable_type: 'MaskKit'
+    }
   end
 
   def self.create_facial_measurement_kit(data)
     facial_measurement_kit_uuid = SecureRandom.uuid
 
-    if data['facial_measurement_kit_created_at']
-      FacialMeasurementKitActor.preset_create(
-        uuid: facial_measurement_kit_uuid,
-        digital_caliper_model: data['digital_caliper_model'],
-        datetime: data['facial_measurement_kit_created_at'].to_datetime
-      )
+    return unless data['facial_measurement_kit_created_at']
 
-      return {
-        shippable_uuid: facial_measurement_kit_uuid,
-        shippable_type: 'FacialMeasurementKit'
-      }
-    end
+    FacialMeasurementKitActor.preset_create(
+      uuid: facial_measurement_kit_uuid,
+      digital_caliper_model: data['digital_caliper_model'],
+      datetime: data['facial_measurement_kit_created_at'].to_datetime
+    )
+
+    {
+      shippable_uuid: facial_measurement_kit_uuid,
+      shippable_type: 'FacialMeasurementKit'
+    }
   end
 
   def self.create_qualitative_fit_testing_kit(data)
-    if data['qualitative_fit_testing_kit_created_at']
-      qlft_uuid = SecureRandom.uuid
+    return unless data['qualitative_fit_testing_kit_created_at']
 
-      if data['qualitative_fit_testing_kit_type'] == 'Allegro'
-        QualitativeFitTestingKitActor.preset_allegro_create(
-          uuid: qlft_uuid,
-          datetime: data['qualitative_fit_testing_kit_created_at'].to_datetime
-        )
-      else
-        QualitativeFitTestingKitActor.preset_diy_create(
-          uuid: qlft_uuid,
-          datetime: data['qualitative_fit_testing_kit_created_at'].to_datetime
-        )
-      end
+    qlft_uuid = SecureRandom.uuid
 
-      return {
-        shippable_uuid: qlft_uuid,
-        shippable_type: 'QualitativeFitTestingKit'
-      }
+    if data['qualitative_fit_testing_kit_type'] == 'Allegro'
+      QualitativeFitTestingKitActor.preset_allegro_create(
+        uuid: qlft_uuid,
+        datetime: data['qualitative_fit_testing_kit_created_at'].to_datetime
+      )
+    else
+      QualitativeFitTestingKitActor.preset_diy_create(
+        uuid: qlft_uuid,
+        datetime: data['qualitative_fit_testing_kit_created_at'].to_datetime
+      )
     end
+
+    {
+      shippable_uuid: qlft_uuid,
+      shippable_type: 'QualitativeFitTestingKit'
+    }
   end
+
   # Parameters:
   #   all_data: dict,
   #     The key is the email, and the value is some dict about that email
@@ -82,20 +85,13 @@ class PopulateEventSourcing
     kits: nil,
     send_mail: false
   )
+    factory = RGeo::Geographic.simple_mercator_factory if factory.nil?
 
-    if factory.nil?
-      factory = RGeo::Geographic.simple_mercator_factory()
-    end
+    from_address_uuid = AddressQuery.find_address_of(user_email: sender_uuid)[0]['uuid'] if from_address_uuid.nil?
 
-    if from_address_uuid.nil?
-      from_address_uuid = AddressQuery.find_address_of(user_email: sender_uuid)[0]['uuid']
-    end
+    study_uuid = StudyQuery.default_study[0]['uuid'] if study_uuid.nil?
 
-    if study_uuid.nil?
-      study_uuid = StudyQuery.default_study[0]['uuid']
-    end
-
-    all_data.each do |email, v|
+    all_data.each_key do |email|
       receiver_uuid = email
 
       data = all_data[email].with_indifferent_access
@@ -156,9 +152,9 @@ class PopulateEventSourcing
       )
 
       kits = [
-        self.create_mask_kit(data),
-        self.create_facial_measurement_kit(data),
-        self.create_qualitative_fit_testing_kit(data)
+        create_mask_kit(data),
+        create_facial_measurement_kit(data),
+        create_qualitative_fit_testing_kit(data)
       ].compact
 
       shipping_uuid = SecureRandom.uuid
@@ -203,7 +199,7 @@ class PopulateEventSourcing
 
       ShippingActor.set_to_address(
         uuid: shipping_uuid,
-        to_address_uuid: to_address_uuid,
+        to_address_uuid: to_address_uuid
       )
 
       if data['purchase_label'].present?
@@ -217,13 +213,13 @@ class PopulateEventSourcing
         )
       end
 
-      if data['send_to_courier'].present?
-        ShippingActor.send_to_courier(
-          uuid: shipping_uuid,
-          details: data['send_to_courier'],
-          datetime: data['package_created_at'].to_datetime + 1.day
-        )
-      end
+      next unless data['send_to_courier'].present?
+
+      ShippingActor.send_to_courier(
+        uuid: shipping_uuid,
+        details: data['send_to_courier'],
+        datetime: data['package_created_at'].to_datetime + 1.day
+      )
     end
   end
 
@@ -264,23 +260,23 @@ class PopulateEventSourcing
             town_city: 'New Haven',
             state: 'CT',
             country: 'US',
-            zip_code: '06515',
+            zip_code: '06515'
           },
-          'user_created_at' => "2025-04-06",
-          'mask_kit_created_at' => "2025-04-07",
-          'facial_measurement_kit_created_at' => "2025-04-07",
-          'qualitative_fit_testing_kit_created_at' => "2025-04-07",
+          'user_created_at' => '2025-04-06',
+          'mask_kit_created_at' => '2025-04-07',
+          'facial_measurement_kit_created_at' => '2025-04-07',
+          'qualitative_fit_testing_kit_created_at' => '2025-04-07',
           'request_for_equipment' => {
             'study_name' => 'Mask Recommender Based on Facial Features',
             'equipment_request' => {
               'masks' => {
-                'requested_at' => now.to_datetime + 1.second,
+                'requested_at' => now.to_datetime + 1.second
               },
               'qualitative_fit_testing_kit' => {
-                'requested_at' => now.to_datetime + 1.second,
+                'requested_at' => now.to_datetime + 1.second
               },
               'facial_measurement_kit' => {
-                'requested_at' => now.to_datetime + 1.second,
+                'requested_at' => now.to_datetime + 1.second
               },
               'money' => {
                 'request_amount' => 0
@@ -314,9 +310,7 @@ class PopulateEventSourcing
 
     puts(last_shipping_status)
 
-    unless last_shipping_status
-      raise ArgumentError.new("Could not find last shipping status for #{to_user_uuid}")
-    end
+    raise ArgumentError, "Could not find last shipping status for #{to_user_uuid}" unless last_shipping_status
 
     ActiveRecord::Base.transaction do
       shipping_uuid = SecureRandom.uuid
@@ -370,7 +364,7 @@ class PopulateEventSourcing
         ShippingActor.add_item(
           uuid: shipping_uuid,
           shippable_uuid: mask_kit_uuid,
-          shippable_type: 'MaskKit',
+          shippable_type: 'MaskKit'
         )
       end
     end

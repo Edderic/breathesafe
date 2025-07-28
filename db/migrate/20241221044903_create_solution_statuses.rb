@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateSolutionStatuses < ActiveRecord::Migration[7.0]
   def change
     create_table :solution_statuses do |t|
@@ -14,7 +16,7 @@ class CreateSolutionStatuses < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    add_index :solution_statuses, [:uuid, :refresh_datetime], unique: true
+    add_index :solution_statuses, %i[uuid refresh_datetime], unique: true
     add_index :solution_statuses, :uuid
   end
 end

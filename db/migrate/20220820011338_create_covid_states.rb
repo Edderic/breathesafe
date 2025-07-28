@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateCovidStates < ActiveRecord::Migration[7.0]
   def change
     create_table :covid_states do |t|

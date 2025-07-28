@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class FacialMeasurementsFitTestsController < ApplicationController
   before_action :authenticate_user!, only: [:create]
 
@@ -8,10 +10,10 @@ class FacialMeasurementsFitTestsController < ApplicationController
 
     if fm.nil?
       status = 401
-      messages = ["No facial measurement found for this id."]
+      messages = ['No facial measurement found for this id.']
     elsif unauthorized?
       status = 401
-      messages = ["Unauthorized."]
+      messages = ['Unauthorized.']
     else
       user = fm.user
 
@@ -26,10 +28,10 @@ class FacialMeasurementsFitTestsController < ApplicationController
         end
 
         status = 201
-        messages = ["Successfully assigned latest facial measurement to past fit tests."]
+        messages = ['Successfully assigned latest facial measurement to past fit tests.']
       else
         status = 401
-        messages = ["Unauthorized."]
+        messages = ['Unauthorized.']
       end
     end
 

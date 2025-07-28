@@ -1,8 +1,8 @@
+# frozen_string_literal: true
+
 class SolutionStatus < ApplicationRecord
   def self.refresh!(datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     status = SolutionStatusBuilder.build
 

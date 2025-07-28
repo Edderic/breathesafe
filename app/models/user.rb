@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
@@ -5,35 +7,32 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable,
          :confirmable, :lockable, :timeoutable, :trackable
 
-
   has_one :profile
   has_many :events, foreign_key: 'author_id'
   has_many :masks, foreign_key: 'author_id'
   has_many :facial_measurements, foreign_key: 'author_id'
 
   def carbon_dioxide_monitors
-    CarbonDioxideMonitor.find_by_sql("select c.* from carbon_dioxide_monitors as c inner join user_carbon_dioxide_monitors as uc on (c.serial = uc.serial) where uc.user_id = #{self.id}")
+    CarbonDioxideMonitor.find_by_sql("select c.* from carbon_dioxide_monitors as c inner join user_carbon_dioxide_monitors as uc on (c.serial = uc.serial) where uc.user_id = #{id}")
   end
 
   def manages?(other_user)
-    if self.admin
+    if admin
       true
-    elsif self.id == other_user.id
+    elsif id == other_user.id
       true
     elsif ManagedUser.for_manager_and_managed(
-      manager_id: self.id,
+      manager_id: id,
       managed_id: other_user.id
-    ).size > 0
+    ).size.positive?
       true
     else
       false
     end
   end
 
-  def apply_study_datetimes(start_datetime:nil, goal_end_datetime: nil)
-    if start_datetime.nil?
-      start_datetime = DateTime.now
-    end
+  def apply_study_datetimes(start_datetime: nil, goal_end_datetime: nil)
+    start_datetime = DateTime.now if start_datetime.nil?
 
     profile = self.profile
     profile.update(

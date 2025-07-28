@@ -1,8 +1,8 @@
+# frozen_string_literal: true
+
 class Status
   def self.refresh!(datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     ActiveRecord::Base.transaction do
       UserStatus.refresh!(datetime: datetime)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class N99ModeToN95ModeConverterService
   class << self
     def n99_exercises
@@ -145,7 +147,6 @@ class N99ModeToN95ModeConverterService
     end
 
     def n99_mode_fit_tests_ids_with_data_but_missing_filtration_efficiency
-
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
           #{n95_mode_estimates_sql}
@@ -165,9 +166,9 @@ class N99ModeToN95ModeConverterService
               SELECT n99_exercises.id,
               mask_id,
               exercises ->> 'name' AS exercise_name,
-              CASE 
+              CASE#{' '}
                 WHEN exercises ->> 'fit_factor' = '' THEN NULL
-                ELSE (exercises ->> 'fit_factor')::numeric 
+                ELSE (exercises ->> 'fit_factor')::numeric#{' '}
               END as exercise_fit_factor
               FROM n99_exercises, jsonb_array_elements(results -> 'quantitative' -> 'exercises') as exercises
           ), n99_filtration_efficiency_from_exercises AS (
@@ -211,7 +212,7 @@ class N99ModeToN95ModeConverterService
     end
 
     def n95_mode_estimates_sql(mask_id: nil)
-      mask_id_clause = mask_id ? "AND mask_id = #{mask_id.to_i}" : ""
+      mask_id_clause = mask_id ? "AND mask_id = #{mask_id.to_i}" : ''
 
       <<-SQL
           WITH
@@ -294,7 +295,7 @@ class N99ModeToN95ModeConverterService
     end
 
     def call(mask_id: nil)
-      mask_id_clause = mask_id ? "AND mask_id = #{mask_id.to_i}" : ""
+      mask_id_clause = mask_id ? "AND mask_id = #{mask_id.to_i}" : ''
 
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
@@ -383,7 +384,7 @@ class N99ModeToN95ModeConverterService
             masks.perimeter_mm,
             masks.strap_type,
             masks.style,
-            #{FacialMeasurement::COLUMNS.join(",")},
+            #{FacialMeasurement::COLUMNS.join(',')},
             #{FacialMeasurement::COLUMNS.map do |col|
               <<-SQL
                 CASE

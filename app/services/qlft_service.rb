@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class QlftService
   class << self
     # Returns qualitative fit testing data, with facial measurements if
@@ -26,7 +28,7 @@ class QlftService
     #     results
     #
     def call(mask_id: nil)
-      mask_id_clause = mask_id ? "AND mask_id = #{mask_id.to_i}" : ""
+      mask_id_clause = mask_id ? "AND mask_id = #{mask_id.to_i}" : ''
 
       ActiveRecord::Base.connection.exec_query(
         <<-SQL

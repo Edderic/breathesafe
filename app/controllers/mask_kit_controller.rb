@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MaskKitController < ApplicationController
   skip_before_action :verify_authenticity_token
 
@@ -40,14 +42,13 @@ class MaskKitController < ApplicationController
             uuid: mask_kit_uuid,
             mask_uuids: [
               mask_id.to_i
-            ],
+            ]
           }
         )
 
         MaskKitStatus.where(uuid: mask_kit_uuid).destroy_all
         MaskKitStatus.refresh!(uuid: mask_kit_uuid)
       end
-
 
       status = 200
     end

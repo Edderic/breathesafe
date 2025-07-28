@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class EventsController < ApplicationController
   skip_forgery_protection
   # TODO: Might want to rename this to index?
@@ -16,9 +18,9 @@ class EventsController < ApplicationController
 
   def external_create
     api_token = params.require(:api_token)
-    name = params["name"]
+    name = params['name']
 
-    if name == "test"
+    if name == 'test'
       respond_to do |format|
         # Add CO2 stuff here
         format.json do
@@ -30,14 +32,14 @@ class EventsController < ApplicationController
         end
       end
 
-    elsif name == "share"
+    elsif name == 'share'
       profile = Profile.find_by(external_api_token: api_token)
 
-      unless profile && profile.can_post_via_external_api
-        status = :unprocessable_entity
-      else
-        status = :ok
-      end
+      status = if profile&.can_post_via_external_api
+                 :ok
+               else
+                 :unprocessable_entity
+               end
 
       user = profile.user
 
@@ -45,7 +47,7 @@ class EventsController < ApplicationController
         data = params['data']
 
         # Adds the CO2 stuff
-        readings = data["points"].map do |j|
+        readings = data['points'].map do |j|
           json = JSON.parse(j.to_json)
           json['timestamp'] = Time.at(json['timestamp'].to_i / 1000)
           json
@@ -56,16 +58,16 @@ class EventsController < ApplicationController
         place_data = {
           'center': {
             'lat': (bounds['ne'][1] + bounds['sw'][1]) / 2.0,
-            'long': (bounds['ne'][0] + bounds['sw'][0]) / 2.0,
+            'long': (bounds['ne'][0] + bounds['sw'][0]) / 2.0
           },
           'types': []
         }
 
-        if data.key?('sensor_data_from_external_api')
-          sensor_data_from_external_api = data['sensor_data_from_external_api']
-        else
-          sensor_data_from_external_api = true
-        end
+        sensor_data_from_external_api = if data.key?('sensor_data_from_external_api')
+                                          data['sensor_data_from_external_api']
+                                        else
+                                          true
+                                        end
 
         event = Event.create(
           status: 'draft',
@@ -80,35 +82,35 @@ class EventsController < ApplicationController
           room_usable_volume_factor: 0.8,
           room_usable_volume_cubic_meters: 2.43 * 8 * 5,
           ventilation_co2_ambient_ppm: 420,
-          ventilation_co2_measurement_device_name: "AirCoda - External API",
-          ventilation_co2_measurement_device_model: "",
-          ventilation_co2_measurement_device_serial: "",
+          ventilation_co2_measurement_device_name: 'AirCoda - External API',
+          ventilation_co2_measurement_device_model: '',
+          ventilation_co2_measurement_device_serial: '',
           ventilation_ach: 0.1,
           portable_ach: 0.1,
-          duration: "1 hour", # do we need this
-          private: "public",
-          occupancy: {"parsed": {}},
+          duration: '1 hour', # do we need this
+          private: 'public',
+          occupancy: { "parsed": {} },
 
           activity_groups: [
             {
-              "id"=>SecureRandom.uuid, # Do we really need this?
-              "sex"=>"Female", # Let's just average this out?
-              "ageGroup"=>"30 to <40",
-              "maskType"=>"None",
-              "numberOfPeople"=>"10",
-              "rapidTestResult"=>"Unknown",
-              "aerosolGenerationActivity"=>"Resting – Speaking",
-              "carbonDioxideGenerationActivity"=>"Sitting tasks, light effort (e.g, office work)",
+              'id' => SecureRandom.uuid, # Do we really need this?
+              'sex' => 'Female', # Let's just average this out?
+              'ageGroup' => '30 to <40',
+              'maskType' => 'None',
+              'numberOfPeople' => '10',
+              'rapidTestResult' => 'Unknown',
+              'aerosolGenerationActivity' => 'Resting – Speaking',
+              'carbonDioxideGenerationActivity' => 'Sitting tasks, light effort (e.g, office work)'
             }
-          ],
+          ]
         )
 
-        unless event
+        if event
+          url = "#{request.host_with_port}/#/events/#{event.id}/update"
+        else
           # TODO: is there a better status to signify validation error or something?
           status = :unprocessable_entity
-          url = ""
-        else
-          url = "#{request.host_with_port}/#/events/#{event.id}/update"
+          url = ''
         end
       end
 
@@ -117,7 +119,7 @@ class EventsController < ApplicationController
         format.json do
           render json: {
             status: status,
-            name: "share-accepted",
+            name: 'share-accepted',
             data: {
               url: url,
               event: event
@@ -141,20 +143,17 @@ class EventsController < ApplicationController
   end
 
   def approve
-    if !current_user or !current_user.admin?
-      status = :unprocessable_entity
-    else
-      if Event.find(params['id']).update(approved_by_id: current_user.id)
-        status = 201
-      else
-        status = :unprocessable_entity
-      end
-    end
+    status = if !current_user || !current_user.admin?
+               :unprocessable_entity
+             elsif Event.find(params['id']).update(approved_by_id: current_user.id)
+               201
+             else
+               :unprocessable_entity
+             end
 
     respond_to do |format|
       format.json do
-        render json: {
-        }.to_json, status: status
+        render json: {}.to_json, status: status
       end
     end
   end
@@ -166,9 +165,7 @@ class EventsController < ApplicationController
       status = :unprocessable_entity
     else
       event = Event.find(params[:id])
-      if event.update(event_data)
-        status = 200
-      end
+      status = 200 if event.update(event_data)
     end
 
     respond_to do |format|
@@ -180,18 +177,17 @@ class EventsController < ApplicationController
     end
   end
 
-
   def create
     if !current_user
       status = :unprocessable_entity
     else
       event = Event.create(event_data)
 
-      if event
-        status = 201
-      else
-        status = :unprocessable_entity
-      end
+      status = if event
+                 201
+               else
+                 :unprocessable_entity
+               end
     end
 
     respond_to do |format|
@@ -240,26 +236,26 @@ class EventsController < ApplicationController
         :sessionTag, # AirCoda
         :locationAge # AirCoda
       ],
-      activity_groups: [
-        :id,
-        :aerosolGenerationActivity,
-        :carbonDioxideGenerationActivity,
-        :ageGroup,
-        :maskType,
-        :numberOfPeople,
-        :rapidTestResult,
-        :sex
+      activity_groups: %i[
+        id
+        aerosolGenerationActivity
+        carbonDioxideGenerationActivity
+        ageGroup
+        maskType
+        numberOfPeople
+        rapidTestResult
+        sex
       ],
-      portable_air_cleaners: [
-        :id,
-        :airDeliveryRateCubicMetersPerHour,
-        :singlePassFiltrationEfficiency,
-        :notes
+      portable_air_cleaners: %i[
+        id
+        airDeliveryRateCubicMetersPerHour
+        singlePassFiltrationEfficiency
+        notes
       ],
       place_data: {},
       occupancy: {
-        parsed: {},
-      },
+        parsed: {}
+      }
     )
   end
 end

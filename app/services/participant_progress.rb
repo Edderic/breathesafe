@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ParticipantProgress
   # tracks the progress of a participant in the Mask Recommender Based on
   # Facial Features
@@ -6,47 +8,45 @@ class ParticipantProgress
     FacialMeasurement::COLUMNS.map do |c|
       "CASE WHEN #{c} IS NOT NULL AND #{c} != 0 THEN 1 ELSE 0 END AS #{c}_present"
     end.join(',')
-  end#
+  end
 
   def self.string_demographics_present_sql
     Profile::STRING_DEMOG_FIELDS.map do |c|
       "CASE WHEN #{c} IS NOT NULL AND #{c} != '' THEN 1 ELSE 0 END AS #{c}_present"
     end.join(',')
-  end#
+  end
 
   def self.numeric_demographics_present_sql
     Profile::NUM_DEMOG_FIELDS.map do |c|
       "CASE WHEN #{c} IS NOT NULL AND #{c} != 0 THEN 1 ELSE 0 END AS #{c}_present"
     end.join(',')
-  end#
+  end
 
   def self.demographics_present_sql
-    (string_demographics_present_sql + ',' + numeric_demographics_present_sql)
-  end#
+    "#{string_demographics_present_sql},#{numeric_demographics_present_sql}"
+  end
 
   def self.demographics_present_counts
     (Profile::STRING_DEMOG_FIELDS + Profile::NUM_DEMOG_FIELDS).map do |c|
       "#{c}_present"
-    end.join('+') + " AS demog_present_counts"
-  end#
-
+    end.join('+') + ' AS demog_present_counts'
+  end
 
   def self.facial_measurements_present_counts
     FacialMeasurement::COLUMNS.map do |c|
       "#{c}_present"
-    end.join('+') + " AS fm_present_counts"
-  end#
-
+    end.join('+') + ' AS fm_present_counts'
+  end
 
   def self.call(manager_id:)
     user = User.find(manager_id)
-    if user.admin?
-      where = ''
-    else
-      where = "WHERE managed_users.manager_id = #{manager_id}"
-    end
+    where = if user.admin?
+              ''
+            else
+              "WHERE managed_users.manager_id = #{manager_id}"
+            end
 
-    result = JSON.parse(
+    JSON.parse(
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
         WITH managed_by_manager AS (
@@ -58,7 +58,7 @@ class ParticipantProgress
           GROUP BY 1
         ), latest_facial_measurements_for_users AS (
           SELECT fm.*,
-          #{self.facial_measurements_present_sql}
+          #{facial_measurements_present_sql}
           FROM facial_measurements fm
           INNER JOIN latest_facial_measurement_created_at lfm
           ON fm.user_id = lfm.user_id
@@ -67,7 +67,7 @@ class ParticipantProgress
           SELECT id,
            created_at,
            updated_at,
-           #{self.facial_measurements_present_counts},
+           #{facial_measurements_present_counts},
            user_id
           FROM latest_facial_measurements_for_users
         ),
@@ -181,7 +181,5 @@ class ParticipantProgress
         SQL
       ).to_json
     )
-
-    result
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Rails.application.routes.draw do
   devise_for :users, controllers: {
     registrations: 'registrations',
@@ -44,24 +46,24 @@ Rails.application.routes.draw do
   put 'fit_tests/:id', to: 'fit_tests#update'
   delete 'fit_tests/:id', to: 'fit_tests#delete'
 
-  post 'managed_users',to: 'managed_users#create'
-  get 'managed_users',to: 'managed_users#index'
-  get 'managed_users/facial_measurements',to: 'managed_users#facial_measurements'
-  get 'managed_users/:id',to: 'managed_users#show'
-  delete 'managed_users/:id',to: 'managed_users#delete'
+  post 'managed_users', to: 'managed_users#create'
+  get 'managed_users', to: 'managed_users#index'
+  get 'managed_users/facial_measurements', to: 'managed_users#facial_measurements'
+  get 'managed_users/:id', to: 'managed_users#show'
+  delete 'managed_users/:id', to: 'managed_users#delete'
 
-  post 'measurement_devices',to: 'measurement_devices#create'
-  get 'measurement_devices',to: 'measurement_devices#index'
-  get 'measurement_devices/:id',to: 'measurement_devices#show'
-  put 'measurement_devices/:id',to: 'measurement_devices#update'
-  delete 'measurement_devices/:id',to: 'measurement_devices#delete'
+  post 'measurement_devices', to: 'measurement_devices#create'
+  get 'measurement_devices', to: 'measurement_devices#index'
+  get 'measurement_devices/:id', to: 'measurement_devices#show'
+  put 'measurement_devices/:id', to: 'measurement_devices#update'
+  delete 'measurement_devices/:id', to: 'measurement_devices#delete'
 
   post 'facial_measurements/:facial_measurement_id/fit_tests', to: 'facial_measurements_fit_tests#create'
   get 'facial_measurements_fit_tests', to: 'facial_measurements_fit_tests#index'
   get 'facial_measurements_fit_tests/:mask_id', to: 'facial_measurements_fit_tests#show'
 
-  delete 'mask_kit/:managed_user_id/:mask_id/',to: 'mask_kit#delete'
-  get 'mask_kit/:managed_user_id',to: 'mask_kit#index'
+  delete 'mask_kit/:managed_user_id/:mask_id/', to: 'mask_kit#delete'
+  get 'mask_kit/:managed_user_id', to: 'mask_kit#index'
 
   post 'mask_recommender', to: 'mask_recommender#create'
 
@@ -76,7 +78,5 @@ Rails.application.routes.draw do
   # root "articles#index"
   resource :csrf_token, only: [:show]
 
-  resources :facial_measurements_fit_tests, only: [:create, :index]
+  resources :facial_measurements_fit_tests, only: %i[create index]
 end
-
-
