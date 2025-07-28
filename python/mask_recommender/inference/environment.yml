@@ -1,0 +1,28 @@
+name: mask_recommender_inference
+channels:
+  - conda-forge
+dependencies:
+  - arviz
+  - autopep8
+  - beautifulsoup4
+  - boto3
+  - jax
+  - jaxlib=0.6.2
+  - jupyter
+  - jupyterlab=4.4.1
+  - matplotlib
+  - numpy
+  - numpyro
+  - openpyxl
+  - pandas
+  - pre_commit
+  - protobuf
+  - psycopg2
+  - pytest
+  - pymc
+  - python
+  - scikit-learn
+  - seaborn
+  - selenium
+  - tqdm
+
