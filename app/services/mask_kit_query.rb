@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MaskKitQuery
   def self.managed_by(manager_id:)
     # TODO:
@@ -21,14 +23,11 @@ class MaskKitQuery
 
     where_clause = "    WHERE mu.manager_id = #{manager_id.to_i}"
 
-    if u.admin?
-      where_clause = ""
-    end
+    where_clause = '' if u.admin?
 
     results = JSON.parse(
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
-
         WITH fit_test_counts_per_mask_user AS (
           SELECT m.id as mask_id, user_id, CASE WHEN COUNT(ft.id) IS NOT NULL THEN COUNT(ft.id) ELSE 0 END AS num_fit_tests_per_mask_user
           FROM masks m
@@ -77,17 +76,17 @@ class MaskKitQuery
 
     FitTest.json_parse(
       results,
-      [
-        "image_urls",
-        "breathability",
-        "filtration_efficiencies",
-        "payable_datetimes"
+      %w[
+        image_urls
+        breathability
+        filtration_efficiencies
+        payable_datetimes
       ]
     )
   end
 
   def self.find_shipped_mask_accessible_to_managed_user(managed_user_id:, mask_id:)
-    results = JSON.parse(
+    JSON.parse(
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
         SELECT *, mks.uuid as mask_kit_uuid

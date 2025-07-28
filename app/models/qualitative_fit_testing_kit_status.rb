@@ -1,16 +1,15 @@
+# frozen_string_literal: true
+
 class QualitativeFitTestingKitStatus < ApplicationRecord
   def self.refresh!(datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     qlft_kit_status = QualitativeFitTestingKitStatusBuilder.build
 
     uuid = qlft_kit_status.keys[0]
     qlft_kit = QualitativeFitTestingKitStatus.create(uuid: uuid)
 
-    qlft_kit_status.each do |uuid, kit|
-
+    qlft_kit_status.each_value do |kit|
       kit['solution_uuids'].each do |sol_uuid|
         QualitativeFitTestingKitJoin.create!(
           qlft_kit_uuid: qlft_kit.uuid,

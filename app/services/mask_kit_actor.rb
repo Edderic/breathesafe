@@ -1,12 +1,10 @@
+# frozen_string_literal: true
+
 class MaskKitActor
   def self.create(uuid: nil, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
-    if uuid.nil?
-      uuid = SecureRandom.uuid
-    end
+    uuid = SecureRandom.uuid if uuid.nil?
 
     Action.create(
       type: 'MaskKitAction',
@@ -44,9 +42,7 @@ class MaskKitActor
   end
 
   def self.update_mask_id(uuid:, from_mask_uuid:, to_mask_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'MaskKitAction',
@@ -64,7 +60,7 @@ class MaskKitActor
     masks = Mask.where('json_array_length(payable_datetimes) > 0')
 
     masks.each do |m|
-      self.add_masks(
+      add_masks(
         uuid: uuid,
         mask_uuids: m.id,
         datetime: datetime

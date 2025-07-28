@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateTapeMeasureStatuses < ActiveRecord::Migration[7.0]
   def change
     create_table :tape_measure_statuses do |t|
@@ -11,7 +13,7 @@ class CreateTapeMeasureStatuses < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    add_index :tape_measure_statuses, [:uuid,:refresh_datetime, :facial_measurement_kit_uuid], unique: true,
-      name: 'index_tape_mea_sta_on_uuid_refr_fm_kit_uuid'
+    add_index :tape_measure_statuses, %i[uuid refresh_datetime facial_measurement_kit_uuid], unique: true,
+                                                                                             name: 'index_tape_mea_sta_on_uuid_refr_fm_kit_uuid'
   end
 end

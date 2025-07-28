@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CommunityFitTesting
   class << self
     def generate_anonymized_users_for_email(email:, num_users:)
@@ -6,9 +8,8 @@ class CommunityFitTesting
       arr = []
       num_users.times do
         first_name = SecureRandom.uuid
-        last_name = ""
+        last_name = ''
         password = SecureRandom.uuid
-
 
         email = "#{first_name}@fake.com"
         ActiveRecord::Base.transaction do
@@ -20,7 +21,7 @@ class CommunityFitTesting
           user.skip_confirmation!
           user.save!
 
-          profile = Profile.create!(
+          Profile.create!(
             user_id: user.id,
             first_name: first_name,
             last_name: last_name,

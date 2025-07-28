@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'open-uri'
 require 'csv'
 
@@ -6,40 +8,39 @@ class CovidCasesUpdater
   # Check to see if the latest date available is 1 day behind
   # If so, do nothing
   # If not, redownload data
-  def initialize
-  end
+  def initialize; end
 
   def update
     latest_date = CovidState.get_latest_date
 
     # TODO: check to see if today's date corresponds with the latest date
-    if !latest_date || latest_date != Date.today - 1.day
-      url = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv'
-      download = URI.open(url)
+    return unless !latest_date || latest_date != Date.today - 1.day
 
-      rows = []
+    url = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv'
+    download = URI.open(url)
 
-      CSV.foreach(download, headers: true) do |row|
-        rows << row
-      end
+    rows = []
 
-      time = DateTime.now.getutc
+    CSV.foreach(download, headers: true) do |row|
+      rows << row
+    end
 
-      CovidState.transaction do
-        CovidState.delete_all
+    time = DateTime.now.getutc
 
-        CovidState.copy_from_client header do |copy|
-          rows.each do |r|
-            copy << [
-              r["cases"],
-              r["deaths"],
-              r["fips"],
-              r["state"],
-              r["date"].to_date,
-              time,
-              time
-            ]
-          end
+    CovidState.transaction do
+      CovidState.delete_all
+
+      CovidState.copy_from_client header do |copy|
+        rows.each do |r|
+          copy << [
+            r['cases'],
+            r['deaths'],
+            r['fips'],
+            r['state'],
+            r['date'].to_date,
+            time,
+            time
+          ]
         end
       end
     end
@@ -48,14 +49,14 @@ class CovidCasesUpdater
   private
 
   def header
-    [
-      :cases_cumulative,
-      :deaths_cumulative,
-      :fips,
-      :state,
-      :date,
-      :created_at,
-      :updated_at
+    %i[
+      cases_cumulative
+      deaths_cumulative
+      fips
+      state
+      date
+      created_at
+      updated_at
     ]
   end
 end

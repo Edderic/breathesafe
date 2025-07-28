@@ -1,8 +1,8 @@
+# frozen_string_literal: true
+
 class StudyActor
   def self.create(uuid:, name:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     StudyAction.create(
       name: 'Create',

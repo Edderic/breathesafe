@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 class AddressStatusBuilder
   def self.build
     actions = AddressAction.all.order(:datetime)
-    actions.reduce({}) do |accum, action|
+    actions.each_with_object({}) do |action, accum|
       metadata = action.metadata
       uuid = metadata['uuid']
 
@@ -19,8 +21,6 @@ class AddressStatusBuilder
       metadata_copy.each do |k, v|
         accum[uuid][k] = v
       end
-
-      accum
     end
   end
 end

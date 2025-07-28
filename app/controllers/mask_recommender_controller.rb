@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MaskRecommenderController < ApplicationController
   skip_before_action :verify_authenticity_token
 
@@ -23,4 +25,3 @@ class MaskRecommenderController < ApplicationController
     )
   end
 end
-

@@ -1,10 +1,10 @@
+# frozen_string_literal: true
+
 class MeasurementDevice < ApplicationRecord
   belongs_to :owner, foreign_key: 'owner_id', class_name: 'User'
 
-  def self.viewable(user, id=nil)
-    if id
-      where_clause = "WHERE measurement_devices.id = #{id}"
-    end
+  def self.viewable(user, id = nil)
+    where_clause = "WHERE measurement_devices.id = #{id}" if id
 
     MeasurementDevice.connection.exec_query(
       <<-SQL

@@ -1,18 +1,18 @@
+# frozen_string_literal: true
+
 class StudyParticipantActor
   def self.set_snapshot(rows:, datetime:)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     rows.each do |row|
-      row.delete("id")
-      row.delete("refresh_datetime")
-      row.delete("created_at")
-      row.delete("updated_at")
+      row.delete('id')
+      row.delete('refresh_datetime')
+      row.delete('created_at')
+      row.delete('updated_at')
 
       Action.create(
-        type: "StudyParticipantAction",
-        name: "SetSnapshot",
+        type: 'StudyParticipantAction',
+        name: 'SetSnapshot',
         datetime: datetime,
         metadata: row
       )
@@ -24,9 +24,7 @@ class StudyParticipantActor
     participant_uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'StudyParticipantAction',
@@ -44,9 +42,7 @@ class StudyParticipantActor
     participant_uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'StudyParticipantAction',
@@ -65,17 +61,15 @@ class StudyParticipantActor
     study_qualifications:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'StudyParticipantAction',
       name: 'SetStudyQualifications',
       datetime: datetime,
       metadata: {
-        'study_uuid'=> study_uuid,
-        'participant_uuid'=> participant_uuid,
+        'study_uuid' => study_uuid,
+        'participant_uuid' => participant_uuid,
         'qualifications' => study_qualifications
       }
     )
@@ -87,14 +81,9 @@ class StudyParticipantActor
     end_date: nil,
     datetime: nil
   )
+    datetime = DateTime.now if datetime.nil?
 
-    if datetime.nil?
-      datetime = DateTime.now
-    end
-
-    if end_date.nil?
-      end_date = datetime + 4.months
-    end
+    end_date = datetime + 4.months if end_date.nil?
 
     Action.create(
       type: 'StudyParticipantAction',
@@ -113,9 +102,7 @@ class StudyParticipantActor
     participant_uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'StudyParticipantAction',
@@ -133,9 +120,7 @@ class StudyParticipantActor
     participant_uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'StudyParticipantAction',
@@ -153,9 +138,7 @@ class StudyParticipantActor
     participant_uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'StudyParticipantAction',
@@ -174,17 +157,15 @@ class StudyParticipantActor
     equipment_request:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'StudyParticipantAction',
       name: 'RequestForEquipment',
       datetime: datetime,
       metadata: {
-        'study_uuid'=> study_uuid,
-        'participant_uuid'=> participant_uuid,
+        'study_uuid' => study_uuid,
+        'participant_uuid' => participant_uuid,
         'equipment_request' => equipment_request
       }
     )
@@ -195,9 +176,7 @@ class StudyParticipantActor
     participant_uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'StudyParticipantAction',
@@ -215,9 +194,7 @@ class StudyParticipantActor
     participant_uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'StudyParticipantAction',

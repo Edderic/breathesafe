@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DeduplicateMasksService
   class << self
     def call(from_mask_id:, to_mask_id:)

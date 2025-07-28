@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'csv'
 
 class State < ApplicationRecord
@@ -12,8 +14,8 @@ class State < ApplicationRecord
       ),
       'data/state_abbreviations.csv'
     )
-    CSV.foreach(path, encoding: "bom|utf-8", headers: :first_row) do |r|
-      self.create(full_name: r["State"], code: r["Code"])
+    CSV.foreach(path, encoding: 'bom|utf-8', headers: :first_row) do |r|
+      create(full_name: r['State'], code: r['Code'])
     end
   end
 end

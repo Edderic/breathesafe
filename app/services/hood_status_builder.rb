@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 class HoodStatusBuilder
   def self.build
     actions = HoodAction.all.order(:datetime)
 
-    actions.reduce({}) do |accum, action|
+    actions.each_with_object({}) do |action, accum|
       if action.name == 'CreateHood'
         accum[action.metadata['uuid']] = action.metadata
         accum[action.metadata['uuid']]['sanitization'] = []
@@ -12,8 +14,6 @@ class HoodStatusBuilder
           'notes' => action.metadtaa['sanitize_notes']
         }
       end
-
-      accum
     end
   end
 end

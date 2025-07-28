@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Profile, type: :model do
-  context "on create" do
+  context 'on create' do
     let(:user) do
       User.create(
         email: 'some@email.com',
@@ -16,7 +18,7 @@ RSpec.describe Profile, type: :model do
       )
     end
 
-    it "should have an external_api_token " do
+    it 'should have an external_api_token ' do
       expect(profile.external_api_token).to be_present
     end
   end

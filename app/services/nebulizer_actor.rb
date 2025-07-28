@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 class NebulizerActor
   MODELS = {
-    "Mayluck Portable Nebulizer" => {
-      'model' => "Mayluck Portable Nebulizer",
+    'Mayluck Portable Nebulizer' => {
+      'model' => 'Mayluck Portable Nebulizer',
       'weight' => {
         'amount' => 286,
         'measurement_unit' => 'g'
@@ -22,8 +24,8 @@ class NebulizerActor
         'url' => 'https://www.amazon.com/dp/B0D5YR5QWZ'
       }
     },
-    "Allegro" => {
-      'model' => "Allegro",
+    'Allegro' => {
+      'model' => 'Allegro',
       'weight' => {
         'amount' => 74,
         'measurement_unit' => 'g'
@@ -45,15 +47,13 @@ class NebulizerActor
       }
 
     }
-  }
+  }.freeze
   def self.preset_create(
     uuid:,
     model:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     metadata = JSON.parse(MODELS[model].to_json)
     metadata['uuid'] = uuid
@@ -95,13 +95,9 @@ class NebulizerActor
     #     'time_cost':
     #   }
     #
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
-    if uuid.nil?
-      uuid = SecureRandom.UUID
-    end
+    uuid = SecureRandom.UUID if uuid.nil?
 
     Action.create(
       type: 'NebulizerAction',
@@ -134,9 +130,7 @@ class NebulizerActor
     #     'batteries_present': true / false,
     #     'can_be_usb_powered': true / false
     #   }
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     if cost.nil?
       cost = {
@@ -148,7 +142,7 @@ class NebulizerActor
     if amount.nil?
       amount = {
         'quantity' => 2,
-        'type' => 'AA',
+        'type' => 'AA'
       }
 
     end
@@ -161,7 +155,7 @@ class NebulizerActor
         'uuid' => uuid,
         'weight' => weight,
         'amount' => amount,
-        'cost' => cost,
+        'cost' => cost
       }
     )
   end
@@ -183,9 +177,7 @@ class NebulizerActor
     #     'batteries_present': true / false,
     #     'can_be_usb_powered': true / false
     #   }
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     if cost.nil?
       cost = {
@@ -230,17 +222,13 @@ class NebulizerActor
     if cost.nil?
       cost = {
         'material_cost' => 0,
-        'time_cost' => 0,
+        'time_cost' => 0
       }
     end
 
-    if sanitize_notes.nil?
-      sanitize_notes = "Wiped with 99.9% isopropyl alcohol"
-    end
+    sanitize_notes = 'Wiped with 99.9% isopropyl alcohol' if sanitize_notes.nil?
 
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'NebulizerAction',
@@ -256,9 +244,7 @@ class NebulizerActor
 
   # TODO: replace because similar functionality exists
   def self.add_to_qlft_kit(uuid:, qlft_kit_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'NebulizerAction',
@@ -274,9 +260,7 @@ class NebulizerActor
 
   # TODO: replace because similar functionality exists
   def self.remove_from_qlft_kit(uuid:, qlft_kit_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'NebulizerAction',
@@ -290,4 +274,3 @@ class NebulizerActor
     )
   end
 end
-

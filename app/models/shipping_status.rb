@@ -1,8 +1,8 @@
+# frozen_string_literal: true
+
 class ShippingStatus < ApplicationRecord
   def self.refresh!(datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     statuses = ShippingStatusBuilder.build
     statuses.each do |uuid, status|

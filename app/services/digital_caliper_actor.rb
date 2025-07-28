@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DigitalCaliperActor
   def self.create(
     uuid: nil,
@@ -27,13 +29,9 @@ class DigitalCaliperActor
     #     'time_cost':
     #   }
     #
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
-    if uuid.nil?
-      uuid = SecureRandom.uuid
-    end
+    uuid = SecureRandom.uuid if uuid.nil?
 
     if weight.nil?
       weight = {
@@ -42,9 +40,7 @@ class DigitalCaliperActor
       }
     end
 
-    if model.nil?
-      model = 'iGaging 8-inch Digital Caliper'
-    end
+    model = 'iGaging 8-inch Digital Caliper' if model.nil?
 
     if cost.nil?
       cost = {
@@ -93,9 +89,7 @@ class DigitalCaliperActor
     #   batteries: {
     #     'batteries': 2AA / not-applicable,
     #   }
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     if cost.nil?
       cost = {
@@ -114,6 +108,7 @@ class DigitalCaliperActor
       }
     )
   end
+
   def self.mark_as_needing_battery_replacement(
     uuid:,
     datetime: nil
@@ -123,9 +118,7 @@ class DigitalCaliperActor
     #   batteries: {
     #     'batteries': 2AA / not-applicable,
     #   }
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'DigitalCaliperAction',
@@ -148,9 +141,7 @@ class DigitalCaliperActor
     #   batteries: {
     #     'batteries': 2AA / not-applicable,
     #   }
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     if cost.nil?
       cost = {
@@ -189,9 +180,7 @@ class DigitalCaliperActor
     #   batteries: {
     #     'batteries': 2AA / not-applicable,
     #   }
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     if cost.nil?
       cost = {
@@ -236,17 +225,13 @@ class DigitalCaliperActor
     if cost.nil?
       cost = {
         'material_cost' => 0,
-        'time_cost' => 0,
+        'time_cost' => 0
       }
     end
 
-    if sanitize_notes.nil?
-      sanitize_notes = "Wiped with 99.9% isopropyl alcohol"
-    end
+    sanitize_notes = 'Wiped with 99.9% isopropyl alcohol' if sanitize_notes.nil?
 
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'DigitalCaliperAction',
@@ -261,9 +246,7 @@ class DigitalCaliperActor
   end
 
   def self.associate_with_facial_measurement_kit(uuid:, facial_measurement_kit_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'DigitalCaliperAction',
@@ -278,9 +261,7 @@ class DigitalCaliperActor
   end
 
   def self.dissociate_from_facial_measurement_kit(uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'DigitalCaliperAction',
@@ -293,5 +274,3 @@ class DigitalCaliperActor
     )
   end
 end
-
-

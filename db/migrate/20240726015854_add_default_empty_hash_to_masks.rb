@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddDefaultEmptyHashToMasks < ActiveRecord::Migration[7.0]
   def change
     remove_column :masks, :filtration_efficiencies, :jsonb

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class RegistrationsController < Devise::RegistrationsController
   skip_before_action :verify_authenticity_token
   clear_respond_to
@@ -9,7 +11,7 @@ class RegistrationsController < Devise::RegistrationsController
 
       format.json do
         render json: {
-          updateSignedIn: !!current_user
+          updateSignedIn: !current_user.nil?
         }.to_json
       end
     end

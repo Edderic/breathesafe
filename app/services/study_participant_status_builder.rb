@@ -1,23 +1,22 @@
+# frozen_string_literal: true
+
 class StudyParticipantStatusBuilder
   def self.build(datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    DateTime.now if datetime.nil?
 
     actions = StudyParticipantAction.all.order(:datetime)
-    actions.reduce({}) do |accum, action|
+    actions.each_with_object({}) do |action, accum|
       metadata = action.metadata
 
       study_uuid = action.metadata['study_uuid']
       participant_uuid = action.metadata['participant_uuid']
-      if accum[study_uuid].nil?
-        accum[study_uuid] = {}
-      end
+      accum[study_uuid] = {} if accum[study_uuid].nil?
 
-      if action.name == 'SetSnapshot'
+      case action.name
+      when 'SetSnapshot'
         accum[study_uuid][participant_uuid] = metadata
 
-      elsif action.name == 'Create'
+      when 'Create'
         accum[study_uuid][participant_uuid] = {
           'interested_datetime' => nil,
           'accepted_datetime' => nil,
@@ -28,12 +27,12 @@ class StudyParticipantStatusBuilder
           'finished_study_datetime' => nil,
           'qualifications' => {
             'hard_to_fit_face' => nil,
-            'country_of_residence' => nil,
+            'country_of_residence' => nil
           },
           'equipment' => {
             'masks' => {
               'requested_at' => nil,
-              'received_at' => nil,
+              'received_at' => nil
             },
             'facial_measurement_kit' => {
               'requested_at' => nil,
@@ -46,28 +45,27 @@ class StudyParticipantStatusBuilder
             'money' => {
               'requested_at' => nil,
               'received_at' => nil
-            },
+            }
           }
         }
-      elsif action.name == 'MarkInterestedInStudy'
+      when 'MarkInterestedInStudy'
         accum[study_uuid][participant_uuid]['interested_datetime'] = action.datetime
-      elsif action.name == 'AcceptIntoStudy'
+      when 'AcceptIntoStudy'
         accum[study_uuid][participant_uuid]['accepted_datetime'] = action.datetime
-      elsif action.name == 'RemoveFromStudy'
+      when 'RemoveFromStudy'
         accum[study_uuid][participant_uuid]['removal_from_study'] = {
           'reason' => action.metadata['reason'],
           'removal_datetime' => action.datetime
         }
-      elsif action.name == 'FinishStudy'
+      when 'FinishStudy'
         accum[study_uuid][participant_uuid]['finished_study_datetime'] = action.datetime
-      elsif action.name == 'SetStudyQualifications'
+      when 'SetStudyQualifications'
         accum[study_uuid][participant_uuid]['qualifications'] = \
           accum[study_uuid][participant_uuid]['qualifications'].merge(metadata['qualifications'])
-      elsif action.name == 'RequestForEquipment'
-        accum[study_uuid][participant_uuid]['equipment'] = accum[study_uuid][participant_uuid]['equipment'].merge(action.metadata['equipment_request'])
+      when 'RequestForEquipment'
+        accum[study_uuid][participant_uuid]['equipment'] =
+          accum[study_uuid][participant_uuid]['equipment'].merge(action.metadata['equipment_request'])
       end
-
-      accum
     end
   end
 end

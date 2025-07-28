@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateNebulizerStatuses < ActiveRecord::Migration[7.0]
   def change
     create_table :nebulizer_statuses do |t|
@@ -13,7 +15,7 @@ class CreateNebulizerStatuses < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    add_index :nebulizer_statuses, [:uuid, :refresh_datetime], unique: true
+    add_index :nebulizer_statuses, %i[uuid refresh_datetime], unique: true
     add_index :nebulizer_statuses, :uuid
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class StudyQuery
   def self.default_study
     JSON.parse(

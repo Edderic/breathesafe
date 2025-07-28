@@ -1,11 +1,11 @@
+# frozen_string_literal: true
+
 class UserActor
   def self.create(
     uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'UserAction',
@@ -23,9 +23,7 @@ class UserActor
     last_name:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'UserAction',
@@ -43,9 +41,7 @@ class UserActor
     uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'UserAction',
@@ -63,9 +59,7 @@ class UserActor
     address_uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'UserAction',
@@ -73,7 +67,7 @@ class UserActor
       name: 'SetAddress',
       metadata: {
         'uuid' => uuid,
-        'address_uuid' => address_uuid,
+        'address_uuid' => address_uuid
       }
     )
   end
@@ -82,9 +76,7 @@ class UserActor
     uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'UserAction',
@@ -104,9 +96,7 @@ class UserActor
     mask_kit_uuid:,
     datetime: nil
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'UserAction',
@@ -114,7 +104,7 @@ class UserActor
       datetime: datetime,
       metadata: {
         'user_uuid': user_uuid,
-        'mask_kit_uuid': mask_kit_uuid,
+        'mask_kit_uuid': mask_kit_uuid
       }
     )
   end

@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 class N95ModeService
   def self.call(mask_id: nil)
-    mask_id_clause = mask_id ? "AND mask_id = #{mask_id.to_i}" : ""
+    mask_id_clause = mask_id ? "AND mask_id = #{mask_id.to_i}" : ''
 
     # Looks for FitTests where testing_mode is 'N95'
     # Computes the harmonic mean fit factor (hmff) for all the exercises,
@@ -19,14 +21,14 @@ class N95ModeService
             SELECT n95_exercises.id,
             mask_id,
             exercises ->> 'name' AS exercise_name,
-            CASE 
+            CASE#{' '}
               WHEN exercises ->> 'fit_factor' = '' THEN NULL
-              ELSE (exercises ->> 'fit_factor')::numeric 
+              ELSE (exercises ->> 'fit_factor')::numeric#{' '}
             END as exercise_fit_factor,
-            CASE 
+            CASE#{' '}
               WHEN exercises ->> 'fit_factor' = '' THEN NULL
               WHEN (exercises ->> 'fit_factor')::numeric IS NULL THEN NULL
-              ELSE 1 / (exercises ->> 'fit_factor')::numeric 
+              ELSE 1 / (exercises ->> 'fit_factor')::numeric#{' '}
             END AS inverse_exercise_fit_factor
             FROM n95_exercises, jsonb_array_elements(results -> 'quantitative' -> 'exercises') as exercises
             WHERE exercises ->> 'name' != 'Normal breathing (SEALED)'

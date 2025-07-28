@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateHoodStatuses < ActiveRecord::Migration[7.0]
   def change
     create_table :hood_statuses do |t|
@@ -12,7 +14,7 @@ class CreateHoodStatuses < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    add_index :hood_statuses, [:uuid, :refresh_datetime], unique: true
+    add_index :hood_statuses, %i[uuid refresh_datetime], unique: true
     add_index :hood_statuses, :uuid
   end
 end

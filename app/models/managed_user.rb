@@ -1,9 +1,10 @@
+# frozen_string_literal: true
+
 class ManagedUser < ApplicationRecord
   belongs_to :manager, foreign_key: 'manager_id', class_name: 'User'
   belongs_to :managed, foreign_key: 'managed_id', class_name: 'User'
 
   def self.for_manager_id(args)
-
     JSON.parse(
       ManagedUser.connection.exec_query(
         <<-SQL

@@ -4,7 +4,7 @@
 #
 
 class AwsLambdaInvokeService
-  DEFAULT_REGION = "us-east-1"
+  DEFAULT_REGION = 'us-east-1'
   MAX_BODY_ROWS = 100
   class << self
     def call(function_name:, payload: {}, region: DEFAULT_REGION)
@@ -17,10 +17,10 @@ class AwsLambdaInvokeService
 
     def init_aws_lambda_client(region)
       Aws::Lambda::Client.new({
-        region: region,
-        access_key_id: ENV["AWS_ACCESS_KEY_ID"],
-        secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
-      })
+                                region: region,
+                                access_key_id: ENV['AWS_ACCESS_KEY_ID'],
+                                secret_access_key: ENV['AWS_SECRET_ACCESS_KEY']
+                              })
     end
 
     def invoke_lambda(aws_lambda, function_name, payload)
@@ -29,10 +29,10 @@ class AwsLambdaInvokeService
     end
 
     def parse_lambda_response(result)
-      raw_response = +""
+      raw_response = +''
       result.payload.each { |chunk| raw_response << chunk }
       Oj.load(raw_response)
-    rescue => e
+    rescue StandardError => e
       raise "Failed to parse Lambda response: #{e.message}"
     end
   end

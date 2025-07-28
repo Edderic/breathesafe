@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # 1 gallon = 3785.41 mL
 # 100 mL
@@ -29,10 +31,9 @@ class SolutionActor
               'measurement_unit': 'minutes'
             }
           },
-          flavor_type: 'saccharin',
+          flavor_type: 'saccharin'
         },
-        'bitrex' => {
-        }
+        'bitrex' => {}
       },
       'sensitivity' => {
         'saccharin' => {
@@ -53,11 +54,10 @@ class SolutionActor
               'measurement_unit': 'minutes'
             }
           },
-          flavor_type: 'saccharin',
+          flavor_type: 'saccharin'
         },
-        'bitrex' => {
-        }
-      },
+        'bitrex' => {}
+      }
     },
     'DIY' => {
       'fit_test' => {
@@ -78,10 +78,9 @@ class SolutionActor
               'amount': 2,
               'measurement_unit': 'minutes'
             }
-          },
+          }
         },
-        'bitrex' => {
-        },
+        'bitrex' => {}
       },
       'sensitivity' => {
         'saccharin' => {
@@ -98,17 +97,16 @@ class SolutionActor
           cost: {
             'material_cost': 0.04,
             'time_cost': {
-                  'amount': 1,
-                  'measurement_unit': 'minute'
-             }
+              'amount': 1,
+              'measurement_unit': 'minute'
+            }
           },
           flavor_type: 'saccharin'
         },
-        'bitrex' => {
-        },
-      },
+        'bitrex' => {}
+      }
     }
-  }
+  }.freeze
 
   def self.preset_create(
     uuid:,
@@ -118,9 +116,7 @@ class SolutionActor
     datetime: nil
 
   )
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     metadata = JSON.parse(MODELS[model][concentration_type][flavor_type].to_json)
 
@@ -137,13 +133,13 @@ class SolutionActor
   end
 
   def self.create(
-    uuid: ,
+    uuid:,
     concentration_type:,
     volume:,
     how:,
     flavor_type:,
     cost:,
-    volume_level_proportion:nil,
+    volume_level_proportion: nil,
     datetime: nil
   )
     # Parameters:
@@ -161,9 +157,7 @@ class SolutionActor
     #     'time_cost':
     #   }
     #
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'SolutionAction',
@@ -190,13 +184,9 @@ class SolutionActor
     #   uuid: uuid
     #   datetime: Defaults to nil
     #     if nil, gets DateTime.now
-    if cost.nil?
-      cost = 0
-    end
+    0 if cost.nil?
 
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'SolutionAction',
@@ -204,16 +194,14 @@ class SolutionActor
       datetime: datetime,
       metadata: {
         'uuid' => uuid,
-        'volume_level_proportion' => volume_level_proportion,
+        'volume_level_proportion' => volume_level_proportion
       }
     )
   end
 
   # TODO: Use the one in QualitativeFitTestingKitActor
   def self.add_to_qlft_kit(uuid:, qlft_kit_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'SolutionAction',
@@ -228,9 +216,7 @@ class SolutionActor
   end
 
   def self.remove_from_qlft_kit(uuid:, qlft_kit_uuid:, datetime: nil)
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
     Action.create(
       type: 'HoodAction',

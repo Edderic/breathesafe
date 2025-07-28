@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'nokogiri'
 
 class UspsOrderParser
@@ -7,24 +9,21 @@ class UspsOrderParser
 
   def parse_orders
     doc = Nokogiri::HTML.parse(@file)
-    headers = doc.css("table thead tr").first.css('th')[2..].map(&:text)
+    doc.css('table thead tr').first.css('th')[2..].map(&:text)
 
-    doc.css("table tbody tr").map do |row|
-      date = row.css("td")[2].text
-      name = row.css("td")[3].css("p").text
-      address_array = row.css("td")[3].css("address")[0].children.map(&:text)
-      address = address_array.reduce("") do |accum, item|
-        unless item == ""
-          accum += "\n" + item
-        end
+    doc.css('table tbody tr').map do |row|
+      date = row.css('td')[2].text
+      name = row.css('td')[3].css('p').text
+      address_array = row.css('td')[3].css('address')[0].children.map(&:text)
+      address = address_array.reduce('') do |accum, item|
+        accum += "\n#{item}" unless item == ''
 
         accum
-      end.lstrip.rstrip
+      end.strip
 
-      weight_oz = row.css("td")[5].children[0].text
-      value = UspsOrderParser.get_value(row).text.split(": ")[1]
-      label_number = row.css("td")[7].css('p').text
-
+      weight_oz = row.css('td')[5].children[0].text
+      value = UspsOrderParser.get_value(row).text.split(': ')[1]
+      label_number = row.css('td')[7].css('p').text
 
       {
         date: date,
@@ -39,7 +38,7 @@ class UspsOrderParser
 
   class << self
     def get_value(row)
-      row.css("td")[5].children.find{|c| c.text.match("Value") }
+      row.css('td')[5].children.find { |c| c.text.match('Value') }
     end
   end
 end

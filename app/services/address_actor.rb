@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddressActor
   def self.stringify_address(address:)
     state_zip_code = "#{address[:state]} #{address[:zip_code]}"
@@ -8,38 +10,32 @@ class AddressActor
       address[:town_city],
       state_zip_code,
       address[:country]
-    ].select{|x| x.present?}.join(', ')
+    ].select(&:present?).join(', ')
   end
 
-  def self.find_or_create(address:, uuid:nil, factory: nil, datetime: nil)
-    if factory.nil?
-      factory = RGeo::Geographic.simple_mercator_factory()
-    end
+  def self.find_or_create(address:, uuid: nil, factory: nil, datetime: nil)
+    factory = RGeo::Geographic.simple_mercator_factory if factory.nil?
 
-    if datetime.nil?
-      datetime = DateTime.now
-    end
+    datetime = DateTime.now if datetime.nil?
 
-    if uuid.nil?
-      uuid = SecureRandom.uuid
-    end
+    uuid = SecureRandom.uuid if uuid.nil?
 
-    stringified_address = self.stringify_address(address: address)
+    stringified_address = stringify_address(address: address)
     created_address_actions = AddressAction.where(
       "name = 'CreateAddress' AND metadata ->> 'stringified_address' = '#{stringified_address}' AND datetime < '#{datetime}'"
     ).order(:datetime)
 
-    if created_address_actions.count == 0
+    if created_address_actions.count.zero?
       search = Geocoder.search(stringified_address)
       search_item = search[0]
 
-      if search_item
-        point = factory.point(
-          search_item.data['lat'], search_item.data['lon']
-        )
-      else
-        point = ""
-      end
+      point = if search_item
+                factory.point(
+                  search_item.data['lat'], search_item.data['lon']
+                )
+              else
+                ''
+              end
 
       AddressAction.create(
         name: 'CreateAddress',
@@ -48,7 +44,7 @@ class AddressActor
           stringified_address: stringified_address,
           address: address,
           address_coordinate: point.to_s
-        },
+        }
       )
 
     else

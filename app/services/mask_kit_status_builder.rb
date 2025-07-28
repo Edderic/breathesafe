@@ -1,31 +1,32 @@
+# frozen_string_literal: true
+
 class MaskKitStatusBuilder
   def self.build(uuid: nil)
-    if uuid.present?
-      mask_kit_actions = MaskKitAction.where("metadata ->> 'uuid' = '#{uuid}'").order(:datetime)
-    else
-      mask_kit_actions = MaskKitAction.all.order(:datetime)
-    end
+    mask_kit_actions = if uuid.present?
+                         MaskKitAction.where("metadata ->> 'uuid' = '#{uuid}'").order(:datetime)
+                       else
+                         MaskKitAction.all.order(:datetime)
+                       end
 
-    mask_kit_actions.reduce({}) do |accum, mask_kit_action|
-      uuid =  mask_kit_action['metadata']['uuid']
+    mask_kit_actions.each_with_object({}) do |mask_kit_action, accum|
+      uuid = mask_kit_action['metadata']['uuid']
 
-      if mask_kit_action.name == 'CreateMaskKit'
+      case mask_kit_action.name
+      when 'CreateMaskKit'
         accum[uuid] = {
           'uuid' => uuid,
           'mask_uuids' => []
         }
-      elsif mask_kit_action.name == 'AddMasks'
+      when 'AddMasks'
         # Assumption right now is mask_uuids is an item
         accum[uuid]['mask_uuids'] << mask_kit_action.metadata['mask_uuids']
-      elsif mask_kit_action.name == 'RemoveMasks'
+      when 'RemoveMasks'
         accum[uuid]['mask_uuids'] = \
           accum[uuid]['mask_uuids'] - mask_kit_action.metadata['mask_uuids']
-      elsif mask_kit_action.name == 'UpdateMaskId'
+      when 'UpdateMaskId'
         accum[uuid]['mask_uuids'] -= [mask_kit_action.metadata['from_mask_uuid']]
         accum[uuid]['mask_uuids'] += [mask_kit_action.metadata['to_mask_uuid']]
       end
-
-      accum
     end
   end
 end

@@ -107,12 +107,13 @@ class FacialMeasurementOutliersService
       SQL
     end
 
-    def zscored_sql(manager_id: nil, facial_measurement_id_of_lower_bound: nil, facial_measurement_id_of_upper_bound: nil)
+    def zscored_sql(manager_id: nil, facial_measurement_id_of_lower_bound: nil,
+                    facial_measurement_id_of_upper_bound: nil)
       manager_filter = manager_id ? "INNER JOIN managed_users mu ON mu.managed_id = fm.user_id AND mu.manager_id = #{manager_id}" : ''
       lower_bound_join = facial_measurement_id_of_lower_bound ? "LEFT JOIN facial_measurements lb ON lb.id = #{facial_measurement_id_of_lower_bound}" : ''
       upper_bound_join = facial_measurement_id_of_upper_bound ? "LEFT JOIN facial_measurements ub ON ub.id = #{facial_measurement_id_of_upper_bound}" : ''
 
-      sql = <<-SQL
+      <<-SQL
         zscored_sql AS (
           SELECT
             fm.id,
@@ -142,7 +143,7 @@ class FacialMeasurementOutliersService
         WITH
         #{latest_measurements_sql},
         #{measurement_stats_sql(manager_id: manager_id, lower_bound_id: facial_measurement_id_of_lower_bound, upper_bound_id: facial_measurement_id_of_upper_bound)},
-        #{zscored_sql(manager_id: , facial_measurement_id_of_lower_bound: , facial_measurement_id_of_upper_bound: )}
+        #{zscored_sql(manager_id:, facial_measurement_id_of_lower_bound:, facial_measurement_id_of_upper_bound:)}
 
         SELECT * FROM zscored_sql
       SQL

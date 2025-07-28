@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateManagedUsers < ActiveRecord::Migration[7.0]
   def change
     create_table :managed_users do |t|

@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 class NebulizerStatusBuilder
   def self.build
     nebulizer_actions = NebulizerAction.all.order(:datetime)
 
-    nebulizer_actions.reduce({}) do |accum, nebulizer_action|
+    nebulizer_actions.each_with_object({}) do |nebulizer_action, accum|
       uuid = nebulizer_action['metadata']['uuid']
       metadata = nebulizer_action['metadata']
 
@@ -20,8 +22,6 @@ class NebulizerStatusBuilder
       elsif nebulizer_action.name == 'Sanitize'
         accum[uuid]['sanitization'] << JSON.parse(metadata.to_json).delete('uuid')
       end
-
-      accum
     end
   end
 end

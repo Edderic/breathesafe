@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ManagedUsersController < ApplicationController
   def index
     if current_user.nil?
@@ -41,10 +43,10 @@ class ManagedUsersController < ApplicationController
         user.skip_confirmation!
         user.save!
 
-        profile = Profile.create!(
+        Profile.create!(
           user_id: user.id,
-          first_name: "Edit",
-          last_name: "Me",
+          first_name: 'Edit',
+          last_name: 'Me',
           measurement_system: 'imperial'
         )
 
@@ -62,7 +64,6 @@ class ManagedUsersController < ApplicationController
         }
 
         status = 201
-
       rescue ActiveRecord::StatementInvalid
         to_render = {
           managed_user: {},
@@ -70,7 +71,6 @@ class ManagedUsersController < ApplicationController
         }
 
         status = 422
-
       end
     end
 
@@ -119,14 +119,14 @@ class ManagedUsersController < ApplicationController
       messages = ['Please log in.']
       status = 422
     else
-      managed_users = ManagedUser.for_manager_and_managed(
+      ManagedUser.for_manager_and_managed(
         manager_id: current_user.id,
         managed_id: params[:id]
       )
 
       ActiveRecord::Base.transaction do
         facial_measurements = FacialMeasurement.where(user_id: params[:id])
-        fit_tests = FitTest.where(facial_measurement_id: facial_measurements.map(&:id) )
+        fit_tests = FitTest.where(facial_measurement_id: facial_measurements.map(&:id))
         fit_tests.destroy_all
 
         facial_measurements.destroy_all
@@ -149,7 +149,6 @@ class ManagedUsersController < ApplicationController
       messages: messages
     }
 
-
     respond_to do |format|
       format.json do
         render json: to_render.to_json, status: status
@@ -160,7 +159,7 @@ class ManagedUsersController < ApplicationController
   def facial_measurements
     if unauthorized?
       status = 401
-      messages = ["Unauthorized."]
+      messages = ['Unauthorized.']
       facial_measurements = []
     else
       facial_measurements = FacialMeasurementOutliersService.call(manager_id: current_user.id)

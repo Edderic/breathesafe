@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 class MasksController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def create
     if unauthorized?
       status = 401
-      messages = ["Unauthorized."]
+      messages = ['Unauthorized.']
       mask = {}
     else
       hashed_mask_data = mask_data.to_hash
@@ -12,7 +14,7 @@ class MasksController < ApplicationController
 
       mask = Mask.create(hashed_mask_data)
 
-      if mask.errors.full_messages.size == 0
+      if mask.errors.full_messages.empty?
         status = 201
         messages = []
       else
@@ -68,18 +70,17 @@ class MasksController < ApplicationController
     # Later on, parents should be able to view / edit their children's data
     unless current_user
       status = 401
-      messages = ["Unauthorized."]
+      messages = ['Unauthorized.']
       to_render = {}
     end
 
     mask = Mask.find(params[:id])
 
-
     # TODO: admins should be able to update data no matter who owns it.
     if mask.author_id != current_user.id
       status = 401
       to_render = {}
-      messages = ["Current user is not the author."]
+      messages = ['Current user is not the author.']
     elsif mask.update(mask_data)
       status = 204
       to_render = {}
@@ -100,12 +101,11 @@ class MasksController < ApplicationController
   def delete
     unless current_user
       status = 401
-      messages = ["Unauthorized."]
       to_render = {}
     end
 
     mask = Mask.find(params[:id])
-    mask_with_aggregations = Mask.with_aggregations(mask_id=mask.id)[0]
+    mask_with_aggregations = Mask.with_aggregations(mask.id)[0]
 
     if mask.author_id != current_user.id
       status = 401
@@ -113,7 +113,7 @@ class MasksController < ApplicationController
       to_render = {
         messages: messages
       }
-    elsif mask_with_aggregations['fit_test_count'] > 0
+    elsif mask_with_aggregations['fit_test_count'].positive?
       status = 401
       to_render = {
         messages: ['Cannot delete a mask that already has a Fit Test assigned to it.']
@@ -157,16 +157,15 @@ class MasksController < ApplicationController
       sources: [],
       image_urls: [],
       where_to_buy_urls: [],
-      filtration_efficiencies: [
-        :filtration_efficiency_percent,
-        :filtration_efficiency_source,
-        :filtration_efficiency_notes
+      filtration_efficiencies: %i[
+        filtration_efficiency_percent
+        filtration_efficiency_source
+        filtration_efficiency_notes
       ],
-      breathability: [
-        :breathability_pascals,
-        :breathability_source
+      breathability: %i[
+        breathability_pascals
+        breathability_source
       ]
     )
   end
 end
-
