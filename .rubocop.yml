@@ -5,9 +5,6 @@
 Metrics/MethodLength:
   Enabled: false
 
-# Inherit from the default configuration
-inherit_from: .rubocop_todo.yml
-
 # Exclude certain directories and files
 AllCops:
   Exclude:
