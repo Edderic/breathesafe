@@ -40,6 +40,7 @@ def scale_data(df, features):
 
     scaler = StandardScaler()
     df[features_to_scale] = scaler.fit_transform(df[features_to_scale])
+    return scaler
 
 
 def ensure_correct_types(df, features_to_type_mapping):
@@ -208,7 +209,10 @@ def evaluate(
     # Find rows with NaN mask_idx (unseen mask_id in test set)
     nan_mask_rows = X_test[mask_idx_test.isna()]
     if not nan_mask_rows.empty:
-        print("Warning: The following test rows have mask_id not seen in training and will be dropped:")
+        print(
+            "Warning: The following test rows have mask_id "
+            + "not seen in training and will be dropped:"
+        )
         print(nan_mask_rows[['mask_id']])
         # Drop these rows from test set
         X_test = X_test[mask_idx_test.notna()]
@@ -299,6 +303,18 @@ def save_mask_data_for_inference(mask_id_to_idx, df, filename='mask_data.json'):
         json.dump(mask_data, f, indent=2)
 
 
+def save_scaler_for_inference(scaler, filename='scaler.json'):
+    """Save scaler information needed for inference"""
+    scaler_data = {
+        'mean': scaler.mean_.tolist(),
+        'scale': scaler.scale_.tolist(),
+        'feature_names': scaler.feature_names_in_.tolist()
+    }
+
+    with open(filename, 'w') as f:
+        json.dump(scaler_data, f, indent=2)
+
+
 # 2. Main training script
 def main():
     endpoint = 'https://www.breathesafe.xyz/facial_measurements_fit_tests.json'
@@ -369,7 +385,7 @@ def main():
         }
     }
 
-    scale_data(df, features_to_type_mapping)
+    scaler = scale_data(df, features_to_type_mapping)
     predictor_cols = [
         k for k, v in features_to_type_mapping.items() if k != outcome_variable
     ]
@@ -491,6 +507,7 @@ def main():
     display_performance_grouped_by_mask(train_df_copy_with_mask_names)
 
     save_mask_data_for_inference(mask_id_to_idx, df)
+    save_scaler_for_inference(scaler)
 
 
 def display_performance_grouped_by_mask(df):
