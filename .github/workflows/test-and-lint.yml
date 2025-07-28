@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:13
@@ -30,7 +30,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.3'
+        ruby-version: '3.3.9'
         bundler-cache: true
 
     - name: Install system dependencies
@@ -54,7 +54,7 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -62,7 +62,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.3'
+        ruby-version: '3.3.9'
         bundler-cache: true
 
     - name: Run RuboCop
@@ -71,7 +71,7 @@ jobs:
 
   python-tests:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -87,7 +87,7 @@ jobs:
         wget -O Mambaforge.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
         bash Mambaforge.sh -b -p $HOME/mambaforge
         source $HOME/mambaforge/bin/activate
-        
+
         # Create environment from environment.yml
         mamba env create -f python/mask_recommender/inference/environment.yml
         source activate mask-recommender-inference
@@ -95,4 +95,4 @@ jobs:
     - name: Run Python tests
       run: |
         cd python/mask_recommender/inference
-        python -m pytest tests/ -v 
+        python -m pytest tests/ -v
