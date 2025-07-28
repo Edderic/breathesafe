@@ -1,0 +1,100 @@
+name: Retrain Mask Recommender Model (Staging)
+
+on:
+  schedule:
+    # Run every Saturday at 2 AM UTC (day before production)
+    - cron: '0 2 * * 6'
+  workflow_dispatch: # Allow manual triggers
+  push:
+    tags:
+      - 'staging-retrain-*'  # Manual trigger with staging retrain tags
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    environment: staging  # Use staging environment variables
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        # Install mamba
+        wget -O Mambaforge.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
+        bash Mambaforge.sh -b -p $HOME/mambaforge
+        source $HOME/mambaforge/bin/activate
+        
+        # Create environment from environment.yml
+        mamba env create -f python/mask_recommender/training/environment.yml
+        source activate mask_recommender
+    
+    - name: Fetch latest data and retrain
+      env:
+        API_ENDPOINT: ${{ secrets.RAILS_API_ENDPOINT || 'https://www.breathesafe.xyz/facial_measurements_fit_tests.json' }}
+      run: |
+        cd python/mask_recommender/training
+        python train.py
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+    
+    - name: Upload model artifacts to S3 (Staging)
+      run: |
+        # Upload with timestamp for versioning
+        aws s3 cp python/mask_recommender/training/pymc_trace.nc s3://${{ secrets.S3_BUCKET }}/models/staging/pymc_trace_$(date +%Y%m%d_%H%M%S).nc
+        # Upload as latest for staging inference Lambda
+        aws s3 cp python/mask_recommender/training/pymc_trace.nc s3://${{ secrets.S3_BUCKET }}/models/staging/pymc_trace_latest.nc
+        
+        # Upload mask data
+        aws s3 cp python/mask_recommender/training/mask_data.json s3://${{ secrets.S3_BUCKET }}/models/staging/mask_data_latest.json
+        
+        # Upload scaler
+        aws s3 cp python/mask_recommender/training/scaler.json s3://${{ secrets.S3_BUCKET }}/models/staging/scaler_latest.json
+    
+    - name: Send success notification
+      uses: dawidd6/action-send-mail@v3
+      if: success()
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "Staging Mask Recommender Model Updated"
+        to: ${{ secrets.NOTIFICATION_EMAIL }}
+        from: ${{ secrets.EMAIL_USERNAME }}
+        body: |
+          The mask recommender model has been successfully retrained and deployed to STAGING.
+          
+          Model artifacts uploaded to S3:
+          - Latest trace: s3://${{ secrets.S3_BUCKET }}/models/staging/pymc_trace_latest.nc
+          - Timestamped backup: s3://${{ secrets.S3_BUCKET }}/models/staging/pymc_trace_$(date +%Y%m%d_%H%M%S).nc
+          - Mask data: s3://${{ secrets.S3_BUCKET }}/models/staging/mask_data_latest.json
+          - Scaler: s3://${{ secrets.S3_BUCKET }}/models/staging/scaler_latest.json
+          
+          The staging inference Lambda function will automatically use the latest model.
+    
+    - name: Send failure notification
+      uses: dawidd6/action-send-mail@v3
+      if: failure()
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "Staging Mask Recommender Model Training Failed"
+        to: ${{ secrets.NOTIFICATION_EMAIL }}
+        from: ${{ secrets.EMAIL_USERNAME }}
+        body: |
+          The mask recommender model training in STAGING failed.
+          
+          Check the GitHub Actions logs for details. 
