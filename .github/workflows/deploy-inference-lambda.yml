@@ -1,0 +1,109 @@
+name: Deploy Inference Lambda
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v1.0.0, v1.1.0, etc.
+    paths:
+      - 'python/mask_recommender/inference/**'  # Only trigger when inference code changes
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r python/mask_recommender/inference/requirements.txt
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+    
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+    
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: mask-recommender-inference
+        IMAGE_TAG: ${{ github.ref_name }}
+      run: |
+        # Build a docker container and push it to ECR
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/inference/
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/inference/
+        
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        echo "image_latest=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
+        
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    
+    - name: Deploy to AWS Lambda
+      run: |
+        # Update the Lambda function with the new image
+        aws lambda update-function-code \
+          --function-name mask-recommender-inference \
+          --image-uri ${{ steps.build-image.outputs.image_latest }}
+        
+        # Wait for the update to complete
+        aws lambda wait function-updated \
+          --function-name mask-recommender-inference
+    
+    - name: Verify deployment
+      run: |
+        # Get function info to verify deployment
+        aws lambda get-function \
+          --function-name mask-recommender-inference \
+          --query 'Configuration.[FunctionName,LastModified,State]' \
+          --output table
+    
+    - name: Send deployment notification
+      uses: dawidd6/action-send-mail@v3
+      if: success()
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "Inference Lambda Deployed - ${{ github.ref_name }}"
+        to: ${{ secrets.NOTIFICATION_EMAIL }}
+        from: ${{ secrets.EMAIL_USERNAME }}
+        body: |
+          The mask recommender inference Lambda function has been successfully deployed.
+          
+          Version: ${{ github.ref_name }}
+          Image: ${{ steps.build-image.outputs.image_latest }}
+          Function: mask-recommender-inference
+          
+          The function is now ready to serve predictions.
+    
+    - name: Send failure notification
+      uses: dawidd6/action-send-mail@v3
+      if: failure()
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "Inference Lambda Deployment Failed - ${{ github.ref_name }}"
+        to: ${{ secrets.NOTIFICATION_EMAIL }}
+        from: ${{ secrets.EMAIL_USERNAME }}
+        body: |
+          The mask recommender inference Lambda function deployment failed.
+          
+          Version: ${{ github.ref_name }}
+          Check the GitHub Actions logs for details. 
