@@ -13,6 +13,7 @@ on:
 jobs:
   retrain:
     runs-on: ubuntu-latest
+    environment: production  # Use production environment variables
     
     steps:
     - name: Checkout code
