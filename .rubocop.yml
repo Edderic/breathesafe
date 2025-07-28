@@ -5,6 +5,9 @@
 Metrics/MethodLength:
   Enabled: false
 
+Metrics/BlockLength:
+  Enabled: false
+
 # Exclude certain directories and files
 AllCops:
   Exclude:
