@@ -25,13 +25,20 @@ jobs:
     
     - name: Install dependencies
       run: |
-        pip install -r python/mask_recommender/requirements.txt
+        # Install mamba
+        wget -O Mambaforge.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
+        bash Mambaforge.sh -b -p $HOME/mambaforge
+        source $HOME/mambaforge/bin/activate
+        
+        # Create environment from environment.yml
+        mamba env create -f python/mask_recommender/training/environment.yml
+        source activate mask_recommender
     
     - name: Fetch latest data and retrain
       env:
         API_ENDPOINT: ${{ secrets.RAILS_API_ENDPOINT || 'https://www.breathesafe.xyz/facial_measurements_fit_tests.json' }}
       run: |
-        cd python/mask_recommender
+        cd python/mask_recommender/training
         python train.py
     
     - name: Configure AWS credentials
@@ -44,15 +51,15 @@ jobs:
     - name: Upload model artifacts to S3
       run: |
         # Upload with timestamp for versioning
-        aws s3 cp python/mask_recommender/pymc_trace.nc s3://${{ secrets.S3_BUCKET }}/models/pymc_trace_$(date +%Y%m%d_%H%M%S).nc
+        aws s3 cp python/mask_recommender/training/pymc_trace.nc s3://${{ secrets.S3_BUCKET }}/models/pymc_trace_$(date +%Y%m%d_%H%M%S).nc
         # Upload as latest for inference Lambda
-        aws s3 cp python/mask_recommender/pymc_trace.nc s3://${{ secrets.S3_BUCKET }}/models/pymc_trace_latest.nc
+        aws s3 cp python/mask_recommender/training/pymc_trace.nc s3://${{ secrets.S3_BUCKET }}/models/pymc_trace_latest.nc
         
         # Upload mask data
-        aws s3 cp python/mask_recommender/mask_data.json s3://${{ secrets.S3_BUCKET }}/models/mask_data_latest.json
+        aws s3 cp python/mask_recommender/training/mask_data.json s3://${{ secrets.S3_BUCKET }}/models/mask_data_latest.json
         
         # Upload scaler
-        aws s3 cp python/mask_recommender/scaler.json s3://${{ secrets.S3_BUCKET }}/models/scaler_latest.json
+        aws s3 cp python/mask_recommender/training/scaler.json s3://${{ secrets.S3_BUCKET }}/models/scaler_latest.json
     
     - name: Send success notification
       uses: dawidd6/action-send-mail@v3
