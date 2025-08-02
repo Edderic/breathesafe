@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Mask model
 class Mask < ApplicationRecord
   belongs_to :author, class_name: 'User'
   validates_presence_of :unique_internal_model_code
@@ -89,10 +90,14 @@ class Mask < ApplicationRecord
                     ELSE jsonb_build_array(breathability)
                   END
             ) AS b
-        ), breathability_aggregates AS (
+        ),         breathability_aggregates AS (
             SELECT id,
               COUNT(*) AS count_breathability,
-              AVG(breathability_pascals::numeric) AS avg_breathability_pa
+              AVG(CASE#{' '}
+                WHEN breathability_pascals ~ '^[0-9]+\.?[0-9]*$'#{' '}
+                THEN breathability_pascals::numeric#{' '}
+                ELSE NULL#{' '}
+              END) AS avg_breathability_pa
             FROM breathability_measurements
             GROUP BY 1
         ),
@@ -313,7 +318,7 @@ class Mask < ApplicationRecord
   end
 
   def self.with_privacy_aggregations(mask_ids = nil)
-    aggregations = with_aggregations(mask_ids = mask_ids)
+    aggregations = with_aggregations(mask_ids)
     race_ethnicity_options = %w[
       american_indian_or_alaskan_native_count
       asian_pacific_islander_count
