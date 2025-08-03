@@ -7,4 +7,4 @@ FactoryBot.define do
     shipping_uuid { SecureRandom.uuid }
     shippable_uuid { SecureRandom.uuid }
   end
-end 
+end
