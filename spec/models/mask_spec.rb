@@ -163,15 +163,7 @@ describe Mask do
     end
 
     it 'calculates average breathability for masks with multiple measurements' do
-      # Debug: Print the actual data in the database
-      puts "\nDebug: Raw breathability data:"
-      puts Mask.find(mask.id).breathability.inspect
-
       result = described_class.with_privacy_aggregations([mask.id])
-
-      # Debug: Print the result
-      puts "\nDebug: Result data:"
-      puts result.first.inspect
 
       expect(result.first['avg_breathability_pa']).to eq(150.0) # (100 + 200) / 2
       expect(result.first['count_breathability']).to eq(2)
