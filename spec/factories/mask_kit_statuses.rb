@@ -6,4 +6,4 @@ FactoryBot.define do
     mask_uuid { rand(1..1000) }
     refresh_datetime { Time.current }
   end
-end 
+end

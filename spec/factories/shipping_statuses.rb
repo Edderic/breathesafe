@@ -9,4 +9,4 @@ FactoryBot.define do
     from_address_uuid { SecureRandom.uuid }
     to_address_uuid { SecureRandom.uuid }
   end
-end 
+end
