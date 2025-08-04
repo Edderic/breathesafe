@@ -90,7 +90,12 @@ class FacialMeasurementOutliersService
     end
 
     def measurement_stats_sql(manager_id: nil, lower_bound_id: nil, upper_bound_id: nil)
-      manager_filter = manager_id ? "INNER JOIN managed_users mu ON mu.managed_id = fm.user_id AND mu.manager_id = #{manager_id}" : ''
+      manager_sql = <<-SQL
+        INNER JOIN managed_users mu ON mu.managed_id = fm.user_id AND mu.manager_id = #{manager_id}"
+      SQL
+
+      manager_filter = manager_id ? manager_sql : ''
+
       lower_bound_join = lower_bound_id ? "LEFT JOIN facial_measurements lb ON lb.id = #{lower_bound_id}" : ''
       upper_bound_join = upper_bound_id ? "LEFT JOIN facial_measurements ub ON ub.id = #{upper_bound_id}" : ''
 
@@ -109,9 +114,25 @@ class FacialMeasurementOutliersService
 
     def zscored_sql(manager_id: nil, facial_measurement_id_of_lower_bound: nil,
                     facial_measurement_id_of_upper_bound: nil)
-      manager_filter = manager_id ? "INNER JOIN managed_users mu ON mu.managed_id = fm.user_id AND mu.manager_id = #{manager_id}" : ''
-      lower_bound_join = facial_measurement_id_of_lower_bound ? "LEFT JOIN facial_measurements lb ON lb.id = #{facial_measurement_id_of_lower_bound}" : ''
-      upper_bound_join = facial_measurement_id_of_upper_bound ? "LEFT JOIN facial_measurements ub ON ub.id = #{facial_measurement_id_of_upper_bound}" : ''
+      manager_filter = ''
+      if manager_id
+        manager_filter = <<-SQL
+          INNER JOIN managed_users mu ON mu.managed_id = fm.user_id AND mu.manager_id = #{manager_id}
+        SQL
+      end
+
+      lower_bound_join = ''
+      if facial_measurement_id_of_lower_bound
+        lower_bound_join = <<-SQL
+          LEFT JOIN facial_measurements lb ON lb.id = #{facial_measurement_id_of_lower_bound}
+        SQL
+      end
+      upper_bound_join = ''
+      if facial_measurement_id_of_upper_bound
+        upper_bound_join = <<-SQL
+          LEFT JOIN facial_measurements ub ON ub.id = #{facial_measurement_id_of_upper_bound}
+        SQL
+      end
 
       <<-SQL
         zscored_sql AS (
