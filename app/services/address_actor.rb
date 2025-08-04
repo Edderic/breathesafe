@@ -22,7 +22,11 @@ class AddressActor
 
     stringified_address = stringify_address(address: address)
     created_address_actions = AddressAction.where(
-      "name = 'CreateAddress' AND metadata ->> 'stringified_address' = '#{stringified_address}' AND datetime < '#{datetime}'"
+      <<-SQL
+      name = 'CreateAddress' AND
+      metadata ->> 'stringified_address' = '#{stringified_address}'
+      AND datetime < '#{datetime}'
+      SQL
     ).order(:datetime)
 
     if created_address_actions.count.zero?
