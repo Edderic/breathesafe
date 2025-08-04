@@ -27,13 +27,13 @@ class ParticipantProgress
   end
 
   def self.demographics_present_counts
-    (Profile::STRING_DEMOG_FIELDS + Profile::NUM_DEMOG_FIELDS).map do |c|
+    (Profile::STRING_DEMOG_FIELDS + Profile::NUM_DEMOG_FIELDS).map do |c| # rubocop:disable Style/StringConcatenation
       "#{c}_present"
     end.join('+') + ' AS demog_present_counts'
   end
 
   def self.facial_measurements_present_counts
-    FacialMeasurement::COLUMNS.map do |c|
+    FacialMeasurement::COLUMNS.map do |c| # rubocop:disable Style/StringConcatenation
       "#{c}_present"
     end.join('+') + ' AS fm_present_counts'
   end
