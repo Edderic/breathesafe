@@ -93,7 +93,6 @@ class UserActor
 
   def self.acknowledged_have_received_mask_kit(
     uuid:,
-    mask_kit_uuid:,
     datetime: nil
   )
     datetime = DateTime.now if datetime.nil?
@@ -103,8 +102,7 @@ class UserActor
       name: 'AcknowledgedHaveReceivedMaskKit',
       datetime: datetime,
       metadata: {
-        'user_uuid': user_uuid,
-        'mask_kit_uuid': mask_kit_uuid
+        'uuid': uuid
       }
     )
   end
