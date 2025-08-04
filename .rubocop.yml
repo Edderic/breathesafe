@@ -35,3 +35,10 @@ AllCops:
     - 'tmp/**/*'
     - 'log/**/*'
     - 'coverage/**/*'
+
+# Load RuboCop extensions
+require:
+  - rubocop-rails
+  - rubocop-rspec
+  - rubocop-rspec_rails
+  - rubocop-factory_bot

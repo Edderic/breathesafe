@@ -5,7 +5,7 @@ class UserStatusBuilder
     actions = UserAction.all.order(:datetime)
 
     actions.each_with_object({}) do |action, accum|
-      puts(action.name)
+      Rails.logger.debug(action.name)
       case action.name
       when 'CreateUser'
         accum[action.metadata['uuid']] = {

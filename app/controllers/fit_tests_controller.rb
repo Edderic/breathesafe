@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# CRUD for Fit Testing data
 class FitTestsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
@@ -76,7 +77,7 @@ class FitTestsController < ApplicationController
   end
 
   def show
-    fit_test = FitTest.find_by_id_with_user_id(params[:id])
+    fit_test = FitTest.find_by(id_with_user_id: params[:id])
     to_render = {}
     messages = []
 

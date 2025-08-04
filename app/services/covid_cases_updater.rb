@@ -14,7 +14,7 @@ class CovidCasesUpdater
     latest_date = CovidState.get_latest_date
 
     # TODO: check to see if today's date corresponds with the latest date
-    return unless !latest_date || latest_date != Date.today - 1.day
+    return unless !latest_date || latest_date != Time.zone.today - 1.day
 
     url = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv'
     download = URI.open(url)

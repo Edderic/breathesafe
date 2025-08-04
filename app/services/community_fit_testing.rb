@@ -3,7 +3,7 @@
 class CommunityFitTesting
   class << self
     def generate_anonymized_users_for_email(email:, num_users:)
-      manager = User.find_by_email(email)
+      manager = User.find_by(email: email)
 
       arr = []
       num_users.times do

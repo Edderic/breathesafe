@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Controller that acts as a superclass for many others
 class ApplicationController < ActionController::Base
   include ActionController::Cookies
   include ActionController::RequestForgeryProtection

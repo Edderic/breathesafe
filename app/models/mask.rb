@@ -3,8 +3,8 @@
 # Mask model
 class Mask < ApplicationRecord
   belongs_to :author, class_name: 'User'
-  validates_presence_of :unique_internal_model_code
-  validates_uniqueness_of :unique_internal_model_code
+  validates :unique_internal_model_code, presence: true
+  validates :unique_internal_model_code, uniqueness: true
 
   def self.find_targeted_but_untested_masks(manager_id)
     results = Mask.connection.exec_query(

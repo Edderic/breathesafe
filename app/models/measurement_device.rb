@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class MeasurementDevice < ApplicationRecord
-  belongs_to :owner, foreign_key: 'owner_id', class_name: 'User'
+  belongs_to :owner, class_name: 'User'
 
   def self.viewable(user, id = nil)
     where_clause = "WHERE measurement_devices.id = #{id}" if id

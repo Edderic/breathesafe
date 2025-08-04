@@ -27,7 +27,7 @@ def ensure_co2_timestamp_exists
 
   # Refactor the data. Use more precise language
   events.each do |e|
-    puts "Going though event id: #{e.id}"
+    Rails.logger.debug "Going though event id: #{e.id}"
     sensor_readings = e.sensor_readings
 
     readings = if sensor_readings

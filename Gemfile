@@ -67,7 +67,10 @@ group :development, :test do
   gem 'debug'
   gem 'dotenv-rails'
   gem 'factory_bot_rails'
+  gem 'rubocop-factory_bot'
+  gem 'rubocop-rails'
   gem 'rubocop-rspec_rails'
+  gem 'ruby-lsp'
 end
 
 group :development do

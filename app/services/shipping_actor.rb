@@ -223,7 +223,7 @@ class ShippingActor
           send_mail: send_mail
         )
       else
-        puts("Skipping #{JSON.parse(s.to_json)}")
+        Rails.logger.debug("Skipping #{JSON.parse(s.to_json)}")
       end
     end
   end

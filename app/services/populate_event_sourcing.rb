@@ -213,7 +213,7 @@ class PopulateEventSourcing
         )
       end
 
-      next unless data['send_to_courier'].present?
+      next if data['send_to_courier'].blank?
 
       ShippingActor.send_to_courier(
         uuid: shipping_uuid,
@@ -308,7 +308,7 @@ class PopulateEventSourcing
     shipping_statuses = ShippingStatus.where("to_user_uuid = '#{to_user_uuid}'").order(:created_at)
     last_shipping_status = shipping_statuses.last
 
-    puts(last_shipping_status)
+    Rails.logger.debug(last_shipping_status)
 
     raise ArgumentError, "Could not find last shipping status for #{to_user_uuid}" unless last_shipping_status
 

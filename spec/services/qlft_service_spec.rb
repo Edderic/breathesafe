@@ -404,7 +404,7 @@ RSpec.describe QlftService do
       it 'returns all qualitative fit tests when no mask_id is provided' do
         results = described_class.call
         expect(results.count).to eq(2)
-        expect(results.map { |r| r['mask_id'] }).to match_array([mask.id, other_mask.id])
+        expect(results.map { |r| r['mask_id'] }).to contain_exactly(mask.id, other_mask.id)
       end
 
       it 'returns only fit tests for the specified mask when mask_id is provided' do

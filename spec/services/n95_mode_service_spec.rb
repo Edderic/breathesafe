@@ -72,7 +72,7 @@ RSpec.describe N95ModeService do
         it 'returns nil for each of the facial measurements' do
           result = described_class.call.to_a.first
           FacialMeasurement::COLUMNS.each do |col|
-            expect(result[col]).to be nil
+            expect(result[col]).to be_nil
           end
         end
 
@@ -80,7 +80,7 @@ RSpec.describe N95ModeService do
           result = described_class.call.to_a.first
           FacialMeasurement::COLUMNS.each do |col|
             z_score_col = "#{col}_z_score"
-            expect(result[z_score_col]).to be nil
+            expect(result[z_score_col]).to be_nil
           end
         end
       end
@@ -420,7 +420,7 @@ RSpec.describe N95ModeService do
       it 'returns all N95 fit tests when no mask_id is provided' do
         results = described_class.call
         expect(results.count).to eq(2)
-        expect(results.map { |r| r['mask_id'] }).to match_array([mask.id, other_mask.id])
+        expect(results.map { |r| r['mask_id'] }).to contain_exactly(mask.id, other_mask.id)
       end
 
       it 'returns only fit tests for the specified mask when mask_id is provided' do

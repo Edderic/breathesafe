@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Hits the Mask Recommender endpoint with facial measurement data,
+# gets list of masks with probability of fit estimates.
 class MaskRecommenderController < ApplicationController
   skip_before_action :verify_authenticity_token
 
