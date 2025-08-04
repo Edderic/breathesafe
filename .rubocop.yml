@@ -44,6 +44,9 @@ RSpec/ExampleLength:
 RSpec/IndexedLet:
   Enabled: false
 
+RSpec/NestedGroups:
+  Enabled: false
+
 # Exclude certain directories and files
 AllCops:
   Exclude:
