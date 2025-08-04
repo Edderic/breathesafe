@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Users
+  # Controller for CRUD operations with CarbonDioxideMonitors
   class CarbonDioxideMonitorsController < ApplicationController
     skip_before_action :verify_authenticity_token
 
@@ -91,9 +92,12 @@ module Users
               co2_monitor.destroy!
             end
 
-            message = "Deleted association between current user and monitor with serial #{co2_monitor.serial}, and the monitor itself. Note: you will not be able to add new measurements of venues without a CO₂ monitor. Please add at least one."
+            message = "Deleted association between current user and monitor with serial #{
+              co2_monitor.serial}, and the monitor itself. Note: you will not be able to" \
+              'add new measurements of venues without a CO₂ monitor. Please add at least one.'
           rescue StandardError
-            message = 'Something went wrong with the deletion of CO2 monitor and the relationship between CO2 monitor and current user.'
+            message = 'Something went wrong with the deletion of CO2 monitor and the relationship' \
+              ' between CO2 monitor and current user.'
           end
         end
       end

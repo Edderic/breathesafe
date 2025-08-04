@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Users
+  # Override after_confirmation_path_for so that user can fill in profile
   class ConfirmationsController < Devise::ConfirmationsController
     # GET /resource/confirmation/new
     # def new
