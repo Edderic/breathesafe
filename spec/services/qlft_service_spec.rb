@@ -20,7 +20,7 @@ RSpec.describe QlftService do
 
   describe '.call' do
     context 'with passing qualitative fit test' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -31,6 +31,10 @@ RSpec.describe QlftService do
                    'exercises' => exercises
                  }
                })
+      end
+
+      before do
+        fit_test
       end
 
       it 'returns passing result with facial measurements' do
@@ -62,7 +66,7 @@ RSpec.describe QlftService do
     end
 
     context 'with failing qualitative fit test' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -79,6 +83,10 @@ RSpec.describe QlftService do
                })
       end
 
+      before do
+        fit_test
+      end
+
       it 'returns failing result' do
         result = described_class.call.to_a.first
         expect(result['qlft_pass']).to be false
@@ -87,7 +95,7 @@ RSpec.describe QlftService do
 
     context 'with mixed results' do
       context 'when some results are null or blank' do
-        let!(:fit_test) do
+        let(:fit_test) do
           create(:fit_test,
                  user: user,
                  mask: mask,
@@ -104,6 +112,10 @@ RSpec.describe QlftService do
                  })
         end
 
+        before do
+          fit_test
+        end
+
         it 'treats null/blank results as passing' do
           result = described_class.call.to_a.first
           expect(result['qlft_pass']).to be true
@@ -111,7 +123,7 @@ RSpec.describe QlftService do
       end
 
       context 'when there are no explicit passes' do
-        let!(:fit_test) do
+        let(:fit_test) do
           create(:fit_test,
                  user: user,
                  mask: mask,
@@ -126,6 +138,10 @@ RSpec.describe QlftService do
                      ]
                    }
                  })
+        end
+
+        before do
+          fit_test
         end
 
         it 'returns null for qlft_pass' do
@@ -191,7 +207,7 @@ RSpec.describe QlftService do
                face_depth: 120)
       end
 
-      let!(:fit_test2) do
+      let(:fit_test2) do
         create(:fit_test,
                user: user2,
                mask: mask,
@@ -207,7 +223,7 @@ RSpec.describe QlftService do
                })
       end
 
-      let!(:fit_test1) do
+      let(:fit_test1) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -221,6 +237,11 @@ RSpec.describe QlftService do
                    ]
                  }
                })
+      end
+
+      before do
+        fit_test1
+        fit_test2
       end
 
       it 'computes z-scores based on population statistics' do
@@ -239,7 +260,7 @@ RSpec.describe QlftService do
     end
 
     context 'with missing facial measurements' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -253,6 +274,10 @@ RSpec.describe QlftService do
                  }
                },
                facial_measurement: nil)
+      end
+
+      before do
+        fit_test
       end
 
       it 'returns null for facial measurement fields' do
@@ -272,7 +297,7 @@ RSpec.describe QlftService do
     end
 
     context 'with facial hair data' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -297,6 +322,10 @@ RSpec.describe QlftService do
                })
       end
 
+      before do
+        fit_test
+      end
+
       it 'includes facial_hair_beard_length_mm in the results' do
         result = described_class.call.to_a.first
         expect(result['facial_hair_beard_length_mm']).to eq(5)
@@ -304,7 +333,7 @@ RSpec.describe QlftService do
     end
 
     context 'with missing facial hair data' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -327,6 +356,10 @@ RSpec.describe QlftService do
                facial_hair: nil)
       end
 
+      before do
+        fit_test
+      end
+
       it 'returns nil for facial_hair_beard_length_mm' do
         result = described_class.call.to_a.first
         expect(result['facial_hair_beard_length_mm']).to be_nil
@@ -334,7 +367,7 @@ RSpec.describe QlftService do
     end
 
     context 'with empty facial hair beard length' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -357,6 +390,10 @@ RSpec.describe QlftService do
                facial_hair: {})
       end
 
+      before do
+        fit_test
+      end
+
       it 'returns nil for facial_hair_beard_length_mm' do
         result = described_class.call.to_a.first
         expect(result['facial_hair_beard_length_mm']).to be_nil
@@ -366,7 +403,7 @@ RSpec.describe QlftService do
     context 'with optional mask_id parameter' do
       let(:other_mask) { create(:mask) }
 
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -380,6 +417,7 @@ RSpec.describe QlftService do
       end
 
       before do
+        fit_test
         # Create qualitative fit test for other_mask
         create(:fit_test,
                user: user,
