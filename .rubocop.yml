@@ -20,6 +20,9 @@ Metrics/CyclomaticComplexity:
 Metrics/PerceivedComplexity:
   Enabled: false
 
+Naming/VariableNumber:
+  Enabled: false
+
 # Exclude certain directories and files
 AllCops:
   Exclude:
