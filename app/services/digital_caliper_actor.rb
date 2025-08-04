@@ -168,7 +168,6 @@ class DigitalCaliperActor
   def self.remove_batteries(
     uuid:,
     cost:,
-    batteries: nil,
     datetime: nil
   )
     # Parameters:

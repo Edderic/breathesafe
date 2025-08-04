@@ -15,9 +15,9 @@ class EmailSender
 
     filter_out_fully_complete_pods = email_with_managed_users_data.select do |_email, progresses|
       progresses.any? do |p|
-        (p['demog_percent_complete'].to_f != 100.0) ||
-          (p['fm_percent_complete'].to_f != 100.0) ||
-          (p['fit_testing_percent_complete'].to_f != 100.0)
+        (p['demog_percent_complete'].to_f < 100.0) ||
+          (p['fm_percent_complete'].to_f < 100.0) ||
+          (p['fit_testing_percent_complete'].to_f >= 100.0)
       end
     end
 
