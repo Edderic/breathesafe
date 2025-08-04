@@ -194,7 +194,6 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
                })
       end
 
-      # rubocop:disable RSpec/ExampleLength, RSpec/MultipleExpectations
       it 'returns all fit tests with facial measurements' do
         get :index, format: :json
 
@@ -221,7 +220,6 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
           expect(fit_test['nose_breadth']).to be_present
         end
       end
-      # rubocop:enable RSpec/ExampleLength, RSpec/MultipleExpectations
     end
   end
 
