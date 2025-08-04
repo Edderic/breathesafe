@@ -41,7 +41,6 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
         expect(response).to have_http_status(:unauthorized)
       end
 
-
       it 'includes correct messaging' do
         post :create, params: { facial_measurement_id: 999_999 }, format: :json
         expect(JSON.parse(response.body)['messages']).to include('No facial measurement found for this id.')
@@ -56,48 +55,62 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
       it 'returns unauthorized status' do
         post :create, params: { facial_measurement_id: facial_measurement.id }, format: :json
         expect(response).to have_http_status(:unauthorized)
+      end
+
+      it 'responds with proper messaging' do
+        post :create, params: { facial_measurement_id: facial_measurement.id }, format: :json
         expect(JSON.parse(response.body)['messages']).to include('Unauthorized.')
       end
     end
 
-    context 'when user is authorized' do
+    context 'when user is authorized and has existing fit tests' do
       before { sign_in manager }
 
-      context 'when user has existing fit tests' do
-        let!(:fit_test1) do
-          create(:fit_test,
-                 :with_just_right_mask,
-                 user: user,
-                 quantitative_fit_testing_device: measurement_device,
-                 facial_measurement: nil)
-        end
-        let!(:fit_test2) do
-          create(:fit_test,
-                 :with_just_right_mask,
-                 user: user,
-                 quantitative_fit_testing_device: measurement_device,
-                 facial_measurement: nil)
-        end
-
-        it 'assigns facial measurement to all user fit tests' do
-          post :create, params: { facial_measurement_id: facial_measurement.id }, format: :json
-
-          expect(response).to have_http_status(:created)
-          expect(JSON.parse(response.body)['messages']).to include('Successfully assigned latest facial measurement to past fit tests.')
-
-          # Verify fit tests were updated
-          expect(fit_test1.reload.facial_measurement_id).to eq(facial_measurement.id)
-          expect(fit_test2.reload.facial_measurement_id).to eq(facial_measurement.id)
-        end
+      let!(:first_fit_test) do
+        create(:fit_test,
+               :with_just_right_mask,
+               user: user,
+               quantitative_fit_testing_device: measurement_device,
+               facial_measurement: nil)
       end
 
-      context 'when user has no fit tests' do
-        it 'returns success status' do
-          post :create, params: { facial_measurement_id: facial_measurement.id }, format: :json
+      let!(:second_fit_test) do
+        create(:fit_test,
+               :with_just_right_mask,
+               user: user,
+               quantitative_fit_testing_device: measurement_device,
+               facial_measurement: nil)
+      end
 
-          expect(response).to have_http_status(:created)
-          expect(JSON.parse(response.body)['messages']).to include('Successfully assigned latest facial measurement to past fit tests.')
-        end
+      before do
+        post :create, params: { facial_measurement_id: facial_measurement.id }, format: :json
+      end
+
+      it 'makes the response have created status' do
+        expect(response).to have_http_status(:created)
+      end
+
+      it 'has a successful message' do
+        expect(JSON.parse(response.body)['messages']).to include('Successfully assigned latest facial measurement to past fit tests.')
+      end
+
+      it 'assigns facial measurement to the first fit test' do
+        expect(second_fit_test.reload.facial_measurement_id).to eq(facial_measurement.id)
+      end
+
+      it 'assigns facial measurement to the second fit test' do
+        expect(second_fit_test.reload.facial_measurement_id).to eq(facial_measurement.id)
+      end
+    end
+
+    context 'when user is authorized and has no fit tests' do
+      before { sign_in manager }
+
+      it 'returns success status' do
+        post :create, params: { facial_measurement_id: facial_measurement.id }, format: :json
+
+        expect(response).to have_http_status(:created)
+        expect(JSON.parse(response.body)['messages']).to include('Successfully assigned latest facial measurement to past fit tests.')
       end
     end
   end
