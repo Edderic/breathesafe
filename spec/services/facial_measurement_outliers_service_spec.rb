@@ -113,7 +113,7 @@ RSpec.describe FacialMeasurementOutliersService do
              nose_protrusion: 21,
              nose_bridge_height: 16,
              lip_width: 52,
-             created_at: 1.days.ago)
+             created_at: 1.day.ago)
     end
 
     let!(:fit_test_1) do

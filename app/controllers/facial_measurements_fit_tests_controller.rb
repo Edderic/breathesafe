@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Controller featuring CRUD operations for Facial Measurements and Fit Tests
 class FacialMeasurementsFitTestsController < ApplicationController
   before_action :authenticate_user!, only: [:create]
 

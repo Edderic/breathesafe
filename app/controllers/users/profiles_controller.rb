@@ -24,7 +24,7 @@ module Users
 
       respond_to do |format|
         format.json do
-          render json: to_render.to_json, status: 200
+          render json: to_render.to_json, status: :ok
         end
       end
     end

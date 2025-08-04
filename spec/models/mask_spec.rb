@@ -5,7 +5,7 @@ require 'rails_helper'
 describe Mask do
   describe '.payable_on(date)' do
     subject do
-      Mask.find_payable_on(date)
+      described_class.find_payable_on(date)
     end
 
     describe 'when date 1 and date 2 are present' do
@@ -25,7 +25,7 @@ describe Mask do
       end
 
       let!(:mask) do
-        Mask.create!(
+        described_class.create!(
           unique_internal_model_code: 'abc',
           author_id: user.id,
           payable_datetimes: [
@@ -42,7 +42,7 @@ describe Mask do
           2.weeks.ago
         end
 
-        it 'should be empty' do
+        it 'is empty' do
           expect(subject).to be_empty
         end
       end
@@ -52,7 +52,7 @@ describe Mask do
           2.weeks.from_now
         end
 
-        it 'should be empty' do
+        it 'is empty' do
           expect(subject).to be_empty
         end
       end
@@ -62,7 +62,7 @@ describe Mask do
           4.days.ago
         end
 
-        it 'should be empty' do
+        it 'is empty' do
           expect(subject).to include(mask)
         end
       end
@@ -85,7 +85,7 @@ describe Mask do
       end
 
       let!(:mask) do
-        Mask.create!(
+        described_class.create!(
           unique_internal_model_code: 'abc',
           author_id: user.id,
           payable_datetimes: [
@@ -102,7 +102,7 @@ describe Mask do
           2.weeks.ago
         end
 
-        it 'should be empty' do
+        it 'is empty' do
           expect(subject).to be_empty
         end
       end
@@ -112,7 +112,7 @@ describe Mask do
           2.weeks.from_now
         end
 
-        it 'should be empty' do
+        it 'is empty' do
           expect(subject).to include(mask)
         end
       end

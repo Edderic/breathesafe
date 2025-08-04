@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Controller featuring CRUD operations for MaskKits
 class MaskKitController < ApplicationController
   skip_before_action :verify_authenticity_token
 
@@ -52,9 +53,6 @@ class MaskKitController < ApplicationController
 
       status = 200
     end
-
-    # TODO:
-    #   display that the mask was "not received" under the "Untested" tab
 
     to_render = {}
 

@@ -251,6 +251,8 @@ GEM
       zeitwerk (~> 2.5)
     rainbow (3.1.1)
     rake (13.2.1)
+    rbs (3.9.4)
+      logger
     rdoc (6.8.1)
       psych (>= 4.0.0)
     regexp_parser (2.9.3)
@@ -301,6 +303,15 @@ GEM
     rubocop-ast (1.45.1)
       parser (>= 3.3.7.2)
       prism (~> 1.4)
+    rubocop-factory_bot (2.27.1)
+      lint_roller (~> 1.1)
+      rubocop (~> 1.72, >= 1.72.1)
+    rubocop-rails (2.32.0)
+      activesupport (>= 4.2.0)
+      lint_roller (~> 1.1)
+      rack (>= 1.1)
+      rubocop (>= 1.75.0, < 2.0)
+      rubocop-ast (>= 1.44.0, < 2.0)
     rubocop-rspec (3.6.0)
       lint_roller (~> 1.1)
       rubocop (~> 1.72, >= 1.72.1)
@@ -308,6 +319,10 @@ GEM
       lint_roller (~> 1.1)
       rubocop (~> 1.72, >= 1.72.1)
       rubocop-rspec (~> 3.5)
+    ruby-lsp (0.26.1)
+      language_server-protocol (~> 3.17.0)
+      prism (>= 1.2, < 2.0)
+      rbs (>= 3, < 5)
     ruby-progressbar (1.13.0)
     rubyzip (2.3.2)
     selenium-webdriver (4.25.0)
@@ -395,7 +410,10 @@ DEPENDENCIES
   rgeo
   rqrcode
   rspec-rails
+  rubocop-factory_bot
+  rubocop-rails
   rubocop-rspec_rails
+  ruby-lsp
   selenium-webdriver (~> 4.25.0)
   sprockets-rails
   stimulus-rails

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Controller with CRUD operations for Masks
 class MasksController < ApplicationController
   skip_before_action :verify_authenticity_token
 

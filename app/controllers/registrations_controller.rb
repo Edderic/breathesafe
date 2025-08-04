@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Overrides Devise::RegistrationController
+# Adds an is_signed_in method that is used in the frontend
 class RegistrationsController < Devise::RegistrationsController
   skip_before_action :verify_authenticity_token
   clear_respond_to
@@ -7,7 +9,7 @@ class RegistrationsController < Devise::RegistrationsController
 
   def is_signed_in
     respond_to do |format|
-      puts(current_user)
+      Rails.logger.debug(current_user)
 
       format.json do
         render json: {

@@ -12,13 +12,13 @@ RSpec.describe Profile, type: :model do
     end
 
     let(:profile) do
-      Profile.create(
+      described_class.create(
         user_id: user.id,
         measurement_system: 'metric'
       )
     end
 
-    it 'should have an external_api_token ' do
+    it 'has an external_api_token' do
       expect(profile.external_api_token).to be_present
     end
   end

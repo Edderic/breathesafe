@@ -105,7 +105,7 @@ RSpec.describe UserSealCheckFacialMeasurementsService do
         expect(too_small_result['qlft_pass']).to be false
         expect(too_big_result['qlft_pass']).to be false
         expect(lot_of_air_result['qlft_pass']).to be false
-        expect(pass_result['qlft_pass']).to be nil
+        expect(pass_result['qlft_pass']).to be_nil
       end
 
       it 'includes facial measurements' do
@@ -270,7 +270,7 @@ RSpec.describe UserSealCheckFacialMeasurementsService do
       it 'returns all fit tests when no mask_id is provided' do
         results = described_class.call
         expect(results.count).to eq(2)
-        expect(results.map { |r| r['mask_id'] }).to match_array([mask.id, other_mask.id])
+        expect(results.map { |r| r['mask_id'] }).to contain_exactly(mask.id, other_mask.id)
       end
 
       it 'returns only fit tests for the specified mask when mask_id is provided' do

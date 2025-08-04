@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Visits
 class EventsController < ApplicationController
   skip_forgery_protection
   # TODO: Might want to rename this to index?
@@ -49,7 +50,7 @@ class EventsController < ApplicationController
         # Adds the CO2 stuff
         readings = data['points'].map do |j|
           json = JSON.parse(j.to_json)
-          json['timestamp'] = Time.at(json['timestamp'].to_i / 1000)
+          json['timestamp'] = Time.zone.at(json['timestamp'].to_i / 1000)
           json
         end
 

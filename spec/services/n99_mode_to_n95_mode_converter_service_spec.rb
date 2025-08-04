@@ -62,11 +62,11 @@ RSpec.describe N99ModeToN95ModeConverterService do
           nil
         end
 
-        it 'returns nil for facial measurements ' do
+        it 'returns nil for facial measurements' do
           result = described_class.call.to_a.first
 
           FacialMeasurement::COLUMNS.each do |col|
-            expect(result[col]).to be nil
+            expect(result[col]).to be_nil
           end
         end
       end
@@ -113,7 +113,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
         it 'returns the fit test' do
           results = described_class.call.to_a
           result = results.first
-          expect(result['qlft_pass']).to be nil
+          expect(result['qlft_pass']).to be_nil
         end
       end
 
@@ -199,7 +199,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
         )
       end
 
-      it 'should return empty' do
+      it 'returns empty' do
         result = described_class.call.to_a
 
         expect(result).to be_empty
@@ -225,7 +225,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
                })
       end
 
-      it 'should return empty' do
+      it 'returns empty' do
         results = described_class.call.to_a
 
         expect(results).to be_empty
@@ -469,7 +469,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
       it 'returns all N99 fit tests converted to N95 mode when no mask_id is provided' do
         results = described_class.call
         expect(results.count).to eq(2)
-        expect(results.map { |r| r['mask_id'] }).to match_array([mask.id, other_mask.id])
+        expect(results.map { |r| r['mask_id'] }).to contain_exactly(mask.id, other_mask.id)
       end
 
       it 'returns only fit tests for the specified mask when mask_id is provided' do
