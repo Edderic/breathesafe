@@ -8,7 +8,7 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
   let(:user) { create(:user) }
   let(:manager) { create(:user) }
 
-  let!(:profile) do
+  let(:profile) do
     create(:profile, user: user)
   end
 
@@ -21,6 +21,7 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
 
   before do
     # Set up manager-managed relationship
+    profile
     create(:managed_user, manager: manager, managed: user)
   end
 
@@ -38,6 +39,11 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
       it 'returns unauthorized status' do
         post :create, params: { facial_measurement_id: 999_999 }, format: :json
         expect(response).to have_http_status(:unauthorized)
+      end
+
+
+      it 'includes correct messaging' do
+        post :create, params: { facial_measurement_id: 999_999 }, format: :json
         expect(JSON.parse(response.body)['messages']).to include('No facial measurement found for this id.')
       end
     end

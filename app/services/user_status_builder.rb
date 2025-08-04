@@ -19,11 +19,12 @@ class UserStatusBuilder
       when 'AcceptIntoStudy'
         study_name = action.metadata['study']
 
-        accum[action.metadata['uuid']]['studies'][study_name] = accum[action.metadata['uuid']]['studies'][study_name].merge(
-          {
-            'accepted_datetime' => action.datetime
-          }
-        )
+        accum[action.metadata['uuid']]['studies'][study_name] = \
+          accum[action.metadata['uuid']]['studies'][study_name].merge(
+            {
+              'accepted_datetime' => action.datetime
+            }
+          )
       when 'MarkHighRisk'
         accum[action.metadata['uuid']]['health_status'] = {
           'is_high_risk' => true,

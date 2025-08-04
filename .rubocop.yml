@@ -32,6 +32,9 @@ Naming/VariableNumber:
 Style/Documentation:
   Enabled: false
 
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
 # Exclude certain directories and files
 AllCops:
   Exclude:

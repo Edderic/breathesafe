@@ -128,7 +128,8 @@ def add_filtration_efficiency_seal_check_exercise_to_qnft
   fts = FitTest.all
   fts.each do |ft|
     results = ft.results
-    unless results['quantitative'] && results['quantitative']['aerosol'] && results['quantitative']['aerosol']['initial_count_per_cm3'].present?
+    unless results['quantitative'] && results['quantitative']['aerosol'] \
+      && results['quantitative']['aerosol']['initial_count_per_cm3'].present?
       next
     end
 
