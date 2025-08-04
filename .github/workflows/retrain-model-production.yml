@@ -2,16 +2,19 @@
 name: Retrain Mask Recommender Model (Production)
 
 on:
-  workflow_run:
-    workflows: ["Retrain Mask Recommender Model (Staging)"]
-    types: [completed]
-    branches: [main]
+  schedule:
+    # Run every Saturday at 12:00 AM Eastern Time (5:00 AM UTC)
+    - cron: '0 5 * * 6'
+  push:
+    tags:
+      - 'production-recommender-v*'  # Only trigger on production version tags like production-recommender-v0.1.2
+    paths:
+      - 'python/mask_recommender/training/**'  # Only trigger when training code changes
 
 jobs:
   retrain:
     runs-on: ubuntu-latest
     environment: production  # Use production environment variables
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     
     steps:
     - name: Checkout code
@@ -60,6 +63,17 @@ jobs:
         # Upload scaler
         aws s3 cp python/mask_recommender/training/scaler.json s3://${{ secrets.S3_BUCKET }}/models/scaler_latest.json
     
+    - name: Deploy updated Lambda function
+      run: |
+        # Update the production Lambda function to use the new model
+        aws lambda update-function-code \
+          --function-name mask-recommender-inference \
+          --image-uri ${{ secrets.ECR_REGISTRY }}/mask-recommender-inference:latest
+        
+        # Wait for the update to complete
+        aws lambda wait function-updated \
+          --function-name mask-recommender-inference
+    
     - name: Send success notification
       uses: dawidd6/action-send-mail@v3
       if: success()
@@ -68,19 +82,20 @@ jobs:
         server_port: 587
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "Production Mask Recommender Model Updated"
+        subject: "Production Mask Recommender Model Updated - ${{ github.event_name == 'schedule' && 'Weekly Auto-Retrain' || github.ref_name }}"
         to: ${{ secrets.NOTIFICATION_EMAIL }}
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
           The mask recommender model has been successfully retrained and deployed to PRODUCTION.
           
+          Trigger: ${{ github.event_name == 'schedule' && 'Weekly Auto-Retrain' || 'Version Tag: ' + github.ref_name }}
           Model artifacts uploaded to S3:
           - Latest trace: s3://${{ secrets.S3_BUCKET }}/models/pymc_trace_latest.nc
           - Timestamped backup: s3://${{ secrets.S3_BUCKET }}/models/pymc_trace_$(date +%Y%m%d_%H%M%S).nc
           - Mask data: s3://${{ secrets.S3_BUCKET }}/models/mask_data_latest.json
           - Scaler: s3://${{ secrets.S3_BUCKET }}/models/scaler_latest.json
           
-          The production inference Lambda function will automatically use the latest model.
+          The production inference Lambda function has been updated with the new model.
     
     - name: Send failure notification
       uses: dawidd6/action-send-mail@v3
@@ -90,10 +105,11 @@ jobs:
         server_port: 587
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "Production Mask Recommender Model Training Failed"
+        subject: "Production Mask Recommender Model Training Failed - ${{ github.event_name == 'schedule' && 'Weekly Auto-Retrain' || github.ref_name }}"
         to: ${{ secrets.NOTIFICATION_EMAIL }}
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
           The mask recommender model training in PRODUCTION failed.
           
+          Trigger: ${{ github.event_name == 'schedule' && 'Weekly Auto-Retrain' || 'Version Tag: ' + github.ref_name }}
           Check the GitHub Actions logs for details.
