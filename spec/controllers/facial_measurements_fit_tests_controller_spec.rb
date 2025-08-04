@@ -34,7 +34,9 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
     end
 
     context 'when facial measurement does not exist' do
-      before { sign_in manager }
+      before do
+        sign_in manager
+      end
 
       it 'returns unauthorized status' do
         post :create, params: { facial_measurement_id: 999_999 }, format: :json
@@ -64,8 +66,6 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
     end
 
     context 'when user is authorized and has existing fit tests' do
-      before { sign_in manager }
-
       let!(:first_fit_test) do
         create(:fit_test,
                :with_just_right_mask,
@@ -83,6 +83,7 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
       end
 
       before do
+        sign_in manager
         post :create, params: { facial_measurement_id: facial_measurement.id }, format: :json
       end
 
@@ -91,11 +92,13 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
       end
 
       it 'has a successful message' do
-        expect(JSON.parse(response.body)['messages']).to include('Successfully assigned latest facial measurement to past fit tests.')
+        expect(
+          JSON.parse(response.body)['messages']
+        ).to include('Successfully assigned latest facial measurement to past fit tests.')
       end
 
       it 'assigns facial measurement to the first fit test' do
-        expect(second_fit_test.reload.facial_measurement_id).to eq(facial_measurement.id)
+        expect(first_fit_test.reload.facial_measurement_id).to eq(facial_measurement.id)
       end
 
       it 'assigns facial measurement to the second fit test' do
@@ -104,22 +107,34 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
     end
 
     context 'when user is authorized and has no fit tests' do
-      before { sign_in manager }
+      before do
+        sign_in manager
+        post :create, params: { facial_measurement_id: facial_measurement.id }, format: :json
+      end
 
       it 'returns success status' do
-        post :create, params: { facial_measurement_id: facial_measurement.id }, format: :json
+        expect(JSON.parse(response.body)['messages']).to include(
+          'Successfully assigned latest facial measurement to past fit tests.'
+        )
+      end
 
+      it 'has a created response' do
         expect(response).to have_http_status(:created)
-        expect(JSON.parse(response.body)['messages']).to include('Successfully assigned latest facial measurement to past fit tests.')
       end
     end
   end
 
   describe 'GET #index' do
     context 'when user is authenticated' do
-      before { sign_in manager }
+      before do
+        sign_in manager
 
-      let!(:n95_fit_test) do
+        n95_fit_test
+        n99_fit_test
+        qlft_fit_test
+      end
+
+      let(:n95_fit_test) do
         create(:fit_test,
                :with_just_right_mask,
                user: user,
@@ -179,6 +194,7 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
                })
       end
 
+      # rubocop:disable RSpec/ExampleLength, RSpec/MultipleExpectations
       it 'returns all fit tests with facial measurements' do
         get :index, format: :json
 
@@ -205,6 +221,7 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
           expect(fit_test['nose_breadth']).to be_present
         end
       end
+      # rubocop:enable RSpec/ExampleLength, RSpec/MultipleExpectations
     end
   end
 
