@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# Controller for Managed Users
 class ManagedUsersController < ApplicationController
   def index
     if current_user.nil?
