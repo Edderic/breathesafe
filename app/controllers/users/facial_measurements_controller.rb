@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Users
+  # Controller for facial measurements
   class FacialMeasurementsController < ApplicationController
     skip_before_action :verify_authenticity_token
 

@@ -20,7 +20,13 @@ Metrics/CyclomaticComplexity:
 Metrics/PerceivedComplexity:
   Enabled: false
 
+Naming/AccessorMethodName:
+  Enabled: false
+
 Naming/VariableNumber:
+  Enabled: false
+
+Style/Documentation:
   Enabled: false
 
 # Exclude certain directories and files
