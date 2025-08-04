@@ -2,7 +2,8 @@ name: Deploy Inference Lambda (Staging)
 
 on:
   push:
-    branches: [ main ]
+    tags:
+      - 'staging-recommender-v*'  # Only trigger on staging version tags like staging-recommender-v0.1.2
     paths:
       - 'python/mask_recommender/inference/**'  # Only trigger when inference code changes
 
@@ -48,7 +49,7 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: mask-recommender-inference-staging
-        IMAGE_TAG: ${{ github.sha }}
+        IMAGE_TAG: ${{ github.ref_name }}
       run: |
         # Build a docker container and push it to ECR
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/inference/
@@ -87,13 +88,13 @@ jobs:
         server_port: 587
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "Staging Inference Lambda Deployed - ${{ github.sha }}"
+        subject: "Staging Inference Lambda Deployed - ${{ github.ref_name }}"
         to: ${{ secrets.NOTIFICATION_EMAIL }}
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
           The mask recommender inference Lambda function has been successfully deployed to STAGING.
           
-          Commit: ${{ github.sha }}
+          Version: ${{ github.ref_name }}
           Image: ${{ steps.build-image.outputs.image_latest }}
           Function: mask-recommender-inference-staging
           
@@ -107,11 +108,11 @@ jobs:
         server_port: 587
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
-        subject: "Staging Inference Lambda Deployment Failed - ${{ github.sha }}"
+        subject: "Staging Inference Lambda Deployment Failed - ${{ github.ref_name }}"
         to: ${{ secrets.NOTIFICATION_EMAIL }}
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
           The mask recommender inference Lambda function deployment to STAGING failed.
           
-          Commit: ${{ github.sha }}
+          Version: ${{ github.ref_name }}
           Check the GitHub Actions logs for details. 
