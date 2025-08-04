@@ -12,7 +12,7 @@ RSpec.describe N95ModeService do
 
   describe '.call' do
     context 'with N95 fit test data' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -29,6 +29,10 @@ RSpec.describe N95ModeService do
                  }
                },
                facial_measurement: facial_measurement)
+      end
+
+      before do
+        fit_test
       end
 
       it 'has the facial_measurement data associated to it' do
@@ -86,7 +90,7 @@ RSpec.describe N95ModeService do
       end
 
       context 'with multiple fit tests for the same mask' do
-        let!(:second_fit_test) do
+        let(:second_fit_test) do
           create(:fit_test,
                  user: user,
                  mask: mask,
@@ -102,6 +106,10 @@ RSpec.describe N95ModeService do
                      ]
                    }
                  })
+        end
+
+        before do
+          second_fit_test
         end
 
         it 'returns results for each fit test' do
@@ -130,7 +138,7 @@ RSpec.describe N95ModeService do
                  face_depth: 125)
         end
 
-        let!(:fit_test2) do
+        let(:fit_test2) do
           create(:fit_test,
                  user: user2,
                  mask: mask,
@@ -149,7 +157,7 @@ RSpec.describe N95ModeService do
                  })
         end
 
-        let!(:fit_test3) do
+        let(:fit_test3) do
           create(:fit_test,
                  user: user3,
                  mask: mask,
@@ -166,6 +174,11 @@ RSpec.describe N95ModeService do
                      ]
                    }
                  })
+        end
+
+        before do
+          fit_test2
+          fit_test3
         end
 
         it 'computes z-scores based on population statistics' do
@@ -185,7 +198,7 @@ RSpec.describe N95ModeService do
     end
 
     context 'with failed fit test' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -203,6 +216,10 @@ RSpec.describe N95ModeService do
                })
       end
 
+      before do
+        fit_test
+      end
+
       it 'identifies failed fit test' do
         result = described_class.call.to_a.first
 
@@ -215,7 +232,7 @@ RSpec.describe N95ModeService do
 
     context 'with edge cases' do
       context 'when fit factors are missing' do
-        let!(:fit_test) do
+        let(:fit_test) do
           create(:fit_test,
                  user: user,
                  mask: mask,
@@ -233,6 +250,10 @@ RSpec.describe N95ModeService do
                  })
         end
 
+        before do
+          fit_test
+        end
+
         it 'excludes exercises with missing fit factors' do
           result = described_class.call.to_a.first
           expect(result['n']).to eq(3) # Only includes exercises with valid fit factors
@@ -240,7 +261,7 @@ RSpec.describe N95ModeService do
       end
 
       context 'when all exercises have the same fit factor' do
-        let!(:fit_test) do
+        let(:fit_test) do
           create(:fit_test,
                  user: user,
                  mask: mask,
@@ -258,6 +279,10 @@ RSpec.describe N95ModeService do
                  })
         end
 
+        before do
+          fit_test
+        end
+
         it 'calculates correct harmonic mean for identical fit factors' do
           result = described_class.call.to_a.first
           expect(result['n95_mode_hmff']).to be_within(0.1).of(100)
@@ -266,7 +291,7 @@ RSpec.describe N95ModeService do
       end
 
       context 'when there are no exercises except Normal breathing (SEALED)' do
-        let!(:fit_test) do
+        let(:fit_test) do
           create(:fit_test,
                  user: user,
                  mask: mask,
@@ -281,6 +306,10 @@ RSpec.describe N95ModeService do
                  })
         end
 
+        before do
+          fit_test
+        end
+
         it 'returns no results' do
           results = described_class.call.to_a
           expect(results).to be_empty
@@ -289,7 +318,7 @@ RSpec.describe N95ModeService do
     end
 
     context 'with facial hair data' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -311,6 +340,10 @@ RSpec.describe N95ModeService do
                })
       end
 
+      before do
+        fit_test
+      end
+
       it 'includes facial_hair_beard_length_mm' do
         result = described_class.call.to_a.first
         expect(result['facial_hair_beard_length_mm']).to eq(5)
@@ -318,7 +351,7 @@ RSpec.describe N95ModeService do
     end
 
     context 'with missing facial hair data' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -337,6 +370,10 @@ RSpec.describe N95ModeService do
                })
       end
 
+      before do
+        fit_test
+      end
+
       it 'returns nil for facial_hair_beard_length_mm' do
         result = described_class.call.to_a.first
         expect(result['facial_hair_beard_length_mm']).to be_nil
@@ -344,7 +381,7 @@ RSpec.describe N95ModeService do
     end
 
     context 'with empty facial hair beard length' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -366,6 +403,10 @@ RSpec.describe N95ModeService do
                })
       end
 
+      before do
+        fit_test
+      end
+
       it 'returns nil for facial_hair_beard_length_mm' do
         result = described_class.call.to_a.first
         expect(result['facial_hair_beard_length_mm']).to be_nil
@@ -373,7 +414,7 @@ RSpec.describe N95ModeService do
     end
 
     context 'with optional mask_id parameter' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -395,6 +436,7 @@ RSpec.describe N95ModeService do
       let(:other_mask) { create(:mask) }
 
       before do
+        fit_test
         # Create N95 fit test for other_mask
         create(:fit_test,
                user: user,
@@ -431,7 +473,7 @@ RSpec.describe N95ModeService do
     end
 
     context 'when beard_length_mm is "1mm"' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -451,6 +493,10 @@ RSpec.describe N95ModeService do
                })
       end
 
+      before do
+        fit_test
+      end
+
       it 'returns 0 for facial_hair_beard_length_mm' do
         result = described_class.call(mask_id: mask.id).to_a.first
         expect(result['facial_hair_beard_length_mm']).to eq(1)
@@ -458,7 +504,7 @@ RSpec.describe N95ModeService do
     end
 
     context 'when beard_length_mm is "5mm"' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -478,6 +524,10 @@ RSpec.describe N95ModeService do
                })
       end
 
+      before do
+        fit_test
+      end
+
       it 'returns 5 for facial_hair_beard_length_mm' do
         result = described_class.call(mask_id: mask.id).to_a.first
         expect(result['facial_hair_beard_length_mm']).to eq(5)
@@ -485,7 +535,7 @@ RSpec.describe N95ModeService do
     end
 
     context 'when beard_length_mm is nil' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -503,6 +553,10 @@ RSpec.describe N95ModeService do
                    ]
                  }
                })
+      end
+
+      before do
+        fit_test
       end
 
       it 'returns nil for facial_hair_beard_length_mm' do
