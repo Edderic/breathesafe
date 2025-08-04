@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_08_04_025557) do
+ActiveRecord::Schema[7.0].define(version: 2025_08_04_025902) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_stat_statements"
   enable_extension "plpgsql"
@@ -191,6 +191,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_08_04_025557) do
     t.json "payable_datetimes", default: []
     t.jsonb "colors", default: [], null: false
     t.index ["author_id"], name: "index_masks_on_author_id"
+    t.index ["unique_internal_model_code"], name: "index_masks_on_unique_internal_model_code", unique: true
   end
 
   create_table "measurement_devices", force: :cascade do |t|
