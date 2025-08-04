@@ -349,7 +349,8 @@ FactoryBot.define do
       user_seal_check do
         {
           'sizing' => {
-            'What do you think about the sizing of this mask relative to your face?' => 'Somewhere in-between too small and too big'
+            'What do you think about the sizing of this mask relative to your face?' => \
+            'Somewhere in-between too small and too big'
           },
           'negative' => {
             '...how much air passed between your face and the mask?' => nil
