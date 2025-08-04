@@ -91,7 +91,7 @@ class FacialMeasurementOutliersService
 
     def measurement_stats_sql(manager_id: nil, lower_bound_id: nil, upper_bound_id: nil)
       manager_sql = <<-SQL
-        INNER JOIN managed_users mu ON mu.managed_id = fm.user_id AND mu.manager_id = #{manager_id}"
+        INNER JOIN managed_users mu ON mu.managed_id = fm.user_id AND mu.manager_id = #{manager_id}
       SQL
 
       manager_filter = manager_id ? manager_sql : ''
