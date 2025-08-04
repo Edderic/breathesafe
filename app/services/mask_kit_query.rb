@@ -2,8 +2,7 @@
 
 class MaskKitQuery
   def self.managed_by(manager_id:)
-    # TODO:
-    # I should be able to view my untested and tested masks.
+    # TODO: I should be able to view my untested and tested masks.
     # - Add Shipping Status, Shipping Status Joins, Mask Kit Status for myself,
     # and others I've tseted.
     #

@@ -3,7 +3,6 @@
 class QualitativeFitTestingKitStatusBuilder
   def self.build
     qlft_kit_actions = QualitativeFitTestingKitAction.all.order(:datetime)
-    # .where("type IN ('QualitativeFitTestingKitAction', 'HoodAction', 'NebulizerAction', 'SolutionAction')").all.order(:datetime)
 
     qlft_kit_actions.each_with_object({}) do |qlft_kit_action, accum|
       uuid = qlft_kit_action['metadata']['uuid']
