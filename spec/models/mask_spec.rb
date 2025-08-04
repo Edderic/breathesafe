@@ -4,7 +4,7 @@ require 'rails_helper'
 
 describe Mask do
   describe '.payable_on(date)' do
-    subject do
+    subject(:payable_date_on) do
       described_class.find_payable_on(date)
     end
 
@@ -43,7 +43,7 @@ describe Mask do
         end
 
         it 'is empty' do
-          expect(subject).to be_empty
+          expect(payable_date_on).to be_empty
         end
       end
 
@@ -53,7 +53,7 @@ describe Mask do
         end
 
         it 'is empty' do
-          expect(subject).to be_empty
+          expect(payable_date_on).to be_empty
         end
       end
 
@@ -63,7 +63,7 @@ describe Mask do
         end
 
         it 'is empty' do
-          expect(subject).to include(mask)
+          expect(payable_date_on).to include(mask)
         end
       end
     end
@@ -103,7 +103,7 @@ describe Mask do
         end
 
         it 'is empty' do
-          expect(subject).to be_empty
+          expect(payable_date_on).to be_empty
         end
       end
 
@@ -113,7 +113,7 @@ describe Mask do
         end
 
         it 'is empty' do
-          expect(subject).to include(mask)
+          expect(payable_date_on).to include(mask)
         end
       end
     end
