@@ -38,6 +38,9 @@ RSpec/MultipleMemoizedHelpers:
 RSpec/MultipleExpectations:
   Enabled: false
 
+RSpec/ExampleLength:
+  Enabled: false
+
 # Exclude certain directories and files
 AllCops:
   Exclude:
