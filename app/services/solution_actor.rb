@@ -184,7 +184,7 @@ class SolutionActor
     #   uuid: uuid
     #   datetime: Defaults to nil
     #     if nil, gets DateTime.now
-    0 if cost.nil?
+    return if cost.nil?
 
     datetime = DateTime.now if datetime.nil?
 
