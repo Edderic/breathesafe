@@ -7,7 +7,7 @@ class RegistrationsController < Devise::RegistrationsController
   clear_respond_to
   respond_to :json
 
-  def is_signed_in
+  def signed_in?
     respond_to do |format|
       Rails.logger.debug(current_user)
 

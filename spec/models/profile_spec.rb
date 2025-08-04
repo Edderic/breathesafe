@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe Profile, type: :model do
-  context 'on create' do
+  context 'when creating' do
     let(:user) do
       User.create(
         email: 'some@email.com',

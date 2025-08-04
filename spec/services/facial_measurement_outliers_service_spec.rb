@@ -116,19 +116,19 @@ RSpec.describe FacialMeasurementOutliersService do
              created_at: 1.day.ago)
     end
 
-    let!(:fit_test_1) do
+    let(:fit_test_1) do
       create(:fit_test,
              user: user,
              facial_measurement: measurement2)
     end
 
-    let!(:fit_test_2) do
+    let(:fit_test_2) do
       create(:fit_test,
              user: other_user,
              facial_measurement: other_user_measurement)
     end
 
-    let!(:fit_test_3) do
+    let(:fit_test_3) do
       create(:fit_test,
              user: other_user,
              facial_measurement: other_user_measurement)
@@ -138,6 +138,10 @@ RSpec.describe FacialMeasurementOutliersService do
       # Create managed user relationships
       create(:managed_user, manager: manager, managed: user)
       create(:managed_user, manager: manager, managed: other_user)
+
+      fit_test_1
+      fit_test_2
+      fit_test_3
     end
 
     context 'with multiple measurements for a user' do
@@ -188,10 +192,14 @@ RSpec.describe FacialMeasurementOutliersService do
                lip_width: 50)
       end
 
-      let!(:fit_test_1) do
+      let(:fit_test_1) do
         create(:fit_test,
                user: user,
                facial_measurement: measurement)
+      end
+
+      before do
+        fit_test_1
       end
 
       it 'returns null z-scores for null measurements' do
@@ -237,10 +245,14 @@ RSpec.describe FacialMeasurementOutliersService do
                created_at: 1.day.ago)
       end
 
-      let!(:unrelated_fit_test) do
+      let(:unrelated_fit_test) do
         create(:fit_test,
                user: unrelated_user,
                facial_measurement: unrelated_measurement)
+      end
+
+      before do
+        unrelated_fit_test
       end
 
       it 'only returns measurements for users managed by the specified manager' do
