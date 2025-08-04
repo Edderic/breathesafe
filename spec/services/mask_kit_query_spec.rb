@@ -16,7 +16,7 @@ RSpec.describe MaskKitQuery do
       create(:shipping_status, to_user_uuid: manager.email)
     end
 
-    let!(:shipping_status_join) do
+    let(:shipping_status_join) do
       create(:shipping_status_join,
              shipping_uuid: shipping_status.uuid,
              shippable_uuid: mask_kit_status.uuid,
@@ -26,6 +26,7 @@ RSpec.describe MaskKitQuery do
     before do
       # Create managed user relationship
       ManagedUser.create!(manager: manager, managed: managed_user)
+      shipping_status_join
     end
 
     context 'when user is not an admin' do

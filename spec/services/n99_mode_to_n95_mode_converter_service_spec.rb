@@ -32,7 +32,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
     end
 
     context 'with N99 fit test data' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                mask: mask,
                user: user,
@@ -47,6 +47,10 @@ RSpec.describe N99ModeToN95ModeConverterService do
 
       let!(:facial_measurement) do
         create(:facial_measurement)
+      end
+
+      before do
+        fit_test
       end
 
       it 'includes facial measurements' do
@@ -169,7 +173,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
     end
 
     context 'when Normal breathing (SEALED) is the only entry' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                mask: mask,
                user: user,
@@ -188,6 +192,8 @@ RSpec.describe N99ModeToN95ModeConverterService do
       end
 
       before do
+        fit_test
+
         mask.update(
           filtration_efficiencies: [
             {
@@ -207,7 +213,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
     end
 
     context 'with invalid data' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                mask: mask,
                user: user,
@@ -225,6 +231,10 @@ RSpec.describe N99ModeToN95ModeConverterService do
                })
       end
 
+      before do
+        fit_test
+      end
+
       it 'returns empty' do
         results = described_class.call.to_a
 
@@ -233,7 +243,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
     end
 
     context 'with a really low score for exercises but high on the normal breathing (sealed)' do
-      let!(:fit_test1) do
+      let(:fit_test1) do
         create(:fit_test,
                mask: mask,
                user: user,
@@ -257,6 +267,10 @@ RSpec.describe N99ModeToN95ModeConverterService do
                    ]
                  }
                })
+      end
+
+      before do
+        fit_test1
       end
 
       it 'shows failing qlft' do
@@ -334,7 +348,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
     end
 
     context 'with facial hair data' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -360,6 +374,10 @@ RSpec.describe N99ModeToN95ModeConverterService do
                })
       end
 
+      before do
+        fit_test
+      end
+
       it 'includes facial_hair_beard_length_mm in the results' do
         result = described_class.call.to_a.first
         expect(result['facial_hair_beard_length_mm']).to eq(5)
@@ -367,7 +385,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
     end
 
     context 'with missing facial hair data' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -391,6 +409,10 @@ RSpec.describe N99ModeToN95ModeConverterService do
                facial_hair: nil)
       end
 
+      before do
+        fit_test
+      end
+
       it 'returns nil for facial_hair_beard_length_mm' do
         result = described_class.call.to_a.first
         expect(result['facial_hair_beard_length_mm']).to be_nil
@@ -398,7 +420,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
     end
 
     context 'with empty facial hair beard length' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -422,6 +444,10 @@ RSpec.describe N99ModeToN95ModeConverterService do
                facial_hair: {})
       end
 
+      before do
+        fit_test
+      end
+
       it 'returns nil for facial_hair_beard_length_mm' do
         result = described_class.call.to_a.first
         expect(result['facial_hair_beard_length_mm']).to be_nil
@@ -429,7 +455,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
     end
 
     context 'with mask_id parameter' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                mask: mask,
                user: user,
@@ -444,6 +470,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
       let(:other_mask) { create(:mask) }
 
       before do
+        fit_test
         # Create N99 fit test for other_mask
         create(:fit_test,
                user: user,
@@ -484,7 +511,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
         create(:facial_measurement, user: user, face_width: 140, jaw_width: 120, face_depth: 110)
       end
 
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                mask: mask,
                user: user,
@@ -495,6 +522,10 @@ RSpec.describe N99ModeToN95ModeConverterService do
                    exercises: exercises
                  }
                })
+      end
+
+      before do
+        fit_test
       end
 
       it 'computes z-scores for facial measurements' do
@@ -518,7 +549,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
                face_depth: 120)
       end
 
-      let!(:fit_test2) do
+      let(:fit_test2) do
         create(:fit_test,
                mask: mask,
                user: user2,
@@ -531,7 +562,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
                })
       end
 
-      let!(:fit_test1) do
+      let(:fit_test1) do
         create(:fit_test,
                mask: mask,
                user: user,
@@ -542,6 +573,11 @@ RSpec.describe N99ModeToN95ModeConverterService do
                    exercises: exercises
                  }
                })
+      end
+
+      before do
+        fit_test1
+        fit_test2
       end
 
       it 'computes z-scores based on population statistics' do
@@ -562,7 +598,7 @@ RSpec.describe N99ModeToN95ModeConverterService do
     context 'when facial measurements are missing' do
       let(:facial_measurement) { nil }
 
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                mask: mask,
                user: user,
@@ -573,6 +609,10 @@ RSpec.describe N99ModeToN95ModeConverterService do
                    exercises: exercises
                  }
                })
+      end
+
+      before do
+        fit_test
       end
 
       it 'returns nil for z-score columns' do

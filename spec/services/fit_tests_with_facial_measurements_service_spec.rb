@@ -143,7 +143,7 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
     end
 
     context 'with missing facial measurements' do
-      let!(:fit_test_without_measurements) do
+      let(:fit_test_without_measurements) do
         create(:fit_test,
                :with_just_right_mask,
                user: user,
@@ -159,6 +159,10 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
                    ]
                  }
                })
+      end
+
+      before do
+        fit_test_without_measurements
       end
 
       it 'returns results with null facial measurements' do
