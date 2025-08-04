@@ -67,7 +67,8 @@ RSpec.describe UserSealCheckFacialMeasurementsService do
                  'positive' => {
                    '...how much did your glasses fog up?' => nil,
                    '...how much pressure build up was there?' => nil,
-                   '...how much air movement on your face along the seal of the mask did you feel?' => 'A lot of air movement'
+                   '...how much air movement on your face along the seal of the mask did you feel?' => \
+                   'A lot of air movement'
                  }
                })
       end
@@ -145,7 +146,7 @@ RSpec.describe UserSealCheckFacialMeasurementsService do
                face_depth: 120)
       end
 
-      let!(:fit_test1) do
+      let(:fit_test1) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -160,7 +161,7 @@ RSpec.describe UserSealCheckFacialMeasurementsService do
                })
       end
 
-      let!(:fit_test2) do
+      let(:fit_test2) do
         create(:fit_test,
                user: user2,
                mask: mask,
@@ -173,6 +174,11 @@ RSpec.describe UserSealCheckFacialMeasurementsService do
                    '...how much air movement on your face along the seal of the mask did you feel?' => 'No air movement'
                  }
                })
+      end
+
+      before do
+        fit_test1
+        fit_test2
       end
 
       it 'computes z-scores based on population statistics' do
@@ -193,7 +199,7 @@ RSpec.describe UserSealCheckFacialMeasurementsService do
     context 'with missing facial measurements' do
       let(:facial_measurement) { nil }
 
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -206,6 +212,10 @@ RSpec.describe UserSealCheckFacialMeasurementsService do
                    '...how much air movement on your face along the seal of the mask did you feel?' => 'No air movement'
                  }
                })
+      end
+
+      before do
+        fit_test
       end
 
       it 'returns null for facial measurement fields' do
@@ -225,7 +235,7 @@ RSpec.describe UserSealCheckFacialMeasurementsService do
     end
 
     context 'with optional mask_id parameter' do
-      let!(:fit_test) do
+      let(:fit_test) do
         create(:fit_test,
                user: user,
                mask: mask,
@@ -265,6 +275,11 @@ RSpec.describe UserSealCheckFacialMeasurementsService do
                    '...how much air movement on your face along the seal of the mask did you feel?' => nil
                  }
                })
+      end
+
+      before do
+        fit_test
+        other_fit_test
       end
 
       it 'returns all fit tests when no mask_id is provided' do
