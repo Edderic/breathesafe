@@ -83,13 +83,13 @@ jobs:
 
     - name: Install dependencies
       run: |
-        # Install mamba
-        wget -O Mambaforge.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
-        bash Mambaforge.sh -b -p $HOME/mambaforge
-        source $HOME/mambaforge/bin/activate
+        # Install Miniconda (more stable than mamba for CI)
+        wget -O miniconda.sh "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+        bash miniconda.sh -b -p $HOME/miniconda
+        source $HOME/miniconda/bin/activate
 
         # Create environment from environment.yml
-        mamba env create -f python/mask_recommender/inference/environment.yml
+        conda env create -f python/mask_recommender/inference/environment.yml
         source activate mask-recommender-inference
 
     - name: Run Python tests
