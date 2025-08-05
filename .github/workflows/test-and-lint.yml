@@ -12,7 +12,7 @@ jobs:
 
     services:
       postgres:
-        image: postgis/postgis:15-3.4
+        image: postgres:15
         env:
           POSTGRES_PASSWORD: postgres
         options: >-
@@ -43,9 +43,6 @@ jobs:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/breathesafe_test
       run: |
         bundle exec rails db:create
-        # Debug: Check if PostGIS is available
-        psql $DATABASE_URL -c "SELECT version();"
-        psql $DATABASE_URL -c "SELECT * FROM pg_available_extensions WHERE extname = 'postgis';"
         bundle exec rails db:schema:load
 
     - name: Run tests
