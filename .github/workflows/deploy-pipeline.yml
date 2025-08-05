@@ -2,15 +2,15 @@ name: Deploy Pipeline
 
 on:
   push:
-    branches: [ development ]
+    branches: [ main ]
   pull_request:
-    branches: [ development ]
+    branches: [ main ]
 
 jobs:
   # Job 1: Run all tests (required for PRs and development pushes)
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:13
@@ -68,7 +68,7 @@ jobs:
         wget -O Mambaforge.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
         bash Mambaforge.sh -b -p $HOME/mambaforge
         source $HOME/mambaforge/bin/activate
-        
+
         # Create environment from environment.yml
         mamba env create -f python/mask_recommender/inference/environment.yml
         source activate mask-recommender-inference
@@ -87,7 +87,7 @@ jobs:
   deploy-staging:
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/development'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment: staging
 
     steps:
@@ -107,16 +107,16 @@ jobs:
       run: |
         # Install Heroku CLI
         curl https://cli-assets.heroku.com/install.sh | sh
-        
+
         # Login to Heroku
         echo $HEROKU_API_KEY | heroku auth:token --stdin
-        
+
         # Clone production database to staging
         heroku pg:copy ${{ secrets.HEROKU_PRODUCTION_APP }}::DATABASE DATABASE --app $HEROKU_APP --confirm $HEROKU_APP
-        
+
         # Deploy to staging
         git push -f https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP.git HEAD:main
-        
+
         # Run migrations
         heroku run rails db:migrate --app $HEROKU_APP
 
@@ -138,7 +138,7 @@ jobs:
         wget -O Mambaforge.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
         bash Mambaforge.sh -b -p $HOME/mambaforge
         source $HOME/mambaforge/bin/activate
-        
+
         # Create environment from environment.yml
         mamba env create -f python/mask_recommender/inference/environment.yml
         source activate mask-recommender-inference
@@ -157,15 +157,15 @@ jobs:
         # Build and push inference Lambda
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/inference/
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/inference/
-        
+
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        
+
         # Update Lambda function
         aws lambda update-function-code \
           --function-name mask-recommender-inference-staging \
           --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        
+
         aws lambda wait function-updated \
           --function-name mask-recommender-inference-staging
 
@@ -179,15 +179,15 @@ jobs:
         # Build and push training Lambda
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/training/
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/training/
-        
+
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        
+
         # Update Lambda function
         aws lambda update-function-code \
           --function-name mask-recommender-training-staging \
           --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        
+
         aws lambda wait function-updated \
           --function-name mask-recommender-training-staging
 
@@ -204,12 +204,12 @@ jobs:
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
           Staging deployment completed successfully from development branch.
-          
+
           Deployed components:
           - Heroku app: ${{ secrets.HEROKU_STAGING_APP }}
           - Inference Lambda: mask-recommender-inference-staging
           - Training Lambda: mask-recommender-training-staging
-          
+
           Database: Cloned from production
           Migrations: Applied successfully
 
@@ -226,14 +226,14 @@ jobs:
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
           Staging deployment failed from development branch.
-          
+
           Check the GitHub Actions logs for details.
 
   # Job 3: Deploy to production (only after successful staging deployment)
   deploy-production:
     runs-on: ubuntu-latest
     needs: deploy-staging
-    if: github.event_name == 'push' && github.ref == 'refs/heads/development'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment: production
 
     steps:
@@ -253,13 +253,13 @@ jobs:
       run: |
         # Install Heroku CLI
         curl https://cli-assets.heroku.com/install.sh | sh
-        
+
         # Login to Heroku
         echo $HEROKU_API_KEY | heroku auth:token --stdin
-        
+
         # Deploy to production
         git push -f https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP.git HEAD:main
-        
+
         # Run migrations
         heroku run rails db:migrate --app $HEROKU_APP
 
@@ -281,7 +281,7 @@ jobs:
         wget -O Mambaforge.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
         bash Mambaforge.sh -b -p $HOME/mambaforge
         source $HOME/mambaforge/bin/activate
-        
+
         # Create environment from environment.yml
         mamba env create -f python/mask_recommender/inference/environment.yml
         source activate mask-recommender-inference
@@ -300,15 +300,15 @@ jobs:
         # Build and push inference Lambda
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/inference/
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/inference/
-        
+
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        
+
         # Update Lambda function
         aws lambda update-function-code \
           --function-name mask-recommender-inference \
           --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        
+
         aws lambda wait function-updated \
           --function-name mask-recommender-inference
 
@@ -322,12 +322,12 @@ jobs:
         # Build and push training Lambda
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/training/
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/training/
-        
+
         # Update Lambda function
         aws lambda update-function-code \
           --function-name mask-recommender-training \
           --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        
+
         aws lambda wait function-updated \
           --function-name mask-recommender-training
 
@@ -344,12 +344,12 @@ jobs:
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
           Production deployment completed successfully from development branch.
-          
+
           Deployed components:
           - Heroku app: ${{ secrets.HEROKU_PRODUCTION_APP }}
           - Inference Lambda: mask-recommender-inference
           - Training Lambda: mask-recommender-training
-          
+
           Migrations: Applied successfully
 
     - name: Send production deployment failure notification
@@ -365,5 +365,5 @@ jobs:
         from: ${{ secrets.EMAIL_USERNAME }}
         body: |
           Production deployment failed from development branch.
-          
-          Check the GitHub Actions logs for details. 
+
+          Check the GitHub Actions logs for details.
