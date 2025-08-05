@@ -75,11 +75,15 @@ jobs:
 
     - name: Run Python inference tests
       run: |
+        source $HOME/miniconda/bin/activate
+        source activate mask-recommender-inference
         cd python/mask_recommender/inference
         python -m pytest tests/ -v
 
     - name: Run Python training tests
       run: |
+        source $HOME/miniconda/bin/activate
+        source activate mask-recommender-inference
         cd python/mask_recommender/training
         python -m pytest tests/ -v
 
