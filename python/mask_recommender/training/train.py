@@ -245,7 +245,8 @@ def evaluate(
 
         # Compute style-specific multipliers for test set
         style_adjustments_test = mean_style_adjustments[style_encoded_test]
-        final_multipliers_test = mean_global_multipliers + style_adjustments_test
+        final_multipliers_test = mean_global_multipliers + \
+            style_adjustments_test
 
         # Compute facial_sum using the final multipliers
         facial_sum_test = np.sum(
