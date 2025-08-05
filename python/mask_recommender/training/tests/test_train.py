@@ -285,7 +285,7 @@ class TestModelTraining:
         self.strap_type_encoded = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
         self.style_encoded = np.array([0, 0, 1, 1, 0, 0, 1, 1, 0, 0])
 
-        @pytest.mark.skipif(platform.system() != 'Linux', reason="PyMC model training only supported on Linux")
+    @pytest.mark.skipif(platform.system() != 'Linux', reason="PyMC model training only supported on Linux")
     def test_train_model(self):
         """Test model training functionality."""
         # Suppress PyMC warnings during testing
@@ -451,15 +451,18 @@ class TestUtilityFunctions:
         """Test diagnostics display functionality."""
         mock_trace = MagicMock()
 
-        # Mock the arviz.plot_trace function to avoid the conversion error
-        with patch('train.az.plot_trace') as mock_plot_trace:
+        # Mock both arviz functions to avoid the conversion error
+        with patch('train.az.plot_trace') as mock_plot_trace, \
+             patch('train.az.plot_energy') as mock_plot_energy:
             mock_plot_trace.return_value = MagicMock()
-            
+            mock_plot_energy.return_value = MagicMock()
+
             # Should not raise any exceptions
             show_diagnostics(mock_trace)
             
-            # Check that the function was called
-            mock_plot_trace.assert_called()
+            # Verify both functions were called
+            mock_plot_trace.assert_called_once()
+            mock_plot_energy.assert_called_once()
 
     def test_display_performance_grouped_by_mask(self):
         """Test performance display functionality."""
