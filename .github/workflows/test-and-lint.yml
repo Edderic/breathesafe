@@ -12,7 +12,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:15
+        image: kartoza/postgis:15-3.4
         env:
           POSTGRES_PASSWORD: postgres
         options: >-
@@ -36,15 +36,13 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y postgresql-client postgresql-15-postgis-3
+        sudo apt-get install -y postgresql-client
 
     - name: Set up database
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/breathesafe_test
       run: |
         bundle exec rails db:create
-        # Enable PostGIS extension manually before loading schema
-        psql $DATABASE_URL -c "CREATE EXTENSION IF NOT EXISTS postgis;"
         bundle exec rails db:schema:load
 
     - name: Run tests
