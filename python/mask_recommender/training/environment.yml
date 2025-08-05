@@ -6,8 +6,8 @@ dependencies:
   - autopep8
   - boto3
   - dask
-  - jax
-  - jaxlib=0.6.2
+  - jax>=0.6.0
+  - jaxlib>=0.6.0
   - jupyter
   - jupyterlab=4.4.1
   - matplotlib
