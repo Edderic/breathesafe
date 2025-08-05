@@ -281,7 +281,7 @@ def evaluate(
 
 
 def presum_log_loss(y_true, y_prob):
-    return -(y_true * np.log(y_prob) + (1 - y_true) * np.log(1 - y_prob))
+    return np.mean(-(y_true * np.log(y_prob) + (1 - y_true) * np.log(1 - y_prob)))
 
 
 def save_mask_data_for_inference(mask_id_to_idx, df, filename='mask_data.json'):
@@ -543,6 +543,8 @@ def filter_outliers(df, z_score_cols):
               f"z-scores (|z| > 2.25) out of {initial_count} total rows")
     else:
         print("No z-score columns found in data, skipping z-score filtering")
+    
+    return df
 
 
 if __name__ == '__main__':

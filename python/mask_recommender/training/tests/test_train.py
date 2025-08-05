@@ -342,13 +342,52 @@ class TestModelEvaluation:
 
     def test_evaluate(self):
         """Test model evaluation functionality."""
-        with patch('train.np.mean') as mock_mean:
-            mock_mean.side_effect = [0.5, 0.3, 0.2, 0.1, 0.4]  # Mock various means
+        # Create a more realistic mock trace with proper posterior data
+        mock_posterior = MagicMock()
+        
+        # Mock the posterior variables with proper dimensions
+        # We have 3 test samples, so arrays should match
+        mock_global_multipliers = MagicMock()
+        mock_global_multipliers.mean.return_value.values = np.array([0.1, 0.2, 0.3, 0.4])  # 4 facial features
+        
+        mock_style_adjustments = MagicMock()
+        # Style adjustments should have shape (num_styles, num_facial_features)
+        # We have 2 styles (0, 1) and 4 facial features
+        mock_style_adjustments.mean.return_value.values = np.array([[0.05, 0.1, 0.15, 0.2], 
+                                                                   [0.1, 0.15, 0.2, 0.25]])  # 2 styles x 4 features
+        
+        mock_a_mask = MagicMock()
+        mock_a_mask.mean.return_value.values = np.array([0.01, 0.02, 0.03])  # 3 masks
+        
+        mock_c_mask = MagicMock()
+        mock_c_mask.mean.return_value.values = np.array([0.1, 0.2, 0.3])  # 3 masks
+        
+        mock_strap_type_effect = MagicMock()
+        mock_strap_type_effect.mean.return_value.values = np.array([0.01, 0.02])  # 2 strap types
+        
+        mock_facial_hair_multiplier = MagicMock()
+        mock_facial_hair_multiplier.mean.return_value.values = np.array([0.001])  # scalar
+        
+        # Set up the posterior mock to return these values
+        mock_posterior.__getitem__.side_effect = lambda key: {
+            'global_multipliers': mock_global_multipliers,
+            'style_multiplier_adjustments': mock_style_adjustments,
+            'a_mask': mock_a_mask,
+            'c_mask': mock_c_mask,
+            'strap_type_effect': mock_strap_type_effect,
+            'facial_hair_multiplier': mock_facial_hair_multiplier
+        }[key]
+        
+        self.mock_trace.posterior = mock_posterior
 
-            y_pred, y_prob = evaluate(
-                self.mock_model, self.mock_trace, self.test_df, self.predictor_cols,
-                self.facial_measurement_cols, self.mask_id_to_idx, "Test"
-            )
+        # Mock the model context manager
+        self.mock_model.__enter__ = MagicMock(return_value=None)
+        self.mock_model.__exit__ = MagicMock(return_value=None)
+
+        y_pred, y_prob = evaluate(
+            self.mock_model, self.mock_trace, self.test_df, self.predictor_cols,
+            self.facial_measurement_cols, self.mask_id_to_idx, "Test"
+        )
 
         # Check that predictions were made
         assert len(y_pred) == len(self.test_df)
@@ -383,9 +422,10 @@ class TestFileOperations:
             trace_path = tmp_file.name
 
         try:
-            save_trace(mock_trace, trace_path)
-            # Check that file was created (mock doesn't actually write)
-            assert True  # If we get here, no exception was raised
+            with patch('train.az.to_netcdf') as mock_to_netcdf:
+                mock_to_netcdf.return_value = None
+                save_trace(mock_trace, trace_path)
+                mock_to_netcdf.assert_called_once_with(mock_trace, trace_path)
         finally:
             if os.path.exists(trace_path):
                 os.unlink(trace_path)
@@ -393,36 +433,45 @@ class TestFileOperations:
     def test_save_mask_data_for_inference(self):
         """Test mask data saving functionality."""
         mask_id_to_idx = {1: 0, 2: 1, 3: 2}
-        df = pd.DataFrame({'mask_id': [1, 2, 3], 'style': ['A', 'B', 'C']})
+        df = pd.DataFrame({
+            'mask_id': [1, 2, 3],
+            'style_encoded': [0, 1, 0],
+            'strap_type_encoded': [0, 1, 0],
+            'perimeter_mm': [300.0, 310.0, 320.0],
+            'style': ['A', 'B', 'A'],
+            'strap_type': ['X', 'Y', 'X']
+        })
 
         with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as tmp_file:
             filename = tmp_file.name
 
         try:
             save_mask_data_for_inference(mask_id_to_idx, df, filename)
-            # Check that file was created
+            
+            # Check that file was created and contains expected data
             assert os.path.exists(filename)
-
-            # Check that file contains valid JSON
             with open(filename, 'r') as f:
                 data = json.load(f)
-                assert 'mask_id_to_idx' in data
-                assert 'unique_masks' in data
+            
+            assert '1' in data
+            assert '2' in data
+            assert '3' in data
+            assert data['1']['style_encoded'] == 0
+            assert data['2']['style_encoded'] == 1
+            assert data['3']['style_encoded'] == 0
         finally:
             if os.path.exists(filename):
                 os.unlink(filename)
 
     def test_save_scaler_for_inference(self):
         """Test scaler saving functionality."""
-        # Create a mock scaler with all required attributes
+        # Create a mock scaler with proper attributes
         mock_scaler = MagicMock()
-        mock_scaler.mean_ = np.array([1.0, 2.0, 3.0])
-        mock_scaler.scale_ = np.array([0.5, 1.0, 1.5])
-        mock_scaler.feature_names_in_ = np.array(['feature1', 'feature2', 'feature3'])
-        
-        # Mock the tolist methods
+        mock_scaler.mean_ = MagicMock()
         mock_scaler.mean_.tolist.return_value = [1.0, 2.0, 3.0]
+        mock_scaler.scale_ = MagicMock()
         mock_scaler.scale_.tolist.return_value = [0.5, 1.0, 1.5]
+        mock_scaler.feature_names_in_ = MagicMock()
         mock_scaler.feature_names_in_.tolist.return_value = ['feature1', 'feature2', 'feature3']
 
         with tempfile.NamedTemporaryFile(suffix='.json', delete=False) as tmp_file:
@@ -430,15 +479,18 @@ class TestFileOperations:
 
         try:
             save_scaler_for_inference(mock_scaler, filename)
-            # Check that file was created
+            
+            # Check that file was created and contains expected data
             assert os.path.exists(filename)
-
-            # Check that file contains valid JSON
             with open(filename, 'r') as f:
                 data = json.load(f)
-                assert 'mean' in data
-                assert 'scale' in data
-                assert 'feature_names' in data
+            
+            assert 'mean' in data
+            assert 'scale' in data
+            assert 'feature_names' in data
+            assert data['mean'] == [1.0, 2.0, 3.0]
+            assert data['scale'] == [0.5, 1.0, 1.5]
+            assert data['feature_names'] == ['feature1', 'feature2', 'feature3']
         finally:
             if os.path.exists(filename):
                 os.unlink(filename)
