@@ -9,4 +9,4 @@ RUN micromamba install -y -n base -c conda-forge python=3.11 pymc jax jaxlib num
 WORKDIR /workspace
 COPY . /workspace
 
-CMD ["python", "python/mask_recommender/train.py"]
+CMD ["python", "python/mask_recommender/training/train.py"]
