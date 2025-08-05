@@ -16,7 +16,8 @@ ActiveRecord::Schema[7.0].define(version: 20_250_804_031_244) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
-  enable_extension 'postgis'
+  # Temporarily disabled PostGIS for CI testing
+  # enable_extension 'postgis'
 
   create_table 'actions', force: :cascade do |t|
     t.datetime 'datetime'
@@ -37,7 +38,8 @@ ActiveRecord::Schema[7.0].define(version: 20_250_804_031_244) do
     t.string 'country', null: false
     t.string 'state', null: false
     t.string 'zip_code', null: false
-    t.geometry 'address_coordinate', limit: { srid: 0, type: 'geometry' }
+    # Temporarily disabled PostGIS geometry column for CI testing
+    # t.geometry 'address_coordinate', limit: { srid: 0, type: 'geometry' }
     t.string 'stringified_address', null: false
     t.datetime 'created_at', null: false
     t.datetime 'updated_at', null: false
