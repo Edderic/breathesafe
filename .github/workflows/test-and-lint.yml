@@ -83,9 +83,9 @@ jobs:
 
     - name: Install dependencies
       run: |
-        # Install Miniconda (more stable than mamba for CI)
-        wget -O miniconda.sh "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
-        bash miniconda.sh -b -p $HOME/miniconda
+        # Install Miniconda using a more reliable method
+        curl -L -O "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+        bash Miniconda3-latest-Linux-x86_64.sh -b -p $HOME/miniconda
         source $HOME/miniconda/bin/activate
 
         # Create environment from environment.yml
