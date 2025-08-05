@@ -1,0 +1,369 @@
+name: Deploy Pipeline
+
+on:
+  push:
+    branches: [ development ]
+  pull_request:
+    branches: [ development ]
+
+jobs:
+  # Job 1: Run all tests (required for PRs and development pushes)
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3.9'
+        bundler-cache: true
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+
+    - name: Set up database
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/breathesafe_test
+      run: |
+        bundle exec rails db:create
+        bundle exec rails db:schema:load
+
+    - name: Run RuboCop
+      run: |
+        bundle exec rubocop --parallel
+
+    - name: Run RSpec tests
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/breathesafe_test
+        RAILS_ENV: test
+      run: |
+        bundle exec rspec spec
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install Python dependencies
+      run: |
+        # Install mamba
+        wget -O Mambaforge.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
+        bash Mambaforge.sh -b -p $HOME/mambaforge
+        source $HOME/mambaforge/bin/activate
+        
+        # Create environment from environment.yml
+        mamba env create -f python/mask_recommender/inference/environment.yml
+        source activate mask-recommender-inference
+
+    - name: Run Python inference tests
+      run: |
+        cd python/mask_recommender/inference
+        python -m pytest tests/ -v
+
+    - name: Run Python training tests
+      run: |
+        cd python/mask_recommender/training
+        python -m pytest tests/ -v
+
+  # Job 2: Deploy to staging (only on development branch pushes, not PRs)
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/development'
+    environment: staging
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3.9'
+        bundler-cache: true
+
+    - name: Deploy to Heroku Staging
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        HEROKU_APP: ${{ secrets.HEROKU_STAGING_APP }}
+      run: |
+        # Install Heroku CLI
+        curl https://cli-assets.heroku.com/install.sh | sh
+        
+        # Login to Heroku
+        echo $HEROKU_API_KEY | heroku auth:token --stdin
+        
+        # Clone production database to staging
+        heroku pg:copy ${{ secrets.HEROKU_PRODUCTION_APP }}::DATABASE DATABASE --app $HEROKU_APP --confirm $HEROKU_APP
+        
+        # Deploy to staging
+        git push -f https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP.git HEAD:main
+        
+        # Run migrations
+        heroku run rails db:migrate --app $HEROKU_APP
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+    - name: Set up Python for Lambda deployment
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install Python dependencies
+      run: |
+        # Install mamba
+        wget -O Mambaforge.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
+        bash Mambaforge.sh -b -p $HOME/mambaforge
+        source $HOME/mambaforge/bin/activate
+        
+        # Create environment from environment.yml
+        mamba env create -f python/mask_recommender/inference/environment.yml
+        source activate mask-recommender-inference
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build and deploy inference Lambda to staging
+      id: build-inference
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: mask-recommender-inference-staging
+        IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
+      run: |
+        # Build and push inference Lambda
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/inference/
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/inference/
+        
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        
+        # Update Lambda function
+        aws lambda update-function-code \
+          --function-name mask-recommender-inference-staging \
+          --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        
+        aws lambda wait function-updated \
+          --function-name mask-recommender-inference-staging
+
+    - name: Build and deploy training Lambda to staging
+      id: build-training
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: mask-recommender-training-staging
+        IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
+      run: |
+        # Build and push training Lambda
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/training/
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/training/
+        
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        
+        # Update Lambda function
+        aws lambda update-function-code \
+          --function-name mask-recommender-training-staging \
+          --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        
+        aws lambda wait function-updated \
+          --function-name mask-recommender-training-staging
+
+    - name: Send staging deployment success notification
+      uses: dawidd6/action-send-mail@v3
+      if: success()
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "Staging Deployment Successful - Development Branch"
+        to: ${{ secrets.NOTIFICATION_EMAIL }}
+        from: ${{ secrets.EMAIL_USERNAME }}
+        body: |
+          Staging deployment completed successfully from development branch.
+          
+          Deployed components:
+          - Heroku app: ${{ secrets.HEROKU_STAGING_APP }}
+          - Inference Lambda: mask-recommender-inference-staging
+          - Training Lambda: mask-recommender-training-staging
+          
+          Database: Cloned from production
+          Migrations: Applied successfully
+
+    - name: Send staging deployment failure notification
+      uses: dawidd6/action-send-mail@v3
+      if: failure()
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "Staging Deployment Failed - Development Branch"
+        to: ${{ secrets.NOTIFICATION_EMAIL }}
+        from: ${{ secrets.EMAIL_USERNAME }}
+        body: |
+          Staging deployment failed from development branch.
+          
+          Check the GitHub Actions logs for details.
+
+  # Job 3: Deploy to production (only after successful staging deployment)
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.event_name == 'push' && github.ref == 'refs/heads/development'
+    environment: production
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3.9'
+        bundler-cache: true
+
+    - name: Deploy to Heroku Production
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        HEROKU_APP: ${{ secrets.HEROKU_PRODUCTION_APP }}
+      run: |
+        # Install Heroku CLI
+        curl https://cli-assets.heroku.com/install.sh | sh
+        
+        # Login to Heroku
+        echo $HEROKU_API_KEY | heroku auth:token --stdin
+        
+        # Deploy to production
+        git push -f https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP.git HEAD:main
+        
+        # Run migrations
+        heroku run rails db:migrate --app $HEROKU_APP
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+    - name: Set up Python for Lambda deployment
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install Python dependencies
+      run: |
+        # Install mamba
+        wget -O Mambaforge.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
+        bash Mambaforge.sh -b -p $HOME/mambaforge
+        source $HOME/mambaforge/bin/activate
+        
+        # Create environment from environment.yml
+        mamba env create -f python/mask_recommender/inference/environment.yml
+        source activate mask-recommender-inference
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build and deploy inference Lambda to production
+      id: build-inference
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: mask-recommender-inference
+        IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
+      run: |
+        # Build and push inference Lambda
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/inference/
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/inference/
+        
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        
+        # Update Lambda function
+        aws lambda update-function-code \
+          --function-name mask-recommender-inference \
+          --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        
+        aws lambda wait function-updated \
+          --function-name mask-recommender-inference
+
+    - name: Build and deploy training Lambda to production
+      id: build-training
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: mask-recommender-training
+        IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
+      run: |
+        # Build and push training Lambda
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/training/
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/training/
+        
+        # Update Lambda function
+        aws lambda update-function-code \
+          --function-name mask-recommender-training \
+          --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        
+        aws lambda wait function-updated \
+          --function-name mask-recommender-training
+
+    - name: Send production deployment success notification
+      uses: dawidd6/action-send-mail@v3
+      if: success()
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "Production Deployment Successful - Development Branch"
+        to: ${{ secrets.NOTIFICATION_EMAIL }}
+        from: ${{ secrets.EMAIL_USERNAME }}
+        body: |
+          Production deployment completed successfully from development branch.
+          
+          Deployed components:
+          - Heroku app: ${{ secrets.HEROKU_PRODUCTION_APP }}
+          - Inference Lambda: mask-recommender-inference
+          - Training Lambda: mask-recommender-training
+          
+          Migrations: Applied successfully
+
+    - name: Send production deployment failure notification
+      uses: dawidd6/action-send-mail@v3
+      if: failure()
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "Production Deployment Failed - Development Branch"
+        to: ${{ secrets.NOTIFICATION_EMAIL }}
+        from: ${{ secrets.EMAIL_USERNAME }}
+        body: |
+          Production deployment failed from development branch.
+          
+          Check the GitHub Actions logs for details. 
