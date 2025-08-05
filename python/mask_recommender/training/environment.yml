@@ -1,0 +1,24 @@
+name: training
+channels:
+  - conda-forge
+dependencies:
+  - arviz
+  - autopep8
+  - boto3
+  - dask
+  - jax
+  - jaxlib=0.6.2
+  - jupyter
+  - jupyterlab=4.4.1
+  - matplotlib
+  - numpy
+  - numpyro
+  - pandas
+  - protobuf
+  - psycopg2
+  - pytest
+  - pymc
+  - python
+  - scikit-learn
+  - seaborn
+  - tqdm
