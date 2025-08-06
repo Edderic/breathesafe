@@ -113,6 +113,7 @@ jobs:
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         HEROKU_APP: ${{ secrets.HEROKU_STAGING_APP }}
+        HEROKU_PRODUCTION_APP: ${{ secrets.HEROKU_PRODUCTION_APP }}
       run: |
         # Install Heroku CLI
         curl https://cli-assets.heroku.com/install.sh | sh
@@ -121,7 +122,7 @@ jobs:
         echo $HEROKU_API_KEY | heroku auth:token --stdin
 
         # Clone production database to staging
-        heroku pg:copy ${{ secrets.HEROKU_PRODUCTION_APP }}::DATABASE DATABASE --app $HEROKU_APP --confirm $HEROKU_APP
+        heroku pg:copy $HEROKU_PRODUCTION_APP::DATABASE DATABASE --app $HEROKU_APP --confirm $HEROKU_APP
 
         # Deploy to staging
         git push -f https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP.git HEAD:main
