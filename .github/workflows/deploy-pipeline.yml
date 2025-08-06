@@ -133,6 +133,9 @@ jobs:
         heroku pg:copy $HEROKU_APP_PRODUCTION::DATABASE_URL $HEROKU_APP::DATABASE --app $HEROKU_APP --confirm $HEROKU_APP
 
         # Deploy to staging
+        # Unshallow the repository for Heroku deployment
+        git fetch --all --unshallow
+
         git push -f https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP.git HEAD:main
 
         # Run migrations
