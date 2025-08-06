@@ -122,6 +122,14 @@ jobs:
         echo $HEROKU_API_KEY | heroku auth:token --stdin
 
         # Clone production database to staging
+        echo "Production app: $HEROKU_PRODUCTION_APP"
+        echo "Staging app: $HEROKU_APP"
+
+        if [ -z "$HEROKU_PRODUCTION_APP" ]; then
+          echo "Error: HEROKU_PRODUCTION_APP is not set"
+          exit 1
+        fi
+
         heroku pg:copy $HEROKU_PRODUCTION_APP::DATABASE DATABASE --app $HEROKU_APP --confirm $HEROKU_APP
 
         # Deploy to staging
