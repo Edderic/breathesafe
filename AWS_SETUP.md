@@ -43,7 +43,7 @@ The AWS user used in GitHub Actions needs the following permissions for ECR and 
                 "arn:aws:lambda:us-east-1:585068368316:function:mask-recommender-inference-staging",
                 "arn:aws:lambda:us-east-1:585068368316:function:mask-recommender-training-staging",
                 "arn:aws:lambda:us-east-1:585068368316:function:mask-recommender-inference",
-                "arn:aws:lambda:us-east-1:585068368316:function:mask-recommender-training"
+                "arn:aws:lambda:us-east-1:585068368316:function:mask-recommender-training-production"
             ]
         }
     ]

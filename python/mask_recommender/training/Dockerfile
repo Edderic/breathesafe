@@ -8,9 +8,9 @@ RUN pip install -r requirements.txt
 
 # Copy function code
 COPY lambda_function.py ${LAMBDA_TASK_ROOT}
+COPY train.py ${LAMBDA_TASK_ROOT}
+COPY run_tests.py ${LAMBDA_TASK_ROOT}
+COPY fix_jax_environment.py ${LAMBDA_TASK_ROOT}
 
-# Copy models directory if it exists
-COPY models/ ${LAMBDA_TASK_ROOT}/models/
-
-# Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
+# Set the CMD to your handler
 CMD [ "lambda_function.handler" ]
