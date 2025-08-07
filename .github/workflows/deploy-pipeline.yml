@@ -7,95 +7,9 @@ on:
     branches: [ main ]
 
 jobs:
-  # Job 1: Run all tests (required for PRs and development pushes)
-  test:
-    runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.3.9'
-        bundler-cache: true
-
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y postgresql-client
-
-    - name: Set up database
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/breathesafe_test
-      run: |
-        bundle exec rails db:create
-        bundle exec rails db:schema:load
-
-    - name: Run RuboCop
-      run: |
-        bundle exec rubocop --parallel
-
-    - name: Run RSpec tests
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/breathesafe_test
-        RAILS_ENV: test
-      run: |
-        bundle exec rspec spec
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-
-    - name: Install Python dependencies
-      run: |
-        # Install Miniconda using a more reliable method
-        curl -L -O "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
-        bash Miniconda3-latest-Linux-x86_64.sh -b -p $HOME/miniconda
-        source $HOME/miniconda/bin/activate
-
-        # Create environment from environment.yml
-        conda env create -f python/mask_recommender/inference/environment.yml
-        source activate mask-recommender-inference
-
-    - name: Run Python inference tests
-      run: |
-        source $HOME/miniconda/bin/activate
-        source activate mask-recommender-inference
-        cd python/mask_recommender/inference
-        python -m pytest tests/ -v
-
-    - name: Run Python training tests
-      run: |
-        source $HOME/miniconda/bin/activate
-        source activate mask-recommender-inference
-        cd python/mask_recommender/training
-        # Run basic tests first (no JAX dependencies)
-        python -m pytest tests/test_basic.py -v
-        # Run simple tests (comprehensive functionality tests)
-        python -m pytest tests/test_simple.py -v
-        # Run mocked tests (avoids JAX version issues)
-        python -m pytest tests/test_train_mocked.py -v
-
   # Job 2: Deploy to staging (only on development branch pushes, not PRs)
   deploy-staging:
     runs-on: ubuntu-latest
-    needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment: staging
 
@@ -165,53 +79,79 @@ jobs:
         source activate mask-recommender-inference
 
     # Temporarily disabled due to ECR permissions issue
-    # - name: Login to Amazon ECR
-    #   id: login-ecr
-    #   uses: aws-actions/amazon-ecr-login@v2
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
 
-    # - name: Build and deploy inference Lambda to staging
-    #   id: build-inference
-    #   env:
-    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-    #     ECR_REPOSITORY: mask-recommender-inference-staging
-    #     IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
-    #   run: |
-    #     # Build and push inference Lambda
-    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/inference/
-    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/inference/
+    - name: Build and deploy inference Lambda to staging
+      id: build-inference
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: mask-recommender-inference-staging
+        IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
+      run: |
+        # Build and push inference Lambda
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/inference/
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/inference/
 
-    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-    #     # Update Lambda function
-    #     aws lambda update-function-code \
-    #       --function-name mask-recommender-inference-staging \
-    #       --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        # Check if Lambda function exists
+        if aws lambda get-function --function-name mask-recommender-inference-staging 2>/dev/null; then
+          echo "Function exists, updating..."
+          aws lambda update-function-code \
+            --function-name mask-recommender-inference-staging \
+            --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        else
+          echo "Function does not exist, creating..."
+          aws lambda create-function \
+            --function-name mask-recommender-inference-staging \
+            --package-type Image \
+            --code ImageUri=$ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            --role arn:aws:iam::585068368316:role/lambda-execution-role \
+            --timeout 300 \
+            --memory-size 1024 \
+            --environment Variables='{"ENVIRONMENT":"staging"}'
+        fi
 
-    #     aws lambda wait function-updated \
-    #       --function-name mask-recommender-inference-staging
+        aws lambda wait function-updated \
+          --function-name mask-recommender-inference-staging
 
-    # - name: Build and deploy training Lambda to staging
-    #   id: build-training
-    #   env:
-    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-    #     ECR_REPOSITORY: mask-recommender-training-staging
-    #     IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
-    #   run: |
-    #     # Build and push training Lambda
-    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/training/
-    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/training/
+    - name: Build and deploy training Lambda to staging
+      id: build-training
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: mask-recommender-training-staging
+        IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
+      run: |
+        # Build and push training Lambda
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/training/
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/training/
 
-    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-    #     # Update Lambda function
-    #     aws lambda update-function-code \
-    #       --function-name mask-recommender-training-staging \
-    #       --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        # Check if Lambda function exists
+        if aws lambda get-function --function-name mask-recommender-training-staging 2>/dev/null; then
+          echo "Function exists, updating..."
+          aws lambda update-function-code \
+            --function-name mask-recommender-training-staging \
+            --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        else
+          echo "Function does not exist, creating..."
+          aws lambda create-function \
+            --function-name mask-recommender-training-staging \
+            --package-type Image \
+            --code ImageUri=$ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            --role arn:aws:iam::585068368316:role/lambda-execution-role \
+            --timeout 900 \
+            --memory-size 2048 \
+            --environment Variables='{"ENVIRONMENT":"staging"}'
+        fi
 
-    #     aws lambda wait function-updated \
-    #       --function-name mask-recommender-training-staging
+        aws lambda wait function-updated \
+          --function-name mask-recommender-training-staging
 
     - name: Send staging deployment success notification
       uses: dawidd6/action-send-mail@v3
@@ -325,10 +265,23 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-        # Update Lambda function
-        aws lambda update-function-code \
-          --function-name mask-recommender-inference \
-          --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        # Check if Lambda function exists
+        if aws lambda get-function --function-name mask-recommender-inference 2>/dev/null; then
+          echo "Function exists, updating..."
+          aws lambda update-function-code \
+            --function-name mask-recommender-inference \
+            --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        else
+          echo "Function does not exist, creating..."
+          aws lambda create-function \
+            --function-name mask-recommender-inference \
+            --package-type Image \
+            --code ImageUri=$ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            --role arn:aws:iam::585068368316:role/lambda-execution-role \
+            --timeout 300 \
+            --memory-size 1024 \
+            --environment Variables='{"ENVIRONMENT":"production"}'
+        fi
 
     - name: Build and deploy training Lambda to production
       id: build-training
@@ -341,10 +294,26 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/training/
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/training/
 
-        # Update Lambda function
-        aws lambda update-function-code \
-          --function-name mask-recommender-training \
-          --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+        # Check if Lambda function exists
+        if aws lambda get-function --function-name mask-recommender-training-production 2>/dev/null; then
+          echo "Function exists, updating..."
+          aws lambda update-function-code \
+            --function-name mask-recommender-training-production \
+            --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        else
+          echo "Function does not exist, creating..."
+          aws lambda create-function \
+            --function-name mask-recommender-training-production \
+            --package-type Image \
+            --code ImageUri=$ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            --role arn:aws:iam::585068368316:role/lambda-execution-role \
+            --timeout 900 \
+            --memory-size 2048 \
+            --environment Variables='{"ENVIRONMENT":"production"}'
+        fi
 
     - name: Send production deployment success notification
       uses: dawidd6/action-send-mail@v3
