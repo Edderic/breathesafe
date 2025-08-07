@@ -17,12 +17,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.3.9'
-        bundler-cache: true
-
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -54,40 +48,6 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build and deploy inference Lambda to staging
-      id: build-inference
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: mask-recommender-inference-staging
-        IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
-      run: |
-        # Build and push inference Lambda
-        cd python/mask_recommender/inference
-        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push .
-        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest --push .
-        cd ../../..
-
-        # Check if Lambda function exists
-        if aws lambda get-function --function-name mask-recommender-inference-staging 2>/dev/null; then
-          echo "Function exists, updating..."
-          aws lambda update-function-code \
-            --function-name mask-recommender-inference-staging \
-            --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        else
-          echo "Function does not exist, creating..."
-          aws lambda create-function \
-            --function-name mask-recommender-inference-staging \
-            --package-type Image \
-            --code ImageUri=$ECR_REGISTRY/$ECR_REPOSITORY:latest \
-            --role arn:aws:iam::585068368316:role/lambda-execution-role \
-            --timeout 300 \
-            --memory-size 1024 \
-            --environment Variables='{"ENVIRONMENT":"staging"}'
-        fi
-
-        aws lambda wait function-updated \
-          --function-name mask-recommender-inference-staging
-
     - name: Build and deploy training Lambda to staging
       id: build-training
       env:
@@ -95,6 +55,10 @@ jobs:
         ECR_REPOSITORY: mask-recommender-training-staging
         IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
       run: |
+        echo ECR_REGISTRY: $ECR_REGISTRY
+        echo ECR_REPOSITORY: $ECR_REPOSITORY
+        echo IMAGE_TAG: $IMAGE_TAG
+
         # Build and push training Lambda
         cd python/mask_recommender/training
         docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push .
@@ -121,6 +85,41 @@ jobs:
 
         aws lambda wait function-updated \
           --function-name mask-recommender-training-staging
+
+    - name: Build and deploy inference Lambda to staging
+      id: build-inference
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: mask-recommender-inference-staging
+        IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
+      run: |
+
+        # Build and push inference Lambda
+        cd python/mask_recommender/inference
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push .
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest --push .
+        cd ../../..
+
+        # Check if Lambda function exists
+        if aws lambda get-function --function-name mask-recommender-inference-staging 2>/dev/null; then
+          echo "Function exists, updating..."
+          aws lambda update-function-code \
+            --function-name mask-recommender-inference-staging \
+            --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        else
+          echo "Function does not exist, creating..."
+          aws lambda create-function \
+            --function-name mask-recommender-inference-staging \
+            --package-type Image \
+            --code ImageUri=$ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            --role arn:aws:iam::585068368316:role/lambda-execution-role \
+            --timeout 300 \
+            --memory-size 1024 \
+            --environment Variables='{"ENVIRONMENT":"staging"}'
+        fi
+
+        aws lambda wait function-updated \
+          --function-name mask-recommender-inference-staging
 
     - name: Send staging deployment success notification
       uses: dawidd6/action-send-mail@v3
