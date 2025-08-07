@@ -330,9 +330,6 @@ jobs:
           --function-name mask-recommender-inference \
           --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-        aws lambda wait function-updated \
-          --function-name mask-recommender-inference
-
     - name: Build and deploy training Lambda to production
       id: build-training
       env:
@@ -348,9 +345,6 @@ jobs:
         aws lambda update-function-code \
           --function-name mask-recommender-training \
           --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
-
-        aws lambda wait function-updated \
-          --function-name mask-recommender-training
 
     - name: Send production deployment success notification
       uses: dawidd6/action-send-mail@v3
