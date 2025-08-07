@@ -51,6 +51,9 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
     - name: Build and deploy inference Lambda to staging
       id: build-inference
       env:
@@ -59,11 +62,8 @@ jobs:
         IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
       run: |
         # Build and push inference Lambda
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/inference/
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/inference/
-
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push python/mask_recommender/inference/
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest --push python/mask_recommender/inference/
 
         # Check if Lambda function exists
         if aws lambda get-function --function-name mask-recommender-inference-staging 2>/dev/null; then
@@ -94,11 +94,8 @@ jobs:
         IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
       run: |
         # Build and push training Lambda
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/training/
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/training/
-
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push python/mask_recommender/training/
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest --push python/mask_recommender/training/
 
         # Check if Lambda function exists
         if aws lambda get-function --function-name mask-recommender-training-staging 2>/dev/null; then
@@ -219,6 +216,9 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
     - name: Build and deploy inference Lambda to production
       id: build-inference
       env:
@@ -227,11 +227,8 @@ jobs:
         IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
       run: |
         # Build and push inference Lambda
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/inference/
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/inference/
-
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push python/mask_recommender/inference/
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest --push python/mask_recommender/inference/
 
         # Check if Lambda function exists
         if aws lambda get-function --function-name mask-recommender-inference 2>/dev/null; then
@@ -259,11 +256,8 @@ jobs:
         IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
       run: |
         # Build and push training Lambda
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/training/
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/training/
-
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push python/mask_recommender/training/
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest --push python/mask_recommender/training/
 
         # Check if Lambda function exists
         if aws lambda get-function --function-name mask-recommender-training-production 2>/dev/null; then
