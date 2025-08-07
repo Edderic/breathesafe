@@ -62,8 +62,10 @@ jobs:
         IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
       run: |
         # Build and push inference Lambda
-        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push python/mask_recommender/inference/
-        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest --push python/mask_recommender/inference/
+        cd python/mask_recommender/inference
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push .
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest --push .
+        cd ../../..
 
         # Check if Lambda function exists
         if aws lambda get-function --function-name mask-recommender-inference-staging 2>/dev/null; then
@@ -94,8 +96,10 @@ jobs:
         IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
       run: |
         # Build and push training Lambda
-        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push python/mask_recommender/training/
-        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest --push python/mask_recommender/training/
+        cd python/mask_recommender/training
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push .
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest --push .
+        cd ../../..
 
         # Check if Lambda function exists
         if aws lambda get-function --function-name mask-recommender-training-staging 2>/dev/null; then
@@ -227,8 +231,10 @@ jobs:
         IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
       run: |
         # Build and push inference Lambda
-        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push python/mask_recommender/inference/
-        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest --push python/mask_recommender/inference/
+        cd python/mask_recommender/inference
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push .
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest --push .
+        cd ../../..
 
         # Check if Lambda function exists
         if aws lambda get-function --function-name mask-recommender-inference 2>/dev/null; then
@@ -256,8 +262,10 @@ jobs:
         IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
       run: |
         # Build and push training Lambda
-        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push python/mask_recommender/training/
-        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest --push python/mask_recommender/training/
+        cd python/mask_recommender/training
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push .
+        docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest --push .
+        cd ../../..
 
         # Check if Lambda function exists
         if aws lambda get-function --function-name mask-recommender-training-production 2>/dev/null; then
