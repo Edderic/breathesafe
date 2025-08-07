@@ -23,38 +23,6 @@ jobs:
         ruby-version: '3.3.9'
         bundler-cache: true
 
-    - name: Deploy to Heroku Staging
-      env:
-        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        HEROKU_APP: ${{ secrets.HEROKU_STAGING_APP }}
-        HEROKU_APP_PRODUCTION: ${{ secrets.HEROKU_APP_PRODUCTION }}
-      run: |
-        # Install Heroku CLI
-        curl https://cli-assets.heroku.com/install.sh | sh
-
-        # Login to Heroku
-        echo $HEROKU_API_KEY | heroku auth:token --stdin
-
-        # Clone production database to staging
-        echo "Production app: $HEROKU_APP_PRODUCTION"
-        echo "Staging app: $HEROKU_APP"
-
-        if [ -z "$HEROKU_APP_PRODUCTION" ]; then
-          echo "Error: HEROKU_APP_PRODUCTION is not set"
-          exit 1
-        fi
-
-        heroku pg:copy $HEROKU_APP_PRODUCTION::DATABASE_URL $HEROKU_APP::DATABASE --app $HEROKU_APP --confirm $HEROKU_APP
-
-        # Deploy to staging
-        # Unshallow the repository for Heroku deployment
-        git fetch --all --unshallow
-
-        git push -f https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP.git HEAD:main
-
-        # Run migrations
-        heroku run rails db:migrate --app $HEROKU_APP
-
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
