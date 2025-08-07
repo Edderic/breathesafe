@@ -164,53 +164,54 @@ jobs:
         conda env create -f python/mask_recommender/inference/environment.yml
         source activate mask-recommender-inference
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
+    # Temporarily disabled due to ECR permissions issue
+    # - name: Login to Amazon ECR
+    #   id: login-ecr
+    #   uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Build and deploy inference Lambda to staging
-      id: build-inference
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: mask-recommender-inference-staging
-        IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
-      run: |
-        # Build and push inference Lambda
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/inference/
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/inference/
+    # - name: Build and deploy inference Lambda to staging
+    #   id: build-inference
+    #   env:
+    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    #     ECR_REPOSITORY: mask-recommender-inference-staging
+    #     IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
+    #   run: |
+    #     # Build and push inference Lambda
+    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/inference/
+    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/inference/
 
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-        # Update Lambda function
-        aws lambda update-function-code \
-          --function-name mask-recommender-inference-staging \
-          --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    #     # Update Lambda function
+    #     aws lambda update-function-code \
+    #       --function-name mask-recommender-inference-staging \
+    #       --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-        aws lambda wait function-updated \
-          --function-name mask-recommender-inference-staging
+    #     aws lambda wait function-updated \
+    #       --function-name mask-recommender-inference-staging
 
-    - name: Build and deploy training Lambda to staging
-      id: build-training
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: mask-recommender-training-staging
-        IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
-      run: |
-        # Build and push training Lambda
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/training/
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/training/
+    # - name: Build and deploy training Lambda to staging
+    #   id: build-training
+    #   env:
+    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    #     ECR_REPOSITORY: mask-recommender-training-staging
+    #     IMAGE_TAG: development-$(date +%Y%m%d_%H%M%S)
+    #   run: |
+    #     # Build and push training Lambda
+    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG python/mask_recommender/training/
+    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest python/mask_recommender/training/
 
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-        # Update Lambda function
-        aws lambda update-function-code \
-          --function-name mask-recommender-training-staging \
-          --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
+    #     # Update Lambda function
+    #     aws lambda update-function-code \
+    #       --function-name mask-recommender-training-staging \
+    #       --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-        aws lambda wait function-updated \
-          --function-name mask-recommender-training-staging
+    #     aws lambda wait function-updated \
+    #       --function-name mask-recommender-training-staging
 
     - name: Send staging deployment success notification
       uses: dawidd6/action-send-mail@v3
@@ -228,8 +229,7 @@ jobs:
 
           Deployed components:
           - Heroku app: ${{ secrets.HEROKU_STAGING_APP }}
-          - Inference Lambda: mask-recommender-inference-staging
-          - Training Lambda: mask-recommender-training-staging
+          - Lambda deployments: Temporarily disabled (ECR permissions issue)
 
           Database: Cloned from production
           Migrations: Applied successfully
