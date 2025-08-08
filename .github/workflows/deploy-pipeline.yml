@@ -82,7 +82,7 @@ jobs:
             --role arn:aws:iam::585068368316:role/lambda-execution-role \
             --timeout 900 \
             --memory-size 2048 \
-            --environment Variables='{"ENVIRONMENT":"staging"}'
+            --environment "Variables={ENVIRONMENT=staging}"
         fi
 
         aws lambda wait function-updated \
@@ -118,7 +118,7 @@ jobs:
             --role arn:aws:iam::585068368316:role/lambda-execution-role \
             --timeout 300 \
             --memory-size 1024 \
-            --environment Variables='{"ENVIRONMENT":"staging"}'
+            --environment "Variables={ENVIRONMENT=staging}"
         fi
 
         aws lambda wait function-updated \
@@ -255,7 +255,7 @@ jobs:
             --role arn:aws:iam::585068368316:role/lambda-execution-role \
             --timeout 300 \
             --memory-size 1024 \
-            --environment Variables='{"ENVIRONMENT":"production"}'
+            --environment "Variables={ENVIRONMENT=production}"
         fi
 
     - name: Build and deploy training Lambda to production
@@ -288,7 +288,7 @@ jobs:
             --role arn:aws:iam::585068368316:role/lambda-execution-role \
             --timeout 900 \
             --memory-size 2048 \
-            --environment Variables='{"ENVIRONMENT":"production"}'
+            --environment "Variables={ENVIRONMENT=production}"
         fi
 
     - name: Send production deployment success notification
