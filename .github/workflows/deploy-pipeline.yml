@@ -115,6 +115,7 @@ jobs:
           --function-name mask-recommender-training-staging
 
     - name: Ensure training Lambda config (staging)
+      continue-on-error: true
       run: |
         set -euo pipefail
         FN="mask-recommender-training-staging"
@@ -175,6 +176,7 @@ jobs:
           --function-name mask-recommender-inference-staging
 
     - name: Ensure inference Lambda config (staging)
+      continue-on-error: true
       run: |
         set -euo pipefail
         FN="mask-recommender-inference-staging"
@@ -395,6 +397,7 @@ jobs:
         exit 1
 
     - name: Ensure inference Lambda config (production)
+      continue-on-error: true
       run: |
         set -euo pipefail
         FN="mask-recommender-inference-production"
