@@ -418,6 +418,8 @@ def main():
 
     # Encode categorical variables
     categorical_cols = ['strap_type', 'style']
+    # Create encoded columns like 'strap_type_encoded' and 'style_encoded'
+    _encodings = encode_categorical_variables(df, categorical_cols)
 
     # Add encoded columns to predictor columns
     for col in categorical_cols:
@@ -543,7 +545,7 @@ def filter_outliers(df, z_score_cols):
               f"z-scores (|z| > 2.25) out of {initial_count} total rows")
     else:
         print("No z-score columns found in data, skipping z-score filtering")
-    
+
     return df
 
 
