@@ -237,7 +237,7 @@ jobs:
       id: build-inference
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: mask-recommender-inference
+        ECR_REPOSITORY: mask-recommender-inference-production
       run: |
         # Generate image tag
         IMAGE_TAG="development-$(date +%Y%m%d_%H%M%S)"
