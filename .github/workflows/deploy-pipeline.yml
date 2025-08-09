@@ -250,7 +250,7 @@ jobs:
         cd ../../..
 
         # Check if Lambda function exists
-        if aws lambda get-function --function-name mask-recommender-inference 2>/dev/null; then
+        if aws lambda get-function --function-name mask-recommender-inference-production 2>/dev/null; then
           echo "Function exists, updating..."
           aws lambda update-function-code \
             --function-name mask-recommender-inference-production \
@@ -271,7 +271,7 @@ jobs:
       id: build-training
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: mask-recommender-training
+        ECR_REPOSITORY: mask-recommender-training-production
       run: |
         # Generate image tag
         IMAGE_TAG="development-$(date +%Y%m%d_%H%M%S)"
