@@ -249,12 +249,12 @@ jobs:
         if aws lambda get-function --function-name mask-recommender-inference 2>/dev/null; then
           echo "Function exists, updating..."
           aws lambda update-function-code \
-            --function-name mask-recommender-inference \
+            --function-name mask-recommender-inference-production \
             --image-uri $ECR_REGISTRY/$ECR_REPOSITORY:latest
         else
           echo "Function does not exist, creating..."
           aws lambda create-function \
-            --function-name mask-recommender-inference \
+            --function-name mask-recommender-inference-production \
             --package-type Image \
             --code ImageUri=$ECR_REGISTRY/$ECR_REPOSITORY:latest \
             --role arn:aws:iam::585068368316:role/lambda-execution-role \
@@ -314,8 +314,8 @@ jobs:
 
           Deployed components:
           - Heroku app: ${{ secrets.HEROKU_PRODUCTION_APP }}
-          - Inference Lambda: mask-recommender-inference
-          - Training Lambda: mask-recommender-training
+          - Inference Lambda: mask-recommender-inference-production
+          - Training Lambda: mask-recommender-training-production
 
           Migrations: Applied successfully
 
