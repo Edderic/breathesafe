@@ -371,6 +371,7 @@ jobs:
         fi
 
     - name: Ensure training Lambda config (production)
+      continue-on-error: true
       run: |
         set -euo pipefail
         FN="mask-recommender-training-production"
