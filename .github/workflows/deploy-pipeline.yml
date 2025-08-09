@@ -119,7 +119,7 @@ jobs:
         aws lambda update-function-configuration \
           --function-name mask-recommender-training-staging \
           --timeout 900 \
-          --memory-size 10240
+          --memory-size 3008
 
     - name: Build and deploy inference Lambda to staging
       id: build-inference
@@ -163,7 +163,7 @@ jobs:
         aws lambda update-function-configuration \
           --function-name mask-recommender-inference-staging \
           --timeout 900 \
-          --memory-size 10240
+          --memory-size 3008
 
     - name: Send staging deployment success notification
       uses: dawidd6/action-send-mail@v3
@@ -343,14 +343,14 @@ jobs:
         aws lambda update-function-configuration \
           --function-name mask-recommender-training-production \
           --timeout 900 \
-          --memory-size 10240
+          --memory-size 3008
 
     - name: Ensure inference Lambda config (production)
       run: |
         aws lambda update-function-configuration \
           --function-name mask-recommender-inference-production \
           --timeout 900 \
-          --memory-size 10240
+          --memory-size 3008
 
     - name: Send production deployment success notification
       uses: dawidd6/action-send-mail@v3
