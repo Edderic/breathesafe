@@ -155,15 +155,15 @@ jobs:
             --environment "Variables={ENVIRONMENT=staging}"
         fi
 
-    - name: Ensure training Lambda config (production)
-      run: |
-        aws lambda update-function-configuration \
-          --function-name mask-recommender-training-production \
-          --timeout 900 \
-          --memory-size 10240
-
         aws lambda wait function-updated \
           --function-name mask-recommender-inference-staging
+
+    - name: Ensure inference Lambda config (staging)
+      run: |
+        aws lambda update-function-configuration \
+          --function-name mask-recommender-inference-staging \
+          --timeout 900 \
+          --memory-size 10240
 
     - name: Send staging deployment success notification
       uses: dawidd6/action-send-mail@v3
@@ -337,6 +337,20 @@ jobs:
             --memory-size 2048 \
             --environment "Variables={ENVIRONMENT=production}"
         fi
+
+    - name: Ensure training Lambda config (production)
+      run: |
+        aws lambda update-function-configuration \
+          --function-name mask-recommender-training-production \
+          --timeout 900 \
+          --memory-size 10240
+
+    - name: Ensure inference Lambda config (production)
+      run: |
+        aws lambda update-function-configuration \
+          --function-name mask-recommender-inference-production \
+          --timeout 900 \
+          --memory-size 10240
 
     - name: Send production deployment success notification
       uses: dawidd6/action-send-mail@v3
