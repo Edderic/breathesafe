@@ -114,6 +114,13 @@ jobs:
         aws lambda wait function-updated \
           --function-name mask-recommender-training-staging
 
+    - name: Ensure training Lambda config (staging)
+      run: |
+        aws lambda update-function-configuration \
+          --function-name mask-recommender-training-staging \
+          --timeout 900 \
+          --memory-size 10240
+
     - name: Build and deploy inference Lambda to staging
       id: build-inference
       env:
@@ -147,6 +154,13 @@ jobs:
             --memory-size 1024 \
             --environment "Variables={ENVIRONMENT=staging}"
         fi
+
+    - name: Ensure training Lambda config (production)
+      run: |
+        aws lambda update-function-configuration \
+          --function-name mask-recommender-training-production \
+          --timeout 900 \
+          --memory-size 10240
 
         aws lambda wait function-updated \
           --function-name mask-recommender-inference-staging
