@@ -132,6 +132,7 @@ jobs:
       with:
         server_address: smtp.gmail.com
         server_port: 587
+        secure: false
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
         subject: "Staging Deployment Successful - Development Branch"
@@ -153,6 +154,7 @@ jobs:
       with:
         server_address: smtp.gmail.com
         server_port: 587
+        secure: false
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
         subject: "Staging Deployment Failed - Development Branch"
@@ -301,6 +303,7 @@ jobs:
       with:
         server_address: smtp.gmail.com
         server_port: 587
+        secure: false
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
         subject: "Production Deployment Successful - Development Branch"
@@ -322,6 +325,7 @@ jobs:
       with:
         server_address: smtp.gmail.com
         server_port: 587
+        secure: false
         username: ${{ secrets.EMAIL_USERNAME }}
         password: ${{ secrets.EMAIL_PASSWORD }}
         subject: "Production Deployment Failed - Development Branch"
