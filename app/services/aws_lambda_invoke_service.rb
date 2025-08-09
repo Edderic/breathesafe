@@ -16,10 +16,14 @@ class AwsLambdaInvokeService
     private
 
     def init_aws_lambda_client(region)
+      # Increase read timeout to support long-running Lambda (up to 15 minutes)
       Aws::Lambda::Client.new({
                                 region: region,
                                 access_key_id: ENV['AWS_ACCESS_KEY_ID'],
-                                secret_access_key: ENV['AWS_SECRET_ACCESS_KEY']
+                                secret_access_key: ENV['AWS_SECRET_ACCESS_KEY'],
+                                http_open_timeout: 15,
+                                http_read_timeout: 920,
+                                retry_limit: 3
                               })
     end
 
