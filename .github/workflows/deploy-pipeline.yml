@@ -116,10 +116,26 @@ jobs:
 
     - name: Ensure training Lambda config (staging)
       run: |
-        aws lambda update-function-configuration \
-          --function-name mask-recommender-training-staging \
-          --timeout 900 \
-          --memory-size 3008
+        set -euo pipefail
+        FN="mask-recommender-training-staging"
+        for i in 1 2 3; do
+          if out=$(aws lambda update-function-configuration \
+              --function-name "$FN" \
+              --timeout 900 \
+              --memory-size 3008 2>&1); then
+            echo "Updated $FN configuration"
+            exit 0
+          fi
+          if echo "$out" | grep -q 'ResourceConflictException'; then
+            echo "Another update in progress for $FN. Retrying ($i/3)..."
+            sleep 10
+          else
+            echo "$out"
+            exit 1
+          fi
+        done
+        echo "Timed out waiting to update $FN configuration"
+        exit 1
 
     - name: Build and deploy inference Lambda to staging
       id: build-inference
@@ -160,10 +176,26 @@ jobs:
 
     - name: Ensure inference Lambda config (staging)
       run: |
-        aws lambda update-function-configuration \
-          --function-name mask-recommender-inference-staging \
-          --timeout 900 \
-          --memory-size 3008
+        set -euo pipefail
+        FN="mask-recommender-inference-staging"
+        for i in 1 2 3; do
+          if out=$(aws lambda update-function-configuration \
+              --function-name "$FN" \
+              --timeout 900 \
+              --memory-size 3008 2>&1); then
+            echo "Updated $FN configuration"
+            exit 0
+          fi
+          if echo "$out" | grep -q 'ResourceConflictException'; then
+            echo "Another update in progress for $FN. Retrying ($i/3)..."
+            sleep 10
+          else
+            echo "$out"
+            exit 1
+          fi
+        done
+        echo "Timed out waiting to update $FN configuration"
+        exit 1
 
     - name: Send staging deployment success notification
       uses: dawidd6/action-send-mail@v3
@@ -340,17 +372,49 @@ jobs:
 
     - name: Ensure training Lambda config (production)
       run: |
-        aws lambda update-function-configuration \
-          --function-name mask-recommender-training-production \
-          --timeout 900 \
-          --memory-size 3008
+        set -euo pipefail
+        FN="mask-recommender-training-production"
+        for i in 1 2 3; do
+          if out=$(aws lambda update-function-configuration \
+              --function-name "$FN" \
+              --timeout 900 \
+              --memory-size 3008 2>&1); then
+            echo "Updated $FN configuration"
+            exit 0
+          fi
+          if echo "$out" | grep -q 'ResourceConflictException'; then
+            echo "Another update in progress for $FN. Retrying ($i/3)..."
+            sleep 10
+          else
+            echo "$out"
+            exit 1
+          fi
+        done
+        echo "Timed out waiting to update $FN configuration"
+        exit 1
 
     - name: Ensure inference Lambda config (production)
       run: |
-        aws lambda update-function-configuration \
-          --function-name mask-recommender-inference-production \
-          --timeout 900 \
-          --memory-size 3008
+        set -euo pipefail
+        FN="mask-recommender-inference-production"
+        for i in 1 2 3; do
+          if out=$(aws lambda update-function-configuration \
+              --function-name "$FN" \
+              --timeout 900 \
+              --memory-size 3008 2>&1); then
+            echo "Updated $FN configuration"
+            exit 0
+          fi
+          if echo "$out" | grep -q 'ResourceConflictException'; then
+            echo "Another update in progress for $FN. Retrying ($i/3)..."
+            sleep 10
+          else
+            echo "$out"
+            exit 1
+          fi
+        done
+        echo "Timed out waiting to update $FN configuration"
+        exit 1
 
     - name: Send production deployment success notification
       uses: dawidd6/action-send-mail@v3
