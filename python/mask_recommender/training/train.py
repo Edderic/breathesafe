@@ -341,6 +341,7 @@ def save_mask_data_for_inference(mask_id_to_idx, df, filename='mask_data.json'):
         mask_samples = df[df['mask_id'] == mask_id].iloc[0]
 
         mask_data[str(mask_id)] = {
+            'mask_idx': int(idx),
             'style_encoded': int(mask_samples['style_encoded']),
             'strap_type_encoded': int(mask_samples['strap_type_encoded']),
             'perimeter_mm': float(mask_samples['perimeter_mm']),

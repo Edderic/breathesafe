@@ -126,8 +126,13 @@ class MaskRecommenderInference:
             facial_sum = np.sum(facial_X * final_multipliers)
             distance = (facial_sum - perimeter_mm) ** 2
 
-            a = a_mask[mask_id]
-            c = c_mask[mask_id]
+            # Use the model's mask index learned during training
+            mask_idx = mask_info.get('mask_idx', None)
+            if mask_idx is None:
+                logger.warning(f"mask_id {mask_id} missing mask_idx; defaulting to mask_id index")
+                mask_idx = mask_id
+            a = a_mask[mask_idx]
+            c = c_mask[mask_idx]
             strap_effect = strap_type_effect[strap_type_encoded]
             facial_hair = facial_features.get('facial_hair_beard_length_mm', 0)
 
