@@ -5,6 +5,7 @@ export const useFacialMeasurementStore = defineStore('facialMeasurement', {
   state: () => ({
     faceWidthMm: 155,
     bitragionSubnasaleArcMm: 255,
+    faceLengthMm: 127,
     noseProtrusionMm: 28,
 
   }),
@@ -16,7 +17,7 @@ export const useFacialMeasurementStore = defineStore('facialMeasurement', {
       let facialMeasurements = getFacialMeasurements()
 
       for (let facialMeasurement in facialMeasurements) {
-        if (toQuery[facialMeasurements]) {
+        if (toQuery[facialMeasurement]) {
           this[facialMeasurement] = parseFloat(toQuery[facialMeasurement])
         }
       }
