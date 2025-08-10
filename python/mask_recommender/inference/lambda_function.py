@@ -13,7 +13,8 @@ logger.setLevel(logging.INFO)
 
 class MaskRecommenderInference:
     def __init__(self):
-        self.s3_client = boto3.client('s3')
+        region = os.environ.get('S3_BUCKET_REGION', 'us-east-2')
+        self.s3_client = boto3.client('s3', region_name=region)
         # Map environment -> bucket
         env = os.environ.get('ENVIRONMENT', 'staging').strip().lower()
         if env not in ('staging', 'production', 'development'):

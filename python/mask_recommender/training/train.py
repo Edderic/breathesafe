@@ -180,9 +180,13 @@ def _s3_prefix():
     return f"mask-recommender-training-{_env_name()}"
 
 
+def _s3_region():
+    return os.environ.get('S3_BUCKET_REGION', 'us-east-2')
+
+
 def _upload_file_to_s3(local_path: str, key: str) -> str:
     bucket = _s3_bucket()
-    s3 = boto3.client('s3')
+    s3 = boto3.client('s3', region_name=_s3_region())
     try:
         s3.upload_file(local_path, bucket, key)
     except ClientError as e:
