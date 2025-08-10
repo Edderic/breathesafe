@@ -124,7 +124,7 @@ jobs:
               --function-name "$FN" \
               --timeout 900 \
               --memory-size 3008 \
-              --environment "Variables={ENVIRONMENT=staging,S3_BUCKET_NAME=breathesafe-staging}" 2>&1); then
+              --environment "Variables={ENVIRONMENT=staging,S3_BUCKET_NAME=breathesafe-staging,S3_BUCKET_REGION=us-east-2}" 2>&1); then
             echo "Updated $FN configuration"
             exit 0
           fi
@@ -186,7 +186,7 @@ jobs:
               --function-name "$FN" \
               --timeout 900 \
               --memory-size 3008 \
-              --environment "Variables={ENVIRONMENT=staging,S3_BUCKET_NAME=breathesafe-staging}" 2>&1); then
+              --environment "Variables={ENVIRONMENT=staging,S3_BUCKET_NAME=breathesafe-staging,S3_BUCKET_REGION=us-east-2}" 2>&1); then
             echo "Updated $FN configuration"
             exit 0
           fi
@@ -384,7 +384,7 @@ jobs:
               --function-name "$FN" \
               --timeout 900 \
               --memory-size 3008 \
-              --environment "Variables={ENVIRONMENT=production,S3_BUCKET_NAME=breathesafe-production}" 2>&1); then
+              --environment "Variables={ENVIRONMENT=production,S3_BUCKET_NAME=breathesafe-production,S3_BUCKET_REGION=us-east-2}" 2>&1); then
             echo "Updated $FN configuration"
             exit 0
           fi
@@ -409,7 +409,7 @@ jobs:
               --function-name "$FN" \
               --timeout 900 \
               --memory-size 3008 \
-              --environment "Variables={ENVIRONMENT=production,S3_BUCKET_NAME=breathesafe-production}" 2>&1); then
+              --environment "Variables={ENVIRONMENT=production,S3_BUCKET_NAME=breathesafe-production,S3_BUCKET_REGION=us-east-2}" 2>&1); then
             echo "Updated $FN configuration"
             exit 0
           fi
