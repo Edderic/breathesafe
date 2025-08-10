@@ -330,8 +330,8 @@ def evaluate(
         fn = np.sum((y_pred == 0) & (y_test == 1))
         ppv = tp / (tp + fp) if (tp + fp) > 0 else float('nan')
         npv = tn / (tn + fn) if (tn + fn) > 0 else float('nan')
-        print(f"\n{testing_type} set accuracy: {accuracy:.3f} ({
-              y_pred.sum()} positive predictions out of {len(y_pred)})")
+        print("\n" + f"{testing_type} set accuracy: {accuracy:.3f} (" +
+              f"{y_pred.sum()} positive predictions out of {len(y_pred)})")
         print(f"{testing_type} set PPV (precision): {ppv:.3f}")
         print(f"{testing_type} set NPV: {npv:.3f}")
 
