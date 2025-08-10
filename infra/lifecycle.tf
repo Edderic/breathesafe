@@ -1,9 +1,10 @@
 locals {
-  buckets = [
-    "breathesafe-production",
-    "breathesafe-staging",
-    "breathesafe-development",
-  ]
+  # Map buckets to their regions; adjust as needed
+  bucket_regions = {
+    "breathesafe-production"  = "us-east-1"
+    "breathesafe-staging"     = "us-east-2"
+    "breathesafe-development" = "us-east-2"
+  }
 
   models_prefixes = [
     "mask-recommender-training-production/models/",
@@ -20,8 +21,9 @@ locals {
 
 # Attach lifecycle rules to existing buckets
 resource "aws_s3_bucket_lifecycle_configuration" "mask_recommender_models" {
-  for_each = toset(local.buckets)
-  bucket   = each.value
+  for_each = local.bucket_regions
+  bucket   = each.key
+  provider = each.value == "us-east-2" ? aws.use2 : aws
 
   rule {
     id     = "expire-models-360d"
@@ -40,8 +42,9 @@ resource "aws_s3_bucket_lifecycle_configuration" "mask_recommender_models" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "mask_recommender_artifacts" {
-  for_each = toset(local.buckets)
-  bucket   = each.value
+  for_each = local.bucket_regions
+  bucket   = each.key
+  provider = each.value == "us-east-2" ? aws.use2 : aws
 
   rule {
     id     = "expire-artifacts-360d"
