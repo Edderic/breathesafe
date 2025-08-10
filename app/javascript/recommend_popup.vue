@@ -13,12 +13,12 @@
           </tr>
         </thead>
         <tbody v-if='explanationToShow == ""'>
-          <tr v-for='(value, key, index) in facialMeasurements'>
-            <th  v-if='value.use_for_recommender'>{{value.eng}}</th>
-            <td v-if='value.use_for_recommender'>
+          <tr v-for='key in recommenderKeys' :key="key">
+            <th>{{ facialMeasurements[key]?.eng }}</th>
+            <td>
               <CircularButton text='?' @click='show(key)'/>
             </td>
-            <td v-if='value.use_for_recommender'>
+            <td>
               <input class='num' type="number" :value='getFacialMeasurement(key)' @change="update($event, key)">
             </td>
           </tr>
@@ -74,7 +74,8 @@ export default {
   data() {
     return {
       search: "",
-      keyToShow: ""
+      keyToShow: "",
+      recommenderKeys: []
     }
   },
   props: {
@@ -117,6 +118,7 @@ export default {
   },
   async created() {
     this.load(this.$route.query, {})
+    await this.fetchRecommenderKeys()
     this.$watch(
       () => this.$route.query,
       (toQuery, fromQuery) => {
@@ -125,6 +127,21 @@ export default {
     )
   },
   methods: {
+    async fetchRecommenderKeys() {
+      try {
+        const resp = await axios.get('/mask_recommender/recommender_columns.json')
+        const cols = (resp.data && resp.data.recommender_columns) || []
+        const keys = []
+        for (const col of cols) {
+          const camel = col.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
+          const key = `${camel}Mm`
+          if (this.facialMeasurements[key]) keys.push(key)
+        }
+        this.recommenderKeys = keys
+      } catch (e) {
+        this.recommenderKeys = []
+      }
+    },
     ...mapActions(useFacialMeasurementStore, ['getFacialMeasurement', 'updateFacialMeasurement']),
     load(toQuery, fromQuery) {
       for (let facialMeasurement in this.facialMeasurements) {
