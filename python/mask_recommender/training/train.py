@@ -15,6 +15,10 @@ print(pm.__version__)
 os.environ["PYMC_EXPERIMENTAL_JAX"] = "1"
 
 
+def _is_test_env():
+    return os.environ.get('ENVIRONMENT', '').strip().lower() == 'test'
+
+
 def get_facial_measurements_with_fit_tests(endpoint):
     """
     1. Data loading function (unchanged)
@@ -138,7 +142,12 @@ def train_model(
         obs = pm.Bernoulli('obs', p=p, observed=y_train)
 
         # 6. Sample from the posterior
-        trace = sample_numpyro_nuts(1000, tune=1000, target_accept=0.95)
+        num_draws = int(os.environ.get('NUM_DRAWS', '1000'))
+        num_tune = int(os.environ.get('NUM_TUNE', '1000'))
+        if _is_test_env():
+            num_draws = int(os.environ.get('NUM_DRAWS', '100'))
+            num_tune = int(os.environ.get('NUM_TUNE', '100'))
+        trace = sample_numpyro_nuts(num_draws, tune=num_tune, target_accept=0.95)
 
     return model, trace
     # 7. Posterior predictive checks and diagnostics
@@ -185,6 +194,8 @@ def _s3_region():
 
 
 def _upload_file_to_s3(local_path: str, key: str) -> str:
+    if _is_test_env():
+        return f"file://{local_path}"
     bucket = _s3_bucket()
     s3 = boto3.client('s3', region_name=_s3_region())
     try:
@@ -198,10 +209,13 @@ def save_trace(
     trace,
     trace_path='pymc_trace.nc'
 ):
-    # Write to /tmp then upload to S3
+    # Write to /tmp then upload to S3 (unless test)
     tmp_path = f"/tmp/{os.path.basename(trace_path)}"
     print(f"\nsaving trace to {tmp_path}")
     az.to_netcdf(trace, tmp_path)
+    if _is_test_env():
+        print(f"Saved test trace to {tmp_path}")
+        return tmp_path
     key = f"{_s3_prefix()}/artifacts/{os.path.basename(trace_path)}"
     uri = _upload_file_to_s3(tmp_path, key)
     # Also update the environment-specific "latest" pointer
@@ -352,6 +366,9 @@ def save_mask_data_for_inference(mask_id_to_idx, df, filename='mask_data.json'):
     tmp_path = f"/tmp/{os.path.basename(filename)}"
     with open(tmp_path, 'w') as f:
         json.dump(mask_data, f, indent=2)
+    if _is_test_env():
+        print(f"Saved test mask metadata to {tmp_path}")
+        return tmp_path
     key = f"{_s3_prefix()}/artifacts/{os.path.basename(filename)}"
     uri = _upload_file_to_s3(tmp_path, key)
     latest_key = f"{_s3_prefix()}/models/mask_data_latest.json"
@@ -371,13 +388,15 @@ def save_scaler_for_inference(scaler, filename='scaler.json'):
     tmp_path = f"/tmp/{os.path.basename(filename)}"
     with open(tmp_path, 'w') as f:
         json.dump(scaler_data, f, indent=2)
+    if _is_test_env():
+        print(f"Saved test scaler to {tmp_path}")
+        return tmp_path
     key = f"{_s3_prefix()}/artifacts/{os.path.basename(filename)}"
     uri = _upload_file_to_s3(tmp_path, key)
     latest_key = f"{_s3_prefix()}/models/scaler_latest.json"
     _upload_file_to_s3(tmp_path, latest_key)
     print(f"Uploaded scaler to {uri}")
     return uri
-
 
 # 2. Main training script
 def main():

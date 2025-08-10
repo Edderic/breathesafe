@@ -114,7 +114,8 @@ export default {
   data() {
     return {
       missingFacialMeasurementsForRecommender: [],
-      userId: 0
+      userId: 0,
+      recommenderColumns: []
     }
   },
   computed: {
@@ -168,58 +169,48 @@ export default {
     if (this.currentUser) {
       this.loadManagedUsers()
     }
+    await this.fetchRecommenderColumns()
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
-    maybeRecommend(r) {
-      let missing = []
-
-      let measurements = {
-        'bitragionSubnasaleArc': {
-          'eng': 'Bitragion subnasale arc (mm)',
-          'mm': 'bitragionSubnasaleArcMm'
-        },
-        'noseProtrusion': {
-          'eng': 'Nose protrusion (mm)',
-          'mm': 'noseProtrusionMm'
-        },
-        'faceWidth' : {
-          'eng': 'Face width (mm)',
-          'mm': 'faceWidthMm'
-        }
+    async fetchRecommenderColumns() {
+      try {
+        const resp = await axios.get('/mask_recommender/recommender_columns.json')
+        this.recommenderColumns = (resp.data && resp.data.recommender_columns) || []
+      } catch (e) {
+        this.recommenderColumns = []
       }
+    },
+    maybeRecommend(r) {
+      const missing = []
+      const query = {}
 
-      for(let key in measurements) {
-        if (!r[key]) {
-          missing.push(measurements[key]['eng'])
+      for (const col of this.recommenderColumns) {
+        const camel = col.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
+        const baseKey = `${camel}`
+        const mmKey = `${camel}Mm`
+        if (!r[baseKey]) {
+          missing.push(baseKey)
+        } else {
+          query[mmKey] = r[baseKey]
         }
       }
 
       if (missing.length > 0) {
         this.missingFacialMeasurementsForRecommender = missing
         this.userId = r.managedId
-      } else {
-        let query = {}
-        for(let key in measurements) {
-            query[measurements[key]['mm']] = r[key]
-        }
-
-        this.$router.push(
-         {
-           name: 'Masks',
-           query: query
-         }
-        )
+        return
       }
+
+      this.$router.push({ name: 'Masks', query })
     },
     backgroundColorForRecommender(r) {
-      let color;
-      if (r.bitragionSubnasaleArc && r.noseProtrusion && r.faceWidth ) {
-        color = facialMeasurementsPresenceColorMapping['Complete'];
-      } else {
-        color = facialMeasurementsPresenceColorMapping['Completely missing'];
-      }
+      const allPresent = this.recommenderColumns.every(col => {
+        const camel = col.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
+        return !!r[camel]
+      })
+      const color = facialMeasurementsPresenceColorMapping[allPresent ? 'Complete' : 'Completely missing']
       return `rgb(${color.r}, ${color.g}, ${color.b})`
     },
     percentage(num) {
@@ -352,4 +343,4 @@ export default {
   .facial-measurements-table tbody tr:hover {
     background-color: rgb(240, 240, 240);
   }
-</style> 
+</style>

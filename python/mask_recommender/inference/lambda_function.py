@@ -35,6 +35,17 @@ class MaskRecommenderInference:
         try:
             # Download latest trace written by training for this environment
             env = os.environ.get('ENVIRONMENT', 'staging').strip().lower()
+            if env == 'test':
+                # Read artifacts from local tmp for offline tests
+                self.trace = az.from_netcdf('/tmp/pymc_trace.nc')
+                with open('/tmp/mask_data.json', 'r') as f:
+                    self.mask_data = json.load(f)
+                try:
+                    with open('/tmp/scaler.json', 'r') as f:
+                        self.scaler = json.load(f)
+                except:
+                    self.scaler = None
+                return
             logger.info("Loading model from " +
                         f"s3://{self.bucket}/mask-recommender-training-{env}/models/pymc_trace_latest.nc")
             self.s3_client.download_file(

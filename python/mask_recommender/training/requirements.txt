@@ -8,3 +8,4 @@ scikit-learn>=1.0.0
 jax==0.4.28
 jaxlib==0.4.28
 numpyro==0.14.0
+pytest>=7.0.0
