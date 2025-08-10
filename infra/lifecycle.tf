@@ -2,8 +2,8 @@ locals {
   # Map buckets to their regions; adjust as needed
   bucket_regions = {
     "breathesafe-production"  = "us-east-1"
-    "breathesafe-staging"     = "us-east-2"
-    "breathesafe-development" = "us-east-2"
+    "breathesafe-staging"     = "us-east-1"
+    "breathesafe-development" = "us-east-1"
   }
 }
 
