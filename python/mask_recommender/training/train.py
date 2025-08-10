@@ -163,7 +163,16 @@ def _env_name():
 
 
 def _s3_bucket():
-    return os.environ.get('S3_BUCKET_NAME', 'breathesafe-production')
+    # Map environment to bucket if S3_BUCKET_NAME not explicitly provided
+    override = os.environ.get('S3_BUCKET_NAME')
+    if override:
+        return override
+    mapping = {
+        'production': 'breathesafe-production',
+        'staging': 'breathesafe-staging',
+        'development': 'breathesafe-development',
+    }
+    return mapping.get(_env_name(), 'breathesafe-staging')
 
 
 def _s3_prefix():
@@ -191,6 +200,9 @@ def save_trace(
     az.to_netcdf(trace, tmp_path)
     key = f"{_s3_prefix()}/artifacts/{os.path.basename(trace_path)}"
     uri = _upload_file_to_s3(tmp_path, key)
+    # Also update the environment-specific "latest" pointer
+    latest_key = f"{_s3_prefix()}/models/pymc_trace_latest.nc"
+    _upload_file_to_s3(tmp_path, latest_key)
     print(f"Uploaded trace to {uri}")
     return uri
 
@@ -337,6 +349,8 @@ def save_mask_data_for_inference(mask_id_to_idx, df, filename='mask_data.json'):
         json.dump(mask_data, f, indent=2)
     key = f"{_s3_prefix()}/artifacts/{os.path.basename(filename)}"
     uri = _upload_file_to_s3(tmp_path, key)
+    latest_key = f"{_s3_prefix()}/models/mask_data_latest.json"
+    _upload_file_to_s3(tmp_path, latest_key)
     print(f"Uploaded mask metadata to {uri}")
     return uri
 
@@ -354,6 +368,8 @@ def save_scaler_for_inference(scaler, filename='scaler.json'):
         json.dump(scaler_data, f, indent=2)
     key = f"{_s3_prefix()}/artifacts/{os.path.basename(filename)}"
     uri = _upload_file_to_s3(tmp_path, key)
+    latest_key = f"{_s3_prefix()}/models/scaler_latest.json"
+    _upload_file_to_s3(tmp_path, latest_key)
     print(f"Uploaded scaler to {uri}")
     return uri
 

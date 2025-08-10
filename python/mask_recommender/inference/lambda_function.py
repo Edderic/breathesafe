@@ -14,7 +14,16 @@ logger.setLevel(logging.INFO)
 class MaskRecommenderInference:
     def __init__(self):
         self.s3_client = boto3.client('s3')
-        self.bucket = os.environ.get('S3_BUCKET', 'breathesafe-models')
+        # Map environment -> bucket
+        env = os.environ.get('ENVIRONMENT', 'staging').strip().lower()
+        if env not in ('staging', 'production', 'development'):
+            env = 'staging'
+        default_bucket = {
+            'production': 'breathesafe-production',
+            'staging': 'breathesafe-staging',
+            'development': 'breathesafe-development',
+        }[env]
+        self.bucket = os.environ.get('S3_BUCKET', default_bucket)
         self.trace = None
         self.mask_data = None
         self.scaler = None
@@ -23,12 +32,12 @@ class MaskRecommenderInference:
     def load_model(self):
         """Load the latest PyMC trace and mask data from S3"""
         try:
-            # Download latest trace
+            # Download latest trace written by training for this environment
             logger.info("Loading model from " +
-                        f"s3://{self.bucket}/models/pymc_trace_latest.nc")
+                        f"s3://{self.bucket}/mask-recommender-training-{os.environ.get('ENVIRONMENT', 'staging').lower()}/models/pymc_trace_latest.nc")
             self.s3_client.download_file(
                 self.bucket,
-                'models/pymc_trace_latest.nc',
+                f"mask-recommender-training-{os.environ.get('ENVIRONMENT', 'staging').lower()}/models/pymc_trace_latest.nc",
                 '/tmp/pymc_trace.nc'
             )
             self.trace = az.from_netcdf('/tmp/pymc_trace.nc')
@@ -36,11 +45,11 @@ class MaskRecommenderInference:
             # Load mask data
             logger.info(
                 "Loading mask data from " +
-                f"s3://{self.bucket}/models/mask_data_latest.json"
+                f"s3://{self.bucket}/mask-recommender-training-{os.environ.get('ENVIRONMENT', 'staging').lower()}/models/mask_data_latest.json"
             )
             self.s3_client.download_file(
                 self.bucket,
-                'models/mask_data_latest.json',
+                f"mask-recommender-training-{os.environ.get('ENVIRONMENT', 'staging').lower()}/models/mask_data_latest.json",
                 '/tmp/mask_data.json'
             )
             with open('/tmp/mask_data.json', 'r') as f:
@@ -50,7 +59,7 @@ class MaskRecommenderInference:
             try:
                 self.s3_client.download_file(
                     self.bucket,
-                    'models/scaler_latest.json',
+                    f"mask-recommender-training-{os.environ.get('ENVIRONMENT', 'staging').lower()}/models/scaler_latest.json",
                     '/tmp/scaler.json'
                 )
                 with open('/tmp/scaler.json', 'r') as f:
