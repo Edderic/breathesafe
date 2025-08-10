@@ -76,21 +76,36 @@ class MaskRecommenderInference:
             raise
 
     def scale_features(self, facial_features: Dict) -> np.ndarray:
-        """Scale facial features using the same scaler from training"""
-        features = np.array([
-            facial_features['face_width'],
-            facial_features['face_length'],
-            facial_features['bitragion_subnasale_arc'],
-            facial_features['nose_protrusion']
-        ]).reshape(1, -1)
+        """Scale facial features using the same scaler from training.
+        Matches on feature_names to ensure correct ordering and subset."""
+        ordered_names = [
+            'face_width',
+            'face_length',
+            'bitragion_subnasale_arc',
+            'nose_protrusion',
+        ]
 
-        if self.scaler:
-            # Apply the same scaling as in training
-            mean = np.array(self.scaler['mean'])
-            scale = np.array(self.scaler['scale'])
-            features = (features - mean) / scale
+        if not self.scaler:
+            return np.array([facial_features.get(n, 0.0) for n in ordered_names], dtype=float)
 
-        return features.flatten()
+        feature_names = self.scaler.get('feature_names', [])
+        mean = np.array(self.scaler.get('mean', []), dtype=float)
+        scale = np.array(self.scaler.get('scale', []), dtype=float)
+
+        name_to_index = {name: idx for idx, name in enumerate(feature_names)}
+        scaled = []
+        for name in ordered_names:
+            value = float(facial_features.get(name, 0.0))
+            if name in name_to_index:
+                idx = name_to_index[name]
+                s = scale[idx] if idx < len(scale) and scale[idx] != 0 else 1.0
+                m = mean[idx] if idx < len(mean) else 0.0
+                scaled.append((value - m) / s)
+            else:
+                # If the feature wasn't part of the scaler, pass through raw
+                scaled.append(value)
+
+        return np.array(scaled, dtype=float)
 
     def predict_fit_probability(
         self, facial_features: Dict, mask_id: int
@@ -120,6 +135,10 @@ class MaskRecommenderInference:
             facial_X = self.scale_features(facial_features)
 
             # Compute prediction (same logic as training)
+            # Guard array bounds
+            if style_encoded >= len(style_adjustments):
+                logger.warning(f"style_encoded {style_encoded} out of bounds; clipping")
+                style_encoded = min(style_encoded, len(style_adjustments) - 1)
             style_adjustment = style_adjustments[style_encoded]
             final_multipliers = global_multipliers + style_adjustment
 
@@ -133,6 +152,9 @@ class MaskRecommenderInference:
                 mask_idx = mask_id
             a = a_mask[mask_idx]
             c = c_mask[mask_idx]
+            if strap_type_encoded >= len(strap_type_effect):
+                logger.warning(f"strap_type_encoded {strap_type_encoded} out of bounds; clipping")
+                strap_type_encoded = min(strap_type_encoded, len(strap_type_effect) - 1)
             strap_effect = strap_type_effect[strap_type_encoded]
             facial_hair = facial_features.get('facial_hair_beard_length_mm', 0)
 
