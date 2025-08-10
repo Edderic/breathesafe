@@ -38,6 +38,12 @@ class ParticipantProgress
     end.join('+') + ' AS fm_present_counts'
   end
 
+  def self.recommender_measurements_select_sql
+    FacialMeasurement::RECOMMENDER_COLUMNS.map do |column_name|
+      "latest_facial_measurements_for_users.#{column_name}"
+    end.join(",\n        ")
+  end
+
   def self.call(manager_id:)
     user = User.find(manager_id)
     where = if user.admin?
@@ -143,9 +149,7 @@ class ParticipantProgress
         ) as manager_email,
         p.first_name,
         p.last_name,
-        latest_facial_measurements_for_users.bitragion_subnasale_arc,
-        latest_facial_measurements_for_users.face_width,
-        latest_facial_measurements_for_users.nose_protrusion,
+        #{recommender_measurements_select_sql},
         sps.removal_from_study ->> 'removal_datetime' IS NOT NULL AS removed_from_study,
         sps.finished_study_datetime IS NOT NULL AS finished_study,
         num_targeted_masks,
