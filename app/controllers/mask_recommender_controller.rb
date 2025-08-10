@@ -20,10 +20,12 @@ class MaskRecommenderController < ApplicationController
 
   def facial_measurements
     params.require(:facial_measurements).permit(
-      :bitragion_subnasale_arc,
-      :face_width,
-      :nose_protrusion,
+      *FacialMeasurement::RECOMMENDER_COLUMNS.map(&:to_sym),
       :facial_hair_beard_length_mm
     )
+  end
+
+  def recommender_columns
+    render json: { recommender_columns: FacialMeasurement::RECOMMENDER_COLUMNS }
   end
 end

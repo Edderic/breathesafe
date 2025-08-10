@@ -1,6 +1,13 @@
 # frozen_string_literal: true
 
 class FacialMeasurement < ApplicationRecord
+  RECOMMENDER_COLUMNS = %w[
+    bitragion_subnasale_arc
+    face_width
+    face_length
+    nose_protrusion
+  ].freeze
+
   COLUMNS = [
     'face_width',
     'jaw_width',

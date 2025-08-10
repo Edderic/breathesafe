@@ -66,6 +66,7 @@ Rails.application.routes.draw do
   get 'mask_kit/:managed_user_id', to: 'mask_kit#index'
 
   post 'mask_recommender', to: 'mask_recommender#create'
+  get 'mask_recommender/recommender_columns', to: 'mask_recommender#recommender_columns'
 
   controller :pages do
     get :qr_code_generator

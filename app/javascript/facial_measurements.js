@@ -40,7 +40,7 @@ export function getFacialMeasurements() {
       'default_value': 127,
       'explanation': 'The distance in the midsagittal plane between the menton landmark at the bottom of the chin and the sellion landmark at the deepest point of the nasal root depression. Please use a caliper.',
       'image_url': 'https://nap.nationalacademies.org/openbook/0309103983/xhtml/images/p20012464g31004.jpg',
-      'use_for_recommender': false
+      'use_for_recommender': true
     },
     'lowerFaceLengthMm': {
       'eng': 'Lower face length (mm)',

@@ -3,8 +3,9 @@
 class MaskRecommender
   class << self
     def call(facial_measurements)
+      heroku_env = ENV.fetch('HEROKU_ENVIRONMENT', 'staging')
       response = AwsLambdaInvokeService.call(
-        function_name: 'mask-recommender-inference', # New inference function
+        function_name: "mask-recommender-inference-#{heroku_env}", # New inference function
         payload: { facial_measurements: facial_measurements }
       )
 

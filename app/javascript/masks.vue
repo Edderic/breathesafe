@@ -362,16 +362,22 @@ export default {
       })
     },
     async updateFacialMeasurement() {
+      // Fetch recommender columns from backend to avoid hardcoding
+      const colsResp = await axios.get('/mask_recommender/recommender_columns.json')
+      const cols = (colsResp.data && colsResp.data.recommender_columns) || []
+
+      // Map snake_case columns to store keys (camelCase + Mm suffix)
+      const payload = {}
+      for (const col of cols) {
+        const camel = col.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
+        const key = `${camel}Mm`
+        payload[col] = this.getFacialMeasurement(key)
+      }
+      payload['facial_hair_beard_length_mm'] = this.facialHairBeardLengthMm
+
       await axios.post(
         `/mask_recommender.json`,
-        {
-          'facial_measurements': {
-            'bitragion_subnasale_arc': this.getFacialMeasurement('bitragionSubnasaleArcMm'),
-            'face_width': this.getFacialMeasurement('faceWidthMm'),
-            'nose_protrusion': this.getFacialMeasurement('noseProtrusionMm'),
-            'facial_hair_beard_length_mm': this.facialHairBeardLengthMm,
-          }
-        }
+        { facial_measurements: payload }
       )
         .then(response => {
           let data = response.data
