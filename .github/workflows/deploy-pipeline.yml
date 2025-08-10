@@ -65,6 +65,23 @@ jobs:
         conda env create -f python/mask_recommender/inference/environment.yml
         source activate mask-recommender-inference
 
+    - name: Run training (test mode) and Python tests
+      run: |
+        # Ensure deps for training and tests
+        pip install -r python/mask_recommender/training/requirements.txt
+        if [ -f python/mask_recommender/inference/requirements.txt ]; then pip install -r python/mask_recommender/inference/requirements.txt; fi
+
+        # Test-mode training to write /tmp artifacts
+        export ENVIRONMENT=test
+        export S3_BUCKET_REGION=us-east-2
+        export NUM_DRAWS=100
+        export NUM_TUNE=100
+        export XLA_PYTHON_CLIENT_PREALLOCATE=false
+        python python/mask_recommender/training/train.py
+
+        # Run inference tests (Linux runner)
+        pytest -q python/mask_recommender/inference/tests
+
     # Temporarily disabled due to ECR permissions issue
     - name: Login to Amazon ECR
       id: login-ecr
@@ -298,6 +315,23 @@ jobs:
         # Create environment from environment.yml
         conda env create -f python/mask_recommender/inference/environment.yml
         source activate mask-recommender-inference
+
+    - name: Run training (test mode) and Python tests
+      run: |
+        # Ensure deps for training and tests
+        pip install -r python/mask_recommender/training/requirements.txt
+        if [ -f python/mask_recommender/inference/requirements.txt ]; then pip install -r python/mask_recommender/inference/requirements.txt; fi
+
+        # Test-mode training to write /tmp artifacts
+        export ENVIRONMENT=test
+        export S3_BUCKET_REGION=us-east-2
+        export NUM_DRAWS=100
+        export NUM_TUNE=100
+        export XLA_PYTHON_CLIENT_PREALLOCATE=false
+        python python/mask_recommender/training/train.py
+
+        # Run inference tests (Linux runner)
+        pytest -q python/mask_recommender/inference/tests
 
     - name: Login to Amazon ECR
       id: login-ecr
