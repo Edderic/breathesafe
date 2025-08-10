@@ -13,6 +13,14 @@ def handler(event, context):
     try:
         logger.info("Starting training process")
 
+        # Allow caller to specify environment and S3 bucket
+        env = (event or {}).get('environment') or os.environ.get('ENVIRONMENT') or 'staging'
+        bucket = (event or {}).get('s3_bucket') or os.environ.get('S3_BUCKET_NAME')
+        if env:
+            os.environ['ENVIRONMENT'] = str(env)
+        if bucket:
+            os.environ['S3_BUCKET_NAME'] = str(bucket)
+
         # Call the main training function
         result = main()
 

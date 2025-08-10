@@ -33,11 +33,12 @@ class MaskRecommenderInference:
         """Load the latest PyMC trace and mask data from S3"""
         try:
             # Download latest trace written by training for this environment
+            env = os.environ.get('ENVIRONMENT', 'staging').strip().lower()
             logger.info("Loading model from " +
-                        f"s3://{self.bucket}/mask-recommender-training-{os.environ.get('ENVIRONMENT', 'staging').lower()}/models/pymc_trace_latest.nc")
+                        f"s3://{self.bucket}/mask-recommender-training-{env}/models/pymc_trace_latest.nc")
             self.s3_client.download_file(
                 self.bucket,
-                f"mask-recommender-training-{os.environ.get('ENVIRONMENT', 'staging').lower()}/models/pymc_trace_latest.nc",
+                f"mask-recommender-training-{env}/models/pymc_trace_latest.nc",
                 '/tmp/pymc_trace.nc'
             )
             self.trace = az.from_netcdf('/tmp/pymc_trace.nc')
@@ -45,11 +46,11 @@ class MaskRecommenderInference:
             # Load mask data
             logger.info(
                 "Loading mask data from " +
-                f"s3://{self.bucket}/mask-recommender-training-{os.environ.get('ENVIRONMENT', 'staging').lower()}/models/mask_data_latest.json"
+                f"s3://{self.bucket}/mask-recommender-training-{env}/models/mask_data_latest.json"
             )
             self.s3_client.download_file(
                 self.bucket,
-                f"mask-recommender-training-{os.environ.get('ENVIRONMENT', 'staging').lower()}/models/mask_data_latest.json",
+                f"mask-recommender-training-{env}/models/mask_data_latest.json",
                 '/tmp/mask_data.json'
             )
             with open('/tmp/mask_data.json', 'r') as f:
@@ -59,7 +60,7 @@ class MaskRecommenderInference:
             try:
                 self.s3_client.download_file(
                     self.bucket,
-                    f"mask-recommender-training-{os.environ.get('ENVIRONMENT', 'staging').lower()}/models/scaler_latest.json",
+                    f"mask-recommender-training-{env}/models/scaler_latest.json",
                     '/tmp/scaler.json'
                 )
                 with open('/tmp/scaler.json', 'r') as f:
