@@ -5,59 +5,71 @@ locals {
     "breathesafe-staging"     = "us-east-2"
     "breathesafe-development" = "us-east-2"
   }
-
-  models_prefixes = [
-    "mask-recommender-training-production/models/",
-    "mask-recommender-training-staging/models/",
-    "mask-recommender-training-development/models/",
-  ]
-
-  artifacts_prefixes = [
-    "mask-recommender-training-production/artifacts/",
-    "mask-recommender-training-staging/artifacts/",
-    "mask-recommender-training-development/artifacts/",
-  ]
 }
 
 # Attach lifecycle rules to existing buckets
-resource "aws_s3_bucket_lifecycle_configuration" "mask_recommender_models" {
-  for_each = local.bucket_regions
+resource "aws_s3_bucket_lifecycle_configuration" "mask_recommender_use1" {
+  for_each = {
+    for name, region in local.bucket_regions : name => region if region == "us-east-1"
+  }
+  provider = aws
   bucket   = each.key
-  provider = each.value == "us-east-2" ? aws.use2 : aws
 
-  rule {
-    id     = "expire-models-360d"
-    status = "Enabled"
-
-    filter {
-      and {
-        prefix = "mask-recommender-training-"
-      }
-    }
-
-    expiration {
-      days = 360
-    }
+  rule { id = "expire-artifacts-prod-360d" status = "Enabled"
+    filter { prefix = "mask-recommender-training-production/artifacts/" }
+    expiration { days = 360 }
+  }
+  rule { id = "expire-artifacts-staging-360d" status = "Enabled"
+    filter { prefix = "mask-recommender-training-staging/artifacts/" }
+    expiration { days = 360 }
+  }
+  rule { id = "expire-artifacts-dev-360d" status = "Enabled"
+    filter { prefix = "mask-recommender-training-development/artifacts/" }
+    expiration { days = 360 }
+  }
+  rule { id = "expire-models-prod-360d" status = "Enabled"
+    filter { prefix = "mask-recommender-training-production/models/" }
+    expiration { days = 360 }
+  }
+  rule { id = "expire-models-staging-360d" status = "Enabled"
+    filter { prefix = "mask-recommender-training-staging/models/" }
+    expiration { days = 360 }
+  }
+  rule { id = "expire-models-dev-360d" status = "Enabled"
+    filter { prefix = "mask-recommender-training-development/models/" }
+    expiration { days = 360 }
   }
 }
 
-resource "aws_s3_bucket_lifecycle_configuration" "mask_recommender_artifacts" {
-  for_each = local.bucket_regions
+resource "aws_s3_bucket_lifecycle_configuration" "mask_recommender_use2" {
+  for_each = {
+    for name, region in local.bucket_regions : name => region if region == "us-east-2"
+  }
+  provider = aws.use2
   bucket   = each.key
-  provider = each.value == "us-east-2" ? aws.use2 : aws
 
-  rule {
-    id     = "expire-artifacts-360d"
-    status = "Enabled"
-
-    filter {
-      and {
-        prefix = "mask-recommender-training-"
-      }
-    }
-
-    expiration {
-      days = 360
-    }
+  rule { id = "expire-artifacts-prod-360d" status = "Enabled"
+    filter { prefix = "mask-recommender-training-production/artifacts/" }
+    expiration { days = 360 }
+  }
+  rule { id = "expire-artifacts-staging-360d" status = "Enabled"
+    filter { prefix = "mask-recommender-training-staging/artifacts/" }
+    expiration { days = 360 }
+  }
+  rule { id = "expire-artifacts-dev-360d" status = "Enabled"
+    filter { prefix = "mask-recommender-training-development/artifacts/" }
+    expiration { days = 360 }
+  }
+  rule { id = "expire-models-prod-360d" status = "Enabled"
+    filter { prefix = "mask-recommender-training-production/models/" }
+    expiration { days = 360 }
+  }
+  rule { id = "expire-models-staging-360d" status = "Enabled"
+    filter { prefix = "mask-recommender-training-staging/models/" }
+    expiration { days = 360 }
+  }
+  rule { id = "expire-models-dev-360d" status = "Enabled"
+    filter { prefix = "mask-recommender-training-development/models/" }
+    expiration { days = 360 }
   }
 }
