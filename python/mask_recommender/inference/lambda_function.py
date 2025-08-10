@@ -6,6 +6,7 @@ import os
 import logging
 from typing import Dict, List
 import traceback
+import joblib
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -28,6 +29,7 @@ class MaskRecommenderInference:
         self.trace = None
         self.mask_data = None
         self.scaler = None
+        self.sklearn_model = None
         self.load_model()
 
     def load_model(self):
@@ -35,8 +37,18 @@ class MaskRecommenderInference:
         try:
             # Download latest trace written by training for this environment
             env = os.environ.get('ENVIRONMENT', 'staging').strip().lower()
+            model_type = os.environ.get('MODEL_TYPE', 'sklearn').strip().lower()
+            if model_type == 'sklearn':
+                if env == 'test':
+                    # Test mode: load local pickled model and mask_data
+                    self.sklearn_model = joblib.load('/tmp/mask_fit_model.joblib')
+                    with open('/tmp/mask_data.json', 'r') as f:
+                        self.mask_data = json.load(f)
+                    return
+                # For now, sklearn in non-test not supported here; fallback to bayes flow below
+
             if env == 'test':
-                # Read artifacts from local tmp for offline tests
+                # Read artifacts from local tmp for offline tests (bayes path)
                 self.trace = az.from_netcdf('/tmp/pymc_trace.nc')
                 with open('/tmp/mask_data.json', 'r') as f:
                     self.mask_data = json.load(f)
@@ -123,7 +135,25 @@ class MaskRecommenderInference:
     ) -> float:
         """Predict fit probability for a specific mask"""
         try:
-            # Extract posterior means
+            if self.sklearn_model is not None:
+                # Build a single-row dataframe for sklearn pipeline
+                # Need style and perimeter_mm from mask_data
+                mi = self.mask_data[str(mask_id)]
+                row = {
+                    'mask_id': mask_id,
+                    'style': mi.get('style', ''),
+                    'perimeter_mm': float(mi.get('perimeter_mm', 0.0)),
+                    'face_width': float(facial_features.get('face_width', 0.0)),
+                    'face_length': float(facial_features.get('face_length', 0.0)),
+                    'bitragion_subnasale_arc': float(facial_features.get('bitragion_subnasale_arc', 0.0)),
+                    'nose_protrusion': float(facial_features.get('nose_protrusion', 0.0)),
+                }
+                import pandas as pd
+                X = pd.DataFrame([row])
+                proba = self.sklearn_model.predict_proba(X)[:, 1][0]
+                return float(proba)
+
+            # Extract posterior means (Bayesian path)
             posterior = self.trace.posterior
             global_multipliers = posterior['global_multipliers'].mean(
                 dim=('chain', 'draw')).values
@@ -165,7 +195,7 @@ class MaskRecommenderInference:
             c = c_mask[mask_idx]
             if strap_type_encoded >= len(strap_type_effect):
                 logger.warning(f"strap_type_encoded {strap_type_encoded} out of bounds; clipping")
-                strap_type_encoded = min(strap_type_encoded, len(strap_type_effect) - 1)
+                strap_type_encoded = min(strrap_type_encoded, len(strap_type_effect) - 1)
             strap_effect = strap_type_effect[strap_type_encoded]
             facial_hair = facial_features.get('facial_hair_beard_length_mm', 0)
 
