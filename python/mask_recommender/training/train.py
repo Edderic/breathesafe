@@ -8,6 +8,8 @@ from pymc.sampling.jax import sample_numpyro_nuts
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import log_loss
 import json
+import boto3
+from botocore.exceptions import ClientError
 
 print(pm.__version__)
 os.environ["PYMC_EXPERIMENTAL_JAX"] = "1"
@@ -155,12 +157,42 @@ def train_model(
     )
 
 
+def _env_name():
+    env = os.environ.get('ENVIRONMENT', '').strip().lower()
+    return env if env in ('staging', 'production') else 'staging'
+
+
+def _s3_bucket():
+    return os.environ.get('S3_BUCKET_NAME', 'breathesafe-production')
+
+
+def _s3_prefix():
+    # e.g., mask-recommender-training-staging or mask-recommender-training-production
+    return f"mask-recommender-training-{_env_name()}"
+
+
+def _upload_file_to_s3(local_path: str, key: str) -> str:
+    bucket = _s3_bucket()
+    s3 = boto3.client('s3')
+    try:
+        s3.upload_file(local_path, bucket, key)
+    except ClientError as e:
+        raise RuntimeError(f"Failed to upload {local_path} to s3://{bucket}/{key}: {e}")
+    return f"s3://{bucket}/{key}"
+
+
 def save_trace(
     trace,
     trace_path='pymc_trace.nc'
 ):
-    print(f"\nsaving trace to {trace_path}")
-    az.to_netcdf(trace, trace_path)
+    # Write to /tmp then upload to S3
+    tmp_path = f"/tmp/{os.path.basename(trace_path)}"
+    print(f"\nsaving trace to {tmp_path}")
+    az.to_netcdf(trace, tmp_path)
+    key = f"{_s3_prefix()}/artifacts/{os.path.basename(trace_path)}"
+    uri = _upload_file_to_s3(tmp_path, key)
+    print(f"Uploaded trace to {uri}")
+    return uri
 
 
 def show_diagnostics(trace):
@@ -285,7 +317,7 @@ def presum_log_loss(y_true, y_prob):
 
 
 def save_mask_data_for_inference(mask_id_to_idx, df, filename='mask_data.json'):
-    """Save mask metadata needed for inference"""
+    """Save mask metadata needed for inference to S3"""
     mask_data = {}
 
     for mask_id, idx in mask_id_to_idx.items():
@@ -300,20 +332,30 @@ def save_mask_data_for_inference(mask_id_to_idx, df, filename='mask_data.json'):
             'strap_type': mask_samples['strap_type']
         }
 
-    with open(filename, 'w') as f:
+    tmp_path = f"/tmp/{os.path.basename(filename)}"
+    with open(tmp_path, 'w') as f:
         json.dump(mask_data, f, indent=2)
+    key = f"{_s3_prefix()}/artifacts/{os.path.basename(filename)}"
+    uri = _upload_file_to_s3(tmp_path, key)
+    print(f"Uploaded mask metadata to {uri}")
+    return uri
 
 
 def save_scaler_for_inference(scaler, filename='scaler.json'):
-    """Save scaler information needed for inference"""
+    """Save scaler information needed for inference to S3"""
     scaler_data = {
         'mean': scaler.mean_.tolist(),
         'scale': scaler.scale_.tolist(),
         'feature_names': scaler.feature_names_in_.tolist()
     }
 
-    with open(filename, 'w') as f:
+    tmp_path = f"/tmp/{os.path.basename(filename)}"
+    with open(tmp_path, 'w') as f:
         json.dump(scaler_data, f, indent=2)
+    key = f"{_s3_prefix()}/artifacts/{os.path.basename(filename)}"
+    uri = _upload_file_to_s3(tmp_path, key)
+    print(f"Uploaded scaler to {uri}")
+    return uri
 
 
 # 2. Main training script
@@ -464,7 +506,7 @@ def main():
     #     ppc = pm.sample_posterior_predictive(trace, var_names=['obs'])
     # az.plot_ppc(az.from_pymc3(posterior_predictive=ppc, model=model, observed_data={'obs': y_train}))
     # Save trace to disk
-    save_trace(trace)
+    trace_uri = save_trace(trace)
     show_diagnostics(trace)
 
     print("Doing evaluation on training set...")
@@ -509,8 +551,16 @@ def main():
     #
     display_performance_grouped_by_mask(train_df_copy_with_mask_names)
 
-    save_mask_data_for_inference(mask_id_to_idx, df)
-    save_scaler_for_inference(scaler)
+    mask_data_uri = save_mask_data_for_inference(mask_id_to_idx, df)
+    scaler_uri = save_scaler_for_inference(scaler)
+
+    return {
+        's3_bucket': _s3_bucket(),
+        's3_prefix': _s3_prefix(),
+        'trace_uri': trace_uri,
+        'mask_data_uri': mask_data_uri,
+        'scaler_uri': scaler_uri,
+    }
 
 
 def display_performance_grouped_by_mask(df):
