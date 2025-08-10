@@ -3,10 +3,10 @@ import { getFacialMeasurements } from '../facial_measurements.js'
 
 export const useFacialMeasurementStore = defineStore('facialMeasurement', {
   state: () => ({
-    faceWidthMm: 155,
-    bitragionSubnasaleArcMm: 255,
-    faceLengthMm: 127,
-    noseProtrusionMm: 28,
+    faceWidthMm: 137,
+    bitragionSubnasaleArcMm: 230,
+    faceLengthMm: 112,
+    noseProtrusionMm: 27,
 
   }),
   actions: {
