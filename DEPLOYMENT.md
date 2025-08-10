@@ -106,10 +106,10 @@ Both staging and production models are automatically retrained weekly with:
 - **Production**: Heroku app + Lambda functions + migrations
 
 #### Weekly Automatic Retraining (Saturday 12:00 AM ET)
-- **Staging**: 
+- **Staging**:
   - Model retraining and upload to staging S3 bucket
   - Lambda function update with new model
-- **Production**: 
+- **Production**:
   - Model retraining and upload to production S3 bucket
   - Lambda function update with new model
 
@@ -166,4 +166,41 @@ git push origin production-recommender-v0.1.3
 - **Automatic Updates**: Models retrained weekly
 - **Manual Control**: Version tags for immediate deployments
 - **Clear separation**: Staging and production are independent
-- **Rollback capability**: Easy to revert to previous versions 
+- **Rollback capability**: Easy to revert to previous versions
+
+
+export ENVIRONMENT='production'
+export SUBFOLDER_NAME='training'
+export FUNCTION_NAME="mask-recommender-${SUBFOLDER_NAME}-${ENVIRONMENT}"
+export FUNCTION_TAG=${FUNCTION_NAME}:latest
+export FOLDER_TO_SAVE_TAR=${PWD}/python/mask_recommender/${SUBFOLDER_NAME}
+export AWS_ACCOUNT_ID=585068368316
+export PROFILE_NAME='breathesafe'
+export AWS_REGION='us-east-1'
+git pull && docker build --platform linux/amd64 -t ${FUNCTION_TAG} ${FOLDER_TO_SAVE_TAR} && docker save ${FUNCTION_TAG} > ${FOLDER_TO_SAVE_TAR}/myimage.tar
+
+export FOLDER_WITH_IMAGE_TAR_PATH="remote:/workspaces/breathesafe/python/mask_recommender/${SUBFOLDER_NAME}/myimage.tar"
+export CODESPACE_NAME=reimagined-couscous-54xjwp5p5wfp6j6
+export AWS_FUNCTION_TAG=${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/$FUNCTION_NAME:latest
+# gh cs cp -e "${FOLDER_WITH_IMAGE_TAR_PATH}" ${FOLDER_TO_SAVE_TAR} -c ${CODESPACE_NAME} && docker load < ${FOLDER_TO_SAVE_TAR}/myimage.tar
+
+docker tag ${FUNCTION_TAG} ${AWS_FUNCTION_TAG} && aws ecr get-login-password  --region ${AWS_REGION} | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com && docker push ${AWS_FUNCTION_TAG}
+
+aws lambda create-function \
+  --function-name ${FUNCTION_NAME}\
+  --package-type Image \
+  --code ImageUri=${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${FUNCTION_TAG} \
+  --role arn:aws:iam::${AWS_ACCOUNT_ID}:role/lambda-ex
+
+&& aws lambda update-function-code \
+  --function-name ${FUNCTION_NAME} \
+  --image-uri=${AWS_FUNCTION_TAG}\
+  --publish
+
+
+
+     # Login and push with the right profile
+     aws ecr get-login-password --profile "$PROFILE_NAME" --region $AWS_REGION | \
+       docker login --username AWS --password-stdin "${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com"
+
+     docker push $AWS_FUNCTION_TAG
