@@ -123,7 +123,8 @@ jobs:
           if out=$(aws lambda update-function-configuration \
               --function-name "$FN" \
               --timeout 900 \
-              --memory-size 3008 2>&1); then
+              --memory-size 3008 \
+              --environment "Variables={ENVIRONMENT=staging,S3_BUCKET_NAME=breathesafe-staging}" 2>&1); then
             echo "Updated $FN configuration"
             exit 0
           fi
@@ -184,7 +185,8 @@ jobs:
           if out=$(aws lambda update-function-configuration \
               --function-name "$FN" \
               --timeout 900 \
-              --memory-size 3008 2>&1); then
+              --memory-size 3008 \
+              --environment "Variables={ENVIRONMENT=staging,S3_BUCKET_NAME=breathesafe-staging}" 2>&1); then
             echo "Updated $FN configuration"
             exit 0
           fi
@@ -381,7 +383,8 @@ jobs:
           if out=$(aws lambda update-function-configuration \
               --function-name "$FN" \
               --timeout 900 \
-              --memory-size 3008 2>&1); then
+              --memory-size 3008 \
+              --environment "Variables={ENVIRONMENT=production,S3_BUCKET_NAME=breathesafe-production}" 2>&1); then
             echo "Updated $FN configuration"
             exit 0
           fi
@@ -405,7 +408,8 @@ jobs:
           if out=$(aws lambda update-function-configuration \
               --function-name "$FN" \
               --timeout 900 \
-              --memory-size 3008 2>&1); then
+              --memory-size 3008 \
+              --environment "Variables={ENVIRONMENT=production,S3_BUCKET_NAME=breathesafe-production}" 2>&1); then
             echo "Updated $FN configuration"
             exit 0
           fi
