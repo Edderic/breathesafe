@@ -172,6 +172,17 @@ def main():
     # Collect any one-hot columns that now exist
     feature_names += [c for c in df.columns if c.startswith("mask_id_") or c.startswith("style_") or c.startswith("strap_type_")]
 
+    # Filter out rows with extreme z-scores for facial measurements
+    z_cols = [c for c in df.columns if c.endswith("_z_score")]
+    if z_cols:
+        zdf = df[z_cols].apply(pd.to_numeric, errors="coerce")
+        within = (zdf.abs() <= 2.25) | zdf.isna()
+        mask = within.all(axis=1)
+        before = len(df)
+        df = df.loc[mask].copy()
+        after = len(df)
+        if after < before:
+            print(f"Filtered out {before - after} rows due to extreme z-scores (>|2.25|).")
 
     dataset = TabularFitDataset(df, feature_names=feature_names, target_col=target_col)
 
