@@ -13,7 +13,8 @@ class MLPConfig:
     hidden_dim: int = 64
     depth: int = 2
     dropout: float = 0.0
-    num_classes: int = 3  # 0=too small, 1=ok, 2=too big
+    # For binary classification with sigmoid output
+    num_classes: int = 2
 
 
 class FitClassifier(nn.Module):
@@ -27,8 +28,11 @@ class FitClassifier(nn.Module):
             if config.dropout > 0:
                 layers.append(nn.Dropout(config.dropout))
             dim = config.hidden_dim
-        layers.append(nn.Linear(dim, config.num_classes))
+        # binary output as probability via Sigmoid
+        layers.append(nn.Linear(dim, 1))
+        layers.append(nn.Sigmoid())
         self.net = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # returns probability in [0,1], shape (N,1)
         return self.net(x)

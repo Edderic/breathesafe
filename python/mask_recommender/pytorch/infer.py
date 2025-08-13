@@ -103,9 +103,8 @@ def main():
     model.eval()
 
     with torch.no_grad():
-        logits = model(X)
-        probs = torch.softmax(logits, dim=1).numpy()
-        preds = probs.argmax(axis=1)
+        probs = model(X).view(-1).numpy()
+        preds = (probs >= 0.5).astype(int)
 
     out = {
         "pred": preds.tolist(),

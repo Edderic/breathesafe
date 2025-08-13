@@ -16,8 +16,8 @@ from .features import FEATURES
 from .model import FitClassifier, MLPConfig
 
 
-def accuracy(logits: torch.Tensor, y: torch.Tensor) -> float:
-    preds = logits.argmax(dim=1)
+def accuracy(probs: torch.Tensor, y: torch.Tensor) -> float:
+    preds = (probs.view(-1) >= 0.5).long()
     return (preds == y).float().mean().item()
 
 
@@ -28,14 +28,14 @@ def train_one_epoch(model, loader, loss_fn, optimizer, device) -> Tuple[float, f
         X = X.to(device)
         y = y.to(device)
         optimizer.zero_grad()
-        logits = model(X)
-        loss = loss_fn(logits, y)
+        probs = model(X).view(-1)
+        loss = loss_fn(probs, y.float())
         loss.backward()
         optimizer.step()
 
         bsz = y.size(0)
         total_loss += loss.item() * bsz
-        total_acc += accuracy(logits.detach(), y) * bsz
+        total_acc += accuracy(probs.detach(), y) * bsz
         n += bsz
     return total_loss / n, total_acc / n
 
@@ -47,11 +47,11 @@ def evaluate(model, loader, loss_fn, device) -> Tuple[float, float]:
         for X, y in loader:
             X = X.to(device)
             y = y.to(device)
-            logits = model(X)
-            loss = loss_fn(logits, y)
+            probs = model(X).view(-1)
+            loss = loss_fn(probs, y.float())
             bsz = y.size(0)
             total_loss += loss.item() * bsz
-            total_acc += accuracy(logits, y) * bsz
+            total_acc += accuracy(probs, y) * bsz
             n += bsz
     return total_loss / n, total_acc / n
 
@@ -192,7 +192,7 @@ def main():
 
     model = FitClassifier(MLPConfig(input_dim=len(feature_names), hidden_dim=args.hidden, depth=args.depth, dropout=args.dropout, num_classes=num_classes)).to(device)
 
-    loss_fn = nn.CrossEntropyLoss()
+    loss_fn = nn.BCELoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
 
     best_val = float("inf")
@@ -210,7 +210,7 @@ def main():
                     "hidden_dim": args.hidden,
                     "depth": args.depth,
                     "dropout": args.dropout,
-                    "num_classes": num_classes,
+                    "num_classes": 2,
                 },
                 "stats": dataset.get_stats().__dict__ if dataset.get_stats() is not None else None,
             }, args.save)
