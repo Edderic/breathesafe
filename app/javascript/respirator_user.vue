@@ -751,23 +751,19 @@ export default {
           }
 
           if (this.facialMeasurements.length == 0) {
-            let dictionary = {
+            // Initialize an empty measurement object so the UI can bind safely
+            this.facialMeasurements.push({
               source: 'caliper for straight lines & tape measure for curves'
-            }
-
-            for (key of this.getFacialMeasurements) {
-              dictionary[key] = undefined
-            }
-
-            this.facialMeasurements.push(dictionary)
+            })
           }
           // whatever you want
         })
         .catch(error => {
-          for(let errorMessage of error.response.data.messages) {
-            this.messages.push({
-              str: errorMessage
-            })
+          const msgs = error && error.response && error.response.data && error.response.data.messages
+          if (Array.isArray(msgs)) {
+            this.addMessages(msgs)
+          } else {
+            this.addMessages([error && error.message ? error.message : 'Something went wrong while loading facial measurements.'])
           }
         // whatever you want
         })
@@ -870,7 +866,12 @@ export default {
           this.status = 'saved'
         })
         .catch(error => {
-          this.addMessages(error.response.data.messages)
+          const msgs = error && error.response && error.response.data && error.response.data.messages
+          if (Array.isArray(msgs)) {
+            this.addMessages(msgs)
+          } else {
+            this.addMessages([error && error.message ? error.message : 'Something went wrong while updating profile.'])
+          }
           // whatever you want
         })
     },
@@ -906,7 +907,12 @@ export default {
           // e.g. get updated list of latest facial measurements
         })
         .catch(error => {
-          this.addMessages([error.response.data.messages])
+          const msgs = error && error.response && error.response.data && error.response.data.messages
+          if (Array.isArray(msgs)) {
+            this.addMessages(msgs)
+          } else {
+            this.addMessages([error && error.message ? error.message : 'Something went wrong while saving facial measurements.'])
+          }
           // whatever you want
         })
     },

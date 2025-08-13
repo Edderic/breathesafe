@@ -66,7 +66,12 @@ export const useManagedUserStore = defineStore('managedUsers', {
           )
         })
         .catch(error => {
-          mainStore.addMessages(error.response.data.messages)
+          const msgs = error && error.response && error.response.data && error.response.data.messages
+          if (Array.isArray(msgs)) {
+            mainStore.addMessages(msgs)
+          } else {
+            mainStore.addMessages([error && error.message ? error.message : 'Something went wrong while loading managed user.'])
+          }
         })
 
     },

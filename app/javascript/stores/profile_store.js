@@ -85,7 +85,12 @@ export const useProfileStore = defineStore('profile', {
           }
         })
         .catch(error => {
-          mainStore.addMessages(error.response.data.messages)
+          const msgs = error && error.response && error.response.data && error.response.data.messages
+          if (Array.isArray(msgs)) {
+            mainStore.addMessages(msgs)
+          } else {
+            mainStore.addMessages([error && error.message ? error.message : 'Something went wrong while loading facial measurements.'])
+          }
         })
 
     },
@@ -146,7 +151,12 @@ export const useProfileStore = defineStore('profile', {
           // whatever you want
         })
         .catch(error => {
-          mainStore.addMessages(error.response.data.messages)
+          const msgs = error && error.response && error.response.data && error.response.data.messages
+          if (Array.isArray(msgs)) {
+            mainStore.addMessages(msgs)
+          } else {
+            mainStore.addMessages([error && error.message ? error.message : 'Something went wrong while loading profile.'])
+          }
           // whatever you want
         })
 
@@ -183,7 +193,12 @@ export const useProfileStore = defineStore('profile', {
           // whatever you want
         })
         .catch(error => {
-          mainStore.addMessages(error.response.data.messages)
+          const msgs = error && error.response && error.response.data && error.response.data.messages
+          if (Array.isArray(msgs)) {
+            mainStore.addMessages(msgs)
+          } else {
+            mainStore.addMessages([error && error.message ? error.message : 'Something went wrong while creating profile.'])
+          }
           // whatever you want
         })
     },
@@ -220,7 +235,12 @@ export const useProfileStore = defineStore('profile', {
           this.status = 'saved'
         })
         .catch(error => {
-          mainStore.addMessages(error.response.data.messages)
+          const msgs = error && error.response && error.response.data && error.response.data.messages
+          if (Array.isArray(msgs)) {
+            mainStore.addMessages(msgs)
+          } else {
+            mainStore.addMessages([error && error.message ? error.message : 'Something went wrong while updating profile.'])
+          }
           // whatever you want
         })
     },
@@ -246,7 +266,12 @@ export const useProfileStore = defineStore('profile', {
         })
         .catch(error => {
           console.log(error)
-          mainStore.addMessages(error.response.data.messages)
+          const msgs = error && error.response && error.response.data && error.response.data.messages
+          if (Array.isArray(msgs)) {
+            mainStore.addMessages(msgs)
+          } else {
+            mainStore.addMessages([error && error.message ? error.message : 'Something went wrong while loading CO2 monitors.'])
+          }
           // whatever you want
         })
     },
@@ -277,7 +302,12 @@ export const useProfileStore = defineStore('profile', {
           }
         })
         .catch(error => {
-          mainStore.addMessages(error.response.data.messages)
+          const msgs = error && error.response && error.response.data && error.response.data.messages
+          if (Array.isArray(msgs)) {
+            mainStore.addMessages(msgs)
+          } else {
+            mainStore.addMessages([error && error.message ? error.message : 'Something went wrong while updating measurement system.'])
+          }
           // whatever you want
         })
     }
