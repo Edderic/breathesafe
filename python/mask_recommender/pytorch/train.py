@@ -40,9 +40,10 @@ def train_one_epoch(model, loader, loss_fn, optimizer, device) -> Tuple[float, f
     return total_loss / n, total_acc / n
 
 
-def evaluate(model, loader, loss_fn, device) -> Tuple[float, float]:
+def evaluate(model, loader, loss_fn, device) -> Tuple[float, float, float, float]:
     model.eval()
     total_loss, total_acc, n = 0.0, 0.0, 0
+    tp = tn = fp = fn = 0
     with torch.no_grad():
         for X, y in loader:
             X = X.to(device)
@@ -53,7 +54,15 @@ def evaluate(model, loader, loss_fn, device) -> Tuple[float, float]:
             total_loss += loss.item() * bsz
             total_acc += accuracy(probs, y) * bsz
             n += bsz
-    return total_loss / n, total_acc / n
+            preds = (probs >= 0.5).long()
+            tp += int(((preds == 1) & (y == 1)).sum().item())
+            tn += int(((preds == 0) & (y == 0)).sum().item())
+            fp += int(((preds == 1) & (y == 0)).sum().item())
+            fn += int(((preds == 0) & (y == 1)).sum().item())
+
+    ppv = float(tp / (tp + fp)) if (tp + fp) > 0 else float('nan')
+    npv = float(tn / (tn + fn)) if (tn + fn) > 0 else float('nan')
+    return total_loss / n, total_acc / n, ppv, npv
 
 
 def _try_load_remote_json(url: str, timeout_s: float = 15.0) -> Optional[pd.DataFrame]:
@@ -209,8 +218,11 @@ def main():
     best_val = float("inf")
     for epoch in range(1, args.epochs + 1):
         tr_loss, tr_acc = train_one_epoch(model, train_loader, loss_fn, optimizer, device)
-        va_loss, va_acc = evaluate(model, val_loader, loss_fn, device)
-        print(f"epoch={epoch} train_loss={tr_loss:.4f} train_acc={tr_acc:.3f} val_loss={va_loss:.4f} val_acc={va_acc:.3f}")
+        va_loss, va_acc, va_ppv, va_npv = evaluate(model, val_loader, loss_fn, device)
+        print(
+            f"epoch={epoch} train_loss={tr_loss:.4f} train_acc={tr_acc:.3f} "
+            f"val_loss={va_loss:.4f} val_acc={va_acc:.3f} val_ppv={va_ppv:.3f} val_npv={va_npv:.3f}"
+        )
         if va_loss < best_val:
             best_val = va_loss
             torch.save({
