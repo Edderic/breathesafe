@@ -2,7 +2,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from typing import List, Optional, Any
+
+# Limit thread counts early to avoid BLAS/OpenMP segfaults on macOS
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("MKL_NUM_THREADS", "1")
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+os.environ.setdefault("VECLIB_MAXIMUM_THREADS", "1")
+os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
 
 import numpy as np
 import pandas as pd
@@ -52,6 +60,13 @@ def main():
     parser.add_argument("--out", type=str, required=True)
     args = parser.parse_args()
 
+    # Reduce PyTorch thread usage as well
+    try:
+        torch.set_num_threads(1)
+        torch.set_num_interop_threads(1)
+    except Exception:
+        pass
+
     ckpt = torch.load(args.model, map_location="cpu")
 
     feature_names: List[str] = ckpt["feature_names"]
@@ -79,6 +94,18 @@ def main():
             for c in dummies.columns:
                 if c not in df.columns:
                     df[c] = dummies[c]
+
+    # Apply the same z-score filtering as training for consistency
+    z_cols = [c for c in df.columns if c.endswith("_z_score")]
+    if z_cols:
+        zdf = df[z_cols].apply(pd.to_numeric, errors="coerce")
+        within = (zdf.abs() <= 2.25) | zdf.isna()
+        mask_rows = within.all(axis=1)
+        before = len(df)
+        df = df.loc[mask_rows].copy()
+        after = len(df)
+        if after < before:
+            print(f"Filtered out {before - after} rows due to extreme z-scores (>|2.25|) during inference.")
 
     for c in feature_names:
         if c not in df.columns:
