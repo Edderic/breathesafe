@@ -1,0 +1,8 @@
+opencv-python>=4.8
+opencv-contrib-python>=4.8
+numpy>=1.24
+scipy>=1.11
+onnxruntime>=1.17
+PyYAML>=6.0
+# For 3DDFA-V2; users typically install from source or pip
+# pip install 3ddfa-v2
