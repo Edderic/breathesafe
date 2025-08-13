@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import argparse
-from typing import List, Tuple
+from typing import List, Tuple, Optional, Any
 
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
+import requests
 
 from .dataset import TabularFitDataset
 from .features import FEATURES
@@ -54,9 +55,47 @@ def evaluate(model, loader, loss_fn, device) -> Tuple[float, float]:
     return total_loss / n, total_acc / n
 
 
+def _try_load_remote_json(url: str, timeout_s: float = 15.0) -> Optional[pd.DataFrame]:
+    try:
+        resp = requests.get(url, timeout=timeout_s)
+
+        if resp.status_code != 200:
+            return None
+        data = resp.json()
+
+        def to_records(obj: Any) -> Optional[List[dict]]:
+            if isinstance(obj, list):
+                return obj
+            if isinstance(obj, dict):
+                for key in [
+                    "data",
+                    "rows",
+                    "items",
+                    "records",
+                    "facial_measurements_fit_tests",
+                    "fit_tests_with_facial_measurements",
+                ]:
+                    if key in obj and isinstance(obj[key], list):
+                        return obj[key]
+            return None
+
+        records = to_records(data)
+        import pdb; pdb.set_trace()
+        if records is None:
+            return None
+        df = pd.json_normalize(records)
+        if df.empty:
+            return None
+        return df
+    except Exception:
+        return None
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--csv", type=str, required=True, help="Path to CSV with features and target")
+    parser.add_argument("--csv", type=str, default=None, help="Path to CSV with features and target (fallback if remote not available)")
+    parser.add_argument("--data_url", type=str, default="https://www.breathesafe.xyz/facial_measurements_fit_tests.json", help="Remote JSON with features/target; used when available")
+    parser.add_argument("--target_col", type=str, default="target", help="Target column name in the dataset")
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--lr", type=float, default=1e-3)
@@ -67,13 +106,34 @@ def main():
     parser.add_argument("--save", type=str, default="fit_classifier.pt")
     args = parser.parse_args()
 
-    df = pd.read_csv(args.csv)
+    # Prefer remote data if available, otherwise fall back to CSV
+    df: Optional[pd.DataFrame] = None
+    if args.data_url:
+        df = _try_load_remote_json(args.data_url)
+        if df is not None:
+            print(f"Loaded remote dataset from {args.data_url} with shape {df.shape}")
+    if df is None:
+        if args.csv is None:
+            raise SystemExit("No remote data available and --csv was not provided.")
+        df = pd.read_csv(args.csv)
+        print(f"Loaded local CSV from {args.csv} with shape {df.shape}")
 
-    # Build full feature list including dynamic mask_id_* columns present in CSV
+    # Build full feature list including dynamic one-hots for mask_id/style/strap_type present in data
     feature_names: List[str] = list(FEATURES)
-    feature_names += [c for c in df.columns if c.startswith("mask_id_")]
+    # If raw categorical columns exist (non one-hot), expand them
+    for cat_col, prefix in [("mask_id", "mask_id_"), ("style", "style_"), ("strap_type", "strap_type_")]:
+        if cat_col in df.columns:
+            dummies = pd.get_dummies(df[cat_col].astype(str), prefix=prefix.rstrip("_"))
+            # Ensure column names follow prefix_value convention
+            dummies.columns = [f"{prefix}{c.split('_',1)[1]}" if c.startswith(prefix.rstrip('_')+"_") else f"{prefix}{c}" for c in dummies.columns]
+            for c in dummies.columns:
+                if c not in df.columns:
+                    df[c] = dummies[c]
+    # Collect any one-hot columns that now exist
+    feature_names += [c for c in df.columns if c.startswith("mask_id_") or c.startswith("style_") or c.startswith("strap_type_")]
 
-    dataset = TabularFitDataset(df, feature_names=feature_names, target_col="target")
+
+    dataset = TabularFitDataset(df, feature_names=feature_names, target_col=args.target_col)
 
     val_size = int(len(dataset) * args.val_split)
     train_size = len(dataset) - val_size

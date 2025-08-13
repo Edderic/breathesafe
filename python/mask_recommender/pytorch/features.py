@@ -12,18 +12,11 @@ FEATURES: List[str] = [
     "lip_width",
     # mask geometry/context
     "perimeter_mm",
-    # strap types and adjustability (binary flags)
-    "headstrap",
+    # adjustability flags remain explicit
     "adjustable_headstrap",
-    "earloops",
     "adjustable_earloops",
-    # mask styles
-    "boat",
-    "duckbill",
-    "cup",
-    "bifold",
-    "bifold+gasket",
-    # generic mask ids (allow sparse one-hots like mask_id_1, mask_id_2, ...)
+    # categorical columns (mask_id/style/strap_type) will be expanded as one-hots:
+    #   mask_id_* , style_* , strap_type_*
 ]
 
 @dataclass
@@ -36,18 +29,11 @@ def split_feature_types(feature_names: List[str]) -> FeatureConfig:
     numerical = []
     binary = []
     for name in feature_names:
-        if name.startswith("mask_id_"):
+        if name.startswith("mask_id_") or name.startswith("style_") or name.startswith("strap_type_"):
             binary.append(name)
         elif name in {
-            "headstrap",
             "adjustable_headstrap",
-            "earloops",
             "adjustable_earloops",
-            "boat",
-            "duckbill",
-            "cup",
-            "bifold",
-            "bifold+gasket",
         }:
             binary.append(name)
         else:
