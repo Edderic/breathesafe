@@ -9,7 +9,6 @@ FEATURES: List[str] = [
     "nose_protrusion",
     "bitragion_subnasale_arc",
     "facial_hair_beard_length_mm",
-    "lip_width",
     # mask geometry/context
     "perimeter_mm",
     # adjustability flags remain explicit
