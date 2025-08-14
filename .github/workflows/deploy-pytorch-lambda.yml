@@ -66,9 +66,11 @@ jobs:
           docker push "$IMAGE_URI"
           docker push "$LATEST_URI"
 
-          echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
+          echo "image_uri_sha=$IMAGE_URI" >> $GITHUB_OUTPUT
+          echo "image_uri_latest=$LATEST_URI" >> $GITHUB_OUTPUT
     outputs:
-      image_uri: ${{ steps.build-image.outputs.image_uri }}
+      image_uri_sha: ${{ steps.build-image.outputs.image_uri_sha }}
+      image_uri_latest: ${{ steps.build-image.outputs.image_uri_latest }}
 
   deploy-staging:
     name: Deploy to staging
@@ -91,9 +93,10 @@ jobs:
       - name: Update Lambda code (staging)
         env:
           FUNCTION_NAME: mask-recommender-staging
-          IMAGE_URI: ${{ needs.build-and-push.outputs.image_uri }}
+          IMAGE_URI: ${{ needs.build-and-push.outputs.image_uri_latest }}
         run: |
           set -euo pipefail
+          if [ -z "${IMAGE_URI:-}" ]; then echo "IMAGE_URI is empty"; exit 1; fi
           aws lambda update-function-code \
             --function-name "$FUNCTION_NAME" \
             --image-uri "$IMAGE_URI" \
@@ -101,7 +104,7 @@ jobs:
 
       - name: Update Lambda environment (staging)
         env:
-          FUNCTION_NAME: ${{ secrets.LAMBDA_FUNCTION_STAGING }}
+          FUNCTION_NAME: mask-recommender-staging
           AWS_REGION: ${{ env.AWS_REGION }}
         run: |
           set -euo pipefail
@@ -134,10 +137,11 @@ jobs:
 
       - name: Update Lambda code (production)
         env:
-          FUNCTION_NAME: ${{ secrets.LAMBDA_FUNCTION_PRODUCTION }}
-          IMAGE_URI: ${{ needs.build-and-push.outputs.image_uri }}
+          FUNCTION_NAME: mask-recommender-production
+          IMAGE_URI: ${{ needs.build-and-push.outputs.image_uri_sha }}
         run: |
           set -euo pipefail
+          if [ -z "${IMAGE_URI:-}" ]; then echo "IMAGE_URI is empty"; exit 1; fi
           aws lambda update-function-code \
             --function-name "$FUNCTION_NAME" \
             --image-uri "$IMAGE_URI" \
