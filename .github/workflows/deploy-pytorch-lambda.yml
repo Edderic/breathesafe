@@ -6,19 +6,18 @@ on:
     paths:
       - 'python/mask_recommender/pytorch/**'
       - '.github/workflows/deploy-pytorch-lambda.yml'
+    tags:
+      - 'prod-*'
   workflow_dispatch:
     inputs:
       target_env:
         description: "Environment to deploy (staging|production)"
         required: false
         default: "staging"
-  push:
-    tags:
-      - 'prod-*'
 
 env:
-  AWS_REGION: ${{ secrets.AWS_REGION || 'us-east-2' }}
-  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY || 'mask-recommender-pytorch' }}
+  AWS_REGION: us-east-2
+  ECR_REPOSITORY: mask-recommender-pytorch
 
 jobs:
   build-and-push:
@@ -36,7 +35,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION || env.AWS_REGION }}
 
       - name: Login to Amazon ECR
         id: ecr-login
@@ -75,14 +74,16 @@ jobs:
     name: Deploy to staging
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.target_env == 'staging')
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.target_env == 'staging')
     steps:
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION || env.AWS_REGION }}
 
       - name: Update Lambda code (staging)
         env:
@@ -114,14 +115,16 @@ jobs:
     name: Deploy to production
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/prod-') || (github.event_name == 'workflow_dispatch' && inputs.target_env == 'production')
+    if: startsWith(github.ref, 'refs/tags/prod-') || (github.event_name == 'workflow_dispatch' && github.event.inputs.target_env == 'production')
     steps:
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION || env.AWS_REGION }}
 
       - name: Update Lambda code (production)
         env:
