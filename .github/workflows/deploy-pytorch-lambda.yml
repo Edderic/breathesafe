@@ -108,6 +108,13 @@ jobs:
             --image-uri "$IMAGE_URI" \
             >/dev/null
 
+      - name: Wait for Lambda to finish updating (staging)
+        env:
+          FUNCTION_NAME: mask-recommender-staging
+        run: |
+          set -euo pipefail
+          aws lambda wait function-updated --function-name "$FUNCTION_NAME"
+
       - name: Update Lambda environment (staging)
         env:
           FUNCTION_NAME: mask-recommender-staging
@@ -160,6 +167,13 @@ jobs:
             --function-name "$FUNCTION_NAME" \
             --image-uri "$IMAGE_URI" \
             >/dev/null
+
+      - name: Wait for Lambda to finish updating (production)
+        env:
+          FUNCTION_NAME: mask-recommender-production
+        run: |
+          set -euo pipefail
+          aws lambda wait function-updated --function-name "$FUNCTION_NAME"
 
       - name: Update Lambda environment (production)
         env:
