@@ -90,7 +90,7 @@ jobs:
 
       - name: Update Lambda code (staging)
         env:
-          FUNCTION_NAME: ${{ secrets.LAMBDA_FUNCTION_STAGING }}
+          FUNCTION_NAME: mask-recommender-staging
           IMAGE_URI: ${{ needs.build-and-push.outputs.image_uri }}
         run: |
           set -euo pipefail
@@ -145,7 +145,7 @@ jobs:
 
       - name: Update Lambda environment (production)
         env:
-          FUNCTION_NAME: ${{ secrets.LAMBDA_FUNCTION_PRODUCTION }}
+          FUNCTION_NAME: mask-recommender-production
           AWS_REGION: ${{ env.AWS_REGION }}
         run: |
           set -euo pipefail
