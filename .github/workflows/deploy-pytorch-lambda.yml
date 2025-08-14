@@ -94,9 +94,15 @@ jobs:
         env:
           FUNCTION_NAME: mask-recommender-staging
           IMAGE_URI: ${{ needs.build-and-push.outputs.image_uri_latest }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
         run: |
           set -euo pipefail
-          if [ -z "${IMAGE_URI:-}" ]; then echo "IMAGE_URI is empty"; exit 1; fi
+          if [ -z "${IMAGE_URI:-}" ] || ! echo "$IMAGE_URI" | grep -q '\.'; then
+            ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+            IMAGE_URI="${ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:latest"
+            echo "Derived IMAGE_URI=${IMAGE_URI}"
+          fi
           aws lambda update-function-code \
             --function-name "$FUNCTION_NAME" \
             --image-uri "$IMAGE_URI" \
@@ -139,9 +145,16 @@ jobs:
         env:
           FUNCTION_NAME: mask-recommender-production
           IMAGE_URI: ${{ needs.build-and-push.outputs.image_uri_sha }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
+          GITHUB_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          if [ -z "${IMAGE_URI:-}" ]; then echo "IMAGE_URI is empty"; exit 1; fi
+          if [ -z "${IMAGE_URI:-}" ] || ! echo "$IMAGE_URI" | grep -q '\.'; then
+            ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+            IMAGE_URI="${ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${GITHUB_SHA}"
+            echo "Derived IMAGE_URI=${IMAGE_URI}"
+          fi
           aws lambda update-function-code \
             --function-name "$FUNCTION_NAME" \
             --image-uri "$IMAGE_URI" \
