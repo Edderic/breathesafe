@@ -23,6 +23,7 @@ jobs:
   build-and-push:
     name: Build and push image to ECR
     runs-on: ubuntu-latest
+    environment: staging
     permissions:
       contents: read
     steps:
@@ -73,6 +74,7 @@ jobs:
     name: Deploy to staging
     needs: build-and-push
     runs-on: ubuntu-latest
+    environment: staging
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.target_env == 'staging')
     permissions:
       contents: read
@@ -115,6 +117,7 @@ jobs:
   deploy-production:
     name: Deploy to production
     needs: build-and-push
+    environment: production
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/prod-') || (github.event_name == 'workflow_dispatch' && github.event.inputs.target_env == 'production')
     permissions:
