@@ -1,0 +1,27 @@
+name: mask_recommender_pytorch
+channels:
+  - conda-forge
+dependencies:
+  - arviz
+  - autopep8
+  - boto3
+  - jax>=0.6.0
+  - jaxlib>=0.6.0
+  - jupyter
+  - jupyterlab=4.4.1
+  - matplotlib
+  - numpy<2
+  - pandas
+  - protobuf
+  - psycopg2
+  - pytest
+  - python
+  - scikit-learn
+  - seaborn
+  - tqdm
+  - pyyaml>=6.0
+  - pip
+  - pip:
+    - graphica
+    torch>=2.2
+    requests>=2.31
