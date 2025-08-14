@@ -118,9 +118,10 @@ jobs:
           CFG=$(aws lambda get-function-configuration --function-name "$FUNCTION_NAME")
           ENV_VARS=$(echo "$CFG" | jq -r '.Environment.Variables // {}')
           MERGED=$(echo "$ENV_VARS" | jq '. + {ENVIRONMENT:"staging", S3_BUCKET_REGION: "'"$AWS_REGION"'"}')
+          printf '{"Variables":%s}' "$MERGED" > env.json
           aws lambda update-function-configuration \
             --function-name "$FUNCTION_NAME" \
-            --environment "Variables=$MERGED" \
+            --environment file://env.json \
             >/dev/null
 
   deploy-production:
@@ -169,7 +170,8 @@ jobs:
           CFG=$(aws lambda get-function-configuration --function-name "$FUNCTION_NAME")
           ENV_VARS=$(echo "$CFG" | jq -r '.Environment.Variables // {}')
           MERGED=$(echo "$ENV_VARS" | jq '. + {ENVIRONMENT:"production", S3_BUCKET_REGION: "'"$AWS_REGION"'"}')
+          printf '{"Variables":%s}' "$MERGED" > env.json
           aws lambda update-function-configuration \
             --function-name "$FUNCTION_NAME" \
-            --environment "Variables=$MERGED" \
+            --environment file://env.json \
             >/dev/null
