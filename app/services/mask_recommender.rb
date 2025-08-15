@@ -2,11 +2,19 @@
 
 class MaskRecommender
   class << self
-    def call(facial_measurements)
+    # New primary entrypoint for inference
+    def infer(facial_measurements, mask_ids: nil)
       heroku_env = ENV.fetch('HEROKU_ENVIRONMENT', 'staging')
+
+      payload = {
+        method: 'infer',
+        facial_measurements: facial_measurements
+      }
+      payload[:mask_ids] = mask_ids if mask_ids.present?
+
       response = AwsLambdaInvokeService.call(
-        function_name: "mask-recommender-inference-#{heroku_env}", # New inference function
-        payload: { facial_measurements: facial_measurements }
+        function_name: "mask-recommender-#{heroku_env}",
+        payload: payload
       )
 
       body = Oj.load(response['body'])
@@ -39,6 +47,24 @@ class MaskRecommender
       end
 
       collection
+    end
+
+    # Trigger training on the unified PyTorch Lambda
+    # Accepts optional parameters like epochs:, data_url:, target_col:
+    def train(epochs: 20, data_url: nil, target_col: 'target')
+      heroku_env = ENV.fetch('HEROKU_ENVIRONMENT', 'staging')
+
+      payload = { method: 'train' }
+      payload[:epochs] = epochs if epochs
+      payload[:data_url] = data_url if data_url
+      payload[:target_col] = target_col if target_col
+
+      response = AwsLambdaInvokeService.call(
+        function_name: "mask-recommender-#{heroku_env}",
+        payload: payload
+      )
+
+      Oj.load(response['body'])
     end
   end
 end
