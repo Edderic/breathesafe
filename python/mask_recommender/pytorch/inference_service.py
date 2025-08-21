@@ -94,7 +94,14 @@ def infer(facial_measurements: Dict[str, Any], mask_ids: Optional[List[int]] = N
     X = torch.from_numpy(X)
 
     with torch.no_grad():
-        probs = model(X).view(-1).numpy()
+        outputs = model(X).view(-1)
+        # If model outputs logits (add_sigmoid=False), convert to probabilities
+        if not config.get("add_sigmoid", True):
+            probs = torch.sigmoid(outputs)
+        else:
+            probs = outputs
+        # Apply tuned threshold if present for ranking? Keep ranking by probability.
+        probs = probs.numpy()
 
     sorted_idx = np.argsort(-probs)
     mask_ids_sorted = [int(df_all.iloc[i]["mask_id"]) for i in sorted_idx]
@@ -102,4 +109,7 @@ def infer(facial_measurements: Dict[str, Any], mask_ids: Optional[List[int]] = N
         "mask_id": {str(i): mid for i, mid in enumerate(mask_ids_sorted)},
         "proba_fit": {str(i): float(probs[idx]) for i, idx in enumerate(sorted_idx)},
     }
+    # Include threshold used during training for downstream decisions
+    thr = float(state.get("threshold", 0.5))
+    out["threshold"] = thr
     return out
