@@ -1,0 +1,13 @@
+qlft_pass,face_width,face_length,nose_protrusion,bitragion_subnasale_arc,facial_hair_beard_length_mm,mask_id,style,strap_type,perimeter_mm,adjustable_headstrap,adjustable_earloops
+true,140,120,28,240,0,18,Boat,Headstrap,400,0,0
+true,138,118,27,238,0,18,Boat,Headstrap,400,0,0
+true,142,119,29,241,0,18,Boat,Headstrap,400,0,0
+true,135,115,26,235,0,18,Boat,Headstrap,400,0,0
+true,137,116,27,236,0,18,Boat,Headstrap,400,0,0
+true,141,121,28,242,0,18,Boat,Headstrap,400,0,0
+false,90,80,12,180,0,18,Boat,Headstrap,400,0,0
+false,88,78,11,178,0,18,Boat,Headstrap,400,0,0
+false,92,81,13,182,0,18,Boat,Headstrap,400,0,0
+false,89,79,12,179,0,18,Boat,Headstrap,400,0,0
+false,87,77,11,177,0,18,Boat,Headstrap,400,0,0
+false,91,82,13,183,0,18,Boat,Headstrap,400,0,0

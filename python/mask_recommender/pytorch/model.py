@@ -15,6 +15,8 @@ class MLPConfig:
     dropout: float = 0.0
     # For binary classification with sigmoid output
     num_classes: int = 2
+    # When False, do not append Sigmoid. Useful with BCEWithLogitsLoss.
+    add_sigmoid: bool = True
 
 
 class FitClassifier(nn.Module):
@@ -28,9 +30,10 @@ class FitClassifier(nn.Module):
             if config.dropout > 0:
                 layers.append(nn.Dropout(config.dropout))
             dim = config.hidden_dim
-        # binary output as probability via Sigmoid
+        # binary output
         layers.append(nn.Linear(dim, 1))
-        layers.append(nn.Sigmoid())
+        if config.add_sigmoid:
+            layers.append(nn.Sigmoid())
         self.net = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
