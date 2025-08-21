@@ -25,12 +25,12 @@ DEFAULT_DATA_URL = "https://www.breathesafe.xyz/facial_measurements_fit_tests.js
 def train(
     data_url: Optional[str] = None,
     csv_path: Optional[str] = None,
-    epochs: int = 50,
+    epochs: int = 80,
     batch_size: int = 64,
     lr: float = 1e-3,
-    hidden: int = 256,
-    depth: int = 3,
-    dropout: float = 0.1,
+    hidden: int = 384,
+    depth: int = 5,
+    dropout: float = 0.0,
     val_split: float = 0.1,
     target_col: str = "target",
 ) -> Dict[str, Any]:
@@ -119,6 +119,25 @@ def train(
         )
     ).to(device)
 
+    # Initialize final layer bias to the logit of the positive prior
+    try:
+        y_all = dataset.y.numpy() if dataset.y is not None else None
+        if y_all is not None and y_all.size > 0:
+            pos_rate = float((y_all == 1).sum() / y_all.size)
+            pos_rate = min(max(pos_rate, 1e-4), 1 - 1e-4)
+            prior_logit = math.log(pos_rate / (1.0 - pos_rate))
+            # locate last Linear layer
+            last_linear_idx = None
+            for i in range(len(model.net) - 1, -1, -1):
+                if isinstance(model.net[i], torch.nn.Linear):
+                    last_linear_idx = i
+                    break
+            if last_linear_idx is not None:
+                with torch.no_grad():
+                    model.net[last_linear_idx].bias.fill_(prior_logit)
+    except Exception:
+        pass
+
     def accuracy(logits: torch.Tensor, y: torch.Tensor) -> float:
         probs = torch.sigmoid(logits).view(-1)
         preds = (probs >= 0.5).long()
@@ -189,6 +208,25 @@ def train(
             targets = torch.zeros(0)
         return probs, targets
 
+    def collect_val_logits_targets(model, loader, device):
+        model.eval()
+        all_logits = []
+        all_targets = []
+        with torch.no_grad():
+            for X, y in loader:
+                X = X.to(device)
+                y = y.to(device)
+                logits = model(X).view(-1)
+                all_logits.append(logits.cpu())
+                all_targets.append(y.cpu())
+        if all_logits:
+            logits = torch.cat(all_logits)
+            targets = torch.cat(all_targets)
+        else:
+            logits = torch.zeros(0)
+            targets = torch.zeros(0, dtype=torch.long)
+        return logits, targets
+
     def metrics_at_threshold(probs, targets, thr: float):
         if probs.size == 0:
             return float('nan'), float('nan'), float('nan')
@@ -220,7 +258,7 @@ def train(
             loss_fn = torch.nn.BCEWithLogitsLoss()
     except Exception:
         loss_fn = torch.nn.BCEWithLogitsLoss()
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
 
     best_f1 = -float("inf")
     best_state: Optional[Dict[str, Any]] = None
@@ -318,6 +356,32 @@ def train(
             "val_f1": va_f1,
             "threshold": 0.5,
         }
+
+    # Optional: Platt scaling on validation set to calibrate probabilities
+    try:
+        # Load best weights into model for calibration
+        model.load_state_dict(best_state["model_state"])  # type: ignore[index]
+        logits_val, targets_val = collect_val_logits_targets(model, val_loader, device)
+        # Fit only if we have both classes present
+        if logits_val.numel() > 0 and targets_val.numel() > 0 and targets_val.unique().numel() > 1:
+            A = torch.tensor(1.0, requires_grad=True)
+            B = torch.tensor(0.0, requires_grad=True)
+            optimizer_platt = torch.optim.LBFGS([A, B], lr=0.5, max_iter=50)
+            bce = torch.nn.BCEWithLogitsLoss()
+
+            def closure():
+                optimizer_platt.zero_grad()
+                preds = A * logits_val + B
+                loss = bce(preds, targets_val.float())
+                loss.backward()
+                return loss
+
+            optimizer_platt.step(closure)
+            best_state["platt"] = {"A": float(A.detach().cpu().item()), "B": float(B.detach().cpu().item())}
+            best_metrics["platt_A"] = best_state["platt"]["A"]
+            best_metrics["platt_B"] = best_state["platt"]["B"]
+    except Exception:
+        pass
 
     s3_paths = s3_io.upload_checkpoint(best_state, best_metrics)  # type: ignore[arg-type]
 

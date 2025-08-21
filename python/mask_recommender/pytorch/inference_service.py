@@ -95,12 +95,17 @@ def infer(facial_measurements: Dict[str, Any], mask_ids: Optional[List[int]] = N
 
     with torch.no_grad():
         outputs = model(X).view(-1)
+        # Apply Platt scaling if available
+        platt = state.get("platt")
+        if platt and ("A" in platt and "B" in platt):
+            A = float(platt["A"])
+            B = float(platt["B"])
+            outputs = A * outputs + B
         # If model outputs logits (add_sigmoid=False), convert to probabilities
         if not config.get("add_sigmoid", True):
             probs = torch.sigmoid(outputs)
         else:
             probs = outputs
-        # Apply tuned threshold if present for ranking? Keep ranking by probability.
         probs = probs.numpy()
 
     sorted_idx = np.argsort(-probs)

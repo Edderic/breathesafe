@@ -93,7 +93,7 @@ def test_integration_adult_high_proba_9205_real_data(monkeypatch):
 
     # Try a stronger model on real data
     from python.mask_recommender.pytorch import lambda_function as lf
-    result = train_impl(data_url=lf.DEFAULT_DATA_URL, epochs=40, hidden=256, depth=4, dropout=0.1, lr=1e-3, val_split=0.1)
+    result = train_impl(data_url=lf.DEFAULT_DATA_URL, epochs=80, hidden=384, depth=5, dropout=0.0, lr=1e-3, val_split=0.1)
 
     assert 'metrics' in result and 'artifacts' in result
 
@@ -108,4 +108,5 @@ def test_integration_adult_high_proba_9205_real_data(monkeypatch):
     proba_by_index = {int(k): v for k, v in out['proba_fit'].items()}
     mask_by_index = {int(k): v for k, v in out['mask_id'].items()}
     idx_18 = next(i for i, mid in mask_by_index.items() if mid == 18)
+
     assert proba_by_index[idx_18] > 0.5
