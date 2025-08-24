@@ -47,9 +47,9 @@ RSpec.describe MaskRecommender, type: :service do
           )
         ).and_return({ 'body' => Oj.dump(body) })
 
-      result = MaskRecommender.infer(facial, mask_ids: [111, 222])
+      result = described_class.infer(facial, mask_ids: [111, 222])
 
-      by_id = result.each_with_object({}) { |h, acc| acc[h['id']] = h }
+      by_id = result.index_by { |h| h['id'] }
       expect(by_id[222]['proba_fit']).to be_within(1e-6).of(0.9)
       expect(by_id[111]['proba_fit']).to be_nil
       expect(by_id[222]['name']).to eq('Mask B')
@@ -76,7 +76,7 @@ RSpec.describe MaskRecommender, type: :service do
           )
         ).and_return({ 'body' => Oj.dump(body) })
 
-      result = MaskRecommender.train(epochs: 5, data_url: 'https://example.com/data.json', target_col: 'qlft_pass')
+      result = described_class.train(epochs: 5, data_url: 'https://example.com/data.json', target_col: 'qlft_pass')
 
       expect(result['message']).to eq(body['message'])
       expect(result.dig('artifacts', 'model_latest')).to eq('s3://bucket/key.pt')
