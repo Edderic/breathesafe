@@ -8,18 +8,44 @@ from .model import FitClassifier, MLPConfig
 from . import s3_io as s3io
 
 
+def to_float_safe(value: Any, default: float = 0.0) -> float:
+    """Convert to float, treating None and invalid values as default."""
+    if value is None:
+        return float(default)
+    try:
+        return float(value)
+    except Exception:
+        return float(default)
+
+
+def to_binary_float(value: Any) -> float:
+    """Convert various truthy/falsey values to 0.0/1.0 floats safely."""
+    if value is None:
+        return 0.0
+    if isinstance(value, str):
+        v = value.strip().lower()
+        if v in ("1", "true", "t", "yes", "y"):  # truthy
+            return 1.0
+        if v in ("0", "false", "f", "no", "n", ""):
+            return 0.0
+    try:
+        return 1.0 if int(value) != 0 else 0.0
+    except Exception:
+        return 1.0 if bool(value) else 0.0
+
+
 def build_feature_row(feature_names: List[str], facial: Dict[str, Any], mask_info: Dict[str, Any]) -> pd.DataFrame:
     row: Dict[str, Any] = {k: 0 for k in feature_names}
     base_numeric = {
-        "face_width": float(facial.get("face_width", 0.0)),
-        "face_length": float(facial.get("face_length", 0.0)),
-        "nose_protrusion": float(facial.get("nose_protrusion", 0.0)),
-        "bitragion_subnasale_arc": float(facial.get("bitragion_subnasale_arc", 0.0)),
-        "facial_hair_beard_length_mm": float(facial.get("facial_hair_beard_length_mm", 0.0)),
-        "lip_width": float(facial.get("lip_width", 0.0)),
-        "perimeter_mm": float(mask_info.get("perimeter_mm", 0.0)),
-        "adjustable_headstrap": float(mask_info.get("adjustable_headstrap", 0)),
-        "adjustable_earloops": float(mask_info.get("adjustable_earloops", 0)),
+        "face_width": to_float_safe(facial.get("face_width")),
+        "face_length": to_float_safe(facial.get("face_length")),
+        "nose_protrusion": to_float_safe(facial.get("nose_protrusion")),
+        "bitragion_subnasale_arc": to_float_safe(facial.get("bitragion_subnasale_arc")),
+        "facial_hair_beard_length_mm": to_float_safe(facial.get("facial_hair_beard_length_mm")),
+        # "lip_width": to_float_safe(facial.get("lip_width")),
+        "perimeter_mm": to_float_safe(mask_info.get("perimeter_mm")),
+        "adjustable_headstrap": to_binary_float(mask_info.get("adjustable_headstrap")),
+        "adjustable_earloops": to_binary_float(mask_info.get("adjustable_earloops")),
     }
     for k, v in base_numeric.items():
         if k in row:
@@ -30,8 +56,10 @@ def build_feature_row(feature_names: List[str], facial: Dict[str, Any], mask_inf
     except Exception:
         mask_id_int = 0
     mask_id = str(mask_id_val)
-    style = str(mask_info.get("style", ""))
-    strap_type = str(mask_info.get("strap_type", ""))
+    style_val = mask_info.get("style")
+    strap_val = mask_info.get("strap_type")
+    style = "" if style_val is None else str(style_val)
+    strap_type = "" if strap_val is None else str(strap_val)
     one_hots = [f"mask_id_{mask_id}", f"style_{style}", f"strap_type_{strap_type}"]
     for oh in one_hots:
         if oh in row:

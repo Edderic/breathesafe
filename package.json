@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@fawmi/vue-google-maps": "^0.9.72",
+    "@mediapipe/tasks-vision": "0.10.18",
     "@vitejs/plugin-vue": "^2.3.3",
     "@vuepic/vue-datepicker": "^3.6.5",
     "axios": "^0.27.2",
@@ -20,6 +21,9 @@
     "vue-worker": "^1.2.1",
     "vue3-geolocation": "^1.0.0",
     "vue3-progress": "^0.0.1-beta4"
+  },
+  "scripts": {
+    "postinstall": "node scripts/copy_mediapipe_wasm.js"
   },
   "jest": {
     "testPathIgnorePatterns": [

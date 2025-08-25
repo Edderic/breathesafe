@@ -70,6 +70,8 @@ import { useMainStore } from './stores/main_store';
 import { Respirator, displayableMasks, sortedDisplayableMasks } from './masks.js'
 import { useFacialMeasurementStore } from './stores/facial_measurement_store'
 import TabSet from './tab_set.vue'
+// Local mediapipe import (installed via package.json)
+// We will dynamically import to avoid heavy initial bundle
 
 
 export default {
@@ -98,6 +100,13 @@ export default {
       drawingUtils: null,
       DrawingUtilsClass: null,
       FaceLandmarkerClass: null,
+      drawConnectorsFn: null,
+      drawLandmarksFn: null,
+      canvasCtx: null,
+      runningModeReady: false,
+      settingVideoMode: false,
+      useImageModeFallback: false,
+      offscreenCanvas: null,
       mediaStream: null,
       animationFrameRequestId: null
     }
@@ -220,27 +229,67 @@ export default {
     async ensureVisionInitialized() {
       if (this.visionInitialized && this.faceLandmarker) return
       try {
-        const visionModule = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.mjs')
-        const { FaceLandmarker, FilesetResolver, DrawingUtils } = visionModule
-        const filesetResolver = await FilesetResolver.forVisionTasks(
-          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
-        )
-        this.faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
-          baseOptions: {
-            modelAssetPath:
-              'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task'
-          },
-          runningMode: 'VIDEO',
-          numFaces: 1,
-          outputFaceBlendshapes: false,
-          outputFacialTransformationMatrixes: false
-        })
-        // Drawing utils will be initialized once canvas context is available
-        this.DrawingUtilsClass = DrawingUtils
-        this.FaceLandmarkerClass = FaceLandmarker
+        const mp = await import(/* @vite-ignore */ '@mediapipe/tasks-vision')
+        if (!mp || (!mp.FaceLandmarker || !mp.FilesetResolver)) {
+          throw new Error('tasks-vision exports missing')
+        }
+        const wasmBase = '/mediapipe/wasm/'
+        let filesetResolver
+        try {
+          filesetResolver = await mp.FilesetResolver.forVisionTasks(wasmBase)
+        } catch (e) {
+          console.error('FilesetResolver.forVisionTasks failed', e)
+          throw e
+        }
+
+        const modelUrl = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task'
+        try {
+          this.faceLandmarker = await mp.FaceLandmarker.createFromOptions(filesetResolver, {
+            baseOptions: { modelAssetPath: modelUrl },
+            runningMode: 'VIDEO',
+            numFaces: 1,
+            outputFaceBlendshapes: false,
+            outputFacialTransformationMatrices: false
+          })
+        } catch (e) {
+          console.error('FaceLandmarker.createFromOptions failed', e)
+          throw e
+        }
+        if (this.faceLandmarker && typeof this.faceLandmarker.setOptions === 'function') {
+          try {
+            await this.faceLandmarker.setOptions({ runningMode: 'VIDEO' })
+          } catch (e) {
+            console.warn('setOptions VIDEO failed, will proceed', e)
+          }
+        }
+        this.runningModeReady = true
+        // Drawing utils
+        this.DrawingUtilsClass = typeof mp.DrawingUtils === 'function' ? mp.DrawingUtils : null
+        this.drawConnectorsFn = null
+        this.drawLandmarksFn = null
+        this.FaceLandmarkerClass = mp.FaceLandmarker
         this.visionInitialized = true
+        this.videoError = ''
       } catch (e) {
+        console.error('MediaPipe init error:', e)
         this.videoError = 'Failed to load face landmark model.'
+      }
+    },
+    async ensureVideoRunningMode() {
+      if (!this.faceLandmarker) return
+      if (this.runningModeReady) return
+      if (this.settingVideoMode) return
+      this.settingVideoMode = true
+      try {
+        const maybePromise = this.faceLandmarker.setOptions({ runningMode: 'VIDEO' })
+        if (maybePromise && typeof maybePromise.then === 'function') {
+          await maybePromise
+        }
+        this.runningModeReady = true
+      } catch (_) {
+        this.runningModeReady = false
+      } finally {
+        this.settingVideoMode = false
       }
     },
     async startVideoMode() {
@@ -254,6 +303,7 @@ export default {
           audio: false
         })
         this.$refs.videoEl.srcObject = this.mediaStream
+        try { await this.$refs.videoEl.play() } catch (_) {}
 
         const onReady = async () => {
           // Size canvas to match video frame
@@ -264,7 +314,19 @@ export default {
           canvas.width = width
           canvas.height = height
           const ctx = canvas.getContext('2d')
-          this.drawingUtils = new this.DrawingUtilsClass(ctx)
+          this.canvasCtx = ctx
+          // Prepare offscreen for fallback image mode
+          this.offscreenCanvas = document.createElement('canvas')
+          this.offscreenCanvas.width = width
+          this.offscreenCanvas.height = height
+          if (this.DrawingUtilsClass) {
+            try {
+              this.drawingUtils = new this.DrawingUtilsClass(ctx)
+            } catch (_) {
+              this.drawingUtils = null
+            }
+          }
+          await this.ensureVideoRunningMode()
           this.processVideoFrame()
         }
 
@@ -282,6 +344,8 @@ export default {
         cancelAnimationFrame(this.animationFrameRequestId)
         this.animationFrameRequestId = null
       }
+      this.runningModeReady = false
+      this.useImageModeFallback = false
       if (this.mediaStream) {
         try {
           this.mediaStream.getTracks().forEach(t => t.stop())
@@ -293,54 +357,208 @@ export default {
         const ctx = canvas.getContext('2d')
         ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
       }
+      this.offscreenCanvas = null
     },
-    processVideoFrame() {
+    async processVideoFrame() {
       if (this.tabToShow !== 'video' || !this.faceLandmarker || !this.$refs.videoEl || !this.$refs.overlayCanvas) return
+
+      if (this.useImageModeFallback) {
+        this.processImageFrame()
+        return
+      }
 
       const video = this.$refs.videoEl
       const canvas = this.$refs.overlayCanvas
-      const ctx = canvas.getContext('2d')
+      const ctx = this.canvasCtx || this.$refs.overlayCanvas.getContext('2d')
+      this.canvasCtx = ctx
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
+      if (!this.runningModeReady) {
+        try {
+          await this.ensureVideoRunningMode()
+        } catch (_) {}
+        this.animationFrameRequestId = requestAnimationFrame(() => this.processVideoFrame())
+        return
+      }
       const nowMs = performance.now()
-      const result = this.faceLandmarker.detectForVideo(video, nowMs)
+      let result = null
+      try {
+        result = this.faceLandmarker.detectForVideo(video, nowMs)
+        this.runningModeReady = true
+      } catch (err) {
+        // If running mode isn't VIDEO yet, request switch and retry next frame silently
+        const msg = (err && err.message) || ''
+        if (msg.includes('runningMode') || msg.includes('VIDEO')) {
+          this.runningModeReady = false
+          // switch to IMAGE fallback to avoid blocking
+          await this.ensureImageRunningMode()
+          this.useImageModeFallback = true
+          this.animationFrameRequestId = requestAnimationFrame(() => this.processImageFrame())
+          return
+        }
+        // For other errors, surface message
+        this.videoError = 'Face landmark detection failed.'
+        this.animationFrameRequestId = requestAnimationFrame(() => this.processVideoFrame())
+        return
+      }
 
       if (result && result.faceLandmarks) {
         for (const landmarks of result.faceLandmarks) {
-          // Tesselation
-          this.drawingUtils.drawConnectors(
-            landmarks,
-            this.FaceLandmarkerClass.FACE_LANDMARKS_TESSELATION,
-            { color: '#00FF00AA', lineWidth: 0.5 }
-          )
-          // Silhouette
-          this.drawingUtils.drawConnectors(
-            landmarks,
-            this.FaceLandmarkerClass.FACE_LANDMARKS_FACE_OVAL,
-            { color: '#FF0000AA', lineWidth: 1 }
-          )
-          // Eyes and lips
-          this.drawingUtils.drawConnectors(
-            landmarks,
-            this.FaceLandmarkerClass.FACE_LANDMARKS_RIGHT_EYE,
-            { color: '#00AAFF', lineWidth: 1 }
-          )
-          this.drawingUtils.drawConnectors(
-            landmarks,
-            this.FaceLandmarkerClass.FACE_LANDMARKS_LEFT_EYE,
-            { color: '#00AAFF', lineWidth: 1 }
-          )
-          this.drawingUtils.drawConnectors(
-            landmarks,
-            this.FaceLandmarkerClass.FACE_LANDMARKS_LIPS,
-            { color: '#FF00AA', lineWidth: 1 }
-          )
-          // Draw individual points lightly
-          this.drawingUtils.drawLandmarks(landmarks, { color: '#FFFFFFAA', radius: 0.5 })
+          // Preferred: instance methods if available
+          if (this.drawingUtils && typeof this.drawingUtils.drawConnectors === 'function') {
+            this.drawingUtils.drawConnectors(
+              landmarks,
+              this.FaceLandmarkerClass.FACE_LANDMARKS_TESSELATION,
+              { color: '#00FF00AA', lineWidth: 0.5 }
+            )
+            this.drawingUtils.drawConnectors(
+              landmarks,
+              this.FaceLandmarkerClass.FACE_LANDMARKS_FACE_OVAL,
+              { color: '#FF0000AA', lineWidth: 1 }
+            )
+            this.drawingUtils.drawConnectors(
+              landmarks,
+              this.FaceLandmarkerClass.FACE_LANDMARKS_RIGHT_EYE,
+              { color: '#00AAFF', lineWidth: 1 }
+            )
+            this.drawingUtils.drawConnectors(
+              landmarks,
+              this.FaceLandmarkerClass.FACE_LANDMARKS_LEFT_EYE,
+              { color: '#00AAFF', lineWidth: 1 }
+            )
+            this.drawingUtils.drawConnectors(
+              landmarks,
+              this.FaceLandmarkerClass.FACE_LANDMARKS_LIPS,
+              { color: '#FF00AA', lineWidth: 1 }
+            )
+            this.drawingUtils.drawLandmarks(landmarks, { color: '#FFFFFFAA', radius: 0.5 })
+          } else {
+            // Fallback: function utilities or minimal renderer
+            const drawConns = this.drawConnectorsFn
+            const drawPts = this.drawLandmarksFn
+            const drawLineSet = (connections, style) => {
+              if (drawConns) {
+                drawConns(ctx, landmarks, connections, style)
+              } else {
+                // Minimal fallback: draw straight lines for connections
+                ctx.save()
+                ctx.strokeStyle = style?.color || '#00FF00AA'
+                ctx.lineWidth = style?.lineWidth || 1
+                ctx.beginPath()
+                for (const [startIdx, endIdx] of connections) {
+                  const s = landmarks[startIdx]
+                  const e = landmarks[endIdx]
+                  ctx.moveTo(s.x * canvas.width, s.y * canvas.height)
+                  ctx.lineTo(e.x * canvas.width, e.y * canvas.height)
+                }
+                ctx.stroke()
+                ctx.restore()
+              }
+            }
+            drawLineSet(this.FaceLandmarkerClass.FACE_LANDMARKS_TESSELATION, { color: '#00FF00AA', lineWidth: 0.5 })
+            drawLineSet(this.FaceLandmarkerClass.FACE_LANDMARKS_FACE_OVAL, { color: '#FF0000AA', lineWidth: 1 })
+            drawLineSet(this.FaceLandmarkerClass.FACE_LANDMARKS_RIGHT_EYE, { color: '#00AAFF', lineWidth: 1 })
+            drawLineSet(this.FaceLandmarkerClass.FACE_LANDMARKS_LEFT_EYE, { color: '#00AAFF', lineWidth: 1 })
+            drawLineSet(this.FaceLandmarkerClass.FACE_LANDMARKS_LIPS, { color: '#FF00AA', lineWidth: 1 })
+            if (drawPts) {
+              drawPts(ctx, landmarks, { color: '#FFFFFFAA', radius: 0.5 })
+            } else {
+              ctx.save()
+              ctx.fillStyle = '#FFFFFFAA'
+              for (const p of landmarks) {
+                ctx.beginPath()
+                ctx.arc(p.x * canvas.width, p.y * canvas.height, 0.5, 0, 2 * Math.PI)
+                ctx.fill()
+              }
+              ctx.restore()
+            }
+          }
         }
       }
 
       this.animationFrameRequestId = requestAnimationFrame(() => this.processVideoFrame())
+    }
+    ,
+    async ensureImageRunningMode() {
+      if (!this.faceLandmarker) return
+      try {
+        const maybe = this.faceLandmarker.setOptions({ runningMode: 'IMAGE' })
+        if (maybe && typeof maybe.then === 'function') await maybe
+      } catch (_) {}
+    },
+    processImageFrame() {
+      if (this.tabToShow !== 'video' || !this.faceLandmarker || !this.$refs.videoEl || !this.$refs.overlayCanvas) return
+      if (!this.useImageModeFallback) {
+        this.animationFrameRequestId = requestAnimationFrame(() => this.processVideoFrame())
+        return
+      }
+
+      const video = this.$refs.videoEl
+      const canvas = this.$refs.overlayCanvas
+      const ctx = this.canvasCtx || this.$refs.overlayCanvas.getContext('2d')
+      this.canvasCtx = ctx
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      // Draw current video frame to offscreen and run IMAGE detection
+      if (!this.offscreenCanvas) {
+        this.offscreenCanvas = document.createElement('canvas')
+        this.offscreenCanvas.width = canvas.width
+        this.offscreenCanvas.height = canvas.height
+      }
+      const off = this.offscreenCanvas
+      const offctx = off.getContext('2d')
+      offctx.drawImage(video, 0, 0, off.width, off.height)
+
+      let result = null
+      try {
+        result = this.faceLandmarker.detect(off)
+      } catch (err) {
+        // If IMAGE mode is also unavailable, schedule retry via video path
+        this.useImageModeFallback = false
+        this.animationFrameRequestId = requestAnimationFrame(() => this.processVideoFrame())
+        return
+      }
+
+      if (result && result.faceLandmarks) {
+        for (const landmarks of result.faceLandmarks) {
+          if (this.drawingUtils && typeof this.drawingUtils.drawConnectors === 'function') {
+            this.drawingUtils.drawConnectors(landmarks, this.FaceLandmarkerClass.FACE_LANDMARKS_TESSELATION, { color: '#00FF00AA', lineWidth: 0.5 })
+            this.drawingUtils.drawConnectors(landmarks, this.FaceLandmarkerClass.FACE_LANDMARKS_FACE_OVAL, { color: '#FF0000AA', lineWidth: 1 })
+            this.drawingUtils.drawConnectors(landmarks, this.FaceLandmarkerClass.FACE_LANDMARKS_RIGHT_EYE, { color: '#00AAFF', lineWidth: 1 })
+            this.drawingUtils.drawConnectors(landmarks, this.FaceLandmarkerClass.FACE_LANDMARKS_LEFT_EYE, { color: '#00AAFF', lineWidth: 1 })
+            this.drawingUtils.drawConnectors(landmarks, this.FaceLandmarkerClass.FACE_LANDMARKS_LIPS, { color: '#FF00AA', lineWidth: 1 })
+            this.drawingUtils.drawLandmarks(landmarks, { color: '#FFFFFFAA', radius: 0.5 })
+          } else {
+            const drawConns = this.drawConnectorsFn
+            const drawPts = this.drawLandmarksFn
+            const drawLineSet = (connections, style) => {
+              if (drawConns) {
+                drawConns(ctx, landmarks, connections, style)
+              } else {
+                ctx.save(); ctx.strokeStyle = style?.color || '#00FF00AA'; ctx.lineWidth = style?.lineWidth || 1; ctx.beginPath()
+                for (const [startIdx, endIdx] of connections) {
+                  const s = landmarks[startIdx]; const e = landmarks[endIdx]
+                  ctx.moveTo(s.x * canvas.width, s.y * canvas.height)
+                  ctx.lineTo(e.x * canvas.width, e.y * canvas.height)
+                }
+                ctx.stroke(); ctx.restore()
+              }
+            }
+            drawLineSet(this.FaceLandmarkerClass.FACE_LANDMARKS_TESSELATION, { color: '#00FF00AA', lineWidth: 0.5 })
+            drawLineSet(this.FaceLandmarkerClass.FACE_LANDMARKS_FACE_OVAL, { color: '#FF0000AA', lineWidth: 1 })
+            drawLineSet(this.FaceLandmarkerClass.FACE_LANDMARKS_RIGHT_EYE, { color: '#00AAFF', lineWidth: 1 })
+            drawLineSet(this.FaceLandmarkerClass.FACE_LANDMARKS_LEFT_EYE, { color: '#00AAFF', lineWidth: 1 })
+            drawLineSet(this.FaceLandmarkerClass.FACE_LANDMARKS_LIPS, { color: '#FF00AA', lineWidth: 1 })
+            if (drawPts) { drawPts(ctx, landmarks, { color: '#FFFFFFAA', radius: 0.5 }) } else {
+              ctx.save(); ctx.fillStyle = '#FFFFFFAA'
+              for (const p of landmarks) { ctx.beginPath(); ctx.arc(p.x * canvas.width, p.y * canvas.height, 0.5, 0, 2 * Math.PI); ctx.fill() }
+              ctx.restore()
+            }
+          }
+        }
+      }
+
+      this.animationFrameRequestId = requestAnimationFrame(() => this.processImageFrame())
     }
   }
 }
