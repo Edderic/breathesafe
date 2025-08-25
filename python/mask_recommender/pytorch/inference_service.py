@@ -62,7 +62,16 @@ def standardize_numeric(X: np.ndarray, feature_names: List[str], stats: Optional
 
 
 def infer(facial_measurements: Dict[str, Any], mask_ids: Optional[List[int]] = None) -> Dict[str, Any]:
-    state = s3io.load_latest_model()
+    try:
+        state = s3io.load_latest_model()
+    except Exception as e:
+        # Fallback for torch.load weights_only default in PyTorch 2.6+ when loading pickled objects
+        import torch.serialization as _ts
+        try:
+            with _ts.safe_globals([__import__('numpy').core.multiarray._reconstruct]):
+                state = s3io.load_latest_model()
+        except Exception:
+            raise
     feature_names: List[str] = state["feature_names"]
     config = state["config"]
     stats = state.get("stats", None)

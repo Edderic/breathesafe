@@ -67,7 +67,8 @@ def main():
     except Exception:
         pass
 
-    ckpt = torch.load(args.model, map_location="cpu")
+    # Allow loading full checkpoint objects with PyTorch 2.6+
+    ckpt = torch.load(args.model, map_location="cpu", weights_only=False)
 
     feature_names: List[str] = ckpt["feature_names"]
     stats = ckpt.get("stats", None)
