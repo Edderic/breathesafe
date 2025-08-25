@@ -1,0 +1,32 @@
+name: Build PyTorch Lambda Image
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'python/mask_recommender/pytorch/**'
+      - '.github/workflows/docker-build-pytorch.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'python/mask_recommender/pytorch/**'
+      - '.github/workflows/docker-build-pytorch.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (repo-root context, specific Dockerfile)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: python/mask_recommender/pytorch/Dockerfile
+          platforms: linux/amd64
+          push: false
+          tags: breathesafe-pytorch:ci
