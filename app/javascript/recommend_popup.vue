@@ -4,7 +4,8 @@
     <div  style='padding: 1em;'>
       <h3>{{title}}:</h3>
       <p>{{explanation}}</p>
-      <table>
+      <TabSet :options="tabOptions" :tabToShow="tabToShow" @update="onTabUpdate"/>
+      <table v-if="tabToShow === 'manual'">
         <thead>
           <tr>
             <th></th>
@@ -24,6 +25,14 @@
           </tr>
         </tbody>
       </table>
+
+      <div v-if="tabToShow === 'video'" class='video-wrapper'>
+        <div class='video-container'>
+          <video ref="videoEl" autoplay playsinline muted class='video' />
+          <canvas ref="overlayCanvas" class='overlay-canvas'></canvas>
+        </div>
+        <p v-if="videoError" class='video-error'>{{ videoError }}</p>
+      </div>
       <br>
 
       <div class='explanation justify-content-center' v-if='explanationToShow != ""'>
@@ -60,6 +69,7 @@ import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useMainStore } from './stores/main_store';
 import { Respirator, displayableMasks, sortedDisplayableMasks } from './masks.js'
 import { useFacialMeasurementStore } from './stores/facial_measurement_store'
+import TabSet from './tab_set.vue'
 
 
 export default {
@@ -69,13 +79,27 @@ export default {
     CircularButton,
     Popup,
     PersonIcon,
-    SortingStatus
+    SortingStatus,
+    TabSet
   },
   data() {
     return {
       search: "",
       keyToShow: "",
-      recommenderKeys: []
+      recommenderKeys: [],
+      tabToShow: 'manual',
+      tabOptions: [
+        { text: 'manual' },
+        { text: 'video' }
+      ],
+      videoError: '',
+      visionInitialized: false,
+      faceLandmarker: null,
+      drawingUtils: null,
+      DrawingUtilsClass: null,
+      FaceLandmarkerClass: null,
+      mediaStream: null,
+      animationFrameRequestId: null
     }
   },
   props: {
@@ -125,6 +149,17 @@ export default {
           this.load.bind(this)
       }
     )
+    this.$watch(
+      () => this.showPopup,
+      (newVal) => {
+        if (!newVal) {
+          this.stopVideoMode()
+        }
+      }
+    )
+  },
+  beforeUnmount() {
+    this.stopVideoMode()
   },
   methods: {
     async fetchRecommenderKeys() {
@@ -172,6 +207,140 @@ export default {
         event,
         'bitragionSubnasaleArcMm'
       )
+    },
+    onTabUpdate(payload) {
+      const name = payload && payload.name ? payload.name : 'manual'
+      this.tabToShow = name
+      if (name === 'video') {
+        this.$nextTick(() => this.startVideoMode())
+      } else {
+        this.stopVideoMode()
+      }
+    },
+    async ensureVisionInitialized() {
+      if (this.visionInitialized && this.faceLandmarker) return
+      try {
+        const visionModule = await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/vision_bundle.mjs')
+        const { FaceLandmarker, FilesetResolver, DrawingUtils } = visionModule
+        const filesetResolver = await FilesetResolver.forVisionTasks(
+          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
+        )
+        this.faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
+          baseOptions: {
+            modelAssetPath:
+              'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task'
+          },
+          runningMode: 'VIDEO',
+          numFaces: 1,
+          outputFaceBlendshapes: false,
+          outputFacialTransformationMatrixes: false
+        })
+        // Drawing utils will be initialized once canvas context is available
+        this.DrawingUtilsClass = DrawingUtils
+        this.FaceLandmarkerClass = FaceLandmarker
+        this.visionInitialized = true
+      } catch (e) {
+        this.videoError = 'Failed to load face landmark model.'
+      }
+    },
+    async startVideoMode() {
+      try {
+        await this.ensureVisionInitialized()
+        if (!this.$refs.videoEl || !this.$refs.overlayCanvas) return
+
+        // Start camera
+        this.mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user' },
+          audio: false
+        })
+        this.$refs.videoEl.srcObject = this.mediaStream
+
+        const onReady = async () => {
+          // Size canvas to match video frame
+          const video = this.$refs.videoEl
+          const canvas = this.$refs.overlayCanvas
+          const width = video.videoWidth || 640
+          const height = video.videoHeight || 480
+          canvas.width = width
+          canvas.height = height
+          const ctx = canvas.getContext('2d')
+          this.drawingUtils = new this.DrawingUtilsClass(ctx)
+          this.processVideoFrame()
+        }
+
+        if (this.$refs.videoEl.readyState >= 2) {
+          onReady()
+        } else {
+          this.$refs.videoEl.onloadedmetadata = onReady
+        }
+      } catch (e) {
+        this.videoError = 'Unable to access camera.'
+      }
+    },
+    stopVideoMode() {
+      if (this.animationFrameRequestId) {
+        cancelAnimationFrame(this.animationFrameRequestId)
+        this.animationFrameRequestId = null
+      }
+      if (this.mediaStream) {
+        try {
+          this.mediaStream.getTracks().forEach(t => t.stop())
+        } catch (_) {}
+        this.mediaStream = null
+      }
+      const canvas = this.$refs && this.$refs.overlayCanvas
+      if (canvas) {
+        const ctx = canvas.getContext('2d')
+        ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
+      }
+    },
+    processVideoFrame() {
+      if (this.tabToShow !== 'video' || !this.faceLandmarker || !this.$refs.videoEl || !this.$refs.overlayCanvas) return
+
+      const video = this.$refs.videoEl
+      const canvas = this.$refs.overlayCanvas
+      const ctx = canvas.getContext('2d')
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      const nowMs = performance.now()
+      const result = this.faceLandmarker.detectForVideo(video, nowMs)
+
+      if (result && result.faceLandmarks) {
+        for (const landmarks of result.faceLandmarks) {
+          // Tesselation
+          this.drawingUtils.drawConnectors(
+            landmarks,
+            this.FaceLandmarkerClass.FACE_LANDMARKS_TESSELATION,
+            { color: '#00FF00AA', lineWidth: 0.5 }
+          )
+          // Silhouette
+          this.drawingUtils.drawConnectors(
+            landmarks,
+            this.FaceLandmarkerClass.FACE_LANDMARKS_FACE_OVAL,
+            { color: '#FF0000AA', lineWidth: 1 }
+          )
+          // Eyes and lips
+          this.drawingUtils.drawConnectors(
+            landmarks,
+            this.FaceLandmarkerClass.FACE_LANDMARKS_RIGHT_EYE,
+            { color: '#00AAFF', lineWidth: 1 }
+          )
+          this.drawingUtils.drawConnectors(
+            landmarks,
+            this.FaceLandmarkerClass.FACE_LANDMARKS_LEFT_EYE,
+            { color: '#00AAFF', lineWidth: 1 }
+          )
+          this.drawingUtils.drawConnectors(
+            landmarks,
+            this.FaceLandmarkerClass.FACE_LANDMARKS_LIPS,
+            { color: '#FF00AA', lineWidth: 1 }
+          )
+          // Draw individual points lightly
+          this.drawingUtils.drawLandmarks(landmarks, { color: '#FFFFFFAA', radius: 0.5 })
+        }
+      }
+
+      this.animationFrameRequestId = requestAnimationFrame(() => this.processVideoFrame())
     }
   }
 }
@@ -210,6 +379,37 @@ export default {
   }
   img {
     max-width: 30em;
+  }
+
+  .video-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1em;
+  }
+  .video-container {
+    position: relative;
+    width: 100%;
+    max-width: 30em;
+  }
+  .video-container .video {
+    width: 100%;
+    height: auto;
+    display: block;
+    transform: scaleX(-1); /* Mirror for selfie view */
+  }
+  .video-container .overlay-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    transform: scaleX(-1); /* Match mirroring */
+  }
+  .video-error {
+    color: #b00020;
+    margin-top: 0.5em;
   }
 
   tbody tr:hover {
