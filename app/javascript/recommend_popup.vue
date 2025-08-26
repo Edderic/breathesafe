@@ -31,7 +31,19 @@
           <video ref="videoEl" autoplay playsinline muted class='video' />
           <canvas ref="overlayCanvas" class='overlay-canvas'></canvas>
         </div>
+        <div class='video-controls'>
+          <Button :shadow='true' @click="onTakePhotoClick" :disabled="takingPhoto || !mediaStream">Take a photo</Button>
+          <div v-if="takingPhoto" class='countdown'>{{ countdownRemaining }}</div>
+        </div>
+        <div v-if="capturedPhotoReady" class='photo-result-container'>
+          <canvas ref="photoCanvas" class='photo-canvas'></canvas>
+        </div>
         <p v-if="videoError" class='video-error'>{{ videoError }}</p>
+        <p class='video-error'>
+          <div v-for="distance in distances" >
+            {{ distance }}
+          </div>
+        </p>
       </div>
       <br>
 
@@ -108,7 +120,15 @@ export default {
       useImageModeFallback: false,
       offscreenCanvas: null,
       mediaStream: null,
-      animationFrameRequestId: null
+      animationFrameRequestId: null,
+      landmarkUpdateTimerId: null,
+      landmarks: [],
+      distances: [],
+      // Photo capture state
+      takingPhoto: false,
+      countdownRemaining: 0,
+      countdownIntervalId: null,
+      capturedPhotoReady: false
     }
   },
   props: {
@@ -130,6 +150,14 @@ export default {
     facialMeasurements() {
       return getFacialMeasurements()
     },
+    landmark97Text() {
+      if (!this.displayedLandmark97) return ''
+      const { x, y, z } = this.displayedLandmark97
+      const rx = Math.round(x * 1000) / 1000
+      const ry = Math.round(y * 1000) / 1000
+      const rz = Math.round((z || 0) * 1000) / 1000
+      return `Landmark 97: x=${rx}, y=${ry}, z=${rz}`
+    },
     explanationToShow() {
       if (!this.keyToShow) {
         return ""
@@ -147,6 +175,9 @@ export default {
         return ""
       }
       return this.facialMeasurements[this.keyToShow]['eng']
+    },
+    landmarksToProcess() {
+      return [197, 196, 217, 126, 142, 36, 205, 207, 214, 210, 211, 32, 208, 199]
     }
   },
   async created() {
@@ -186,13 +217,20 @@ export default {
         this.recommenderKeys = []
       }
     },
-    ...mapActions(useFacialMeasurementStore, ['getFacialMeasurement', 'updateFacialMeasurement']),
+   ...mapActions(useFacialMeasurementStore, ['getFacialMeasurement', 'updateFacialMeasurement']),
     load(toQuery, fromQuery) {
       for (let facialMeasurement in this.facialMeasurements) {
         if (toQuery[facialMeasurement]) {
           this.updateFacialMeasurement(facialMeasurement, toQuery[facialMeasurement])
         }
       }
+    },
+    computeDistance(point_1, point_2) {
+      return Math.sqrt(
+        (point_1.x - point_2.x) ** 2
+        + (point_1.y - point_2.y) ** 2
+        + (point_1.z - point_2.z) ** 2
+      )
     },
     show(key) {
       this.keyToShow = key
@@ -328,6 +366,10 @@ export default {
           }
           await this.ensureVideoRunningMode()
           this.processVideoFrame()
+          // Start a 5-second interval to snapshot and display landmark 97
+          this.landmarkUpdateTimerId = setInterval(() => {
+            this.updateLandmarks()
+          }, 5000)
         }
 
         if (this.$refs.videoEl.readyState >= 2) {
@@ -344,6 +386,17 @@ export default {
         cancelAnimationFrame(this.animationFrameRequestId)
         this.animationFrameRequestId = null
       }
+      if (this.landmarkUpdateTimerId) {
+        clearInterval(this.landmarkUpdateTimerId)
+        this.landmarkUpdateTimerId = null
+      }
+      if (this.countdownIntervalId) {
+        clearInterval(this.countdownIntervalId)
+        this.countdownIntervalId = null
+      }
+      this.takingPhoto = false
+      this.countdownRemaining = 0
+      this.capturedPhotoReady = false
       this.runningModeReady = false
       this.useImageModeFallback = false
       if (this.mediaStream) {
@@ -374,6 +427,43 @@ export default {
         } catch (_) {}
         this.faceLandmarker = null
         this.visionInitialized = false
+      }
+    },
+    async updateLandmarks() {
+      try {
+        this.distances = []
+
+        if (!this.faceLandmarker || !this.$refs.videoEl) return
+        if (!this.runningModeReady && !this.useImageModeFallback) return
+        let result
+        if (this.useImageModeFallback) {
+          // Use current offscreen image
+          const off = this.offscreenCanvas
+          if (!off) return
+          // Ensure IMAGE mode
+          await this.ensureImageRunningMode()
+          result = this.faceLandmarker.detect(off)
+        } else {
+          // Ensure VIDEO mode
+          await this.ensureVideoRunningMode()
+          result = this.faceLandmarker.detectForVideo(this.$refs.videoEl, performance.now())
+        }
+        if (result && result.faceLandmarks && result.faceLandmarks.length > 0) {
+          this.landmarks = result.faceLandmarks[0]
+          for (let i = 0; i< this.landmarksToProcess.length - 1; i++) {
+            this.distances.push(
+              {
+                'name': `${this.landmarks[i]}, ${this.landmarks[i+1]}`,
+                distance: this.computeDistance(
+                  this.landmarks[i],
+                  this.landmarks[i+1],
+                )
+              }
+            )
+          }
+        }
+      } catch (_) {
+        // ignore transient errors
       }
     },
     async processVideoFrame() {
@@ -577,6 +667,155 @@ export default {
 
       this.animationFrameRequestId = requestAnimationFrame(() => this.processImageFrame())
     }
+    ,
+    onTakePhotoClick() {
+      if (this.takingPhoto || !this.$refs.videoEl) return
+      // Start a visible 3-second countdown then capture
+      this.takingPhoto = true
+      this.countdownRemaining = 3
+      if (this.countdownIntervalId) {
+        clearInterval(this.countdownIntervalId)
+        this.countdownIntervalId = null
+      }
+      this.countdownIntervalId = setInterval(async () => {
+        this.countdownRemaining -= 1
+        if (this.countdownRemaining <= 0) {
+          clearInterval(this.countdownIntervalId)
+          this.countdownIntervalId = null
+          try {
+            await this.capturePhotoFromVideo()
+          } finally {
+            this.takingPhoto = false
+          }
+        }
+      }, 1000)
+    }
+    ,
+    async capturePhotoFromVideo() {
+      try {
+        const video = this.$refs.videoEl
+        if (!video) return
+        const width = video.videoWidth || 640
+        const height = video.videoHeight || 480
+
+        // Prepare destination canvas shown in UI
+        this.capturedPhotoReady = true
+        await this.$nextTick()
+        const photoCanvas = this.$refs.photoCanvas
+        if (!photoCanvas) return
+        photoCanvas.width = width
+        photoCanvas.height = height
+        const ctx = photoCanvas.getContext('2d')
+        if (!ctx) return
+
+        // Draw the current video frame
+        ctx.save()
+        // The video preview is mirrored via CSS. For the snapshot, we also mirror visually
+        // by applying a horizontal flip so the image matches the preview.
+        ctx.translate(width, 0)
+        ctx.scale(-1, 1)
+        ctx.drawImage(video, 0, 0, width, height)
+        ctx.restore()
+
+        // Run landmark detection on the unmirrored pixel coordinates. Since we drew the
+        // image mirrored into photoCanvas, pass a temporary offscreen canvas with the
+        // original orientation to FaceLandmarker for correct coordinates.
+        const analysisCanvas = document.createElement('canvas')
+        analysisCanvas.width = width
+        analysisCanvas.height = height
+        const analysisCtx = analysisCanvas.getContext('2d')
+        if (analysisCtx) {
+          analysisCtx.drawImage(video, 0, 0, width, height)
+        }
+
+        let result = null
+        // Ensure model is available
+        if (!this.faceLandmarker) {
+          await this.ensureVisionInitialized()
+        }
+        if (this.faceLandmarker) {
+          try {
+            await this.ensureImageRunningMode()
+            result = this.faceLandmarker.detect(analysisCanvas)
+          } catch (e) {
+            // ignore detection errors; image will still be shown
+          }
+        }
+
+        if (result && result.faceLandmarks && result.faceLandmarks.length > 0) {
+          const detected = result.faceLandmarks[0]
+          // Draw landmarks on the mirrored canvas by mirroring x coordinates
+          this.drawLandmarksOnCanvas(ctx, photoCanvas, detected, /*isMirrored*/ true)
+        }
+
+        // Already set true above; leave as-is
+      } catch (_) {
+        // Silent fail
+      }
+    }
+    ,
+    drawLandmarksOnCanvas(ctx, canvas, landmarks, isMirrored = false) {
+      const width = canvas.width
+      const height = canvas.height
+      const maybeUtilsClass = this.DrawingUtilsClass
+      if (maybeUtilsClass) {
+        try {
+          const utils = new maybeUtilsClass(ctx)
+          const connectionsSets = [
+            this.FaceLandmarkerClass?.FACE_LANDMARKS_TESSELATION,
+            this.FaceLandmarkerClass?.FACE_LANDMARKS_FACE_OVAL,
+            this.FaceLandmarkerClass?.FACE_LANDMARKS_RIGHT_EYE,
+            this.FaceLandmarkerClass?.FACE_LANDMARKS_LEFT_EYE,
+            this.FaceLandmarkerClass?.FACE_LANDMARKS_LIPS
+          ].filter(Boolean)
+
+          const maybeMirrorPoint = (p) => ({ x: isMirrored ? 1 - p.x : p.x, y: p.y, z: p.z })
+          const mirroredLandmarks = landmarks.map(maybeMirrorPoint)
+
+          for (const connections of connectionsSets) {
+            utils.drawConnectors(mirroredLandmarks, connections, { color: '#00FF00AA', lineWidth: 0.75 })
+          }
+          utils.drawLandmarks(mirroredLandmarks, { color: '#FFFFFFAA', radius: 0.75 })
+          return
+        } catch (_) {
+          // fallback below
+        }
+      }
+
+      // Fallback manual drawing
+      const drawLineSet = (connections, style) => {
+        if (!connections) return
+        ctx.save()
+        ctx.strokeStyle = style?.color || '#00FF00AA'
+        ctx.lineWidth = style?.lineWidth || 1
+        ctx.beginPath()
+        for (const [startIdx, endIdx] of connections) {
+          const s = landmarks[startIdx]
+          const e = landmarks[endIdx]
+          const sx = (isMirrored ? 1 - s.x : s.x) * width
+          const ex = (isMirrored ? 1 - e.x : e.x) * width
+          const sy = s.y * height
+          const ey = e.y * height
+          ctx.moveTo(sx, sy)
+          ctx.lineTo(ex, ey)
+        }
+        ctx.stroke()
+        ctx.restore()
+      }
+
+      drawLineSet(this.FaceLandmarkerClass?.FACE_LANDMARKS_TESSELATION, { color: '#00FF00AA', lineWidth: 0.5 })
+      drawLineSet(this.FaceLandmarkerClass?.FACE_LANDMARKS_FACE_OVAL, { color: '#FF0000AA', lineWidth: 1 })
+      drawLineSet(this.FaceLandmarkerClass?.FACE_LANDMARKS_RIGHT_EYE, { color: '#00AAFF', lineWidth: 1 })
+      drawLineSet(this.FaceLandmarkerClass?.FACE_LANDMARKS_LEFT_EYE, { color: '#00AAFF', lineWidth: 1 })
+      drawLineSet(this.FaceLandmarkerClass?.FACE_LANDMARKS_LIPS, { color: '#FF00AA', lineWidth: 1 })
+      ctx.save(); ctx.fillStyle = '#FFFFFFAA'
+      for (const p of landmarks) {
+        const px = (isMirrored ? 1 - p.x : p.x) * width
+        const py = p.y * height
+        ctx.beginPath(); ctx.arc(px, py, 0.75, 0, Math.PI * 2); ctx.fill()
+      }
+      ctx.restore()
+    }
   }
 }
 </script>
@@ -641,6 +880,28 @@ export default {
     height: 100%;
     pointer-events: none;
     transform: scaleX(-1); /* Match mirroring */
+  }
+  .video-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    margin-top: 0.75em;
+  }
+  .countdown {
+    font-size: 1.5em;
+    font-weight: 700;
+  }
+  .photo-result-container {
+    position: relative;
+    width: 100%;
+    max-width: 30em;
+    margin-top: 0.75em;
+  }
+  .photo-canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    transform: scaleX(-1); /* Mirror like the live preview */
   }
   .video-error {
     color: #b00020;
