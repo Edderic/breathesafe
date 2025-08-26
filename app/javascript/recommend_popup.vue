@@ -339,7 +339,7 @@ export default {
         this.videoError = 'Unable to access camera.'
       }
     },
-    stopVideoMode() {
+    async stopVideoMode() {
       if (this.animationFrameRequestId) {
         cancelAnimationFrame(this.animationFrameRequestId)
         this.animationFrameRequestId = null
@@ -357,7 +357,24 @@ export default {
         const ctx = canvas.getContext('2d')
         ctx && ctx.clearRect(0, 0, canvas.width, canvas.height)
       }
+      const video = this.$refs && this.$refs.videoEl
+      if (video) {
+        try { video.pause && video.pause() } catch (_) {}
+        try { video.srcObject = null } catch (_) {}
+      }
       this.offscreenCanvas = null
+      // Fully dispose the faceLandmarker so re-entering video re-initializes cleanly
+      if (this.faceLandmarker) {
+        try {
+          if (typeof this.faceLandmarker.close === 'function') {
+            await this.faceLandmarker.close()
+          } else if (typeof this.faceLandmarker.delete === 'function') {
+            this.faceLandmarker.delete()
+          }
+        } catch (_) {}
+        this.faceLandmarker = null
+        this.visionInitialized = false
+      }
     },
     async processVideoFrame() {
       if (this.tabToShow !== 'video' || !this.faceLandmarker || !this.$refs.videoEl || !this.$refs.overlayCanvas) return
