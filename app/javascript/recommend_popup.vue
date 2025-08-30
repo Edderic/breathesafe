@@ -538,17 +538,6 @@ export default {
         }
         if (result && result.faceLandmarks && result.faceLandmarks.length > 0) {
           this.landmarks = result.faceLandmarks[0]
-          for (let i = 0; i< this.landmarksToProcess.length - 1; i++) {
-            this.distances.push(
-              {
-                'name': `${this.landmarks[i]}, ${this.landmarks[i+1]}`,
-                distance: this.computeDistance(
-                  this.landmarks[i],
-                  this.landmarks[i+1],
-                )
-              }
-            )
-          }
         }
       } catch (_) {
         // ignore transient errors
