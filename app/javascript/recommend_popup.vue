@@ -43,28 +43,29 @@
               <Button :shadow='true' @click="retakePhoto">Retake photo</Button>
               <Button :shadow='true' @click="startAddPoints">Add points for re-scaling</Button>
             </div>
-            <div v-else-if="flowStage === 'side_photo'">
-              <Button :shadow='true' @click="retakePhoto">Retake the photo</Button>
-              <Button :shadow='true' @click="startAddPoints">Add points for re-scaling</Button>
-            </div>
+
 
             <div v-if="isSelectingPoints">
               <div class='rescale-input-row'>
                 <span v-if="hasTwoPoints" style='font-weight: 600; margin-right: 0.5em;'>rescaling distance (mm)</span>
                 <input v-if="hasTwoPoints && isFrontalStage" id='rescale-mm-front' type='number' min='1' step='0.1' v-model.number="frontalReferenceMm" @change="recomputeScales" />
-                <input v-if="hasTwoPoints && isSideStage" id='rescale-mm-side' type='number' min='1' step='0.1' v-model.number="sideReferenceMm" @change="recomputeScales" />
               </div>
               <div class='next-row'>
-                <Button v-if="isFrontalStage && hasTwoPoints" :shadow='true' @click="proceedToSideLive">Next</Button>
-                <Button v-if="isSideStage && hasTwoPoints" :shadow='true' @click="computeMeasurements">Compute facial measurements</Button>
+                <Button v-if="isFrontalStage && hasTwoPoints" :shadow='true' @click="computeMeasurements">Compute facial measurements</Button>
               </div>
             </div>
 
             <div v-if="showResults" class='results'>
               <div><strong>face_width (mm):</strong> {{ results.face_width_mm ?? '—' }}</div>
               <div><strong>face_length (mm):</strong> {{ results.face_length_mm ?? '—' }}</div>
-              <div><strong>bitragion_subnasale_arc (mm):</strong> {{ results.bitragion_subnasale_arc_mm ?? '—' }}</div>
-              <div><strong>nose_protrusion (mm):</strong> {{ results.nose_protrusion_mm ?? '—' }}</div>
+              <div class='rescale-input-row'>
+                <label for='bitr-mm'><strong>bitragion_subnasale_arc (mm):</strong></label>
+                <input id='bitr-mm' type='number' min='1' step='0.1' :value="getFacialMeasurement('bitragionSubnasaleArcMm')" @change="update($event, 'bitragionSubnasaleArcMm')" />
+              </div>
+              <div class='rescale-input-row'>
+                <label for='nose-mm'><strong>nose_protrusion (mm):</strong></label>
+                <input id='nose-mm' type='number' min='1' step='0.1' :value="getFacialMeasurement('noseProtrusionMm')" @change="update($event, 'noseProtrusionMm')" />
+              </div>
             </div>
           </div>
         </div>
@@ -761,8 +762,7 @@ export default {
         this.flowStage = 'frontal_live'
         this.frontalPoints = []
       } else {
-        this.flowStage = 'side_live'
-        this.sidePoints = []
+        // Side flow skipped for now
       }
     }
     ,
@@ -770,8 +770,6 @@ export default {
       if (!this.capturedPhotoReady) return
       if (this.flowStage === 'frontal_photo') {
         this.flowStage = 'frontal_points'
-      } else if (this.flowStage === 'side_photo') {
-        this.flowStage = 'side_points'
       }
       this.$nextTick(() => this.redrawCurrentPhoto())
     }
@@ -786,9 +784,6 @@ export default {
       if (this.flowStage === 'frontal_points') {
         if (this.frontalPoints.length >= 2) this.frontalPoints = []
         this.frontalPoints.push({ x, y })
-      } else if (this.flowStage === 'side_points') {
-        if (this.sidePoints.length >= 2) this.sidePoints = []
-        this.sidePoints.push({ x, y })
       }
       this.$nextTick(() => this.redrawCurrentPhoto())
     }
@@ -799,16 +794,15 @@ export default {
       const ctx = canvas.getContext('2d')
       if (!ctx) return
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      const storeCanvas = (this.flowStage.startsWith('frontal')) ? null : null
-      const lm = (this.flowStage.startsWith('frontal')) ? this.frontalLandmarks : this.sideLandmarks
+      const lm = this.frontalLandmarks
       // Draw mirrored image to match preview using last captured frame if available
-      let imgCanvas = this.flowStage.startsWith('frontal') ? this.frontalImageCanvas : this.sideImageCanvas
+      let imgCanvas = this.frontalImageCanvas
       if (!imgCanvas) return
       ctx.save(); ctx.translate(canvas.width, 0); ctx.scale(-1, 1); ctx.drawImage(imgCanvas, 0, 0, canvas.width, canvas.height); ctx.restore()
       if (lm) {
         this.drawLandmarksOnCanvas(ctx, canvas, lm, /*isMirrored*/ true)
       }
-      const points = this.flowStage.startsWith('frontal') ? this.frontalPoints : this.sidePoints
+      const points = this.frontalPoints
       if (points && points.length > 0) {
         ctx.save(); ctx.fillStyle = 'red'; ctx.strokeStyle = 'red'; ctx.lineWidth = 2
         for (const p of points) { ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill() }
@@ -822,40 +816,55 @@ export default {
         const dx = this.frontalPoints[0].x - this.frontalPoints[1].x
         const dy = this.frontalPoints[0].y - this.frontalPoints[1].y
         const d = Math.sqrt(dx*dx + dy*dy)
+        // Multiply by some factor to de-bias the result
         if (d > 0) this.frontalMmPerPixel = this.frontalReferenceMm / d
       }
-      if (this.sidePoints.length === 2 && this.sideReferenceMm) {
-        const dx = this.sidePoints[0].x - this.sidePoints[1].x
-        const dy = this.sidePoints[0].y - this.sidePoints[1].y
-        const d = Math.sqrt(dx*dx + dy*dy)
-        if (d > 0) this.sideMmPerPixel = this.sideReferenceMm / d
-      }
+      // Side flow skipped for now per requirements
     }
     ,
     proceedToSideLive() {
+      // Skipped per requirements; directly compute
       this.recomputeScales()
-      this.capturedPhotoReady = false
-      this.flowStage = 'side_live'
-      this.currentPhoto = 'side'
+      this.computeMeasurements()
     }
     ,
     computeMeasurements() {
       this.recomputeScales()
       const out = { face_width_mm: null, face_length_mm: null, bitragion_subnasale_arc_mm: null, nose_protrusion_mm: null }
-      if (this.frontalLandmarks && this.frontalMmPerPixel) {
-        const w = this.frontalImageCanvas?.width || 1
-        const h = this.frontalImageCanvas?.height || 1
-        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
-        for (const p of this.frontalLandmarks) {
-          const x = (1 - p.x) * w // mirrored to match display
-          const y = p.y * h
-          if (x < minX) minX = x; if (x > maxX) maxX = x
-          if (y < minY) minY = y; if (y > maxY) maxY = y
-        }
-        if (isFinite(minX) && isFinite(maxX)) out.face_width_mm = Math.round((maxX - minX) * this.frontalMmPerPixel)
-        if (isFinite(minY) && isFinite(maxY)) out.face_length_mm = Math.round((maxY - minY) * this.frontalMmPerPixel)
+      if (!this.frontalLandmarks || !this.frontalMmPerPixel) {
+        this.videoError = 'Please add two points and enter the rescaling distance (mm).'
+        return
       }
-      // TODO: bitragion_subnasale_arc_mm and nose_protrusion_mm depend on specific landmark indices and side depth; will finalize after clarification
+      const w = this.frontalImageCanvas?.width || 1
+      const h = this.frontalImageCanvas?.height || 1
+      const lm = this.frontalLandmarks
+
+      const getMirroredPixel = (idx) => {
+        const p = lm[idx]
+        return { x: (1 - p.x) * w, y: p.y * h }
+      }
+      let bias_correction_factor = 1.0;
+      // face_width: landmarks #127 and #356
+      try {
+        const a = getMirroredPixel(127)
+        const b = getMirroredPixel(356)
+        const dx = a.x - b.x, dy = a.y - b.y
+        const dpx = Math.sqrt(dx*dx + dy*dy)
+        out.face_width_mm = Math.round(dpx * this.frontalMmPerPixel) * bias_correction_factor
+        this.updateFacialMeasurement('faceWidthMm', out.face_width_mm)
+      } catch (_) {}
+
+      // face_length: landmarks #152 and #168
+      try {
+        const a = getMirroredPixel(152)
+        const b = getMirroredPixel(168)
+        const dx = a.x - b.x, dy = a.y - b.y
+        const dpx = Math.sqrt(dx*dx + dy*dy)
+        out.face_length_mm = Math.round(dpx * this.frontalMmPerPixel) * bias_correction_factor
+        this.updateFacialMeasurement('faceLengthMm', out.face_length_mm)
+      } catch (_) {}
+
+      // Skip bitragion_subnasale_arc_mm and nose_protrusion_mm (user-provided)
       this.results = out
       this.flowStage = 'results'
     },
@@ -963,12 +972,11 @@ export default {
         }
 
         // Move to photo stage
-        if (this.isFrontalStage) {
+      if (this.isFrontalStage) {
           this.flowStage = 'frontal_photo'
           this.currentPhoto = 'frontal'
         } else {
-          this.flowStage = 'side_photo'
-          this.currentPhoto = 'side'
+        // Side flow skipped for now
         }
       } catch (_) {
         // Silent fail
