@@ -9,9 +9,17 @@ class MaskRecommenderController < ApplicationController
     # TODO: For now, only current user can access facial measurements
     # Later on, parents should be able to view / edit their children's data
     status = 200
-    backend = params.dig(:mask_recommender, :backend)
-    backend ||= params[:mask_recommender_backend]
-    masks = MaskRecommender.infer(facial_measurements, backend: backend)
+    # Prefer explicit function_base param (nested or top-level)
+    function_base = params.dig(:mask_recommender, :function_base)
+    function_base ||= params[:function_base]
+    # Backward-compat: map legacy backend params to function_base if provided
+    if function_base.blank?
+      legacy_backend = params.dig(:mask_recommender, :backend) || params[:mask_recommender_backend]
+      if legacy_backend.present?
+        function_base = legacy_backend.to_s == 'rf' ? 'mask-recommender-rf' : 'mask-recommender'
+      end
+    end
+    masks = MaskRecommender.infer(facial_measurements, function_base: function_base)
 
     respond_to do |format|
       format.json do
