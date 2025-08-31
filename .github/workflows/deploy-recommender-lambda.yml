@@ -148,7 +148,6 @@ jobs:
           ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
         run: |
           set -euo pipefail
-          if [ -z "${IMAGE_URI:-}" ]; then echo "No image built; skipping deploy."; exit 0; fi
           if [ -z "${IMAGE_URI:-}" ] || ! echo "$IMAGE_URI" | grep -q '\.'; then
             ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
             IMAGE_URI="${ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:latest"
@@ -208,7 +207,6 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          if [ -z "${IMAGE_URI:-}" ]; then echo "No image built; skipping deploy."; exit 0; fi
           if [ -z "${IMAGE_URI:-}" ] || ! echo "$IMAGE_URI" | grep -q '\.'; then
             ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
             IMAGE_URI="${ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${GITHUB_SHA}"
