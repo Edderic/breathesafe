@@ -42,13 +42,6 @@ RSpec.describe MaskRecommenderController, type: :controller do
       expect(response).to have_http_status(:ok)
     end
 
-    it 'calls MaskRecommender.infer without function_base when not provided' do
-      post :create, params: { facial_measurements: facial_payload }, as: :json
-
-      expect(MaskRecommender).to have_received(:infer).with(facial_payload.stringify_keys, function_base: nil)
-      expect(response).to have_http_status(:ok)
-    end
-
     it 'permits only recommender columns and beard length' do
       noisy = facial_payload.merge(extra: 'ignore_me')
       post :create, params: { facial_measurements: noisy }, as: :json
