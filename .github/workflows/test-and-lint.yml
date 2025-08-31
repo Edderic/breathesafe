@@ -3,6 +3,8 @@ name: Test and Lint
 on:
   push:
     branches: [ main, develop, staging ]
+    tags:
+      - 'prod-*'
   pull_request:
     branches: [ main, develop, staging ]
 

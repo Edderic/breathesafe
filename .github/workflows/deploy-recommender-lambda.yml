@@ -30,6 +30,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Ensure Test and Lint passed for this commit
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const sha = context.sha;
+            const { data } = await github.rest.actions.listWorkflowRunsForRepo({ owner, repo, per_page: 50, status: 'success' });
+            const ok = data.workflow_runs.some(w => w.head_sha === sha && w.name === 'Test and Lint' && w.conclusion === 'success');
+            if (!ok) {
+              core.setFailed('Blocking deploy: Test and Lint has not succeeded for this commit.');
+            }
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -49,6 +61,10 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           set -euo pipefail
+          # Skip if no RF changes on push
+          if [ "${{ github.event_name }}" = "push" ]; then
+            if ! git diff --name-only ${{ github.sha }}^ ${{ github.sha }} | grep -E '^python/mask_recommender/random_forest/'; then
+              echo "No RF changes detected; skipping image build/push."; echo "image_uri_sha=" >> $GITHUB_OUTPUT; echo "image_uri_latest=" >> $GITHUB_OUTPUT; exit 0; fi; fi
           IMAGE_URI="$REGISTRY/$REPO:$IMAGE_TAG"
           LATEST_URI="$REGISTRY/$REPO:latest"
 
@@ -98,6 +114,7 @@ jobs:
           ECR_REPOSITORY: ${{ env.ECR_REPOSITORY }}
         run: |
           set -euo pipefail
+          if [ -z "${IMAGE_URI:-}" ]; then echo "No image built; skipping deploy."; exit 0; fi
           if [ -z "${IMAGE_URI:-}" ] || ! echo "$IMAGE_URI" | grep -q '\.'; then
             ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
             IMAGE_URI="${ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:latest"
@@ -157,6 +174,7 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
+          if [ -z "${IMAGE_URI:-}" ]; then echo "No image built; skipping deploy."; exit 0; fi
           if [ -z "${IMAGE_URI:-}" ] || ! echo "$IMAGE_URI" | grep -q '\.'; then
             ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
             IMAGE_URI="${ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${GITHUB_SHA}"
