@@ -1,11 +1,11 @@
-name: Deploy PyTorch Lambda
+name: Deploy Recommender Lambda
 
 on:
   push:
     branches: [ main ]
     paths:
-      - 'python/mask_recommender/pytorch/**'
-      - '.github/workflows/deploy-pytorch-lambda.yml'
+      - 'python/mask_recommender/random_forest/**'
+      - '.github/workflows/deploy-recommender-lambda.yml'
     tags:
       - 'prod-*'
   workflow_dispatch:
@@ -17,7 +17,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: mask-recommender-pytorch
+  ECR_REPOSITORY: mask-recommender
 
 jobs:
   build-and-push:
@@ -56,9 +56,9 @@ jobs:
           aws ecr describe-repositories --repository-names "$REPO" >/dev/null 2>&1 || \
             aws ecr create-repository --repository-name "$REPO" >/dev/null
 
-          # Build with context at python/mask_recommender
+          # Build Random Forest lambda image
           docker build \
-            -f python/mask_recommender/pytorch/Dockerfile \
+            -f python/mask_recommender/random_forest/Dockerfile \
             -t "$IMAGE_URI" \
             -t "$LATEST_URI" \
             python/mask_recommender
@@ -121,10 +121,9 @@ jobs:
           AWS_REGION: ${{ env.AWS_REGION }}
         run: |
           set -euo pipefail
-          # Fetch existing env vars and merge ENVIRONMENT/S3_BUCKET_REGION
           CFG=$(aws lambda get-function-configuration --function-name "$FUNCTION_NAME")
           ENV_VARS=$(echo "$CFG" | jq -r '.Environment.Variables // {}')
-          MERGED=$(echo "$ENV_VARS" | jq '. + {ENVIRONMENT:"staging", S3_BUCKET_REGION: "'"$AWS_REGION"'"}')
+          MERGED=$(echo "$ENV_VARS" | jq '. + {ENVIRONMENT:"staging", S3_BUCKET_REGION: '"'"$AWS_REGION"'"'}')
           printf '{"Variables":%s}' "$MERGED" > env.json
           aws lambda update-function-configuration \
             --function-name "$FUNCTION_NAME" \
@@ -183,7 +182,7 @@ jobs:
           set -euo pipefail
           CFG=$(aws lambda get-function-configuration --function-name "$FUNCTION_NAME")
           ENV_VARS=$(echo "$CFG" | jq -r '.Environment.Variables // {}')
-          MERGED=$(echo "$ENV_VARS" | jq '. + {ENVIRONMENT:"production", S3_BUCKET_REGION: "'"$AWS_REGION"'"}')
+          MERGED=$(echo "$ENV_VARS" | jq '. + {ENVIRONMENT:"production", S3_BUCKET_REGION: '"'"$AWS_REGION"'"'}')
           printf '{"Variables":%s}' "$MERGED" > env.json
           aws lambda update-function-configuration \
             --function-name "$FUNCTION_NAME" \
