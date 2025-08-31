@@ -3,10 +3,8 @@
 class MaskRecommender
   class << self
     # New primary entrypoint for inference
-    def infer(facial_measurements, mask_ids: nil, backend: nil)
+    def infer(facial_measurements, mask_ids: nil, function_base: 'mask-recommender')
       heroku_env = ENV.fetch('HEROKU_ENVIRONMENT', 'development')
-      backend = (backend || ENV['MASK_RECOMMENDER_BACKEND'] || 'pytorch').to_s.strip.downcase
-      function_base = backend == 'rf' ? 'mask-recommender-rf' : 'mask-recommender'
 
       payload = {
         method: 'infer',
@@ -59,10 +57,8 @@ class MaskRecommender
 
     # Trigger training on the unified PyTorch Lambda
     # Accepts optional parameters like epochs:, data_url:, target_col:
-    def train(epochs: 20, data_url: nil, target_col: 'target', backend: nil)
+    def train(epochs: 20, data_url: nil, target_col: 'target', function_base: 'mask-recommender')
       heroku_env = ENV.fetch('HEROKU_ENVIRONMENT', 'staging')
-      backend = (backend || ENV['MASK_RECOMMENDER_BACKEND'] || 'pytorch').to_s.strip.downcase
-      function_base = backend == 'rf' ? 'mask-recommender-rf' : 'mask-recommender'
 
       payload = { method: 'train' }
       payload[:epochs] = epochs if epochs
