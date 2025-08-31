@@ -85,16 +85,27 @@ jobs:
 
     - name: Install dependencies
       run: |
-        # Install mamba
-        wget -O Mambaforge.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"
-        bash Mambaforge.sh -b -p $HOME/mambaforge
-        source $HOME/mambaforge/bin/activate
+        set -euo pipefail
+        # Install Miniforge (stable link pattern)
+        URL_BASE="https://github.com/conda-forge/miniforge/releases/latest/download"
+        INSTALLER="Miniforge3-$(uname)-$(uname -m).sh"
+        wget -O Miniforge.sh "$URL_BASE/$INSTALLER"
+        bash Miniforge.sh -b -p "$HOME/miniforge"
+        source "$HOME/miniforge/bin/activate"
+        conda config --set always_yes yes --set changeps1 no
+        conda update -n base -c conda-forge conda
 
-        # Create environment from environment.yml
-        mamba env create -f python/mask_recommender/inference/environment.yml
-        source activate mask-recommender-inference
+        # Create environment for Random Forest
+        conda env create -f python/mask_recommender/random_forest/environment.yml || conda env update -f python/mask_recommender/random_forest/environment.yml
+        conda activate mask_recommender_rf
 
-    - name: Run Python tests
+    - name: Run Python tests (inference + random_forest)
+      env:
+        PYTHONPATH: ${{ github.workspace }}
       run: |
-        cd python/mask_recommender/inference
-        python -m pytest tests/ -v
+        set -euo pipefail
+        source "$HOME/miniforge/bin/activate"
+        conda activate mask_recommender_rf
+        python -m pytest \
+          python/mask_recommender/random_forest/tests \
+          -v
