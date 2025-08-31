@@ -9,7 +9,9 @@ class MaskRecommenderController < ApplicationController
     # TODO: For now, only current user can access facial measurements
     # Later on, parents should be able to view / edit their children's data
     status = 200
-    masks = MaskRecommender.infer(facial_measurements)
+    backend = params.dig(:mask_recommender, :backend)
+    backend ||= params[:mask_recommender_backend]
+    masks = MaskRecommender.infer(facial_measurements, backend: backend)
 
     respond_to do |format|
       format.json do

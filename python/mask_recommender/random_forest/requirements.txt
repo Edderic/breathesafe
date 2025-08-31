@@ -1,0 +1,6 @@
+boto3==1.34.162
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.5.2
+joblib==1.4.2
+requests==2.32.3

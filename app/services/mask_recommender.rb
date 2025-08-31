@@ -3,8 +3,10 @@
 class MaskRecommender
   class << self
     # New primary entrypoint for inference
-    def infer(facial_measurements, mask_ids: nil)
+    def infer(facial_measurements, mask_ids: nil, backend: nil)
       heroku_env = ENV.fetch('HEROKU_ENVIRONMENT', 'development')
+      backend = (backend || ENV['MASK_RECOMMENDER_BACKEND'] || 'pytorch').to_s.strip.downcase
+      function_base = backend == 'rf' ? 'mask-recommender-rf' : 'mask-recommender'
 
       payload = {
         method: 'infer',
@@ -13,7 +15,7 @@ class MaskRecommender
       payload[:mask_ids] = mask_ids if mask_ids.present?
 
       response = AwsLambdaInvokeService.call(
-        function_name: "mask-recommender-#{heroku_env}",
+        function_name: "#{function_base}-#{heroku_env}",
         payload: payload
       )
 
@@ -57,8 +59,10 @@ class MaskRecommender
 
     # Trigger training on the unified PyTorch Lambda
     # Accepts optional parameters like epochs:, data_url:, target_col:
-    def train(epochs: 20, data_url: nil, target_col: 'target')
+    def train(epochs: 20, data_url: nil, target_col: 'target', backend: nil)
       heroku_env = ENV.fetch('HEROKU_ENVIRONMENT', 'staging')
+      backend = (backend || ENV['MASK_RECOMMENDER_BACKEND'] || 'pytorch').to_s.strip.downcase
+      function_base = backend == 'rf' ? 'mask-recommender-rf' : 'mask-recommender'
 
       payload = { method: 'train' }
       payload[:epochs] = epochs if epochs
@@ -66,7 +70,7 @@ class MaskRecommender
       payload[:target_col] = target_col if target_col
 
       response = AwsLambdaInvokeService.call(
-        function_name: "mask-recommender-#{heroku_env}",
+        function_name: "#{function_base}-#{heroku_env}",
         payload: payload
       )
 
