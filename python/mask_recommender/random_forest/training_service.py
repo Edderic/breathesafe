@@ -18,8 +18,6 @@ from . import s3_io
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-DEFAULT_DATA_URL = "https://www.breathesafe.xyz/facial_measurements_fit_tests.json"
-
 
 def train(
     data_url: Optional[str] = None,
