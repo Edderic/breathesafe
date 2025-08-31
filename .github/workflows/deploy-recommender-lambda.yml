@@ -26,20 +26,54 @@ jobs:
     environment: staging
     permissions:
       contents: read
+      actions: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Ensure Test and Lint passed for this commit
+      - name: Wait for Test and Lint to succeed for this commit
         uses: actions/github-script@v7
         with:
           script: |
             const { owner, repo } = context.repo;
             const sha = context.sha;
-            const { data } = await github.rest.actions.listWorkflowRunsForRepo({ owner, repo, per_page: 50, status: 'success' });
-            const ok = data.workflow_runs.some(w => w.head_sha === sha && w.name === 'Test and Lint' && w.conclusion === 'success');
-            if (!ok) {
-              core.setFailed('Blocking deploy: Test and Lint has not succeeded for this commit.');
+            const WORKFLOW_NAME = 'Test and Lint';
+            const TIMEOUT_MIN = 30;
+            const INTERVAL_MS = 15000;
+
+            const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+            async function findRun() {
+              // Paginate up to ~300 runs
+              const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, {
+                owner, repo, per_page: 100
+              });
+              return runs.find(w => w.head_sha === sha && w.name === WORKFLOW_NAME);
+            }
+
+            const started = Date.now();
+            while (true) {
+              const run = await findRun();
+              if (run) {
+                if (run.status === 'completed') {
+                  if (run.conclusion === 'success') {
+                    core.info('Test and Lint succeeded. Proceeding.');
+                    break;
+                  } else {
+                    core.setFailed(`Blocking deploy: Test and Lint conclusion=${run.conclusion}`);
+                    break;
+                  }
+                } else {
+                  core.info(`Found Test and Lint run (status=${run.status}). Waiting...`);
+                }
+              } else {
+                core.info('Waiting for Test and Lint run to appear...');
+              }
+              if ((Date.now() - started) > TIMEOUT_MIN * 60000) {
+                core.setFailed('Timeout waiting for Test and Lint to succeed.');
+                break;
+              }
+              await sleep(INTERVAL_MS);
             }
 
       - name: Configure AWS credentials
@@ -61,8 +95,8 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           set -euo pipefail
-          # Skip if no RF changes on push
-          if [ "${{ github.event_name }}" = "push" ]; then
+          # Skip if no RF changes on branch pushes (do not skip on tag pushes)
+          if [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.ref }}" == refs/heads/* ]]; then
             if ! git diff --name-only ${{ github.sha }}^ ${{ github.sha }} | grep -E '^python/mask_recommender/random_forest/'; then
               echo "No RF changes detected; skipping image build/push."; echo "image_uri_sha=" >> $GITHUB_OUTPUT; echo "image_uri_latest=" >> $GITHUB_OUTPUT; exit 0; fi; fi
           IMAGE_URI="$REGISTRY/$REPO:$IMAGE_TAG"
