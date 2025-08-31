@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe MaskRecommenderController, type: :controller do
@@ -14,9 +16,9 @@ RSpec.describe MaskRecommenderController, type: :controller do
 
     before do
       allow(MaskRecommender).to receive(:infer).and_return([
-        { 'id' => 1, 'proba_fit' => 0.9, 'name' => 'Mask A' },
-        { 'id' => 2, 'proba_fit' => 0.7, 'name' => 'Mask B' }
-      ])
+                                                             { 'id' => 1, 'proba_fit' => 0.9, 'name' => 'Mask A' },
+                                                             { 'id' => 2, 'proba_fit' => 0.7, 'name' => 'Mask B' }
+                                                           ])
     end
 
     it 'calls MaskRecommender.infer with function_base override when provided (top-level)' do
@@ -25,7 +27,8 @@ RSpec.describe MaskRecommenderController, type: :controller do
         function_base: 'mask-recommender-rf'
       }, as: :json
 
-      expect(MaskRecommender).to have_received(:infer).with(facial_payload.stringify_keys, function_base: 'mask-recommender-rf')
+      expect(MaskRecommender).to have_received(:infer).with(facial_payload.stringify_keys,
+                                                            function_base: 'mask-recommender-rf')
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
       expect(body).to be_an(Array)
@@ -38,7 +41,8 @@ RSpec.describe MaskRecommenderController, type: :controller do
         mask_recommender: { function_base: 'mask-recommender' }
       }, as: :json
 
-      expect(MaskRecommender).to have_received(:infer).with(facial_payload.stringify_keys, function_base: 'mask-recommender')
+      expect(MaskRecommender).to have_received(:infer).with(facial_payload.stringify_keys,
+                                                            function_base: 'mask-recommender')
       expect(response).to have_http_status(:ok)
     end
 
