@@ -21,7 +21,8 @@ def get_s3_bucket_and_prefix() -> Tuple[str, str]:
         "development": "breathesafe-development",
     }[env]
     bucket = os.environ.get("S3_BUCKET", default_bucket)
-    prefix = f"mask-recommender-pytorch-{env}/models"
+    # Write artifacts to the shared recommender prefix, not framework-specific
+    prefix = f"mask-recommender-{env}/models"
     return bucket, prefix
 
 
@@ -32,8 +33,8 @@ def s3_client():
 
 def save_bytes_to_s3(data: bytes, key: str) -> str:
     if _env() == "development":
-        # Local filesystem persistence under /tmp when developing
-        base = "/tmp/mask-recommender-pytorch-development/models"
+        # Local filesystem persistence under /tmp when developing (shared path)
+        base = "/tmp/mask-recommender-development/models"
         os.makedirs(base, exist_ok=True)
         path = os.path.join(base, key)
         with open(path, "wb") as f:
@@ -75,7 +76,7 @@ def save_mask_data(mask_data: Dict[str, Any]) -> Dict[str, str]:
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     payload = json.dumps(mask_data).encode("utf-8")
     if _env() == "development":
-        base = "/tmp/mask-recommender-pytorch-development/models"
+        base = "/tmp/mask-recommender-development/models"
         os.makedirs(base, exist_ok=True)
         latest_path = os.path.join(base, "mask_data_latest.json")
         versioned_path = os.path.join(base, f"mask_data_{timestamp}.json")
@@ -103,7 +104,7 @@ def save_mask_data(mask_data: Dict[str, Any]) -> Dict[str, str]:
 def load_mask_data() -> Dict[str, Any]:
     # Load from local filesystem in development; otherwise from S3
     if _env() == "development":
-        base = "/tmp/mask-recommender-pytorch-development/models"
+        base = "/tmp/mask-recommender-development/models"
         path = os.path.join(base, "mask_data_latest.json")
         with open(path, "rb") as f:
             return json.loads(f.read().decode("utf-8"))
@@ -127,7 +128,7 @@ def load_mask_data() -> Dict[str, Any]:
 
 def load_latest_model() -> Dict[str, Any]:
     if _env() == "development":
-        base = "/tmp/mask-recommender-pytorch-development/models"
+        base = "/tmp/mask-recommender-development/models"
         path = os.path.join(base, "fit_classifier_latest.pt")
         with open(path, "rb") as f:
             buf = io.BytesIO(f.read())
