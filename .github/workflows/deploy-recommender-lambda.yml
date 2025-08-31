@@ -174,8 +174,8 @@ jobs:
           set -euo pipefail
           CFG=$(aws lambda get-function-configuration --function-name "$FUNCTION_NAME")
           ENV_VARS=$(echo "$CFG" | jq -r '.Environment.Variables // {}')
-          MERGED=$(echo "$ENV_VARS" | jq '. + {ENVIRONMENT:"staging", S3_BUCKET_REGION: '"'"$AWS_REGION"'"'}')
-          printf '{"Variables":%s}' "$MERGED" > env.json
+          MERGED=$(echo "$ENV_VARS" | jq --arg ENVIRONMENT staging --arg S3_BUCKET_REGION "$AWS_REGION" '. + {ENVIRONMENT:$ENVIRONMENT, S3_BUCKET_REGION:$S3_BUCKET_REGION}')
+          printf '{"Variables":%s}\n' "$MERGED" > env.json
           aws lambda update-function-configuration \
             --function-name "$FUNCTION_NAME" \
             --environment file://env.json \
@@ -234,8 +234,8 @@ jobs:
           set -euo pipefail
           CFG=$(aws lambda get-function-configuration --function-name "$FUNCTION_NAME")
           ENV_VARS=$(echo "$CFG" | jq -r '.Environment.Variables // {}')
-          MERGED=$(echo "$ENV_VARS" | jq '. + {ENVIRONMENT:"production", S3_BUCKET_REGION: '"'"$AWS_REGION"'"'}')
-          printf '{"Variables":%s}' "$MERGED" > env.json
+          MERGED=$(echo "$ENV_VARS" | jq --arg ENVIRONMENT production --arg S3_BUCKET_REGION "$AWS_REGION" '. + {ENVIRONMENT:$ENVIRONMENT, S3_BUCKET_REGION:$S3_BUCKET_REGION}')
+          printf '{"Variables":%s}\n' "$MERGED" > env.json
           aws lambda update-function-configuration \
             --function-name "$FUNCTION_NAME" \
             --environment file://env.json \
