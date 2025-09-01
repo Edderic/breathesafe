@@ -2,8 +2,6 @@
 
 # CRUD for Fit Testing data
 class FitTestsController < ApplicationController
-  skip_before_action :verify_authenticity_token
-
   def create
     fit_test = {}
     user = User.find(user_data[:id])
@@ -56,13 +54,15 @@ class FitTestsController < ApplicationController
       status = 401
       messages = ['Unauthorized.']
       fit_tests = []
+      tested_and_untested = []
     else
       fit_tests = JSON.parse(
         FitTest.viewable(current_user).to_json
       )
       messages = []
+      tested_and_untested = MaskKitQuery.managed_by(manager_id: current_user.id)
     end
-    tested_and_untested = MaskKitQuery.managed_by(manager_id: current_user.id)
+
     to_render = {
       fit_tests: fit_tests,
       tested_and_untested: tested_and_untested,
