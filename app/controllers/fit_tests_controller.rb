@@ -77,7 +77,7 @@ class FitTestsController < ApplicationController
   end
 
   def show
-    fit_test = FitTest.find_by(id_with_user_id: params[:id])
+    fit_test = FitTest.find(params[:id])
     to_render = {}
     messages = []
 
