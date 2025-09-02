@@ -192,6 +192,7 @@
                     <option>Cup</option>
                     <option>Duckbill</option>
                     <option>Elastomeric</option>
+                    <option>Surgical</option>
                 </select>
                 <span v-show='!newOrEditMode'>{{style}}</span>
               </td>
