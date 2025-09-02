@@ -37,11 +37,12 @@ RSpec.describe BulkDataImporter, type: :service do
   before do
     # Stub S3 read/write to avoid external deps
     allow(described_class).to receive(:s3_client).and_raise(StandardError) # force local path fallback
-    allow(File).to receive(:exist?).and_call_original
-    allow(File).to receive(:exist?).with('input.csv').and_return(true)
+    allow(described_class).to receive(:write_csv_to_s3).and_return(true)
+
+    # Stub file reads for both relative and expanded paths
     allow(File).to receive(:read).and_call_original
     allow(File).to receive(:read).with('input.csv').and_return(input_csv)
-    allow(described_class).to receive(:write_csv_to_s3).and_return(true)
+    allow(File).to receive(:read).with(File.expand_path('input.csv')).and_return(input_csv)
   end
 
   describe 'validate mode' do
@@ -90,6 +91,7 @@ RSpec.describe BulkDataImporter, type: :service do
         csv << ['unknown', '', '', '', 'SKIP', *Array.new(12, ''), 'N95', 'skip row']
       end
       allow(File).to receive(:read).with('input.csv').and_return(confirmed_csv)
+      allow(File).to receive(:read).with(File.expand_path('input.csv')).and_return(confirmed_csv)
 
       expect do
         described_class.call(
