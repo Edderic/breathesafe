@@ -47,6 +47,9 @@ RSpec/IndexedLet:
 RSpec/NestedGroups:
   Enabled: false
 
+Naming/MethodParameterName:
+  Enabled: false
+
 # Exclude certain directories and files
 AllCops:
   Exclude:

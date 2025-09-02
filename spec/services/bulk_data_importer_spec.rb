@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe BulkDataImporter, type: :service do
@@ -20,8 +22,8 @@ RSpec.describe BulkDataImporter, type: :service do
 
   let(:csv_rows) do
     [
-      [ 'crash25-a1', '', '', '', '', *(Array.new(12, '')), 'N95', 'ok' ], # should match mask_a
-      [ 'unknown mask', '', '', '', '', *(Array.new(12, '')), 'N95', 'ok' ]
+      ['crash25-a1', '', '', '', '', *Array.new(12, ''), 'N95', 'ok'], # should match mask_a
+      ['unknown mask', '', '', '', '', *Array.new(12, ''), 'N95', 'ok']
     ]
   end
 
@@ -34,12 +36,12 @@ RSpec.describe BulkDataImporter, type: :service do
 
   before do
     # Stub S3 read/write to avoid external deps
-    allow(BulkDataImporter).to receive(:s3_client).and_raise(StandardError) # force local path fallback
+    allow(described_class).to receive(:s3_client).and_raise(StandardError) # force local path fallback
     allow(File).to receive(:exist?).and_call_original
     allow(File).to receive(:exist?).with('input.csv').and_return(true)
     allow(File).to receive(:read).and_call_original
     allow(File).to receive(:read).with('input.csv').and_return(input_csv)
-    allow(BulkDataImporter).to receive(:write_csv_to_s3).and_return(true)
+    allow(described_class).to receive(:write_csv_to_s3).and_return(true)
   end
 
   describe 'validate mode' do
@@ -56,7 +58,7 @@ RSpec.describe BulkDataImporter, type: :service do
       expect(result[:status]).to eq('ok')
 
       # Parse the output we would have written
-      out_table = CSV.parse(input_csv, headers: true) # Just reuse structure
+      CSV.parse(input_csv, headers: true) # Just reuse structure
       # We can recompute to check suggestions directly via private methods if needed; keep high level here
 
       # Ensure best suggestion for row 1 is mask_a
@@ -84,8 +86,8 @@ RSpec.describe BulkDataImporter, type: :service do
     it 'creates fit tests for rows with confirmed id and skips SKIP' do
       confirmed_csv = CSV.generate do |csv|
         csv << headers
-        csv << ['crash25-a1', '', '', '', mask_a.id, *(Array.new(12, '')), 'N95', 'ok']
-        csv << ['unknown', '', '', '', 'SKIP', *(Array.new(12, '')), 'N95', 'skip row']
+        csv << ['crash25-a1', '', '', '', mask_a.id, *Array.new(12, ''), 'N95', 'ok']
+        csv << ['unknown', '', '', '', 'SKIP', *Array.new(12, ''), 'N95', 'skip row']
       end
       allow(File).to receive(:read).with('input.csv').and_return(confirmed_csv)
 
@@ -99,7 +101,7 @@ RSpec.describe BulkDataImporter, type: :service do
           mode: 'save',
           testing_mode: 'N95'
         )
-      end.to change { FitTest.count }.by(1)
+      end.to change(FitTest, :count).by(1)
       ft = FitTest.last
       expect(ft.mask_id).to eq(mask_a.id)
       expect(ft.results['quantitative']).to be_present
