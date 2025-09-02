@@ -40,15 +40,20 @@ class BulkDataImporter
     'Notes'
   ].freeze
 
-  DEFAULT_DISTANCE_THRESHOLD = 0.4
+  DEFAULT_DISTANCE_THRESHOLD = 0.8
 
   class << self
+    def dev_env?(environment)
+      %w[development dev].include?(environment.to_s.strip.downcase)
+    end
     def call(style:, read_path:, write_path:, environment:, user_id:, mode:, testing_mode:)
       validate_inputs!(style:, read_path:, write_path:, environment:, user_id:, mode:, testing_mode:)
-
-      bucket = s3_bucket_for(environment)
-
-      csv_in = read_from_s3_or_local(bucket:, path: read_path)
+      if dev_env?(environment)
+        csv_in = File.read(File.expand_path(read_path))
+      else
+        bucket = s3_bucket_for(environment)
+        csv_in = read_from_s3_or_local(bucket:, path: read_path)
+      end
       table = CSV.parse(csv_in, headers: true)
       headers = table.headers
 
@@ -57,8 +62,13 @@ class BulkDataImporter
       case mode.to_s
       when 'validate'
         out_table = perform_validate(table: table, threshold: DEFAULT_DISTANCE_THRESHOLD)
-        write_csv_to_s3(bucket:, key: s3_key_for(write_path), csv_string: out_table.to_csv)
-        { status: 'ok', written_to: "s3://#{bucket}/#{s3_key_for(write_path)}", rows: out_table.size }
+        if dev_env?(environment)
+          File.write(File.expand_path(write_path), out_table.to_csv)
+          { status: 'ok', written_to: File.expand_path(write_path), rows: out_table.size }
+        else
+          write_csv_to_s3(bucket: s3_bucket_for(environment), key: s3_key_for(write_path), csv_string: out_table.to_csv)
+          { status: 'ok', written_to: "s3://#{s3_bucket_for(environment)}/#{s3_key_for(write_path)}", rows: out_table.size }
+        end
       when 'save'
         perform_save!(table: table, user_id:, style:, testing_mode:)
         { status: 'ok', saved_rows: table.size }
