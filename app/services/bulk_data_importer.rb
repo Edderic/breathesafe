@@ -46,6 +46,7 @@ class BulkDataImporter
     def dev_env?(environment)
       %w[development dev].include?(environment.to_s.strip.downcase)
     end
+
     def call(style:, read_path:, write_path:, environment:, user_id:, mode:, testing_mode:)
       validate_inputs!(style:, read_path:, write_path:, environment:, user_id:, mode:, testing_mode:)
       if dev_env?(environment)
@@ -67,7 +68,8 @@ class BulkDataImporter
           { status: 'ok', written_to: File.expand_path(write_path), rows: out_table.size }
         else
           write_csv_to_s3(bucket: s3_bucket_for(environment), key: s3_key_for(write_path), csv_string: out_table.to_csv)
-          { status: 'ok', written_to: "s3://#{s3_bucket_for(environment)}/#{s3_key_for(write_path)}", rows: out_table.size }
+          { status: 'ok', written_to: "s3://#{s3_bucket_for(environment)}/#{s3_key_for(write_path)}",
+            rows: out_table.size }
         end
       when 'save'
         perform_save!(table: table, user_id:, style:, testing_mode:)
