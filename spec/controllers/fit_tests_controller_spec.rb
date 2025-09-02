@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe FitTestsController, type: :controller do
@@ -5,7 +7,7 @@ RSpec.describe FitTestsController, type: :controller do
   let(:managed_user) { create(:user) }
 
   before do
-    allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(manager)
+    allow(controller).to receive(:current_user).and_return(manager)
     allow(manager).to receive(:manages?).and_return(true)
   end
 
@@ -25,7 +27,8 @@ RSpec.describe FitTestsController, type: :controller do
           mask_id: mask.id,
           quantitative_fit_testing_device_id: quantitative_fit_testing_device.id,
           facial_hair: { beard_length_mm: 0, beard_cover_technique: 'none' },
-          results: { qualitative: { procedure: 'bitrex', notes: 'ok', aerosol: { solution: 'bitrex' }, exercises: [{ name: 'talk', result: 'pass' }] } },
+          results: { qualitative: { procedure: 'bitrex', notes: 'ok', aerosol: { solution: 'bitrex' },
+                                    exercises: [{ name: 'talk', result: 'pass' }] } },
           user_seal_check: { positive: [], negative: [], sizing: [] },
           comfort: []
         },
@@ -36,9 +39,9 @@ RSpec.describe FitTestsController, type: :controller do
     it 'creates a fit test for a managed user and returns 201' do
       create(:facial_measurement, user: managed_user)
 
-      expect {
+      expect do
         post :create, params: fit_test_params, as: :json
-      }.to change { FitTest.count }.by(1)
+      end.to change(FitTest, :count).by(1)
 
       expect(response).to have_http_status(:created)
       body = JSON.parse(response.body)
@@ -47,7 +50,7 @@ RSpec.describe FitTestsController, type: :controller do
     end
 
     it 'returns 401 when unauthorized' do
-      allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(nil)
+      allow(controller).to receive(:current_user).and_return(nil)
       post :create, params: fit_test_params, as: :json
       expect(response).to have_http_status(:unauthorized)
     end
@@ -70,7 +73,7 @@ RSpec.describe FitTestsController, type: :controller do
     end
 
     it 'returns 401 when unauthorized' do
-      allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(nil)
+      allow(controller).to receive(:current_user).and_return(nil)
       get :index, as: :json
       expect(response).to have_http_status(:unauthorized)
     end
@@ -87,7 +90,7 @@ RSpec.describe FitTestsController, type: :controller do
     end
 
     it 'returns 401 when unauthorized' do
-      allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(nil)
+      allow(controller).to receive(:current_user).and_return(nil)
       get :show, params: { id: fit_test.id }, as: :json
       expect(response).to have_http_status(:unauthorized)
     end
@@ -111,7 +114,7 @@ RSpec.describe FitTestsController, type: :controller do
     end
 
     it 'returns 401 when unauthorized' do
-      allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(nil)
+      allow(controller).to receive(:current_user).and_return(nil)
       patch :update, params: { id: fit_test.id, fit_test: { mask_id: mask.id } }, as: :json
       expect(response).to have_http_status(:unauthorized)
     end
@@ -132,7 +135,7 @@ RSpec.describe FitTestsController, type: :controller do
     end
 
     it 'returns 401 when unauthorized' do
-      allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(nil)
+      allow(controller).to receive(:current_user).and_return(nil)
       delete :delete, params: { id: fit_test.id }, as: :json
       expect(response).to have_http_status(:unauthorized)
     end
