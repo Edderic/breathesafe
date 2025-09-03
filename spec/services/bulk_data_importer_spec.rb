@@ -4,7 +4,6 @@ require 'rails_helper'
 
 RSpec.describe BulkDataImporter, type: :service do
   let!(:mask_a) { create(:mask, unique_internal_model_code: 'CRASH25-A1', perimeter_mm: 500) }
-  let!(:mask_b) { create(:mask, unique_internal_model_code: 'CRASH25-B2', perimeter_mm: 520) }
   let!(:user)   { create(:user) }
 
   let(:headers) do

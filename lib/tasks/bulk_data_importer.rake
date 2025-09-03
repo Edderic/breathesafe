@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable Layout/LineLength
 namespace :bulk_data do
   desc 'Run BulkDataImporter. Example: rake bulk_data:import style=Crash2.5 read=./in.csv write=./out.csv env=staging user_id=123 mode=validate testing_mode=N95'
   task import: :environment do
@@ -27,3 +28,4 @@ namespace :bulk_data do
     puts result.inspect
   end
 end
+# rubocop:enable Layout/LineLength
