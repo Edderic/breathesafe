@@ -193,6 +193,7 @@
                     <option>Duckbill</option>
                     <option>Elastomeric</option>
                     <option>Surgical</option>
+                    <option>Adhesive</option>
                 </select>
                 <span v-show='!newOrEditMode'>{{style}}</span>
               </td>
@@ -209,6 +210,7 @@
                     <option>Adjustable Earloop</option>
                     <option>Headstrap</option>
                     <option>Adjustable Headstrap</option>
+                    <option>Strapless</option>
                 </select>
                 <span v-show='!newOrEditMode'>{{strapType}}</span>
               </td>
