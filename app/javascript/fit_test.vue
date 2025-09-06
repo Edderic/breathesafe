@@ -68,7 +68,7 @@
         <h3 class='text-align-center'>Search for and pick a mask</h3>
 
         <div class='row justify-content-center'>
-          <input type="text" :value='this.selectedMask.uniqueInternalModelCode' @change='updateSearch($event, "mask")' :disabled='!createOrEdit'>
+          <input type="text" :value='selectedMask && selectedMask.uniqueInternalModelCode' @change='updateSearch($event, "mask")' :disabled='!createOrEdit'>
           <SearchIcon height='2em' width='2em'/>
         </div>
 
@@ -92,7 +92,7 @@
           <tbody>
             <tr>
               <th>Selected Mask</th>
-              <td>{{selectedMask.uniqueInternalModelCode}}</td>
+              <td>{{selectedMask && selectedMask.uniqueInternalModelCode}}</td>
             </tr>
           </tbody>
         </table>
@@ -108,7 +108,7 @@
           </tr>
           <tr>
             <th>Selected Mask</th>
-            <td>{{selectedMask.uniqueInternalModelCode}}</td>
+            <td>{{selectedMask && selectedMask.uniqueInternalModelCode}}</td>
           </tr>
         </tbody>
       </table>
@@ -144,7 +144,7 @@
           </tr>
           <tr>
             <th>Selected Mask</th>
-            <td>{{selectedMask.uniqueInternalModelCode}}</td>
+            <td>{{selectedMask && selectedMask.uniqueInternalModelCode}}</td>
           </tr>
         </tbody>
       </table>
@@ -192,7 +192,7 @@
           </tr>
           <tr>
             <th>Selected Mask</th>
-            <td>{{selectedMask.uniqueInternalModelCode}}</td>
+            <td>{{selectedMask && selectedMask.uniqueInternalModelCode}}</td>
           </tr>
         </tbody>
       </table>
@@ -258,7 +258,7 @@
             </tr>
             <tr>
               <th>Selected Mask</th>
-              <td>{{selectedMask.uniqueInternalModelCode}}</td>
+              <td>{{selectedMask && selectedMask.uniqueInternalModelCode}}</td>
             </tr>
 
             <tr>
@@ -361,7 +361,7 @@
             </tr>
             <tr>
               <th>Selected Mask</th>
-              <td>{{selectedMask.uniqueInternalModelCode}}</td>
+              <td>{{selectedMask && selectedMask.uniqueInternalModelCode}}</td>
             </tr>
 
             <tr>
@@ -1026,8 +1026,8 @@ export default {
         user_seal_check: this.userSealCheck,
         results: this.results,
         comfort: this.comfort,
-        uniqueInternalModelCode: this.selectedMask.uniqueInternalModelCode,
-        has_exhalation_valve: this.selectedMask['hasExhalationValve']
+        uniqueInternalModelCode: this.selectedMask && this.selectedMask.uniqueInternalModelCode,
+        has_exhalation_valve: this.selectedMask && this.selectedMask['hasExhalationValve']
       })
     },
     missingDataUserSealCheck() {
@@ -1136,7 +1136,7 @@ export default {
       return {
         quantitative_fit_testing_device_id: this.quantitativeFitTestingDeviceId,
         comfort: this.comfort,
-        mask_id: this.selectedMask.id,
+        mask_id: this.selectedMask && this.selectedMask.id,
         user_seal_check: this.userSealCheck,
         results: this.results,
         facial_hair: this.facialHair
@@ -1148,7 +1148,7 @@ export default {
     showPositiveUserSealCheck() {
       return this.selectedMask &&
         'hasExhalationValve' in this.selectedMask &&
-        this.selectedMask['hasExhalationValve'] == false
+        this.selectedMask && this.selectedMask['hasExhalationValve'] == false
     },
     maskHasBeenSelected() {
       return !!this.selectedMask && this.selectedMask['id'] != 0
@@ -1281,8 +1281,13 @@ export default {
         await this.loadFitTest()
 
         if (toQuery.maskId) {
-          this.selectedMask = this.masks.filter((m) => m.id == parseInt(toQuery.maskId))[0]
-          this.searchMask = this.selectedMask.uniqueInternalModelCode
+          const foundMask = this.masks.filter((m) => m.id == parseInt(toQuery.maskId))[0]
+          this.selectedMask = foundMask || {
+            id: null,
+            uniqueInternalModelCode: '',
+            hasExhalationValve: false
+          }
+          this.searchMask = this.selectedMask && this.selectedMask.uniqueInternalModelCode
         }
       }
 
@@ -1413,7 +1418,12 @@ export default {
 
             this.id = fitTestData.id
 
-            this.selectedMask = this.masks.filter((m) => m.id == fitTestData.mask_id)[0]
+            const foundMask = this.masks.filter((m) => m.id == fitTestData.mask_id)[0]
+            this.selectedMask = foundMask || {
+              id: null,
+              uniqueInternalModelCode: '',
+              hasExhalationValve: false
+            }
             this.comfort = fitTestData.comfort
             this.userSealCheck = fitTestData.user_seal_check
             this.facialHair = fitTestData.facial_hair
@@ -1611,7 +1621,7 @@ export default {
       }
     },
     validateMask() {
-      if (this.selectedMask.id == 0) {
+      if (this.selectedMask && this.selectedMask.id == 0) {
         this.messages.push(
           {
             str: "Please select a mask."
