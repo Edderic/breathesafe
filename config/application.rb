@@ -4,6 +4,8 @@ require_relative 'boot'
 
 require 'logger'
 require 'rails/all'
+# Ensure PostGIS adapter is loaded
+require 'activerecord-postgis-adapter'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.

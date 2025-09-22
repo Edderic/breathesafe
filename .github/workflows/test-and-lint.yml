@@ -42,14 +42,17 @@ jobs:
 
     - name: Set up database
       env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/breathesafe_test
+        DATABASE_URL: postgis://postgres:postgres@localhost:5432/breathesafe_test
       run: |
         bundle exec rails db:create
-        bundle exec rails db:schema:load
+        # Enable PostGIS extension
+        PGPASSWORD=postgres psql -h localhost -U postgres -d breathesafe_test -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+        # Run migrations instead of schema:load to ensure PostGIS is properly set up
+        bundle exec rails db:migrate
 
     - name: Run tests
       env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/breathesafe_test
+        DATABASE_URL: postgis://postgres:postgres@localhost:5432/breathesafe_test
         RAILS_ENV: test
       run: |
         bundle exec rspec spec
