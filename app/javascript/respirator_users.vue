@@ -596,20 +596,6 @@ export default {
   .top-container {
     height: 100vh;
   }
-  @media(max-width: 700px) {
-    img {
-      width: 100vw;
-    }
-
-    .call-to-actions {
-      height: 14em;
-    }
-
-    #search {
-      width: 75vw;
-      padding: 1em;
-    }
-  }
 
   .row {
     display: flex;
@@ -696,4 +682,23 @@ export default {
     margin-bottom: 1em;
   }
 
+  @media(max-width: 700px) {
+    img {
+      width: 100vw;
+    }
+
+    .call-to-actions {
+      height: 14em;
+    }
+
+    #search {
+      width: 75vw;
+      padding: 1em;
+    }
+
+    .header {
+      flex-direction: column;
+
+    }
+  }
 </style>

@@ -18,7 +18,87 @@
 
     <div :class='{main: true, scrollable: managedUsers.length == 0}'>
       <div class='centered facial-measurements-table-container'>
-        <table class='facial-measurements-table'>
+        <table class='facial-measurements-table phone'>
+          <thead class='facial-measurements-header'>
+            <tr>
+              <td colspan='1'> </td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for='r in displayables' text='Edit'>
+              <td>
+                <table>
+                  <thead>
+                    <tr>
+                      <td colspan='2'>
+                        <div class='flex-direction-row align-items-center maxed-width'>
+                          <CircularButton text='v'/>
+                          <div @click="visit(r.managedId, 'Name')">
+                            {{r.firstName}} {{r.lastName}}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr @click="visit(r.managedId, 'Demographics')">
+
+                      <td>Demographics</td>
+                      <td class='colored-cell'>
+                        <ColoredCell
+                            :colorScheme="evenlySpacedColorScheme"
+                            :maxVal=1
+                            :value='1 - r.demogPercentComplete / 100'
+                            :text='percentage(r.demogPercentComplete)'
+                            class='color-cell'
+                            />
+                      </td>
+                    </tr>
+                    <tr @click="visit(r.managedId, 'Facial Measurements')" >
+                      <td>Facial Measurements</td>
+                      <td class='colored-cell' >
+                        <ColoredCell
+                            :colorScheme="evenlySpacedColorScheme"
+                            :maxVal=1
+                            :value='1- r.fmPercentComplete / 100'
+                            :text='percentage(r.fmPercentComplete)'
+                            class='color-cell'
+                            />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style='color: black;'>Number Masks tested</td>
+                      <td class='colored-cell' >
+                        <router-link :to="{name: 'FitTests', query: {'managedId': r.managedId }}">
+                          <ColoredCell
+                              :colorScheme="evenlySpacedColorScheme"
+                              :maxVal=1
+                              :value='1 - (r.fitTestingPercentComplete || 0) / 100'
+                              :text='percentage(r.fitTestingPercentComplete || 0)'
+                              class='color-cell'
+                              />
+                        </router-link>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td colspan='2' class='colored-cell' @click='maybeRecommend(r)'>
+                        <Button :style='`font-size: 1em; background-color: ${backgroundColorForRecommender(r)}`'>
+                          Recommend Masks
+                        </Button>
+                      </td>
+                    </tr>
+                  </tbody>
+
+                </table>
+              </td>
+
+
+            </tr>
+          </tbody>
+        </table>
+
+        <table class='facial-measurements-table non-phone'>
           <thead class='facial-measurements-header'>
             <tr>
               <th v-if='currentUser && currentUser.admin'>Manager Email</th>
@@ -89,6 +169,7 @@ import axios from 'axios';
 import Button from './button.vue'
 import ClosableMessage from './closable_message.vue'
 import ColoredCell from './colored_cell.vue'
+import CircularButton from './circular_button.vue'
 import Popup from './pop_up.vue'
 import { deepSnakeToCamel, setupCSRF } from './misc.js'
 import { facialMeasurementsPresenceColorMapping, genColorSchemeBounds } from './colors.js'
@@ -101,6 +182,7 @@ export default {
   name: 'RespiratorUsersOverview',
   components: {
     Button,
+    CircularButton,
     ClosableMessage,
     ColoredCell,
     Popup
@@ -236,6 +318,12 @@ export default {
     display: flex;
     flex-direction: column;
   }
+
+  .flex-direction-row {
+    display: flex;
+    flex-direction: row;
+  }
+
   p {
     margin: 1em;
   }
@@ -316,6 +404,8 @@ export default {
     position: relative;
   }
 
+
+
   .facial-measurements-table {
     width: 100%;
     border-collapse: collapse;
@@ -342,5 +432,40 @@ export default {
 
   .facial-measurements-table tbody tr:hover {
     background-color: rgb(240, 240, 240);
+  }
+
+  .maxed-width {
+    width: 100%;
+  }
+
+  @media(max-width: 700px) {
+    img {
+      width: 100vw;
+    }
+
+    .call-to-actions {
+      height: 14em;
+    }
+
+    #search {
+      width: 75vw;
+      padding: 1em;
+    }
+
+    .header {
+      flex-direction: column;
+
+    }
+
+    .phone {
+    }
+
+    .phone table {
+      width: 100%;
+    }
+
+    .non-phone {
+      display: none;
+    }
   }
 </style>

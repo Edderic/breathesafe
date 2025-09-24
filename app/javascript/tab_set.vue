@@ -1,4 +1,5 @@
 <template>
+  <div class='tabToShowContainer'>
     <div class='menu row' id='tabToShow'>
       <Button v-for="o in options" :class="{ tab: true }" @click='setTabThenTrigger(o)' shadow='true' :text='o.text' :selected="tabToShow==o.text"/>
     </div>
@@ -6,6 +7,7 @@
     <select id='tabToShowMobile' :value="tabToShow" name="tabToShowSelect" @change='setTabThenTrigger'>
       <option v-for='option in options' :value="option.text">{{option.text}}</option>
     </select>
+  </div>
 </template>
 
 <script>
@@ -178,6 +180,12 @@ export default {
 
     #tabToShow {
       display: none;
+    }
+
+    .tabToShowContainer {
+      margin-top: 1em;
+      margin-bottom: 1em;
+
     }
   }
 </style>
