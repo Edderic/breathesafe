@@ -26,11 +26,18 @@ export default {
     highlight: {
       type: Boolean,
       default: false
+    },
+    hoverable: {
+      type: Boolean,
+      default: true
     }
   },
   computed: {
     computedBackgroundColor() {
-      if (this.highlight || this.hover) {
+      if (!this.hoverable) {
+        return this.backgroundColor
+      }
+      else if (this.highlight || this.hover) {
         return '#eee'
       } else {
         return this.backgroundColor
@@ -57,6 +64,5 @@ export default {
 
   .circle:hover {
     cursor: pointer;
-    background-color: #eee;
   }
 </style>

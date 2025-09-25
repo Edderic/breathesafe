@@ -19,24 +19,19 @@
     <div :class='{main: true, scrollable: managedUsers.length == 0}'>
       <div class='centered facial-measurements-table-container'>
         <table class='facial-measurements-table phone'>
-          <thead class='facial-measurements-header'>
-            <tr>
-              <td colspan='1'> </td>
-            </tr>
-          </thead>
           <tbody>
             <tr v-for='r in displayables' text='Edit'>
-              <td>
+              <td class='first-layer-td'>
                 <table>
                   <thead>
                     <tr>
-                      <td colspan='2'>
+                      <td colspan='2' @click="toggleExpansion(r.managedId)" >
                         <div class='flex-direction-row align-items-center maxed-width'>
                           <ExpandableButton
+                            :hoverable='false'
                             :expanded="expandedUsers[r.managedId] || false"
-                            @click="toggleExpansion(r.managedId)"
                           />
-                          <div @click="visit(r.managedId, 'Name')">
+                          <div>
                             {{r.firstName}} {{r.lastName}}
                           </div>
                         </div>
@@ -338,7 +333,10 @@ export default {
   }
 
   th, td {
-    padding: 0.5em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .colored-cell {
@@ -428,15 +426,15 @@ export default {
   }
 
   .facial-measurements-table th {
-    padding: 1em;
+    padding-top: 1em;
+    padding-bottom: 1em;
     background-color: #eee;
     border-bottom: 2px solid #ddd;
     font-weight: bold;
   }
 
-  .facial-measurements-table td {
-    padding: 0.5em;
-    border-bottom: 1px solid #ddd;
+  .facial-measurements-table tbody tr:hover {
+    background-color: rgb(240, 240, 240);
   }
 
   .facial-measurements-table tbody tr:hover {
@@ -466,12 +464,20 @@ export default {
 
     }
 
-    .phone {
+    .first-layer-td {
+      padding-left: 0.5em;
+      padding-right: 0.5em;
+      width: 90vw;
+    }
+    .phone table {
+      width: 90vw;
     }
 
-    .phone table {
-      width: 100%;
+    .phone tr {
+      background-color: #eee;
+      border-bottom: 1px solid #aaa;
     }
+
 
     .non-phone {
       display: none;
