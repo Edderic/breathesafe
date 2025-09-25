@@ -32,7 +32,10 @@
                     <tr>
                       <td colspan='2'>
                         <div class='flex-direction-row align-items-center maxed-width'>
-                          <CircularButton text='v'/>
+                          <ExpandableButton
+                            :expanded="expandedUsers[r.managedId] || false"
+                            @click="toggleExpansion(r.managedId)"
+                          />
                           <div @click="visit(r.managedId, 'Name')">
                             {{r.firstName}} {{r.lastName}}
                           </div>
@@ -40,7 +43,7 @@
                       </td>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody v-if='expandedUsers[r.managedId]'>
                     <tr @click="visit(r.managedId, 'Demographics')">
 
                       <td>Demographics</td>
@@ -170,6 +173,7 @@ import Button from './button.vue'
 import ClosableMessage from './closable_message.vue'
 import ColoredCell from './colored_cell.vue'
 import CircularButton from './circular_button.vue'
+import ExpandableButton from './expandable_button.vue'
 import Popup from './pop_up.vue'
 import { deepSnakeToCamel, setupCSRF } from './misc.js'
 import { facialMeasurementsPresenceColorMapping, genColorSchemeBounds } from './colors.js'
@@ -185,6 +189,7 @@ export default {
     CircularButton,
     ClosableMessage,
     ColoredCell,
+    ExpandableButton,
     Popup
   },
   props: {
@@ -197,7 +202,8 @@ export default {
     return {
       missingFacialMeasurementsForRecommender: [],
       userId: 0,
-      recommenderColumns: []
+      recommenderColumns: [],
+      expandedUsers: {} // Track expansion state for each user
     }
   },
   computed: {
@@ -256,6 +262,9 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
+    toggleExpansion(userId) {
+      this.expandedUsers[userId] = !this.expandedUsers[userId];
+    },
     async fetchRecommenderColumns() {
       try {
         const resp = await axios.get('/mask_recommender/recommender_columns.json')
