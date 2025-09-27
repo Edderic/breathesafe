@@ -2246,5 +2246,9 @@ export default {
       grid-template-rows: auto;
     }
 
+    input[type='text'] {
+      width: 82vw;
+    }
+
   }
 </style>

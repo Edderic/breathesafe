@@ -49,7 +49,7 @@ class ParticipantProgress
     where = if user.admin?
               ''
             else
-              "WHERE managed_users.manager_id = #{manager_id}"
+              "WHERE mu.manager_id = #{manager_id}"
             end
 
     JSON.parse(
@@ -139,46 +139,45 @@ class ParticipantProgress
             LEFT JOIN mask_kit_statuses mks
             ON mks.uuid = ssj.shippable_uuid
             WHERE ssj.shippable_type = 'MaskKit'
+        ), num_masks_tested AS (
+          -- TODO: correctly calculate num_unique_masks_tested
+          SELECT user_id, COUNT(DISTINCT mask_id) AS num_unique_masks_tested
+          FROM managed_users INNER JOIN fit_tests ft ON (ft.user_id = managed_users.id)
+          GROUP BY 1
         )
 
 
+
         SELECT
-        COALESCE(
-          managers_who_are_study_participants.email,
-          mask_shipped_counts.to_user_uuid
-        ) as manager_email,
+        managers.email as manager_email,
         p.first_name,
         p.last_name,
         #{recommender_measurements_select_sql},
-        sps.removal_from_study ->> 'removal_datetime' IS NOT NULL AS removed_from_study,
-        sps.finished_study_datetime IS NOT NULL AS finished_study,
-        num_targeted_masks,
+        -- num_targeted_masks,
         total_unique_masks_fit_tested.num_targeted_unique_masks_fit_tested,
-        ROUND((num_targeted_unique_masks_fit_tested::float / num_targeted_masks * 100)::numeric, 2) AS fit_testing_percent_complete,
+        -- ROUND((num_targeted_unique_masks_fit_tested::float / num_targeted_masks * 100)::numeric, 2) AS fit_testing_percent_complete,
         ROUND(((1 - missing_ratio)::numeric * 100)::numeric, 2) AS fm_percent_complete,
         ROUND((demog_present_counts::float / #{Profile::STRING_DEMOG_FIELDS.size + Profile::NUM_DEMOG_FIELDS.size} * 100)::numeric, 2) AS demog_percent_complete,
-        managed_users.*, fm.created_at, fm.updated_at
+        mu.*, fm.created_at, fm.updated_at,
+        num_masks_tested.num_unique_masks_tested
 
-        FROM mask_shipped_counts
-        LEFT JOIN
-          managers_who_are_study_participants
-          ON managers_who_are_study_participants.email = mask_shipped_counts.to_user_uuid
-        FULL OUTER JOIN managed_users
-          ON managed_users.manager_id = managers_who_are_study_participants.id
+        FROM users AS managers
+        INNER JOIN managed_users mu ON (mu.manager_id = managers.id)
+
+        INNER JOIN num_masks_tested ON (num_masks_tested.user_id = mu.managed_id)
 
         LEFT JOIN latest_facial_measurements_for_users ON latest_facial_measurements_for_users.user_id =
-          managed_users.managed_id
+          mu.managed_id
 
         LEFT JOIN facial_measurement_missing_ratio AS fmmr ON (fmmr.id = latest_facial_measurements_for_users.id)
 
         LEFT JOIN profile_with_demog_fields_present_count p
-          ON managed_users.managed_id = p.user_id
+          ON mu.managed_id = p.user_id
         LEFT JOIN latest_facial_measurements_for_users_counts fm
-          ON fm.user_id = managed_users.managed_id
+          ON fm.user_id = mu.managed_id
         LEFT JOIN total_unique_masks_fit_tested
-          ON total_unique_masks_fit_tested.user_id = managed_users.managed_id
-        LEFT JOIN study_participant_statuses sps
-          ON sps.participant_uuid = mask_shipped_counts.to_user_uuid
+          ON total_unique_masks_fit_tested.user_id = mu.managed_id
+
 
         #{where}
         ORDER BY manager_email

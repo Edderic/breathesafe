@@ -71,11 +71,19 @@
                           <ColoredCell
                               :colorScheme="evenlySpacedColorScheme"
                               :maxVal=1
-                              :value='1 - (r.fitTestingPercentComplete || 0) / 100'
-                              :text='percentage(r.fitTestingPercentComplete || 0)'
+                              :value='r.numUniqueMasksTested'
+                              :text='r.numUniqueMasksTested'
                               class='color-cell'
                               />
                         </router-link>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td colspan='2' class='colored-cell' @click='createFitTestForUser(r)'>
+                        <Button :style='`font-size: 1em; background-color: ${backgroundColorForRecommender(r)}`'>
+                          Add Fit Testing Data
+                        </Button>
                       </td>
                     </tr>
 
@@ -310,6 +318,15 @@ export default {
         },
         query: {
           tabToShow: tabToShow
+        }
+      })
+    },
+    createFitTestForUser(user) {
+      this.$router.push({
+        name: 'NewFitTest',
+        query: {
+          userId: user.managedId,
+          tabToShow: 'Mask'
         }
       })
     }
