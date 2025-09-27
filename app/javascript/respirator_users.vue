@@ -7,7 +7,8 @@
         <CircularButton text="?" @click="showHelp = true"/>
       </div>
 
-      <div class='menu row'>
+      <div class='menu row align-items-center'>
+        <label>Metrics</label>
         <TabSet
           :options='tabToShowOptions'
           @update='setTabToShow'
@@ -693,5 +694,11 @@ export default {
       flex-direction: column;
 
     }
+  }
+
+  label {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+
   }
 </style>
