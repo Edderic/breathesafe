@@ -15,14 +15,6 @@
         />
       </div>
 
-      <div class='menu row' v-if='facialMeasurementsData.length > 0 && tabToShow == "Facial Measurements"'>
-        <TabSet
-          :options='facialMeasurementViewOptions'
-          @update='setFacialMeasurementView'
-          :tabToShow='facialMeasurementView'
-        />
-      </div>
-
       <div class='row justify-content-center'>
         <input id='search' type="text" v-model='search'>
         <SearchIcon height='2em' width='2em'/>
@@ -30,7 +22,7 @@
     </div>
 
     <div v-if='tabToShow == "Overview"'>
-      <RespiratorUsersOverview :search="search" />
+      <RespiratorUsersOverview :search="search" :tabToShow="tabToShow" />
     </div>
 
     <Popup v-if='showHelp' @onclose='showHelp = false'>
@@ -201,8 +193,9 @@ export default {
     },
     tabToShowOptions() {
       return [
-        { text: 'Overview' },
-        { text: 'Facial Measurements' }
+        { text: 'Demographics' },
+        { text: 'Facial measurements' },
+        { text: 'Num masks tested' }
       ];
     },
     facialMeasurementViewOptions() {

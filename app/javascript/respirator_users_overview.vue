@@ -34,6 +34,14 @@
                           <div>
                             {{r.firstName}} {{r.lastName}}
                           </div>
+
+                          <ColoredCell
+                            :colorScheme="evenlySpacedColorScheme"
+                            :maxVal="1"
+                            :value="getColoredCellValue(r)"
+                            :text="getColoredCellText(r)"
+                            class="colored-cell highlighted-colored-cell"
+                          />
                         </div>
                       </td>
                     </tr>
@@ -48,7 +56,7 @@
                             :maxVal=1
                             :value='1 - r.demogPercentComplete / 100'
                             :text='percentage(r.demogPercentComplete)'
-                            class='color-cell'
+                            class='colored-cell'
                             />
                       </td>
                     </tr>
@@ -60,7 +68,7 @@
                             :maxVal=1
                             :value='1- r.fmPercentComplete / 100'
                             :text='percentage(r.fmPercentComplete)'
-                            class='color-cell'
+                            class='colored-cell'
                             />
                       </td>
                     </tr>
@@ -73,7 +81,7 @@
                               :maxVal=1
                               :value='1 - r.numUniqueMasksTested / 40 < 0 ? 0 : 1 - r.numUniqueMasksTested / 40 '
                               :text='r.numUniqueMasksTested'
-                              class='color-cell'
+                              class='colored-cell'
                               />
                         </router-link>
                       </td>
@@ -127,7 +135,7 @@
                   :maxVal=1
                   :value='1 - r.demogPercentComplete / 100'
                   :text='percentage(r.demogPercentComplete)'
-                  class='color-cell'
+                  class='colored-cell'
                 />
               </td>
               <td @click="visit(r.managedId, 'Facial Measurements')" class='colored-cell' >
@@ -136,7 +144,7 @@
                   :maxVal=1
                   :value='1- r.fmPercentComplete / 100'
                   :text='percentage(r.fmPercentComplete)'
-                  class='color-cell'
+                  class='colored-cell'
                 />
               </td>
               <td class='colored-cell' @click='v'>
@@ -146,7 +154,8 @@
                     :maxVal=1
                     :value='1 - (r.fitTestingPercentComplete || 0) / 100'
                     :text='percentage(r.fitTestingPercentComplete || 0)'
-                    class='color-cell'
+                    class='colored-cell'
+
                   />
                 </router-link>
               </td>
@@ -199,6 +208,10 @@ export default {
     search: {
       type: String,
       default: ""
+    },
+    tabToShow: {
+      type: String,
+      default: "Demographics"
     }
   },
   data() {
@@ -253,6 +266,35 @@ export default {
     },
     evenlySpacedColorScheme() {
       return genColorSchemeBounds(0, 1, 5)
+    },
+    getColoredCellValue() {
+      return (user) => {
+        switch (this.tabToShow) {
+          case 'Demographics':
+            return 1 - user.demogPercentComplete / 100
+          case 'Facial measurements':
+            return 1 - user.fmPercentComplete / 100
+          case 'Num masks tested':
+            const value = 1 - user.numUniqueMasksTested / 40
+            return value < 0 ? 0 : value
+          default:
+            return 1 - user.demogPercentComplete / 100
+        }
+      }
+    },
+    getColoredCellText() {
+      return (user) => {
+        switch (this.tabToShow) {
+          case 'Demographics':
+            return this.percentage(user.demogPercentComplete)
+          case 'Facial measurements':
+            return this.percentage(user.fmPercentComplete)
+          case 'Num masks tested':
+            return `${user.numUniqueMasksTested || 0}`
+          default:
+            return this.percentage(user.demogPercentComplete)
+        }
+      }
     }
   },
   async created() {
@@ -502,5 +544,12 @@ export default {
     .non-phone {
       display: none;
     }
+  }
+
+  .highlighted-colored-cell {
+    margin-left: auto;
+    margin-right: 0.5em;
+    padding: 1em;
+    border-radius: 100%;
   }
 </style>
