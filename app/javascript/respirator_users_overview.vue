@@ -209,7 +209,7 @@ export default {
       type: String,
       default: ""
     },
-    tabToShow: {
+    metricToShow: {
       type: String,
       default: "Demographics"
     }
@@ -269,7 +269,7 @@ export default {
     },
     getColoredCellValue() {
       return (user) => {
-        switch (this.tabToShow) {
+        switch (this.metricToShow) {
           case 'Demographics':
             return 1 - user.demogPercentComplete / 100
           case 'Facial measurements':
@@ -284,7 +284,7 @@ export default {
     },
     getColoredCellText() {
       return (user) => {
-        switch (this.tabToShow) {
+        switch (this.metricToShow) {
           case 'Demographics':
             return this.percentage(user.demogPercentComplete)
           case 'Facial measurements':
@@ -550,6 +550,5 @@ export default {
     margin-left: auto;
     margin-right: 0.5em;
     padding: 1em;
-    border-radius: 100%;
   }
 </style>

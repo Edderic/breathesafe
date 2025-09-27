@@ -7,13 +7,12 @@
         <CircularButton text="?" @click="showHelp = true"/>
       </div>
 
-      <div class='menu row align-items-center'>
+      <div class='menu row align-items-center metrics-row-select'>
         <label>Metrics</label>
-        <TabSet
-          :options='tabToShowOptions'
-          @update='setTabToShow'
-          :tabToShow='tabToShow'
-        />
+
+        <select id='tabToShowMobile' :value="metricToShow" name="tabToShowSelect" @change='displayMetric'>
+          <option v-for='option in tabToShowOptions' :value="option.text">{{option.text}}</option>
+        </select>
       </div>
 
       <div class='row justify-content-center'>
@@ -22,8 +21,8 @@
       </div>
     </div>
 
-    <div v-if='tabToShow == "Overview"'>
-      <RespiratorUsersOverview :search="search" :tabToShow="tabToShow" />
+    <div>
+      <RespiratorUsersOverview :search="search" :metricToShow="metricToShow" />
     </div>
 
     <Popup v-if='showHelp' @onclose='showHelp = false'>
@@ -145,6 +144,7 @@ export default {
     return {
       search: "",
       tabToShow: "Overview",
+      metricToShow: "Demographics",
       facialMeasurementView: "Absolute",
       facialMeasurementsData: [],
       showHelp: false
@@ -365,21 +365,24 @@ export default {
         })
     },
 
+    displayMetric(event) {
+      this.metricToShow = event.target.value
+    },
     setTabToShow(option) {
       this.tabToShow = option.name;
-      if (this.tabToShow === 'Facial Measurements') {
-        this.loadFacialMeasurementsData();
-      }
+      //if (this.tabToShow === 'Facial Measurements') {
+      //  this.loadFacialMeasurementsData();
+      //}
 
       // Update URL query parameter to reflect current tab
-      const query = { ...this.$route.query };
-      if (this.tabToShow === 'Overview') {
-        query.tab = 'overview';
-      } else if (this.tabToShow === 'Facial Measurements') {
-        query.tab = 'facial_measurements';
-      }
+      //const query = { ...this.$route.query };
+      //if (this.tabToShow === 'Overview') {
+      //  query.tab = 'overview';
+      //} else if (this.tabToShow === 'Facial Measurements') {
+      //  query.tab = 'facial_measurements';
+      //}
 
-      this.$router.replace({ query });
+      //this.$router.replace({ query });
     },
     handleRoute() {
       console.log('handleRoute called with:', {
@@ -700,5 +703,14 @@ export default {
     padding-left: 0.5em;
     padding-right: 0.5em;
 
+  }
+
+  .metrics-row-select {
+    margin-top: 1em;
+    margin-bottom: 1em;
+  }
+
+  select {
+    padding: 1em;
   }
 </style>
