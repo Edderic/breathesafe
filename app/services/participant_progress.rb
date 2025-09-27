@@ -142,7 +142,7 @@ class ParticipantProgress
         ), num_masks_tested AS (
           -- TODO: correctly calculate num_unique_masks_tested
           SELECT user_id, COUNT(DISTINCT mask_id) AS num_unique_masks_tested
-          FROM managed_users INNER JOIN fit_tests ft ON (ft.user_id = managed_users.id)
+          FROM managed_users INNER JOIN fit_tests ft ON (ft.user_id = managed_users.managed_id)
           GROUP BY 1
         )
 
@@ -164,7 +164,7 @@ class ParticipantProgress
         FROM users AS managers
         INNER JOIN managed_users mu ON (mu.manager_id = managers.id)
 
-        INNER JOIN num_masks_tested ON (num_masks_tested.user_id = mu.managed_id)
+        LEFT JOIN num_masks_tested ON (num_masks_tested.user_id = mu.managed_id)
 
         LEFT JOIN latest_facial_measurements_for_users ON latest_facial_measurements_for_users.user_id =
           mu.managed_id
