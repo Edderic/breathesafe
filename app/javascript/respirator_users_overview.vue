@@ -53,7 +53,7 @@
                       </td>
                     </tr>
                     <tr @click="visit(r.managedId, 'Facial Measurements')" >
-                      <td>Facial Measurements</td>
+                      <td>Facial measurements</td>
                       <td class='colored-cell' >
                         <ColoredCell
                             :colorScheme="evenlySpacedColorScheme"
@@ -65,13 +65,13 @@
                       </td>
                     </tr>
                     <tr>
-                      <td style='color: black;'>Number Masks tested</td>
+                      <td style='color: black;'>Num unique masks tested</td>
                       <td class='colored-cell' >
                         <router-link :to="{name: 'FitTests', query: {'managedId': r.managedId }}">
                           <ColoredCell
-                              :colorScheme="evenlySpacedColorScheme"
+                              :colorScheme="genColorSchemeBounded(0, 1)"
                               :maxVal=1
-                              :value='r.numUniqueMasksTested'
+                              :value='1 - r.numUniqueMasksTested / 40 < 0 ? 0 : 1 - r.numUniqueMasksTested / 40 '
                               :text='r.numUniqueMasksTested'
                               class='color-cell'
                               />
@@ -265,6 +265,9 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
+    genColorSchemeBounded(minimum, maximum) {
+      return genColorSchemeBounds(minimum, maximum, 5)
+    },
     toggleExpansion(userId) {
       this.expandedUsers[userId] = !this.expandedUsers[userId];
     },
