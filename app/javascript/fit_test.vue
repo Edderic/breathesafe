@@ -29,7 +29,7 @@
         @navigate-to-step="navigateToStep"
       />
 
-      <div v-show='tabToShow == "User"'>
+      <div v-show='tabToShow == "User"' class='right-pane'>
         <div>
           <h3 class='text-align-center'>Search for user</h3>
 
@@ -62,9 +62,18 @@
             </tbody>
           </table>
         </div>
+
+        <br>
+        <div class='row buttons'>
+          <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+          <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
+          <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
+          <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
+        </div>
+
       </div>
 
-      <div v-show='tabToShow == "Mask"' class='main'>
+      <div v-show='tabToShow == "Mask"' class='main right-pane'>
 
         <div>
           <h3 class='text-align-center'>Search for and pick a mask</h3>
@@ -99,9 +108,18 @@
             </tbody>
           </table>
         </div>
+
+        <br>
+        <div class='row buttons'>
+          <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+          <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
+          <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
+          <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
+        </div>
+
       </div>
 
-      <div v-show='tabToShow == "Facial Hair"' class='justify-content-center flex-dir-col align-content-center'>
+      <div v-show='tabToShow == "Facial Hair"' class='justify-content-center flex-dir-col align-content-center right-pane'>
 
         <p class='narrow-p'>Having a beard can increase seal leakage. If you don't have one, please select "0mm" for the following question. If you do have one, please use a caliper or tape measure to estimate beard length.</p>
 
@@ -123,9 +141,18 @@
           :selected="facialHair['beard_cover_technique']"
           :disabled="!createOrEdit"
         />
+
+        <br>
+        <div class='row buttons'>
+          <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+          <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
+          <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
+          <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
+        </div>
+
       </div>
 
-      <div v-show='tabToShow == "Comfort"' class='justify-content-center flex-dir-col'>
+      <div v-show='tabToShow == "Comfort"' class='justify-content-center flex-dir-col right-pane'>
 
         <SurveyQuestion
           question="How comfortable is the position of the mask on the nose?"
@@ -158,11 +185,19 @@
           :selected="comfort['How comfortable is the position of the mask on face and cheeks?']"
           :disabled="!createOrEdit"
         />
+
+        <br>
+        <div class='row buttons'>
+          <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+          <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
+          <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
+          <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
+        </div>
+
       </div>
 
 
-      <div v-show='tabToShow == "User Seal Check"' class='justify-content-center flex-dir-col align-content-center'>
-
+      <div v-show='tabToShow == "User Seal Check"' class='justify-content-center flex-dir-col align-content-center right-pane'>
         <div>
           <SurveyQuestion
               question="What do you think about the sizing of this mask relative to your face?"
@@ -212,9 +247,17 @@
               :disabled="!createOrEdit"
               />
         </div>
+
+        <br>
+        <div class='row buttons'>
+          <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+          <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
+          <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
+          <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
+        </div>
       </div>
 
-      <div v-show='tabToShow == "QLFT"' class='justify-content-center flex-dir-col align-content-center'>
+      <div v-show='tabToShow == "QLFT"' class='justify-content-center flex-dir-col align-content-center right-pane'>
         <div class='grid qlft'>
           <table v-show='secondaryTabToShow == "Choose Procedure"'>
             <tbody>
@@ -307,9 +350,17 @@
           </table>
 
         </div>
+
+        <br>
+        <div class='row buttons'>
+          <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+          <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
+          <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
+          <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
+        </div>
       </div>
 
-      <div v-show='tabToShow == "QNFT"' class='justify-content-center flex-dir-col align-content-center'>
+      <div v-show='tabToShow == "QNFT"' class='justify-content-center flex-dir-col align-content-center right-pane'>
         <div class='grid qlft'>
           <table v-show='secondaryTabToShow == "Choose Procedure"'>
             <tbody>
@@ -423,17 +474,15 @@
         </div>
 
 
+      <br>
+      <div class='row buttons'>
+        <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+        <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
+        <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
+        <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
+      </div>
+
     </div>
-
-    <br>
-
-    <div class='row buttons'>
-      <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
-      <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
-      <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
-      <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
-    </div>
-
   </div>
 </div>
 </template>
@@ -2069,6 +2118,9 @@ export default {
     flex-direction: row;
   }
 
+  .row.buttons {
+    justify-content: center;
+  }
 
 
   .flex-dir-col {
@@ -2169,9 +2221,13 @@ export default {
   }
 
   .columns {
-    display: grid;
-    grid-template-columns: 33% 66%;
-    grid-template-rows: auto;
+  }
+
+  .right-pane {
+    position: relative;
+    left: 20%;
+    display: flex;
+    flex-direction: column;
   }
 
   .grid {
