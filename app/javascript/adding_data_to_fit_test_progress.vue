@@ -27,7 +27,10 @@
           >
             {{ getStepDisplayValue(step.key) }}
           </span>
-          <span class="step-status">
+          <span
+            class="step-status"
+            v-if="getStepStatus(step.key) !== ''"
+          >
             {{ getStepStatus(step.key) }}
           </span>
         </div>
@@ -110,6 +113,18 @@ export default {
       return this.computedCompletedSteps.includes(stepKey)
     },
     getStepStatus(stepKey) {
+      // For User and Mask, don't show "Complete" since we show the actual values
+      if (stepKey === 'User' || stepKey === 'Mask') {
+        if (this.isStepCompleted(stepKey)) {
+          return '' // Empty string for User and Mask when completed
+        } else if (this.currentStep === stepKey) {
+          return 'In Progress'
+        } else {
+          return 'Not Started'
+        }
+      }
+
+      // For other steps, show normal status
       if (this.isStepCompleted(stepKey)) {
         return 'Complete'
       } else if (this.currentStep === stepKey) {
@@ -270,6 +285,12 @@ export default {
 /* Alternative approach using CSS classes */
 .step-item .step-value.not-selected {
   color: #dc3545;
+  font-weight: 500;
+}
+
+/* Green styling for selected User and Mask values */
+.step-item.completed .step-value:not(.not-selected) {
+  color: #28a745;
   font-weight: 500;
 }
 
