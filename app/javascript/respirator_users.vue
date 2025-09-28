@@ -7,14 +7,6 @@
         <CircularButton text="?" @click="showHelp = true"/>
       </div>
 
-      <div class='menu row align-items-center metrics-row-select'>
-        <label>Metrics</label>
-
-        <select id='tabToShowMobile' :value="metricToShow" name="tabToShowSelect" @change='displayMetric'>
-          <option v-for='option in tabToShowOptions' :value="option.text">{{option.text}}</option>
-        </select>
-      </div>
-
       <div class='row justify-content-center'>
         <input id='search' type="text" v-model='search'>
         <SearchIcon height='2em' width='2em'/>
@@ -89,7 +81,7 @@
                     :value='getValueForColumn(row, col)'
                     :text='getDisplayValueForColumn(row, col)'
                     :exception='getExceptionForColumn(row, col)'
-                    class='color-cell'
+                    class='colored-cell'
                   />
                 </td>
               </tr>
@@ -525,14 +517,10 @@ export default {
     margin: 1em;
   }
 
-  th, td {
-    padding: 0.5em;
-  }
-
   .colored-cell {
     color: white;
     text-shadow: 1px 1px 2px black;
-
+    padding: 1em;
   }
 
   .quote {
@@ -705,7 +693,7 @@ export default {
 
   }
 
-  .metrics-row-select {
+  .row {
     margin-top: 1em;
     margin-bottom: 1em;
   }

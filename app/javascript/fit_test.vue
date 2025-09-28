@@ -22,6 +22,14 @@
       />
     </div>
 
+    <!-- Progress Component -->
+    <AddingDataToFitTestProgress
+      :selectedUser="selectedUser"
+      :selectedMask="selectedMask"
+      :completedSteps="completedFitTestSteps"
+      :currentStep="tabToShow"
+    />
+
     <div class='container chunk'>
       <ClosableMessage @onclose='messages = []' :messages='messages'/>
       <br>
@@ -62,7 +70,7 @@
       </div>
     </div>
 
-    <div v-show='tabToShow == "Mask"'>
+    <div v-show='tabToShow == "Mask"' class='main'>
 
       <div>
         <h3 class='text-align-center'>Search for and pick a mask</h3>
@@ -100,18 +108,6 @@
     </div>
 
     <div v-show='tabToShow == "Facial Hair"' class='justify-content-center flex-dir-col align-content-center'>
-      <table>
-        <tbody>
-          <tr>
-            <th>Selected User</th>
-            <td>{{selectedUser.fullName}}</td>
-          </tr>
-          <tr>
-            <th>Selected Mask</th>
-            <td>{{selectedMask && selectedMask.uniqueInternalModelCode}}</td>
-          </tr>
-        </tbody>
-      </table>
 
       <p class='narrow-p'>Having a beard can increase seal leakage. If you don't have one, please select "0mm" for the following question. If you do have one, please use a caliper or tape measure to estimate beard length.</p>
 
@@ -136,18 +132,6 @@
     </div>
 
     <div v-show='tabToShow == "Comfort"' class='justify-content-center flex-dir-col'>
-      <table>
-        <tbody>
-          <tr>
-            <th>Selected User</th>
-            <td>{{selectedUser.fullName}}</td>
-          </tr>
-          <tr>
-            <th>Selected Mask</th>
-            <td>{{selectedMask && selectedMask.uniqueInternalModelCode}}</td>
-          </tr>
-        </tbody>
-      </table>
 
       <SurveyQuestion
         question="How comfortable is the position of the mask on the nose?"
@@ -184,18 +168,6 @@
 
 
     <div v-show='tabToShow == "User Seal Check"' class='justify-content-center flex-dir-col align-content-center'>
-      <table>
-        <tbody>
-          <tr>
-            <th>Selected User</th>
-            <td>{{selectedUser.fullName}}</td>
-          </tr>
-          <tr>
-            <th>Selected Mask</th>
-            <td>{{selectedMask && selectedMask.uniqueInternalModelCode}}</td>
-          </tr>
-        </tbody>
-      </table>
 
       <div>
         <SurveyQuestion
@@ -252,14 +224,6 @@
       <div class='grid qlft'>
         <table v-show='secondaryTabToShow == "Choose Procedure"'>
           <tbody>
-            <tr>
-              <th>Selected User</th>
-              <td>{{selectedUser.fullName}}</td>
-            </tr>
-            <tr>
-              <th>Selected Mask</th>
-              <td>{{selectedMask && selectedMask.uniqueInternalModelCode}}</td>
-            </tr>
 
             <tr>
               <th>Procedure</th>
@@ -355,14 +319,6 @@
       <div class='grid qlft'>
         <table v-show='secondaryTabToShow == "Choose Procedure"'>
           <tbody>
-            <tr>
-              <th>Selected User</th>
-              <td>{{selectedUser.fullName}}</td>
-            </tr>
-            <tr>
-              <th>Selected Mask</th>
-              <td>{{selectedMask && selectedMask.uniqueInternalModelCode}}</td>
-            </tr>
 
             <tr>
               <th>Procedure</th>
@@ -504,10 +460,12 @@ import { useMainStore } from './stores/main_store';
 import { useManagedUserStore } from './stores/managed_users_store';
 import { useMeasurementDeviceStore } from './stores/measurement_devices_store';
 import { FitTest } from './fit_testing.js'
+import AddingDataToFitTestProgress from './adding_data_to_fit_test_progress.vue'
 
 export default {
   name: 'FitTest',
   components: {
+    AddingDataToFitTestProgress,
     Button,
     CircularButton,
     ClosableMessage,
@@ -1183,6 +1141,38 @@ export default {
       }
 
       return this.maskDisplayables.slice(0, lengthToDisplay)
+    },
+    completedFitTestSteps() {
+      const completed = []
+
+      // Check Facial Hair completion
+      if (this.facialHair &&
+          this.facialHair.beard_length_mm !== null &&
+          this.facialHair.beard_cover_technique !== null) {
+        completed.push('Facial Hair')
+      }
+
+      // Check User Seal Check completion
+      if (this.userSealCheck && this.userSealCheckPassed()) {
+        completed.push('User Seal Check')
+      }
+
+      // Check Comfort completion
+      if (this.comfort && Object.values(this.comfort).every(value => value !== null)) {
+        completed.push('Comfort')
+      }
+
+      // Check QLFT completion (simplified check)
+      if (this.qualitativeProcedure && this.qualitativeProcedure !== 'Skipping') {
+        completed.push('QLFT')
+      }
+
+      // Check QNFT completion (simplified check)
+      if (this.quantitativeProcedure && this.quantitativeProcedure !== 'Skipping') {
+        completed.push('QNFT')
+      }
+
+      return completed
     },
   },
   async created() {
@@ -2130,7 +2120,6 @@ export default {
 
   .main, .grid.selectedMask {
     display: grid;
-    grid-template-columns: 33% 33% 33%;
     grid-template-rows: auto;
   }
 

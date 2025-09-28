@@ -18,96 +18,62 @@
 
     <div :class='{main: true, scrollable: managedUsers.length == 0}'>
       <div class='centered facial-measurements-table-container'>
-        <table class='facial-measurements-table phone'>
+
+        <table class='facial-measurements-table phone' >
+          <thead class='facial-measurements-header'>
+            <tr>
+              <th v-if='currentUser && currentUser.admin'>Manager Email</th>
+              <th></th>
+              <th>Demog</th>
+              <th>Face</th>
+              <th># masks tested</th>
+              <th>Rec</th>
+              <th>Add FT</th>
+            </tr>
+          </thead>
           <tbody>
             <tr v-for='r in displayables' text='Edit'>
-              <td class='first-layer-td'>
-                <table>
-                  <thead>
-                    <tr>
-                      <td colspan='2' @click="toggleExpansion(r.managedId)" >
-                        <div class='flex-direction-row align-items-center maxed-width'>
-                          <ExpandableButton
-                            :hoverable='false'
-                            :expanded="expandedUsers[r.managedId] || false"
-                          />
-                          <div>
-                            {{r.firstName}} {{r.lastName}}
-                          </div>
-
-                          <ColoredCell
-                            :colorScheme="evenlySpacedColorScheme"
-                            :maxVal="1"
-                            :value="getColoredCellValue(r)"
-                            :text="getColoredCellText(r)"
-                            class="colored-cell highlighted-colored-cell"
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  </thead>
-                  <tbody v-if='expandedUsers[r.managedId]'>
-                    <tr @click="visit(r.managedId, 'Demographics')">
-
-                      <td>Demographics</td>
-                      <td class='colored-cell'>
-                        <ColoredCell
-                            :colorScheme="evenlySpacedColorScheme"
-                            :maxVal=1
-                            :value='1 - r.demogPercentComplete / 100'
-                            :text='percentage(r.demogPercentComplete)'
-                            class='colored-cell'
-                            />
-                      </td>
-                    </tr>
-                    <tr @click="visit(r.managedId, 'Facial Measurements')" >
-                      <td>Facial measurements</td>
-                      <td class='colored-cell' >
-                        <ColoredCell
-                            :colorScheme="evenlySpacedColorScheme"
-                            :maxVal=1
-                            :value='1- r.fmPercentComplete / 100'
-                            :text='percentage(r.fmPercentComplete)'
-                            class='colored-cell'
-                            />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style='color: black;'>Num unique masks tested</td>
-                      <td class='colored-cell' >
-                        <router-link :to="{name: 'FitTests', query: {'managedId': r.managedId }}">
-                          <ColoredCell
-                              :colorScheme="genColorSchemeBounded(0, 1)"
-                              :maxVal=1
-                              :value='1 - r.numUniqueMasksTested / 40 < 0 ? 0 : 1 - r.numUniqueMasksTested / 40 '
-                              :text='r.numUniqueMasksTested'
-                              class='colored-cell'
-                              />
-                        </router-link>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td colspan='2' class='colored-cell' @click='createFitTestForUser(r)'>
-                        <Button :style='`font-size: 1em; background-color: ${backgroundColorForRecommender(r)}`'>
-                          Add Fit Testing Data
-                        </Button>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td colspan='2' class='colored-cell' @click='maybeRecommend(r)'>
-                        <Button :style='`font-size: 1em; background-color: ${backgroundColorForRecommender(r)}`'>
-                          Recommend Masks
-                        </Button>
-                      </td>
-                    </tr>
-                  </tbody>
-
-                </table>
+              <td v-if='currentUser && currentUser.admin'>{{r['managerEmail']}}</td>
+              <td class='name' @click="visit(r.managedId, 'Name')">
+                {{r.firstName}} {{r.lastName}}
               </td>
-
-
+              <td @click="visit(r.managedId, 'Demographics')" class='colored-cell' >
+                <ColoredCell
+                  :colorScheme="evenlySpacedColorScheme"
+                  :maxVal=1
+                  :value='1 - r.demogPercentComplete / 100'
+                  :text='percentage(r.demogPercentComplete)'
+                  class='colored-cell'
+                />
+              </td>
+              <td @click="visit(r.managedId, 'Facial Measurements')" class='colored-cell' >
+                <ColoredCell
+                  :colorScheme="evenlySpacedColorScheme"
+                  :maxVal=1
+                  :value='1- r.fmPercentComplete / 100'
+                  :text='percentage(r.fmPercentComplete)'
+                  class='colored-cell'
+                />
+              </td>
+              <td class='colored-cell' @click='v'>
+                <router-link :to="{name: 'FitTests', query: {'managedId': r.managedId }}">
+                  <ColoredCell
+                      :colorScheme="genColorSchemeBounded(0, 1)"
+                      :maxVal=1
+                      :value='1 - r.numUniqueMasksTested / 40 < 0 ? 0 : 1 - r.numUniqueMasksTested / 40 '
+                      :text='r.numUniqueMasksTested'
+                      class='colored-cell'
+                      />
+                </router-link>
+              </td>
+              <td class='colored-cell' @click='maybeRecommend(r)'>
+                  <Button :style='`font-size: 1em; background-color: ${backgroundColorForRecommender(r)}`'>
+                    Rec
+                  </Button>
+              </td>
+              <td class='centered-text'>
+                <CircularButton text="+" @click="createFitTestForUser(r)"/>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -117,10 +83,11 @@
             <tr>
               <th v-if='currentUser && currentUser.admin'>Manager Email</th>
               <th>Name</th>
-              <th>Demographics</th>
-              <th>Face Measurements</th>
-              <th>Masks that have data</th>
+              <th>Demographics Completion</th>
+              <th>Face Measurements Completion</th>
+              <th>Unique masks tested</th>
               <th>Recommend</th>
+              <th>Add Fit Test</th>
             </tr>
           </thead>
           <tbody>
@@ -150,19 +117,21 @@
               <td class='colored-cell' @click='v'>
                 <router-link :to="{name: 'FitTests', query: {'managedId': r.managedId }}">
                   <ColoredCell
-                    :colorScheme="evenlySpacedColorScheme"
-                    :maxVal=1
-                    :value='1 - (r.fitTestingPercentComplete || 0) / 100'
-                    :text='percentage(r.fitTestingPercentComplete || 0)'
-                    class='colored-cell'
-
-                  />
+                      :colorScheme="genColorSchemeBounded(0, 1)"
+                      :maxVal=1
+                      :value='1 - r.numUniqueMasksTested / 40 < 0 ? 0 : 1 - r.numUniqueMasksTested / 40 '
+                      :text='r.numUniqueMasksTested'
+                      class='colored-cell'
+                      />
                 </router-link>
               </td>
               <td class='colored-cell' @click='maybeRecommend(r)'>
                   <Button :style='`font-size: 1em; background-color: ${backgroundColorForRecommender(r)}`'>
                     Recommend
                   </Button>
+              </td>
+              <td class='centered-text'>
+                <CircularButton text="+" @click="newUser"/>
               </td>
             </tr>
           </tbody>
@@ -507,6 +476,22 @@ export default {
     width: 100%;
   }
 
+  .phone {
+    display: none;
+  }
+
+  td.name {
+    padding: 1em;
+  }
+
+  .colored-cell {
+    padding: 0.5em;
+  }
+
+  .centered-text {
+    text-align: center;
+  }
+
   @media(max-width: 700px) {
     img {
       width: 100vw;
@@ -536,7 +521,6 @@ export default {
     }
 
     .phone tr {
-      background-color: #eee;
       border-bottom: 1px solid #aaa;
     }
 
@@ -544,11 +528,19 @@ export default {
     .non-phone {
       display: none;
     }
+
+    .phone {
+      display: block;
+    }
+
+    /* Rotated headers for mobile */
+
+    .phone.facial-measurements-table thead tr {
+      height: 80px; /* Match the th height */
+    }
+    .phone th, .phone td {
+      width: 1em;
+    }
   }
 
-  .highlighted-colored-cell {
-    margin-left: auto;
-    margin-right: 0.5em;
-    padding: 1em;
-  }
 </style>
