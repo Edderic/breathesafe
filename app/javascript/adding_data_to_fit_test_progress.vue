@@ -168,10 +168,11 @@ export default {
 }
 
 .desktop-sidebar {
-  top: 20px;
-  right: 20px;
+  position: fixed;
+  top: 3em;
+  left: 0;
+  height: 100vh;
   width: 300px;
-  max-height: calc(100vh - 40px);
   overflow-y: auto;
 }
 
