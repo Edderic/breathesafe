@@ -65,9 +65,9 @@ export default {
         { key: 'Mask', name: 'Mask Selection' },
         { key: 'Facial Hair', name: 'Facial Hair Check' },
         { key: 'User Seal Check', name: 'User Seal Check' },
-        { key: 'Comfort', name: 'Comfort Assessment' },
         { key: 'QLFT', name: 'Qualitative Fit Test' },
-        { key: 'QNFT', name: 'Quantitative Fit Test' }
+        { key: 'QNFT', name: 'Quantitative Fit Test' },
+        { key: 'Comfort', name: 'Comfort Assessment' },
       ]
     }
   },

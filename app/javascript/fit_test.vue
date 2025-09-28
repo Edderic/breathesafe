@@ -1,6 +1,6 @@
 <template>
   <div class='align-items-center flex-dir-col top-container'>
-    <div class='flex align-items-center row'>
+    <div class='flex align-items-center row phone'>
       <h2 class='tagline'>{{pageTitle}}</h2>
     </div>
 
@@ -31,6 +31,7 @@
 
       <div v-show='tabToShow == "User"' class='right-pane'>
         <div>
+          <h2 class='text-align-center'>User selection</h2>
           <h3 class='text-align-center'>Search for user</h3>
 
           <div class='row justify-content-center'>
@@ -76,6 +77,7 @@
       <div v-show='tabToShow == "Mask"' class='main right-pane'>
 
         <div>
+          <h2 class='text-align-center'>Mask Selection</h2>
           <h3 class='text-align-center'>Search for and pick a mask</h3>
 
           <div class='row justify-content-center'>
@@ -120,6 +122,7 @@
       </div>
 
       <div v-show='tabToShow == "Facial Hair"' class='justify-content-center flex-dir-col align-content-center right-pane'>
+        <h2 class='text-align-center'>Facial Hair Check</h2>
 
         <p class='narrow-p'>Having a beard can increase seal leakage. If you don't have one, please select "0mm" for the following question. If you do have one, please use a caliper or tape measure to estimate beard length.</p>
 
@@ -152,52 +155,10 @@
 
       </div>
 
-      <div v-show='tabToShow == "Comfort"' class='justify-content-center flex-dir-col right-pane'>
-
-        <SurveyQuestion
-          question="How comfortable is the position of the mask on the nose?"
-          :answer_options="['Uncomfortable', 'Unsure', 'Comfortable']"
-          @update="selectComfortNose"
-          :selected="comfort['How comfortable is the position of the mask on the nose?']"
-          :disabled="!createOrEdit"
-        />
-
-        <SurveyQuestion
-          question="Is there adequate room for eye protection?"
-          :answer_options="['Inadequate', 'Adequate', 'Not applicable']"
-          @update="selectComfortEyeProtection"
-          :selected="comfort['Is there adequate room for eye protection?']"
-          :disabled="!createOrEdit"
-        />
-
-        <SurveyQuestion
-          question="Is there enough room to talk?"
-          :answer_options="['Not enough', 'Unsure', 'Enough']"
-          @update="selectComfortEnoughRoomToTalk"
-          :selected="comfort['Is there enough room to talk?']"
-          :disabled="!createOrEdit"
-        />
-
-        <SurveyQuestion
-          question="How comfortable is the position of the mask on face and cheeks?"
-          :answer_options="['Uncomfortable', 'Unsure', 'Comfortable']"
-          @update="selectComfortFaceAndCheeks"
-          :selected="comfort['How comfortable is the position of the mask on face and cheeks?']"
-          :disabled="!createOrEdit"
-        />
-
-        <br>
-        <div class='row buttons'>
-          <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
-          <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
-          <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
-          <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
-        </div>
-
-      </div>
 
 
       <div v-show='tabToShow == "User Seal Check"' class='justify-content-center flex-dir-col align-content-center right-pane'>
+        <h2 class='text-align-center'>User Seal Check</h2>
         <div>
           <SurveyQuestion
               question="What do you think about the sizing of this mask relative to your face?"
@@ -483,6 +444,51 @@
       </div>
 
     </div>
+
+      <div v-show='tabToShow == "Comfort"' class='justify-content-center flex-dir-col right-pane'>
+        <h2 class='text-align-center'>Comfort Assessment</h2>
+
+        <SurveyQuestion
+          question="How comfortable is the position of the mask on the nose?"
+          :answer_options="['Uncomfortable', 'Unsure', 'Comfortable']"
+          @update="selectComfortNose"
+          :selected="comfort['How comfortable is the position of the mask on the nose?']"
+          :disabled="!createOrEdit"
+        />
+
+        <SurveyQuestion
+          question="Is there adequate room for eye protection?"
+          :answer_options="['Inadequate', 'Adequate', 'Not applicable']"
+          @update="selectComfortEyeProtection"
+          :selected="comfort['Is there adequate room for eye protection?']"
+          :disabled="!createOrEdit"
+        />
+
+        <SurveyQuestion
+          question="Is there enough room to talk?"
+          :answer_options="['Not enough', 'Unsure', 'Enough']"
+          @update="selectComfortEnoughRoomToTalk"
+          :selected="comfort['Is there enough room to talk?']"
+          :disabled="!createOrEdit"
+        />
+
+        <SurveyQuestion
+          question="How comfortable is the position of the mask on face and cheeks?"
+          :answer_options="['Uncomfortable', 'Unsure', 'Comfortable']"
+          @update="selectComfortFaceAndCheeks"
+          :selected="comfort['How comfortable is the position of the mask on face and cheeks?']"
+          :disabled="!createOrEdit"
+        />
+
+        <br>
+        <div class='row buttons'>
+          <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+          <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
+          <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
+          <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
+        </div>
+
+      </div>
   </div>
 </div>
 </template>
@@ -2285,6 +2291,9 @@ export default {
     grid-template-rows: auto;
   }
 
+  .phone {
+    display: none;
+  }
 
   @media(max-width: 700px) {
     img {
@@ -2324,6 +2333,10 @@ export default {
 
     .columns {
       grid-template-columns: 100%;
+    }
+
+    .phone {
+      display: flex;
     }
 
   }
