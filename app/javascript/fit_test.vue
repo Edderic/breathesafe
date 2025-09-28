@@ -28,6 +28,7 @@
       :selectedMask="selectedMask"
       :completedSteps="completedFitTestSteps"
       :currentStep="tabToShow"
+      @navigate-to-step="navigateToStep"
     />
 
     <div class='container chunk'>
@@ -1153,8 +1154,19 @@ export default {
       }
 
       // Check User Seal Check completion
-      if (this.userSealCheck && this.userSealCheckPassed()) {
-        completed.push('User Seal Check')
+      if (this.userSealCheck) {
+        const sizingComplete = this.userSealCheck.sizing &&
+          Object.values(this.userSealCheck.sizing).every(value => value !== null)
+
+        const positiveComplete = this.userSealCheck.positive &&
+          Object.values(this.userSealCheck.positive).every(value => value !== null)
+
+        const negativeComplete = this.userSealCheck.negative &&
+          Object.values(this.userSealCheck.negative).every(value => value !== null)
+
+        if (sizingComplete && positiveComplete && negativeComplete) {
+          completed.push('User Seal Check')
+        }
       }
 
       // Check Comfort completion
@@ -1961,6 +1973,21 @@ export default {
 
       query = Object.assign(query, {
         tabToShow: opt.name
+      })
+
+      this.$router.push({
+        name: this.$route.name,
+        query: query
+      })
+    },
+    navigateToStep(stepKey) {
+      // Navigate to the specified step
+      this.tabToShow = stepKey
+
+      // Update URL query parameter
+      let query = JSON.parse(JSON.stringify(this.$route.query))
+      query = Object.assign(query, {
+        tabToShow: stepKey
       })
 
       this.$router.push({

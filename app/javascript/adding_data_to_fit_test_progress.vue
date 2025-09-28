@@ -1,18 +1,5 @@
 <template>
   <div class="fit-test-progress-container" :class="{ 'mobile-sticky': isMobile, 'desktop-sidebar': !isMobile }">
-    <table class="fit-test-progress-table">
-      <tbody>
-        <tr>
-          <th>Selected User</th>
-          <td>{{ selectedUser ? selectedUser.fullName : 'Not Selected' }}</td>
-        </tr>
-        <tr>
-          <th>Selected Mask</th>
-          <td>{{ selectedMask ? selectedMask.uniqueInternalModelCode : 'Not Selected' }}</td>
-        </tr>
-      </tbody>
-    </table>
-
     <div class="progress-steps">
       <h4>Progress</h4>
       <div class="step-list">
@@ -25,6 +12,7 @@
             'current': currentStep === step.key,
             'not-started': !isStepCompleted(step.key) && currentStep !== step.key
           }"
+          @click="navigateToStep(step.key)"
         >
           <span class="step-indicator">
             <span v-if="isStepCompleted(step.key)" class="checkmark">✓</span>
@@ -32,6 +20,13 @@
             <span v-else class="not-started-indicator">○</span>
           </span>
           <span class="step-name">{{ step.name }}</span>
+          <span
+            class="step-value"
+            :class="{ 'not-selected': getStepValue(step.key) === 'Not Selected' }"
+            :title="getStepValue(step.key)"
+          >
+            {{ getStepDisplayValue(step.key) }}
+          </span>
           <span class="step-status">
             {{ getStepStatus(step.key) }}
           </span>
@@ -122,6 +117,35 @@ export default {
       } else {
         return 'Not Started'
       }
+    },
+    getStepValue(stepKey) {
+      switch (stepKey) {
+        case 'User':
+          return this.selectedUser ? this.selectedUser.fullName : 'Not Selected'
+        case 'Mask':
+          return this.selectedMask ? this.selectedMask.uniqueInternalModelCode : 'Not Selected'
+        default:
+          return this.getStepStatus(stepKey)
+      }
+    },
+    getStepDisplayValue(stepKey) {
+      const value = this.getStepValue(stepKey)
+
+      // For User and Mask, show actual values or "Not Selected"
+      if (stepKey === 'User' || stepKey === 'Mask') {
+        if (value === 'Not Selected') {
+          return value
+        }
+        // Truncate to 30 characters
+        return value.length > 30 ? value.substring(0, 30) + '...' : value
+      }
+
+      // For other steps, show status
+      return value
+    },
+    navigateToStep(stepKey) {
+      // Emit event to parent component to change the current step
+      this.$emit('navigate-to-step', stepKey)
     }
   }
 }
@@ -152,24 +176,7 @@ export default {
   overflow-y: auto;
 }
 
-.fit-test-progress-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-}
-
-.fit-test-progress-table th,
-.fit-test-progress-table td {
-  padding: 0.5rem;
-  text-align: left;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.fit-test-progress-table th {
-  background-color: #e9ecef;
-  font-weight: bold;
-  width: 40%;
-}
+/* Removed table styles since we removed the table */
 
 .progress-steps h4 {
   margin: 0 0 0.5rem 0;
@@ -188,6 +195,13 @@ export default {
   align-items: center;
   padding: 0.25rem 0;
   font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.step-item:hover {
+  background-color: rgba(0, 123, 255, 0.1);
 }
 
 .step-indicator {
@@ -213,6 +227,17 @@ export default {
 .step-name {
   flex: 1;
   font-weight: 500;
+  min-width: 120px;
+}
+
+.step-value {
+  flex: 1;
+  font-size: 0.85rem;
+  margin-right: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
 }
 
 .step-status {
@@ -236,6 +261,18 @@ export default {
   color: #6c757d;
 }
 
+/* Special styling for "Not Selected" values */
+.step-value:contains("Not Selected") {
+  color: #dc3545;
+  font-weight: 500;
+}
+
+/* Alternative approach using CSS classes */
+.step-item .step-value.not-selected {
+  color: #dc3545;
+  font-weight: 500;
+}
+
 /* Mobile-specific styles */
 @media (max-width: 700px) {
   .desktop-sidebar {
@@ -251,10 +288,24 @@ export default {
 
   .step-item {
     font-size: 0.85rem;
+    flex-wrap: wrap;
   }
 
   .step-list {
     gap: 0.125rem;
+  }
+
+  .step-name {
+    min-width: 100px;
+  }
+
+  .step-value {
+    max-width: 120px;
+    font-size: 0.8rem;
+  }
+
+  .step-status {
+    font-size: 0.75rem;
   }
 }
 </style>
