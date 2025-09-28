@@ -24,6 +24,7 @@
       <AddingDataToFitTestProgress
         :selectedUser="selectedUser"
         :selectedMask="selectedMask"
+        :facialHair="facialHair"
         :completedSteps="completedFitTestSteps"
         :currentStep="tabToShow"
         @navigate-to-step="navigateToStep"

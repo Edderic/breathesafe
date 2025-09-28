@@ -51,6 +51,10 @@ export default {
       type: Object,
       default: null
     },
+    facialHair: {
+      type: Object,
+      default: null
+    },
     completedSteps: {
       type: Array,
       default: () => []
@@ -113,10 +117,10 @@ export default {
       return this.computedCompletedSteps.includes(stepKey)
     },
     getStepStatus(stepKey) {
-      // For User and Mask, don't show "Complete" since we show the actual values
-      if (stepKey === 'User' || stepKey === 'Mask') {
+      // For User, Mask, and Facial Hair, don't show "Complete" since we show the actual values
+      if (stepKey === 'User' || stepKey === 'Mask' || stepKey === 'Facial Hair') {
         if (this.isStepCompleted(stepKey)) {
-          return '' // Empty string for User and Mask when completed
+          return '' // Empty string for User, Mask, and Facial Hair when completed
         } else if (this.currentStep === stepKey) {
           return 'In Progress'
         } else {
@@ -139,6 +143,11 @@ export default {
           return this.selectedUser ? this.selectedUser.fullName : 'Not Selected'
         case 'Mask':
           return this.selectedMask ? this.selectedMask.uniqueInternalModelCode : 'Not Selected'
+        case 'Facial Hair':
+          if (this.facialHair && this.facialHair.beard_length_mm && this.facialHair.beard_cover_technique) {
+            return `${this.facialHair.beard_length_mm}, ${this.facialHair.beard_cover_technique}`
+          }
+          return 'Not Selected'
         default:
           return this.getStepStatus(stepKey)
       }
@@ -146,8 +155,8 @@ export default {
     getStepDisplayValue(stepKey) {
       const value = this.getStepValue(stepKey)
 
-      // For User and Mask, show actual values or "Not Selected"
-      if (stepKey === 'User' || stepKey === 'Mask') {
+      // For User, Mask, and Facial Hair, show actual values or "Not Selected"
+      if (stepKey === 'User' || stepKey === 'Mask' || stepKey === 'Facial Hair') {
         if (value === 'Not Selected') {
           return value
         }
