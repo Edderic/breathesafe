@@ -1021,12 +1021,17 @@
       },
       signIn() {
         if (!this.currentUser) {
-          let query = JSON.parse(JSON.stringify(this.$route.query))
+          if (this.$route && this.$route.name === 'SignIn') {
+            return;
+          }
 
-          query['attempt-name'] = this.$route.name
+          const currentRoute = this.$route || { name: undefined, params: {}, query: {} };
+          const query = JSON.parse(JSON.stringify(currentRoute.query || {}));
 
-          for (let k in this.$route.params) {
-            query[`params-${k}`] = this.$route.params[k]
+          query['attempt-name'] = currentRoute.name;
+
+          for (const key in (currentRoute.params || {})) {
+            query[`params-${key}`] = currentRoute.params[key]
           }
 
           this.$router.push({

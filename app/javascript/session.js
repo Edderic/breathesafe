@@ -1,14 +1,22 @@
 export async function signIn() {
   if (!this.currentUser) {
-    let query = JSON.parse(JSON.stringify(this.$route.query))
-
-    query['attempt-name'] = this.$route.name
-
-    for (let k in this.$route.params) {
-      query[`params-${k}`] = this.$route.params[k]
+    // Prevent re-entrant calls from components that remain alive briefly during route change
+    if (this.$route && this.$route.name === 'SignIn') {
+      return;
     }
 
-    await this.$router.push({
+    const currentRoute = this.$route || { name: undefined, params: {}, query: {} };
+    const query = JSON.parse(JSON.stringify(currentRoute.query || {}));
+
+    query['attempt-name'] = currentRoute.name;
+
+    for (const key in (currentRoute.params || {})) {
+      query[`params-${key}`] = currentRoute.params[key]
+    }
+
+    // Defer navigation until after the current component mount completes
+    await this.$nextTick();
+    await this.$router.replace({
       name: 'SignIn',
       query: query
     })

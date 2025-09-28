@@ -64,6 +64,12 @@ import { useEventStore } from '../stores/event_store.js';
 import { useMainStore } from '../stores/main_store.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+  const mountEl = document.getElementById('app');
+  if (!mountEl) {
+    console.error('Breathesafe: #app mount element not found; aborting Vue mount.');
+    return;
+  }
+
   const app = createApp(App);
   const pinia = createPinia();
   // 1. Define route components.
@@ -112,14 +118,11 @@ document.addEventListener('DOMContentLoaded', () => {
     history: createWebHashHistory(),
     routes, // short for `routes: routes`
     scrollBehavior(to, from, savedPosition) {
-      if (to.hash) {
-
-        let element_to_scroll_to = document.getElementById(to.hash.slice(1));
-        element_to_scroll_to.scrollIntoView(
-          {
-            behavior: 'smooth',
-          }
-        );
+      if (to.hash && to.hash.startsWith('#') && to.hash.length > 1) {
+        const elementToScrollTo = document.getElementById(to.hash.slice(1));
+        if (elementToScrollTo && typeof elementToScrollTo.scrollIntoView === 'function') {
+          elementToScrollTo.scrollIntoView({ behavior: 'smooth' });
+        }
       }
     }
   })
@@ -146,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
       },
   // }).use(pinia).use(Vue3Geolocation).mount('#app')
   }).use(VueMathjax)
-    .use(pinia).use(Datepicker).use(Vue3Progress, options).use(Vue3Geolocation).use(router).mount('#app')
+    .use(pinia).use(Datepicker).use(Vue3Progress, options).use(Vue3Geolocation).use(router).mount(mountEl)
 
 
   const mainStore = useMainStore();

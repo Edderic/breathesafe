@@ -74,21 +74,14 @@ export default {
   },
   created() {
    if (this.currentUser) {
-      let attemptName = this.$route.query['attempt-name'];
-      if (attemptName) {
-        this.$router.push({
-          'name': attemptName
-        })
-      }
+      this.redirectToAttemptTarget();
     }
     this.$watch(
       () => this.$route.query,
       (toQuery, previousQuery) => {
         let attemptName = toQuery['attempt-name']
         if (attemptName && !!this.currentUser) {
-          this.$router.push({
-            'name': attemptName
-          })
+          this.redirectToAttemptTarget();
         }
       }
     )
@@ -105,6 +98,35 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['setFocusTab', 'getCurrentUser']),
     ...mapActions(useProfileStore, ['loadProfile']),
+    buildRouteFromAttemptQuery() {
+      const attemptName = this.$route.query['attempt-name'];
+      if (!attemptName || attemptName === 'SignIn') {
+        return null;
+      }
+
+      const query = JSON.parse(JSON.stringify(this.$route.query));
+      delete query['attempt-name'];
+
+      const params = {};
+      for (const key in this.$route.query) {
+        if (key.startsWith('params-')) {
+          const paramKey = key.substring('params-'.length);
+          params[paramKey] = this.$route.query[key];
+        }
+      }
+
+      Object.keys(query).forEach((key) => {
+        if (key.startsWith('params-')) delete query[key];
+      });
+
+      return { name: attemptName, params, query };
+    },
+    redirectToAttemptTarget() {
+      const target = this.buildRouteFromAttemptQuery();
+      if (target) {
+        this.$router.replace(target);
+      }
+    },
     setEmail(event) {
       this.email = event.target.value;
     },
@@ -163,31 +185,9 @@ export default {
         // whatever you want
         this.loadProfile()
 
-        let attemptName = this.$route.query['attempt-name'];
-
-        if (attemptName && attemptName != 'SignIn') {
-          let query = JSON.parse(JSON.stringify(this.$route.query))
-          delete query['attempt-name']
-
-          let params = {}
-          let paramKey = null;
-
-          for(let k in query) {
-            if (k.includes('params-')) {
-              paramKey = k.split('params-')[1]
-              params[paramKey] = query[k]
-            }
-          }
-
-          let obj = {
-            name: attemptName,
-            params: params,
-            query: query
-          }
-
-          // TODO: delete the params- query strings
+        const obj = this.buildRouteFromAttemptQuery();
+        if (obj) {
           this.$router.push(obj);
-
         }
         else if (this.$router.options.history.state.back == '/' || this.$router.options.history.state.back == '/sign_out') {
           this.$router.push(
