@@ -7,14 +7,6 @@
 
     <div class='menu row'>
       <TabSet
-        :options='tabToShowOptions'
-        @update='setRouteTo'
-        :tabToShow='tabToShow'
-      />
-    </div>
-
-    <div class='menu row'>
-      <TabSet
         v-if='tabToShow == "QLFT" || tabToShow == "QNFT"'
         :options='secondaryTabToShowOptions'
         @update='setSecondaryTab'

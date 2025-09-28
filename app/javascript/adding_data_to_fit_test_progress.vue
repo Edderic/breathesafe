@@ -168,7 +168,6 @@ export default {
 }
 
 .desktop-sidebar {
-  position: fixed;
   top: 20px;
   right: 20px;
   width: 300px;
