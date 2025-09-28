@@ -22,412 +22,413 @@
       />
     </div>
 
-    <!-- Progress Component -->
-    <AddingDataToFitTestProgress
-      :selectedUser="selectedUser"
-      :selectedMask="selectedMask"
-      :completedSteps="completedFitTestSteps"
-      :currentStep="tabToShow"
-      @navigate-to-step="navigateToStep"
-    />
-
     <div class='container chunk'>
       <ClosableMessage @onclose='messages = []' :messages='messages'/>
       <br>
     </div>
 
-    <div v-show='tabToShow == "User"'>
-      <div>
-        <h3 class='text-align-center'>Search for user</h3>
+    <!-- Progress Component -->
+    <div class='columns'>
+      <AddingDataToFitTestProgress
+        :selectedUser="selectedUser"
+        :selectedMask="selectedMask"
+        :completedSteps="completedFitTestSteps"
+        :currentStep="tabToShow"
+        @navigate-to-step="navigateToStep"
+      />
 
-        <div class='row justify-content-center'>
-          <input type="text" @change='updateSearch($event, "user")' :disabled='!createOrEdit'>
-          <SearchIcon height='2em' width='2em'/>
-        </div>
+      <div v-show='tabToShow == "User"'>
+        <div>
+          <h3 class='text-align-center'>Search for user</h3>
 
-        <h3 v-show="userDisplayables.length == 0" class='text-align-center'>Not able to find the user?
-          <router-link :to="{name: 'RespiratorUsers'}"> Click here to add user information. </router-link>
-        </h3>
+          <div class='row justify-content-center'>
+            <input type="text" @change='updateSearch($event, "user")' :disabled='!createOrEdit'>
+            <SearchIcon height='2em' width='2em'/>
+          </div>
+
+          <h3 v-show="userDisplayables.length == 0" class='text-align-center'>Not able to find the user?
+            <router-link :to="{name: 'RespiratorUsers'}"> Click here to add user information. </router-link>
+          </h3>
 
 
-        <div :class='{main: true}'>
-          <div class='text-row pointable flex flex-dir-col align-items-center justify-content-center' v-for='u in userDisplayables' @click='selectUser(u.managedId)'>
-            <div class='description'>
-              <span>
-                {{u.firstName + ' ' + u.lastName}}
-              </span>
+          <div :class='{main: true}'>
+            <div class='text-row pointable flex flex-dir-col align-items-center justify-content-center' v-for='u in userDisplayables' @click='selectUser(u.managedId)'>
+              <div class='description'>
+                <span>
+                  {{u.firstName + ' ' + u.lastName}}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <table>
-          <tbody>
-            <tr>
-              <th>Selected User</th>
-              <td>{{selectedUser.fullName}}</td>
-            </tr>
-          </tbody>
-        </table>
+          <table>
+            <tbody>
+              <tr>
+                <th>Selected User</th>
+                <td>{{selectedUser.fullName}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
 
-    <div v-show='tabToShow == "Mask"' class='main'>
+      <div v-show='tabToShow == "Mask"' class='main'>
 
-      <div>
-        <h3 class='text-align-center'>Search for and pick a mask</h3>
+        <div>
+          <h3 class='text-align-center'>Search for and pick a mask</h3>
 
-        <div class='row justify-content-center'>
-          <input type="text" :value='selectedMask && selectedMask.uniqueInternalModelCode' @change='updateSearch($event, "mask")' :disabled='!createOrEdit'>
-          <SearchIcon height='2em' width='2em'/>
-        </div>
+          <div class='row justify-content-center'>
+            <input type="text" :value='selectedMask && selectedMask.uniqueInternalModelCode' @change='updateSearch($event, "mask")' :disabled='!createOrEdit'>
+            <SearchIcon height='2em' width='2em'/>
+          </div>
 
-        <h3 v-show="selectMaskDisplayables.length == 0" class='text-align-center'>Not able to find the mask?
-          <router-link :to="{name: 'NewMask'}"> Click here to add information about the mask. </router-link>
-        </h3>
+          <h3 v-show="selectMaskDisplayables.length == 0" class='text-align-center'>Not able to find the mask?
+            <router-link :to="{name: 'NewMask'}"> Click here to add information about the mask. </router-link>
+          </h3>
 
 
-        <div :class='{main: true, grid: true, selectedMask: true, oneCol: maskDisplayables.length == 1}'>
-          <div class='card pointable flex flex-dir-col align-items-center justify-content-center' v-for='m in selectMaskDisplayables' @click='selectMask(m.id)'>
-            <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
-            <div class='description'>
-              <span>
-                {{m.uniqueInternalModelCode}}
-              </span>
+          <div :class='{main: true, grid: true, selectedMask: true, oneCol: maskDisplayables.length == 1}'>
+            <div class='card pointable flex flex-dir-col align-items-center justify-content-center' v-for='m in selectMaskDisplayables' @click='selectMask(m.id)'>
+              <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
+              <div class='description'>
+                <span>
+                  {{m.uniqueInternalModelCode}}
+                </span>
+              </div>
             </div>
           </div>
+
+          <table>
+            <tbody>
+              <tr>
+                <th>Selected Mask</th>
+                <td>{{selectedMask && selectedMask.uniqueInternalModelCode}}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div v-show='tabToShow == "Facial Hair"' class='justify-content-center flex-dir-col align-content-center'>
+
+        <p class='narrow-p'>Having a beard can increase seal leakage. If you don't have one, please select "0mm" for the following question. If you do have one, please use a caliper or tape measure to estimate beard length.</p>
+
+        <SurveyQuestion
+          question="How long is your beard?"
+          :answer_options="beardLengthOptions"
+          @update="selectBeardLength"
+          :selected="facialHair['beard_length_mm']"
+          :disabled="!createOrEdit"
+        />
+
+        <p class='narrow-p'>Beard Cover Technique: To improve the seal for those with beards without shaving or trimming the beard itself, one could cover the beard with an elastic band, as shown <a href="https://www.youtube.com/watch?v=pBMSydda5WY">in this video</a>.
+        </p>
+
+        <SurveyQuestion
+          question="If you do have a beard, are you using the beard cover technique?"
+          :answer_options="['Yes', 'No', 'Not applicable']"
+          @update="selectBeardCoverTechnique"
+          :selected="facialHair['beard_cover_technique']"
+          :disabled="!createOrEdit"
+        />
+      </div>
+
+      <div v-show='tabToShow == "Comfort"' class='justify-content-center flex-dir-col'>
+
+        <SurveyQuestion
+          question="How comfortable is the position of the mask on the nose?"
+          :answer_options="['Uncomfortable', 'Unsure', 'Comfortable']"
+          @update="selectComfortNose"
+          :selected="comfort['How comfortable is the position of the mask on the nose?']"
+          :disabled="!createOrEdit"
+        />
+
+        <SurveyQuestion
+          question="Is there adequate room for eye protection?"
+          :answer_options="['Inadequate', 'Adequate', 'Not applicable']"
+          @update="selectComfortEyeProtection"
+          :selected="comfort['Is there adequate room for eye protection?']"
+          :disabled="!createOrEdit"
+        />
+
+        <SurveyQuestion
+          question="Is there enough room to talk?"
+          :answer_options="['Not enough', 'Unsure', 'Enough']"
+          @update="selectComfortEnoughRoomToTalk"
+          :selected="comfort['Is there enough room to talk?']"
+          :disabled="!createOrEdit"
+        />
+
+        <SurveyQuestion
+          question="How comfortable is the position of the mask on face and cheeks?"
+          :answer_options="['Uncomfortable', 'Unsure', 'Comfortable']"
+          @update="selectComfortFaceAndCheeks"
+          :selected="comfort['How comfortable is the position of the mask on face and cheeks?']"
+          :disabled="!createOrEdit"
+        />
+      </div>
+
+
+      <div v-show='tabToShow == "User Seal Check"' class='justify-content-center flex-dir-col align-content-center'>
+
+        <div>
+          <SurveyQuestion
+              question="What do you think about the sizing of this mask relative to your face?"
+              :answer_options="['Too big', 'Somewhere in-between too small and too big', 'Too small']"
+              @update="selectSizingUserSealCheck"
+              :selected="userSealCheck['sizing']['What do you think about the sizing of this mask relative to your face?']"
+              :disabled="!createOrEdit"
+              />
         </div>
 
-        <table>
-          <tbody>
-            <tr>
-              <th>Selected Mask</th>
-              <td>{{selectedMask && selectedMask.uniqueInternalModelCode}}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+        <a class='text-align-center' href="//cdc.gov/niosh/docs/2018-130/pdfs/2018-130.pdf" target='_blank'>What are user seal checks?</a>
+        <div v-show="showPositiveUserSealCheck">
+          <h4>While performing a *positive-pressure* user seal check, </h4>
 
-    <div v-show='tabToShow == "Facial Hair"' class='justify-content-center flex-dir-col align-content-center'>
+          <SurveyQuestion
+              question="...how much air movement on your face along the seal of the mask did you feel?"
+              :answer_options="['A lot of air movement', 'Some air movement', 'No air movement']"
+              @update="selectPositivePressureAirMovement"
+              :selected="userSealCheck['positive']['...how much air movement on your face along the seal of the mask did you feel?']"
+              :disabled="!createOrEdit"
+              />
 
-      <p class='narrow-p'>Having a beard can increase seal leakage. If you don't have one, please select "0mm" for the following question. If you do have one, please use a caliper or tape measure to estimate beard length.</p>
+          <SurveyQuestion
+              question="...how much did your glasses fog up?"
+              :answer_options="['A lot', 'A little', 'Not at all', 'Not applicable']"
+              @update="selectPositivePressureGlassesFoggingUp"
+              :selected="userSealCheck['positive']['...how much did your glasses fog up?']"
+              :disabled="!createOrEdit"
+              />
 
-      <SurveyQuestion
-        question="How long is your beard?"
-        :answer_options="beardLengthOptions"
-        @update="selectBeardLength"
-        :selected="facialHair['beard_length_mm']"
-        :disabled="!createOrEdit"
-      />
-
-      <p class='narrow-p'>Beard Cover Technique: To improve the seal for those with beards without shaving or trimming the beard itself, one could cover the beard with an elastic band, as shown <a href="https://www.youtube.com/watch?v=pBMSydda5WY">in this video</a>.
-      </p>
-
-      <SurveyQuestion
-        question="If you do have a beard, are you using the beard cover technique?"
-        :answer_options="['Yes', 'No', 'Not applicable']"
-        @update="selectBeardCoverTechnique"
-        :selected="facialHair['beard_cover_technique']"
-        :disabled="!createOrEdit"
-      />
-    </div>
-
-    <div v-show='tabToShow == "Comfort"' class='justify-content-center flex-dir-col'>
-
-      <SurveyQuestion
-        question="How comfortable is the position of the mask on the nose?"
-        :answer_options="['Uncomfortable', 'Unsure', 'Comfortable']"
-        @update="selectComfortNose"
-        :selected="comfort['How comfortable is the position of the mask on the nose?']"
-        :disabled="!createOrEdit"
-      />
-
-      <SurveyQuestion
-        question="Is there adequate room for eye protection?"
-        :answer_options="['Inadequate', 'Adequate', 'Not applicable']"
-        @update="selectComfortEyeProtection"
-        :selected="comfort['Is there adequate room for eye protection?']"
-        :disabled="!createOrEdit"
-      />
-
-      <SurveyQuestion
-        question="Is there enough room to talk?"
-        :answer_options="['Not enough', 'Unsure', 'Enough']"
-        @update="selectComfortEnoughRoomToTalk"
-        :selected="comfort['Is there enough room to talk?']"
-        :disabled="!createOrEdit"
-      />
-
-      <SurveyQuestion
-        question="How comfortable is the position of the mask on face and cheeks?"
-        :answer_options="['Uncomfortable', 'Unsure', 'Comfortable']"
-        @update="selectComfortFaceAndCheeks"
-        :selected="comfort['How comfortable is the position of the mask on face and cheeks?']"
-        :disabled="!createOrEdit"
-      />
-    </div>
-
-
-    <div v-show='tabToShow == "User Seal Check"' class='justify-content-center flex-dir-col align-content-center'>
-
-      <div>
-        <SurveyQuestion
-            question="What do you think about the sizing of this mask relative to your face?"
-            :answer_options="['Too big', 'Somewhere in-between too small and too big', 'Too small']"
-            @update="selectSizingUserSealCheck"
-            :selected="userSealCheck['sizing']['What do you think about the sizing of this mask relative to your face?']"
-            :disabled="!createOrEdit"
-            />
-      </div>
-
-      <a class='text-align-center' href="//cdc.gov/niosh/docs/2018-130/pdfs/2018-130.pdf" target='_blank'>What are user seal checks?</a>
-      <div v-show="showPositiveUserSealCheck">
-        <h4>While performing a *positive-pressure* user seal check, </h4>
-
-        <SurveyQuestion
-            question="...how much air movement on your face along the seal of the mask did you feel?"
-            :answer_options="['A lot of air movement', 'Some air movement', 'No air movement']"
-            @update="selectPositivePressureAirMovement"
-            :selected="userSealCheck['positive']['...how much air movement on your face along the seal of the mask did you feel?']"
-            :disabled="!createOrEdit"
-            />
-
-        <SurveyQuestion
-            question="...how much did your glasses fog up?"
-            :answer_options="['A lot', 'A little', 'Not at all', 'Not applicable']"
-            @update="selectPositivePressureGlassesFoggingUp"
-            :selected="userSealCheck['positive']['...how much did your glasses fog up?']"
-            :disabled="!createOrEdit"
-            />
-
-        <SurveyQuestion
-            question="...how much pressure build up was there?"
-            :answer_options="['As expected', 'Less than expected', 'No pressure build up']"
-            @update="selectPositivePressureBuildUp"
-            :selected="userSealCheck['positive']['...how much pressure build up was there?']"
-            :disabled="!createOrEdit"
-            />
-      </div>
-
-      <div v-show="!showPositiveUserSealCheck">
-        <h4>While performing a *negative-pressure* user seal check, </h4>
-        <SurveyQuestion
-            question="...how much air passed between your face and the mask?"
-            :answer_options="['A lot of air', 'Some air', 'Unnoticeable']"
-            @update="selectNegativePressureAirMovement"
-            :selected="userSealCheck['negative']['...how much air passed between your face and the mask?']"
-            :disabled="!createOrEdit"
-            />
-      </div>
-    </div>
-
-    <div v-show='tabToShow == "QLFT"' class='justify-content-center flex-dir-col align-content-center'>
-      <div class='grid qlft'>
-        <table v-show='secondaryTabToShow == "Choose Procedure"'>
-          <tbody>
-
-            <tr>
-              <th>Procedure</th>
-              <td>
-                <select v-model='qualitativeProcedure' :disabled='!createOrEdit'>
-                  <option>Skipping</option>
-                  <option>Full OSHA</option>
-                </select>
-              </td>
-            </tr>
-
-            <tr v-show='qualitativeProcedure != "Skipping"'>
-              <th>Solution</th>
-              <td>
-                <select v-model='qualitativeAerosolSolution' :disabled='!createOrEdit'>
-                  <option>Saccharin</option>
-                  <option>Bitrex</option>
-                </select>
-              </td>
-            </tr>
-
-            <tr v-show='qualitativeProcedure != "Skipping"'>
-              <th>Notes</th>
-              <td>
-                <textarea id="" name="" cols="30" rows="10" v-model='qualitativeAerosolNotes' :disabled='!createOrEdit'></textarea>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class='instructions' v-show='secondaryTabToShow == "Choose Procedure" && (tabToShow == "QLFT") && qualitativeProcedure == "Full OSHA"'>
-          <h3>{{instructionTitle}}</h3>
-          <p v-for='text in instructionParagraphs'>
-            {{text}}
-          </p>
+          <SurveyQuestion
+              question="...how much pressure build up was there?"
+              :answer_options="['As expected', 'Less than expected', 'No pressure build up']"
+              @update="selectPositivePressureBuildUp"
+              :selected="userSealCheck['positive']['...how much pressure build up was there?']"
+              :disabled="!createOrEdit"
+              />
         </div>
 
-        <div class='instructions' v-show='secondaryTabToShow == "Choose Procedure" && tabToShow == "QLFT" && qualitativeProcedure == "Skipping"'>
-          <p>
-            Qualitative fit testing can be skipped if:
-            <ul>
-              <li>user seal check failed from the previous step</li>
-              <li>user seal check passed and you are going to do quantitative fit testing (QNFT)</li>
-            </ul>
-          </p>
+        <div v-show="!showPositiveUserSealCheck">
+          <h4>While performing a *negative-pressure* user seal check, </h4>
+          <SurveyQuestion
+              question="...how much air passed between your face and the mask?"
+              :answer_options="['A lot of air', 'Some air', 'Unnoticeable']"
+              @update="selectNegativePressureAirMovement"
+              :selected="userSealCheck['negative']['...how much air passed between your face and the mask?']"
+              :disabled="!createOrEdit"
+              />
         </div>
+      </div>
 
+      <div v-show='tabToShow == "QLFT"' class='justify-content-center flex-dir-col align-content-center'>
+        <div class='grid qlft'>
+          <table v-show='secondaryTabToShow == "Choose Procedure"'>
+            <tbody>
 
-        <table v-show='secondaryTabToShow == "Results"'>
-          <tbody >
-            <template v-for='(ex, index) in qualitativeExercises' >
-              <tr v-if='index < 4'>
-                <th>{{ex.name}}</th>
+              <tr>
+                <th>Procedure</th>
                 <td>
-                  <CircularButton text="?" @click="showDescription(ex.name)"/>
-                </td>
-                <td>
-                  <select v-model='ex.result' :disabled='!createOrEdit'>
-                    <option>Pass</option>
-                    <option>Fail</option>
-                    <option>Not applicable</option>
+                  <select v-model='qualitativeProcedure' :disabled='!createOrEdit'>
+                    <option>Skipping</option>
+                    <option>Full OSHA</option>
                   </select>
                 </td>
               </tr>
-            </template>
-          </tbody>
-        </table>
 
-        <table v-show='secondaryTabToShow == "Results"'>
-          <tbody class='qlft'>
-            <template v-for='(ex, index) in qualitativeExercises' >
-              <tr v-if='index >= 4'>
-                <th>{{ex.name}}</th>
+              <tr v-show='qualitativeProcedure != "Skipping"'>
+                <th>Solution</th>
                 <td>
-                  <CircularButton text="?" @click="showDescription(ex.name)"/>
-                </td>
-                <td>
-                  <select v-model='ex.result' :disabled='!createOrEdit'>
-                    <option>Pass</option>
-                    <option>Fail</option>
-                    <option>Not applicable</option>
+                  <select v-model='qualitativeAerosolSolution' :disabled='!createOrEdit'>
+                    <option>Saccharin</option>
+                    <option>Bitrex</option>
                   </select>
                 </td>
               </tr>
-            </template>
-          </tbody>
-        </table>
 
-      </div>
-    </div>
-
-    <div v-show='tabToShow == "QNFT"' class='justify-content-center flex-dir-col align-content-center'>
-      <div class='grid qlft'>
-        <table v-show='secondaryTabToShow == "Choose Procedure"'>
-          <tbody>
-
-            <tr>
-              <th>Procedure</th>
-              <td>
-                <select v-model='quantitativeProcedure' :disabled='!createOrEdit'>
-                  <option>Skipping</option>
-                  <option>OSHA Fast Filtering Face Piece Respirators</option>
-                  <option>Full OSHA</option>
-                </select>
-              </td>
-            </tr>
-
-            <tr>
-              <th>Device</th>
-              <td>
-                <select v-model='quantitativeFitTestingDeviceId' :disabled='!createOrEdit'>
-                  <option v-for='d in measurementDevices' :value='d.id'>
-                  {{deviceInfo(d)}}
-                  </option>
-                </select>
-              </td>
-            </tr>
-
-            <tr v-show='quantitativeProcedure != "Skipping"'>
-              <th>Testing mode</th>
-              <td>
-                <select v-model='quantitativeTestingMode' :disabled='!createOrEdit'>
-                  <option>N95</option>
-                  <option>N99</option>
-                </select>
-              </td>
-            </tr>
-
-            <tr v-show='quantitativeProcedure != "Skipping"'>
-              <th>Aerosol</th>
-              <td>
-                <select v-model='quantitativeAerosolSolution' :disabled='!createOrEdit'>
-                  <option>Ambient</option>
-                </select>
-              </td>
-            </tr>
-
-            <tr v-show='quantitativeProcedure != "Skipping"'>
-              <th>Initial count (particles / cm3)</th>
-              <td>
-                <input type='number' v-model='initialCountPerCm3' :disabled='!createOrEdit'>
-              </td>
-            </tr>
-
-            <tr v-show='quantitativeProcedure != "Skipping"'>
-              <th>Notes</th>
-              <td>
-                <textarea id="" name="" cols="30" rows="10" v-model='quantitativeAerosolNotes' :disabled='!createOrEdit' ></textarea>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class='instructions' v-if='secondaryTabToShow == "Choose Procedure" && tabToShow == "QNFT" && quantitativeProcedure == "Skipping"'>
-          <p>
-            Quantitative fit testing can be skipped if:
-            <ul>
-              <li>user seal check failed from the previous step</li>
-              <li>user seal check passed but you are skipping qualitative fit testing (QLFT)</li>
-            </ul>
-          </p>
-        </div>
-
-        <div class='instructions' v-show='quantitativeProcedure != "Skipping" && secondaryTabToShow != "Results"'>
-          <h3>{{instructionTitle}}</h3>
-          <p v-for='text in instructionParagraphs'>
-            {{text}}
-          </p>
-        </div>
-
-        <table v-show='secondaryTabToShow == "Results"'>
-          <tbody >
-            <template v-for='(ex, index) in quantitativeExercises' >
-              <tr v-if='index < numExercisesHalf'>
-                <th>{{ex.name}}</th>
+              <tr v-show='qualitativeProcedure != "Skipping"'>
+                <th>Notes</th>
                 <td>
-                  <CircularButton text="?" @click="showDescription(ex.name)"/>
-                </td>
-                <td>
-                  <input type="number" v-model='ex.fit_factor' :disabled='!createOrEdit'>
+                  <textarea id="" name="" cols="30" rows="10" v-model='qualitativeAerosolNotes' :disabled='!createOrEdit'></textarea>
                 </td>
               </tr>
-            </template>
-          </tbody>
-        </table>
+            </tbody>
+          </table>
 
-        <table v-show='secondaryTabToShow == "Results"'>
-          <tbody >
-            <template v-for='(ex, index) in quantitativeExercises' >
-              <tr v-if='index >= numExercisesHalf'>
-                <th>{{ex.name}}</th>
+          <div class='instructions' v-show='secondaryTabToShow == "Choose Procedure" && (tabToShow == "QLFT") && qualitativeProcedure == "Full OSHA"'>
+            <h3>{{instructionTitle}}</h3>
+            <p v-for='text in instructionParagraphs'>
+              {{text}}
+            </p>
+          </div>
+
+          <div class='instructions' v-show='secondaryTabToShow == "Choose Procedure" && tabToShow == "QLFT" && qualitativeProcedure == "Skipping"'>
+            <p>
+              Qualitative fit testing can be skipped if:
+              <ul>
+                <li>user seal check failed from the previous step</li>
+                <li>user seal check passed and you are going to do quantitative fit testing (QNFT)</li>
+              </ul>
+            </p>
+          </div>
+
+
+          <table v-show='secondaryTabToShow == "Results"'>
+            <tbody >
+              <template v-for='(ex, index) in qualitativeExercises' >
+                <tr v-if='index < 4'>
+                  <th>{{ex.name}}</th>
+                  <td>
+                    <CircularButton text="?" @click="showDescription(ex.name)"/>
+                  </td>
+                  <td>
+                    <select v-model='ex.result' :disabled='!createOrEdit'>
+                      <option>Pass</option>
+                      <option>Fail</option>
+                      <option>Not applicable</option>
+                    </select>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+
+          <table v-show='secondaryTabToShow == "Results"'>
+            <tbody class='qlft'>
+              <template v-for='(ex, index) in qualitativeExercises' >
+                <tr v-if='index >= 4'>
+                  <th>{{ex.name}}</th>
+                  <td>
+                    <CircularButton text="?" @click="showDescription(ex.name)"/>
+                  </td>
+                  <td>
+                    <select v-model='ex.result' :disabled='!createOrEdit'>
+                      <option>Pass</option>
+                      <option>Fail</option>
+                      <option>Not applicable</option>
+                    </select>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+
+      <div v-show='tabToShow == "QNFT"' class='justify-content-center flex-dir-col align-content-center'>
+        <div class='grid qlft'>
+          <table v-show='secondaryTabToShow == "Choose Procedure"'>
+            <tbody>
+
+              <tr>
+                <th>Procedure</th>
                 <td>
-                  <CircularButton text="?" @click="showDescription(ex.name)"/>
-                </td>
-                <td>
-                  <input type="number" v-model='ex.fit_factor' :disabled='!createOrEdit'>
+                  <select v-model='quantitativeProcedure' :disabled='!createOrEdit'>
+                    <option>Skipping</option>
+                    <option>OSHA Fast Filtering Face Piece Respirators</option>
+                    <option>Full OSHA</option>
+                  </select>
                 </td>
               </tr>
-            </template>
-          </tbody>
-        </table>
 
-      </div>
+              <tr>
+                <th>Device</th>
+                <td>
+                  <select v-model='quantitativeFitTestingDeviceId' :disabled='!createOrEdit'>
+                    <option v-for='d in measurementDevices' :value='d.id'>
+                    {{deviceInfo(d)}}
+                    </option>
+                  </select>
+                </td>
+              </tr>
+
+              <tr v-show='quantitativeProcedure != "Skipping"'>
+                <th>Testing mode</th>
+                <td>
+                  <select v-model='quantitativeTestingMode' :disabled='!createOrEdit'>
+                    <option>N95</option>
+                    <option>N99</option>
+                  </select>
+                </td>
+              </tr>
+
+              <tr v-show='quantitativeProcedure != "Skipping"'>
+                <th>Aerosol</th>
+                <td>
+                  <select v-model='quantitativeAerosolSolution' :disabled='!createOrEdit'>
+                    <option>Ambient</option>
+                  </select>
+                </td>
+              </tr>
+
+              <tr v-show='quantitativeProcedure != "Skipping"'>
+                <th>Initial count (particles / cm3)</th>
+                <td>
+                  <input type='number' v-model='initialCountPerCm3' :disabled='!createOrEdit'>
+                </td>
+              </tr>
+
+              <tr v-show='quantitativeProcedure != "Skipping"'>
+                <th>Notes</th>
+                <td>
+                  <textarea id="" name="" cols="30" rows="10" v-model='quantitativeAerosolNotes' :disabled='!createOrEdit' ></textarea>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class='instructions' v-if='secondaryTabToShow == "Choose Procedure" && tabToShow == "QNFT" && quantitativeProcedure == "Skipping"'>
+            <p>
+              Quantitative fit testing can be skipped if:
+              <ul>
+                <li>user seal check failed from the previous step</li>
+                <li>user seal check passed but you are skipping qualitative fit testing (QLFT)</li>
+              </ul>
+            </p>
+          </div>
+
+          <div class='instructions' v-show='quantitativeProcedure != "Skipping" && secondaryTabToShow != "Results"'>
+            <h3>{{instructionTitle}}</h3>
+            <p v-for='text in instructionParagraphs'>
+              {{text}}
+            </p>
+          </div>
+
+          <table v-show='secondaryTabToShow == "Results"'>
+            <tbody >
+              <template v-for='(ex, index) in quantitativeExercises' >
+                <tr v-if='index < numExercisesHalf'>
+                  <th>{{ex.name}}</th>
+                  <td>
+                    <CircularButton text="?" @click="showDescription(ex.name)"/>
+                  </td>
+                  <td>
+                    <input type="number" v-model='ex.fit_factor' :disabled='!createOrEdit'>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+
+          <table v-show='secondaryTabToShow == "Results"'>
+            <tbody >
+              <template v-for='(ex, index) in quantitativeExercises' >
+                <tr v-if='index >= numExercisesHalf'>
+                  <th>{{ex.name}}</th>
+                  <td>
+                    <CircularButton text="?" @click="showDescription(ex.name)"/>
+                  </td>
+                  <td>
+                    <input type="number" v-model='ex.fit_factor' :disabled='!createOrEdit'>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+
+        </div>
 
 
     </div>
@@ -442,6 +443,7 @@
     </div>
 
   </div>
+</div>
 </template>
 
 <script>
@@ -2174,6 +2176,12 @@ export default {
     cursor: pointer;
   }
 
+  .columns {
+    display: grid;
+    grid-template-columns: 33% 66%;
+    grid-template-rows: auto;
+  }
+
   .grid {
     display: grid;
     grid-template-columns: 33% 33% 33%;
@@ -2264,6 +2272,10 @@ export default {
 
     input[type='text'] {
       width: 82vw;
+    }
+
+    .columns {
+      grid-template-columns: 100%;
     }
 
   }
