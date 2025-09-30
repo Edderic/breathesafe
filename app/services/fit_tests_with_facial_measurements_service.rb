@@ -5,6 +5,8 @@ class FitTestsWithFacialMeasurementsService
     def call(mask_id: nil)
       n95_mode_experimental_scores = N95ModeService.call(mask_id: mask_id).to_a
       n95_mode_estimate_scores_from_n99 = N99ModeToN95ModeConverterService.call(mask_id: mask_id).to_a
+      # If each exercise that is NOT NULL is passed, then qlft_score for that
+      # fit test will be a pass.
       qlft_scores = QlftService.call(mask_id: mask_id).to_a
       user_seal_check_scores = UserSealCheckFacialMeasurementsService.call(mask_id: mask_id).to_a
 
