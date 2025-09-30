@@ -1387,22 +1387,22 @@ export function displayCADR(systemOfMeasurement, cubicMetersPerHour) {
 }
 
 
-export function setupCSRF() {
+export async function setupCSRF() {
   axios.defaults.headers.common['Accept'] = 'application/json'
-  refreshCSRF();
+  axios.defaults.withCredentials = true
+  await refreshCSRF();
 }
 
-export function refreshCSRF() {
+export async function refreshCSRF() {
 // Example in Vue component after sign-in
-   axios.get('/csrf_token')
-     .then(response => {
-       const newCsrfToken = response.data.csrf_token;
-       // Update the axios instance with the new token
-       axios.defaults.headers.common['X-CSRF-Token'] = newCsrfToken;
-     })
-    .catch(error => {
-      console.error('Failed to refresh CSRF token', error);
-    });
+   try {
+     const response = await axios.get('/csrf_token')
+     const newCsrfToken = response.data.csrf_token;
+     // Update the axios instance with the new token
+     axios.defaults.headers.common['X-CSRF-Token'] = newCsrfToken;
+   } catch (error) {
+     console.error('Failed to refresh CSRF token', error);
+   }
 }
 export function generateUUID() {
     // https://stackoverflow.com/questions/105034/how-to-create-guid-uuid

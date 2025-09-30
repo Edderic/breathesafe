@@ -2,6 +2,10 @@
 
 class UserSealCheckFacialMeasurementsService
   class << self
+    # When user seal check hash is present, and (sizing is too big or too small)
+    # OR user notes that there is "a lot of air movement", then it's a failure
+    # otherwise, we are unsure -- need to do a quantitative or qualitative fit
+    # test
     def call(mask_id: nil)
       mask_id_clause = mask_id ? "AND mask_id = #{mask_id.to_i}" : ''
 

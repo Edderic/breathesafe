@@ -175,13 +175,14 @@ export default {
           password: this.password
         }
       })
-      .then(response => {
+      .then(async response => {
         if (response.status == 201) {
           success = true
         }
 
-
         this.currentUser = response.data
+        // Refresh CSRF token after successful sign-in
+        await setupCSRF()
         // whatever you want
         this.loadProfile()
 

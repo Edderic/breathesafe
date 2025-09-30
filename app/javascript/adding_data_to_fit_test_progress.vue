@@ -55,6 +55,22 @@ export default {
       type: Object,
       default: null
     },
+    userSealCheck: {
+      type: Object,
+      default: null
+    },
+    qualitativeProcedure: {
+      type: String,
+      default: null
+    },
+    quantitativeProcedure: {
+      type: String,
+      default: null
+    },
+    comfort: {
+      type: Object,
+      default: null
+    },
     completedSteps: {
       type: Array,
       default: () => []
@@ -117,10 +133,12 @@ export default {
       return this.computedCompletedSteps.includes(stepKey)
     },
     getStepStatus(stepKey) {
-      // For User, Mask, and Facial Hair, don't show "Complete" since we show the actual values
-      if (stepKey === 'User' || stepKey === 'Mask' || stepKey === 'Facial Hair') {
+      // For all steps that show actual values, don't show "Complete" since we show the actual values
+      const stepsWithValues = ['User', 'Mask', 'Facial Hair', 'User Seal Check', 'QLFT', 'QNFT', 'Comfort']
+
+      if (stepsWithValues.includes(stepKey)) {
         if (this.isStepCompleted(stepKey)) {
-          return '' // Empty string for User, Mask, and Facial Hair when completed
+          return '' // Empty string when completed
         } else if (this.currentStep === stepKey) {
           return 'In Progress'
         } else {
@@ -148,6 +166,39 @@ export default {
             return `${this.facialHair.beard_length_mm}, ${this.facialHair.beard_cover_technique}`
           }
           return 'Not Selected'
+        case 'User Seal Check':
+          // not started - nothing is filled out
+          // passed:
+          //   if user responds "Somewhere between too big and too small" to "What do you think about the sizing of this mask relative to your face?" AND
+          //   "No air movement" to "...how much air movement on your face along the seal of the mask did you feel?"
+          //
+          // failed:
+          //   if user responds too big or too small. Failed. Skip the rest of the questions
+          //   if user responds "A lot of air movement" to "...how much air movement on your face along the seal of the mask did you feel?", that's a fail.
+          //
+          // incomplete -
+          if (this.userSealCheck && this.isUserSealCheckComplete()) {
+            return 'Passed'
+          } else if (this.userSealCheck && this.isUserSealCheckStarted()) {
+            return 'Failed'
+          }
+          return 'Not Selected'
+        case 'QLFT':
+          if (this.qualitativeProcedure && this.qualitativeProcedure !== 'Skipping') {
+            return this.qualitativeProcedure
+          }
+          return 'Not Selected'
+        case 'QNFT':
+          if (this.quantitativeProcedure && this.quantitativeProcedure !== 'Skipping') {
+            return this.quantitativeProcedure
+          }
+          return 'Not Selected'
+        case 'Comfort':
+          if (this.comfort && this.isComfortComplete()) {
+            const comfortCount = Object.values(this.comfort).filter(value => value !== null).length
+            return `${comfortCount} questions answered`
+          }
+          return 'Not Selected'
         default:
           return this.getStepStatus(stepKey)
       }
@@ -155,8 +206,10 @@ export default {
     getStepDisplayValue(stepKey) {
       const value = this.getStepValue(stepKey)
 
-      // For User, Mask, and Facial Hair, show actual values or "Not Selected"
-      if (stepKey === 'User' || stepKey === 'Mask' || stepKey === 'Facial Hair') {
+      // For all steps that show actual values, show actual values or "Not Selected"
+      const stepsWithValues = ['User', 'Mask', 'Facial Hair', 'User Seal Check', 'QLFT', 'QNFT', 'Comfort']
+
+      if (stepsWithValues.includes(stepKey)) {
         if (value === 'Not Selected') {
           return value
         }
@@ -170,6 +223,40 @@ export default {
     navigateToStep(stepKey) {
       // Emit event to parent component to change the current step
       this.$emit('navigate-to-step', stepKey)
+    },
+    isUserSealCheckComplete() {
+      if (!this.userSealCheck) return false
+
+      const sizingComplete = this.userSealCheck.sizing &&
+        Object.values(this.userSealCheck.sizing).every(value => value !== null)
+
+      const positiveComplete = this.userSealCheck.positive &&
+        Object.values(this.userSealCheck.positive).every(value => value !== null)
+
+      const negativeComplete = this.userSealCheck.negative &&
+        Object.values(this.userSealCheck.negative).every(value => value !== null)
+
+      return sizingComplete && (positiveComplete || negativeComplete)
+    },
+    isUserSealCheckStarted() {
+      debugger
+      if (!this.userSealCheck) return false
+
+      // Check if any field has been filled
+      const hasSizingData = this.userSealCheck.sizing &&
+        Object.values(this.userSealCheck.sizing).some(value => value !== null)
+
+      const hasPositiveData = this.userSealCheck.positive &&
+        Object.values(this.userSealCheck.positive).some(value => value !== null)
+
+      const hasNegativeData = this.userSealCheck.negative &&
+        Object.values(this.userSealCheck.negative).some(value => value !== null)
+
+      return hasSizingData || hasPositiveData || hasNegativeData
+    },
+    isComfortComplete() {
+      if (!this.comfort) return false
+      return Object.values(this.comfort).every(value => value !== null)
     }
   }
 }

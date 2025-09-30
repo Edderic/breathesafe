@@ -25,6 +25,10 @@
         :selectedUser="selectedUser"
         :selectedMask="selectedMask"
         :facialHair="facialHair"
+        :userSealCheck="userSealCheck"
+        :qualitativeProcedure="qualitativeProcedure"
+        :quantitativeProcedure="quantitativeProcedure"
+        :comfort="comfort"
         :completedSteps="completedFitTestSteps"
         :currentStep="tabToShow"
         @navigate-to-step="navigateToStep"
@@ -1683,8 +1687,8 @@ export default {
     },
 
     async saveFitTest(query, successCallback) {
-      if (!tabToShow) {
-        tabToShow = 'Mask'
+      if (!this.tabToShow) {
+        this.tabToShow = 'Mask'
       }
 
       if (this.id) {
