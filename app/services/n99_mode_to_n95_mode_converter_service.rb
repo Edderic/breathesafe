@@ -379,6 +379,7 @@ class N99ModeToN95ModeConverterService
           )
 
           SELECT unioned.*,
+            ft.user_seal_check::jsonb AS user_seal_check,
             (regexp_replace(facial_hair ->> 'beard_length_mm', '[^0-9]', '', 'g'))::integer as facial_hair_beard_length_mm,
             masks.unique_internal_model_code,
             masks.perimeter_mm,

@@ -45,6 +45,7 @@ class N95ModeService
 
         SELECT n95_mode_experimentals.*,
           fit_tests.mask_id,
+          fit_tests.user_seal_check::jsonb AS user_seal_check,
           (regexp_replace(facial_hair ->> 'beard_length_mm', '[^0-9]', '', 'g'))::integer as facial_hair_beard_length_mm,
           '#{self}' AS source,
           fit_tests.user_id,

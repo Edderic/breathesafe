@@ -157,16 +157,19 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
         expect(n95_result['n95_mode_hmff']).to be > 100
         expect(n95_result['qlft_pass']).to be true
         expect(n95_result['face_width']).to eq(facial_measurement.face_width)
+        expect(n95_result['user_seal_check']).not_to be_nil
 
         # Verify N99 test results
         expect(n99_result['n95_mode_hmff']).to be > 100
         expect(n99_result['qlft_pass']).to be true
         expect(n99_result['face_width']).to eq(facial_measurement.face_width)
+        expect(n99_result['user_seal_check']).not_to be_nil
 
         # Verify QLFT test results
         expect(qlft_result['qlft_pass']).to be true
         expect(qlft_result['n']).to eq(2) # Number of exercises
         expect(qlft_result['face_width']).to eq(facial_measurement.face_width)
+        expect(qlft_result['user_seal_check']).not_to be_nil
       end
     end
 
@@ -260,5 +263,7 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
         expect(results).to be_empty
       end
     end
+
+
   end
 end
