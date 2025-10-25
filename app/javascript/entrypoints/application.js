@@ -143,7 +143,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Only intercept normal navigation; do not loop
     if (needsConsent && !navigatingToConsent) {
-      next({ name: 'ConsentForm', query: { return_to_name: to.name, return_to_query: JSON.stringify(to.query || {}), return_to_params: JSON.stringify(to.params || {}) } });
+      next({
+        name: 'ConsentForm',
+        query: {
+          return_to_name: to.name,
+          return_to_query: JSON.stringify(to.query || {}),
+          return_to_params: JSON.stringify(to.params || {}),
+          latest_version: latest || ''
+        }
+      });
       return;
     }
 

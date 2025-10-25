@@ -455,7 +455,7 @@
       <h3>We updated our Consent Form</h3>
       <p>
         You are seeing this because your accepted version does not match the
-        latest version ({{ consentFormVersion }}). Please review the consent
+        latest version ({{ infoVersion }}). Please review the consent
         form below. You can accept to continue sharing your data for research
         purposes, or reject and continue using the app.
       </p>
@@ -511,6 +511,7 @@ export default {
       showThanksPopup: false,
       showRejectConfirm: false,
       showRejectInfo: false,
+      infoVersion: '',
     }
   },
   props: { },
@@ -522,6 +523,7 @@ export default {
     const needsInfo = !!this.currentUser && !!this.consentFormVersion && this.currentUser.consent_form_version_accepted !== this.consentFormVersion;
     if (needsInfo) {
       this.showInfoPopup = true;
+      this.infoVersion = this.$route.query.latest_version || this.consentFormVersion || '';
     }
   },
   methods: {
