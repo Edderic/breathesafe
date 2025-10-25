@@ -19,6 +19,8 @@ export const useMainStore = defineStore('main', {
     focusSubTab: "Analytics",
     signedIn: false,
     currentUser: undefined,
+    consentFormVersion: undefined,
+    consentDismissedForSession: false,
     messages: [],
     whereabouts: {lat: 51.093048, lng: 6.842120},
   }),
@@ -81,12 +83,16 @@ export const useMainStore = defineStore('main', {
     setMessage(message) {
       this.message = message
     },
+    setConsentDismissedForSession(value) {
+      this.consentDismissedForSession = !!value
+    },
     async getCurrentUser() {
       setupCSRF()
 
       await axios.get('/users/get_current_user.json')
         .then(response => {
           this.currentUser = response.data.currentUser;
+          this.consentFormVersion = response.data.consentFormVersion;
           this.signedIn = !!response.data.currentUser;
           console.log('this.signedIn', this.signedIn)
           // whatever you want
@@ -95,6 +101,7 @@ export const useMainStore = defineStore('main', {
           console.log(error)
           this.message = "Could not get current user.";
           this.currentUser = undefined;
+          this.consentFormVersion = undefined;
           this.signedIn = false;
           // whatever you want
         })

@@ -127,6 +127,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })
 
+  // Router guard: show consent form after login if needed
+  router.beforeEach(async (to, from, next) => {
+    const main = useMainStore();
+    // Ensure current user info is loaded once per session
+    if (main.currentUser === undefined) {
+      await main.getCurrentUser();
+    }
+
+    const user = main.currentUser;
+    const latest = main.consentFormVersion;
+
+    const needsConsent = !!user && !!latest && user.consent_form_version_accepted !== latest && !main.consentDismissedForSession;
+    const navigatingToConsent = to.name === 'ConsentForm';
+
+    // Only intercept normal navigation; do not loop
+    if (needsConsent && !navigatingToConsent) {
+      next({ name: 'ConsentForm', query: { return_to_name: to.name, return_to_query: JSON.stringify(to.query || {}), return_to_params: JSON.stringify(to.params || {}) } });
+      return;
+    }
+
+    next();
+  })
+
   const options = {
     position: "fixed",
     height: "3px",

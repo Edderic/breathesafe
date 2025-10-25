@@ -74,10 +74,6 @@
     </div>
 
     <div class='margined main'>
-      <div class='consent-actions'>
-        <Button class='accept' @click='onAccept'>Accept</Button>
-        <Button class='reject' @click='onReject'>Reject</Button>
-      </div>
       <h2>Mask recommender based on facial measurements</h2>
 
       <div class='row'>
@@ -454,6 +450,18 @@
     </div>
   </div>
 
+  <Popup v-if='showInfoPopup' @onclose='showInfoPopup = false'>
+    <div>
+      <h3>We updated our Consent Form</h3>
+      <p>
+        You are seeing this because your accepted version does not match the
+        latest version ({{ consentFormVersion }}). Please review the consent
+        form below. You can accept to continue sharing your data for research
+        purposes, or reject and continue using the app.
+      </p>
+    </div>
+  </Popup>
+
   <Popup v-if='showThanksPopup' @onclose='closeThanks'>
     <p>Thank you for giving consent. Have a great day!</p>
   </Popup>
@@ -475,6 +483,11 @@
     </p>
   </Popup>
 
+  <div class='consent-bottom-actions'>
+    <Button class='accept' @click='onAccept'>Accept</Button>
+    <Button class='reject' @click='onReject'>Reject</Button>
+  </div>
+
 </template>
 <script>
 
@@ -494,6 +507,7 @@ export default {
   },
   data() {
     return {
+      showInfoPopup: false,
       showThanksPopup: false,
       showRejectConfirm: false,
       showRejectInfo: false,
@@ -502,6 +516,13 @@ export default {
   props: { },
   computed: {
     ...mapState(useMainStore, ['currentUser', 'consentFormVersion'])
+  },
+  async mounted() {
+    await this.getCurrentUser();
+    const needsInfo = !!this.currentUser && !!this.consentFormVersion && this.currentUser.consent_form_version_accepted !== this.consentFormVersion;
+    if (needsInfo) {
+      this.showInfoPopup = true;
+    }
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'setConsentDismissedForSession']),
@@ -558,6 +579,29 @@ export default {
 }
 </script>
 <style scoped>
+  .consent-bottom-actions {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+    z-index: 1002;
+  }
+
+  .consent-bottom-actions .accept {
+    background: #2e7d32;
+    color: white;
+  }
+
+  .consent-bottom-actions .reject {
+    background: #c62828;
+    color: white;
+  }
   .margined {
     margin: 1em;
   }
