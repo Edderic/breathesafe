@@ -74,6 +74,10 @@
     </div>
 
     <div class='margined main'>
+      <div class='consent-actions'>
+        <Button class='accept' @click='onAccept'>Accept</Button>
+        <Button class='reject' @click='onReject'>Reject</Button>
+      </div>
       <h2>Mask recommender based on facial measurements</h2>
 
       <div class='row'>
@@ -97,7 +101,7 @@
       </div>
 
       <div>
-        <p>Last updated: Dec. 01, 2024</p>
+        <p>Last updated: Oct. 10, 2025</p>
       </div>
         <div id='invitation-to-participate'>
           <br>
@@ -143,36 +147,23 @@
 
         <div class='grid-images'>
           <figure>
-            <a href="https://www.amazon.com/gp/product/B00JALAIIE/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1" target='_blank'>
-              <img class='left-pane-image' src="https://c.media-amazon.com/images/I/6194IWMjJEL._SX522_.jpg" alt='iGaging 6" Digital External Outside Caliper OD for Woodworking'>
-            </a>
-            <figcaption>Digital Caliper</figcaption>
-          </figure>
-
-          <figure>
-            <a href="https://www.amazon.com/dp/B0BGHCTL45?ref=ppx_yo2ov_dt_b_fed_asin_title" target='_blank'>
-              <img class='left-pane-image' src="https://c.media-amazon.com/images/I/71Cwjwnqc6L._SL1500_.jpg" alt='Tape Measure, iBayam Soft Ruler Measuring Tape for Body Weight Loss Fabric Sewing Tailor Cloth Vinyl Measurement Craft Supplies, 60-Inch Double Scale Ruler, 2-Pack White, Blue'>
-            </a>
-            <figcaption>Tape Measure</figcaption>
-          </figure>
-
-          <figure>
             <a href="https://aiden.health/products/makrite-801" target='_blank'>
               <img class='left-pane-image' src="https://aiden.health/cdn/shop/files/766B9B3B-9325-407B-B94E-E4C41C6207BB_710x589@2x.png?v=1718600885" alt='Makrite 801-N95 (adj. head straps), NIOSH 84A-9223, 160mmHg fluid resistance'>
             </a>
             <figcaption>A Mask</figcaption>
           </figure>
+
+          <figure>
+            <a href="https://www.verizon.com/smartphones/apple-iphone-14/" target='_blank'>
+              <img class='left-pane-image' src="https://ss7.vzw.com/is/image/VerizonWireless/iphone-14-midnight-fall22-a?wid=930&hei=930&fmt=webp" alt='An iPhone'>
+            </a>
+            <figcaption>A device equipped with a camera</figcaption>
+          </figure>
         </div>
 
         <p>
-        You can contribute valuable data by submitting <a
-          href="https://www.cdc.gov/niosh/docs/2018-130/pdfs/2018-130.pdf"
-          target='_blank'>user seal check</a> information. If you know that a
-        mask does not fit your face and has obvious leaks, you could contribute
-        this data in the User Seal Check section of "Adding a Fit Test".
+        ...and either quantitative or qualitative fit testing equipment:
         </p>
-
-        The following are <strong>optional</strong>:
 
         <div class='grid-images'>
           <figure>
@@ -189,13 +180,19 @@
             <figcaption>Qualitative Fit Testing equipment</figcaption>
           </figure>
 
-          <figure>
-            <a href="https://www.verizon.com/smartphones/apple-iphone-14/" target='_blank'>
-              <img class='left-pane-image' src="https://ss7.vzw.com/is/image/VerizonWireless/iphone-14-midnight-fall22-a?wid=930&hei=930&fmt=webp" alt='An iPhone'>
-            </a>
-            <figcaption>A device equipped with a camera</figcaption>
-          </figure>
         </div>
+
+        <p>
+        If you are interested in becoming a participant, missing at least one of the required equipment, and live close to Breathesafe LLC's address, you may be able to borrow equipment to do the study. Please email <a href="mailto:info@breathesafe.xyz?subject=Mask Recommender Question">info@breathesafe.xyz</a> to inquire about the possibility.
+        </p>
+
+        <p>
+        You can contribute valuable data by submitting <a
+          href="https://www.cdc.gov/niosh/docs/2018-130/pdfs/2018-130.pdf"
+          target='_blank'>user seal check</a> information. If you know that a
+        mask does not fit your face and has obvious leaks, you could contribute
+        this data in the User Seal Check section of "Adding a Fit Test".
+        </p>
 
         <div id='study-procedures'>
           <br>
@@ -204,13 +201,19 @@
         </div>
 
 
-        <h5>Phase 1: manual measurements of facial features (using caliper/tape) </h5>
+        <h5>Automated inference of facial measurements</h5>
 
-        <p>
-        You will be asked to give information about demographics and facial measurements <router-link :to='{name: "RespiratorUsers"}'>here</router-link>.
-        Once that is filled out, you can add the following fit testing data <router-link :to='{name: "NewFitTest"}'> here</router-link>:
+        <p>While it is possible to get some facial measurements via caliper and tape as what was originally being done for this research, doing so can be a bit tedious and inaccessible, and for others, could deter adoption of said recommender system. On the other hand, smart phones are quite ubiquitous. To get facial measurements quickly and seamlessly, the study requires access to an iPhone True Depth camera (i.e. has FaceID feature -- standard in the recent base models, iPhone X model onward). You will be able to install an application made by Breathesafe LLC (currently being developed), or if you live close enough to the address of Breathesafe LLC, you may be able to borrow an iPhone for the purposes of obtaining facial measurements. The app will store facial measurements relevant to mask fitting, and will be sent to Breathesafe's secure server for storage for creation and improvement of statistical model to predict fit based on facial measurements.
         </p>
 
+        <h5>Demographics</h5>
+
+        <p>
+        You will be asked to give information about demographics. See the <router-link :to="tocPath('confidentiality')">confidentiality section</router-link> to learn more.
+        Once that is filled out, you can add the following fit testing data:
+        </p>
+
+        <h5>Fit Testing</h5>
         <ul>
           <li>user seal check</li>
           <li>qualitative fit testing (if applicable)</li>
@@ -220,11 +223,6 @@
 
         <p>
         You will be guided by the UI. Clicking on the "Save and Continue" button will validate the information being saved and will show helpful error messages and general messages. For example, if a user fails the user seal check section, they don't need to add qualitative or quantitative fit testing data (as it is assumed that they will most likely fail either of those more stringent tests).
-        </p>
-
-        <h5>Phase 2: automated inference of facial measurements via selfies </h5>
-
-        <p>Getting facial measurements via caliper and tape can be a bit tedious and could deter adoption of said recommender system. Breathesafe LLC will attempt to simplify this process by inferring facial measurements via selfies. You will be given the opportunity to share selfies to this project to assess and improve the performance of a facial measurement system based on selfies. Given your facial measurements that were taken from phase 1 using caliper and tape, we will assess and improve the accuracy of said inference system.
         </p>
 
 
@@ -273,7 +271,7 @@
             </tr>
             <tr>
               <td>Adding quantitative fit testing data</td>
-              <td>10 minutes</td>
+              <td>5 minutes</td>
               <td>per mask</td>
               <td>Depends on you having access to a QNFT device</td>
             </tr>
@@ -315,17 +313,18 @@
         <p>Sensitive data like facial measurements will be stored in a database.
         Data such as the following will be collected:
         <ul>
-          <li>first name</li>
-          <li>last name</li>
-          <li>email</li>
-          <li>IP address - for quality control purposes.</li>
+          <li>first name - you can choose to be anonymous. You can use an alias*.</li>
+          <li>last name - you can choose to be anonymous. You can use an alias*.</li>
+          <li>email - you can choose to be anonymous. You can create an email that does not reference your identity and use that email.</li>
           <li>home address (optional) - If you need financial assistance with buying equipment for testing purposes. Breathesafe LLC can order equipment on your behalf and send them your way. See the <a href="#compensation">compensation</a> section for details.</li>
-          <li>facial measurement data - to create a recommendation system tailored to the individual.</li>
-          <li>selfies - to validate facial measurement inference from photos.</li>
+          <li>facial measurement data - to create a recommendation system tailored to the individual.**</li>
           <li>fit testing measurement tools used (e.g. PortaCount)</li>
           <li>fit testing results (e.g. pass/fail for Qualitative Fit Testing, fit factors for Quantitative Fit Testing)</li>
         </ul>
         </p>
+
+        <p>* An alias can be used by a study participant to protect themselves from the very unlikely, but non-zero probability, scenario of a data breach.</p>
+        <p>** Only measurements related to mask fitting will be recorded (e.g. nose, cheek, chin measurements)</p>
 
         <div id='benefits'>
           <br>
@@ -341,14 +340,23 @@
           <h4>How will participants' information be kept confidential?</h4>
         </div>
 
+        <h4>Data aggregation</h4>
         <p> In terms
-        of data publicly displayed on this web app, we will only show
-        aggregate data about users, such as demographic information and fit
-        test results for each mask. We will maintain privacy of individual fit
-        testing information along with demographics. We will preserve privacy
+        of data publicly displayed on this web app, demographic information will
+        only be shown in aggregate. We will preserve privacy
         of individuals in the aggregation of the data: if a demographic has
-        less than 5 people in it, they will be grouped in the "Prefer not to
+        less than 5 people in it, they will be automatically grouped in the "Prefer not to
         disclose / too small sample size" group.
+        </p>
+
+        <h4>First name, Last name, Email</h4>
+        <p>Strictly confidential and will not be displayed outside of the app. However, study participants can are encouraged to make use of aliases for enhanced protection in the very unlikely, but non-zero probability, event of a data breach.</p>
+
+        <h4>Facial measurements and Fit Testing Data</h4>
+        <p>
+
+        Facial measurements and fit testing data could be displayed in scatter plots to help future users understand the weaknesses of the model in predicting fit. For example, let's say an individual is looking to find a mask that fits their face. Let's say the model says 70% probability of fit for a particular mask, and the user is interested in getting more context about this prediction. The user could take a look at scatter plots to have a better understanding of this number (i.e. are there a bunch of data points that are similar to mine that have passed with this mask?)
+
         </p>
 
         <p>This study may go on indefinitely. If for any reason you want your data deleted, you may do so. See
@@ -386,13 +394,13 @@
         <p>Participation in this study is on a voluntary basis. However, if you need financial assistance with getting the equipment or labor, please let us know by emailing <a href='subject=Mask Recommender Financial Assistance Question'>info@breathesafe.xyz</a>.
         </p>
 
-        <p>Here are things we can help with:</p>
+        <p>Here are things we can help with, provided you live close by to the Breathesafe LLC address:</p>
 
         <ul>
-          <li>buying facial measurement tools: caliper / tape</li>
           <li>buying masks</li>
           <li>buying probes</li>
           <li>buying qualitative fit testing equipment</li>
+          <li>access to an iPhone with True Depth camera</li>
           <li>paying for your time to do the testing</li>
         </ul>
 
@@ -446,23 +454,105 @@
     </div>
   </div>
 
+  <Popup v-if='showThanksPopup' @onclose='closeThanks'>
+    <p>Thank you for giving consent. Have a great day!</p>
+  </Popup>
+
+  <Popup v-if='showRejectConfirm' @onclose='showRejectConfirm = false'>
+    <div>
+      <h3>Are you sure?</h3>
+      <div class='row'>
+        <Button class='cancel' @click='showRejectConfirm = false'>Cancel</Button>
+        <Button class='confirm' @click='confirmReject'>Yes</Button>
+      </div>
+    </div>
+  </Popup>
+
+  <Popup v-if='showRejectInfo' @onclose='dismissRejectInfo'>
+    <p>
+      You could go to the Respirator Users page
+      <router-link :to="{ name: 'RespiratorUsers' }">(link)</router-link>, click on each of the users you manage, hit edit, and delete their data. That will delete facial measurements, demographics, fit tests, etc.
+    </p>
+  </Popup>
+
 </template>
 <script>
 
 import CircularButton from './circular_button.vue';
+import Button from './button.vue';
+import Popup from './pop_up.vue';
+import axios from 'axios';
+import { mapActions, mapState } from 'pinia';
+import { useMainStore } from './stores/main_store';
 
 export default {
   name: 'ConsentForm',
   components: {
     CircularButton,
+    Button,
+    Popup,
   },
-  data() { return {} },
+  data() {
+    return {
+      showThanksPopup: false,
+      showRejectConfirm: false,
+      showRejectInfo: false,
+    }
+  },
   props: { },
   computed: {
+    ...mapState(useMainStore, ['currentUser', 'consentFormVersion'])
   },
   methods: {
+    ...mapActions(useMainStore, ['getCurrentUser', 'setConsentDismissedForSession']),
     tocPath(suffix) {
       return `/consent_form#${suffix}`
+    },
+    async onAccept() {
+      await this.getCurrentUser();
+      if (!this.currentUser) { return }
+      try {
+        const response = await axios.post('/users/consent', { decision: 'accept' });
+        if (response.status >= 200 && response.status < 300) {
+          this.showThanksPopup = true;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    async onReject() {
+      this.showRejectConfirm = true;
+    },
+    async confirmReject() {
+      try {
+        await axios.post('/users/consent', { decision: 'reject' });
+      } catch (e) {
+        console.error(e);
+      }
+      this.showRejectConfirm = false;
+      this.showRejectInfo = true;
+    },
+    closeThanks() {
+      this.showThanksPopup = false;
+      // Mark consent screen dismissed for this session and return to target
+      this.setConsentDismissedForSession(true);
+      const name = this.$route.query.return_to_name || 'Landing';
+      let params = {};
+      let query = {};
+      try { params = JSON.parse(this.$route.query.return_to_params || '{}') } catch {}
+      try { query = JSON.parse(this.$route.query.return_to_query || '{}') } catch {}
+      this.$router.replace({ name, params, query });
+    },
+    dismissRejectInfo() {
+      this.showRejectInfo = false;
+      // Allow the user to continue using the app; mark dismissed for session
+      this.setConsentDismissedForSession(true);
+      const name = this.$route.query.return_to_name || 'Landing';
+      let params = {};
+      let query = {};
+      try { params = JSON.parse(this.$route.query.return_to_params || '{}') } catch {}
+      try { query = JSON.parse(this.$route.query.return_to_query || '{}') } catch {}
+      this.$router.replace({ name, params, query });
     }
   }
 }
