@@ -44,8 +44,8 @@
         What are the benefits of participating in this study?
       </router-link>
 
-      <router-link :to="tocPath('confidentiality')">
-        How will participants' information be kept confidential?
+      <router-link :to="tocPath('privacy')">
+        How will participants' privacy be protected?
       </router-link>
 
       <router-link :to="tocPath('data-use-over-time')">
@@ -197,15 +197,15 @@
         </div>
 
 
-        <h5>Automated inference of facial measurements</h5>
+        <h5>Acquiring facial measurements</h5>
 
-        <p>While it is possible to get some facial measurements via caliper and tape as what was originally being done for this research, doing so can be a bit tedious and inaccessible, and for others, could deter adoption of said recommender system. On the other hand, smart phones are quite ubiquitous. To get facial measurements quickly and seamlessly, the study requires access to an iPhone True Depth camera (i.e. has FaceID feature -- standard in the recent base models, iPhone X model onward). You will be able to install an application made by Breathesafe LLC (currently being developed), or if you live close enough to the address of Breathesafe LLC, you may be able to borrow an iPhone for the purposes of obtaining facial measurements. The app will store facial measurements relevant to mask fitting, and will be sent to Breathesafe's secure server for storage for creation and improvement of statistical model to predict fit based on facial measurements.
+        <p>To get facial measurements quickly and seamlessly, the study requires access to an iPhone True Depth camera (i.e. has FaceID feature -- standard in the recent base models, iPhone X model onward). You will be able to install an application made by Breathesafe LLC (currently being developed), or if you live close enough to the address of Breathesafe LLC, you may be able to borrow an iPhone for the purposes of obtaining facial measurements. The app will store facial measurements relevant to mask fitting, and will be sent to Breathesafe's secure server for storage for creation and improvement of statistical model to predict fit based on facial measurements.
         </p>
 
         <h5>Demographics</h5>
 
         <p>
-        You will be asked to give information about demographics. See the <router-link :to="tocPath('confidentiality')">confidentiality section</router-link> to learn more.
+        You will be asked to give information about demographics. See the <router-link :to="tocPath('privacy')">data privacy section</router-link> to learn more.
         Once that is filled out, you can add the following fit testing data:
         </p>
 
@@ -330,11 +330,14 @@
 
         <p>One direct benefit is one might be able to find a mask that has overall high protection (combination of fit and high filtration efficiency), if they haven't aready. Another benefit is gaining a sense of accomplishment in helping others find masks that offer high protection for their faces by providing data that will be used to improve performance of a personalized recommender system.</p>
 
-        <div id='confidentiality'>
+        <div id='privacy'>
           <br>
           <br>
-          <h4>How will participants' information be kept confidential?</h4>
+          <h4>How will participants' privacy be protected?</h4>
         </div>
+
+        <h4>First name, Last name, Email</h4>
+        <p>Strictly confidential and will not be displayed on the app. However, study participants can are encouraged to make use of aliases for enhanced protection in the very unlikely, but non-zero probability, event of a data breach.</p>
 
         <h4>Data aggregation</h4>
         <p> In terms
@@ -345,13 +348,10 @@
         disclose / too small sample size" group.
         </p>
 
-        <h4>First name, Last name, Email</h4>
-        <p>Strictly confidential and will not be displayed outside of the app. However, study participants can are encouraged to make use of aliases for enhanced protection in the very unlikely, but non-zero probability, event of a data breach.</p>
-
         <h4>Facial measurements and Fit Testing Data</h4>
         <p>
 
-        Facial measurements and fit testing data could be displayed in scatter plots to help future users understand the weaknesses of the model in predicting fit. For example, let's say an individual is looking to find a mask that fits their face. Let's say the model says 70% probability of fit for a particular mask, and the user is interested in getting more context about this prediction. The user could take a look at scatter plots to have a better understanding of this number (i.e. are there a bunch of data points that are similar to mine that have passed with this mask?)
+        Facial measurements and fit testing data could be displayed in scatter plots to help future users understand the weaknesses of the model in predicting fit. For example, let's say an individual is looking to find a mask that fits their face. Let's say the model says 70% probability of fit for a particular mask, and the user is interested in getting more context about this prediction. The user could take a look at scatter plots to have a better understanding of this number (i.e. are there a bunch of data points that are similar to user's that have passed with this mask?)
 
         </p>
 
@@ -483,7 +483,7 @@
     </p>
   </Popup>
 
-  <div class='consent-bottom-actions'>
+  <div v-if='showConsentActions' class='consent-bottom-actions'>
     <Button class='accept' @click='onAccept'>Accept</Button>
     <Button class='reject' @click='onReject'>Reject</Button>
   </div>
@@ -516,7 +516,10 @@ export default {
   },
   props: { },
   computed: {
-    ...mapState(useMainStore, ['currentUser', 'consentFormVersion'])
+    ...mapState(useMainStore, ['currentUser', 'consentFormVersion']),
+    showConsentActions() {
+      return !!this.currentUser && !!this.consentFormVersion && this.currentUser.consent_form_version_accepted !== this.consentFormVersion;
+    }
   },
   async mounted() {
     await this.getCurrentUser();
