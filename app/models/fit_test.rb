@@ -136,7 +136,8 @@ class FitTest < ApplicationRecord
       required_columns = %w[
         face_width jaw_width face_depth face_length lower_face_length bitragion_menton_arc
         bitragion_subnasale_arc cheek_fullness nasal_root_breadth nose_protrusion
-        nose_bridge_height lip_width head_circumference nose_breadth]
+        nose_bridge_height lip_width head_circumference nose_breadth
+      ]
       missing_columns = required_columns.reject { |col| facial_measurement.send(col).blank? }
 
       row['facialMeasurementPresence'] = if missing_columns.empty?
