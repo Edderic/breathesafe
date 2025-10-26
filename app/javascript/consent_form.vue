@@ -309,8 +309,8 @@
         <p>Sensitive data like facial measurements will be stored in a database.
         Data such as the following will be collected:
         <ul>
-          <li>first name - you can choose to be anonymous. You can use an alias*.</li>
-          <li>last name - you can choose to be anonymous. You can use an alias*.</li>
+          <li>first name - encrypted*.</li>
+          <li>last name - encrypted*.</li>
           <li>email - you can choose to be anonymous. You can create an email that does not reference your identity and use that email.</li>
           <li>home address (optional) - If you need financial assistance with buying equipment for testing purposes. Breathesafe LLC can order equipment on your behalf and send them your way. See the <a href="#compensation">compensation</a> section for details.</li>
           <li>facial measurement data - to create a recommendation system tailored to the individual.**</li>
@@ -319,7 +319,7 @@
         </ul>
         </p>
 
-        <p>* An alias can be used by a study participant to protect themselves from the very unlikely, but non-zero probability, scenario of a data breach.</p>
+        <p>* Breathesafe app uses standard AES-256 encryption.</p>
         <p>** Only measurements related to mask fitting will be recorded (e.g. nose, cheek, chin measurements)</p>
 
         <div id='benefits'>
