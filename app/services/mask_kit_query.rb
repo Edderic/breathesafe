@@ -73,6 +73,21 @@ class MaskKitQuery
       ).to_json
     )
 
+    # Decrypt the profile data for each result
+    results.each do |result|
+      next unless result['first_name'].is_a?(String) && result['first_name'].start_with?('{"p":')
+
+      begin
+        profile = Profile.find_by(user_id: result['managed_id'])
+        if profile
+          result['first_name'] = profile.first_name
+          result['last_name'] = profile.last_name
+        end
+      rescue StandardError => e
+        Rails.logger.warn "Failed to decrypt profile data for user #{result['managed_id']}: #{e.message}"
+      end
+    end
+
     FitTest.json_parse(
       results,
       %w[
