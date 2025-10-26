@@ -7,6 +7,10 @@ class Profile < ApplicationRecord
   belongs_to :user
   validates :user_id, uniqueness: true
 
+  # Encrypt sensitive personal information
+  # Using deterministic encryption for first_name and last_name to enable searching
+  encrypts :first_name, :last_name, deterministic: true
+
   before_create do
     self.external_api_token = SecureRandom.uuid
   end
