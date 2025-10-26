@@ -52,7 +52,8 @@ class ParticipantProgress
               "WHERE mu.manager_id = #{manager_id}"
             end
 
-    JSON.parse(
+    # Execute the complex query
+    results = JSON.parse(
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
         WITH managed_by_manager AS (
@@ -184,5 +185,24 @@ class ParticipantProgress
         SQL
       ).to_json
     )
+
+    # Decrypt the profile data for each result
+    results.each do |result|
+      next unless result['first_name'].is_a?(String) && result['first_name'].start_with?('{"p":')
+
+      # This is encrypted data, decrypt it
+      begin
+        profile = Profile.find_by(user_id: result['managed_id'])
+        if profile
+          result['first_name'] = profile.first_name
+          result['last_name'] = profile.last_name
+        end
+      rescue StandardError => e
+        # If decryption fails, leave the encrypted data as is
+        Rails.logger.warn "Failed to decrypt profile data for user #{result['managed_id']}: #{e.message}"
+      end
+    end
+
+    results
   end
 end

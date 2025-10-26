@@ -6,8 +6,8 @@ class ManagedUser < ApplicationRecord
 
   def self.for_manager_id(args)
     # Use ActiveRecord queries to ensure encryption/decryption works properly
-    managed_users = ManagedUser.includes(:managed => :profile)
-                              .where(manager_id: args[:manager_id])
+    managed_users = ManagedUser.includes(managed: :profile)
+                               .where(manager_id: args[:manager_id])
 
     result = []
 
@@ -54,24 +54,24 @@ class ManagedUser < ApplicationRecord
       # Add facial measurement data if available
       if latest_facial_measurement
         row.merge!({
-          'facial_measurement_id' => latest_facial_measurement.id,
-          'source' => latest_facial_measurement.source,
-          'face_width' => latest_facial_measurement.face_width,
-          'jaw_width' => latest_facial_measurement.jaw_width,
-          'face_depth' => latest_facial_measurement.face_depth,
-          'face_length' => latest_facial_measurement.face_length,
-          'lower_face_length' => latest_facial_measurement.lower_face_length,
-          'bitragion_menton_arc' => latest_facial_measurement.bitragion_menton_arc,
-          'bitragion_subnasale_arc' => latest_facial_measurement.bitragion_subnasale_arc,
-          'cheek_fullness' => latest_facial_measurement.cheek_fullness,
-          'nasal_root_breadth' => latest_facial_measurement.nasal_root_breadth,
-          'nose_protrusion' => latest_facial_measurement.nose_protrusion,
-          'nose_bridge_height' => latest_facial_measurement.nose_bridge_height,
-          'lip_width' => latest_facial_measurement.lip_width,
-          'head_circumference' => latest_facial_measurement.head_circumference,
-          'nose_breadth' => latest_facial_measurement.nose_breadth,
-          'arkit' => latest_facial_measurement.arkit
-        })
+                     'facial_measurement_id' => latest_facial_measurement.id,
+                     'source' => latest_facial_measurement.source,
+                     'face_width' => latest_facial_measurement.face_width,
+                     'jaw_width' => latest_facial_measurement.jaw_width,
+                     'face_depth' => latest_facial_measurement.face_depth,
+                     'face_length' => latest_facial_measurement.face_length,
+                     'lower_face_length' => latest_facial_measurement.lower_face_length,
+                     'bitragion_menton_arc' => latest_facial_measurement.bitragion_menton_arc,
+                     'bitragion_subnasale_arc' => latest_facial_measurement.bitragion_subnasale_arc,
+                     'cheek_fullness' => latest_facial_measurement.cheek_fullness,
+                     'nasal_root_breadth' => latest_facial_measurement.nasal_root_breadth,
+                     'nose_protrusion' => latest_facial_measurement.nose_protrusion,
+                     'nose_bridge_height' => latest_facial_measurement.nose_bridge_height,
+                     'lip_width' => latest_facial_measurement.lip_width,
+                     'head_circumference' => latest_facial_measurement.head_circumference,
+                     'nose_breadth' => latest_facial_measurement.nose_breadth,
+                     'arkit' => latest_facial_measurement.arkit
+                   })
       end
 
       result << row
@@ -82,9 +82,9 @@ class ManagedUser < ApplicationRecord
 
   def self.for_manager_and_managed(args)
     # Use ActiveRecord queries to ensure encryption/decryption works properly
-    managed_user = ManagedUser.includes(:managed => :profile)
-                             .where(manager_id: args[:manager_id], managed_id: args[:managed_id])
-                             .first
+    managed_user = ManagedUser.includes(managed: :profile)
+                              .where(manager_id: args[:manager_id], managed_id: args[:managed_id])
+                              .first
 
     return [] unless managed_user
 
@@ -130,28 +130,28 @@ class ManagedUser < ApplicationRecord
     # Add facial measurement data if available
     if latest_facial_measurement
       row.merge!({
-        'facial_measurement_id' => latest_facial_measurement.id,
-        'source' => latest_facial_measurement.source,
-        'face_width' => latest_facial_measurement.face_width,
-        'jaw_width' => latest_facial_measurement.jaw_width,
-        'face_depth' => latest_facial_measurement.face_depth,
-        'face_length' => latest_facial_measurement.face_length,
-        'lower_face_length' => latest_facial_measurement.lower_face_length,
-        'bitragion_menton_arc' => latest_facial_measurement.bitragion_menton_arc,
-        'bitragion_subnasale_arc' => latest_facial_measurement.bitragion_subnasale_arc,
-        'cheek_fullness' => latest_facial_measurement.cheek_fullness,
-        'nasal_root_breadth' => latest_facial_measurement.nasal_root_breadth,
-        'nose_protrusion' => latest_facial_measurement.nose_protrusion,
-        'nose_bridge_height' => latest_facial_measurement.nose_bridge_height,
-        'lip_width' => latest_facial_measurement.lip_width,
-        'head_circumference' => latest_facial_measurement.head_circumference,
-        'nose_breadth' => latest_facial_measurement.nose_breadth,
-        'arkit' => latest_facial_measurement.arkit
-      })
+                   'facial_measurement_id' => latest_facial_measurement.id,
+                   'source' => latest_facial_measurement.source,
+                   'face_width' => latest_facial_measurement.face_width,
+                   'jaw_width' => latest_facial_measurement.jaw_width,
+                   'face_depth' => latest_facial_measurement.face_depth,
+                   'face_length' => latest_facial_measurement.face_length,
+                   'lower_face_length' => latest_facial_measurement.lower_face_length,
+                   'bitragion_menton_arc' => latest_facial_measurement.bitragion_menton_arc,
+                   'bitragion_subnasale_arc' => latest_facial_measurement.bitragion_subnasale_arc,
+                   'cheek_fullness' => latest_facial_measurement.cheek_fullness,
+                   'nasal_root_breadth' => latest_facial_measurement.nasal_root_breadth,
+                   'nose_protrusion' => latest_facial_measurement.nose_protrusion,
+                   'nose_bridge_height' => latest_facial_measurement.nose_bridge_height,
+                   'lip_width' => latest_facial_measurement.lip_width,
+                   'head_circumference' => latest_facial_measurement.head_circumference,
+                   'nose_breadth' => latest_facial_measurement.nose_breadth,
+                   'arkit' => latest_facial_measurement.arkit
+                 })
 
       # Calculate missing ratio if needed
       # Note: This is a simplified version - you may need to implement the full missing_ratio_sql logic
-      row['missing_ratio'] = 0.0  # Placeholder - implement actual calculation if needed
+      row['missing_ratio'] = 0.0 # Placeholder - implement actual calculation if needed
     end
 
     [row]
