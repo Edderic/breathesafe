@@ -60,6 +60,7 @@ import RespiratorUser from '../respirator_user.vue'
 import Registration from '../registration.vue'
 import SignIn from '../sign_in.vue'
 import TermsOfService from '../terms_of_service.vue'
+import AdminStudyParticipants from '../admin_study_participants.vue'
 import { useEventStore } from '../stores/event_store.js';
 import { useMainStore } from '../stores/main_store.js';
 
@@ -108,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/terms_of_service', component: TermsOfService, name: 'TermsOfService' },
     { path: '/consent_form', component: ConsentForm, name: 'ConsentForm' },
     { path: '/privacy', component: PrivacyPolicy, name: 'PrivacyPolicy' },
+    { path: '/admin/study_participants', component: AdminStudyParticipants, name: 'AdminStudyParticipants' },
   ]
 
   // 3. Create the router instance and pass the `routes` option

@@ -84,4 +84,9 @@ Rails.application.routes.draw do
   resource :csrf_token, only: [:show]
 
   resources :facial_measurements_fit_tests, only: %i[create index]
+
+  # Admin routes
+  namespace :admin do
+    resources :study_participants, only: [:index]
+  end
 end
