@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_251_026_022_834) do
+ActiveRecord::Schema[7.0].define(version: 20_251_027_020_732) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -224,13 +224,6 @@ ActiveRecord::Schema[7.0].define(version: 20_251_026_022_834) do
     t.datetime 'updated_at', null: false
     t.index %w[uuid refresh_datetime], name: 'index_nebulizer_statuses_on_uuid_and_refresh_datetime', unique: true
     t.index ['uuid'], name: 'index_nebulizer_statuses_on_uuid'
-  end
-
-  create_table 'population_states', force: :cascade do |t|
-    t.integer 'population'
-    t.string 'name'
-    t.datetime 'created_at', null: false
-    t.datetime 'updated_at', null: false
   end
 
   create_table 'profiles', force: :cascade do |t|
