@@ -9,7 +9,7 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
   let(:facial_measurement) { create(:facial_measurement, :complete, user: user) }
 
   describe '.call' do
-    context '3M 1870+ AURA N99 to N95 conversion' do
+    context 'when 3M 1870+ AURA N99 to N95 conversion' do
       let(:special_mask) { create(:mask, unique_internal_model_code: '3M 1870+ AURA™') }
 
       let!(:n99_fit_test_for_3m_1870) do
@@ -80,13 +80,16 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
 
       it 'converts N99 test to N95 HMFF > 100 and qlft_pass true' do
         results = described_class.call.to_a
-        row = results.find { |r| r['id'] == n99_fit_test_for_3m_1870.id && r['source'] == 'N99ModeToN95ModeConverterService' }
+        row = results.find do |r|
+          r['id'] == n99_fit_test_for_3m_1870.id && r['source'] == 'N99ModeToN95ModeConverterService'
+        end
         expect(row).not_to be_nil
         expect(row['n95_mode_hmff']).to be > 100
         expect(row['qlft_pass']).to be true
         expect(row['unique_internal_model_code']).to eq('3M 1870+ AURA™')
       end
     end
+
     context 'with all types of fit tests' do
       let!(:n95_fit_test) do
         create(:fit_test,
@@ -263,7 +266,5 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
         expect(results).to be_empty
       end
     end
-
-
   end
 end
