@@ -31,7 +31,7 @@ module Users
     # end
     def after_confirmation_path_for(_resource_name, resource)
       sign_in(resource)
-      "#{request.base_url}/#/profile"
+      "#{request.base_url}/#/respirator_users"
     end
   end
 end
