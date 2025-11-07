@@ -14,7 +14,7 @@ module Users
         format.json do
           render json: {
             currentUser: current_user,
-            consentFormVersion: Rails.application.config.x.consent_form_version
+            consentFormVersion: consent_form_version
           }.to_json
         end
       end

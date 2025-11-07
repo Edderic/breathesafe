@@ -30,7 +30,7 @@ class RegistrationsController < Devise::RegistrationsController
     if resource.persisted?
       # If user accepted consent during registration, set consent fields
       if [true, 'true', '1', true].include?(accept_consent)
-        current_version = Rails.application.config.x.consent_form_version
+        current_version = consent_form_version
         if current_version.is_a?(String) && current_version.present?
           # Use update to respect validations
           resource.update(

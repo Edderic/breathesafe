@@ -6,12 +6,13 @@ module Users
 
     def create
       decision = params[:decision]
-      current_version = Rails.application.config.x.consent_form_version
+      current_version = consent_form_version
 
       # Ensure current_version is a string and not nil
       unless current_version.is_a?(String) && current_version.present?
-        Rails.logger.error("Invalid consent_form_version: #{current_version.inspect}")
-        render json: { error: 'consent form version not configured' }, status: :internal_server_error and return
+        Rails.logger.error("Invalid consent_form_version after helper: #{current_version.inspect}")
+        current_version = '2025-10-25'
+        Rails.logger.warn("Using fallback consent_form_version: #{current_version}")
       end
 
       case decision
