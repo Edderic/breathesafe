@@ -541,7 +541,12 @@ export default {
                      versionChanged;
     if (needsInfo) {
       this.showInfoPopup = true;
-      this.infoVersion = this.$route.query.latest_version || this.consentFormVersion || '';
+      // Ensure latest_version is a string, not [object Object]
+      const routeVersion = this.$route.query.latest_version;
+      const versionString = typeof routeVersion === 'string' && routeVersion !== '[object Object]'
+        ? routeVersion
+        : (this.consentFormVersion || '');
+      this.infoVersion = versionString;
     }
   },
   methods: {

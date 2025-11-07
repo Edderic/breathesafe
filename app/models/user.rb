@@ -7,6 +7,9 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable,
          :confirmable, :lockable, :timeoutable, :trackable
 
+  # Validate consent_form_version_accepted if present
+  validate :consent_form_version_accepted_format, if: -> { consent_form_version_accepted.present? }
+
   has_one :profile, dependent: :destroy, inverse_of: :user
   has_many :events, foreign_key: 'author_id', dependent: :destroy, inverse_of: :user
   has_many :masks, foreign_key: 'author_id', inverse_of: :user # rubocop:disable Rails/HasManyOrHasOneDependent
@@ -52,6 +55,16 @@ class User < ApplicationRecord
     # the managed users of this user.
     # If we don't do this and just assume that everyone has the same set of
     # targeted masks, it's simpler, but not flexible and could give wrong data
+  end
+
+  # Validation for consent_form_version_accepted
+  def consent_form_version_accepted_format
+    # Reject invalid values like "{}" or empty strings
+    if consent_form_version_accepted == '{}' ||
+       consent_form_version_accepted.blank? ||
+       !consent_form_version_accepted.is_a?(String)
+      errors.add(:consent_form_version_accepted, 'must be a valid version string')
+    end
   end
 
   # Override Devise's notification sending to handle SMTP errors gracefully

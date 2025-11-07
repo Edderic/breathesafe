@@ -92,7 +92,11 @@ export const useMainStore = defineStore('main', {
       await axios.get('/users/get_current_user.json')
         .then(response => {
           this.currentUser = response.data.currentUser;
-          this.consentFormVersion = response.data.consentFormVersion;
+          // Ensure consentFormVersion is always a string
+          const version = response.data.consentFormVersion;
+          this.consentFormVersion = typeof version === 'string'
+            ? version
+            : (version ? String(version) : undefined);
           this.signedIn = !!response.data.currentUser;
           console.log('this.signedIn', this.signedIn)
           // whatever you want

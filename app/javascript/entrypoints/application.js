@@ -138,7 +138,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const user = main.currentUser;
-    const latest = main.consentFormVersion;
+    // Ensure consentFormVersion is a string, not an object
+    const latest = typeof main.consentFormVersion === 'string'
+      ? main.consentFormVersion
+      : (main.consentFormVersion ? String(main.consentFormVersion) : '');
 
     const needsConsent = !!user && !!latest && user.consent_form_version_accepted !== latest && !main.consentDismissedForSession;
     const navigatingToConsent = to.name === 'ConsentForm';
@@ -148,10 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
       next({
         name: 'ConsentForm',
         query: {
-          return_to_name: to.name,
+          return_to_name: to.name || 'Landing',
           return_to_query: JSON.stringify(to.query || {}),
           return_to_params: JSON.stringify(to.params || {}),
-          latest_version: latest || ''
+          latest_version: latest
         }
       });
       return;

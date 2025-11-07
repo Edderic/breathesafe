@@ -145,7 +145,8 @@ export default {
       axios.post('/users', {
         user: {
           email: this.email,
-          password: this.password
+          password: this.password,
+          accept_consent: this.agreeTOSMedicalDisclaimerPrivacyPolicy
         }
       })
       .then(response => {
