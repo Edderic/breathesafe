@@ -45,10 +45,6 @@
                         Participant UUID
                         <i class="fas fa-sort ms-1" :class="getSortIcon('participant_uuid')"></i>
                       </th>
-                      <th @click="sortBy('created_at')" class="sortable">
-                        Created At
-                        <i class="fas fa-sort ms-1" :class="getSortIcon('created_at')"></i>
-                      </th>
                       <th @click="sortBy('finished_study_datetime')" class="sortable">
                         Finished Study
                         <i class="fas fa-sort ms-1" :class="getSortIcon('finished_study_datetime')"></i>
@@ -62,12 +58,6 @@
                     <tr v-for="participant in paginatedParticipants" :key="participant.participant_uuid">
                       <td>
                         <code class="text-muted">{{ participant.participant_uuid }}</code>
-                      </td>
-                      <td>
-                        <span v-if="participant.created_at">
-                          {{ formatDateTime(participant.created_at) }}
-                        </span>
-                        <span v-else class="text-muted">-</span>
                       </td>
                       <td>
                         <span v-if="participant.finished_study_datetime">
