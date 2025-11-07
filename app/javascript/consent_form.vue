@@ -309,18 +309,22 @@
         <p>Sensitive data like facial measurements will be stored in a database.
         Data such as the following will be collected:
         <ul>
-          <li>first name - encrypted*.</li>
-          <li>last name - encrypted*.</li>
-          <li>email - you can choose to be anonymous. You can create an email that does not reference your identity and use that email.</li>
+          <li>first name</li>
+          <li>last name</li>
+          <li>email</li>
           <li>home address (optional) - If you need financial assistance with buying equipment for testing purposes. Breathesafe LLC can order equipment on your behalf and send them your way. See the <a href="#compensation">compensation</a> section for details.</li>
-          <li>facial measurement data - to create a recommendation system tailored to the individual.**</li>
+          <li>facial measurement data - to create a recommendation system tailored to the individual.</li>
           <li>fit testing measurement tools used (e.g. PortaCount)</li>
           <li>fit testing results (e.g. pass/fail for Qualitative Fit Testing, fit factors for Quantitative Fit Testing)</li>
         </ul>
         </p>
 
-        <p>* Breathesafe app uses standard AES-256 encryption.</p>
-        <p>** Only measurements related to mask fitting will be recorded (e.g. nose, cheek, chin measurements)</p>
+        <p>
+          To protect your sensitive data, Breathesafe uses <a href='https://guides.rubyonrails.org/active_record_encryption.html'>application-level encryption</a>
+          to minimize risk in the unlikely event of a data breach. Further, you can make use of an alias (i.e. first name, last name, email that does not reference your real names) to mitigate risk even further.
+        </p>
+
+        <p>With respect to facial measurements, only the minimal amount related to mask fitting will be recorded (e.g. nose, cheek, chin measurements).</p>
 
         <div id='benefits'>
           <br>
@@ -362,9 +366,10 @@
         <p>
         Breathesafe LLC will follow best security practices to prevent malicious actors from accessing said database. Example of such actions are:
         <ul>
+          <li>using application-level encryption.</li>
           <li>using https to prevent man-in-the-middle attacks.</li>
-          <li>admins will be using password managers and two factor authentication</li>
-          <li>number of admins will be as small as possible to limit risk</li>
+          <li>admins will be using password managers and two factor authentication.</li>
+          <li>number of admins will be as small as possible to limit risk.</li>
         </ul>
         </p>
 
