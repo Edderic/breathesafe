@@ -53,4 +53,23 @@ class User < ApplicationRecord
     # If we don't do this and just assume that everyone has the same set of
     # targeted masks, it's simpler, but not flexible and could give wrong data
   end
+
+  # Override Devise's notification sending to handle SMTP errors gracefully
+  # This prevents user registration from failing if email delivery fails
+  def send_devise_notification(notification, *args)
+    super
+  rescue ArgumentError => e
+    # Handle SMTP configuration errors (e.g., missing API key)
+    if e.message.include?('SMTP-AUTH') || e.message.include?('secret phrase')
+      Rails.logger.error("Failed to send #{notification} email to #{email}: #{e.message}")
+      # Don't re-raise - allow user registration to succeed even if email fails
+      return
+    end
+    raise
+  rescue StandardError => e
+    # Log other email errors but don't fail registration
+    Rails.logger.error("Failed to send #{notification} email to #{email}: #{e.class}: #{e.message}")
+    Rails.logger.error(e.backtrace.join("\n")) if e.backtrace
+    # Don't re-raise - allow user registration to succeed even if email fails
+  end
 end

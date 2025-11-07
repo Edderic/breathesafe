@@ -528,7 +528,17 @@ export default {
   },
   async mounted() {
     await this.getCurrentUser();
-    const needsInfo = !!this.currentUser && !!this.consentFormVersion && this.currentUser.consent_form_version_accepted !== this.consentFormVersion;
+    // Only show the "We updated our Consent Form" popup if:
+    // 1. User exists and consent form version exists
+    // 2. User has previously accepted a consent form (consent_form_version_accepted is not null/undefined)
+    // 3. The accepted version is different from the current version (meaning the form was updated)
+    // This prevents showing the popup to users who just accepted the current version during registration
+    const hasAcceptedBefore = !!this.currentUser?.consent_form_version_accepted;
+    const versionChanged = hasAcceptedBefore &&
+                          this.currentUser.consent_form_version_accepted !== this.consentFormVersion;
+    const needsInfo = !!this.currentUser &&
+                     !!this.consentFormVersion &&
+                     versionChanged;
     if (needsInfo) {
       this.showInfoPopup = true;
       this.infoVersion = this.$route.query.latest_version || this.consentFormVersion || '';
