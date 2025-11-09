@@ -27,6 +27,8 @@ class FacialMeasurement < ApplicationRecord
 
   belongs_to :user
 
+  validate :validate_arkit_structure, if: -> { arkit.present? }
+
   def self.latest(user)
     facial_measurements = FacialMeasurement.where(user_id: user.id).order(:created_at)
 
@@ -73,5 +75,84 @@ class FacialMeasurement < ApplicationRecord
           FROM latest_facial_measurement_missing_counts
         )
     SQL
+  end
+
+  private
+
+  def validate_arkit_structure
+    # arkit must be a hash
+    unless arkit.is_a?(Hash)
+      errors.add(:arkit, 'must be a hash')
+      return
+    end
+
+    # Must have "average_measurements" key
+    unless arkit.key?('average_measurements')
+      errors.add(:arkit, 'must have an "average_measurements" key')
+      return
+    end
+
+    average_measurements = arkit['average_measurements']
+
+    # "average_measurements" must be a hash
+    unless average_measurements.is_a?(Hash)
+      errors.add(:arkit, '"average_measurements" must be a hash')
+      return
+    end
+
+    # rubocop:disable Layout/LineLength
+    # Validate each entry in average_measurements
+    average_measurements.each do |key, value|
+      # Key must match pattern: digits-dash-digits (e.g., "14-818")
+      unless key.is_a?(String) && key.match?(/^\d+-\d+$/)
+        errors.add(
+          :arkit,
+          "key in average_measurements must match pattern 'digits-dash-digits' (e.g., '14-818'), got: #{key.inspect}")
+        next
+      end
+
+      # Value must be a hash
+      unless value.is_a?(Hash)
+        errors.add(
+          :arkit,
+          "value for key '#{key}' in average_measurements must be a hash"
+        )
+        next
+      end
+
+      # Must have "value" key with positive float
+      unless value.key?('value')
+        errors.add(
+          :arkit,
+          "hash for key '#{key}' in average_measurements must have 'value' key"
+        )
+        next
+      end
+
+      value_float = value['value']
+      unless value_float.is_a?(Numeric) && value_float.to_f.positive?
+        errors.add(
+          :arkit,
+          "value for key '#{key}' in average_measurements must be a positive float, got: #{value_float.inspect}"
+        )
+      end
+
+      # Must have "description" key with string value
+      unless value.key?('description')
+        errors.add(
+          :arkit,
+          "hash for key '#{key}' in average_measurements must have 'description' key"
+        )
+        next
+      end
+
+      unless value['description'].is_a?(String)
+        errors.add(
+          :arkit,
+          "description for key '#{key}' in average_measurements must be a string, got: #{value['description'].class}"
+        )
+      end
+    end
+    # rubocop:enable Layout/LineLength
   end
 end
