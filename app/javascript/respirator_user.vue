@@ -25,14 +25,6 @@
       />
     </div>
 
-    <div class='menu row' v-show="tabToShow == 'Facial Measurements'">
-      <TabSet
-        :options='facialMeasurementParts'
-        @update='setSecondaryRouteTo'
-        :tabToShow='secondaryTab'
-      />
-    </div>
-
     <div class='main justify-items-center' v-if='tabToShow=="Name"'>
       <p class='narrow-p '>
         A user could input data on behalf of other users (e.g. a parent inputting data of their children).
@@ -110,16 +102,28 @@
     <div class="edit-facial-measurements" v-if='tabToShow=="Facial Measurements"'>
 
       <div class='left-pane' >
-        <p v-if='infoToShow == "straightLineMeasurementsGuide"' >For measuring straight lines (e.g. face width (B), face length (D), etc.), we recommend a digital caliper such as <a href="https://www.amazon.com/gp/product/B00JALAIIE/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1" target='_blank'>this</a>.</p>
-        <a href="https://www.amazon.com/gp/product/B00JALAIIE/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1" target='_blank' v-if='infoToShow == "straightLineMeasurementsGuide"' >
-          <img class='left-pane-image' src="https://c.media-amazon.com/images/I/6194IWMjJEL._SX522_.jpg" alt='iGaging 6" Digital External Outside Caliper OD for Woodworking' v-if='infoToShow == "straightLineMeasurementsGuide"' >
-        </a>
+        <p v-if='infoToShow == "straightLineMeasurementsGuide"' >
+An iOS app is currently in development to make the facial measurement collection seamless. Please reach out to info@breathesafe.xyz to get some information about how to get access to this app. After following instructions in the app, you'll be asked to upload data. If successful, you'll see the data here, in JSON format.
+</p>
 
-        <p v-show='infoToShow == "curvedMeasurementsGuide"'>For measuring curves (e.g. bitragion subnasale arc (L) and bitragion menton arc (K)), we recommend a tape measure such as <a href="https://www.amazon.com/dp/B0BGHCTL45?ref=ppx_yo2ov_dt_b_fed_asin_title">this</a>.</p>
-
-        <a v-show='infoToShow == "curvedMeasurementsGuide"' href="https://www.amazon.com/dp/B0BGHCTL45?ref=ppx_yo2ov_dt_b_fed_asin_title" target='_blank'>
-          <img class='left-pane-image' src="https://c.media-amazon.com/images/I/71Cwjwnqc6L._SL1500_.jpg" alt='Tape Measure, iBayam Soft Ruler Measuring Tape for Body Weight Loss Fabric Sewing Tailor Cloth Vinyl Measurement Craft Supplies, 60-Inch Double Scale Ruler, 2-Pack White, Blue' v-show='infoToShow == "curvedMeasurementsGuide"'>
-        </a>
+        <!-- iOS App Data (ARKit) -->
+        <div v-if='infoToShow == "straightLineMeasurementsGuide"' style="margin: 1em 0;">
+          <h4>iOS App Data</h4>
+          <div v-if='mode == "View"'>
+            <pre v-if='latestFacialMeasurement && latestFacialMeasurement.arkit' style="background-color: #f5f5f5; padding: 1em; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; overflow-y: auto; max-height: 40vh;">{{ formattedArkit }}</pre>
+            <p v-else style="color: #666; font-style: italic;">No iOS app data available.</p>
+          </div>
+          <div v-else>
+            <textarea
+              v-if='latestFacialMeasurement'
+              v-model='arkitTextareaValue'
+              @input='updateArkitFromTextarea'
+              style="width: 100%; min-height: 200px; font-family: monospace; padding: 1em; border: 1px solid #ccc; border-radius: 4px;"
+              placeholder='Enter JSON data here...'
+            ></textarea>
+            <p v-else style="color: #666; font-style: italic;">No facial measurement available.</p>
+          </div>
+        </div>
 
         <div v-for='(value, key, index) in facialMeasurementExplanations'>
 
@@ -162,313 +166,86 @@
           <tbody>
             <tr>
               <th colspan="1">
-                <label for="faceWidth">Face Width (mm) </label>
+                <label>Nose (mm)</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('faceWidthMm')" :highlight="infoToShow == 'faceWidthMm'"/>
+                <CircularButton text="?" @click="toggleInfo('noseArkit')" :highlight="infoToShow == 'noseArkit'"/>
               </td>
-
               <td>
-                <input
-                    v-if='latestFacialMeasurement'
-                    type='number'
-                    :value="latestFacialMeasurement.faceWidth"
-                    @change='setFacialMeasurement($event, "faceWidth")'
-                    :disabled="mode == 'View'"
-                    >
+                <span v-if="aggregatedArkitMeasurements.nose !== null">
+                  {{ aggregatedArkitMeasurements.nose.toFixed(1) }}
+                </span>
+                <span v-else style="color: #666; font-style: italic;">Incomplete</span>
               </td>
             </tr>
 
             <tr>
               <th colspan="1">
-                <label for="jawWidth">Jaw Width (mm)</label>
+                <label>Strap (mm)</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('jawWidthMm')" :highlight="infoToShow == 'jawWidthMm'"/>
+                <CircularButton text="?" @click="toggleInfo('strapArkit')" :highlight="infoToShow == 'strapArkit'"/>
               </td>
               <td>
-                <input
-                    v-if='latestFacialMeasurement'
-                    type='number'
-                    :value="latestFacialMeasurement.jawWidth"
-                    @change='setFacialMeasurement($event, "jawWidth")'
-                    :disabled="mode == 'View'"
-                    >
+                <span v-if="aggregatedArkitMeasurements.strap !== null">
+                  {{ aggregatedArkitMeasurements.strap.toFixed(1) }}
+                </span>
+                <span v-else style="color: #666; font-style: italic;">Incomplete</span>
               </td>
             </tr>
-            <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
+
+            <tr>
               <th colspan="1">
-                <label for="faceDepth">Face Depth (mm)</label>
+                <label>Top Cheek (mm)</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('faceDepth')" :highlight="infoToShow == 'faceDepth'"/>
+                <CircularButton text="?" @click="toggleInfo('topCheekArkit')" :highlight="infoToShow == 'topCheekArkit'"/>
               </td>
               <td>
-                <input
-                    v-if='latestFacialMeasurement'
-                    type='number'
-                    :value="latestFacialMeasurement.faceDepth"
-                    @change='setFacialMeasurement($event, "faceDepth")'
-                    :disabled="mode == 'View'"
-                    >
+                <span v-if="aggregatedArkitMeasurements.topCheek !== null">
+                  {{ aggregatedArkitMeasurements.topCheek.toFixed(1) }}
+                </span>
+                <span v-else style="color: #666; font-style: italic;">Incomplete</span>
               </td>
             </tr>
 
-            <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
+            <tr>
               <th colspan="1">
-                <label for="faceLength">Face Length (mm)</label>
+                <label>Mid Cheek (mm)</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('faceLengthMm')" :highlight="infoToShow == 'faceLengthMm'"/>
+                <CircularButton text="?" @click="toggleInfo('midCheekArkit')" :highlight="infoToShow == 'midCheekArkit'"/>
               </td>
               <td>
-                <input
-                    v-if='latestFacialMeasurement'
-                    type='number'
-                    :value="latestFacialMeasurement.faceLength"
-                    @change='setFacialMeasurement($event, "faceLength")'
-                    :disabled="mode == 'View'"
-                    >
+                <span v-if="aggregatedArkitMeasurements.midCheek !== null">
+                  {{ aggregatedArkitMeasurements.midCheek.toFixed(1) }}
+                </span>
+                <span v-else style="color: #666; font-style: italic;">Incomplete</span>
               </td>
             </tr>
 
-            <tr v-show="secondaryTab == 'Part I' || mode == 'View'">
+            <tr>
               <th colspan="1">
-                <label for="lowerFaceLength">Lower Face Length (mm)</label>
+                <label>Chin (mm)</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('lowerFaceLengthMm')" :highlight="infoToShow == 'lowerFaceLengthMm'"/>
+                <CircularButton text="?" @click="toggleInfo('chinArkit')" :highlight="infoToShow == 'chinArkit'"/>
               </td>
               <td>
-                <input
-                    v-if='latestFacialMeasurement'
-                    type='number'
-                    :value="latestFacialMeasurement.lowerFaceLength"
-                    @change='setFacialMeasurement($event, "lowerFaceLength")'
-                    :disabled="mode == 'View'"
-                    >
+                <span v-if="aggregatedArkitMeasurements.chin !== null">
+                  {{ aggregatedArkitMeasurements.chin.toFixed(1) }}
+                </span>
+                <span v-else style="color: #666; font-style: italic;">Incomplete</span>
               </td>
             </tr>
-
-
             </tbody>
           </table>
           </div>
-          <div class='flex-dir-col'  v-show="secondaryTab == 'Part II'">
-            <br>
-
-            <table>
-              <tbody>
-              <tr>
-                <th colspan='2' ><h3>Straight-line Measurements (Part II)</h3></th>
-                <td>
-                  <CircularButton text="?" @click="toggleInfo('straightLineMeasurementsGuide')" :highlight="infoToShow == 'straightLineMeasurementsGuide'"/>
-                </td>
-              </tr>
-              <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
-                <th colspan="1">
-                  <label for="noseProtrusion">Nose Breadth (mm)</label>
-                </th>
-
-                <td>
-                  <CircularButton text="?" @click="toggleInfo('noseBreadthMm')" :highlight="infoToShow == 'noseBreadthMm'"/>
-                </td>
-                <td>
-                  <input
-                      v-if='latestFacialMeasurement'
-                      type='number'
-                      :value="latestFacialMeasurement.noseBreadth"
-                      @change='setFacialMeasurement($event, "noseBreadth")'
-                      :disabled="mode == 'View'"
-                      >
-                </td>
-              </tr>
-
-              <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
-                <th colspan="1">
-                  <label for="noseProtrusion">Nose Protrusion (mm)</label>
-                </th>
-
-                <td>
-                  <CircularButton text="?" @click="toggleInfo('noseProtrusionMm')" :highlight="infoToShow == 'noseProtrusionMm'"/>
-                </td>
-                <td>
-                  <input
-                      v-if='latestFacialMeasurement'
-                      type='number'
-                      :value="latestFacialMeasurement.noseProtrusion"
-                      @change='setFacialMeasurement($event, "noseProtrusion")'
-                      :disabled="mode == 'View'"
-                      >
-                </td>
-              </tr>
-
-              <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
-                <th colspan="1">
-                  <label for="nasalRootBreadth">Nasal Root Breadth (mm)</label>
-                </th>
-
-                <td>
-                  <CircularButton text="?" @click="toggleInfo('nasalRootBreadthMm')" :highlight="infoToShow == 'nasalRootBreadthMm'"/>
-                </td>
-                <td>
-                  <input
-                      v-if='latestFacialMeasurement'
-                      type='number'
-                      :value="latestFacialMeasurement.nasalRootBreadth"
-                      @change='setFacialMeasurement($event, "nasalRootBreadth")'
-                      :disabled="mode == 'View'"
-                      >
-                </td>
-              </tr>
-
-              <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
-                <th colspan="1">
-                  <label for="noseBridgeHeight">Nose Bridge Height (mm)</label>
-                </th>
-                <td>
-                  <CircularButton text="?" @click="toggleInfo('noseBridgeHeightMm')" :highlight="infoToShow == 'noseBridgeHeightMm'"/>
-                </td>
-                <td>
-                  <input
-                      v-if='latestFacialMeasurement'
-                      type='number'
-                      :value="latestFacialMeasurement.noseBridgeHeight"
-                      @change='setFacialMeasurement($event, "noseBridgeHeight")'
-                      :disabled="mode == 'View'"
-                      >
-                </td>
-              </tr>
-
-              <tr v-show="secondaryTab == 'Part II' || mode == 'View'">
-                <th colspan="1">
-                  <label for="lipWidth">Lip Width (mm)</label>
-                </th>
-                <td>
-                  <CircularButton text="?" @click="toggleInfo('lipWidthMm')" :highlight="infoToShow == 'lipWidthMm'"/>
-                </td>
-                <td>
-                  <input
-                      v-if='latestFacialMeasurement'
-                      type='number'
-                      :value="latestFacialMeasurement.lipWidth"
-                      :disabled="mode == 'View'"
-                      @change='setFacialMeasurement($event, "lipWidth")'
-                      >
-                </td>
-              </tr>
-
-
-
-
-            </tbody>
-          </table>
-        </div>
 
         <div class='flex-dir-col'>
 
         <br>
-
-        <table v-show="secondaryTab == 'Part III'" >
-          <tbody>
-
-            <tr>
-              <th colspan='2'><h3>Curved Measurements</h3></th>
-              <td>
-                <CircularButton text="?" @click="toggleInfo('curvedMeasurementsGuide')" :highlight="infoToShow == 'curvedMeasurementsGuide'"/>
-              </td>
-            </tr>
-
-            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
-              <th colspan="1">
-                <label for="bitragionMentonArc">Bitragion Menton Arc (mm)</label>
-              </th>
-              <td>
-                <CircularButton text="?" @click="toggleInfo('bitragionMentonArcMm')" :highlight="infoToShow == 'bitragionMentonArcMm'"/>
-              </td>
-              <td>
-                <input
-                    v-if='latestFacialMeasurement'
-                    type='number'
-                    :value="latestFacialMeasurement.bitragionMentonArc"
-                    @change='setFacialMeasurement($event, "bitragionMentonArc")'
-                    :disabled="mode == 'View'"
-                    >
-              </td>
-            </tr>
-
-            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
-              <th colspan="1">
-                <label for="bitragionSubnasaleArc">Bitragion Subnasale Arc (mm)</label>
-              </th>
-              <td>
-                <CircularButton text="?" @click="toggleInfo('bitragionSubnasaleArcMm')" :highlight="infoToShow == 'bitragionSubnasaleArcMm'"/>
-              </td>
-              <td>
-                <input
-                    v-if='latestFacialMeasurement'
-                    type='number'
-                    :value="latestFacialMeasurement.bitragionSubnasaleArc"
-                    @change='setFacialMeasurement($event, "bitragionSubnasaleArc")'
-                    :disabled="mode == 'View'"
-                    >
-              </td>
-            </tr>
-
-            <tr v-show="secondaryTab == 'Part III' || mode == 'View'">
-              <th colspan="1">
-                <label for="headCircumference">Head Circumference (mm)</label>
-              </th>
-              <td>
-                <CircularButton text="?" @click="toggleInfo('headCircumferenceMm')" :highlight="infoToShow == 'headCircumferenceMm'"/>
-              </td>
-              <td>
-                <input
-                    v-if='latestFacialMeasurement'
-                    type='number'
-                    :value="latestFacialMeasurement.headCircumference"
-                    @change='setFacialMeasurement($event, "headCircumference")'
-                    :disabled="mode == 'View'"
-                    >
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <table v-show="secondaryTab == 'Part III'">
-          <thead>
-            <tr>
-              <th colspan='3'><h3>Qualitative Measurements</h3></th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr>
-              <th>
-                <label for="cheekFullness">Cheek Fullness</label>
-              </th>
-              <td>
-                <CircularButton text="?" @click="toggleInfo('cheekFullness')" :highlight="infoToShow == 'cheekFullness'"/>
-              </td>
-              <td>
-                <select
-                    v-if='latestFacialMeasurement'
-                    :value="latestFacialMeasurement.cheekFullness"
-                    @change='setFacialMeasurement($event, "cheekFullness")'
-                    :disabled="mode == 'View'"
-                    >
-                    <option>hollow/gaunt</option>
-                    <option>medium</option>
-                    <option>rounded/full</option>
-                </select>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
       </div>
-
-
     </div>
 
     <br>
@@ -494,7 +271,7 @@ import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import TabSet from './tab_set.vue'
 import { getFacialMeasurements } from './facial_measurements.js'
-import { deepSnakeToCamel, setupCSRF } from './misc.js'
+import { deepSnakeToCamel, deepCamelToSnake, setupCSRF } from './misc.js'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
@@ -517,12 +294,6 @@ export default {
         {
           text: "Part I",
         },
-        {
-          text: "Part II",
-        },
-        {
-          text: "Part III"
-        }
       ],
       secondaryTab: 'Part I',
 
@@ -584,7 +355,8 @@ export default {
         "Other"
       ],
       facialMeasurements: [],
-      infoToShow: "straightLineMeasurementsGuide"
+      infoToShow: "straightLineMeasurementsGuide",
+      arkitTextareaValue: ''
     }
   },
   props: {
@@ -642,6 +414,149 @@ export default {
         return new Date(a.createdAt) > new Date(b.createdAt)
       })
     },
+    formattedArkit() {
+      if (!this.latestFacialMeasurement || !this.latestFacialMeasurement.arkit) {
+        return '';
+      }
+      try {
+        return JSON.stringify(this.latestFacialMeasurement.arkit, null, 2);
+      } catch (e) {
+        return String(this.latestFacialMeasurement.arkit);
+      }
+    },
+    aggregatedArkitMeasurements() {
+      if (!this.latestFacialMeasurement || !this.latestFacialMeasurement.arkit) {
+        return {
+          nose: null,
+          strap: null,
+          topCheek: null,
+          midCheek: null,
+          chin: null
+        };
+      }
+
+      const arkit = this.latestFacialMeasurement.arkit;
+      let measurementsDict = arkit;
+
+      // Debug: log the arkit structure
+      console.log('[ARKit Aggregation] Full arkit object:', arkit);
+
+      // Handle nested data structures - check if measurements are nested
+      if (arkit && typeof arkit === 'object' && !Array.isArray(arkit)) {
+        // Check if there's an 'averageMeasurements' key (camelCase from deepSnakeToCamel)
+        if (arkit.averageMeasurements && typeof arkit.averageMeasurements === 'object') {
+          measurementsDict = arkit.averageMeasurements;
+          console.log('[ARKit Aggregation] Using averageMeasurements (camelCase)');
+        }
+        // Check if there's an 'average_measurements' key (snake_case, fallback)
+        else if (arkit.average_measurements && typeof arkit.average_measurements === 'object') {
+          measurementsDict = arkit.average_measurements;
+          console.log('[ARKit Aggregation] Using average_measurements (snake_case)');
+        } else {
+          console.log('[ARKit Aggregation] Using top-level arkit object');
+        }
+      }
+
+      console.log('[ARKit Aggregation] Measurements dict keys:', Object.keys(measurementsDict || {}).slice(0, 10));
+
+      // Define the measurement keys for each subsection (from preprocessing.py)
+      const noseKeys = [
+        "160-371", "371-367", "367-387", "387-14",
+        "609-802", "802-798", "798-14", "14-818"
+      ];
+
+      const strapKeys = [
+        "967-464", "464-456", "456-451", "451-455",
+        "999-1027", "1027-884", "884-883", "883-879"
+      ];
+
+      const topCheekKeys = [
+        "879-600", "600-756", "756-862", "862-753", "753-594", "594-582", "582-609",
+        "451-151", "151-321", "321-434", "434-318", "318-145", "145-133", "133-160"
+      ];
+
+      const midCheekKeys = [
+        "509-893", "893-894", "894-881", "881-880", "880-879",
+        "60-478", "478-479", "479-453", "453-452", "452-451"
+      ];
+
+      const chinKeys = [
+        "1049-983", "983-982", "982-1050", "1050-1051", "1051-1052", "1052-1053", "1053-509",
+        "1049-984", "984-985", "985-986", "986-987", "987-988", "988-989", "989-60"
+      ];
+
+      const sumKeys = (keys, data, sectionName) => {
+        let total = 0.0;
+        let foundCount = 0;
+        const missingKeys = [];
+
+        const extractValue = (value) => {
+          if (typeof value === 'number') {
+            return parseFloat(value);
+          } else if (value && typeof value === 'object' && value !== null && !Array.isArray(value)) {
+            // Handle dict format: {'value': 3.82, 'description': '...'}
+            if ('value' in value) {
+              const val = value.value;
+              if (typeof val === 'number') {
+                return parseFloat(val);
+              }
+            }
+          }
+          return null;
+        };
+
+        for (const key of keys) {
+          if (key in data && data[key] !== null && data[key] !== undefined) {
+            const value = extractValue(data[key]);
+            if (value !== null && !isNaN(value) && isFinite(value)) {
+              total += value;
+              foundCount++;
+            } else {
+              missingKeys.push(key);
+            }
+          } else {
+            missingKeys.push(key);
+          }
+        }
+
+        // Return null if no keys were found (incomplete data)
+        if (foundCount === 0) {
+          console.log(`[ARKit Aggregation] ${sectionName}: No keys found. Missing: ${missingKeys.slice(0, 5).join(', ')}`);
+          return null;
+        }
+
+        // Return null if some keys are missing (incomplete)
+        if (foundCount < keys.length) {
+          console.log(`[ARKit Aggregation] ${sectionName}: Incomplete. Found ${foundCount}/${keys.length}. Missing: ${missingKeys.slice(0, 5).join(', ')}`);
+          return null;
+        }
+
+        return total;
+      };
+
+      return {
+        nose: sumKeys(noseKeys, measurementsDict, 'nose'),
+        strap: sumKeys(strapKeys, measurementsDict, 'strap'),
+        topCheek: sumKeys(topCheekKeys, measurementsDict, 'top_cheek'),
+        midCheek: sumKeys(midCheekKeys, measurementsDict, 'mid_cheek'),
+        chin: sumKeys(chinKeys, measurementsDict, 'chin')
+      };
+    },
+  },
+  watch: {
+    mode(newMode) {
+      // Sync textarea when switching to edit mode
+      if (newMode === 'Edit') {
+        this.syncArkitTextarea();
+      }
+    },
+    latestFacialMeasurement: {
+      handler() {
+        // Sync textarea when facial measurement changes
+        this.syncArkitTextarea();
+      },
+      deep: true
+    }
   },
   async created() {
     await this.getCurrentUser()
@@ -756,6 +671,9 @@ export default {
               source: 'caliper for straight lines & tape measure for curves'
             })
           }
+
+          // Sync arkit textarea value when measurements are loaded
+          this.syncArkitTextarea()
           // whatever you want
         })
         .catch(error => {
@@ -767,6 +685,40 @@ export default {
           }
         // whatever you want
         })
+    },
+    syncArkitTextarea() {
+      if (this.latestFacialMeasurement && this.latestFacialMeasurement.arkit) {
+        try {
+          this.arkitTextareaValue = JSON.stringify(this.latestFacialMeasurement.arkit, null, 2);
+        } catch (e) {
+          this.arkitTextareaValue = String(this.latestFacialMeasurement.arkit);
+        }
+      } else {
+        this.arkitTextareaValue = '';
+      }
+    },
+    updateArkitFromTextarea() {
+      if (!this.latestFacialMeasurement) {
+        return;
+      }
+
+      const text = this.arkitTextareaValue.trim();
+
+      if (!text) {
+        // Empty textarea means no arkit data
+        this.latestFacialMeasurement.arkit = null;
+        return;
+      }
+
+      try {
+        // Try to parse as JSON
+        const parsed = JSON.parse(text);
+        this.latestFacialMeasurement.arkit = parsed;
+      } catch (e) {
+        // Invalid JSON - keep the text but don't update the object yet
+        // Validation will happen on save
+        // We could show a warning here if needed
+      }
     },
     validateYearOfBirth() {
       let messages = [];
@@ -799,31 +751,13 @@ export default {
           await this.saveProfile("Facial Measurements")
         }
       } else {
-        if (this.secondaryTab == 'Part I') {
-          if (this.messages.length == 0) {
-            await this.saveFacialMeasurement(function() {
-              this.setSecondaryRouteTo({name: 'Part II'})
-            }.bind(this))
-          }
-        }
-        else if (this.secondaryTab == 'Part II') {
-          if (this.messages.length == 0) {
-            await this.saveFacialMeasurement(function() {
-              this.setSecondaryRouteTo({name: 'Part III'})
-            }.bind(this))
-          }
-        }
-        else if (this.secondaryTab == 'Part III') {
-          if (this.messages.length == 0) {
-            await this.saveFacialMeasurement(function() {
-              this.mode = 'View'
-              this.addMessages(["Successfully saved the last step of facial measurements."])
-
-              this.setSecondaryRouteTo({name: 'Part III'})
-            }.bind(this))
-
-
-          }
+        // Facial Measurements tab - route to Respirator Users after save
+        if (this.messages.length == 0) {
+          await this.saveFacialMeasurement(function() {
+            this.$router.push({
+              name: 'RespiratorUsers'
+            })
+          }.bind(this))
         }
       }
         // must be in Facial Measurements
@@ -876,6 +810,25 @@ export default {
         })
     },
     async saveFacialMeasurement(successCallback) {
+      // Parse arkit from textarea if in edit mode
+      if (this.mode !== 'View' && this.arkitTextareaValue.trim()) {
+        try {
+          this.latestFacialMeasurement.arkit = JSON.parse(this.arkitTextareaValue.trim());
+        } catch (e) {
+          this.addMessages([`Invalid JSON in iOS App Data: ${e.message}`]);
+          return; // Don't save if JSON is invalid
+        }
+      } else if (this.mode !== 'View' && !this.arkitTextareaValue.trim()) {
+        // Empty textarea means no arkit data
+        this.latestFacialMeasurement.arkit = null;
+      }
+
+      // Convert ARKit data from camelCase to snake_case before sending to Ruby
+      let arkitData = null;
+      if (this.latestFacialMeasurement.arkit) {
+        arkitData = deepCamelToSnake(this.latestFacialMeasurement.arkit);
+      }
+
       await axios.post(
         `/users/${this.$route.params.id}/facial_measurements.json`, {
           facial_measurement: {
@@ -894,12 +847,16 @@ export default {
             bitragion_subnasale_arc: this.latestFacialMeasurement.bitragionSubnasaleArc,
             cheek_fullness: this.latestFacialMeasurement.cheekFullness,
             head_circumference: this.latestFacialMeasurement.headCircumference,
+            arkit: arkitData,
             user_id: this.$route.params.id
           }
         }
       )
         .then(response => {
           let data = response.data
+
+          // Reload facial measurements to get the updated data
+          this.loadFacialMeasurements(this.$route.params.id);
 
           successCallback()
           // whatever you want
@@ -911,7 +868,27 @@ export default {
           if (Array.isArray(msgs)) {
             this.addMessages(msgs)
           } else {
-            this.addMessages([error && error.message ? error.message : 'Something went wrong while saving facial measurements.'])
+            // Check for validation errors in the response
+            const errorData = error.response?.data;
+            if (errorData && typeof errorData === 'object') {
+              // Handle Rails validation errors
+              if (errorData.errors && typeof errorData.errors === 'object') {
+                Object.keys(errorData.errors).forEach(key => {
+                  const fieldErrors = Array.isArray(errorData.errors[key])
+                    ? errorData.errors[key]
+                    : [errorData.errors[key]];
+                  fieldErrors.forEach(err => {
+                    this.addMessages([`${key}: ${err}`]);
+                  });
+                });
+              } else if (errorData.error) {
+                this.addMessages([errorData.error]);
+              } else {
+                this.addMessages([error && error.message ? error.message : 'Something went wrong while saving facial measurements.']);
+              }
+            } else {
+              this.addMessages([error && error.message ? error.message : 'Something went wrong while saving facial measurements.']);
+            }
           }
           // whatever you want
         })

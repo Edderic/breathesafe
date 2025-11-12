@@ -100,14 +100,14 @@ class FacialMeasurement < ApplicationRecord
       return
     end
 
-    # rubocop:disable Layout/LineLength
     # Validate each entry in average_measurements
     average_measurements.each do |key, value|
       # Key must match pattern: digits-dash-digits (e.g., "14-818")
       unless key.is_a?(String) && key.match?(/^\d+-\d+$/)
         errors.add(
           :arkit,
-          "key in average_measurements must match pattern 'digits-dash-digits' (e.g., '14-818'), got: #{key.inspect}")
+          "key in average_measurements must match pattern 'digits-dash-digits' (e.g., '14-818'), got: #{key.inspect}"
+        )
         next
       end
 
@@ -146,13 +146,12 @@ class FacialMeasurement < ApplicationRecord
         next
       end
 
-      unless value['description'].is_a?(String)
-        errors.add(
-          :arkit,
-          "description for key '#{key}' in average_measurements must be a string, got: #{value['description'].class}"
-        )
-      end
+      next if value['description'].is_a?(String)
+
+      errors.add(
+        :arkit,
+        "description for key '#{key}' in average_measurements must be a string, got: #{value['description'].class}"
+      )
     end
-    # rubocop:enable Layout/LineLength
   end
 end

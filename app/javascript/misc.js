@@ -774,6 +774,42 @@ export function deepSnakeToCamel(obj) {
   return new_obj
 }
 
+function camelToSnake(str) {
+  // Convert camelCase to snake_case
+  // e.g., "averageMeasurements" -> "average_measurements"
+  // Don't convert if already contains underscores (might be snake_case already)
+  if (str.includes('_')) {
+    return str;
+  }
+  // Insert underscore before capital letters and convert to lowercase
+  return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`).replace(/^_/, '');
+}
+
+export function deepCamelToSnake(obj) {
+  /*
+   * Useful for converting nested objects / arrays. Javascript convention is to use
+   * camelCase while Ruby convention is to use snake_case. This should be
+   * used when converting data from Javascript to the Rails backend.
+   */
+  let new_obj;
+
+  if (Array.isArray(obj)) {
+    new_obj = []
+  } else if (obj == null) {
+    return null
+  } else if (typeof(obj) == 'object') {
+    new_obj = {}
+  } else {
+    return obj
+  }
+
+  for (let o in obj) {
+    new_obj[camelToSnake(o)] = deepCamelToSnake(obj[o])
+  }
+
+  return new_obj
+}
+
 function emissionRate(activityGroups) {
   /*
    * Returns total CO2 emission rate (L/s)
