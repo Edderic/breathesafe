@@ -172,7 +172,7 @@ An iOS app is currently in development to make the facial measurement collection
                 <CircularButton text="?" @click="toggleInfo('noseArkit')" :highlight="infoToShow == 'noseArkit'"/>
               </td>
               <td>
-                <span v-if="aggregatedArkitMeasurements.nose !== null">
+                <span v-if="aggregatedArkitMeasurements.nose != null && typeof aggregatedArkitMeasurements.nose === 'number'">
                   {{ aggregatedArkitMeasurements.nose.toFixed(1) }}
                 </span>
                 <span v-else style="color: #666; font-style: italic;">Incomplete</span>
@@ -187,7 +187,7 @@ An iOS app is currently in development to make the facial measurement collection
                 <CircularButton text="?" @click="toggleInfo('strapArkit')" :highlight="infoToShow == 'strapArkit'"/>
               </td>
               <td>
-                <span v-if="aggregatedArkitMeasurements.strap !== null">
+                <span v-if="aggregatedArkitMeasurements.strap != null && typeof aggregatedArkitMeasurements.strap === 'number'">
                   {{ aggregatedArkitMeasurements.strap.toFixed(1) }}
                 </span>
                 <span v-else style="color: #666; font-style: italic;">Incomplete</span>
@@ -202,7 +202,7 @@ An iOS app is currently in development to make the facial measurement collection
                 <CircularButton text="?" @click="toggleInfo('topCheekArkit')" :highlight="infoToShow == 'topCheekArkit'"/>
               </td>
               <td>
-                <span v-if="aggregatedArkitMeasurements.topCheek !== null">
+                <span v-if="aggregatedArkitMeasurements.topCheek != null && typeof aggregatedArkitMeasurements.topCheek === 'number'">
                   {{ aggregatedArkitMeasurements.topCheek.toFixed(1) }}
                 </span>
                 <span v-else style="color: #666; font-style: italic;">Incomplete</span>
@@ -217,7 +217,7 @@ An iOS app is currently in development to make the facial measurement collection
                 <CircularButton text="?" @click="toggleInfo('midCheekArkit')" :highlight="infoToShow == 'midCheekArkit'"/>
               </td>
               <td>
-                <span v-if="aggregatedArkitMeasurements.midCheek !== null">
+                <span v-if="aggregatedArkitMeasurements.midCheek != null && typeof aggregatedArkitMeasurements.midCheek === 'number'">
                   {{ aggregatedArkitMeasurements.midCheek.toFixed(1) }}
                 </span>
                 <span v-else style="color: #666; font-style: italic;">Incomplete</span>
@@ -232,7 +232,7 @@ An iOS app is currently in development to make the facial measurement collection
                 <CircularButton text="?" @click="toggleInfo('chinArkit')" :highlight="infoToShow == 'chinArkit'"/>
               </td>
               <td>
-                <span v-if="aggregatedArkitMeasurements.chin !== null">
+                <span v-if="aggregatedArkitMeasurements.chin != null && typeof aggregatedArkitMeasurements.chin === 'number'">
                   {{ aggregatedArkitMeasurements.chin.toFixed(1) }}
                 </span>
                 <span v-else style="color: #666; font-style: italic;">Incomplete</span>
