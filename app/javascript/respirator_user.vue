@@ -425,7 +425,8 @@ export default {
       }
     },
     aggregatedArkitMeasurements() {
-      if (!this.latestFacialMeasurement || !this.latestFacialMeasurement.arkit) {
+      // Use aggregated values from Ruby backend (computed in FacialMeasurement model)
+      if (!this.latestFacialMeasurement || !this.latestFacialMeasurement.aggregated) {
         return {
           nose: null,
           strap: null,
@@ -435,111 +436,15 @@ export default {
         };
       }
 
-      const arkit = this.latestFacialMeasurement.arkit;
-      let measurementsDict = arkit;
+      const aggregated = this.latestFacialMeasurement.aggregated;
 
-      // Debug: log the arkit structure
-      console.log('[ARKit Aggregation] Full arkit object:', arkit);
-
-      // Handle nested data structures - check if measurements are nested
-      if (arkit && typeof arkit === 'object' && !Array.isArray(arkit)) {
-        // Check if there's an 'averageMeasurements' key (camelCase from deepSnakeToCamel)
-        if (arkit.averageMeasurements && typeof arkit.averageMeasurements === 'object') {
-          measurementsDict = arkit.averageMeasurements;
-          console.log('[ARKit Aggregation] Using averageMeasurements (camelCase)');
-        }
-        // Check if there's an 'average_measurements' key (snake_case, fallback)
-        else if (arkit.average_measurements && typeof arkit.average_measurements === 'object') {
-          measurementsDict = arkit.average_measurements;
-          console.log('[ARKit Aggregation] Using average_measurements (snake_case)');
-        } else {
-          console.log('[ARKit Aggregation] Using top-level arkit object');
-        }
-      }
-
-      console.log('[ARKit Aggregation] Measurements dict keys:', Object.keys(measurementsDict || {}).slice(0, 10));
-
-      // Define the measurement keys for each subsection (from preprocessing.py)
-      const noseKeys = [
-        "160-371", "371-367", "367-387", "387-14",
-        "609-802", "802-798", "798-14", "14-818"
-      ];
-
-      const strapKeys = [
-        "967-464", "464-456", "456-451", "451-455",
-        "999-1027", "1027-884", "884-883", "883-879"
-      ];
-
-      const topCheekKeys = [
-        "879-600", "600-756", "756-862", "862-753", "753-594", "594-582", "582-609",
-        "451-151", "151-321", "321-434", "434-318", "318-145", "145-133", "133-160"
-      ];
-
-      const midCheekKeys = [
-        "509-893", "893-894", "894-881", "881-880", "880-879",
-        "60-478", "478-479", "479-453", "453-452", "452-451"
-      ];
-
-      const chinKeys = [
-        "1049-983", "983-982", "982-1050", "1050-1051", "1051-1052", "1052-1053", "1053-509",
-        "1049-984", "984-985", "985-986", "986-987", "987-988", "988-989", "989-60"
-      ];
-
-      const sumKeys = (keys, data, sectionName) => {
-        let total = 0.0;
-        let foundCount = 0;
-        const missingKeys = [];
-
-        const extractValue = (value) => {
-          if (typeof value === 'number') {
-            return parseFloat(value);
-          } else if (value && typeof value === 'object' && value !== null && !Array.isArray(value)) {
-            // Handle dict format: {'value': 3.82, 'description': '...'}
-            if ('value' in value) {
-              const val = value.value;
-              if (typeof val === 'number') {
-                return parseFloat(val);
-              }
-            }
-          }
-          return null;
-        };
-
-        for (const key of keys) {
-          if (key in data && data[key] !== null && data[key] !== undefined) {
-            const value = extractValue(data[key]);
-            if (value !== null && !isNaN(value) && isFinite(value)) {
-              total += value;
-              foundCount++;
-            } else {
-              missingKeys.push(key);
-            }
-          } else {
-            missingKeys.push(key);
-          }
-        }
-
-        // Return null if no keys were found (incomplete data)
-        if (foundCount === 0) {
-          console.log(`[ARKit Aggregation] ${sectionName}: No keys found. Missing: ${missingKeys.slice(0, 5).join(', ')}`);
-          return null;
-        }
-
-        // Return null if some keys are missing (incomplete)
-        if (foundCount < keys.length) {
-          console.log(`[ARKit Aggregation] ${sectionName}: Incomplete. Found ${foundCount}/${keys.length}. Missing: ${missingKeys.slice(0, 5).join(', ')}`);
-          return null;
-        }
-
-        return total;
-      };
-
+      // Convert snake_case keys from Ruby to camelCase for JavaScript
       return {
-        nose: sumKeys(noseKeys, measurementsDict, 'nose'),
-        strap: sumKeys(strapKeys, measurementsDict, 'strap'),
-        topCheek: sumKeys(topCheekKeys, measurementsDict, 'top_cheek'),
-        midCheek: sumKeys(midCheekKeys, measurementsDict, 'mid_cheek'),
-        chin: sumKeys(chinKeys, measurementsDict, 'chin')
+        nose: aggregated.noseMm !== undefined ? aggregated.noseMm : null,
+        strap: aggregated.strapMm !== undefined ? aggregated.strapMm : null,
+        topCheek: aggregated.topCheekMm !== undefined ? aggregated.topCheekMm : null,
+        midCheek: aggregated.midCheekMm !== undefined ? aggregated.midCheekMm : null,
+        chin: aggregated.chinMm !== undefined ? aggregated.chinMm : null
       };
     },
   },
