@@ -92,7 +92,8 @@ module Users
         'bitragion_subnasale_arc',
         'cheek_fullness',
         'head_circumference',
-        'user_id'
+        'user_id',
+        arkit: {} # Permit arkit as a hash (JSONB column)
       )
     end
   end
