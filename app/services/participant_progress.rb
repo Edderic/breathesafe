@@ -81,6 +81,8 @@ class ParticipantProgress
 
         #{FacialMeasurement.missing_ratio_sql},
 
+        #{FacialMeasurement.arkit_percent_complete_sql},
+
         profile_with_demog_fields_present AS (
           SELECT *, #{demographics_present_sql}
           FROM profiles
@@ -157,7 +159,7 @@ class ParticipantProgress
         -- num_targeted_masks,
         total_unique_masks_fit_tested.num_targeted_unique_masks_fit_tested,
         -- ROUND((num_targeted_unique_masks_fit_tested::float / num_targeted_masks * 100)::numeric, 2) AS fit_testing_percent_complete,
-        ROUND(((1 - missing_ratio)::numeric * 100)::numeric, 2) AS fm_percent_complete,
+        COALESCE(apc.percent_complete, 0.0) AS fm_percent_complete,
         ROUND((demog_present_counts::float / #{Profile::STRING_DEMOG_FIELDS.size + Profile::NUM_DEMOG_FIELDS.size} * 100)::numeric, 2) AS demog_percent_complete,
         mu.*, fm.created_at, fm.updated_at,
         num_masks_tested.num_unique_masks_tested
@@ -171,6 +173,8 @@ class ParticipantProgress
           mu.managed_id
 
         LEFT JOIN facial_measurement_missing_ratio AS fmmr ON (fmmr.id = latest_facial_measurements_for_users.id)
+
+        LEFT JOIN arkit_percent_complete AS apc ON (apc.id = latest_facial_measurements_for_users.id)
 
         LEFT JOIN profile_with_demog_fields_present_count p
           ON mu.managed_id = p.user_id

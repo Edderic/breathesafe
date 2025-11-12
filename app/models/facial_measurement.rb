@@ -87,9 +87,26 @@ class FacialMeasurement < ApplicationRecord
     }
   end
 
+  def percent_complete
+    aggregated = aggregated_arkit_measurements
+
+    # Count how many of the 5 aggregated measurements are not nil
+    completed_count = [
+      aggregated[:nose_mm],
+      aggregated[:strap_mm],
+      aggregated[:top_cheek_mm],
+      aggregated[:mid_cheek_mm],
+      aggregated[:chin_mm]
+    ].count { |value| !value.nil? }
+
+    # Return percentage as float (0.0 to 100.0)
+    (completed_count / 5.0 * 100.0).round(2)
+  end
+
   def as_json(options = {})
     super(options).merge(
-      'aggregated' => aggregated_arkit_measurements
+      'aggregated' => aggregated_arkit_measurements,
+      'percent_complete' => percent_complete
     )
   end
 
@@ -137,6 +154,144 @@ class FacialMeasurement < ApplicationRecord
         ), facial_measurement_missing_ratio AS (
           SELECT *, round(missing_count::numeric / 12, 4) AS missing_ratio
           FROM latest_facial_measurement_missing_counts
+        )
+    SQL
+  end
+
+  def self.arkit_percent_complete_sql
+    # Check if all required keys exist for each of the 5 aggregated sections
+    # For each section, check that the key exists AND has a non-null 'value' field
+    # Structure: arkit->'average_measurements'->'key' gives us {"value": 3.82, "description": "..."}
+
+    <<-SQL
+        arkit_percent_complete AS (
+          SELECT
+            id,
+            user_id,
+            CASE
+              WHEN arkit IS NULL OR arkit->'average_measurements' IS NULL THEN 0.0
+              ELSE (
+                -- Check nose section (8 keys)
+                CASE WHEN
+                  (arkit->'average_measurements' ? '160-371' AND
+                   arkit->'average_measurements' ? '371-367' AND
+                   arkit->'average_measurements' ? '367-387' AND
+                   arkit->'average_measurements' ? '387-14' AND
+                   arkit->'average_measurements' ? '609-802' AND
+                   arkit->'average_measurements' ? '802-798' AND
+                   arkit->'average_measurements' ? '798-14' AND
+                   arkit->'average_measurements' ? '14-818' AND
+                   (arkit->'average_measurements'->'160-371'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'371-367'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'367-387'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'387-14'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'609-802'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'802-798'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'798-14'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'14-818'->>'value') IS NOT NULL) THEN 1 ELSE 0 END +
+                -- Check strap section (8 keys)
+                CASE WHEN
+                  (arkit->'average_measurements' ? '967-464' AND
+                   arkit->'average_measurements' ? '464-456' AND
+                   arkit->'average_measurements' ? '456-451' AND
+                   arkit->'average_measurements' ? '451-455' AND
+                   arkit->'average_measurements' ? '999-1027' AND
+                   arkit->'average_measurements' ? '1027-884' AND
+                   arkit->'average_measurements' ? '884-883' AND
+                   arkit->'average_measurements' ? '883-879' AND
+                   (arkit->'average_measurements'->'967-464'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'464-456'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'456-451'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'451-455'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'999-1027'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'1027-884'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'884-883'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'883-879'->>'value') IS NOT NULL) THEN 1 ELSE 0 END +
+                -- Check top cheek section (14 keys)
+                CASE WHEN
+                  (arkit->'average_measurements' ? '879-600' AND
+                   arkit->'average_measurements' ? '600-756' AND
+                   arkit->'average_measurements' ? '756-862' AND
+                   arkit->'average_measurements' ? '862-753' AND
+                   arkit->'average_measurements' ? '753-594' AND
+                   arkit->'average_measurements' ? '594-582' AND
+                   arkit->'average_measurements' ? '582-609' AND
+                   arkit->'average_measurements' ? '451-151' AND
+                   arkit->'average_measurements' ? '151-321' AND
+                   arkit->'average_measurements' ? '321-434' AND
+                   arkit->'average_measurements' ? '434-318' AND
+                   arkit->'average_measurements' ? '318-145' AND
+                   arkit->'average_measurements' ? '145-133' AND
+                   arkit->'average_measurements' ? '133-160' AND
+                   (arkit->'average_measurements'->'879-600'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'600-756'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'756-862'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'862-753'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'753-594'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'594-582'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'582-609'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'451-151'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'151-321'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'321-434'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'434-318'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'318-145'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'145-133'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'133-160'->>'value') IS NOT NULL) THEN 1 ELSE 0 END +
+                -- Check mid cheek section (10 keys)
+                CASE WHEN
+                  (arkit->'average_measurements' ? '509-893' AND
+                   arkit->'average_measurements' ? '893-894' AND
+                   arkit->'average_measurements' ? '894-881' AND
+                   arkit->'average_measurements' ? '881-880' AND
+                   arkit->'average_measurements' ? '880-879' AND
+                   arkit->'average_measurements' ? '60-478' AND
+                   arkit->'average_measurements' ? '478-479' AND
+                   arkit->'average_measurements' ? '479-453' AND
+                   arkit->'average_measurements' ? '453-452' AND
+                   arkit->'average_measurements' ? '452-451' AND
+                   (arkit->'average_measurements'->'509-893'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'893-894'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'894-881'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'881-880'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'880-879'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'60-478'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'478-479'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'479-453'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'453-452'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'452-451'->>'value') IS NOT NULL) THEN 1 ELSE 0 END +
+                -- Check chin section (14 keys)
+                CASE WHEN
+                  (arkit->'average_measurements' ? '1049-983' AND
+                   arkit->'average_measurements' ? '983-982' AND
+                   arkit->'average_measurements' ? '982-1050' AND
+                   arkit->'average_measurements' ? '1050-1051' AND
+                   arkit->'average_measurements' ? '1051-1052' AND
+                   arkit->'average_measurements' ? '1052-1053' AND
+                   arkit->'average_measurements' ? '1053-509' AND
+                   arkit->'average_measurements' ? '1049-984' AND
+                   arkit->'average_measurements' ? '984-985' AND
+                   arkit->'average_measurements' ? '985-986' AND
+                   arkit->'average_measurements' ? '986-987' AND
+                   arkit->'average_measurements' ? '987-988' AND
+                   arkit->'average_measurements' ? '988-989' AND
+                   arkit->'average_measurements' ? '989-60' AND
+                   (arkit->'average_measurements'->'1049-983'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'983-982'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'982-1050'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'1050-1051'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'1051-1052'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'1052-1053'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'1053-509'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'1049-984'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'984-985'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'985-986'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'986-987'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'987-988'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'988-989'->>'value') IS NOT NULL AND
+                   (arkit->'average_measurements'->'989-60'->>'value') IS NOT NULL) THEN 1 ELSE 0 END
+              ) * 20.0
+            END AS percent_complete
+          FROM latest_facial_measurements_for_users
         )
     SQL
   end
