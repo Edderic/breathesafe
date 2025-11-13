@@ -356,7 +356,8 @@ export default {
       ],
       facialMeasurements: [],
       infoToShow: "straightLineMeasurementsGuide",
-      arkitTextareaValue: ''
+      arkitTextareaValue: '',
+      aggregateArkitTimeout: null
     }
   },
   props: {
@@ -475,7 +476,6 @@ export default {
     }
 
     let toQuery = this.$route.query
-
     if (toQuery['tabToShow'] && (this.$route.name == "RespiratorUser")) {
       this.tabToShow = toQuery['tabToShow']
     }
@@ -497,6 +497,12 @@ export default {
         }
       }
     )
+  },
+  beforeUnmount() {
+    // Clean up timeout when component is destroyed
+    if (this.aggregateArkitTimeout) {
+      clearTimeout(this.aggregateArkitTimeout);
+    }
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
@@ -612,6 +618,16 @@ export default {
       if (!text) {
         // Empty textarea means no arkit data
         this.latestFacialMeasurement.arkit = null;
+        // Clear aggregated data
+        if (this.latestFacialMeasurement.aggregated) {
+          this.latestFacialMeasurement.aggregated = {
+            noseMm: null,
+            strapMm: null,
+            topCheekMm: null,
+            midCheekMm: null,
+            chinMm: null
+          };
+        }
         return;
       }
 
@@ -619,10 +635,72 @@ export default {
         // Try to parse as JSON
         const parsed = JSON.parse(text);
         this.latestFacialMeasurement.arkit = parsed;
+
+        // Debounce the aggregation API call (wait 500ms after user stops typing)
+        if (this.aggregateArkitTimeout) {
+          clearTimeout(this.aggregateArkitTimeout);
+        }
+
+        this.aggregateArkitTimeout = setTimeout(() => {
+          this.computeAggregations(parsed);
+        }, 500);
       } catch (e) {
         // Invalid JSON - keep the text but don't update the object yet
         // Validation will happen on save
-        // We could show a warning here if needed
+        // Clear aggregated data on invalid JSON
+        if (this.latestFacialMeasurement.aggregated) {
+          this.latestFacialMeasurement.aggregated = {
+            noseMm: null,
+            strapMm: null,
+            topCheekMm: null,
+            midCheekMm: null,
+            chinMm: null
+          };
+        }
+      }
+    },
+    async computeAggregations(arkitData) {
+      // Only compute aggregations in Edit mode
+      if (this.mode === 'View') {
+        return;
+      }
+
+      if (!this.latestFacialMeasurement) {
+        return;
+      }
+
+      try {
+        setupCSRF();
+
+        // Convert camelCase to snake_case before sending to Ruby
+        const arkitDataSnakeCase = deepCamelToSnake(arkitData);
+
+        const response = await axios.post(
+          `/users/${this.$route.params.id}/facial_measurements/aggregate_arkit.json`,
+          { arkit: arkitDataSnakeCase }
+        );
+
+        if (response.data && response.data.aggregated) {
+          // Convert snake_case keys from Ruby to camelCase for JavaScript
+          const aggregated = deepSnakeToCamel(response.data.aggregated);
+
+          // Update the aggregated data
+          if (!this.latestFacialMeasurement.aggregated) {
+            this.latestFacialMeasurement.aggregated = {};
+          }
+
+          this.latestFacialMeasurement.aggregated = {
+            noseMm: aggregated.noseMm !== undefined ? aggregated.noseMm : null,
+            strapMm: aggregated.strapMm !== undefined ? aggregated.strapMm : null,
+            topCheekMm: aggregated.topCheekMm !== undefined ? aggregated.topCheekMm : null,
+            midCheekMm: aggregated.midCheekMm !== undefined ? aggregated.midCheekMm : null,
+            chinMm: aggregated.chinMm !== undefined ? aggregated.chinMm : null
+          };
+        }
+      } catch (error) {
+        // Silently fail - don't show error messages while user is typing
+        // Aggregations will be computed on save anyway
+        console.warn('Failed to compute aggregations:', error);
       }
     },
     validateYearOfBirth() {

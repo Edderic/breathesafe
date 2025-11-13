@@ -75,6 +75,50 @@ module Users
       end
     end
 
+    def aggregate_arkit
+      # Compute aggregated measurements from ARKit JSON using Ruby logic (single source of truth)
+      if !current_user
+        status = 401
+        messages = ['Unauthorized.']
+        aggregated = nil
+      elsif !current_user.manages?(User.find(params['user_id']))
+        status = 422
+        messages = ['Not managed by current user.']
+        aggregated = nil
+      else
+        begin
+          arkit_data = params[:arkit]
+
+          # Create a temporary FacialMeasurement instance to use the aggregation logic
+          temp_measurement = FacialMeasurement.new(arkit: arkit_data)
+
+          # Use the model's aggregation method (single source of truth)
+          aggregated = temp_measurement.aggregated_arkit_measurements
+          percent_complete = temp_measurement.percent_complete
+
+          status = 200
+          messages = []
+        rescue StandardError => e
+          status = 422
+          messages = ["Error computing aggregations: #{e.message}"]
+          aggregated = nil
+          percent_complete = 0.0
+        end
+      end
+
+      to_render = {
+        aggregated: aggregated,
+        percent_complete: percent_complete,
+        messages: messages
+      }
+
+      respond_to do |format|
+        format.json do
+          render json: to_render.to_json, status: status
+        end
+      end
+    end
+
     def facial_measurement_data
       params.require(:facial_measurement).permit(
         'source',

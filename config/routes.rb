@@ -37,6 +37,7 @@ Rails.application.routes.draw do
   get 'users/:user_id/facial_measurements', to: 'users/facial_measurements#show'
   post 'users/:user_id/facial_measurements', to: 'users/facial_measurements#create'
   post 'users/:user_id/facial_measurements_from_arkit', to: 'users/facial_measurements_from_arkit#create'
+  post 'users/:user_id/facial_measurements/aggregate_arkit', to: 'users/facial_measurements#aggregate_arkit'
 
   get 'masks', to: 'masks#index'
   post 'masks', to: 'masks#create'
