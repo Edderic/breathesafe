@@ -67,6 +67,10 @@ export default {
       type: String,
       default: null
     },
+    fitTestProcedure: {
+      type: String,
+      default: null
+    },
     comfort: {
       type: Object,
       default: null
@@ -88,8 +92,7 @@ export default {
         { key: 'Mask', name: 'Mask Selection' },
         { key: 'Facial Hair', name: 'Facial Hair Check' },
         { key: 'User Seal Check', name: 'User Seal Check' },
-        { key: 'QLFT', name: 'Qualitative Fit Test' },
-        { key: 'QNFT', name: 'Quantitative Fit Test' },
+        { key: 'Fit Test', name: 'Fit Test' },
         { key: 'Comfort', name: 'Comfort Assessment' },
       ]
     }
@@ -118,6 +121,13 @@ export default {
       // User Seal Check is completed if all questions are answered
       if (this.isUserSealCheckComplete()) {
         completed.push('User Seal Check')
+      }
+
+      // Fit Test is completed if fitTestProcedure is set (or old structure has a procedure)
+      if (this.fitTestProcedure ||
+          (this.qualitativeProcedure && this.qualitativeProcedure !== 'Skipping') ||
+          (this.quantitativeProcedure && this.quantitativeProcedure !== 'Skipping')) {
+        completed.push('Fit Test')
       }
 
       // Add other steps from props if provided
@@ -154,14 +164,22 @@ export default {
           return 'Not Selected'
         case 'User Seal Check':
           return this.evaluateUserSealCheck()
-        case 'QLFT':
-          if (this.qualitativeProcedure && this.qualitativeProcedure !== 'Skipping') {
-            return this.qualitativeProcedure
+        case 'Fit Test':
+          if (this.fitTestProcedure) {
+            // Map internal values to display names
+            const procedureMap = {
+              'qualitative_full_osha': 'qualitative: Full OSHA',
+              'quantitative_osha_fast': 'quantitative: OSHA Fast Face Piece Respirators',
+              'quantitative_full_osha': 'quantitative: Full OSHA'
+            }
+            return procedureMap[this.fitTestProcedure] || this.fitTestProcedure
           }
-          return 'Not Selected'
-        case 'QNFT':
+          // Fallback to old structure for backwards compatibility
+          if (this.qualitativeProcedure && this.qualitativeProcedure !== 'Skipping') {
+            return `qualitative: ${this.qualitativeProcedure}`
+          }
           if (this.quantitativeProcedure && this.quantitativeProcedure !== 'Skipping') {
-            return this.quantitativeProcedure
+            return `quantitative: ${this.quantitativeProcedure}`
           }
           return 'Not Selected'
         case 'Comfort':
@@ -178,7 +196,7 @@ export default {
       const value = this.getStepValue(stepKey)
 
       // For all steps that show actual values, show actual values or "Not Selected"
-      const stepsWithValues = ['User', 'Mask', 'Facial Hair', 'User Seal Check', 'QLFT', 'QNFT', 'Comfort']
+      const stepsWithValues = ['User', 'Mask', 'Facial Hair', 'User Seal Check', 'Fit Test', 'Comfort']
 
       if (stepsWithValues.includes(stepKey)) {
         if (value === 'Not Selected' || !value) {

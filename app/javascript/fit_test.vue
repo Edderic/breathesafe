@@ -7,7 +7,7 @@
 
     <div class='menu row'>
       <TabSet
-        v-if='tabToShow == "QLFT" || tabToShow == "QNFT"'
+        v-if='tabToShow == "Fit Test"'
         :options='secondaryTabToShowOptions'
         @update='setSecondaryTab'
         :tabToShow='secondaryTabToShow'
@@ -28,13 +28,14 @@
         :userSealCheck="userSealCheck"
         :qualitativeProcedure="qualitativeProcedure"
         :quantitativeProcedure="quantitativeProcedure"
+        :fitTestProcedure="fitTestProcedure"
         :comfort="comfort"
         :completedSteps="completedFitTestSteps"
         :currentStep="tabToShow"
         @navigate-to-step="navigateToStep"
       />
 
-      <div v-show='tabToShow == "User"' class='right-pane'>
+      <div v-show='tabToShow == "User"' class='right-pane narrow-width'>
         <div>
           <h2 class='text-align-center'>User selection</h2>
           <h3 class='text-align-center'>Search for user</h3>
@@ -207,98 +208,160 @@
         </div>
       </div>
 
-      <div v-show='tabToShow == "QLFT"' class='justify-content-center flex-dir-col align-content-center right-pane'>
-        <div class='grid qlft'>
-          <table v-show='secondaryTabToShow == "Choose Procedure"'>
-            <tbody>
+      <div v-show='tabToShow == "Fit Test"' class='justify-content-center flex-dir-col align-content-center right-pane'>
+        <h2 class='text-align-center'>Fit Test</h2>
 
+        <div v-show='secondaryTabToShow == "Choose Procedure"'>
+          <p v-if='!fitTestProcedure' class='text-align-center'>Please select a fit testing procedure</p>
+
+          <table>
+            <tbody>
               <tr>
                 <th>Procedure</th>
                 <td>
-                  <select v-model='qualitativeProcedure' :disabled='!createOrEdit'>
-                    <option>Skipping</option>
-                    <option>Full OSHA</option>
+                  <select v-model='fitTestProcedure' @change='onFitTestProcedureChange' :disabled='!createOrEdit'>
+                    <option :value='null'>-- Select --</option>
+                    <option value='qualitative_full_osha'>qualitative: Full OSHA</option>
+                    <option value='quantitative_osha_fast'>quantitative: OSHA Fast Face Piece Respirators</option>
+                    <option value='quantitative_full_osha'>quantitative: Full OSHA</option>
                   </select>
                 </td>
               </tr>
 
-              <tr v-show='qualitativeProcedure != "Skipping"'>
-                <th>Solution</th>
-                <td>
-                  <select v-model='qualitativeAerosolSolution' :disabled='!createOrEdit'>
-                    <option>Saccharin</option>
-                    <option>Bitrex</option>
-                  </select>
-                </td>
-              </tr>
+              <!-- Qualitative fields -->
+              <template v-if='fitTestProcedure === "qualitative_full_osha"'>
+                <tr>
+                  <th>Solution</th>
+                  <td>
+                    <select v-model='qualitativeAerosolSolution' :disabled='!createOrEdit'>
+                      <option>Saccharin</option>
+                      <option>Bitrex</option>
+                    </select>
+                  </td>
+                </tr>
+              </template>
 
-              <tr v-show='qualitativeProcedure != "Skipping"'>
-                <th>Notes</th>
-                <td>
-                  <textarea id="" name="" cols="30" rows="10" v-model='qualitativeAerosolNotes' :disabled='!createOrEdit'></textarea>
-                </td>
-              </tr>
+              <!-- Quantitative fields -->
+              <template v-if='fitTestProcedure && fitTestProcedure.startsWith("quantitative")'>
+                <tr>
+                  <th>Device</th>
+                  <td>
+                    <select v-model='quantitativeFitTestingDeviceId' :disabled='!createOrEdit'>
+                      <option :value='null'>-- Select --</option>
+                      <option v-for='d in measurementDevices' :value='d.id'>
+                        {{deviceInfo(d)}}
+                      </option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Testing mode</th>
+                  <td>
+                    <select v-model='quantitativeTestingMode' :disabled='!createOrEdit'>
+                      <option>N95</option>
+                      <option>N99</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Aerosol</th>
+                  <td>
+                    <select v-model='quantitativeAerosolSolution' :disabled='!createOrEdit'>
+                      <option>Ambient</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Initial count (particles / cm3)</th>
+                  <td>
+                    <input type='number' v-model='initialCountPerCm3' :disabled='!createOrEdit'>
+                  </td>
+                </tr>
+              </template>
             </tbody>
           </table>
+        </div>
 
-          <div class='instructions' v-show='secondaryTabToShow == "Choose Procedure" && (tabToShow == "QLFT") && qualitativeProcedure == "Full OSHA"'>
+        <!-- Detailed Instructions tab -->
+        <div v-show='secondaryTabToShow == "Detailed Instructions" && fitTestProcedure'>
+          <div class='instructions' style='max-height: 60vh; overflow-y: auto;'>
             <h3>{{instructionTitle}}</h3>
             <p v-for='text in instructionParagraphs'>
               {{text}}
             </p>
           </div>
+        </div>
 
-          <div class='instructions' v-show='secondaryTabToShow == "Choose Procedure" && tabToShow == "QLFT" && qualitativeProcedure == "Skipping"'>
-            <p>
-              Qualitative fit testing can be skipped if:
-              <ul>
-                <li>user seal check failed from the previous step</li>
-                <li>user seal check passed and you are going to do quantitative fit testing (QNFT)</li>
-              </ul>
-            </p>
-          </div>
+        <!-- Results tab -->
+        <div v-show='secondaryTabToShow == "Results" && fitTestProcedure'>
+          <!-- Qualitative exercises -->
+          <template v-if='fitTestProcedure === "qualitative_full_osha"'>
+            <table>
+              <tbody>
+                <template v-for='(ex, index) in qualitativeExercises'>
+                  <tr :key='index'>
+                    <th>{{ex.name}}</th>
+                    <td>
+                      <CircularButton text="?" @click="showDescription(ex.name)"/>
+                    </td>
+                    <td>
+                      <select v-model='ex.result' :disabled='!createOrEdit'>
+                        <option>Pass</option>
+                        <option>Fail</option>
+                        <option>Not applicable</option>
+                      </select>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </template>
 
+          <!-- Quantitative exercises -->
+          <template v-if='fitTestProcedure && fitTestProcedure.startsWith("quantitative")'>
+            <table>
+              <tbody>
+                <template v-for='(ex, index) in quantitativeExercises'>
+                  <tr :key='index'>
+                    <th>{{ex.name}}</th>
+                    <td>
+                      <CircularButton text="?" @click="showDescription(ex.name)"/>
+                    </td>
+                    <td>
+                      <input type="number" v-model='ex.fit_factor' :disabled='!createOrEdit' placeholder='Fit factor'>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </template>
+        </div>
 
-          <table v-show='secondaryTabToShow == "Results"'>
-            <tbody >
-              <template v-for='(ex, index) in qualitativeExercises' >
-                <tr v-if='index < 4'>
-                  <th>{{ex.name}}</th>
-                  <td>
-                    <CircularButton text="?" @click="showDescription(ex.name)"/>
-                  </td>
-                  <td>
-                    <select v-model='ex.result' :disabled='!createOrEdit'>
-                      <option>Pass</option>
-                      <option>Fail</option>
-                      <option>Not applicable</option>
-                    </select>
-                  </td>
-                </tr>
-              </template>
+        <!-- Notes tab -->
+        <div v-show='secondaryTabToShow == "Notes" && fitTestProcedure'>
+          <table>
+            <tbody>
+              <tr>
+                <th>Notes</th>
+                <td>
+                  <textarea
+                    v-if='fitTestProcedure === "qualitative_full_osha"'
+                    v-model='qualitativeAerosolNotes'
+                    :disabled='!createOrEdit'
+                    cols="30"
+                    rows="10">
+                  </textarea>
+                  <textarea
+                    v-else
+                    v-model='quantitativeAerosolNotes'
+                    :disabled='!createOrEdit'
+                    cols="30"
+                    rows="10">
+                  </textarea>
+                </td>
+              </tr>
             </tbody>
           </table>
-
-          <table v-show='secondaryTabToShow == "Results"'>
-            <tbody class='qlft'>
-              <template v-for='(ex, index) in qualitativeExercises' >
-                <tr v-if='index >= 4'>
-                  <th>{{ex.name}}</th>
-                  <td>
-                    <CircularButton text="?" @click="showDescription(ex.name)"/>
-                  </td>
-                  <td>
-                    <select v-model='ex.result' :disabled='!createOrEdit'>
-                      <option>Pass</option>
-                      <option>Fail</option>
-                      <option>Not applicable</option>
-                    </select>
-                  </td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
-
         </div>
 
         <br>
@@ -309,130 +372,6 @@
           <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
         </div>
       </div>
-
-      <div v-show='tabToShow == "QNFT"' class='justify-content-center flex-dir-col align-content-center right-pane'>
-        <div class='grid qlft'>
-          <table v-show='secondaryTabToShow == "Choose Procedure"'>
-            <tbody>
-
-              <tr>
-                <th>Procedure</th>
-                <td>
-                  <select v-model='quantitativeProcedure' :disabled='!createOrEdit'>
-                    <option>Skipping</option>
-                    <option>OSHA Fast Filtering Face Piece Respirators</option>
-                    <option>Full OSHA</option>
-                  </select>
-                </td>
-              </tr>
-
-              <tr>
-                <th>Device</th>
-                <td>
-                  <select v-model='quantitativeFitTestingDeviceId' :disabled='!createOrEdit'>
-                    <option v-for='d in measurementDevices' :value='d.id'>
-                    {{deviceInfo(d)}}
-                    </option>
-                  </select>
-                </td>
-              </tr>
-
-              <tr v-show='quantitativeProcedure != "Skipping"'>
-                <th>Testing mode</th>
-                <td>
-                  <select v-model='quantitativeTestingMode' :disabled='!createOrEdit'>
-                    <option>N95</option>
-                    <option>N99</option>
-                  </select>
-                </td>
-              </tr>
-
-              <tr v-show='quantitativeProcedure != "Skipping"'>
-                <th>Aerosol</th>
-                <td>
-                  <select v-model='quantitativeAerosolSolution' :disabled='!createOrEdit'>
-                    <option>Ambient</option>
-                  </select>
-                </td>
-              </tr>
-
-              <tr v-show='quantitativeProcedure != "Skipping"'>
-                <th>Initial count (particles / cm3)</th>
-                <td>
-                  <input type='number' v-model='initialCountPerCm3' :disabled='!createOrEdit'>
-                </td>
-              </tr>
-
-              <tr v-show='quantitativeProcedure != "Skipping"'>
-                <th>Notes</th>
-                <td>
-                  <textarea id="" name="" cols="30" rows="10" v-model='quantitativeAerosolNotes' :disabled='!createOrEdit' ></textarea>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div class='instructions' v-if='secondaryTabToShow == "Choose Procedure" && tabToShow == "QNFT" && quantitativeProcedure == "Skipping"'>
-            <p>
-              Quantitative fit testing can be skipped if:
-              <ul>
-                <li>user seal check failed from the previous step</li>
-                <li>user seal check passed but you are skipping qualitative fit testing (QLFT)</li>
-              </ul>
-            </p>
-          </div>
-
-          <div class='instructions' v-show='quantitativeProcedure != "Skipping" && secondaryTabToShow != "Results"'>
-            <h3>{{instructionTitle}}</h3>
-            <p v-for='text in instructionParagraphs'>
-              {{text}}
-            </p>
-          </div>
-
-          <table v-show='secondaryTabToShow == "Results"'>
-            <tbody >
-              <template v-for='(ex, index) in quantitativeExercises' >
-                <tr v-if='index < numExercisesHalf'>
-                  <th>{{ex.name}}</th>
-                  <td>
-                    <CircularButton text="?" @click="showDescription(ex.name)"/>
-                  </td>
-                  <td>
-                    <input type="number" v-model='ex.fit_factor' :disabled='!createOrEdit'>
-                  </td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
-
-          <table v-show='secondaryTabToShow == "Results"'>
-            <tbody >
-              <template v-for='(ex, index) in quantitativeExercises' >
-                <tr v-if='index >= numExercisesHalf'>
-                  <th>{{ex.name}}</th>
-                  <td>
-                    <CircularButton text="?" @click="showDescription(ex.name)"/>
-                  </td>
-                  <td>
-                    <input type="number" v-model='ex.fit_factor' :disabled='!createOrEdit'>
-                  </td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
-
-        </div>
-
-
-      <br>
-      <div class='row buttons'>
-        <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
-        <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
-        <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
-        <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
-      </div>
-
-    </div>
 
       <div v-show='tabToShow == "Comfort"' class='justify-content-center flex-dir-col right-pane'>
         <h2 class='text-align-center'>Comfort Assessment</h2>
@@ -543,7 +482,13 @@ export default {
           text: 'Choose Procedure'
         },
         {
+          text: 'Detailed Instructions'
+        },
+        {
           text: 'Results'
+        },
+        {
+          text: 'Notes'
         },
       ],
       tabToShowOptions: [
@@ -560,15 +505,13 @@ export default {
           text: "User Seal Check"
         },
         {
-          text: "QLFT"
-        },
-        {
-          text: "QNFT"
+          text: "Fit Test"
         },
         {
           text: "Comfort",
         },
       ],
+      fitTestProcedure: null, // 'qualitative_full_osha', 'quantitative_osha_fast', 'quantitative_full_osha'
       oshaFastFFRExercises: {
         'Bending over': {
           'description': 'The test subject shall bend at the waist, as if going to touch his/her toes for 50 seconds and inhale 2 times at the bottom.',
@@ -576,11 +519,14 @@ export default {
         'Talking': {
           'description': 'The subject shall talk out loud slowly and loud enough so as to be heard clearly by the test conductor. The subject can read from a prepared text such as the Rainbow Passage, count backward from 100, or recite a memorized poem or song.  Rainbow Passage: When the sunlight strikes raindrops in the air, they act like a prism and form a rainbow. The rainbow is a division of white light into many beautiful colors. These take the shape of a long round arch, with its path high above, and its two ends apparently beyond the horizon. There is, according to legend, a boiling pot of gold at one end. People look, but no one ever finds it. When a man looks for something beyond reach, his friends say he is looking for the pot of gold at the end of the rainbow.'
         },
-        'Head side-to-side': {
+        'Turning head side to side': {
           'description': "The test subject shall stand in place, slowly turning his/her head from side to side for 30 seconds and inhale 2 times at each extreme."
         },
-        'Head up-and-down': {
+        'Moving head up and down': {
           'description': "The test subject shall stand in place, slowly moving his/her head up and down for 39 seconds and inhale 2 times at each extreme."
+        },
+        'Normal breathing (SEALED)': {
+          'description': 'The purpose of this exercise is to get an estimate of filtration efficiency of the mask material. The test subject shall seal the mask to their face using their hands as best as they can. For each hand, the tester can create a letter C. With the thumb and pointer finger holding the C position, squeeze the edges of the mask to the face. If the test subject feels that all air is going through the filter (i.e. no gaps), then you can enter the associated fit factor here. Otherwise, leave blank'
         }
       },
       oshaExercises: {
@@ -1004,7 +950,9 @@ export default {
     },
     quantitativeExercises() {
       // Has a "name" field
-      if (this.quantitativeProcedure == 'Full OSHA') {
+      // Check fitTestProcedure first, then fall back to quantitativeProcedure for backwards compatibility
+      if (this.fitTestProcedure === 'quantitative_full_osha' ||
+          (this.quantitativeProcedure == 'Full OSHA' && !this.fitTestProcedure)) {
         return this.quantitativeExercisesFullOsha
       }
 
@@ -1060,7 +1008,12 @@ export default {
       return this.fitTest.userSealCheckPassed
     },
     aerosol() {
-
+      if (this.fitTestProcedure === 'qualitative_full_osha') {
+        return this.qualitativeAerosolSolution
+      } else if (this.fitTestProcedure && this.fitTestProcedure.startsWith('quantitative')) {
+        return this.quantitativeAerosolSolution
+      }
+      // Fallback to old structure for backwards compatibility
       if (this.tabToShow == "QLFT") {
         return this.qualitativeAerosolSolution
       } else if (this.tabToShow == "QNFT"){
@@ -1074,14 +1027,36 @@ export default {
         return
       }
 
-      return this.fitTestingInstructions[this.tabToShow][this.aerosol].title
+      // Map fitTestProcedure to instruction key
+      let instructionKey = this.tabToShow
+      if (this.fitTestProcedure === 'qualitative_full_osha') {
+        instructionKey = 'QLFT'
+      } else if (this.fitTestProcedure && this.fitTestProcedure.startsWith('quantitative')) {
+        instructionKey = 'QNFT'
+      }
+
+      if (this.fitTestingInstructions[instructionKey] && this.fitTestingInstructions[instructionKey][this.aerosol]) {
+        return this.fitTestingInstructions[instructionKey][this.aerosol].title
+      }
+      return ''
     },
     instructionParagraphs() {
       if (!this.aerosol) {
-        return
+        return []
       }
 
-      return this.fitTestingInstructions[this.tabToShow][this.aerosol].paragraphs
+      // Map fitTestProcedure to instruction key
+      let instructionKey = this.tabToShow
+      if (this.fitTestProcedure === 'qualitative_full_osha') {
+        instructionKey = 'QLFT'
+      } else if (this.fitTestProcedure && this.fitTestProcedure.startsWith('quantitative')) {
+        instructionKey = 'QNFT'
+      }
+
+      if (this.fitTestingInstructions[instructionKey] && this.fitTestingInstructions[instructionKey][this.aerosol]) {
+        return this.fitTestingInstructions[instructionKey][this.aerosol].paragraphs
+      }
+      return []
     },
     results() {
       // TODO: if this.qualitativeExercises is blank, add null results to it
@@ -1210,14 +1185,11 @@ export default {
         completed.push('Comfort')
       }
 
-      // Check QLFT completion (simplified check)
-      if (this.qualitativeProcedure && this.qualitativeProcedure !== 'Skipping') {
-        completed.push('QLFT')
-      }
-
-      // Check QNFT completion (simplified check)
-      if (this.quantitativeProcedure && this.quantitativeProcedure !== 'Skipping') {
-        completed.push('QNFT')
+      // Check Fit Test completion
+      if (this.fitTestProcedure ||
+          (this.qualitativeProcedure && this.qualitativeProcedure !== 'Skipping') ||
+          (this.quantitativeProcedure && this.quantitativeProcedure !== 'Skipping')) {
+        completed.push('Fit Test')
       }
 
       return completed
@@ -1313,7 +1285,12 @@ export default {
         if (this.acceptableRouteName) {
           // pull the data
           if ('tabToShow' in toQuery) {
-            this.tabToShow = toQuery['tabToShow']
+            // Map old QLFT/QNFT to Fit Test for backwards compatibility
+            if (toQuery['tabToShow'] === 'QLFT' || toQuery['tabToShow'] === 'QNFT') {
+              this.tabToShow = 'Fit Test'
+            } else {
+              this.tabToShow = toQuery['tabToShow']
+            }
           }
 
           if (toQuery['mode']) {
@@ -1362,11 +1339,19 @@ export default {
     showDescription(name) {
       this.messages = []
 
-      this.messages.push(
-        {
-          str: this.oshaExercises[name].description
-        }
-      )
+      // Check both exercise sets to find the description
+      let description = null
+      if (this.oshaExercises && this.oshaExercises[name]) {
+        description = this.oshaExercises[name].description
+      } else if (this.oshaFastFFRExercises && this.oshaFastFFRExercises[name]) {
+        description = this.oshaFastFFRExercises[name].description
+      }
+
+      if (description) {
+        this.messages.push({ str: description })
+      } else {
+        this.messages.push({ str: 'Description not available' })
+      }
     },
     updateSearch(event, userOrMask) {
       if (userOrMask == 'mask') {
@@ -1502,6 +1487,9 @@ export default {
             this.setQuantitativeExercises(results.quantitative.exercises)
             this.initialCountPerCm3 = results.quantitative.aerosol.initial_count_per_cm3
 
+            // Sync fitTestProcedure from existing data for backwards compatibility
+            this.syncFitTestProcedureFromExisting()
+
             this.selectUser(fitTestData.user_id)
 
             // whatever you want
@@ -1558,7 +1546,7 @@ export default {
                     id: this.$route.params.id
                   },
                   query: {
-                    tabToShow: 'QNFT',
+                    tabToShow: 'Fit Test',
                     secondaryTabToShow: 'Choose Procedure',
                   }
                 }
@@ -1685,6 +1673,9 @@ export default {
       if (!this.tabToShow) {
         this.tabToShow = 'Mask'
       }
+
+      // Sync fitTestProcedure to old structure before saving for backwards compatibility
+      this.syncProceduresFromFitTestProcedure()
 
       if (this.id) {
         await axios.put(
@@ -1820,7 +1811,7 @@ export default {
 
         if (this.messages.length == 0) {
           await this.saveFitTest({
-            tabToShow: 'QLFT',
+            tabToShow: 'Fit Test',
             secondaryTabToShow: 'Choose Procedure'
           })
 
@@ -1841,24 +1832,33 @@ export default {
 
       }
 
-      else if (this.tabToShow == 'QLFT' && this.secondaryTabToShow == 'Choose Procedure') {
+      else if (this.tabToShow == 'Fit Test' && this.secondaryTabToShow == 'Choose Procedure') {
         this.validateUser()
         this.validateMask()
         this.validateUserSealCheck()
-        this.validateQLFT('Choose Procedure')
 
-        if (this.qualitativeProcedure == 'Skipping') {
-          await this.saveFitTest(
-            {
-              tabToShow: 'QNFT',
-              secondaryTabToShow: 'Choose Procedure'
-            }
-          )
+        // Validate procedure is selected
+        if (!this.fitTestProcedure) {
+          this.messages.push({ str: 'Please select a fit testing procedure.' })
+          return
         }
-        else if (this.messages.length == 0) {
+
+        // Sync to old structure before validation
+        this.syncProceduresFromFitTestProcedure()
+
+        // Validate based on procedure type
+        if (this.fitTestProcedure === 'qualitative_full_osha') {
+          this.validateQLFT('Choose Procedure')
+        } else if (this.fitTestProcedure && this.fitTestProcedure.startsWith('quantitative')) {
+          this.validatePresenceOfDevice()
+          this.validatePresenceOfInitialCountPerCM3()
+          this.validateValueOfInitialCountPerCM3()
+        }
+
+        if (this.messages.length == 0) {
           await this.saveFitTest(
             {
-              tabToShow: 'QLFT',
+              tabToShow: 'Fit Test',
               secondaryTabToShow: 'Results'
             }
           )
@@ -1867,75 +1867,21 @@ export default {
         }
       }
 
-      else if (this.tabToShow == 'QLFT' && this.secondaryTabToShow == 'Results') {
+      else if (this.tabToShow == 'Fit Test' && this.secondaryTabToShow == 'Results') {
         this.validateUser()
         this.validateMask()
         this.validateUserSealCheck()
-        this.validateQLFT('Results')
 
-        if (this.messages.length == 0) {
-          await this.saveFitTest(
-            {
-              tabToShow: 'QNFT',
-              secondaryTabToShow: 'Choose Procedure'
-            }
-          )
+        // Sync to old structure before validation
+        this.syncProceduresFromFitTestProcedure()
 
-
-          if (this.qualitativeHasAFailure) {
-            this.messages.push(
-              {
-                str: "QLFT has a failure. You may skip adding quantitative fit testing data and comfort data if you wish, by clicking here.",
-                to: {
-                  'name': 'FitTests'
-                }
-              }
-            )
-
-          }
-        } else {
-          return
+        // Validate based on procedure type
+        if (this.fitTestProcedure === 'qualitative_full_osha') {
+          this.validateQLFT('Results')
+        } else if (this.fitTestProcedure && this.fitTestProcedure.startsWith('quantitative')) {
+          this.validateQLFT()
+          this.validateQNFT()
         }
-      }
-      else if (this.tabToShow == 'QNFT' && this.secondaryTabToShow != 'Results') {
-        this.validateUser()
-        this.validateMask()
-        this.validateUserSealCheck()
-        this.validateQLFT()
-        this.validatePresenceOfDevice()
-
-        this.validatePresenceOfInitialCountPerCM3()
-        this.validateValueOfInitialCountPerCM3()
-        this.validateQLFTorQNFTExists()
-
-
-        if (this.messages.length == 0) {
-          if (this.quantitativeProcedure == 'Skipping') {
-            await this.saveFitTest(
-              {
-                tabToShow: 'Comfort',
-              }
-            )
-          } else {
-            await this.saveFitTest(
-              {
-                tabToShow: 'QNFT',
-                secondaryTabToShow: 'Results'
-              }
-            )
-          }
-        } else {
-          return
-        }
-      }
-
-      else if (this.tabToShow == 'QNFT' && this.secondaryTabToShow == 'Results') {
-        this.validateUser()
-        this.validateMask()
-        this.validateUserSealCheck()
-        this.validateQLFT()
-        this.validateQNFT()
-        this.validateQLFTorQNFTExists()
 
         if (this.messages.length == 0) {
           await this.saveFitTest(
@@ -1952,6 +1898,8 @@ export default {
         this.validateUser()
         this.validateMask()
         this.validateUserSealCheck()
+        // Sync fitTestProcedure before checking if fit test exists
+        this.syncProceduresFromFitTestProcedure()
         this.validateQLFTorQNFTExists()
         this.validateComfort()
 
@@ -1989,6 +1937,101 @@ export default {
     },
     selectNegativePressure(value) {
       this['userSealCheck']['While performing a negative user seal check, did you notice any leakage?'] = value
+    },
+    // Sync fitTestProcedure from existing qualitativeProcedure/quantitativeProcedure for backwards compatibility
+    syncFitTestProcedureFromExisting() {
+      if (this.qualitativeProcedure && this.qualitativeProcedure !== 'Skipping') {
+        if (this.qualitativeProcedure === 'Full OSHA') {
+          this.fitTestProcedure = 'qualitative_full_osha'
+        }
+      } else if (this.quantitativeProcedure && this.quantitativeProcedure !== 'Skipping') {
+        if (this.quantitativeProcedure === 'OSHA Fast Filtering Face Piece Respirators') {
+          this.fitTestProcedure = 'quantitative_osha_fast'
+        } else if (this.quantitativeProcedure === 'Full OSHA') {
+          this.fitTestProcedure = 'quantitative_full_osha'
+        }
+      }
+    },
+    // Map fitTestProcedure to qualitativeProcedure/quantitativeProcedure when saving
+    syncProceduresFromFitTestProcedure() {
+      if (!this.fitTestProcedure) {
+        return
+      }
+
+      if (this.fitTestProcedure === 'qualitative_full_osha') {
+        this.qualitativeProcedure = 'Full OSHA'
+        this.quantitativeProcedure = 'Skipping'
+      } else if (this.fitTestProcedure === 'quantitative_osha_fast') {
+        this.qualitativeProcedure = 'Skipping'
+        this.quantitativeProcedure = 'OSHA Fast Filtering Face Piece Respirators'
+      } else if (this.fitTestProcedure === 'quantitative_full_osha') {
+        this.qualitativeProcedure = 'Skipping'
+        this.quantitativeProcedure = 'Full OSHA'
+      }
+    },
+    // Get exercises based on fitTestProcedure
+    getExercisesForProcedure() {
+      if (this.fitTestProcedure === 'qualitative_full_osha') {
+        return this.qualitativeExercises || []
+      } else if (this.fitTestProcedure === 'quantitative_osha_fast') {
+        return this.quantitativeExercises || []
+      } else if (this.fitTestProcedure === 'quantitative_full_osha') {
+        return this.quantitativeExercises || []
+      }
+      return []
+    },
+    // Initialize exercises based on selected procedure
+    initializeExercisesForProcedure() {
+      if (this.fitTestProcedure === 'qualitative_full_osha') {
+        // Only initialize if not already set (to preserve existing data)
+        if (!this.qualitativeExercises || this.qualitativeExercises.length === 0) {
+          this.qualitativeExercises = [
+            { name: 'Normal breathing', result: null },
+            { name: 'Deep breathing', result: null },
+            { name: 'Turning head side to side', result: null },
+            { name: 'Moving head up and down', result: null },
+            { name: 'Talking', result: null },
+            { name: 'Bending over', result: null },
+            { name: 'Normal breathing', result: null }
+          ]
+        }
+      } else if (this.fitTestProcedure === 'quantitative_osha_fast') {
+        // Only initialize if not already set
+        if (!this.quantitativeExercisesOSHAFastFFR || this.quantitativeExercisesOSHAFastFFR.length === 0) {
+          this.setQuantitativeExercises([
+            { name: 'Bending over', fit_factor: null },
+            { name: 'Talking', fit_factor: null },
+            { name: 'Turning head side to side', fit_factor: null },
+            { name: 'Moving head up and down', fit_factor: null },
+            { name: 'Normal breathing (SEALED)', fit_factor: null }
+          ])
+        }
+      } else if (this.fitTestProcedure === 'quantitative_full_osha') {
+        // Only initialize if not already set
+        if (!this.quantitativeExercisesFullOsha || this.quantitativeExercisesFullOsha.length === 0) {
+          this.setQuantitativeExercises([
+            { name: 'Normal breathing', fit_factor: null },
+            { name: 'Deep breathing', fit_factor: null },
+            { name: 'Turning head side to side', fit_factor: null },
+            { name: 'Moving head up and down', fit_factor: null },
+            { name: 'Talking', fit_factor: null },
+            { name: 'Grimace', fit_factor: null },
+            { name: 'Bending over', fit_factor: null },
+            { name: 'Normal breathing', fit_factor: null },
+            { name: 'Normal breathing (SEALED)', fit_factor: null }
+          ])
+        }
+      }
+    },
+    onFitTestProcedureChange() {
+      // Sync to old structure for backwards compatibility
+      this.syncProceduresFromFitTestProcedure()
+
+      // Initialize exercises for the selected procedure
+      this.initializeExercisesForProcedure()
+
+      // Set secondary tab to "Choose Procedure" when procedure changes
+      this.secondaryTabToShow = 'Choose Procedure'
     },
     selectBeardLength(value) {
       this['facialHair']['beard_length_mm'] = value
@@ -2221,6 +2264,13 @@ export default {
   }
 
   .columns {
+  }
+
+  .right-pane.narrow-width {
+    position: relative;
+    left: 66%;
+    display: flex;
+    flex-direction: column;
   }
 
   .right-pane {
