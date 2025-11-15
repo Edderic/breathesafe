@@ -58,8 +58,8 @@ export class FitTest {
     }
 
     if (this.usePositivePressureUserSealCheck) {
-      return (this.userSealCheck.positive["...how much air movement on your face along the seal of the mask did you feel?"] == 'No air movement') &&
-        (this.userSealCheck.positive["...how much pressure build up was there?"] == 'As expected')
+      const airMovement = this.userSealCheck.positive["...how much air movement on your face along the seal of the mask did you feel?"]
+      return airMovement == 'No air movement' || airMovement == 'Some air movement'
     } else {
       return (this.userSealCheck['negative']['...how much air passed between your face and the mask?'] == 'Unnoticeable')
     }
@@ -82,47 +82,38 @@ export class FitTest {
   }
 
   get userSealCheckStatus() {
-    let nullCount = 0
-    let sizingQuestion = this.userSealCheck['sizing']["What do you think about the sizing of this mask relative to your face?"]
+    const sizingQuestionKey = "What do you think about the sizing of this mask relative to your face?"
+    const sizing = this.userSealCheck['sizing'] && this.userSealCheck['sizing'][sizingQuestionKey]
 
-    if ( sizingQuestion == "Too small" || sizingQuestion == 'Too big') {
+    if (sizing == "Too small" || sizing == 'Too big') {
       return 'Failed'
     }
 
     if (this.usePositivePressureUserSealCheck) {
-      // Fail the sizing question, -> Failed
-      // One question failed -> Fail
-      // All questions unanswered or blank -> incomplete
-      // No questions failed but there is a blank -> incomplete
-      // All questions answered and no failure -> pass
-      //
-      // So we can count the number of blanks
-      // Scenario 1: all questions unanswered or blank -> Incomplete
-      if (
-        (
-          (!isNullOrBlank(this.userSealCheck.positive["...how much air movement on your face along the seal of the mask did you feel?"])) &&
-          (this.userSealCheck.positive["...how much air movement on your face along the seal of the mask did you feel?"] != 'No air movement')
-        ) || (
-          !isNullOrBlank(this.userSealCheck.positive["...how much did your glasses fog up?"]) &&
-          (
-            (this.userSealCheck.positive["...how much did your glasses fog up?"] != 'Not at all') &&
-            (this.userSealCheck.positive["...how much did your glasses fog up?"] != 'Not applicable')
-          )
-        ) || (
-          !isNullOrBlank(this.userSealCheck.positive["...how much pressure build up was there?"]) &&
-          (this.userSealCheck.positive["...how much pressure build up was there?"] != 'As expected')
-        )
-      ) {
-          return 'Failed'
-      } else if (
-        isNullOrBlank(this.userSealCheck.positive["...how much air movement on your face along the seal of the mask did you feel?"]) ||
-          isNullOrBlank(this.userSealCheck.positive["...how much did your glasses fog up?"]) ||
-          isNullOrBlank(this.userSealCheck.positive["...how much pressure build up was there?"])
-      ) {
+      // Use the same logic as UserSealCheckService
+      const airMovementQuestion = "...how much air movement on your face along the seal of the mask did you feel?"
+
+      const airMovement = this.userSealCheck.positive && this.userSealCheck.positive[airMovementQuestion]
+
+      // Check if questions are missing
+      if (isNullOrBlank(sizing) || isNullOrBlank(airMovement)) {
         return 'Incomplete'
-      } else {
-        return 'Passed'
       }
+
+      // Fail if "A lot of air movement" is selected
+      if (airMovement == 'A lot of air movement') {
+        return 'Failed'
+      }
+
+      // Pass if "Somewhere in-between too small and too big" AND ("Some air movement" OR "No air movement")
+      if (sizing == "Somewhere in-between too small and too big") {
+        if (airMovement == 'Some air movement' || airMovement == 'No air movement') {
+          return 'Passed'
+        }
+      }
+
+      // If we get here, the combination doesn't match our pass criteria
+      return 'Incomplete'
 
     } else {
       // use negative pressure

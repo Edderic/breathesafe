@@ -153,22 +153,7 @@ export default {
           }
           return 'Not Selected'
         case 'User Seal Check':
-          // not started - nothing is filled out
-          // passed:
-          //   if user responds "Somewhere between too big and too small" to "What do you think about the sizing of this mask relative to your face?" AND
-          //   "No air movement" to "...how much air movement on your face along the seal of the mask did you feel?"
-          //
-          // failed:
-          //   if user responds too big or too small. Failed. Skip the rest of the questions
-          //   if user responds "A lot of air movement" to "...how much air movement on your face along the seal of the mask did you feel?", that's a fail.
-          //
-          // incomplete -
-          if (this.userSealCheck && this.isUserSealCheckComplete()) {
-            return 'Passed'
-          } else if (this.userSealCheck && this.isUserSealCheckStarted()) {
-            return 'Failed'
-          }
-          return 'Not Selected'
+          return this.evaluateUserSealCheck()
         case 'QLFT':
           if (this.qualitativeProcedure && this.qualitativeProcedure !== 'Skipping') {
             return this.qualitativeProcedure
@@ -212,34 +197,50 @@ export default {
       // Emit event to parent component to change the current step
       this.$emit('navigate-to-step', stepKey)
     },
-    isUserSealCheckComplete() {
-      if (!this.userSealCheck) return false
+    // Evaluates user seal check using the same logic as UserSealCheckService
+    // Returns 'Passed', 'Failed', or 'Not Selected' (for incomplete)
+    evaluateUserSealCheck() {
+      if (!this.userSealCheck) return 'Not Selected'
 
-      const sizingComplete = this.userSealCheck.sizing &&
-        Object.values(this.userSealCheck.sizing).every(value => value !== null)
+      const sizingQuestion = 'What do you think about the sizing of this mask relative to your face?'
+      const airMovementQuestion = '...how much air movement on your face along the seal of the mask did you feel?'
 
-      const positiveComplete = this.userSealCheck.positive &&
-        Object.values(this.userSealCheck.positive).every(value => value !== null)
+      const sizing = this.userSealCheck.sizing && this.userSealCheck.sizing[sizingQuestion]
+      const airMovement = this.userSealCheck.positive && this.userSealCheck.positive[airMovementQuestion]
 
-      const negativeComplete = this.userSealCheck.negative &&
-        Object.values(this.userSealCheck.negative).every(value => value !== null)
+      // Check if sizing question is missing
+      if (!sizing || sizing.toString().trim() === '') {
+        return 'Not Selected'
+      }
 
-      return sizingComplete && (positiveComplete || negativeComplete)
+      // Check if air movement question is missing
+      if (!airMovement || airMovement.toString().trim() === '') {
+        return 'Not Selected'
+      }
+
+      // Fail if "Too big" or "Too small" is selected
+      if (sizing.toString() === 'Too big' || sizing.toString() === 'Too small') {
+        return 'Failed'
+      }
+
+      // Fail if "A lot of air movement" is selected
+      if (airMovement.toString() === 'A lot of air movement') {
+        return 'Failed'
+      }
+
+      // Pass if "Somewhere in-between too small and too big" AND ("Some air movement" OR "No air movement")
+      if (sizing.toString() === 'Somewhere in-between too small and too big') {
+        if (airMovement.toString() === 'Some air movement' || airMovement.toString() === 'No air movement') {
+          return 'Passed'
+        }
+      }
+
+      // If we get here, the combination doesn't match our pass criteria
+      return 'Not Selected'
     },
-    isUserSealCheckStarted() {
-      if (!this.userSealCheck) return false
-
-      // Check if any field has been filled
-      const hasSizingData = this.userSealCheck.sizing &&
-        Object.values(this.userSealCheck.sizing).some(value => value !== null)
-
-      const hasPositiveData = this.userSealCheck.positive &&
-        Object.values(this.userSealCheck.positive).some(value => value !== null)
-
-      const hasNegativeData = this.userSealCheck.negative &&
-        Object.values(this.userSealCheck.negative).some(value => value !== null)
-
-      return hasSizingData || hasPositiveData || hasNegativeData
+    isUserSealCheckComplete() {
+      const result = this.evaluateUserSealCheck()
+      return result === 'Passed'
     },
     isComfortComplete() {
       if (!this.comfort) return false

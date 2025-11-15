@@ -18,13 +18,9 @@ class UserSealCheckFacialMeasurementsService
             SELECT id,
               mask_id,
               user_seal_check,
-              CASE
-                WHEN user_seal_check -> 'sizing' ->> 'What do you think about the sizing of this mask relative to your face?' IN ('Too small', 'Too big')
-                  THEN false
-                WHEN user_seal_check -> 'positive' ->> '...how much air movement on your face along the seal of the mask did you feel?' = 'A lot of air movement'
-                  THEN false
-                ELSE NULL
-              END as qlft_pass
+              -- Use UserSealCheckService logic to determine qlft_pass
+              -- This will be computed in Ruby after fetching results
+              NULL as qlft_pass
             FROM fit_tests
             WHERE user_seal_check IS NOT NULL
             #{mask_id_clause}
@@ -47,8 +43,11 @@ class UserSealCheckFacialMeasurementsService
         SQL
       )
 
-      # Compute aggregated ARKit measurements in Ruby
+      # Compute qlft_pass and aggregated ARKit measurements in Ruby
       facial_measurements_with_aggregated = results.map do |row|
+        # Set qlft_pass based on user seal check evaluation
+        user_seal_check_data = row['user_seal_check']
+        row['qlft_pass'] = UserSealCheckService.qlft_pass_value(user_seal_check_data)
         facial_measurement_id = row['facial_measurement_id']
         arkit_data = row['arkit']
 

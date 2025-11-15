@@ -185,22 +185,6 @@
               :selected="userSealCheck['positive']['...how much air movement on your face along the seal of the mask did you feel?']"
               :disabled="!createOrEdit"
               />
-
-          <SurveyQuestion
-              question="...how much did your glasses fog up?"
-              :answer_options="['A lot', 'A little', 'Not at all', 'Not applicable']"
-              @update="selectPositivePressureGlassesFoggingUp"
-              :selected="userSealCheck['positive']['...how much did your glasses fog up?']"
-              :disabled="!createOrEdit"
-              />
-
-          <SurveyQuestion
-              question="...how much pressure build up was there?"
-              :answer_options="['As expected', 'Less than expected', 'No pressure build up']"
-              @update="selectPositivePressureBuildUp"
-              :selected="userSealCheck['positive']['...how much pressure build up was there?']"
-              :disabled="!createOrEdit"
-              />
         </div>
 
         <div v-show="!showPositiveUserSealCheck">
@@ -972,9 +956,7 @@ export default {
           "What do you think about the sizing of this mask relative to your face?": null
         },
         'positive': {
-          "...how much air movement on your face along the seal of the mask did you feel?": null,
-          '...how much did your glasses fog up?': null,
-          '...how much pressure build up was there?': null
+          "...how much air movement on your face along the seal of the mask did you feel?": null
         },
         'negative': {
           '...how much air passed between your face and the mask?': null
@@ -2004,12 +1986,6 @@ export default {
     },
     selectNegativePressureAirMovement(value) {
       this['userSealCheck']['negative']['...how much air passed between your face and the mask?'] = value
-    },
-    selectPositivePressureGlassesFoggingUp(value) {
-      this['userSealCheck']['positive']['...how much did your glasses fog up?'] = value
-    },
-    selectPositivePressureBuildUp(value) {
-      this['userSealCheck']['positive']['...how much pressure build up was there?'] = value
     },
     selectNegativePressure(value) {
       this['userSealCheck']['While performing a negative user seal check, did you notice any leakage?'] = value
