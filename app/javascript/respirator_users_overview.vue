@@ -131,7 +131,7 @@
                   </Button>
               </td>
               <td class='centered-text'>
-                <CircularButton text="+" @click="newUser"/>
+                <CircularButton text="+" @click="createFitTestForUser(r)"/>
               </td>
             </tr>
           </tbody>

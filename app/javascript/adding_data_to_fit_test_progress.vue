@@ -158,9 +158,9 @@ export default {
     getStepValue(stepKey) {
       switch (stepKey) {
         case 'User':
-          return this.selectedUser ? this.selectedUser.fullName : 'Not Selected'
+          return (this.selectedUser && this.selectedUser.fullName) ? this.selectedUser.fullName : 'Not Selected'
         case 'Mask':
-          return this.selectedMask ? this.selectedMask.uniqueInternalModelCode : 'Not Selected'
+          return (this.selectedMask && this.selectedMask.uniqueInternalModelCode) ? this.selectedMask.uniqueInternalModelCode : 'Not Selected'
         case 'Facial Hair':
           if (this.facialHair && this.facialHair.beard_length_mm && this.facialHair.beard_cover_technique) {
             return `${this.facialHair.beard_length_mm}, ${this.facialHair.beard_cover_technique}`
@@ -210,15 +210,17 @@ export default {
       const stepsWithValues = ['User', 'Mask', 'Facial Hair', 'User Seal Check', 'QLFT', 'QNFT', 'Comfort']
 
       if (stepsWithValues.includes(stepKey)) {
-        if (value === 'Not Selected') {
-          return value
+        if (value === 'Not Selected' || !value) {
+          return 'Not Selected'
         }
+        // Ensure value is a string before calling .length
+        const stringValue = String(value)
         // Truncate to 30 characters
-        return value.length > 30 ? value.substring(0, 30) + '...' : value
+        return stringValue.length > 30 ? stringValue.substring(0, 30) + '...' : stringValue
       }
 
       // For other steps, show status
-      return value
+      return value || 'Not Started'
     },
     navigateToStep(stepKey) {
       // Emit event to parent component to change the current step
@@ -239,7 +241,6 @@ export default {
       return sizingComplete && (positiveComplete || negativeComplete)
     },
     isUserSealCheckStarted() {
-      debugger
       if (!this.userSealCheck) return false
 
       // Check if any field has been filled
