@@ -7,7 +7,7 @@ class N95ModeService
     # Looks for FitTests where testing_mode is 'N95'
     # Computes the harmonic mean fit factor (hmff) for all the exercises,
     # with the exception of Normal breathing (SEALED)
-    ActiveRecord::Base.connection.exec_query(
+    results = ActiveRecord::Base.connection.exec_query(
       <<-SQL
         WITH
         #{FacialMeasurementOutliersService.latest_measurements_sql},
@@ -53,22 +53,45 @@ class N95ModeService
           masks.perimeter_mm,
           masks.strap_type,
           masks.style,
-          #{FacialMeasurement::COLUMNS.join(', ')},
-          #{FacialMeasurement::COLUMNS.map do |col|
-            <<-SQL
-              CASE
-                WHEN facial_measurements.#{col} IS NULL THEN NULL
-                WHEN ms.stddev_#{col} = 0 OR ms.stddev_#{col} IS NULL THEN NULL
-                ELSE (facial_measurements.#{col} - ms.avg_#{col}) / ms.stddev_#{col}
-              END as #{col}_z_score
-            SQL
-          end.join(',')}
+          fit_tests.facial_measurement_id,
+          facial_measurements.arkit
         FROM n95_mode_experimentals
         INNER JOIN fit_tests ON fit_tests.id = n95_mode_experimentals.id
         INNER JOIN masks ON fit_tests.mask_id = masks.id
         LEFT JOIN facial_measurements ON fit_tests.facial_measurement_id = facial_measurements.id
-        CROSS JOIN measurement_stats ms
       SQL
     )
+
+    # Compute aggregated ARKit measurements in Ruby
+    facial_measurements_with_aggregated = results.map do |row|
+      facial_measurement_id = row['facial_measurement_id']
+      arkit_data = row['arkit']
+
+      aggregated = if facial_measurement_id && arkit_data
+                     temp_fm = FacialMeasurement.new(arkit: arkit_data)
+                     temp_fm.aggregated_arkit_measurements
+                   else
+                     {
+                       nose_mm: nil,
+                       strap_mm: nil,
+                       top_cheek_mm: nil,
+                       mid_cheek_mm: nil,
+                       chin_mm: nil
+                     }
+                   end
+
+      # Convert symbol keys to string keys to match SQL result format
+      aggregated_string_keys = aggregated.transform_keys(&:to_s)
+      row.merge(aggregated_string_keys)
+    end
+
+    # Compute stats on aggregated measurements
+    stats = FacialMeasurementOutliersService.compute_aggregated_stats(facial_measurements_with_aggregated)
+
+    # Add z-scores for each row
+    facial_measurements_with_aggregated.map do |row|
+      z_scores = FacialMeasurementOutliersService.compute_z_scores(row, stats)
+      row.merge(z_scores)
+    end
   end
 end

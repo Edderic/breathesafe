@@ -1,82 +1,66 @@
 # frozen_string_literal: true
 
 class FacialMeasurementOutliersService
+  # Aggregated ARKit measurement columns
+  AGGREGATED_COLUMNS = %w[nose_mm strap_mm top_cheek_mm mid_cheek_mm chin_mm].freeze
+
   class << self
     def measurement_stats_sql_without_bounds
+      # This method is kept for backward compatibility but now returns empty SQL
+      # Stats are computed in Ruby after fetching aggregated measurements
       <<-SQL
         measurement_stats AS (
-          SELECT
-            1 as id,
-            #{FacialMeasurement::COLUMNS.map do |col|
-              <<-SQL
-                AVG(fm.#{col}) AS avg_#{col},
-                STDDEV_POP(fm.#{col}) AS stddev_#{col}
-              SQL
-            end.join(',')}
-          FROM latest_facial_measurements fm
+          SELECT 1 as id
         )
       SQL
     end
 
-    def avg_stddev_cols(lower_bound_id: nil, upper_bound_id: nil)
-      FacialMeasurement::COLUMNS.map do |col|
-        bounds_conditions = []
+    def compute_aggregated_stats(facial_measurements)
+      # Compute stats on aggregated ARKit measurements in Ruby
+      stats = {}
 
-        bounds_conditions << "fm.#{col} >= lb.#{col}" if lower_bound_id
+      AGGREGATED_COLUMNS.each do |col|
+        values = facial_measurements.map { |fm| fm[col] }.compact
 
-        bounds_conditions << "fm.#{col} <= ub.#{col}" if upper_bound_id
+        if values.any?
+          avg = values.sum.to_f / values.length
+          variance = values.sum { |v| (v - avg)**2 } / values.length
+          stddev = Math.sqrt(variance)
 
-        if bounds_conditions.any?
-          <<-SQL
-          AVG(CASE WHEN #{bounds_conditions.join(' AND ')} THEN fm.#{col} ELSE NULL END) AS avg_#{col},
-          STDDEV_POP(CASE WHEN #{bounds_conditions.join(' AND ')} THEN fm.#{col} ELSE NULL END) AS stddev_#{col}
-          SQL
+          stats["avg_#{col}"] = avg
+          stats["stddev_#{col}"] = stddev
         else
-          <<-SQL
-          AVG(fm.#{col}) AS avg_#{col},
-          STDDEV_POP(fm.#{col}) AS stddev_#{col}
-          SQL
+          stats["avg_#{col}"] = nil
+          stats["stddev_#{col}"] = nil
         end
-      end.join(',')
+      end
+
+      stats
+    end
+
+    def compute_z_scores(facial_measurement, stats)
+      # Compute z-scores for aggregated measurements
+      z_scores = {}
+
+      AGGREGATED_COLUMNS.each do |col|
+        value = facial_measurement[col]
+        avg = stats["avg_#{col}"]
+        stddev = stats["stddev_#{col}"]
+
+        z_scores["#{col}_z_score"] = if value.nil? || avg.nil? || stddev.nil? || stddev.zero?
+                                       nil
+                                     else
+                                       (value - avg) / stddev
+                                     end
+      end
+
+      z_scores
     end
 
     def zscore_cols
-      FacialMeasurement::COLUMNS.map do |col|
-        <<-SQL
-          CASE
-            WHEN fm.#{col} IS NULL THEN NULL
-            WHEN ms.stddev_#{col} = 0 OR ms.stddev_#{col} IS NULL THEN NULL
-            ELSE (fm.#{col} - ms.avg_#{col}) / ms.stddev_#{col}
-          END as #{col}_z_score
-        SQL
-      end.join(',')
-    end
-
-    def bounds_filter_cols(lower_bound_id: nil, upper_bound_id: nil)
-      if lower_bound_id.nil? && upper_bound_id.nil?
-        return FacialMeasurement::COLUMNS.map do |col|
-          "fm.#{col}"
-        end.join(', ')
-      end
-
-      FacialMeasurement::COLUMNS.map do |col|
-        conditions = []
-
-        conditions << "fm.#{col} >= lb.#{col}" if lower_bound_id
-
-        conditions << "fm.#{col} <= ub.#{col}" if upper_bound_id
-
-        if conditions.any?
-          <<-SQL
-            CASE
-              WHEN #{conditions.join(' AND ')} THEN fm.#{col}
-              ELSE NULL
-            END as #{col}
-          SQL
-        else
-          "fm.#{col}"
-        end
-      end.join(', ')
+      # Deprecated: kept for backward compatibility
+      # Z-scores are now computed in Ruby
+      ''
     end
 
     def latest_measurements_sql
@@ -102,8 +86,7 @@ class FacialMeasurementOutliersService
       <<-SQL
         measurement_stats AS (
           SELECT
-            1 as id,
-            #{avg_stddev_cols(lower_bound_id: lower_bound_id, upper_bound_id: upper_bound_id)}
+            1 as id
           FROM latest_facial_measurements fm
           #{lower_bound_join}
           #{upper_bound_join}
@@ -145,7 +128,6 @@ class FacialMeasurementOutliersService
             (p.first_name || ' ' || p.last_name) as full_name,
             #{manager_id ? 'manager.email as manager_email,' : 'NULL as manager_email,'}
             #{zscore_cols},
-            #{bounds_filter_cols(lower_bound_id: facial_measurement_id_of_lower_bound, upper_bound_id: facial_measurement_id_of_upper_bound)}
           FROM latest_facial_measurements fm
           INNER JOIN users u ON u.id = fm.user_id
           INNER JOIN profiles p ON p.user_id = fm.user_id
