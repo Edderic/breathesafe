@@ -77,7 +77,7 @@ class N95ModeService
                                       end
                        temp_fm = FacialMeasurement.new(arkit: parsed_arkit)
                        temp_fm.aggregated_arkit_measurements
-                     rescue JSON::ParserError, StandardError
+                     rescue StandardError
                        # If parsing fails, return nil values
                        {
                          nose_mm: nil,

@@ -417,8 +417,8 @@ class N99ModeToN95ModeConverterService
                                         end
                          temp_fm = FacialMeasurement.new(arkit: parsed_arkit)
                          temp_fm.aggregated_arkit_measurements
-                       rescue JSON::ParserError, StandardError
-                         # If parsing fails, return nil values
+          rescue StandardError
+            # If parsing fails, return nil values
                          {
                            nose_mm: nil,
                            strap_mm: nil,
