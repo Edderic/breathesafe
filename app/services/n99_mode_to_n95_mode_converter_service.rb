@@ -407,9 +407,26 @@ class N99ModeToN95ModeConverterService
         facial_measurement_id = row['facial_measurement_id']
         arkit_data = row['arkit']
 
-        aggregated = if facial_measurement_id && arkit_data
-                       temp_fm = FacialMeasurement.new(arkit: arkit_data)
-                       temp_fm.aggregated_arkit_measurements
+        aggregated = if facial_measurement_id && arkit_data && !arkit_data.to_s.strip.empty?
+                       begin
+                         # Parse JSONB if it's a string, otherwise use as-is
+                         parsed_arkit = if arkit_data.is_a?(String)
+                                          JSON.parse(arkit_data)
+                                        else
+                                          arkit_data
+                                        end
+                         temp_fm = FacialMeasurement.new(arkit: parsed_arkit)
+                         temp_fm.aggregated_arkit_measurements
+                       rescue JSON::ParserError, StandardError
+                         # If parsing fails, return nil values
+                         {
+                           nose_mm: nil,
+                           strap_mm: nil,
+                           top_cheek_mm: nil,
+                           mid_cheek_mm: nil,
+                           chin_mm: nil
+                         }
+                       end
                      else
                        {
                          nose_mm: nil,
