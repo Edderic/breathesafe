@@ -62,6 +62,7 @@ export default {
     margin-right: auto;
     left: 0;
     right: 0;
+    z-index:1000;
   }
 
   .close {
