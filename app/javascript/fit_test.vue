@@ -1313,6 +1313,19 @@ export default {
               successCallback
             )
           }
+        } else if (this.$route.name == 'NewFitTest' && toQuery.userId) {
+          // Handle case where only userId is provided (e.g., from clicking "+" button)
+          await this.loadManagedUsers()
+          let managedUser = this.managedUsers.filter((m) => m.managedId == parseInt(toQuery.userId))[0]
+
+          if (managedUser) {
+            this.selectedUser = managedUser
+            this.searchUser = managedUser.fullName
+            // Set tabToShow from query if provided, otherwise default to 'Mask'
+            if (toQuery.tabToShow) {
+              this.tabToShow = toQuery.tabToShow
+            }
+          }
         }
 
         if (this.acceptableRouteName) {

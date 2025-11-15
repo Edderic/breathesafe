@@ -115,6 +115,11 @@ export default {
         completed.push('Mask')
       }
 
+      // User Seal Check is completed if all questions are answered
+      if (this.isUserSealCheckComplete()) {
+        completed.push('User Seal Check')
+      }
+
       // Add other steps from props if provided
       this.completedSteps.forEach(step => {
         if (!completed.includes(step)) {
@@ -133,27 +138,8 @@ export default {
       return this.computedCompletedSteps.includes(stepKey)
     },
     getStepStatus(stepKey) {
-      // For all steps that show actual values, don't show "Complete" since we show the actual values
-      const stepsWithValues = ['User', 'Mask', 'Facial Hair', 'User Seal Check', 'QLFT', 'QNFT', 'Comfort']
-
-      if (stepsWithValues.includes(stepKey)) {
-        if (this.isStepCompleted(stepKey)) {
-          return '' // Empty string when completed
-        } else if (this.currentStep === stepKey) {
-          return 'In Progress'
-        } else {
-          return 'Not Started'
-        }
-      }
-
-      // For other steps, show normal status
-      if (this.isStepCompleted(stepKey)) {
-        return 'Complete'
-      } else if (this.currentStep === stepKey) {
-        return 'In Progress'
-      } else {
-        return 'Not Started'
-      }
+      // Remove status text - visual indicators (checkmarks, circles) are sufficient
+      return ''
     },
     getStepValue(stepKey) {
       switch (stepKey) {
@@ -337,6 +323,8 @@ export default {
 }
 
 .step-name {
+  margin-left: 0.5em;
+  margin-right: 0.5em;
   flex: 1;
   font-weight: 500;
   min-width: 120px;
