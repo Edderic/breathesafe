@@ -100,7 +100,7 @@ RSpec.describe FacialMeasurement, type: :model do
       it 'is invalid with array' do
         measurement = described_class.new(
           user_id: user.id,
-          arkit: ['array', 'not', 'hash']
+          arkit: %w[array not hash]
         )
         expect(measurement).not_to be_valid
         expect(measurement.errors[:arkit]).to include('must be a hash')
@@ -148,7 +148,7 @@ RSpec.describe FacialMeasurement, type: :model do
 
       it 'is invalid with array' do
         arkit = {
-          'average_measurements' => ['array', 'not', 'hash']
+          'average_measurements' => %w[array not hash]
         }
         measurement = described_class.new(
           user_id: user.id,
@@ -229,7 +229,7 @@ RSpec.describe FacialMeasurement, type: :model do
       end
 
       it 'is invalid with non-string key (symbols get converted to strings in JSONB)' do
-        # Note: In JSONB, symbol keys are converted to strings, so we test with a numeric key
+        # NOTE: In JSONB, symbol keys are converted to strings, so we test with a numeric key
         arkit = {
           'average_measurements' => {
             14_818 => { # numeric key
@@ -265,7 +265,7 @@ RSpec.describe FacialMeasurement, type: :model do
       it 'is invalid with array value' do
         arkit = {
           'average_measurements' => {
-            '14-818' => ['array', 'not', 'hash']
+            '14-818' => %w[array not hash]
           }
         }
         measurement = described_class.new(
