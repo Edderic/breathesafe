@@ -112,10 +112,10 @@ class QlftService
       # Compute stats on aggregated measurements
       stats = FacialMeasurementOutliersService.compute_aggregated_stats(facial_measurements_with_aggregated)
 
-      # Add z-scores for each row
+      # Add z-scores for each row and remove arkit key
       facial_measurements_with_aggregated.map do |row|
         z_scores = FacialMeasurementOutliersService.compute_z_scores(row, stats)
-        row.merge(z_scores)
+        row.merge(z_scores).except('arkit', 'facial_measurement_id')
       end
     end
   end

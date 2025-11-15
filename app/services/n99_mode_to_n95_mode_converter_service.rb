@@ -297,7 +297,7 @@ class N99ModeToN95ModeConverterService
     def call(mask_id: nil)
       mask_id_clause = mask_id ? "AND mask_id = #{mask_id.to_i}" : ''
 
-      ActiveRecord::Base.connection.exec_query(
+      results = ActiveRecord::Base.connection.exec_query(
         <<-SQL
           WITH
           #{FacialMeasurementOutliersService.latest_measurements_sql},
@@ -399,6 +399,9 @@ class N99ModeToN95ModeConverterService
         SQL
       )
 
+      # Convert ActiveRecord::Result to array of hashes
+      results = JSON.parse(results.to_json)
+
       # Compute aggregated ARKit measurements in Ruby
       facial_measurements_with_aggregated = results.map do |row|
         facial_measurement_id = row['facial_measurement_id']
@@ -425,10 +428,10 @@ class N99ModeToN95ModeConverterService
       # Compute stats on aggregated measurements
       stats = FacialMeasurementOutliersService.compute_aggregated_stats(facial_measurements_with_aggregated)
 
-      # Add z-scores for each row
+      # Add z-scores for each row and remove arkit key
       facial_measurements_with_aggregated.map do |row|
         z_scores = FacialMeasurementOutliersService.compute_z_scores(row, stats)
-        row.merge(z_scores)
+        row.merge(z_scores).except('arkit', 'facial_measurement_id')
       end
     end
   end
