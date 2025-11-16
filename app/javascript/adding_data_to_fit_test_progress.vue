@@ -285,7 +285,7 @@ export default {
 }
 
 .desktop-sidebar {
-  position: fixed;
+
   top: 3em;
   left: 0;
   height: 100vh;

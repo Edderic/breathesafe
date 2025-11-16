@@ -5,15 +5,6 @@
     </div>
 
 
-    <div class='menu row'>
-      <TabSet
-        v-if='tabToShow == "Fit Test"'
-        :options='secondaryTabToShowOptions'
-        @update='setSecondaryTab'
-        :tabToShow='secondaryTabToShow'
-      />
-    </div>
-
     <div class='container chunk'>
       <ClosableMessage @onclose='messages = []' :messages='messages'/>
       <br>
@@ -127,7 +118,7 @@
 
       </div>
 
-      <div v-show='tabToShow == "Facial Hair"' class='justify-content-center flex-dir-col align-content-center right-pane'>
+      <div v-show='tabToShow == "Facial Hair"' class='flex-dir-col align-content-center right-pane'>
         <h2 class='text-align-center'>Facial Hair Check</h2>
 
         <p class='narrow-p'>Having a beard can increase seal leakage. If you don't have one, please select "0mm" for the following question. If you do have one, please use a caliper or tape measure to estimate beard length.</p>
@@ -163,7 +154,7 @@
 
 
 
-      <div v-show='tabToShow == "User Seal Check"' class='justify-content-center flex-dir-col align-content-center right-pane'>
+      <div v-show='tabToShow == "User Seal Check"' class='flex-dir-col align-content-center right-pane'>
         <h2 class='text-align-center'>User Seal Check</h2>
         <div>
           <SurveyQuestion
@@ -208,8 +199,18 @@
         </div>
       </div>
 
-      <div v-show='tabToShow == "Fit Test"' class='justify-content-center flex-dir-col align-content-center right-pane'>
+      <div v-show='tabToShow == "Fit Test"' class='flex-dir-col align-content-center right-pane'>
         <h2 class='text-align-center'>Fit Test</h2>
+
+        <div class='menu row'>
+          <TabSet
+            v-if='tabToShow == "Fit Test"'
+            :options='secondaryTabToShowOptions'
+            @update='setSecondaryTab'
+            :tabToShow='secondaryTabToShow'
+          />
+        </div>
+
 
         <div v-show='secondaryTabToShow == "Choose Procedure"'>
           <p v-if='!fitTestProcedure' class='text-align-center'>Please select a fit testing procedure</p>
@@ -373,7 +374,7 @@
         </div>
       </div>
 
-      <div v-show='tabToShow == "Comfort"' class='justify-content-center flex-dir-col right-pane'>
+      <div v-show='tabToShow == "Comfort"' class='flex-dir-col right-pane'>
         <h2 class='text-align-center'>Comfort Assessment</h2>
 
         <SurveyQuestion
@@ -2110,6 +2111,10 @@ export default {
     padding: 1em 0;
   }
 
+  table {
+    width: 100%;
+  }
+
   .pointable:hover {
     background-color: #eee;
     cursor: pointer;
@@ -2264,18 +2269,18 @@ export default {
   }
 
   .columns {
+    display: grid;
+    grid-template-columns: 33% 66%;
+    grid-template-rows: auto;
+    width: 100vw;
   }
 
   .right-pane.narrow-width {
-    position: relative;
-    left: 66%;
     display: flex;
     flex-direction: column;
   }
 
   .right-pane {
-    position: relative;
-    left: 20%;
     display: flex;
     flex-direction: column;
   }
