@@ -7,6 +7,10 @@ class Mask < ApplicationRecord
                                  optional: true, inverse_of: :duplicate_masks
   has_many :duplicate_masks, class_name: 'Mask', foreign_key: 'duplicate_of',
                              dependent: :nullify, inverse_of: :duplicate_of_mask
+  has_many :mask_pairs_as_a, class_name: 'MaskPair', foreign_key: 'mask_a_id',
+                             dependent: :restrict_with_exception, inverse_of: :mask_a
+  has_many :mask_pairs_as_b, class_name: 'MaskPair', foreign_key: 'mask_b_id',
+                             dependent: :restrict_with_exception, inverse_of: :mask_b
 
   validates :unique_internal_model_code, presence: true
   validates :unique_internal_model_code, uniqueness: true
