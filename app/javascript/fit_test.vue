@@ -229,6 +229,14 @@
                 </td>
               </tr>
 
+              <!-- Instructions row -->
+              <tr v-if='fitTestProcedure && aerosol'>
+                <th>Instructions</th>
+                <td>
+                  <CircularButton text="?" @click="showInstructions" />
+                </td>
+              </tr>
+
               <!-- Qualitative fields -->
               <template v-if='fitTestProcedure === "qualitative_full_osha"'>
                 <tr>
@@ -281,16 +289,6 @@
               </template>
             </tbody>
           </table>
-        </div>
-
-        <!-- Detailed Instructions tab -->
-        <div v-show='secondaryTabToShow == "Detailed Instructions" && fitTestProcedure'>
-          <div class='instructions' style='max-height: 60vh; overflow-y: auto;'>
-            <h3>{{instructionTitle}}</h3>
-            <p v-for='text in instructionParagraphs'>
-              {{text}}
-            </p>
-          </div>
         </div>
 
         <!-- Results tab -->
@@ -481,9 +479,6 @@ export default {
       secondaryTabToShowOptions: [
         {
           text: 'Choose Procedure'
-        },
-        {
-          text: 'Detailed Instructions'
         },
         {
           text: 'Results'
@@ -1355,6 +1350,20 @@ export default {
       } else {
         this.messages.push({ str: 'Description not available' })
       }
+    },
+    showInstructions() {
+      this.messages = []
+
+      if (!this.instructionTitle || !this.instructionParagraphs || this.instructionParagraphs.length === 0) {
+        this.messages.push({ str: 'Instructions not available. Please select a procedure and solution/aerosol.' })
+        return
+      }
+
+      // Add title and paragraphs as separate messages
+      this.messages.push({ str: this.instructionTitle })
+      this.instructionParagraphs.forEach(paragraph => {
+        this.messages.push({ str: paragraph })
+      })
     },
     updateSearch(event, userOrMask) {
       if (userOrMask == 'mask') {

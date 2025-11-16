@@ -63,6 +63,8 @@ export default {
     left: 0;
     right: 0;
     z-index:1000;
+    max-height: 80vh;
+    overflow-y: auto;
   }
 
   .close {
