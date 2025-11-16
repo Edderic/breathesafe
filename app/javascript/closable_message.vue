@@ -57,7 +57,7 @@ export default {
     font-weight: bold;
     background-color: #ffffd6;
 
-    position: absolute;
+    position: fixed;
     margin-left: auto;
     margin-right: auto;
     left: 0;

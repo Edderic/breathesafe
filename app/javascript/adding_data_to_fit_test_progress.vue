@@ -285,10 +285,10 @@ export default {
 }
 
 .desktop-sidebar {
-
+  position: fixed;
   top: 3em;
   left: 0;
-  height: 100vh;
+  height: 85vh;
   width: 300px;
   overflow-y: auto;
 }
@@ -399,11 +399,11 @@ export default {
 }
 
 /* Mobile-specific styles */
-@media (max-width: 700px) {
+@media (max-width: 1000px) {
   .desktop-sidebar {
     position: static;
-    width: 100%;
-    max-height: none;
+    width: 97vw;
+    max-height: 15em;
     margin-bottom: 1rem;
   }
 

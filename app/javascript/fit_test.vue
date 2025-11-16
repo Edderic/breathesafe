@@ -2281,8 +2281,10 @@ export default {
   }
 
   .right-pane {
-    display: flex;
-    flex-direction: column;
+    position: relative;
+    left: 34vw;
+    width: 66vw;
+    max-width: 700px;
   }
 
   .grid {
@@ -2344,7 +2346,7 @@ export default {
     display: none;
   }
 
-  @media(max-width: 700px) {
+  @media(max-width: 1000px) {
     img {
       width: 100vw;
     }
@@ -2364,6 +2366,7 @@ export default {
     .row.buttons {
       flex-direction: column;
       width: 95vw;
+      align-items: center;
     }
 
     .grid.qlft {
@@ -2386,6 +2389,14 @@ export default {
 
     .phone {
       display: flex;
+    }
+
+    .right-pane {
+      left: 0;
+      display: flex;
+      justify-content: center;
+      width: auto;
+      max-width: none;
     }
 
   }
