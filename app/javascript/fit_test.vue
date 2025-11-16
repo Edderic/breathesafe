@@ -298,8 +298,8 @@
           <template v-if='fitTestProcedure === "qualitative_full_osha"'>
             <table>
               <tbody>
-                <template v-for='(ex, index) in qualitativeExercises'>
-                  <tr :key='index'>
+                <template v-for='(ex, index) in qualitativeExercises' :key='index'>
+                  <tr>
                     <th>{{ex.name}}</th>
                     <td>
                       <CircularButton text="?" @click="showDescription(ex.name)"/>
@@ -321,8 +321,8 @@
           <template v-if='fitTestProcedure && fitTestProcedure.startsWith("quantitative")'>
             <table>
               <tbody>
-                <template v-for='(ex, index) in quantitativeExercises'>
-                  <tr :key='index'>
+                <template v-for='(ex, index) in quantitativeExercises' :key='index'>
+                  <tr>
                     <th>{{ex.name}}</th>
                     <td>
                       <CircularButton text="?" @click="showDescription(ex.name)"/>
