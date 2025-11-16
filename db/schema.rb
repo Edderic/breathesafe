@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_251_027_020_732) do
+ActiveRecord::Schema[7.0].define(version: 20_251_116_202_923) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -194,7 +194,9 @@ ActiveRecord::Schema[7.0].define(version: 20_251_027_020_732) do
     t.float 'perimeter_mm'
     t.json 'payable_datetimes', default: []
     t.jsonb 'colors', default: [], null: false
+    t.integer 'duplicate_of'
     t.index ['author_id'], name: 'index_masks_on_author_id'
+    t.index ['duplicate_of'], name: 'index_masks_on_duplicate_of'
     t.index ['unique_internal_model_code'], name: 'index_masks_on_unique_internal_model_code', unique: true
   end
 
@@ -457,6 +459,7 @@ ActiveRecord::Schema[7.0].define(version: 20_251_027_020_732) do
   add_foreign_key 'fit_tests', 'users'
   add_foreign_key 'managed_users', 'users', column: 'managed_id'
   add_foreign_key 'managed_users', 'users', column: 'manager_id'
+  add_foreign_key 'masks', 'masks', column: 'duplicate_of', on_delete: :nullify
   add_foreign_key 'masks', 'users', column: 'author_id'
   add_foreign_key 'measurement_devices', 'users', column: 'owner_id'
   add_foreign_key 'profiles', 'users'

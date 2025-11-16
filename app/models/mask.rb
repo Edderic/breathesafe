@@ -3,8 +3,15 @@
 # Mask model
 class Mask < ApplicationRecord
   belongs_to :author, class_name: 'User'
+  belongs_to :duplicate_of_mask, class_name: 'Mask', foreign_key: 'duplicate_of',
+                                 optional: true, inverse_of: :duplicate_masks
+  has_many :duplicate_masks, class_name: 'Mask', foreign_key: 'duplicate_of',
+                             dependent: :nullify, inverse_of: :duplicate_of_mask
+
   validates :unique_internal_model_code, presence: true
   validates :unique_internal_model_code, uniqueness: true
+  validate :cannot_be_duplicate_of_self
+  validate :cannot_create_circular_reference
 
   def self.find_targeted_but_untested_masks(manager_id)
     results = Mask.connection.exec_query(
@@ -395,6 +402,41 @@ class Mask < ApplicationRecord
       m_data = JSON.parse(m.to_json)
 
       m_data.merge(hash[m.id])
+    end
+  end
+
+  private
+
+  def cannot_be_duplicate_of_self
+    return if duplicate_of.blank?
+
+    return unless duplicate_of == id
+
+    errors.add(:duplicate_of, 'cannot reference itself')
+  end
+
+  def cannot_create_circular_reference
+    return if duplicate_of.blank?
+    return if duplicate_of == id # Already handled by cannot_be_duplicate_of_self
+
+    # Traverse up the chain to check for circular references
+    visited = Set.new([id])
+    current_mask_id = duplicate_of
+
+    while current_mask_id.present?
+      # If we've seen this mask before, we have a cycle
+      if visited.include?(current_mask_id)
+        errors.add(:duplicate_of, 'would create a circular reference')
+        break
+      end
+
+      visited.add(current_mask_id)
+
+      # Get the next mask in the chain
+      next_mask = Mask.find_by(id: current_mask_id)
+      break unless next_mask
+
+      current_mask_id = next_mask.duplicate_of
     end
   end
 end
