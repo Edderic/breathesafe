@@ -1248,14 +1248,16 @@ export default {
           if (this.$route.query.size) {
             this.userSealCheck["sizing"]["What do you think about the sizing of this mask relative to your face?"] = toQuery.size
 
-            successCallback = function () {
+            successCallback = () => {
               this.$router.push({
                 name: 'FitTests',
                 query: {
                   managedId: managedUser.managedId
                 }
+              }).then(() => {
+                this.scrollToTop()
               })
-            }.bind(this)
+            }
           }
 
           if (managedUser) {
@@ -1697,6 +1699,8 @@ export default {
               path: `/fit_tests/${this.id}`,
               query: query,
               force: true
+            }).then(() => {
+              this.scrollToTop()
             })
           })
           .catch(error => {
@@ -1741,6 +1745,8 @@ export default {
                 },
                 query: query,
                 force: true
+              }).then(() => {
+                this.scrollToTop()
               })
             }
           })
@@ -1913,6 +1919,8 @@ export default {
 
           this.$router.push({
             name: 'FitTests'
+          }).then(() => {
+            this.scrollToTop()
           })
 
           this.messages.push(
@@ -2055,6 +2063,17 @@ export default {
     selectGeneralComfort(value) {
       this['comfort']['How comfortable is this mask/respirator?'] = value
     },
+    scrollToTop() {
+      // Scroll to top with smooth behavior after a short delay to allow content to render
+      this.$nextTick(() => {
+        setTimeout(() => {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          })
+        }, 100)
+      })
+    },
     setRouteTo(opt) {
       let query = JSON.parse(JSON.stringify(this.$route.query))
 
@@ -2065,6 +2084,8 @@ export default {
       this.$router.push({
         name: this.$route.name,
         query: query
+      }).then(() => {
+        this.scrollToTop()
       })
     },
     navigateToStep(stepKey) {
@@ -2080,6 +2101,8 @@ export default {
       this.$router.push({
         name: this.$route.name,
         query: query
+      }).then(() => {
+        this.scrollToTop()
       })
     },
     setSecondaryTab(opt) {
@@ -2089,6 +2112,8 @@ export default {
           tabToShow: this.$route.query.tabToShow,
           secondaryTabToShow: opt.name
         }
+      }).then(() => {
+        this.scrollToTop()
       })
     },
   }
