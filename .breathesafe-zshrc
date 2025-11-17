@@ -2,3 +2,5 @@ export BREATHESAFE_STAG_S3="s3://breathesafe-staging"
 export BREATHESAFE_PROD_S3="s3://breathesafe"
 export BREATHESAFE_DEV="$HOME/code/breathesafe"
 export BREATHESAFE_DEV_S3="s3://breathesafe-development"
+
+export AWS_SSL_VERIFY=false

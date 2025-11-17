@@ -281,3 +281,9 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+
+## Run mask fit predictor locally
+
+```
+scripts/run_lambda_locally.sh
+```

@@ -22,19 +22,37 @@ class AwsLambdaInvokeService
 
     def init_aws_lambda_client(region)
       # Increase read timeout to support long-running Lambda (up to 15 minutes)
-      Aws::Lambda::Client.new({
-                                region: region,
-                                access_key_id: ENV['AWS_ACCESS_KEY_ID'],
-                                secret_access_key: ENV['AWS_SECRET_ACCESS_KEY'],
-                                http_open_timeout: 15,
-                                http_read_timeout: 920,
-                                retry_limit: 3
-                              })
+      client_options = {
+        region: region,
+        access_key_id: ENV['AWS_ACCESS_KEY_ID'],
+        secret_access_key: ENV['AWS_SECRET_ACCESS_KEY'],
+        http_open_timeout: 15,
+        http_read_timeout: 920,
+        retry_limit: 3
+      }
+
+      # If SSL verification is explicitly disabled via environment variable
+      if ENV['AWS_SSL_VERIFY'] == 'false'
+        require 'openssl'
+        # NOTE: This is less secure and should only be used in development/staging
+        # The AWS SDK will use the default HTTP client with SSL verification disabled
+        client_options[:ssl_verify_peer] = false
+      end
+
+      Aws::Lambda::Client.new(client_options)
     end
 
     def invoke_lambda(aws_lambda, function_name, payload)
       result = aws_lambda.invoke(function_name: function_name, payload: payload.to_json)
       parse_lambda_response(result)
+    rescue Seahorse::Client::NetworkingError => e
+      # Handle SSL certificate verification errors
+      raise unless e.message.include?('certificate verify failed') || e.message.include?('CRL')
+
+      Rails.logger.error("AWS Lambda SSL error: #{e.message}")
+      Rails.logger.error('If this persists, you may need to set AWS_SSL_VERIFY=false (development/staging only)')
+      raise "AWS Lambda connection failed due to SSL certificate verification: #{e.message}. " \
+            'This may be due to outdated certificate stores or unreachable CRL servers.'
     end
 
     def parse_lambda_response(result)
@@ -46,6 +64,8 @@ class AwsLambdaInvokeService
     end
 
     def local_mode?
+      return false
+
       env = ENV.fetch('HEROKU_ENVIRONMENT', Rails.env.to_s).to_s.downcase
       %w[development dev].include?(env)
     end
