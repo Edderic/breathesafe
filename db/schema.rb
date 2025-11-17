@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_251_117_025_227) do
+ActiveRecord::Schema[7.0].define(version: 20_251_117_030_059) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -215,7 +215,9 @@ ActiveRecord::Schema[7.0].define(version: 20_251_117_025_227) do
     t.json 'payable_datetimes', default: []
     t.jsonb 'colors', default: [], null: false
     t.integer 'duplicate_of'
+    t.bigint 'brand_id'
     t.index ['author_id'], name: 'index_masks_on_author_id'
+    t.index ['brand_id'], name: 'index_masks_on_brand_id'
     t.index ['duplicate_of'], name: 'index_masks_on_duplicate_of'
     t.index ['unique_internal_model_code'], name: 'index_masks_on_unique_internal_model_code', unique: true
   end
@@ -481,6 +483,7 @@ ActiveRecord::Schema[7.0].define(version: 20_251_117_025_227) do
   add_foreign_key 'managed_users', 'users', column: 'manager_id'
   add_foreign_key 'mask_pairs', 'masks', column: 'mask_a_id', on_delete: :restrict
   add_foreign_key 'mask_pairs', 'masks', column: 'mask_b_id', on_delete: :restrict
+  add_foreign_key 'masks', 'brands', on_delete: :nullify
   add_foreign_key 'masks', 'masks', column: 'duplicate_of', on_delete: :nullify
   add_foreign_key 'masks', 'users', column: 'author_id'
   add_foreign_key 'measurement_devices', 'users', column: 'owner_id'
