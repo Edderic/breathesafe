@@ -1823,7 +1823,36 @@ export default {
       else if (this.tabToShow == 'User Seal Check') {
         this.validateUser()
         this.validateMask()
-        this.validateUserSealCheck()
+
+        // Check if we should skip validation based on early failure conditions
+        const sizingAnswer = this.userSealCheck['sizing']["What do you think about the sizing of this mask relative to your face?"]
+        const airMovementAnswer = this.userSealCheck['positive']["...how much air movement on your face along the seal of the mask did you feel?"]
+
+        // If air movement is "A lot of air movement", proceed regardless of other answers
+        const hasAirMovementFailure = airMovementAnswer === 'A lot of air movement'
+
+        // If sizing is "Too big" or "Too small", proceed to Fit Test
+        const hasSizingFailure = sizingAnswer === 'Too big' || sizingAnswer === 'Too small'
+
+        // Only validate if we're not skipping due to early failure conditions
+        if (!hasAirMovementFailure && !hasSizingFailure) {
+          this.validateUserSealCheck()
+        } else if (hasAirMovementFailure) {
+          // If air movement indicates failure, we can proceed regardless of sizing
+          // But we should still ensure the air movement question itself is answered
+          if (!airMovementAnswer) {
+            this.messages.push({
+              str: `Please fill out: "...how much air movement on your face along the seal of the mask did you feel?"`
+            })
+          }
+        } else if (hasSizingFailure) {
+          // If sizing indicates failure, ensure sizing question is answered
+          if (!sizingAnswer) {
+            this.messages.push({
+              str: `Please fill out: "What do you think about the sizing of this mask relative to your face?"`
+            })
+          }
+        }
 
         if (this.messages.length == 0) {
           await this.saveFitTest({
@@ -1837,7 +1866,11 @@ export default {
               {
                 str: "User seal check failed. You may skip adding qualitative or quantitative fit testing data, along with comfort data if you wish, by clicking here.",
                 to: {
-                  'name': 'FitTests'
+                  'name': 'FitTests',
+                  'query': {
+                    'tabToShow': 'Tested',
+                    'managedId': this.selectedUser.managedId
+                  }
                 }
               }
             )
