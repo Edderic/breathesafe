@@ -1927,7 +1927,11 @@ export default {
           )
 
           this.$router.push({
-            name: 'FitTests'
+            name: 'FitTests',
+            query: {
+              tabToShow: 'Tested',
+              managedId: this.selectedUser.managedId
+            }
           }).then(() => {
             this.scrollToTop()
           })
