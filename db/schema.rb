@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_251_117_030_059) do
+ActiveRecord::Schema[7.0].define(version: 20_251_120_150_339) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -120,6 +120,8 @@ ActiveRecord::Schema[7.0].define(version: 20_251_117_030_059) do
     t.integer 'head_circumference'
     t.integer 'nose_breadth'
     t.jsonb 'arkit'
+    t.index %w[user_id created_at], name: 'index_facial_measurements_on_user_id_and_created_at_desc',
+                                    order: { created_at: :desc }
     t.index ['user_id'], name: 'index_facial_measurements_on_user_id'
   end
 
