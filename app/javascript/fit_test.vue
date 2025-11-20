@@ -1868,7 +1868,6 @@ export default {
                 to: {
                   'name': 'FitTests',
                   'query': {
-                    'tabToShow': 'Tested',
                     'managedId': this.selectedUser.managedId
                   }
                 }
@@ -1962,7 +1961,6 @@ export default {
           this.$router.push({
             name: 'FitTests',
             query: {
-              tabToShow: 'Tested',
               managedId: this.selectedUser.managedId
             }
           }).then(() => {

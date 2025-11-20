@@ -5,13 +5,6 @@
       <CircularButton text="+" @click="newFitTest"/>
     </div>
 
-    <div class='menu row'>
-      <TabSet
-        :options='tabToShowOptions'
-        @update='setTabTo'
-        :tabToShow='tabToShow'
-      />
-    </div>
 
     <div class='row'>
       <label >By:</label>
@@ -34,19 +27,7 @@
       <br>
     </div>
 
-    <MaskCards
-      v-if='tabToShow == "Untested"'
-      :viewMaskOnClick='false'
-      :cards='sortedDisplayables'
-      :showStats='false'
-      :managedUser='managedUser'
-      :showMaskCardPopup='showMaskCardPopup'
-      @toggleMaskCardPopup='toggleMaskCardPopup'
-      @newFitTestWithSize='newFitTestWithSize'
-      @newFitTestForUser='newFitTestForUser'
-      @markNotIncludedInMaskKit='markNotIncludedInMaskKit'/>
-
-    <div class='main scrollable desktopView' v-if='tabToShow == "Tested"'>
+    <div class='main scrollable desktopView'>
       <table>
         <thead>
           <th>Tester</th>
@@ -62,35 +43,35 @@
         </thead>
         <tbody>
           <tr v-for='f in sortedFitTests'>
-            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User"})'>{{f.firstName + ' ' + f.lastName}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{f.firstName + ' ' + f.lastName}}</td>
             <td>
               <router-link :to="showMask(f)">
                 <img :src="f.imageUrls[0]" alt="" class='thumbnail'>
               </router-link>
             </td>
-            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.uniqueInternalModelCode}}</td>
-            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.shortHandCreatedAt}}</td>
-            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Facial Hair"})'>{{f.facialHair.beard_length_mm}}</td>
-            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User Seal Check"})'>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{f.uniqueInternalModelCode}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{f.shortHandCreatedAt}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{f.facialHair.beard_length_mm}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>
               <ColoredCell class='status' :text='f.userSealCheckStatus' :backgroundColor='statusColor(f.userSealCheckStatus)'/>
             </td>
-            <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QLFT"})'>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>
               <ColoredCell class='status' :text='f.qualitativeStatus' :backgroundColor='statusColor(f.qualitativeStatus)'/>
             </td>
-            <td class='status' @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QNFT"})'>
+            <td class='status' @click='setRouteTo("EditFitTest", { id: f.id }, {})'>
               <ColoredCell class='status' :text='f.quantitativeStatus' :backgroundColor='quantitativeStatusColor(f.quantitativeStatus)'/>
             </td>
             <td >
-              <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})' class='status' :text='f.comfortStatus' :backgroundColor='statusColor(f.comfortStatus)'/>
+              <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, {})' class='status' :text='f.comfortStatus' :backgroundColor='statusColor(f.comfortStatus)'/>
             </td>
               <td >
-                <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})' class='status' :text='f.facialMeasurementPresence' :backgroundColor='facialMeasPresenceColorMappingStatus(f.facialMeasurementPresence)'/>
+                <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, {})' class='status' :text='f.facialMeasurementPresence' :backgroundColor='facialMeasPresenceColorMappingStatus(f.facialMeasurementPresence)'/>
               </td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div class='main scrollable mobileView' v-show='tabToShow == "Tested"'>
+    <div class='main scrollable mobileView'>
       <div class='grid'>
         <div v-for='f in sortedFitTests' class='card'>
           <table>
@@ -101,47 +82,47 @@
                 </router-link>
               </td>
               <th>Tester</th>
-              <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User"})'>{{f.firstName + ' ' + f.lastName}}</td>
+              <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{f.firstName + ' ' + f.lastName}}</td>
             </tr>
             <tr>
               <th>Mask</th>
-              <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.uniqueInternalModelCode}}</td>
+              <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{f.uniqueInternalModelCode}}</td>
             </tr>
 
             <tr>
               <th>Created at</th>
-              <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Mask"})'>{{f.shortHandCreatedAt}}</td>
+              <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{f.shortHandCreatedAt}}</td>
               <th>Beard length</th>
-              <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Facial Hair"})'>{{f.facialHair.beard_length_mm}}</td>
+              <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{f.facialHair.beard_length_mm}}</td>
             </tr>
 
             <tr>
               <th>User Seal Check</th>
-              <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "User Seal Check"})'>
+              <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>
                 <ColoredCell class='status' :text='f.userSealCheckStatus' :backgroundColor='statusColor(f.userSealCheckStatus)'/>
               </td>
               <th>QLFT</th>
-              <td @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QLFT"})'>
+              <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>
                 <ColoredCell class='status' :text='f.qualitativeStatus' :backgroundColor='statusColor(f.qualitativeStatus)'/>
               </td>
             </tr>
 
             <tr>
               <th>QNFT</th>
-              <td class='status' @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "QNFT"})'>
+              <td class='status' @click='setRouteTo("EditFitTest", { id: f.id }, {})'>
                 <ColoredCell class='status' :text='f.quantitativeStatus' :backgroundColor='quantitativeStatusColor(f.quantitativeStatus)'/>
               </td>
 
               <th>Comfort</th>
               <td >
-                <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})' class='status' :text='f.comfortStatus' :backgroundColor='statusColor(f.comfortStatus)'/>
+                <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, {})' class='status' :text='f.comfortStatus' :backgroundColor='statusColor(f.comfortStatus)'/>
               </td>
             </tr>
 
             <tr>
               <th colspan='2'>Facial Measurements</th>
               <td colspan='2'>
-                <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, { tabToShow: "Comfort"})' class='status' :text='f.facialMeasurementPresence' :backgroundColor='facialMeasPresenceColorMappingStatus(f.facialMeasurementPresence)'/>
+                <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, {})' class='status' :text='f.facialMeasurementPresence' :backgroundColor='facialMeasPresenceColorMappingStatus(f.facialMeasurementPresence)'/>
               </td>
             </tr>
           </table>
@@ -166,8 +147,6 @@ import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import { facialMeasurementsPresenceColorMapping, userSealCheckColorMapping, genColorSchemeBounds, getColor, fitFactorColorScheme } from './colors.js'
 import ColoredCell from './colored_cell.vue'
-import MaskCards from './mask_card.vue'
-import TabSet from './tab_set.vue'
 import { deepSnakeToCamel, setupCSRF } from './misc.js'
 // import SortFilterPopup from './sort_filter_popup.vue'
 import SearchSortFilterSection from './search_sort_filter_section.vue'
@@ -187,32 +166,18 @@ export default {
     CircularButton,
     ClosableMessage,
     ColoredCell,
-    MaskCards,
     // SortFilterPopup,
     SearchSortFilterSection,
     SurveyQuestion,
-    TabSet
   },
   data() {
     return {
-      tabToShowOptions: [
-        {
-          text: "Untested",
-        },
-        {
-          text: "Tested",
-        }
-      ],
-
       managedId: 0,
-      testedAndUntested: [],
       messages: [],
       masks: [],
       search: "",
       fit_tests: [],
-      tabToShow: "Untested",
       showPopup: false,
-      showMaskCardPopup: false,
       sortByField: undefined,
       sortByStatus: undefined,
       filterForColor: "none",
@@ -281,35 +246,6 @@ export default {
       }
 
     },
-    untestedDisplayables() {
-      return displayableMasks.bind(this)(this.untested)
-    },
-    sortedDisplayables() {
-      return sortedDisplayableMasks.bind(this)(this.untestedDisplayables)
-    },
-    untested() {
-      if (!this.managedUser) {
-        return []
-      }
-
-      return this.testedAndUntested.filter(
-        function(t) {
-          let lowerSearch = this.search.toLowerCase()
-
-          let lowerSearchCriteria = true;
-
-          if (lowerSearch != "") {
-            lowerSearchCriteria = t.uniqueInternalModelCode.toLowerCase().match(lowerSearch)
-          }
-
-          return (
-            (t.managedId == this.managedId)
-            && (t.numFitTestsPerMaskUser == 0)
-            && lowerSearchCriteria
-          )
-        }.bind(this)
-      )
-    },
     displayables() {
       let lowerSearch = this.search.toLowerCase()
 
@@ -356,18 +292,12 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser', 'setWaiting']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
-    toggleMaskCardPopup() {
-      this.showMaskCardPopup = !this.showMaskCardPopup
-    },
     async loadWatch(toQuery, fromQuery) {
       if (this.$route.name == 'FitTests' ) {
         if (!this.currentUser) {
           signIn.call(this)
         } else {
           await this.loadStuff()
-          if (toQuery['tabToShow']) {
-            this.tabToShow = toQuery.tabToShow
-          }
           if (toQuery['managedId']) {
             this.managedId = parseInt(toQuery.managedId)
           }
@@ -385,29 +315,6 @@ export default {
         }
       }
     },
-    async markNotIncludedInMaskKit(args) {
-      this.setWaiting(true);
-      setupCSRF();
-      let answer = window.confirm(`Are you sure you want to mark this mask as not being included in the mask kit?`);
-
-      if (answer) {
-        await axios.delete(
-          `/mask_kit/${args.managedId}/${args.maskId}.json`,
-        )
-          .then(response => {
-            let data = response.data
-          })
-          .catch(error => {
-            this.message = "Failed to remove mask from mask kit"
-          }).finally(() => {
-            this.setWaiting(false)
-          })
-
-        await this.loadFitTests()
-
-        this.showMaskCardPopup = false
-      }
-    },
     newFitTestForUser(args) {
       this.$router.push(
         {
@@ -415,77 +322,6 @@ export default {
           query: args
         }
       )
-    },
-    newFitTestWithSize(args) {
-      setupCSRF();
-      this.setWaiting(true);
-      axios.post(
-        '/fit_tests.json',
-        {
-          fit_test: {
-            mask_id: args.maskId,
-            facial_hair: {
-              "beard_length_mm": "0mm",
-              "beard_cover_technique": "No"
-            },
-            user_seal_check: {
-              sizing: {
-                "What do you think about the sizing of this mask relative to your face?": args.size
-              },
-              "negative": {"...how much air passed between your face and the mask?": null},
-              "positive": {"...how much did your glasses fog up?": "A lot", "...how much pressure build up was there?": "No pressure build up", "...how much air movement on your face along the seal of the mask did you feel?": "A lot of air movement"}},
-            comfort: {
-              "Is there enough room to talk?": null,
-              "Is there adequate room for eye protection?": null,
-              "How comfortable is the position of the mask on the nose?": null,
-              "How comfortable is the position of the mask on face and cheeks?": null
-            },
-            quantitative_fit_testing_device_id: null,
-            results: {
-              "qualitative":  {
-                "aerosol": {"solution": "Saccharin"},
-                "exercises":  [
-                  {"name": "Normal breathing", "result": null},
-                  {"name": "Deep breathing", "result": null},
-                  {"name": "Turning head side to side", "result": null},
-                  {"name": "Moving head up and down", "result": null},
-                  {"name": "Talking", "result": null},
-                  {"name": "Bending over", "result": null},
-                  {"name": "Normal breathing", "result": null}
-                ],
-                "procedure": null
-              },
-              "quantitative":  {
-                "aerosol": {"solution": "Ambient", "initial_count_per_cm3": null},
-                "exercises":  [
-                  {"name": "Bending over", "fit_factor": null},
-                  {"name": "Talking", "fit_factor": null},
-                  {"name": "Turning head side to side", "fit_factor": null},
-                  {"name": "Moving head up and down", "fit_factor": null},
-                  {"name": "Normal breathing (SEALED)", "fit_factor": null}],
-                "procedure": null,
-                "testing_mode": "N99"
-              }
-            },
-          },
-          user: {
-            id: args.userId
-          }
-        }
-      )
-      .then(response => {
-        if (response.status === 201) {
-          this.loadFitTests();
-          this.showMaskCardPopup = false;
-        } else {
-          this.message = "Failed to create fit test.";
-        }
-      })
-      .catch(error => {
-        this.message = "Failed to create fit test.";
-      }).finally(() => {
-        this.setWaiting(false);
-      });
     },
     toggleShowPopup(showPopup) {
       this.showPopup = showPopup
@@ -540,20 +376,6 @@ export default {
       let color = userSealCheckColorMapping[status]
       return `rgb(${color.r}, ${color.g}, ${color.b})`
     },
-    setTabTo(opt) {
-      let query = JSON.parse(JSON.stringify(this.$route.query))
-
-      let someQuery = Object.assign(query,
-        {
-          tabToShow: opt.name,
-        }
-      )
-
-      this.$router.push({
-        name: this.$route.name,
-        query: someQuery
-      })
-    },
     setRouteTo(name, params, query) {
 
       this.$router.push(
@@ -605,9 +427,6 @@ export default {
           let data = response.data
           if (response.data.fit_tests) {
             this.fit_tests = data.fit_tests.map((ft) => new FitTest(ft))
-          }
-          if (response.data.tested_and_untested) {
-            this.testedAndUntested = deepSnakeToCamel(data.tested_and_untested)
           }
           // whatever you want
         })
