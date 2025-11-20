@@ -190,21 +190,15 @@ class ParticipantProgress
       ).to_json
     )
 
-    # Decrypt the profile data for each result
-    results.each do |result|
-      next unless result['first_name'].is_a?(String) && result['first_name'].start_with?('{"p":')
+    managed_ids = results.map { |result| result['managed_id'] }.compact
+    profiles_by_user_id = Profile.where(user_id: managed_ids).index_by(&:user_id)
 
-      # This is encrypted data, decrypt it
-      begin
-        profile = Profile.find_by(user_id: result['managed_id'])
-        if profile
-          result['first_name'] = profile.first_name
-          result['last_name'] = profile.last_name
-        end
-      rescue StandardError => e
-        # If decryption fails, leave the encrypted data as is
-        Rails.logger.warn "Failed to decrypt profile data for user #{result['managed_id']}: #{e.message}"
-      end
+    results.each do |result|
+      profile = profiles_by_user_id[result['managed_id']]
+      next unless profile
+
+      result['first_name'] = profile.first_name
+      result['last_name'] = profile.last_name
     end
 
     results
