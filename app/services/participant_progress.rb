@@ -46,20 +46,16 @@ class ParticipantProgress
 
   def self.call(manager_id:)
     user = User.find(manager_id)
-    where = if user.admin?
-              ''
-            else
-              "WHERE mu.manager_id = #{manager_id}"
-            end
+    manager_filter = user.admin? ? '' : "WHERE manager_id = #{manager_id}"
 
     # Execute the complex query
     results = JSON.parse(
       ActiveRecord::Base.connection.exec_query(
         <<-SQL
-        WITH managed_by_manager AS (
-          SELECT * FROM managed_users
-          WHERE manager_id = '#{manager_id}'
-        ), latest_facial_measurement_created_at AS (
+          WITH managed_by_manager AS (
+            SELECT * FROM managed_users
+            #{manager_filter}
+          ), latest_facial_measurement_created_at AS (
           SELECT user_id, MAX(created_at) AS created_at
           FROM facial_measurements fm
           GROUP BY 1
@@ -142,10 +138,10 @@ class ParticipantProgress
             LEFT JOIN mask_kit_statuses mks
             ON mks.uuid = ssj.shippable_uuid
             WHERE ssj.shippable_type = 'MaskKit'
-        ), num_masks_tested AS (
+          ), num_masks_tested AS (
           -- TODO: correctly calculate num_unique_masks_tested
-          SELECT user_id, COUNT(DISTINCT mask_id) AS num_unique_masks_tested
-          FROM managed_users INNER JOIN fit_tests ft ON (ft.user_id = managed_users.managed_id)
+            SELECT user_id, COUNT(DISTINCT mask_id) AS num_unique_masks_tested
+            FROM managed_by_manager INNER JOIN fit_tests ft ON (ft.user_id = managed_by_manager.managed_id)
           GROUP BY 1
         )
 
@@ -165,7 +161,7 @@ class ParticipantProgress
         num_masks_tested.num_unique_masks_tested
 
         FROM users AS managers
-        INNER JOIN managed_users mu ON (mu.manager_id = managers.id)
+        INNER JOIN managed_by_manager mu ON (mu.manager_id = managers.id)
 
         LEFT JOIN num_masks_tested ON (num_masks_tested.user_id = mu.managed_id)
 
@@ -184,7 +180,6 @@ class ParticipantProgress
           ON total_unique_masks_fit_tested.user_id = mu.managed_id
 
 
-        #{where}
         ORDER BY manager_email
         SQL
       ).to_json
