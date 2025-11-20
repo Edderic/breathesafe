@@ -59,20 +59,14 @@ class ParticipantProgress
           SELECT user_id, MAX(created_at) AS created_at
           FROM facial_measurements fm
           GROUP BY 1
-        ), latest_facial_measurements_for_users AS (
+        ),
+        latest_facial_measurements_for_users AS (
           SELECT fm.*,
           #{facial_measurements_present_sql}
           FROM facial_measurements fm
           INNER JOIN latest_facial_measurement_created_at lfm
           ON fm.user_id = lfm.user_id
           AND fm.created_at = lfm.created_at
-        ), latest_facial_measurements_for_users_counts AS (
-          SELECT id,
-           created_at,
-           updated_at,
-           #{facial_measurements_present_counts},
-           user_id
-          FROM latest_facial_measurements_for_users
         ),
 
         #{FacialMeasurement.missing_ratio_sql},
@@ -88,27 +82,17 @@ class ParticipantProgress
             #{demographics_present_counts}
           FROM profile_with_demog_fields_present
         ),
-        masks_shipped AS (
-          SELECT to_user_uuid, mask_uuid
-          FROM shipping_statuses ss
-          INNER JOIN shipping_status_joins ssj
-            ON ssj.shipping_uuid = ss.uuid
-          INNER JOIN mask_kit_statuses mks
-            ON mks.uuid = ssj.shippable_uuid
-        ),
-        targeted_masks AS (
-          SELECT * FROM masks_shipped
-          INNER JOIN masks ON masks.id = masks_shipped.mask_uuid
-        ), targeted_fit_tests AS (
-          SELECT targeted_masks.id,
+
+        fit_tests_joined_with_masks AS (
+          SELECT masks.id,
           fit_tests.user_id
 
-          FROM targeted_masks
+          FROM masks
           INNER JOIN fit_tests
-          ON targeted_masks.id = fit_tests.mask_id
+          ON masks.id = fit_tests.mask_id
         ), targeted_mask_counts AS (
           SELECT user_id, id, COUNT(*) AS num_fit_tests_per_mask
-          FROM targeted_fit_tests
+          FROM fit_tests_joined_with_masks
           GROUP BY 1, 2
         ), total_unique_masks_fit_tested AS (
           SELECT user_id, COUNT(id) AS num_targeted_unique_masks_fit_tested
@@ -118,27 +102,9 @@ class ParticipantProgress
           SELECT users.* FROM users
           LEFT JOIN profiles
           ON profiles.user_id = users.id
-        ), targeted_masks_count AS (
-          SELECT COUNT(*) AS num_targeted_masks
-          FROM targeted_masks
         ),
-        mask_shipped_counts AS (
-          SELECT to_user_uuid, count(*) AS num_targeted_masks
-          FROM masks_shipped
-          GROUP BY 1
-        ), sent_masks AS (
-            SELECT distinct on (mask_uuid)
-                us.uuid as us_uuid,
-                mask_uuid
-            FROM user_statuses us
-            LEFT JOIN shipping_statuses ss
-            ON ss.to_user_uuid = us.uuid
-            LEFT JOIN shipping_status_joins ssj
-            ON ssj.shipping_uuid = ss.uuid
-            LEFT JOIN mask_kit_statuses mks
-            ON mks.uuid = ssj.shippable_uuid
-            WHERE ssj.shippable_type = 'MaskKit'
-          ), num_masks_tested AS (
+
+        num_masks_tested AS (
           -- TODO: correctly calculate num_unique_masks_tested
             SELECT user_id, COUNT(DISTINCT mask_id) AS num_unique_masks_tested
             FROM managed_by_manager INNER JOIN fit_tests ft ON (ft.user_id = managed_by_manager.managed_id)
@@ -154,10 +120,9 @@ class ParticipantProgress
         #{recommender_measurements_select_sql},
         -- num_targeted_masks,
         total_unique_masks_fit_tested.num_targeted_unique_masks_fit_tested,
-        -- ROUND((num_targeted_unique_masks_fit_tested::float / num_targeted_masks * 100)::numeric, 2) AS fit_testing_percent_complete,
         COALESCE(apc.percent_complete, 0.0) AS fm_percent_complete,
         ROUND((demog_present_counts::float / #{Profile::STRING_DEMOG_FIELDS.size + Profile::NUM_DEMOG_FIELDS.size} * 100)::numeric, 2) AS demog_percent_complete,
-        mu.*, fm.created_at, fm.updated_at,
+        mu.*,
         num_masks_tested.num_unique_masks_tested
 
         FROM users AS managers
@@ -174,8 +139,6 @@ class ParticipantProgress
 
         LEFT JOIN profile_with_demog_fields_present_count p
           ON mu.managed_id = p.user_id
-        LEFT JOIN latest_facial_measurements_for_users_counts fm
-          ON fm.user_id = mu.managed_id
         LEFT JOIN total_unique_masks_fit_tested
           ON total_unique_masks_fit_tested.user_id = mu.managed_id
 
