@@ -56,8 +56,9 @@ class ParticipantProgress
             SELECT * FROM managed_users
             #{manager_filter}
           ), latest_facial_measurement_created_at AS (
-          SELECT user_id, MAX(created_at) AS created_at
+          SELECT fm.user_id, MAX(fm.created_at) AS created_at
           FROM facial_measurements fm
+          INNER JOIN managed_by_manager mbm ON fm.user_id = mbm.managed_id
           GROUP BY 1
         ),
         latest_facial_measurements_for_users AS (
@@ -67,6 +68,7 @@ class ParticipantProgress
           INNER JOIN latest_facial_measurement_created_at lfm
           ON fm.user_id = lfm.user_id
           AND fm.created_at = lfm.created_at
+          INNER JOIN managed_by_manager mbm ON fm.user_id = mbm.managed_id
         ),
 
         #{FacialMeasurement.missing_ratio_sql},
@@ -74,9 +76,9 @@ class ParticipantProgress
         #{FacialMeasurement.arkit_percent_complete_sql},
 
         profile_with_demog_fields_present AS (
-          SELECT *, #{demographics_present_sql}
-          FROM profiles
-
+          SELECT p.*, #{demographics_present_sql}
+          FROM profiles p
+          INNER JOIN managed_by_manager mbm ON p.user_id = mbm.managed_id
         ), profile_with_demog_fields_present_count AS (
           SELECT *,
             #{demographics_present_counts}
@@ -86,10 +88,10 @@ class ParticipantProgress
         fit_tests_joined_with_masks AS (
           SELECT masks.id,
           fit_tests.user_id
-
           FROM masks
           INNER JOIN fit_tests
           ON masks.id = fit_tests.mask_id
+          INNER JOIN managed_by_manager mbm ON fit_tests.user_id = mbm.managed_id
         ), targeted_mask_counts AS (
           SELECT user_id, id, COUNT(*) AS num_fit_tests_per_mask
           FROM fit_tests_joined_with_masks
@@ -132,8 +134,6 @@ class ParticipantProgress
 
         LEFT JOIN latest_facial_measurements_for_users ON latest_facial_measurements_for_users.user_id =
           mu.managed_id
-
-        LEFT JOIN facial_measurement_missing_ratio AS fmmr ON (fmmr.id = latest_facial_measurements_for_users.id)
 
         LEFT JOIN arkit_percent_complete AS apc ON (apc.id = latest_facial_measurements_for_users.id)
 
