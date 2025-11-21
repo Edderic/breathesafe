@@ -51,7 +51,7 @@
             </td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{f.uniqueInternalModelCode}}</td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{f.shortHandCreatedAt}}</td>
-            <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{f.facialHair.beard_length_mm}}</td>
+            <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{getBeardLength(f)}}</td>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>
               <ColoredCell class='status' :text='f.userSealCheckStatus' :backgroundColor='statusColor(f.userSealCheckStatus)'/>
             </td>
@@ -93,7 +93,7 @@
               <th>Created at</th>
               <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{f.shortHandCreatedAt}}</td>
               <th>Beard length</th>
-              <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{f.facialHair.beard_length_mm}}</td>
+              <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{getBeardLength(f)}}</td>
             </tr>
 
             <tr>
@@ -302,6 +302,15 @@ export default {
     ...mapActions(useMainStore, ['getCurrentUser', 'setWaiting']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
+    getBeardLength(fitTest) {
+      if (!fitTest || !fitTest.facialHair || Object.keys(fitTest.facialHair).length === 0) {
+        return 'N/A'
+      }
+      // Check both camelCase (after deepSnakeToCamel) and snake_case (original) versions
+      const facialHair = fitTest.facialHair
+      const beardLength = facialHair.beardLengthMm || facialHair.beard_length_mm
+      return beardLength || 'N/A'
+    },
     async loadWatch(toQuery, fromQuery) {
       if (this.$route.name == 'FitTests' ) {
         if (!this.currentUser) {

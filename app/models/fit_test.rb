@@ -83,6 +83,23 @@ class FitTest < ApplicationRecord
         row['facialMeasurementPresence'] = 'Completely missing'
       end
 
+      # Apply json_parse logic for specific columns
+      %w[facial_hair comfort results user_seal_check image_urls].each do |col|
+        row[col] = if !row[col]
+                     col == 'image_urls' ? [] : {}
+                   elsif col == 'image_urls'
+                     if row['image_urls'].is_a?(String)
+                       [row['image_urls'].gsub('{', '').gsub('}', '').gsub('"', '')]
+                     else
+                       row['image_urls']
+                     end
+                   elsif row[col].is_a?(String)
+                     JSON.parse(row[col])
+                   else
+                     row[col] # Already parsed (JSONB returns hash/array)
+                   end
+      end
+
       result << row
     end
 
