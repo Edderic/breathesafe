@@ -1,26 +1,29 @@
 <template>
   <div class='align-items-center flex-dir-col'>
-    <div class='flex align-items-center row'>
-      <h2 class='tagline'>Fit Tests</h2>
-      <CircularButton text="+" @click="newFitTest"/>
+
+    <div class='header-section'>
+      <div class='flex align-items-center row'>
+        <h2 class='tagline'>Fit Tests</h2>
+        <CircularButton text="+" @click="newFitTest"/>
+      </div>
+
+
+      <div class='row'>
+        <label >By:</label>
+        <select :value="managedId" @change='setManagedUser'>
+          <option v-for='m in uniqueManagedUsers' :key="m.managedId" :value="m.managedId">{{m.firstName + ' ' + m.lastName}}</option>
+        </select>
+      </div>
+
+      <SearchSortFilterSection
+          @updateSearch='filterFor'
+          @toggleShowPopup='toggleShowPopup'
+          @filterFor='filterFor'
+          :filterForColor='filterForColor'
+          :filterForStrapType='filterForStrapType'
+          :filterForStyle='filterForStyle'
+          />
     </div>
-
-
-    <div class='row'>
-      <label >By:</label>
-      <select :value="managedId" @change='setManagedUser'>
-        <option v-for='m in uniqueManagedUsers' :key="m.managedId" :value="m.managedId">{{m.firstName + ' ' + m.lastName}}</option>
-      </select>
-    </div>
-
-    <SearchSortFilterSection
-      @updateSearch='filterFor'
-      @toggleShowPopup='toggleShowPopup'
-      @filterFor='filterFor'
-      :filterForColor='filterForColor'
-      :filterForStrapType='filterForStrapType'
-      :filterForStyle='filterForStyle'
-    />
 
     <div class='container chunk'>
       <ClosableMessage @onclose='messages = []' :messages='messages'/>
@@ -462,6 +465,11 @@ export default {
   .flex {
     display: flex;
   }
+
+  .flex-dir-row {
+    display: flex;
+    flex-direction: row;
+  }
   .main {
     display: flex;
     flex-direction: column;
@@ -658,6 +666,12 @@ export default {
     display: none;
   }
 
+  .header-section {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
   @media(max-width: 1450px) {
     #search {
       width: 70vw;
@@ -735,6 +749,16 @@ export default {
     .thumbnail {
       max-width: 50vw;
       max-height: none;
+    }
+  }
+
+  @media(max-width: 700px) {
+    .header-section {
+      flex-direction: column;
+    }
+
+    .search-section {
+      width: 90vw;
     }
   }
 </style>
