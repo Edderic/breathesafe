@@ -115,7 +115,7 @@ class ParticipantProgress
 
 
 
-        SELECT
+        SELECT DISTINCT ON (mu.managed_id)
         managers.email as manager_email,
         p.first_name,
         p.last_name,
@@ -142,8 +142,7 @@ class ParticipantProgress
         LEFT JOIN total_unique_masks_fit_tested
           ON total_unique_masks_fit_tested.user_id = mu.managed_id
 
-
-        ORDER BY manager_email
+        ORDER BY mu.managed_id, manager_email
         SQL
       ).to_json
     )

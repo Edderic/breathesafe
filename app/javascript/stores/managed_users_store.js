@@ -32,13 +32,19 @@ export const useManagedUserStore = defineStore('managedUsers', {
           if (response.data.managed_users) {
             managedUsers = response.data.managed_users
 
+            // Deduplicate by managedId to prevent duplicates
+            const seenIds = new Set()
             for(let managedUserData of managedUsers) {
               managedUser = deepSnakeToCamel(managedUserData)
-              this.managedUsers.push(
-                new RespiratorUser(
-                  managedUser
+              const managedId = managedUser.managedId || managedUser.managed_id
+              if (managedId && !seenIds.has(managedId)) {
+                seenIds.add(managedId)
+                this.managedUsers.push(
+                  new RespiratorUser(
+                    managedUser
+                  )
                 )
-              )
+              }
             }
           }
         })

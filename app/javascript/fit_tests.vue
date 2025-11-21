@@ -9,7 +9,7 @@
     <div class='row'>
       <label >By:</label>
       <select :value="managedId" @change='setManagedUser'>
-        <option v-for='m in managedUsers' :value="m.managedId">{{m.firstName + ' ' + m.lastName}}</option>
+        <option v-for='m in uniqueManagedUsers' :key="m.managedId" :value="m.managedId">{{m.firstName + ' ' + m.lastName}}</option>
       </select>
     </div>
 
@@ -216,6 +216,16 @@ export default {
           'managedUsers',
         ]
     ),
+    uniqueManagedUsers() {
+      const seen = new Set()
+      return this.managedUsers.filter(m => {
+        if (seen.has(m.managedId)) {
+          return false
+        }
+        seen.add(m.managedId)
+        return true
+      })
+    },
     ...mapState(
         useProfileStore,
         [
