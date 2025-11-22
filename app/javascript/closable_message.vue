@@ -84,4 +84,10 @@ export default {
     padding: 1em;
 
   }
+
+  tr td {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
 </style>

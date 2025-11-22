@@ -802,7 +802,7 @@ export default {
 
   .scrollable {
     overflow-y: auto;
-    height: 75vh;
+    height: 80vh;
     width: 100%;
   }
 
@@ -962,7 +962,7 @@ export default {
   }
 
   .actions-table td {
-    padding: 0.5em 0;
+    padding: 0.5em;
   }
 
   .thumbnail-small {
@@ -975,6 +975,13 @@ export default {
     display: flex;
     gap: 1em;
     margin-top: 1em;
+  }
+
+  .actions-buttons .button {
+    display: flex;
+    width:45%;
+    align-items: center;
+    justify-content: center;
   }
 
   .delete-confirmation {
