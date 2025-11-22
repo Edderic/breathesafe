@@ -30,6 +30,51 @@
       <br>
     </div>
 
+    <!-- Actions menu for fit test -->
+    <div v-if='selectedFitTestForActions' :key='actionsMenuKey' class='actions-menu-container' @click.self='closeActionsMenu'>
+      <div class='actions-menu-wrapper' @click.stop>
+        <CircularButton @click='closeActionsMenu' class='close-actions' text='x'/>
+        <div class='actions-menu-content'>
+          <table class='actions-table' v-if='selectedFitTestForActions'>
+            <tr>
+              <th>Tester</th>
+              <td>{{selectedFitTestForActions.firstName + ' ' + selectedFitTestForActions.lastName}}</td>
+            </tr>
+            <tr>
+              <th>Image</th>
+              <td>
+                <img v-if='selectedFitTestForActions.imageUrls && selectedFitTestForActions.imageUrls[0]'
+                     :src="selectedFitTestForActions.imageUrls[0]"
+                     alt=""
+                     class='thumbnail-small'>
+                <span v-else>No image</span>
+              </td>
+            </tr>
+            <tr>
+              <th>Mask</th>
+              <td>{{selectedFitTestForActions.uniqueInternalModelCode}}</td>
+            </tr>
+            <tr>
+              <th>Created at</th>
+              <td>{{selectedFitTestForActions.shortHandCreatedAt}}</td>
+            </tr>
+          </table>
+          <div class='actions-buttons'>
+            <Button text='Clone' @click='cloneFitTest'/>
+            <Button text='Delete' @click='confirmDelete'/>
+          </div>
+          <div v-if='deleteConfirmation' class='delete-confirmation'>
+            <p>Are you sure you want to delete this fit test?</p>
+            <div class='confirmation-buttons'>
+              <Button text='Delete' @click='deleteFitTest'/>
+              <Button text='Cancel' @click='cancelDelete'/>
+            </div>
+          </div>
+          <ClosableMessage v-if='actionMenuMessages && actionMenuMessages.length > 0' @onclose='actionMenuMessages = []' :messages='actionMenuMessages'/>
+        </div>
+      </div>
+    </div>
+
     <div class='main scrollable desktopView'>
       <table>
         <thead>
@@ -43,9 +88,10 @@
           <th>QNFT HMFF</th>
           <th>Comfort</th>
           <th>Has facial measurement data</th>
+          <th>Actions</th>
         </thead>
         <tbody>
-          <tr v-for='f in sortedFitTests'>
+          <tr v-for='f in sortedFitTests' :key='f.id'>
             <td @click='setRouteTo("EditFitTest", { id: f.id }, {})'>{{f.firstName + ' ' + f.lastName}}</td>
             <td>
               <router-link :to="showMask(f)">
@@ -70,6 +116,14 @@
               <td >
                 <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, {})' class='status' :text='f.facialMeasurementPresence' :backgroundColor='facialMeasPresenceColorMappingStatus(f.facialMeasurementPresence)'/>
               </td>
+            <td @click.stop>
+              <CircularButton @click.stop='showActions(f.id)' class='gear-button'>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
+                </svg>
+              </CircularButton>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -188,6 +242,10 @@ export default {
       filterForStyle: "none",
       filterForTargeted: true,
       filterForNotTargeted: true,
+      selectedFitTestForActions: null,
+      deleteConfirmation: false,
+      actionMenuMessages: [],
+      actionsMenuKey: 0
     }
   },
   props: {
@@ -313,6 +371,75 @@ export default {
       const facialHair = fitTest.facialHair
       const beardLength = facialHair.beardLengthMm || facialHair.beard_length_mm
       return beardLength || 'N/A'
+    },
+    showActions(fitTestId) {
+      const fitTest = this.fit_tests.find(f => f.id === fitTestId)
+      if (fitTest) {
+        this.deleteConfirmation = false
+        this.actionMenuMessages = []
+        // Create a new object reference to ensure Vue detects the change
+        // Copy all properties to a new object
+        this.selectedFitTestForActions = Object.assign({}, fitTest)
+        // Increment key to force re-render
+        this.actionsMenuKey += 1
+      }
+    },
+    closeActionsMenu() {
+      this.selectedFitTestForActions = null
+      this.deleteConfirmation = false
+      this.actionMenuMessages = []
+    },
+    async cloneFitTest() {
+      if (!this.selectedFitTestForActions) return
+
+      try {
+        const response = await axios.post(
+          `/fit_tests/${this.selectedFitTestForActions.id}/clone`,
+          {},
+          { headers: { 'Content-Type': 'application/json' } }
+        )
+
+        if (response.status === 201) {
+          this.actionMenuMessages = [{ str: 'Fit test cloned successfully!' }]
+          this.closeActionsMenu()
+          // Refresh the table
+          await this.loadFitTests()
+        } else {
+          this.actionMenuMessages = [{ str: 'Failed to clone fit test.' }]
+        }
+      } catch (error) {
+        const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to clone fit test.'
+        this.actionMenuMessages = [{ str: errorMsg }]
+      }
+    },
+    confirmDelete() {
+      this.deleteConfirmation = true
+      this.actionMenuMessages = []
+    },
+    cancelDelete() {
+      this.deleteConfirmation = false
+      this.actionMenuMessages = []
+    },
+    async deleteFitTest() {
+      if (!this.selectedFitTestForActions) return
+
+      try {
+        const response = await axios.delete(
+          `/fit_tests/${this.selectedFitTestForActions.id}`
+        )
+
+        if (response.status === 200) {
+          this.actionMenuMessages = [{ str: 'Fit test deleted successfully!' }]
+          this.closeActionsMenu()
+          // Refresh the table
+          await this.loadFitTests()
+        } else {
+          this.actionMenuMessages = [{ str: 'Failed to delete fit test.' }]
+        }
+      } catch (error) {
+        const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to delete fit test.'
+        this.actionMenuMessages = [{ str: errorMsg }]
+      }
     },
     async loadWatch(toQuery, fromQuery) {
       if (this.$route.name == 'FitTests' ) {
@@ -760,5 +887,89 @@ export default {
     .search-section {
       width: 90vw;
     }
+  }
+
+  .actions-menu-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .actions-menu-wrapper {
+    position: relative;
+    background-color: #ffffd6;
+    border-radius: 8px;
+    padding: 1em;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .close-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+  }
+
+  .actions-menu-content {
+    padding: 1em;
+  }
+
+  .actions-table {
+    width: 100%;
+    margin-bottom: 1em;
+  }
+
+  .actions-table th {
+    text-align: left;
+    padding-right: 1em;
+    font-weight: bold;
+  }
+
+  .actions-table td {
+    padding: 0.5em 0;
+  }
+
+  .thumbnail-small {
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: contain;
+  }
+
+  .actions-buttons {
+    display: flex;
+    gap: 1em;
+    margin-top: 1em;
+  }
+
+  .delete-confirmation {
+    margin-top: 1em;
+    padding: 1em;
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+  }
+
+  .delete-confirmation p {
+    margin-bottom: 1em;
+  }
+
+  .confirmation-buttons {
+    display: flex;
+    gap: 1em;
+  }
+
+  .gear-button svg {
+    display: block;
+    margin: 0 auto;
   }
 </style>

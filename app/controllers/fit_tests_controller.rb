@@ -133,21 +133,57 @@ class FitTestsController < ApplicationController
   def delete
     fit_test = FitTest.find(params[:id])
 
-    if !current_user
-      status = 401
-      messages = ['Unauthorized.']
-      to_render = {}
-    elsif !current_user.manages?(fit_test_user)
-      status = 401
-      messages = ['Unauthorized.']
-    elsif fit_test.delete
+    if fit_test.destroy
       status = 200
       messages = []
+    else
+      status = 422
+      messages = fit_test.errors.full_messages
     end
 
     to_render = {
       messages: messages
     }
+
+    respond_to do |format|
+      format.json do
+        render json: to_render.to_json, status: status
+      end
+    end
+  end
+
+  def clone
+    original_fit_test = FitTest.find(params[:id])
+    user = original_fit_test.user
+
+    # Get latest facial measurement
+    latest_facial_measurement = FacialMeasurement.latest(user)
+    fm_id = latest_facial_measurement&.id
+
+    # Clone all attributes except id, created_at, updated_at
+    cloned_attributes = original_fit_test.attributes.except('id', 'created_at', 'updated_at')
+    cloned_attributes['facial_measurement_id'] = fm_id
+    cloned_attributes['user_id'] = user.id
+
+    # Remove any nil values that might cause issues
+    cloned_attributes = cloned_attributes.compact
+
+    fit_test = FitTest.create(cloned_attributes)
+
+    if fit_test.persisted?
+      status = 201
+      messages = []
+      to_render = {
+        fit_test: JSON.parse(fit_test.to_json),
+        messages: messages
+      }
+    else
+      status = 422
+      messages = fit_test.errors.full_messages
+      to_render = {
+        messages: messages
+      }
+    end
 
     respond_to do |format|
       format.json do

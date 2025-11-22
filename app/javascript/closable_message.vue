@@ -1,8 +1,8 @@
 <template>
-  <div class='closable-container' v-if='messages.length > 0'>
+  <div class='closable-container' v-if='shouldShow'>
     <CircularButton @click='close' class='close' :style='{bottom: bottom, left: left}' text='x'/>
     <div class='slot-wrapper'>
-      <p v-for='message in messages'>
+      <p v-for='message in messages' :key='message.str'>
         <router-link v-if='!!message.to' :to='message.to' @click='close'>
           {{message.str}}
         </router-link>
@@ -10,6 +10,7 @@
           {{message.str}}
         </span>
       </p>
+      <slot></slot>
     </div>
   </div>
 </template>
@@ -40,6 +41,9 @@ export default {
 
     left() {
       return `${400 - 40}px`
+    },
+    shouldShow() {
+      return this.messages.length > 0 || (this.$slots.default && this.$slots.default().length > 0)
     }
 
   }, methods: {

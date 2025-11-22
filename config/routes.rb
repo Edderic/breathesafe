@@ -50,6 +50,7 @@ Rails.application.routes.draw do
   get 'fit_tests/:id', to: 'fit_tests#show'
   put 'fit_tests/:id', to: 'fit_tests#update'
   delete 'fit_tests/:id', to: 'fit_tests#delete'
+  post 'fit_tests/:id/clone', to: 'fit_tests#clone'
 
   post 'managed_users', to: 'managed_users#create'
   get 'managed_users', to: 'managed_users#index'
