@@ -118,10 +118,36 @@
               </td>
             <td @click.stop>
               <CircularButton @click.stop='showActions(f.id)' class='gear-button'>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
-                  <circle cx="12" cy="12" r="3"></circle>
-                  <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
-                </svg>
+
+              <svg
+                viewBox="0 0 100 100"
+                xmlns="http://www.w3.org/2000/svg"
+                role="img"
+                aria-label="Gear icon"
+                class='gear'
+              >
+                <!-- Gear body & teeth use currentColor so you can tint via CSS -->
+                <g fill="currentColor">
+                  <!-- Main gear body -->
+                  <circle cx="50" cy="50" r="30" />
+
+                  <!-- Six teeth -->
+                  <rect x="45" y="8" width="10" height="12" rx="2" ry="2" />
+                  <rect x="45" y="8" width="10" height="12" rx="2" ry="2"
+                        transform="rotate(60 50 50)" />
+                  <rect x="45" y="8" width="10" height="12" rx="2" ry="2"
+                        transform="rotate(120 50 50)" />
+                  <rect x="45" y="8" width="10" height="12" rx="2" ry="2"
+                        transform="rotate(180 50 50)" />
+                  <rect x="45" y="8" width="10" height="12" rx="2" ry="2"
+                        transform="rotate(240 50 50)" />
+                  <rect x="45" y="8" width="10" height="12" rx="2" ry="2"
+                        transform="rotate(300 50 50)" />
+
+                  <!-- Inner ring -->
+                  <circle cx="50" cy="50" r="14" fill="none" stroke="currentColor" stroke-width="6" />
+                </g>
+              </svg>
               </CircularButton>
             </td>
           </tr>
@@ -971,5 +997,7 @@ export default {
   .gear-button svg {
     display: block;
     margin: 0 auto;
+    color: #80808080;
   }
+
 </style>
