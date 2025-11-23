@@ -5,6 +5,7 @@
       <div class='flex align-items-center row'>
         <h2 class='tagline'>Fit Tests</h2>
         <CircularButton text="+" @click="newFitTest"/>
+        <CircularButton text="⬆" @click="importFitTests" class="import-button"/>
       </div>
 
 
@@ -578,6 +579,13 @@ export default {
         }
       )
     },
+    importFitTests() {
+      this.$router.push(
+        {
+          name: "FitTestsImport"
+        }
+      )
+    },
     viewMask(id) {
       this.$router.push(
         {
@@ -714,6 +722,8 @@ export default {
   .tagline {
     text-align: center;
     font-weight: bold;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
   }
 
   .align-items-center {
@@ -1005,6 +1015,11 @@ export default {
     display: block;
     margin: 0 auto;
     color: #80808080;
+  }
+
+  .import-button {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
   }
 
 </style>
