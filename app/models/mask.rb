@@ -4,6 +4,7 @@
 class Mask < ApplicationRecord
   belongs_to :author, class_name: 'User'
   belongs_to :brand, optional: true
+  belongs_to :bulk_fit_tests_import, optional: true
   belongs_to :duplicate_of_mask, class_name: 'Mask', foreign_key: 'duplicate_of',
                                  optional: true, inverse_of: :duplicate_masks
   has_many :duplicate_masks, class_name: 'Mask', foreign_key: 'duplicate_of',

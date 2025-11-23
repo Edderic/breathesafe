@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_251_120_150_339) do
+ActiveRecord::Schema[7.0].define(version: 20_251_123_165_055) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -65,6 +65,21 @@ ActiveRecord::Schema[7.0].define(version: 20_251_120_150_339) do
     t.datetime 'created_at', null: false
     t.datetime 'updated_at', null: false
     t.index ['name'], name: 'index_brands_on_name', unique: true
+  end
+
+  create_table 'bulk_fit_tests_imports', force: :cascade do |t|
+    t.bigint 'user_id', null: false
+    t.string 'source_name', null: false
+    t.string 'source_type', null: false
+    t.jsonb 'column_matching_mapping', default: {}
+    t.text 'user_matching', default: '{}'
+    t.jsonb 'mask_matching', default: {}
+    t.json 'user_seal_check_matching', default: {}
+    t.json 'fit_testing_matching', default: {}
+    t.string 'status', default: 'pending'
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.index ['user_id'], name: 'index_bulk_fit_tests_imports_on_user_id'
   end
 
   create_table 'carbon_dioxide_monitors', force: :cascade do |t|
@@ -476,6 +491,7 @@ ActiveRecord::Schema[7.0].define(version: 20_251_120_150_339) do
   end
 
   add_foreign_key 'addresses', 'users'
+  add_foreign_key 'bulk_fit_tests_imports', 'users'
   add_foreign_key 'facial_measurements', 'users'
   add_foreign_key 'fit_tests', 'facial_measurements'
   add_foreign_key 'fit_tests', 'masks'
