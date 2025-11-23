@@ -87,6 +87,9 @@ FactoryBot.define do
     password_confirmation { 'password123' }
     confirmed_at { Time.current }
     admin { false }
+    # Set consent fields by default so test users don't see consent form
+    consent_form_version_accepted { Rails.application.config.x.consent_form_version }
+    consent_form_accepted_at { Time.current }
 
     trait :unconfirmed do
       confirmed_at { nil }
@@ -151,6 +154,11 @@ FactoryBot.define do
       after(:create) do |user|
         create_list(:address, 2, user: user)
       end
+    end
+
+    trait :without_consent do
+      consent_form_version_accepted { nil }
+      consent_form_accepted_at { nil }
     end
   end
 
