@@ -83,11 +83,50 @@
               <thead>
                 <tr>
                   <th>Columns Found in File</th>
+                  <th>Breathesafe matching column</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(column, index) in fileColumns" :key="index">
                   <td>{{ column }}</td>
+                  <td>
+                    <select
+                      v-model="columnMappings[column]"
+                      @change="updateColumnMatching"
+                      class="column-select"
+                    >
+                      <option value="">-- Select --</option>
+                      <option value="User.email">User.email</option>
+                      <option value="Profile.first_name">Profile.first_name</option>
+                      <option value="Profile.last_name">Profile.last_name</option>
+                      <option value="Mask.unique_internal_model_code">Mask.unique_internal_model_code</option>
+                      <option value="QNFT -> Bending over">QNFT -> Bending over</option>
+                      <option value="QNFT -> Talking">QNFT -> Talking</option>
+                      <option value="QNFT -> Turning head side to side">QNFT -> Turning head side to side</option>
+                      <option value="QNFT -> Moving head up and down">QNFT -> Moving head up and down</option>
+                      <option value="QNFT -> Normal breathing 1">QNFT -> Normal breathing 1</option>
+                      <option value="QNFT -> Normal breathing 2">QNFT -> Normal breathing 2</option>
+                      <option value="QNFT -> Normal breathing (SEALED)">QNFT -> Normal breathing (SEALED)</option>
+                      <option value="QNFT -> Grimace">QNFT -> Grimace</option>
+                      <option value="QNFT -> Deep breathing">QNFT -> Deep breathing</option>
+                      <option value="QLFT -> Bending over">QLFT -> Bending over</option>
+                      <option value="QLFT -> Talking">QLFT -> Talking</option>
+                      <option value="QLFT -> Turning head side to side">QLFT -> Turning head side to side</option>
+                      <option value="QLFT -> Moving head up and down">QLFT -> Moving head up and down</option>
+                      <option value="QLFT -> Normal breathing 1">QLFT -> Normal breathing 1</option>
+                      <option value="QLFT -> Normal breathing 2">QLFT -> Normal breathing 2</option>
+                      <option value="QLFT -> Normal breathing (SEALED)">QLFT -> Normal breathing (SEALED)</option>
+                      <option value="QLFT -> Grimace">QLFT -> Grimace</option>
+                      <option value="QLFT -> Deep breathing">QLFT -> Deep breathing</option>
+                      <option value="QNFT mode (N99 / N95)">QNFT mode (N99 / N95)</option>
+                      <option value="QLFT -> solution">QLFT -> solution</option>
+                      <option value='comfort -> "Is there enough room to talk?"'>comfort -> "Is there enough room to talk?"</option>
+                      <option value='comfort -> "Is there adequate room for eye protection?"'>comfort -> "Is there adequate room for eye protection?"</option>
+                      <option value='comfort -> "How comfortable is the position of the mask on the nose?"'>comfort -> "How comfortable is the position of the mask on the nose?"</option>
+                      <option value='comfort -> "How comfortable is the position of the mask on face and cheeks?"'>comfort -> "How comfortable is the position of the mask on face and cheeks?"</option>
+                      <option value="USC -> What do you think about the sizing of this mask relative to your face?">USC -> What do you think about the sizing of this mask relative to your face?</option>
+                    </select>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -196,6 +235,7 @@ export default {
       fileColumns: [],
       csvLines: [],
       headerRowIndex: 0,
+      columnMappings: {},
       columnMatching: null,
       userMatching: null,
       maskMatching: null,
@@ -268,7 +308,23 @@ export default {
         const headerLine = this.csvLines[this.headerRowIndex]
         // Handle CSV parsing - split by comma, but respect quoted fields
         const columns = this.parseCSVLine(headerLine)
-        this.fileColumns = columns.map(col => col.trim()).filter(col => col !== '')
+        const newColumns = columns.map(col => col.trim()).filter(col => col !== '')
+
+        // Preserve existing mappings for columns that still exist
+        const preservedMappings = {}
+        newColumns.forEach(column => {
+          if (this.columnMappings.hasOwnProperty(column)) {
+            preservedMappings[column] = this.columnMappings[column]
+          } else {
+            preservedMappings[column] = ''
+          }
+        })
+
+        this.fileColumns = newColumns
+        this.columnMappings = preservedMappings
+
+        // Update columnMatching object
+        this.updateColumnMatching()
 
         // Clear any previous error messages if parsing succeeded
         if (this.fileColumns.length > 0) {
@@ -278,6 +334,10 @@ export default {
         this.messages = [{ str: `Error parsing header row: ${error.message}` }]
         this.fileColumns = []
       }
+    },
+    updateColumnMatching() {
+      // Update the columnMatching object with current mappings
+      this.columnMatching = { ...this.columnMappings }
     },
     parseCSVLine(line) {
       // Simple CSV parser that handles quoted fields
@@ -507,6 +567,14 @@ input[type="file"] {
 .column-matching-table td {
   border: 1px solid #dee2e6;
   padding: 0.75em;
+}
+
+.column-select {
+  width: 100%;
+  padding: 0.5em;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.9em;
 }
 
 .column-matching-table tbody tr:hover {
