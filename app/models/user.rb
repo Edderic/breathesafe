@@ -14,6 +14,7 @@ class User < ApplicationRecord
   has_many :events, foreign_key: 'author_id', dependent: :destroy, inverse_of: :user
   has_many :masks, foreign_key: 'author_id', inverse_of: :user # rubocop:disable Rails/HasManyOrHasOneDependent
   has_many :facial_measurements, foreign_key: 'author_id', dependent: :destroy, inverse_of: :user
+  has_many :bulk_fit_tests_imports, dependent: :destroy
 
   def carbon_dioxide_monitors
     CarbonDioxideMonitor.find_by_sql(
