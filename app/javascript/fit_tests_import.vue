@@ -68,14 +68,40 @@
           <h2 class='text-align-center'>Column Matching</h2>
           <h3 class='text-align-center'>Match CSV columns to fit test fields</h3>
 
-          <p class='text-align-center'>Placeholder: Column matching interface will go here</p>
+          <div class='header-row-selector'>
+            <label for="header-row-index">Header row index:</label>
+            <select id="header-row-index" v-model="headerRowIndex" @change="updateColumnsFromHeaderRow">
+              <option :value="0">0</option>
+              <option :value="1">1</option>
+              <option :value="2">2</option>
+              <option :value="3">3</option>
+            </select>
+          </div>
+
+          <div v-if="fileColumns && fileColumns.length > 0" class='column-matching-table'>
+            <table>
+              <thead>
+                <tr>
+                  <th>Columns Found in File</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(column, index) in fileColumns" :key="index">
+                  <td>{{ column }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class='text-align-center'>
+            <p>No columns found. Please import a file first.</p>
+          </div>
         </div>
 
         <br>
         <div class='row buttons'>
           <Button shadow='true' class='button' text="Back" @click='goToPreviousStep'/>
           <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
-          <Button shadow='true' class='button' text="Next" @click='goToNextStep'/>
+          <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='!fileColumns || fileColumns.length === 0'/>
         </div>
       </div>
 
@@ -167,6 +193,9 @@ export default {
       messages: [],
       currentStep: 'Import File',
       importedFile: null,
+      fileColumns: [],
+      csvLines: [],
+      headerRowIndex: 0,
       columnMatching: null,
       userMatching: null,
       maskMatching: null,
@@ -176,7 +205,7 @@ export default {
     }
   },
   methods: {
-    handleFileSelect(event) {
+    async handleFileSelect(event) {
       const file = event.target.files[0]
       if (file) {
         this.importedFile = {
@@ -184,7 +213,103 @@ export default {
           size: file.size,
           file: file
         }
+
+        // Parse CSV file to extract column names
+        await this.parseCSVFile(file)
       }
+    },
+    parseCSVFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+
+        reader.onload = (e) => {
+          try {
+            const text = e.target.result
+            // Store all lines for later re-parsing
+            this.csvLines = text.split('\n').filter(line => line.trim() !== '')
+
+            // Parse columns using the current header row index
+            this.updateColumnsFromHeaderRow()
+
+            resolve()
+          } catch (error) {
+            this.messages = [{ str: `Error parsing file: ${error.message}` }]
+            this.fileColumns = []
+            reject(error)
+          }
+        }
+
+        reader.onerror = () => {
+          this.messages = [{ str: 'Error reading file.' }]
+          this.fileColumns = []
+          reject(new Error('File reading error'))
+        }
+
+        // Read only the first few KB to get the header rows
+        const blob = file.slice(0, 10240) // Read first 10KB
+        reader.readAsText(blob)
+      })
+    },
+    updateColumnsFromHeaderRow() {
+      if (!this.csvLines || this.csvLines.length === 0) {
+        this.fileColumns = []
+        return
+      }
+
+      // Check if the selected header row index is valid
+      if (this.headerRowIndex >= this.csvLines.length) {
+        this.fileColumns = []
+        this.messages = [{ str: `Header row index ${this.headerRowIndex} is beyond the file length.` }]
+        return
+      }
+
+      try {
+        // Parse the header row at the selected index
+        const headerLine = this.csvLines[this.headerRowIndex]
+        // Handle CSV parsing - split by comma, but respect quoted fields
+        const columns = this.parseCSVLine(headerLine)
+        this.fileColumns = columns.map(col => col.trim()).filter(col => col !== '')
+
+        // Clear any previous error messages if parsing succeeded
+        if (this.fileColumns.length > 0) {
+          this.messages = []
+        }
+      } catch (error) {
+        this.messages = [{ str: `Error parsing header row: ${error.message}` }]
+        this.fileColumns = []
+      }
+    },
+    parseCSVLine(line) {
+      // Simple CSV parser that handles quoted fields
+      const result = []
+      let current = ''
+      let inQuotes = false
+
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i]
+
+        if (char === '"') {
+          if (inQuotes && line[i + 1] === '"') {
+            // Escaped quote
+            current += '"'
+            i++ // Skip next quote
+          } else {
+            // Toggle quote state
+            inQuotes = !inQuotes
+          }
+        } else if (char === ',' && !inQuotes) {
+          // End of field
+          result.push(current)
+          current = ''
+        } else {
+          current += char
+        }
+      }
+
+      // Add the last field
+      result.push(current)
+
+      return result
     },
     formatFileSize(bytes) {
       if (bytes === 0) return '0 Bytes'
@@ -340,6 +465,52 @@ export default {
 input[type="file"] {
   padding: 0.5em;
   margin: 1em;
+}
+
+.header-row-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin: 1em 0;
+  justify-content: center;
+}
+
+.header-row-selector label {
+  font-weight: 500;
+}
+
+.header-row-selector select {
+  padding: 0.5em;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 1em;
+}
+
+.column-matching-table {
+  margin-top: 2em;
+}
+
+.column-matching-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+}
+
+.column-matching-table th {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 0.75em;
+  text-align: left;
+  font-weight: bold;
+}
+
+.column-matching-table td {
+  border: 1px solid #dee2e6;
+  padding: 0.75em;
+}
+
+.column-matching-table tbody tr:hover {
+  background-color: #f8f9fa;
 }
 
 @media (max-width: 1000px) {
