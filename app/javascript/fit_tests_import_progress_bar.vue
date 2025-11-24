@@ -43,6 +43,10 @@
 export default {
   name: 'FitTestsImportProgressBar',
   props: {
+    sourceName: {
+      type: String,
+      default: null
+    },
     importedFile: {
       type: Object,
       default: null
@@ -100,8 +104,8 @@ export default {
     computedCompletedSteps() {
       const completed = []
 
-      // Import File step is completed if importedFile exists
-      if (this.importedFile && this.importedFile.name) {
+      // Import File step is completed if sourceName exists (from saved import) or importedFile exists (new import)
+      if (this.sourceName || (this.importedFile && this.importedFile.name)) {
         completed.push('Import File')
       }
 
@@ -154,6 +158,10 @@ export default {
     getStepValue(stepKey) {
       switch (stepKey) {
         case 'Import File':
+          // Prefer sourceName (from saved import), fallback to importedFile.name (new import)
+          if (this.sourceName) {
+            return this.sourceName
+          }
           return (this.importedFile && this.importedFile.name) ? this.importedFile.name : 'Not Selected'
         case 'Column Matching':
           if (this.columnMatching && this.isColumnMatchingComplete()) {

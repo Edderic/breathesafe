@@ -12,6 +12,7 @@
     <!-- Progress Component -->
     <div class='columns'>
       <FitTestsImportProgressBar
+        :sourceName="sourceName"
         :importedFile="importedFile"
         :columnMatching="columnMatching"
         :userMatching="userMatching"
@@ -38,17 +39,25 @@
             />
           </div>
 
-          <div v-if="importedFile" class='file-info'>
+          <div v-if="importedFile || sourceName" class='file-info'>
             <h3 class='text-align-center'>Selected File</h3>
             <table>
               <tbody>
                 <tr>
                   <th>File Name</th>
-                  <td>{{ importedFile.name }}</td>
+                  <td>{{ sourceName || importedFile.name }}</td>
                 </tr>
-                <tr>
+                <tr v-if="bulkImportFileSize">
+                  <th>File Size</th>
+                  <td>{{ formatFileSize(bulkImportFileSize) }}</td>
+                </tr>
+                <tr v-else-if="importedFile">
                   <th>File Size</th>
                   <td>{{ formatFileSize(importedFile.size) }}</td>
+                </tr>
+                <tr v-if="bulkImportCreatedAt">
+                  <th>Upload Date/Time</th>
+                  <td>{{ formatDateTime(bulkImportCreatedAt) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -233,6 +242,7 @@ export default {
     return {
       messages: [],
       currentStep: 'Import File',
+      sourceName: null,
       importedFile: null,
       fileColumns: [],
       csvLines: [],
@@ -246,7 +256,9 @@ export default {
       fitTestDataMatching: null,
       completedSteps: [],
       bulkFitTestsImportId: null,
-      isSaving: false
+      isSaving: false,
+      bulkImportCreatedAt: null,
+      bulkImportFileSize: null
     }
   },
   async mounted() {
@@ -411,6 +423,11 @@ export default {
       const i = Math.floor(Math.log(bytes) / Math.log(k))
       return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
     },
+    formatDateTime(dateTimeString) {
+      if (!dateTimeString) return ''
+      const date = new Date(dateTimeString)
+      return date.toLocaleString()
+    },
     navigateToStep(stepKey) {
       this.currentStep = stepKey
     },
@@ -466,6 +483,21 @@ export default {
         if (response.status === 201 && response.data.bulk_fit_tests_import) {
           this.bulkFitTestsImportId = response.data.bulk_fit_tests_import.id
 
+          // Set source_name for progress bar display
+          if (response.data.bulk_fit_tests_import.source_name) {
+            this.sourceName = response.data.bulk_fit_tests_import.source_name
+          }
+
+          // Store created_at for display
+          if (response.data.bulk_fit_tests_import.created_at) {
+            this.bulkImportCreatedAt = response.data.bulk_fit_tests_import.created_at
+          }
+
+          // Calculate file size
+          if (this.csvFullContent) {
+            this.bulkImportFileSize = new Blob([this.csvFullContent]).size
+          }
+
           // Navigate to the bulk import page
           this.$router.push({
             name: 'BulkFitTestsImport',
@@ -504,8 +536,19 @@ export default {
           const bulkImport = response.data.bulk_fit_tests_import
           this.bulkFitTestsImportId = bulkImport.id
 
-          // Load the import data if available
+          // Set source_name for progress bar display
+          if (bulkImport.source_name) {
+            this.sourceName = bulkImport.source_name
+          }
+
+          // Store created_at for display
+          if (bulkImport.created_at) {
+            this.bulkImportCreatedAt = bulkImport.created_at
+          }
+
+          // Calculate file size from import_data if available
           if (bulkImport.import_data) {
+            this.bulkImportFileSize = new Blob([bulkImport.import_data]).size
             this.csvFullContent = bulkImport.import_data
             // Parse the CSV to get columns
             this.csvLines = bulkImport.import_data.split('\n').filter(line => line.trim() !== '')

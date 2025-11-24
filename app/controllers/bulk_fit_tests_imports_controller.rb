@@ -63,7 +63,7 @@ class BulkFitTestsImportsController < ApplicationController
   private
 
   def bulk_import_params
-    permitted = params.require(:bulk_fit_tests_import).permit(
+    params.require(:bulk_fit_tests_import).permit(
       :source_name,
       :source_type,
       :import_data,
@@ -74,6 +74,5 @@ class BulkFitTestsImportsController < ApplicationController
       user_seal_check_matching: {},
       fit_testing_matching: {}
     )
-    permitted
   end
 end
