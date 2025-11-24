@@ -58,7 +58,7 @@
         <br>
         <div class='row buttons'>
           <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
-          <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='!importedFile'/>
+          <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='!importedFile || isSaving'/>
         </div>
       </div>
 
@@ -216,9 +216,11 @@
 </template>
 
 <script>
+import axios from 'axios'
 import Button from './button.vue'
 import ClosableMessage from './closable_message.vue'
 import FitTestsImportProgressBar from './fit_tests_import_progress_bar.vue'
+import { setupCSRF } from './misc.js'
 
 export default {
   name: 'FitTestsImport',
@@ -234,6 +236,7 @@ export default {
       importedFile: null,
       fileColumns: [],
       csvLines: [],
+      csvFullContent: null,
       headerRowIndex: 0,
       columnMappings: {},
       columnMatching: null,
@@ -241,7 +244,17 @@ export default {
       maskMatching: null,
       userSealCheckMatching: null,
       fitTestDataMatching: null,
-      completedSteps: []
+      completedSteps: [],
+      bulkFitTestsImportId: null,
+      isSaving: false
+    }
+  },
+  async mounted() {
+    setupCSRF()
+
+    // If we're viewing an existing bulk import, load it
+    if (this.$route.params.id) {
+      await this.loadBulkImport()
     }
   },
   methods: {
@@ -288,6 +301,26 @@ export default {
         // Read only the first few KB to get the header rows
         const blob = file.slice(0, 10240) // Read first 10KB
         reader.readAsText(blob)
+      })
+    },
+    readFullFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+
+        reader.onload = (e) => {
+          try {
+            this.csvFullContent = e.target.result
+            resolve(e.target.result)
+          } catch (error) {
+            reject(error)
+          }
+        }
+
+        reader.onerror = () => {
+          reject(new Error('File reading error'))
+        }
+
+        reader.readAsText(file)
       })
     },
     updateColumnsFromHeaderRow() {
@@ -381,7 +414,13 @@ export default {
     navigateToStep(stepKey) {
       this.currentStep = stepKey
     },
-    goToNextStep() {
+    async goToNextStep() {
+      // If we're on the "Import File" step, save to backend first
+      if (this.currentStep === 'Import File') {
+        await this.saveBulkImport()
+        return // Navigation will happen in saveBulkImport
+      }
+
       const steps = [
         'Import File',
         'Column Matching',
@@ -393,6 +432,54 @@ export default {
       const currentIndex = steps.indexOf(this.currentStep)
       if (currentIndex < steps.length - 1) {
         this.currentStep = steps[currentIndex + 1]
+      }
+    },
+    async saveBulkImport() {
+      if (!this.importedFile || this.isSaving) {
+        return
+      }
+
+      this.isSaving = true
+      this.messages = []
+
+      try {
+        // Read the full file content if not already read
+        if (!this.csvFullContent) {
+          await this.readFullFile(this.importedFile.file)
+        }
+
+        const payload = {
+          bulk_fit_tests_import: {
+            source_name: this.importedFile.name,
+            source_type: 'CSV',
+            import_data: this.csvFullContent,
+            status: 'pending',
+            column_matching_mapping: this.columnMatching || {},
+            mask_matching: this.maskMatching || {},
+            user_seal_check_matching: this.userSealCheckMatching || {},
+            fit_testing_matching: this.fitTestDataMatching || {}
+          }
+        }
+
+        const response = await axios.post('/bulk_fit_tests_imports.json', payload)
+
+        if (response.status === 201 && response.data.bulk_fit_tests_import) {
+          this.bulkFitTestsImportId = response.data.bulk_fit_tests_import.id
+
+          // Navigate to the bulk import page
+          this.$router.push({
+            name: 'BulkFitTestsImport',
+            params: { id: this.bulkFitTestsImportId }
+          })
+        } else {
+          const errorMessages = response.data.messages || ['Failed to save import file.']
+          this.messages = errorMessages.map(msg => ({ str: msg }))
+        }
+      } catch (error) {
+        const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to save import file.'
+        this.messages = [{ str: errorMsg }]
+      } finally {
+        this.isSaving = false
       }
     },
     goToPreviousStep() {
@@ -407,6 +494,42 @@ export default {
       const currentIndex = steps.indexOf(this.currentStep)
       if (currentIndex > 0) {
         this.currentStep = steps[currentIndex - 1]
+      }
+    },
+    async loadBulkImport() {
+      try {
+        const response = await axios.get(`/bulk_fit_tests_imports/${this.$route.params.id}.json`)
+
+        if (response.status === 200 && response.data.bulk_fit_tests_import) {
+          const bulkImport = response.data.bulk_fit_tests_import
+          this.bulkFitTestsImportId = bulkImport.id
+
+          // Load the import data if available
+          if (bulkImport.import_data) {
+            this.csvFullContent = bulkImport.import_data
+            // Parse the CSV to get columns
+            this.csvLines = bulkImport.import_data.split('\n').filter(line => line.trim() !== '')
+            this.updateColumnsFromHeaderRow()
+          }
+
+          // Load other mappings if available
+          if (bulkImport.column_matching_mapping) {
+            this.columnMatching = bulkImport.column_matching_mapping
+            // Reverse the mapping to populate columnMappings
+            Object.keys(bulkImport.column_matching_mapping).forEach(csvColumn => {
+              this.columnMappings[csvColumn] = bulkImport.column_matching_mapping[csvColumn]
+            })
+          }
+
+          // Move to Column Matching step if import_data exists
+          if (bulkImport.import_data) {
+            this.currentStep = 'Column Matching'
+            this.completedSteps = ['Import File']
+          }
+        }
+      } catch (error) {
+        const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to load bulk import.'
+        this.messages = [{ str: errorMsg }]
       }
     },
     cancelImport() {
