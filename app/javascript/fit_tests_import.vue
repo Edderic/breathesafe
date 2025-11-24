@@ -718,11 +718,22 @@ export default {
             this.bulkImportFileSize = new Blob([this.csvFullContent]).size
           }
 
-          // Navigate to the bulk import page
-          this.$router.push({
-            name: 'BulkFitTestsImport',
-            params: { id: this.bulkFitTestsImportId }
-          })
+          // Mark Import File as completed
+          if (!this.completedSteps.includes('Import File')) {
+            this.completedSteps.push('Import File')
+          }
+
+          // Navigate to Column Matching step
+          this.currentStep = 'Column Matching'
+
+          // Update URL to reflect the bulk import ID (for refresh/back button support)
+          // Only update if we're on the new route, not if we're already on a specific import
+          if (!this.$route.params.id) {
+            this.$router.replace({
+              name: 'BulkFitTestsImport',
+              params: { id: this.bulkFitTestsImportId }
+            })
+          }
         } else {
           const errorMessages = response.data.messages || ['Failed to save import file.']
           this.messages = errorMessages.map(msg => ({ str: msg }))
