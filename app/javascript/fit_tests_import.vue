@@ -104,7 +104,7 @@
                       @change="updateColumnMatching"
                       class="column-select"
                     >
-                      <option value="">-- Select --</option>
+                      <option :value="''">-- Select --</option>
                       <option value="User.email">User.email</option>
                       <option value="Profile.first_name">Profile.first_name</option>
                       <option value="Profile.last_name">Profile.last_name</option>
@@ -149,7 +149,7 @@
         <div class='row buttons'>
           <Button shadow='true' class='button' text="Back" @click='goToPreviousStep'/>
           <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
-          <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='!fileColumns || fileColumns.length === 0'/>
+          <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='!fileColumns || fileColumns.length === 0 || isSaving'/>
         </div>
       </div>
 
@@ -381,7 +381,8 @@ export default {
       }
     },
     updateColumnMatching() {
-      // Update the columnMatching object with current mappings
+      // Update the columnMatching object with current mappings (excluding header_row_index)
+      // header_row_index is stored separately and added when saving
       this.columnMatching = { ...this.columnMappings }
     },
     parseCSVLine(line) {
@@ -430,12 +431,76 @@ export default {
     },
     navigateToStep(stepKey) {
       this.currentStep = stepKey
+
+      // If navigating back to Column Matching, reload from backend
+      if (stepKey === 'Column Matching' && this.bulkFitTestsImportId) {
+        this.reloadColumnMatching()
+      }
+    },
+    async reloadColumnMatching() {
+      if (!this.bulkFitTestsImportId) {
+        return
+      }
+
+      try {
+        const response = await axios.get(`/bulk_fit_tests_imports/${this.bulkFitTestsImportId}.json`)
+
+        if (response.status === 200 && response.data.bulk_fit_tests_import) {
+          const bulkImport = response.data.bulk_fit_tests_import
+
+          // Restore header_row_index FIRST before parsing columns
+          if (bulkImport.column_matching_mapping && bulkImport.column_matching_mapping.header_row_index !== undefined) {
+            this.headerRowIndex = bulkImport.column_matching_mapping.header_row_index
+          }
+
+          // Re-parse columns using the restored header_row_index
+          if (bulkImport.import_data) {
+            this.csvLines = bulkImport.import_data.split('\n').filter(line => line.trim() !== '')
+            this.updateColumnsFromHeaderRow()
+          }
+
+          // Restore column mappings
+          if (bulkImport.column_matching_mapping) {
+            this.columnMatching = bulkImport.column_matching_mapping
+
+            // Initialize columnMappings for all fileColumns first (with empty strings)
+            this.fileColumns.forEach(column => {
+              this.columnMappings[column] = ''
+            })
+
+            // Populate columnMappings from saved data (excluding header_row_index)
+            // Use empty string if mapping is null/undefined to show "-- Select --"
+            Object.keys(bulkImport.column_matching_mapping).forEach(csvColumn => {
+              if (csvColumn !== 'header_row_index') {
+                // Only set if the column exists in fileColumns
+                if (this.fileColumns.includes(csvColumn)) {
+                  this.columnMappings[csvColumn] = bulkImport.column_matching_mapping[csvColumn] || ''
+                }
+              }
+            })
+          } else {
+            // If no saved mappings, initialize all columns with empty strings
+            this.fileColumns.forEach(column => {
+              this.columnMappings[column] = ''
+            })
+          }
+        }
+      } catch (error) {
+        const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to reload column matching.'
+        this.messages = [{ str: errorMsg }]
+      }
     },
     async goToNextStep() {
       // If we're on the "Import File" step, save to backend first
       if (this.currentStep === 'Import File') {
         await this.saveBulkImport()
         return // Navigation will happen in saveBulkImport
+      }
+
+      // If we're on the "Column Matching" step, save column matching data
+      if (this.currentStep === 'Column Matching') {
+        await this.saveColumnMatching()
+        return // Navigation will happen in saveColumnMatching if successful
       }
 
       const steps = [
@@ -449,6 +514,70 @@ export default {
       const currentIndex = steps.indexOf(this.currentStep)
       if (currentIndex < steps.length - 1) {
         this.currentStep = steps[currentIndex + 1]
+      }
+    },
+    async saveColumnMatching() {
+      if (!this.bulkFitTestsImportId || this.isSaving) {
+        return
+      }
+
+      this.isSaving = true
+      this.messages = []
+
+      try {
+        // Update columnMatching with current mappings
+        this.updateColumnMatching()
+
+        // Create the column_matching_mapping object with header_row_index included
+        // Include all columns from fileColumns, even if they have empty mappings
+        const columnMatchingMapping = {
+          header_row_index: this.headerRowIndex
+        }
+
+        // Add mappings for all file columns (empty string if no mapping selected)
+        this.fileColumns.forEach(column => {
+          columnMatchingMapping[column] = this.columnMappings[column] || ''
+        })
+
+        const payload = {
+          bulk_fit_tests_import: {
+            column_matching_mapping: columnMatchingMapping
+          }
+        }
+
+        const response = await axios.put(`/bulk_fit_tests_imports/${this.bulkFitTestsImportId}.json`, payload)
+
+        if (response.status === 200) {
+          // Update local state
+          this.columnMatching = columnMatchingMapping
+
+          // Move to User Matching step
+          const steps = [
+            'Import File',
+            'Column Matching',
+            'User Matching',
+            'Mask Matching',
+            'User Seal Check Matching',
+            'Fit Test Data Matching'
+          ]
+          const currentIndex = steps.indexOf(this.currentStep)
+          if (currentIndex < steps.length - 1) {
+            this.currentStep = steps[currentIndex + 1]
+          }
+
+          // Mark Column Matching as completed
+          if (!this.completedSteps.includes('Column Matching')) {
+            this.completedSteps.push('Column Matching')
+          }
+        } else {
+          const errorMessages = response.data.messages || ['Failed to save column matching.']
+          this.messages = errorMessages.map(msg => ({ str: msg }))
+        }
+      } catch (error) {
+        const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to save column matching.'
+        this.messages = [{ str: errorMsg }]
+      } finally {
+        this.isSaving = false
       }
     },
     async saveBulkImport() {
@@ -550,22 +679,54 @@ export default {
           if (bulkImport.import_data) {
             this.bulkImportFileSize = new Blob([bulkImport.import_data]).size
             this.csvFullContent = bulkImport.import_data
-            // Parse the CSV to get columns
             this.csvLines = bulkImport.import_data.split('\n').filter(line => line.trim() !== '')
+          }
+
+          // Restore header_row_index FIRST before parsing columns
+          if (bulkImport.column_matching_mapping && bulkImport.column_matching_mapping.header_row_index !== undefined) {
+            this.headerRowIndex = bulkImport.column_matching_mapping.header_row_index
+          }
+
+          // Parse columns using the restored header_row_index
+          if (bulkImport.import_data) {
             this.updateColumnsFromHeaderRow()
           }
 
-          // Load other mappings if available
+          // Load column mappings if available
           if (bulkImport.column_matching_mapping) {
             this.columnMatching = bulkImport.column_matching_mapping
-            // Reverse the mapping to populate columnMappings
+
+            // Initialize columnMappings for all fileColumns first (with empty strings)
+            this.fileColumns.forEach(column => {
+              if (!this.columnMappings.hasOwnProperty(column)) {
+                this.columnMappings[column] = ''
+              }
+            })
+
+            // Populate columnMappings from saved data (excluding header_row_index)
+            // Use empty string if mapping is null/undefined to show "-- Select --"
             Object.keys(bulkImport.column_matching_mapping).forEach(csvColumn => {
-              this.columnMappings[csvColumn] = bulkImport.column_matching_mapping[csvColumn]
+              if (csvColumn !== 'header_row_index') {
+                // Only set if the column exists in fileColumns
+                if (this.fileColumns.includes(csvColumn)) {
+                  this.columnMappings[csvColumn] = bulkImport.column_matching_mapping[csvColumn] || ''
+                }
+              }
+            })
+          } else {
+            // If no saved mappings, initialize all columns with empty strings
+            this.fileColumns.forEach(column => {
+              this.columnMappings[column] = ''
             })
           }
 
-          // Move to Column Matching step if import_data exists
-          if (bulkImport.import_data) {
+          // Set current step and completed steps
+          if (bulkImport.column_matching_mapping && Object.keys(bulkImport.column_matching_mapping).length > 1) {
+            // If column matching exists (has more than just header_row_index), we're on Column Matching step
+            this.currentStep = 'Column Matching'
+            this.completedSteps = ['Import File']
+          } else if (bulkImport.import_data) {
+            // If import_data exists but no column matching yet, start at Column Matching
             this.currentStep = 'Column Matching'
             this.completedSteps = ['Import File']
           }
@@ -714,6 +875,8 @@ input[type="file"] {
 
 .column-matching-table {
   margin-top: 2em;
+  overflow-y: scroll;
+  height: 50vh;
 }
 
 .column-matching-table table {
