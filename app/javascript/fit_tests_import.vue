@@ -230,6 +230,8 @@ import Button from './button.vue'
 import ClosableMessage from './closable_message.vue'
 import FitTestsImportProgressBar from './fit_tests_import_progress_bar.vue'
 import { setupCSRF } from './misc.js'
+import { mapState, mapActions } from 'pinia'
+import { useMainStore } from './stores/main_store.js'
 
 export default {
   name: 'FitTestsImport',
@@ -237,6 +239,9 @@ export default {
     Button,
     ClosableMessage,
     FitTestsImportProgressBar
+  },
+  computed: {
+    ...mapState(useMainStore, ['currentUser'])
   },
   data() {
     return {
@@ -264,12 +269,58 @@ export default {
   async mounted() {
     setupCSRF()
 
-    // If we're viewing an existing bulk import, load it
-    if (this.$route.params.id) {
-      await this.loadBulkImport()
+    // Check if we're returning from sign-in (check for attempt-name in query)
+    if (this.$route.query['attempt-name'] && this.$route.query['attempt-name'] !== 'SignIn') {
+      // User was redirected here after sign-in, reload data
+      if (this.$route.params.id) {
+        await this.loadBulkImport()
+      }
+    } else {
+      // Normal load
+      if (this.$route.params.id) {
+        await this.loadBulkImport()
+      }
     }
   },
   methods: {
+    ...mapActions(useMainStore, ['getCurrentUser']),
+    buildReturnRouteQuery() {
+      // Build query params for returning to this route after sign-in
+      const query = {
+        'attempt-name': this.$route.name
+      }
+
+      // Add route params as params-* query params
+      if (this.$route.params && Object.keys(this.$route.params).length > 0) {
+        Object.keys(this.$route.params).forEach(key => {
+          query[`params-${key}`] = this.$route.params[key]
+        })
+      }
+
+      // Preserve existing query params (except attempt-name and params-*)
+      Object.keys(this.$route.query).forEach(key => {
+        if (key !== 'attempt-name' && !key.startsWith('params-')) {
+          query[key] = this.$route.query[key]
+        }
+      })
+
+      return query
+    },
+    redirectToSignIn() {
+      // Redirect to SignIn with return route information
+      const query = this.buildReturnRouteQuery()
+      this.$router.push({
+        name: 'SignIn',
+        query: query
+      })
+    },
+    async checkAuthentication() {
+      // Check if user is authenticated, refresh if needed
+      if (!this.currentUser) {
+        await this.getCurrentUser()
+      }
+      return !!this.currentUser
+    },
     async handleFileSelect(event) {
       const file = event.target.files[0]
       if (file) {
@@ -442,6 +493,13 @@ export default {
         return
       }
 
+      // Check authentication before reloading
+      const isAuthenticated = await this.checkAuthentication()
+      if (!isAuthenticated) {
+        this.redirectToSignIn()
+        return
+      }
+
       try {
         const response = await axios.get(`/bulk_fit_tests_imports/${this.bulkFitTestsImportId}.json`)
 
@@ -486,11 +544,24 @@ export default {
           }
         }
       } catch (error) {
+        // Handle authentication errors
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          this.redirectToSignIn()
+          return
+        }
+
         const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to reload column matching.'
         this.messages = [{ str: errorMsg }]
       }
     },
     async goToNextStep() {
+      // Check authentication before proceeding
+      const isAuthenticated = await this.checkAuthentication()
+      if (!isAuthenticated) {
+        this.redirectToSignIn()
+        return
+      }
+
       // If we're on the "Import File" step, save to backend first
       if (this.currentStep === 'Import File') {
         await this.saveBulkImport()
@@ -518,6 +589,13 @@ export default {
     },
     async saveColumnMatching() {
       if (!this.bulkFitTestsImportId || this.isSaving) {
+        return
+      }
+
+      // Check authentication before saving
+      const isAuthenticated = await this.checkAuthentication()
+      if (!isAuthenticated) {
+        this.redirectToSignIn()
         return
       }
 
@@ -574,6 +652,12 @@ export default {
           this.messages = errorMessages.map(msg => ({ str: msg }))
         }
       } catch (error) {
+        // Handle authentication errors
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          this.redirectToSignIn()
+          return
+        }
+
         const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to save column matching.'
         this.messages = [{ str: errorMsg }]
       } finally {
@@ -582,6 +666,13 @@ export default {
     },
     async saveBulkImport() {
       if (!this.importedFile || this.isSaving) {
+        return
+      }
+
+      // Check authentication before saving
+      const isAuthenticated = await this.checkAuthentication()
+      if (!isAuthenticated) {
+        this.redirectToSignIn()
         return
       }
 
@@ -637,6 +728,12 @@ export default {
           this.messages = errorMessages.map(msg => ({ str: msg }))
         }
       } catch (error) {
+        // Handle authentication errors
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          this.redirectToSignIn()
+          return
+        }
+
         const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to save import file.'
         this.messages = [{ str: errorMsg }]
       } finally {
@@ -658,6 +755,13 @@ export default {
       }
     },
     async loadBulkImport() {
+      // Check authentication before loading
+      const isAuthenticated = await this.checkAuthentication()
+      if (!isAuthenticated) {
+        this.redirectToSignIn()
+        return
+      }
+
       try {
         const response = await axios.get(`/bulk_fit_tests_imports/${this.$route.params.id}.json`)
 
@@ -732,6 +836,12 @@ export default {
           }
         }
       } catch (error) {
+        // Handle authentication errors
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          this.redirectToSignIn()
+          return
+        }
+
         const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to load bulk import.'
         this.messages = [{ str: errorMsg }]
       }

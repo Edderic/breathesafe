@@ -65,11 +65,9 @@ class BulkFitTestsImportsController < ApplicationController
 
     if unauthorized?
       status = 401
-      messages = ['Unauthorized.']
       to_render = {}
     elsif !current_user.manages?(bulk_import.user)
       status = 422
-      messages = ['Unauthorized.']
       to_render = {}
     elsif bulk_import.update(bulk_import_params)
       status = 200
