@@ -20,7 +20,7 @@ class BulkFitTestsImport < ApplicationRecord
   validates :status, inclusion: { in: STATUSES }
   validate :import_data_must_be_valid_csv, if: -> { import_data.present? }
 
-  before_save :set_default_user_matching, if: -> { user_matching.blank? }
+  before_validation :set_default_user_matching, if: -> { user_matching.blank? }
 
   private
 

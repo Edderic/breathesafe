@@ -7,9 +7,11 @@ class BulkFitTestsImportsController < ApplicationController
       messages = ['Unauthorized.']
       bulk_import = {}
     else
-      bulk_import = BulkFitTestsImport.create(
-        bulk_import_params.merge(user: current_user)
-      )
+      params_hash = bulk_import_params.merge(user: current_user)
+      # Set default user_matching if not provided to avoid encryption issues
+      params_hash[:user_matching] ||= '{}'
+
+      bulk_import = BulkFitTestsImport.create(params_hash)
 
       if bulk_import.persisted?
         status = 201
@@ -38,11 +40,9 @@ class BulkFitTestsImportsController < ApplicationController
 
     if unauthorized?
       status = 401
-      messages = ['Unauthorized.']
       to_render = {}
     elsif !current_user.manages?(bulk_import.user)
       status = 422
-      messages = ['Unauthorized.']
       to_render = {}
     else
       status = 200
@@ -63,15 +63,17 @@ class BulkFitTestsImportsController < ApplicationController
   private
 
   def bulk_import_params
-    params.require(:bulk_fit_tests_import).permit(
+    permitted = params.require(:bulk_fit_tests_import).permit(
       :source_name,
       :source_type,
       :import_data,
       :status,
+      :user_matching,
       column_matching_mapping: {},
       mask_matching: {},
       user_seal_check_matching: {},
       fit_testing_matching: {}
     )
+    permitted
   end
 end
