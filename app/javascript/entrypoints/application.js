@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/masks/:id/edit', component: Mask, name: 'EditMask' },
     { path: '/respirator_user/:id', component: RespiratorUser, name: 'RespiratorUser' },
     { path: '/fit_tests/new', component: FitTest, name: 'NewFitTest' },
-    { path: '/fit_tests/import', component: FitTestsImport, name: 'FitTestsImport' },
+    { path: '/fit_tests/bulk_imports/new', component: FitTestsImport, name: 'FitTestsImport' },
     { path: '/fit_tests/:id/edit', component: FitTest, name: 'EditFitTest' },
     { path: '/fit_tests/:id', component: FitTest, name: 'ViewFitTest' },
     { path: '/fit_tests', component: FitTests, name: 'FitTests' },
