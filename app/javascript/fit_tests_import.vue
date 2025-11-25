@@ -85,6 +85,7 @@
               <option :value="2">2</option>
               <option :value="3">3</option>
             </select>
+            <Button shadow='true' class='button match-button' text="Match" @click='attemptAutoMatch' :disabled='!fileColumns || fileColumns.length === 0'/>
           </div>
 
           <div v-if="fileColumns && fileColumns.length > 0" class='column-matching-table'>
@@ -196,6 +197,24 @@
         </div>
       </div>
 
+      <!-- Match Confirmation Popup -->
+      <Popup v-if="showMatchConfirmation" @onclose="cancelMatchConfirmation">
+        <div class='match-confirmation-content'>
+          <h3>Confirm Column Matching</h3>
+          <p>The following mappings will overwrite existing selections:</p>
+          <ul class='match-overwrites-list'>
+            <li v-for="(breathesafeField, csvColumn) in pendingMatchOverwrites" :key="csvColumn">
+              <strong>{{ csvColumn }}</strong> → {{ breathesafeField }}
+            </li>
+          </ul>
+          <p>Do you want to proceed?</p>
+          <div class='match-confirmation-buttons'>
+            <Button shadow='true' class='button' text="Cancel" @click='cancelMatchConfirmation'/>
+            <Button shadow='true' class='button' text="Confirm" @click='confirmMatchOverwrite'/>
+          </div>
+        </div>
+      </Popup>
+
       <!-- Fit Test Data Matching Step -->
       <div v-show='currentStep == "Fit Test Data Matching"' class='right-pane narrow-width'>
         <div>
@@ -221,6 +240,7 @@ import axios from 'axios'
 import Button from './button.vue'
 import ClosableMessage from './closable_message.vue'
 import FitTestsImportProgressBar from './fit_tests_import_progress_bar.vue'
+import Popup from './pop_up.vue'
 import { setupCSRF } from './misc.js'
 import { mapState, mapActions } from 'pinia'
 import { useMainStore } from './stores/main_store.js'
@@ -230,7 +250,8 @@ export default {
   components: {
     Button,
     ClosableMessage,
-    FitTestsImportProgressBar
+    FitTestsImportProgressBar,
+    Popup
   },
   computed: {
     ...mapState(useMainStore, ['currentUser'])
@@ -255,7 +276,10 @@ export default {
       bulkFitTestsImportId: null,
       isSaving: false,
       bulkImportCreatedAt: null,
-      bulkImportFileSize: null
+      bulkImportFileSize: null,
+      showMatchConfirmation: false,
+      pendingMatchOverwrites: {},
+      pendingMatches: {}
     }
   },
   async mounted() {
@@ -471,6 +495,152 @@ export default {
       if (!dateTimeString) return ''
       const date = new Date(dateTimeString)
       return date.toLocaleString()
+    },
+    levenshteinDistance(str1, str2) {
+      // Calculate Levenshtein distance between two strings
+      const len1 = str1.length
+      const len2 = str2.length
+
+      if (len1 === 0) return len2
+      if (len2 === 0) return len1
+
+      const matrix = []
+
+      // Initialize matrix
+      for (let i = 0; i <= len1; i++) {
+        matrix[i] = [i]
+      }
+      for (let j = 0; j <= len2; j++) {
+        matrix[0][j] = j
+      }
+
+      // Fill matrix
+      for (let i = 1; i <= len1; i++) {
+        for (let j = 1; j <= len2; j++) {
+          const cost = str1[i - 1] === str2[j - 1] ? 0 : 1
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j] + 1,      // deletion
+            matrix[i][j - 1] + 1,      // insertion
+            matrix[i - 1][j - 1] + cost // substitution
+          )
+        }
+      }
+
+      return matrix[len1][len2]
+    },
+    calculateSimilarity(str1, str2) {
+      // Normalize strings: lowercase, remove special characters, normalize spaces
+      const normalize = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim()
+      const norm1 = normalize(str1)
+      const norm2 = normalize(str2)
+
+      if (norm1 === norm2) return 1.0
+
+      const maxLen = Math.max(norm1.length, norm2.length)
+      if (maxLen === 0) return 0.0
+
+      const distance = this.levenshteinDistance(norm1, norm2)
+      return 1 - (distance / maxLen)
+    },
+    getBreathesafeFieldOptions() {
+      // Return all available Breathesafe matching column options (must match the select options)
+      return [
+        'User.email',
+        'Profile.first_name',
+        'Profile.last_name',
+        'Profile.first_name + Profile.last_name',
+        'Mask.unique_internal_model_code',
+        'Bending over',
+        'Talking',
+        'Turning head side to side',
+        'Moving head up and down',
+        'Normal breathing 1',
+        'Normal breathing 2',
+        'Normal breathing (SEALED)',
+        'Grimace',
+        'Deep breathing',
+        'Testing mode (QLFT / N99 / N95)',
+        'QLFT -> solution',
+        'comfort -> "Is there enough room to talk?"',
+        'comfort -> "Is there adequate room for eye protection?"',
+        'comfort -> "How comfortable is the position of the mask on the nose?"',
+        'comfort -> "How comfortable is the position of the mask on face and cheeks?"',
+        'USC -> What do you think about the sizing of this mask relative to your face?'
+      ]
+    },
+    attemptAutoMatch() {
+      if (!this.fileColumns || this.fileColumns.length === 0) {
+        return
+      }
+
+      const breathesafeOptions = this.getBreathesafeFieldOptions()
+      const matches = {}
+      const usedBreathesafeFields = new Set()
+      const overwrites = {}
+
+      // Calculate similarity scores for all CSV columns against all Breathesafe fields
+      const similarityScores = []
+
+      this.fileColumns.forEach(csvColumn => {
+        breathesafeOptions.forEach(breathesafeField => {
+          const similarity = this.calculateSimilarity(csvColumn, breathesafeField)
+          if (similarity > 0.7) { // High confidence threshold
+            similarityScores.push({
+              csvColumn,
+              breathesafeField,
+              similarity
+            })
+          }
+        })
+      })
+
+      // Sort by similarity (highest first)
+      similarityScores.sort((a, b) => b.similarity - a.similarity)
+
+      // Assign matches (one-to-one mapping, best match wins)
+      similarityScores.forEach(({ csvColumn, breathesafeField, similarity }) => {
+        // Skip if CSV column already matched or Breathesafe field already used
+        if (!matches.hasOwnProperty(csvColumn) && !usedBreathesafeFields.has(breathesafeField)) {
+          // Check if this would overwrite an existing mapping
+          if (this.columnMappings[csvColumn] && this.columnMappings[csvColumn] !== '') {
+            overwrites[csvColumn] = breathesafeField
+          }
+
+          matches[csvColumn] = breathesafeField
+          usedBreathesafeFields.add(breathesafeField)
+        }
+      })
+
+      // If there are overwrites, show confirmation popup
+      if (Object.keys(overwrites).length > 0) {
+        this.pendingMatchOverwrites = overwrites
+        this.pendingMatches = matches
+        this.showMatchConfirmation = true
+      } else {
+        // No overwrites, apply matches directly
+        this.applyMatches(matches)
+      }
+    },
+    applyMatches(matches) {
+      // Apply the matches to columnMappings
+      Object.keys(matches).forEach(csvColumn => {
+        this.columnMappings[csvColumn] = matches[csvColumn]
+      })
+
+      // Update columnMatching object
+      this.updateColumnMatching()
+
+      this.messages = [{ str: `Matched ${Object.keys(matches).length} column(s) automatically.` }]
+    },
+    confirmMatchOverwrite() {
+      // Apply all matches including overwrites
+      this.applyMatches(this.pendingMatches)
+      this.cancelMatchConfirmation()
+    },
+    cancelMatchConfirmation() {
+      this.showMatchConfirmation = false
+      this.pendingMatchOverwrites = {}
+      this.pendingMatches = {}
     },
     navigateToStep(stepKey) {
       this.currentStep = stepKey
@@ -984,6 +1154,39 @@ input[type="file"] {
   border: 1px solid #dee2e6;
   border-radius: 4px;
   font-size: 1em;
+}
+
+.match-button {
+  margin-left: 1em;
+}
+
+.match-confirmation-content {
+  padding: 1em;
+}
+
+.match-confirmation-content h3 {
+  margin-top: 0;
+}
+
+.match-overwrites-list {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 1em 0;
+}
+
+.match-overwrites-list li {
+  padding: 0.5em;
+  margin: 0.5em 0;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+}
+
+.match-confirmation-buttons {
+  display: flex;
+  gap: 1em;
+  justify-content: center;
+  margin-top: 1.5em;
 }
 
 .column-matching-table {
