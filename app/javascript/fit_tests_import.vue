@@ -94,6 +94,7 @@
                 <tr>
                   <th>Columns Found in File</th>
                   <th>Breathesafe matching column</th>
+                  <th>Similarity score</th>
                 </tr>
               </thead>
               <tbody>
@@ -106,10 +107,10 @@
                       class="column-select"
                     >
                       <option :value="''">-- Select --</option>
-                      <option value="User.email">User.email</option>
-                      <option value="Profile.first_name">Profile.first_name</option>
-                      <option value="Profile.last_name">Profile.last_name</option>
-                      <option value="Profile.first_name + Profile.last_name">Profile.first_name + Profile.last_name</option>
+                      <option value="email">email</option>
+                      <option value="first name">first name</option>
+                      <option value="last name">last name</option>
+                      <option value="user name">user name</option>
                       <option value="Mask.unique_internal_model_code">Mask.unique_internal_model_code</option>
                       <option value="Bending over">Bending over</option>
                       <option value="Talking">Talking</option>
@@ -128,6 +129,12 @@
                       <option value='comfort -> "How comfortable is the position of the mask on face and cheeks?"'>comfort -> "How comfortable is the position of the mask on face and cheeks?"</option>
                       <option value="USC -> What do you think about the sizing of this mask relative to your face?">USC -> What do you think about the sizing of this mask relative to your face?</option>
                     </select>
+                  </td>
+                  <td class="similarity-score-cell">
+                    <span v-if="getSimilarityScore(column) !== null" class="similarity-score">
+                      {{ formatSimilarityScore(getSimilarityScore(column)) }}
+                    </span>
+                    <span v-else class="similarity-score-empty">--</span>
                   </td>
                 </tr>
               </tbody>
@@ -545,10 +552,10 @@ export default {
     getBreathesafeFieldOptions() {
       // Return all available Breathesafe matching column options (must match the select options)
       return [
-        'User.email',
-        'Profile.first_name',
-        'Profile.last_name',
-        'Profile.first_name + Profile.last_name',
+        'email',
+        'first name', // Profile.first_name
+        'last name', // Profile.last_name
+        'user name', // Profile.first_name + Profile.last_name
         'Mask.unique_internal_model_code',
         'Bending over',
         'Talking',
@@ -584,7 +591,7 @@ export default {
       this.fileColumns.forEach(csvColumn => {
         breathesafeOptions.forEach(breathesafeField => {
           const similarity = this.calculateSimilarity(csvColumn, breathesafeField)
-          if (similarity > 0.7) { // High confidence threshold
+          if (similarity > 0.4) { // High confidence threshold
             similarityScores.push({
               csvColumn,
               breathesafeField,
@@ -641,6 +648,23 @@ export default {
       this.showMatchConfirmation = false
       this.pendingMatchOverwrites = {}
       this.pendingMatches = {}
+    },
+    getSimilarityScore(csvColumn) {
+      // Get similarity score between CSV column and selected Breathesafe field
+      const selectedBreathesafeField = this.columnMappings[csvColumn]
+
+      if (!selectedBreathesafeField || selectedBreathesafeField === '') {
+        return null
+      }
+
+      return this.calculateSimilarity(csvColumn, selectedBreathesafeField)
+    },
+    formatSimilarityScore(score) {
+      if (score === null || score === undefined) {
+        return '--'
+      }
+      // Format as percentage with 1 decimal place
+      return (score * 100).toFixed(1) + '%'
     },
     navigateToStep(stepKey) {
       this.currentStep = stepKey
@@ -1220,6 +1244,22 @@ input[type="file"] {
   border: 1px solid #dee2e6;
   border-radius: 4px;
   font-size: 0.9em;
+}
+
+.similarity-score-cell {
+  text-align: center;
+  vertical-align: middle;
+  min-width: 120px;
+}
+
+.similarity-score {
+  font-weight: 500;
+  color: #28a745;
+}
+
+.similarity-score-empty {
+  color: #6c757d;
+  font-style: italic;
 }
 
 .column-matching-table tbody tr:hover {
