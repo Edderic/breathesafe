@@ -161,6 +161,8 @@
           <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
           <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='!fileColumns || fileColumns.length === 0 || isSaving || hasColumnMatchingValidationErrors'/>
         </div>
+        <br>
+        <br>
       </div>
 
       <!-- User Matching Step -->
@@ -1488,7 +1490,7 @@ input[type="file"] {
 .column-matching-table {
   margin-top: 2em;
   overflow-y: scroll;
-  height: 50vh;
+  height: 40vh;
 }
 
 .column-matching-table table {
