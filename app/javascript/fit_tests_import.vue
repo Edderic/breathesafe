@@ -88,6 +88,14 @@
             <Button shadow='true' class='button match-button' text="Match" @click='attemptAutoMatch' :disabled='!fileColumns || fileColumns.length === 0'/>
           </div>
 
+          <div v-if="hasColumnMatchingValidationErrors" class="validation-errors">
+            <ClosableMessage
+              v-for="(error, index) in columnMatchingValidationErrors"
+              :key="index"
+              :messages="[getDuplicateErrorMessage(error)]"
+            />
+          </div>
+
           <div v-if="fileColumns && fileColumns.length > 0" class='column-matching-table'>
             <table>
               <thead>
@@ -98,13 +106,14 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(column, index) in fileColumns" :key="index">
+                <tr v-for="(column, index) in fileColumns" :key="index" :class="{ 'has-duplicate-error': isColumnInDuplicateError(column) }">
                   <td>{{ column }}</td>
                   <td>
                     <select
                       v-model="columnMappings[column]"
                       @change="updateColumnMatching"
                       class="column-select"
+                      :class="{ 'has-error': isColumnInDuplicateError(column) }"
                     >
                       <option :value="''">-- Select --</option>
                       <option value="email">email</option>
@@ -121,7 +130,7 @@
                       <option value="Normal breathing (SEALED)">Normal breathing (SEALED)</option>
                       <option value="Grimace">Grimace</option>
                       <option value="Deep breathing">Deep breathing</option>
-                      <option value="Testing mode (QLFT / N99 / N95)">Testing mode (QLFT / N99 / N95)</option>
+                      <option value="Testing mode">Testing mode (QLFT / N99 / N95)</option>
                       <option value="QLFT -> solution">QLFT -> solution</option>
                       <option value='comfort -> "Is there enough room to talk?"'>comfort -> "Is there enough room to talk?"</option>
                       <option value='comfort -> "Is there adequate room for eye protection?"'>comfort -> "Is there adequate room for eye protection?"</option>
@@ -149,7 +158,7 @@
         <div class='row buttons'>
           <Button shadow='true' class='button' text="Back" @click='goToPreviousStep'/>
           <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
-          <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='!fileColumns || fileColumns.length === 0 || isSaving'/>
+          <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='!fileColumns || fileColumns.length === 0 || isSaving || hasColumnMatchingValidationErrors'/>
         </div>
       </div>
 
@@ -261,7 +270,41 @@ export default {
     Popup
   },
   computed: {
-    ...mapState(useMainStore, ['currentUser'])
+    ...mapState(useMainStore, ['currentUser']),
+    columnMatchingValidationErrors() {
+      // Check for duplicate Breathesafe matching values
+      const errors = []
+      const usedBreathesafeValues = {}
+
+      // Track which CSV columns are using each Breathesafe value
+      Object.keys(this.columnMappings).forEach(csvColumn => {
+        const breathesafeValue = this.columnMappings[csvColumn]
+        if (breathesafeValue && breathesafeValue !== '') {
+          if (usedBreathesafeValues[breathesafeValue]) {
+            // This Breathesafe value is already used by another column
+            usedBreathesafeValues[breathesafeValue].push(csvColumn)
+          } else {
+            usedBreathesafeValues[breathesafeValue] = [csvColumn]
+          }
+        }
+      })
+
+      // Generate error messages for duplicates
+      Object.keys(usedBreathesafeValues).forEach(breathesafeValue => {
+        const csvColumns = usedBreathesafeValues[breathesafeValue]
+        if (csvColumns.length > 1) {
+          errors.push({
+            breathesafeValue: breathesafeValue,
+            csvColumns: csvColumns
+          })
+        }
+      })
+
+      return errors
+    },
+    hasColumnMatchingValidationErrors() {
+      return this.columnMatchingValidationErrors.length > 0
+    }
   },
   data() {
     return {
@@ -566,7 +609,7 @@ export default {
         'Normal breathing (SEALED)',
         'Grimace',
         'Deep breathing',
-        'Testing mode (QLFT / N99 / N95)',
+        'Testing mode',
         'QLFT -> solution',
         'comfort -> "Is there enough room to talk?"',
         'comfort -> "Is there adequate room for eye protection?"',
@@ -581,7 +624,7 @@ export default {
         'email',
         'user name',
         'Mask.unique_internal_model_code',
-        'Testing mode (QLFT / N99 / N95)',
+        'Testing mode',
         'Bending over',
         'Talking',
         'Turning head side to side',
@@ -594,7 +637,7 @@ export default {
       // Find Breathesafe fields that match the priority pattern
       // For exact matches: return fields that exactly match
       // For contains matches: return fields that contain the priority text
-      const exactMatches = ['email', 'user name', 'Mask.unique_internal_model_code', 'Testing mode (QLFT / N99 / N95)']
+      const exactMatches = ['email', 'user name', 'Mask.unique_internal_model_code', 'Testing mode']
 
       if (exactMatches.includes(priorityField)) {
         return availableBreathesafeFields.filter(field => field === priorityField)
@@ -619,7 +662,11 @@ export default {
       let availableCsvColumns = [...this.fileColumns]
       let availableBreathesafeFields = [...breathesafeOptions]
 
-      // PHASE 1: Process priority fields in order (using 0.3 threshold)
+      // Track priority Breathesafe fields that were attempted but didn't match
+      // These should be excluded from Phase 2
+      const priorityBreathesafeFieldsAttempted = new Set()
+
+      // PHASE 1: Process priority fields in order (using 0.15 threshold)
       priorityFields.forEach(priorityField => {
         // Find Breathesafe fields that match this priority pattern
         const matchingBreathesafeFields = this.findBreathesafeFieldsForPriority(priorityField, availableBreathesafeFields)
@@ -628,10 +675,16 @@ export default {
           return // Skip if no matching fields or no CSV columns left
         }
 
+        // Track that we attempted to match these priority fields
+        matchingBreathesafeFields.forEach(field => {
+          priorityBreathesafeFieldsAttempted.add(field)
+        })
+
         // For each matching Breathesafe field, find the best CSV column match
         let bestBreathesafeField = null
         let bestCsvColumn = null
         let bestNormalizedProbability = 0
+        let bestAbsoluteSimilarity = 0
 
         matchingBreathesafeFields.forEach(breathesafeField => {
           // Calculate similarity scores with all remaining CSV columns
@@ -644,14 +697,32 @@ export default {
             sumSimilarities += similarity
           })
 
+          // Also calculate similarity against ALL CSV columns (for consistent threshold checking)
+          const similaritiesAllColumns = {}
+          let sumSimilaritiesAllColumns = 0
+          this.fileColumns.forEach(csvColumn => {
+            const similarity = this.calculateSimilarity(csvColumn, breathesafeField)
+            similaritiesAllColumns[csvColumn] = similarity
+            sumSimilaritiesAllColumns += similarity
+          })
+
           // Normalize similarities to get probabilities
-          if (sumSimilarities > 0) {
+          if (sumSimilarities > 0 && sumSimilaritiesAllColumns > 0) {
             availableCsvColumns.forEach(csvColumn => {
-              const normalizedProbability = similarities[csvColumn] / sumSimilarities
+              const normalizedProbabilityRemaining = similarities[csvColumn] / sumSimilarities
+              const normalizedProbabilityAll = similaritiesAllColumns[csvColumn] / sumSimilaritiesAllColumns
+              const absoluteSimilarity = similarities[csvColumn]
+
+              // For priority fields, use the normalized probability against ALL columns (consistent with display)
+              // This ensures that if the displayed score would be below threshold, we don't match
+              const normalizedProbability = normalizedProbabilityAll
 
               // Track the best match for this priority field
-              if (normalizedProbability > bestNormalizedProbability) {
+              // Prefer higher normalized probability, but also consider absolute similarity
+              if (normalizedProbability > bestNormalizedProbability ||
+                  (normalizedProbability === bestNormalizedProbability && absoluteSimilarity > bestAbsoluteSimilarity)) {
                 bestNormalizedProbability = normalizedProbability
+                bestAbsoluteSimilarity = absoluteSimilarity
                 bestBreathesafeField = breathesafeField
                 bestCsvColumn = csvColumn
               }
@@ -659,8 +730,20 @@ export default {
           }
         })
 
-        // If best probability is >= 0.15 (priority threshold), assign the match
-        if (bestNormalizedProbability >= 0.15 && bestBreathesafeField && bestCsvColumn) {
+        // If best probability is >= 0.15 (priority threshold) AND absolute similarity is reasonable, assign the match
+        // Require minimum absolute similarity of 0.08 to prevent matches when all similarities are very low
+        // This prevents cases where normalized probability is high but absolute similarity is very low
+        // (e.g., if all similarities are 0.01, 0.005, 0.002, the best normalized prob could be 0.588 but absolute is only 0.01)
+        // Using 0.08 ensures we only match when there's a meaningful similarity (at least 8% string similarity)
+        const MIN_ABSOLUTE_SIMILARITY_FOR_PRIORITY = 0.08
+        const PRIORITY_THRESHOLD = 0.15
+
+        // Only match if BOTH conditions are met:
+        // 1. Normalized probability meets threshold
+        // 2. Absolute similarity meets minimum
+        if (bestNormalizedProbability >= PRIORITY_THRESHOLD &&
+            bestAbsoluteSimilarity >= MIN_ABSOLUTE_SIMILARITY_FOR_PRIORITY &&
+            bestBreathesafeField && bestCsvColumn) {
           // Check if this would overwrite an existing mapping
           if (this.columnMappings[bestCsvColumn] && this.columnMappings[bestCsvColumn] !== '') {
             overwrites[bestCsvColumn] = bestBreathesafeField
@@ -671,7 +754,31 @@ export default {
           // Remove matched items from available pools
           availableCsvColumns = availableCsvColumns.filter(col => col !== bestCsvColumn)
           availableBreathesafeFields = availableBreathesafeFields.filter(field => field !== bestBreathesafeField)
+          // Remove from attempted set since it matched
+          priorityBreathesafeFieldsAttempted.delete(bestBreathesafeField)
+        } else {
+          // Priority field didn't match - ensure all matching Breathesafe fields stay in attempted set
+          // so they're excluded from Phase 2
+          // (They're already added above, so no action needed here)
         }
+      })
+
+      // Remove priority fields that didn't match from Phase 2 consideration
+      // Also exclude any Breathesafe field that matches a priority pattern (defensive check)
+      const priorityPatterns = this.getPriorityFields()
+      availableBreathesafeFields = availableBreathesafeFields.filter(field => {
+        // Exclude if it was attempted in Phase 1
+        if (priorityBreathesafeFieldsAttempted.has(field)) {
+          return false
+        }
+        // Also exclude if it matches any priority pattern (defensive check)
+        for (const priorityPattern of priorityPatterns) {
+          const matchingFields = this.findBreathesafeFieldsForPriority(priorityPattern, [field])
+          if (matchingFields.length > 0) {
+            return false // This field matches a priority pattern, exclude it
+          }
+        }
+        return true
       })
 
       // PHASE 2: Continue matching remaining fields using original algorithm (0.4 threshold)
@@ -895,8 +1002,28 @@ export default {
         this.currentStep = steps[currentIndex + 1]
       }
     },
+    isColumnInDuplicateError(csvColumn) {
+      // Check if this CSV column is part of a duplicate error
+      return this.columnMatchingValidationErrors.some(error =>
+        error.csvColumns.includes(csvColumn)
+      )
+    },
+    getDuplicateErrorMessage(error) {
+      // Generate error message for duplicate Breathesafe matching value
+      return {
+        str: `The Breathesafe matching value "${error.breathesafeValue}" is used by multiple columns: ${error.csvColumns.join(', ')}. Each Breathesafe matching value can only be used once.`
+      }
+    },
     async saveColumnMatching() {
       if (!this.bulkFitTestsImportId || this.isSaving) {
+        return
+      }
+
+      // Check for validation errors before saving
+      if (this.hasColumnMatchingValidationErrors) {
+        this.messages = this.columnMatchingValidationErrors.map(error =>
+          this.getDuplicateErrorMessage(error)
+        )
         return
       }
 
@@ -1372,6 +1499,29 @@ input[type="file"] {
   text-align: center;
   vertical-align: middle;
   min-width: 120px;
+}
+
+.validation-errors {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.column-matching-table tr.has-duplicate-error {
+  background-color: #fff5f5;
+}
+
+.column-matching-table tr.has-duplicate-error td {
+  border-color: #fc8181;
+}
+
+.column-select.has-error {
+  border-color: #e53e3e;
+  background-color: #fff5f5;
+}
+
+.column-select.has-error:focus {
+  outline-color: #e53e3e;
+  border-color: #e53e3e;
 }
 
 .similarity-score {
