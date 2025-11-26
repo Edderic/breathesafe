@@ -88,11 +88,12 @@
             <Button shadow='true' class='button match-button' text="Match" @click='attemptAutoMatch' :disabled='!fileColumns || fileColumns.length === 0'/>
           </div>
 
-          <div v-if="hasColumnMatchingValidationErrors" class="validation-errors">
+          <div v-if="visibleColumnMatchingValidationErrors.length > 0" class="validation-errors">
             <ClosableMessage
-              v-for="(error, index) in columnMatchingValidationErrors"
-              :key="index"
+              v-for="(error, index) in visibleColumnMatchingValidationErrors"
+              :key="error.errorKey"
               :messages="[getDuplicateErrorMessage(error)]"
+              @onclose="dismissValidationError(error)"
             />
           </div>
 
@@ -295,12 +296,19 @@ export default {
         if (csvColumns.length > 1) {
           errors.push({
             breathesafeValue: breathesafeValue,
-            csvColumns: csvColumns
+            csvColumns: csvColumns,
+            errorKey: `${breathesafeValue}:${csvColumns.sort().join(',')}` // Create unique key for this error
           })
         }
       })
 
       return errors
+    },
+    visibleColumnMatchingValidationErrors() {
+      // Filter out dismissed errors
+      return this.columnMatchingValidationErrors.filter(error =>
+        !this.dismissedValidationErrors.has(error.errorKey)
+      )
     },
     hasColumnMatchingValidationErrors() {
       return this.columnMatchingValidationErrors.length > 0
@@ -329,7 +337,8 @@ export default {
       bulkImportFileSize: null,
       showMatchConfirmation: false,
       pendingMatchOverwrites: {},
-      pendingMatches: {}
+      pendingMatches: {},
+      dismissedValidationErrors: new Set()
     }
   },
   async mounted() {
@@ -501,6 +510,16 @@ export default {
       // Update the columnMatching object with current mappings (excluding header_row_index)
       // header_row_index is stored separately and added when saving
       this.columnMatching = { ...this.columnMappings }
+
+      // Clear dismissed errors that no longer exist (so they can reappear if the same error happens again)
+      const currentErrorKeys = new Set(this.columnMatchingValidationErrors.map(e => e.errorKey))
+      const keysToRemove = []
+      this.dismissedValidationErrors.forEach(key => {
+        if (!currentErrorKeys.has(key)) {
+          keysToRemove.push(key)
+        }
+      })
+      keysToRemove.forEach(key => this.dismissedValidationErrors.delete(key))
     },
     parseCSVLine(line) {
       // Simple CSV parser that handles quoted fields
@@ -1013,6 +1032,10 @@ export default {
       return {
         str: `The Breathesafe matching value "${error.breathesafeValue}" is used by multiple columns: ${error.csvColumns.join(', ')}. Each Breathesafe matching value can only be used once.`
       }
+    },
+    dismissValidationError(error) {
+      // Add error to dismissed set
+      this.dismissedValidationErrors.add(error.errorKey)
     },
     async saveColumnMatching() {
       if (!this.bulkFitTestsImportId || this.isSaving) {
