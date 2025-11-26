@@ -582,41 +582,62 @@ export default {
 
       const breathesafeOptions = this.getBreathesafeFieldOptions()
       const matches = {}
-      const usedBreathesafeFields = new Set()
       const overwrites = {}
 
-      // Calculate similarity scores for all CSV columns against all Breathesafe fields
-      const similarityScores = []
+      // Create a copy of available CSV columns and Breathesafe fields
+      let availableCsvColumns = [...this.fileColumns]
+      let availableBreathesafeFields = [...breathesafeOptions]
 
-      this.fileColumns.forEach(csvColumn => {
-        breathesafeOptions.forEach(breathesafeField => {
-          const similarity = this.calculateSimilarity(csvColumn, breathesafeField)
-          if (similarity > 0.4) { // High confidence threshold
-            similarityScores.push({
-              csvColumn,
-              breathesafeField,
-              similarity
+      // Iterate until no more matches can be made
+      while (availableCsvColumns.length > 0 && availableBreathesafeFields.length > 0) {
+        let bestBreathesafeField = null
+        let bestCsvColumn = null
+        let bestNormalizedProbability = 0
+
+        // For each remaining Breathesafe field, find the best match
+        availableBreathesafeFields.forEach(breathesafeField => {
+          // Calculate similarity scores with all remaining CSV columns
+          const similarities = {}
+          let sumSimilarities = 0
+
+          availableCsvColumns.forEach(csvColumn => {
+            const similarity = this.calculateSimilarity(csvColumn, breathesafeField)
+            similarities[csvColumn] = similarity
+            sumSimilarities += similarity
+          })
+
+          // Normalize similarities to get probabilities
+          if (sumSimilarities > 0) {
+            availableCsvColumns.forEach(csvColumn => {
+              const normalizedProbability = similarities[csvColumn] / sumSimilarities
+
+              // Track the best match across all Breathesafe fields
+              if (normalizedProbability > bestNormalizedProbability) {
+                bestNormalizedProbability = normalizedProbability
+                bestBreathesafeField = breathesafeField
+                bestCsvColumn = csvColumn
+              }
             })
           }
         })
-      })
 
-      // Sort by similarity (highest first)
-      similarityScores.sort((a, b) => b.similarity - a.similarity)
-
-      // Assign matches (one-to-one mapping, best match wins)
-      similarityScores.forEach(({ csvColumn, breathesafeField, similarity }) => {
-        // Skip if CSV column already matched or Breathesafe field already used
-        if (!matches.hasOwnProperty(csvColumn) && !usedBreathesafeFields.has(breathesafeField)) {
+        // If best probability is >= 0.4, assign the match
+        if (bestNormalizedProbability >= 0.25 && bestBreathesafeField && bestCsvColumn) {
           // Check if this would overwrite an existing mapping
-          if (this.columnMappings[csvColumn] && this.columnMappings[csvColumn] !== '') {
-            overwrites[csvColumn] = breathesafeField
+          if (this.columnMappings[bestCsvColumn] && this.columnMappings[bestCsvColumn] !== '') {
+            overwrites[bestCsvColumn] = bestBreathesafeField
           }
 
-          matches[csvColumn] = breathesafeField
-          usedBreathesafeFields.add(breathesafeField)
+          matches[bestCsvColumn] = bestBreathesafeField
+
+          // Remove matched items from available pools
+          availableCsvColumns = availableCsvColumns.filter(col => col !== bestCsvColumn)
+          availableBreathesafeFields = availableBreathesafeFields.filter(field => field !== bestBreathesafeField)
+        } else {
+          // No good match found, stop iteration
+          break
         }
-      })
+      }
 
       // If there are overwrites, show confirmation popup
       if (Object.keys(overwrites).length > 0) {
@@ -650,20 +671,35 @@ export default {
       this.pendingMatches = {}
     },
     getSimilarityScore(csvColumn) {
-      // Get similarity score between CSV column and selected Breathesafe field
+      // Get normalized probability between CSV column and selected Breathesafe field
       const selectedBreathesafeField = this.columnMappings[csvColumn]
 
       if (!selectedBreathesafeField || selectedBreathesafeField === '') {
         return null
       }
 
-      return this.calculateSimilarity(csvColumn, selectedBreathesafeField)
+      // Calculate similarity scores for this Breathesafe field with all CSV columns
+      const similarities = {}
+      let sumSimilarities = 0
+
+      this.fileColumns.forEach(col => {
+        const similarity = this.calculateSimilarity(col, selectedBreathesafeField)
+        similarities[col] = similarity
+        sumSimilarities += similarity
+      })
+
+      // Normalize to get probability
+      if (sumSimilarities > 0) {
+        return similarities[csvColumn] / sumSimilarities
+      }
+
+      return null
     },
     formatSimilarityScore(score) {
       if (score === null || score === undefined) {
         return '--'
       }
-      // Format as percentage with 1 decimal place
+      // Format normalized probability as percentage with 1 decimal place
       return (score * 100).toFixed(1) + '%'
     },
     navigateToStep(stepKey) {
