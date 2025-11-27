@@ -171,14 +171,53 @@
           <h2 class='text-align-center'>User Matching</h2>
           <h3 class='text-align-center'>Match imported users to existing users</h3>
 
-          <p class='text-align-center'>Placeholder: User matching interface will go here</p>
+          <div v-if="userMatchingRows.length > 0" class='user-matching-table'>
+            <table>
+              <thead>
+                <tr>
+                  <th>File manager email</th>
+                  <th>File user name</th>
+                  <th>Breathesafe user name</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, index) in userMatchingRows" :key="index" :class="{ 'has-error': row.hasError }">
+                  <td>
+                    <span v-if="row.managerEmailError" class="error-text">{{ row.managerEmailError }}</span>
+                    <span v-else>{{ row.managerEmail }}</span>
+                  </td>
+                  <td>
+                    <span v-if="row.userNameError" class="error-text">{{ row.userNameError }}</span>
+                    <span v-else>{{ row.userName }}</span>
+                  </td>
+                  <td>
+                    <select
+                      v-model="row.selectedManagedUserId"
+                      @change="updateUserMatching"
+                      class="user-select"
+                      :disabled="row.hasError || loadingManagedUsers"
+                    >
+                      <option :value="null">-- Select --</option>
+                      <option v-for="managedUser in getManagedUsersForRow(row)" :key="managedUser.managed_id" :value="managedUser.managed_id">
+                        {{ getManagedUserName(managedUser) }}
+                      </option>
+                      <option value="__to_be_created__">To be created</option>
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class='text-align-center'>
+            <p>No user data found. Please complete column matching first.</p>
+          </div>
         </div>
 
         <br>
         <div class='row buttons'>
           <Button shadow='true' class='button' text="Back" @click='goToPreviousStep'/>
           <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
-          <Button shadow='true' class='button' text="Next" @click='goToNextStep'/>
+          <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='userMatchingRows.length === 0 || isSaving || hasUserMatchingErrors'/>
         </div>
       </div>
 
@@ -314,6 +353,9 @@ export default {
     },
     hasColumnMatchingValidationErrors() {
       return this.columnMatchingValidationErrors.length > 0
+    },
+    hasUserMatchingErrors() {
+      return this.userMatchingRows.some(row => row.hasError)
     }
   },
   data() {
@@ -340,7 +382,10 @@ export default {
       showMatchConfirmation: false,
       pendingMatchOverwrites: {},
       pendingMatches: {},
-      dismissedValidationErrors: new Set()
+      dismissedValidationErrors: new Set(),
+      userMatchingRows: [],
+      managedUsersByManager: {},
+      loadingManagedUsers: false
     }
   },
   async mounted() {
@@ -916,12 +961,17 @@ export default {
       // Format normalized probability as percentage with 1 decimal place
       return (score * 100).toFixed(1) + '%'
     },
-    navigateToStep(stepKey) {
+    async navigateToStep(stepKey) {
       this.currentStep = stepKey
 
       // If navigating back to Column Matching, reload from backend
       if (stepKey === 'Column Matching' && this.bulkFitTestsImportId) {
         this.reloadColumnMatching()
+      }
+
+      // If navigating to User Matching, initialize user matching
+      if (stepKey === 'User Matching' && this.bulkFitTestsImportId) {
+        await this.initializeUserMatching()
       }
     },
     async reloadColumnMatching() {
@@ -1010,6 +1060,12 @@ export default {
         return // Navigation will happen in saveColumnMatching if successful
       }
 
+      // If we're on the "User Matching" step, save user matching data
+      if (this.currentStep === 'User Matching') {
+        await this.saveUserMatching()
+        return // Navigation will happen in saveUserMatching if successful
+      }
+
       const steps = [
         'Import File',
         'Column Matching',
@@ -1020,7 +1076,13 @@ export default {
       ]
       const currentIndex = steps.indexOf(this.currentStep)
       if (currentIndex < steps.length - 1) {
-        this.currentStep = steps[currentIndex + 1]
+        const nextStep = steps[currentIndex + 1]
+        this.currentStep = nextStep
+
+        // Initialize user matching when navigating to User Matching step
+        if (nextStep === 'User Matching') {
+          await this.initializeUserMatching()
+        }
       }
     },
     isColumnInDuplicateError(csvColumn) {
@@ -1119,6 +1181,290 @@ export default {
         }
 
         const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to save column matching.'
+        this.messages = [{ str: errorMsg }]
+      } finally {
+        this.isSaving = false
+      }
+    },
+    async initializeUserMatching() {
+      // Parse CSV data and extract manager email and user name columns
+      if (!this.csvFullContent || !this.columnMatching) {
+        this.userMatchingRows = []
+        return
+      }
+
+      // Find columns mapped to "manager email" and "user name"
+      const managerEmailColumn = Object.keys(this.columnMatching).find(
+        col => this.columnMatching[col] === 'manager email'
+      )
+      const userNameColumn = Object.keys(this.columnMatching).find(
+        col => this.columnMatching[col] === 'user name'
+      )
+
+      if (!managerEmailColumn || !userNameColumn) {
+        this.userMatchingRows = []
+        this.messages = [{ str: 'Manager email and user name columns must be mapped in Column Matching.' }]
+        return
+      }
+
+      // Parse CSV lines
+      const csvLines = this.csvFullContent.split('\n').filter(line => line.trim() !== '')
+      if (csvLines.length <= this.headerRowIndex) {
+        this.userMatchingRows = []
+        return
+      }
+
+      // Get header row
+      const headerRow = this.parseCSVLine(csvLines[this.headerRowIndex])
+      const managerEmailIndex = headerRow.indexOf(managerEmailColumn)
+      const userNameIndex = headerRow.indexOf(userNameColumn)
+
+      if (managerEmailIndex === -1 || userNameIndex === -1) {
+        this.userMatchingRows = []
+        this.messages = [{ str: 'Could not find manager email or user name columns in CSV.' }]
+        return
+      }
+
+      // Parse data rows and group by unique (manager email, user name) combinations
+      const uniqueCombinations = new Map()
+
+      for (let i = this.headerRowIndex + 1; i < csvLines.length; i++) {
+        const row = this.parseCSVLine(csvLines[i])
+        const managerEmail = row[managerEmailIndex] ? row[managerEmailIndex].trim() : ''
+        const userName = row[userNameIndex] ? row[userNameIndex].trim() : ''
+
+        const key = `${managerEmail}|||${userName}`
+        if (!uniqueCombinations.has(key)) {
+          uniqueCombinations.set(key, {
+            managerEmail: managerEmail,
+            userName: userName,
+            managerEmailError: null,
+            userNameError: null,
+            hasError: false,
+            selectedManagedUserId: null,
+            managerUserId: null
+          })
+        }
+      }
+
+      // Convert to array and validate
+      this.userMatchingRows = Array.from(uniqueCombinations.values()).map(row => {
+        // Validate manager email
+        if (!row.managerEmail || row.managerEmail === '') {
+          row.managerEmailError = 'Manager email is required'
+          row.hasError = true
+        }
+
+        // Validate user name
+        if (!row.userName || row.userName === '') {
+          row.userNameError = 'User name is required'
+          row.hasError = true
+        }
+
+        return row
+      })
+
+      // Load saved user matching if it exists
+      if (this.userMatching && typeof this.userMatching === 'object' && Object.keys(this.userMatching).length > 0) {
+        this.userMatchingRows.forEach(row => {
+          const key = `${row.managerEmail}|||${row.userName}`
+          if (this.userMatching[key]) {
+            row.selectedManagedUserId = this.userMatching[key] === '__to_be_created__' ? '__to_be_created__' : this.userMatching[key]
+          }
+        })
+      }
+
+      // Fetch managed users for each unique manager email
+      await this.fetchManagedUsersForAllManagers()
+    },
+    async fetchManagedUsersForAllManagers() {
+      // Get unique manager emails (only from rows without errors)
+      const uniqueManagerEmails = [...new Set(
+        this.userMatchingRows
+          .filter(row => !row.hasError && row.managerEmail)
+          .map(row => row.managerEmail)
+      )]
+
+      this.loadingManagedUsers = true
+      this.managedUsersByManager = {}
+
+      for (const managerEmail of uniqueManagerEmails) {
+        await this.fetchManagedUsersForManager(managerEmail)
+      }
+
+      this.loadingManagedUsers = false
+    },
+    async fetchManagedUsersForManager(managerEmail) {
+      if (!managerEmail || managerEmail === '') {
+        return
+      }
+
+      try {
+        // Check authentication
+        const isAuthenticated = await this.checkAuthentication()
+        if (!isAuthenticated) {
+          return
+        }
+
+        // Find manager user by email
+        const response = await axios.get(`/users.json`, {
+          params: { email: managerEmail }
+        })
+
+        if (response.status === 200 && response.data.users && response.data.users.length > 0) {
+          const managerUser = response.data.users[0]
+          const managerId = managerUser.id
+
+          // Check if current user can manage this manager
+          // If current user is admin, they can manage anyone
+          // Otherwise, they can only manage themselves
+          const currentUserIsAdmin = this.currentUser && this.currentUser.admin
+          const canManage = currentUserIsAdmin || (this.currentUser && this.currentUser.id === managerId)
+
+          if (!canManage) {
+            // Set error for rows with this manager email
+            this.userMatchingRows.forEach(row => {
+              if (row.managerEmail === managerEmail) {
+                row.managerEmailError = 'You do not have permission to manage users for this manager'
+                row.hasError = true
+              }
+            })
+            return
+          }
+
+          // Fetch managed users for this manager
+          const managedUsersResponse = await axios.get(`/managed_users.json`, {
+            params: { manager_id: managerId }
+          })
+
+          if (managedUsersResponse.status === 200 && managedUsersResponse.data.managed_users) {
+            this.managedUsersByManager[managerEmail] = managedUsersResponse.data.managed_users
+
+            // Store manager user ID for each row
+            this.userMatchingRows.forEach(row => {
+              if (row.managerEmail === managerEmail) {
+                row.managerUserId = managerId
+              }
+            })
+          }
+        } else {
+          // Manager not found
+          this.userMatchingRows.forEach(row => {
+            if (row.managerEmail === managerEmail) {
+              row.managerEmailError = 'Manager not found with this email'
+              row.hasError = true
+            }
+          })
+        }
+      } catch (error) {
+        // Handle errors
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          this.redirectToSignIn()
+          return
+        }
+
+        this.userMatchingRows.forEach(row => {
+          if (row.managerEmail === managerEmail) {
+            row.managerEmailError = 'Error loading managed users'
+            row.hasError = true
+          }
+        })
+      }
+    },
+    getManagedUsersForRow(row) {
+      if (!row.managerEmail || row.hasError) {
+        return []
+      }
+
+      const managedUsers = this.managedUsersByManager[row.managerEmail] || []
+      return managedUsers
+    },
+    getManagedUserName(managedUser) {
+      if (!managedUser) {
+        return ''
+      }
+
+      const firstName = managedUser.first_name || ''
+      const lastName = managedUser.last_name || ''
+      return `${firstName} ${lastName}`.trim() || `User ${managedUser.managed_id}`
+    },
+    updateUserMatching() {
+      // Update userMatching object when selections change
+      // This will be saved when user clicks Next
+    },
+    async saveUserMatching() {
+      if (!this.bulkFitTestsImportId || this.isSaving) {
+        return
+      }
+
+      // Check for validation errors
+      if (this.hasUserMatchingErrors) {
+        this.messages = [{ str: 'Please fix all errors before proceeding.' }]
+        return
+      }
+
+      // Check authentication
+      const isAuthenticated = await this.checkAuthentication()
+      if (!isAuthenticated) {
+        this.redirectToSignIn()
+        return
+      }
+
+      this.isSaving = true
+      this.messages = []
+
+      try {
+        // Build user_matching object
+        const userMatching = {}
+        this.userMatchingRows.forEach(row => {
+          if (!row.hasError && row.selectedManagedUserId) {
+            const key = `${row.managerEmail}|||${row.userName}`
+            userMatching[key] = row.selectedManagedUserId
+          }
+        })
+
+        const payload = {
+          bulk_fit_tests_import: {
+            user_matching: JSON.stringify(userMatching)
+          }
+        }
+
+        const response = await axios.put(`/bulk_fit_tests_imports/${this.bulkFitTestsImportId}.json`, payload)
+
+        if (response.status === 200) {
+          // Update local state
+          this.userMatching = userMatching
+
+          // Move to Mask Matching step
+          const steps = [
+            'Import File',
+            'Column Matching',
+            'User Matching',
+            'Mask Matching',
+            'User Seal Check Matching',
+            'Fit Test Data Matching'
+          ]
+          const currentIndex = steps.indexOf(this.currentStep)
+          if (currentIndex < steps.length - 1) {
+            this.currentStep = steps[currentIndex + 1]
+          }
+
+          // Mark User Matching as completed
+          if (!this.completedSteps.includes('User Matching')) {
+            this.completedSteps.push('User Matching')
+          }
+        } else {
+          const errorMessages = response.data.messages || ['Failed to save user matching.']
+          this.messages = errorMessages.map(msg => ({ str: msg }))
+        }
+      } catch (error) {
+        // Handle authentication errors
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          this.redirectToSignIn()
+          return
+        }
+
+        const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to save user matching.'
         this.messages = [{ str: errorMsg }]
       } finally {
         this.isSaving = false
@@ -1295,8 +1641,27 @@ export default {
             })
           }
 
+          // Load user_matching if available
+          if (bulkImport.user_matching) {
+            try {
+              // user_matching is encrypted text, parse it as JSON
+              this.userMatching = typeof bulkImport.user_matching === 'string'
+                ? JSON.parse(bulkImport.user_matching)
+                : bulkImport.user_matching
+            } catch (e) {
+              // If parsing fails, try to use it as-is or default to empty object
+              this.userMatching = bulkImport.user_matching || {}
+            }
+          } else {
+            this.userMatching = {}
+          }
+
           // Set current step and completed steps
-          if (bulkImport.column_matching_mapping && Object.keys(bulkImport.column_matching_mapping).length > 1) {
+          if (bulkImport.user_matching && Object.keys(this.userMatching).length > 0) {
+            // If user matching exists, we're past User Matching step
+            this.currentStep = 'Mask Matching'
+            this.completedSteps = ['Import File', 'Column Matching', 'User Matching']
+          } else if (bulkImport.column_matching_mapping && Object.keys(bulkImport.column_matching_mapping).length > 1) {
             // If column matching exists (has more than just header_row_index), we're on Column Matching step
             this.currentStep = 'Column Matching'
             this.completedSteps = ['Import File']
@@ -1561,6 +1926,52 @@ input[type="file"] {
 
 .column-matching-table tbody tr:hover {
   background-color: #f8f9fa;
+}
+
+.user-matching-table {
+  margin-top: 2em;
+  overflow-y: scroll;
+  height: 50vh;
+}
+
+.user-matching-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+}
+
+.user-matching-table th {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 0.75em;
+  text-align: left;
+  font-weight: bold;
+}
+
+.user-matching-table td {
+  border: 1px solid #dee2e6;
+  padding: 0.75em;
+}
+
+.user-select {
+  width: 100%;
+  padding: 0.5em;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.user-matching-table tr.has-error {
+  background-color: #fff5f5;
+}
+
+.user-matching-table tr.has-error td {
+  border-color: #fc8181;
+}
+
+.error-text {
+  color: #e53e3e;
+  font-weight: bold;
 }
 
 @media (max-width: 1000px) {
