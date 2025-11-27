@@ -171,6 +171,28 @@
           <h2 class='text-align-center'>User Matching</h2>
           <h3 class='text-align-center'>Match imported users to existing users</h3>
 
+          <div class='user-matching-header'>
+            <Button shadow='true' class='button match-button' text="Match" @click='attemptUserAutoMatch' :disabled='userMatchingRows.length === 0 || loadingManagedUsers || hasUserMatchingErrors'/>
+          </div>
+
+          <!-- Match Confirmation Popup for User Matching -->
+          <Popup v-if="showUserMatchConfirmation" @onclose="cancelUserMatchConfirmation">
+            <div class='match-confirmation-content'>
+              <h3>Confirm User Matching</h3>
+              <p>The following mappings will overwrite existing selections:</p>
+              <ul class='match-overwrites-list'>
+                <li v-for="(breathesafeName, fileUserName) in pendingUserMatchOverwrites" :key="fileUserName">
+                  <strong>{{ fileUserName }}</strong> → {{ breathesafeName }}
+                </li>
+              </ul>
+              <p>Do you want to proceed?</p>
+              <div class='match-confirmation-buttons'>
+                <Button shadow='true' class='button' text="Cancel" @click='cancelUserMatchConfirmation'/>
+                <Button shadow='true' class='button' text="Confirm" @click='confirmUserMatchOverwrite'/>
+              </div>
+            </div>
+          </Popup>
+
           <div v-if="userMatchingRows.length > 0" class='user-matching-table'>
             <table>
               <thead>
@@ -178,6 +200,7 @@
                   <th>File manager email</th>
                   <th>File user name</th>
                   <th>Breathesafe user name</th>
+                  <th>Similarity score</th>
                 </tr>
               </thead>
               <tbody>
@@ -195,6 +218,7 @@
                       v-model="row.selectedManagedUserId"
                       @change="updateUserMatching"
                       class="user-select"
+                      :class="{ 'has-error': row.hasError }"
                       :disabled="row.hasError || loadingManagedUsers"
                     >
                       <option :value="null">-- Select --</option>
@@ -203,6 +227,12 @@
                       </option>
                       <option value="__to_be_created__">To be created</option>
                     </select>
+                  </td>
+                  <td class="similarity-score-cell">
+                    <span v-if="getUserMatchingSimilarityScore(row) !== null" class="similarity-score">
+                      {{ formatSimilarityScore(getUserMatchingSimilarityScore(row)) }}
+                    </span>
+                    <span v-else class="similarity-score-empty">--</span>
                   </td>
                 </tr>
               </tbody>
@@ -385,7 +415,10 @@ export default {
       dismissedValidationErrors: new Set(),
       userMatchingRows: [],
       managedUsersByManager: {},
-      loadingManagedUsers: false
+      loadingManagedUsers: false,
+      showUserMatchConfirmation: false,
+      pendingUserMatchOverwrites: {},
+      pendingUserMatches: {}
     }
   },
   async mounted() {
@@ -1392,6 +1425,172 @@ export default {
       // Update userMatching object when selections change
       // This will be saved when user clicks Next
     },
+    attemptUserAutoMatch() {
+      if (!this.userMatchingRows || this.userMatchingRows.length === 0) {
+        return
+      }
+
+      const matches = {}
+      const overwrites = {}
+
+      // Group rows by manager email
+      const rowsByManager = {}
+      this.userMatchingRows.forEach(row => {
+        if (row.hasError || !row.managerEmail || !row.userName) {
+          return // Skip rows with errors or missing data
+        }
+
+        if (!rowsByManager[row.managerEmail]) {
+          rowsByManager[row.managerEmail] = []
+        }
+        rowsByManager[row.managerEmail].push(row)
+      })
+
+      // Process each manager group separately
+      Object.keys(rowsByManager).forEach(managerEmail => {
+        const rows = rowsByManager[managerEmail]
+        const managedUsers = this.managedUsersByManager[managerEmail] || []
+
+        if (managedUsers.length === 0) {
+          // No managed users available, assign "To be created" to all rows
+          rows.forEach(row => {
+            if (!row.selectedManagedUserId || row.selectedManagedUserId === '') {
+              matches[`${row.managerEmail}|||${row.userName}`] = '__to_be_created__'
+            }
+          })
+          return
+        }
+
+        // Sort rows by user name for consistent processing
+        const sortedRows = [...rows].sort((a, b) => {
+          if (a.userName < b.userName) return -1
+          if (a.userName > b.userName) return 1
+          return 0
+        })
+
+        // Track which managed users have been matched
+        const usedManagedUserIds = new Set()
+
+        // For each row, find the best match from available managed users
+        sortedRows.forEach(row => {
+          let bestManagedUser = null
+          let bestSimilarity = 0
+
+          // Find best match from available managed users
+          managedUsers.forEach(managedUser => {
+            if (usedManagedUserIds.has(managedUser.managed_id)) {
+              return // Skip already matched managed users
+            }
+
+            const fullName = this.getManagedUserName(managedUser)
+            const similarity = this.calculateSimilarity(row.userName, fullName)
+
+            if (similarity > bestSimilarity) {
+              bestSimilarity = similarity
+              bestManagedUser = managedUser
+            }
+          })
+
+          // If best similarity is >= 0.4, assign the match
+          const key = `${row.managerEmail}|||${row.userName}`
+          if (bestSimilarity >= 0.4 && bestManagedUser) {
+            // Check if row already has this managed user selected
+            const alreadyHasBestMatch = row.selectedManagedUserId &&
+              row.selectedManagedUserId.toString() === bestManagedUser.managed_id.toString()
+
+            if (alreadyHasBestMatch) {
+              // Already has the best match, mark it as used and skip
+              usedManagedUserIds.add(bestManagedUser.managed_id)
+            } else {
+              // Check if this would overwrite an existing selection
+              if (row.selectedManagedUserId && row.selectedManagedUserId !== '' && row.selectedManagedUserId !== '__to_be_created__') {
+                // Would overwrite existing selection
+                const existingName = this.getManagedUserNameById(row.selectedManagedUserId, managerEmail)
+                overwrites[row.userName] = this.getManagedUserName(bestManagedUser)
+              }
+
+              matches[key] = bestManagedUser.managed_id.toString()
+              usedManagedUserIds.add(bestManagedUser.managed_id)
+            }
+          } else {
+            // Similarity too low, assign "To be created"
+            if (!row.selectedManagedUserId || row.selectedManagedUserId === '') {
+              matches[key] = '__to_be_created__'
+            } else if (row.selectedManagedUserId && row.selectedManagedUserId !== '' && row.selectedManagedUserId !== '__to_be_created__') {
+              // Would overwrite existing selection with "To be created"
+              const existingName = this.getManagedUserNameById(row.selectedManagedUserId, managerEmail)
+              overwrites[row.userName] = 'To be created'
+              matches[key] = '__to_be_created__'
+            }
+          }
+        })
+      })
+
+      // If there are overwrites, show confirmation popup
+      if (Object.keys(overwrites).length > 0) {
+        this.pendingUserMatchOverwrites = overwrites
+        this.pendingUserMatches = matches
+        this.showUserMatchConfirmation = true
+      } else {
+        // No overwrites, apply matches directly
+        this.applyUserMatches(matches)
+      }
+    },
+    applyUserMatches(matches) {
+      // Apply the matches to userMatchingRows
+      Object.keys(matches).forEach(key => {
+        const parts = key.split('|||')
+        if (parts.length === 2) {
+          const managerEmail = parts[0]
+          const userName = parts[1]
+
+          const row = this.userMatchingRows.find(r =>
+            r.managerEmail === managerEmail && r.userName === userName
+          )
+
+          if (row) {
+            row.selectedManagedUserId = matches[key]
+          }
+        }
+      })
+
+      this.messages = [{ str: `Matched ${Object.keys(matches).length} user(s) automatically.` }]
+    },
+    confirmUserMatchOverwrite() {
+      // Apply all matches including overwrites
+      this.applyUserMatches(this.pendingUserMatches)
+      this.cancelUserMatchConfirmation()
+    },
+    cancelUserMatchConfirmation() {
+      this.showUserMatchConfirmation = false
+      this.pendingUserMatchOverwrites = {}
+      this.pendingUserMatches = {}
+    },
+    getManagedUserNameById(managedUserId, managerEmail) {
+      const managedUsers = this.managedUsersByManager[managerEmail] || []
+      const managedUser = managedUsers.find(mu => mu.managed_id.toString() === managedUserId.toString())
+      return managedUser ? this.getManagedUserName(managedUser) : `User ${managedUserId}`
+    },
+    getUserMatchingSimilarityScore(row) {
+      // Get similarity score between File user name and selected Breathesafe user name
+      if (!row.selectedManagedUserId || row.selectedManagedUserId === '' || row.selectedManagedUserId === '__to_be_created__') {
+        return null
+      }
+
+      if (!row.managerEmail || row.hasError) {
+        return null
+      }
+
+      const managedUsers = this.managedUsersByManager[row.managerEmail] || []
+      const selectedManagedUser = managedUsers.find(mu => mu.managed_id.toString() === row.selectedManagedUserId.toString())
+
+      if (!selectedManagedUser) {
+        return null
+      }
+
+      const fullName = this.getManagedUserName(selectedManagedUser)
+      return this.calculateSimilarity(row.userName, fullName)
+    },
     async saveUserMatching() {
       if (!this.bulkFitTestsImportId || this.isSaving) {
         return
@@ -1942,6 +2141,11 @@ input[type="file"] {
 
 .column-matching-table tbody tr:hover {
   background-color: #f8f9fa;
+}
+
+.user-matching-header {
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 .user-matching-table {
