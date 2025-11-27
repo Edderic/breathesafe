@@ -10,14 +10,30 @@ class ManagedUsersController < ApplicationController
       }
       status = 422
     else
-      managed_users = ParticipantProgress.call(manager_id: current_user.id)
+      # Determine manager_id: use params if admin, otherwise use current_user.id
+      manager_id = if current_user.admin && params[:manager_id].present?
+                     params[:manager_id].to_i
+                   else
+                     current_user.id
+                   end
 
-      to_render = {
-        managed_users: managed_users,
-        messages: []
-      }
+      # Verify permission: admin can access any manager, non-admin only themselves
+      unless current_user.admin || manager_id == current_user.id
+        to_render = {
+          managed_users: [],
+          messages: ['Unauthorized.']
+        }
+        status = 403
+      else
+        managed_users = ManagedUser.for_manager_id(manager_id: manager_id)
 
-      status = 200
+        to_render = {
+          managed_users: managed_users,
+          messages: []
+        }
+
+        status = 200
+      end
     end
 
     respond_to do |format|

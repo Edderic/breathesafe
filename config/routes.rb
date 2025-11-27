@@ -18,6 +18,7 @@ Rails.application.routes.draw do
 
   # Consent tracking for the current user
   post 'users/consent', to: 'users/consents#create'
+  get 'users', to: 'users#index'
 
   post 'events/external/:api_token', to: 'events#external_create'
 
