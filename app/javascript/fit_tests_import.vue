@@ -1662,9 +1662,25 @@ export default {
             this.currentStep = 'Mask Matching'
             this.completedSteps = ['Import File', 'Column Matching', 'User Matching']
           } else if (bulkImport.column_matching_mapping && Object.keys(bulkImport.column_matching_mapping).length > 1) {
-            // If column matching exists (has more than just header_row_index), we're on Column Matching step
-            this.currentStep = 'Column Matching'
-            this.completedSteps = ['Import File']
+            // If column matching exists (has more than just header_row_index), check if we should be on User Matching
+            // Check if manager email and user name columns are mapped
+            const columnMatchingValues = Object.values(bulkImport.column_matching_mapping)
+            const hasManagerEmail = columnMatchingValues.includes('manager email')
+            const hasUserName = columnMatchingValues.includes('user name')
+
+            if (hasManagerEmail && hasUserName) {
+              // Column matching is complete, allow User Matching step
+              this.currentStep = 'User Matching'
+              this.completedSteps = ['Import File', 'Column Matching']
+              // Initialize user matching after a short delay to ensure data is loaded
+              this.$nextTick(() => {
+                this.initializeUserMatching()
+              })
+            } else {
+              // Still on Column Matching step
+              this.currentStep = 'Column Matching'
+              this.completedSteps = ['Import File']
+            }
           } else if (bulkImport.import_data) {
             // If import_data exists but no column matching yet, start at Column Matching
             this.currentStep = 'Column Matching'

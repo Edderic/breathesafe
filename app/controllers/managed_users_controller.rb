@@ -18,13 +18,7 @@ class ManagedUsersController < ApplicationController
                    end
 
       # Verify permission: admin can access any manager, non-admin only themselves
-      unless current_user.admin || manager_id == current_user.id
-        to_render = {
-          managed_users: [],
-          messages: ['Unauthorized.']
-        }
-        status = 403
-      else
+      if current_user.admin || manager_id == current_user.id
         managed_users = ManagedUser.for_manager_id(manager_id: manager_id)
 
         to_render = {
@@ -33,6 +27,12 @@ class ManagedUsersController < ApplicationController
         }
 
         status = 200
+      else
+        to_render = {
+          managed_users: [],
+          messages: ['Unauthorized.']
+        }
+        status = 403
       end
     end
 

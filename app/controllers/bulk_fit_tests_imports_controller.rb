@@ -145,7 +145,7 @@ class BulkFitTestsImportsController < ApplicationController
     )
   end
 
-  def create_users_for_matching(user_matching, bulk_import)
+  def create_users_for_matching(user_matching, _bulk_import)
     updated_user_matching = user_matching.dup
     created_users = {}
 
@@ -163,9 +163,7 @@ class BulkFitTestsImportsController < ApplicationController
 
       # Find manager user by email
       manager_user = User.find_by(email: manager_email)
-      unless manager_user
-        raise "Manager not found with email: #{manager_email}"
-      end
+      raise "Manager not found with email: #{manager_email}" unless manager_user
 
       # Verify permission: admin can create for any manager, non-admin only for themselves
       unless current_user.admin || manager_user.id == current_user.id
@@ -176,7 +174,7 @@ class BulkFitTestsImportsController < ApplicationController
       # Split by space, first part is first_name, rest is last_name
       name_parts = user_name.split(/\s+/)
       first_name = name_parts[0] || ''
-      last_name = name_parts.length > 1 ? name_parts[1..-1].join(' ') : ''
+      last_name = name_parts.length > 1 ? name_parts[1..].join(' ') : ''
 
       # Create user, profile, and managed_user in a transaction
       ActiveRecord::Base.transaction do
