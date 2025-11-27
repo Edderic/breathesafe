@@ -117,7 +117,7 @@
                       :class="{ 'has-error': isColumnInDuplicateError(column) }"
                     >
                       <option :value="''">-- Select --</option>
-                      <option value="email">email</option>
+                      <option value="manager email">manager email</option>
                       <option value="first name">first name</option>
                       <option value="last name">last name</option>
                       <option value="user name">user name</option>
@@ -607,13 +607,16 @@ export default {
 
       if (norm1 === norm2) return 1.0
 
+      const maxLen = Math.max(norm1.length, norm2.length)
+      if (maxLen === 0) return 0.0
+
       const distance = this.levenshteinDistance(norm1, norm2)
-      return 1.0 / Math.max(distance, 0.01)
+      return 1 - (distance / maxLen)
     },
     getBreathesafeFieldOptions() {
       // Return all available Breathesafe matching column options (must match the select options)
       return [
-        'email',
+        'manager email',
         'first name', // Profile.first_name
         'last name', // Profile.last_name
         'user name', // Profile.first_name + Profile.last_name
@@ -639,7 +642,7 @@ export default {
     getPriorityFields() {
       // Return priority fields in order of matching priority
       return [
-        'email',
+        'manager email',
         'user name',
         'Mask.unique_internal_model_code',
         'Testing mode',
@@ -655,7 +658,7 @@ export default {
       // Find Breathesafe fields that match the priority pattern
       // For exact matches: return fields that exactly match
       // For contains matches: return fields that contain the priority text
-      const exactMatches = ['email', 'user name', 'Mask.unique_internal_model_code', 'Testing mode']
+      const exactMatches = ['manager email', 'user name', 'Mask.unique_internal_model_code', 'Testing mode']
 
       if (exactMatches.includes(priorityField)) {
         return availableBreathesafeFields.filter(field => field === priorityField)
