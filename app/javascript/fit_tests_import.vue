@@ -607,11 +607,8 @@ export default {
 
       if (norm1 === norm2) return 1.0
 
-      const maxLen = Math.max(norm1.length, norm2.length)
-      if (maxLen === 0) return 0.0
-
       const distance = this.levenshteinDistance(norm1, norm2)
-      return 1 - (distance / maxLen)
+      return 1.0 / Math.max(distance, 0.01)
     },
     getBreathesafeFieldOptions() {
       // Return all available Breathesafe matching column options (must match the select options)
