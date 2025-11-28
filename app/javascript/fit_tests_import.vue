@@ -167,7 +167,7 @@
 
       <!-- User Matching Step -->
       <div v-show='currentStep == "User Matching"' class='right-pane narrow-width'>
-        <div>
+        <div class='display'>
           <h2 class='text-align-center'>User Matching</h2>
           <h3 class='text-align-center'>Match imported users to existing users</h3>
 
@@ -2035,7 +2035,12 @@ input[type="file"] {
 }
 
 .match-button {
-  margin-left: 1em;
+  max-width: 1em;
+}
+.display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .match-confirmation-content {
