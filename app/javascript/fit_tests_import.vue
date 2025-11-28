@@ -241,6 +241,8 @@
           <div v-else class='text-align-center'>
             <p>No user data found. Please complete column matching first.</p>
           </div>
+          <br>
+          <br>
         </div>
 
         <br>
@@ -2156,7 +2158,7 @@ input[type="file"] {
 .user-matching-table {
   margin-top: 2em;
   overflow-y: scroll;
-  height: 50vh;
+  max-height: 40vh;
 }
 
 .user-matching-table table {
