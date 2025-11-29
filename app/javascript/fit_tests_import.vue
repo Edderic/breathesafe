@@ -259,14 +259,85 @@
           <h2 class='text-align-center'>Mask Matching</h2>
           <h3 class='text-align-center'>Match imported masks to existing masks</h3>
 
-          <p class='text-align-center'>Placeholder: Mask matching interface will go here</p>
+          <div class='mask-matching-header'>
+            <Button shadow='true' class='button match-button' text="Match" @click='attemptMaskAutoMatch' :disabled='maskMatchingRows.length === 0 || loadingMasks'/>
+          </div>
+
+          <!-- Match Confirmation Popup for Mask Matching -->
+          <Popup v-if="showMaskMatchConfirmation" @onclose="cancelMaskMatchConfirmation">
+            <div class='match-confirmation-content'>
+              <h3>Confirm Mask Matching</h3>
+              <p>The following mappings will overwrite existing selections:</p>
+              <ul class='match-overwrites-list'>
+                <li v-for="(breathesafeName, fileMaskName) in pendingMaskMatchOverwrites" :key="fileMaskName">
+                  <strong>{{ fileMaskName }}</strong> → {{ breathesafeName }}
+                </li>
+              </ul>
+              <p>Do you want to proceed?</p>
+              <div class='match-confirmation-buttons'>
+                <Button shadow='true' class='button' text="Cancel" @click='cancelMaskMatchConfirmation'/>
+                <Button shadow='true' class='button' text="Confirm" @click='confirmMaskMatchOverwrite'/>
+              </div>
+            </div>
+          </Popup>
+
+          <div v-if="maskMatchingRows.length > 0" class='mask-matching-table'>
+            <table>
+              <thead>
+                <tr>
+                  <th>File Mask name</th>
+                  <th>Breathesafe Mask name</th>
+                  <th>Breathesafe Mask id</th>
+                  <th>Similarity Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, index) in maskMatchingRows" :key="index">
+                  <td>{{ row.fileMaskName }}</td>
+                  <td>
+                    <select
+                      v-model="row.selectedMaskId"
+                      @change="updateMaskMatching"
+                      class="mask-select"
+                    >
+                      <option :value="null">-- Select --</option>
+                      <option v-for="mask in deduplicatedMasks" :key="mask.id" :value="mask.id">
+                        {{ mask.unique_internal_model_code }}
+                      </option>
+                      <option value="__to_be_created__">To be created</option>
+                    </select>
+                  </td>
+                  <td>
+                    <router-link
+                      v-if="row.selectedMaskId && row.selectedMaskId !== '__to_be_created__'"
+                      :to="{ name: 'ShowMask', params: { id: row.selectedMaskId }, query: { displayTab: 'Misc. Info' } }"
+                      target="_blank"
+                      class="mask-id-link"
+                    >
+                      {{ row.selectedMaskId }}
+                    </router-link>
+                    <span v-else class="similarity-score-empty">--</span>
+                  </td>
+                  <td class="similarity-score-cell">
+                    <span v-if="getMaskMatchingSimilarityScore(row) !== null" class="similarity-score">
+                      {{ formatSimilarityScore(getMaskMatchingSimilarityScore(row)) }}
+                    </span>
+                    <span v-else class="similarity-score-empty">--</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class='text-align-center'>
+            <p>No mask data found. Please complete column matching first.</p>
+          </div>
         </div>
 
         <br>
         <div class='row buttons'>
           <Button shadow='true' class='button' text="Back" @click='goToPreviousStep'/>
           <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
-          <Button shadow='true' class='button' text="Next" @click='goToNextStep'/>
+          <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='maskMatchingRows.length === 0 || isSaving'/>
         </div>
       </div>
 
@@ -388,6 +459,18 @@ export default {
     },
     hasUserMatchingErrors() {
       return this.userMatchingRows.some(row => row.hasError)
+    },
+    deduplicatedMasks() {
+      // Filter masks where duplicate_of is null and sort alphabetically by unique_internal_model_code
+      return this.allMasks
+        .filter(mask => mask.duplicate_of === null || mask.duplicate_of === undefined)
+        .sort((a, b) => {
+          const codeA = (a.unique_internal_model_code || '').toLowerCase()
+          const codeB = (b.unique_internal_model_code || '').toLowerCase()
+          if (codeA < codeB) return -1
+          if (codeA > codeB) return 1
+          return 0
+        })
     }
   },
   data() {
@@ -420,7 +503,13 @@ export default {
       loadingManagedUsers: false,
       showUserMatchConfirmation: false,
       pendingUserMatchOverwrites: {},
-      pendingUserMatches: {}
+      pendingUserMatches: {},
+      maskMatchingRows: [],
+      allMasks: [],
+      loadingMasks: false,
+      showMaskMatchConfirmation: false,
+      pendingMaskMatchOverwrites: {},
+      pendingMaskMatches: {}
     }
   },
   async mounted() {
@@ -1008,6 +1097,11 @@ export default {
       if (stepKey === 'User Matching' && this.bulkFitTestsImportId) {
         await this.initializeUserMatching()
       }
+
+      // If navigating to Mask Matching, initialize mask matching
+      if (stepKey === 'Mask Matching' && this.bulkFitTestsImportId) {
+        await this.initializeMaskMatching()
+      }
     },
     async reloadColumnMatching() {
       if (!this.bulkFitTestsImportId) {
@@ -1101,6 +1195,12 @@ export default {
         return // Navigation will happen in saveUserMatching if successful
       }
 
+      // If we're on the "Mask Matching" step, save mask matching data
+      if (this.currentStep === 'Mask Matching') {
+        await this.saveMaskMatching()
+        return // Navigation will happen in saveMaskMatching if successful
+      }
+
       const steps = [
         'Import File',
         'Column Matching',
@@ -1117,6 +1217,11 @@ export default {
         // Initialize user matching when navigating to User Matching step
         if (nextStep === 'User Matching') {
           await this.initializeUserMatching()
+        }
+
+        // Initialize mask matching when navigating to Mask Matching step
+        if (nextStep === 'Mask Matching') {
+          await this.initializeMaskMatching()
         }
       }
     },
@@ -1593,6 +1698,235 @@ export default {
       const fullName = this.getManagedUserName(selectedManagedUser)
       return this.calculateSimilarity(row.userName, fullName)
     },
+    async initializeMaskMatching() {
+      // Parse CSV data and extract mask names from column mapped to Mask.unique_internal_model_code
+      if (!this.csvFullContent || !this.columnMatching) {
+        this.maskMatchingRows = []
+        return
+      }
+
+      // Find column mapped to "Mask.unique_internal_model_code"
+      const maskColumn = Object.keys(this.columnMatching).find(
+        col => this.columnMatching[col] === 'Mask.unique_internal_model_code'
+      )
+
+      if (!maskColumn) {
+        this.maskMatchingRows = []
+        this.messages = [{ str: 'Mask column must be mapped in Column Matching.' }]
+        return
+      }
+
+      // Parse CSV lines
+      const csvLines = this.csvFullContent.split('\n').filter(line => line.trim() !== '')
+      if (csvLines.length <= this.headerRowIndex) {
+        this.maskMatchingRows = []
+        return
+      }
+
+      // Get header row
+      const headerRow = this.parseCSVLine(csvLines[this.headerRowIndex])
+      const maskColumnIndex = headerRow.indexOf(maskColumn)
+
+      if (maskColumnIndex === -1) {
+        this.maskMatchingRows = []
+        this.messages = [{ str: 'Could not find mask column in CSV.' }]
+        return
+      }
+
+      // Parse data rows and get unique mask names
+      const uniqueMaskNames = new Set()
+
+      for (let i = this.headerRowIndex + 1; i < csvLines.length; i++) {
+        const row = this.parseCSVLine(csvLines[i])
+        const maskName = row[maskColumnIndex] ? row[maskColumnIndex].trim() : ''
+        if (maskName && maskName !== '') {
+          uniqueMaskNames.add(maskName)
+        }
+      }
+
+      // Convert to array and create rows
+      this.maskMatchingRows = Array.from(uniqueMaskNames).map(maskName => ({
+        fileMaskName: maskName,
+        selectedMaskId: null
+      }))
+
+      // Load saved mask matching if it exists
+      if (this.maskMatching && typeof this.maskMatching === 'object' && Object.keys(this.maskMatching).length > 0) {
+        this.maskMatchingRows.forEach(row => {
+          if (this.maskMatching[row.fileMaskName]) {
+            row.selectedMaskId = this.maskMatching[row.fileMaskName] === '__to_be_created__'
+              ? '__to_be_created__'
+              : this.maskMatching[row.fileMaskName]
+          }
+        })
+      }
+
+      // Fetch deduplicated masks
+      await this.fetchDeduplicatedMasks()
+    },
+    async fetchDeduplicatedMasks() {
+      this.loadingMasks = true
+
+      try {
+        // Check authentication
+        const isAuthenticated = await this.checkAuthentication()
+        if (!isAuthenticated) {
+          return
+        }
+
+        const response = await axios.get('/masks.json')
+
+        if (response.status === 200 && response.data.masks) {
+          // Filter masks where duplicate_of is null
+          this.allMasks = response.data.masks.filter(mask =>
+            mask.duplicate_of === null || mask.duplicate_of === undefined
+          )
+        }
+      } catch (error) {
+        // Handle errors
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          this.redirectToSignIn()
+          return
+        }
+
+        this.messages = [{ str: 'Error loading masks.' }]
+      } finally {
+        this.loadingMasks = false
+      }
+    },
+    attemptMaskAutoMatch() {
+      if (!this.maskMatchingRows || this.maskMatchingRows.length === 0) {
+        return
+      }
+
+      if (this.deduplicatedMasks.length === 0) {
+        // No masks available, assign "To be created" to all rows without selections
+        const matches = {}
+        this.maskMatchingRows.forEach(row => {
+          if (!row.selectedMaskId || row.selectedMaskId === '') {
+            matches[row.fileMaskName] = '__to_be_created__'
+          }
+        })
+        this.applyMaskMatches(matches)
+        return
+      }
+
+      const matches = {}
+      const overwrites = {}
+
+      // Sort rows by file mask name for consistent processing
+      const sortedRows = [...this.maskMatchingRows].sort((a, b) => {
+        if (a.fileMaskName < b.fileMaskName) return -1
+        if (a.fileMaskName > b.fileMaskName) return 1
+        return 0
+      })
+
+      // Track which masks have been matched
+      const usedMaskIds = new Set()
+
+      // For each row, find the best match from available masks
+      sortedRows.forEach(row => {
+        let bestMask = null
+        let bestSimilarity = 0
+
+        // Find best match from available masks
+        this.deduplicatedMasks.forEach(mask => {
+          if (usedMaskIds.has(mask.id)) {
+            return // Skip already matched masks
+          }
+
+          const similarity = this.calculateSimilarity(row.fileMaskName, mask.unique_internal_model_code)
+
+          if (similarity > bestSimilarity) {
+            bestSimilarity = similarity
+            bestMask = mask
+          }
+        })
+
+        // If best similarity is >= 0.4, assign the match
+        if (bestSimilarity >= 0.4 && bestMask) {
+          // Check if row already has this mask selected
+          const alreadyHasBestMatch = row.selectedMaskId &&
+            row.selectedMaskId.toString() === bestMask.id.toString()
+
+          if (alreadyHasBestMatch) {
+            // Already has the best match, mark it as used and skip
+            usedMaskIds.add(bestMask.id)
+          } else {
+            // Check if this would overwrite an existing selection
+            if (row.selectedMaskId && row.selectedMaskId !== '' && row.selectedMaskId !== '__to_be_created__') {
+              // Would overwrite existing selection
+              const existingMask = this.deduplicatedMasks.find(m => m.id.toString() === row.selectedMaskId.toString())
+              const existingName = existingMask ? existingMask.unique_internal_model_code : `Mask ${row.selectedMaskId}`
+              overwrites[row.fileMaskName] = bestMask.unique_internal_model_code
+            }
+
+            matches[row.fileMaskName] = bestMask.id.toString()
+            usedMaskIds.add(bestMask.id)
+          }
+        } else {
+          // Similarity too low, assign "To be created"
+          if (!row.selectedMaskId || row.selectedMaskId === '') {
+            matches[row.fileMaskName] = '__to_be_created__'
+          } else if (row.selectedMaskId && row.selectedMaskId !== '' && row.selectedMaskId !== '__to_be_created__') {
+            // Would overwrite existing selection with "To be created"
+            const existingMask = this.deduplicatedMasks.find(m => m.id.toString() === row.selectedMaskId.toString())
+            const existingName = existingMask ? existingMask.unique_internal_model_code : `Mask ${row.selectedMaskId}`
+            overwrites[row.fileMaskName] = 'To be created'
+            matches[row.fileMaskName] = '__to_be_created__'
+          }
+        }
+      })
+
+      // If there are overwrites, show confirmation popup
+      if (Object.keys(overwrites).length > 0) {
+        this.pendingMaskMatchOverwrites = overwrites
+        this.pendingMaskMatches = matches
+        this.showMaskMatchConfirmation = true
+      } else {
+        // No overwrites, apply matches directly
+        this.applyMaskMatches(matches)
+      }
+    },
+    applyMaskMatches(matches) {
+      // Apply the matches to maskMatchingRows
+      Object.keys(matches).forEach(fileMaskName => {
+        const row = this.maskMatchingRows.find(r => r.fileMaskName === fileMaskName)
+        if (row) {
+          row.selectedMaskId = matches[fileMaskName]
+        }
+      })
+
+      this.messages = [{ str: `Matched ${Object.keys(matches).length} mask(s) automatically.` }]
+    },
+    confirmMaskMatchOverwrite() {
+      // Apply all matches including overwrites
+      this.applyMaskMatches(this.pendingMaskMatches)
+      this.cancelMaskMatchConfirmation()
+    },
+    cancelMaskMatchConfirmation() {
+      this.showMaskMatchConfirmation = false
+      this.pendingMaskMatchOverwrites = {}
+      this.pendingMaskMatches = {}
+    },
+    getMaskMatchingSimilarityScore(row) {
+      // Get similarity score between File mask name and selected Breathesafe mask
+      if (!row.selectedMaskId || row.selectedMaskId === '' || row.selectedMaskId === '__to_be_created__') {
+        return null
+      }
+
+      const selectedMask = this.deduplicatedMasks.find(m => m.id.toString() === row.selectedMaskId.toString())
+
+      if (!selectedMask) {
+        return null
+      }
+
+      return this.calculateSimilarity(row.fileMaskName, selectedMask.unique_internal_model_code)
+    },
+    updateMaskMatching() {
+      // Update maskMatching object when selections change
+      // This will be saved when user clicks Next
+    },
     async saveUserMatching() {
       if (!this.bulkFitTestsImportId || this.isSaving) {
         return
@@ -1666,6 +2000,77 @@ export default {
         }
 
         const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to save user matching.'
+        this.messages = [{ str: errorMsg }]
+      } finally {
+        this.isSaving = false
+      }
+    },
+    async saveMaskMatching() {
+      if (!this.bulkFitTestsImportId || this.isSaving) {
+        return
+      }
+
+      // Check authentication
+      const isAuthenticated = await this.checkAuthentication()
+      if (!isAuthenticated) {
+        this.redirectToSignIn()
+        return
+      }
+
+      this.isSaving = true
+      this.messages = []
+
+      try {
+        // Build mask_matching object
+        const maskMatching = {}
+        this.maskMatchingRows.forEach(row => {
+          if (row.selectedMaskId) {
+            maskMatching[row.fileMaskName] = row.selectedMaskId
+          }
+        })
+
+        const payload = {
+          bulk_fit_tests_import: {
+            mask_matching: maskMatching
+          }
+        }
+
+        const response = await axios.put(`/bulk_fit_tests_imports/${this.bulkFitTestsImportId}.json`, payload)
+
+        if (response.status === 200) {
+          // Update local state
+          this.maskMatching = maskMatching
+
+          // Move to User Seal Check Matching step
+          const steps = [
+            'Import File',
+            'Column Matching',
+            'User Matching',
+            'Mask Matching',
+            'User Seal Check Matching',
+            'Fit Test Data Matching'
+          ]
+          const currentIndex = steps.indexOf(this.currentStep)
+          if (currentIndex < steps.length - 1) {
+            this.currentStep = steps[currentIndex + 1]
+          }
+
+          // Mark Mask Matching as completed
+          if (!this.completedSteps.includes('Mask Matching')) {
+            this.completedSteps.push('Mask Matching')
+          }
+        } else {
+          const errorMessages = response.data.messages || ['Failed to save mask matching.']
+          this.messages = errorMessages.map(msg => ({ str: msg }))
+        }
+      } catch (error) {
+        // Handle authentication errors
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          this.redirectToSignIn()
+          return
+        }
+
+        const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to save mask matching.'
         this.messages = [{ str: errorMsg }]
       } finally {
         this.isSaving = false
@@ -1857,11 +2262,26 @@ export default {
             this.userMatching = {}
           }
 
+          // Load mask_matching if available
+          if (bulkImport.mask_matching) {
+            this.maskMatching = bulkImport.mask_matching
+          } else {
+            this.maskMatching = {}
+          }
+
           // Set current step and completed steps
-          if (bulkImport.user_matching && Object.keys(this.userMatching).length > 0) {
+          if (bulkImport.mask_matching && Object.keys(this.maskMatching).length > 0) {
+            // If mask matching exists, we're past Mask Matching step
+            this.currentStep = 'User Seal Check Matching'
+            this.completedSteps = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching']
+          } else if (bulkImport.user_matching && Object.keys(this.userMatching).length > 0) {
             // If user matching exists, we're past User Matching step
             this.currentStep = 'Mask Matching'
             this.completedSteps = ['Import File', 'Column Matching', 'User Matching']
+            // Initialize mask matching after a short delay to ensure data is loaded
+            this.$nextTick(() => {
+              this.initializeMaskMatching()
+            })
           } else if (bulkImport.column_matching_mapping && Object.keys(bulkImport.column_matching_mapping).length > 1) {
             // If column matching exists (has more than just header_row_index), check if we should be on User Matching
             // Check if manager email and user name columns are mapped
@@ -2199,6 +2619,59 @@ input[type="file"] {
 .error-text {
   color: #e53e3e;
   font-weight: bold;
+}
+
+.mask-matching-header {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.mask-matching-table {
+  margin-top: 2em;
+  overflow-y: scroll;
+  height: 50vh;
+}
+
+.mask-matching-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+}
+
+.mask-matching-table th {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 0.75em;
+  text-align: left;
+  font-weight: bold;
+}
+
+.mask-matching-table td {
+  border: 1px solid #dee2e6;
+  padding: 0.75em;
+}
+
+.mask-select {
+  width: 100%;
+  padding: 0.5em;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.mask-matching-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.mask-id-link {
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.mask-id-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
 }
 
 @media (max-width: 1000px) {

@@ -106,6 +106,29 @@ class BulkFitTestsImportsController < ApplicationController
         end
       end
 
+      # Handle mask creation if mask_matching contains "__to_be_created__"
+      mask_matching_param = params.dig(:bulk_fit_tests_import, :mask_matching)
+      if mask_matching_param.present?
+        begin
+          updated_mask_matching = create_masks_for_matching(mask_matching_param, bulk_import)
+
+          # Update params with the modified mask_matching
+          params[:bulk_fit_tests_import][:mask_matching] = updated_mask_matching
+        rescue StandardError => e
+          status = 422
+          to_render = {
+            messages: ["Error creating masks: #{e.message}"]
+          }
+
+          respond_to do |format|
+            format.json do
+              render json: to_render.to_json, status: status
+            end
+          end
+          return
+        end
+      end
+
       if bulk_import.update(bulk_import_params)
         status = 200
         messages = []
@@ -207,5 +230,28 @@ class BulkFitTestsImportsController < ApplicationController
     end
 
     updated_user_matching
+  end
+
+  def create_masks_for_matching(mask_matching, bulk_import)
+    updated_mask_matching = mask_matching.dup
+
+    mask_matching.each do |file_mask_name, value|
+      next unless value == '__to_be_created__'
+
+      # Create mask with file_mask_name as unique_internal_model_code
+      # Author should be set to the manager (bulk_import.user)
+      ActiveRecord::Base.transaction do
+        new_mask = Mask.create!(
+          unique_internal_model_code: file_mask_name,
+          author_id: bulk_import.user_id,
+          bulk_fit_tests_import_id: bulk_import.id
+        )
+
+        # Update mask_matching with the created mask's ID
+        updated_mask_matching[file_mask_name] = new_mask.id.to_s
+      end
+    end
+
+    updated_mask_matching
   end
 end
