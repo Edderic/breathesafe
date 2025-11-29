@@ -2034,12 +2034,16 @@ export default {
       }
 
       // Find columns mapped to mask and testing mode
+      // columnMatching structure: { "CSV Column Name": "Breathesafe Column Name" }
       const maskColumn = Object.keys(this.columnMatching).find(
         col => this.columnMatching[col] === 'Mask.unique_internal_model_code'
       )
 
       const testingModeColumn = Object.keys(this.columnMatching).find(
-        col => this.columnMatching[col] === 'Testing mode (QLFT / N99 / N95)'
+        col => {
+          const mappedValue = this.columnMatching[col]
+          return mappedValue === 'Testing mode' || mappedValue === 'Testing mode (QLFT / N99 / N95)'
+        }
       )
 
       if (!maskColumn) {
@@ -2058,7 +2062,13 @@ export default {
       // Get header row
       const headerRow = this.parseCSVLine(csvLines[this.headerRowIndex])
       const maskColumnIndex = headerRow.indexOf(maskColumn)
-      const testingModeColumnIndex = testingModeColumn ? headerRow.indexOf(testingModeColumn) : -1
+      // testingModeColumn is the CSV column name (key), use it to find index (case-insensitive)
+      let testingModeColumnIndex = -1
+      if (testingModeColumn) {
+        testingModeColumnIndex = headerRow.findIndex(col =>
+          col && col.trim().toLowerCase() === testingModeColumn.trim().toLowerCase()
+        )
+      }
 
       if (maskColumnIndex === -1) {
         this.fitTestDataRows = []
