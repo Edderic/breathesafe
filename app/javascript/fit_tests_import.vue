@@ -401,6 +401,7 @@
                   <th>Breathesafe mask name</th>
                   <th>Breathesafe mask id</th>
                   <th>Testing mode</th>
+                  <th>Bending over</th>
                   <th>Talking</th>
                   <th>Turning head side to side</th>
                   <th>Moving head up and down</th>
@@ -426,6 +427,7 @@
                     <span v-else class="similarity-score-empty">--</span>
                   </td>
                   <td>{{ row.testingMode || '--' }}</td>
+                  <td>{{ row.exercises.bendingOver !== null && row.exercises.bendingOver !== undefined ? row.exercises.bendingOver : '--' }}</td>
                   <td>{{ row.exercises.talking !== null && row.exercises.talking !== undefined ? row.exercises.talking : '--' }}</td>
                   <td>{{ row.exercises.turningHeadSideToSide !== null && row.exercises.turningHeadSideToSide !== undefined ? row.exercises.turningHeadSideToSide : '--' }}</td>
                   <td>{{ row.exercises.movingHeadUpAndDown !== null && row.exercises.movingHeadUpAndDown !== undefined ? row.exercises.movingHeadUpAndDown : '--' }}</td>
@@ -2026,6 +2028,11 @@ export default {
         return
       }
 
+      // Ensure masks are loaded first
+      if (this.allMasks.length === 0) {
+        await this.fetchDeduplicatedMasks()
+      }
+
       // Find columns mapped to mask and testing mode
       const maskColumn = Object.keys(this.columnMatching).find(
         col => this.columnMatching[col] === 'Mask.unique_internal_model_code'
@@ -2061,6 +2068,7 @@ export default {
 
       // Find exercise columns
       const exerciseColumns = {
+        bendingOver: this.findExerciseColumn('Bending over'),
         talking: this.findExerciseColumn('Talking'),
         turningHeadSideToSide: this.findExerciseColumn('Turning head side to side'),
         movingHeadUpAndDown: this.findExerciseColumn('Moving head up and down'),
@@ -2090,8 +2098,8 @@ export default {
           continue // Skip rows with unmapped or to-be-created masks
         }
 
-        // Find mask name from deduplicated masks
-        const mask = this.deduplicatedMasks.find(m => m.id.toString() === maskId.toString())
+        // Find mask name from all masks (not just deduplicated)
+        const mask = this.allMasks.find(m => m.id.toString() === maskId.toString())
         const maskName = mask ? mask.unique_internal_model_code : `Mask ${maskId}`
 
         // Extract exercise values
@@ -2117,7 +2125,7 @@ export default {
       this.fitTestDataRows = rows
     },
     findExerciseColumn(exerciseName) {
-      // Find column mapped to this exercise (could be QLFT -> or QNFT ->)
+      // Find column mapped to this exercise (could be QLFT ->, QNFT ->, or direct match)
       if (!this.columnMatching || !this.fileColumns) {
         return null
       }
@@ -2129,16 +2137,28 @@ export default {
       }
       const headerRow = this.parseCSVLine(csvLines[this.headerRowIndex])
 
+      const normalizedExercise = exerciseName.toLowerCase()
+
       // Look for columns mapped to exercises containing this name
-      // Check both QLFT -> and QNFT -> patterns
+      // Check both QLFT -> and QNFT -> patterns, as well as direct matches
       for (const csvColumn of this.fileColumns) {
         const mappedValue = this.columnMatching[csvColumn]
         if (typeof mappedValue === 'string') {
+          const normalizedMapped = mappedValue.toLowerCase()
+
+          // Check for direct match (e.g., "Talking" matches "Talking")
+          if (normalizedMapped === normalizedExercise) {
+            const columnIndex = headerRow.indexOf(csvColumn)
+            if (columnIndex >= 0) {
+              return {
+                csvColumn,
+                columnIndex
+              }
+            }
+          }
+
           // Check if it matches QLFT -> Exercise or QNFT -> Exercise
           // e.g., "QLFT -> Talking" or "QNFT -> Talking"
-          const normalizedMapped = mappedValue.toLowerCase()
-          const normalizedExercise = exerciseName.toLowerCase()
-
           if (normalizedMapped.includes('->') && normalizedMapped.includes(normalizedExercise)) {
             const columnIndex = headerRow.indexOf(csvColumn)
             if (columnIndex >= 0) {
