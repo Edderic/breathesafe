@@ -2627,8 +2627,7 @@ export default {
 }
 
 .narrow-width {
-  max-width: 900px;
-  margin: 0 auto;
+  max-width: 70vw;
 }
 
 .text-align-center {
@@ -2638,6 +2637,7 @@ export default {
 .tagline {
   text-align: center;
   font-weight: bold;
+  margin-left: 300px;
 }
 
 .container {
@@ -2969,6 +2969,10 @@ input[type="file"] {
   }
 
   .right-pane {
+    margin-left: 0;
+  }
+
+  .tagline {
     margin-left: 0;
   }
 }
