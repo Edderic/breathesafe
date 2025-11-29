@@ -1,7 +1,6 @@
 <template>
-  <div class='closable-container' v-if='shouldShow'>
-    <CircularButton @click='close' class='close' :style='{bottom: bottom, left: left}' text='x'/>
-    <div class='slot-wrapper'>
+  <Popup v-if='shouldShow' @onclose='close'>
+    <div class='message-content'>
       <p v-for='message in messages' :key='message.str'>
         <router-link v-if='!!message.to' :to='message.to' @click='close'>
           {{message.str}}
@@ -12,20 +11,16 @@
       </p>
       <slot></slot>
     </div>
-  </div>
+  </Popup>
 </template>
 
 <script>
-import CircularButton from './circular_button.vue'
+import Popup from './pop_up.vue'
 
 export default {
   name: 'ClosableMessage',
   components: {
-    CircularButton
-  },
-  data() {
-    return {
-    }
+    Popup
   },
   props: {
     messages: {
@@ -34,60 +29,38 @@ export default {
     }
   },
   computed: {
-    bottom() {
-      return `15px`
-
-    },
-
-    left() {
-      return `${400 - 40}px`
-    },
     shouldShow() {
       return this.messages.length > 0 || (this.$slots.default && this.$slots.default().length > 0)
     }
-
-  }, methods: {
+  },
+  methods: {
     close() {
       this.$emit('onclose')
     }
   }
-
 }
 </script>
 
 <style scoped>
-  .closable-container {
-    width: 400px;
+  .message-content {
     font-weight: bold;
-    background-color: #ffffd6;
-
-    position: fixed;
-    margin-left: auto;
-    margin-right: auto;
-    left: 0;
-    right: 0;
-    z-index:1000;
-    max-height: 80vh;
-    overflow-y: auto;
   }
 
-  .close {
-    position: relative;
+  .message-content p {
+    padding: 0.5em 0;
+    margin: 0;
   }
 
-  .slot-wrapper {
-    position: relative;
-    top: -30px;
+  .message-content p:first-child {
+    padding-top: 0;
   }
 
-  p {
-    padding: 1em;
-
+  .message-content p:last-child {
+    padding-bottom: 0;
   }
 
   tr td {
     padding-left: 0.5em;
     padding-right: 0.5em;
   }
-
 </style>

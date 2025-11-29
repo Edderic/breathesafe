@@ -7,13 +7,11 @@
       </router-link>
     </div>
 
-    <div v-if="messages.length > 0" class="messages-section">
-      <ClosableMessage
-        v-for="(message, index) in messages"
-        :key="index"
-        :messages="[message]"
-      />
-    </div>
+    <ClosableMessage
+      v-if="messages.length > 0"
+      :messages="messages"
+      @onclose="messages = []"
+    />
 
     <div class="filters-section">
       <div class="filter-group">

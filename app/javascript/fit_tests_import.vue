@@ -90,14 +90,11 @@
             <Button shadow='true' class='button match-button' text="Match" @click='attemptAutoMatch' :disabled='!fileColumns || fileColumns.length === 0'/>
           </div>
 
-          <div v-if="visibleColumnMatchingValidationErrors.length > 0" class="validation-errors">
-            <ClosableMessage
-              v-for="(error, index) in visibleColumnMatchingValidationErrors"
-              :key="error.errorKey"
-              :messages="[getDuplicateErrorMessage(error)]"
-              @onclose="dismissValidationError(error)"
-            />
-          </div>
+          <ClosableMessage
+            v-if="visibleColumnMatchingValidationErrors.length > 0"
+            :messages="visibleColumnMatchingValidationErrors.map(error => ({ str: getDuplicateErrorMessage(error).str }))"
+            @onclose="dismissAllValidationErrors"
+          />
 
           <div v-if="fileColumns && fileColumns.length > 0" class='column-matching-table'>
             <table>
@@ -1367,6 +1364,12 @@ export default {
     dismissValidationError(error) {
       // Add error to dismissed set
       this.dismissedValidationErrors.add(error.errorKey)
+    },
+    dismissAllValidationErrors() {
+      // Dismiss all visible validation errors
+      this.visibleColumnMatchingValidationErrors.forEach(error => {
+        this.dismissedValidationErrors.add(error.errorKey)
+      })
     },
     async saveColumnMatching() {
       if (!this.bulkFitTestsImportId || this.isSaving) {

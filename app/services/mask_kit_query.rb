@@ -74,11 +74,20 @@ class MaskKitQuery
     )
 
     # Decrypt the profile data for each result
+    # Collect all managed_ids that need decryption
+    managed_ids_needing_decryption = results.select do |result|
+      result['managed_id'] && result['first_name'].is_a?(String) && result['first_name'].start_with?('{"p":')
+    end.map { |result| result['managed_id'] }.uniq
+
+    # Preload all profiles in a single query
+    profiles_by_user_id = Profile.where(user_id: managed_ids_needing_decryption).index_by(&:user_id)
+
+    # Update results using preloaded profiles
     results.each do |result|
-      next unless result['first_name'].is_a?(String) && result['first_name'].start_with?('{"p":')
+      next unless result['managed_id'] && result['first_name'].is_a?(String) && result['first_name'].start_with?('{"p":')
 
       begin
-        profile = Profile.find_by(user_id: result['managed_id'])
+        profile = profiles_by_user_id[result['managed_id']]
         if profile
           result['first_name'] = profile.first_name
           result['last_name'] = profile.last_name
