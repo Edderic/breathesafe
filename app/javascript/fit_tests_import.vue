@@ -2512,6 +2512,9 @@ input[type="file"] {
   padding: 0.75em;
   text-align: left;
   font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .column-matching-table td {
@@ -2593,6 +2596,9 @@ input[type="file"] {
   padding: 0.75em;
   text-align: left;
   font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .user-matching-table td {
@@ -2644,6 +2650,9 @@ input[type="file"] {
   padding: 0.75em;
   text-align: left;
   font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .mask-matching-table td {
