@@ -255,7 +255,7 @@
 
       <!-- Mask Matching Step -->
       <div v-show='currentStep == "Mask Matching"' class='right-pane narrow-width'>
-        <div>
+        <div class='display'>
           <h2 class='text-align-center'>Mask Matching</h2>
           <h3 class='text-align-center'>Match imported masks to existing masks</h3>
 
@@ -2381,7 +2381,7 @@ export default {
 }
 
 .narrow-width {
-  max-width: 600px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
