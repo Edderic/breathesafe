@@ -37,6 +37,7 @@
               @change='handleFileSelect'
               accept=".csv,.xlsx,.xls"
               ref="fileInput"
+              :disabled="isCompleted"
             />
           </div>
 
@@ -116,6 +117,7 @@
                       @change="updateColumnMatching"
                       class="column-select"
                       :class="{ 'has-error': isColumnInDuplicateError(column) }"
+                      :disabled="isCompleted"
                     >
                       <option :value="''">-- Select --</option>
                       <option value="manager email">manager email</option>
@@ -220,7 +222,7 @@
                       @change="updateUserMatching"
                       class="user-select"
                       :class="{ 'has-error': row.hasError }"
-                      :disabled="row.hasError || loadingManagedUsers"
+                      :disabled="row.hasError || loadingManagedUsers || isCompleted"
                     >
                       <option :value="null">-- Select --</option>
                       <option v-for="managedUser in getManagedUsersForRow(row)" :key="managedUser.managed_id" :value="managedUser.managed_id">
@@ -300,6 +302,7 @@
                       v-model="row.selectedMaskId"
                       @change="updateMaskMatching"
                       class="mask-select"
+                      :disabled="isCompleted"
                     >
                       <option :value="null">-- Select --</option>
                       <option v-for="mask in deduplicatedMasks" :key="mask.id" :value="mask.id">
@@ -465,7 +468,17 @@
         <div class='row buttons'>
           <Button shadow='true' class='button' text="Back" @click='goToPreviousStep'/>
           <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
-          <Button shadow='true' class='button' text="Import" @click='completeImport'/>
+          <Button
+            v-if="!isCompleted"
+            shadow='true'
+            class='button'
+            text="Import"
+            @click='completeImport'
+            :disabled="isSaving || fitTestDataRows.length === 0"
+          />
+          <div v-if="isCompleted" class='text-align-center' style='margin-top: 1em; padding: 1em; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px;'>
+            <p style='margin: 0; color: #155724;'>✓ This import has been completed and cannot be modified.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -557,6 +570,9 @@ export default {
       return columnMatchingValues.some(value =>
         typeof value === 'string' && value.startsWith('USC ->')
       )
+    },
+    isCompleted() {
+      return this.bulkImportStatus === 'completed'
     }
   },
   data() {
@@ -597,7 +613,8 @@ export default {
       pendingMaskMatchOverwrites: {},
       pendingMaskMatches: {},
       userSealCheckMatchingSkipped: false,
-      fitTestDataRows: []
+      fitTestDataRows: [],
+      bulkImportStatus: null
     }
   },
   async mounted() {
@@ -2505,6 +2522,7 @@ export default {
         if (response.status === 200 && response.data.bulk_fit_tests_import) {
           const bulkImport = response.data.bulk_fit_tests_import
           this.bulkFitTestsImportId = bulkImport.id
+          this.bulkImportStatus = bulkImport.status
 
           // Set source_name for progress bar display
           if (bulkImport.source_name) {
@@ -2637,7 +2655,85 @@ export default {
       // Navigate back to fit tests list
       this.$router.push({ name: 'FitTests' })
     },
-    completeImport() {
+    async completeImport() {
+      if (!this.bulkFitTestsImportId || this.isSaving) {
+        return
+      }
+
+      // Check authentication
+      const isAuthenticated = await this.checkAuthentication()
+      if (!isAuthenticated) {
+        this.redirectToSignIn()
+        return
+      }
+
+      if (this.fitTestDataRows.length === 0) {
+        this.messages = [{ str: 'No fit test data to import.' }]
+        return
+      }
+
+      this.isSaving = true
+      this.messages = []
+
+      try {
+        // Prepare fit tests data for backend
+        const fitTestsData = this.fitTestDataRows.map(row => {
+          // Map exercise keys to proper exercise names
+          const exercises = {}
+          if (row.exercises.bendingOver) exercises['Bending over'] = row.exercises.bendingOver
+          if (row.exercises.talking) exercises['Talking'] = row.exercises.talking
+          if (row.exercises.turningHeadSideToSide) exercises['Turning head side to side'] = row.exercises.turningHeadSideToSide
+          if (row.exercises.movingHeadUpAndDown) exercises['Moving head up and down'] = row.exercises.movingHeadUpAndDown
+          if (row.exercises.normalBreathing1) exercises['Normal breathing 1'] = row.exercises.normalBreathing1
+          if (row.exercises.normalBreathing2) exercises['Normal breathing 2'] = row.exercises.normalBreathing2
+          if (row.exercises.grimace) exercises['Grimace'] = row.exercises.grimace
+          if (row.exercises.deepBreathing) exercises['Deep breathing'] = row.exercises.deepBreathing
+          if (row.exercises.normalBreathingSealed) exercises['Normal breathing (SEALED)'] = row.exercises.normalBreathingSealed
+
+          return {
+            user_id: row.managedUserId, // This is the managed_user_id, which is the user_id
+            mask_id: row.maskId,
+            testing_mode: row.testingMode,
+            exercises: exercises
+          }
+        })
+
+        const response = await axios.post(
+          `/bulk_fit_tests_imports/${this.bulkFitTestsImportId}/complete_import.json`,
+          {
+            fit_tests_data: fitTestsData,
+            fit_tests_to_add: fitTestsData.length
+          }
+        )
+
+        if (response.status === 200) {
+          // Update local state
+          this.bulkImportStatus = 'completed'
+
+          // Reload bulk import to get updated status
+          await this.loadBulkImport()
+
+          this.messages = [{ str: `Successfully imported ${fitTestsData.length} fit test(s).` }]
+
+          // Optionally redirect to list view or show success message
+        } else {
+          const errorMessages = response.data.messages || ['Failed to import fit tests.']
+          this.messages = errorMessages.map(msg => ({ str: msg }))
+        }
+      } catch (error) {
+        // Handle authentication errors
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          this.redirectToSignIn()
+          return
+        }
+
+        const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to import fit tests.'
+        this.messages = [{ str: errorMsg }]
+      } finally {
+        this.isSaving = false
+      }
+    },
+    completeImportOld() {
       // Placeholder: Complete the import process
       this.messages = [{ str: 'Import completed successfully!' }]
       // Navigate back to fit tests list after a delay

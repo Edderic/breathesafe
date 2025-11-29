@@ -53,9 +53,12 @@ Rails.application.routes.draw do
   delete 'fit_tests/:id', to: 'fit_tests#delete'
   post 'fit_tests/:id/clone', to: 'fit_tests#clone'
 
+  get 'bulk_fit_tests_imports', to: 'bulk_fit_tests_imports#index'
   post 'bulk_fit_tests_imports', to: 'bulk_fit_tests_imports#create'
   get 'bulk_fit_tests_imports/:id', to: 'bulk_fit_tests_imports#show'
   put 'bulk_fit_tests_imports/:id', to: 'bulk_fit_tests_imports#update'
+  delete 'bulk_fit_tests_imports/:id', to: 'bulk_fit_tests_imports#destroy'
+  post 'bulk_fit_tests_imports/:id/complete_import', to: 'bulk_fit_tests_imports#complete_import'
 
   post 'managed_users', to: 'managed_users#create'
   get 'managed_users', to: 'managed_users#index'

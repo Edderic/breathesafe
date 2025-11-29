@@ -60,6 +60,193 @@ class BulkFitTestsImportsController < ApplicationController
     end
   end
 
+  def index
+    if unauthorized?
+      status = 401
+      to_render = { bulk_fit_tests_imports: [], messages: ['Unauthorized.'] }
+    else
+      bulk_imports = BulkFitTestsImport.where(user: current_user).order(created_at: :desc)
+
+      # Build response with fit test counts
+      imports_data = bulk_imports.map do |import|
+        fit_tests_added = import.fit_tests.count
+
+        # Calculate fit_tests_to_add
+        # For completed imports, it equals fit_tests_added (both show the same number)
+        # For pending imports, calculate from CSV data rows
+        fit_tests_to_add = if import.status == 'completed'
+                             fit_tests_added
+                           else
+                             # Parse CSV to count data rows (excluding header)
+                             # This is an approximation - actual count depends on valid mask/user mappings
+                             begin
+                               import_data = import.import_data
+                               if import_data.present?
+                                 csv_lines = import_data.split("\n").reject(&:blank?)
+                                 # Get header_row_index from column_matching_mapping if available
+                                 header_row_index = import.column_matching_mapping&.dig('header_row_index')
+                                 header_row_index = header_row_index.to_i if header_row_index
+                                 header_row_index ||= 0
+                                 # Count data rows (after header)
+                                 data_rows = csv_lines.length > header_row_index ? csv_lines.length - header_row_index - 1 : 0
+                                 [data_rows, 0].max
+                               else
+                                 0
+                               end
+                             rescue StandardError
+                               0
+                             end
+                           end
+
+        {
+          id: import.id,
+          source_name: import.source_name,
+          status: import.status,
+          fit_tests_to_add: fit_tests_to_add,
+          fit_tests_added: fit_tests_added,
+          created_at: import.created_at,
+          updated_at: import.updated_at
+        }
+      end
+
+      status = 200
+      to_render = {
+        bulk_fit_tests_imports: imports_data,
+        messages: []
+      }
+    end
+
+    respond_to do |format|
+      format.json do
+        render json: to_render.to_json, status: status
+      end
+    end
+  end
+
+  def destroy
+    bulk_import = BulkFitTestsImport.find(params[:id])
+
+    if unauthorized?
+      status = 401
+      to_render = { messages: ['Unauthorized.'] }
+    elsif !current_user.manages?(bulk_import.user)
+      status = 422
+      to_render = { messages: ['Unauthorized.'] }
+    elsif bulk_import.destroy
+      status = 200
+      to_render = { messages: [] }
+    else
+      status = 422
+      to_render = { messages: bulk_import.errors.full_messages }
+    end
+
+    respond_to do |format|
+      format.json do
+        render json: to_render.to_json, status: status
+      end
+    end
+  end
+
+  def complete_import
+    bulk_import = BulkFitTestsImport.find(params[:id])
+
+    if unauthorized?
+      status = 401
+      to_render = { messages: ['Unauthorized.'] }
+    elsif !current_user.manages?(bulk_import.user)
+      status = 422
+      to_render = { messages: ['Unauthorized.'] }
+    elsif bulk_import.status == 'completed'
+      status = 422
+      to_render = { messages: ['Import has already been completed.'] }
+    else
+      begin
+        fit_tests_data = params[:fit_tests_data] || []
+
+        ActiveRecord::Base.transaction do
+          fit_tests_data.each do |fit_test_data|
+            # Extract data
+            user_id = fit_test_data[:user_id] || fit_test_data['user_id']
+            mask_id = fit_test_data[:mask_id] || fit_test_data['mask_id']
+            testing_mode = fit_test_data[:testing_mode] || fit_test_data['testing_mode']
+            exercises = fit_test_data[:exercises] || fit_test_data['exercises'] || {}
+
+            # user_id is already the managed_user_id (user_id from ManagedUser)
+            # No conversion needed - managed_user_id IS the user_id
+
+            # Build results structure based on testing mode
+            results = {}
+            if %w[N95 N99].include?(testing_mode)
+              # Quantitative fit test
+              quantitative_exercises = []
+              exercises.each do |key, value|
+                next if value.blank?
+
+                # Key is already the exercise name (e.g., "Bending over", "Talking")
+                exercise_name = key.to_s
+                quantitative_exercises << {
+                  'name' => exercise_name,
+                  'fit_factor' => value.to_s
+                }
+              end
+
+              results['quantitative'] = {
+                'testing_mode' => testing_mode,
+                'exercises' => quantitative_exercises
+              }
+            elsif testing_mode == 'QLFT'
+              # Qualitative fit test
+              qualitative_exercises = []
+              exercises.each do |key, value|
+                next if value.blank?
+
+                # Key is already the exercise name (e.g., "Bending over", "Talking")
+                exercise_name = key.to_s
+                qualitative_exercises << {
+                  'name' => exercise_name,
+                  'result' => value.to_s
+                }
+              end
+
+              results['qualitative'] = {
+                'exercises' => qualitative_exercises
+              }
+            end
+
+            # Create fit test
+            FitTest.create!(
+              user_id: user_id,
+              mask_id: mask_id,
+              bulk_fit_tests_import_id: bulk_import.id,
+              results: results
+            )
+          end
+
+          # Mark import as completed
+          bulk_import.update!(status: 'completed')
+        end
+
+        status = 200
+        to_render = {
+          bulk_fit_tests_import: JSON.parse(bulk_import.reload.to_json),
+          messages: []
+        }
+      rescue StandardError => e
+        # Transaction will automatically rollback on exception
+        status = 422
+        to_render = {
+          messages: ["Error importing fit tests: #{e.message}"]
+        }
+      end
+    end
+
+    respond_to do |format|
+      format.json do
+        render json: to_render.to_json, status: status
+      end
+    end
+  end
+
   def update
     bulk_import = BulkFitTestsImport.find(params[:id])
 

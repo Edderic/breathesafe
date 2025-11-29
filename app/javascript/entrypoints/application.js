@@ -50,6 +50,7 @@ import Mask from '../add_mask.vue'
 import FitTest from '../fit_test.vue'
 import FitTests from '../fit_tests.vue'
 import FitTestsImport from '../fit_tests_import.vue'
+import BulkFitTestsImportsList from '../bulk_fit_tests_imports_list.vue'
 import MaskRecommenderOnboarding from '../mask_recommender_onboarding.vue'
 import MeasurementDevices from '../measurement_devices.vue'
 import MeasurementDevice from '../measurement_device.vue'
@@ -90,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/masks/:id/edit', component: Mask, name: 'EditMask' },
     { path: '/respirator_user/:id', component: RespiratorUser, name: 'RespiratorUser' },
     { path: '/fit_tests/new', component: FitTest, name: 'NewFitTest' },
+    { path: '/fit_tests/bulk_imports', component: BulkFitTestsImportsList, name: 'BulkFitTestsImportsList' },
     { path: '/fit_tests/bulk_imports/new', component: FitTestsImport, name: 'NewBulkFitTestsImport' },
     { path: '/fit_tests/bulk_imports/:id', component: FitTestsImport, name: 'BulkFitTestsImport' },
     { path: '/fit_tests/:id/edit', component: FitTest, name: 'EditFitTest' },
