@@ -21,6 +21,7 @@
         :fitTestDataMatching="fitTestDataMatching"
         :completedSteps="completedSteps"
         :currentStep="currentStep"
+        :userSealCheckMatchingSkipped="userSealCheckMatchingSkipped"
         @navigate-to-step="navigateToStep"
       />
 
@@ -351,8 +352,8 @@
 
           <div v-if="!hasUSCColumnsMatched" class='text-align-center' style='margin-top: 2em; padding: 1em; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;'>
             <p style='margin: 0; color: #856404;'>
-              ⚠️ No columns were matched to Breathesafe user seal check columns. If you think this is a mistake, please go to the Column Matching section by
-              <a href="#" @click.prevent="navigateToStep('Column Matching')" style='color: #007bff; text-decoration: underline; cursor: pointer;'>clicking here</a>.
+              ⚠️ No columns were matched to Breathesafe user seal check columns. Doing so is optional. If you think this is a mistake, please go to the Column Matching section by
+              <a href="#" @click.prevent="navigateToStep('Column Matching')" style='color: #007bff; text-decoration: underline; cursor: pointer;'>clicking here</a>. Otherwise, please hit Next to continue.
             </p>
           </div>
 
@@ -393,7 +394,53 @@
           <h2 class='text-align-center'>Fit Test Data Matching</h2>
           <h3 class='text-align-center'>Review and confirm fit test data</h3>
 
-          <p class='text-align-center'>Placeholder: Fit test data matching interface will go here</p>
+          <div v-if="fitTestDataRows.length > 0" class='fit-test-data-table'>
+            <table>
+              <thead>
+                <tr>
+                  <th>Breathesafe mask name</th>
+                  <th>Breathesafe mask id</th>
+                  <th>Testing mode</th>
+                  <th>Talking</th>
+                  <th>Turning head side to side</th>
+                  <th>Moving head up and down</th>
+                  <th>Normal breathing 1</th>
+                  <th>Normal breathing 2</th>
+                  <th>Grimace</th>
+                  <th>Deep breathing</th>
+                  <th>Normal breathing (SEALED)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, index) in fitTestDataRows" :key="index">
+                  <td>{{ row.maskName }}</td>
+                  <td>
+                    <router-link
+                      v-if="row.maskId && row.maskId !== '__to_be_created__'"
+                      :to="{ name: 'ShowMask', params: { id: row.maskId }, query: { displayTab: 'Misc. Info' } }"
+                      target="_blank"
+                      class="mask-id-link"
+                    >
+                      {{ row.maskId }}
+                    </router-link>
+                    <span v-else class="similarity-score-empty">--</span>
+                  </td>
+                  <td>{{ row.testingMode || '--' }}</td>
+                  <td>{{ row.exercises.talking !== null && row.exercises.talking !== undefined ? row.exercises.talking : '--' }}</td>
+                  <td>{{ row.exercises.turningHeadSideToSide !== null && row.exercises.turningHeadSideToSide !== undefined ? row.exercises.turningHeadSideToSide : '--' }}</td>
+                  <td>{{ row.exercises.movingHeadUpAndDown !== null && row.exercises.movingHeadUpAndDown !== undefined ? row.exercises.movingHeadUpAndDown : '--' }}</td>
+                  <td>{{ row.exercises.normalBreathing1 !== null && row.exercises.normalBreathing1 !== undefined ? row.exercises.normalBreathing1 : '--' }}</td>
+                  <td>{{ row.exercises.normalBreathing2 !== null && row.exercises.normalBreathing2 !== undefined ? row.exercises.normalBreathing2 : '--' }}</td>
+                  <td>{{ row.exercises.grimace !== null && row.exercises.grimace !== undefined ? row.exercises.grimace : '--' }}</td>
+                  <td>{{ row.exercises.deepBreathing !== null && row.exercises.deepBreathing !== undefined ? row.exercises.deepBreathing : '--' }}</td>
+                  <td>{{ row.exercises.normalBreathingSealed !== null && row.exercises.normalBreathingSealed !== undefined ? row.exercises.normalBreathingSealed : '--' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class='text-align-center'>
+            <p>No fit test data found. Please complete previous steps first.</p>
+          </div>
         </div>
 
         <br>
@@ -530,7 +577,9 @@ export default {
       loadingMasks: false,
       showMaskMatchConfirmation: false,
       pendingMaskMatchOverwrites: {},
-      pendingMaskMatches: {}
+      pendingMaskMatches: {},
+      userSealCheckMatchingSkipped: false,
+      fitTestDataRows: []
     }
   },
   async mounted() {
@@ -1123,6 +1172,11 @@ export default {
       if (stepKey === 'Mask Matching' && this.bulkFitTestsImportId) {
         await this.initializeMaskMatching()
       }
+
+      // If navigating to Fit Test Data Matching, initialize fit test data matching
+      if (stepKey === 'Fit Test Data Matching' && this.bulkFitTestsImportId) {
+        await this.initializeFitTestDataMatching()
+      }
     },
     async reloadColumnMatching() {
       if (!this.bulkFitTestsImportId) {
@@ -1222,6 +1276,18 @@ export default {
         return // Navigation will happen in saveMaskMatching if successful
       }
 
+      // If we're on the "User Seal Check Matching" step, check if it should be skipped
+      if (this.currentStep === 'User Seal Check Matching') {
+        // If no USC columns are matched, mark as skipped
+        if (!this.hasUSCColumnsMatched) {
+          this.userSealCheckMatchingSkipped = true
+          // Mark as completed (skipped) so it shows in progress bar
+          if (!this.completedSteps.includes('User Seal Check Matching')) {
+            this.completedSteps.push('User Seal Check Matching')
+          }
+        }
+      }
+
       const steps = [
         'Import File',
         'Column Matching',
@@ -1243,6 +1309,11 @@ export default {
         // Initialize mask matching when navigating to Mask Matching step
         if (nextStep === 'Mask Matching') {
           await this.initializeMaskMatching()
+        }
+
+        // Initialize fit test data matching when navigating to Fit Test Data Matching step
+        if (nextStep === 'Fit Test Data Matching') {
+          await this.initializeFitTestDataMatching()
         }
       }
     },
@@ -1947,6 +2018,140 @@ export default {
     updateMaskMatching() {
       // Update maskMatching object when selections change
       // This will be saved when user clicks Next
+    },
+    async initializeFitTestDataMatching() {
+      // Parse CSV data and create rows for fit test data
+      if (!this.csvFullContent || !this.columnMatching || !this.maskMatching) {
+        this.fitTestDataRows = []
+        return
+      }
+
+      // Find columns mapped to mask and testing mode
+      const maskColumn = Object.keys(this.columnMatching).find(
+        col => this.columnMatching[col] === 'Mask.unique_internal_model_code'
+      )
+
+      const testingModeColumn = Object.keys(this.columnMatching).find(
+        col => this.columnMatching[col] === 'Testing mode (QLFT / N99 / N95)'
+      )
+
+      if (!maskColumn) {
+        this.fitTestDataRows = []
+        this.messages = [{ str: 'Mask column must be mapped in Column Matching.' }]
+        return
+      }
+
+      // Parse CSV lines
+      const csvLines = this.csvFullContent.split('\n').filter(line => line.trim() !== '')
+      if (csvLines.length <= this.headerRowIndex) {
+        this.fitTestDataRows = []
+        return
+      }
+
+      // Get header row
+      const headerRow = this.parseCSVLine(csvLines[this.headerRowIndex])
+      const maskColumnIndex = headerRow.indexOf(maskColumn)
+      const testingModeColumnIndex = testingModeColumn ? headerRow.indexOf(testingModeColumn) : -1
+
+      if (maskColumnIndex === -1) {
+        this.fitTestDataRows = []
+        this.messages = [{ str: 'Could not find mask column in CSV.' }]
+        return
+      }
+
+      // Find exercise columns
+      const exerciseColumns = {
+        talking: this.findExerciseColumn('Talking'),
+        turningHeadSideToSide: this.findExerciseColumn('Turning head side to side'),
+        movingHeadUpAndDown: this.findExerciseColumn('Moving head up and down'),
+        normalBreathing1: this.findExerciseColumn('Normal breathing 1'),
+        normalBreathing2: this.findExerciseColumn('Normal breathing 2'),
+        grimace: this.findExerciseColumn('Grimace'),
+        deepBreathing: this.findExerciseColumn('Deep breathing'),
+        normalBreathingSealed: this.findExerciseColumn('Normal breathing (SEALED)')
+      }
+
+      // Parse data rows
+      const rows = []
+      for (let i = this.headerRowIndex + 1; i < csvLines.length; i++) {
+        const csvRow = this.parseCSVLine(csvLines[i])
+        const fileMaskName = csvRow[maskColumnIndex] ? csvRow[maskColumnIndex].trim() : ''
+        const testingMode = testingModeColumnIndex >= 0 && csvRow[testingModeColumnIndex]
+          ? csvRow[testingModeColumnIndex].trim()
+          : null
+
+        if (!fileMaskName) {
+          continue // Skip rows without mask name
+        }
+
+        // Find mask ID from mask_matching
+        const maskId = this.maskMatching[fileMaskName]
+        if (!maskId || maskId === '__to_be_created__') {
+          continue // Skip rows with unmapped or to-be-created masks
+        }
+
+        // Find mask name from deduplicated masks
+        const mask = this.deduplicatedMasks.find(m => m.id.toString() === maskId.toString())
+        const maskName = mask ? mask.unique_internal_model_code : `Mask ${maskId}`
+
+        // Extract exercise values
+        const exercises = {}
+        Object.keys(exerciseColumns).forEach(exerciseKey => {
+          const columnInfo = exerciseColumns[exerciseKey]
+          if (columnInfo && columnInfo.columnIndex >= 0) {
+            const value = csvRow[columnInfo.columnIndex]
+            exercises[exerciseKey] = value ? value.trim() : null
+          } else {
+            exercises[exerciseKey] = null
+          }
+        })
+
+        rows.push({
+          maskName,
+          maskId,
+          testingMode,
+          exercises
+        })
+      }
+
+      this.fitTestDataRows = rows
+    },
+    findExerciseColumn(exerciseName) {
+      // Find column mapped to this exercise (could be QLFT -> or QNFT ->)
+      if (!this.columnMatching || !this.fileColumns) {
+        return null
+      }
+
+      // Parse CSV to get header row
+      const csvLines = this.csvFullContent.split('\n').filter(line => line.trim() !== '')
+      if (csvLines.length <= this.headerRowIndex) {
+        return null
+      }
+      const headerRow = this.parseCSVLine(csvLines[this.headerRowIndex])
+
+      // Look for columns mapped to exercises containing this name
+      // Check both QLFT -> and QNFT -> patterns
+      for (const csvColumn of this.fileColumns) {
+        const mappedValue = this.columnMatching[csvColumn]
+        if (typeof mappedValue === 'string') {
+          // Check if it matches QLFT -> Exercise or QNFT -> Exercise
+          // e.g., "QLFT -> Talking" or "QNFT -> Talking"
+          const normalizedMapped = mappedValue.toLowerCase()
+          const normalizedExercise = exerciseName.toLowerCase()
+
+          if (normalizedMapped.includes('->') && normalizedMapped.includes(normalizedExercise)) {
+            const columnIndex = headerRow.indexOf(csvColumn)
+            if (columnIndex >= 0) {
+              return {
+                csvColumn,
+                columnIndex
+              }
+            }
+          }
+        }
+      }
+
+      return null
     },
     async saveUserMatching() {
       if (!this.bulkFitTestsImportId || this.isSaving) {
@@ -2690,6 +2895,40 @@ input[type="file"] {
 }
 
 .mask-matching-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.fit-test-data-table {
+  margin-top: 2em;
+  overflow-y: scroll;
+  overflow-x: auto;
+  height: 50vh;
+}
+
+.fit-test-data-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+  min-width: 1000px;
+}
+
+.fit-test-data-table th {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 0.75em;
+  text-align: left;
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.fit-test-data-table td {
+  border: 1px solid #dee2e6;
+  padding: 0.75em;
+}
+
+.fit-test-data-table tbody tr:hover {
   background-color: #f8f9fa;
 }
 

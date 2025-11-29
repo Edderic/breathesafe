@@ -10,7 +10,8 @@
           :class="{
             'completed': isStepCompleted(step.key),
             'current': currentStep === step.key,
-            'not-started': !isStepCompleted(step.key) && currentStep !== step.key
+            'not-started': !isStepCompleted(step.key) && currentStep !== step.key,
+            'skipped': isStepSkipped(step.key)
           }"
           @click="navigateToStep(step.key)"
         >
@@ -78,6 +79,10 @@ export default {
     currentStep: {
       type: String,
       default: 'Import File'
+    },
+    userSealCheckMatchingSkipped: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -151,6 +156,12 @@ export default {
     isStepCompleted(stepKey) {
       return this.computedCompletedSteps.includes(stepKey)
     },
+    isStepSkipped(stepKey) {
+      if (stepKey === 'User Seal Check Matching') {
+        return this.userSealCheckMatchingSkipped
+      }
+      return false
+    },
     getStepStatus(stepKey) {
       // Remove status text - visual indicators (checkmarks, circles) are sufficient
       return ''
@@ -179,6 +190,9 @@ export default {
           }
           return 'Not Selected'
         case 'User Seal Check Matching':
+          if (this.userSealCheckMatchingSkipped) {
+            return '⚠️ No matching'
+          }
           if (this.userSealCheckMatching && this.isUserSealCheckMatchingComplete()) {
             return 'User Seal Checks Matched'
           }
@@ -357,6 +371,18 @@ export default {
 .step-item.completed .step-value:not(.not-selected) {
   color: #28a745;
   font-weight: 500;
+}
+
+.step-item.skipped .step-value {
+  color: #856404;
+  font-weight: 500;
+}
+
+.step-item.skipped {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  padding: 0.5rem;
+  margin: 0.125rem 0;
 }
 
 /* Mobile-specific styles */
