@@ -339,6 +339,8 @@
           <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
           <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='maskMatchingRows.length === 0 || isSaving'/>
         </div>
+        <br>
+        <br>
       </div>
 
       <!-- User Seal Check Matching Step -->
@@ -347,7 +349,16 @@
           <h2 class='text-align-center'>User Seal Check Matching</h2>
           <h3 class='text-align-center'>Match user seal check data</h3>
 
-          <p class='text-align-center'>Placeholder: User seal check matching interface will go here</p>
+          <div v-if="!hasUSCColumnsMatched" class='text-align-center' style='margin-top: 2em; padding: 1em; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;'>
+            <p style='margin: 0; color: #856404;'>
+              ⚠️ No columns were matched to Breathesafe user seal check columns. If you think this is a mistake, please go to the Column Matching section by
+              <a href="#" @click.prevent="navigateToStep('Column Matching')" style='color: #007bff; text-decoration: underline; cursor: pointer;'>clicking here</a>.
+            </p>
+          </div>
+
+          <div v-else>
+            <p class='text-align-center'>Placeholder: User seal check matching interface will go here</p>
+          </div>
         </div>
 
         <br>
@@ -471,6 +482,16 @@ export default {
           if (codeA > codeB) return 1
           return 0
         })
+    },
+    hasUSCColumnsMatched() {
+      // Check if any column matching values start with "USC ->"
+      if (!this.columnMatching || typeof this.columnMatching !== 'object') {
+        return false
+      }
+      const columnMatchingValues = Object.values(this.columnMatching)
+      return columnMatchingValues.some(value =>
+        typeof value === 'string' && value.startsWith('USC ->')
+      )
     }
   },
   data() {
@@ -2635,7 +2656,7 @@ input[type="file"] {
 .mask-matching-table {
   margin-top: 2em;
   overflow-y: scroll;
-  height: 50vh;
+  height: 40vh;
 }
 
 .mask-matching-table table {
