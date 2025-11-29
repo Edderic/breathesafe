@@ -398,6 +398,9 @@
             <table>
               <thead>
                 <tr>
+                  <th>Manager email</th>
+                  <th>User name</th>
+                  <th>Breathesafe user id</th>
                   <th>Breathesafe mask name</th>
                   <th>Breathesafe mask id</th>
                   <th>Testing mode</th>
@@ -414,6 +417,19 @@
               </thead>
               <tbody>
                 <tr v-for="(row, index) in fitTestDataRows" :key="index">
+                  <td>{{ row.managerEmail || '--' }}</td>
+                  <td :class="{ 'user-name-error': !row.managedUserId }">{{ row.userName || '--' }}</td>
+                  <td>
+                    <router-link
+                      v-if="row.managedUserId"
+                      :to="{ name: 'RespiratorUser', params: { id: row.managedUserId } }"
+                      target="_blank"
+                      class="user-id-link"
+                    >
+                      {{ row.managedUserId }}
+                    </router-link>
+                    <span v-else class="similarity-score-empty">--</span>
+                  </td>
                   <td>{{ row.maskName }}</td>
                   <td>
                     <router-link
@@ -2033,7 +2049,7 @@ export default {
         await this.fetchDeduplicatedMasks()
       }
 
-      // Find columns mapped to mask and testing mode
+      // Find columns mapped to mask, testing mode, manager email, and user name
       // columnMatching structure: { "CSV Column Name": "Breathesafe Column Name" }
       const maskColumn = Object.keys(this.columnMatching).find(
         col => this.columnMatching[col] === 'Mask.unique_internal_model_code'
@@ -2044,6 +2060,14 @@ export default {
           const mappedValue = this.columnMatching[col]
           return mappedValue === 'Testing mode' || mappedValue === 'Testing mode (QLFT / N99 / N95)'
         }
+      )
+
+      const managerEmailColumn = Object.keys(this.columnMatching).find(
+        col => this.columnMatching[col] === 'manager email'
+      )
+
+      const userNameColumn = Object.keys(this.columnMatching).find(
+        col => this.columnMatching[col] === 'user name'
       )
 
       if (!maskColumn) {
@@ -2067,6 +2091,21 @@ export default {
       if (testingModeColumn) {
         testingModeColumnIndex = headerRow.findIndex(col =>
           col && col.trim().toLowerCase() === testingModeColumn.trim().toLowerCase()
+        )
+      }
+
+      // Find manager email and user name column indices (case-insensitive)
+      let managerEmailColumnIndex = -1
+      if (managerEmailColumn) {
+        managerEmailColumnIndex = headerRow.findIndex(col =>
+          col && col.trim().toLowerCase() === managerEmailColumn.trim().toLowerCase()
+        )
+      }
+
+      let userNameColumnIndex = -1
+      if (userNameColumn) {
+        userNameColumnIndex = headerRow.findIndex(col =>
+          col && col.trim().toLowerCase() === userNameColumn.trim().toLowerCase()
         )
       }
 
@@ -2098,6 +2137,14 @@ export default {
           ? csvRow[testingModeColumnIndex].trim()
           : null
 
+        // Extract manager email and user name
+        const managerEmail = managerEmailColumnIndex >= 0 && csvRow[managerEmailColumnIndex]
+          ? csvRow[managerEmailColumnIndex].trim()
+          : null
+        const userName = userNameColumnIndex >= 0 && csvRow[userNameColumnIndex]
+          ? csvRow[userNameColumnIndex].trim()
+          : null
+
         if (!fileMaskName) {
           continue // Skip rows without mask name
         }
@@ -2112,6 +2159,14 @@ export default {
         const mask = this.allMasks.find(m => m.id.toString() === maskId.toString())
         const maskName = mask ? mask.unique_internal_model_code : `Mask ${maskId}`
 
+        // Look up managed_user_id from user_matching
+        // Format: key is "manager_email|||user_name", value is managed_user_id
+        let managedUserId = null
+        if (managerEmail && userName && this.userMatching) {
+          const userMatchingKey = `${managerEmail}|||${userName}`
+          managedUserId = this.userMatching[userMatchingKey] || null
+        }
+
         // Extract exercise values
         const exercises = {}
         Object.keys(exerciseColumns).forEach(exerciseKey => {
@@ -2125,6 +2180,9 @@ export default {
         })
 
         rows.push({
+          managerEmail,
+          userName,
+          managedUserId,
           maskName,
           maskId,
           testingMode,
@@ -2971,6 +3029,22 @@ input[type="file"] {
 .mask-id-link:hover {
   color: #0056b3;
   text-decoration: underline;
+}
+
+.user-id-link {
+  color: #007bff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.user-id-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.user-name-error {
+  color: #dc3545;
+  font-weight: bold;
 }
 
 @media (max-width: 1000px) {
