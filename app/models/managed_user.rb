@@ -14,18 +14,21 @@ class ManagedUser < ApplicationRecord
     # Collect all managed_ids to preload facial measurements
     managed_ids = managed_users.map(&:managed_id).compact.uniq
 
-    # Preload latest facial measurements for all managed users in a single query
-    # Use a more efficient approach: get all measurements for these users, then group in Ruby
-    # This avoids complex SQL subqueries and is safer
+    # Preload latest facial measurements for all managed users efficiently
+    # Use PostgreSQL's DISTINCT ON to get only the latest measurement per user in a single query
     if managed_ids.any?
-      all_facial_measurements = FacialMeasurement.where(user_id: managed_ids)
-                                                 .order(created_at: :desc)
-                                                 .to_a
-
-      # Group by user_id and take the first (latest) one for each user
-      latest_facial_measurements = all_facial_measurements
-                                   .group_by(&:user_id)
-                                   .transform_values { |measurements| measurements.first }
+      # Use raw SQL with DISTINCT ON for efficiency (PostgreSQL-specific)
+      # This gets the latest facial measurement per user in a single query
+      # Use sanitize_sql_array for safe parameter binding
+      sql = ActiveRecord::Base.sanitize_sql_array([
+        <<-SQL.squish, managed_ids
+          SELECT DISTINCT ON (user_id) *
+          FROM facial_measurements
+          WHERE user_id IN (?)
+          ORDER BY user_id, created_at DESC
+        SQL
+      ])
+      latest_facial_measurements = FacialMeasurement.find_by_sql(sql).index_by(&:user_id)
     else
       latest_facial_measurements = {}
     end
