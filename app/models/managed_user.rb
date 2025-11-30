@@ -11,11 +11,28 @@ class ManagedUser < ApplicationRecord
 
     result = []
 
+    # Collect all managed_ids to preload facial measurements
+    managed_ids = managed_users.map(&:managed_id).compact.uniq
+
+    # Preload latest facial measurements for all managed users in a single query
+    # Use a more efficient approach: get all measurements for these users, then group in Ruby
+    # This avoids complex SQL subqueries and is safer
+    if managed_ids.any?
+      all_facial_measurements = FacialMeasurement.where(user_id: managed_ids)
+                                                 .order(created_at: :desc)
+                                                 .to_a
+
+      # Group by user_id and take the first (latest) one for each user
+      latest_facial_measurements = all_facial_measurements
+                                   .group_by(&:user_id)
+                                   .transform_values { |measurements| measurements.first }
+    else
+      latest_facial_measurements = {}
+    end
+
     managed_users.each do |mu|
       profile = mu.managed.profile
-      latest_facial_measurement = FacialMeasurement.where(user_id: mu.managed_id)
-                                                   .order(created_at: :desc)
-                                                   .first
+      latest_facial_measurement = latest_facial_measurements[mu.managed_id]
 
       # Build the result hash with decrypted values
       row = {
@@ -120,8 +137,10 @@ class ManagedUser < ApplicationRecord
     return [] unless managed_user
 
     profile = managed_user.managed.profile
+    # For single user, we can still optimize by using a more efficient query
     latest_facial_measurement = FacialMeasurement.where(user_id: managed_user.managed_id)
                                                  .order(created_at: :desc)
+                                                 .limit(1)
                                                  .first
 
     # Build the result hash with decrypted values
