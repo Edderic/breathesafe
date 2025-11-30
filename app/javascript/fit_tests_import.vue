@@ -555,6 +555,11 @@
             <p><strong>Warning:</strong> {{ unmappedQlftValuesCount }} QLFT row(s) contain unmapped QLFT values. These rows will not be imported. Unmapped values are highlighted in red.</p>
           </div>
 
+          <!-- Warning about invalid N95/N99 values -->
+          <div v-if="invalidN95N99ValuesCount > 0" class='qlft-unmapped-warning'>
+            <p><strong>Warning:</strong> {{ invalidN95N99ValuesCount }} N95/N99 row(s) contain non-alphanumeric characters in exercise columns. These rows will not be imported. Invalid values are highlighted in red.</p>
+          </div>
+
           <div v-if="fitTestDataRows.length > 0" class='fit-test-data-table'>
             <table>
               <thead>
@@ -604,15 +609,15 @@
                     <span v-else class="similarity-score-empty">--</span>
                   </td>
                   <td>{{ row.testingMode || '--' }}</td>
-                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.bendingOver }">{{ row.exercises.bendingOver !== null && row.exercises.bendingOver !== undefined ? row.exercises.bendingOver : '--' }}</td>
-                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.talking }">{{ row.exercises.talking !== null && row.exercises.talking !== undefined ? row.exercises.talking : '--' }}</td>
-                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.turningHeadSideToSide }">{{ row.exercises.turningHeadSideToSide !== null && row.exercises.turningHeadSideToSide !== undefined ? row.exercises.turningHeadSideToSide : '--' }}</td>
-                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.movingHeadUpAndDown }">{{ row.exercises.movingHeadUpAndDown !== null && row.exercises.movingHeadUpAndDown !== undefined ? row.exercises.movingHeadUpAndDown : '--' }}</td>
-                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.normalBreathing1 }">{{ row.exercises.normalBreathing1 !== null && row.exercises.normalBreathing1 !== undefined ? row.exercises.normalBreathing1 : '--' }}</td>
-                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.normalBreathing2 }">{{ row.exercises.normalBreathing2 !== null && row.exercises.normalBreathing2 !== undefined ? row.exercises.normalBreathing2 : '--' }}</td>
-                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.grimace }">{{ row.exercises.grimace !== null && row.exercises.grimace !== undefined ? row.exercises.grimace : '--' }}</td>
-                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.deepBreathing }">{{ row.exercises.deepBreathing !== null && row.exercises.deepBreathing !== undefined ? row.exercises.deepBreathing : '--' }}</td>
-                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.normalBreathingSealed }">{{ row.exercises.normalBreathingSealed !== null && row.exercises.normalBreathingSealed !== undefined ? row.exercises.normalBreathingSealed : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.bendingOver) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.bendingOver) }">{{ row.exercises.bendingOver !== null && row.exercises.bendingOver !== undefined ? row.exercises.bendingOver : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.talking) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.talking) }">{{ row.exercises.talking !== null && row.exercises.talking !== undefined ? row.exercises.talking : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.turningHeadSideToSide) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.turningHeadSideToSide) }">{{ row.exercises.turningHeadSideToSide !== null && row.exercises.turningHeadSideToSide !== undefined ? row.exercises.turningHeadSideToSide : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.movingHeadUpAndDown) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.movingHeadUpAndDown) }">{{ row.exercises.movingHeadUpAndDown !== null && row.exercises.movingHeadUpAndDown !== undefined ? row.exercises.movingHeadUpAndDown : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.normalBreathing1) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.normalBreathing1) }">{{ row.exercises.normalBreathing1 !== null && row.exercises.normalBreathing1 !== undefined ? row.exercises.normalBreathing1 : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.normalBreathing2) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.normalBreathing2) }">{{ row.exercises.normalBreathing2 !== null && row.exercises.normalBreathing2 !== undefined ? row.exercises.normalBreathing2 : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.grimace) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.grimace) }">{{ row.exercises.grimace !== null && row.exercises.grimace !== undefined ? row.exercises.grimace : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.deepBreathing) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.deepBreathing) }">{{ row.exercises.deepBreathing !== null && row.exercises.deepBreathing !== undefined ? row.exercises.deepBreathing : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.normalBreathingSealed) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.normalBreathingSealed) }">{{ row.exercises.normalBreathingSealed !== null && row.exercises.normalBreathingSealed !== undefined ? row.exercises.normalBreathingSealed : '--' }}</td>
                 </tr>
               </tbody>
             </table>
@@ -786,6 +791,18 @@ export default {
         }
         // Check if any exercise has unmapped QLFT value
         return row.exerciseHasUnmappedQlftValue && Object.values(row.exerciseHasUnmappedQlftValue).some(hasUnmapped => hasUnmapped === true)
+      }).length
+    },
+    invalidN95N99ValuesCount() {
+      if (!this.fitTestDataRows || this.fitTestDataRows.length === 0) {
+        return 0
+      }
+      return this.fitTestDataRows.filter(row => {
+        if (row.testingMode !== 'N95' && row.testingMode !== 'N99') {
+          return false
+        }
+        // Check if any exercise has invalid (non-alphanumeric) value
+        return row.exerciseHasInvalidN95N99Value && Object.values(row.exerciseHasInvalidN95N99Value).some(hasInvalid => hasInvalid === true)
       }).length
     },
     deduplicatedMasks() {
@@ -3058,6 +3075,7 @@ export default {
         // Extract exercise values
         const exercises = {}
         const exerciseHasUnmappedQlftValue = {}
+        const exerciseHasInvalidN95N99Value = {}
         Object.keys(exerciseColumns).forEach(exerciseKey => {
           const columnInfo = exerciseColumns[exerciseKey]
           if (columnInfo && columnInfo.columnIndex >= 0) {
@@ -3074,13 +3092,29 @@ export default {
                 exercises[exerciseKey] = trimmedValue // Keep original value for display
                 exerciseHasUnmappedQlftValue[exerciseKey] = true
               }
+              exerciseHasInvalidN95N99Value[exerciseKey] = false
+            } else if ((testingMode === 'N95' || testingMode === 'N99') && trimmedValue) {
+              // For N95/N99 rows, check if value contains only alphanumeric characters
+              // Allow numbers, letters, and common numeric characters like decimal points, minus signs
+              // But flag if there are other non-alphanumeric characters
+              const alphanumericRegex = /^[a-zA-Z0-9.\-+\s]*$/
+              if (alphanumericRegex.test(trimmedValue)) {
+                exercises[exerciseKey] = trimmedValue
+                exerciseHasInvalidN95N99Value[exerciseKey] = false
+              } else {
+                exercises[exerciseKey] = trimmedValue // Keep original value for display
+                exerciseHasInvalidN95N99Value[exerciseKey] = true
+              }
+              exerciseHasUnmappedQlftValue[exerciseKey] = false
             } else {
               exercises[exerciseKey] = trimmedValue
               exerciseHasUnmappedQlftValue[exerciseKey] = false
+              exerciseHasInvalidN95N99Value[exerciseKey] = false
             }
           } else {
             exercises[exerciseKey] = null
             exerciseHasUnmappedQlftValue[exerciseKey] = false
+            exerciseHasInvalidN95N99Value[exerciseKey] = false
           }
         })
 
@@ -3092,7 +3126,8 @@ export default {
           maskId,
           testingMode,
           exercises,
-          exerciseHasUnmappedQlftValue
+          exerciseHasUnmappedQlftValue,
+          exerciseHasInvalidN95N99Value
         })
       }
 
@@ -3600,14 +3635,19 @@ export default {
       this.messages = []
 
       try {
-        // Filter out rows with unmapped QLFT values
+        // Filter out rows with unmapped QLFT values or invalid N95/N99 values
         const validFitTestRows = this.fitTestDataRows.filter(row => {
           // If this is a QLFT row, check if any exercise has unmapped QLFT value
           if (row.testingMode === 'QLFT' && row.exerciseHasUnmappedQlftValue) {
             const hasUnmapped = Object.values(row.exerciseHasUnmappedQlftValue).some(hasUnmapped => hasUnmapped === true)
             return !hasUnmapped // Exclude rows with unmapped values
           }
-          return true // Include all non-QLFT rows and QLFT rows without unmapped values
+          // If this is an N95/N99 row, check if any exercise has invalid (non-alphanumeric) value
+          if ((row.testingMode === 'N95' || row.testingMode === 'N99') && row.exerciseHasInvalidN95N99Value) {
+            const hasInvalid = Object.values(row.exerciseHasInvalidN95N99Value).some(hasInvalid => hasInvalid === true)
+            return !hasInvalid // Exclude rows with invalid values
+          }
+          return true // Include all other rows
         })
 
         if (validFitTestRows.length === 0) {
