@@ -541,7 +541,71 @@ export default {
       )
     },
     hasColumnMatchingValidationErrors() {
-      return this.columnMatchingValidationErrors.length > 0
+      return this.columnMatchingValidationErrors.length > 0 || this.requiredColumnValidationErrors.length > 0
+    },
+    requiredColumnValidationErrors() {
+      const errors = []
+      const mappedValues = Object.values(this.columnMappings).filter(v => v && v !== '')
+
+      // Check for manager email
+      if (!mappedValues.includes('manager email')) {
+        errors.push({
+          category: 'required_fields',
+          missingField: 'manager email',
+          errorKey: 'required_manager_email'
+        })
+      }
+
+      // Check for user name
+      if (!mappedValues.includes('user name')) {
+        errors.push({
+          category: 'required_fields',
+          missingField: 'user name',
+          errorKey: 'required_user_name'
+        })
+      }
+
+      // Check for testing mode (exact match)
+      if (!mappedValues.includes('Testing mode')) {
+        errors.push({
+          category: 'required_fields',
+          missingField: 'Testing mode',
+          errorKey: 'required_testing_mode'
+        })
+      }
+
+      // Check for at least one exercise
+      const exerciseNames = [
+        'Talking',
+        'Turning head side to side',
+        'Moving head up and down',
+        'Normal breathing 1',
+        'Normal breathing 2',
+        'Grimace',
+        'Deep breathing',
+        'Normal breathing (SEALED)'
+      ]
+
+      // Check if any mapped value contains any exercise name (regardless of prefix)
+      const hasExercise = exerciseNames.some(exerciseName => {
+        return mappedValues.some(mappedValue => {
+          if (typeof mappedValue !== 'string') return false
+          // Check for direct match or prefixed match (e.g., "QLFT -> Talking" or "QNFT -> Talking")
+          return mappedValue === exerciseName ||
+                 mappedValue.includes(`-> ${exerciseName}`) ||
+                 mappedValue.includes(`->${exerciseName}`)
+        })
+      })
+
+      if (!hasExercise) {
+        errors.push({
+          category: 'required_exercises',
+          missingExercises: exerciseNames,
+          errorKey: 'required_at_least_one_exercise'
+        })
+      }
+
+      return errors
     },
     hasUserMatchingErrors() {
       return this.userMatchingRows.some(row => row.hasError)
@@ -1376,11 +1440,24 @@ export default {
         return
       }
 
-      // Check for validation errors before saving
-      if (this.hasColumnMatchingValidationErrors) {
+      // Check for duplicate validation errors
+      if (this.columnMatchingValidationErrors.length > 0) {
         this.messages = this.columnMatchingValidationErrors.map(error =>
           this.getDuplicateErrorMessage(error)
         )
+        return
+      }
+
+      // Check for required column validation errors
+      if (this.requiredColumnValidationErrors.length > 0) {
+        this.messages = this.requiredColumnValidationErrors.map(error => {
+          if (error.category === 'required_fields') {
+            return { str: `Required column "${error.missingField}" is not matched. Please select a CSV column for "${error.missingField}".` }
+          } else if (error.category === 'required_exercises') {
+            return { str: `At least one fit testing exercise must be matched. Please match at least one of the following exercises: ${error.missingExercises.join(', ')}.` }
+          }
+          return { str: 'Please complete all required column mappings.' }
+        })
         return
       }
 
