@@ -11,7 +11,6 @@
             'completed': isStepCompleted(step.key),
             'current': currentStep === step.key,
             'not-started': !isStepCompleted(step.key) && currentStep !== step.key,
-            'skipped': isStepSkipped(step.key)
           }"
           @click="navigateToStep(step.key)"
         >
