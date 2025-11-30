@@ -582,7 +582,7 @@ export default {
     importFitTests() {
       this.$router.push(
         {
-          name: "NewBulkFitTestsImport"
+          name: "BulkFitTestsImportsList"
         }
       )
     },
