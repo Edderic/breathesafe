@@ -72,10 +72,12 @@ class BulkFitTestsImportsController < ApplicationController
         fit_tests_added = import.fit_tests.count
 
         # Calculate fit_tests_to_add
-        # For completed imports, it equals fit_tests_added (both show the same number)
+        # For completed imports, use stored value if available, otherwise fall back to fit_tests_added
         # For pending imports, calculate from CSV data rows
         fit_tests_to_add = if import.status == 'completed'
-                             fit_tests_added
+                             # Check if fit_tests_to_add was stored in column_matching_mapping
+                             stored_count = import.column_matching_mapping&.dig('fit_tests_to_add')
+                             stored_count || fit_tests_added
                            else
                              # Parse CSV to count data rows (excluding header)
                              # This is an approximation - actual count depends on valid mask/user mappings
@@ -222,8 +224,12 @@ class BulkFitTestsImportsController < ApplicationController
             )
           end
 
-          # Mark import as completed
-          bulk_import.update!(status: 'completed')
+          # Mark import as completed and store fit_tests_to_add
+          fit_tests_to_add = params[:fit_tests_to_add] || fit_tests_data.length
+          bulk_import.update!(
+            status: 'completed',
+            column_matching_mapping: bulk_import.column_matching_mapping.merge('fit_tests_to_add' => fit_tests_to_add)
+          )
         end
 
         status = 200

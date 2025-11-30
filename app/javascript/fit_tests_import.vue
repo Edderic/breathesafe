@@ -643,6 +643,8 @@
             <p style='margin: 0; color: #155724;'>✓ This import has been completed and cannot be modified.</p>
           </div>
         </div>
+        <br>
+        <br>
       </div>
     </div>
   </div>
@@ -3690,7 +3692,7 @@ export default {
           `/bulk_fit_tests_imports/${this.bulkFitTestsImportId}/complete_import.json`,
           {
             fit_tests_data: fitTestsData,
-            fit_tests_to_add: fitTestsData.length
+            fit_tests_to_add: this.fitTestDataRows.length // Count before filtering
           }
         )
 
