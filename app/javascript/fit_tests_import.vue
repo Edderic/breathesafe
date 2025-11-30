@@ -3550,12 +3550,20 @@ export default {
             // If QLFT values matching exists, we're past QLFT Values Matching step
             this.currentStep = 'Fit Test Data Matching'
             this.completedSteps = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching', 'QLFT Values Matching']
+            // Initialize fit test data matching after a short delay to ensure data is loaded
+            this.$nextTick(() => {
+              this.initializeFitTestDataMatching()
+            })
           } else if (bulkImport.testing_mode_matching && Object.keys(this.testingModeMatching).length > 0) {
             // If testing mode matching exists, check if QLFT Values Matching is needed
             if (this.qlftValuesMatchingNotApplicable) {
               // Skip QLFT Values Matching, go to Fit Test Data Matching
               this.currentStep = 'Fit Test Data Matching'
               this.completedSteps = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching', 'QLFT Values Matching']
+              // Initialize fit test data matching after a short delay to ensure data is loaded
+              this.$nextTick(() => {
+                this.initializeFitTestDataMatching()
+              })
             } else {
               // Go to QLFT Values Matching
               this.currentStep = 'QLFT Values Matching'
