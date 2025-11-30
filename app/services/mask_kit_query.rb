@@ -30,6 +30,8 @@ class MaskKitQuery
     sql_start = Time.current
     sql_results_raw = ActiveRecord::Base.connection.exec_query(
       <<-SQL
+        -- TODO: deduplicate masks before counting
+
         WITH fit_test_counts_per_mask_user AS (
           SELECT m.id as mask_id, user_id, CASE WHEN COUNT(ft.id) IS NOT NULL THEN COUNT(ft.id) ELSE 0 END AS num_fit_tests_per_mask_user
           FROM masks m
@@ -40,39 +42,18 @@ class MaskKitQuery
         #{Mask.average_filtration_efficiencies_sql}
 
         SELECT
-          masks.*,
-          avg_sealed_ffs.*,
           users.email,
           profiles.first_name,
           profiles.last_name,
-          mks.uuid as mask_kit_uuid,
-          managed_id,
-          CASE WHEN num_fit_tests_per_mask_user IS NOT NULL THEN
-            num_fit_tests_per_mask_user
-          ELSE
-            0
-          END AS num_fit_tests_per_mask_user
-        FROM masks
-        LEFT JOIN avg_sealed_ffs
-          ON masks.id = avg_sealed_ffs.mask_id
-        LEFT JOIN mask_kit_statuses mks
-          ON mks.mask_uuid = masks.id
-        LEFT JOIN shipping_status_joins ssj
-          ON ssj.shippable_uuid = mks.uuid
-        LEFT JOIN shipping_statuses ss
-          ON ss.uuid = ssj.shipping_uuid
-        LEFT JOIN users
-          ON users.email = ss.to_user_uuid
+          managed_id
+        FROM users
         LEFT JOIN managed_users mu
-          ON mu.manager_id = users.id
+          ON mu.managed_id = users.id
         LEFT JOIN profiles ON profiles.user_id = mu.managed_id
-        LEFT JOIN fit_test_counts_per_mask_user ftcpmu
-          ON ftcpmu.mask_id = masks.id
-          AND ftcpmu.user_id = mu.managed_id
 
 
         #{where_clause}
-        SQL
+      SQL
     )
     Rails.logger.debug "MaskKitQuery: SQL query took: #{(Time.current - sql_start) * 1000}ms"
 

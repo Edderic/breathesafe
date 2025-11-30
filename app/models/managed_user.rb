@@ -38,7 +38,7 @@ class ManagedUser < ApplicationRecord
       Rails.logger.debug "ManagedUser.for_manager_id: Facial measurement query took: #{(Time.current - facial_measurement_start) * 1000}ms, loaded #{latest_facial_measurements.length} measurements"
     else
       latest_facial_measurements = {}
-      Rails.logger.debug "ManagedUser.for_manager_id: No managed_ids, skipped facial measurement query"
+      Rails.logger.debug 'ManagedUser.for_manager_id: No managed_ids, skipped facial measurement query'
     end
 
     loop_start = Time.current
