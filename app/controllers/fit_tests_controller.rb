@@ -50,19 +50,31 @@ class FitTestsController < ApplicationController
   end
 
   def index
+    start_time = Time.current
     if unauthorized?
       status = 401
       messages = ['Unauthorized.']
       fit_tests = []
       tested_and_untested = []
     else
-      fit_tests = JSON.parse(
-        FitTest.viewable(current_user).to_json
-      )
+      viewable_start = Time.current
+      fit_tests_json = FitTest.viewable(current_user).to_json
+      Rails.logger.debug "FitTest.viewable + to_json took: #{(Time.current - viewable_start) * 1000}ms"
+
+      parse_start = Time.current
+      fit_tests = JSON.parse(fit_tests_json)
+      Rails.logger.debug "JSON.parse took: #{(Time.current - parse_start) * 1000}ms"
+
       messages = []
+
+      mask_kit_start = Time.current
       tested_and_untested = MaskKitQuery.managed_by(manager_id: current_user.id)
+      Rails.logger.debug "MaskKitQuery.managed_by took: #{(Time.current - mask_kit_start) * 1000}ms"
     end
 
+    Rails.logger.debug "FitTestsController#index total time: #{(Time.current - start_time) * 1000}ms"
+
+    render_start = Time.current
     to_render = {
       fit_tests: fit_tests,
       tested_and_untested: tested_and_untested,
@@ -71,9 +83,13 @@ class FitTestsController < ApplicationController
 
     respond_to do |format|
       format.json do
-        render json: to_render.to_json, status: status
+        json_render_start = Time.current
+        json_output = to_render.to_json
+        Rails.logger.debug "FitTestsController#index: to_json took: #{(Time.current - json_render_start) * 1000}ms"
+        render json: json_output, status: status
       end
     end
+    Rails.logger.debug "FitTestsController#index: Render preparation took: #{(Time.current - render_start) * 1000}ms"
   end
 
   def show

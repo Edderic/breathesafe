@@ -8,19 +8,25 @@ class FitTest < ApplicationRecord
   belongs_to :quantitative_fit_testing_device, class_name: 'MeasurementDevice', optional: true
 
   def self.viewable(user)
+    start_time = Time.current
     # Use ActiveRecord queries to ensure encryption/decryption works properly
+    query_start = Time.current
     if user.admin?
       fit_tests = FitTest.includes(:user, :mask, :facial_measurement, user: :profile)
                          .order(updated_at: :desc)
     else
+      managed_user_ids_start = Time.current
       managed_user_ids = ManagedUser.where(manager_id: user.id).pluck(:managed_id)
+      Rails.logger.debug "FitTest.viewable: ManagedUser query took: #{(Time.current - managed_user_ids_start) * 1000}ms, found #{managed_user_ids.length} IDs"
       fit_tests = FitTest.includes(:user, :mask, :facial_measurement, user: :profile)
                          .where(user_id: managed_user_ids)
                          .order(updated_at: :desc)
     end
+    Rails.logger.debug "FitTest.viewable: Initial query took: #{(Time.current - query_start) * 1000}ms, found #{fit_tests.length} fit tests"
 
     result = []
 
+    loop_start = Time.current
     fit_tests.each do |ft|
       profile = ft.user.profile
       mask = ft.mask
@@ -103,6 +109,8 @@ class FitTest < ApplicationRecord
 
       result << row
     end
+    Rails.logger.debug "FitTest.viewable: Main loop took: #{(Time.current - loop_start) * 1000}ms, processed #{result.length} rows"
+    Rails.logger.debug "FitTest.viewable total time: #{(Time.current - start_time) * 1000}ms"
 
     result
   end

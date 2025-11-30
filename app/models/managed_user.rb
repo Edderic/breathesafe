@@ -5,34 +5,43 @@ class ManagedUser < ApplicationRecord
   belongs_to :managed, class_name: 'User'
 
   def self.for_manager_id(args)
+    start_time = Time.current
     # Use ActiveRecord queries to ensure encryption/decryption works properly
+    query_start = Time.current
     managed_users = ManagedUser.includes(managed: :profile)
                                .where(manager_id: args[:manager_id])
+    Rails.logger.debug "ManagedUser.for_manager_id: Initial query took: #{(Time.current - query_start) * 1000}ms, found #{managed_users.length} managed users"
 
     result = []
 
     # Collect all managed_ids to preload facial measurements
+    collect_start = Time.current
     managed_ids = managed_users.map(&:managed_id).compact.uniq
+    Rails.logger.debug "ManagedUser.for_manager_id: Collecting managed_ids took: #{(Time.current - collect_start) * 1000}ms, found #{managed_ids.length} unique IDs"
 
     # Preload latest facial measurements for all managed users efficiently
     # Use PostgreSQL's DISTINCT ON to get only the latest measurement per user in a single query
+    facial_measurement_start = Time.current
     if managed_ids.any?
       # Use raw SQL with DISTINCT ON for efficiency (PostgreSQL-specific)
       # This gets the latest facial measurement per user in a single query
       # Use sanitize_sql_array for safe parameter binding
       sql = ActiveRecord::Base.sanitize_sql_array([
-        <<-SQL.squish, managed_ids
+                                                    <<-SQL.squish, managed_ids
           SELECT DISTINCT ON (user_id) *
           FROM facial_measurements
           WHERE user_id IN (?)
           ORDER BY user_id, created_at DESC
-        SQL
-      ])
+                                                    SQL
+                                                  ])
       latest_facial_measurements = FacialMeasurement.find_by_sql(sql).index_by(&:user_id)
+      Rails.logger.debug "ManagedUser.for_manager_id: Facial measurement query took: #{(Time.current - facial_measurement_start) * 1000}ms, loaded #{latest_facial_measurements.length} measurements"
     else
       latest_facial_measurements = {}
+      Rails.logger.debug "ManagedUser.for_manager_id: No managed_ids, skipped facial measurement query"
     end
 
+    loop_start = Time.current
     managed_users.each do |mu|
       profile = mu.managed.profile
       latest_facial_measurement = latest_facial_measurements[mu.managed_id]
@@ -127,6 +136,8 @@ class ManagedUser < ApplicationRecord
 
       result << row
     end
+    Rails.logger.debug "ManagedUser.for_manager_id: Main loop took: #{(Time.current - loop_start) * 1000}ms, processed #{result.length} rows"
+    Rails.logger.debug "ManagedUser.for_manager_id total time: #{(Time.current - start_time) * 1000}ms"
 
     result
   end
