@@ -41,10 +41,48 @@ class ManagedUser < ApplicationRecord
       Rails.logger.debug 'ManagedUser.for_manager_id: No managed_ids, skipped facial measurement query'
     end
 
+    # Preload unique mask counts for all managed users efficiently
+    mask_count_start = Time.current
+    unique_mask_counts = if managed_ids.any?
+                           # Count unique masks tested per user
+                           FitTest.where(user_id: managed_ids)
+                                  .joins(:mask)
+                                  .where('masks.duplicate_of IS NULL')
+                                  .group(:user_id)
+                                  .count('DISTINCT fit_tests.mask_id')
+                         else
+                           {}
+                         end
+    Rails.logger.debug "ManagedUser.for_manager_id: Unique mask count query took: #{(Time.current - mask_count_start) * 1000}ms, found #{unique_mask_counts.length} users"
+
     loop_start = Time.current
     managed_users.each do |mu|
       profile = mu.managed.profile
       latest_facial_measurement = latest_facial_measurements[mu.managed_id]
+
+      # Calculate demographics completion percentage
+      demog_percent_complete = 0
+      if profile
+        demog_fields = [
+          profile.race_ethnicity,
+          profile.gender_and_sex,
+          profile.year_of_birth,
+          profile.demographics
+        ]
+        completed_demog_fields = demog_fields.count(&:present?)
+        demog_percent_complete = (completed_demog_fields.to_f / demog_fields.length * 100).round
+      end
+
+      # Calculate facial measurements completion percentage
+      fm_percent_complete = 0
+      if latest_facial_measurement
+        # Use the percent_complete method from FacialMeasurement
+        # This calculates based on aggregated ARKit measurements (nose, strap, top_cheek, mid_cheek, chin)
+        fm_percent_complete = latest_facial_measurement.percent_complete.to_f
+      end
+
+      # Get unique masks tested count
+      num_unique_masks_tested = unique_mask_counts[mu.managed_id] || 0
 
       # Build the result hash with decrypted values
       row = {
@@ -53,7 +91,11 @@ class ManagedUser < ApplicationRecord
         'manager_id' => mu.manager_id,
         'managed_id' => mu.managed_id,
         'created_at' => mu.created_at,
-        'updated_at' => mu.updated_at
+        'updated_at' => mu.updated_at,
+        # Calculated completion percentages
+        'demog_percent_complete' => demog_percent_complete,
+        'fm_percent_complete' => fm_percent_complete,
+        'num_unique_masks_tested' => num_unique_masks_tested
       }
 
       # Profile attributes (these will be automatically decrypted)
