@@ -68,6 +68,10 @@ export default {
       type: Object,
       default: null
     },
+    testingModeMatching: {
+      type: Object,
+      default: null
+    },
     fitTestDataMatching: {
       type: Object,
       default: null
@@ -94,6 +98,7 @@ export default {
         { key: 'User Matching', name: 'User Matching' },
         { key: 'Mask Matching', name: 'Mask Matching' },
         { key: 'User Seal Check Matching', name: 'User Seal Check Matching' },
+        { key: 'Testing Mode Values Matching', name: 'Testing Mode Values Matching' },
         { key: 'Fit Test Data Matching', name: 'Fit Test Data Matching' },
       ]
     }
@@ -132,6 +137,11 @@ export default {
       // User Seal Check Matching step is completed if userSealCheckMatching exists and is complete
       if (this.userSealCheckMatching && this.isUserSealCheckMatchingComplete()) {
         completed.push('User Seal Check Matching')
+      }
+
+      // Testing Mode Values Matching step is completed if testingModeMatching exists and is complete
+      if (this.testingModeMatching && this.isTestingModeMatchingComplete()) {
+        completed.push('Testing Mode Values Matching')
       }
 
       // Fit Test Data Matching step is completed if fitTestDataMatching exists and is complete
@@ -197,6 +207,11 @@ export default {
             return 'User Seal Checks Matched'
           }
           return 'Not Selected'
+        case 'Testing Mode Values Matching':
+          if (this.testingModeMatching && this.isTestingModeMatchingComplete()) {
+            return 'Testing Modes Matched'
+          }
+          return 'Not Selected'
         case 'Fit Test Data Matching':
           if (this.fitTestDataMatching && this.isFitTestDataMatchingComplete()) {
             return 'Fit Test Data Matched'
@@ -210,7 +225,7 @@ export default {
       const value = this.getStepValue(stepKey)
 
       // For all steps that show actual values, show actual values or "Not Selected"
-      const stepsWithValues = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Fit Test Data Matching']
+      const stepsWithValues = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching', 'Fit Test Data Matching']
 
       if (stepsWithValues.includes(stepKey)) {
         if (value === 'Not Selected' || !value) {
@@ -244,6 +259,10 @@ export default {
     isUserSealCheckMatchingComplete() {
       // Placeholder: return true if user seal check matching is complete
       return this.userSealCheckMatching && Object.keys(this.userSealCheckMatching).length > 0
+    },
+    isTestingModeMatchingComplete() {
+      // Return true if testing mode matching is complete
+      return this.testingModeMatching && Object.keys(this.testingModeMatching).length > 0
     },
     isFitTestDataMatchingComplete() {
       // Placeholder: return true if fit test data matching is complete

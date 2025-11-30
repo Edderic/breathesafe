@@ -18,6 +18,7 @@
         :userMatching="userMatching"
         :maskMatching="maskMatching"
         :userSealCheckMatching="userSealCheckMatching"
+        :testingModeMatching="testingModeMatching"
         :fitTestDataMatching="fitTestDataMatching"
         :completedSteps="completedSteps"
         :currentStep="currentStep"
@@ -370,6 +371,83 @@
         </div>
       </div>
 
+      <!-- Testing Mode Values Matching Step -->
+      <div v-show='currentStep == "Testing Mode Values Matching"' class='right-pane narrow-width'>
+        <div class='display'>
+          <h2 class='text-align-center'>Testing Mode Values Matching</h2>
+          <h3 class='text-align-center'>Match file testing mode values to Breathesafe testing mode values</h3>
+
+          <div class='testing-mode-matching-header'>
+            <Button shadow='true' class='button match-button' text="Match" @click='attemptTestingModeAutoMatch' :disabled='testingModeMatchingRows.length === 0'/>
+          </div>
+
+          <!-- Match Confirmation Popup for Testing Mode Matching -->
+          <Popup v-if="showTestingModeMatchConfirmation" @onclose="cancelTestingModeMatchConfirmation">
+            <div class='match-confirmation-content'>
+              <h3>Confirm Testing Mode Matching</h3>
+              <p>The following mappings will overwrite existing selections:</p>
+              <ul class='match-overwrites-list'>
+                <li v-for="(breathesafeValue, fileValue) in pendingTestingModeMatchOverwrites" :key="fileValue">
+                  <strong>{{ fileValue }}</strong> → {{ breathesafeValue }}
+                </li>
+              </ul>
+              <p>Do you want to proceed?</p>
+              <div class='match-confirmation-buttons'>
+                <Button shadow='true' class='button' text="Cancel" @click='cancelTestingModeMatchConfirmation'/>
+                <Button shadow='true' class='button' text="Confirm" @click='confirmTestingModeMatchOverwrite'/>
+              </div>
+            </div>
+          </Popup>
+
+          <div v-if="testingModeMatchingRows.length > 0" class='testing-mode-matching-table'>
+            <table>
+              <thead>
+                <tr>
+                  <th>File testing mode values</th>
+                  <th>Breathesafe testing mode values</th>
+                  <th>Similarity Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, index) in testingModeMatchingRows" :key="index">
+                  <td>{{ row.fileValue }}</td>
+                  <td>
+                    <select
+                      v-model="row.selectedBreathesafeValue"
+                      @change="updateTestingModeMatching"
+                      class="testing-mode-select"
+                      :disabled="isCompleted"
+                    >
+                      <option :value="null">-- Select --</option>
+                      <option value="N99">N99</option>
+                      <option value="N95">N95</option>
+                      <option value="QLFT">QLFT</option>
+                    </select>
+                  </td>
+                  <td class="similarity-score-cell">
+                    <span v-if="getTestingModeSimilarityScore(row) !== null" class="similarity-score">
+                      {{ formatSimilarityScore(getTestingModeSimilarityScore(row)) }}
+                    </span>
+                    <span v-else class="similarity-score-empty">--</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class='text-align-center'>
+            <p>No testing mode data found. Please complete column matching first.</p>
+          </div>
+        </div>
+        <br>
+        <div class='row buttons'>
+          <Button shadow='true' class='button' text="Back" @click='goToPreviousStep'/>
+          <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
+          <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='testingModeMatchingRows.length === 0 || hasUnmappedTestingModes || isSaving'/>
+        </div>
+        <br>
+        <br>
+      </div>
+
       <!-- Match Confirmation Popup -->
       <Popup v-if="showMatchConfirmation" @onclose="cancelMatchConfirmation">
         <div class='match-confirmation-content'>
@@ -610,6 +688,11 @@ export default {
     hasUserMatchingErrors() {
       return this.userMatchingRows.some(row => row.hasError)
     },
+    hasUnmappedTestingModes() {
+      return this.testingModeMatchingRows.some(
+        row => !row.selectedBreathesafeValue || row.selectedBreathesafeValue === ''
+      )
+    },
     deduplicatedMasks() {
       // Filter masks where duplicate_of is null and sort alphabetically by unique_internal_model_code
       return this.allMasks
@@ -651,6 +734,7 @@ export default {
       userMatching: null,
       maskMatching: null,
       userSealCheckMatching: null,
+      testingModeMatching: null,
       fitTestDataMatching: null,
       completedSteps: [],
       bulkFitTestsImportId: null,
@@ -674,6 +758,10 @@ export default {
       pendingMaskMatchOverwrites: {},
       pendingMaskMatches: {},
       userSealCheckMatchingSkipped: false,
+      testingModeMatchingRows: [],
+      showTestingModeMatchConfirmation: false,
+      pendingTestingModeMatchOverwrites: {},
+      pendingTestingModeMatches: {},
       fitTestDataRows: [],
       bulkImportStatus: null
     }
@@ -1269,6 +1357,11 @@ export default {
         await this.initializeMaskMatching()
       }
 
+      // If navigating to Testing Mode Values Matching, initialize testing mode matching
+      if (stepKey === 'Testing Mode Values Matching' && this.bulkFitTestsImportId) {
+        await this.initializeTestingModeMatching()
+      }
+
       // If navigating to Fit Test Data Matching, initialize fit test data matching
       if (stepKey === 'Fit Test Data Matching' && this.bulkFitTestsImportId) {
         await this.initializeFitTestDataMatching()
@@ -1382,6 +1475,15 @@ export default {
             this.completedSteps.push('User Seal Check Matching')
           }
         }
+        this.currentStep = 'Testing Mode Values Matching'
+        await this.initializeTestingModeMatching()
+        return
+      }
+
+      // If we're on the "Testing Mode Values Matching" step, save testing mode matching data
+      if (this.currentStep === 'Testing Mode Values Matching') {
+        await this.saveTestingModeMatching()
+        return // Navigation will happen in saveTestingModeMatching if successful
       }
 
       const steps = [
@@ -1390,6 +1492,7 @@ export default {
         'User Matching',
         'Mask Matching',
         'User Seal Check Matching',
+        'Testing Mode Values Matching',
         'Fit Test Data Matching'
       ]
       const currentIndex = steps.indexOf(this.currentStep)
@@ -1405,6 +1508,11 @@ export default {
         // Initialize mask matching when navigating to Mask Matching step
         if (nextStep === 'Mask Matching') {
           await this.initializeMaskMatching()
+        }
+
+        // Initialize testing mode matching when navigating to Testing Mode Values Matching step
+        if (nextStep === 'Testing Mode Values Matching') {
+          await this.initializeTestingModeMatching()
         }
 
         // Initialize fit test data matching when navigating to Fit Test Data Matching step
@@ -2134,6 +2242,248 @@ export default {
       // Update maskMatching object when selections change
       // This will be saved when user clicks Next
     },
+    async initializeTestingModeMatching() {
+      // Parse CSV data and extract unique testing mode values from column mapped to "Testing mode"
+      if (!this.csvFullContent || !this.columnMatching) {
+        this.testingModeMatchingRows = []
+        if (!this.csvFullContent) {
+          this.messages = [{ str: 'CSV file content not loaded. Please complete Import File step first.' }]
+        } else if (!this.columnMatching) {
+          this.messages = [{ str: 'Column matching not completed. Please complete Column Matching step first.' }]
+        }
+        return
+      }
+
+      // Find column mapped to "Testing mode"
+      const testingModeColumn = Object.keys(this.columnMatching).find(
+        col => {
+          const mappedValue = this.columnMatching[col]
+          return mappedValue === 'Testing mode' || mappedValue === 'Testing mode (QLFT / N99 / N95)'
+        }
+      )
+
+      if (!testingModeColumn) {
+        this.testingModeMatchingRows = []
+        // Debug: show what columns are mapped
+        const mappedColumns = Object.keys(this.columnMatching).map(col => `${col} => ${this.columnMatching[col]}`).join(', ')
+        this.messages = [{ str: `Testing mode column must be mapped in Column Matching. Currently mapped columns: ${mappedColumns}` }]
+        return
+      }
+
+      // Parse CSV lines
+      const csvLines = this.csvFullContent.split('\n').filter(line => line.trim() !== '')
+      if (csvLines.length <= this.headerRowIndex) {
+        this.testingModeMatchingRows = []
+        return
+      }
+
+      // Get header row
+      const headerRow = this.parseCSVLine(csvLines[this.headerRowIndex])
+      // Find column index case-insensitively
+      const testingModeColumnIndex = headerRow.findIndex(col =>
+        col && col.trim().toLowerCase() === testingModeColumn.trim().toLowerCase()
+      )
+
+      if (testingModeColumnIndex === -1) {
+        this.testingModeMatchingRows = []
+        // Debug: show available header columns
+        const availableColumns = headerRow.map((col, idx) => `"${col}"`).join(', ')
+        this.messages = [{ str: `Could not find testing mode column "${testingModeColumn}" in CSV header. Available columns: ${availableColumns}` }]
+        return
+      }
+
+      // Extract unique testing mode values from data rows (skip header row)
+      const uniqueTestingModes = new Set()
+      for (let i = this.headerRowIndex + 1; i < csvLines.length; i++) {
+        const row = this.parseCSVLine(csvLines[i])
+        if (row[testingModeColumnIndex]) {
+          const value = row[testingModeColumnIndex].trim()
+          if (value) {
+            uniqueTestingModes.add(value)
+          }
+        }
+      }
+
+      // Create rows for each unique testing mode value
+      const rows = Array.from(uniqueTestingModes).map(fileValue => ({
+        fileValue: fileValue,
+        selectedBreathesafeValue: null
+      }))
+
+      // Load saved matching if available
+      if (this.testingModeMatching && Object.keys(this.testingModeMatching).length > 0) {
+        rows.forEach(row => {
+          if (this.testingModeMatching[row.fileValue]) {
+            row.selectedBreathesafeValue = this.testingModeMatching[row.fileValue]
+          }
+        })
+      }
+
+      this.testingModeMatchingRows = rows
+    },
+    updateTestingModeMatching() {
+      // Update testingModeMatching object when selections change
+      // This will be saved when user clicks Next
+    },
+    getTestingModeSimilarityScore(row) {
+      // Get similarity score between File testing mode value and selected Breathesafe testing mode value
+      if (!row.selectedBreathesafeValue || row.selectedBreathesafeValue === '') {
+        return null
+      }
+
+      return this.calculateSimilarity(row.fileValue, row.selectedBreathesafeValue)
+    },
+    attemptTestingModeAutoMatch() {
+      if (!this.testingModeMatchingRows || this.testingModeMatchingRows.length === 0) {
+        return
+      }
+
+      const matches = {}
+      const overwrites = {}
+
+      // Breathesafe testing mode options
+      const breathesafeOptions = ['N99', 'N95', 'QLFT']
+
+      // Track which breathesafe options have been matched
+      const usedBreathesafeOptions = new Set()
+
+      // Sort rows by file value for consistent processing
+      const sortedRows = [...this.testingModeMatchingRows].sort((a, b) => {
+        if (a.fileValue < b.fileValue) return -1
+        if (a.fileValue > b.fileValue) return 1
+        return 0
+      })
+
+      // For each row, find the best match from available breathesafe options
+      sortedRows.forEach(row => {
+        let bestBreathesafeValue = null
+        let bestSimilarity = 0
+
+        // Find best match from available breathesafe options
+        breathesafeOptions.forEach(breathesafeValue => {
+          if (usedBreathesafeOptions.has(breathesafeValue)) {
+            return // Skip already matched breathesafe options
+          }
+
+          const similarity = this.calculateSimilarity(row.fileValue, breathesafeValue)
+
+          if (similarity > bestSimilarity) {
+            bestSimilarity = similarity
+            bestBreathesafeValue = breathesafeValue
+          }
+        })
+
+        // If best similarity is >= 0.4, assign the match
+        if (bestSimilarity >= 0.4 && bestBreathesafeValue) {
+          // Check if row already has this breathesafe value selected
+          const alreadyHasBestMatch = row.selectedBreathesafeValue &&
+            row.selectedBreathesafeValue === bestBreathesafeValue
+
+          if (alreadyHasBestMatch) {
+            // Already has the best match, mark it as used and skip
+            usedBreathesafeOptions.add(bestBreathesafeValue)
+            return
+          }
+
+          // Check if row has a different selection that would be overwritten
+          if (row.selectedBreathesafeValue && row.selectedBreathesafeValue !== bestBreathesafeValue) {
+            overwrites[row.fileValue] = bestBreathesafeValue
+          }
+
+          matches[row.fileValue] = bestBreathesafeValue
+          usedBreathesafeOptions.add(bestBreathesafeValue)
+        }
+      })
+
+      // If there are overwrites, ask for confirmation
+      if (Object.keys(overwrites).length > 0) {
+        this.pendingTestingModeMatchOverwrites = overwrites
+        this.pendingTestingModeMatches = matches
+        this.showTestingModeMatchConfirmation = true
+      } else {
+        // No overwrites, apply matches directly
+        this.applyTestingModeMatches(matches)
+      }
+    },
+    applyTestingModeMatches(matches) {
+      // Apply matches to rows
+      this.testingModeMatchingRows.forEach(row => {
+        if (matches[row.fileValue]) {
+          row.selectedBreathesafeValue = matches[row.fileValue]
+        }
+      })
+      this.updateTestingModeMatching()
+    },
+    confirmTestingModeMatchOverwrite() {
+      // Merge pending matches with overwrites
+      const allMatches = { ...this.pendingTestingModeMatches, ...this.pendingTestingModeMatchOverwrites }
+      this.applyTestingModeMatches(allMatches)
+      this.cancelTestingModeMatchConfirmation()
+    },
+    cancelTestingModeMatchConfirmation() {
+      this.showTestingModeMatchConfirmation = false
+      this.pendingTestingModeMatchOverwrites = {}
+      this.pendingTestingModeMatches = {}
+    },
+    async saveTestingModeMatching() {
+      // Validate that all file testing mode values have a mapping
+      const unmappedRows = this.testingModeMatchingRows.filter(
+        row => !row.selectedBreathesafeValue || row.selectedBreathesafeValue === ''
+      )
+
+      if (unmappedRows.length > 0) {
+        this.messages = [{
+          str: `Please map all testing mode values. ${unmappedRows.length} value(s) are unmapped: ${unmappedRows.map(r => r.fileValue).join(', ')}`
+        }]
+        return
+      }
+
+      // Build testing mode matching object: { "file_value": "breathesafe_value" }
+      const matching = {}
+      this.testingModeMatchingRows.forEach(row => {
+        if (row.selectedBreathesafeValue) {
+          matching[row.fileValue] = row.selectedBreathesafeValue
+        }
+      })
+
+      // Check authentication before saving
+      const isAuthenticated = await this.checkAuthentication()
+      if (!isAuthenticated) {
+        return
+      }
+
+      this.isSaving = true
+      this.messages = []
+
+      try {
+        const response = await axios.put(`/bulk_fit_tests_imports/${this.bulkFitTestsImportId}.json`, {
+          bulk_fit_tests_import: {
+            testing_mode_matching: matching
+          }
+        })
+
+        if (response.status === 200) {
+          this.testingModeMatching = matching
+          // Mark step as completed
+          if (!this.completedSteps.includes('Testing Mode Values Matching')) {
+            this.completedSteps.push('Testing Mode Values Matching')
+          }
+          // Move to next step
+          this.currentStep = 'Fit Test Data Matching'
+          await this.initializeFitTestDataMatching()
+        }
+      } catch (error) {
+        console.error('Error saving testing mode matching:', error)
+        if (error.response && error.response.status === 401) {
+          // User is not authenticated, redirect to sign in
+          await this.handleUnauthorized()
+        } else {
+          this.messages = [{ str: 'Error saving testing mode matching. Please try again.' }]
+        }
+      } finally {
+        this.isSaving = false
+      }
+    },
     async initializeFitTestDataMatching() {
       // Parse CSV data and create rows for fit test data
       if (!this.csvFullContent || !this.columnMatching || !this.maskMatching) {
@@ -2230,9 +2580,18 @@ export default {
       for (let i = this.headerRowIndex + 1; i < csvLines.length; i++) {
         const csvRow = this.parseCSVLine(csvLines[i])
         const fileMaskName = csvRow[maskColumnIndex] ? csvRow[maskColumnIndex].trim() : ''
-        const testingMode = testingModeColumnIndex >= 0 && csvRow[testingModeColumnIndex]
+        const fileTestingMode = testingModeColumnIndex >= 0 && csvRow[testingModeColumnIndex]
           ? csvRow[testingModeColumnIndex].trim()
           : null
+
+        // Map file testing mode value to Breathesafe testing mode value using testing_mode_matching
+        let testingMode = null
+        if (fileTestingMode && this.testingModeMatching && this.testingModeMatching[fileTestingMode]) {
+          testingMode = this.testingModeMatching[fileTestingMode]
+        } else if (fileTestingMode) {
+          // If no mapping found, use the file value as-is (for display purposes)
+          testingMode = fileTestingMode
+        }
 
         // Extract manager email and user name
         const managerEmail = managerEmailColumnIndex >= 0 && csvRow[managerEmailColumnIndex]
@@ -2581,6 +2940,7 @@ export default {
         'User Matching',
         'Mask Matching',
         'User Seal Check Matching',
+        'Testing Mode Values Matching',
         'Fit Test Data Matching'
       ]
       const currentIndex = steps.indexOf(this.currentStep)
@@ -2681,8 +3041,19 @@ export default {
             this.maskMatching = {}
           }
 
+          // Load testing_mode_matching if available
+          if (bulkImport.testing_mode_matching) {
+            this.testingModeMatching = bulkImport.testing_mode_matching
+          } else {
+            this.testingModeMatching = {}
+          }
+
           // Set current step and completed steps
-          if (bulkImport.mask_matching && Object.keys(this.maskMatching).length > 0) {
+          if (bulkImport.testing_mode_matching && Object.keys(this.testingModeMatching).length > 0) {
+            // If testing mode matching exists, we're past Testing Mode Values Matching step
+            this.currentStep = 'Fit Test Data Matching'
+            this.completedSteps = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching']
+          } else if (bulkImport.mask_matching && Object.keys(this.maskMatching).length > 0) {
             // If mask matching exists, we're past Mask Matching step
             this.currentStep = 'User Seal Check Matching'
             this.completedSteps = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching']
@@ -3159,6 +3530,52 @@ input[type="file"] {
 }
 
 .mask-matching-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.testing-mode-matching-header {
+  margin-bottom: 1em;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.testing-mode-matching-table {
+  margin-top: 2em;
+  overflow-y: scroll;
+  height: 40vh;
+}
+
+.testing-mode-matching-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+}
+
+.testing-mode-matching-table th {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 0.75em;
+  text-align: left;
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.testing-mode-matching-table td {
+  border: 1px solid #dee2e6;
+  padding: 0.75em;
+}
+
+.testing-mode-select {
+  width: 100%;
+  padding: 0.5em;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.testing-mode-matching-table tbody tr:hover {
   background-color: #f8f9fa;
 }
 

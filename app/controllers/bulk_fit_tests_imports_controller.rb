@@ -351,6 +351,7 @@ class BulkFitTestsImportsController < ApplicationController
       column_matching_mapping: {},
       mask_matching: {},
       user_seal_check_matching: {},
+      testing_mode_matching: {},
       fit_testing_matching: {}
     )
   end
