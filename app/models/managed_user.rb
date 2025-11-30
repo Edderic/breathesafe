@@ -24,32 +24,63 @@ class ManagedUser < ApplicationRecord
         'manager_id' => mu.manager_id,
         'managed_id' => mu.managed_id,
         'created_at' => mu.created_at,
-        'updated_at' => mu.updated_at,
-
-        # Profile attributes (these will be automatically decrypted)
-        'user_id' => profile.user_id,
-        'measurement_system' => profile.measurement_system,
-        'num_positive_cases_last_seven_days' => profile.num_positive_cases_last_seven_days,
-        'num_people_population' => profile.num_people_population,
-        'uncounted_cases_multiplier' => profile.uncounted_cases_multiplier,
-        'mask_type' => profile.mask_type,
-        'event_display_risk_time' => profile.event_display_risk_time,
-        'first_name' => profile.first_name,  # This will be decrypted
-        'last_name' => profile.last_name,    # This will be decrypted
-        'height_meters' => profile.height_meters,
-        'stride_length_meters' => profile.stride_length_meters,
-        'socials' => profile.socials,
-        'external_api_token' => profile.external_api_token,
-        'can_post_via_external_api' => profile.can_post_via_external_api,
-        'demographics' => profile.demographics,
-        'race_ethnicity' => profile.race_ethnicity,
-        'gender_and_sex' => profile.gender_and_sex,
-        'other_gender' => profile.other_gender,
-        'year_of_birth' => profile.year_of_birth,
-        'study_start_datetime' => profile.study_start_datetime,
-        'study_goal_end_datetime' => profile.study_goal_end_datetime,
-        'profile_id' => profile.id
+        'updated_at' => mu.updated_at
       }
+
+      # Profile attributes (these will be automatically decrypted)
+      # Handle case where profile might not exist
+      if profile
+        row.merge!({
+                     'user_id' => profile.user_id,
+                     'measurement_system' => profile.measurement_system,
+                     'num_positive_cases_last_seven_days' => profile.num_positive_cases_last_seven_days,
+                     'num_people_population' => profile.num_people_population,
+                     'uncounted_cases_multiplier' => profile.uncounted_cases_multiplier,
+                     'mask_type' => profile.mask_type,
+                     'event_display_risk_time' => profile.event_display_risk_time,
+                     'first_name' => profile.first_name,  # This will be decrypted
+                     'last_name' => profile.last_name,    # This will be decrypted
+                     'height_meters' => profile.height_meters,
+                     'stride_length_meters' => profile.stride_length_meters,
+                     'socials' => profile.socials,
+                     'external_api_token' => profile.external_api_token,
+                     'can_post_via_external_api' => profile.can_post_via_external_api,
+                     'demographics' => profile.demographics,
+                     'race_ethnicity' => profile.race_ethnicity,
+                     'gender_and_sex' => profile.gender_and_sex,
+                     'other_gender' => profile.other_gender,
+                     'year_of_birth' => profile.year_of_birth,
+                     'study_start_datetime' => profile.study_start_datetime,
+                     'study_goal_end_datetime' => profile.study_goal_end_datetime,
+                     'profile_id' => profile.id
+                   })
+      else
+        # Set default values when profile doesn't exist
+        row.merge!({
+                     'user_id' => mu.managed_id,
+                     'measurement_system' => nil,
+                     'num_positive_cases_last_seven_days' => nil,
+                     'num_people_population' => nil,
+                     'uncounted_cases_multiplier' => nil,
+                     'mask_type' => nil,
+                     'event_display_risk_time' => nil,
+                     'first_name' => nil,
+                     'last_name' => nil,
+                     'height_meters' => nil,
+                     'stride_length_meters' => nil,
+                     'socials' => nil,
+                     'external_api_token' => nil,
+                     'can_post_via_external_api' => nil,
+                     'demographics' => nil,
+                     'race_ethnicity' => nil,
+                     'gender_and_sex' => nil,
+                     'other_gender' => nil,
+                     'year_of_birth' => nil,
+                     'study_start_datetime' => nil,
+                     'study_goal_end_datetime' => nil,
+                     'profile_id' => nil
+                   })
+      end
 
       # Add facial measurement data if available
       if latest_facial_measurement
@@ -100,32 +131,63 @@ class ManagedUser < ApplicationRecord
       'manager_id' => managed_user.manager_id,
       'managed_id' => managed_user.managed_id,
       'created_at' => managed_user.created_at,
-      'updated_at' => managed_user.updated_at,
-
-      # Profile attributes (these will be automatically decrypted)
-      'user_id' => profile.user_id,
-      'measurement_system' => profile.measurement_system,
-      'num_positive_cases_last_seven_days' => profile.num_positive_cases_last_seven_days,
-      'num_people_population' => profile.num_people_population,
-      'uncounted_cases_multiplier' => profile.uncounted_cases_multiplier,
-      'mask_type' => profile.mask_type,
-      'event_display_risk_time' => profile.event_display_risk_time,
-      'first_name' => profile.first_name,  # This will be decrypted
-      'last_name' => profile.last_name,    # This will be decrypted
-      'height_meters' => profile.height_meters,
-      'stride_length_meters' => profile.stride_length_meters,
-      'socials' => profile.socials,
-      'external_api_token' => profile.external_api_token,
-      'can_post_via_external_api' => profile.can_post_via_external_api,
-      'demographics' => profile.demographics,
-      'race_ethnicity' => profile.race_ethnicity,
-      'gender_and_sex' => profile.gender_and_sex,
-      'other_gender' => profile.other_gender,
-      'year_of_birth' => profile.year_of_birth,
-      'study_start_datetime' => profile.study_start_datetime,
-      'study_goal_end_datetime' => profile.study_goal_end_datetime,
-      'profile_id' => profile.id
+      'updated_at' => managed_user.updated_at
     }
+
+    # Profile attributes (these will be automatically decrypted)
+    # Handle case where profile might not exist
+    if profile
+      row.merge!({
+                   'user_id' => profile.user_id,
+                   'measurement_system' => profile.measurement_system,
+                   'num_positive_cases_last_seven_days' => profile.num_positive_cases_last_seven_days,
+                   'num_people_population' => profile.num_people_population,
+                   'uncounted_cases_multiplier' => profile.uncounted_cases_multiplier,
+                   'mask_type' => profile.mask_type,
+                   'event_display_risk_time' => profile.event_display_risk_time,
+                   'first_name' => profile.first_name,  # This will be decrypted
+                   'last_name' => profile.last_name,    # This will be decrypted
+                   'height_meters' => profile.height_meters,
+                   'stride_length_meters' => profile.stride_length_meters,
+                   'socials' => profile.socials,
+                   'external_api_token' => profile.external_api_token,
+                   'can_post_via_external_api' => profile.can_post_via_external_api,
+                   'demographics' => profile.demographics,
+                   'race_ethnicity' => profile.race_ethnicity,
+                   'gender_and_sex' => profile.gender_and_sex,
+                   'other_gender' => profile.other_gender,
+                   'year_of_birth' => profile.year_of_birth,
+                   'study_start_datetime' => profile.study_start_datetime,
+                   'study_goal_end_datetime' => profile.study_goal_end_datetime,
+                   'profile_id' => profile.id
+                 })
+    else
+      # Set default values when profile doesn't exist
+      row.merge!({
+                   'user_id' => managed_user.managed_id,
+                   'measurement_system' => nil,
+                   'num_positive_cases_last_seven_days' => nil,
+                   'num_people_population' => nil,
+                   'uncounted_cases_multiplier' => nil,
+                   'mask_type' => nil,
+                   'event_display_risk_time' => nil,
+                   'first_name' => nil,
+                   'last_name' => nil,
+                   'height_meters' => nil,
+                   'stride_length_meters' => nil,
+                   'socials' => nil,
+                   'external_api_token' => nil,
+                   'can_post_via_external_api' => nil,
+                   'demographics' => nil,
+                   'race_ethnicity' => nil,
+                   'gender_and_sex' => nil,
+                   'other_gender' => nil,
+                   'year_of_birth' => nil,
+                   'study_start_datetime' => nil,
+                   'study_goal_end_datetime' => nil,
+                   'profile_id' => nil
+                 })
+    end
 
     # Add facial measurement data if available
     if latest_facial_measurement

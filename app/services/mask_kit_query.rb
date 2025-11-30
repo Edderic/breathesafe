@@ -84,7 +84,9 @@ class MaskKitQuery
 
     # Update results using preloaded profiles
     results.each do |result|
-      next unless result['managed_id'] && result['first_name'].is_a?(String) && result['first_name'].start_with?('{"p":')
+      unless result['managed_id'] && result['first_name'].is_a?(String) && result['first_name'].start_with?('{"p":')
+        next
+      end
 
       begin
         profile = profiles_by_user_id[result['managed_id']]
