@@ -72,6 +72,14 @@ export default {
       type: Object,
       default: null
     },
+    qlftValuesMatching: {
+      type: Object,
+      default: null
+    },
+    qlftValuesMatchingNotApplicable: {
+      type: Boolean,
+      default: false
+    },
     fitTestDataMatching: {
       type: Object,
       default: null
@@ -99,6 +107,7 @@ export default {
         { key: 'Mask Matching', name: 'Mask Matching' },
         { key: 'User Seal Check Matching', name: 'User Seal Check Matching' },
         { key: 'Testing Mode Values Matching', name: 'Testing Mode Values Matching' },
+        { key: 'QLFT Values Matching', name: 'QLFT Values Matching' },
         { key: 'Fit Test Data Matching', name: 'Fit Test Data Matching' },
       ]
     }
@@ -144,6 +153,11 @@ export default {
         completed.push('Testing Mode Values Matching')
       }
 
+      // QLFT Values Matching step is completed if qlftValuesMatching exists and is complete, or if not applicable
+      if (this.qlftValuesMatchingNotApplicable || (this.qlftValuesMatching && this.isQlftValuesMatchingComplete())) {
+        completed.push('QLFT Values Matching')
+      }
+
       // Fit Test Data Matching step is completed if fitTestDataMatching exists and is complete
       if (this.fitTestDataMatching && this.isFitTestDataMatchingComplete()) {
         completed.push('Fit Test Data Matching')
@@ -169,6 +183,9 @@ export default {
     isStepSkipped(stepKey) {
       if (stepKey === 'User Seal Check Matching') {
         return this.userSealCheckMatchingSkipped
+      }
+      if (stepKey === 'QLFT Values Matching') {
+        return this.qlftValuesMatchingNotApplicable
       }
       return false
     },
@@ -212,6 +229,14 @@ export default {
             return 'Testing Modes Matched'
           }
           return 'Not Selected'
+        case 'QLFT Values Matching':
+          if (this.qlftValuesMatchingNotApplicable) {
+            return 'Not applicable'
+          }
+          if (this.qlftValuesMatching && this.isQlftValuesMatchingComplete()) {
+            return 'QLFT Values Matched'
+          }
+          return 'Not Selected'
         case 'Fit Test Data Matching':
           if (this.fitTestDataMatching && this.isFitTestDataMatchingComplete()) {
             return 'Fit Test Data Matched'
@@ -225,7 +250,7 @@ export default {
       const value = this.getStepValue(stepKey)
 
       // For all steps that show actual values, show actual values or "Not Selected"
-      const stepsWithValues = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching', 'Fit Test Data Matching']
+      const stepsWithValues = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching', 'QLFT Values Matching', 'Fit Test Data Matching']
 
       if (stepsWithValues.includes(stepKey)) {
         if (value === 'Not Selected' || !value) {
@@ -263,6 +288,10 @@ export default {
     isTestingModeMatchingComplete() {
       // Return true if testing mode matching is complete
       return this.testingModeMatching && Object.keys(this.testingModeMatching).length > 0
+    },
+    isQlftValuesMatchingComplete() {
+      // Return true if QLFT values matching is complete
+      return this.qlftValuesMatching && Object.keys(this.qlftValuesMatching).length > 0
     },
     isFitTestDataMatchingComplete() {
       // Placeholder: return true if fit test data matching is complete
@@ -393,7 +422,7 @@ export default {
 }
 
 .step-item.skipped .step-value {
-  color: #856404;
+  color: #28a745;
   font-weight: 500;
 }
 

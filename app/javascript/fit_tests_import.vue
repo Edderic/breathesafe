@@ -19,6 +19,8 @@
         :maskMatching="maskMatching"
         :userSealCheckMatching="userSealCheckMatching"
         :testingModeMatching="testingModeMatching"
+        :qlftValuesMatching="qlftValuesMatching"
+        :qlftValuesMatchingNotApplicable="qlftValuesMatchingNotApplicable"
         :fitTestDataMatching="fitTestDataMatching"
         :completedSteps="completedSteps"
         :currentStep="currentStep"
@@ -448,6 +450,82 @@
         <br>
       </div>
 
+      <!-- QLFT Values Matching Step -->
+      <div v-show='currentStep == "QLFT Values Matching"' class='right-pane narrow-width'>
+        <div class='display'>
+          <h2 class='text-align-center'>QLFT Values Matching</h2>
+          <h3 class='text-align-center'>Match file QLFT exercise values to Breathesafe QLFT values (Pass/Fail)</h3>
+
+          <div class='qlft-values-matching-header'>
+            <Button shadow='true' class='button match-button' text="Match" @click='attemptQlftValuesAutoMatch' :disabled='qlftValuesMatchingRows.length === 0'/>
+          </div>
+
+          <!-- Match Confirmation Popup for QLFT Values Matching -->
+          <Popup v-if="showQlftValuesMatchConfirmation" @onclose="cancelQlftValuesMatchConfirmation">
+            <div class='match-confirmation-content'>
+              <h3>Confirm QLFT Values Matching</h3>
+              <p>The following mappings will overwrite existing selections:</p>
+              <ul class='match-overwrites-list'>
+                <li v-for="(breathesafeValue, fileValue) in pendingQlftValuesMatchOverwrites" :key="fileValue">
+                  <strong>{{ fileValue }}</strong> → {{ breathesafeValue }}
+                </li>
+              </ul>
+              <p>Do you want to proceed?</p>
+              <div class='match-confirmation-buttons'>
+                <Button shadow='true' class='button' text="Cancel" @click='cancelQlftValuesMatchConfirmation'/>
+                <Button shadow='true' class='button' text="Confirm" @click='confirmQlftValuesMatchOverwrite'/>
+              </div>
+            </div>
+          </Popup>
+
+          <div v-if="qlftValuesMatchingRows.length > 0" class='qlft-values-matching-table'>
+            <table>
+              <thead>
+                <tr>
+                  <th>File QLFT values</th>
+                  <th>Breathesafe QLFT values</th>
+                  <th>Similarity Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, index) in qlftValuesMatchingRows" :key="index">
+                  <td>{{ row.fileValue }}</td>
+                  <td>
+                    <select
+                      v-model="row.selectedBreathesafeValue"
+                      @change="updateQlftValuesMatching"
+                      class="qlft-values-select"
+                      :disabled="isCompleted"
+                    >
+                      <option :value="null">-- Select --</option>
+                      <option value="Pass">Pass</option>
+                      <option value="Fail">Fail</option>
+                    </select>
+                  </td>
+                  <td class="similarity-score-cell">
+                    <span v-if="getQlftValuesSimilarityScore(row) !== null" class="similarity-score">
+                      {{ formatSimilarityScore(getQlftValuesSimilarityScore(row)) }}
+                    </span>
+                    <span v-else class="similarity-score-empty">--</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class='text-align-center'>
+            <p>No QLFT values found. This step is not applicable if there are no QLFT rows.</p>
+          </div>
+        </div>
+        <br>
+        <div class='row buttons'>
+          <Button shadow='true' class='button' text="Back" @click='goToPreviousStep'/>
+          <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
+          <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='isSaving'/>
+        </div>
+        <br>
+        <br>
+      </div>
+
       <!-- Match Confirmation Popup -->
       <Popup v-if="showMatchConfirmation" @onclose="cancelMatchConfirmation">
         <div class='match-confirmation-content'>
@@ -471,6 +549,11 @@
         <div>
           <h2 class='text-align-center'>Fit Test Data Matching</h2>
           <h3 class='text-align-center'>Review and confirm fit test data</h3>
+
+          <!-- Warning about unmapped QLFT values -->
+          <div v-if="unmappedQlftValuesCount > 0" class='qlft-unmapped-warning'>
+            <p><strong>Warning:</strong> {{ unmappedQlftValuesCount }} QLFT row(s) contain unmapped QLFT values. These rows will not be imported. Unmapped values are highlighted in red.</p>
+          </div>
 
           <div v-if="fitTestDataRows.length > 0" class='fit-test-data-table'>
             <table>
@@ -521,15 +604,15 @@
                     <span v-else class="similarity-score-empty">--</span>
                   </td>
                   <td>{{ row.testingMode || '--' }}</td>
-                  <td>{{ row.exercises.bendingOver !== null && row.exercises.bendingOver !== undefined ? row.exercises.bendingOver : '--' }}</td>
-                  <td>{{ row.exercises.talking !== null && row.exercises.talking !== undefined ? row.exercises.talking : '--' }}</td>
-                  <td>{{ row.exercises.turningHeadSideToSide !== null && row.exercises.turningHeadSideToSide !== undefined ? row.exercises.turningHeadSideToSide : '--' }}</td>
-                  <td>{{ row.exercises.movingHeadUpAndDown !== null && row.exercises.movingHeadUpAndDown !== undefined ? row.exercises.movingHeadUpAndDown : '--' }}</td>
-                  <td>{{ row.exercises.normalBreathing1 !== null && row.exercises.normalBreathing1 !== undefined ? row.exercises.normalBreathing1 : '--' }}</td>
-                  <td>{{ row.exercises.normalBreathing2 !== null && row.exercises.normalBreathing2 !== undefined ? row.exercises.normalBreathing2 : '--' }}</td>
-                  <td>{{ row.exercises.grimace !== null && row.exercises.grimace !== undefined ? row.exercises.grimace : '--' }}</td>
-                  <td>{{ row.exercises.deepBreathing !== null && row.exercises.deepBreathing !== undefined ? row.exercises.deepBreathing : '--' }}</td>
-                  <td>{{ row.exercises.normalBreathingSealed !== null && row.exercises.normalBreathingSealed !== undefined ? row.exercises.normalBreathingSealed : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.bendingOver }">{{ row.exercises.bendingOver !== null && row.exercises.bendingOver !== undefined ? row.exercises.bendingOver : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.talking }">{{ row.exercises.talking !== null && row.exercises.talking !== undefined ? row.exercises.talking : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.turningHeadSideToSide }">{{ row.exercises.turningHeadSideToSide !== null && row.exercises.turningHeadSideToSide !== undefined ? row.exercises.turningHeadSideToSide : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.movingHeadUpAndDown }">{{ row.exercises.movingHeadUpAndDown !== null && row.exercises.movingHeadUpAndDown !== undefined ? row.exercises.movingHeadUpAndDown : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.normalBreathing1 }">{{ row.exercises.normalBreathing1 !== null && row.exercises.normalBreathing1 !== undefined ? row.exercises.normalBreathing1 : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.normalBreathing2 }">{{ row.exercises.normalBreathing2 !== null && row.exercises.normalBreathing2 !== undefined ? row.exercises.normalBreathing2 : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.grimace }">{{ row.exercises.grimace !== null && row.exercises.grimace !== undefined ? row.exercises.grimace : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.deepBreathing }">{{ row.exercises.deepBreathing !== null && row.exercises.deepBreathing !== undefined ? row.exercises.deepBreathing : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.normalBreathingSealed }">{{ row.exercises.normalBreathingSealed !== null && row.exercises.normalBreathingSealed !== undefined ? row.exercises.normalBreathingSealed : '--' }}</td>
                 </tr>
               </tbody>
             </table>
@@ -693,6 +776,18 @@ export default {
         row => !row.selectedBreathesafeValue || row.selectedBreathesafeValue === ''
       )
     },
+    unmappedQlftValuesCount() {
+      if (!this.fitTestDataRows || this.fitTestDataRows.length === 0) {
+        return 0
+      }
+      return this.fitTestDataRows.filter(row => {
+        if (row.testingMode !== 'QLFT') {
+          return false
+        }
+        // Check if any exercise has unmapped QLFT value
+        return row.exerciseHasUnmappedQlftValue && Object.values(row.exerciseHasUnmappedQlftValue).some(hasUnmapped => hasUnmapped === true)
+      }).length
+    },
     deduplicatedMasks() {
       // Filter masks where duplicate_of is null and sort alphabetically by unique_internal_model_code
       return this.allMasks
@@ -735,6 +830,8 @@ export default {
       maskMatching: null,
       userSealCheckMatching: null,
       testingModeMatching: null,
+      qlftValuesMatching: null,
+      qlftValuesMatchingNotApplicable: false,
       fitTestDataMatching: null,
       completedSteps: [],
       bulkFitTestsImportId: null,
@@ -762,6 +859,10 @@ export default {
       showTestingModeMatchConfirmation: false,
       pendingTestingModeMatchOverwrites: {},
       pendingTestingModeMatches: {},
+      qlftValuesMatchingRows: [],
+      showQlftValuesMatchConfirmation: false,
+      pendingQlftValuesMatchOverwrites: {},
+      pendingQlftValuesMatches: {},
       fitTestDataRows: [],
       bulkImportStatus: null
     }
@@ -1362,6 +1463,11 @@ export default {
         await this.initializeTestingModeMatching()
       }
 
+      // If navigating to QLFT Values Matching, initialize QLFT values matching
+      if (stepKey === 'QLFT Values Matching' && this.bulkFitTestsImportId) {
+        await this.initializeQlftValuesMatching()
+      }
+
       // If navigating to Fit Test Data Matching, initialize fit test data matching
       if (stepKey === 'Fit Test Data Matching' && this.bulkFitTestsImportId) {
         await this.initializeFitTestDataMatching()
@@ -1486,6 +1592,12 @@ export default {
         return // Navigation will happen in saveTestingModeMatching if successful
       }
 
+      // If we're on the "QLFT Values Matching" step, save QLFT values matching data
+      if (this.currentStep === 'QLFT Values Matching') {
+        await this.saveQlftValuesMatching()
+        return // Navigation will happen in saveQlftValuesMatching if successful
+      }
+
       const steps = [
         'Import File',
         'Column Matching',
@@ -1493,6 +1605,7 @@ export default {
         'Mask Matching',
         'User Seal Check Matching',
         'Testing Mode Values Matching',
+        'QLFT Values Matching',
         'Fit Test Data Matching'
       ]
       const currentIndex = steps.indexOf(this.currentStep)
@@ -1513,6 +1626,11 @@ export default {
         // Initialize testing mode matching when navigating to Testing Mode Values Matching step
         if (nextStep === 'Testing Mode Values Matching') {
           await this.initializeTestingModeMatching()
+        }
+
+        // Initialize QLFT values matching when navigating to QLFT Values Matching step
+        if (nextStep === 'QLFT Values Matching') {
+          await this.initializeQlftValuesMatching()
         }
 
         // Initialize fit test data matching when navigating to Fit Test Data Matching step
@@ -2468,9 +2586,16 @@ export default {
           if (!this.completedSteps.includes('Testing Mode Values Matching')) {
             this.completedSteps.push('Testing Mode Values Matching')
           }
-          // Move to next step
-          this.currentStep = 'Fit Test Data Matching'
-          await this.initializeFitTestDataMatching()
+          // Move to next step - check if QLFT Values Matching is needed
+          if (this.qlftValuesMatchingNotApplicable) {
+            // Skip QLFT Values Matching, go directly to Fit Test Data Matching
+            this.currentStep = 'Fit Test Data Matching'
+            await this.initializeFitTestDataMatching()
+          } else {
+            // Go to QLFT Values Matching
+            this.currentStep = 'QLFT Values Matching'
+            await this.initializeQlftValuesMatching()
+          }
         }
       } catch (error) {
         console.error('Error saving testing mode matching:', error)
@@ -2484,11 +2609,318 @@ export default {
         this.isSaving = false
       }
     },
+    async initializeQlftValuesMatching() {
+      // Check if there are any QLFT rows based on testing_mode_matching
+      if (!this.csvFullContent || !this.columnMatching || !this.testingModeMatching) {
+        this.qlftValuesMatchingRows = []
+        this.qlftValuesMatchingNotApplicable = true
+        return
+      }
+
+      // Check if any testing mode maps to "QLFT"
+      const hasQlftRows = Object.values(this.testingModeMatching).some(value => value === 'QLFT')
+
+      if (!hasQlftRows) {
+        this.qlftValuesMatchingRows = []
+        this.qlftValuesMatchingNotApplicable = true
+        // Mark as completed (not applicable)
+        if (!this.completedSteps.includes('QLFT Values Matching')) {
+          this.completedSteps.push('QLFT Values Matching')
+        }
+        return
+      }
+
+      // Find all QLFT exercise columns
+      const qlftExerciseNames = [
+        'Bending over',
+        'Talking',
+        'Turning head side to side',
+        'Moving head up and down',
+        'Normal breathing 1',
+        'Normal breathing 2',
+        'Grimace',
+        'Deep breathing',
+        'Normal breathing (SEALED)'
+      ]
+
+      // Find columns mapped to QLFT exercises
+      const qlftExerciseColumns = []
+      qlftExerciseNames.forEach(exerciseName => {
+        const column = Object.keys(this.columnMatching).find(
+          col => {
+            const mappedValue = this.columnMatching[col]
+            // Check for QLFT -> prefix or direct match
+            return mappedValue === `QLFT -> ${exerciseName}` || mappedValue === exerciseName
+          }
+        )
+        if (column) {
+          qlftExerciseColumns.push({ column, exerciseName })
+        }
+      })
+
+      if (qlftExerciseColumns.length === 0) {
+        this.qlftValuesMatchingRows = []
+        this.qlftValuesMatchingNotApplicable = true
+        return
+      }
+
+      // Parse CSV lines
+      const csvLines = this.csvFullContent.split('\n').filter(line => line.trim() !== '')
+      if (csvLines.length <= this.headerRowIndex) {
+        this.qlftValuesMatchingRows = []
+        this.qlftValuesMatchingNotApplicable = true
+        return
+      }
+
+      // Get header row
+      const headerRow = this.parseCSVLine(csvLines[this.headerRowIndex])
+
+      // Find column indices for QLFT exercises
+      const qlftExerciseColumnIndices = qlftExerciseColumns.map(({ column }) => {
+        const index = headerRow.findIndex(col =>
+          col && col.trim().toLowerCase() === column.trim().toLowerCase()
+        )
+        return { column, index }
+      }).filter(({ index }) => index >= 0)
+
+      if (qlftExerciseColumnIndices.length === 0) {
+        this.qlftValuesMatchingRows = []
+        this.qlftValuesMatchingNotApplicable = true
+        return
+      }
+
+      // Extract unique QLFT values from all QLFT exercise columns
+      const uniqueQlftValues = new Set()
+
+      // Only process rows where testing mode is QLFT
+      for (let i = this.headerRowIndex + 1; i < csvLines.length; i++) {
+        const csvRow = this.parseCSVLine(csvLines[i])
+
+        // Check if this row has QLFT testing mode
+        const testingModeColumn = Object.keys(this.columnMatching).find(
+          col => {
+            const mappedValue = this.columnMatching[col]
+            return mappedValue === 'Testing mode' || mappedValue === 'Testing mode (QLFT / N99 / N95)'
+          }
+        )
+
+        if (testingModeColumn) {
+          const testingModeColumnIndex = headerRow.findIndex(col =>
+            col && col.trim().toLowerCase() === testingModeColumn.trim().toLowerCase()
+          )
+
+          if (testingModeColumnIndex >= 0) {
+            const fileTestingMode = csvRow[testingModeColumnIndex] ? csvRow[testingModeColumnIndex].trim() : null
+            const mappedTestingMode = fileTestingMode && this.testingModeMatching[fileTestingMode]
+
+            // Only process if this row maps to QLFT
+            if (mappedTestingMode !== 'QLFT') {
+              continue
+            }
+          }
+        }
+
+        // Extract values from all QLFT exercise columns
+        qlftExerciseColumnIndices.forEach(({ index }) => {
+          if (csvRow[index]) {
+            const value = csvRow[index].trim()
+            if (value) {
+              uniqueQlftValues.add(value)
+            }
+          }
+        })
+      }
+
+      // Create rows for each unique QLFT value
+      const rows = Array.from(uniqueQlftValues).map(fileValue => ({
+        fileValue: fileValue,
+        selectedBreathesafeValue: null
+      }))
+
+      // Load saved matching if available
+      if (this.qlftValuesMatching && Object.keys(this.qlftValuesMatching).length > 0) {
+        rows.forEach(row => {
+          if (this.qlftValuesMatching[row.fileValue]) {
+            row.selectedBreathesafeValue = this.qlftValuesMatching[row.fileValue]
+          }
+        })
+      }
+
+      this.qlftValuesMatchingRows = rows
+      this.qlftValuesMatchingNotApplicable = false
+    },
+    updateQlftValuesMatching() {
+      // Update qlftValuesMatching object when selections change
+      // This will be saved when user clicks Next
+    },
+    getQlftValuesSimilarityScore(row) {
+      // Get similarity score between File QLFT value and selected Breathesafe QLFT value
+      if (!row.selectedBreathesafeValue || row.selectedBreathesafeValue === '') {
+        return null
+      }
+
+      return this.calculateSimilarity(row.fileValue, row.selectedBreathesafeValue)
+    },
+    attemptQlftValuesAutoMatch() {
+      if (!this.qlftValuesMatchingRows || this.qlftValuesMatchingRows.length === 0) {
+        return
+      }
+
+      const matches = {}
+      const overwrites = {}
+
+      // Breathesafe QLFT value options
+      const breathesafeOptions = ['Pass', 'Fail']
+
+      // Track which breathesafe options have been matched
+      const usedBreathesafeOptions = new Set()
+
+      // Sort rows by file value for consistent processing
+      const sortedRows = [...this.qlftValuesMatchingRows].sort((a, b) => {
+        if (a.fileValue < b.fileValue) return -1
+        if (a.fileValue > b.fileValue) return 1
+        return 0
+      })
+
+      // For each row, find the best match from available breathesafe options
+      sortedRows.forEach(row => {
+        let bestBreathesafeValue = null
+        let bestSimilarity = 0
+
+        // Find best match from available breathesafe options
+        breathesafeOptions.forEach(breathesafeValue => {
+          if (usedBreathesafeOptions.has(breathesafeValue)) {
+            return // Skip already matched breathesafe options
+          }
+
+          const similarity = this.calculateSimilarity(row.fileValue, breathesafeValue)
+
+          if (similarity > bestSimilarity) {
+            bestSimilarity = similarity
+            bestBreathesafeValue = breathesafeValue
+          }
+        })
+
+        // If best similarity is >= 0.4, assign the match
+        if (bestSimilarity >= 0.4 && bestBreathesafeValue) {
+          // Check if row already has this breathesafe value selected
+          const alreadyHasBestMatch = row.selectedBreathesafeValue &&
+            row.selectedBreathesafeValue === bestBreathesafeValue
+
+          if (alreadyHasBestMatch) {
+            // Already has the best match, mark it as used and skip
+            usedBreathesafeOptions.add(bestBreathesafeValue)
+            return
+          }
+
+          // Check if row has a different selection that would be overwritten
+          if (row.selectedBreathesafeValue && row.selectedBreathesafeValue !== bestBreathesafeValue) {
+            overwrites[row.fileValue] = bestBreathesafeValue
+          }
+
+          matches[row.fileValue] = bestBreathesafeValue
+          usedBreathesafeOptions.add(bestBreathesafeValue)
+        }
+      })
+
+      // If there are overwrites, ask for confirmation
+      if (Object.keys(overwrites).length > 0) {
+        this.pendingQlftValuesMatchOverwrites = overwrites
+        this.pendingQlftValuesMatches = matches
+        this.showQlftValuesMatchConfirmation = true
+      } else {
+        // No overwrites, apply matches directly
+        this.applyQlftValuesMatches(matches)
+      }
+    },
+    applyQlftValuesMatches(matches) {
+      // Apply matches to rows
+      this.qlftValuesMatchingRows.forEach(row => {
+        if (matches[row.fileValue]) {
+          row.selectedBreathesafeValue = matches[row.fileValue]
+        }
+      })
+      this.updateQlftValuesMatching()
+    },
+    confirmQlftValuesMatchOverwrite() {
+      // Merge pending matches with overwrites
+      const allMatches = { ...this.pendingQlftValuesMatches, ...this.pendingQlftValuesMatchOverwrites }
+      this.applyQlftValuesMatches(allMatches)
+      this.cancelQlftValuesMatchConfirmation()
+    },
+    cancelQlftValuesMatchConfirmation() {
+      this.showQlftValuesMatchConfirmation = false
+      this.pendingQlftValuesMatchOverwrites = {}
+      this.pendingQlftValuesMatches = {}
+    },
+    async saveQlftValuesMatching() {
+      // Build QLFT values matching object: { "file_value": "breathesafe_value" }
+      const matching = {}
+      this.qlftValuesMatchingRows.forEach(row => {
+        if (row.selectedBreathesafeValue) {
+          matching[row.fileValue] = row.selectedBreathesafeValue
+        }
+      })
+
+      // Check for unmapped values and show warning
+      const unmappedRows = this.qlftValuesMatchingRows.filter(
+        row => !row.selectedBreathesafeValue || row.selectedBreathesafeValue === ''
+      )
+
+      if (unmappedRows.length > 0) {
+        // Show warning but allow proceeding
+        this.messages = [{
+          str: `Warning: ${unmappedRows.length} QLFT value(s) are unmapped. Importing will not include rows with unmapped QLFT values: ${unmappedRows.map(r => r.fileValue).join(', ')}`
+        }]
+      }
+
+      // Check authentication before saving
+      const isAuthenticated = await this.checkAuthentication()
+      if (!isAuthenticated) {
+        return
+      }
+
+      this.isSaving = true
+
+      try {
+        const response = await axios.put(`/bulk_fit_tests_imports/${this.bulkFitTestsImportId}.json`, {
+          bulk_fit_tests_import: {
+            qlft_values_matching: matching
+          }
+        })
+
+        if (response.status === 200) {
+          this.qlftValuesMatching = matching
+          // Mark step as completed
+          if (!this.completedSteps.includes('QLFT Values Matching')) {
+            this.completedSteps.push('QLFT Values Matching')
+          }
+          // Move to next step
+          this.currentStep = 'Fit Test Data Matching'
+          await this.initializeFitTestDataMatching()
+        }
+      } catch (error) {
+        console.error('Error saving QLFT values matching:', error)
+        if (error.response && error.response.status === 401) {
+          // User is not authenticated, redirect to sign in
+          await this.handleUnauthorized()
+        } else {
+          this.messages = [{ str: 'Error saving QLFT values matching. Please try again.' }]
+        }
+      } finally {
+        this.isSaving = false
+      }
+    },
     async initializeFitTestDataMatching() {
       // Parse CSV data and create rows for fit test data
       if (!this.csvFullContent || !this.columnMatching || !this.maskMatching) {
         this.fitTestDataRows = []
         return
+      }
+
+      // Ensure qlftValuesMatching is loaded if available
+      if (!this.qlftValuesMatching) {
+        this.qlftValuesMatching = {}
       }
 
       // Ensure masks are loaded first
@@ -2625,13 +3057,30 @@ export default {
 
         // Extract exercise values
         const exercises = {}
+        const exerciseHasUnmappedQlftValue = {}
         Object.keys(exerciseColumns).forEach(exerciseKey => {
           const columnInfo = exerciseColumns[exerciseKey]
           if (columnInfo && columnInfo.columnIndex >= 0) {
             const value = csvRow[columnInfo.columnIndex]
-            exercises[exerciseKey] = value ? value.trim() : null
+            const trimmedValue = value ? value.trim() : null
+
+            // If this is a QLFT row, check if the value is mapped
+            if (testingMode === 'QLFT' && trimmedValue && this.qlftValuesMatching) {
+              const mappedValue = this.qlftValuesMatching[trimmedValue]
+              if (mappedValue) {
+                exercises[exerciseKey] = mappedValue
+                exerciseHasUnmappedQlftValue[exerciseKey] = false
+              } else {
+                exercises[exerciseKey] = trimmedValue // Keep original value for display
+                exerciseHasUnmappedQlftValue[exerciseKey] = true
+              }
+            } else {
+              exercises[exerciseKey] = trimmedValue
+              exerciseHasUnmappedQlftValue[exerciseKey] = false
+            }
           } else {
             exercises[exerciseKey] = null
+            exerciseHasUnmappedQlftValue[exerciseKey] = false
           }
         })
 
@@ -2642,7 +3091,8 @@ export default {
           maskName,
           maskId,
           testingMode,
-          exercises
+          exercises,
+          exerciseHasUnmappedQlftValue
         })
       }
 
@@ -2941,6 +3391,7 @@ export default {
         'Mask Matching',
         'User Seal Check Matching',
         'Testing Mode Values Matching',
+        'QLFT Values Matching',
         'Fit Test Data Matching'
       ]
       const currentIndex = steps.indexOf(this.currentStep)
@@ -3048,11 +3499,33 @@ export default {
             this.testingModeMatching = {}
           }
 
+          // Load qlft_values_matching if available
+          if (bulkImport.qlft_values_matching) {
+            this.qlftValuesMatching = bulkImport.qlft_values_matching
+          } else {
+            this.qlftValuesMatching = {}
+          }
+
+          // Check if QLFT Values Matching is applicable
+          const hasQlftRows = Object.values(this.testingModeMatching).some(value => value === 'QLFT')
+          this.qlftValuesMatchingNotApplicable = !hasQlftRows
+
           // Set current step and completed steps
-          if (bulkImport.testing_mode_matching && Object.keys(this.testingModeMatching).length > 0) {
-            // If testing mode matching exists, we're past Testing Mode Values Matching step
+          if (bulkImport.qlft_values_matching && Object.keys(this.qlftValuesMatching).length > 0) {
+            // If QLFT values matching exists, we're past QLFT Values Matching step
             this.currentStep = 'Fit Test Data Matching'
-            this.completedSteps = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching']
+            this.completedSteps = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching', 'QLFT Values Matching']
+          } else if (bulkImport.testing_mode_matching && Object.keys(this.testingModeMatching).length > 0) {
+            // If testing mode matching exists, check if QLFT Values Matching is needed
+            if (this.qlftValuesMatchingNotApplicable) {
+              // Skip QLFT Values Matching, go to Fit Test Data Matching
+              this.currentStep = 'Fit Test Data Matching'
+              this.completedSteps = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching', 'QLFT Values Matching']
+            } else {
+              // Go to QLFT Values Matching
+              this.currentStep = 'QLFT Values Matching'
+              this.completedSteps = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching']
+            }
           } else if (bulkImport.mask_matching && Object.keys(this.maskMatching).length > 0) {
             // If mask matching exists, we're past Mask Matching step
             this.currentStep = 'User Seal Check Matching'
@@ -3127,8 +3600,24 @@ export default {
       this.messages = []
 
       try {
+        // Filter out rows with unmapped QLFT values
+        const validFitTestRows = this.fitTestDataRows.filter(row => {
+          // If this is a QLFT row, check if any exercise has unmapped QLFT value
+          if (row.testingMode === 'QLFT' && row.exerciseHasUnmappedQlftValue) {
+            const hasUnmapped = Object.values(row.exerciseHasUnmappedQlftValue).some(hasUnmapped => hasUnmapped === true)
+            return !hasUnmapped // Exclude rows with unmapped values
+          }
+          return true // Include all non-QLFT rows and QLFT rows without unmapped values
+        })
+
+        if (validFitTestRows.length === 0) {
+          this.messages = [{ str: 'No valid fit test data to import. All rows have unmapped QLFT values or other issues.' }]
+          this.isSaving = false
+          return
+        }
+
         // Prepare fit tests data for backend
-        const fitTestsData = this.fitTestDataRows.map(row => {
+        const fitTestsData = validFitTestRows.map(row => {
           // Map exercise keys to proper exercise names
           const exercises = {}
           if (row.exercises.bendingOver) exercises['Bending over'] = row.exercises.bendingOver
@@ -3577,6 +4066,67 @@ input[type="file"] {
 
 .testing-mode-matching-table tbody tr:hover {
   background-color: #f8f9fa;
+}
+
+.qlft-values-matching-header {
+  margin-bottom: 1em;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.qlft-values-matching-table {
+  margin-top: 2em;
+  overflow-y: scroll;
+  height: 40vh;
+}
+
+.qlft-values-matching-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+}
+
+.qlft-values-matching-table th {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 0.75em;
+  text-align: left;
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.qlft-values-matching-table td {
+  border: 1px solid #dee2e6;
+  padding: 0.75em;
+}
+
+.qlft-values-select {
+  width: 100%;
+  padding: 0.5em;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.qlft-values-matching-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.qlft-unmapped-warning {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  padding: 1em;
+  margin: 1em 0;
+  color: #856404;
+}
+
+.qlft-unmapped-value {
+  background-color: #f8d7da;
+  color: #721c24;
+  font-weight: bold;
 }
 
 .fit-test-data-table {

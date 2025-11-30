@@ -352,6 +352,7 @@ class BulkFitTestsImportsController < ApplicationController
       mask_matching: {},
       user_seal_check_matching: {},
       testing_mode_matching: {},
+      qlft_values_matching: {},
       fit_testing_matching: {}
     )
   end
