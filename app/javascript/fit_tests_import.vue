@@ -3216,7 +3216,12 @@ export default {
           ]
           const currentIndex = steps.indexOf(this.currentStep)
           if (currentIndex < steps.length - 1) {
-            this.currentStep = steps[currentIndex + 1]
+            const nextStep = steps[currentIndex + 1]
+            this.currentStep = nextStep
+            // Initialize Mask Matching immediately to avoid empty view until refresh
+            if (nextStep === 'Mask Matching') {
+              await this.initializeMaskMatching()
+            }
           }
 
           // Mark User Matching as completed
