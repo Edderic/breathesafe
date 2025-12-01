@@ -4,8 +4,8 @@ require 'csv'
 
 class BulkFitTestsImport < ApplicationRecord
   belongs_to :user
-  has_many :masks, dependent: :destroy
   has_many :fit_tests, dependent: :destroy
+  has_many :masks, dependent: :destroy
 
   validates :source_name, presence: true
   validates :source_type, presence: true
