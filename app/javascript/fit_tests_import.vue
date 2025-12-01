@@ -404,7 +404,7 @@
           </div>
 
           <div v-else>
-            <div class='user-seal-check-matching-header'>
+            <div class='user-seal-check-matching-header justify-content-center'>
               <Button shadow='true' class='button match-button' text="Match" @click='attemptUSCAutoMatch' :disabled='userSealCheckMatchingRows.length === 0'/>
             </div>
             <div v-if="userSealCheckMatchingRows.length > 0" class='user-seal-check-matching-table'>
@@ -417,7 +417,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(row, index) in userSealCheckMatchingRows" :key="index">
+                  <tr v-for="(row, index) in sortedUserSealCheckMatchingRows" :key="index">
                     <td>{{ row.question }}</td>
                     <td>{{ row.fileValue }}</td>
                     <td>
@@ -748,6 +748,20 @@ export default {
   },
   computed: {
     ...mapState(useMainStore, ['currentUser']),
+    sortedUserSealCheckMatchingRows() {
+      const rows = this.userSealCheckMatchingRows || []
+      return [...rows].sort((a, b) => {
+        const aq = (a.question || '').toLowerCase()
+        const bq = (b.question || '').toLowerCase()
+        if (aq < bq) return -1
+        if (aq > bq) return 1
+        const av = (a.fileValue || '').toLowerCase()
+        const bv = (b.fileValue || '').toLowerCase()
+        if (av < bv) return -1
+        if (av > bv) return 1
+        return 0
+      })
+    },
     columnMatchingValidationErrors() {
       // Check for duplicate Breathesafe matching values
       const errors = []
