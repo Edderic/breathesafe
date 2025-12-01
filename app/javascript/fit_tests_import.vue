@@ -3734,6 +3734,10 @@ export default {
             // If mask matching exists, we're past Mask Matching step
             this.currentStep = 'User Seal Check Matching'
             this.completedSteps = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching']
+            // Initialize USC matching after a short delay to ensure data is loaded
+            this.$nextTick(() => {
+              this.initializeUserSealCheckMatching()
+            })
           } else if (bulkImport.user_matching && Object.keys(this.userMatching).length > 0) {
             // If user matching exists, we're past User Matching step
             this.currentStep = 'Mask Matching'
