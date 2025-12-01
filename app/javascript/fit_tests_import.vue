@@ -3750,6 +3750,13 @@ export default {
             this.maskMatching = {}
           }
 
+          // Load user_seal_check_matching if available
+          if (bulkImport.user_seal_check_matching) {
+            this.userSealCheckMatching = bulkImport.user_seal_check_matching
+          } else {
+            this.userSealCheckMatching = {}
+          }
+
           // Load testing_mode_matching if available
           if (bulkImport.testing_mode_matching) {
             this.testingModeMatching = bulkImport.testing_mode_matching
