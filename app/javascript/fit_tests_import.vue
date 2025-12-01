@@ -623,7 +623,7 @@
       <!-- Fit Test Data Matching Step -->
       <div v-show='currentStep == "Fit Test Data Matching"' class='right-pane narrow-width'>
         <div>
-          <h2 class='text-align-center'>Fit Test Data Matching</h2>
+          <h2 class='text-align-center'>Review</h2>
           <h3 class='text-align-center'>Review and confirm fit test data</h3>
 
           <!-- Warning about unmapped QLFT values -->
@@ -646,6 +646,9 @@
                   <th>Breathesafe mask name</th>
                   <th>Breathesafe mask id</th>
                   <th>Testing mode</th>
+                  <th>Beard length (mm)</th>
+                  <th>USC sizing</th>
+                  <th>USC air movement</th>
                   <th>Bending over</th>
                   <th>Talking</th>
                   <th>Turning head side to side</th>
@@ -685,6 +688,17 @@
                     <span v-else class="similarity-score-empty">--</span>
                   </td>
                   <td>{{ row.testingMode || '--' }}</td>
+                  <td>
+                    <span :class="{ 'qlft-unmapped-value': row.beardLengthInvalid }">
+                      {{ row.beardLengthMm ? row.beardLengthMm : '--' }}
+                    </span>
+                  </td>
+                  <td>
+                    {{ row.uscSizing || '--' }}
+                  </td>
+                  <td>
+                    {{ row.uscAirMovement || '--' }}
+                  </td>
                   <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.bendingOver) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.bendingOver) }">{{ row.exercises.bendingOver !== null && row.exercises.bendingOver !== undefined ? row.exercises.bendingOver : '--' }}</td>
                   <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.talking) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.talking) }">{{ row.exercises.talking !== null && row.exercises.talking !== undefined ? row.exercises.talking : '--' }}</td>
                   <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.turningHeadSideToSide) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.turningHeadSideToSide) }">{{ row.exercises.turningHeadSideToSide !== null && row.exercises.turningHeadSideToSide !== undefined ? row.exercises.turningHeadSideToSide : '--' }}</td>
@@ -3190,6 +3204,39 @@ export default {
             }
           }
         }
+        // USC columns (if mapped)
+        const sizingQ = 'USC -> What do you think about the sizing of this mask relative to your face?'
+        const airQ = 'USC -> How much air movement on your face along the seal of the mask did you feel?'
+        const sizingCsvColumn = Object.keys(this.columnMatching).find(col => this.columnMatching[col] === sizingQ)
+        const airCsvColumn = Object.keys(this.columnMatching).find(col => this.columnMatching[col] === airQ)
+        let uscSizing = null
+        let uscAirMovement = null
+        let uscSizingFile = null
+        let uscAirMovementFile = null
+        if (sizingCsvColumn) {
+          const sizingIdx = headerRow.findIndex(col => col && col.trim().toLowerCase() === sizingCsvColumn.trim().toLowerCase())
+          if (sizingIdx >= 0) {
+            const raw = csvRow[sizingIdx]
+            const fileVal = raw && raw.trim() !== '' ? raw.trim() : null
+            if (fileVal) {
+              uscSizingFile = fileVal
+              const mapped = this.userSealCheckMatching && this.userSealCheckMatching[sizingQ] ? this.userSealCheckMatching[sizingQ][fileVal] : null
+              uscSizing = mapped || fileVal
+            }
+          }
+        }
+        if (airCsvColumn) {
+          const airIdx = headerRow.findIndex(col => col && col.trim().toLowerCase() === airCsvColumn.trim().toLowerCase())
+          if (airIdx >= 0) {
+            const raw = csvRow[airIdx]
+            const fileVal = raw && raw.trim() !== '' ? raw.trim() : null
+            if (fileVal) {
+              uscAirMovementFile = fileVal
+              const mapped = this.userSealCheckMatching && this.userSealCheckMatching[airQ] ? this.userSealCheckMatching[airQ][fileVal] : null
+              uscAirMovement = mapped || fileVal
+            }
+          }
+        }
 
         // Map file testing mode value to Breathesafe testing mode value using testing_mode_matching
         let testingMode = null
@@ -3287,7 +3334,11 @@ export default {
           exerciseHasUnmappedQlftValue,
           exerciseHasInvalidN95N99Value,
           beardLengthMm,
-          beardLengthInvalid
+          beardLengthInvalid,
+          uscSizing,
+          uscAirMovement,
+          uscSizingFile,
+          uscAirMovementFile
         })
       }
 
@@ -3855,6 +3906,29 @@ export default {
           }
           if (row.beardLengthMm && !row.beardLengthInvalid) {
             payload.facial_hair = { beard_length_mm: `${row.beardLengthMm}mm` }
+          }
+          // Build user_seal_check payload from row USC mapping
+          const sizingQ = 'USC -> What do you think about the sizing of this mask relative to your face?'
+          const sizingKey = 'What do you think about the sizing of this mask relative to your face?'
+          const airQ = 'USC -> How much air movement on your face along the seal of the mask did you feel?'
+          const airKey = '...how much air movement on your face along the seal of the mask did you feel?'
+          const fogKey = '...how much did your glasses fog up?'
+          const pressureKey = '...how much pressure build up was there?'
+          const passedAirKey = '...how much air passed between your face and the mask?'
+          const mappedSizing = row.uscSizingFile && this.userSealCheckMatching && this.userSealCheckMatching[sizingQ]
+            ? this.userSealCheckMatching[sizingQ][row.uscSizingFile] || null
+            : null
+          const mappedAir = row.uscAirMovementFile && this.userSealCheckMatching && this.userSealCheckMatching[airQ]
+            ? this.userSealCheckMatching[airQ][row.uscAirMovementFile] || null
+            : null
+          payload.user_seal_check = {
+            sizing: { [sizingKey]: mappedSizing },
+            negative: { [passedAirKey]: null },
+            positive: {
+              [fogKey]: null,
+              [pressureKey]: null,
+              [airKey]: mappedAir
+            }
           }
           return payload
         })
