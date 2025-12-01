@@ -2936,9 +2936,6 @@ export default {
       // Breathesafe QLFT value options
       const breathesafeOptions = ['Pass', 'Fail']
 
-      // Track which breathesafe options have been matched
-      const usedBreathesafeOptions = new Set()
-
       // Sort rows by file value for consistent processing
       const sortedRows = [...this.qlftValuesMatchingRows].sort((a, b) => {
         if (a.fileValue < b.fileValue) return -1
@@ -2951,12 +2948,8 @@ export default {
         let bestBreathesafeValue = null
         let bestSimilarity = 0
 
-        // Find best match from available breathesafe options
+        // Find best match from breathesafe options
         breathesafeOptions.forEach(breathesafeValue => {
-          if (usedBreathesafeOptions.has(breathesafeValue)) {
-            return // Skip already matched breathesafe options
-          }
-
           const similarity = this.calculateSimilarity(row.fileValue, breathesafeValue)
 
           if (similarity > bestSimilarity) {
@@ -2972,8 +2965,6 @@ export default {
             row.selectedBreathesafeValue === bestBreathesafeValue
 
           if (alreadyHasBestMatch) {
-            // Already has the best match, mark it as used and skip
-            usedBreathesafeOptions.add(bestBreathesafeValue)
             return
           }
 
@@ -2983,7 +2974,6 @@ export default {
           }
 
           matches[row.fileValue] = bestBreathesafeValue
-          usedBreathesafeOptions.add(bestBreathesafeValue)
         }
       })
 
