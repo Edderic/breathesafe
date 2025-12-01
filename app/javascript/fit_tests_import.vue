@@ -1319,10 +1319,6 @@ export default {
       const breathesafeOptions = this.getBreathesafeFieldOptions()
       const matches = {}
       const overwrites = {}
-      // Enforce uniqueness of Breathesafe fields
-      const usedBreathesafe = new Set(
-        Object.values(this.columnMappings).filter(v => v && v !== '')
-      )
       // Alias-based exact mappings (keep this convenience)
       const aliasNormalize = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim()
       const aliasMap = {
@@ -1336,7 +1332,7 @@ export default {
         // Try alias exact match first
         const norm = aliasNormalize(csvColumn)
         const aliasTarget = aliasMap[norm]
-        if (aliasTarget && !usedBreathesafe.has(aliasTarget)) {
+        if (aliasTarget) {
           selected = aliasTarget
         }
         // Otherwise pick best similarity above threshold
@@ -1344,7 +1340,6 @@ export default {
           let bestField = null
           let bestSim = -1
           breathesafeOptions.forEach(field => {
-            if (usedBreathesafe.has(field)) return
             const sim = this.calculateSimilarity(csvColumn, field)
             if (sim > bestSim) {
               bestSim = sim
@@ -1360,7 +1355,6 @@ export default {
             overwrites[csvColumn] = selected
           }
           matches[csvColumn] = selected
-          usedBreathesafe.add(selected)
         }
       })
       if (Object.keys(overwrites).length > 0) {
