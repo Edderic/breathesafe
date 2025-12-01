@@ -171,6 +171,7 @@ class BulkFitTestsImportsController < ApplicationController
             user_id = fit_test_data[:user_id] || fit_test_data['user_id']
             mask_id = fit_test_data[:mask_id] || fit_test_data['mask_id']
             testing_mode = fit_test_data[:testing_mode] || fit_test_data['testing_mode']
+            facial_hair = fit_test_data[:facial_hair] || fit_test_data['facial_hair']
             exercises = fit_test_data[:exercises] || fit_test_data['exercises'] || {}
 
             # user_id is already the managed_user_id (user_id from ManagedUser)
@@ -220,6 +221,7 @@ class BulkFitTestsImportsController < ApplicationController
               user_id: user_id,
               mask_id: mask_id,
               bulk_fit_tests_import_id: bulk_import.id,
+              facial_hair: facial_hair,
               results: results
             )
           end

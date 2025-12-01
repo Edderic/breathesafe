@@ -134,6 +134,11 @@
             :messages="visibleColumnMatchingValidationErrors.map(error => ({ str: getDuplicateErrorMessage(error).str }))"
             @onclose="dismissAllValidationErrors"
           />
+          <ClosableMessage
+            v-if="beardLengthWarnings.length > 0"
+            :messages="beardLengthWarnings"
+            @onclose="dismissBeardWarnings"
+          />
 
           <div v-if="fileColumns && fileColumns.length > 0" class='column-matching-table'>
             <table>
@@ -172,6 +177,7 @@
                       <option value="Deep breathing">Deep breathing</option>
                       <option value="Testing mode">Testing mode (QLFT / N99 / N95)</option>
                       <option value="QLFT -> solution">QLFT -> solution</option>
+                      <option value="facial hair beard length mm">facial hair beard length mm</option>
                       <option value='comfort -> "Is there enough room to talk?"'>comfort -> "Is there enough room to talk?"</option>
                       <option value='comfort -> "Is there adequate room for eye protection?"'>comfort -> "Is there adequate room for eye protection?"</option>
                       <option value='comfort -> "How comfortable is the position of the mask on the nose?"'>comfort -> "How comfortable is the position of the mask on the nose?"</option>
@@ -780,6 +786,15 @@ export default {
         })
       }
 
+      // Check for facial hair beard length mm (exact match)
+      if (!mappedValues.includes('facial hair beard length mm')) {
+        errors.push({
+          category: 'required_fields',
+          missingField: 'facial hair beard length mm',
+          errorKey: 'required_facial_hair_beard_length_mm'
+        })
+      }
+
       // Check for at least one exercise
       const exerciseNames = [
         'Talking',
@@ -900,6 +915,7 @@ export default {
       pendingMatchOverwrites: {},
       pendingMatches: {},
       dismissedValidationErrors: new Set(),
+      dismissedBeardWarnings: false,
       userMatchingRows: [],
       managedUsersByManager: {},
       loadingManagedUsers: false,
@@ -1214,12 +1230,53 @@ export default {
         'Deep breathing',
         'Testing mode',
         'QLFT -> solution',
+        'facial hair beard length mm',
         'comfort -> "Is there enough room to talk?"',
         'comfort -> "Is there adequate room for eye protection?"',
         'comfort -> "How comfortable is the position of the mask on the nose?"',
         'comfort -> "How comfortable is the position of the mask on face and cheeks?"',
         'USC -> What do you think about the sizing of this mask relative to your face?'
       ]
+    },
+    beardLengthWarnings() {
+      // Show warnings in Column Matching when beard length is mapped but values are missing/invalid
+      if (this.dismissedBeardWarnings) return []
+      const messages = []
+      try {
+        if (!this.csvFullContent || !this.columnMatching) return messages
+        // Find mapped CSV column name for beard length
+        const beardCsvColumn = Object.keys(this.columnMatching).find(
+          col => this.columnMatching[col] === 'facial hair beard length mm'
+        )
+        if (!beardCsvColumn) return messages
+        // Parse header row
+        const lines = this.csvFullContent.split('\n').filter(l => l.trim() !== '')
+        if (lines.length <= this.headerRowIndex) return messages
+        const header = this.parseCSVLine(lines[this.headerRowIndex])
+        const idx = header.findIndex(col => col && col.trim().toLowerCase() === beardCsvColumn.trim().toLowerCase())
+        if (idx < 0) return messages
+        let missing = 0
+        let invalid = 0
+        for (let i = this.headerRowIndex + 1; i < lines.length; i++) {
+          const row = this.parseCSVLine(lines[i])
+          const raw = row[idx]
+          if (raw == null || raw.trim() === '') {
+            missing++
+            continue
+          }
+          const trimmed = raw.trim()
+          const numeric = trimmed.match(/^\d+(\.\d+)?$/)
+          if (!numeric) invalid++
+        }
+        if (missing > 0) messages.push({ str: `${missing} row(s) have missing beard length (mm).` })
+        if (invalid > 0) messages.push({ str: `${invalid} row(s) have invalid (non-numeric) beard length values.` })
+      } catch (e) {
+        // ignore parsing issues for warnings
+      }
+      return messages
+    },
+    dismissBeardWarnings() {
+      this.dismissedBeardWarnings = true
     },
     getPriorityFields() {
       // Return priority fields in order of matching priority
@@ -1228,6 +1285,7 @@ export default {
         'user name',
         'Mask.unique_internal_model_code',
         'Testing mode',
+        'facial hair beard length',
         'Bending over',
         'Talking',
         'Turning head side to side',
@@ -1264,6 +1322,28 @@ export default {
       // Create a copy of available CSV columns and Breathesafe fields
       let availableCsvColumns = [...this.fileColumns]
       let availableBreathesafeFields = [...breathesafeOptions]
+
+      // Alias-based exact mappings first (before similarity-based phases)
+      const aliasNormalize = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim()
+      const aliasMap = {
+        'manager email': 'manager email',
+        'facial hair beard length': 'facial hair beard length mm',
+        'testing mode': 'Testing mode'
+      }
+      availableCsvColumns.slice().forEach(csvColumn => {
+        const norm = aliasNormalize(csvColumn)
+        if (aliasMap[norm]) {
+          const targetField = aliasMap[norm]
+          if (availableBreathesafeFields.includes(targetField)) {
+            if (this.columnMappings[csvColumn] && this.columnMappings[csvColumn] !== '') {
+              overwrites[csvColumn] = targetField
+            }
+            matches[csvColumn] = targetField
+            availableCsvColumns = availableCsvColumns.filter(col => col !== csvColumn)
+            availableBreathesafeFields = availableBreathesafeFields.filter(field => field !== targetField)
+          }
+        }
+      })
 
       // Track priority Breathesafe fields that were attempted but didn't match
       // These should be excluded from Phase 2
@@ -1793,7 +1873,22 @@ export default {
           ]
           const currentIndex = steps.indexOf(this.currentStep)
           if (currentIndex < steps.length - 1) {
-            this.currentStep = steps[currentIndex + 1]
+            const nextStep = steps[currentIndex + 1]
+            this.currentStep = nextStep
+            // Initialize next step immediately to avoid empty view until refresh
+            if (nextStep === 'User Matching') {
+              await this.initializeUserMatching()
+            } else if (nextStep === 'Mask Matching') {
+              await this.initializeMaskMatching()
+            } else if (nextStep === 'User Seal Check Matching') {
+              // nothing to initialize here
+            } else if (nextStep === 'Testing Mode Values Matching') {
+              await this.initializeTestingModeMatching()
+            } else if (nextStep === 'QLFT Values Matching') {
+              await this.initializeQlftValuesMatching()
+            } else if (nextStep === 'Fit Test Data Matching') {
+              await this.initializeFitTestDataMatching()
+            }
           }
 
           // Mark Column Matching as completed
@@ -3073,6 +3168,27 @@ export default {
         const fileTestingMode = testingModeColumnIndex >= 0 && csvRow[testingModeColumnIndex]
           ? csvRow[testingModeColumnIndex].trim()
           : null
+        // Beard length column (if mapped)
+        const beardCsvColumn = Object.keys(this.columnMatching).find(
+          col => this.columnMatching[col] === 'facial hair beard length mm'
+        )
+        let beardLengthMm = null
+        let beardLengthInvalid = false
+        if (beardCsvColumn) {
+          const beardIdx = headerRow.findIndex(col => col && col.trim().toLowerCase() === beardCsvColumn.trim().toLowerCase())
+          if (beardIdx >= 0) {
+            const raw = csvRow[beardIdx]
+            if (raw != null && raw.trim() !== '') {
+              const trimmed = raw.trim()
+              const numericMatch = trimmed.match(/^\d+(\.\d+)?$/)
+              if (numericMatch) {
+                beardLengthMm = trimmed
+              } else {
+                beardLengthInvalid = true
+              }
+            }
+          }
+        }
 
         // Map file testing mode value to Breathesafe testing mode value using testing_mode_matching
         let testingMode = null
@@ -3168,7 +3284,9 @@ export default {
           testingMode,
           exercises,
           exerciseHasUnmappedQlftValue,
-          exerciseHasInvalidN95N99Value
+          exerciseHasInvalidN95N99Value,
+          beardLengthMm,
+          beardLengthInvalid
         })
       }
 
@@ -3719,12 +3837,16 @@ export default {
           if (row.exercises.deepBreathing) exercises['Deep breathing'] = row.exercises.deepBreathing
           if (row.exercises.normalBreathingSealed) exercises['Normal breathing (SEALED)'] = row.exercises.normalBreathingSealed
 
-          return {
+          const payload = {
             user_id: row.managedUserId, // This is the managed_user_id, which is the user_id
             mask_id: row.maskId,
             testing_mode: row.testingMode,
             exercises: exercises
           }
+          if (row.beardLengthMm && !row.beardLengthInvalid) {
+            payload.facial_hair = { beard_length_mm: `${row.beardLengthMm}mm` }
+          }
+          return payload
         })
 
         const response = await axios.post(
