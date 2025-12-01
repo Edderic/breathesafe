@@ -197,6 +197,20 @@ class BulkFitTestsImportsController < ApplicationController
                 'testing_mode' => testing_mode,
                 'exercises' => quantitative_exercises
               }
+              # Also include qualitative defaults (null object pattern)
+              results['qualitative'] ||= {
+                'aerosol' => { 'solution' => 'Saccharin' },
+                'exercises' => [
+                  { 'name' => 'Normal breathing', 'result' => nil },
+                  { 'name' => 'Deep breathing', 'result' => nil },
+                  { 'name' => 'Turning head side to side', 'result' => nil },
+                  { 'name' => 'Moving head up and down', 'result' => nil },
+                  { 'name' => 'Talking', 'result' => nil },
+                  { 'name' => 'Bending over', 'result' => nil },
+                  { 'name' => 'Normal breathing', 'result' => nil }
+                ],
+                'procedure' => nil
+              }
             elsif testing_mode == 'QLFT'
               # Qualitative fit test
               qualitative_exercises = []
@@ -213,6 +227,19 @@ class BulkFitTestsImportsController < ApplicationController
 
               results['qualitative'] = {
                 'exercises' => qualitative_exercises
+              }
+              # Also include quantitative defaults (null object pattern)
+              results['quantitative'] ||= {
+                'aerosol' => { 'solution' => 'Ambient', 'initial_count_per_cm3' => nil },
+                'exercises' => [
+                  { 'name' => 'Bending over', 'fit_factor' => nil },
+                  { 'name' => 'Talking', 'fit_factor' => nil },
+                  { 'name' => 'Turning head side to side', 'fit_factor' => nil },
+                  { 'name' => 'Moving head up and down', 'fit_factor' => nil },
+                  { 'name' => 'Normal breathing (SEALED)', 'fit_factor' => nil }
+                ],
+                'procedure' => nil,
+                'testing_mode' => 'N99'
               }
             end
 
