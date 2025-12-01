@@ -1319,42 +1319,23 @@ export default {
       const breathesafeOptions = this.getBreathesafeFieldOptions()
       const matches = {}
       const overwrites = {}
-      // Alias-based exact mappings (keep this convenience)
-      const aliasNormalize = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim()
-      const aliasMap = {
-        'manager email': 'manager email',
-        'facial hair beard length': 'facial hair beard length mm',
-        'testing mode': 'Testing mode'
-      }
       const THRESHOLD = 0.4
       this.fileColumns.forEach(csvColumn => {
-        let selected = null
-        // Try alias exact match first
-        const norm = aliasNormalize(csvColumn)
-        const aliasTarget = aliasMap[norm]
-        if (aliasTarget) {
-          selected = aliasTarget
-        }
-        // Otherwise pick best similarity above threshold
-        if (!selected) {
-          let bestField = null
-          let bestSim = -1
-          breathesafeOptions.forEach(field => {
-            const sim = this.calculateSimilarity(csvColumn, field)
-            if (sim > bestSim) {
-              bestSim = sim
-              bestField = field
-            }
-          })
-          if (bestField && bestSim >= THRESHOLD) {
-            selected = bestField
+        // Pick best similarity above threshold for each CSV column
+        let bestField = null
+        let bestSim = -1
+        breathesafeOptions.forEach(field => {
+          const sim = this.calculateSimilarity(csvColumn, field)
+          if (sim > bestSim) {
+            bestSim = sim
+            bestField = field
           }
-        }
-        if (selected) {
+        })
+        if (bestField && bestSim >= THRESHOLD) {
           if (this.columnMappings[csvColumn] && this.columnMappings[csvColumn] !== '') {
-            overwrites[csvColumn] = selected
+            overwrites[csvColumn] = bestField
           }
-          matches[csvColumn] = selected
+          matches[csvColumn] = bestField
         }
       })
       if (Object.keys(overwrites).length > 0) {
