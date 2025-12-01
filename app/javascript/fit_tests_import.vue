@@ -1235,7 +1235,8 @@ export default {
         'comfort -> "Is there adequate room for eye protection?"',
         'comfort -> "How comfortable is the position of the mask on the nose?"',
         'comfort -> "How comfortable is the position of the mask on face and cheeks?"',
-        'USC -> What do you think about the sizing of this mask relative to your face?'
+        'USC -> What do you think about the sizing of this mask relative to your face?',
+        'USC -> how much air movement on your face along the seal of the mask did you feel?'
       ]
     },
     beardLengthWarnings() {
@@ -1291,7 +1292,9 @@ export default {
         'Turning head side to side',
         'Moving head up and down',
         'Normal breathing 1',
-        'Normal breathing 2'
+        'Normal breathing 2',
+        'USC -> how much air movement on your face along the seal of the mask did you feel?',
+        'USC -> What do you think about the sizing of this mask relative to your face?'
       ]
     },
     findBreathesafeFieldsForPriority(priorityField, availableBreathesafeFields) {
@@ -1313,215 +1316,58 @@ export default {
       if (!this.fileColumns || this.fileColumns.length === 0) {
         return
       }
-
       const breathesafeOptions = this.getBreathesafeFieldOptions()
-      const priorityFields = this.getPriorityFields()
       const matches = {}
       const overwrites = {}
-
-      // Create a copy of available CSV columns and Breathesafe fields
-      let availableCsvColumns = [...this.fileColumns]
-      let availableBreathesafeFields = [...breathesafeOptions]
-
-      // Alias-based exact mappings first (before similarity-based phases)
+      // Enforce uniqueness of Breathesafe fields
+      const usedBreathesafe = new Set(
+        Object.values(this.columnMappings).filter(v => v && v !== '')
+      )
+      // Alias-based exact mappings (keep this convenience)
       const aliasNormalize = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, ' ').replace(/\s+/g, ' ').trim()
       const aliasMap = {
         'manager email': 'manager email',
         'facial hair beard length': 'facial hair beard length mm',
         'testing mode': 'Testing mode'
       }
-      availableCsvColumns.slice().forEach(csvColumn => {
+      const THRESHOLD = 0.4
+      this.fileColumns.forEach(csvColumn => {
+        let selected = null
+        // Try alias exact match first
         const norm = aliasNormalize(csvColumn)
-        if (aliasMap[norm]) {
-          const targetField = aliasMap[norm]
-          if (availableBreathesafeFields.includes(targetField)) {
-            if (this.columnMappings[csvColumn] && this.columnMappings[csvColumn] !== '') {
-              overwrites[csvColumn] = targetField
+        const aliasTarget = aliasMap[norm]
+        if (aliasTarget && !usedBreathesafe.has(aliasTarget)) {
+          selected = aliasTarget
+        }
+        // Otherwise pick best similarity above threshold
+        if (!selected) {
+          let bestField = null
+          let bestSim = -1
+          breathesafeOptions.forEach(field => {
+            if (usedBreathesafe.has(field)) return
+            const sim = this.calculateSimilarity(csvColumn, field)
+            if (sim > bestSim) {
+              bestSim = sim
+              bestField = field
             }
-            matches[csvColumn] = targetField
-            availableCsvColumns = availableCsvColumns.filter(col => col !== csvColumn)
-            availableBreathesafeFields = availableBreathesafeFields.filter(field => field !== targetField)
+          })
+          if (bestField && bestSim >= THRESHOLD) {
+            selected = bestField
           }
+        }
+        if (selected) {
+          if (this.columnMappings[csvColumn] && this.columnMappings[csvColumn] !== '') {
+            overwrites[csvColumn] = selected
+          }
+          matches[csvColumn] = selected
+          usedBreathesafe.add(selected)
         }
       })
-
-      // Track priority Breathesafe fields that were attempted but didn't match
-      // These should be excluded from Phase 2
-      const priorityBreathesafeFieldsAttempted = new Set()
-
-      // PHASE 1: Process priority fields in order (using 0.15 threshold)
-      priorityFields.forEach(priorityField => {
-        // Find Breathesafe fields that match this priority pattern
-        const matchingBreathesafeFields = this.findBreathesafeFieldsForPriority(priorityField, availableBreathesafeFields)
-
-        if (matchingBreathesafeFields.length === 0 || availableCsvColumns.length === 0) {
-          return // Skip if no matching fields or no CSV columns left
-        }
-
-        // Track that we attempted to match these priority fields
-        matchingBreathesafeFields.forEach(field => {
-          priorityBreathesafeFieldsAttempted.add(field)
-        })
-
-        // For each matching Breathesafe field, find the best CSV column match
-        let bestBreathesafeField = null
-        let bestCsvColumn = null
-        let bestNormalizedProbability = 0
-        let bestAbsoluteSimilarity = 0
-
-        matchingBreathesafeFields.forEach(breathesafeField => {
-          // Calculate similarity scores with all remaining CSV columns
-          const similarities = {}
-          let sumSimilarities = 0
-
-          availableCsvColumns.forEach(csvColumn => {
-            const similarity = this.calculateSimilarity(csvColumn, breathesafeField)
-            similarities[csvColumn] = similarity
-            sumSimilarities += similarity
-          })
-
-          // Also calculate similarity against ALL CSV columns (for consistent threshold checking)
-          const similaritiesAllColumns = {}
-          let sumSimilaritiesAllColumns = 0
-          this.fileColumns.forEach(csvColumn => {
-            const similarity = this.calculateSimilarity(csvColumn, breathesafeField)
-            similaritiesAllColumns[csvColumn] = similarity
-            sumSimilaritiesAllColumns += similarity
-          })
-
-          // Normalize similarities to get probabilities
-          if (sumSimilarities > 0 && sumSimilaritiesAllColumns > 0) {
-            availableCsvColumns.forEach(csvColumn => {
-              const normalizedProbabilityRemaining = similarities[csvColumn] / sumSimilarities
-              const normalizedProbabilityAll = similaritiesAllColumns[csvColumn] / sumSimilaritiesAllColumns
-              const absoluteSimilarity = similarities[csvColumn]
-
-              // For priority fields, use the normalized probability against ALL columns (consistent with display)
-              // This ensures that if the displayed score would be below threshold, we don't match
-              const normalizedProbability = normalizedProbabilityAll
-
-              // Track the best match for this priority field
-              // Prefer higher normalized probability, but also consider absolute similarity
-              if (normalizedProbability > bestNormalizedProbability ||
-                  (normalizedProbability === bestNormalizedProbability && absoluteSimilarity > bestAbsoluteSimilarity)) {
-                bestNormalizedProbability = normalizedProbability
-                bestAbsoluteSimilarity = absoluteSimilarity
-                bestBreathesafeField = breathesafeField
-                bestCsvColumn = csvColumn
-              }
-            })
-          }
-        })
-
-        // If best probability is >= 0.15 (priority threshold) AND absolute similarity is reasonable, assign the match
-        // Require minimum absolute similarity of 0.08 to prevent matches when all similarities are very low
-        // This prevents cases where normalized probability is high but absolute similarity is very low
-        // (e.g., if all similarities are 0.01, 0.005, 0.002, the best normalized prob could be 0.588 but absolute is only 0.01)
-        // Using 0.08 ensures we only match when there's a meaningful similarity (at least 8% string similarity)
-        const MIN_ABSOLUTE_SIMILARITY_FOR_PRIORITY = 0.08
-        const PRIORITY_THRESHOLD = 0.15
-
-        // Only match if BOTH conditions are met:
-        // 1. Normalized probability meets threshold
-        // 2. Absolute similarity meets minimum
-        if (bestNormalizedProbability >= PRIORITY_THRESHOLD &&
-            bestAbsoluteSimilarity >= MIN_ABSOLUTE_SIMILARITY_FOR_PRIORITY &&
-            bestBreathesafeField && bestCsvColumn) {
-          // Check if this would overwrite an existing mapping
-          if (this.columnMappings[bestCsvColumn] && this.columnMappings[bestCsvColumn] !== '') {
-            overwrites[bestCsvColumn] = bestBreathesafeField
-          }
-
-          matches[bestCsvColumn] = bestBreathesafeField
-
-          // Remove matched items from available pools
-          availableCsvColumns = availableCsvColumns.filter(col => col !== bestCsvColumn)
-          availableBreathesafeFields = availableBreathesafeFields.filter(field => field !== bestBreathesafeField)
-          // Remove from attempted set since it matched
-          priorityBreathesafeFieldsAttempted.delete(bestBreathesafeField)
-        } else {
-          // Priority field didn't match - ensure all matching Breathesafe fields stay in attempted set
-          // so they're excluded from Phase 2
-          // (They're already added above, so no action needed here)
-        }
-      })
-
-      // Remove priority fields that didn't match from Phase 2 consideration
-      // Also exclude any Breathesafe field that matches a priority pattern (defensive check)
-      const priorityPatterns = this.getPriorityFields()
-      availableBreathesafeFields = availableBreathesafeFields.filter(field => {
-        // Exclude if it was attempted in Phase 1
-        if (priorityBreathesafeFieldsAttempted.has(field)) {
-          return false
-        }
-        // Also exclude if it matches any priority pattern (defensive check)
-        for (const priorityPattern of priorityPatterns) {
-          const matchingFields = this.findBreathesafeFieldsForPriority(priorityPattern, [field])
-          if (matchingFields.length > 0) {
-            return false // This field matches a priority pattern, exclude it
-          }
-        }
-        return true
-      })
-
-      // PHASE 2: Continue matching remaining fields using original algorithm (0.4 threshold)
-      while (availableCsvColumns.length > 0 && availableBreathesafeFields.length > 0) {
-        let bestBreathesafeField = null
-        let bestCsvColumn = null
-        let bestNormalizedProbability = 0
-
-        // For each remaining Breathesafe field, find the best match
-        availableBreathesafeFields.forEach(breathesafeField => {
-          // Calculate similarity scores with all remaining CSV columns
-          const similarities = {}
-          let sumSimilarities = 0
-
-          availableCsvColumns.forEach(csvColumn => {
-            const similarity = this.calculateSimilarity(csvColumn, breathesafeField)
-            similarities[csvColumn] = similarity
-            sumSimilarities += similarity
-          })
-
-          // Normalize similarities to get probabilities
-          if (sumSimilarities > 0) {
-            availableCsvColumns.forEach(csvColumn => {
-              const normalizedProbability = similarities[csvColumn] / sumSimilarities
-
-              // Track the best match across all Breathesafe fields
-              if (normalizedProbability > bestNormalizedProbability) {
-                bestNormalizedProbability = normalizedProbability
-                bestBreathesafeField = breathesafeField
-                bestCsvColumn = csvColumn
-              }
-            })
-          }
-        })
-
-        // If best probability is >= 0.4, assign the match
-        if (bestNormalizedProbability >= 0.4 && bestBreathesafeField && bestCsvColumn) {
-          // Check if this would overwrite an existing mapping
-          if (this.columnMappings[bestCsvColumn] && this.columnMappings[bestCsvColumn] !== '') {
-            overwrites[bestCsvColumn] = bestBreathesafeField
-          }
-
-          matches[bestCsvColumn] = bestBreathesafeField
-
-          // Remove matched items from available pools
-          availableCsvColumns = availableCsvColumns.filter(col => col !== bestCsvColumn)
-          availableBreathesafeFields = availableBreathesafeFields.filter(field => field !== bestBreathesafeField)
-        } else {
-          // No good match found, stop iteration
-          break
-        }
-      }
-
-      // If there are overwrites, show confirmation popup
       if (Object.keys(overwrites).length > 0) {
         this.pendingMatchOverwrites = overwrites
         this.pendingMatches = matches
         this.showMatchConfirmation = true
       } else {
-        // No overwrites, apply matches directly
         this.applyMatches(matches)
       }
     },
