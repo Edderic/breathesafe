@@ -183,6 +183,7 @@
                       <option value='comfort -> "How comfortable is the position of the mask on the nose?"'>comfort -> "How comfortable is the position of the mask on the nose?"</option>
                       <option value='comfort -> "How comfortable is the position of the mask on face and cheeks?"'>comfort -> "How comfortable is the position of the mask on face and cheeks?"</option>
                       <option value="USC -> What do you think about the sizing of this mask relative to your face?">USC -> What do you think about the sizing of this mask relative to your face?</option>
+                      <option value="USC -> How much air movement on your face along the seal of the mask did you feel?">USC -> How much air movement on your face along the seal of the mask did you feel?</option>
                     </select>
                   </td>
                   <td class="similarity-score-cell">
@@ -1236,7 +1237,7 @@ export default {
         'comfort -> "How comfortable is the position of the mask on the nose?"',
         'comfort -> "How comfortable is the position of the mask on face and cheeks?"',
         'USC -> What do you think about the sizing of this mask relative to your face?',
-        'USC -> how much air movement on your face along the seal of the mask did you feel?'
+        'USC -> How much air movement on your face along the seal of the mask did you feel?'
       ]
     },
     beardLengthWarnings() {
