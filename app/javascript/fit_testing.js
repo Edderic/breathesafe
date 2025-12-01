@@ -10,10 +10,11 @@ export class FitTest {
       this[k] = this._fit_test[k]
     }
 
-    this.qualitative = data.results.qualitative;
-    this.quantitative = data.results.quantitative;
-    this.qualitativeExercises = this.qualitative.exercises
-    this.quantitativeExercises = this.quantitative.exercises
+    // Handle cases where results might be null/undefined or qualitative/quantitative might not exist
+    this.qualitative = data.results?.qualitative || {};
+    this.quantitative = data.results?.quantitative || {};
+    this.qualitativeExercises = this.qualitative?.exercises || []
+    this.quantitativeExercises = this.quantitative?.exercises || []
 
     this.comfortQuestions = {
       "How comfortable is the position of the mask on the nose?": {
@@ -32,7 +33,7 @@ export class FitTest {
   }
 
   get quantitativeTestingMode() {
-    return this.quantitative.testing_mode;
+    return this.quantitative?.testing_mode;
   }
 
   get shortHandCreatedAt() {

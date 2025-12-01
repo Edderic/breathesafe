@@ -350,13 +350,41 @@ export default {
 
       let displayable_fit_tests = displayableMasks.bind(this)(this.fit_tests)
 
+      // Debug: log fit tests and managedId
+      if (this.managedId) {
+        console.log('Filtering with managedId:', this.managedId)
+        console.log('Total fit tests:', this.fit_tests.length)
+        console.log('After displayableMasks:', displayable_fit_tests.length)
+        console.log('Sample fit test:', displayable_fit_tests[0])
+        if (displayable_fit_tests[0]) {
+          console.log('Sample fit test userId:', displayable_fit_tests[0].userId, 'user_id:', displayable_fit_tests[0].user_id)
+        }
+      }
+
       let results = displayable_fit_tests.filter(
         function(fit_test) {
           let managedUserIdCriteria = true;
           let lowerSearchCriteria = true;
 
           if (this.managedId) {
-            managedUserIdCriteria = (fit_test.userId == this.managedId);
+            // Compare as numbers to handle type mismatches
+            // Handle null/undefined userId - check both camelCase and snake_case
+            const fitTestUserId = fit_test.userId != null ? parseInt(fit_test.userId) :
+                                 (fit_test.user_id != null ? parseInt(fit_test.user_id) : null)
+            const managedIdInt = parseInt(this.managedId)
+            managedUserIdCriteria = (fitTestUserId === managedIdInt);
+
+            // Debug: log first few comparisons
+            if (results.length < 3) {
+              console.log('Filter check:', {
+                fitTestId: fit_test.id,
+                fitTestUserId: fitTestUserId,
+                managedIdInt: managedIdInt,
+                matches: managedUserIdCriteria,
+                userId: fit_test.userId,
+                user_id: fit_test.user_id
+              })
+            }
           }
 
           if (lowerSearch != "") {
@@ -366,6 +394,8 @@ export default {
           return lowerSearchCriteria && managedUserIdCriteria
         }.bind(this)
       )
+
+      console.log('Final filtered results:', results.length)
 
       return results
 
@@ -474,8 +504,12 @@ export default {
           signIn.call(this)
         } else {
           await this.loadStuff()
+          console.log('After loadStuff, fit_tests length:', this.fit_tests.length)
           if (toQuery['managedId']) {
             this.managedId = parseInt(toQuery.managedId)
+            console.log('Set managedId from query:', { queryValue: toQuery.managedId, parsed: this.managedId })
+          } else {
+            console.log('No managedId in query:', toQuery)
           }
 
           // setup search, filtering, sorting variables
@@ -603,20 +637,25 @@ export default {
     },
     async loadFitTests() {
       // TODO: make this more flexible so parents can load data of their children
-      await axios.get(
-        `/fit_tests.json`,
-      )
-        .then(response => {
-          let data = response.data
-          if (response.data.fit_tests) {
-            this.fit_tests = data.fit_tests.map((ft) => new FitTest(ft))
+      console.log('loadFitTests called')
+      try {
+        const response = await axios.get(`/fit_tests.json`)
+        console.log('loadFitTests response:', response.status, response.data)
+        let data = response.data
+        if (response.data.fit_tests) {
+          this.fit_tests = data.fit_tests.map((ft) => new FitTest(ft))
+          console.log('Loaded fit tests:', this.fit_tests.length)
+          if (this.fit_tests.length > 0) {
+            console.log('First fit test:', this.fit_tests[0])
+            console.log('First fit test userId:', this.fit_tests[0].userId, 'user_id:', this.fit_tests[0].user_id)
           }
-          // whatever you want
-        })
-        .catch(error => {
-          this.message = "Failed to load fit tests."
-          // whatever you want
-        })
+        } else {
+          console.log('No fit_tests in response data')
+        }
+      } catch (error) {
+        console.error('Error loading fit tests:', error)
+        this.message = "Failed to load fit tests."
+      }
     },
   }
 }
