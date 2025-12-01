@@ -107,7 +107,7 @@ export default {
         { key: 'User Seal Check Matching', name: 'User Seal Check Matching' },
         { key: 'Testing Mode Values Matching', name: 'Testing Mode Values Matching' },
         { key: 'QLFT Values Matching', name: 'QLFT Values Matching' },
-        { key: 'Fit Test Data Matching', name: 'Fit Test Data Matching' },
+        { key: 'Fit Test Data Matching', name: 'Review' },
       ]
     }
   },
@@ -237,10 +237,8 @@ export default {
           }
           return 'Not Selected'
         case 'Fit Test Data Matching':
-          if (this.fitTestDataMatching && this.isFitTestDataMatchingComplete()) {
-            return 'Fit Test Data Matched'
-          }
-          return 'Not Selected'
+          // Do not show "Not Selected" for Review step; leave blank or show status
+          return ''
         default:
           return this.getStepStatus(stepKey)
       }
@@ -249,7 +247,7 @@ export default {
       const value = this.getStepValue(stepKey)
 
       // For all steps that show actual values, show actual values or "Not Selected"
-      const stepsWithValues = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching', 'QLFT Values Matching', 'Fit Test Data Matching']
+      const stepsWithValues = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching', 'QLFT Values Matching']
 
       if (stepsWithValues.includes(stepKey)) {
         if (value === 'Not Selected' || !value) {
@@ -261,8 +259,8 @@ export default {
         return stringValue.length > 30 ? stringValue.substring(0, 30) + '...' : stringValue
       }
 
-      // For other steps, show status
-      return value || 'Not Started'
+      // For other steps (like Review), suppress "Not Selected"/"Not Started" text
+      return value || ''
     },
     navigateToStep(stepKey) {
       // Emit event to parent component to change the current step
