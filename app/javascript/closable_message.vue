@@ -16,6 +16,7 @@
 
 <script>
 import Popup from './pop_up.vue'
+import { Comment } from 'vue'
 
 export default {
   name: 'ClosableMessage',
@@ -30,7 +31,19 @@ export default {
   },
   computed: {
     shouldShow() {
-      return this.messages.length > 0 || (this.$slots.default && this.$slots.default().length > 0)
+      if (this.messages && this.messages.length > 0) return true
+      if (!this.$slots.default) return false
+      const nodes = this.$slots.default() || []
+      // Consider only non-comment, non-empty nodes as visible content
+      const hasVisible = nodes.some(n => {
+        if (n.type === Comment) return false
+        if (typeof n.children === 'string') {
+          return n.children.trim().length > 0
+        }
+        // For element nodes, treat as visible
+        return true
+      })
+      return hasVisible
     }
   },
   methods: {

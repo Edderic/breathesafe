@@ -5,7 +5,13 @@
     </div>
 
     <div class='container chunk'>
-      <ClosableMessage @onclose='messages = []' :messages='messages'/>
+      <ClosableMessage @onclose='messages = []; showGoToBulkImports = false' :messages='messages'>
+        <div v-if="showGoToBulkImports" class="row justify-content-center" style="margin-top: 0.5em;">
+          <router-link :to="{ name: 'BulkFitTestsImportsList' }" @click="messages = []; showGoToBulkImports = false">
+            <Button shadow='true' class='button' text="Go to Bulk Imports"/>
+          </router-link>
+        </div>
+      </ClosableMessage>
       <br>
     </div>
 
@@ -953,6 +959,7 @@ export default {
       messages: [],
       currentStep: 'Import File',
       showImportFileHelp: false,
+      showGoToBulkImports: false,
       sourceName: null,
       importedFile: null,
       fileColumns: [],
@@ -3948,7 +3955,10 @@ export default {
           // Reload bulk import to get updated status
           await this.loadBulkImport()
 
-          this.messages = [{ str: `Successfully imported ${fitTestsData.length} fit test(s).` }]
+          this.messages = [
+            { str: `Successfully imported ${fitTestsData.length} fit test(s).` },
+          ]
+          this.showGoToBulkImports = true
 
           // Optionally redirect to list view or show success message
         } else {
