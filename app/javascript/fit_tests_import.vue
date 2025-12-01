@@ -404,7 +404,40 @@
           </div>
 
           <div v-else>
-            <p class='text-align-center'>Placeholder: User seal check matching interface will go here</p>
+            <div class='user-seal-check-matching-header'>
+              <Button shadow='true' class='button match-button' text="Match" @click='attemptUSCAutoMatch' :disabled='userSealCheckMatchingRows.length === 0'/>
+            </div>
+            <div v-if="userSealCheckMatchingRows.length > 0" class='user-seal-check-matching-table'>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Breathesafe user seal check question</th>
+                    <th>Value found in file</th>
+                    <th>Breathesafe matching value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, index) in userSealCheckMatchingRows" :key="index">
+                    <td>{{ row.question }}</td>
+                    <td>{{ row.fileValue }}</td>
+                    <td>
+                      <select
+                        v-model="row.selectedBreathesafeValue"
+                        @change="updateUserSealCheckMatching"
+                        class="usc-select"
+                        :disabled="isCompleted"
+                      >
+                        <option :value="''">-- Select --</option>
+                        <option v-for="opt in getUSCOptions(row.question)" :key="opt" :value="opt">{{ opt }}</option>
+                      </select>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-else class='text-align-center'>
+              <p>No user seal check values found. Please complete column matching first.</p>
+            </div>
           </div>
         </div>
 
@@ -903,6 +936,7 @@ export default {
       userMatching: null,
       maskMatching: null,
       userSealCheckMatching: null,
+      userSealCheckMatchingRows: [],
       testingModeMatching: null,
       qlftValuesMatching: null,
       qlftValuesMatchingNotApplicable: false,
@@ -960,6 +994,134 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
+    getUSCOptions(question) {
+      const sizingQ = 'USC -> What do you think about the sizing of this mask relative to your face?'
+      const airQ = 'USC -> How much air movement on your face along the seal of the mask did you feel?'
+      if (question === sizingQ) {
+        return ['Too big', 'Somewhere in-between too small and too big', 'Too small']
+      }
+      if (question === airQ) {
+        return ['A lot of air movement', 'Some air movement', 'No air movement']
+      }
+      return []
+    },
+    async initializeUserSealCheckMatching() {
+      if (!this.csvFullContent || !this.columnMatching) {
+        this.userSealCheckMatchingRows = []
+        return
+      }
+      const sizingQ = 'USC -> What do you think about the sizing of this mask relative to your face?'
+      const airQ = 'USC -> How much air movement on your face along the seal of the mask did you feel?'
+      // Determine which CSV columns are mapped to USC questions
+      const sizingCsvColumn = Object.keys(this.columnMatching).find(col => this.columnMatching[col] === sizingQ)
+      const airCsvColumn = Object.keys(this.columnMatching).find(col => this.columnMatching[col] === airQ)
+      if (!sizingCsvColumn && !airCsvColumn) {
+        this.userSealCheckMatchingRows = []
+        return
+      }
+      const lines = this.csvFullContent.split('\n').filter(line => line.trim() !== '')
+      if (lines.length <= this.headerRowIndex) {
+        this.userSealCheckMatchingRows = []
+        return
+      }
+      const header = this.parseCSVLine(lines[this.headerRowIndex])
+      const findIndexCI = (name) => header.findIndex(h => h && h.trim().toLowerCase() === name.trim().toLowerCase())
+      const sizingIdx = sizingCsvColumn ? findIndexCI(sizingCsvColumn) : -1
+      const airIdx = airCsvColumn ? findIndexCI(airCsvColumn) : -1
+      const uniquePairs = new Map() // key: question||value
+      for (let i = this.headerRowIndex + 1; i < lines.length; i++) {
+        const row = this.parseCSVLine(lines[i])
+        if (sizingIdx >= 0) {
+          const v = row[sizingIdx]?.trim()
+          if (v && v !== '') {
+            uniquePairs.set(`${sizingQ}|||${v}`, { question: sizingQ, fileValue: v })
+          }
+        }
+        if (airIdx >= 0) {
+          const v = row[airIdx]?.trim()
+          if (v && v !== '') {
+            uniquePairs.set(`${airQ}|||${v}`, { question: airQ, fileValue: v })
+          }
+        }
+      }
+      // Build rows and set selected values from existing mapping if available
+      const rows = Array.from(uniquePairs.values()).map(pair => {
+        let selected = ''
+        if (this.userSealCheckMatching && this.userSealCheckMatching[pair.question]) {
+          selected = this.userSealCheckMatching[pair.question][pair.fileValue] || ''
+        }
+        return {
+          question: pair.question,
+          fileValue: pair.fileValue,
+          selectedBreathesafeValue: selected
+        }
+      })
+      this.userSealCheckMatchingRows = rows
+    },
+    updateUserSealCheckMatching() {
+      // Build nested mapping: { question: { file_value: breathesafe_value } }
+      const mapping = {}
+      this.userSealCheckMatchingRows.forEach(row => {
+        if (!mapping[row.question]) mapping[row.question] = {}
+        if (row.selectedBreathesafeValue && row.selectedBreathesafeValue !== '') {
+          mapping[row.question][row.fileValue] = row.selectedBreathesafeValue
+        }
+      })
+      this.userSealCheckMatching = mapping
+    },
+    attemptUSCAutoMatch() {
+      if (!this.userSealCheckMatchingRows || this.userSealCheckMatchingRows.length === 0) return
+      const THRESHOLD = 0.4
+      this.userSealCheckMatchingRows.forEach(row => {
+        const options = this.getUSCOptions(row.question)
+        let best = ''
+        let bestSim = -1
+        options.forEach(opt => {
+          const sim = this.calculateSimilarity(row.fileValue, opt)
+          if (sim > bestSim) {
+            bestSim = sim
+            best = opt
+          }
+        })
+        if (best && bestSim >= THRESHOLD) {
+          row.selectedBreathesafeValue = best
+        }
+      })
+      this.updateUserSealCheckMatching()
+    },
+    async saveUserSealCheckMatching() {
+      if (!this.bulkFitTestsImportId || this.isSaving) {
+        return
+      }
+      // Check authentication
+      const isAuthenticated = await this.checkAuthentication()
+      if (!isAuthenticated) {
+        this.redirectToSignIn()
+        return
+      }
+      this.isSaving = true
+      try {
+        // Ensure mapping reflects current selections
+        this.updateUserSealCheckMatching()
+        const payload = {
+          bulk_fit_tests_import: {
+            user_seal_check_matching: this.userSealCheckMatching || {}
+          }
+        }
+        const response = await axios.put(`/bulk_fit_tests_imports/${this.bulkFitTestsImportId}.json`, payload)
+        if (response.status === 200) {
+          // ok
+        } else {
+          const errorMessages = response.data.messages || ['Failed to save user seal check matching.']
+          this.messages = errorMessages.map(msg => ({ str: msg }))
+        }
+      } catch (e) {
+        const errorMsg = e.response?.data?.messages?.[0] || e.message || 'Failed to save user seal check matching.'
+        this.messages = [{ str: errorMsg }]
+      } finally {
+        this.isSaving = false
+      }
+    },
     buildReturnRouteQuery() {
       // Build query params for returning to this route after sign-in
       const query = {
@@ -1418,6 +1580,11 @@ export default {
         await this.initializeMaskMatching()
       }
 
+      // If navigating to User Seal Check Matching, initialize USC matching
+      if (stepKey === 'User Seal Check Matching' && this.bulkFitTestsImportId) {
+        await this.initializeUserSealCheckMatching()
+      }
+
       // If navigating to Testing Mode Values Matching, initialize testing mode matching
       if (stepKey === 'Testing Mode Values Matching' && this.bulkFitTestsImportId) {
         await this.initializeTestingModeMatching()
@@ -1533,17 +1700,25 @@ export default {
 
       // If we're on the "User Seal Check Matching" step, check if it should be skipped
       if (this.currentStep === 'User Seal Check Matching') {
-        // If no USC columns are matched, mark as skipped
-        if (!this.hasUSCColumnsMatched) {
-          this.userSealCheckMatchingSkipped = true
-          // Mark as completed (skipped) so it shows in progress bar
+        if (this.hasUSCColumnsMatched) {
+          await this.saveUserSealCheckMatching()
+          // Mark as completed
           if (!this.completedSteps.includes('User Seal Check Matching')) {
             this.completedSteps.push('User Seal Check Matching')
           }
+          this.currentStep = 'Testing Mode Values Matching'
+          await this.initializeTestingModeMatching()
+          return
+        } else {
+          // If no USC columns are matched, mark as skipped
+          this.userSealCheckMatchingSkipped = true
+          if (!this.completedSteps.includes('User Seal Check Matching')) {
+            this.completedSteps.push('User Seal Check Matching')
+          }
+          this.currentStep = 'Testing Mode Values Matching'
+          await this.initializeTestingModeMatching()
+          return
         }
-        this.currentStep = 'Testing Mode Values Matching'
-        await this.initializeTestingModeMatching()
-        return
       }
 
       // If we're on the "Testing Mode Values Matching" step, save testing mode matching data
