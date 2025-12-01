@@ -32,7 +32,7 @@
       <div v-show='currentStep == "Import File"' class='right-pane narrow-width'>
         <div>
           <h2 class='text-align-center'>Import File</h2>
-          <div class='text-align-center'>
+          <div class='text-align-center justify-content-center align-items-center'>
             <h3 style='display: inline-block; margin-right: 8px;'>Select a file to import</h3>
             <CircularButton text="?" @click="showImportFileHelp = true"/>
           </div>
