@@ -2,6 +2,7 @@
   <div class='popup' @click='close'>
     <div class='content' @click.stop>
       <CircularButton @click='close' class='close' text='x'/>
+      <br>
       <div class='slot-wrapper'>
         <slot></slot>
       </div>
