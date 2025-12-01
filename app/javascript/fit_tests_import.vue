@@ -32,7 +32,43 @@
       <div v-show='currentStep == "Import File"' class='right-pane narrow-width'>
         <div>
           <h2 class='text-align-center'>Import File</h2>
-          <h3 class='text-align-center'>Select a file to import</h3>
+          <div class='text-align-center'>
+            <h3 style='display: inline-block; margin-right: 8px;'>Select a file to import</h3>
+            <CircularButton text="?" @click="showImportFileHelp = true"/>
+          </div>
+
+          <Popup v-if="showImportFileHelp" @onclose="showImportFileHelp = false">
+            <div>
+              <h3>What should the file contain?</h3>
+              <p>Your CSV should include columns similar to:</p>
+              <ul style="text-align: left; margin-left: 1.2em;">
+                <li><strong>Manager email</strong></li>
+                <li><strong>User name</strong></li>
+                <li><strong>At least one fit testing exercise result</strong>, e.g.:
+                  <ul>
+                    <li>Normal breathing 1</li>
+                    <li>Deep breathing</li>
+                    <li>Talking</li>
+                    <li>Turning head side to side</li>
+                    <li>Moving head up and down</li>
+                    <li>Grimace</li>
+                    <li>Bending over</li>
+                    <li>Normal breathing 2</li>
+                    <li>Normal breathing (SEALED)</li>
+                  </ul>
+                </li>
+                <li><strong>Testing mode</strong> (e.g., N99, N95, or QLFT)</li>
+              </ul>
+              <p>
+                <a href="/sample_fit_tests_import.csv" download>Download sample CSV template</a>
+              </p>
+              <h4>What to expect during import</h4>
+              <ul style="text-align: left; margin-left: 1.2em;">
+                <li>Columns in your file will be matched to columns Breathesafe understands.</li>
+                <li>Values in those columns will be matched to values that Breathesafe understands.</li>
+              </ul>
+            </div>
+          </Popup>
 
           <div class='row justify-content-center'>
             <input
@@ -656,6 +692,7 @@ import Button from './button.vue'
 import ClosableMessage from './closable_message.vue'
 import FitTestsImportProgressBar from './fit_tests_import_progress_bar.vue'
 import Popup from './pop_up.vue'
+import CircularButton from './circular_button.vue'
 import { setupCSRF } from './misc.js'
 import { mapState, mapActions } from 'pinia'
 import { useMainStore } from './stores/main_store.js'
@@ -666,7 +703,8 @@ export default {
     Button,
     ClosableMessage,
     FitTestsImportProgressBar,
-    Popup
+    Popup,
+    CircularButton
   },
   computed: {
     ...mapState(useMainStore, ['currentUser']),
@@ -837,6 +875,7 @@ export default {
     return {
       messages: [],
       currentStep: 'Import File',
+      showImportFileHelp: false,
       sourceName: null,
       importedFile: null,
       fileColumns: [],
