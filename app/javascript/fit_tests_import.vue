@@ -415,11 +415,11 @@
             </p>
           </div>
 
-          <div v-else>
+          <div v-else >
             <div class='user-seal-check-matching-header justify-content-center'>
               <Button shadow='true' class='button match-button' text="Match" @click='attemptUSCAutoMatch' :disabled='userSealCheckMatchingRows.length === 0'/>
             </div>
-            <div v-if="userSealCheckMatchingRows.length > 0" class='user-seal-check-matching-table'>
+            <div v-if="userSealCheckMatchingRows.length > 0" class='user-seal-check-matching-table fit-test-data-table content'>
               <table>
                 <thead>
                   <tr>
