@@ -152,7 +152,7 @@
             @onclose="dismissBeardWarnings"
           />
 
-          <div v-if="fileColumns && fileColumns.length > 0" class='column-matching-table'>
+          <div v-if="fileColumns && fileColumns.length > 0" class='column-matching-table content'>
             <table>
               <thead>
                 <tr>
@@ -251,7 +251,7 @@
             </div>
           </Popup>
 
-          <div v-if="userMatchingRows.length > 0" class='user-matching-table'>
+          <div v-if="userMatchingRows.length > 0" class='user-matching-table content'>
             <table>
               <thead>
                 <tr>
@@ -339,7 +339,7 @@
             </div>
           </Popup>
 
-          <div v-if="maskMatchingRows.length > 0" class='mask-matching-table'>
+          <div v-if="maskMatchingRows.length > 0" class='mask-matching-table content'>
             <table>
               <thead>
                 <tr>
@@ -489,7 +489,7 @@
             </div>
           </Popup>
 
-          <div v-if="testingModeMatchingRows.length > 0" class='testing-mode-matching-table'>
+          <div v-if="testingModeMatchingRows.length > 0" class='testing-mode-matching-table content'>
             <table>
               <thead>
                 <tr>
@@ -566,7 +566,7 @@
             </div>
           </Popup>
 
-          <div v-if="qlftValuesMatchingRows.length > 0" class='qlft-values-matching-table'>
+          <div v-if="qlftValuesMatchingRows.length > 0" class='qlft-values-matching-table content'>
             <table>
               <thead>
                 <tr>
@@ -648,7 +648,7 @@
             <p><strong>Warning:</strong> {{ invalidN95N99ValuesCount }} N95/N99 row(s) contain non-alphanumeric characters in exercise columns. These rows will not be imported. Invalid values are highlighted in red.</p>
           </div>
 
-          <div v-if="fitTestDataRows.length > 0" class='fit-test-data-table'>
+          <div v-if="fitTestDataRows.length > 0" class='fit-test-data-table content'>
             <table>
               <thead>
                 <tr>
@@ -4164,8 +4164,6 @@ input[type="file"] {
 
 .column-matching-table {
   margin-top: 2em;
-  overflow-y: scroll;
-  height: 40vh;
 }
 
 .column-matching-table table {
@@ -4249,7 +4247,6 @@ input[type="file"] {
 .user-matching-table {
   margin-top: 2em;
   overflow-y: scroll;
-  max-height: 40vh;
 }
 
 .user-matching-table table {
@@ -4300,10 +4297,14 @@ input[type="file"] {
   margin-bottom: 1em;
 }
 
+.content {
+  max-height: 40vh;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
 .mask-matching-table {
   margin-top: 2em;
-  overflow-y: scroll;
-  height: 40vh;
 }
 
 .mask-matching-table table {
@@ -4348,8 +4349,6 @@ input[type="file"] {
 
 .testing-mode-matching-table {
   margin-top: 2em;
-  overflow-y: scroll;
-  height: 40vh;
 }
 
 .testing-mode-matching-table table {
@@ -4394,8 +4393,6 @@ input[type="file"] {
 
 .qlft-values-matching-table {
   margin-top: 2em;
-  overflow-y: scroll;
-  height: 40vh;
 }
 
 .qlft-values-matching-table table {
@@ -4449,9 +4446,6 @@ input[type="file"] {
 
 .fit-test-data-table {
   margin-top: 2em;
-  overflow-y: scroll;
-  overflow-x: auto;
-  height: 50vh;
 }
 
 .fit-test-data-table table {
