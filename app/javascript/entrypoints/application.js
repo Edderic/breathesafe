@@ -23,8 +23,8 @@ console.log('Visit the guide for more information: ', 'https://vite-ruby.netlify
 // // Import all channels.
 // const channels = import.meta.globEager('./**/*_channel.js')
 
-// Example: Import a stylesheet in app/frontend/index.css
-// import '~/index.css'
+// Global styles
+import '../index.css'
 //
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';

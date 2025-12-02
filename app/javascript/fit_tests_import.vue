@@ -32,7 +32,13 @@
         :currentStep="currentStep"
         :userSealCheckMatchingSkipped="userSealCheckMatchingSkipped"
         @navigate-to-step="navigateToStep"
-      />
+      >
+        <template #actions>
+          <router-link :to="{ name: 'BulkFitTestsImportsList' }">
+            <Button shadow='true' class='button' text="Bulk Imports"/>
+          </router-link>
+        </template>
+      </FitTestsImportProgressBar>
 
       <!-- Import File Step -->
       <div v-show='currentStep == "Import File"' class='right-pane narrow-width'>

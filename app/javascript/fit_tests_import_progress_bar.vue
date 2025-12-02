@@ -35,6 +35,9 @@
           </span>
         </div>
       </div>
+      <div class="progress-actions">
+        <slot name="actions"></slot>
+      </div>
     </div>
   </div>
 </template>
@@ -428,6 +431,10 @@ export default {
   border: 1px solid #ffc107;
   padding: 0.5rem;
   margin: 0.125rem 0;
+}
+
+.progress-actions {
+  margin-top: 0.5rem;
 }
 
 /* Mobile-specific styles */

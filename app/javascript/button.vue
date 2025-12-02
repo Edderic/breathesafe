@@ -72,6 +72,7 @@ export default {
     color: white;
     display: flex;
     align-items: center;
+    justify-content: center;
   }
   .button:hover {
     cursor: pointer;
