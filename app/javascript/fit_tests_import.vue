@@ -3290,9 +3290,9 @@ export default {
           if (!this.completedSteps.includes('QLFT Values Matching')) {
             this.completedSteps.push('QLFT Values Matching')
           }
-          // Move to next step
-          this.currentStep = 'Fit Test Data Matching'
-          await this.initializeFitTestDataMatching()
+          // Move to next step: Comfort Matching before Review
+          this.currentStep = 'Comfort Matching'
+          await this.initializeComfortMatching()
         }
       } catch (error) {
         console.error('Error saving QLFT values matching:', error)
