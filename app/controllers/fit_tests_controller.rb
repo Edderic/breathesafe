@@ -292,7 +292,6 @@ class FitTestsController < ApplicationController
       ],
       comfort: [
         'How comfortable is the position of the mask on the nose?',
-        'Is there adequate room for eye protection?',
         'Is there enough room to talk?',
         'How comfortable is the position of the mask on face and cheeks?'
       ]

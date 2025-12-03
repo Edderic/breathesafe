@@ -20,9 +20,6 @@ export class FitTest {
       "How comfortable is the position of the mask on the nose?": {
         'passingAnswers': ['Comfortable']
       },
-      "Is there adequate room for eye protection?": {
-        'passingAnswers': ['Adequate', 'Not applicable']
-      },
       "Is there enough room to talk?": {
         'passingAnswers': ['Enough']
       },

@@ -83,7 +83,6 @@
                 <li><strong>Comfort questions</strong>, e.g.:
                   <ul>
                     <li>How comfortable is the position of the mask on the nose?</li>
-                    <li>Is there adequate room for eye protection?</li>
                     <li>Is there enough room to talk?</li>
                     <li>How comfortable is the position of the mask on face and cheeks?</li>
                   </ul>
@@ -261,7 +260,6 @@
                       <option value="QLFT -> solution">QLFT -> solution</option>
                       <option value="facial hair beard length mm">facial hair beard length mm</option>
                       <option value='comfort -> "Is there enough room to talk?"'>comfort -> "Is there enough room to talk?"</option>
-                      <option value='comfort -> "Is there adequate room for eye protection?"'>comfort -> "Is there adequate room for eye protection?"</option>
                       <option value='comfort -> "How comfortable is the position of the mask on the nose?"'>comfort -> "How comfortable is the position of the mask on the nose?"</option>
                       <option value='comfort -> "How comfortable is the position of the mask on face and cheeks?"'>comfort -> "How comfortable is the position of the mask on face and cheeks?"</option>
                       <option value="USC -> What do you think about the sizing of this mask relative to your face?">USC -> What do you think about the sizing of this mask relative to your face?</option>
@@ -732,7 +730,6 @@
                   <th>USC sizing</th>
                   <th>USC air movement</th>
                   <th>Comfort - Nose</th>
-                  <th>Comfort - Eye Protection</th>
                   <th>Comfort - Talk</th>
                   <th>Comfort - Face/Cheeks</th>
                   <th>Bending over</th>
@@ -786,7 +783,6 @@
                     {{ row.uscAirMovement || '--' }}
                   </td>
                   <td>{{ row.comfortNose || '--' }}</td>
-                  <td>{{ row.comfortEye || '--' }}</td>
                   <td>{{ row.comfortTalk || '--' }}</td>
                   <td>{{ row.comfortFace || '--' }}</td>
                   <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.bendingOver) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.bendingOver) }">{{ row.exercises.bendingOver !== null && row.exercises.bendingOver !== undefined ? row.exercises.bendingOver : '--' }}</td>
@@ -1192,7 +1188,7 @@ export default {
     },
     attemptUSCAutoMatch() {
       if (!this.userSealCheckMatchingRows || this.userSealCheckMatchingRows.length === 0) return
-      const THRESHOLD = 0.4
+      const THRESHOLD = 0.1
       this.userSealCheckMatchingRows.forEach(row => {
         const options = this.getUSCOptions(row.question)
         let best = ''
@@ -1245,11 +1241,9 @@ export default {
     },
     getComfortOptions(question) {
       const nose = 'How comfortable is the position of the mask on the nose?'
-      const eyes = 'Is there adequate room for eye protection?'
       const talk = 'Is there enough room to talk?'
       const face = 'How comfortable is the position of the mask on face and cheeks?'
       if (question === nose) return ['Uncomfortable', 'Unsure', 'Comfortable']
-      if (question === eyes) return ['Inadequate', 'Adequate', 'Not applicable']
       if (question === talk) return ['Not enough', 'Unsure', 'Enough']
       if (question === face) return ['Uncomfortable', 'Unsure', 'Comfortable']
       return []
@@ -1268,7 +1262,6 @@ export default {
       const findIndexCI = (name) => header.findIndex(h => h && h.trim().toLowerCase() === name.trim().toLowerCase())
       const questions = [
         'How comfortable is the position of the mask on the nose?',
-        'Is there adequate room for eye protection?',
         'Is there enough room to talk?',
         'How comfortable is the position of the mask on face and cheeks?'
       ]
@@ -1301,6 +1294,15 @@ export default {
           fileValue: pair.fileValue,
           selectedBreathesafeValue: selected
         }
+      })
+      // Sort by Breathesafe matching question, then by value found in file
+      rows.sort((a, b) => {
+        // First sort by question
+        if (a.question !== b.question) {
+          return a.question.localeCompare(b.question)
+        }
+        // Then sort by fileValue
+        return a.fileValue.localeCompare(b.fileValue)
       })
       this.comfortMatchingRows = rows
     },
@@ -1636,7 +1638,6 @@ export default {
         'QLFT -> solution',
         'facial hair beard length mm',
         'comfort -> "Is there enough room to talk?"',
-        'comfort -> "Is there adequate room for eye protection?"',
         'comfort -> "How comfortable is the position of the mask on the nose?"',
         'comfort -> "How comfortable is the position of the mask on face and cheeks?"',
         'USC -> What do you think about the sizing of this mask relative to your face?',
@@ -3579,18 +3580,6 @@ export default {
               : null
             return mapped || val
           })(),
-          comfortEye: (() => {
-            const col = Object.keys(this.columnMatching).find(c => this.columnMatching[c] === 'comfort -> "Is there adequate room for eye protection?"')
-            if (!col) return null
-            const idx = headerRow.findIndex(h => h && h.trim().toLowerCase() === col.trim().toLowerCase())
-            if (idx < 0) return null
-            const val = csvRow[idx] ? csvRow[idx].trim() : null
-            if (!val) return null
-            const mapped = (this.comfortMatching && this.comfortMatching['Is there adequate room for eye protection?'])
-              ? this.comfortMatching['Is there adequate room for eye protection?'][val]
-              : null
-            return mapped || val
-          })(),
           comfortTalk: (() => {
             const col = Object.keys(this.columnMatching).find(c => this.columnMatching[c] === 'comfort -> "Is there enough room to talk?"')
             if (!col) return null
@@ -3617,14 +3606,6 @@ export default {
           })(),
           comfortNoseFile: (() => {
             const col = Object.keys(this.columnMatching).find(c => this.columnMatching[c] === 'comfort -> "How comfortable is the position of the mask on the nose?"')
-            if (!col) return null
-            const idx = headerRow.findIndex(h => h && h.trim().toLowerCase() === col.trim().toLowerCase())
-            if (idx < 0) return null
-            const val = csvRow[idx] ? csvRow[idx].trim() : null
-            return val || null
-          })(),
-          comfortEyeFile: (() => {
-            const col = Object.keys(this.columnMatching).find(c => this.columnMatching[c] === 'comfort -> "Is there adequate room for eye protection?"')
             if (!col) return null
             const idx = headerRow.findIndex(h => h && h.trim().toLowerCase() === col.trim().toLowerCase())
             if (idx < 0) return null
@@ -4260,14 +4241,12 @@ export default {
           const comfortObj = {}
           const comfortQuestions = [
             'How comfortable is the position of the mask on the nose?',
-            'Is there adequate room for eye protection?',
             'Is there enough room to talk?',
             'How comfortable is the position of the mask on face and cheeks?'
           ]
           comfortQuestions.forEach(q => {
             const csvVal = (q === comfortQuestions[0]) ? row.comfortNoseFile
-              : (q === comfortQuestions[1]) ? row.comfortEyeFile
-              : (q === comfortQuestions[2]) ? row.comfortTalkFile
+              : (q === comfortQuestions[1]) ? row.comfortTalkFile
               : row.comfortFaceFile
             let mapped = null
             if (csvVal && this.comfortMatching && this.comfortMatching[q]) {

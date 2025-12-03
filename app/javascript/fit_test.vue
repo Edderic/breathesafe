@@ -386,14 +386,6 @@
         />
 
         <SurveyQuestion
-          question="Is there adequate room for eye protection?"
-          :answer_options="['Inadequate', 'Adequate', 'Not applicable']"
-          @update="selectComfortEyeProtection"
-          :selected="comfort['Is there adequate room for eye protection?']"
-          :disabled="!createOrEdit"
-        />
-
-        <SurveyQuestion
           question="Is there enough room to talk?"
           :answer_options="['Not enough', 'Unsure', 'Enough']"
           @update="selectComfortEnoughRoomToTalk"
@@ -891,7 +883,6 @@ export default {
       },
       comfort: {
         "How comfortable is the position of the mask on the nose?": null,
-        "Is there adequate room for eye protection?": null,
         "Is there enough room to talk?": null,
         "How comfortable is the position of the mask on face and cheeks?": null
       },
@@ -2186,9 +2177,6 @@ export default {
     },
     selectComfortNose(value) {
       this['comfort']['How comfortable is the position of the mask on the nose?'] = value
-    },
-    selectComfortEyeProtection(value) {
-      this['comfort']['Is there adequate room for eye protection?'] = value
     },
     selectComfortEnoughRoomToTalk(value) {
       this['comfort']['Is there enough room to talk?'] = value
