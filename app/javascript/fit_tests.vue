@@ -347,19 +347,7 @@ export default {
     displayables() {
       let lowerSearch = this.search.toLowerCase()
 
-
       let displayable_fit_tests = displayableMasks.bind(this)(this.fit_tests)
-
-      // Debug: log fit tests and managedId
-      if (this.managedId) {
-        console.log('Filtering with managedId:', this.managedId)
-        console.log('Total fit tests:', this.fit_tests.length)
-        console.log('After displayableMasks:', displayable_fit_tests.length)
-        console.log('Sample fit test:', displayable_fit_tests[0])
-        if (displayable_fit_tests[0]) {
-          console.log('Sample fit test userId:', displayable_fit_tests[0].userId, 'user_id:', displayable_fit_tests[0].user_id)
-        }
-      }
 
       let results = displayable_fit_tests.filter(
         function(fit_test) {
@@ -373,18 +361,6 @@ export default {
                                  (fit_test.user_id != null ? parseInt(fit_test.user_id) : null)
             const managedIdInt = parseInt(this.managedId)
             managedUserIdCriteria = (fitTestUserId === managedIdInt);
-
-            // Debug: log first few comparisons
-            if (results.length < 3) {
-              console.log('Filter check:', {
-                fitTestId: fit_test.id,
-                fitTestUserId: fitTestUserId,
-                managedIdInt: managedIdInt,
-                matches: managedUserIdCriteria,
-                userId: fit_test.userId,
-                user_id: fit_test.user_id
-              })
-            }
           }
 
           if (lowerSearch != "") {
