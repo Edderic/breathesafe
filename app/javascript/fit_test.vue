@@ -22,6 +22,7 @@
         :fitTestProcedure="fitTestProcedure"
         :comfort="comfort"
         :hasExistingFitTestUser="hasExistingFitTestUser"
+        :hasFitTestData="hasFitTestData"
         :completedSteps="completedFitTestSteps"
         :currentStep="tabToShow"
         @navigate-to-step="navigateToStep"
@@ -971,6 +972,15 @@ export default {
         has_exhalation_valve: this.selectedMask && this.selectedMask['hasExhalationValve']
       })
     },
+    hasFitTestData() {
+      const r = this.results
+      if (!r) return false
+      const qual = r.qualitative && Array.isArray(r.qualitative.exercises) ? r.qualitative.exercises : []
+      const quant = r.quantitative && Array.isArray(r.quantitative.exercises) ? r.quantitative.exercises : []
+      const hasQual = qual.some(ex => ex && ex.result != null && String(ex.result).trim() !== '')
+      const hasQuant = quant.some(ex => ex && ex.fit_factor != null && String(ex.fit_factor).trim() !== '')
+      return hasQual || hasQuant
+    },
     missingDataUserSealCheck() {
       let missingValues = []
 
@@ -1186,7 +1196,8 @@ export default {
       // Check Fit Test completion
       if (this.fitTestProcedure ||
           (this.qualitativeProcedure && this.qualitativeProcedure !== 'Skipping') ||
-          (this.quantitativeProcedure && this.quantitativeProcedure !== 'Skipping')) {
+          (this.quantitativeProcedure && this.quantitativeProcedure !== 'Skipping') ||
+          this.hasFitTestData) {
         completed.push('Fit Test')
       }
 

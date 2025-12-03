@@ -79,6 +79,10 @@ export default {
       type: Boolean,
       default: false
     },
+    hasFitTestData: {
+      type: Boolean,
+      default: false
+    },
     completedSteps: {
       type: Array,
       default: () => []
@@ -127,10 +131,11 @@ export default {
         completed.push('User Seal Check')
       }
 
-      // Fit Test is completed if fitTestProcedure is set (or old structure has a procedure)
+      // Fit Test is completed if procedure is set OR there is existing fit test data
       if (this.fitTestProcedure ||
           (this.qualitativeProcedure && this.qualitativeProcedure !== 'Skipping') ||
-          (this.quantitativeProcedure && this.quantitativeProcedure !== 'Skipping')) {
+          (this.quantitativeProcedure && this.quantitativeProcedure !== 'Skipping') ||
+          this.hasFitTestData) {
         completed.push('Fit Test')
       }
 
@@ -190,6 +195,9 @@ export default {
           }
           if (this.quantitativeProcedure && this.quantitativeProcedure !== 'Skipping') {
             return `quantitative: ${this.quantitativeProcedure}`
+          }
+          if (this.hasFitTestData) {
+            return 'Existing fit test data'
           }
           return 'Not Selected'
         case 'Comfort':
