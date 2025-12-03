@@ -1518,21 +1518,24 @@ export default {
 
             this.quantitativeFitTestingDeviceId = fitTestData.quantitative_fit_testing_device_id
 
-            this.qualitativeAerosolSolution = results.qualitative.aerosol.solution
-            this.qualitativeNotes = results.qualitative.notes
-            this.qualitativeProcedure = results.qualitative.procedure
-            this.qualitativeExercises = results.qualitative.exercises
+            this.qualitativeAerosolSolution = results.qualitative?.aerosol?.solution
+            this.qualitativeNotes = results.qualitative?.notes
+            this.qualitativeProcedure = results.qualitative?.procedure
+            this.qualitativeExercises = results.qualitative?.exercises || []
 
-            this.quantitativeTestingMode = results.quantitative.testing_mode
-            this.quantitativeAerosolSolution = results.quantitative.aerosol.solution
-            this.quantitativeNotes = results.quantitative.notes
-            this.quantitativeProcedure = results.quantitative.procedure
+            this.quantitativeTestingMode = results.quantitative?.testing_mode
+            this.quantitativeAerosolSolution = results.quantitative?.aerosol?.solution
+            this.quantitativeNotes = results.quantitative?.notes
+            this.quantitativeProcedure = results.quantitative?.procedure
 
-            this.setQuantitativeExercises(results.quantitative.exercises)
-            this.initialCountPerCm3 = results.quantitative.aerosol.initial_count_per_cm3
+            this.setQuantitativeExercises(results.quantitative?.exercises || [])
+            this.initialCountPerCm3 = results.quantitative?.aerosol?.initial_count_per_cm3
 
             // Sync fitTestProcedure from existing data for backwards compatibility
-            this.syncFitTestProcedureFromExisting()
+            // Pass the raw exercises as a fallback in case the arrays aren't set correctly
+            // Ensure we have the exercises array before syncing
+            const quantExercises = results.quantitative && results.quantitative.exercises ? results.quantitative.exercises : []
+            this.syncFitTestProcedureFromExisting(quantExercises)
 
             this.selectUser(fitTestData.user_id)
 
@@ -2024,35 +2027,63 @@ export default {
       this['userSealCheck']['While performing a negative user seal check, did you notice any leakage?'] = value
     },
     // Sync fitTestProcedure from existing qualitativeProcedure/quantitativeProcedure for backwards compatibility
-    syncFitTestProcedureFromExisting() {
+    // rawQuantitativeExercises is an optional parameter with the raw exercises from the API (for fallback checking)
+    syncFitTestProcedureFromExisting(rawQuantitativeExercises = null) {
       if (this.qualitativeProcedure && this.qualitativeProcedure !== 'Skipping') {
         if (this.qualitativeProcedure === 'Full OSHA') {
           this.fitTestProcedure = 'qualitative_full_osha'
+          return
         }
       } else if (this.quantitativeProcedure && this.quantitativeProcedure !== 'Skipping') {
         if (this.quantitativeProcedure === 'OSHA Fast Filtering Face Piece Respirators') {
           this.fitTestProcedure = 'quantitative_osha_fast'
+          return
         } else if (this.quantitativeProcedure === 'Full OSHA') {
           this.fitTestProcedure = 'quantitative_full_osha'
+          return
         }
       } else {
         // If no explicit procedure, try to infer from exercise data
-        // Check quantitative exercises first (check both arrays since we don't know which one has data)
+        // Prioritize checking raw exercises if provided (most reliable)
+        if (rawQuantitativeExercises && Array.isArray(rawQuantitativeExercises) && rawQuantitativeExercises.length > 0) {
+          const hasQuantData = rawQuantitativeExercises.some(ex => ex && ex.fit_factor != null && String(ex.fit_factor).trim() !== '')
+          if (hasQuantData) {
+            // Infer procedure type based on number of exercises
+            // Full OSHA typically has 9 exercises, OSHA Fast has 5
+            const exerciseCount = rawQuantitativeExercises.length
+            if (exerciseCount >= 8) {
+              this.fitTestProcedure = 'quantitative_full_osha'
+              return
+            } else if (exerciseCount >= 4) {
+              this.fitTestProcedure = 'quantitative_osha_fast'
+              return
+            }
+          }
+        }
+
+        // Fallback: check arrays if raw exercises not provided
         const quantExercisesFull = this.quantitativeExercisesFullOsha || []
         const quantExercisesFast = this.quantitativeExercisesOSHAFastFFR || []
-        const quantExercises = quantExercisesFull.length > 0 ? quantExercisesFull : quantExercisesFast
-        const hasQuantData = quantExercises.some(ex => ex && ex.fit_factor != null && String(ex.fit_factor).trim() !== '')
 
-        if (hasQuantData) {
-          // Infer procedure type based on number of exercises
-          // Full OSHA has 9 exercises (including SEALED), OSHA Fast has 5
-          const exerciseCount = quantExercises.length
-          if (exerciseCount >= 8 || quantExercisesFull.length > 0) {
-            // Full OSHA typically has 9 exercises, or if exercises are in FullOsha array
+        // Check which array has exercises with actual fit_factor data
+        const hasQuantDataFull = quantExercisesFull.some(ex => ex && ex.fit_factor != null && String(ex.fit_factor).trim() !== '')
+        const hasQuantDataFast = quantExercisesFast.some(ex => ex && ex.fit_factor != null && String(ex.fit_factor).trim() !== '')
+
+        if (hasQuantDataFull || hasQuantDataFast) {
+          // Determine which procedure type based on which array has data and exercise count
+          if (hasQuantDataFull) {
+            // If FullOsha array has data, it's Full OSHA
             this.fitTestProcedure = 'quantitative_full_osha'
-          } else if (exerciseCount >= 4) {
-            // OSHA Fast typically has 5 exercises
-            this.fitTestProcedure = 'quantitative_osha_fast'
+          } else if (hasQuantDataFast) {
+            // If Fast array has data, check count to be sure
+            const exerciseCount = quantExercisesFast.length
+            if (exerciseCount >= 8) {
+              // If it has 8+ exercises, it's actually Full OSHA (might have been mis-categorized)
+              this.fitTestProcedure = 'quantitative_full_osha'
+            } else {
+              // Otherwise it's OSHA Fast
+              this.fitTestProcedure = 'quantitative_osha_fast'
+            }
           }
         } else {
           // Check qualitative exercises
