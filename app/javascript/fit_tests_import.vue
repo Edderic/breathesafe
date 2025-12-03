@@ -1243,6 +1243,126 @@ export default {
         this.isSaving = false
       }
     },
+    getComfortOptions(question) {
+      const nose = 'How comfortable is the position of the mask on the nose?'
+      const eyes = 'Is there adequate room for eye protection?'
+      const talk = 'Is there enough room to talk?'
+      const face = 'How comfortable is the position of the mask on face and cheeks?'
+      if (question === nose) return ['Uncomfortable', 'Unsure', 'Comfortable']
+      if (question === eyes) return ['Inadequate', 'Adequate', 'Not applicable']
+      if (question === talk) return ['Not enough', 'Unsure', 'Enough']
+      if (question === face) return ['Uncomfortable', 'Unsure', 'Comfortable']
+      return []
+    },
+    async initializeComfortMatching() {
+      if (!this.csvFullContent || !this.columnMatching) {
+        this.comfortMatchingRows = []
+        return
+      }
+      const lines = this.csvFullContent.split('\n').filter(l => l.trim() !== '')
+      if (lines.length <= this.headerRowIndex) {
+        this.comfortMatchingRows = []
+        return
+      }
+      const header = this.parseCSVLine(lines[this.headerRowIndex])
+      const findIndexCI = (name) => header.findIndex(h => h && h.trim().toLowerCase() === name.trim().toLowerCase())
+      const questions = [
+        'How comfortable is the position of the mask on the nose?',
+        'Is there adequate room for eye protection?',
+        'Is there enough room to talk?',
+        'How comfortable is the position of the mask on face and cheeks?'
+      ]
+      const questionToIndex = {}
+      questions.forEach(q => {
+        const csvCol = Object.keys(this.columnMatching).find(col => this.columnMatching[col] === `comfort -> "${q}"`)
+        if (csvCol) {
+          const idx = findIndexCI(csvCol)
+          if (idx >= 0) questionToIndex[q] = idx
+        }
+      })
+      const uniquePairs = new Map()
+      for (let i = this.headerRowIndex + 1; i < lines.length; i++) {
+        const row = this.parseCSVLine(lines[i])
+        Object.keys(questionToIndex).forEach(q => {
+          const idx = questionToIndex[q]
+          const v = row[idx]?.trim()
+          if (v && v !== '') {
+            uniquePairs.set(`${q}|||${v}`, { question: q, fileValue: v })
+          }
+        })
+      }
+      const rows = Array.from(uniquePairs.values()).map(pair => {
+        let selected = ''
+        if (this.comfortMatching && this.comfortMatching[pair.question]) {
+          selected = this.comfortMatching[pair.question][pair.fileValue] || ''
+        }
+        return {
+          question: pair.question,
+          fileValue: pair.fileValue,
+          selectedBreathesafeValue: selected
+        }
+      })
+      this.comfortMatchingRows = rows
+    },
+    updateComfortMatching() {
+      const mapping = {}
+      this.comfortMatchingRows.forEach(row => {
+        if (!mapping[row.question]) mapping[row.question] = {}
+        if (row.selectedBreathesafeValue && row.selectedBreathesafeValue !== '') {
+          mapping[row.question][row.fileValue] = row.selectedBreathesafeValue
+        }
+      })
+      this.comfortMatching = mapping
+    },
+    attemptComfortAutoMatch() {
+      if (!this.comfortMatchingRows || this.comfortMatchingRows.length === 0) return
+      const THRESHOLD = 0.4
+      this.comfortMatchingRows.forEach(row => {
+        const options = this.getComfortOptions(row.question)
+        let best = ''
+        let bestSim = -1
+        options.forEach(opt => {
+          const sim = this.calculateSimilarity(row.fileValue, opt)
+          if (sim > bestSim) {
+            bestSim = sim
+            best = opt
+          }
+        })
+        if (best && bestSim >= THRESHOLD) {
+          row.selectedBreathesafeValue = best
+        }
+      })
+      this.updateComfortMatching()
+    },
+    async saveComfortMatching() {
+      if (!this.bulkFitTestsImportId || this.isSaving) {
+        return
+      }
+      const isAuthenticated = await this.checkAuthentication()
+      if (!isAuthenticated) {
+        this.redirectToSignIn()
+        return
+      }
+      this.isSaving = true
+      try {
+        this.updateComfortMatching()
+        const payload = {
+          bulk_fit_tests_import: {
+            comfort_matching: this.comfortMatching || {}
+          }
+        }
+        const response = await axios.put(`/bulk_fit_tests_imports/${this.bulkFitTestsImportId}.json`, payload)
+        if (response.status !== 200) {
+          const errorMessages = response.data.messages || ['Failed to save comfort matching.']
+          this.messages = errorMessages.map(msg => ({ str: msg }))
+        }
+      } catch (e) {
+        const errorMsg = e.response?.data?.messages?.[0] || e.message || 'Failed to save comfort matching.'
+        this.messages = [{ str: errorMsg }]
+      } finally {
+        this.isSaving = false
+      }
+    },
     buildReturnRouteQuery() {
       // Build query params for returning to this route after sign-in
       const query = {
