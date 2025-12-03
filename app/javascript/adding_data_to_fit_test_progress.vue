@@ -75,6 +75,10 @@ export default {
       type: Object,
       default: null
     },
+    hasExistingFitTestUser: {
+      type: Boolean,
+      default: false
+    },
     completedSteps: {
       type: Array,
       default: () => []
@@ -154,7 +158,13 @@ export default {
     getStepValue(stepKey) {
       switch (stepKey) {
         case 'User':
-          return (this.selectedUser && this.selectedUser.fullName) ? this.selectedUser.fullName : 'Not Selected'
+          if (this.selectedUser && this.selectedUser.fullName) {
+            return this.selectedUser.fullName
+          }
+          if (this.hasExistingFitTestUser) {
+            return 'Existing user'
+          }
+          return 'Not Selected'
         case 'Mask':
           return (this.selectedMask && this.selectedMask.uniqueInternalModelCode) ? this.selectedMask.uniqueInternalModelCode : 'Not Selected'
         case 'Facial Hair':

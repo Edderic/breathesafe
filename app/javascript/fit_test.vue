@@ -21,6 +21,7 @@
         :quantitativeProcedure="quantitativeProcedure"
         :fitTestProcedure="fitTestProcedure"
         :comfort="comfort"
+        :hasExistingFitTestUser="hasExistingFitTestUser"
         :completedSteps="completedFitTestSteps"
         :currentStep="tabToShow"
         @navigate-to-step="navigateToStep"
@@ -906,6 +907,7 @@ export default {
       },
       searchMask: "",
       searchUser: "",
+      hasExistingFitTestUser: false,
     }
   },
   props: {
@@ -1476,6 +1478,7 @@ export default {
             let fitTestData = response.data.fit_test
 
             this.id = fitTestData.id
+            this.hasExistingFitTestUser = !!fitTestData.user_id
 
             const foundMask = this.masks.filter((m) => m.id == fitTestData.mask_id)[0]
             this.selectedMask = foundMask || {
