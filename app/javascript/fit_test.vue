@@ -1338,6 +1338,13 @@ export default {
         return
       }
 
+      // If procedure is not set, infer from number of exercises
+      // Full OSHA typically has 9 exercises, OSHA Fast has 5
+      if (!this.quantitativeProcedure && exercises && exercises.length >= 8) {
+        this.quantitativeExercisesFullOsha = exercises
+        return
+      }
+
       this.quantitativeExercisesOSHAFastFFR = exercises
     },
     deviceInfo(d) {
@@ -2027,6 +2034,35 @@ export default {
           this.fitTestProcedure = 'quantitative_osha_fast'
         } else if (this.quantitativeProcedure === 'Full OSHA') {
           this.fitTestProcedure = 'quantitative_full_osha'
+        }
+      } else {
+        // If no explicit procedure, try to infer from exercise data
+        // Check quantitative exercises first (check both arrays since we don't know which one has data)
+        const quantExercisesFull = this.quantitativeExercisesFullOsha || []
+        const quantExercisesFast = this.quantitativeExercisesOSHAFastFFR || []
+        const quantExercises = quantExercisesFull.length > 0 ? quantExercisesFull : quantExercisesFast
+        const hasQuantData = quantExercises.some(ex => ex && ex.fit_factor != null && String(ex.fit_factor).trim() !== '')
+
+        if (hasQuantData) {
+          // Infer procedure type based on number of exercises
+          // Full OSHA has 9 exercises (including SEALED), OSHA Fast has 5
+          const exerciseCount = quantExercises.length
+          if (exerciseCount >= 8 || quantExercisesFull.length > 0) {
+            // Full OSHA typically has 9 exercises, or if exercises are in FullOsha array
+            this.fitTestProcedure = 'quantitative_full_osha'
+          } else if (exerciseCount >= 4) {
+            // OSHA Fast typically has 5 exercises
+            this.fitTestProcedure = 'quantitative_osha_fast'
+          }
+        } else {
+          // Check qualitative exercises
+          const qualExercises = this.qualitativeExercises || []
+          const hasQualData = qualExercises.some(ex => ex && ex.result != null && String(ex.result).trim() !== '')
+
+          if (hasQualData) {
+            // Qualitative Full OSHA typically has 7 exercises
+            this.fitTestProcedure = 'qualitative_full_osha'
+          }
         }
       }
     },
