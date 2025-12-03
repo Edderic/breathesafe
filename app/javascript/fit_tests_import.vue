@@ -72,6 +72,23 @@
                 </li>
                 <li><strong>Testing mode</strong> (e.g., N99, N95, or QLFT)</li>
               </ul>
+              <p>Optional columns</p>
+              <ul style="text-align: left; margin-left: 1.2em;">
+                <li><strong>User seal check questions</strong>, e.g.:
+                  <ul>
+                    <li>What do you think about the sizing of this mask relative to your face?</li>
+                    <li>How much air movement on your face along the seal of the mask did you feel?</li>
+                  </ul>
+                </li>
+                <li><strong>Comfort questions</strong>, e.g.:
+                  <ul>
+                    <li>How comfortable is the position of the mask on the nose?</li>
+                    <li>Is there adequate room for eye protection?</li>
+                    <li>Is there enough room to talk?</li>
+                    <li>How comfortable is the position of the mask on face and cheeks?</li>
+                  </ul>
+                </li>
+              </ul>
               <p>
                 <a href="/sample_fit_tests_import.csv" download>Download sample CSV template</a>
               </p>
