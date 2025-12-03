@@ -139,6 +139,11 @@ export default {
         completed.push('Fit Test')
       }
 
+      // Comfort is completed if all comfort questions are answered
+      if (this.isComfortComplete()) {
+        completed.push('Comfort')
+      }
+
       // Add other steps from props if provided
       this.completedSteps.forEach(step => {
         if (!completed.includes(step)) {
@@ -280,7 +285,16 @@ export default {
     },
     isComfortComplete() {
       if (!this.comfort) return false
-      return Object.values(this.comfort).every(value => value !== null)
+      // Only check the currently valid comfort questions (excluding removed "Is there adequate room for eye protection?")
+      const validQuestions = [
+        'How comfortable is the position of the mask on the nose?',
+        'Is there enough room to talk?',
+        'How comfortable is the position of the mask on face and cheeks?'
+      ]
+      return validQuestions.every(question => {
+        const value = this.comfort[question]
+        return value !== null && value !== undefined
+      })
     }
   }
 }
