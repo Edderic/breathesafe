@@ -5,4 +5,3 @@ class AddComfortMatchingToBulkFitTestsImports < ActiveRecord::Migration[7.0]
     add_column :bulk_fit_tests_imports, :comfort_matching, :jsonb, default: {}
   end
 end
-
