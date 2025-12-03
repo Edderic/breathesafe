@@ -173,6 +173,7 @@ class BulkFitTestsImportsController < ApplicationController
             testing_mode = fit_test_data[:testing_mode] || fit_test_data['testing_mode']
             facial_hair = fit_test_data[:facial_hair] || fit_test_data['facial_hair']
             user_seal_check = fit_test_data[:user_seal_check] || fit_test_data['user_seal_check']
+            comfort = fit_test_data[:comfort] || fit_test_data['comfort']
             exercises = fit_test_data[:exercises] || fit_test_data['exercises'] || {}
 
             # user_id is already the managed_user_id (user_id from ManagedUser)
@@ -251,6 +252,7 @@ class BulkFitTestsImportsController < ApplicationController
               bulk_fit_tests_import_id: bulk_import.id,
               facial_hair: facial_hair,
               user_seal_check: user_seal_check,
+              comfort: comfort,
               results: results
             )
           end
@@ -390,6 +392,7 @@ class BulkFitTestsImportsController < ApplicationController
       user_seal_check_matching: {},
       testing_mode_matching: {},
       qlft_values_matching: {},
+      comfort_matching: {},
       fit_testing_matching: {}
     )
   end

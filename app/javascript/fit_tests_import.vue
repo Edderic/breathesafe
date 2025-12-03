@@ -27,6 +27,7 @@
         :testingModeMatching="testingModeMatching"
         :qlftValuesMatching="qlftValuesMatching"
         :qlftValuesMatchingNotApplicable="qlftValuesMatchingNotApplicable"
+        :comfortMatching="comfortMatching"
         :fitTestDataMatching="fitTestDataMatching"
         :completedSteps="completedSteps"
         :currentStep="currentStep"
@@ -122,6 +123,58 @@
           <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
           <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='!importedFile || isSaving'/>
         </div>
+      </div>
+
+      <!-- Comfort Matching Step -->
+      <div v-show='currentStep == "Comfort Matching"' class='right-pane narrow-width'>
+        <div class='display'>
+          <h2 class='text-align-center'>Comfort Matching</h2>
+          <h3 class='text-align-center'>Match comfort questions</h3>
+
+          <div class='user-seal-check-matching-header justify-content-center'>
+            <Button shadow='true' class='button match-button' text="Match" @click='attemptComfortAutoMatch' :disabled='comfortMatchingRows.length === 0'/>
+          </div>
+
+          <div v-if="comfortMatchingRows.length > 0" class='user-seal-check-matching-table fit-test-data-table content'>
+            <table>
+              <thead>
+                <tr>
+                  <th>Breathesafe comfort question</th>
+                  <th>Value found in file</th>
+                  <th>Breathesafe matching value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, index) in comfortMatchingRows" :key="`${row.question}-${row.fileValue}-${index}`">
+                  <td>{{ row.question }}</td>
+                  <td>{{ row.fileValue }}</td>
+                  <td>
+                    <select
+                      v-model="row.selectedBreathesafeValue"
+                      @change="updateComfortMatching"
+                      class="usc-select"
+                      :disabled="isCompleted"
+                    >
+                      <option :value="''">-- Select --</option>
+                      <option v-for="opt in getComfortOptions(row.question)" :key="opt" :value="opt">{{ opt }}</option>
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-else class='text-align-center'>
+            <p>No comfort values found. You may skip this step.</p>
+          </div>
+        </div>
+        <br>
+        <div class='row buttons'>
+          <Button shadow='true' class='button' text="Back" @click='goToPreviousStep'/>
+          <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
+          <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='isSaving'/>
+        </div>
+        <br>
+        <br>
       </div>
 
       <!-- Column Matching Step -->
@@ -661,6 +714,10 @@
                   <th>Beard length (mm)</th>
                   <th>USC sizing</th>
                   <th>USC air movement</th>
+                  <th>Comfort - Nose</th>
+                  <th>Comfort - Eye Protection</th>
+                  <th>Comfort - Talk</th>
+                  <th>Comfort - Face/Cheeks</th>
                   <th>Bending over</th>
                   <th>Talking</th>
                   <th>Turning head side to side</th>
@@ -711,6 +768,10 @@
                   <td>
                     {{ row.uscAirMovement || '--' }}
                   </td>
+                  <td>{{ row.comfortNose || '--' }}</td>
+                  <td>{{ row.comfortEye || '--' }}</td>
+                  <td>{{ row.comfortTalk || '--' }}</td>
+                  <td>{{ row.comfortFace || '--' }}</td>
                   <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.bendingOver) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.bendingOver) }">{{ row.exercises.bendingOver !== null && row.exercises.bendingOver !== undefined ? row.exercises.bendingOver : '--' }}</td>
                   <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.talking) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.talking) }">{{ row.exercises.talking !== null && row.exercises.talking !== undefined ? row.exercises.talking : '--' }}</td>
                   <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.turningHeadSideToSide) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.turningHeadSideToSide) }">{{ row.exercises.turningHeadSideToSide !== null && row.exercises.turningHeadSideToSide !== undefined ? row.exercises.turningHeadSideToSide : '--' }}</td>
@@ -981,6 +1042,7 @@ export default {
       testingModeMatching: null,
       qlftValuesMatching: null,
       qlftValuesMatchingNotApplicable: false,
+      comfortMatching: null,
       fitTestDataMatching: null,
       completedSteps: [],
       bulkFitTestsImportId: null,
@@ -1013,6 +1075,7 @@ export default {
       showQlftValuesMatchConfirmation: false,
       pendingQlftValuesMatchOverwrites: {},
       pendingQlftValuesMatches: {},
+      comfortMatchingRows: [],
       fitTestDataRows: [],
       bulkImportStatus: null
     }
@@ -1636,6 +1699,11 @@ export default {
         await this.initializeQlftValuesMatching()
       }
 
+      // If navigating to Comfort Matching, initialize comfort matching
+      if (stepKey === 'Comfort Matching' && this.bulkFitTestsImportId) {
+        await this.initializeComfortMatching()
+      }
+
       // If navigating to Fit Test Data Matching, initialize fit test data matching
       if (stepKey === 'Fit Test Data Matching' && this.bulkFitTestsImportId) {
         await this.initializeFitTestDataMatching()
@@ -1773,6 +1841,14 @@ export default {
         await this.saveQlftValuesMatching()
         return // Navigation will happen in saveQlftValuesMatching if successful
       }
+      // If we're on the "Comfort Matching" step, save comfort matching data
+      if (this.currentStep === 'Comfort Matching') {
+        await this.saveComfortMatching()
+        // Move to Review
+        this.currentStep = 'Fit Test Data Matching'
+        await this.initializeFitTestDataMatching()
+        return
+      }
 
       const steps = [
         'Import File',
@@ -1782,6 +1858,7 @@ export default {
         'User Seal Check Matching',
         'Testing Mode Values Matching',
         'QLFT Values Matching',
+        'Comfort Matching',
         'Fit Test Data Matching'
       ]
       const currentIndex = steps.indexOf(this.currentStep)
@@ -2779,9 +2856,9 @@ export default {
           }
           // Move to next step - check if QLFT Values Matching is needed
           if (this.qlftValuesMatchingNotApplicable) {
-            // Skip QLFT Values Matching, go directly to Fit Test Data Matching
-            this.currentStep = 'Fit Test Data Matching'
-            await this.initializeFitTestDataMatching()
+            // Skip QLFT Values Matching, go to Comfort Matching
+            this.currentStep = 'Comfort Matching'
+            await this.initializeComfortMatching()
           } else {
             // Go to QLFT Values Matching
             this.currentStep = 'QLFT Values Matching'
@@ -3351,7 +3428,88 @@ export default {
           uscSizing,
           uscAirMovement,
           uscSizingFile,
-          uscAirMovementFile
+          uscAirMovementFile,
+          // Comfort display and file values (mapped for display, file for payload)
+          comfortNose: (() => {
+            const col = Object.keys(this.columnMatching).find(c => this.columnMatching[c] === 'comfort -> "How comfortable is the position of the mask on the nose?"')
+            if (!col) return null
+            const idx = headerRow.findIndex(h => h && h.trim().toLowerCase() === col.trim().toLowerCase())
+            if (idx < 0) return null
+            const val = csvRow[idx] ? csvRow[idx].trim() : null
+            if (!val) return null
+            const mapped = (this.comfortMatching && this.comfortMatching['How comfortable is the position of the mask on the nose?'])
+              ? this.comfortMatching['How comfortable is the position of the mask on the nose?'][val]
+              : null
+            return mapped || val
+          })(),
+          comfortEye: (() => {
+            const col = Object.keys(this.columnMatching).find(c => this.columnMatching[c] === 'comfort -> "Is there adequate room for eye protection?"')
+            if (!col) return null
+            const idx = headerRow.findIndex(h => h && h.trim().toLowerCase() === col.trim().toLowerCase())
+            if (idx < 0) return null
+            const val = csvRow[idx] ? csvRow[idx].trim() : null
+            if (!val) return null
+            const mapped = (this.comfortMatching && this.comfortMatching['Is there adequate room for eye protection?'])
+              ? this.comfortMatching['Is there adequate room for eye protection?'][val]
+              : null
+            return mapped || val
+          })(),
+          comfortTalk: (() => {
+            const col = Object.keys(this.columnMatching).find(c => this.columnMatching[c] === 'comfort -> "Is there enough room to talk?"')
+            if (!col) return null
+            const idx = headerRow.findIndex(h => h && h.trim().toLowerCase() === col.trim().toLowerCase())
+            if (idx < 0) return null
+            const val = csvRow[idx] ? csvRow[idx].trim() : null
+            if (!val) return null
+            const mapped = (this.comfortMatching && this.comfortMatching['Is there enough room to talk?'])
+              ? this.comfortMatching['Is there enough room to talk?'][val]
+              : null
+            return mapped || val
+          })(),
+          comfortFace: (() => {
+            const col = Object.keys(this.columnMatching).find(c => this.columnMatching[c] === 'comfort -> "How comfortable is the position of the mask on face and cheeks?"')
+            if (!col) return null
+            const idx = headerRow.findIndex(h => h && h.trim().toLowerCase() === col.trim().toLowerCase())
+            if (idx < 0) return null
+            const val = csvRow[idx] ? csvRow[idx].trim() : null
+            if (!val) return null
+            const mapped = (this.comfortMatching && this.comfortMatching['How comfortable is the position of the mask on face and cheeks?'])
+              ? this.comfortMatching['How comfortable is the position of the mask on face and cheeks?'][val]
+              : null
+            return mapped || val
+          })(),
+          comfortNoseFile: (() => {
+            const col = Object.keys(this.columnMatching).find(c => this.columnMatching[c] === 'comfort -> "How comfortable is the position of the mask on the nose?"')
+            if (!col) return null
+            const idx = headerRow.findIndex(h => h && h.trim().toLowerCase() === col.trim().toLowerCase())
+            if (idx < 0) return null
+            const val = csvRow[idx] ? csvRow[idx].trim() : null
+            return val || null
+          })(),
+          comfortEyeFile: (() => {
+            const col = Object.keys(this.columnMatching).find(c => this.columnMatching[c] === 'comfort -> "Is there adequate room for eye protection?"')
+            if (!col) return null
+            const idx = headerRow.findIndex(h => h && h.trim().toLowerCase() === col.trim().toLowerCase())
+            if (idx < 0) return null
+            const val = csvRow[idx] ? csvRow[idx].trim() : null
+            return val || null
+          })(),
+          comfortTalkFile: (() => {
+            const col = Object.keys(this.columnMatching).find(c => this.columnMatching[c] === 'comfort -> "Is there enough room to talk?"')
+            if (!col) return null
+            const idx = headerRow.findIndex(h => h && h.trim().toLowerCase() === col.trim().toLowerCase())
+            if (idx < 0) return null
+            const val = csvRow[idx] ? csvRow[idx].trim() : null
+            return val || null
+          })(),
+          comfortFaceFile: (() => {
+            const col = Object.keys(this.columnMatching).find(c => this.columnMatching[c] === 'comfort -> "How comfortable is the position of the mask on face and cheeks?"')
+            if (!col) return null
+            const idx = headerRow.findIndex(h => h && h.trim().toLowerCase() === col.trim().toLowerCase())
+            if (idx < 0) return null
+            const val = csvRow[idx] ? csvRow[idx].trim() : null
+            return val || null
+          })()
         })
       }
 
@@ -3776,6 +3934,12 @@ export default {
           } else {
             this.qlftValuesMatching = {}
           }
+          // Load comfort_matching if available
+          if (bulkImport.comfort_matching) {
+            this.comfortMatching = bulkImport.comfort_matching
+          } else {
+            this.comfortMatching = {}
+          }
 
           // Check if QLFT Values Matching is applicable
           const hasQlftRows = Object.values(this.testingModeMatching).some(value => value === 'QLFT')
@@ -3793,19 +3957,19 @@ export default {
           } else if (bulkImport.testing_mode_matching && Object.keys(this.testingModeMatching).length > 0) {
             // If testing mode matching exists, check if QLFT Values Matching is needed
             if (this.qlftValuesMatchingNotApplicable) {
-              // Skip QLFT Values Matching, go to Fit Test Data Matching
-              this.currentStep = 'Fit Test Data Matching'
-              this.completedSteps = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching', 'QLFT Values Matching']
+          // Skip QLFT Values Matching, go to Comfort Matching
+          this.currentStep = 'Comfort Matching'
+          this.completedSteps = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching', 'QLFT Values Matching']
               // Initialize fit test data matching after a short delay to ensure data is loaded
               this.$nextTick(() => {
-                this.initializeFitTestDataMatching()
+            this.initializeComfortMatching()
               })
             } else {
               // Go to QLFT Values Matching
               this.currentStep = 'QLFT Values Matching'
               this.completedSteps = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching']
             }
-          } else if (bulkImport.mask_matching && Object.keys(this.maskMatching).length > 0) {
+      } else if (bulkImport.mask_matching && Object.keys(this.maskMatching).length > 0) {
             // If mask matching exists, we're past Mask Matching step
             this.currentStep = 'User Seal Check Matching'
             this.completedSteps = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching']
@@ -3813,7 +3977,7 @@ export default {
             this.$nextTick(() => {
               this.initializeUserSealCheckMatching()
             })
-          } else if (bulkImport.user_matching && Object.keys(this.userMatching).length > 0) {
+      } else if (bulkImport.user_matching && Object.keys(this.userMatching).length > 0) {
             // If user matching exists, we're past User Matching step
             this.currentStep = 'Mask Matching'
             this.completedSteps = ['Import File', 'Column Matching', 'User Matching']
@@ -3950,6 +4114,26 @@ export default {
               [airKey]: mappedAir
             }
           }
+          // Build comfort payload (null-object pattern)
+          const comfortObj = {}
+          const comfortQuestions = [
+            'How comfortable is the position of the mask on the nose?',
+            'Is there adequate room for eye protection?',
+            'Is there enough room to talk?',
+            'How comfortable is the position of the mask on face and cheeks?'
+          ]
+          comfortQuestions.forEach(q => {
+            const csvVal = (q === comfortQuestions[0]) ? row.comfortNoseFile
+              : (q === comfortQuestions[1]) ? row.comfortEyeFile
+              : (q === comfortQuestions[2]) ? row.comfortTalkFile
+              : row.comfortFaceFile
+            let mapped = null
+            if (csvVal && this.comfortMatching && this.comfortMatching[q]) {
+              mapped = this.comfortMatching[q][csvVal] || null
+            }
+            comfortObj[q] = mapped
+          })
+          payload.comfort = comfortObj
           return payload
         })
 

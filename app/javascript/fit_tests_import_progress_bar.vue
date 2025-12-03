@@ -82,6 +82,10 @@ export default {
       type: Boolean,
       default: false
     },
+    comfortMatching: {
+      type: Object,
+      default: null
+    },
     fitTestDataMatching: {
       type: Object,
       default: null
@@ -110,6 +114,7 @@ export default {
         { key: 'User Seal Check Matching', name: 'User Seal Check Matching' },
         { key: 'Testing Mode Values Matching', name: 'Testing Mode Values Matching' },
         { key: 'QLFT Values Matching', name: 'QLFT Values Matching' },
+        { key: 'Comfort Matching', name: 'Comfort Matching' },
         { key: 'Fit Test Data Matching', name: 'Review' },
       ]
     }
@@ -158,6 +163,11 @@ export default {
       // QLFT Values Matching step is completed if qlftValuesMatching exists and is complete, or if not applicable
       if (this.qlftValuesMatchingNotApplicable || (this.qlftValuesMatching && this.isQlftValuesMatchingComplete())) {
         completed.push('QLFT Values Matching')
+      }
+
+      // Comfort Matching step is completed if comfort mapping exists and is complete
+      if (this.$props.comfortMatching && Object.keys(this.$props.comfortMatching).length > 0) {
+        completed.push('Comfort Matching')
       }
 
       // Fit Test Data Matching step is completed if fitTestDataMatching exists and is complete
@@ -250,7 +260,7 @@ export default {
       const value = this.getStepValue(stepKey)
 
       // For all steps that show actual values, show actual values or "Not Selected"
-      const stepsWithValues = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching', 'QLFT Values Matching']
+      const stepsWithValues = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching', 'QLFT Values Matching', 'Comfort Matching']
 
       if (stepsWithValues.includes(stepKey)) {
         if (value === 'Not Selected' || !value) {
