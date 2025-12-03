@@ -55,7 +55,7 @@
             <tbody>
               <tr>
                 <th>Selected User</th>
-                <td>{{selectedUser.fullName}}</td>
+                <td>{{ selectedUser ? selectedUser.fullName : '' }}</td>
               </tr>
             </tbody>
           </table>
@@ -1407,8 +1407,19 @@ export default {
       }
     },
     selectUser(id) {
-      this.selectedUser = this.managedUsers.filter((m) => m.managedId == id)[0]
-      this.searchUser = this.selectedUser.fullName
+      const found = this.managedUsers.filter((m) => m.managedId == id)[0]
+      if (found) {
+        this.selectedUser = found
+        this.searchUser = this.selectedUser.fullName
+      } else {
+        // Fallback to an empty RespiratorUser to avoid render errors
+        this.selectedUser = new RespiratorUser({
+          firstName: '',
+          lastName: '',
+          managedId: id
+        })
+        this.searchUser = ''
+      }
     },
     async loadMasks() {
       // TODO: make this more flexible so parents can load data of their children
