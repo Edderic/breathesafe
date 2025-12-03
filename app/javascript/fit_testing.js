@@ -179,6 +179,11 @@ export class FitTest {
       return -1
     }
 
+    // Handle empty or missing quantitative data
+    if (!this.quantitativeExercises || this.quantitativeExercises.length === 0) {
+      return 0
+    }
+
     // quantify HMFF
     let fitFactorsInverted = 0
     let fitFactorCount = 0
@@ -192,17 +197,22 @@ export class FitTest {
         // efficiency of the mask.
       }
 
-      if (!!ex.fit_factor) {
+      // Only process if fit_factor exists and is a valid number
+      const fitFactor = parseFloat(ex.fit_factor)
+      if (fitFactor && !isNaN(fitFactor) && isFinite(fitFactor) && fitFactor > 0) {
         fitFactorCount += 1
+        fitFactorsInverted += 1 / fitFactor
       }
-
-      fitFactorsInverted += 1 / ex.fit_factor
     }
-
 
     if (this.quantitativeExercises.length - fitFactorCount - sealingExercise > 0) {
       // there are still some exercises that haven't been done. OSHA protocol
       // expects users to finish every single exercise to get the overall HMFF
+      return 0
+    }
+
+    // Check if we have valid data to calculate HMFF
+    if (fitFactorCount === 0 || fitFactorsInverted === 0) {
       return 0
     }
 
@@ -213,6 +223,11 @@ export class FitTest {
       return "Skipped"
     }
 
+    // Handle empty or missing quantitative data
+    if (!this.quantitativeExercises || this.quantitativeExercises.length === 0) {
+      return 'Incomplete'
+    }
+
     // quantify HMFF
     let fitFactorsInverted = 0
     let fitFactorCount = 0
@@ -226,13 +241,13 @@ export class FitTest {
         // efficiency of the mask.
       }
 
-      if (!!ex.fit_factor) {
+      // Only process if fit_factor exists and is a valid number
+      const fitFactor = parseFloat(ex.fit_factor)
+      if (fitFactor && !isNaN(fitFactor) && isFinite(fitFactor) && fitFactor > 0) {
         fitFactorCount += 1
+        fitFactorsInverted += 1 / fitFactor
       }
-
-      fitFactorsInverted += 1 / ex.fit_factor
     }
-
 
     if (this.quantitativeExercises.length - fitFactorCount - sealingExercise > 0) {
       // there are still some exercises that haven't been done. OSHA protocol
@@ -240,6 +255,13 @@ export class FitTest {
       return 'Incomplete'
     }
 
-    return `${round(fitFactorCount / fitFactorsInverted, 1)} (${this.quantitativeTestingMode})`
+    // Check if we have valid data to calculate HMFF
+    if (fitFactorCount === 0 || fitFactorsInverted === 0) {
+      return 'Incomplete'
+    }
+
+    const hmff = round(fitFactorCount / fitFactorsInverted, 1)
+    const testingMode = this.quantitativeTestingMode || 'N95'
+    return `${hmff} (${testingMode})`
   }
 };

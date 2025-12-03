@@ -20,12 +20,46 @@ class FitTestsController < ApplicationController
 
       fm_id = latest_facial_measurement.id if latest_facial_measurement
 
-      fit_test = FitTest.create(
-        fit_test_data.merge(
-          facial_measurement_id: fm_id,
-          user_id: user.id
-        )
+      # Ensure results has proper structure if not provided or empty
+      fit_test_params = fit_test_data.merge(
+        facial_measurement_id: fm_id,
+        user_id: user.id
       )
+
+      # Set default results structure if missing or empty
+      if fit_test_params[:results].blank?
+        fit_test_params[:results] = {
+          'qualitative' => {
+            'aerosol' => { 'solution' => 'Saccharin' },
+            'exercises' => [
+              { 'name' => 'Normal breathing', 'result' => nil },
+              { 'name' => 'Deep breathing', 'result' => nil },
+              { 'name' => 'Turning head side to side', 'result' => nil },
+              { 'name' => 'Moving head up and down', 'result' => nil },
+              { 'name' => 'Talking', 'result' => nil },
+              { 'name' => 'Bending over', 'result' => nil },
+              { 'name' => 'Normal breathing', 'result' => nil }
+            ],
+            'procedure' => nil
+          },
+          'quantitative' => {
+            'exercises' => [
+              { 'name' => 'Bending over', 'fit_factor' => nil },
+              { 'name' => 'Talking', 'fit_factor' => nil },
+              { 'name' => 'Turning head side to side', 'fit_factor' => nil },
+              { 'name' => 'Moving head up and down', 'fit_factor' => nil },
+              { 'name' => 'Normal breathing 1', 'fit_factor' => nil },
+              { 'name' => 'Normal breathing 2', 'fit_factor' => nil },
+              { 'name' => 'Grimace', 'fit_factor' => nil },
+              { 'name' => 'Deep breathing', 'fit_factor' => nil },
+              { 'name' => 'Normal breathing (SEALED)', 'fit_factor' => nil }
+            ],
+            'testing_mode' => 'N95'
+          }
+        }
+      end
+
+      fit_test = FitTest.create(fit_test_params)
 
       if fit_test
         status = 201

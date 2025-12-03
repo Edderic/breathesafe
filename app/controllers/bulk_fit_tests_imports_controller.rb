@@ -245,6 +245,40 @@ class BulkFitTestsImportsController < ApplicationController
               }
             end
 
+            # Ensure results always has the proper structure (null object pattern)
+            # This handles cases where testing_mode is missing or invalid
+            if results.empty?
+              results = {
+                'qualitative' => {
+                  'aerosol' => { 'solution' => 'Saccharin' },
+                  'exercises' => [
+                    { 'name' => 'Normal breathing', 'result' => nil },
+                    { 'name' => 'Deep breathing', 'result' => nil },
+                    { 'name' => 'Turning head side to side', 'result' => nil },
+                    { 'name' => 'Moving head up and down', 'result' => nil },
+                    { 'name' => 'Talking', 'result' => nil },
+                    { 'name' => 'Bending over', 'result' => nil },
+                    { 'name' => 'Normal breathing', 'result' => nil }
+                  ],
+                  'procedure' => nil
+                },
+                'quantitative' => {
+                  'exercises' => [
+                    { 'name' => 'Bending over', 'fit_factor' => nil },
+                    { 'name' => 'Talking', 'fit_factor' => nil },
+                    { 'name' => 'Turning head side to side', 'fit_factor' => nil },
+                    { 'name' => 'Moving head up and down', 'fit_factor' => nil },
+                    { 'name' => 'Normal breathing 1', 'fit_factor' => nil },
+                    { 'name' => 'Normal breathing 2', 'fit_factor' => nil },
+                    { 'name' => 'Grimace', 'fit_factor' => nil },
+                    { 'name' => 'Deep breathing', 'fit_factor' => nil },
+                    { 'name' => 'Normal breathing (SEALED)', 'fit_factor' => nil }
+                  ],
+                  'testing_mode' => 'N95'
+                }
+              }
+            end
+
             # Create fit test
             FitTest.create!(
               user_id: user_id,
