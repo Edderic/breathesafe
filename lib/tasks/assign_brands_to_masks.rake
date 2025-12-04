@@ -82,11 +82,19 @@ namespace :masks do
         word_distance_score = 0.0
       else
         word_edit_dist = levenshtein_distance_words(brand_words, mask_words)
-        word_distance_score = 1.0 / (1.0 + word_edit_dist.to_f)
+        word_distance_score = 1.0 / (0.01 + word_edit_dist.to_f)
       end
 
-      # Average the two scores
-      (char_distance_score + word_distance_score) / 2.0
+      # Score 3: Word containment - check if any brand word is contained in any mask word
+      word_containment_score = 0.0
+      if brand_words.any? && mask_words.any?
+        word_containment_score = brand_words.any? { |brand_word|
+          mask_words.any? { |mask_word| mask_word.include?(brand_word) }
+        } ? 1.0 : 0.0
+      end
+
+      # Average the three scores
+      (char_distance_score + word_distance_score + word_containment_score) / 3.0
     end
 
     # Find masks without brand_id
@@ -131,7 +139,7 @@ namespace :masks do
       end
 
       # Sort by score descending and take top 10
-      top_matches = scores.sort_by { |s| -s[:score] }.first(20)
+      top_matches = scores.sort_by { |s| -s[:score] }.first(100)
 
       # Filter by threshold (0.1)
       matches_above_threshold = top_matches.select { |m| m[:score] >= threshold }
@@ -218,7 +226,7 @@ namespace :masks do
           end
         rescue Interrupt
           puts "\n\nInterrupted by user. Exiting..."
-          break
+          exit
         rescue StandardError => e
           puts "Error processing input: #{e.message}"
           puts "Skipping this mask."
