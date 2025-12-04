@@ -82,7 +82,7 @@ namespace :masks do
         word_distance_score = 0.0
       else
         word_edit_dist = levenshtein_distance_words(brand_words, mask_words)
-        word_distance_score = 1.0 - (word_edit_dist.to_f / max_words)
+        word_distance_score = 1.0 / (1.0 + word_edit_dist.to_f)
       end
 
       # Average the two scores
@@ -131,7 +131,7 @@ namespace :masks do
       end
 
       # Sort by score descending and take top 10
-      top_matches = scores.sort_by { |s| -s[:score] }.first(10)
+      top_matches = scores.sort_by { |s| -s[:score] }.first(20)
 
       # Filter by threshold (0.1)
       matches_above_threshold = top_matches.select { |m| m[:score] >= threshold }
