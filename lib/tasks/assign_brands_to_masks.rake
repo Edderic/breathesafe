@@ -63,10 +63,16 @@ namespace :masks do
       norm_mask = normalize_string(mask_code)
       norm_brand = normalize_string(brand_name)
 
-      # Score 1: String matching - 1 if brand name is contained in mask code, 0 otherwise
-      string_match_score = norm_mask.include?(norm_brand) ? 1.0 : 0.0
+      # Score 1: Character-based Levenshtein distance similarity
+      max_char_length = [norm_mask.length, norm_brand.length].max
+      if max_char_length.zero?
+        char_distance_score = 0.0
+      else
+        char_edit_dist = levenshtein_distance(norm_mask, norm_brand)
+        char_distance_score = 1.0 - (char_edit_dist.to_f / max_char_length)
+      end
 
-      # Score 2: Word-based Levenshtein distance
+      # Score 2: Word-based Levenshtein distance similarity
       # Split into words (split on whitespace and filter empty strings)
       mask_words = norm_mask.split(/\s+/).reject(&:empty?)
       brand_words = norm_brand.split(/\s+/).reject(&:empty?)
@@ -80,7 +86,7 @@ namespace :masks do
       end
 
       # Average the two scores
-      (string_match_score + word_distance_score) / 2.0
+      (char_distance_score + word_distance_score) / 2.0
     end
 
     # Find masks without brand_id
