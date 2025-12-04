@@ -34,21 +34,53 @@ namespace :masks do
       str.to_s.downcase.strip
     end
 
+    # Levenshtein distance for words (arrays)
+    def levenshtein_distance_words(words1, words2)
+      n = words1.length
+      m = words2.length
+      return m if n.zero?
+      return n if m.zero?
+
+      prev = (0..m).to_a
+      cur = Array.new(m + 1, 0)
+      (1..n).each do |i|
+        cur[0] = i
+        (1..m).each do |j|
+          cost = words1[i - 1] == words2[j - 1] ? 0 : 1
+          cur[j] = [
+            cur[j - 1] + 1,
+            prev[j] + 1,
+            prev[j - 1] + cost
+          ].min
+        end
+        prev, cur = cur, prev
+      end
+      prev[m]
+    end
+
     # Calculate similarity score between mask code and brand name
     def calculate_similarity(mask_code, brand_name)
       norm_mask = normalize_string(mask_code)
       norm_brand = normalize_string(brand_name)
 
-      # String matching score: 1 if brand name is contained in mask code, 0 otherwise
+      # Score 1: String matching - 1 if brand name is contained in mask code, 0 otherwise
       string_match_score = norm_mask.include?(norm_brand) ? 1.0 : 0.0
 
-      # Edit distance score: 1 - (edit_distance / max_length)
-      max_length = [norm_mask.length, norm_brand.length].max
-      edit_dist = levenshtein_distance(norm_mask, norm_brand)
-      edit_distance_score = max_length.zero? ? 0.0 : 1.0 - (edit_dist.to_f / max_length)
+      # Score 2: Word-based Levenshtein distance
+      # Split into words (split on whitespace and filter empty strings)
+      mask_words = norm_mask.split(/\s+/).reject(&:empty?)
+      brand_words = norm_brand.split(/\s+/).reject(&:empty?)
+
+      max_words = [mask_words.length, brand_words.length].max
+      if max_words.zero?
+        word_distance_score = 0.0
+      else
+        word_edit_dist = levenshtein_distance_words(brand_words, mask_words)
+        word_distance_score = 1.0 - (word_edit_dist.to_f / max_words)
+      end
 
       # Average the two scores
-      (string_match_score + edit_distance_score) / 2.0
+      (string_match_score + word_distance_score) / 2.0
     end
 
     # Find masks without brand_id
