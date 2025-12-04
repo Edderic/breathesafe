@@ -134,12 +134,12 @@ namespace :masks do
 
       # Calculate similarity scores for all brands
       scores = brands.map do |brand|
-        score = calculate_similarity(mask.unique_internal_model_code, brand.name)
+        score = calculate_similarity(mask.unique_internal_model_code.downcase, brand.name.downcase)
         { brand: brand, score: score }
       end
 
       # Sort by score descending and take top 10
-      top_matches = scores.sort_by { |s| -s[:score] }.first(100)
+      top_matches = scores.sort_by { |s| -s[:score] }.first(200)
 
       # Filter by threshold (0.1)
       matches_above_threshold = top_matches.select { |m| m[:score] >= threshold }
