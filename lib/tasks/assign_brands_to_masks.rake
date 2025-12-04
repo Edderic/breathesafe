@@ -74,6 +74,8 @@ namespace :masks do
     skipped_count = 0
     auto_skipped_mask_ids = []
 
+    threshold = 0.01
+
     masks.each_with_index do |mask, index|
       current_number = index + 1
       puts "=" * 80
@@ -94,10 +96,10 @@ namespace :masks do
       top_matches = scores.sort_by { |s| -s[:score] }.first(10)
 
       # Filter by threshold (0.1)
-      matches_above_threshold = top_matches.select { |m| m[:score] >= 0.1 }
+      matches_above_threshold = top_matches.select { |m| m[:score] >= threshold }
 
       if matches_above_threshold.empty?
-        puts "No matches found above threshold (0.1). Auto-skipping this mask."
+        puts "No matches found above threshold (#{threshold}). Auto-skipping this mask."
         auto_skipped_mask_ids << mask.id
         skipped_count += 1
         puts
@@ -105,7 +107,7 @@ namespace :masks do
       end
 
       # Display top matches
-      puts "Top matches (score >= 0.1):"
+      puts "Top matches (score >= #{threshold}):"
       puts "-" * 80
       puts "0. Skip this mask"
       matches_above_threshold.each_with_index do |match, idx|
@@ -131,9 +133,13 @@ namespace :masks do
           selected_match = matches_above_threshold[choice - 1]
           selected_brand = selected_match[:brand]
 
+          # Update the mask immediately
           mask.brand_id = selected_brand.id
           if mask.save
+            # Reload to ensure we have the latest data
+            mask.reload
             puts "✓ Assigned brand '#{selected_brand.name}' (ID: #{selected_brand.id}) to mask #{mask.id}"
+            puts "  Mask brand_id is now: #{mask.brand_id}"
             assigned_count += 1
           else
             puts "✗ Error saving mask: #{mask.errors.full_messages.join(', ')}"
