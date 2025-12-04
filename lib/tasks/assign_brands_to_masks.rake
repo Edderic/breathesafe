@@ -144,56 +144,87 @@ namespace :masks do
         next
       end
 
-      # Display top matches
-      puts "Top matches (score >= #{threshold}):"
-      puts "-" * 80
-      puts "0. Skip this mask"
-      matches_above_threshold.each_with_index do |match, idx|
-        number = idx + 1
-        brand = match[:brand]
-        score = match[:score]
-        puts "#{number}. Brand: #{brand.name} (ID: #{brand.id}) - Score: #{score.round(4)}"
-      end
-      puts "-" * 80
-      puts
+      # Display matches with pagination (10 at a time)
+      start_index = 0
+      page_size = 10
+      total_matches = matches_above_threshold.length
 
-      # Get user input
-      begin
-        print "Enter your choice (0-#{matches_above_threshold.length}): "
-        input = STDIN.gets.chomp.strip
+      loop do
+        # Calculate which matches to show on this page
+        end_index = [start_index + page_size, total_matches].min
+        current_page_matches = matches_above_threshold[start_index...end_index]
 
-        choice = input.to_i
-
-        if choice.zero?
-          puts "Skipping mask #{mask.id}"
-          skipped_count += 1
-        elsif choice >= 1 && choice <= matches_above_threshold.length
-          selected_match = matches_above_threshold[choice - 1]
-          selected_brand = selected_match[:brand]
-
-          # Update the mask immediately
-          mask.brand_id = selected_brand.id
-          if mask.save
-            # Reload to ensure we have the latest data
-            mask.reload
-            puts "✓ Assigned brand '#{selected_brand.name}' (ID: #{selected_brand.id}) to mask #{mask.id}"
-            puts "  Mask brand_id is now: #{mask.brand_id}"
-            assigned_count += 1
-          else
-            puts "✗ Error saving mask: #{mask.errors.full_messages.join(', ')}"
-            skipped_count += 1
-          end
-        else
-          puts "Invalid choice. Please enter a number between 0 and #{matches_above_threshold.length}."
-          redo
+        puts "Top matches (score >= #{threshold}):"
+        puts "-" * 80
+        puts "0. Skip this mask"
+        current_page_matches.each_with_index do |match, idx|
+          number = start_index + idx + 1
+          brand = match[:brand]
+          score = match[:score]
+          puts "#{number}. Brand: #{brand.name} (ID: #{brand.id}) - Score: #{score.round(4)}"
         end
-      rescue Interrupt
-        puts "\n\nInterrupted by user. Exiting..."
-        break
-      rescue StandardError => e
-        puts "Error processing input: #{e.message}"
-        puts "Skipping this mask."
-        skipped_count += 1
+        if end_index < total_matches
+          puts "m. Show more options (#{end_index} of #{total_matches} shown)"
+        end
+        puts "-" * 80
+        puts
+
+        # Get user input
+        begin
+          max_choice = end_index
+          print "Enter your choice (0-#{max_choice}"
+          print ", m for more" if end_index < total_matches
+          print "): "
+          input = STDIN.gets.chomp.strip.downcase
+
+          if input == 'm'
+            if end_index < total_matches
+              start_index = end_index
+              puts
+              next
+            else
+              puts "No more options to show."
+              redo
+            end
+          end
+
+          choice = input.to_i
+
+          if choice.zero?
+            puts "Skipping mask #{mask.id}"
+            skipped_count += 1
+            break
+          elsif choice >= 1 && choice <= total_matches
+            selected_match = matches_above_threshold[choice - 1]
+            selected_brand = selected_match[:brand]
+
+            # Update the mask immediately
+            mask.brand_id = selected_brand.id
+            if mask.save
+              # Reload to ensure we have the latest data
+              mask.reload
+              puts "✓ Assigned brand '#{selected_brand.name}' (ID: #{selected_brand.id}) to mask #{mask.id}"
+              puts "  Mask brand_id is now: #{mask.brand_id}"
+              assigned_count += 1
+            else
+              puts "✗ Error saving mask: #{mask.errors.full_messages.join(', ')}"
+              skipped_count += 1
+            end
+            break
+          else
+            puts "Invalid choice. Please enter a number between 0 and #{total_matches}"
+            puts "or 'm' to show more options." if end_index < total_matches
+            redo
+          end
+        rescue Interrupt
+          puts "\n\nInterrupted by user. Exiting..."
+          break
+        rescue StandardError => e
+          puts "Error processing input: #{e.message}"
+          puts "Skipping this mask."
+          skipped_count += 1
+          break
+        end
       end
 
       puts
