@@ -112,7 +112,7 @@ namespace :masks do
     skipped_count = 0
     auto_skipped_mask_ids = []
 
-    threshold = 0.01
+    threshold = 0.001
 
     masks.each_with_index do |mask, index|
       current_number = index + 1
