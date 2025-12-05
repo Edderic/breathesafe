@@ -34,6 +34,7 @@ class UserSealCheckFacialMeasurementsService
             masks.style,
             '#{self}' AS source,
             fit_tests.user_id,
+            fit_tests.created_at,
             fit_tests.facial_measurement_id,
             facial_measurements.arkit
           FROM fit_tests_with_seal_checks

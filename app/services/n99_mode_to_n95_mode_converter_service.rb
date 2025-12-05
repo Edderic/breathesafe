@@ -388,6 +388,7 @@ class N99ModeToN95ModeConverterService
             '#{self}' AS source,
             mask_id,
             ft.user_id,
+            ft.created_at,
             ft.facial_measurement_id,
             fm.arkit
           FROM unioned

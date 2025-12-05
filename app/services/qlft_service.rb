@@ -76,6 +76,7 @@ class QlftService
             masks.style,
             '#{self}' AS source,
             fit_tests.user_id,
+            fit_tests.created_at,
             mask_id,
             fit_tests.facial_measurement_id,
             facial_measurements.arkit
