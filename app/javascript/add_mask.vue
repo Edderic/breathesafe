@@ -391,15 +391,6 @@
 
     </div>
     <div class='grid bar-charts main-section' v-show='showMode &&  displayTab == "Fit Testing"'>
-      <div class='card' v-for='s in scatterPlots'>
-        <ScatterPlot
-          :title="s.title"
-          :xLabel="s.xLabel"
-          :yLabel="s.yLabel"
-          :points="s.points"
-          :crossHairPoint="s.crossHairPoint"
-        />
-      </div>
       <div class='card'>
         <h3 class='title'>Counts</h3>
         <HorizontalStackedBar
