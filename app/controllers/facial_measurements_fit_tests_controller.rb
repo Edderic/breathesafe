@@ -48,7 +48,27 @@ class FacialMeasurementsFitTestsController < ApplicationController
   end
 
   def index
-    fit_tests_with_facial_measurements = FitTestsWithFacialMeasurementsService.call
+    # Check if demographics are requested
+    with_demographics = params[:with_demographics] == 'true'
+
+    # If demographics are requested, verify admin access
+    if with_demographics && (unauthorized? || !current_user.admin)
+      to_render = {
+        fit_tests_with_facial_measurements: [],
+        messages: ['Unauthorized. Admin access required to view demographics.']
+      }
+
+      respond_to do |format|
+        format.json do
+          render json: to_render.to_json, status: :forbidden
+        end
+      end
+      return
+    end
+
+    fit_tests_with_facial_measurements = FitTestsWithFacialMeasurementsService.call(
+      with_demographics: with_demographics
+    )
 
     to_render = {
       fit_tests_with_facial_measurements: fit_tests_with_facial_measurements
@@ -62,8 +82,29 @@ class FacialMeasurementsFitTestsController < ApplicationController
   end
 
   def show
+    # Check if demographics are requested
+    with_demographics = params[:with_demographics] == 'true'
+
+    # If demographics are requested, verify admin access
+    if with_demographics && (unauthorized? || !current_user.admin)
+      to_render = {
+        fit_tests_with_facial_measurements: [],
+        messages: ['Unauthorized. Admin access required to view demographics.']
+      }
+
+      respond_to do |format|
+        format.json do
+          render json: to_render.to_json, status: :forbidden
+        end
+      end
+      return
+    end
+
     fit_tests_with_facial_measurements = \
-      FitTestsWithFacialMeasurementsService.call(mask_id: mask_id)
+      FitTestsWithFacialMeasurementsService.call(
+        mask_id: mask_id,
+        with_demographics: with_demographics
+      )
 
     to_render = {
       fit_tests_with_facial_measurements: fit_tests_with_facial_measurements
