@@ -35,7 +35,7 @@
       <Button shadow='true' @click="signIn" text='Sign In'/>
     </div>
 
-    <div class='container' v-if='!registered'>
+    <div class='container checkbox-container' v-if='!registered'>
       <input
         v-model='agreeTOSMedicalDisclaimerPrivacyPolicy'
         type="checkbox"
@@ -266,7 +266,27 @@ export default {
     }
 
     input[type='checkbox'] {
-      transform: scale(2)
+      width: 1.2em;
+      height: 1.2em;
+      min-width: 1.2em;
+      min-height: 1.2em;
+      -webkit-appearance: checkbox;
+      appearance: checkbox;
+      margin-right: 0.5em;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+
+    .checkbox-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .checkbox-container label {
+      padding: 0;
+      margin-left: 0.5em;
+      flex: 1;
     }
   }
 </style>
