@@ -273,6 +273,16 @@ export default {
     }
     await this.fetchRecommenderColumns()
   },
+  watch: {
+    '$route'(to, from) {
+      // Reload managed users when navigating back to RespiratorUsers page
+      // This ensures we have the latest data, especially after saving profile changes
+      // Only reload if we're actually navigating TO RespiratorUsers (not just query changes)
+      if (this.currentUser && to.name === 'RespiratorUsers' && from.name !== 'RespiratorUsers') {
+        this.loadManagedUsers()
+      }
+    }
+  },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
