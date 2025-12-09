@@ -408,7 +408,16 @@ export default {
       return `Which race or ethnicity best describes ${this.managedUser.firstName}?`;
     },
     latestFacialMeasurement() {
-      return this.facialMeasurements[this.facialMeasurements.length - 1];
+      if (!this.facialMeasurements || this.facialMeasurements.length === 0) {
+        return null;
+      }
+      // Find the measurement with the most recent updatedAt timestamp
+      return this.facialMeasurements.reduce((latest, current) => {
+        if (!latest) return current;
+        if (!current || !current.updatedAt) return latest;
+        if (!latest.updatedAt) return current;
+        return new Date(current.updatedAt) > new Date(latest.updatedAt) ? current : latest;
+      }, null);
     },
     sortedFacialMeasurements() {
       return this.facialMeasurements.sort((a, b) => {
