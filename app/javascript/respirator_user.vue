@@ -108,7 +108,7 @@ An iOS app is currently in development to make the facial measurement collection
 
         <!-- iOS App Data (ARKit) -->
         <div v-if='infoToShow == "straightLineMeasurementsGuide"' style="margin: 1em 0;">
-          <h4>iOS App Data</h4>
+          <h4>iOS App Data<span v-if='arkitTimestamp'> (updated: {{ arkitTimestamp }})</span></h4>
           <div v-if='mode == "View"'>
             <pre v-if='latestFacialMeasurement && latestFacialMeasurement.arkit' style="background-color: #f5f5f5; padding: 1em; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; overflow-y: auto; max-height: 40vh;">{{ formattedArkit }}</pre>
             <p v-else style="color: #666; font-style: italic;">No iOS app data available.</p>
@@ -424,6 +424,28 @@ export default {
       } catch (e) {
         return String(this.latestFacialMeasurement.arkit);
       }
+    },
+    arkitTimestamp() {
+      if (!this.latestFacialMeasurement || !this.latestFacialMeasurement.arkit) {
+        return null;
+      }
+      // Use createdAt from the facial measurement (when ARKit data was saved)
+      const timestamp = this.latestFacialMeasurement.createdAt;
+      if (!timestamp) {
+        return null;
+      }
+      // Format as YYYY-MM-DD HH:MM:SS
+      const date = new Date(timestamp);
+      if (isNaN(date.getTime())) {
+        return null;
+      }
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     },
     aggregatedArkitMeasurements() {
       // Use aggregated values from Ruby backend (computed in FacialMeasurement model)
