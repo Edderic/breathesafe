@@ -154,13 +154,10 @@ An iOS app is currently in development to make the facial measurement collection
 
       <div class='flex-dir-col' v-show="secondaryTab == 'Part I'">
         <br>
-        <table>
+        <table class="aggregated-measurements-table">
           <thead>
             <tr>
-              <th colspan='2'><h3>Straight-line Measurements (Part I)</h3></th>
-              <td>
-                <CircularButton text="?" @click="toggleInfo('straightLineMeasurementsGuide')" :highlight="infoToShow == 'straightLineMeasurementsGuide'"/>
-              </td>
+              <th colspan='2'><h3>Aggregated Measurements</h3></th>
             </tr>
           </thead>
           <tbody>
@@ -168,9 +165,6 @@ An iOS app is currently in development to make the facial measurement collection
               <th colspan="1">
                 <label>Nose (mm)</label>
               </th>
-              <td>
-                <CircularButton text="?" @click="toggleInfo('noseArkit')" :highlight="infoToShow == 'noseArkit'"/>
-              </td>
               <td>
                 <span v-if="aggregatedArkitMeasurements.nose != null && typeof aggregatedArkitMeasurements.nose === 'number'">
                   {{ aggregatedArkitMeasurements.nose.toFixed(1) }}
@@ -184,9 +178,6 @@ An iOS app is currently in development to make the facial measurement collection
                 <label>Strap (mm)</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('strapArkit')" :highlight="infoToShow == 'strapArkit'"/>
-              </td>
-              <td>
                 <span v-if="aggregatedArkitMeasurements.strap != null && typeof aggregatedArkitMeasurements.strap === 'number'">
                   {{ aggregatedArkitMeasurements.strap.toFixed(1) }}
                 </span>
@@ -198,9 +189,6 @@ An iOS app is currently in development to make the facial measurement collection
               <th colspan="1">
                 <label>Top Cheek (mm)</label>
               </th>
-              <td>
-                <CircularButton text="?" @click="toggleInfo('topCheekArkit')" :highlight="infoToShow == 'topCheekArkit'"/>
-              </td>
               <td>
                 <span v-if="aggregatedArkitMeasurements.topCheek != null && typeof aggregatedArkitMeasurements.topCheek === 'number'">
                   {{ aggregatedArkitMeasurements.topCheek.toFixed(1) }}
@@ -214,9 +202,6 @@ An iOS app is currently in development to make the facial measurement collection
                 <label>Mid Cheek (mm)</label>
               </th>
               <td>
-                <CircularButton text="?" @click="toggleInfo('midCheekArkit')" :highlight="infoToShow == 'midCheekArkit'"/>
-              </td>
-              <td>
                 <span v-if="aggregatedArkitMeasurements.midCheek != null && typeof aggregatedArkitMeasurements.midCheek === 'number'">
                   {{ aggregatedArkitMeasurements.midCheek.toFixed(1) }}
                 </span>
@@ -228,9 +213,6 @@ An iOS app is currently in development to make the facial measurement collection
               <th colspan="1">
                 <label>Chin (mm)</label>
               </th>
-              <td>
-                <CircularButton text="?" @click="toggleInfo('chinArkit')" :highlight="infoToShow == 'chinArkit'"/>
-              </td>
               <td>
                 <span v-if="aggregatedArkitMeasurements.chin != null && typeof aggregatedArkitMeasurements.chin === 'number'">
                   {{ aggregatedArkitMeasurements.chin.toFixed(1) }}
@@ -1107,6 +1089,70 @@ export default {
       width: 90vw;
       padding: 1em;
     }
+  }
+
+  .aggregated-measurements-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .aggregated-measurements-table thead {
+    background-color: #f5f5f5;
+  }
+
+  .aggregated-measurements-table thead th {
+    padding: 1em;
+    text-align: left;
+    border-bottom: 2px solid #ddd;
+  }
+
+  .aggregated-measurements-table thead th h3 {
+    margin: 0;
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .aggregated-measurements-table tbody tr {
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s ease;
+  }
+
+  .aggregated-measurements-table tbody tr:hover {
+    background-color: #f9f9f9;
+  }
+
+  .aggregated-measurements-table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .aggregated-measurements-table tbody th {
+    padding: 0.75em 1em;
+    text-align: left;
+    font-weight: 500;
+    color: #555;
+    width: 50%;
+  }
+
+  .aggregated-measurements-table tbody th label {
+    margin: 0;
+    font-weight: 500;
+  }
+
+  .aggregated-measurements-table tbody td {
+    padding: 0.75em 1em;
+    text-align: right;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .aggregated-measurements-table tbody td span {
+    font-size: 1em;
   }
 
 </style>
