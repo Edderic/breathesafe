@@ -3,9 +3,107 @@
     <CircularButton text="TOC" class='toc-button'/>
   </router-link>
 
+<div class="container">
+  <!-- Mobile TOC - shown at top on mobile -->
+  <div class='toc toc-mobile margined' id='toc-mobile'>
+    <h2><strong>TABLE OF CONTENTS</strong></h2>
+
+    <router-link to="/privacy#top">
+      PRIVACY POLICY (BREATHESAFE & SNAPFIT)
+    </router-link>
+
+    <router-link to="/privacy#who-we-are">
+      1. WHO WE ARE
+    </router-link>
+
+    <router-link to="/privacy#what-this-policy-covers">
+      2. WHAT THIS POLICY COVERS
+    </router-link>
+
+    <router-link to="/privacy#baseline-app-use">
+      2A. BASELINE APP USE (NON-RESEARCH)
+    </router-link>
+
+    <router-link to="/privacy#optional-research-participation">
+      2B. OPTIONAL RESEARCH PARTICIPATION (OPT-IN)
+    </router-link>
+
+    <router-link to="/privacy#information-we-collect">
+      3. INFORMATION WE COLLECT
+    </router-link>
+
+    <router-link to="/privacy#information-you-provide">
+      3.1 INFORMATION YOU PROVIDE TO US
+    </router-link>
+
+    <router-link to="/privacy#facial-measurement-data">
+      3.2 FACIAL MEASUREMENT DATA (BASELINE VS RESEARCH)
+    </router-link>
+
+    <router-link to="/privacy#automatically-collected-data">
+      3.3 AUTOMATICALLY COLLECTED TECHNICAL DATA
+    </router-link>
+
+    <router-link to="/privacy#how-we-use-information">
+      4. HOW WE USE YOUR INFORMATION
+    </router-link>
+
+    <router-link to="/privacy#baseline-use">
+      4.1 BASELINE APP USE (NON-RESEARCH)
+    </router-link>
+
+    <router-link to="/privacy#research-use">
+      4.2 OPTIONAL RESEARCH PARTICIPATION
+    </router-link>
+
+    <router-link to="/privacy#recommendations-generated">
+      5. HOW RECOMMENDATIONS ARE GENERATED
+    </router-link>
+
+    <router-link to="/privacy#legal-bases">
+      6. LEGAL BASES FOR PROCESSING (GDPR / UK GDPR)
+    </router-link>
+
+    <router-link to="/privacy#sharing-information">
+      7. SHARING YOUR INFORMATION
+    </router-link>
+
+    <router-link to="/privacy#public-display">
+      8. WHAT WE DISPLAY PUBLICLY
+    </router-link>
+
+    <router-link to="/privacy#international-transfers">
+      9. INTERNATIONAL TRANSFERS
+    </router-link>
+
+    <router-link to="/privacy#data-retention">
+      10. DATA RETENTION
+    </router-link>
+
+    <router-link to="/privacy#security">
+      11. SECURITY
+    </router-link>
+
+    <router-link to="/privacy#your-rights">
+      12. YOUR RIGHTS AND CHOICES
+    </router-link>
+
+    <router-link to="/privacy#children-consent">
+      13. CHILDREN AND PARENT/GUARDIAN CONSENT
+    </router-link>
+
+    <router-link to="/privacy#policy-changes">
+      14. CHANGES TO THIS POLICY
+    </router-link>
+
+    <router-link to="/privacy#contact">
+      15. CONTACT
+    </router-link>
+  </div>
+
 <div class="grid">
 
-  <div class='toc margined overflow' id='toc'>
+  <div class='toc toc-desktop margined overflow' id='toc'>
     <br>
     <br>
     <br>
@@ -457,6 +555,7 @@
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <script>
@@ -471,6 +570,11 @@ export default {
 </script>
 
 <style scoped>
+  .container {
+    display: flex;
+    flex-direction: column;
+  }
+
   .grid {
     display: grid;
     grid-template-columns: 20% 80%;
@@ -512,6 +616,12 @@ export default {
     top: 1em;
     right: 1em;
     z-index: 1000;
+    display: none;
+  }
+
+  /* Mobile TOC - hidden on desktop */
+  .toc-mobile {
+    display: none;
   }
 
   @media(max-width: 700px) {
@@ -519,8 +629,34 @@ export default {
       grid-template-columns: 100%;
     }
 
-    .toc {
+    /* Hide desktop TOC on mobile */
+    .toc-desktop {
       display: none;
+    }
+
+    /* Show mobile TOC at top */
+    .toc-mobile {
+      display: flex;
+      background-color: #f8f8f8;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 1em;
+      margin-bottom: 1em;
+    }
+
+    .toc-mobile h2 {
+      font-size: 1.2em;
+      margin: 0 0 0.5em 0;
+    }
+
+    .toc-mobile a {
+      padding: 0.3em 0.5em;
+      font-size: 0.9em;
+    }
+
+    /* Show TOC button on mobile */
+    .toc-button {
+      display: block;
     }
   }
 </style>
