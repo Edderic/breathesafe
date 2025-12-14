@@ -63,12 +63,16 @@ class ManagedUser < ApplicationRecord
       # Calculate demographics completion percentage
       demog_percent_complete = 0
       if profile
+        # Required fields for all users
         demog_fields = [
           profile.race_ethnicity,
           profile.gender_and_sex,
-          profile.year_of_birth,
-          profile.demographics
+          profile.year_of_birth
         ]
+
+        # Add other_gender to required fields only if gender_and_sex is "Other"
+        demog_fields << profile.other_gender if profile.gender_and_sex == 'Other'
+
         completed_demog_fields = demog_fields.count(&:present?)
         demog_percent_complete = (completed_demog_fields.to_f / demog_fields.length * 100).round
       end
