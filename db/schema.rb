@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_251_214_035_954) do
+ActiveRecord::Schema[7.0].define(version: 20_251_214_043_923) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -122,23 +122,23 @@ ActiveRecord::Schema[7.0].define(version: 20_251_214_035_954) do
   create_table 'facial_measurements', force: :cascade do |t|
     t.bigint 'user_id', null: false
     t.string 'source'
-    t.integer 'face_width'
-    t.integer 'jaw_width'
-    t.integer 'face_depth'
-    t.integer 'face_length'
-    t.float 'lower_face_length'
-    t.integer 'bitragion_menton_arc'
-    t.integer 'bitragion_subnasale_arc'
     t.string 'cheek_fullness'
     t.datetime 'created_at', null: false
     t.datetime 'updated_at', null: false
-    t.integer 'nasal_root_breadth'
-    t.integer 'nose_protrusion'
-    t.integer 'nose_bridge_height'
-    t.integer 'lip_width'
-    t.integer 'head_circumference'
-    t.integer 'nose_breadth'
     t.jsonb 'arkit'
+    t.text 'face_width'
+    t.text 'jaw_width'
+    t.text 'face_depth'
+    t.text 'face_length'
+    t.text 'bitragion_menton_arc'
+    t.text 'bitragion_subnasale_arc'
+    t.text 'nasal_root_breadth'
+    t.text 'nose_protrusion'
+    t.text 'nose_bridge_height'
+    t.text 'lip_width'
+    t.text 'head_circumference'
+    t.text 'nose_breadth'
+    t.text 'lower_face_length'
     t.index %w[user_id created_at], name: 'index_facial_measurements_on_user_id_and_created_at_desc',
                                     order: { created_at: :desc }
     t.index ['user_id'], name: 'index_facial_measurements_on_user_id'

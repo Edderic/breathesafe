@@ -25,6 +25,13 @@ class FacialMeasurement < ApplicationRecord
     'nose_breadth'
   ].freeze
 
+  # Encrypt sensitive facial measurement data
+  encrypts :face_width, :jaw_width, :face_depth, :face_length, :lower_face_length,
+           :bitragion_menton_arc, :bitragion_subnasale_arc, :cheek_fullness,
+           :nasal_root_breadth, :nose_protrusion, :nose_bridge_height,
+           :lip_width, :head_circumference, :nose_breadth, :arkit,
+           deterministic: true
+
   belongs_to :user
 
   validate :validate_arkit_structure, if: -> { arkit.present? }
