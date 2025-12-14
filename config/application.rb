@@ -31,5 +31,8 @@ module Breathesafe
 
     # Enable encryption
     config.active_record.encryption.extend_queries = true
+
+    # Temporarily support unencrypted data during transition period
+    config.active_record.encryption.support_unencrypted_data = true
   end
 end
