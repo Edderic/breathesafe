@@ -296,9 +296,9 @@ ActiveRecord::Schema[7.0].define(version: 20_251_214_035_954) do
     t.string 'race_ethnicity'
     t.string 'gender_and_sex'
     t.string 'other_gender'
-    t.integer 'year_of_birth'
     t.datetime 'study_start_datetime'
     t.datetime 'study_goal_end_datetime'
+    t.text 'year_of_birth'
     t.index ['user_id'], name: 'index_profiles_on_user_id', unique: true
   end
 
