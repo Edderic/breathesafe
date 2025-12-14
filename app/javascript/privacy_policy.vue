@@ -215,7 +215,7 @@
       <br>
       <br>
       <div class="styles-documentPreviewer-881656"><div><span class="document-previewer-logo-d16635"></span><div class="document-previewer-wrapper-a717db">      <div data-custom-class="body">
-      <div><strong><span style="font-size: 26px;"><span data-custom-class="title">PRIVACY POLICY (BREATHESAFE & SNAPFIT)</span></span></strong></div>
+      <div><strong><span style="font-size: 26px;"><span data-custom-class="title">Privacy Policy (Breathesafe &amp; SnapFit)</span></span></strong></div>
       <div><br></div>
       <div><span style="color: rgb(127, 127, 127);"><strong><span style="font-size: 15px;"><span data-custom-class="subtitle">Last updated December 13, 2025</span></span></strong></span></div>
       <div><br></div>
@@ -228,7 +228,7 @@
       <div id="who-we-are">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">1. WHO WE ARE</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">1. Who We Are</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><strong>Data Controller:</strong> Breathesafe LLC</span></span></span></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><strong>Registered:</strong> Nevada, United States</span></span></span></div>
@@ -240,7 +240,7 @@
       <div id="what-this-policy-covers">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">2. WHAT THIS POLICY COVERS</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">2. What This Policy Covers</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">SnapFit has two data-use modes:</span></span></span></div>
         <div><br></div>
@@ -275,7 +275,7 @@
       <div id="information-we-collect">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">3. INFORMATION WE COLLECT</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">3. Information We Collect</span></span></strong></div>
         <div><br></div>
 
         <!-- Section 3.1: Information you provide -->
@@ -341,7 +341,7 @@
       <div id="how-we-use-information">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">4. HOW WE USE YOUR INFORMATION</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">4. How We Use Your Information</span></span></strong></div>
         <div><br></div>
 
         <!-- Section 4.1: Baseline app use -->
@@ -376,7 +376,7 @@
       <div id="recommendations-generated">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">5. HOW RECOMMENDATIONS ARE GENERATED</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">5. How Recommendations Are Generated</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">If you use "Recommend masks" and consent to TrueDepth scanning:</span></span></span></div>
         <ol>
@@ -391,7 +391,7 @@
       <div id="legal-bases">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">6. LEGAL BASES FOR PROCESSING (GDPR / UK GDPR)</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">6. Legal Bases for Processing (GDPR / UK GDPR)</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Where applicable, we rely on:</span></span></span></div>
         <ul>
@@ -412,7 +412,7 @@
       <div id="sharing-information">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">7. SHARING YOUR INFORMATION</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">7. Sharing Your Information</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We do <strong>not</strong> sell personal data.</span></span></span></div>
         <div><br></div>
@@ -428,7 +428,7 @@
       <div id="public-display">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">8. WHAT WE DISPLAY PUBLICLY</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">8. What We Display Publicly</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We may display <strong>aggregated statistics</strong>, such as:</span></span></span></div>
         <ul>
@@ -449,7 +449,7 @@
       <div id="international-transfers">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">9. INTERNATIONAL TRANSFERS</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">9. International Transfers</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Data may be processed in the United States. Where required, appropriate safeguards are applied for international transfers.</span></span></span></div>
       </div>
@@ -458,7 +458,7 @@
       <div id="data-retention">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">10. DATA RETENTION</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">10. Data Retention</span></span></strong></div>
         <div><br></div>
 
         <div><strong><span style="font-size: 14px;"><span data-custom-class="body_text">Research retention</span></span></strong></div>
@@ -489,7 +489,7 @@
       <div id="security">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">11. SECURITY</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">11. Security</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We apply reasonable technical and organizational safeguards, including encryption in transit and access controls. No system is perfectly secure.</span></span></span></div>
       </div>
@@ -498,7 +498,7 @@
       <div id="your-rights">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">12. YOUR RIGHTS AND CHOICES</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">12. Your Rights and Choices</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may:</span></span></span></div>
         <ul>
@@ -514,7 +514,7 @@
       <div id="children-consent">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">13. CHILDREN AND PARENT/GUARDIAN CONSENT</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">13. Children and Parent/Guardian Consent</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">SnapFit may be used by minors <strong>only with parent/guardian consent</strong>.</span></span></span></div>
         <ul>
@@ -529,7 +529,7 @@
       <div id="policy-changes">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">14. CHANGES TO THIS POLICY</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">14. Changes to This Policy</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We may update this policy periodically. Material changes will be communicated in the app or on the website.</span></span></span></div>
       </div>
@@ -538,7 +538,7 @@
       <div id="contact">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">15. CONTACT</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">15. Contact</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><strong>Breathesafe LLC</strong></span></span></span></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">138 Miller Ave.</span></span></span></div>

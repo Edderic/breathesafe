@@ -143,7 +143,7 @@
       <br>
       <br>
       <div class="styles-documentPreviewer-881656"><div><span class="document-previewer-logo-d16635"></span><div class="document-previewer-wrapper-a717db">      <div data-custom-class="body">
-      <div><strong><span style="font-size: 26px;"><span data-custom-class="title">TERMS OF SERVICE (BREATHESAFE & SNAPFIT)</span></span></strong></div>
+      <div><strong><span style="font-size: 26px;"><span data-custom-class="title">Terms of Service (Breathesafe &amp; SnapFit)</span></span></strong></div>
       <div><br></div>
       <div><span style="color: rgb(127, 127, 127);"><strong><span style="font-size: 15px;"><span data-custom-class="subtitle">Last updated December 13, 2025</span></span></strong></span></div>
       <div><br></div>
@@ -152,7 +152,7 @@
       <div id="agreement-to-legal-terms">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">AGREEMENT TO OUR LEGAL TERMS</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">Agreement to Our Legal Terms</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We are <strong>Breathesafe LLC</strong> ("Company," "we," "us," "our"), a company registered in <strong>Nevada, United States</strong>, with our principal place of business at <strong>138 Miller Ave., Rumford, RI 02916, United States</strong>.</span></span></span></div>
         <div><br></div>
@@ -165,7 +165,7 @@
       <div id="eligibility-age-requirements">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">ELIGIBILITY AND AGE REQUIREMENTS</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">Eligibility and Age Requirements</span></span></strong></div>
         <div><br></div>
 
         <!-- Subsection: Adults -->
@@ -196,7 +196,7 @@
       <div id="user-registration">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">USER REGISTRATION</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">User Registration</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may be required to register for an account.</span></span></span></div>
         <div><br></div>
@@ -226,7 +226,7 @@
       <div id="user-representations">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">USER REPRESENTATIONS</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">User Representations</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">By using the Services, you represent and warrant that:</span></span></span></div>
         <div><br></div>
@@ -244,7 +244,7 @@
       <div id="privacy">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">PRIVACY</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">Privacy</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Your use of the Services is subject to our <strong>Privacy Policy</strong>, which describes how we collect, use, and protect your information.</span></span></span></div>
         <div><br></div>
@@ -261,7 +261,7 @@
       <div id="disclaimer-medical-advice">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">DISCLAIMER OF MEDICAL ADVICE</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">Disclaimer of Medical Advice</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">The Services provide informational tools related to mask fit and risk reduction. They <strong>do not provide medical advice</strong>, diagnosis, or treatment.</span></span></span></div>
         <div><br></div>
@@ -272,7 +272,7 @@
       <div id="termination">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">TERMINATION</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">Termination</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We may suspend or terminate your account if you violate these Legal Terms or applicable law.</span></span></span></div>
         <div><br></div>
@@ -283,7 +283,7 @@
       <div id="limitation-liability">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">LIMITATION OF LIABILITY</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">Limitation of Liability</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">To the fullest extent permitted by law, Breathesafe LLC shall not be liable for indirect, incidental, consequential, or punitive damages arising from use of the Services.</span></span></span></div>
       </div>
@@ -292,7 +292,7 @@
       <div id="governing-law">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">GOVERNING LAW</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">Governing Law</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">These Legal Terms are governed by the laws of the <strong>Commonwealth of Rhode Island</strong>, without regard to conflict-of-law principles.</span></span></span></div>
       </div>
@@ -301,7 +301,7 @@
       <div id="contact">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">CONTACT</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">Contact</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Breathesafe LLC</span></span></span></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">138 Miller Ave.</span></span></span></div>

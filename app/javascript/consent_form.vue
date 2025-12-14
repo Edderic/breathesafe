@@ -192,7 +192,7 @@
       <br>
       <br>
       <div class="styles-documentPreviewer-881656"><div><span class="document-previewer-logo-d16635"></span><div class="document-previewer-wrapper-a717db">      <div data-custom-class="body">
-      <div><strong><span style="font-size: 26px;"><span data-custom-class="title">CONSENT FORM: MASK RECOMMENDER BASED ON FACIAL MEASUREMENTS (SNAPFIT / BREATHESAFE)</span></span></strong></div>
+      <div><strong><span style="font-size: 26px;"><span data-custom-class="title">Consent Form: Mask Recommender Based on Facial Measurements (SnapFit / Breathesafe)</span></span></strong></div>
       <div><br></div>
       <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><strong>Principal Investigator:</strong> Edderic Ugaddan</span></span></span></div>
       <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Owner, Breathesafe LLC</span></span></span></div>
@@ -208,7 +208,7 @@
       <div id="invitation-to-participate">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">INVITATION TO PARTICIPATE</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">Invitation to Participate</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You are being invited to participate in a project to improve a <strong>mask recommender based on facial features</strong>. Participation is voluntary.</span></span></span></div>
         <div><br></div>
@@ -219,7 +219,7 @@
       <div id="why-is-this-project-being-done">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHY IS THIS PROJECT BEING DONE?</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">Why Is This Project Being Done?</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">High-protection respirators work best when both filtration efficiency and <strong>fit</strong> are high. While filtration efficiency is well studied, identifying which masks fit a given face often requires trial and error. The goal of this project is to make it easier for people to find masks that are more likely to fit their face.</span></span></span></div>
       </div>
@@ -228,7 +228,7 @@
       <div id="who-can-participate">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHO CAN PARTICIPATE?</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">Who Can Participate?</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">SnapFit can be used by:</span></span></span></div>
         <ul>
@@ -246,7 +246,7 @@
       <div id="study-procedures">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHAT ARE THE STUDY / PROJECT PROCEDURES?</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">What Are the Study / Project Procedures?</span></span></strong></div>
         <div><br></div>
 
         <!-- Subsection: Baseline app use -->
@@ -281,7 +281,7 @@
       <div id="information-collected">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHAT INFORMATION MAY BE COLLECTED?</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">What Information May Be Collected?</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Depending on your choices, we may collect:</span></span></span></div>
         <ul>
@@ -299,7 +299,7 @@
       <div id="data-retention">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">HOW LONG WILL THE DATA BE USED?</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">How Long Will the Data Be Used?</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Your data will be retained <strong>until you decide to delete your data</strong>.</span></span></span></div>
         <div><br></div>
@@ -323,7 +323,7 @@
       <div id="can-participants-leave">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">CAN PARTICIPANTS CHOOSE TO LEAVE?</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">Can Participants Choose to Leave?</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Yes. Participation is voluntary.</span></span></span></div>
         <div><br></div>
@@ -340,7 +340,7 @@
       <div id="risks-of-participation">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHAT ARE THE RISKS OF PARTICIPATION?</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">What Are the Risks of Participation?</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Some data collected (such as facial measurements) are sensitive. Risks include the unlikely possibility of unauthorized access in the event of a data breach.</span></span></span></div>
         <div><br></div>
@@ -357,7 +357,7 @@
       <div id="benefits-of-participation">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHAT ARE THE BENEFITS OF PARTICIPATION?</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">What Are the Benefits of Participation?</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Potential benefits include:</span></span></span></div>
         <ul>
@@ -371,7 +371,7 @@
       <div id="privacy-protection">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">HOW IS PRIVACY PROTECTED?</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">How Is Privacy Protected?</span></span></strong></div>
         <div><br></div>
         <ul>
           <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Personal identifiers (name, email) are not publicly displayed.</span></span></span></li>
@@ -385,7 +385,7 @@
       <div id="compensation">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">ARE PARTICIPANTS COMPENSATED?</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">Are Participants Compensated?</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Participation is voluntary. In some cases, Breathesafe may assist with equipment or costs related to data contribution, depending on availability and location. Please contact info@breathesafe.xyz for details.</span></span></span></div>
       </div>
@@ -394,7 +394,7 @@
       <div id="participant-rights">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHAT ARE THE RIGHTS OF PARTICIPANTS?</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">What Are the Rights of Participants?</span></span></strong></div>
         <div><br></div>
         <ul>
           <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Participation is voluntary.</span></span></span></li>
@@ -408,7 +408,7 @@
       <div id="contact">
         <br>
         <br>
-        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHO CAN I CONTACT WITH QUESTIONS?</span></span></strong></div>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">Who Can I Contact with Questions?</span></span></strong></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Email: <strong>info@breathesafe.xyz</strong></span></span></span></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Mail:</span></span></span></div>
