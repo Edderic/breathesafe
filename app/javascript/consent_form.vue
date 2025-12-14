@@ -1,37 +1,4 @@
 <template>
-  <Popup v-if='showInfoPopup' @onclose='showInfoPopup = false'>
-    <div>
-      <h3>We updated our Consent Form</h3>
-      <p>
-        You are seeing this because your accepted version does not match the
-        latest version ({{ infoVersion }}). Please review the consent
-        form below. You can accept to continue sharing your data for research
-        purposes, or reject and continue using the app.
-      </p>
-    </div>
-  </Popup>
-
-  <Popup v-if='showThanksPopup' @onclose='closeThanks'>
-    <p>Thank you for giving consent. Have a great day!</p>
-  </Popup>
-
-  <Popup v-if='showRejectConfirm' @onclose='showRejectConfirm = false'>
-    <div>
-      <h3>Are you sure?</h3>
-      <div class='row'>
-        <Button class='cancel' @click='showRejectConfirm = false'>Cancel</Button>
-        <Button class='confirm' @click='confirmReject'>Yes</Button>
-      </div>
-    </div>
-  </Popup>
-
-  <Popup v-if='showRejectInfo' @onclose='dismissRejectInfo'>
-    <p>
-      You could go to the Respirator Users page
-      <router-link :to="{ name: 'RespiratorUsers' }">(link)</router-link>, click on each of the users you manage, hit edit, and delete their data. That will delete facial measurements, demographics, fit tests, etc.
-    </p>
-  </Popup>
-
   <router-link to="/consent_form#toc-mobile">
     <CircularButton text="TOC" class='toc-button'/>
   </router-link>
@@ -426,110 +393,16 @@
       </div>
     </div>
   </div>
-
-  <div v-if='showConsentActions' class='consent-bottom-actions'>
-    <Button class='accept' @click='onAccept'>Accept</Button>
-    <Button class='reject' @click='onReject'>Reject</Button>
-  </div>
 </div>
 </template>
 
 <script>
 import CircularButton from './circular_button.vue'
-import Button from './button.vue'
-import Popup from './pop_up.vue'
-import axios from 'axios'
-import { mapActions, mapState } from 'pinia'
-import { useMainStore } from './stores/main_store'
 
 export default {
   name: 'ConsentForm',
   components: {
-    CircularButton,
-    Button,
-    Popup
-  },
-  data() {
-    return {
-      showInfoPopup: false,
-      showThanksPopup: false,
-      showRejectConfirm: false,
-      showRejectInfo: false,
-      infoVersion: ''
-    }
-  },
-  computed: {
-    ...mapState(useMainStore, ['currentUser', 'consentFormVersion']),
-    showConsentActions() {
-      return !!this.currentUser && !!this.consentFormVersion && this.currentUser.consent_form_version_accepted !== this.consentFormVersion
-    }
-  },
-  async mounted() {
-    await this.getCurrentUser()
-    // Only show the "We updated our Consent Form" popup if:
-    // 1. User exists and consent form version exists
-    // 2. User has previously accepted a consent form (consent_form_version_accepted is not null/undefined)
-    // 3. The accepted version is different from the current version (meaning the form was updated)
-    // This prevents showing the popup to users who just accepted the current version during registration
-    const hasAcceptedBefore = !!this.currentUser?.consent_form_version_accepted
-    const versionChanged = hasAcceptedBefore &&
-                          this.currentUser.consent_form_version_accepted !== this.consentFormVersion
-    const needsInfo = !!this.currentUser &&
-                     !!this.consentFormVersion &&
-                     versionChanged
-    if (needsInfo) {
-      this.showInfoPopup = true
-      this.infoVersion = this.$route.query.latest_version || this.consentFormVersion || ''
-    }
-  },
-  methods: {
-    ...mapActions(useMainStore, ['getCurrentUser', 'setConsentDismissedForSession']),
-    async onAccept() {
-      await this.getCurrentUser()
-      if (!this.currentUser) { return }
-      try {
-        const response = await axios.post('/users/consent', { decision: 'accept' })
-        if (response.status >= 200 && response.status < 300) {
-          this.showThanksPopup = true
-        }
-      } catch (e) {
-        console.error(e)
-      }
-    },
-    async onReject() {
-      this.showRejectConfirm = true
-    },
-    async confirmReject() {
-      try {
-        await axios.post('/users/consent', { decision: 'reject' })
-      } catch (e) {
-        console.error(e)
-      }
-      this.showRejectConfirm = false
-      this.showRejectInfo = true
-    },
-    closeThanks() {
-      this.showThanksPopup = false
-      // Mark consent screen dismissed for this session and return to target
-      this.setConsentDismissedForSession(true)
-      const name = this.$route.query.return_to_name || 'Landing'
-      let params = {}
-      let query = {}
-      try { params = JSON.parse(this.$route.query.return_to_params || '{}') } catch {}
-      try { query = JSON.parse(this.$route.query.return_to_query || '{}') } catch {}
-      this.$router.replace({ name, params, query })
-    },
-    dismissRejectInfo() {
-      this.showRejectInfo = false
-      // Allow the user to continue using the app; mark dismissed for session
-      this.setConsentDismissedForSession(true)
-      const name = this.$route.query.return_to_name || 'Landing'
-      let params = {}
-      let query = {}
-      try { params = JSON.parse(this.$route.query.return_to_params || '{}') } catch {}
-      try { query = JSON.parse(this.$route.query.return_to_query || '{}') } catch {}
-      this.$router.replace({ name, params, query })
-    }
+    CircularButton
   }
 }
 </script>
@@ -608,70 +481,6 @@ export default {
   #contact,
   #toc-mobile {
     scroll-margin-top: 3.25em;
-  }
-
-  .consent-bottom-actions {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: white;
-    border-top: 2px solid #ddd;
-    padding: 1em;
-    display: flex;
-    justify-content: center;
-    gap: 1em;
-    z-index: 1000;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  }
-
-  .consent-bottom-actions .accept {
-    background-color: #4CAF50;
-    color: white;
-    padding: 0.75em 2em;
-    font-size: 1.1em;
-    font-weight: bold;
-  }
-
-  .consent-bottom-actions .accept:hover {
-    background-color: #45a049;
-  }
-
-  .consent-bottom-actions .reject {
-    background-color: #f44336;
-    color: white;
-    padding: 0.75em 2em;
-    font-size: 1.1em;
-    font-weight: bold;
-  }
-
-  .consent-bottom-actions .reject:hover {
-    background-color: #da190b;
-  }
-
-  .row {
-    display: flex;
-    gap: 1em;
-    justify-content: center;
-    margin-top: 1em;
-  }
-
-  .cancel {
-    background-color: #999;
-    color: white;
-  }
-
-  .cancel:hover {
-    background-color: #777;
-  }
-
-  .confirm {
-    background-color: #f44336;
-    color: white;
-  }
-
-  .confirm:hover {
-    background-color: #da190b;
   }
 
   @media(max-width: 700px) {
