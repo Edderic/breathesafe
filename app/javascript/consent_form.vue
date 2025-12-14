@@ -1,712 +1,521 @@
 <template>
-
-  <router-link :to="tocPath('toc')">
+  <router-link to="/consent_form#toc-mobile">
     <CircularButton text="TOC" class='toc-button'/>
   </router-link>
 
-  <div class='grid'>
-    <div class='toc margined overflow' id='toc'>
-      <br>
-      <br>
-      <br>
-      <div  ><br></div><h2 ><strong>TABLE OF CONTENTS</strong></h2><div  ><br></div>
-
-
-      <router-link :to="tocPath('invitation-to-participate')">
-        Invitation to participate
-      </router-link>
-
-      <router-link :to="tocPath('why-study')">
-        Why is this study being done?
-      </router-link>
-
-      <router-link :to="tocPath('who-can-participate')">
-        Who can participate?
-      </router-link>
-
-      <router-link :to="tocPath('study-procedures')">
-        What are the study procedures?
-      </router-link>
-
-      <router-link :to="tocPath('how-long-study')">
-        How long will you be in this study?
-      </router-link>
-
-      <router-link :to="tocPath('leave-study')">
-        Can participants choose to leave the study?
-      </router-link>
-
-      <router-link :to="tocPath('risks-harms')">
-        What are the risks and harms of participating in the study?
-      </router-link>
-
-      <router-link :to="tocPath('benefits')">
-        What are the benefits of participating in this study?
-      </router-link>
-
-      <router-link :to="tocPath('privacy')">
-        How will participants' privacy be protected?
-      </router-link>
-
-      <router-link :to="tocPath('data-use-over-time')">
-        How long will the data be used?
-      </router-link>
-
-      <router-link :to="tocPath('compensation')">
-        Are participants compensated in this study?
-      </router-link>
-
-      <router-link :to="tocPath('participant-rights')">
-        What are the rights of the participants?
-      </router-link>
-
-      <router-link :to="tocPath('reach-out')">
-        Whom do participants contact for questions?
-      </router-link>
-
-      <router-link :to="tocPath('onboarding')">
-        Do you have more details about the data collection process?
-      </router-link>
-      <br>
-      <br>
-      <br>
-
-    </div>
-
-    <div class='margined main'>
-      <h2>Mask recommender based on facial measurements</h2>
-
-      <div class='row'>
-        <h4 for="">Principal Investigator</h4>
-
-        <div>
-          Edderic Ugaddan
-        </div>
-        <div>
-          Owner, Breathesafe LLC
-        </div>
-        <div>
-          info@breathesafe.xyz
-        </div>
-        <div>
-          138 Miller Ave.
-        </div>
-        <div>
-          Rumford, RI 02916
-        </div>
-      </div>
-
-      <div>
-        <p>Last updated: Oct. 10, 2025</p>
-      </div>
-        <div id='invitation-to-participate'>
-          <br>
-          <br>
-          <h4>Invitation to Participate</h4>
-        </div>
-
-        <p>You are being invited to participate in this research study to create a mask recommender based on facial features.</p>
-
-        <div id='why-study'>
-          <br>
-          <br>
-          <h4>Why is this study being done?</h4>
-        </div>
-
-        <p>
-        As of this time, it is not that easy to find high protection masks for
-        some people.
-
-        Protection is a combination of high filtration efficiency and fit.
-        Lots of work has been done on vetting the filtration efficiency side. However,
-        without a good fitting mask, the efficacy of high filtration masks can
-        be severely diminished.
-
-        To find masks that fit well, there is still a bunch of trial and error
-        involved. We want to make the search for masks that do both (high
-        filtration efficiency and good fit) simpler and easier. For more
-        details, please see the <a
-        href="https://docs.google.com/document/d/1XZ2foY_cpDYImOBE5P048byj1jqLZ5JHdif6rfx3HAU/edit#heading=h.akrinhrxttzu">Respirator
-        Recommender proposal</a>.
-
-        </p>
-
-        <div id='who-can-participate'>
-          <br>
-          <br>
-          <h4>Who can participate?</h4>
-        </div>
-
-        <p>
-        As a participant, you will need access to the following:
-        </p>
-
-        <div class='grid-images'>
-          <figure>
-            <a href="https://aiden.health/products/makrite-801" target='_blank'>
-              <img class='left-pane-image' src="https://aiden.health/cdn/shop/files/766B9B3B-9325-407B-B94E-E4C41C6207BB_710x589@2x.png?v=1718600885" alt='Makrite 801-N95 (adj. head straps), NIOSH 84A-9223, 160mmHg fluid resistance'>
-            </a>
-            <figcaption>A Mask</figcaption>
-          </figure>
-
-          <figure>
-            <a href="https://www.verizon.com/smartphones/apple-iphone-14/" target='_blank'>
-              <img class='left-pane-image' src="https://ss7.vzw.com/is/image/VerizonWireless/iphone-14-midnight-fall22-a?wid=930&hei=930&fmt=webp" alt='An iPhone'>
-            </a>
-            <figcaption>A device equipped with a camera</figcaption>
-          </figure>
-        </div>
-
-        <p>
-        ...and either quantitative or qualitative fit testing equipment:
-        </p>
-
-        <div class='grid-images'>
-          <figure>
-            <a href="https://tsi.com/discontinued-products/portacount%C2%AE-respirator-fit-tester-8038/" target='_blank'>
-              <img class='left-pane-image' src="https://tsi.com/getmetafile/a296129e-5e8d-48d6-a3a7-05a2d5195987/8038_01" alt='PortaCount'>
-            </a>
-            <figcaption>A Quantitative Fit Testing device such as a PortaCount</figcaption>
-          </figure>
-
-          <figure>
-            <a href="https://www.youtube.com/watch?v=Syj_zeNtLGI" target='_blank'>
-              <img class='left-pane-image' src="https://profittesting.com/cdn/shop/articles/MelFitTest4blog2.jpg?v=1634512473" alt='Tape Measure, iBayam Soft Ruler Measuring Tape for Body Weight Loss Fabric Sewing Tailor Cloth Vinyl Measurement Craft Supplies, 60-Inch Double Scale Ruler, 2-Pack White, Blue'>
-            </a>
-            <figcaption>Qualitative Fit Testing equipment</figcaption>
-          </figure>
-
-        </div>
-
-        <p>
-        If you are interested in becoming a participant, missing at least one of the required equipment, and live close to Breathesafe LLC's address, you may be able to borrow equipment to do the study. Please email <a href="mailto:info@breathesafe.xyz?subject=Mask Recommender Question">info@breathesafe.xyz</a> to inquire about the possibility.
-        </p>
-
-        <p>
-        You can contribute valuable data by submitting <a
-          href="https://www.cdc.gov/niosh/docs/2018-130/pdfs/2018-130.pdf"
-          target='_blank'>user seal check</a> information. If you know that a
-        mask does not fit your face and has obvious leaks, you could contribute
-        this data in the User Seal Check section of "Adding a Fit Test".
-        </p>
-
-        <div id='study-procedures'>
-          <br>
-          <br>
-          <h4>What are the study procedures?</h4>
-        </div>
-
-
-        <h5>Acquiring facial measurements</h5>
-
-        <p>To get facial measurements quickly and seamlessly, the study requires access to an iPhone True Depth camera (i.e. has FaceID feature -- standard in the recent base models, iPhone X model onward). You will be able to install an application made by Breathesafe LLC (currently being developed), or if you live close enough to the address of Breathesafe LLC, you may be able to borrow an iPhone for the purposes of obtaining facial measurements. The app will store facial measurements relevant to mask fitting, and will be sent to Breathesafe's secure server for storage for creation and improvement of statistical model to predict fit based on facial measurements.
-        </p>
-
-        <h5>Demographics</h5>
-
-        <p>
-        You will be asked to give information about demographics. See the <router-link :to="tocPath('privacy')">data privacy section</router-link> to learn more.
-        Once that is filled out, you can add the following fit testing data:
-        </p>
-
-        <h5>Fit Testing</h5>
-        <ul>
-          <li>user seal check</li>
-          <li>qualitative fit testing (if applicable)</li>
-          <li>quantitative fit testing (if applicable)</li>
-          <li>comfort</li>
-        </ul>
-
-        <p>
-        You will be guided by the UI. Clicking on the "Save and Continue" button will validate the information being saved and will show helpful error messages and general messages. For example, if a user fails the user seal check section, they don't need to add qualitative or quantitative fit testing data (as it is assumed that they will most likely fail either of those more stringent tests).
-        </p>
-
-
-        <div id='how-long-study'>
-          <br>
-          <br>
-          <h4>How long will you be in this study?</h4>
-        </div>
-
-        In terms of adding data to the system, it can vary, depending on
-        whether or not you have access to qualitative fit testing (QLFT) or
-        quantitative fit testing (QNFT) devices.
-        <table>
-          <thead>
-            <tr>
-              <th>Steps</th>
-              <th>Time commitment</th>
-              <th>Frequency</th>
-              <th>Necessity</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Answering demographics questions</td>
-              <td>1 minute</td>
-              <td>once</td>
-              <td>Necessary</td>
-            </tr>
-            <tr>
-              <td>Adding facial measurements manually</td>
-              <td>3 minutes</td>
-              <td>once, or over the years</td>
-              <td>Necessary</td>
-            </tr>
-            <tr>
-              <td>Adding user seal check data</td>
-              <td>1 minute</td>
-              <td>per mask</td>
-              <td>Necessary</td>
-            </tr>
-            <tr>
-              <td>Adding qualitative fit testing data</td>
-              <td>10 minutes</td>
-              <td>per mask</td>
-              <td>Depends on you having access to QLFT tools</td>
-            </tr>
-            <tr>
-              <td>Adding quantitative fit testing data</td>
-              <td>5 minutes</td>
-              <td>per mask</td>
-              <td>Depends on you having access to a QNFT device</td>
-            </tr>
-            <tr>
-              <td>Adding comfort data</td>
-              <td>1 minute</td>
-              <td>per mask</td>
-              <td>Can be skipped if user seal check fails.</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div id='leave-study'>
-          <br>
-          <br>
-          <h4>Can participants choose to leave the study?</h4>
-        </div>
-        <p>Participants may be able to delete their data by visiting the
-        <router-link :to='{name: "RespiratorUsers"}'>
-          Respirator Users
-        </router-link> section, and clicking on an individual they have access
-        to, click "Edit" and then click "Delete." This functionality is
-        available for people who have gone through the registration process.
-        That will delete user information such as email, password,
-        demographics, and fit testing data. Users will have the ability to
-        delete their data and have their data not contribute to research until
-        publication (which is TBD). Deletion of data in the future will have no
-        effect to the state of previously published research, but may alter
-        existing statistical machine learning models that are being used at the
-        time on the web application.
-
-        </p>
-
-        <div id='risks-harms'>
-          <br>
-          <br>
-          <h4>What are the risks and harms of participating in the study?</h4>
-        </div>
-        <p>Sensitive data like facial measurements will be stored in a database.
-        Data such as the following will be collected:
-        <ul>
-          <li>first name</li>
-          <li>last name</li>
-          <li>email</li>
-          <li>home address (optional) - If you need financial assistance with buying equipment for testing purposes. Breathesafe LLC can order equipment on your behalf and send them your way. See the <a href="#compensation">compensation</a> section for details.</li>
-          <li>facial measurement data - to create a recommendation system tailored to the individual.</li>
-          <li>fit testing measurement tools used (e.g. PortaCount)</li>
-          <li>fit testing results (e.g. pass/fail for Qualitative Fit Testing, fit factors for Quantitative Fit Testing)</li>
-        </ul>
-        </p>
-
-        <p>
-          To protect your sensitive data, Breathesafe uses <a href='https://guides.rubyonrails.org/active_record_encryption.html'>application-level encryption</a>
-          to minimize risk in the unlikely event of a data breach. Further, you can make use of an alias (i.e. first name, last name, email that does not reference your real names) to mitigate risk even further.
-        </p>
-
-        <p>With respect to facial measurements, only the minimal amount related to mask fitting will be recorded (e.g. nose, cheek, chin measurements).</p>
-
-        <div id='benefits'>
-          <br>
-          <br>
-          <h4>What are the benefits of participating in this study?</h4>
-        </div>
-
-        <p>One direct benefit is one might be able to find a mask that has overall high protection (combination of fit and high filtration efficiency), if they haven't aready. Another benefit is gaining a sense of accomplishment in helping others find masks that offer high protection for their faces by providing data that will be used to improve performance of a personalized recommender system.</p>
-
-        <div id='privacy'>
-          <br>
-          <br>
-          <h4>How will participants' privacy be protected?</h4>
-        </div>
-
-        <h4>First name, Last name, Email</h4>
-        <p>Strictly confidential and will not be displayed on the app. However, study participants can are encouraged to make use of aliases for enhanced protection in the very unlikely, but non-zero probability, event of a data breach.</p>
-
-        <h4>Data aggregation</h4>
-        <p> In terms
-        of data publicly displayed on this web app, demographic information will
-        only be shown in aggregate. We will preserve privacy
-        of individuals in the aggregation of the data: if a demographic has
-        less than 5 people in it, they will be automatically grouped in the "Prefer not to
-        disclose / too small sample size" group.
-        </p>
-
-        <h4>Facial measurements and Fit Testing Data</h4>
-        <p>
-
-        Facial measurements and fit testing data could be displayed in scatter plots to help future users understand the weaknesses of the model in predicting fit. For example, let's say an individual is looking to find a mask that fits their face. Let's say the model says 70% probability of fit for a particular mask, and the user is interested in getting more context about this prediction. The user could take a look at scatter plots to have a better understanding of this number (i.e. are there a bunch of data points that are similar to user's that have passed with this mask?)
-
-        </p>
-
-        <p>This study may go on indefinitely. If for any reason you want your data deleted, you may do so. See
-<router-link :to="tocPath('leave-study')"> Can participants choose to leave the study?</router-link>
-        section above for details.</p>
-
-        <p>
-        Breathesafe LLC will follow best security practices to prevent malicious actors from accessing said database. Example of such actions are:
-        <ul>
-          <li>using application-level encryption.</li>
-          <li>using https to prevent man-in-the-middle attacks.</li>
-          <li>admins will be using password managers and two factor authentication.</li>
-          <li>number of admins will be as small as possible to limit risk.</li>
-        </ul>
-        </p>
-
-        <p>Users could also choose to be anonymous when signing up. They are
-        free to use fake names to decrease the risk of their biometric data
-        identifying them in the small but non-zero chance that a hacker gets a
-        hold of the database.</p>
-
-        <div id='data-use-over-time'>
-          <br>
-          <br>
-          <h4>How long will the data be used?</h4>
-        </div>
-
-        <p>Data could be stored indefinitely. Models might get refined over time, which uses the data.</p>
-
-        <div id='compensation'>
-          <br>
-          <br>
-          <h4>Are participants compensated in this study?</h4>
-        </div>
-
-        <p>Participation in this study is on a voluntary basis. However, if you need financial assistance with getting the equipment or labor, please let us know by emailing <a href='subject=Mask Recommender Financial Assistance Question'>info@breathesafe.xyz</a>.
-        </p>
-
-        <p>Here are things we can help with, provided you live close by to the Breathesafe LLC address:</p>
-
-        <ul>
-          <li>buying masks</li>
-          <li>buying probes</li>
-          <li>buying qualitative fit testing equipment</li>
-          <li>access to an iPhone with True Depth camera</li>
-          <li>paying for your time to do the testing</li>
-        </ul>
-
-        <div id='participant-rights'>
-          <br>
-          <br>
-          <h4> What are the rights of the participants? </h4>
-        </div>
-
-        <p>Your participation in this study is voluntary. You may decide not to
-        be in this study. Even if you consent to participate, you have the
-        right to withdraw and delete your data later on. See the
-
-        <router-link :to="tocPath('leave-study')">Can participants choose to leave the study?</router-link> section for details.
-</p>
-
-        <div id='reach-out'>
-          <br>
-          <br>
-          <h4>Whom do participants contact for questions?</h4>
-        </div>
-
-        <p>You may reach out to <a href="mailto:info@breathesafe.xyz?subject=Mask Recommender Question">info@breathesafe.xyz</a>. For general questions and discussion, you could also join this <a href="https://discord.com/channels/1220937763751465001/1249885817724473485">Discord group</a>.</p>
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
-
-      <div id='onboarding'>
-        <br>
-        <br>
-        <h4>Do you have more details about the data collection process?</h4>
-      </div>
-
-      <p>
-      Please visit the <router-link to="/onboarding#onboarding">onboarding page</router-link> to learn more about details.
-      </p>
-      <br>
-      <br>
-      <br>
-      <br>
-      <br>
-
-      <div></div>
-      <br>
-      <br>
-      <br>
-      <br>
-
-    </div>
+<div class="container">
+  <!-- Mobile TOC - shown at top on mobile -->
+  <div class='toc toc-mobile margined' id='toc-mobile'>
+    <h2><strong>TABLE OF CONTENTS</strong></h2>
+
+    <router-link to="/consent_form#top">
+      CONSENT FORM: MASK RECOMMENDER BASED ON FACIAL MEASUREMENTS
+    </router-link>
+
+    <router-link to="/consent_form#invitation-to-participate">
+      INVITATION TO PARTICIPATE
+    </router-link>
+
+    <router-link to="/consent_form#why-is-this-project-being-done">
+      WHY IS THIS PROJECT BEING DONE?
+    </router-link>
+
+    <router-link to="/consent_form#who-can-participate">
+      WHO CAN PARTICIPATE?
+    </router-link>
+
+    <router-link to="/consent_form#study-procedures">
+      WHAT ARE THE STUDY / PROJECT PROCEDURES?
+    </router-link>
+
+    <router-link to="/consent_form#baseline-app-use">
+      BASELINE APP USE (NOT RESEARCH)
+    </router-link>
+
+    <router-link to="/consent_form#optional-research-participation">
+      OPTIONAL RESEARCH PARTICIPATION (OPT-IN)
+    </router-link>
+
+    <router-link to="/consent_form#information-collected">
+      WHAT INFORMATION MAY BE COLLECTED?
+    </router-link>
+
+    <router-link to="/consent_form#data-retention">
+      HOW LONG WILL THE DATA BE USED?
+    </router-link>
+
+    <router-link to="/consent_form#can-participants-leave">
+      CAN PARTICIPANTS CHOOSE TO LEAVE?
+    </router-link>
+
+    <router-link to="/consent_form#risks-of-participation">
+      WHAT ARE THE RISKS OF PARTICIPATION?
+    </router-link>
+
+    <router-link to="/consent_form#benefits-of-participation">
+      WHAT ARE THE BENEFITS OF PARTICIPATION?
+    </router-link>
+
+    <router-link to="/consent_form#privacy-protection">
+      HOW IS PRIVACY PROTECTED?
+    </router-link>
+
+    <router-link to="/consent_form#compensation">
+      ARE PARTICIPANTS COMPENSATED?
+    </router-link>
+
+    <router-link to="/consent_form#participant-rights">
+      WHAT ARE THE RIGHTS OF PARTICIPANTS?
+    </router-link>
+
+    <router-link to="/consent_form#contact">
+      WHO CAN I CONTACT WITH QUESTIONS?
+    </router-link>
   </div>
 
-  <Popup v-if='showInfoPopup' @onclose='showInfoPopup = false'>
-    <div>
-      <h3>We updated our Consent Form</h3>
-      <p>
-        You are seeing this because your accepted version does not match the
-        latest version ({{ infoVersion }}). Please review the consent
-        form below. You can accept to continue sharing your data for research
-        purposes, or reject and continue using the app.
-      </p>
+<div class="grid">
+
+  <div class='toc toc-desktop margined overflow' id='toc'>
+    <br>
+    <br>
+    <br>
+      <div><br></div><h2><strong>TABLE OF CONTENTS</strong></h2><div><br></div>
+
+      <router-link to="/consent_form#top">
+        CONSENT FORM: MASK RECOMMENDER BASED ON FACIAL MEASUREMENTS
+      </router-link>
+
+      <router-link to="/consent_form#invitation-to-participate">
+        INVITATION TO PARTICIPATE
+      </router-link>
+
+      <router-link to="/consent_form#why-is-this-project-being-done">
+        WHY IS THIS PROJECT BEING DONE?
+      </router-link>
+
+      <router-link to="/consent_form#who-can-participate">
+        WHO CAN PARTICIPATE?
+      </router-link>
+
+      <router-link to="/consent_form#study-procedures">
+        WHAT ARE THE STUDY / PROJECT PROCEDURES?
+      </router-link>
+
+      <router-link to="/consent_form#baseline-app-use">
+        BASELINE APP USE (NOT RESEARCH)
+      </router-link>
+
+      <router-link to="/consent_form#optional-research-participation">
+        OPTIONAL RESEARCH PARTICIPATION (OPT-IN)
+      </router-link>
+
+      <router-link to="/consent_form#information-collected">
+        WHAT INFORMATION MAY BE COLLECTED?
+      </router-link>
+
+      <router-link to="/consent_form#data-retention">
+        HOW LONG WILL THE DATA BE USED?
+      </router-link>
+
+      <router-link to="/consent_form#can-participants-leave">
+        CAN PARTICIPANTS CHOOSE TO LEAVE?
+      </router-link>
+
+      <router-link to="/consent_form#risks-of-participation">
+        WHAT ARE THE RISKS OF PARTICIPATION?
+      </router-link>
+
+      <router-link to="/consent_form#benefits-of-participation">
+        WHAT ARE THE BENEFITS OF PARTICIPATION?
+      </router-link>
+
+      <router-link to="/consent_form#privacy-protection">
+        HOW IS PRIVACY PROTECTED?
+      </router-link>
+
+      <router-link to="/consent_form#compensation">
+        ARE PARTICIPANTS COMPENSATED?
+      </router-link>
+
+      <router-link to="/consent_form#participant-rights">
+        WHAT ARE THE RIGHTS OF PARTICIPANTS?
+      </router-link>
+
+      <router-link to="/consent_form#contact">
+        WHO CAN I CONTACT WITH QUESTIONS?
+      </router-link>
+
+      <br>
+      <br>
+      <br>
+
     </div>
-  </Popup>
+    <div class="margined main">
+      <br>
+      <br>
+      <br>
+      <div id="top">
+      <br>
+      <br>
+      <br>
+      <div class="styles-documentPreviewer-881656"><div><span class="document-previewer-logo-d16635"></span><div class="document-previewer-wrapper-a717db">      <div data-custom-class="body">
+      <div><strong><span style="font-size: 26px;"><span data-custom-class="title">CONSENT FORM: MASK RECOMMENDER BASED ON FACIAL MEASUREMENTS (SNAPFIT / BREATHESAFE)</span></span></strong></div>
+      <div><br></div>
+      <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><strong>Principal Investigator:</strong> Edderic Ugaddan</span></span></span></div>
+      <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Owner, Breathesafe LLC</span></span></span></div>
+      <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Email: info@breathesafe.xyz</span></span></span></div>
+      <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Registered in Nevada, United States</span></span></span></div>
+      <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Principal place of business / mailing address:</span></span></span></div>
+      <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">138 Miller Ave., Rumford, RI 02916, United States</span></span></span></div>
+      <div><br></div>
+      <div><span style="color: rgb(127, 127, 127);"><strong><span style="font-size: 15px;"><span data-custom-class="subtitle">Last updated December 13, 2025</span></span></strong></span></div>
+      <div><br></div>
 
-  <Popup v-if='showThanksPopup' @onclose='closeThanks'>
-    <p>Thank you for giving consent. Have a great day!</p>
-  </Popup>
+      <!-- Section: Invitation to Participate -->
+      <div id="invitation-to-participate">
+        <br>
+        <br>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">INVITATION TO PARTICIPATE</span></span></strong></div>
+        <div><br></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You are being invited to participate in a project to improve a <strong>mask recommender based on facial features</strong>. Participation is voluntary.</span></span></span></div>
+        <div><br></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may use the SnapFit application <strong>without participating in research</strong>. Research participation is optional and requires explicit opt-in.</span></span></span></div>
+      </div>
 
-  <Popup v-if='showRejectConfirm' @onclose='showRejectConfirm = false'>
-    <div>
-      <h3>Are you sure?</h3>
-      <div class='row'>
-        <Button class='cancel' @click='showRejectConfirm = false'>Cancel</Button>
-        <Button class='confirm' @click='confirmReject'>Yes</Button>
+      <!-- Section: Why is this project being done? -->
+      <div id="why-is-this-project-being-done">
+        <br>
+        <br>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHY IS THIS PROJECT BEING DONE?</span></span></strong></div>
+        <div><br></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">High-protection respirators work best when both filtration efficiency and <strong>fit</strong> are high. While filtration efficiency is well studied, identifying which masks fit a given face often requires trial and error. The goal of this project is to make it easier for people to find masks that are more likely to fit their face.</span></span></span></div>
+      </div>
+
+      <!-- Section: Who can participate? -->
+      <div id="who-can-participate">
+        <br>
+        <br>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHO CAN PARTICIPATE?</span></span></strong></div>
+        <div><br></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">SnapFit can be used by:</span></span></span></div>
+        <ul>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Adults (18+)</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Minors <strong>with parent or guardian consent and supervision</strong></span></span></span></li>
+        </ul>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">To participate in optional research contributions, you must:</span></span></span></div>
+        <ul>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Have access to an iOS device with a TrueDepth camera (Face ID–capable), and</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Provide informed consent (or parent/guardian consent, where applicable).</span></span></span></li>
+        </ul>
+      </div>
+
+      <!-- Section: Study procedures -->
+      <div id="study-procedures">
+        <br>
+        <br>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHAT ARE THE STUDY / PROJECT PROCEDURES?</span></span></strong></div>
+        <div><br></div>
+
+        <!-- Subsection: Baseline app use -->
+        <div id="baseline-app-use">
+          <div><strong><span style="font-size: 16px;"><span data-custom-class="heading_2">Baseline app use (not research)</span></span></strong></div>
+          <div><br></div>
+          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">If you use SnapFit only for recommendations:</span></span></span></div>
+          <ul>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">The app may request access to the iOS TrueDepth camera.</span></span></span></li>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Facial characteristics relevant to respirator fit are converted into <strong>derived numeric measurements</strong>.</span></span></span></li>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">These derived measurements are sent securely to Breathesafe servers to generate mask-fit recommendations.</span></span></span></li>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Raw facial images or full face scans are <strong>not required to be stored</strong> for baseline functionality.</span></span></span></li>
+          </ul>
+        </div>
+
+        <!-- Subsection: Optional research participation -->
+        <div id="optional-research-participation">
+          <br>
+          <div><strong><span style="font-size: 16px;"><span data-custom-class="heading_2">Optional research participation (opt-in)</span></span></strong></div>
+          <div><br></div>
+          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">If you explicitly opt in to research participation:</span></span></span></div>
+          <ul>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">A <strong>mask-specific subset of raw facial measurement points</strong> relevant to respirator fit may be stored.</span></span></span></li>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">These data are used to improve and evaluate fit-prediction models and to understand how different masks interact with facial geometry.</span></span></span></li>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Participation in research is <strong>not required</strong> to use SnapFit.</span></span></span></li>
+          </ul>
+          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may opt out of research participation at any time in the app.</span></span></span></div>
+        </div>
+      </div>
+
+      <!-- Section: Information collected -->
+      <div id="information-collected">
+        <br>
+        <br>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHAT INFORMATION MAY BE COLLECTED?</span></span></strong></div>
+        <div><br></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Depending on your choices, we may collect:</span></span></span></div>
+        <ul>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Email address and account credentials</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Optional profile name (you may use a pseudonym)</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Optional demographic information (e.g., gender/sex, year of birth)</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Derived facial measurements relevant to respirator fit</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><strong>If you opt in to research:</strong> a mask-specific subset of raw facial measurement points</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Mask model information and fit-related feedback (e.g., user seal check, qualitative or quantitative fit test results, comfort)</span></span></span></li>
+        </ul>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may use aliases or pseudonyms for your profile name. You must not impersonate others and must provide a valid email address for account communications.</span></span></span></div>
+      </div>
+
+      <!-- Section: Data retention -->
+      <div id="data-retention">
+        <br>
+        <br>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">HOW LONG WILL THE DATA BE USED?</span></span></strong></div>
+        <div><br></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Your data will be retained <strong>until you decide to delete your data</strong>.</span></span></span></div>
+        <div><br></div>
+        <ul>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">If you opt in to research participation, your data may be used for research and model improvement <strong>until you delete it</strong>.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">If you use SnapFit only for baseline functionality, your data will be retained <strong>until you delete it</strong>.</span></span></span></li>
+        </ul>
+
+        <div><strong><span style="font-size: 14px;"><span data-custom-class="body_text">After account deletion</span></span></strong></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">When you delete your account or use the "delete all my data" option:</span></span></span></div>
+        <ul>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Your email address will be deleted.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Your demographic information will be deleted.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Your derived facial measurements will be deleted.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Any stored mask-specific raw facial measurement points (if applicable) will be deleted.</span></span></span></li>
+        </ul>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Aggregated, de-identified statistics that do not identify you may be retained.</span></span></span></div>
+      </div>
+
+      <!-- Section: Can participants leave? -->
+      <div id="can-participants-leave">
+        <br>
+        <br>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">CAN PARTICIPANTS CHOOSE TO LEAVE?</span></span></strong></div>
+        <div><br></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Yes. Participation is voluntary.</span></span></span></div>
+        <div><br></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may:</span></span></span></div>
+        <ul>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Stop using SnapFit at any time.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Opt out of research participation at any time.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Delete your account and associated data using in-app controls or by contacting info@breathesafe.xyz.</span></span></span></li>
+        </ul>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Deleting your data will stop future use of your data for research and model training.</span></span></span></div>
+      </div>
+
+      <!-- Section: Risks of participation -->
+      <div id="risks-of-participation">
+        <br>
+        <br>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHAT ARE THE RISKS OF PARTICIPATION?</span></span></strong></div>
+        <div><br></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Some data collected (such as facial measurements) are sensitive. Risks include the unlikely possibility of unauthorized access in the event of a data breach.</span></span></span></div>
+        <div><br></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">To reduce risk:</span></span></span></div>
+        <ul>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Only the minimum facial data needed for fit assessment is collected.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Data are transmitted using encrypted connections.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Data such as raw facial measurement points are stored encrypted.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may use a pseudonym to further reduce identifiability.</span></span></span></li>
+        </ul>
+      </div>
+
+      <!-- Section: Benefits of participation -->
+      <div id="benefits-of-participation">
+        <br>
+        <br>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHAT ARE THE BENEFITS OF PARTICIPATION?</span></span></strong></div>
+        <div><br></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Potential benefits include:</span></span></span></div>
+        <ul>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Improved ability to find respirators that fit your face.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Contributing to tools that may help others find better-fitting masks.</span></span></span></li>
+        </ul>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">There may be no direct benefit to you.</span></span></span></div>
+      </div>
+
+      <!-- Section: Privacy protection -->
+      <div id="privacy-protection">
+        <br>
+        <br>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">HOW IS PRIVACY PROTECTED?</span></span></strong></div>
+        <div><br></div>
+        <ul>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Personal identifiers (name, email) are not publicly displayed.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Publicly displayed information, if any, is aggregated and de-identified.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Small groups are suppressed or grouped to reduce re-identification risk.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Breathesafe follows reasonable security practices to protect stored data.</span></span></span></li>
+        </ul>
+      </div>
+
+      <!-- Section: Compensation -->
+      <div id="compensation">
+        <br>
+        <br>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">ARE PARTICIPANTS COMPENSATED?</span></span></strong></div>
+        <div><br></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Participation is voluntary. In some cases, Breathesafe may assist with equipment or costs related to data contribution, depending on availability and location. Please contact info@breathesafe.xyz for details.</span></span></span></div>
+      </div>
+
+      <!-- Section: Participant rights -->
+      <div id="participant-rights">
+        <br>
+        <br>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHAT ARE THE RIGHTS OF PARTICIPANTS?</span></span></strong></div>
+        <div><br></div>
+        <ul>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Participation is voluntary.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may withdraw at any time.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may request access to or deletion of your data.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Parents/guardians may exercise these rights on behalf of minors.</span></span></span></li>
+        </ul>
+      </div>
+
+      <!-- Section: Contact -->
+      <div id="contact">
+        <br>
+        <br>
+        <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">WHO CAN I CONTACT WITH QUESTIONS?</span></span></strong></div>
+        <div><br></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Email: <strong>info@breathesafe.xyz</strong></span></span></span></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Mail:</span></span></span></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Breathesafe LLC</span></span></span></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">138 Miller Ave.</span></span></span></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Rumford, RI 02916</span></span></span></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">United States</span></span></span></div>
+      </div>
+
+      <br>
+      <br>
+      <br>
+      </div>
+      </div></div></div>
       </div>
     </div>
-  </Popup>
-
-  <Popup v-if='showRejectInfo' @onclose='dismissRejectInfo'>
-    <p>
-      You could go to the Respirator Users page
-      <router-link :to="{ name: 'RespiratorUsers' }">(link)</router-link>, click on each of the users you manage, hit edit, and delete their data. That will delete facial measurements, demographics, fit tests, etc.
-    </p>
-  </Popup>
-
-  <div v-if='showConsentActions' class='consent-bottom-actions'>
-    <Button class='accept' @click='onAccept'>Accept</Button>
-    <Button class='reject' @click='onReject'>Reject</Button>
   </div>
-
+</div>
 </template>
-<script>
 
-import CircularButton from './circular_button.vue';
-import Button from './button.vue';
-import Popup from './pop_up.vue';
-import axios from 'axios';
-import { mapActions, mapState } from 'pinia';
-import { useMainStore } from './stores/main_store';
+<script>
+import CircularButton from './circular_button.vue'
 
 export default {
   name: 'ConsentForm',
   components: {
-    CircularButton,
-    Button,
-    Popup,
-  },
-  data() {
-    return {
-      showInfoPopup: false,
-      showThanksPopup: false,
-      showRejectConfirm: false,
-      showRejectInfo: false,
-      infoVersion: '',
-    }
-  },
-  props: { },
-  computed: {
-    ...mapState(useMainStore, ['currentUser', 'consentFormVersion']),
-    showConsentActions() {
-      return !!this.currentUser && !!this.consentFormVersion && this.currentUser.consent_form_version_accepted !== this.consentFormVersion;
-    }
-  },
-  async mounted() {
-    await this.getCurrentUser();
-    // Only show the "We updated our Consent Form" popup if:
-    // 1. User exists and consent form version exists
-    // 2. User has previously accepted a consent form (consent_form_version_accepted is not null/undefined)
-    // 3. The accepted version is different from the current version (meaning the form was updated)
-    // This prevents showing the popup to users who just accepted the current version during registration
-    const hasAcceptedBefore = !!this.currentUser?.consent_form_version_accepted;
-    const versionChanged = hasAcceptedBefore &&
-                          this.currentUser.consent_form_version_accepted !== this.consentFormVersion;
-    const needsInfo = !!this.currentUser &&
-                     !!this.consentFormVersion &&
-                     versionChanged;
-    if (needsInfo) {
-      this.showInfoPopup = true;
-      // Ensure latest_version is a string, not [object Object]
-      const routeVersion = this.$route.query.latest_version;
-      const versionString = typeof routeVersion === 'string' && routeVersion !== '[object Object]'
-        ? routeVersion
-        : (this.consentFormVersion || '');
-      this.infoVersion = versionString;
-    }
-  },
-  methods: {
-    ...mapActions(useMainStore, ['getCurrentUser', 'setConsentDismissedForSession']),
-    tocPath(suffix) {
-      return `/consent_form#${suffix}`
-    },
-    async onAccept() {
-      await this.getCurrentUser();
-      if (!this.currentUser) { return }
-      try {
-        const response = await axios.post('/users/consent', { decision: 'accept' });
-        if (response.status >= 200 && response.status < 300) {
-          this.showThanksPopup = true;
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    },
-    async onReject() {
-      this.showRejectConfirm = true;
-    },
-    async confirmReject() {
-      try {
-        await axios.post('/users/consent', { decision: 'reject' });
-      } catch (e) {
-        console.error(e);
-      }
-      this.showRejectConfirm = false;
-      this.showRejectInfo = true;
-    },
-    closeThanks() {
-      this.showThanksPopup = false;
-      // Mark consent screen dismissed for this session and return to target
-      this.setConsentDismissedForSession(true);
-      const name = this.$route.query.return_to_name || 'Landing';
-      let params = {};
-      let query = {};
-      try { params = JSON.parse(this.$route.query.return_to_params || '{}') } catch {}
-      try { query = JSON.parse(this.$route.query.return_to_query || '{}') } catch {}
-      this.$router.replace({ name, params, query });
-    },
-    dismissRejectInfo() {
-      this.showRejectInfo = false;
-      // Allow the user to continue using the app; mark dismissed for session
-      this.setConsentDismissedForSession(true);
-      const name = this.$route.query.return_to_name || 'Landing';
-      let params = {};
-      let query = {};
-      try { params = JSON.parse(this.$route.query.return_to_params || '{}') } catch {}
-      try { query = JSON.parse(this.$route.query.return_to_query || '{}') } catch {}
-      this.$router.replace({ name, params, query });
-    }
+    CircularButton
   }
 }
 </script>
+
 <style scoped>
-  .consent-bottom-actions {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-    z-index: 1002;
-  }
-
-  .consent-bottom-actions .accept {
-    background: #2e7d32;
-    color: white;
-  }
-
-  .consent-bottom-actions .reject {
-    background: #c62828;
-    color: white;
-  }
-  .margined {
-    margin: 1em;
-  }
-
-  .toc {
-    width: 35vw;
-    position: fixed;
-    top: 0;
+  .container {
     display: flex;
     flex-direction: column;
-    height: 90vh;
   }
 
   .grid {
     display: grid;
-    grid-template-columns: 35vw 65vw;
-    justify-content: center;
-  }
-
-  .grid-images {
-    display: grid;
-    grid-template-columns: 33% 33% 33%;
+    grid-template-columns: 20% 80%;
     grid-template-rows: auto;
   }
 
+  .margined {
+    margin: 1em;
+  }
+
   .main {
-    margin-left: 35vw;
-    width: 60vw;
+    max-width: 50em;
   }
 
   .overflow {
+    overflow-y: auto;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+  }
 
-    overflow: auto;
+  .toc {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .toc a {
+    padding: 0.5em;
+    text-decoration: none;
+    color: #333;
+  }
+
+  .toc a:hover {
+    background-color: #f0f0f0;
   }
 
   .toc-button {
     position: fixed;
-    right: 1em;
     top: 4em;
+    right: 1em;
+    z-index: 1000;
+    display: none;
   }
 
-  .left-pane-image {
-    max-width: 15em;
+  /* Mobile TOC - hidden on desktop */
+  .toc-mobile {
+    display: none;
   }
 
-  @media(min-width: 1200px) {
-    .toc-button {
+  /* Add scroll margin to all anchor sections to account for fixed nav bar */
+  #top,
+  #invitation-to-participate,
+  #why-is-this-project-being-done,
+  #who-can-participate,
+  #study-procedures,
+  #baseline-app-use,
+  #optional-research-participation,
+  #information-collected,
+  #data-retention,
+  #can-participants-leave,
+  #risks-of-participation,
+  #benefits-of-participation,
+  #privacy-protection,
+  #compensation,
+  #participant-rights,
+  #contact,
+  #toc-mobile {
+    scroll-margin-top: 3.25em;
+  }
+
+  @media(max-width: 700px) {
+    .grid {
+      grid-template-columns: 100%;
+    }
+
+    /* Hide desktop TOC on mobile */
+    .toc-desktop {
       display: none;
     }
 
-  }
-  @media(max-width: 1200px) {
-    .left-pane-image {
-      max-width: 8em;
-    }
-    .grid {
+    /* Show mobile TOC at top */
+    .toc-mobile {
       display: flex;
-      flex-direction: column;
+      background-color: #f8f8f8;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 1em;
+      margin-bottom: 1em;
     }
 
-    .toc {
-      position: relative;
-      width: 75vw;
+    .toc-mobile h2 {
+      font-size: 1.2em;
+      margin: 0 0 0.5em 0;
     }
 
-    .main {
-      width: 75vw;
-      margin-left: 0;
+    .toc-mobile a {
+      padding: 0.3em 0.5em;
+      font-size: 0.9em;
     }
 
+    /* Show TOC button on mobile */
+    .toc-button {
+      display: block;
+    }
   }
-
-  .tos-header {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-  }
-
-  th, td {
-    padding: 0.5em;
-  }
-
 </style>
