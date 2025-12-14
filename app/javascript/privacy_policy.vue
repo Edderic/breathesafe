@@ -624,6 +624,34 @@ export default {
     display: none;
   }
 
+  /* Add scroll margin to all anchor sections to account for fixed nav bar */
+  #top,
+  #who-we-are,
+  #what-this-policy-covers,
+  #baseline-app-use,
+  #optional-research-participation,
+  #information-we-collect,
+  #information-you-provide,
+  #facial-measurement-data,
+  #automatically-collected-data,
+  #how-we-use-information,
+  #baseline-use,
+  #research-use,
+  #recommendations-generated,
+  #legal-bases,
+  #sharing-information,
+  #public-display,
+  #international-transfers,
+  #data-retention,
+  #security,
+  #your-rights,
+  #children-consent,
+  #policy-changes,
+  #contact,
+  #toc-mobile {
+    scroll-margin-top: 3.25em;
+  }
+
   @media(max-width: 700px) {
     .grid {
       grid-template-columns: 100%;
