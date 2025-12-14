@@ -7,8 +7,43 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable,
          :confirmable, :lockable, :timeoutable, :trackable
 
-  # Validate consent_form_version_accepted if present
+  # Validate consent_form_version_accepted if present (legacy field)
   validate :consent_form_version_accepted_format, if: -> { consent_form_version_accepted.present? }
+
+  # Helper methods for forms jsonb field
+  def form_accepted?(form_name)
+    forms.dig(form_name.to_s, 'version_accepted').present?
+  end
+
+  def form_version_accepted(form_name)
+    forms.dig(form_name.to_s, 'version_accepted')
+  end
+
+  def form_accepted_at(form_name)
+    accepted_at_str = forms.dig(form_name.to_s, 'accepted_at')
+    Time.zone.parse(accepted_at_str) if accepted_at_str.present?
+  rescue ArgumentError
+    nil
+  end
+
+  def accept_form(form_name, version)
+    self.forms ||= {}
+    self.forms[form_name.to_s] = {
+      'version_accepted' => version,
+      'accepted_at' => Time.current.utc.iso8601
+    }
+  end
+
+  def needs_to_accept_forms?(current_versions)
+    return [] unless forms.is_a?(Hash)
+
+    outdated_forms = []
+    current_versions.each do |form_name, current_version|
+      accepted_version = form_version_accepted(form_name)
+      outdated_forms << form_name.to_s if accepted_version.nil? || accepted_version != current_version
+    end
+    outdated_forms
+  end
 
   has_one :profile, dependent: :destroy, inverse_of: :user
   has_many :events, foreign_key: 'author_id', dependent: :destroy, inverse_of: :user

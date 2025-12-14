@@ -6,33 +6,36 @@ module Users
 
     def create
       decision = params[:decision]
-      current_version = consent_form_version
-
-      # Ensure current_version is a string and not nil
-      unless current_version.is_a?(String) && current_version.present?
-        Rails.logger.error("Invalid consent_form_version after helper: #{current_version.inspect}")
-        current_version = '2025-10-25'
-        Rails.logger.warn("Using fallback consent_form_version: #{current_version}")
-      end
+      forms_to_accept = params[:forms] || ['consent_form'] # Default to consent_form for backward compatibility
 
       case decision
       when 'accept'
-        # Explicitly ensure we're setting a string value
-        version_string = current_version.to_s
-        current_user.update!(
-          consent_form_version_accepted: version_string,
-          consent_form_accepted_at: Time.current
-        )
+        # Get current versions for all forms
+        current_versions = {
+          'consent_form' => Rails.application.config.consent_form_version,
+          'disclaimer' => Rails.application.config.disclaimer_version,
+          'terms_of_service' => Rails.application.config.terms_of_service_version,
+          'privacy_policy' => Rails.application.config.privacy_policy_version
+        }
 
-        # Reload to ensure we have the latest data
-        current_user.reload
-
-        # Verify the value was set correctly
-        if current_user.consent_form_version_accepted != version_string
-          # rubocop:disable Layout/LineLength
-          Rails.logger.error("Failed to set consent_form_version_accepted. Expected: #{version_string.inspect}, Got: #{current_user.consent_form_version_accepted.inspect}")
-          # rubocop:enable Layout/LineLength
+        # Accept all specified forms
+        forms_to_accept.each do |form_name|
+          version = current_versions[form_name]
+          if version.present?
+            current_user.accept_form(form_name, version)
+          else
+            Rails.logger.warn("Unknown form type: #{form_name}")
+          end
         end
+
+        # Also update legacy fields for consent_form for backward compatibility
+        if forms_to_accept.include?('consent_form')
+          current_user.consent_form_version_accepted = current_versions['consent_form']
+          current_user.consent_form_accepted_at = Time.current
+        end
+
+        current_user.save!
+        current_user.reload
 
         accepted = true
       when 'reject'
@@ -44,7 +47,7 @@ module Users
 
       render json: {
         accepted: accepted,
-        version: current_version,
+        forms: current_user.forms,
         currentUser: current_user.reload
       }
     end

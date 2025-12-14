@@ -1,5 +1,6 @@
 <template>
   <vue3-progress/>
+  <LegalFormsConsentPopup/>
   <div class='column'>
     <NavBar></NavBar>
 
@@ -17,6 +18,7 @@
 import Footer from './footer.vue';
 import NavBar from './navbar.vue';
 import Spinner from './spinner.vue'
+import LegalFormsConsentPopup from './legal_forms_consent_popup.vue'
 import { useMainStore } from './stores/main_store';
 import { useProfileStore } from './stores/profile_store';
 import { mapActions, mapWritableState, mapState, mapStores } from 'pinia'
@@ -27,6 +29,7 @@ export default {
     Footer,
     Spinner,
     NavBar,
+    LegalFormsConsentPopup
   },
   computed: {
     ...mapStores(useMainStore),

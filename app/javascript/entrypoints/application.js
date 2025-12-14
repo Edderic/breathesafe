@@ -142,29 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
       await main.getCurrentUser();
     }
 
-    const user = main.currentUser;
-    // Ensure consentFormVersion is a string, not an object
-    const latest = typeof main.consentFormVersion === 'string'
-      ? main.consentFormVersion
-      : (main.consentFormVersion ? String(main.consentFormVersion) : '');
-
-    const needsConsent = !!user && !!latest && user.consent_form_version_accepted !== latest && !main.consentDismissedForSession;
-    const navigatingToConsent = to.name === 'ConsentForm';
-
-    // Only intercept normal navigation; do not loop
-    if (needsConsent && !navigatingToConsent) {
-      next({
-        name: 'ConsentForm',
-        query: {
-          return_to_name: to.name || 'Landing',
-          return_to_query: JSON.stringify(to.query || {}),
-          return_to_params: JSON.stringify(to.params || {}),
-          latest_version: latest
-        }
-      });
-      return;
-    }
-
+    // Router guard removed - consent is now handled via popup instead of redirect
     next();
   })
 

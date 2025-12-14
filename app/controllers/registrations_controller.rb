@@ -32,11 +32,18 @@ class RegistrationsController < Devise::RegistrationsController
       if [true, 'true', '1', true].include?(accept_consent)
         current_version = consent_form_version
         if current_version.is_a?(String) && current_version.present?
-          # Use update to respect validations
+          # Update both legacy fields and new forms structure
           resource.update(
             consent_form_version_accepted: current_version,
             consent_form_accepted_at: Time.current
           )
+
+          # Also update the forms jsonb field for all four documents
+          resource.accept_form('consent_form', current_version)
+          resource.accept_form('disclaimer', Rails.application.config.disclaimer_version)
+          resource.accept_form('terms_of_service', Rails.application.config.terms_of_service_version)
+          resource.accept_form('privacy_policy', Rails.application.config.privacy_policy_version)
+          resource.save!
         end
       end
 

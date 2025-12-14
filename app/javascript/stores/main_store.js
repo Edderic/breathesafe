@@ -20,6 +20,9 @@ export const useMainStore = defineStore('main', {
     signedIn: false,
     currentUser: undefined,
     consentFormVersion: undefined,
+    disclaimerVersion: undefined,
+    termsOfServiceVersion: undefined,
+    privacyPolicyVersion: undefined,
     consentDismissedForSession: false,
     messages: [],
     whereabouts: {lat: 51.093048, lng: 6.842120},
@@ -92,11 +95,27 @@ export const useMainStore = defineStore('main', {
       await axios.get('/users/get_current_user.json')
         .then(response => {
           this.currentUser = response.data.currentUser;
-          // Ensure consentFormVersion is always a string
-          const version = response.data.consentFormVersion;
-          this.consentFormVersion = typeof version === 'string'
-            ? version
-            : (version ? String(version) : undefined);
+          // Ensure all form versions are always strings
+          const consentVersion = response.data.consentFormVersion;
+          this.consentFormVersion = typeof consentVersion === 'string'
+            ? consentVersion
+            : (consentVersion ? String(consentVersion) : undefined);
+
+          const disclaimerVer = response.data.disclaimerVersion;
+          this.disclaimerVersion = typeof disclaimerVer === 'string'
+            ? disclaimerVer
+            : (disclaimerVer ? String(disclaimerVer) : undefined);
+
+          const termsVer = response.data.termsOfServiceVersion;
+          this.termsOfServiceVersion = typeof termsVer === 'string'
+            ? termsVer
+            : (termsVer ? String(termsVer) : undefined);
+
+          const privacyVer = response.data.privacyPolicyVersion;
+          this.privacyPolicyVersion = typeof privacyVer === 'string'
+            ? privacyVer
+            : (privacyVer ? String(privacyVer) : undefined);
+
           this.signedIn = !!response.data.currentUser;
           console.log('this.signedIn', this.signedIn)
           // whatever you want
