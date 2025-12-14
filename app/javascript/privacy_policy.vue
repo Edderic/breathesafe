@@ -1,5 +1,5 @@
 <template>
-  <router-link to="/privacy#toc">
+  <router-link to="/privacy#toc-mobile">
     <CircularButton text="TOC" class='toc-button'/>
   </router-link>
 
@@ -613,7 +613,7 @@ export default {
 
   .toc-button {
     position: fixed;
-    top: 1em;
+    top: 4em;
     right: 1em;
     z-index: 1000;
     display: none;
