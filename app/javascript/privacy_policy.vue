@@ -6,98 +6,98 @@
 <div class="container">
   <!-- Mobile TOC - shown at top on mobile -->
   <div class='toc toc-mobile margined' id='toc-mobile'>
-    <h2><strong>TABLE OF CONTENTS</strong></h2>
+    <h2><strong>Table of Contents</strong></h2>
 
     <router-link to="/privacy#top">
-      PRIVACY POLICY (BREATHESAFE & SNAPFIT)
+      Privacy Policy (Breathesafe & SnapFit)
     </router-link>
 
     <router-link to="/privacy#who-we-are">
-      1. WHO WE ARE
+      1. Who We Are
     </router-link>
 
     <router-link to="/privacy#what-this-policy-covers">
-      2. WHAT THIS POLICY COVERS
+      2. What This Policy Covers
     </router-link>
 
     <router-link to="/privacy#baseline-app-use">
-      2A. BASELINE APP USE (NON-RESEARCH)
+      2A. Baseline App Use (Non-Research)
     </router-link>
 
     <router-link to="/privacy#optional-research-participation">
-      2B. OPTIONAL RESEARCH PARTICIPATION (OPT-IN)
+      2B. Optional Research Participation (Opt-In)
     </router-link>
 
     <router-link to="/privacy#information-we-collect">
-      3. INFORMATION WE COLLECT
+      3. Information We Collect
     </router-link>
 
     <router-link to="/privacy#information-you-provide">
-      3.1 INFORMATION YOU PROVIDE TO US
+      3.1 Information You Provide to Us
     </router-link>
 
     <router-link to="/privacy#facial-measurement-data">
-      3.2 FACIAL MEASUREMENT DATA (BASELINE VS RESEARCH)
+      3.2 Facial Measurement Data (Baseline vs Research)
     </router-link>
 
     <router-link to="/privacy#automatically-collected-data">
-      3.3 AUTOMATICALLY COLLECTED TECHNICAL DATA
+      3.3 Automatically Collected Technical Data
     </router-link>
 
     <router-link to="/privacy#how-we-use-information">
-      4. HOW WE USE YOUR INFORMATION
+      4. How We Use Your Information
     </router-link>
 
     <router-link to="/privacy#baseline-use">
-      4.1 BASELINE APP USE (NON-RESEARCH)
+      4.1 Baseline App Use (Non-Research)
     </router-link>
 
     <router-link to="/privacy#research-use">
-      4.2 OPTIONAL RESEARCH PARTICIPATION
+      4.2 Optional Research Participation
     </router-link>
 
     <router-link to="/privacy#recommendations-generated">
-      5. HOW RECOMMENDATIONS ARE GENERATED
+      5. How Recommendations Are Generated
     </router-link>
 
     <router-link to="/privacy#legal-bases">
-      6. LEGAL BASES FOR PROCESSING (GDPR / UK GDPR)
+      6. Legal Bases for Processing (GDPR / UK GDPR)
     </router-link>
 
     <router-link to="/privacy#sharing-information">
-      7. SHARING YOUR INFORMATION
+      7. Sharing Your Information
     </router-link>
 
     <router-link to="/privacy#public-display">
-      8. WHAT WE DISPLAY PUBLICLY
+      8. What We Display Publicly
     </router-link>
 
     <router-link to="/privacy#international-transfers">
-      9. INTERNATIONAL TRANSFERS
+      9. International Transfers
     </router-link>
 
     <router-link to="/privacy#data-retention">
-      10. DATA RETENTION
+      10. Data Retention
     </router-link>
 
     <router-link to="/privacy#security">
-      11. SECURITY
+      11. Security
     </router-link>
 
     <router-link to="/privacy#your-rights">
-      12. YOUR RIGHTS AND CHOICES
+      12. Your Rights and Choices
     </router-link>
 
     <router-link to="/privacy#children-consent">
-      13. CHILDREN AND PARENT/GUARDIAN CONSENT
+      13. Children and Parent/Guardian Consent
     </router-link>
 
     <router-link to="/privacy#policy-changes">
-      14. CHANGES TO THIS POLICY
+      14. Changes to This Policy
     </router-link>
 
     <router-link to="/privacy#contact">
-      15. CONTACT
+      15. Contact
     </router-link>
   </div>
 
@@ -107,98 +107,98 @@
     <br>
     <br>
     <br>
-      <div><br></div><h2><strong>TABLE OF CONTENTS</strong></h2><div><br></div>
+      <div><br></div><h2><strong>Table of Contents</strong></h2><div><br></div>
 
       <router-link to="/privacy#top">
-        PRIVACY POLICY (BREATHESAFE & SNAPFIT)
+        Privacy Policy (Breathesafe & SnapFit)
       </router-link>
 
       <router-link to="/privacy#who-we-are">
-        1. WHO WE ARE
+        1. Who We Are
       </router-link>
 
       <router-link to="/privacy#what-this-policy-covers">
-        2. WHAT THIS POLICY COVERS
+        2. What This Policy Covers
       </router-link>
 
       <router-link to="/privacy#baseline-app-use">
-        2A. BASELINE APP USE (NON-RESEARCH)
+        2A. Baseline App Use (Non-Research)
       </router-link>
 
       <router-link to="/privacy#optional-research-participation">
-        2B. OPTIONAL RESEARCH PARTICIPATION (OPT-IN)
+        2B. Optional Research Participation (Opt-In)
       </router-link>
 
       <router-link to="/privacy#information-we-collect">
-        3. INFORMATION WE COLLECT
+        3. Information We Collect
       </router-link>
 
       <router-link to="/privacy#information-you-provide">
-        3.1 INFORMATION YOU PROVIDE TO US
+        3.1 Information You Provide to Us
       </router-link>
 
       <router-link to="/privacy#facial-measurement-data">
-        3.2 FACIAL MEASUREMENT DATA (BASELINE VS RESEARCH)
+        3.2 Facial Measurement Data (Baseline vs Research)
       </router-link>
 
       <router-link to="/privacy#automatically-collected-data">
-        3.3 AUTOMATICALLY COLLECTED TECHNICAL DATA
+        3.3 Automatically Collected Technical Data
       </router-link>
 
       <router-link to="/privacy#how-we-use-information">
-        4. HOW WE USE YOUR INFORMATION
+        4. How We Use Your Information
       </router-link>
 
       <router-link to="/privacy#baseline-use">
-        4.1 BASELINE APP USE (NON-RESEARCH)
+        4.1 Baseline App Use (Non-Research)
       </router-link>
 
       <router-link to="/privacy#research-use">
-        4.2 OPTIONAL RESEARCH PARTICIPATION
+        4.2 Optional Research Participation
       </router-link>
 
       <router-link to="/privacy#recommendations-generated">
-        5. HOW RECOMMENDATIONS ARE GENERATED
+        5. How Recommendations Are Generated
       </router-link>
 
       <router-link to="/privacy#legal-bases">
-        6. LEGAL BASES FOR PROCESSING (GDPR / UK GDPR)
+        6. Legal Bases for Processing (GDPR / UK GDPR)
       </router-link>
 
       <router-link to="/privacy#sharing-information">
-        7. SHARING YOUR INFORMATION
+        7. Sharing Your Information
       </router-link>
 
       <router-link to="/privacy#public-display">
-        8. WHAT WE DISPLAY PUBLICLY
+        8. What We Display Publicly
       </router-link>
 
       <router-link to="/privacy#international-transfers">
-        9. INTERNATIONAL TRANSFERS
+        9. International Transfers
       </router-link>
 
       <router-link to="/privacy#data-retention">
-        10. DATA RETENTION
+        10. Data Retention
       </router-link>
 
       <router-link to="/privacy#security">
-        11. SECURITY
+        11. Security
       </router-link>
 
       <router-link to="/privacy#your-rights">
-        12. YOUR RIGHTS AND CHOICES
+        12. Your Rights and Choices
       </router-link>
 
       <router-link to="/privacy#children-consent">
-        13. CHILDREN AND PARENT/GUARDIAN CONSENT
+        13. Children and Parent/Guardian Consent
       </router-link>
 
       <router-link to="/privacy#policy-changes">
-        14. CHANGES TO THIS POLICY
+        14. Changes to This Policy
       </router-link>
 
       <router-link to="/privacy#contact">
-        15. CONTACT
+        15. Contact
       </router-link>
 
       <br>

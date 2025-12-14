@@ -6,62 +6,62 @@
 <div class="container">
   <!-- Mobile TOC - shown at top on mobile -->
   <div class='toc toc-mobile margined' id='toc-mobile'>
-    <h2><strong>TABLE OF CONTENTS</strong></h2>
+    <h2><strong>Table of Contents</strong></h2>
 
     <router-link to="/terms_of_service#top">
-      TERMS OF SERVICE (BREATHESAFE & SNAPFIT)
+      Terms of Service (Breathesafe & SnapFit)
     </router-link>
 
     <router-link to="/terms_of_service#agreement-to-legal-terms">
-      AGREEMENT TO OUR LEGAL TERMS
+      Agreement to Our Legal Terms
     </router-link>
 
     <router-link to="/terms_of_service#eligibility-age-requirements">
-      ELIGIBILITY AND AGE REQUIREMENTS
+      Eligibility and Age Requirements
     </router-link>
 
     <router-link to="/terms_of_service#adults">
-      ADULTS
+      Adults
     </router-link>
 
     <router-link to="/terms_of_service#minors">
-      MINORS (PARENT / GUARDIAN CONSENT)
+      Minors (Parent / Guardian Consent)
     </router-link>
 
     <router-link to="/terms_of_service#user-registration">
-      USER REGISTRATION
+      User Registration
     </router-link>
 
     <router-link to="/terms_of_service#pseudonyms">
-      PSEUDONYMS
+      Pseudonyms
     </router-link>
 
     <router-link to="/terms_of_service#user-representations">
-      USER REPRESENTATIONS
+      User Representations
     </router-link>
 
     <router-link to="/terms_of_service#privacy">
-      PRIVACY
+      Privacy
     </router-link>
 
     <router-link to="/terms_of_service#disclaimer-medical-advice">
-      DISCLAIMER OF MEDICAL ADVICE
+      Disclaimer of Medical Advice
     </router-link>
 
     <router-link to="/terms_of_service#termination">
-      TERMINATION
+      Termination
     </router-link>
 
     <router-link to="/terms_of_service#limitation-liability">
-      LIMITATION OF LIABILITY
+      Limitation of Liability
     </router-link>
 
     <router-link to="/terms_of_service#governing-law">
-      GOVERNING LAW
+      Governing Law
     </router-link>
 
     <router-link to="/terms_of_service#contact">
-      CONTACT
+      Contact
     </router-link>
   </div>
 
@@ -71,62 +71,62 @@
     <br>
     <br>
     <br>
-      <div><br></div><h2><strong>TABLE OF CONTENTS</strong></h2><div><br></div>
+      <div><br></div><h2><strong>Table of Contents</strong></h2><div><br></div>
 
       <router-link to="/terms_of_service#top">
-        TERMS OF SERVICE (BREATHESAFE & SNAPFIT)
+        Terms of Service (Breathesafe & SnapFit)
       </router-link>
 
       <router-link to="/terms_of_service#agreement-to-legal-terms">
-        AGREEMENT TO OUR LEGAL TERMS
+        Agreement to Our Legal Terms
       </router-link>
 
       <router-link to="/terms_of_service#eligibility-age-requirements">
-        ELIGIBILITY AND AGE REQUIREMENTS
+        Eligibility and Age Requirements
       </router-link>
 
       <router-link to="/terms_of_service#adults">
-        ADULTS
+        Adults
       </router-link>
 
       <router-link to="/terms_of_service#minors">
-        MINORS (PARENT / GUARDIAN CONSENT)
+        Minors (Parent / Guardian Consent)
       </router-link>
 
       <router-link to="/terms_of_service#user-registration">
-        USER REGISTRATION
+        User Registration
       </router-link>
 
       <router-link to="/terms_of_service#pseudonyms">
-        PSEUDONYMS
+        Pseudonyms
       </router-link>
 
       <router-link to="/terms_of_service#user-representations">
-        USER REPRESENTATIONS
+        User Representations
       </router-link>
 
       <router-link to="/terms_of_service#privacy">
-        PRIVACY
+        Privacy
       </router-link>
 
       <router-link to="/terms_of_service#disclaimer-medical-advice">
-        DISCLAIMER OF MEDICAL ADVICE
+        Disclaimer of Medical Advice
       </router-link>
 
       <router-link to="/terms_of_service#termination">
-        TERMINATION
+        Termination
       </router-link>
 
       <router-link to="/terms_of_service#limitation-liability">
-        LIMITATION OF LIABILITY
+        Limitation of Liability
       </router-link>
 
       <router-link to="/terms_of_service#governing-law">
-        GOVERNING LAW
+        Governing Law
       </router-link>
 
       <router-link to="/terms_of_service#contact">
-        CONTACT
+        Contact
       </router-link>
 
       <br>

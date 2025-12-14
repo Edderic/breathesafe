@@ -39,70 +39,70 @@
 <div class="container">
   <!-- Mobile TOC - shown at top on mobile -->
   <div class='toc toc-mobile margined' id='toc-mobile'>
-    <h2><strong>TABLE OF CONTENTS</strong></h2>
+    <h2><strong>Table of Contents</strong></h2>
 
     <router-link to="/consent_form#top">
-      CONSENT FORM: MASK RECOMMENDER BASED ON FACIAL MEASUREMENTS
+      Consent Form: Mask Recommender Based on Facial Measurements
     </router-link>
 
     <router-link to="/consent_form#invitation-to-participate">
-      INVITATION TO PARTICIPATE
+      Invitation to Participate
     </router-link>
 
     <router-link to="/consent_form#why-is-this-project-being-done">
-      WHY IS THIS PROJECT BEING DONE?
+      Why Is This Project Being Done?
     </router-link>
 
     <router-link to="/consent_form#who-can-participate">
-      WHO CAN PARTICIPATE?
+      Who Can Participate?
     </router-link>
 
     <router-link to="/consent_form#study-procedures">
-      WHAT ARE THE STUDY / PROJECT PROCEDURES?
+      What Are the Study / Project Procedures?
     </router-link>
 
     <router-link to="/consent_form#baseline-app-use">
-      BASELINE APP USE (NOT RESEARCH)
+      Baseline App Use (Not Research)
     </router-link>
 
     <router-link to="/consent_form#optional-research-participation">
-      OPTIONAL RESEARCH PARTICIPATION (OPT-IN)
+      Optional Research Participation (Opt-In)
     </router-link>
 
     <router-link to="/consent_form#information-collected">
-      WHAT INFORMATION MAY BE COLLECTED?
+      What Information May Be Collected?
     </router-link>
 
     <router-link to="/consent_form#data-retention">
-      HOW LONG WILL THE DATA BE USED?
+      How Long Will the Data Be Used?
     </router-link>
 
     <router-link to="/consent_form#can-participants-leave">
-      CAN PARTICIPANTS CHOOSE TO LEAVE?
+      Can Participants Choose to Leave?
     </router-link>
 
     <router-link to="/consent_form#risks-of-participation">
-      WHAT ARE THE RISKS OF PARTICIPATION?
+      What Are the Risks of Participation?
     </router-link>
 
     <router-link to="/consent_form#benefits-of-participation">
-      WHAT ARE THE BENEFITS OF PARTICIPATION?
+      What Are the Benefits of Participation?
     </router-link>
 
     <router-link to="/consent_form#privacy-protection">
-      HOW IS PRIVACY PROTECTED?
+      How Is Privacy Protected?
     </router-link>
 
     <router-link to="/consent_form#compensation">
-      ARE PARTICIPANTS COMPENSATED?
+      Are Participants Compensated?
     </router-link>
 
     <router-link to="/consent_form#participant-rights">
-      WHAT ARE THE RIGHTS OF PARTICIPANTS?
+      What Are the Rights of Participants?
     </router-link>
 
     <router-link to="/consent_form#contact">
-      WHO CAN I CONTACT WITH QUESTIONS?
+      Who Can I Contact with Questions?
     </router-link>
   </div>
 
@@ -112,70 +112,70 @@
     <br>
     <br>
     <br>
-      <div><br></div><h2><strong>TABLE OF CONTENTS</strong></h2><div><br></div>
+      <div><br></div><h2><strong>Table of Contents</strong></h2><div><br></div>
 
       <router-link to="/consent_form#top">
-        CONSENT FORM: MASK RECOMMENDER BASED ON FACIAL MEASUREMENTS
+        Consent Form: Mask Recommender Based on Facial Measurements
       </router-link>
 
       <router-link to="/consent_form#invitation-to-participate">
-        INVITATION TO PARTICIPATE
+        Invitation to Participate
       </router-link>
 
       <router-link to="/consent_form#why-is-this-project-being-done">
-        WHY IS THIS PROJECT BEING DONE?
+        Why Is This Project Being Done?
       </router-link>
 
       <router-link to="/consent_form#who-can-participate">
-        WHO CAN PARTICIPATE?
+        Who Can Participate?
       </router-link>
 
       <router-link to="/consent_form#study-procedures">
-        WHAT ARE THE STUDY / PROJECT PROCEDURES?
+        What Are the Study / Project Procedures?
       </router-link>
 
       <router-link to="/consent_form#baseline-app-use">
-        BASELINE APP USE (NOT RESEARCH)
+        Baseline App Use (Not Research)
       </router-link>
 
       <router-link to="/consent_form#optional-research-participation">
-        OPTIONAL RESEARCH PARTICIPATION (OPT-IN)
+        Optional Research Participation (Opt-In)
       </router-link>
 
       <router-link to="/consent_form#information-collected">
-        WHAT INFORMATION MAY BE COLLECTED?
+        What Information May Be Collected?
       </router-link>
 
       <router-link to="/consent_form#data-retention">
-        HOW LONG WILL THE DATA BE USED?
+        How Long Will the Data Be Used?
       </router-link>
 
       <router-link to="/consent_form#can-participants-leave">
-        CAN PARTICIPANTS CHOOSE TO LEAVE?
+        Can Participants Choose to Leave?
       </router-link>
 
       <router-link to="/consent_form#risks-of-participation">
-        WHAT ARE THE RISKS OF PARTICIPATION?
+        What Are the Risks of Participation?
       </router-link>
 
       <router-link to="/consent_form#benefits-of-participation">
-        WHAT ARE THE BENEFITS OF PARTICIPATION?
+        What Are the Benefits of Participation?
       </router-link>
 
       <router-link to="/consent_form#privacy-protection">
-        HOW IS PRIVACY PROTECTED?
+        How Is Privacy Protected?
       </router-link>
 
       <router-link to="/consent_form#compensation">
-        ARE PARTICIPANTS COMPENSATED?
+        Are Participants Compensated?
       </router-link>
 
       <router-link to="/consent_form#participant-rights">
-        WHAT ARE THE RIGHTS OF PARTICIPANTS?
+        What Are the Rights of Participants?
       </router-link>
 
       <router-link to="/consent_form#contact">
-        WHO CAN I CONTACT WITH QUESTIONS?
+        Who Can I Contact with Questions?
       </router-link>
 
       <br>
