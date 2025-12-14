@@ -315,7 +315,7 @@
         <ul>
           <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Only the minimum facial data needed for fit assessment is collected.</span></span></span></li>
           <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Data are transmitted using encrypted connections.</span></span></span></li>
-          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Data such as raw facial measurement points and names are stored encrypted.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Data such as raw facial measurement points, names, and demographic information are stored encrypted.</span></span></span></li>
           <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may use a pseudonym to further reduce identifiability.</span></span></span></li>
         </ul>
       </div>

@@ -104,7 +104,7 @@
       <h2>Onboarding for Mask Recommender Based on Facial Features</h2>
 
       <div>
-        <p>Last updated: Nov. 21, 2024</p>
+        <p>Last updated: Dec. 12, 2025</p>
       </div>
 
       <div class='row'>
@@ -117,17 +117,7 @@
           <h4>Timeline</h4>
         </div>
 
-        <p>There are two phases for this project:</p>
-        <ul>
-          <li>collect fit testing data and facial measurement data with caliper and tape (to then create a model that predicts fit)</li>
-          <li>collect selfies (to predict facial measurement data accurately and seamlessly)</li>
-        </ul>
-
-        <p>For collecting fit testing and facial measurement data, Breathesafe LLC hopes to have fit testers be done in 4 months after they get the fit testing equipment and masks from us. Collecting selfies will be done at a later time. You can opt in to this later on, which is voluntary and not required for participation in the former.</p>
-
-        <p>As mentioned in the <router-link :to='tocPath("expected-equipment")'>Expected equipment</router-link> section below, there are 44 masks. I am hoping that for most testers, they will be done in about 4 months after receiving the equipment. Some of these masks are going to be too small or too big. For those, you will be able to quickly mark masks as way too small or way too big and would not have to go through the full qualitative or quantitative fit testing procedure. It will take about 30 seconds or less to mark a mask as such in the
-        <router-link :to="{name: 'NewFitTest'}">Adding a Fit Test page</router-link>.
-        </p>
+        <p>This is an ongoing project with no definite end-date. You can add fit testing data and facial measurements at any time.</p>
 
         <div id='expected-time-commitment'>
           <br>
@@ -135,8 +125,50 @@
           <h4>Time Commitment</h4>
         </div>
 
+        <h5>
+          Registration
+        </h5>
         <p>
-        For qualitative fit testers, you will go through the OSHA set of exercises:
+        It might take about a couple of minutes to register, confirm the email, and login.
+        </p>
+        <h5>
+          Creating a respirator user
+        </h5>
+        <p>
+        It takes 30 seconds to create a Respirator User. You could create one for yourself, and for others you'd like to add data for (e.g. your children).
+        </p>
+
+        <h5>
+          Adding Demographic Information
+        </h5>
+        <p>
+        There are a few questions about race, ethnicity, gender / sex. It should take less than 30 seconds to answer per Respirator User that you've created.
+        </p>
+
+
+        <h5>
+          Adding Facial Measurements
+        </h5>
+        <p>
+        To add facial measurements for a Respirator User, use the <router-link :to="{name: 'NewFitTest'}">SnapFit iOS app</router-link> to upload the relevant facial measurements to Breathesafe. It might take a minute to search and download the app from the App Store. Once downloaded, it can take a few seconds to take measurements, and upload the data to Breathesafe to improve the Mask Recommender system.
+        </p>
+
+
+        <h5>
+          User Seal Check Results
+        </h5>
+        <p>
+        Some of the masks that you try are going to be too small or too big. For those, you will be able to quickly mark masks as way too small or way too big and would not have to go through the full qualitative or quantitative fit testing procedure. It will take about 30 seconds or less to mark a mask as such in the
+        <router-link :to="{name: 'NewFitTest'}">Adding a Fit Test page</router-link>.
+        </p>
+
+
+        <h5>
+          Qualitative Fit Testing
+        </h5>
+
+        <p>
+        If you have access to qualitative fit testing, you will go through the OSHA set of exercises:
 
         </p>
 
@@ -150,10 +182,33 @@
           <li>Normal breathing #2</li>
         </ul>
 
-        <p>Each exercise takes a minute to do. Filling out the fit testing data in <router-link :to="{name: 'NewFitTest'}">Adding a Fit Test page</router-link> takes about a couple of minutes max. So in total that's about 9 minutes per mask. Let's say that about 1/3 of the masks are obviously too small / too big for you. That translates to 46 masks / 3  =~ 15 masks. For those masks, let's say you took a minute to fill out the <router-link :to="{name: 'NewFitTest'}">Adding a Fit Test page</router-link>. So that's 15 minutes of your time. And then for those masks you do decide to qualitatively test, that translates to (46 - 15) masks = 31 masks. 31 masks x 10 minutes / mask = 310 minutes. So for the data collection for Phase I, that translates to about 310 minutes + 15 minutes = 325 minutes of your time. To get all the testing done in 4 months, that averages to 325 minutes / 4 months = 81.25 minutes / month, or 1.35 hours per month.
-
+        <p>Each exercise takes a minute to do. Filling out the fit testing data in <router-link :to="{name: 'NewFitTest'}">Adding a Fit Test page</router-link> takes about a couple of minutes max. So in total that's about 9 minutes per mask.
+        </p>
+        <h5>
+          Quantitative Fit Testing
+        </h5>
+        <p>
+        If you have access to quantitative fit testing, you will go through these smaller number of OSHA exercises (which I dub as the "OSHA Fast Facepiece Respirator" set of exercises)
 
         </p>
+
+        <ul>
+          <li>Bending over</li>
+          <li>Turning head side-to-side</li>
+          <li>Moving head up-and-down</li>
+          <li>Talking</li>
+        </ul>
+
+        <p>
+        Since each exercise takes a minute to do, and adding in some buffer, let's assume it takes 5 minutes to do one mask.
+        </p>
+        <h5>
+          Uploading Fit Testing Results in Bulk
+        </h5>
+        <p>
+        If you prefer to store your data using spreadsheets instead of the regular UI, or already have fit testing data saved in a spreadsheet, you can upload your data seamlessly using the Bulk Fit Tests Importing tool. It takes about a minute or two to upload data from spreadsheets (CSV). See the <router-link :to="{name: 'NewFitTest'}">Bulk Fit Tests Import section.</router-link>
+        </p>
+
 
         <div id='expected-equipment'>
           <br>
@@ -161,33 +216,12 @@
           <h4>Expected equipment</h4>
         </div>
 
-        <p>For volunteers who want to  receive a set of masks from Breathesafe LLC, I can also provide the following equipment if you don’t have it:</p>
-
-        <ul>
-          <li>Qualitative Fit Testing Kit OR Quantitative Fit Testing Device</li>
-          <li>Masks to test</li>
-          <li>Digital Caliper &amp; Tape</li>
-        </ul>
-
         <p>
-        Masks to test are listed <router-link :to='{query: { sortByField:"uniqueFitTestersCount", "sortByStatus":"descending", "filterForTargeted": "true", "filterForNotTargeted": "false" }}'>here</router-link>. There are about 46 masks.
+        You can do fit testing on your own set of masks. I also expect that you have access to an iPhone with True Depth camera, along with either a qualitative or quantitative fit testing device:
         </p>
 
 
         <div class='grid-images'>
-          <figure>
-            <a href="https://www.amazon.com/gp/product/B00JALAIIE/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1" target='_blank'>
-              <img class='left-pane-image' src="https://c.media-amazon.com/images/I/6194IWMjJEL._SX522_.jpg" alt='iGaging 6" Digital External Outside Caliper OD for Woodworking'>
-            </a>
-            <figcaption>Digital Caliper</figcaption>
-          </figure>
-
-          <figure>
-            <a href="https://www.amazon.com/dp/B0BGHCTL45?ref=ppx_yo2ov_dt_b_fed_asin_title" target='_blank'>
-              <img class='left-pane-image' src="https://c.media-amazon.com/images/I/71Cwjwnqc6L._SL1500_.jpg" alt='Tape Measure, iBayam Soft Ruler Measuring Tape for Body Weight Loss Fabric Sewing Tailor Cloth Vinyl Measurement Craft Supplies, 60-Inch Double Scale Ruler, 2-Pack White, Blue'>
-            </a>
-            <figcaption>Tape Measure</figcaption>
-          </figure>
 
           <figure>
             <a href="https://www.youtube.com/watch?v=Syj_zeNtLGI" target='_blank'>
@@ -203,7 +237,16 @@
             <figcaption>A Quantitative Fit Testing device such as a PortaCount</figcaption>
           </figure>
 
+          <figure>
+            <a href="https://www.verizon.com/smartphones/apple-iphone-14/" target='_blank'>
+              <img class='left-pane-image' src="https://ss7.vzw.com/is/image/VerizonWireless/iphone-14-midnight-fall22-a?wid=930&hei=930&fmt=webp" alt='An iPhone'>
+            </a>
+            <figcaption>An iPhone with True Depth camera</figcaption>
+          </figure>
+
         </div>
+
+        <p>For the <strong>iPhone</strong> requirement, one can tell whether or not the device has True Depth capability is if the particular iPhone model is capable of using FaceID. If an iPhone model is not capable of FaceID, it probably doesn't have a True Depth infrared sensor.</p>
 
         <p>For the <strong>qualitative</strong> fit testing kit, you should have:</p>
         <ul>
@@ -227,7 +270,7 @@
 
         <p>If you don't have qualitative fit testing equipment, but have access to <strong>quantitative</strong> fit testing equipment, you should have:</p>
         <ul>
-          <li>a quantitative fit testing machine (e.g. TSI 8020A)</li>
+          <li>a quantitative fit testing machine with N95-mode capability (e.g. TSI 8020A w/ N95-Mode Companion)</li>
           <li>probes</li>
         </ul>
 
