@@ -159,9 +159,6 @@ class ManagedUsersController < ApplicationController
           # Delete facial measurements
           facial_measurements.destroy_all
 
-          # Delete events authored by this user
-          Event.where(author_id: managed_id).destroy_all
-
           # Delete profile
           profile = Profile.find_by(user_id: managed_id)
           profile&.destroy
@@ -169,7 +166,7 @@ class ManagedUsersController < ApplicationController
           # Delete managed user relationships
           ManagedUser.where(managed_id: managed_id).destroy_all
 
-          # Finally delete the user
+          # Finally delete the user (dependent associations will be handled by Rails)
           user.destroy
 
           messages = ['User deleted successfully.']
