@@ -166,7 +166,11 @@ class ManagedUsersController < ApplicationController
           # Delete managed user relationships
           ManagedUser.where(managed_id: managed_id).destroy_all
 
-          # Finally delete the user (dependent associations will be handled by Rails)
+          # Delete bulk fit test imports
+          BulkFitTestsImport.where(user_id: managed_id).destroy_all
+
+          # TODO: maybe not a good idea to destroy. We wanna know that the user
+          # has consented, etc.
           user.destroy
 
           messages = ['User deleted successfully.']
