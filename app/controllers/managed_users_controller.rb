@@ -132,33 +132,43 @@ class ManagedUsersController < ApplicationController
     messages = []
 
     if current_user.nil?
-
       messages = ['Please log in.']
       status = 422
     else
-      ManagedUser.for_manager_and_managed(
-        manager_id: current_user.id,
-        managed_id: params[:id]
-      )
+      # Find the ManagedUser record by its ID
+      managed_user = ManagedUser.find_by(id: params[:id])
 
-      ActiveRecord::Base.transaction do
-        facial_measurements = FacialMeasurement.where(user_id: params[:id])
-        fit_tests = FitTest.where(facial_measurement_id: facial_measurements.map(&:id))
-        fit_tests.destroy_all
+      if managed_user.nil?
+        messages = ['Managed user not found.']
+        status = 404
+      elsif managed_user.manager_id != current_user.id
+        messages = ['Not authorized to delete this user.']
+        status = 403
+      else
+        # Get the actual user ID (managed_id) to delete related records
+        managed_id = managed_user.managed_id
 
-        facial_measurements.destroy_all
+        ActiveRecord::Base.transaction do
+          facial_measurements = FacialMeasurement.where(user_id: managed_id)
+          fit_tests = FitTest.where(facial_measurement_id: facial_measurements.map(&:id))
+          fit_tests.destroy_all
 
-        profile = Profile.find_by(user_id: params[:id])
-        profile.destroy
+          facial_measurements.destroy_all
 
-        ManagedUser.where(managed_id: params[:id]).destroy_all
+          profile = Profile.find_by(user_id: managed_id)
+          profile&.destroy
 
-        User.find(params[:id]).destroy
-      rescue ActiveRecord::StatementInvalid
-        messages = ['Transaction to delete failed.']
+          ManagedUser.where(managed_id: managed_id).destroy_all
+
+          User.find(managed_id).destroy
+
+          messages = ['User deleted successfully.']
+          status = 200
+        rescue ActiveRecord::StatementInvalid => e
+          messages = ["Transaction to delete failed: #{e.message}"]
+          status = 500
+        end
       end
-
-      status = 200
     end
 
     to_render = {

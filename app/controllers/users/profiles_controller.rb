@@ -24,7 +24,7 @@ module Users
         profile = nil
       elsif !current_user.manages?(user)
         status = 422
-        messages = ["Not authorized to view this profile"]
+        messages = ['Not authorized to view this profile']
         profile = nil
       else
         profile = user.profile
