@@ -149,22 +149,35 @@ class ManagedUsersController < ApplicationController
         managed_id = managed_user.managed_id
 
         ActiveRecord::Base.transaction do
+          user = User.find(managed_id)
+
+          # Delete fit tests first
           facial_measurements = FacialMeasurement.where(user_id: managed_id)
           fit_tests = FitTest.where(facial_measurement_id: facial_measurements.map(&:id))
           fit_tests.destroy_all
 
+          # Delete facial measurements
           facial_measurements.destroy_all
 
+          # Delete events authored by this user
+          Event.where(author_id: managed_id).destroy_all
+
+          # Delete profile
           profile = Profile.find_by(user_id: managed_id)
           profile&.destroy
 
+          # Delete managed user relationships
           ManagedUser.where(managed_id: managed_id).destroy_all
 
-          User.find(managed_id).destroy
+          # Finally delete the user
+          user.destroy
 
           messages = ['User deleted successfully.']
           status = 200
-        rescue ActiveRecord::StatementInvalid => e
+        rescue ActiveRecord::RecordNotFound => e
+          messages = ["User not found: #{e.message}"]
+          status = 404
+        rescue StandardError => e
           messages = ["Transaction to delete failed: #{e.message}"]
           status = 500
         end
