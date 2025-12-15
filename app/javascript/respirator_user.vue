@@ -103,7 +103,7 @@
 
       <div class='left-pane' >
         <p v-if='infoToShow == "straightLineMeasurementsGuide"' >
-An iOS app is currently in development to make the facial measurement collection seamless. Please reach out to info@breathesafe.xyz to get some information about how to get access to this app. After following instructions in the app, you'll be asked to upload data. If successful, you'll see the data here, in JSON format.
+The SnapFit iOS app is currently in development to make the facial measurement collection seamless. If you're viewing this via SnapFit using an in-app browser, you can close this browser now and add facial measurements there. If successful, you'll see the data here, in JSON format.
 </p>
 
         <!-- iOS App Data (ARKit) -->
