@@ -16,16 +16,30 @@ module Users
     end
 
     def show
-      profile = current_user.profile
+      user = User.find(params[:user_id])
+
+      if current_user.nil?
+        status = 401
+        messages = ['Unauthorized.']
+        profile = nil
+      elsif !current_user.manages?(user)
+        status = 422
+        messages = ["Not authorized to view this profile"]
+        profile = nil
+      else
+        profile = user.profile
+        status = 200
+        messages = []
+      end
 
       to_render = {
         profile: profile,
-        message: ''
+        messages: messages
       }
 
       respond_to do |format|
         format.json do
-          render json: to_render.to_json, status: :ok
+          render json: to_render.to_json, status: status
         end
       end
     end
