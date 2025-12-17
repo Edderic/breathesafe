@@ -118,38 +118,7 @@
                 <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, {})' class='status' :text='f.facialMeasurementPresence' :backgroundColor='facialMeasPresenceColorMappingStatus(f.facialMeasurementPresence)'/>
               </td>
             <td @click.stop>
-              <CircularButton @click.stop='showActions(f.id)' class='gear-button'>
-
-              <svg
-                viewBox="0 0 100 100"
-                xmlns="http://www.w3.org/2000/svg"
-                role="img"
-                aria-label="Gear icon"
-                class='gear'
-              >
-                <!-- Gear body & teeth use currentColor so you can tint via CSS -->
-                <g fill="currentColor">
-                  <!-- Main gear body -->
-                  <circle cx="50" cy="50" r="30" />
-
-                  <!-- Six teeth -->
-                  <rect x="45" y="8" width="10" height="12" rx="2" ry="2" />
-                  <rect x="45" y="8" width="10" height="12" rx="2" ry="2"
-                        transform="rotate(60 50 50)" />
-                  <rect x="45" y="8" width="10" height="12" rx="2" ry="2"
-                        transform="rotate(120 50 50)" />
-                  <rect x="45" y="8" width="10" height="12" rx="2" ry="2"
-                        transform="rotate(180 50 50)" />
-                  <rect x="45" y="8" width="10" height="12" rx="2" ry="2"
-                        transform="rotate(240 50 50)" />
-                  <rect x="45" y="8" width="10" height="12" rx="2" ry="2"
-                        transform="rotate(300 50 50)" />
-
-                  <!-- Inner ring -->
-                  <circle cx="50" cy="50" r="14" fill="none" stroke="currentColor" stroke-width="6" />
-                </g>
-              </svg>
-              </CircularButton>
+              <GearButton @click.stop='showActions(f.id)' />
             </td>
           </tr>
         </tbody>
@@ -228,6 +197,7 @@
 import axios from 'axios';
 import Button from './button.vue'
 import CircularButton from './circular_button.vue'
+import GearButton from './gear_button.vue'
 import ClosableMessage from './closable_message.vue'
 import { facialMeasurementsPresenceColorMapping, userSealCheckColorMapping, genColorSchemeBounds, getColor, fitFactorColorScheme } from './colors.js'
 import ColoredCell from './colored_cell.vue'
@@ -248,6 +218,7 @@ export default {
   components: {
     Button,
     CircularButton,
+    GearButton,
     ClosableMessage,
     ColoredCell,
     // SortFilterPopup,
@@ -1026,11 +997,6 @@ export default {
     gap: 1em;
   }
 
-  .gear-button svg {
-    display: block;
-    margin: 0 auto;
-    color: #80808080;
-  }
 
   .import-button {
     margin-left: 0.5em;
