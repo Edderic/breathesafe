@@ -22,7 +22,7 @@
         <table class='facial-measurements-table phone' >
           <thead class='facial-measurements-header'>
             <tr>
-              <th v-if='currentUser && currentUser.admin' @click='toggleSort("manager_email")' class='sortable-header'>
+              <th v-if='isAdminView' @click='toggleSort("manager_email")' class='sortable-header'>
                 Manager Email
                 <span class='sort-indicator' v-if='currentSort === "manager_email"'>
                   {{ currentOrder === 'asc' ? '↑' : '↓' }}
@@ -58,7 +58,7 @@
           </thead>
           <tbody>
             <tr v-for='r in displayables' text='Edit'>
-              <td v-if='currentUser && currentUser.admin'>{{r['managerEmail']}}</td>
+              <td v-if='isAdminView'>{{r['managerEmail']}}</td>
               <td class='name' @click="visit(r.managedId, 'Name')">
                 {{r.firstName}} {{r.lastName}}
               </td>
@@ -106,7 +106,7 @@
         <table class='facial-measurements-table non-phone'>
           <thead class='facial-measurements-header'>
             <tr>
-              <th v-if='currentUser && currentUser.admin' @click='toggleSort("manager_email")' class='sortable-header'>
+              <th v-if='isAdminView' @click='toggleSort("manager_email")' class='sortable-header'>
                 Manager Email
                 <span class='sort-indicator' v-if='currentSort === "manager_email"'>
                   {{ currentOrder === 'asc' ? '↑' : '↓' }}
@@ -142,7 +142,7 @@
           </thead>
           <tbody>
             <tr v-for='r in displayables' text='Edit'>
-              <td v-if='currentUser && currentUser.admin'>{{r['managerEmail']}}</td>
+              <td v-if='isAdminView'>{{r['managerEmail']}}</td>
               <td @click="visit(r.managedId, 'Name')">
                 {{r.firstName}} {{r.lastName}}
               </td>
