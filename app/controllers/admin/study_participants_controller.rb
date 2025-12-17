@@ -96,11 +96,9 @@ module Admin
 
       # For each managed user, count unique masks they've tested
       # Then sum across all managed users
-      total_unique_masks = managed_user_ids.sum do |managed_id|
+      managed_user_ids.sum do |managed_id|
         FitTest.where(user_id: managed_id).distinct.count(:mask_id)
       end
-
-      total_unique_masks
     end
 
     def ensure_admin

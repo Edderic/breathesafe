@@ -136,6 +136,39 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination -->
+        <div v-if="totalPages > 1" class="pagination-container">
+          <nav aria-label="Respirator users pagination">
+            <ul class="pagination">
+              <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                <button @click="goToPage(1)" class="page-link" :disabled="currentPage === 1">First</button>
+              </li>
+              <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                <button @click="goToPage(currentPage - 1)" class="page-link" :disabled="currentPage === 1">Previous</button>
+              </li>
+
+              <li
+                v-for="page in visiblePages"
+                :key="page"
+                class="page-item"
+                :class="{ active: page === currentPage }"
+              >
+                <button @click="goToPage(page)" class="page-link">{{ page }}</button>
+              </li>
+
+              <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                <button @click="goToPage(currentPage + 1)" class="page-link" :disabled="currentPage === totalPages">Next</button>
+              </li>
+              <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                <button @click="goToPage(totalPages)" class="page-link" :disabled="currentPage === totalPages">Last</button>
+              </li>
+            </ul>
+            <div class="pagination-info">
+              Showing {{ (currentPage - 1) * perPage + 1 }}-{{ Math.min(currentPage * perPage, totalCount) }} of {{ totalCount }} users
+            </div>
+          </nav>
+        </div>
       </div>
 
       <h3 class='text-align-center' v-show='displayables.length == 0' >
@@ -211,6 +244,14 @@ export default {
           'managedUsers'
         ]
     ),
+    ...mapState(
+        useManagedUserStore,
+        [
+          'totalCount',
+          'currentPage',
+          'perPage'
+        ]
+    ),
     linkToUserFacialMeasurement() {
       return {
         'name': 'RespiratorUser',
@@ -232,6 +273,22 @@ export default {
           }
         )
       }
+    },
+    isAdminView() {
+      return this.$route.query.admin === 'true' && this.currentUser?.admin
+    },
+    totalPages() {
+      return Math.ceil(this.totalCount / this.perPage)
+    },
+    visiblePages() {
+      const pages = [];
+      const start = Math.max(1, this.currentPage - 2);
+      const end = Math.min(this.totalPages, this.currentPage + 2);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      return pages;
     },
     evenlySpacedColorScheme() {
       return genColorSchemeBounds(0, 1, 5)
@@ -269,7 +326,7 @@ export default {
   async created() {
     await this.getCurrentUser()
     if (this.currentUser) {
-      this.loadManagedUsers()
+      this.loadData()
     }
     await this.fetchRecommenderColumns()
   },
@@ -277,15 +334,28 @@ export default {
     '$route'(to, from) {
       // Reload managed users when navigating back to RespiratorUsers page
       // This ensures we have the latest data, especially after saving profile changes
-      // Only reload if we're actually navigating TO RespiratorUsers (not just query changes)
-      if (this.currentUser && to.name === 'RespiratorUsers' && from.name !== 'RespiratorUsers') {
-        this.loadManagedUsers()
+      // Reload if navigating TO RespiratorUsers OR if admin query param changes
+      if (this.currentUser && to.name === 'RespiratorUsers') {
+        if (from.name !== 'RespiratorUsers' || to.query.admin !== from.query.admin) {
+          this.loadData()
+        }
       }
     }
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
+    loadData(page = 1) {
+      const admin = this.isAdminView
+      this.loadManagedUsers({ admin, page, perPage: 25 })
+    },
+    goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.loadData(page)
+        // Scroll to top of table
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    },
     genColorSchemeBounded(minimum, maximum) {
       return genColorSchemeBounds(minimum, maximum, 5)
     },
@@ -550,6 +620,71 @@ export default {
     }
     .phone th, .phone td {
       width: 1em;
+    }
+  }
+
+  .pagination-container {
+    margin: 2em 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    gap: 0.5em;
+    margin: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .page-item {
+    display: inline-block;
+  }
+
+  .page-link {
+    padding: 0.5em 1em;
+    border: 1px solid #ddd;
+    background-color: white;
+    color: #007bff;
+    cursor: pointer;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+
+  .page-link:hover:not(:disabled) {
+    background-color: #e9ecef;
+  }
+
+  .page-item.active .page-link {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+
+  .page-item.disabled .page-link {
+    color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .pagination-info {
+    text-align: center;
+    margin-top: 1em;
+    color: #666;
+    font-size: 0.9em;
+  }
+
+  @media(max-width: 700px) {
+    .pagination {
+      font-size: 0.85em;
+    }
+
+    .page-link {
+      padding: 0.4em 0.7em;
     }
   }
 

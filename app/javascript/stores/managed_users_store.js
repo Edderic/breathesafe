@@ -9,14 +9,17 @@ import { RespiratorUser } from '../respirator_user.js'
 export const useManagedUserStore = defineStore('managedUsers', {
   state: () => ({
     managedUser: {},
-    managedUsers: []
+    managedUsers: [],
+    totalCount: 0,
+    currentPage: 1,
+    perPage: 25
   }),
   getters: {
     // ...mapState(useMainStore, ['currentUser']),
     // ...mapWritableState(useMainStore, ['message']),
   },
   actions: {
-    async loadManagedUsers() {
+    async loadManagedUsers({ admin = false, page = 1, perPage = 25 } = {}) {
       this.managedUsers = [];
       let mainStore = useMainStore()
       let managedUsers = [];
@@ -24,11 +27,26 @@ export const useManagedUserStore = defineStore('managedUsers', {
 
       setupCSRF();
 
+      const params = new URLSearchParams({
+        page: page.toString(),
+        per_page: perPage.toString()
+      });
+
+      if (admin) {
+        params.append('admin', 'true');
+      }
+
       await axios.get(
-        `/managed_users.json`,
+        `/managed_users.json?${params.toString()}`,
       )
         .then(response => {
           let data = response.data
+
+          // Update pagination state
+          this.totalCount = data.total_count || 0
+          this.currentPage = data.page || 1
+          this.perPage = data.per_page || 25
+
           if (response.data.managed_users) {
             managedUsers = response.data.managed_users
 

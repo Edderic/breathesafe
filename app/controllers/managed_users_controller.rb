@@ -6,33 +6,85 @@ class ManagedUsersController < ApplicationController
     if current_user.nil?
       to_render = {
         managed_users: [],
-        messages: ['Please log in.']
+        messages: ['Please log in.'],
+        total_count: 0,
+        page: 1,
+        per_page: 25
       }
       status = 422
     else
-      # Determine manager_id: use params if admin, otherwise use current_user.id
-      manager_id = if current_user.admin && params[:manager_id].present?
-                     params[:manager_id].to_i
-                   else
-                     current_user.id
-                   end
+      # Check if admin wants to see all users
+      show_all_users = current_user.admin && params[:admin] == 'true'
 
-      # Verify permission: admin can access any manager, non-admin only themselves
-      if current_user.admin || manager_id == current_user.id
-        managed_users = ManagedUser.for_manager_id(manager_id: manager_id)
+      # Pagination params
+      page = (params[:page] || 1).to_i
+      per_page = (params[:per_page] || 25).to_i
+      per_page = [per_page, 100].min # Cap at 100 per page
+
+      if show_all_users
+        # Admin viewing all users - get all managed users across all managers
+        managed_users_query = ManagedUser.all
+        total_count = managed_users_query.count
+
+        # Apply pagination
+        managed_users = managed_users_query
+                        .offset((page - 1) * per_page)
+                        .limit(per_page)
+                        .map do |mu|
+          ManagedUser.for_manager_and_managed(manager_id: mu.manager_id,
+                                              managed_id: mu.managed_id).first
+        end
+                        .compact
 
         to_render = {
           managed_users: managed_users,
-          messages: []
+          messages: [],
+          total_count: total_count,
+          page: page,
+          per_page: per_page
         }
-
         status = 200
       else
-        to_render = {
-          managed_users: [],
-          messages: ['Unauthorized.']
-        }
-        status = 403
+        # Determine manager_id: use params if admin, otherwise use current_user.id
+        manager_id = if current_user.admin && params[:manager_id].present?
+                       params[:manager_id].to_i
+                     else
+                       current_user.id
+                     end
+
+        # Verify permission: admin can access any manager, non-admin only themselves
+        if current_user.admin || manager_id == current_user.id
+          # Get count first
+          total_count = ManagedUser.where(manager_id: manager_id).count
+
+          # Get paginated managed users
+          managed_user_records = ManagedUser.where(manager_id: manager_id)
+                                            .offset((page - 1) * per_page)
+                                            .limit(per_page)
+
+          managed_users = managed_user_records.map do |mu|
+            ManagedUser.for_manager_and_managed(manager_id: manager_id, managed_id: mu.managed_id).first
+          end.compact
+
+          to_render = {
+            managed_users: managed_users,
+            messages: [],
+            total_count: total_count,
+            page: page,
+            per_page: per_page
+          }
+
+          status = 200
+        else
+          to_render = {
+            managed_users: [],
+            messages: ['Unauthorized.'],
+            total_count: 0,
+            page: page,
+            per_page: per_page
+          }
+          status = 403
+        end
       end
     end
 
