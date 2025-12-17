@@ -81,7 +81,7 @@ export default {
 
 <style scoped>
   .pagination-container {
-    margin: 2em 0;
+    margin: 1em;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -92,7 +92,7 @@ export default {
     list-style: none;
     padding: 0;
     gap: 0.5em;
-    margin: 0;
+    margin: 0.5em;
     flex-wrap: wrap;
     justify-content: center;
   }
@@ -130,7 +130,7 @@ export default {
 
   .pagination-info {
     text-align: center;
-    margin-top: 1em;
+    margin: 0.5em;
     color: #666;
     font-size: 0.9em;
   }
