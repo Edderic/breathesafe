@@ -532,8 +532,8 @@ export default {
   th, td {
     padding-top: 0.5em;
     padding-bottom: 0.5em;
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
   }
 
   .colored-cell {
