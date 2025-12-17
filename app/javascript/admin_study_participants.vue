@@ -45,6 +45,10 @@
                         Participant UUID
                         <i class="fas fa-sort ms-1" :class="getSortIcon('participant_uuid')"></i>
                       </th>
+                      <th @click="sortBy('masks_count')" class="sortable">
+                        Masks
+                        <i class="fas fa-sort ms-1" :class="getSortIcon('masks_count')"></i>
+                      </th>
                       <th @click="sortBy('finished_study_datetime')" class="sortable">
                         Finished Study
                         <i class="fas fa-sort ms-1" :class="getSortIcon('finished_study_datetime')"></i>
@@ -52,12 +56,16 @@
                       <th>Removal from Study</th>
                       <th>Qualifications</th>
                       <th>Equipment</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="participant in paginatedParticipants" :key="participant.participant_uuid">
                       <td>
                         <code class="text-muted">{{ participant.participant_uuid }}</code>
+                      </td>
+                      <td class="text-center">
+                        <span class="badge bg-primary">{{ participant.masks_count || 0 }}</span>
                       </td>
                       <td>
                         <span v-if="participant.finished_study_datetime">
@@ -97,6 +105,9 @@
                           </button>
                         </div>
                         <span v-else class="text-muted">-</span>
+                      </td>
+                      <td @click.stop>
+                        <GearButton @click.stop="showActionsPopup(participant)" />
                       </td>
                     </tr>
                   </tbody>
@@ -145,6 +156,85 @@
       </div>
     </div>
 
+    <!-- Actions Popup -->
+    <Popup v-if="showActions" @onclose="closeActionsPopup">
+      <div class="actions-popup-content">
+        <h4>Participant Actions</h4>
+        <div class="mb-3">
+          <strong>Participant UUID:</strong>
+          <code class="ms-2">{{ selectedParticipantForActions?.participant_uuid }}</code>
+        </div>
+
+        <div class="d-flex flex-column gap-2">
+          <button
+            @click="confirmRemoveFromStudy"
+            class="btn btn-danger"
+            :disabled="actionInProgress"
+          >
+            <i class="fas fa-user-times me-2"></i>
+            Remove from Study
+          </button>
+
+          <button
+            @click="confirmFinishStudy"
+            class="btn btn-success"
+            :disabled="actionInProgress || selectedParticipantForActions?.finished_study_datetime"
+          >
+            <i class="fas fa-check-circle me-2"></i>
+            Finish Study
+          </button>
+        </div>
+      </div>
+    </Popup>
+
+    <!-- Confirmation Popup for Remove from Study -->
+    <Popup v-if="showRemoveConfirmation" @onclose="closeRemoveConfirmation">
+      <div class="confirmation-popup-content">
+        <h4>Confirm Removal from Study</h4>
+        <p>Are you sure you want to remove this participant from the study?</p>
+        <p><strong>UUID:</strong> <code>{{ selectedParticipantForActions?.participant_uuid }}</code></p>
+
+        <div class="mb-3">
+          <label for="removal-reason" class="form-label">Reason for removal:</label>
+          <textarea
+            id="removal-reason"
+            v-model="removalReason"
+            class="form-control"
+            rows="3"
+            placeholder="Enter reason..."
+          ></textarea>
+        </div>
+
+        <div class="d-flex gap-2 justify-content-end">
+          <button @click="closeRemoveConfirmation" class="btn btn-secondary">
+            Cancel
+          </button>
+          <button @click="executeRemoveFromStudy" class="btn btn-danger" :disabled="!removalReason.trim()">
+            Confirm Remove
+          </button>
+        </div>
+      </div>
+    </Popup>
+
+    <!-- Confirmation Popup for Finish Study -->
+    <Popup v-if="showFinishConfirmation" @onclose="closeFinishConfirmation">
+      <div class="confirmation-popup-content">
+        <h4>Confirm Finish Study</h4>
+        <p>Are you sure you want to mark this participant's study as finished?</p>
+        <p><strong>UUID:</strong> <code>{{ selectedParticipantForActions?.participant_uuid }}</code></p>
+        <p class="text-muted">This will set the finished_study_datetime to the current time.</p>
+
+        <div class="d-flex gap-2 justify-content-end">
+          <button @click="closeFinishConfirmation" class="btn btn-secondary">
+            Cancel
+          </button>
+          <button @click="executeFinishStudy" class="btn btn-success">
+            Confirm Finish
+          </button>
+        </div>
+      </div>
+    </Popup>
+
     <!-- Details Modal -->
     <div
       v-if="showDetailsModal"
@@ -183,9 +273,16 @@
 <script>
 import axios from 'axios';
 import { useMainStore } from './stores/main_store.js';
+import { setupCSRF } from './misc.js';
+import Popup from './pop_up.vue';
+import GearButton from './gear_button.vue';
 
 export default {
   name: 'AdminStudyParticipants',
+  components: {
+    Popup,
+    GearButton
+  },
   data() {
     return {
       studyParticipants: [],
@@ -198,7 +295,13 @@ export default {
       showDetailsModal: false,
       selectedParticipant: null,
       selectedDetails: null,
-      detailsTitle: ''
+      detailsTitle: '',
+      showActions: false,
+      selectedParticipantForActions: null,
+      showRemoveConfirmation: false,
+      showFinishConfirmation: false,
+      removalReason: '',
+      actionInProgress: false
     };
   },
   computed: {
@@ -310,6 +413,81 @@ export default {
       if (!dateString) return '-';
       const date = new Date(dateString);
       return date.toLocaleString();
+    },
+    showActionsPopup(participant) {
+      this.selectedParticipantForActions = participant;
+      this.showActions = true;
+    },
+    closeActionsPopup() {
+      this.showActions = false;
+      this.selectedParticipantForActions = null;
+    },
+    confirmRemoveFromStudy() {
+      this.showRemoveConfirmation = true;
+    },
+    closeRemoveConfirmation() {
+      this.showRemoveConfirmation = false;
+      this.removalReason = '';
+    },
+    confirmFinishStudy() {
+      this.showFinishConfirmation = true;
+    },
+    closeFinishConfirmation() {
+      this.showFinishConfirmation = false;
+    },
+    async executeRemoveFromStudy() {
+      if (!this.removalReason.trim()) {
+        alert('Please provide a reason for removal');
+        return;
+      }
+
+      this.actionInProgress = true;
+      setupCSRF();
+
+      try {
+        await axios.post('/admin/study_participants/remove_from_study', {
+          participant_uuid: this.selectedParticipantForActions.participant_uuid,
+          reason: this.removalReason
+        });
+
+        // Refresh data
+        await this.loadData();
+
+        // Close all popups
+        this.closeRemoveConfirmation();
+        this.closeActionsPopup();
+
+        alert('Participant successfully removed from study');
+      } catch (err) {
+        console.error('Error removing participant:', err);
+        alert(err.response?.data?.error || 'Failed to remove participant from study');
+      } finally {
+        this.actionInProgress = false;
+      }
+    },
+    async executeFinishStudy() {
+      this.actionInProgress = true;
+      setupCSRF();
+
+      try {
+        await axios.post('/admin/study_participants/finish_study', {
+          participant_uuid: this.selectedParticipantForActions.participant_uuid
+        });
+
+        // Refresh data
+        await this.loadData();
+
+        // Close all popups
+        this.closeFinishConfirmation();
+        this.closeActionsPopup();
+
+        alert('Study marked as finished for this participant');
+      } catch (err) {
+        console.error('Error finishing study:', err);
+        alert(err.response?.data?.error || 'Failed to mark study as finished');
+      } finally {
+        this.actionInProgress = false;
+      }
     }
   }
 };
@@ -366,5 +544,26 @@ pre {
   word-wrap: break-word;
   max-height: 400px;
   overflow-y: auto;
+}
+
+.actions-popup-content,
+.confirmation-popup-content {
+  padding: 1.5em;
+  min-width: 400px;
+}
+
+.actions-popup-content h4,
+.confirmation-popup-content h4 {
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+.actions-popup-content .btn,
+.confirmation-popup-content .btn {
+  width: 100%;
+}
+
+.confirmation-popup-content .btn {
+  width: auto;
 }
 </style>

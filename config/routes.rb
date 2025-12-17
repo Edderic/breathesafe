@@ -97,6 +97,11 @@ Rails.application.routes.draw do
 
   # Admin routes
   namespace :admin do
-    resources :study_participants, only: [:index]
+    resources :study_participants, only: [:index] do
+      collection do
+        post :remove_from_study
+        post :finish_study
+      end
+    end
   end
 end
