@@ -37,7 +37,7 @@
     </router-link>
 
     <router-link to="/privacy#facial-measurement-data">
-      3.2 Facial Measurement Data (Baseline vs Research)
+      3.2 Facial Measurement Data (TrueDepth API)
     </router-link>
 
     <router-link to="/privacy#automatically-collected-data">
@@ -138,7 +138,7 @@
       </router-link>
 
       <router-link to="/privacy#facial-measurement-data">
-        3.2 Facial Measurement Data (Baseline vs Research)
+        3.2 Facial Measurement Data (TrueDepth API)
       </router-link>
 
       <router-link to="/privacy#automatically-collected-data">
@@ -296,31 +296,51 @@
         <!-- Section 3.2: Facial measurement data -->
         <div id="facial-measurement-data">
           <br>
-          <div><strong><span style="font-size: 16px;"><span data-custom-class="heading_2">3.2 Facial measurement data (baseline vs research)</span></span></strong></div>
+          <div><strong><span style="font-size: 16px;"><span data-custom-class="heading_2">3.2 Facial Measurement Data (TrueDepth API)</span></span></strong></div>
           <div><br></div>
 
-          <div><strong><span style="font-size: 14px;"><span data-custom-class="body_text">Baseline app use (non-research)</span></span></strong></div>
+          <div><strong><span style="font-size: 14px;"><span data-custom-class="body_text">Use of the TrueDepth API</span></span></strong></div>
+          <div><br></div>
+          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">MasqFit uses the iOS <strong>TrueDepth API</strong> solely to derive facial measurements relevant to respirator fit.</span></span></span></div>
+          <div><br></div>
+          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">The TrueDepth API is used to estimate facial geometry features such as measurements related to the <strong>nose, cheeks, and chin</strong> which are required to generate mask-fit recommendations.</span></span></span></div>
+          <div><br></div>
+
+          <div><strong><span style="font-size: 14px;"><span data-custom-class="body_text">Baseline App Use (Non-Research)</span></span></strong></div>
+          <div><br></div>
+          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">For baseline app functionality:</span></span></span></div>
           <ul>
-            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">MasqFit may request access to the iOS <strong>TrueDepth camera</strong> to estimate facial characteristics relevant to respirator fit.</span></span></span></li>
-            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">For baseline use, we derive <strong>numeric facial measurements/features</strong> (e.g., measurements related to nose, cheek, and chin geometry).</span></span></span></li>
-            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">These <strong>derived measurements</strong> are used to generate recommendations and may be transmitted to our servers for that purpose.</span></span></span></li>
-            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><strong>Raw facial scans or full point clouds are not required to be stored</strong> for baseline functionality.</span></span></span></li>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">The app derives numeric facial measurements/features from TrueDepth input.</span></span></span></li>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">These derived measurements are used to generate personalized, probabilistic mask-fit recommendations.</span></span></span></li>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><strong>Face images, video recordings, and full 3D facial scans are not stored.</strong></span></span></span></li>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Raw TrueDepth data and full facial point clouds are <strong>not retained</strong> for baseline app use.</span></span></span></li>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Facial measurement data is <strong>not used for advertising or marketing purposes.</strong></span></span></span></li>
           </ul>
 
-          <div><strong><span style="font-size: 14px;"><span data-custom-class="body_text">Optional research participation</span></span></strong></div>
-          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">If you <strong>opt in</strong> to research participation:</span></span></span></div>
+          <div><strong><span style="font-size: 14px;"><span data-custom-class="body_text">Optional Research Participation (Opt-In)</span></span></strong></div>
+          <div><br></div>
+          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">If you explicitly opt in to research participation:</span></span></span></div>
+          <div><br></div>
+          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We may store a <strong>mask-specific subset of raw facial measurement points</strong> derived from TrueDepth data.</span></span></span></div>
           <ul>
-            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We may store a <strong>mask-specific subset of raw facial measurement points</strong> that are relevant to respirator fit.</span></span></span></li>
-            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">These points are limited to what is necessary for:</span></span></span>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">These raw measurement points are limited to what is necessary to:</span></span></span>
               <ul>
-                <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">evaluating model performance,</span></span></span></li>
-                <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">improving fit-prediction models,</span></span></span></li>
-                <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">understanding how different mask designs interact with facial geometry.</span></span></span></li>
+                <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">evaluate and improve mask-fit prediction models,</span></span></span></li>
+                <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">assess model performance against fit-testing results,</span></span></span></li>
+                <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">study aggregated trends such as sampling bias and equity.</span></span></span></li>
               </ul>
             </li>
-            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We do <strong>not</strong> store full face images or video recordings; only the subset of facial measurement points needed for the research purpose is retained.</span></span></span></li>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We do <strong>not</strong> store full face images, video recordings, or complete 3D facial scans.</span></span></span></li>
           </ul>
-          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may opt out of research participation at any time, which will stop future research collection.</span></span></span></div>
+          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Participation in research is <strong>voluntary</strong>, <strong>opt-in</strong>, and <strong>not required</strong> to use the app.</span></span></span></div>
+          <div><br></div>
+
+          <div><strong><span style="font-size: 14px;"><span data-custom-class="body_text">Data Control and Retention</span></span></strong></div>
+          <ul>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may opt out of research participation at any time.</span></span></span></li>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Facial measurement data (including any stored raw measurement points, if applicable) is retained <strong>until you delete your data</strong>.</span></span></span></li>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Upon account deletion, all associated facial measurement data is deleted.</span></span></span></li>
+          </ul>
         </div>
 
         <!-- Section 3.3: Automatically collected data -->
