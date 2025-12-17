@@ -9,7 +9,7 @@
     <h2><strong>Table of Contents</strong></h2>
 
     <router-link to="/terms_of_service#top">
-      Terms of Service (Breathesafe & SnapFit)
+      Terms of Service (Breathesafe & MasqFit)
     </router-link>
 
     <router-link to="/terms_of_service#agreement-to-legal-terms">
@@ -74,7 +74,7 @@
       <div><br></div><h2><strong>Table of Contents</strong></h2><div><br></div>
 
       <router-link to="/terms_of_service#top">
-        Terms of Service (Breathesafe & SnapFit)
+        Terms of Service (Breathesafe & MasqFit)
       </router-link>
 
       <router-link to="/terms_of_service#agreement-to-legal-terms">
@@ -143,7 +143,7 @@
       <br>
       <br>
       <div class="styles-documentPreviewer-881656"><div><span class="document-previewer-logo-d16635"></span><div class="document-previewer-wrapper-a717db">      <div data-custom-class="body">
-      <div><strong><span style="font-size: 26px;"><span data-custom-class="title">Terms of Service (Breathesafe &amp; SnapFit)</span></span></strong></div>
+      <div><strong><span style="font-size: 26px;"><span data-custom-class="title">Terms of Service (Breathesafe &amp; MasqFit)</span></span></strong></div>
       <div><br></div>
       <div><span style="color: rgb(127, 127, 127);"><strong><span style="font-size: 15px;"><span data-custom-class="subtitle">Last updated December 13, 2025</span></span></strong></span></div>
       <div><br></div>
@@ -156,7 +156,7 @@
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We are <strong>Breathesafe LLC</strong> ("Company," "we," "us," "our"), a company registered in <strong>Nevada, United States</strong>, with our principal place of business at <strong>138 Miller Ave., Rumford, RI 02916, United States</strong>.</span></span></span></div>
         <div><br></div>
-        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We operate the SnapFit mobile application and related services (collectively, the "Services").</span></span></span></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We operate the MasqFit mobile application and related services (collectively, the "Services").</span></span></span></div>
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">By accessing or using the Services, you agree to be bound by these Terms of Service ("Legal Terms"). If you do not agree, you must discontinue use of the Services.</span></span></span></div>
       </div>

@@ -9,7 +9,7 @@
     <h2><strong>Table of Contents</strong></h2>
 
     <router-link to="/disclaimer#top">
-      Disclaimer (Breathesafe & SnapFit)
+      Disclaimer (Breathesafe & MasqFit)
     </router-link>
 
     <router-link to="/disclaimer#general-information">
@@ -58,7 +58,7 @@
       <div><br></div><h2><strong>Table of Contents</strong></h2><div><br></div>
 
       <router-link to="/disclaimer#top">
-        Disclaimer (Breathesafe & SnapFit)
+        Disclaimer (Breathesafe & MasqFit)
       </router-link>
 
       <router-link to="/disclaimer#general-information">
@@ -100,9 +100,9 @@
 
   <div class='main margined'>
     <div id='top'>
-      <h1>Disclaimer (Breathesafe & SnapFit)</h1>
+      <h1>Disclaimer (Breathesafe & MasqFit)</h1>
       <p><strong>Last updated:</strong> December 13, 2025</p>
-      <p>This Disclaimer applies to <strong>Breathesafe LLC</strong> ("Breathesafe," "we," "us," "our") and to all related websites, mobile applications (including <strong>SnapFit</strong>), and services (collectively, the "Services").</p>
+      <p>This Disclaimer applies to <strong>Breathesafe LLC</strong> ("Breathesafe," "we," "us," "our") and to all related websites, mobile applications (including <strong>MasqFit</strong>), and services (collectively, the "Services").</p>
       <p>By using the Services, you acknowledge and agree to the terms of this Disclaimer.</p>
     </div>
 
@@ -123,7 +123,7 @@
       <br>
       <br>
       <h2>Algorithmic Recommendations Disclaimer</h2>
-      <p>SnapFit provides <strong>probabilistic mask-fit recommendations</strong> based on facial measurements and available data.</p>
+      <p>MasqFit provides <strong>probabilistic mask-fit recommendations</strong> based on facial measurements and available data.</p>
       <p>These recommendations:</p>
       <ul>
         <li>are <strong>estimates</strong>, not guarantees;</li>
@@ -192,7 +192,7 @@
       <br>
       <br>
       <h2>Research Participation Disclaimer</h2>
-      <p>Participation in optional research or data-sharing programs is <strong>voluntary</strong> and <strong>not required</strong> to use baseline SnapFit functionality.</p>
+      <p>Participation in optional research or data-sharing programs is <strong>voluntary</strong> and <strong>not required</strong> to use baseline MasqFit functionality.</p>
       <p>Opting in to research participation does not change the non-medical nature of the Services and does not create a healthcare provider–patient relationship.</p>
     </div>
 

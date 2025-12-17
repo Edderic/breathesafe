@@ -9,7 +9,7 @@
     <h2><strong>Table of Contents</strong></h2>
 
     <router-link to="/privacy#top">
-      Privacy Policy (Breathesafe & SnapFit)
+      Privacy Policy (Breathesafe & MasqFit)
     </router-link>
 
     <router-link to="/privacy#who-we-are">
@@ -110,7 +110,7 @@
       <div><br></div><h2><strong>Table of Contents</strong></h2><div><br></div>
 
       <router-link to="/privacy#top">
-        Privacy Policy (Breathesafe & SnapFit)
+        Privacy Policy (Breathesafe & MasqFit)
       </router-link>
 
       <router-link to="/privacy#who-we-are">
@@ -215,11 +215,11 @@
       <br>
       <br>
       <div class="styles-documentPreviewer-881656"><div><span class="document-previewer-logo-d16635"></span><div class="document-previewer-wrapper-a717db">      <div data-custom-class="body">
-      <div><strong><span style="font-size: 26px;"><span data-custom-class="title">Privacy Policy (Breathesafe &amp; SnapFit)</span></span></strong></div>
+      <div><strong><span style="font-size: 26px;"><span data-custom-class="title">Privacy Policy (Breathesafe &amp; MasqFit)</span></span></strong></div>
       <div><br></div>
       <div><span style="color: rgb(127, 127, 127);"><strong><span style="font-size: 15px;"><span data-custom-class="subtitle">Last updated December 13, 2025</span></span></strong></span></div>
       <div><br></div>
-      <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">This Privacy Policy explains how <strong>Breathesafe LLC</strong> ("Breathesafe," "we," "us," "our") collects, uses, shares, and protects information when you use <strong>SnapFit</strong> and related services (the "Services").</span></span></span></div>
+      <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">This Privacy Policy explains how <strong>Breathesafe LLC</strong> ("Breathesafe," "we," "us," "our") collects, uses, shares, and protects information when you use <strong>MasqFit</strong> and related services (the "Services").</span></span></span></div>
       <div><br></div>
       <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">If you do not agree with this Privacy Policy, do not use the Services.</span></span></span></div>
       <div><br></div>
@@ -242,7 +242,7 @@
         <br>
         <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">2. What This Policy Covers</span></span></strong></div>
         <div><br></div>
-        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">SnapFit has two data-use modes:</span></span></span></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">MasqFit has two data-use modes:</span></span></span></div>
         <div><br></div>
 
         <!-- Section 2A: Baseline app use -->
@@ -267,7 +267,7 @@
             <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">evaluate performance across masks and populations,</span></span></span></li>
             <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">study sampling bias and equity-related issues.</span></span></span></li>
           </ul>
-          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><strong>Important:</strong> Research participation is <strong>not required</strong> to use SnapFit.</span></span></span></div>
+          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><strong>Important:</strong> Research participation is <strong>not required</strong> to use MasqFit.</span></span></span></div>
         </div>
       </div>
 
@@ -301,7 +301,7 @@
 
           <div><strong><span style="font-size: 14px;"><span data-custom-class="body_text">Baseline app use (non-research)</span></span></strong></div>
           <ul>
-            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">SnapFit may request access to the iOS <strong>TrueDepth camera</strong> to estimate facial characteristics relevant to respirator fit.</span></span></span></li>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">MasqFit may request access to the iOS <strong>TrueDepth camera</strong> to estimate facial characteristics relevant to respirator fit.</span></span></span></li>
             <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">For baseline use, we derive <strong>numeric facial measurements/features</strong> (e.g., measurements related to nose, cheek, and chin geometry).</span></span></span></li>
             <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">These <strong>derived measurements</strong> are used to generate recommendations and may be transmitted to our servers for that purpose.</span></span></span></li>
             <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><strong>Raw facial scans or full point clouds are not required to be stored</strong> for baseline functionality.</span></span></span></li>
@@ -333,7 +333,7 @@
             <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">IP address, device type, operating system version</span></span></span></li>
             <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">security- and reliability-related logs (e.g., error reports)</span></span></span></li>
           </ul>
-          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We do <strong>not</strong> collect geolocation data for SnapFit features.</span></span></span></div>
+          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We do <strong>not</strong> collect geolocation data for MasqFit features.</span></span></span></div>
         </div>
       </div>
 
@@ -516,7 +516,7 @@
         <br>
         <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">13. Children and Parent/Guardian Consent</span></span></strong></div>
         <div><br></div>
-        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">SnapFit may be used by minors <strong>only with parent/guardian consent</strong>.</span></span></span></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">MasqFit may be used by minors <strong>only with parent/guardian consent</strong>.</span></span></span></div>
         <ul>
           <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Parents/guardians must approve data collection.</span></span></span></li>
           <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Only minimum necessary data is collected.</span></span></span></li>

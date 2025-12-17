@@ -159,7 +159,7 @@
       <br>
       <br>
       <div class="styles-documentPreviewer-881656"><div><span class="document-previewer-logo-d16635"></span><div class="document-previewer-wrapper-a717db">      <div data-custom-class="body">
-      <div><strong><span style="font-size: 26px;"><span data-custom-class="title">Consent Form: Mask Recommender Based on Facial Measurements (SnapFit / Breathesafe)</span></span></strong></div>
+      <div><strong><span style="font-size: 26px;"><span data-custom-class="title">Consent Form: Mask Recommender Based on Facial Measurements (MasqFit / Breathesafe)</span></span></strong></div>
       <div><br></div>
       <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><strong>Principal Investigator:</strong> Edderic Ugaddan</span></span></span></div>
       <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Owner, Breathesafe LLC</span></span></span></div>
@@ -179,7 +179,7 @@
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You are being invited to participate in a project to improve a <strong>mask recommender based on facial features</strong>. Participation is voluntary.</span></span></span></div>
         <div><br></div>
-        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may use the SnapFit application <strong>without participating in research</strong>. Research participation is optional and requires explicit opt-in.</span></span></span></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may use the MasqFit application <strong>without participating in research</strong>. Research participation is optional and requires explicit opt-in.</span></span></span></div>
       </div>
 
       <!-- Section: Why is this project being done? -->
@@ -197,7 +197,7 @@
         <br>
         <div><strong><span style="font-size: 19px;"><span data-custom-class="heading_1">Who Can Participate?</span></span></strong></div>
         <div><br></div>
-        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">SnapFit can be used by:</span></span></span></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">MasqFit can be used by:</span></span></span></div>
         <ul>
           <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Adults (18+)</span></span></span></li>
           <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Minors <strong>with parent or guardian consent and supervision</strong></span></span></span></li>
@@ -220,7 +220,7 @@
         <div id="baseline-app-use">
           <div><strong><span style="font-size: 16px;"><span data-custom-class="heading_2">Baseline app use (not research)</span></span></strong></div>
           <div><br></div>
-          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">If you use SnapFit only for recommendations:</span></span></span></div>
+          <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">If you use MasqFit only for recommendations:</span></span></span></div>
           <ul>
             <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">The app may request access to the iOS TrueDepth camera.</span></span></span></li>
             <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Facial characteristics relevant to respirator fit are converted into <strong>derived numeric measurements</strong>.</span></span></span></li>
@@ -238,7 +238,7 @@
           <ul>
             <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">A <strong>mask-specific subset of raw facial measurement points</strong> relevant to respirator fit may be stored.</span></span></span></li>
             <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">These data are used to improve and evaluate fit-prediction models and to understand how different masks interact with facial geometry.</span></span></span></li>
-            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Participation in research is <strong>not required</strong> to use SnapFit.</span></span></span></li>
+            <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Participation in research is <strong>not required</strong> to use MasqFit.</span></span></span></li>
           </ul>
           <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may opt out of research participation at any time in the app.</span></span></span></div>
         </div>
@@ -272,7 +272,7 @@
         <div><br></div>
         <ul>
           <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">If you opt in to research participation, your data may be used for research and model improvement <strong>until you delete it</strong>.</span></span></span></li>
-          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">If you use SnapFit only for baseline functionality, your data will be retained <strong>until you delete it</strong>.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">If you use MasqFit only for baseline functionality, your data will be retained <strong>until you delete it</strong>.</span></span></span></li>
         </ul>
 
         <div><strong><span style="font-size: 14px;"><span data-custom-class="body_text">After account deletion</span></span></strong></div>
@@ -296,7 +296,7 @@
         <div><br></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">You may:</span></span></span></div>
         <ul>
-          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Stop using SnapFit at any time.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Stop using MasqFit at any time.</span></span></span></li>
           <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Opt out of research participation at any time.</span></span></span></li>
           <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Delete your account and associated data using in-app controls or by contacting info@breathesafe.xyz.</span></span></span></li>
         </ul>
