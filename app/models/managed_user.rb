@@ -203,6 +203,37 @@ class ManagedUser < ApplicationRecord
                                                  .limit(1)
                                                  .first
 
+    # Calculate demographics completion percentage
+    demog_percent_complete = 0
+    if profile
+      # Required fields for all users
+      demog_fields = [
+        profile.race_ethnicity,
+        profile.gender_and_sex,
+        profile.year_of_birth
+      ]
+
+      # Add other_gender to required fields only if gender_and_sex is "Other"
+      demog_fields << profile.other_gender if profile.gender_and_sex == 'Other'
+
+      completed_demog_fields = demog_fields.count(&:present?)
+      demog_percent_complete = (completed_demog_fields.to_f / demog_fields.length * 100).round
+    end
+
+    # Calculate facial measurements completion percentage
+    fm_percent_complete = 0
+    if latest_facial_measurement
+      # Use the percent_complete method from FacialMeasurement
+      # This calculates based on aggregated ARKit measurements (nose, strap, top_cheek, mid_cheek, chin)
+      fm_percent_complete = latest_facial_measurement.percent_complete.to_f
+    end
+
+    # Get unique masks tested count
+    num_unique_masks_tested = FitTest.where(user_id: managed_user.managed_id)
+                                     .joins(:mask)
+                                     .where('masks.duplicate_of IS NULL')
+                                     .count('DISTINCT fit_tests.mask_id')
+
     # Build the result hash with decrypted values
     row = {
       # ManagedUser attributes
@@ -210,7 +241,11 @@ class ManagedUser < ApplicationRecord
       'manager_id' => managed_user.manager_id,
       'managed_id' => managed_user.managed_id,
       'created_at' => managed_user.created_at,
-      'updated_at' => managed_user.updated_at
+      'updated_at' => managed_user.updated_at,
+      # Calculated completion percentages
+      'demog_percent_complete' => demog_percent_complete,
+      'fm_percent_complete' => fm_percent_complete,
+      'num_unique_masks_tested' => num_unique_masks_tested
     }
 
     # Profile attributes (these will be automatically decrypted)
