@@ -332,4 +332,189 @@ class ManagedUser < ApplicationRecord
 
     [row]
   end
+
+  def self.for_manager_id_paginated(args)
+    manager_id = args[:manager_id]
+    page = args[:page] || 1
+    per_page = args[:per_page] || 25
+    sort_field = args[:sort_field]
+    sort_order = args[:sort_order]
+
+    # Build the base query with all the calculations
+    results = build_managed_users_query(manager_id: manager_id)
+
+    # Apply sorting if specified
+    results = apply_sorting(results, sort_field, sort_order)
+
+    # Apply pagination to the array
+    offset = (page - 1) * per_page
+    results[offset, per_page] || []
+  end
+
+  def self.for_all_users_paginated(args)
+    page = args[:page] || 1
+    per_page = args[:per_page] || 25
+    sort_field = args[:sort_field]
+    sort_order = args[:sort_order]
+
+    # Build query for all users across all managers
+    results = build_managed_users_query(manager_id: nil)
+
+    # Apply sorting if specified
+    results = apply_sorting(results, sort_field, sort_order)
+
+    # Apply pagination to the array
+    offset = (page - 1) * per_page
+    results[offset, per_page] || []
+  end
+
+  def self.build_managed_users_query(manager_id:)
+    # Use includes to properly load associations and handle encryption
+    query = ManagedUser.includes(managed: :profile, manager: [])
+
+    # Filter by manager_id if provided
+    query = query.where(manager_id: manager_id) if manager_id
+
+    # Load the managed users with associations
+    managed_users = query.to_a
+    managed_ids = managed_users.map(&:managed_id)
+
+    # Preload facial measurements
+    latest_facial_measurements = if managed_ids.any?
+                                   sql = ActiveRecord::Base.sanitize_sql_array([
+                                                                                 <<-SQL.squish, managed_ids
+                                     SELECT DISTINCT ON (user_id) *
+                                     FROM facial_measurements
+                                     WHERE user_id IN (?)
+                                     ORDER BY user_id, created_at DESC
+                                                                                 SQL
+                                                                               ])
+                                   FacialMeasurement.find_by_sql(sql).index_by(&:user_id)
+                                 else
+                                   {}
+                                 end
+
+    # Preload mask counts
+    unique_mask_counts = if managed_ids.any?
+                           FitTest.where(user_id: managed_ids)
+                                  .joins(:mask)
+                                  .where('masks.duplicate_of IS NULL')
+                                  .group(:user_id)
+                                  .count('DISTINCT fit_tests.mask_id')
+                         else
+                           {}
+                         end
+
+    # Build result array with calculations
+    managed_users.map do |mu|
+      profile = mu.managed.profile
+      latest_facial_measurement = latest_facial_measurements[mu.managed_id]
+
+      # Calculate demographics completion
+      demog_fields = []
+      if profile
+        demog_fields = [
+          profile.race_ethnicity,
+          profile.gender_and_sex,
+          profile.year_of_birth
+        ]
+        demog_fields << profile.other_gender if profile.gender_and_sex == 'Other'
+      end
+      completed_demog_fields = demog_fields.count(&:present?)
+      demog_percent_complete = demog_fields.any? ? (completed_demog_fields.to_f / demog_fields.length * 100).round : 0
+
+      # Calculate facial measurements completion
+      fm_percent_complete = latest_facial_measurement ? latest_facial_measurement.percent_complete.to_f : 0
+
+      # Get unique masks tested
+      num_unique_masks_tested = unique_mask_counts[mu.managed_id] || 0
+
+      # Build hash with all data (using ActiveRecord objects for proper decryption)
+      {
+        'id' => mu.id,
+        'manager_id' => mu.manager_id,
+        'managed_id' => mu.managed_id,
+        'created_at' => mu.created_at,
+        'updated_at' => mu.updated_at,
+        'manager_email' => mu.manager.email,
+        'user_id' => mu.managed_id,
+        'first_name' => profile&.first_name,
+        'last_name' => profile&.last_name,
+        'measurement_system' => profile&.measurement_system,
+        'num_positive_cases_last_seven_days' => profile&.num_positive_cases_last_seven_days,
+        'num_people_population' => profile&.num_people_population,
+        'uncounted_cases_multiplier' => profile&.uncounted_cases_multiplier,
+        'mask_type' => profile&.mask_type,
+        'event_display_risk_time' => profile&.event_display_risk_time,
+        'height_meters' => profile&.height_meters,
+        'stride_length_meters' => profile&.stride_length_meters,
+        'socials' => profile&.socials,
+        'external_api_token' => profile&.external_api_token,
+        'can_post_via_external_api' => profile&.can_post_via_external_api,
+        'demographics' => profile&.demographics,
+        'race_ethnicity' => profile&.race_ethnicity,
+        'gender_and_sex' => profile&.gender_and_sex,
+        'other_gender' => profile&.other_gender,
+        'year_of_birth' => profile&.year_of_birth,
+        'study_start_datetime' => profile&.study_start_datetime,
+        'study_goal_end_datetime' => profile&.study_goal_end_datetime,
+        'profile_id' => profile&.id,
+        'demog_percent_complete' => demog_percent_complete,
+        'fm_percent_complete' => fm_percent_complete,
+        'num_unique_masks_tested' => num_unique_masks_tested,
+        'facial_measurement_id' => latest_facial_measurement&.id,
+        'source' => latest_facial_measurement&.source,
+        'face_width' => latest_facial_measurement&.face_width,
+        'jaw_width' => latest_facial_measurement&.jaw_width,
+        'face_depth' => latest_facial_measurement&.face_depth,
+        'face_length' => latest_facial_measurement&.face_length,
+        'lower_face_length' => latest_facial_measurement&.lower_face_length,
+        'bitragion_menton_arc' => latest_facial_measurement&.bitragion_menton_arc,
+        'bitragion_subnasale_arc' => latest_facial_measurement&.bitragion_subnasale_arc,
+        'cheek_fullness' => latest_facial_measurement&.cheek_fullness,
+        'nasal_root_breadth' => latest_facial_measurement&.nasal_root_breadth,
+        'nose_protrusion' => latest_facial_measurement&.nose_protrusion,
+        'nose_bridge_height' => latest_facial_measurement&.nose_bridge_height,
+        'lip_width' => latest_facial_measurement&.lip_width,
+        'head_circumference' => latest_facial_measurement&.head_circumference,
+        'nose_breadth' => latest_facial_measurement&.nose_breadth,
+        'arkit' => latest_facial_measurement&.arkit,
+        'missing_ratio' => 0.0
+      }
+    end
+  end
+
+  def self.apply_sorting(results, sort_field, sort_order)
+    return results unless sort_field && sort_order
+
+    # Map sort fields to hash keys
+    sort_key = case sort_field
+               when 'name'
+                 'first_name'
+               when 'manager_email'
+                 'manager_email'
+               when 'demog_percent_complete'
+                 'demog_percent_complete'
+               when 'fm_percent_complete'
+                 'fm_percent_complete'
+               when 'num_unique_masks_tested'
+                 'num_unique_masks_tested'
+               else
+                 return results # Unknown field, no sorting
+               end
+
+    # Sort the array of hashes
+    sorted = results.sort_by do |row|
+      value = row[sort_key]
+      # Handle nil values - put them at the end
+      if value.nil?
+        sort_order == 'asc' ? Float::INFINITY : -Float::INFINITY
+      else
+        value
+      end
+    end
+
+    # Reverse if descending
+    sort_order == 'desc' ? sorted.reverse : sorted
+  end
 end

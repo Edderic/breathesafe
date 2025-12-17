@@ -22,11 +22,36 @@
         <table class='facial-measurements-table phone' >
           <thead class='facial-measurements-header'>
             <tr>
-              <th v-if='currentUser && currentUser.admin'>Manager Email</th>
-              <th></th>
-              <th>Demog</th>
-              <th>Face</th>
-              <th># masks tested</th>
+              <th v-if='currentUser && currentUser.admin' @click='toggleSort("manager_email")' class='sortable-header'>
+                Manager Email
+                <span class='sort-indicator' v-if='currentSort === "manager_email"'>
+                  {{ currentOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th @click='toggleSort("name")' class='sortable-header'>
+                Name
+                <span class='sort-indicator' v-if='currentSort === "name"'>
+                  {{ currentOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th @click='toggleSort("demog_percent_complete")' class='sortable-header'>
+                Demog
+                <span class='sort-indicator' v-if='currentSort === "demog_percent_complete"'>
+                  {{ currentOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th @click='toggleSort("fm_percent_complete")' class='sortable-header'>
+                Face
+                <span class='sort-indicator' v-if='currentSort === "fm_percent_complete"'>
+                  {{ currentOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th @click='toggleSort("num_unique_masks_tested")' class='sortable-header'>
+                # masks tested
+                <span class='sort-indicator' v-if='currentSort === "num_unique_masks_tested"'>
+                  {{ currentOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
               <th>Rec</th>
               <th>Add FT</th>
             </tr>
@@ -81,11 +106,36 @@
         <table class='facial-measurements-table non-phone'>
           <thead class='facial-measurements-header'>
             <tr>
-              <th v-if='currentUser && currentUser.admin'>Manager Email</th>
-              <th>Name</th>
-              <th>Demographics Completion</th>
-              <th>Face Measurements Completion</th>
-              <th>Unique masks tested</th>
+              <th v-if='currentUser && currentUser.admin' @click='toggleSort("manager_email")' class='sortable-header'>
+                Manager Email
+                <span class='sort-indicator' v-if='currentSort === "manager_email"'>
+                  {{ currentOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th @click='toggleSort("name")' class='sortable-header'>
+                Name
+                <span class='sort-indicator' v-if='currentSort === "name"'>
+                  {{ currentOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th @click='toggleSort("demog_percent_complete")' class='sortable-header'>
+                Demographics Completion
+                <span class='sort-indicator' v-if='currentSort === "demog_percent_complete"'>
+                  {{ currentOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th @click='toggleSort("fm_percent_complete")' class='sortable-header'>
+                Face Measurements Completion
+                <span class='sort-indicator' v-if='currentSort === "fm_percent_complete"'>
+                  {{ currentOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
+              <th @click='toggleSort("num_unique_masks_tested")' class='sortable-header'>
+                Unique masks tested
+                <span class='sort-indicator' v-if='currentSort === "num_unique_masks_tested"'>
+                  {{ currentOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
               <th>Recommend</th>
               <th>Add Fit Test</th>
             </tr>
@@ -221,7 +271,9 @@ export default {
       missingFacialMeasurementsForRecommender: [],
       userId: 0,
       recommenderColumns: [],
-      expandedUsers: {} // Track expansion state for each user
+      expandedUsers: {}, // Track expansion state for each user
+      currentSort: null,
+      currentOrder: null
     }
   },
   computed: {
@@ -290,6 +342,19 @@ export default {
       }
       return pages;
     },
+    metricSortField() {
+      // Map the current metric display to its sort field
+      switch (this.metricToShow) {
+        case 'Demographics':
+          return 'demog_percent_complete'
+        case 'Facial measurements':
+          return 'fm_percent_complete'
+        case 'Num masks tested':
+          return 'num_unique_masks_tested'
+        default:
+          return 'demog_percent_complete'
+      }
+    },
     evenlySpacedColorScheme() {
       return genColorSchemeBounds(0, 1, 5)
     },
@@ -324,6 +389,10 @@ export default {
     }
   },
   async created() {
+    // Initialize sort state from route query params
+    this.currentSort = this.$route.query.sort || null
+    this.currentOrder = this.$route.query.order || null
+
     await this.getCurrentUser()
     if (this.currentUser) {
       this.loadData()
@@ -347,7 +416,9 @@ export default {
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     loadData(page = 1) {
       const admin = this.isAdminView
-      this.loadManagedUsers({ admin, page, perPage: 25 })
+      const sort = this.currentSort
+      const order = this.currentOrder
+      this.loadManagedUsers({ admin, page, perPage: 25, sort, order })
     },
     goToPage(page) {
       if (page >= 1 && page <= this.totalPages) {
@@ -355,6 +426,45 @@ export default {
         // Scroll to top of table
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }
+    },
+    toggleSort(field) {
+      if (this.currentSort === field) {
+        // Same field - cycle through: asc -> desc -> null
+        if (this.currentOrder === 'asc') {
+          this.currentOrder = 'desc'
+        } else if (this.currentOrder === 'desc') {
+          // Remove sort
+          this.currentSort = null
+          this.currentOrder = null
+        }
+      } else {
+        // New field - start with ascending
+        this.currentSort = field
+        this.currentOrder = 'asc'
+      }
+
+      // Update route with new sort params
+      this.updateRoute()
+
+      // Reload data with new sort
+      this.loadData(1) // Reset to page 1 when sorting changes
+    },
+    updateRoute() {
+      const query = { ...this.$route.query }
+
+      if (this.currentSort && this.currentOrder) {
+        query.sort = this.currentSort
+        query.order = this.currentOrder
+      } else {
+        // Remove sort params when clearing sort
+        delete query.sort
+        delete query.order
+      }
+
+      // Reset to page 1 when sort changes
+      delete query.page
+
+      this.$router.push({ query })
     },
     genColorSchemeBounded(minimum, maximum) {
       return genColorSchemeBounds(minimum, maximum, 5)
@@ -678,6 +788,23 @@ export default {
     font-size: 0.9em;
   }
 
+  .sortable-header {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: background-color 0.2s;
+  }
+
+  .sortable-header:hover {
+    background-color: #f0f0f0;
+  }
+
+  .sort-indicator {
+    margin-left: 0.5em;
+    font-size: 0.8em;
+    color: #007bff;
+  }
+
   @media(max-width: 700px) {
     .pagination {
       font-size: 0.85em;
@@ -685,6 +812,15 @@ export default {
 
     .page-link {
       padding: 0.4em 0.7em;
+    }
+
+    .sortable-header {
+      padding: 0.5em 0.3em;
+    }
+
+    .sort-indicator {
+      display: inline-block;
+      margin-left: 0.2em;
     }
   }
 

@@ -21,20 +21,36 @@ class ManagedUsersController < ApplicationController
       per_page = (params[:per_page] || 25).to_i
       per_page = [per_page, 100].min # Cap at 100 per page
 
+      # Sorting params
+      sort_field = params[:sort]
+      sort_order = params[:order]
+
+      # Validate sort order
+      sort_order = nil unless %w[asc desc].include?(sort_order)
+
+      # Map frontend field names to database columns/calculations
+      sort_column_map = {
+        'name' => 'profiles.first_name',
+        'manager_email' => 'users.email',
+        'demog_percent_complete' => 'demog_percent_complete',
+        'fm_percent_complete' => 'fm_percent_complete',
+        'num_unique_masks_tested' => 'num_unique_masks_tested'
+      }
+
+      # Only apply sorting if both field and order are valid
+      "#{sort_column_map[sort_field]} #{sort_order.upcase}" if sort_field && sort_order && sort_column_map[sort_field]
+
       if show_all_users
         # Admin viewing all users - get all managed users across all managers
-        managed_users_query = ManagedUser.all
-        total_count = managed_users_query.count
+        # Use for_manager_id_with_sort which can handle sorting
+        managed_users = ManagedUser.for_all_users_paginated(
+          page: page,
+          per_page: per_page,
+          sort_field: sort_field,
+          sort_order: sort_order
+        )
 
-        # Apply pagination
-        managed_users = managed_users_query
-                        .offset((page - 1) * per_page)
-                        .limit(per_page)
-                        .map do |mu|
-          ManagedUser.for_manager_and_managed(manager_id: mu.manager_id,
-                                              managed_id: mu.managed_id).first
-        end
-                        .compact
+        total_count = ManagedUser.count
 
         to_render = {
           managed_users: managed_users,
@@ -54,17 +70,16 @@ class ManagedUsersController < ApplicationController
 
         # Verify permission: admin can access any manager, non-admin only themselves
         if current_user.admin || manager_id == current_user.id
-          # Get count first
           total_count = ManagedUser.where(manager_id: manager_id).count
 
-          # Get paginated managed users
-          managed_user_records = ManagedUser.where(manager_id: manager_id)
-                                            .offset((page - 1) * per_page)
-                                            .limit(per_page)
-
-          managed_users = managed_user_records.map do |mu|
-            ManagedUser.for_manager_and_managed(manager_id: manager_id, managed_id: mu.managed_id).first
-          end.compact
+          # Get paginated and sorted managed users
+          managed_users = ManagedUser.for_manager_id_paginated(
+            manager_id: manager_id,
+            page: page,
+            per_page: per_page,
+            sort_field: sort_field,
+            sort_order: sort_order
+          )
 
           to_render = {
             managed_users: managed_users,
