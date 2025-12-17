@@ -11,10 +11,23 @@
         <input id='search' type="text" v-model='search'>
         <SearchIcon height='2em' width='2em'/>
       </div>
+
+      <Pagination
+        :current-page="currentPage"
+        :per-page="perPage"
+        :total-count="totalCount"
+        item-name="users"
+        @page-change="handlePageChange"
+      />
     </div>
 
     <div>
-      <RespiratorUsersOverview :search="search" :metricToShow="metricToShow" />
+      <RespiratorUsersOverview
+        ref="overview"
+        :search="search"
+        :metricToShow="metricToShow"
+        @pagination-update="handlePaginationUpdate"
+      />
     </div>
 
     <Popup v-if='showHelp' @onclose='showHelp = false'>
@@ -119,6 +132,7 @@ import SearchIcon from './search_icon.vue'
 
 import TabSet from './tab_set.vue'
 import RespiratorUsersOverview from './respirator_users_overview.vue'
+import Pagination from './pagination.vue'
 
 export default {
   name: 'RespiratorUsers',
@@ -130,7 +144,8 @@ export default {
     Popup,
     SearchIcon,
     TabSet,
-    RespiratorUsersOverview
+    RespiratorUsersOverview,
+    Pagination
   },
   data() {
     return {
@@ -139,7 +154,10 @@ export default {
       metricToShow: "Demographics",
       facialMeasurementView: "Absolute",
       facialMeasurementsData: [],
-      showHelp: false
+      showHelp: false,
+      currentPage: 1,
+      perPage: 25,
+      totalCount: 0
     }
   },
   props: {
@@ -283,6 +301,19 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useProfileStore, ['loadProfile']),
+    handlePaginationUpdate(paginationData) {
+      this.currentPage = paginationData.currentPage
+      this.perPage = paginationData.perPage
+      this.totalCount = paginationData.totalCount
+    },
+    handlePageChange(page) {
+      // Call the overview component's loadData method with the new page
+      if (this.$refs.overview) {
+        this.$refs.overview.loadData(page)
+        // Scroll to top of page
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    },
     statusColor(fitTestingPercent) {
       let percentage = parseFloat(fitTestingPercent.split("%")[0])
       let status = 'Passed'
