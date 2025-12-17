@@ -236,7 +236,7 @@ The SnapFit iOS app is currently in development to make the facial measurement c
       <Button :shadow='true' class='button' text="View Mode" @click='mode = "View"' v-show='mode == "Edit"'/>
       <Button :shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-show='mode == "View"'/>
       <Button :shadow='true' text="Save and continue" @click='save()' v-show='mode != "View"'/>
-      <Button :shadow='true' text="Delete" @click='deleteUser($route.params.id)' v-show='mode == "Edit"'/>
+      <Button :shadow='true' text="Delete" @click='deleteUser(managedUser.id)' v-show='mode == "Edit"'/>
       <Button :shadow='true' text="Apply Retroactively to Fit Tests" @click='applyFacialMeasurements' v-show='mode == "View" && tabToShow == "Facial Measurements"'/>
     </div>
     <br>
