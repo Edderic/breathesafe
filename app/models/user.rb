@@ -47,7 +47,7 @@ class User < ApplicationRecord
 
   has_one :profile, dependent: :destroy, inverse_of: :user
   has_many :masks, foreign_key: 'author_id', inverse_of: :user # rubocop:disable Rails/HasManyOrHasOneDependent
-  has_many :facial_measurements, foreign_key: 'user_id', dependent: :destroy, inverse_of: :user
+  has_many :facial_measurements, dependent: :destroy, inverse_of: :user
   has_many :bulk_fit_tests_imports, dependent: :destroy
 
   def carbon_dioxide_monitors

@@ -35,14 +35,16 @@ class UserSealCheckFacialMeasurementsService
             '#{self}' AS source,
             fit_tests.user_id,
             fit_tests.created_at,
-            fit_tests.facial_measurement_id,
-            facial_measurements.arkit
+            fit_tests.facial_measurement_id
           FROM fit_tests_with_seal_checks
           INNER JOIN fit_tests ON fit_tests.id = fit_tests_with_seal_checks.id
           INNER JOIN masks ON fit_tests.mask_id = masks.id
-          LEFT JOIN facial_measurements ON fit_tests.facial_measurement_id = facial_measurements.id
         SQL
       )
+
+      # Load FacialMeasurements through ActiveRecord to get decrypted data
+      fm_ids = results.map { |row| row['facial_measurement_id'] }.compact.uniq
+      facial_measurements_by_id = FacialMeasurement.where(id: fm_ids).index_by(&:id)
 
       # Compute qlft_pass and aggregated ARKit measurements in Ruby
       facial_measurements_with_aggregated = results.map do |row|
@@ -50,20 +52,23 @@ class UserSealCheckFacialMeasurementsService
         user_seal_check_data = row['user_seal_check']
         row['qlft_pass'] = UserSealCheckService.qlft_pass_value(user_seal_check_data)
         facial_measurement_id = row['facial_measurement_id']
-        arkit_data = row['arkit']
 
-        aggregated = if facial_measurement_id && arkit_data && !arkit_data.to_s.strip.empty?
-                       begin
-                         # Parse JSONB if it's a string, otherwise use as-is
-                         parsed_arkit = if arkit_data.is_a?(String)
-                                          JSON.parse(arkit_data)
-                                        else
-                                          arkit_data
-                                        end
-                         temp_fm = FacialMeasurement.new(arkit: parsed_arkit)
-                         temp_fm.aggregated_arkit_measurements
-                       rescue StandardError
-                         # If parsing fails, return nil values
+        aggregated = if facial_measurement_id
+                       fm = facial_measurements_by_id[facial_measurement_id]
+                       if fm && fm.arkit.present?
+                         begin
+                           fm.aggregated_arkit_measurements
+                         rescue StandardError => e
+                           Rails.logger.error("Error computing aggregated measurements for FM #{facial_measurement_id}: #{e.message}")
+                           {
+                             nose_mm: nil,
+                             strap_mm: nil,
+                             top_cheek_mm: nil,
+                             mid_cheek_mm: nil,
+                             chin_mm: nil
+                           }
+                         end
+                       else
                          {
                            nose_mm: nil,
                            strap_mm: nil,
