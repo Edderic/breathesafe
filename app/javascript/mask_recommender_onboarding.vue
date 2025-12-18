@@ -66,6 +66,10 @@
         Adding Fit Tests: User Seal Check
       </router-link>
 
+      <router-link :to="tocPath('adding-fit-tests-qnft')">
+        Adding Fit Tests: Qualitative Fit Testing (QNFT)
+      </router-link>
+
       <router-link :to="tocPath('adding-fit-tests-qlft')">
         Adding Fit Tests: Qualitative Fit Testing (QLFT)
       </router-link>
@@ -596,6 +600,70 @@
             <figcaption>Adding a Fit Test: User Seal Check Failed</figcaption>
           </figure>
         </div>
+
+        <div id='adding-fit-tests-qnft'>
+          <br>
+          <br>
+          <h4> Adding Fit Tests: Quantitative Fit Testing (QNFT) </h4>
+        </div>
+
+        <p>You may move onto the next section if you're instead doing qualitative fit testing (QLFT).</p>
+
+        <p>You should be asked about which fit testing procedure you'd like to add data for:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="images/fit-testing-choose-procedure-1.png" alt='MasqFit Fit Testing - Choose a Procedure' height='400'>
+            <figcaption>MasqFit Fit Testing - Choose a Procedure</figcaption>
+          </figure>
+        </div>
+
+        <p>Here are the options:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="images/fit-testing-choose-procedure-2.png" alt='MasqFit Fit Testing - Procedure Options' height='400'>
+            <figcaption>MasqFit Fit Testing - Procedure Options</figcaption>
+          </figure>
+        </div>
+
+        <p>I recommend you to select the "OSHA Fast Face Piece Respirators" option as it is the faster option, though the Full OSHA option is available as well. Choosing a procedure will show more questions about the testing mode, and initial count (particles / cm3). Ideally you have N95 mode capability if you are testing N95-certified respirators. Initial counts are also asked for to ensure that the results are valid (i.e. the device might not be sensitive enough to detect up to 200 fit factor if the initial count is too low. Aim for higher than 70, but this number depends on the model of your fit testing device.)</p>
+
+        <div class='center'>
+          <figure>
+              <img src="images/fit-testing-qnft.png" alt='MasqFit Fit Testing - Procedure Options' height='400'>
+            <figcaption>MasqFit Fit Testing - Procedure Options</figcaption>
+          </figure>
+        </div>
+
+        <p>Hitting "Save and Continue", you should see a list of exercises:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="images/fit-testing-qnft-exercises.png" alt='MasqFit Fit Testing - QNFT exercises' height='400'>
+            <figcaption>MasqFit Fit Testing - QNFT exercises</figcaption>
+          </figure>
+        </div>
+
+        <p>Clicking on one of the Help (?) buttons, you should see instructions about how to perform the particular exercise.</p>
+
+        <div class='center'>
+          <figure>
+              <img src="images/fit-testing-exercise-instructions.png" alt='MasqFit Fit Testing - QNFT exercise instructions' height='400'>
+            <figcaption>MasqFit Fit Testing - QNFT exercise instructions</figcaption>
+          </figure>
+        </div>
+
+        <p>Do each exercise and write the fit factors you've acquired from the testing device:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="images/fit-testing-add-fit-factors.png" alt='MasqFit Fit Testing - QNFT Add Fit Factors' height='400'>
+            <figcaption>MasqFit Fit Testing - Add Fit Factors</figcaption>
+          </figure>
+        </div>
+
+        <p>Then hit Save and Continue.</p>
 
         <div id='adding-fit-tests-qlft'>
           <br>
