@@ -37,10 +37,8 @@
               <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
             </div>
           </div>
-          <h3 class='text-align-center'>Search for user</h3>
-
           <div class='row justify-content-center'>
-            <input type="text" @change='updateSearch($event, "user")' :disabled='!createOrEdit'>
+            <input type="text" @change='updateSearch($event, "user")' :disabled='!createOrEdit' placeholder='Search for user'>
             <SearchIcon height='2em' width='2em'/>
           </div>
 
