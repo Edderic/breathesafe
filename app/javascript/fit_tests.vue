@@ -405,15 +405,18 @@ export default {
         )
 
         if (response.status === 201) {
-          this.actionMenuMessages = [{ str: 'Fit test cloned successfully!' }]
+          // Show success message at top of page
+          this.messages = [{ str: 'Fit test cloned successfully!' }]
           this.closeActionsMenu()
           // Refresh the table
           await this.loadFitTests()
         } else {
+          // Show error in popup
           this.actionMenuMessages = [{ str: 'Failed to clone fit test.' }]
         }
       } catch (error) {
         const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to clone fit test.'
+        // Show error in popup
         this.actionMenuMessages = [{ str: errorMsg }]
       }
     },
@@ -434,15 +437,18 @@ export default {
         )
 
         if (response.status === 200) {
-          this.actionMenuMessages = [{ str: 'Fit test deleted successfully!' }]
+          // Show success message at top of page
+          this.messages = [{ str: 'Fit test deleted successfully!' }]
           this.closeActionsMenu()
           // Refresh the table
           await this.loadFitTests()
         } else {
+          // Show error in popup
           this.actionMenuMessages = [{ str: 'Failed to delete fit test.' }]
         }
       } catch (error) {
         const errorMsg = error.response?.data?.messages?.[0] || error.message || 'Failed to delete fit test.'
+        // Show error in popup
         this.actionMenuMessages = [{ str: errorMsg }]
       }
     },
