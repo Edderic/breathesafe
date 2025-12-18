@@ -370,43 +370,100 @@
           <h4>Adding Respirator Users: Facial Measurements Tab</h4>
         </div>
 
-        <p>After anwering demographics questions, you will then be asked for facial measurement information:</p>
-
+        <p>Download the MasqFit app from the App Store on your iPhone with True Depth Camera (i.e. has FaceID capability). You should see a landing screen like this:</p>
         <div class='center'>
           <figure>
-            <router-link :to='{name: "RespiratorUsers"}'>
-              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/respirator-user-facial-measurements-1.png" alt='Adding a new Respirator User. Facial Measurements Part I'>
-            </router-link>
-            <figcaption>Adding a new Respirator User: Facial Measurements Tab</figcaption>
+              <img src="images/masqfit-landing-page.png" alt='MasqFit landing page' height='400'>
+            <figcaption>MasqFit landing page</figcaption>
           </figure>
         </div>
 
-        <p>Clicking on the question mark buttons will show you what a particular measurement means:</p>
+        <p>Click on the "Contribute Facial Measurement Data" button. You should see the sign-in / registration page. Please sign-in with your Breathesafe credentials.</p>
 
         <div class='center'>
           <figure>
-            <router-link :to='{name: "RespiratorUsers"}'>
-              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/respirator-user-facial-measurements-2.png" alt='Adding a new Respirator User. Facial Measurements Part I'>
-            </router-link>
-            <figcaption>Adding a new Respirator User: User clicked on "Face width" question mark button</figcaption>
+              <img src="images/masqfit-login.png" alt='MasqFit sign-in page' height='400'>
+            <figcaption>MasqFit sign-in page</figcaption>
           </figure>
         </div>
 
-        <p>There are three sections. Please fill them out to the best of your ability. In <strong>Edit Mode</strong>, you will have a <strong>Save and continue</strong> button. Make sure to click on that to save the data. It will save your progress. Once you are done adding data for a Respirator User, you should see a notice that says the last step was successfully saved:</p>
+        <p>You should see a list of Respirator Users associated with your account. You should see at least one entry:</p>
 
         <div class='center'>
           <figure>
-            <router-link :to='{name: "RespiratorUsers"}'>
-              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/respirator-user-done.png" alt='Adding a new Respirator User. Last step successfully saved'>
-            </router-link>
-            <figcaption>Adding a new Respirator User: Last step successfully saved</figcaption>
+              <img src="images/masqfit-respirator-users.png" alt='MasqFit Respirator Users View' height='400'>
+            <figcaption>MasqFit Respirator Users View</figcaption>
+          </figure>
+        </div>
+
+        <p>Click on the "Gear" icon with the user you'd like to add facial measurement data for. You should see a list of options:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="images/masqfit-respirator-users-list-of-options-for-user.png" alt='MasqFit Respirator User Options' height='400'>
+            <figcaption>MasqFit Respirator Options</figcaption>
+          </figure>
+        </div>
+
+
+        <p>Click on "Add Facial Measurements". You should see something like so:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="images/masqfit-facial-measurements-blank.png" alt='MasqFit Facial Measurements for User View' height='400'>
+            <figcaption>MasqFit Facial Measurements for User View</figcaption>
+          </figure>
+        </div>
+
+        <p>Click on "Add Facial Measurements". You'll be taken to this view:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="images/masqfit-facial-measurements-blank.png" alt='MasqFit Facial Measurements for User View' height='400'>
+            <figcaption>MasqFit Facial Measurements for User View</figcaption>
+          </figure>
+        </div>
+
+        <p>Click on "Add Facial Measurements". You'll be taken to this view:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="images/masqfit-facial-measurements-ar-view.png" alt='MasqFit Facial Measurements Augmented Reality View' height='400'>
+            <figcaption>MasqFit Facial Measurements Augmented Reality View</figcaption>
+          </figure>
+        </div>
+
+        <p>Position your face close to the camera (less than 12 inches away) in portrait mode. Remove glasses, hats, or anything covering your face. Stay still, then press the "Start Measurement button". After hitting that button, you should see:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="images/masqfit-facial-measurements-ar-view-complete.png" alt='MasqFit Facial Measurement Points Taken' height='400'>
+            <figcaption>MasqFit Facial Measurement Points Taken.</figcaption>
+          </figure>
+        </div>
+
+        <p>It says: "Measurement complete! You can now export your data." Press the "Save" button. It should show a message:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="images/masqfit-facial-measurements-ar-view-success.png" alt='MasqFit Facial Measurements Saved' height='400'>
+            <figcaption>MasqFit Facial Measurements Saved</figcaption>
+          </figure>
+        </div>
+
+        <p>Press "OK". It should show you aggregated measurements of the individual:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="images/masqfit-facial-measurements-aggregated.png" alt='MasqFit Facial Measurements Aggregated' height='400'>
+            <figcaption>MasqFit Facial Measurements Aggregated</figcaption>
           </figure>
         </div>
 
         <p>Going to the
             <router-link :to='{name: "RespiratorUsers"}'>
               Respirator Users
-            </router-link> page shows that information for the user has been completed (for Phase I):
+            </router-link> page shows that information for the user has been completed:
         </p>
 
         <div class='center'>
