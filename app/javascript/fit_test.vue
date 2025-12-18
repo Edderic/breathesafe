@@ -37,34 +37,27 @@
               <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
             </div>
           </div>
-          <div class='row justify-content-center'>
-            <input type="text" @change='updateSearch($event, "user")' :disabled='!createOrEdit' placeholder='Search for user'>
-            <SearchIcon height='2em' width='2em'/>
+          <div v-if="sortedUserDisplayables.length > 0" class='row justify-content-center'>
+            <select
+              :value="selectedUser ? selectedUser.managedId : null"
+              @change='selectUserFromDropdown($event)'
+              :disabled='!createOrEdit'
+              class='user-select'>
+              <option :value='null'>-- Select User --</option>
+              <option v-for='u in sortedUserDisplayables' :key='u.managedId' :value='u.managedId'>
+                {{u.firstName}} {{u.lastName}} - {{u.managedId}}
+              </option>
+            </select>
           </div>
 
-          <h3 v-show="userDisplayables.length == 0" class='text-align-center'>Not able to find the user?
-            <router-link :to="{name: 'RespiratorUsers'}"> Click here to add user information. </router-link>
-          </h3>
-
-
-          <div :class='{main: true}'>
-            <div class='text-row pointable flex flex-dir-col align-items-center justify-content-center' v-for='u in userDisplayables' @click='selectUser(u.managedId)'>
-              <div class='description'>
-                <span>
-                  {{u.firstName + ' ' + u.lastName}}
-                </span>
-              </div>
-            </div>
+          <div v-else class='empty-user-state'>
+            <select disabled class='user-select'>
+              <option>No users available</option>
+            </select>
+            <p class='text-align-center'>
+              Please add a user by <router-link :to="{name: 'RespiratorUsers'}">clicking here</router-link>
+            </p>
           </div>
-
-          <table>
-            <tbody>
-              <tr>
-                <th>Selected User</th>
-                <td>{{ selectedUser ? selectedUser.fullName : '' }}</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
 
         <br>
@@ -1166,6 +1159,13 @@ export default {
         return this.managedUsersWhoCanAddFitTestData.filter((user) => user.fullName.toLowerCase().match(lowerSearch))
       }
     },
+    sortedUserDisplayables() {
+      return [...this.userDisplayables].sort((a, b) => {
+        const nameA = `${a.firstName} ${a.lastName}`.toLowerCase()
+        const nameB = `${b.firstName} ${b.lastName}`.toLowerCase()
+        return nameA.localeCompare(nameB)
+      })
+    },
     maskDisplayables() {
       // Backend now handles search and pagination
       return this.masks
@@ -1473,6 +1473,12 @@ export default {
           managedId: id
         })
         this.searchUser = ''
+      }
+    },
+    selectUserFromDropdown(event) {
+      const managedId = parseInt(event.target.value)
+      if (managedId) {
+        this.selectUser(managedId)
       }
     },
     async loadMasks() {
@@ -2309,6 +2315,25 @@ export default {
     display: flex;
     gap: 0.5em;
     flex-shrink: 0;
+  }
+
+  .user-select {
+    min-width: 300px;
+    padding: 0.5em;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .empty-user-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+  }
+
+  .empty-user-state p {
+    margin: 0;
   }
 
   .flex {
