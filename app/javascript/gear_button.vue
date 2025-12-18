@@ -1,5 +1,5 @@
 <template>
-  <CircularButton @click='$emit("click")' class='gear-button'>
+  <CircularButton @click='handleClick' class='gear-button'>
     <svg
       viewBox="0 0 100 100"
       xmlns="http://www.w3.org/2000/svg"
@@ -40,7 +40,12 @@ export default {
   components: {
     CircularButton
   },
-  emits: ['click']
+  emits: ['click'],
+  methods: {
+    handleClick(event) {
+      this.$emit('click', event)
+    }
+  }
 }
 </script>
 
