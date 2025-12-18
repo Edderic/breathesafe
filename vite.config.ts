@@ -7,11 +7,4 @@ export default defineConfig({
     VuePlugin(),
     RubyPlugin(),
   ],
-  build: {
-    rollupOptions: {
-      external: [
-        /^\/images\/.*/
-      ]
-    }
-  }
 })
