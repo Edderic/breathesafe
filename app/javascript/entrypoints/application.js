@@ -161,13 +161,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // A store could be good for Manipulating the Google Maps component via a
   // search component contained in another.
 
-  app.use(VueGoogleMaps, {
-      load: {
-          key: window.gon.GOOGLE_MAPS_API_KEY,
-          libraries: 'places'
-      },
-  // }).use(pinia).use(Vue3Geolocation).mount('#app')
-  }).use(VueMathjax)
+  // Only load Google Maps if the API key is available
+  if (window.gon && window.gon.GOOGLE_MAPS_API_KEY) {
+    app.use(VueGoogleMaps, {
+        load: {
+            key: window.gon.GOOGLE_MAPS_API_KEY,
+            libraries: 'places'
+        },
+    })
+  }
+
+  app.use(VueMathjax)
     .use(pinia).use(Datepicker).use(Vue3Progress, options).use(Vue3Geolocation).use(router).mount(mountEl)
 
 
