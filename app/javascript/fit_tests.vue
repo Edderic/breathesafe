@@ -178,7 +178,7 @@
                 <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, {})' class='status' :text='f.facialMeasurementPresence' :backgroundColor='facialMeasPresenceColorMappingStatus(f.facialMeasurementPresence)'/>
               </td>
               <th colspan='1'>Actions</th>
-              <td @click.stop>
+              <td @click.stop style='text-align: center;'>
                 <GearButton @click.stop='showActions(f.id)' />
               </td>
             </tr>
