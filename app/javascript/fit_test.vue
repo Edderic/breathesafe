@@ -270,17 +270,6 @@
               <!-- Quantitative fields -->
               <template v-if='fitTestProcedure && fitTestProcedure.startsWith("quantitative")'>
                 <tr>
-                  <th>Device</th>
-                  <td>
-                    <select v-model='quantitativeFitTestingDeviceId' :disabled='!createOrEdit'>
-                      <option :value='null'>-- Select --</option>
-                      <option v-for='d in measurementDevices' :value='d.id'>
-                        {{deviceInfo(d)}}
-                      </option>
-                    </select>
-                  </td>
-                </tr>
-                <tr>
                   <th>Testing mode</th>
                   <td>
                     <select v-model='quantitativeTestingMode' :disabled='!createOrEdit'>
@@ -1123,7 +1112,6 @@ export default {
     },
     toSave() {
       return {
-        quantitative_fit_testing_device_id: this.quantitativeFitTestingDeviceId,
         comfort: this.comfort,
         mask_id: this.selectedMask && this.selectedMask.id,
         user_seal_check: this.userSealCheck,
@@ -1550,8 +1538,6 @@ export default {
 
             let results = fitTestData.results
 
-            this.quantitativeFitTestingDeviceId = fitTestData.quantitative_fit_testing_device_id
-
             this.qualitativeAerosolSolution = results.qualitative?.aerosol?.solution
             this.qualitativeNotes = results.qualitative?.notes
             this.qualitativeProcedure = results.qualitative?.procedure
@@ -1697,16 +1683,6 @@ export default {
       }
     },
     validatePresenceOfDevice() {
-      if (this.quantitativeProcedure != 'Skipping' && !this.quantitativeFitTestingDeviceId) {
-        this.messages.push(
-          {
-            str: `Please choose a quantitative fit testing device. If you'd like to add one not currently listed, see "Measurement Devices" section'`,
-            to: {
-              name: "MeasurementDevices"
-            }
-          }
-        )
-      }
     },
     validateQNFT(part) {
       if (!this.quantitativeProcedure) {
@@ -1723,7 +1699,6 @@ export default {
         this.validatePresenceOfInitialCountPerCM3()
         this.validateValueOfInitialCountPerCM3()
         this.validatePresenceOfTestingMode()
-        this.validatePresenceOfDevice()
       }
 
       if (this.quantitativeProcedure == 'Full OSHA' && this.secondaryTabToShow == 'Results') {
