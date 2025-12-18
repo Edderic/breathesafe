@@ -38,8 +38,14 @@ class MasksController < ApplicationController
   end
 
   def index
+    masks = if current_user&.admin
+              Mask.with_admin_aggregations
+            else
+              Mask.with_privacy_aggregations
+            end
+
     to_render = {
-      masks: Mask.with_privacy_aggregations
+      masks: masks
     }
     messages = []
 
@@ -55,8 +61,15 @@ class MasksController < ApplicationController
     # Later on, parents should be able to view / edit their children's data
     status = 200
     messages = []
+
+    mask = if current_user&.admin
+             Mask.with_admin_aggregations([params[:id]])[0]
+           else
+             Mask.with_privacy_aggregations([params[:id]])[0]
+           end
+
     to_render = {
-      mask: Mask.with_privacy_aggregations([params[:id]])[0]
+      mask: mask
     }
 
     respond_to do |format|

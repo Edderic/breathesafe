@@ -2,6 +2,9 @@
 
 # Mask model
 class Mask < ApplicationRecord
+  # Privacy threshold for demographic counts
+  DEMOGRAPHIC_PRIVACY_THRESHOLD = 5
+
   belongs_to :author, class_name: 'User'
   belongs_to :brand, optional: true
   belongs_to :bulk_fit_tests_import, optional: true
@@ -76,11 +79,11 @@ class Mask < ApplicationRecord
   end
 
   def self.with_aggregations(mask_ids = nil)
-    mask_id_clause = if mask_ids
-                       Mask.sanitize_sql_array(['WHERE m.id IN (?)', mask_ids])
-                     else
-                       ''
-                     end
+    if mask_ids
+      Mask.sanitize_sql_array(['WHERE m.id IN (?)', mask_ids])
+    else
+      ''
+    end
 
     result = Mask.connection.exec_query(
       <<-SQL
@@ -180,6 +183,23 @@ class Mask < ApplicationRecord
     result
   end
 
+  def self.with_admin_aggregations(mask_ids = nil)
+    with_aggregations(mask_ids)
+
+    masks = if mask_ids
+              Mask.where(id: mask_ids)
+            else
+              Mask.all
+            end
+
+    # Calculate demographics without privacy thresholds for admin
+    masks.each { |m| m.calculate_demographics!(apply_privacy_threshold: false) }
+
+    masks.map do |m|
+      JSON.parse(m.to_json)
+    end
+  end
+
   def self.with_privacy_aggregations(mask_ids = nil)
     aggregations = with_aggregations(mask_ids)
     race_ethnicity_options = %w[
@@ -255,7 +275,8 @@ class Mask < ApplicationRecord
             end
 
     # Calculate demographics for each mask before converting to JSON
-    masks.each(&:calculate_demographics!)
+    # Apply privacy thresholds for non-admin view
+    masks.each { |m| m.calculate_demographics!(apply_privacy_threshold: true) }
 
     masks.map do |m|
       m_data = JSON.parse(m.to_json)
@@ -328,12 +349,12 @@ class Mask < ApplicationRecord
   end
 
   # Calculate demographics from fit tests
-  def calculate_demographics!
+  def calculate_demographics!(apply_privacy_threshold: false)
     # Get unique fit testers for this mask
     unique_testers = FitTest.joins(:facial_measurement)
                             .where(mask_id: id)
                             .select('DISTINCT facial_measurements.user_id, fit_tests.created_at')
-                            .group_by { |ft| ft.user_id }
+                            .group_by(&:user_id)
                             .map { |user_id, fts| { user_id: user_id, created_at: fts.first.created_at } }
 
     # Load profiles through ActiveRecord to get decrypted values
@@ -435,6 +456,72 @@ class Mask < ApplicationRecord
         end
       elsif profile.user_id
         self.prefer_not_to_disclose_age_count += 1
+      end
+    end
+
+    # Apply privacy thresholds if requested
+    apply_privacy_thresholds! if apply_privacy_threshold
+
+    self
+  end
+
+  # Apply privacy thresholds to demographic counts
+  def apply_privacy_thresholds!
+    threshold = DEMOGRAPHIC_PRIVACY_THRESHOLD
+
+    # Race/ethnicity groups
+    race_ethnicity_fields = %i[
+      american_indian_or_alaskan_native_count
+      asian_pacific_islander_count
+      black_african_american_count
+      hispanic_count
+      white_caucasian_count
+      multiple_ethnicity_other_count
+    ]
+
+    race_ethnicity_fields.each do |field|
+      count = send(field) || 0
+      if count.positive? && count < threshold
+        self.prefer_not_to_disclose_race_ethnicity_count += count
+        send("#{field}=", 0)
+      end
+    end
+
+    # Gender/sex groups
+    gender_sex_fields = %i[
+      cisgender_male_count
+      cisgender_female_count
+      mtf_transgender_count
+      ftm_transgender_count
+      intersex_count
+      other_gender_sex_count
+    ]
+
+    gender_sex_fields.each do |field|
+      count = send(field) || 0
+      if count.positive? && count < threshold
+        self.prefer_not_to_disclose_gender_sex_count += count
+        send("#{field}=", 0)
+      end
+    end
+
+    # Age groups
+    age_fields = %i[
+      age_between_2_and_4
+      age_between_4_and_6
+      age_between_6_and_8
+      age_between_8_and_10
+      age_between_10_and_12
+      age_between_12_and_14
+      age_between_14_and_18
+      age_adult
+    ]
+
+    age_fields.each do |field|
+      count = send(field) || 0
+      if count.positive? && count < threshold
+        self.prefer_not_to_disclose_age_count += count
+        send("#{field}=", 0)
       end
     end
 
