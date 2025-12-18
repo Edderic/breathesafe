@@ -601,6 +601,8 @@
           </figure>
         </div>
 
+        <p>If the User Seal Check does pass, the user can then add QLFT and/or QNFT data. First, the user will be asked about if they wanna add QLFT testing results:</p>
+
         <div id='adding-fit-tests-qnft'>
           <br>
           <br>
