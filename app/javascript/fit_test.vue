@@ -88,6 +88,13 @@
             <router-link :to="{name: 'NewMask'}"> Click here to add information about the mask. </router-link>
           </h3>
 
+          <Pagination
+            :currentPage="maskCurrentPage"
+            :perPage="maskPerPage"
+            :totalCount="maskTotalCount"
+            itemName="masks"
+            @page-change="handleMaskPageChange"
+          />
 
           <div :class='{main: true, grid: true, selectedMask: true, oneCol: maskDisplayables.length == 1}'>
             <div class='card pointable flex flex-dir-col align-items-center justify-content-center' v-for='m in selectMaskDisplayables' @click='selectMask(m.id)'>
@@ -99,6 +106,14 @@
               </div>
             </div>
           </div>
+
+          <Pagination
+            :currentPage="maskCurrentPage"
+            :perPage="maskPerPage"
+            :totalCount="maskTotalCount"
+            itemName="masks"
+            @page-change="handleMaskPageChange"
+          />
 
           <table>
             <tbody>
@@ -432,6 +447,7 @@ import { useManagedUserStore } from './stores/managed_users_store';
 import { useMeasurementDeviceStore } from './stores/measurement_devices_store';
 import { FitTest } from './fit_testing.js'
 import AddingDataToFitTestProgress from './adding_data_to_fit_test_progress.vue'
+import Pagination from './pagination.vue'
 
 export default {
   name: 'FitTest',
@@ -440,6 +456,7 @@ export default {
     Button,
     CircularButton,
     ClosableMessage,
+    Pagination,
     SearchIcon,
     SurveyQuestion,
     TabSet
@@ -900,6 +917,9 @@ export default {
       searchMask: "",
       searchUser: "",
       hasExistingFitTestUser: false,
+      maskCurrentPage: 1,
+      maskPerPage: 6,
+      maskTotalCount: 0,
     }
   },
   props: {
@@ -1138,20 +1158,12 @@ export default {
       }
     },
     maskDisplayables() {
-      if (this.searchMask == "") {
-        return this.masks
-      } else {
-        let lowerSearch = this.searchMask.toLowerCase()
-        return this.masks.filter((mask) => mask.uniqueInternalModelCode.toLowerCase().match(lowerSearch))
-      }
+      // Backend now handles search and pagination
+      return this.masks
     },
     selectMaskDisplayables() {
-      let lengthToDisplay = 6
-      if (this.maskDisplayables.length < 6) {
-        lengthToDisplay = this.maskDisplayables.length
-      }
-
-      return this.maskDisplayables.slice(0, lengthToDisplay)
+      // Backend now handles pagination, so return all masks from current page
+      return this.maskDisplayables
     },
     completedFitTestSteps() {
       const completed = []
@@ -1230,6 +1242,10 @@ export default {
       if (!this.currentUser) {
         signIn.call(this)
       } else {
+        // Initialize mask pagination from URL
+        if (toQuery.maskPage) {
+          this.maskCurrentPage = parseInt(toQuery.maskPage) || 1
+        }
 
         if (this.$route.name == 'NewFitTest') {
           this.mode = 'Create'
@@ -1382,11 +1398,29 @@ export default {
           'uniqueInternalModelCode': null
         }
         this.searchMask = event.target.value
+        // Reset to page 1 when search changes
+        this.maskCurrentPage = 1
+        this.updateMaskPaginationInUrl()
+        this.loadMasks()
       } else {
         this.selectedUser = new RespiratorUser({
         })
         this.searchUser = event.target.value
       }
+    },
+    handleMaskPageChange(page) {
+      this.maskCurrentPage = page
+      this.updateMaskPaginationInUrl()
+      this.loadMasks()
+    },
+    updateMaskPaginationInUrl() {
+      const query = { ...this.$route.query }
+      if (this.maskCurrentPage > 1) {
+        query.maskPage = this.maskCurrentPage
+      } else {
+        delete query.maskPage
+      }
+      this.$router.replace({ query })
     },
     getAbsoluteHref(href) {
       // TODO: make sure this works for all
@@ -1433,14 +1467,23 @@ export default {
       }
     },
     async loadMasks() {
-      // TODO: make this more flexible so parents can load data of their children
-      await axios.get(
-        `/masks.json`,
-      )
+      // Build query params for pagination and search
+      const params = new URLSearchParams()
+      params.append('page', this.maskCurrentPage)
+      params.append('per_page', this.maskPerPage)
+
+      if (this.searchMask) {
+        params.append('search', this.searchMask)
+      }
+
+      await axios.get(`/masks.json?${params.toString()}`)
         .then(response => {
           let data = response.data
           if (response.data.masks) {
             this.masks = deepSnakeToCamel(data.masks)
+            this.maskTotalCount = data.total_count || 0
+            this.maskCurrentPage = data.page || 1
+            this.maskPerPage = data.per_page || 6
           }
         })
         .catch(error => {
@@ -2524,7 +2567,7 @@ export default {
 
     .main, .grid.selectedMask, .grid.selectedMask.oneCol {
       display: grid;
-      grid-template-columns: 100%;
+      grid-template-columns: 50% 50%;
       grid-template-rows: auto;
     }
 

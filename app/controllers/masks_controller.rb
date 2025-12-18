@@ -38,14 +38,36 @@ class MasksController < ApplicationController
   end
 
   def index
+    # Extract pagination and search parameters
+    page = params[:page]&.to_i || 1
+    per_page = params[:per_page]&.to_i || 6
+    search = params[:search]
+
+    # Get base query
+    masks_query = Mask.all
+
+    # Apply search filter if provided
+    masks_query = masks_query.where('unique_internal_model_code ILIKE ?', "%#{search}%") if search.present?
+
+    # Get total count before pagination
+    total_count = masks_query.count
+
+    # Apply pagination
+    offset = (page - 1) * per_page
+    mask_ids = masks_query.order(:id).offset(offset).limit(per_page).pluck(:id)
+
+    # Get masks with aggregations
     masks = if current_user&.admin
-              Mask.with_admin_aggregations
+              Mask.with_admin_aggregations(mask_ids)
             else
-              Mask.with_privacy_aggregations
+              Mask.with_privacy_aggregations(mask_ids)
             end
 
     to_render = {
-      masks: masks
+      masks: masks,
+      total_count: total_count,
+      page: page,
+      per_page: per_page
     }
     messages = []
 
