@@ -154,7 +154,7 @@
           Adding Facial Measurements
         </h5>
         <p>
-        To add facial measurements for a Respirator User, use the <router-link :to="{name: 'NewFitTest'}">SnapFit iOS app</router-link> to upload the relevant facial measurements to Breathesafe. It might take a minute to search and download the app from the App Store. Once downloaded, it can take a few seconds to take measurements, and upload the data to Breathesafe to improve the Mask Recommender system.
+        To add facial measurements for a Respirator User, use the <router-link :to="{name: 'NewFitTest'}">MasqFit iOS app</router-link> to upload the relevant facial measurements to Breathesafe. It might take a minute to search and download the app from the App Store. Once downloaded, it can take a few seconds to take measurements, and upload the data to Breathesafe to improve the Mask Recommender system.
         </p>
 
 
