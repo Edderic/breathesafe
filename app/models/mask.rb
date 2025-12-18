@@ -133,159 +133,10 @@ class Mask < ApplicationRecord
           LEFT JOIN facial_measurements fm
             ON (fm.id = ft.facial_measurement_id)
           GROUP BY 1, 2
-        ), demographic_breakdown AS (
-          SELECT m.id,
-            SUM(
-              CASE WHEN p.race_ethnicity = 'American Indian or Alaskan Native'
-                THEN 1
-              ELSE 0
-              END
-            ) AS american_indian_or_alaskan_native_count,
-            SUM(
-              CASE WHEN p.race_ethnicity = 'Asian / Pacific Islander'
-                THEN 1
-              ELSE 0
-              END
-            ) AS asian_pacific_islander_count,
-            SUM(
-              CASE WHEN p.race_ethnicity = 'Black or African American'
-                THEN 1
-              ELSE 0
-              END
-            ) AS black_african_american_count,
-            SUM(
-              CASE WHEN p.race_ethnicity = 'Hispanic'
-                THEN 1
-              ELSE 0
-              END
-            ) AS hispanic_count,
-            SUM(
-              CASE WHEN p.race_ethnicity = 'White / Caucasian'
-                THEN 1
-              ELSE 0
-              END
-            ) AS white_caucasian_count,
-            SUM(
-              CASE WHEN p.race_ethnicity = 'Multiple ethnicity / Other'
-                THEN 1
-              ELSE 0
-              END
-            ) AS multiple_ethnicity_other_count,
-            SUM(
-              CASE WHEN p.race_ethnicity = 'Prefer not to disclose'
-                THEN 1
-              ELSE 0
-              END
-            ) AS prefer_not_to_disclose_race_ethnicity_count,
-            SUM(
-              CASE WHEN p.gender_and_sex = 'Cisgender male'
-                THEN 1
-              ELSE 0
-              END
-            ) AS cisgender_male_count,
-            SUM(
-              CASE WHEN p.gender_and_sex = 'Cisgender female'
-                THEN 1
-              ELSE 0
-              END
-            ) AS cisgender_female_count,
-            SUM(
-              CASE WHEN p.gender_and_sex = 'MTF transgender'
-                THEN 1
-              ELSE 0
-              END
-            ) AS mtf_transgender_count,
-            SUM(
-              CASE WHEN p.gender_and_sex = 'FTM transgender'
-                THEN 1
-              ELSE 0
-              END
-            ) AS ftm_transgender_count,
-            SUM(
-              CASE WHEN p.gender_and_sex = 'Intersex'
-                THEN 1
-              ELSE 0
-              END
-            ) AS intersex_count,
-            SUM(
-              CASE WHEN p.gender_and_sex = 'Prefer not to disclose'
-                THEN 1
-              ELSE 0
-              END
-            ) AS prefer_not_to_disclose_gender_sex_count,
-            SUM(
-              CASE WHEN p.gender_and_sex = 'Other'
-                THEN 1
-              ELSE 0
-              END
-            ) AS other_gender_sex_count,
-            SUM(
-              CASE WHEN EXTRACT(YEAR FROM ft.created_at) - p.year_of_birth >= 2 AND EXTRACT(YEAR FROM ft.created_at) - p.year_of_birth < 4
-                THEN 1
-              ELSE 0
-              END
-            ) AS age_between_2_and_4,
-            SUM(
-              CASE WHEN EXTRACT(YEAR FROM ft.created_at) - p.year_of_birth >= 4 AND EXTRACT(YEAR FROM ft.created_at) - p.year_of_birth < 6
-                THEN 1
-              ELSE 0
-              END
-            ) AS age_between_4_and_6,
-            SUM(
-              CASE WHEN EXTRACT(YEAR FROM ft.created_at) - p.year_of_birth >= 6 AND EXTRACT(YEAR FROM ft.created_at) - p.year_of_birth < 8
-                THEN 1
-              ELSE 0
-              END
-            ) AS age_between_6_and_8,
-            SUM(
-              CASE WHEN EXTRACT(YEAR FROM ft.created_at) - p.year_of_birth >= 8 AND EXTRACT(YEAR FROM ft.created_at) - p.year_of_birth < 10
-                THEN 1
-              ELSE 0
-              END
-            ) AS age_between_8_and_10,
-            SUM(
-              CASE WHEN EXTRACT(YEAR FROM ft.created_at) - p.year_of_birth >= 10 AND EXTRACT(YEAR FROM ft.created_at) - p.year_of_birth < 12
-                THEN 1
-              ELSE 0
-              END
-            ) AS age_between_10_and_12,
-            SUM(
-              CASE WHEN EXTRACT(YEAR FROM ft.created_at) - p.year_of_birth >= 12 AND EXTRACT(YEAR FROM ft.created_at) - p.year_of_birth < 14
-                THEN 1
-              ELSE 0
-              END
-            ) AS age_between_12_and_14,
-            SUM(
-              CASE WHEN EXTRACT(YEAR FROM ft.created_at) - p.year_of_birth >= 14 AND EXTRACT(YEAR FROM ft.created_at) - p.year_of_birth < 18
-                THEN 1
-              ELSE 0
-              END
-            ) AS age_between_14_and_18,
-            SUM(
-              CASE WHEN EXTRACT(YEAR FROM ft.created_at) - p.year_of_birth >= 18
-                THEN 1
-              ELSE 0
-              END
-            ) AS age_adult,
-            SUM(
-              CASE WHEN p.year_of_birth IS NULL AND p.user_id IS NOT NULL
-                THEN 1
-              ELSE 0
-              END
-            ) AS prefer_not_to_disclose_age_count
-
-          FROM masks m
-          LEFT JOIN unique_fit_testers_per_mask ft
-            ON (ft.mask_id = m.id)
-          LEFT JOIN profiles p
-            ON (p.user_id = ft.user_id)
-          #{mask_id_clause}
-          GROUP BY m.id
         )
 
         SELECT masks.id,
           masks.*,
-          demographic_breakdown.*,
           CASE WHEN fit_test_count IS NULL THEN 0 ELSE fit_test_count END AS fit_test_count,
           unique_fit_tester_counts_per_mask.*,
           avg_sealed_ffs.avg_sealed_ff AS avg_sealed_fit_factor,
@@ -293,11 +144,10 @@ class Mask < ApplicationRecord
           breathability_aggregates.avg_breathability_pa,
           count_breathability
         FROM
-          masks LEFT JOIN demographic_breakdown
-            ON masks.id = demographic_breakdown.id
-          LEFT JOIN fit_test_counts_per_mask ON (fit_test_counts_per_mask.mask_id = demographic_breakdown.id)
+          masks
+          LEFT JOIN fit_test_counts_per_mask ON (fit_test_counts_per_mask.mask_id = masks.id)
           LEFT JOIN unique_fit_tester_counts_per_mask
-            ON (unique_fit_tester_counts_per_mask.mask_id = demographic_breakdown.id)
+            ON (unique_fit_tester_counts_per_mask.mask_id = masks.id)
           LEFT JOIN avg_sealed_ffs
             ON masks.id = avg_sealed_ffs.mask_id
           LEFT JOIN breathability_aggregates
@@ -404,11 +254,191 @@ class Mask < ApplicationRecord
               Mask.all
             end
 
+    # Calculate demographics for each mask before converting to JSON
+    masks.each(&:calculate_demographics!)
+
     masks.map do |m|
       m_data = JSON.parse(m.to_json)
 
-      m_data.merge(hash[m.id])
+      # Apply privacy threshold adjustments
+      # Note: hash[m.id] may not have demographic data anymore since we removed SQL aggregations
+      # The demographic counts are now in m_data from calculate_demographics!
+      # We only merge non-demographic fields from hash if they exist
+      if hash[m.id]
+        # Don't overwrite the demographic counts we just calculated
+        hash_data = hash[m.id].except(
+          'american_indian_or_alaskan_native_count',
+          'asian_pacific_islander_count',
+          'black_african_american_count',
+          'hispanic_count',
+          'white_caucasian_count',
+          'multiple_ethnicity_other_count',
+          'prefer_not_to_disclose_race_ethnicity_count',
+          'cisgender_male_count',
+          'cisgender_female_count',
+          'mtf_transgender_count',
+          'ftm_transgender_count',
+          'intersex_count',
+          'prefer_not_to_disclose_gender_sex_count',
+          'other_gender_sex_count',
+          'age_between_2_and_4',
+          'age_between_4_and_6',
+          'age_between_6_and_8',
+          'age_between_8_and_10',
+          'age_between_10_and_12',
+          'age_between_12_and_14',
+          'age_between_14_and_18',
+          'age_adult',
+          'prefer_not_to_disclose_age_count'
+        )
+        m_data.merge(hash_data)
+      else
+        m_data
+      end
     end
+  end
+
+  # Override as_json to include virtual attributes
+  def as_json(options = {})
+    super(options).merge(
+      'american_indian_or_alaskan_native_count' => american_indian_or_alaskan_native_count,
+      'asian_pacific_islander_count' => asian_pacific_islander_count,
+      'black_african_american_count' => black_african_american_count,
+      'hispanic_count' => hispanic_count,
+      'white_caucasian_count' => white_caucasian_count,
+      'multiple_ethnicity_other_count' => multiple_ethnicity_other_count,
+      'prefer_not_to_disclose_race_ethnicity_count' => prefer_not_to_disclose_race_ethnicity_count,
+      'cisgender_male_count' => cisgender_male_count,
+      'cisgender_female_count' => cisgender_female_count,
+      'mtf_transgender_count' => mtf_transgender_count,
+      'ftm_transgender_count' => ftm_transgender_count,
+      'intersex_count' => intersex_count,
+      'prefer_not_to_disclose_gender_sex_count' => prefer_not_to_disclose_gender_sex_count,
+      'other_gender_sex_count' => other_gender_sex_count,
+      'age_between_2_and_4' => age_between_2_and_4,
+      'age_between_4_and_6' => age_between_4_and_6,
+      'age_between_6_and_8' => age_between_6_and_8,
+      'age_between_8_and_10' => age_between_8_and_10,
+      'age_between_10_and_12' => age_between_10_and_12,
+      'age_between_12_and_14' => age_between_12_and_14,
+      'age_between_14_and_18' => age_between_14_and_18,
+      'age_adult' => age_adult,
+      'prefer_not_to_disclose_age_count' => prefer_not_to_disclose_age_count
+    )
+  end
+
+  # Calculate demographics from fit tests
+  def calculate_demographics!
+    # Get unique fit testers for this mask
+    unique_testers = FitTest.joins(:facial_measurement)
+                            .where(mask_id: id)
+                            .select('DISTINCT facial_measurements.user_id, fit_tests.created_at')
+                            .group_by { |ft| ft.user_id }
+                            .map { |user_id, fts| { user_id: user_id, created_at: fts.first.created_at } }
+
+    # Load profiles through ActiveRecord to get decrypted values
+    user_ids = unique_testers.map { |t| t[:user_id] }.compact
+    profiles = Profile.where(user_id: user_ids).index_by(&:user_id)
+
+    # Initialize all counts to 0
+    self.american_indian_or_alaskan_native_count = 0
+    self.asian_pacific_islander_count = 0
+    self.black_african_american_count = 0
+    self.hispanic_count = 0
+    self.white_caucasian_count = 0
+    self.multiple_ethnicity_other_count = 0
+    self.prefer_not_to_disclose_race_ethnicity_count = 0
+    self.cisgender_male_count = 0
+    self.cisgender_female_count = 0
+    self.mtf_transgender_count = 0
+    self.ftm_transgender_count = 0
+    self.intersex_count = 0
+    self.prefer_not_to_disclose_gender_sex_count = 0
+    self.other_gender_sex_count = 0
+    self.age_between_2_and_4 = 0
+    self.age_between_4_and_6 = 0
+    self.age_between_6_and_8 = 0
+    self.age_between_8_and_10 = 0
+    self.age_between_10_and_12 = 0
+    self.age_between_12_and_14 = 0
+    self.age_between_14_and_18 = 0
+    self.age_adult = 0
+    self.prefer_not_to_disclose_age_count = 0
+
+    # Count demographics
+    unique_testers.each do |tester|
+      profile = profiles[tester[:user_id]]
+      next unless profile
+
+      # Count race/ethnicity
+      case profile.race_ethnicity
+      when 'American Indian or Alaskan Native'
+        self.american_indian_or_alaskan_native_count += 1
+      when 'Asian / Pacific Islander'
+        self.asian_pacific_islander_count += 1
+      when 'Black or African American'
+        self.black_african_american_count += 1
+      when 'Hispanic'
+        self.hispanic_count += 1
+      when 'White / Caucasian'
+        self.white_caucasian_count += 1
+      when 'Multiple ethnicity / Other'
+        self.multiple_ethnicity_other_count += 1
+      when 'Prefer not to disclose'
+        self.prefer_not_to_disclose_race_ethnicity_count += 1
+      end
+
+      # Count gender/sex
+      case profile.gender_and_sex
+      when 'Cisgender male'
+        self.cisgender_male_count += 1
+      when 'Cisgender female'
+        self.cisgender_female_count += 1
+      when 'MTF transgender'
+        self.mtf_transgender_count += 1
+      when 'FTM transgender'
+        self.ftm_transgender_count += 1
+      when 'Intersex'
+        self.intersex_count += 1
+      when 'Prefer not to disclose'
+        self.prefer_not_to_disclose_gender_sex_count += 1
+      when 'Other'
+        self.other_gender_sex_count += 1
+      end
+
+      # Count age ranges
+      if profile.year_of_birth
+        begin
+          year_of_birth = profile.year_of_birth.to_i
+          age = tester[:created_at].year - year_of_birth
+
+          case age
+          when 2...4
+            self.age_between_2_and_4 += 1
+          when 4...6
+            self.age_between_4_and_6 += 1
+          when 6...8
+            self.age_between_6_and_8 += 1
+          when 8...10
+            self.age_between_8_and_10 += 1
+          when 10...12
+            self.age_between_10_and_12 += 1
+          when 12...14
+            self.age_between_12_and_14 += 1
+          when 14...18
+            self.age_between_14_and_18 += 1
+          when 18..Float::INFINITY
+            self.age_adult += 1
+          end
+        rescue StandardError
+          # If year_of_birth can't be converted, skip age calculation
+        end
+      elsif profile.user_id
+        self.prefer_not_to_disclose_age_count += 1
+      end
+    end
+
+    self
   end
 
   private
@@ -445,4 +475,29 @@ class Mask < ApplicationRecord
       current_mask_id = next_mask.duplicate_of
     end
   end
+
+  # Virtual attributes for demographic counts
+  attr_accessor :american_indian_or_alaskan_native_count,
+                :asian_pacific_islander_count,
+                :black_african_american_count,
+                :hispanic_count,
+                :white_caucasian_count,
+                :multiple_ethnicity_other_count,
+                :prefer_not_to_disclose_race_ethnicity_count,
+                :cisgender_male_count,
+                :cisgender_female_count,
+                :mtf_transgender_count,
+                :ftm_transgender_count,
+                :intersex_count,
+                :prefer_not_to_disclose_gender_sex_count,
+                :other_gender_sex_count,
+                :age_between_2_and_4,
+                :age_between_4_and_6,
+                :age_between_6_and_8,
+                :age_between_8_and_10,
+                :age_between_10_and_12,
+                :age_between_12_and_14,
+                :age_between_14_and_18,
+                :age_adult,
+                :prefer_not_to_disclose_age_count
 end
