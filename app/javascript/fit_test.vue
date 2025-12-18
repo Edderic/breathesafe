@@ -30,7 +30,13 @@
 
       <div v-show='tabToShow == "User"' class='right-pane narrow-width'>
         <div>
-          <h2 class='text-align-center'>User selection</h2>
+          <div class='title-row'>
+            <h2 class='title-row-item text-align-center'>User selection</h2>
+            <div class='title-row-item mode-buttons'>
+              <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+              <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
+            </div>
+          </div>
           <h3 class='text-align-center'>Search for user</h3>
 
           <div class='row justify-content-center'>
@@ -65,8 +71,6 @@
 
         <br>
         <div class='row buttons'>
-          <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
-          <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
           <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
           <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
         </div>
@@ -76,11 +80,16 @@
       <div v-show='tabToShow == "Mask"' class='main right-pane'>
 
         <div>
-          <h2 class='text-align-center'>Mask Selection</h2>
-          <h3 class='text-align-center'>Search for and pick a mask</h3>
+          <div class='title-row'>
+            <h2 class='header title-row-item'>Mask Selection</h2>
+            <div class='mode-buttons title-row-item'>
+              <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+              <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
+            </div>
+          </div>
 
           <div class='row justify-content-center'>
-            <input type="text" :value='selectedMask && selectedMask.uniqueInternalModelCode' @change='updateSearch($event, "mask")' :disabled='!createOrEdit'>
+            <input type="text" :value='selectedMask && selectedMask.uniqueInternalModelCode' @change='updateSearch($event, "mask")' :disabled='!createOrEdit' placeholder='Search for mask'>
             <SearchIcon height='2em' width='2em'/>
           </div>
 
@@ -127,8 +136,6 @@
 
         <br>
         <div class='row buttons'>
-          <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
-          <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
           <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
           <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
         </div>
@@ -136,7 +143,13 @@
       </div>
 
       <div v-show='tabToShow == "Facial Hair"' class='flex-dir-col align-content-center right-pane'>
-        <h2 class='text-align-center'>Facial Hair Check</h2>
+        <div class='title-row'>
+          <h2 class='text-align-center title-row-item'>Facial Hair Check</h2>
+          <div class='mode-buttons title-row-item'>
+            <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+            <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
+          </div>
+        </div>
 
         <p class='narrow-p'>Having a beard can increase seal leakage. If you don't have one, please select "0mm" for the following question. If you do have one, please use a caliper or tape measure to estimate beard length.</p>
 
@@ -161,8 +174,6 @@
 
         <br>
         <div class='row buttons'>
-          <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
-          <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
           <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
           <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
         </div>
@@ -172,7 +183,13 @@
 
 
       <div v-show='tabToShow == "User Seal Check"' class='flex-dir-col align-content-center right-pane'>
-        <h2 class='text-align-center'>User Seal Check</h2>
+        <div class='title-row'>
+          <h2 class='text-align-center title-row-item'>User Seal Check</h2>
+          <div class='mode-buttons title-row-item'>
+            <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+            <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
+          </div>
+        </div>
         <div>
           <SurveyQuestion
               question="What do you think about the sizing of this mask relative to your face?"
@@ -209,15 +226,19 @@
 
         <br>
         <div class='row buttons'>
-          <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
-          <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
           <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
           <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
         </div>
       </div>
 
       <div v-show='tabToShow == "Fit Test"' class='flex-dir-col align-content-center right-pane'>
-        <h2 class='text-align-center'>Fit Test</h2>
+        <div class='title-row'>
+          <h2 class='text-align-center title-row-item'>Fit Test</h2>
+          <div class='mode-buttons title-row-item'>
+            <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+            <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
+          </div>
+        </div>
 
         <div class='menu row'>
           <TabSet
@@ -371,15 +392,19 @@
 
         <br>
         <div class='row buttons'>
-          <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
-          <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
           <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
           <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
         </div>
       </div>
 
       <div v-show='tabToShow == "Comfort"' class='flex-dir-col right-pane'>
-        <h2 class='text-align-center'>Comfort Assessment</h2>
+        <div class='title-row'>
+          <h2 class='text-align-center title-row-item'>Comfort Assessment</h2>
+          <div class='mode-buttons title-row-item'>
+            <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
+            <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
+          </div>
+        </div>
 
         <SurveyQuestion
           question="How comfortable is the position of the mask on the nose?"
@@ -407,8 +432,6 @@
 
         <br>
         <div class='row buttons'>
-          <Button shadow='true' class='button' text="View Mode" @click='mode = "View"' v-if='mode == "Edit"'/>
-          <Button shadow='true' class='button' text="Edit Mode" @click='mode = "Edit"' v-if='!createOrEdit'/>
           <Button shadow='true' class='button' text="Save and Continue" @click='validateAndSaveFitTest' v-if='createOrEdit'/>
           <Button shadow='true' class='button' text="Delete" @click='deleteFitTest' v-if='mode == "Edit"'/>
         </div>
@@ -2263,6 +2286,33 @@ export default {
 </script>
 
 <style scoped>
+
+  .header {
+    align-items: left;
+  }
+
+  .title-row-item {
+    margin-left: 1em;
+    margin-right: 1em;
+  }
+  .title-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 1em;
+  }
+
+  .title-row h2 {
+    margin: 0;
+  }
+
+  .mode-buttons {
+    display: flex;
+    gap: 0.5em;
+    flex-shrink: 0;
+  }
+
   .flex {
     display: flex;
   }
