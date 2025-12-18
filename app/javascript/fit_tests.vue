@@ -933,7 +933,7 @@ export default {
 
   .actions-menu-wrapper {
     position: relative;
-    background-color: #ffffd6;
+    background-color: white;
     border-radius: 8px;
     padding: 1em;
     max-width: 500px;
