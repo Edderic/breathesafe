@@ -173,15 +173,16 @@
             </tr>
 
             <tr>
-              <th colspan='2'>Facial Measurements</th>
-              <td colspan='2'>
+              <th colspan='1'>Facial Measurements</th>
+              <td colspan='1'>
                 <ColoredCell @click='setRouteTo("EditFitTest", { id: f.id }, {})' class='status' :text='f.facialMeasurementPresence' :backgroundColor='facialMeasPresenceColorMappingStatus(f.facialMeasurementPresence)'/>
+              </td>
+              <th colspan='1'>Actions</th>
+              <td @click.stop>
+                <GearButton @click.stop='showActions(f.id)' />
               </td>
             </tr>
           </table>
-
-
-
         </div>
       </div>
     </div>

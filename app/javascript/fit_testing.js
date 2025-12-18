@@ -115,6 +115,7 @@ export class FitTest {
 
     } else {
       // use negative pressure
+      let nullCount = 0
 
       for (const [key, value] of Object.entries(this.userSealCheck.negative)) {
         if (value != 'Unnoticeable') {
