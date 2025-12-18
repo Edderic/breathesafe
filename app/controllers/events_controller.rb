@@ -7,7 +7,6 @@ class EventsController < ApplicationController
   def new
     respond_to do |format|
       format.html do
-        gon.GOOGLE_MAPS_API_KEY = ENV['GOOGLE_MAPS_API_KEY']
         gon.S3_HTTPS = ENV['S3_HTTPS']
       end
 
