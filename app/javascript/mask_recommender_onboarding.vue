@@ -54,50 +54,61 @@
         Adding Masks
       </router-link>
 
-      <router-link :to="tocPath('adding-fit-tests')">
-        Adding Fit Tests for a Respirator User
+      <router-link :to="tocPath('adding-a-fit-test')">
+        Adding a Fit Test
       </router-link>
 
-      <router-link :to="tocPath('adding-fit-tests-selecting-a-user')">
-        Adding Fit Tests: Selecting a User
+      <div style="margin-left: 2em;">
+        <router-link :to="tocPath('adding-fit-tests-selecting-a-user')">
+          Selecting a User
+        </router-link>
+        <br>
+        <router-link :to="tocPath('adding-fit-tests-searching-for-a-mask')">
+          Searching for a Mask
+        </router-link>
+        <br>
+        <router-link :to="tocPath('adding-fit-tests-facial-hair')">
+          Facial Hair Information
+        </router-link>
+        <br>
+        <router-link :to="tocPath('adding-fit-tests-user-seal-check')">
+          User Seal Check
+        </router-link>
+        <br>
+        <router-link :to="tocPath('adding-fit-tests-qnft')">
+          Quantitative Fit Testing (QNFT)
+        </router-link>
+        <br>
+        <router-link :to="tocPath('adding-fit-tests-qlft')">
+          Qualitative Fit Testing (QLFT)
+        </router-link>
+        <br>
+        <router-link :to="tocPath('adding-fit-tests-comfort')">
+          Comfort
+        </router-link>
+      </div>
+
+      <br>
+
+      <router-link :to="tocPath('running-a-qualitative-fit-test')">
+        Running a Qualitative Fit Test
       </router-link>
 
-      <router-link :to="tocPath('adding-fit-tests-searching-for-a-mask')">
-        Adding Fit Tests: Searching for a mask
-      </router-link>
+      <div style="margin-left: 2em;">
+        <router-link :to="tocPath('running-fit-tests-qlft-setup-equipment')">
+          Equipment Setup
+        </router-link>
+        <br>
+        <router-link :to="tocPath('running-fit-tests-qlft-sensitivity-check')">
+          Sensitivity Check
+        </router-link>
+        <br>
+        <router-link :to="tocPath('running-fit-tests-qlft-fit-tests')">
+          Fit Tests
+        </router-link>
+      </div>
 
-      <router-link :to="tocPath('adding-fit-tests-facial-hair')">
-        Adding Fit Tests: Facial Hair Information
-      </router-link>
-
-      <router-link :to="tocPath('adding-fit-tests-user-seal-check')">
-        Adding Fit Tests: User Seal Check
-      </router-link>
-
-      <router-link :to="tocPath('adding-fit-tests-qnft')">
-        Adding Fit Tests: Qualitative Fit Testing (QNFT)
-      </router-link>
-
-      <router-link :to="tocPath('adding-fit-tests-qlft')">
-        Adding Fit Tests: Qualitative Fit Testing (QLFT)
-      </router-link>
-
-      <router-link :to="tocPath('running-fit-tests-qlft-setup-equipment')">
-        Running a Qualitative Fit Test: Equipment Setup
-      </router-link>
-
-      <router-link :to="tocPath('running-fit-tests-qlft-sensitivity-check')">
-        Running a Qualitative Fit Test: Sensitivity Check
-      </router-link>
-
-      <router-link :to="tocPath('running-fit-tests-qlft-fit-tests')">
-        Running a Qualitative Fit Test: Fit Tests
-      </router-link>
-
-
-      <router-link :to="tocPath('adding-fit-tests-comfort')">
-        Adding Fit Tests: Comfort Questions
-      </router-link>
+      <br>
 
       <router-link :to="tocPath('fit-testing-results')">
         Fit Testing Results
@@ -531,10 +542,10 @@
           </figure>
         </div>
 
-        <div id='adding-fit-tests'>
+        <div id='adding-a-fit-test'>
           <br>
           <br>
-          <h4>Adding Fit Tests</h4>
+          <h3>Adding a Fit Test</h3>
         </div>
 
         <p>You can visit the Fit Tests section by clicking on this
@@ -780,6 +791,11 @@
           </figure>
         </div>
 
+        <div id='running-a-qualitative-fit-test'>
+          <br>
+          <br>
+          <h3>Running a Qualitative Fit Test</h3>
+        </div>
 
         <div id='running-fit-tests-qlft-setup-equipment'>
           <br>
@@ -1538,6 +1554,8 @@ export default {
 
   /* Scroll margin for TOC anchor links */
   #adding-a-respirator-user,
+  #adding-a-fit-test,
+  #running-a-qualitative-fit-test,
   #import-a-file,
   #columns-matching,
   #user-matching,
