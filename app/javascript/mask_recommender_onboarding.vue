@@ -183,7 +183,7 @@
       <h2>Onboarding for Mask Recommender Based on Facial Features</h2>
 
       <div>
-        <p>Last updated: Dec. 12, 2025</p>
+        <p>Last updated: Dec. 19, 2025</p>
       </div>
 
       <div class='row'>
