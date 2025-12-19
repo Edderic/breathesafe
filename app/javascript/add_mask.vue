@@ -1,28 +1,5 @@
 <template>
   <div class='main-container align-items-center'>
-    <div class='header'>
-      <div class='header-row'>
-        <h2 class='tagline'>{{tagline}}</h2>
-      </div>
-      <div class='container chunk'>
-        <ClosableMessage @onclose='messages = []' :messages='messages'/>
-        <br>
-      </div>
-      <TabSet
-        class='tab-set'
-        :options='tabToShowOptions'
-        @update='setDisplay'
-        :tabToShow='displayTab'
-        v-if='showMode'
-      />
-
-      <Button v-show='!newMode && displayTab == "Fit Testing"' id='contextualize-button' class='icon' @click='showPopup = "Contextualize"'>
-        Contextualize
-      </Button>
-
-      <br>
-    </div>
-
     <!-- Progress Bar for New/Edit Mode -->
     <div class='columns' v-if='newOrEditMode'>
       <MaskProgressBar
@@ -56,6 +33,23 @@
     />
 
     <div :class="['main', 'main-section', { 'with-sidebar': newOrEditMode }]" v-show="displayTab == 'Misc. Info'">
+
+      <div class='header'>
+        <div class='header-row'>
+          <h2 class='tagline'>{{tagline}}</h2>
+        </div>
+        <div class='container chunk'>
+          <ClosableMessage @onclose='messages = []' :messages='messages'/>
+          <br>
+        </div>
+
+        <Button v-show='!newMode && displayTab == "Fit Testing"' id='contextualize-button' class='icon' @click='showPopup = "Contextualize"'>
+          Contextualize
+        </Button>
+
+        <br>
+      </div>
+
       <div :class='{ grid: true, view: showMode, edit: !showMode, triple: columnCount == 3, quad: columnCount == 4}'>
         <table v-if='tabToShow == "Image & Purchasing" || showMode'>
           <tbody>
@@ -1576,7 +1570,6 @@ export default {
   .tagline {
     text-align: center;
     font-weight: bold;
-    margin-right: 2em;
     margin-top: 0;
     margin-bottom: 0;
   }
@@ -1685,8 +1678,6 @@ export default {
   }
 
   .header {
-    width: 90vw;
-    position: fixed;
     background-color: white;
     display: flex;
     justify-content: center;
@@ -1698,10 +1689,6 @@ export default {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-  }
-
-  .main-section {
-    margin-top: 5em;
   }
 
   .main-section.with-sidebar {
@@ -1761,14 +1748,7 @@ export default {
     .grid.triple, .grid.view.triple, .grid.view.quad {
       grid-template-columns: 100%;
     }
-    .header {
-      flex-direction: column;
-    }
     .main-section {
-      margin-top: 12em;
-    }
-    .main-section.with-sidebar {
-      margin-left: 0;
     }
   }
   @media(max-width: 700px) {
