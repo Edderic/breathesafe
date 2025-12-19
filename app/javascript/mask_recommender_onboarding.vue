@@ -99,6 +99,40 @@
         Importing Fit Tests in Bulk
       </router-link>
 
+      <div style="margin-left: 2em;">
+        <router-link :to="tocPath('import-a-file')">
+          Import a File
+        </router-link>
+        <br>
+        <router-link :to="tocPath('columns-matching')">
+          Columns Matching
+        </router-link>
+        <br>
+        <router-link :to="tocPath('user-matching')">
+          User Matching
+        </router-link>
+        <br>
+        <router-link :to="tocPath('mask-matching')">
+          Mask Matching
+        </router-link>
+        <br>
+        <router-link :to="tocPath('user-seal-check-matching')">
+          User Seal Check Matching
+        </router-link>
+        <br>
+        <router-link :to="tocPath('qlft-values-matching')">
+          QLFT Values Matching
+        </router-link>
+        <br>
+        <router-link :to="tocPath('comfort-matching')">
+          Comfort Matching
+        </router-link>
+        <br>
+        <router-link :to="tocPath('review-and-import')">
+          Review and Import
+        </router-link>
+      </div>
+
       <br>
       <br>
       <br>
@@ -1056,6 +1090,10 @@
 
         <p>This section walks you through importing fit tests via a CSV. For some people, they might be more comfortable writing down their data in spreadsheets than inputting data one-by-one directly in the app. In the Fit tests page, there should be an up-arrow icon, which is meant for importing fit tests in bulk:</p>
 
+        <div id='import-a-file'>
+          <h5>Import a File</h5>
+        </div>
+
         <div class='center'>
           <figure>
             <router-link :to='{name: "FitTests"}'>
@@ -1140,6 +1178,10 @@
           </figure>
         </div>
 
+        <div id='columns-matching'>
+          <h5>Columns Matching</h5>
+        </div>
+
         <p>After clicking Next, you'll be taken to the Columns Matching section:</p>
 
         <div class='center'>
@@ -1167,6 +1209,10 @@
           </figure>
         </div>
 
+        <div id='user-matching'>
+          <h5>User Matching</h5>
+        </div>
+
         <p>Then hitting Next, you should be taken to the User Matching section. Hit the "Match" button:</p>
 
         <div class='center'>
@@ -1176,7 +1222,11 @@
           </figure>
         </div>
 
-        <p>Then hitting Next, you should be taken to the User Matching section. Hit the "Match" button:</p>
+        <div id='mask-matching'>
+          <h5>Mask Matching</h5>
+        </div>
+
+        <p>Then hitting Next, you should be taken to the Mask Matching section. Hit the "Match" button:</p>
 
         <div class='center'>
           <figure>
@@ -1192,6 +1242,10 @@
               <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-mask-incorrect.png" alt='Mask Matching: Manual Fix'>
             <figcaption>Mask Matching: Manual Fix</figcaption>
           </figure>
+        </div>
+
+        <div id='user-seal-check-matching'>
+          <h5>User Seal Check Matching</h5>
         </div>
 
         <p>Moving onto User Seal Check Matching, you might see something like this:</p>
@@ -1212,6 +1266,10 @@
           </figure>
         </div>
 
+        <div id='qlft-values-matching'>
+          <h5>QLFT Values Matching</h5>
+        </div>
+
         <p>QLFT Values Matching attempts to map pass and fail values to the corresponding Breathesafe values:</p>
 
         <div class='center'>
@@ -1219,6 +1277,10 @@
               <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-qlft-values-matching.png" alt='QLFT Values Matching'>
             <figcaption>QLFT Values Matching</figcaption>
           </figure>
+        </div>
+
+        <div id='comfort-matching'>
+          <h5>Comfort Matching</h5>
         </div>
 
         <p>In Comfort Matching, the Match functionality was successful in some but not for others. Manual fix was needed:</p>
@@ -1237,6 +1299,10 @@
               <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-comfort-matching-manual.png" alt='Comfort Values Matching — Manual'>
             <figcaption>Comfort Values Matching — Manual</figcaption>
           </figure>
+        </div>
+
+        <div id='review-and-import'>
+          <h5>Review and Import</h5>
         </div>
 
         <p>Then review:</p>
