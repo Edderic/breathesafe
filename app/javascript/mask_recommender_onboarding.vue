@@ -6,9 +6,6 @@
 
   <div class='grid'>
     <div class='toc margined overflow' id='toc'>
-      <br>
-      <br>
-      <br>
       <div  ><br></div><h2 ><strong>TABLE OF CONTENTS</strong></h2><div  ><br></div>
       <router-link :to="tocPath('timeline')">
         Timeline
@@ -26,9 +23,7 @@
         Account Creation
       </router-link>
 
-      <router-link :to="tocPath('adding-measurement-devices')">
-        Adding Measurement Devices
-      </router-link>
+      <br>
 
       <router-link :to="tocPath('adding-a-respirator-user')">
         Adding a Respirator User
@@ -53,6 +48,8 @@
       <router-link :to="tocPath('adding-masks')">
         Adding Masks
       </router-link>
+
+      <br>
 
       <router-link :to="tocPath('adding-a-fit-test')">
         Adding a Fit Test
@@ -113,6 +110,8 @@
       <router-link :to="tocPath('fit-testing-results')">
         Fit Testing Results
       </router-link>
+
+      <br>
 
       <router-link :to="tocPath('importing-fit-tests-in-bulk')">
         Importing Fit Tests in Bulk
@@ -1411,11 +1410,11 @@ export default {
 </script>
 <style scoped>
   .margined {
-    margin: 1em;
+    margin: 2em;
   }
 
   .toc {
-    width: 35vw;
+    width: 27vw;
     position: fixed;
     top: 0;
     display: flex;
@@ -1529,6 +1528,7 @@ export default {
     .toc {
       position: relative;
       width: 75vw;
+      height: auto;
     }
 
     .main {
@@ -1553,6 +1553,7 @@ export default {
   }
 
   /* Scroll margin for TOC anchor links */
+  #toc,
   #adding-a-respirator-user,
   #adding-a-fit-test,
   #running-a-qualitative-fit-test,
