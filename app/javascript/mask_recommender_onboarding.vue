@@ -86,6 +86,25 @@
       </div>
 
       <br>
+      <router-link :to="tocPath('running-a-quantitative-fit-test')">
+        Running a Quantitative Fit Test
+      </router-link>
+
+      <div style="margin-left: 2em;">
+        <router-link :to="tocPath('tsi-8020a-with-n95-companion')">
+          TSI 8020A w/ N95 Companion Training Video
+        </router-link>
+        <br>
+        <router-link :to="tocPath('tsi-8020-manual')">
+          TSI 8020 Manual
+        </router-link>
+        <br>
+        <router-link :to="tocPath('tsi-8095-n95-companion-manual')">
+          TSI 8095 N95 Companion Manual
+        </router-link>
+      </div>
+
+      <br>
 
       <router-link :to="tocPath('running-a-qualitative-fit-test')">
         Running a Qualitative Fit Test
@@ -789,6 +808,40 @@
             <figcaption>Adding a Fit Test: QNFT: Choose Procedure: Skipping</figcaption>
           </figure>
         </div>
+
+        <div id='running-a-quantitative-fit-test'>
+          <br>
+          <br>
+          <h3>Running a Quantitative Fit Test</h3>
+        </div>
+
+        <div id='tsi-8020a-with-n95-companion'>
+          <br>
+          <br>
+          <h4>TSI 8020A w/ N95 Companion</h4>
+        </div>
+
+        <figure>
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/YtGaLMneojA" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          <figcaption>TSI 8020A PortaCount with N95 Companion training</figcaption>
+        </figure>
+
+        <div id='tsi-8020-manual'>
+          <br>
+          <br>
+          <h4>TSI 8020A Manual</h4>
+        </div>
+
+        <a href='https://www.tttenviro.com/wp-content/uploads/Manual-TSI-Portacount-model-8020.pdf' target='_blank'>Here is a link to the 8020 Manual.</a>
+
+        <div id='tsi-8095-n95-companion-manual'>
+          <br>
+          <br>
+          <h4>TSI 8095 N95 Companion Manual</h4>
+        </div>
+
+        <a href='https://tsi.com/getmedia/23133329-810a-45d0-8bdf-145592b592c8/1980308J-8095-N95-Companion?ext=.pdf' target='_blank'>Here is a link to the 8095 N95 Companion Manual.</a>
+
 
         <div id='running-a-qualitative-fit-test'>
           <br>
