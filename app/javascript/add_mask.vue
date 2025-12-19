@@ -1779,7 +1779,9 @@ export default {
     }
 
     input {
-      width: 95vw;
+      width: 85vw;
+      margin: 1em;
+      padding: 1em;
     }
 
     #contextualize-button {
@@ -1788,16 +1790,19 @@ export default {
     }
 
     .main-section {
-      margin-top: 15em;
     }
 
     .main-section.with-sidebar {
       margin-left: 0;
-      margin-top: 18em;
     }
 
     select {
-      width: 97vw;
+      width: 90vw;
+      padding: 1em;
+    }
+
+    td {
+      padding: 0.5em 0;
     }
 
     .navigator {
