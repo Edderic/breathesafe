@@ -1522,4 +1522,16 @@ export default {
     }
   }
 
+  /* Scroll margin for TOC anchor links */
+  #import-a-file,
+  #columns-matching,
+  #user-matching,
+  #mask-matching,
+  #user-seal-check-matching,
+  #qlft-values-matching,
+  #comfort-matching,
+  #review-and-import {
+    scroll-margin-top: 4em;
+  }
+
 </style>
