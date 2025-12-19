@@ -30,17 +30,25 @@
         Adding Measurement Devices
       </router-link>
 
-      <router-link :to="tocPath('adding-respirator-users-name')">
-        Adding Respirator Users: Name Tab
+      <router-link :to="tocPath('adding-a-respirator-user')">
+        Adding a Respirator User
       </router-link>
 
-      <router-link :to="tocPath('adding-respirator-users-demographics')">
-        Adding Respirator Users: Demographics Tab
-      </router-link>
+      <div style="margin-left: 2em;">
+        <router-link :to="tocPath('adding-respirator-users-name')">
+          Name
+        </router-link>
+        <br>
+        <router-link :to="tocPath('adding-respirator-users-demographics')">
+          Demographics
+        </router-link>
+        <br>
+        <router-link :to="tocPath('adding-respirator-users-facial-measurements')">
+          Facial Measurements
+        </router-link>
+      </div>
 
-      <router-link :to="tocPath('adding-respirator-users-facial-measurements')">
-        Adding Respirator Users: Facial Measurements Tab
-      </router-link>
+      <br>
 
       <router-link :to="tocPath('adding-masks')">
         Adding Masks
@@ -353,6 +361,12 @@
         <p>The
         <router-link :to="{'name': 'MeasurementDevices'}">Measurement Devices</router-link>
         Data is meant for diagnosing potential calibration issues.</p>
+
+        <div id='adding-a-respirator-user'>
+          <br>
+          <br>
+          <h3>Adding a Respirator User</h3>
+        </div>
 
         <div id='adding-respirator-users-name'>
           <br>
@@ -1523,6 +1537,7 @@ export default {
   }
 
   /* Scroll margin for TOC anchor links */
+  #adding-a-respirator-user,
   #import-a-file,
   #columns-matching,
   #user-matching,
