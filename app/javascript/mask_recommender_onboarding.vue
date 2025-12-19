@@ -45,12 +45,6 @@
 
       <br>
 
-      <router-link :to="tocPath('adding-masks')">
-        Adding Masks
-      </router-link>
-
-      <br>
-
       <router-link :to="tocPath('adding-a-fit-test')">
         Adding a Fit Test
       </router-link>
@@ -84,6 +78,12 @@
           Comfort
         </router-link>
       </div>
+      <br>
+
+      <router-link :to="tocPath('fit-testing-results')">
+        Fit Testing Results
+      </router-link>
+
 
       <br>
       <router-link :to="tocPath('running-a-quantitative-fit-test')">
@@ -123,12 +123,6 @@
           Fit Tests
         </router-link>
       </div>
-
-      <br>
-
-      <router-link :to="tocPath('fit-testing-results')">
-        Fit Testing Results
-      </router-link>
 
       <br>
 
@@ -1115,23 +1109,6 @@
 
 
 
-        <div id='adding-masks'>
-          <br>
-          <br>
-          <h4>Adding Masks</h4>
-        </div>
-        <p>If you are trying to add fit testing data for a mask, but could not find the mask in the system, you can add it by visiting <router-link :to='{name: "NewMask"}'>this link</router-link>.</p>
-
-        <div class='center'>
-          <figure>
-            <router-link :to='{name: "NewFitTest"}'>
-              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-comfort.png" alt='Comfort questions'>
-            </router-link>
-            <figcaption>Adding a Fit Test: Comfort Questions</figcaption>
-          </figure>
-        </div>
-
-
         <div id='adding-fit-tests-comfort'>
           <br>
           <br>
@@ -1146,7 +1123,6 @@
             <figcaption>Adding a Fit Test: Comfort Questions</figcaption>
           </figure>
         </div>
-
 
         <div id='fit-testing-results'>
           <br>

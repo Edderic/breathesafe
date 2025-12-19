@@ -16,18 +16,32 @@
         v-if='showMode'
       />
 
-      <TabSet
-        class='tab-set hide-when-mobile'
-        :options='tabEditOptions'
-        @update='setRouteTo'
-        :tabToShow='tabToShow'
-          v-if='newOrEditMode'
-      />
       <Button v-show='!newMode && displayTab == "Fit Testing"' id='contextualize-button' class='icon' @click='showPopup = "Contextualize"'>
         Contextualize
       </Button>
 
       <br>
+    </div>
+
+    <!-- Progress Bar for New/Edit Mode -->
+    <div class='columns' v-if='newOrEditMode'>
+      <MaskProgressBar
+        :uniqueInternalModelCode="uniqueInternalModelCode"
+        :initialCostUsDollars="initialCostUsDollars"
+        :colors="colors"
+        :filterType="filterType"
+        :style="style"
+        :strapType="strapType"
+        :hasExhalationValve="hasExhalationValve"
+        :imageUrls="imageUrls"
+        :whereToBuyUrls="whereToBuyUrls"
+        :perimeterMm="perimeterMm"
+        :massGrams="massGrams"
+        :filtrationEfficiencies="filtrationEfficiencies"
+        :breathability="breathability"
+        :currentStep="tabToShow"
+        @navigate-to-step="navigateToStep"
+      />
     </div>
 
     <RecommendPopup
@@ -41,7 +55,7 @@
        explanation="Facial measurement graphs display fit testing results, where green points denote passing a fit test, and red points denote failing a fit test. You can input your facial measurements to see if this mask probably fits your face. The closer you are to green points, the higher the likelihood. If your measurements are not close to anyone else's, then the recommender fit probability might not be accurate."
     />
 
-    <div class='main main-section' v-show="displayTab == 'Misc. Info'">
+    <div :class="['main', 'main-section', { 'with-sidebar': newOrEditMode }]" v-show="displayTab == 'Misc. Info'">
       <div :class='{ grid: true, view: showMode, edit: !showMode, triple: columnCount == 3, quad: columnCount == 4}'>
         <table v-if='tabToShow == "Image & Purchasing" || showMode'>
           <tbody>
@@ -390,7 +404,7 @@
       <br>
 
     </div>
-    <div class='grid bar-charts main-section' v-show='showMode &&  displayTab == "Fit Testing"'>
+    <div :class="['grid', 'bar-charts', 'main-section', { 'with-sidebar': newOrEditMode }]" v-show='showMode &&  displayTab == "Fit Testing"'>
       <div class='card'>
         <h3 class='title'>Counts</h3>
         <HorizontalStackedBar
@@ -481,6 +495,7 @@ import ClosableMessage from './closable_message.vue'
 import ColoredCell from './colored_cell.vue'
 import HorizontalStackedBar from './horizontal_stacked_bar.vue'
 import TabSet from './tab_set.vue'
+import MaskProgressBar from './mask_progress_bar.vue'
 import { deepSnakeToCamel, shortHandHref, round } from './misc.js'
 import RecommendPopup from './recommend_popup.vue'
 import Popup from './pop_up.vue'
@@ -503,6 +518,7 @@ export default {
     ClosableMessage,
     ColoredCell,
     HorizontalStackedBar,
+    MaskProgressBar,
     Popup,
     RecommendPopup,
     ScatterPlot,
@@ -1415,6 +1431,25 @@ export default {
         query: combinedQuery
       })
     },
+    navigateToStep(stepKey) {
+      let routeName = this.$route.name
+
+      let newQuery = {
+        tabToShow: stepKey
+      }
+
+      let combinedQuery = Object.assign(
+        JSON.parse(
+          JSON.stringify(this.$route.query)
+        ),
+        newQuery
+      )
+
+      this.$router.push({
+        name: routeName,
+        query: combinedQuery
+      })
+    },
     visitMasks() {
       this.$router.push({
         name: 'Masks',
@@ -1669,6 +1704,14 @@ export default {
     margin-top: 5em;
   }
 
+  .main-section.with-sidebar {
+    margin-left: 320px;
+  }
+
+  .columns {
+    display: flex;
+  }
+
   .tab-set {
     margin-left: 2em;
     margin-right: 2em;
@@ -1709,6 +1752,11 @@ export default {
     }
 
   }
+  @media(max-width: 1000px) {
+    .main-section.with-sidebar {
+      margin-left: 0;
+    }
+  }
   @media(max-width: 1170px) {
     .grid.triple, .grid.view.triple, .grid.view.quad {
       grid-template-columns: 100%;
@@ -1718,6 +1766,9 @@ export default {
     }
     .main-section {
       margin-top: 12em;
+    }
+    .main-section.with-sidebar {
+      margin-left: 0;
     }
   }
   @media(max-width: 700px) {
@@ -1758,6 +1809,11 @@ export default {
 
     .main-section {
       margin-top: 15em;
+    }
+
+    .main-section.with-sidebar {
+      margin-left: 0;
+      margin-top: 18em;
     }
 
     select {
