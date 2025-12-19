@@ -95,6 +95,10 @@
         Fit Testing Results
       </router-link>
 
+      <router-link :to="tocPath('importing-fit-tests-in-bulk')">
+        Importing Fit Tests in Bulk
+      </router-link>
+
       <br>
       <br>
       <br>
@@ -210,7 +214,7 @@
           Uploading Fit Testing Results in Bulk
         </h5>
         <p>
-        If you prefer to store your data using spreadsheets instead of the regular UI, or already have fit testing data saved in a spreadsheet, you can upload your data seamlessly using the Bulk Fit Tests Importing tool. It takes about a minute or two to upload data from spreadsheets (CSV). See the <router-link :to="{name: 'NewFitTest'}">Bulk Fit Tests Import section.</router-link>
+        If you prefer to store your data using spreadsheets instead of the regular UI, or already have fit testing data saved in a spreadsheet, you can upload your data seamlessly using the Bulk Fit Tests Importing tool. It takes about a minute or two to upload data from spreadsheets (CSV). See the <router-link :to="tocPath('importing-fit-tests-in-bulk')">Bulk Fit Tests Import section.</router-link>
         </p>
 
 
@@ -1043,6 +1047,241 @@
             <figcaption>Fit Test Results</figcaption>
           </figure>
         </div>
+
+        <div id='importing-fit-tests-in-bulk'>
+          <br>
+          <br>
+          <h4>Importing Fit Tests in Bulk</h4>
+        </div>
+
+        <p>This section walks you through importing fit tests via a CSV. For some people, they might be more comfortable writing down their data in spreadsheets than inputting data one-by-one directly in the app. In the Fit tests page, there should be an up-arrow icon, which is meant for importing fit tests in bulk:</p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "FitTests"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/fit-test-page-with-bulk-upload-icon-arrow.png" alt='Fit Test Results'>
+            </router-link>
+            <figcaption>Import Bulk Fit Tests button</figcaption>
+          </figure>
+        </div>
+
+        <p>Clicking on that should take you to the Bulk Fit Tests page:</p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "BulkFitTestsImportsList"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-none.png" alt='Bulk Fit Tests Imports'>
+            </router-link>
+            <figcaption>Bulk Fit Tests Imports page</figcaption>
+          </figure>
+        </div>
+
+        <p>Clicking on the New import button should take you to the Import a File section:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-import-a-file.png" alt='Importing a File'>
+            <figcaption>Importing a File</figcaption>
+          </figure>
+        </div>
+
+        <p>You can click on the Help (?) button to learn more:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-import-a-file-help.png" alt='Importing a File: Help'>
+            <figcaption>Importing a File: Help</figcaption>
+          </figure>
+        </div>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-import-a-file-help-2.png" alt='Importing a File: Help'>
+            <figcaption>Importing a File: Help (Part II)</figcaption>
+          </figure>
+        </div>
+
+        <a href="/sample_fit_tests_import.csv" download>You can download the sample CSV template here.</a>
+
+        <p>Here's a preview of the sample CSV template you could use:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-sample-1.png" alt='Sample Data: Part I'>
+            <figcaption>Sample Data: Part I</figcaption>
+          </figure>
+        </div>
+
+        <p>As you can see some values might be the same thing (e.g. "ok" vs. "OK"). These from-file values will be mapped to the same Breathesafe value later on.</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-sample-2.png" alt='Sample Data: Part II'>
+            <figcaption>Sample Data: Part II</figcaption>
+          </figure>
+        </div>
+
+        <p>Rows representing a fit testing session for an individual-and-mask pair can have different testing modes (e.g. quantitative fit testing with N95/N99 mode vs. qualitative fit testing).</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-sample-3.png" alt='Sample Data: Part III'>
+            <figcaption>Sample Data: Part III</figcaption>
+          </figure>
+        </div>
+
+        <p>You can use that template and fill the spreadsheet with data, and then import that file.
+        After choosing a CSV file with the data, you should see some metadata:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-import-a-file-success.png" alt='Importing a File'>
+            <figcaption>Importing a File: Success</figcaption>
+          </figure>
+        </div>
+
+        <p>After clicking Next, you'll be taken to the Columns Matching section:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-column-matching-1.png" alt='Columns Matching (Part I)'>
+            <figcaption>Columns Matching (Part I)</figcaption>
+          </figure>
+        </div>
+
+        <p>You can click on the Match button to do auto-matching:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-column-matching-2.png" alt='Columns Matching (Part II)'>
+            <figcaption>Columns Matching (Part II)</figcaption>
+          </figure>
+        </div>
+
+        <p>It's based on string matching, works pretty well, but could have errors. Scrolling down some more, you could see some of the exercises from the file being matched to exercises in Breathesafe:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-column-matching-3.png" alt='Columns Matching (Part III)'>
+            <figcaption>Columns Matching (Part III)</figcaption>
+          </figure>
+        </div>
+
+        <p>Then hitting Next, you should be taken to the User Matching section. Hit the "Match" button:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-users.png" alt='User Matching'>
+            <figcaption>User Matching</figcaption>
+          </figure>
+        </div>
+
+        <p>Then hitting Next, you should be taken to the User Matching section. Hit the "Match" button:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-mask.png" alt='Mask Matching'>
+            <figcaption>Mask Matching</figcaption>
+          </figure>
+        </div>
+
+        <p>Sometimes there are mistakes with the auto-matching (e.g. Zimi 7711 and Zimi ZM100). Please fix.</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-mask-incorrect.png" alt='Mask Matching: Manual Fix'>
+            <figcaption>Mask Matching: Manual Fix</figcaption>
+          </figure>
+        </div>
+
+        <p>Moving onto User Seal Check Matching, you might see something like this:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-user-seal-check-matching.png" alt='User Seal Check Matching'>
+            <figcaption>User Seal Check Matching</figcaption>
+          </figure>
+        </div>
+
+        <p>With the Match button and some manual matching:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-user-seal-check-matching-manual.png" alt='User Seal Check Matching: Auto + Manual Matching'>
+            <figcaption>User Seal Check: Auto + Manual Matching</figcaption>
+          </figure>
+        </div>
+
+        <p>QLFT Values Matching attempts to map pass and fail values to the corresponding Breathesafe values:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-qlft-values-matching.png" alt='QLFT Values Matching'>
+            <figcaption>QLFT Values Matching</figcaption>
+          </figure>
+        </div>
+
+        <p>In Comfort Matching, the Match functionality was successful in some but not for others. Manual fix was needed:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-comfort-matching.png" alt='Comfort Values Matching'>
+            <figcaption>Comfort Values Matching</figcaption>
+          </figure>
+        </div>
+
+        <p>With manual fixing:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-comfort-matching-manual.png" alt='Comfort Values Matching — Manual'>
+            <figcaption>Comfort Values Matching — Manual</figcaption>
+          </figure>
+        </div>
+
+        <p>Then review:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-review-1.png" alt='Comfort Values Matching — Review (Part I)'>
+            <figcaption>Review (Part I)</figcaption>
+          </figure>
+        </div>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-review-2.png" alt='Comfort Values Matching — Review (Part II)'>
+            <figcaption>Review (Part II)</figcaption>
+          </figure>
+        </div>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-review-3.png" alt='Comfort Values Matching — Review (Part III)'>
+            <figcaption>Review (Part III)</figcaption>
+          </figure>
+        </div>
+
+        <p>If everything looks good, please press the "Import" button. That should show you a success message:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-successful.png" alt='Bulk Imports Successful'>
+            <figcaption>Bulk Imports Successful</figcaption>
+          </figure>
+        </div>
+
+        <p>Clicking on the "Go to Bulk Imports" should take you to that page:</p>
+
+        <div class='center'>
+          <figure>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/bulk-imports-page-with-one-row.png" alt='Bulk Imports Successful'>
+            <figcaption>Bulk Imports — New Row</figcaption>
+          </figure>
+        </div>
+
+
+
         <br>
         <br>
         <br>
