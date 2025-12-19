@@ -145,7 +145,7 @@
 
             <tr>
               <th>Colors</th>
-              <td colspan='1' class='text-align-center'>
+              <td colspan='1' class='colors'>
 
               <span v-for='opt in colorOptions' class='filterCheckbox' >
                 <Circle :color='opt' :selected='colors.includes(opt)' :for='`color${opt}`' @click='filterFor("Color", opt)' v-if='newOrEditMode || colors.includes(opt)'/>
@@ -1482,16 +1482,10 @@ export default {
     margin: 1em auto;
   }
 
-  input[type='number'] {
-    min-width: 2em;
-    font-size: 24px;
-    padding-left: 0.25em;
-    padding-right: 0.25em;
-  }
-
   .has-minimal-width {
     min-width: 25em;
   }
+
   .text-for-other {
     margin: 0 1.25em;
   }
@@ -1713,7 +1707,6 @@ export default {
 
   .filterCheckbox {
     display: flex;
-    justify-content: center;
   }
 
   .contextualizePopup  {
@@ -1801,12 +1794,20 @@ export default {
       padding: 1em;
     }
 
-    td {
-      padding: 0.5em 0;
-    }
-
     .navigator {
       width: 98vw;
+    }
+
+    .button {
+      width: 85vw;
+    }
+
+    .has-minimal-width {
+      min-width: auto;
+    }
+
+    .colors {
+      min-width: 85vw;
     }
   }
 
