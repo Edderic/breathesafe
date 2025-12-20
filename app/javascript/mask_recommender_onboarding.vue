@@ -102,6 +102,56 @@
         <router-link :to="tocPath('tsi-8095-n95-companion-manual')">
           TSI 8095 N95 Companion Manual
         </router-link>
+
+        <br>
+        <router-link :to="tocPath('installing-probes-to-masks')">
+          Installing Probes to Masks
+        </router-link>
+
+        <br>
+        <router-link :to="tocPath('setting-up-tsi-8020A-with-tsi-8095')">
+          Setting up TSI 8020A with TSI 8095 N95 Companion
+        </router-link>
+
+        <br>
+        <router-link :to="tocPath('setup-alcohol-cartridge')">
+          Setting up Alcohol Cartridge
+        </router-link>
+
+        <br>
+        <router-link :to="tocPath('connecting-the-8020a-and-8095')">
+          Connecting the 8020A and the 8095
+        </router-link>
+
+        <br>
+        <router-link :to="tocPath('setup-n95-companion-pendant')">
+          Setting up N95 Companion Pendant
+        </router-link>
+
+        <br>
+        <router-link :to="tocPath('setup-aerosol-generator')">
+          Setting up the Aerosol Generator
+        </router-link>
+
+        <br>
+        <router-link :to="tocPath('turning-on-the-portacount')">
+          Turning on the PortaCount
+        </router-link>
+
+        <br>
+        <router-link :to="tocPath('daily-checks')">
+          Daily Checks
+        </router-link>
+
+        <br>
+        <router-link :to="tocPath('ready-for-testing')">
+          Ready for Testing
+        </router-link>
+
+        <br>
+        <router-link :to="tocPath('putting-things-back')">
+          Putting things back
+        </router-link>
       </div>
 
       <br>
@@ -835,6 +885,426 @@
         </div>
 
         <a href='https://tsi.com/getmedia/23133329-810a-45d0-8bdf-145592b592c8/1980308J-8095-N95-Companion?ext=.pdf' target='_blank'>Here is a link to the 8095 N95 Companion Manual.</a>
+
+
+        <div id='installing-probes-to-masks'>
+          <br>
+          <br>
+          <h4>Installing Probes to Masks</h4>
+        </div>
+
+        <p>For quantitative fit testing, we'll need to install a probe on the to-be-tested masks. Quantitative fit testing works by comparing the within-mask particle concentration and the ambient (outside-of-mask) particle concentrations. In this example, I'll be showing you how to insert a reusable probe. You'll need to have access to an X-ACTO knife (which Breathesafe LLC might have provided you):</p>
+
+
+        <div class='grid even'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-reusable-probes.png" alt='Reusable Probes'>
+            <figcaption>Reusable Probes</figcaption>
+          </figure>
+
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-xacto-knife-hole.png" alt='Xacto Knife Hole'>
+            <figcaption>Xacto Knife Hole</figcaption>
+          </figure>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-xacto-knife-hole-2.png" alt='Xacto Knife Hole 2'>
+            <figcaption>Xacto Knife Hole 2</figcaption>
+          </figure>
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-xacto-knife-hole-3.png" alt='Xacto Knife Hole 3'>
+            <figcaption>Xacto Knife Hole 3</figcaption>
+          </figure>
+
+        </div>
+
+        <p>Insert the Probe all the way. You might have to rotate the probe like a screw so that it goes all the way in.</p>
+
+        <div class='grid even'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-probe.png" alt='Probe'>
+            <figcaption>Probe</figcaption>
+          </figure>
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-insert-probe-through-mask-hole.png" alt='Insert Probe Through Mask Hole'>
+            <figcaption>Insert Probe Through Mask Hole</figcaption>
+          </figure>
+        </div>
+
+        <p>Add the washer</p>
+
+        <div class='grid even'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-rubber.png" alt='Rubber'>
+            <figcaption>Rubber</figcaption>
+          </figure>
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-probe-rubber-washer.png" alt='Probe Rubber Washer'>
+            <figcaption>Probe Rubber Washer</figcaption>
+          </figure>
+        </div>
+
+
+        <p>Rotate the nut so that the nut and the probe are sealed together:</p>
+
+        <div class='grid even'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-probe-nut-1.png" alt='Probe Nut 1'>
+            <figcaption>Probe Nut 1</figcaption>
+          </figure>
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-probe-nut-2.png" alt='Probe Nut 2'>
+            <figcaption>Probe Nut 2</figcaption>
+          </figure>
+        </div>
+
+        <div id='setting-up-tsi-8020A-with-tsi-8095'>
+          <br>
+          <br>
+          <h4>Setting up TSI 8020A with TSI 8095 N95 Companion</h4>
+        </div>
+
+        <p>If you've borrowed Breathesafe LLC's TSI 8020A and the TSI 8095 N95 Companion, you should see two luggages' worth of equipment.</p>
+
+        <figure>
+          <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-2-luggages.png" alt='2 Luggages containing TSI 8020A and TSI 8095 N95 Companion'>
+          <figcaption>2 Luggages containing TSI 8020A and TSI 8095 N95 Companion</figcaption>
+        </figure>
+
+        <p>Take out the N95 Companion and place it on some flat surface (e.g. table, floor, etc.):</p>
+
+        <figure>
+          <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-companion.png" alt='Companion'>
+          <figcaption>Companion</figcaption>
+        </figure>
+
+        <p>Place 8020a on top of the N95 companion.</p>
+
+
+        <div class='grid even'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-place-8020a-on-top-of-companion.png" alt='Place 8020a On Top Of Companion'>
+            <figcaption>Place 8020a On Top Of the Companion</figcaption>
+          </figure>
+
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-8020a-with-companion-close-up.png" alt='8020a With Companion Close Up'>
+            <figcaption>8020a With Companion Close Up</figcaption>
+          </figure>
+        </div>
+
+        <div id='setup-alcohol-cartridge'>
+          <br>
+          <br>
+          <h4>Setting up Alcohol Cartridge</h4>
+        </div>
+
+        <p>Get the Alcohol Container. Remove Storage Cap from 8020A by turning counter-clockwise.</p>
+
+        <div class='grid even'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-get-alcohol-container.png" alt='Get Alcohol Container'>
+            <figcaption>Get Alcohol Container</figcaption>
+          </figure>
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-remove-storage-cap.png" alt='Remove Storage Cap'>
+            <figcaption>Remove Storage Cap</figcaption>
+          </figure>
+        </div>
+
+        <p>Remove Alcohol Cartridge from its container by turning counter-clockwise. Then let the excess alcohol drip onto the sides of the container. Then place Alcohol Cartridge Into 8020a. Insert all the way and then turn clockwise to lock it:
+        </p>
+
+
+        <div class='grid even'>
+
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-alcohol-cartridge.png" alt='Alcohol Cartridge'>
+            <figcaption>Alcohol Cartridge</figcaption>
+          </figure>
+
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-place-alcohol-cartridge-into-8020a.png" alt='Place Alcohol Cartridge Into 8020a'>
+            <figcaption>Alcohol Cartridge Placed Into 8020a</figcaption>
+          </figure>
+
+        </div>
+
+        <p>Place the Storage Cap onto the Alcohol container. Rotate clockwise to seal:</p>
+
+        <div class='grid even'>
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-place-storage-cap-on-alcohol-container.png" alt='Place Storage Cap On Alcohol Container'>
+            <figcaption>Place Storage Cap On Alcohol Container</figcaption>
+          </figure>
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-clockwise-seal.png" alt='Clockwise Seal'>
+            <figcaption>Clockwise Seal</figcaption>
+          </figure>
+
+        </div>
+
+        <div id='connecting-the-8020a-and-8095'>
+          <br>
+          <br>
+          <h4>Connecting the 8020A and the 8095</h4>
+        </div>
+
+        <p>Plug the N95 Companion Silver port To the 8020A Silver port:</p>
+
+        <figure>
+          <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-plug-silver-to-silver.png" alt='Plug Silver To Silver'>
+          <figcaption>Plug Silver To Silver</figcaption>
+        </figure>
+
+        <p>At the back, connect the two devices via the telephone cable. Plug all the way in until you hear a clicking sound:</p>
+        <div class='grid even'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-plug-back.png" alt='Connect the two devices via the telephone cable'>
+            <figcaption>Back view, with the two devices connected via telephone cable</figcaption>
+          </figure>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-plug-back-all-the-way.png" alt='Plugged all the way in'>
+            <figcaption>Plugged all the way in</figcaption>
+          </figure>
+        </div>
+
+
+        <p>Get the power adapter for the TSI 8020A:</p>
+
+        <div class='grid even'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-power-adapter.png" alt='Power Adapter'>
+            <figcaption>Power Adapter</figcaption>
+          </figure>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-connect-power-adapter-and-cord.png" alt='Connect Power Adapter And Cord'>
+            <figcaption>Connect Power Adapter And Cord</figcaption>
+          </figure>
+        </div>
+
+        <p>Plug Barrel Jack of Power Adapter into 8020A</p>
+
+        <figure>
+          <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-plug-barrel-jack.png" alt='Plug Barrel Jack'>
+          <figcaption>Plug Barrel Jack</figcaption>
+        </figure>
+
+        <div id='setup-n95-companion-pendant'>
+          <br>
+          <br>
+          <h4>Setting up N95 Companion Pendant</h4>
+        </div>
+
+        <p>N95 Companion Pendant. Connect the N95 Companion Pendant to the N95 Companion by attaching the blue connector and the sampling tube like so:</p>
+
+
+        <div class='grid even'>
+        <figure>
+          <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-n95-companion-pendant.png" alt='N95 Companion Pendant'>
+          <figcaption>N95 Companion Pendant</figcaption>
+        </figure>
+
+        <figure>
+          <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-attach-two-plugs-to-n95-companion.png" alt='Attach Two Plugs To N95 Companion'>
+          <figcaption>Attach Two Plugs To N95 Companion</figcaption>
+        </figure>
+
+        </div>
+
+        <div id='setup-aerosol-generator'>
+          <br>
+          <br>
+          <h4>Setting up the Aerosol Generator</h4>
+        </div>
+
+        <p>Extract the Salt Reservoir container and the aerosol generator. Add tap water to the fill line, and then add some salt, preferably kosher salt (just NaCl). Mix the solution so that the salt dissolves. Attach Salt Solution Container To Humidifier and then rotate to seal the two together:</p>
+
+        <div class='grid even'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-salt-solution-reservoir.png" alt='Salt Solution Reservoir'>
+            <figcaption>Salt Solution Reservoir</figcaption>
+          </figure>
+
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-attach-salt-solution-container-to-humidifier.png" alt='Attach Salt Solution Container To Humidifier'>
+            <figcaption>Attach Salt Solution Container To Humidifier</figcaption>
+          </figure>
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-plug-humidifier.png" alt='Plug Humidifier'>
+            <figcaption>Plug Humidifier</figcaption>
+          </figure>
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-humidifier-plug-to-wall-socket-and-turn-on.png" alt='Humidifier Plug To Wall Socket And Turn On'>
+            <figcaption>Humidifier Plug To Wall Socket And Turn On</figcaption>
+          </figure>
+        </div>
+
+        <div id='turning-on-the-portacount'>
+          <br>
+          <br>
+          <h4>Turning on the PortaCount</h4>
+        </div>
+
+        <p>Turn On by pressing the On/Off button. You should see a countdown. After waiting a minute, you should see something like so:</p>
+
+        <div class='grid even'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-turn-on.png" alt='Turn On'>
+            <figcaption>Turn On</figcaption>
+          </figure>
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-after-waiting-a-minute.png" alt='After Waiting A Minute'>
+            <figcaption>After Waiting A Minute</figcaption>
+          </figure>
+        </div>
+
+        <p>Switch to Count Mode by pressing the COUNT button. <strong>If the value on the screen is less than 70 particles per cubic centimeter, then the counts are way too low. You'll need to run the aerosol generator, and wait until the level is way above that limit</strong>.</p>
+
+        <figure>
+          <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-count-mode-low.png" alt='Count Mode Low'>
+          <figcaption>Ambient Count Too Low</figcaption>
+        </figure>
+
+
+        <div id='daily-checks'>
+          <br>
+          <br>
+          <h4>Daily Checks</h4>
+        </div>
+
+        <p>Once you have way over 70 particles / cubic centimeter, you could run the Daily Checks to ensure that the fit factors that you're getting from the PortaCount are valid.</p>
+
+
+        <div class='grid even'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-daily-check-zero-check-filter.png" alt='Daily Check Zero Check Filter'>
+            <figcaption>Daily Check Zero Check Filter</figcaption>
+          </figure>
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-zero-check-connected-to-mask-sample-tube.png" alt='Zero Check Connected To Mask Sample Tube'>
+            <figcaption>Zero Check Connected To Mask Sample Tube</figcaption>
+          </figure>
+        </div>
+
+        <p>You should get 0.00 particles per cubic centimeter. Switch to the Fit Test mode by clicking on the button. Then press Start. After a minute, you should get a fit factor of 200, the highest that can be detected by the PortaCount:</p>
+
+
+        <div class='grid even'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-should-get-0-count-while-using-zero-check-filter.png" alt='Should Get 0 Count While Using Zero Check Filter'>
+            <figcaption>Should Get 0 Count While Using Zero Check Filter</figcaption>
+          </figure>
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-zero-check-fit-test-waiting.png" alt='Zero Check Fit Test Waiting'>
+            <figcaption>Zero Check Fit Test Waiting</figcaption>
+          </figure>
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-zero-check-gives-highest-score-possible-of-200.png" alt='Zero Check Gives Highest Score Possible Of 200'>
+            <figcaption>Zero Check Gives Highest Score Possible Of 200</figcaption>
+          </figure>
+        </div>
+
+        <p>Wear N95 Companion Pendant</p>
+
+        <div id='ready-for-testing'>
+          <br>
+          <br>
+          <h4>Ready for Testing</h4>
+        </div>
+
+        <p>Once the Daily Checks pass, you are now ready to test masks on your face. Go ahead and wear the N95 Pendant.</p>
+
+        <div class='grid even'>
+
+        <figure>
+          <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-wear-n95-companion-pendant.png" alt='Wear N95 Companion Pendant'>
+          <figcaption>Wear N95 Companion Pendant</figcaption>
+        </figure>
+
+        <figure>
+          <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-n95-pendant-tighten.png" alt='N95 Pendant Tighten'>
+          <figcaption>N95 Pendant Tighten</figcaption>
+        </figure>
+
+        <figure>
+          <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-attach-mask-sample-to-mask-probe.png" alt='Attach Mask Sample Tube To Mask Probe'>
+          <figcaption>Attach Mask Sample Tube To Mask Probe</figcaption>
+        </figure>
+
+        <figure>
+          <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-don-respirator.png" alt='Don Respirator'>
+          <figcaption>Don Respirator</figcaption>
+        </figure>
+
+        <figure>
+          <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-n95-pendant-ensure-ambient-sample-tube-unblocked.png" alt='N95 Pendant Ensure Ambient Sample Tube Unblocked'>
+          <figcaption>N95 Pendant Ensure Ambient Sample Tube Unblocked</figcaption>
+        </figure>
+        </div>
+
+        <p>While the PortaCount is on Fit Test mode, press the Start button and then do an exercise from the protocol (e.g. Bend over, Head side-to-side, Head up-and-down, Talking)</p>
+
+        <figure>
+          <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-run-fit-test-got-31-ff.png" alt='Run Fit Test Got 31 Ff'>
+          <figcaption>Run Fit Test Got 31 Ff</figcaption>
+        </figure>
+
+        <p>Repeat for each of the exercises to complete the protocol for one mask. Record each result through the Breathesafe app, either one by one — see <router-link :to="tocPath('adding-a-fit-test')"> Adding a Fit Test </router-link> — or in bulk (see <router-link :to="tocPath('importing-fit-tests-in-bulk')"> Importing Fit Tests in Bulk).</router-link>
+        </p>
+
+        <p>Repeat the testing for other masks by first removing the mask sampling tube from the probe:</p>
+
+        <div class='grid even'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-remove-tube-1.png" alt='Remove Tube 1'>
+            <figcaption>Remove Tube 1</figcaption>
+          </figure>
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-remove-tube-2.png" alt='Remove Tube 2'>
+            <figcaption>Remove Tube 2</figcaption>
+          </figure>
+
+        </div>
+
+
+        <div id='putting-things-back'>
+          <br>
+          <br>
+          <h4>Putting things back</h4>
+        </div>
+
+        <p>When done, swap the Storage Cap with the Alcohol Cartridge. Make sure they are fastened correctly.</p>
+
+        <div class='grid even'>
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-when-done-get-ready-to-swap-storage-cap-and-alcohol-cartridge.png" alt='When Done Get Ready To Swap Storage Cap And Alcohol Cartridge'>
+            <figcaption>When Done Get Ready To Swap Storage Cap And Alcohol Cartridge</figcaption>
+          </figure>
+
+          <figure>
+            <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-put-items-back-to-luggage.png" alt='Put Items Back To Luggage'>
+            <figcaption>Put Items Back To Luggage</figcaption>
+          </figure>
+        </div>
 
 
         <div id='running-a-qualitative-fit-test'>
