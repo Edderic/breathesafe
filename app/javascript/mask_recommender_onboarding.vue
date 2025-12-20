@@ -853,6 +853,37 @@
           </figure>
         </div>
 
+        <div id='adding-fit-tests-comfort'>
+          <br>
+          <br>
+          <h4>Comfort Questions</h4>
+        </div>
+        <p>The user will then be asked questions about comfort:</p>
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-comfort.png" alt='Comfort questions'>
+            </router-link>
+            <figcaption>Adding a Fit Test: Comfort Questions</figcaption>
+          </figure>
+        </div>
+
+        <div id='fit-testing-results'>
+          <br>
+          <br>
+          <h4>Fit Testing Results</h4>
+        </div>
+        <p>After that, you'll be taken to the Fit Tests page. After doing this for many masks, you'll see your results displayed like so:</p>
+
+        <div class='center'>
+          <figure>
+            <router-link :to='{name: "NewFitTest"}'>
+              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/fit-test-results.png" alt='Fit Test Results'>
+            </router-link>
+            <figcaption>Fit Test Results</figcaption>
+          </figure>
+        </div>
+
         <div id='running-a-quantitative-fit-test'>
           <br>
           <br>
@@ -1577,38 +1608,6 @@
         The fit test solution is 100x more concentrated than the sensitivity solution. Succeeding in tasting the sensitivity solution, while wearing a mask and not detecting the 100x stronger (fit test) solution for a particular exercise implies that the mask has a fit factor of at least 100 for that particular instance of an exercise.  However, there are several exercises. To pass the qualitative fit test, the tester should not be able to taste the fit test solution through <em>all</em> the exercises. If the tester tastes the fit test solution midway, that is considered a failure (i.e. the overall fit factor is less than 100.)
         </p>
 
-
-
-        <div id='adding-fit-tests-comfort'>
-          <br>
-          <br>
-          <h4>Adding Respirator Users: Comfort Questions</h4>
-        </div>
-        <p>The user will then be asked questions about comfort:</p>
-        <div class='center'>
-          <figure>
-            <router-link :to='{name: "NewFitTest"}'>
-              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/add-fit-test-comfort.png" alt='Comfort questions'>
-            </router-link>
-            <figcaption>Adding a Fit Test: Comfort Questions</figcaption>
-          </figure>
-        </div>
-
-        <div id='fit-testing-results'>
-          <br>
-          <br>
-          <h4>Fit Testing Results</h4>
-        </div>
-        <p>After that, you'll be taken to the Fit Tests page. After doing this for many masks, you'll see your results displayed like so:</p>
-
-        <div class='center'>
-          <figure>
-            <router-link :to='{name: "NewFitTest"}'>
-              <img src="https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/fit-test-results.png" alt='Fit Test Results'>
-            </router-link>
-            <figcaption>Fit Test Results</figcaption>
-          </figure>
-        </div>
 
         <div id='importing-fit-tests-in-bulk'>
           <br>
