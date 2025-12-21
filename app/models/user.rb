@@ -150,7 +150,7 @@ class User < ApplicationRecord
 
       # Anonymize email and mark as deleted
       update!(
-        email: "deleted_user_#{id}@deleted.local",
+        email: "deleted_user_#{SecureRandom.uuid}@example.invalid",
         deleted_at: Time.current
       )
     end
