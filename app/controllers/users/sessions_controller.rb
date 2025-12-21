@@ -3,11 +3,12 @@
 module Users
   # Controller for Sessions
   class SessionsController < DeviseController
-    prepend_before_action :require_no_authentication, only: %i[new create destroy get_current_user]
+    prepend_before_action :require_no_authentication, only: %i[new create destroy]
     prepend_before_action :allow_params_authentication!, only: :create
     prepend_before_action(only: %i[create destroy]) { request.env['devise.skip_timeout'] = true }
 
     skip_before_action :verify_authenticity_token, only: %i[destroy create]
+    before_action :authenticate_user!, only: [:get_current_user]
 
     def get_current_user
       respond_to do |format|
