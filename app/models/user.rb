@@ -148,9 +148,11 @@ class User < ApplicationRecord
       # Delete this user's data
       soft_delete_user_data!
 
-      # Anonymize email and mark as deleted
+      # Anonymize email and unconfirmed_email, then mark as deleted
+      anonymized_email = "deleted_user_#{SecureRandom.uuid}@example.invalid"
       update!(
-        email: "deleted_user_#{SecureRandom.uuid}@example.invalid",
+        email: anonymized_email,
+        unconfirmed_email: nil,
         deleted_at: Time.current
       )
     end
