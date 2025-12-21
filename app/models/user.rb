@@ -1,11 +1,23 @@
 # frozen_string_literal: true
 
 class User < ApplicationRecord
+  acts_as_paranoid
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
          :confirmable, :lockable, :timeoutable, :trackable
+
+  # Prevent deleted users from logging in
+  def active_for_authentication?
+    super && !deleted?
+  end
+
+  # Custom message for deleted accounts
+  def inactive_message
+    deleted? ? :deleted_account : super
+  end
 
   # Validate consent_form_version_accepted if present (legacy field)
   validate :consent_form_version_accepted_format, if: -> { consent_form_version_accepted.present? }
@@ -119,5 +131,46 @@ class User < ApplicationRecord
     Rails.logger.error("Failed to send #{notification} email to #{email}: #{e.class}: #{e.message}")
     Rails.logger.error(e.backtrace.join("\n")) if e.backtrace
     # Don't re-raise - allow user registration to succeed even if email fails
+  end
+
+  # Soft delete user account - anonymizes PII while keeping consent records
+  def soft_delete!
+    transaction do
+      # Delete all managed users where this user is the manager
+      ManagedUser.where(manager_id: id).find_each do |mu|
+        managed_user = User.find_by(id: mu.managed_id)
+        next unless managed_user
+
+        # Delete the managed user's data
+        managed_user.soft_delete_user_data!
+      end
+
+      # Delete this user's data
+      soft_delete_user_data!
+
+      # Anonymize email and mark as deleted
+      update!(
+        email: "deleted_user_#{id}@deleted.local",
+        deleted_at: Time.current
+      )
+    end
+  end
+
+  # Helper method to delete user data (used by soft_delete! for both manager and managed users)
+  def soft_delete_user_data!
+    # Delete profile
+    profile&.destroy
+
+    # Delete facial measurements and related fit tests
+    facial_measurements.each do |fm|
+      FitTest.where(facial_measurement_id: fm.id).destroy_all
+      fm.destroy
+    end
+
+    # Delete bulk fit test imports
+    bulk_fit_tests_imports.destroy_all
+
+    # Delete managed user relationships
+    ManagedUser.where(managed_id: id).destroy_all
   end
 end

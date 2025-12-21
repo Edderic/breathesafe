@@ -20,6 +20,9 @@ Rails.application.routes.draw do
   post 'users/consent', to: 'users/consents#create'
   get 'users', to: 'users#index'
 
+  # Account deletion
+  delete 'users/account', to: 'users/accounts#destroy'
+
   post 'events/external/:api_token', to: 'events#external_create'
 
   post 'events', to: 'events#create'
