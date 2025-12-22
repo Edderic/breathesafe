@@ -102,7 +102,41 @@
 
         <!-- Pass Rates by Mask -->
         <div class="chart-container-full">
-          <h3>Pass Rates by Mask (Top 10)</h3>
+          <h3>Pass Rates by Mask</h3>
+
+          <!-- Sorting Controls -->
+          <div class="sort-controls">
+            <div class="sort-group">
+              <label for="maskSortBy">Sort by:</label>
+              <select id="maskSortBy" v-model="maskSortBy" @change="onSortChange" class="sort-select">
+                <option value="pass_rate">Pass Rate</option>
+                <option value="sample_size">Sample Size</option>
+                <option value="name">Mask Name</option>
+              </select>
+            </div>
+
+            <div class="sort-group">
+              <label for="maskSortOrder">Order:</label>
+              <select id="maskSortOrder" v-model="maskSortOrder" @change="onSortChange" class="sort-select">
+                <option value="desc">{{ maskSortBy === 'name' ? 'Z-A' : 'High to Low' }}</option>
+                <option value="asc">{{ maskSortBy === 'name' ? 'A-Z' : 'Low to High' }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <Pagination
+            :current-page="maskCurrentPage"
+            :per-page="maskPerPage"
+            :total-count="totalMasks"
+            item-name="masks"
+            @page-change="onMaskPageChange"
+          />
+
+          <div class="sample-size-note">
+            Sample sizes shown in parentheses. Lighter colors indicate smaller sample sizes.
+          </div>
+
           <div class="chart-wrapper">
             <canvas ref="passRateByMaskChart"></canvas>
           </div>
@@ -112,6 +146,9 @@
         <div class="charts-row">
           <div class="chart-container">
             <h3>Pass Rates by Strap Type</h3>
+            <div class="sample-size-note">
+              Sample sizes in parentheses. Lighter = smaller sample.
+            </div>
             <div class="chart-wrapper">
               <canvas ref="passRateByStrapChart"></canvas>
             </div>
@@ -119,6 +156,9 @@
 
           <div class="chart-container">
             <h3>Pass Rates by Style</h3>
+            <div class="sample-size-note">
+              Sample sizes in parentheses. Lighter = smaller sample.
+            </div>
             <div class="chart-wrapper">
               <canvas ref="passRateByStyleChart"></canvas>
             </div>
@@ -131,18 +171,76 @@
 
 <script>
 import { Chart, registerables } from 'chart.js';
+import Pagination from './pagination.vue';
 
 Chart.register(...registerables);
 
 export default {
   name: 'Dashboard',
+  components: {
+    Pagination
+  },
   data() {
     return {
       stats: null,
       loading: true,
       error: null,
-      charts: {}
+      charts: {},
+      // Pagination and sorting for Pass Rates by Mask
+      maskCurrentPage: 1,
+      maskPerPage: 10,
+      maskSortBy: 'pass_rate', // 'pass_rate', 'sample_size', 'name'
+      maskSortOrder: 'desc' // 'asc' or 'desc'
     };
+  },
+  computed: {
+    sortedMasks() {
+      if (!this.stats?.fit_tests?.pass_rates?.by_mask) return [];
+
+      const masks = [...this.stats.fit_tests.pass_rates.by_mask];
+
+      // Sort based on current sort settings
+      masks.sort((a, b) => {
+        let compareA, compareB;
+
+        switch (this.maskSortBy) {
+          case 'pass_rate':
+            compareA = a.pass_rate;
+            compareB = b.pass_rate;
+            break;
+          case 'sample_size':
+            compareA = a.total;
+            compareB = b.total;
+            break;
+          case 'name':
+            compareA = a.name.toLowerCase();
+            compareB = b.name.toLowerCase();
+            // For strings, handle ascending/descending differently
+            if (this.maskSortOrder === 'asc') {
+              return compareA.localeCompare(compareB);
+            } else {
+              return compareB.localeCompare(compareA);
+            }
+        }
+
+        // For numbers
+        if (this.maskSortOrder === 'asc') {
+          return compareA - compareB;
+        } else {
+          return compareB - compareA;
+        }
+      });
+
+      return masks;
+    },
+    paginatedMasks() {
+      const start = (this.maskCurrentPage - 1) * this.maskPerPage;
+      const end = start + this.maskPerPage;
+      return this.sortedMasks.slice(start, end);
+    },
+    totalMasks() {
+      return this.sortedMasks.length;
+    }
   },
   mounted() {
     this.loadDashboardData();
@@ -349,30 +447,33 @@ export default {
         return;
       }
 
-      // Take top 10 masks by total tests
-      const byMask = this.stats.fit_tests.pass_rates.by_mask || [];
+      const masks = this.paginatedMasks;
 
-      if (byMask.length === 0) {
+      if (masks.length === 0) {
         console.warn('No mask pass rate data available');
         return;
       }
 
-      console.log('Rendering pass rate by mask chart with', byMask.length, 'masks');
+      console.log('Rendering pass rate by mask chart with', masks.length, 'masks');
 
-      const topMasks = byMask
-        .sort((a, b) => b.total - a.total)
-        .slice(0, 10);
+      // Color bars based on sample size - lighter for smaller samples
+      const colors = masks.map(m => this.getColorBySampleSize(m.total, '#2196F3'));
+
+      // Destroy existing chart if it exists
+      if (this.charts.passRateByMask) {
+        this.charts.passRateByMask.destroy();
+      }
 
       this.charts.passRateByMask = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: topMasks.map(m => this.truncateLabel(m.name, 40)),
+          labels: masks.map(m => this.truncateLabel(m.name, 40)),
           datasets: [{
             label: 'Pass Rate (%)',
-            data: topMasks.map(m => m.pass_rate),
-            backgroundColor: '#2196F3',
+            data: masks.map(m => m.pass_rate),
+            backgroundColor: colors,
             borderWidth: 1,
-            borderColor: '#1976D2'
+            borderColor: colors.map(c => this.darkenColor(c, 0.2))
           }]
         },
         options: {
@@ -397,16 +498,31 @@ export default {
             tooltip: {
               callbacks: {
                 label: (context) => {
-                  const mask = topMasks[context.dataIndex];
+                  const mask = masks[context.dataIndex];
                   return [
                     `Pass Rate: ${mask.pass_rate}%`,
-                    `Passed: ${mask.passed}/${mask.total}`
+                    `Passed: ${mask.passed}/${mask.total}`,
+                    `Sample Size: ${mask.total}`
                   ];
                 }
               }
+            },
+            datalabels: {
+              anchor: 'end',
+              align: 'end',
+              formatter: (value, context) => {
+                const mask = masks[context.dataIndex];
+                return `(${mask.total})`;
+              },
+              color: '#555',
+              font: {
+                size: 11,
+                weight: 'bold'
+              }
             }
           }
-        }
+        },
+        plugins: [this.createDataLabelsPlugin(masks)]
       });
 
       console.log('Pass rate by mask chart rendered successfully');
@@ -427,6 +543,9 @@ export default {
 
       console.log('Rendering pass rate by strap chart with', strapData.length, 'strap types');
 
+      // Color bars based on sample size - lighter for smaller samples
+      const colors = strapData.map(s => this.getColorBySampleSize(s.total, '#FF9800'));
+
       this.charts.passRateByStrap = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -434,9 +553,9 @@ export default {
           datasets: [{
             label: 'Pass Rate (%)',
             data: strapData.map(s => s.pass_rate),
-            backgroundColor: '#FF9800',
+            backgroundColor: colors,
             borderWidth: 1,
-            borderColor: '#F57C00'
+            borderColor: colors.map(c => this.darkenColor(c, 0.2))
           }]
         },
         options: {
@@ -463,13 +582,15 @@ export default {
                   const strap = strapData[context.dataIndex];
                   return [
                     `Pass Rate: ${strap.pass_rate}%`,
-                    `Passed: ${strap.passed}/${strap.total}`
+                    `Passed: ${strap.passed}/${strap.total}`,
+                    `Sample Size: ${strap.total}`
                   ];
                 }
               }
             }
           }
-        }
+        },
+        plugins: [this.createDataLabelsPlugin(strapData)]
       });
 
       console.log('Pass rate by strap chart rendered successfully');
@@ -490,6 +611,9 @@ export default {
 
       console.log('Rendering pass rate by style chart with', styleData.length, 'styles');
 
+      // Color bars based on sample size - lighter for smaller samples
+      const colors = styleData.map(s => this.getColorBySampleSize(s.total, '#9C27B0'));
+
       this.charts.passRateByStyle = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -497,9 +621,9 @@ export default {
           datasets: [{
             label: 'Pass Rate (%)',
             data: styleData.map(s => s.pass_rate),
-            backgroundColor: '#9C27B0',
+            backgroundColor: colors,
             borderWidth: 1,
-            borderColor: '#7B1FA2'
+            borderColor: colors.map(c => this.darkenColor(c, 0.2))
           }]
         },
         options: {
@@ -526,20 +650,121 @@ export default {
                   const style = styleData[context.dataIndex];
                   return [
                     `Pass Rate: ${style.pass_rate}%`,
-                    `Passed: ${style.passed}/${style.total}`
+                    `Passed: ${style.passed}/${style.total}`,
+                    `Sample Size: ${style.total}`
                   ];
                 }
               }
             }
           }
-        }
+        },
+        plugins: [this.createDataLabelsPlugin(styleData)]
       });
 
       console.log('Pass rate by style chart rendered successfully');
     },
+    onMaskPageChange(page) {
+      this.maskCurrentPage = page;
+      // Re-render the mask chart with new page data
+      this.$nextTick(() => {
+        this.renderPassRateByMaskChart();
+      });
+    },
+    onSortChange() {
+      // Reset to first page when sort changes
+      this.maskCurrentPage = 1;
+      // Re-render the mask chart with new sort
+      this.$nextTick(() => {
+        this.renderPassRateByMaskChart();
+      });
+    },
     truncateLabel(label, maxLength) {
       if (!label) return 'Unknown';
       return label.length > maxLength ? label.substring(0, maxLength) + '...' : label;
+    },
+    getColorBySampleSize(sampleSize, baseColor) {
+      // Use lighter colors for smaller sample sizes
+      // Thresholds: n < 10 (very light), n < 30 (light), n < 50 (medium), n >= 50 (full color)
+      if (sampleSize < 10) {
+        return this.lightenColor(baseColor, 0.6); // Very light
+      } else if (sampleSize < 30) {
+        return this.lightenColor(baseColor, 0.4); // Light
+      } else if (sampleSize < 50) {
+        return this.lightenColor(baseColor, 0.2); // Medium
+      } else {
+        return baseColor; // Full color
+      }
+    },
+    lightenColor(color, amount) {
+      // Convert hex to RGB
+      const hex = color.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+
+      // Lighten by moving towards white
+      const newR = Math.round(r + (255 - r) * amount);
+      const newG = Math.round(g + (255 - g) * amount);
+      const newB = Math.round(b + (255 - b) * amount);
+
+      // Convert back to hex
+      return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+    },
+    darkenColor(color, amount) {
+      // Convert hex to RGB
+      const hex = color.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+
+      // Darken by moving towards black
+      const newR = Math.round(r * (1 - amount));
+      const newG = Math.round(g * (1 - amount));
+      const newB = Math.round(b * (1 - amount));
+
+      // Convert back to hex
+      return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+    },
+    createDataLabelsPlugin(data) {
+      // Custom plugin to draw sample size labels at the end of bars
+      return {
+        id: 'sampleSizeLabels',
+        afterDatasetsDraw: (chart) => {
+          const ctx = chart.ctx;
+
+          chart.data.datasets.forEach((dataset, datasetIndex) => {
+            const meta = chart.getDatasetMeta(datasetIndex);
+
+            meta.data.forEach((bar, index) => {
+              const item = data[index];
+              const sampleSize = `(${item.total})`;
+
+              // Set font
+              ctx.font = 'bold 11px Arial';
+              ctx.fillStyle = '#555';
+              ctx.textAlign = 'left';
+              ctx.textBaseline = 'middle';
+
+              // Calculate position
+              let x, y;
+
+              if (chart.config.options.indexAxis === 'y') {
+                // Horizontal bar chart
+                x = bar.x + 5; // 5px padding from end of bar
+                y = bar.y;
+              } else {
+                // Vertical bar chart
+                x = bar.x;
+                y = bar.y - 5; // 5px above bar
+                ctx.textAlign = 'center';
+              }
+
+              // Draw the label
+              ctx.fillText(sampleSize, x, y);
+            });
+          });
+        }
+      };
     }
   }
 };
@@ -689,6 +914,58 @@ export default {
   margin: 0.5rem 0;
 }
 
+.sample-size-note {
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.sort-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.sort-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort-group label {
+  font-weight: 600;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.sort-select {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  color: #333;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.sort-select:hover {
+  border-color: #2196F3;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
 @media (max-width: 768px) {
   .dashboard-container {
     padding: 1rem;
@@ -708,6 +985,21 @@ export default {
 
   .stat-value {
     font-size: 2rem;
+  }
+
+  .sort-controls {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .sort-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .sort-select {
+    flex: 1;
+    max-width: 200px;
   }
 }
 </style>
