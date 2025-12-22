@@ -42,6 +42,7 @@ import Analytics from '../analytics.vue'
 import App from '../app.vue';
 import AddMeasurements from '../add_measurements.vue';
 import ConsentForm from '../consent_form.vue'
+import Dashboard from '../dashboard.vue'
 import FAQs from '../faqs.vue';
 import Disclaimer from '../disclaimer.vue';
 import Venues from '../map_events.vue'
@@ -84,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // We'll talk about nested routes later.
   const routes = [
     { path: '/', component: Landing, name: 'Landing' },
+    { path: '/dashboard', component: Dashboard, name: 'Dashboard' },
     { path: '/respirator_users', component: RespiratorUsers, name: 'RespiratorUsers' },
     { path: '/masks', component: Masks, name: 'Masks' },
     { path: '/masks/new', component: Mask, name: 'NewMask' },
