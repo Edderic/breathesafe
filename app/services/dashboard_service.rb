@@ -98,8 +98,8 @@ class DashboardService
       # Load facial measurements for these users
       facial_measurements = FacialMeasurement.where(user_id: user_ids_with_fit_tests)
 
-      # Old set columns
-      old_columns = %w[
+      # Traditional measurement columns
+      traditional_columns = %w[
         face_width
         face_length
         bitragion_subnasale_arc
@@ -108,35 +108,49 @@ class DashboardService
         nose_bridge_height
       ]
 
-      users_with_old = 0
-      users_with_new = 0
-      users_with_both = 0
+      # Initialize counters (non-mutually exclusive)
+      users_with_incomplete_traditional = 0
+      users_with_complete_traditional = 0
+      users_with_arkit = 0
+      users_with_both_complete = 0
+      users_with_no_measurements = 0
 
       user_ids_with_fit_tests.each do |user_id|
         user_measurements = facial_measurements.select { |fm| fm.user_id == user_id }
-        next if user_measurements.empty?
 
-        # Check if user has all old measurements
-        has_old = user_measurements.any? do |fm|
-          old_columns.all? { |col| fm.send(col).present? }
+        # Check if user has complete traditional measurements (all 6)
+        has_complete_traditional = user_measurements.any? do |fm|
+          traditional_columns.all? { |col| fm.send(col).present? }
         end
 
-        # Check if user has arkit measurements
-        has_new = user_measurements.any? { |fm| fm.arkit.present? }
-
-        if has_old && has_new
-          users_with_both += 1
-        elsif has_old
-          users_with_old += 1
-        elsif has_new
-          users_with_new += 1
+        # Check if user has any traditional measurements (1-6)
+        has_any_traditional = user_measurements.any? do |fm|
+          traditional_columns.any? { |col| fm.send(col).present? }
         end
+
+        # Check if user has incomplete traditional (has some but not all)
+        has_incomplete_traditional = has_any_traditional && !has_complete_traditional
+
+        # Check if user has ARKit measurements
+        has_arkit = user_measurements.any? { |fm| fm.arkit.present? }
+
+        # Check if user has no measurements at all
+        has_no_measurements = !has_any_traditional && !has_arkit
+
+        # Count in each applicable category (non-mutually exclusive)
+        users_with_incomplete_traditional += 1 if has_incomplete_traditional || (!has_any_traditional && !has_arkit)
+        users_with_complete_traditional += 1 if has_complete_traditional
+        users_with_arkit += 1 if has_arkit
+        users_with_both_complete += 1 if has_complete_traditional && has_arkit
+        users_with_no_measurements += 1 if has_no_measurements
       end
 
       {
-        users_with_old_measurements: users_with_old,
-        users_with_new_measurements: users_with_new,
-        users_with_both: users_with_both
+        users_with_incomplete_traditional: users_with_incomplete_traditional,
+        users_with_complete_traditional: users_with_complete_traditional,
+        users_with_arkit: users_with_arkit,
+        users_with_both_complete: users_with_both_complete,
+        users_with_no_measurements: users_with_no_measurements
       }
     end
 

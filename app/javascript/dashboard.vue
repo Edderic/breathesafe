@@ -73,19 +73,30 @@
         <div class="charts-row">
           <div class="chart-container">
             <h3>Facial Measurements by Type</h3>
+            <div class="sample-size-note">
+              Note: Categories are not mutually exclusive. Users may be counted in multiple categories.
+            </div>
             <canvas ref="facialMeasurementsChart"></canvas>
             <div class="chart-legend">
               <div class="legend-item">
+                <span class="legend-color" style="background-color: #f44336;"></span>
+                <span>Incomplete Traditional: {{ stats.fit_tests.facial_measurements.users_with_incomplete_traditional }}</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color" style="background-color: #4CAF50;"></span>
+                <span>Complete Traditional: {{ stats.fit_tests.facial_measurements.users_with_complete_traditional }}</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color" style="background-color: #2196F3;"></span>
+                <span>Has ARKit: {{ stats.fit_tests.facial_measurements.users_with_arkit }}</span>
+              </div>
+              <div class="legend-item">
                 <span class="legend-color" style="background-color: #9C27B0;"></span>
-                <span>Old Set Only: {{ stats.fit_tests.facial_measurements.users_with_old_measurements }}</span>
+                <span>Both Complete: {{ stats.fit_tests.facial_measurements.users_with_both_complete }}</span>
               </div>
               <div class="legend-item">
-                <span class="legend-color" style="background-color: #00BCD4;"></span>
-                <span>ARKit Only: {{ stats.fit_tests.facial_measurements.users_with_new_measurements }}</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color" style="background-color: #8BC34A;"></span>
-                <span>Both: {{ stats.fit_tests.facial_measurements.users_with_both }}</span>
+                <span class="legend-color" style="background-color: #757575;"></span>
+                <span>No Measurements: {{ stats.fit_tests.facial_measurements.users_with_no_measurements }}</span>
               </div>
             </div>
           </div>
@@ -379,15 +390,17 @@ export default {
       this.charts.facialMeasurements = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: ['Old Set', 'ARKit', 'Both'],
+          labels: ['Incomplete\nTraditional', 'Complete\nTraditional', 'Has\nARKit', 'Both\nComplete', 'No\nMeasurements'],
           datasets: [{
             label: 'Users',
             data: [
-              this.stats.fit_tests.facial_measurements.users_with_old_measurements,
-              this.stats.fit_tests.facial_measurements.users_with_new_measurements,
-              this.stats.fit_tests.facial_measurements.users_with_both
+              this.stats.fit_tests.facial_measurements.users_with_incomplete_traditional,
+              this.stats.fit_tests.facial_measurements.users_with_complete_traditional,
+              this.stats.fit_tests.facial_measurements.users_with_arkit,
+              this.stats.fit_tests.facial_measurements.users_with_both_complete,
+              this.stats.fit_tests.facial_measurements.users_with_no_measurements
             ],
-            backgroundColor: ['#9C27B0', '#00BCD4', '#8BC34A'],
+            backgroundColor: ['#f44336', '#4CAF50', '#2196F3', '#9C27B0', '#757575'],
             borderWidth: 1,
             borderColor: '#fff'
           }]
@@ -406,6 +419,20 @@ export default {
           plugins: {
             legend: {
               display: false
+            },
+            tooltip: {
+              callbacks: {
+                afterLabel: (context) => {
+                  const labels = [
+                    'Has 1-5 traditional measurements or none',
+                    'Has all 6 traditional measurements',
+                    'Has ARKit data (regardless of traditional)',
+                    'Has all 6 traditional AND ARKit',
+                    'Has neither traditional nor ARKit'
+                  ];
+                  return labels[context.dataIndex];
+                }
+              }
             }
           }
         }
