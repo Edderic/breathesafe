@@ -103,19 +103,25 @@
         <!-- Pass Rates by Mask -->
         <div class="chart-container-full">
           <h3>Pass Rates by Mask (Top 10)</h3>
-          <canvas ref="passRateByMaskChart"></canvas>
+          <div class="chart-wrapper">
+            <canvas ref="passRateByMaskChart"></canvas>
+          </div>
         </div>
 
         <!-- Pass Rates by Strap Type -->
         <div class="charts-row">
           <div class="chart-container">
             <h3>Pass Rates by Strap Type</h3>
-            <canvas ref="passRateByStrapChart"></canvas>
+            <div class="chart-wrapper">
+              <canvas ref="passRateByStrapChart"></canvas>
+            </div>
           </div>
 
           <div class="chart-container">
             <h3>Pass Rates by Style</h3>
-            <canvas ref="passRateByStyleChart"></canvas>
+            <div class="chart-wrapper">
+              <canvas ref="passRateByStyleChart"></canvas>
+            </div>
           </div>
         </div>
       </section>
@@ -164,19 +170,44 @@ export default {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        this.stats = await response.json();
+        const data = await response.json();
 
-        // Wait for next tick to ensure refs are available
-        await this.$nextTick();
-        this.renderCharts();
+        // Debug logging
+        console.log('Dashboard stats loaded:', data);
+        console.log('Pass rates by mask:', data.fit_tests?.pass_rates?.by_mask);
+        console.log('Pass rates by strap:', data.fit_tests?.pass_rates?.by_strap_type);
+        console.log('Pass rates by style:', data.fit_tests?.pass_rates?.by_style);
+
+        // Set stats
+        this.stats = data;
       } catch (err) {
         this.error = err.message;
         console.error('Error loading dashboard data:', err);
       } finally {
         this.loading = false;
+
+        // Now that loading is false, the v-else block will render
+        // Wait for DOM to update, then render charts
+        await this.$nextTick();
+        console.log('After setting loading=false and nextTick');
+        console.log('passRateByMaskChart exists?', !!this.$refs.passRateByMaskChart);
+
+        if (this.stats && !this.error) {
+          // Give DOM a bit more time to fully render
+          setTimeout(() => {
+            console.log('About to render charts');
+            console.log('passRateByMaskChart exists now?', !!this.$refs.passRateByMaskChart);
+            this.renderCharts();
+          }, 100);
+        }
       }
     },
     renderCharts() {
+      console.log('renderCharts called');
+      console.log('Available refs:', Object.keys(this.$refs));
+      console.log('filtrationChart ref:', this.$refs.filtrationChart);
+      console.log('passRateByMaskChart ref:', this.$refs.passRateByMaskChart);
+
       this.renderFiltrationChart();
       this.renderBreathabilityChart();
       this.renderFacialMeasurementsChart();
@@ -313,17 +344,29 @@ export default {
     },
     renderPassRateByMaskChart() {
       const ctx = this.$refs.passRateByMaskChart;
-      if (!ctx) return;
+      if (!ctx) {
+        console.error('passRateByMaskChart canvas ref not found');
+        return;
+      }
 
       // Take top 10 masks by total tests
-      const topMasks = this.stats.fit_tests.pass_rates.by_mask
+      const byMask = this.stats.fit_tests.pass_rates.by_mask || [];
+
+      if (byMask.length === 0) {
+        console.warn('No mask pass rate data available');
+        return;
+      }
+
+      console.log('Rendering pass rate by mask chart with', byMask.length, 'masks');
+
+      const topMasks = byMask
         .sort((a, b) => b.total - a.total)
         .slice(0, 10);
 
       this.charts.passRateByMask = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: topMasks.map(m => this.truncateLabel(m.name, 30)),
+          labels: topMasks.map(m => this.truncateLabel(m.name, 40)),
           datasets: [{
             label: 'Pass Rate (%)',
             data: topMasks.map(m => m.pass_rate),
@@ -334,7 +377,7 @@ export default {
         },
         options: {
           responsive: true,
-          maintainAspectRatio: true,
+          maintainAspectRatio: false,
           indexAxis: 'y',
           scales: {
             x: {
@@ -365,12 +408,24 @@ export default {
           }
         }
       });
+
+      console.log('Pass rate by mask chart rendered successfully');
     },
     renderPassRateByStrapChart() {
       const ctx = this.$refs.passRateByStrapChart;
-      if (!ctx) return;
+      if (!ctx) {
+        console.error('passRateByStrapChart canvas ref not found');
+        return;
+      }
 
-      const strapData = this.stats.fit_tests.pass_rates.by_strap_type;
+      const strapData = this.stats.fit_tests.pass_rates.by_strap_type || [];
+
+      if (strapData.length === 0) {
+        console.warn('No strap type pass rate data available');
+        return;
+      }
+
+      console.log('Rendering pass rate by strap chart with', strapData.length, 'strap types');
 
       this.charts.passRateByStrap = new Chart(ctx, {
         type: 'bar',
@@ -386,7 +441,7 @@ export default {
         },
         options: {
           responsive: true,
-          maintainAspectRatio: true,
+          maintainAspectRatio: false,
           scales: {
             y: {
               beginAtZero: true,
@@ -416,12 +471,24 @@ export default {
           }
         }
       });
+
+      console.log('Pass rate by strap chart rendered successfully');
     },
     renderPassRateByStyleChart() {
       const ctx = this.$refs.passRateByStyleChart;
-      if (!ctx) return;
+      if (!ctx) {
+        console.error('passRateByStyleChart canvas ref not found');
+        return;
+      }
 
-      const styleData = this.stats.fit_tests.pass_rates.by_style;
+      const styleData = this.stats.fit_tests.pass_rates.by_style || [];
+
+      if (styleData.length === 0) {
+        console.warn('No style pass rate data available');
+        return;
+      }
+
+      console.log('Rendering pass rate by style chart with', styleData.length, 'styles');
 
       this.charts.passRateByStyle = new Chart(ctx, {
         type: 'bar',
@@ -437,7 +504,7 @@ export default {
         },
         options: {
           responsive: true,
-          maintainAspectRatio: true,
+          maintainAspectRatio: false,
           scales: {
             y: {
               beginAtZero: true,
@@ -467,6 +534,8 @@ export default {
           }
         }
       });
+
+      console.log('Pass rate by style chart rendered successfully');
     },
     truncateLabel(label, maxLength) {
       if (!label) return 'Unknown';
@@ -577,6 +646,16 @@ export default {
   color: #555;
   margin-bottom: 1rem;
   text-align: center;
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 400px;
+  width: 100%;
+}
+
+.chart-wrapper canvas {
+  max-height: 400px;
 }
 
 .chart-legend {

@@ -145,6 +145,9 @@ class DashboardService
       # Filter out fit tests without qlft_pass data
       fit_tests_with_pass_data = fit_tests_data.reject { |ft| ft['qlft_pass'].nil? }
 
+      Rails.logger.info "Dashboard: Total fit tests with pass data: #{fit_tests_with_pass_data.count}"
+      Rails.logger.info "Dashboard: Sample fit test data keys: #{fit_tests_with_pass_data.first&.keys&.inspect}"
+
       # Overall pass rate
       total_with_pass_data = fit_tests_with_pass_data.count
       total_passed = fit_tests_with_pass_data.count { |ft| [true, 't'].include?(ft['qlft_pass']) }
@@ -152,12 +155,15 @@ class DashboardService
 
       # Pass rates by mask
       by_mask = calculate_pass_rate_by_attribute(fit_tests_with_pass_data, 'mask_id', 'unique_internal_model_code')
+      Rails.logger.info "Dashboard: Pass rates by mask count: #{by_mask.count}"
 
       # Pass rates by strap type
       by_strap_type = calculate_pass_rate_by_attribute(fit_tests_with_pass_data, 'strap_type', 'strap_type')
+      Rails.logger.info "Dashboard: Pass rates by strap type count: #{by_strap_type.count}"
 
       # Pass rates by style
       by_style = calculate_pass_rate_by_attribute(fit_tests_with_pass_data, 'style', 'style')
+      Rails.logger.info "Dashboard: Pass rates by style count: #{by_style.count}"
 
       {
         overall: {
@@ -174,7 +180,7 @@ class DashboardService
     def calculate_pass_rate_by_attribute(fit_tests_data, group_key, display_key)
       grouped = fit_tests_data.group_by { |ft| ft[group_key] }
 
-      grouped.map do |key, tests|
+      result = grouped.map do |key, tests|
         next if key.nil?
 
         total = tests.count
@@ -182,12 +188,15 @@ class DashboardService
         pass_rate = total.positive? ? (passed.to_f / total * 100).round(2) : 0
 
         {
-          name: tests.first[display_key] || key.to_s,
-          total: total,
-          passed: passed,
-          pass_rate: pass_rate
+          'name' => tests.first[display_key] || key.to_s,
+          'total' => total,
+          'passed' => passed,
+          'pass_rate' => pass_rate
         }
-      end.compact.sort_by { |item| -item[:pass_rate] }
+      end.compact.sort_by { |item| -item['pass_rate'] }
+
+      Rails.logger.info "Dashboard: calculate_pass_rate_by_attribute for #{group_key}: #{result.inspect}"
+      result
     end
   end
 end
