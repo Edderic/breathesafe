@@ -73,6 +73,11 @@
         <div class="charts-row">
           <div class="chart-container">
             <h3>Facial Measurements by Type</h3>
+            <div class="measurement-explanation">
+              <strong>Traditional measurements</strong> are taken with tape measures and calipers: face_width, face_length,
+              bitragion_subnasale_arc, nasal_root_breadth, nose_protrusion, and nose_bridge_height (6 total).
+              <strong>ARKit</strong> measurements come from iPhone 3D face scanning.
+            </div>
             <div class="sample-size-note">
               Note: Categories are not mutually exclusive. Users may be counted in multiple categories.
             </div>
@@ -947,6 +952,21 @@ export default {
   font-style: italic;
   margin-bottom: 0.5rem;
   text-align: center;
+}
+
+.measurement-explanation {
+  font-size: 0.9rem;
+  color: #555;
+  background-color: #f0f7ff;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border-left: 4px solid #2196F3;
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.measurement-explanation strong {
+  color: #1976D2;
 }
 
 .sort-controls {
