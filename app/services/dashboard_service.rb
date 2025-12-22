@@ -33,18 +33,17 @@ class DashboardService
     end
 
     def masks_with_filtration_data
-      # Get masks with filtration_efficiencies data
-      Mask.where.not(filtration_efficiencies: []).count
+      # Use avg_sealed_ff from N99ModeToN95ModeConverterService as the source of truth
+      # This includes masks with:
+      # 1. Aaron Collins filtration efficiency data, OR
+      # 2. N99 mode fit test data with "Normal Breathing (SEALED)" exercise
 
-      # Get masks with N99 mode fit tests (Normal Breathing SEALED)
-      n99_fit_tests = N99ModeToN95ModeConverterService.n99_filtration_efficiency_from_exercises.to_a
-      mask_ids_with_n99 = n99_fit_tests.map { |ft| ft['mask_id'] }.compact.uniq
+      avg_sealed_ffs = N99ModeToN95ModeConverterService.avg_sealed_ffs.to_a
 
-      # Combine both sets (union)
-      masks_with_fe_ids = Mask.where.not(filtration_efficiencies: []).pluck(:id)
-      all_mask_ids_with_data = (masks_with_fe_ids + mask_ids_with_n99).uniq
+      # Get unique mask IDs that have avg_sealed_ff
+      mask_ids_with_filtration_data = avg_sealed_ffs.map { |row| row['mask_id'] }.compact.uniq
 
-      all_mask_ids_with_data.count
+      mask_ids_with_filtration_data.count
     end
 
     def count_masks_with_breathability
