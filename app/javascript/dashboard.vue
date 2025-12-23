@@ -454,10 +454,43 @@ export default {
 
                 ctx.fillStyle = '#fff';
                 ctx.font = 'bold 14px Arial';
-                ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
-                const x = bar.x;
+                // Measure label width
+                const labelWidth = ctx.measureText(label).width;
+
+                // For stacked horizontal bars:
+                // bar.base is the starting x position (left edge of this segment)
+                // bar.x is the ending x position (right edge of this segment)
+                const leftEdge = bar.base;
+                const rightEdge = bar.x;
+                const segmentWidth = rightEdge - leftEdge;
+
+                const padding = 10;
+                let x;
+
+                // Position label to stay within its color segment
+                if (labelWidth + (padding * 2) < segmentWidth) {
+                  // Label fits, center it in the segment
+                  x = leftEdge + (segmentWidth / 2);
+                } else {
+                  // Label is tight, position from left with padding
+                  x = leftEdge + (labelWidth / 2) + padding;
+                }
+
+                // Ensure label doesn't exceed right edge of segment
+                const labelRightEdge = x + (labelWidth / 2);
+                if (labelRightEdge > rightEdge - padding) {
+                  x = rightEdge - (labelWidth / 2) - padding;
+                }
+
+                // Ensure label doesn't go before left edge of segment
+                const labelLeftEdge = x - (labelWidth / 2);
+                if (labelLeftEdge < leftEdge + padding) {
+                  x = leftEdge + (labelWidth / 2) + padding;
+                }
+
+                ctx.textAlign = 'center';
                 const y = bar.y;
 
                 ctx.fillText(label, x, y);
@@ -540,10 +573,43 @@ export default {
 
                 ctx.fillStyle = '#fff';
                 ctx.font = 'bold 14px Arial';
-                ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
-                const x = bar.x;
+                // Measure label width
+                const labelWidth = ctx.measureText(label).width;
+
+                // For stacked horizontal bars:
+                // bar.base is the starting x position (left edge of this segment)
+                // bar.x is the ending x position (right edge of this segment)
+                const leftEdge = bar.base;
+                const rightEdge = bar.x;
+                const segmentWidth = rightEdge - leftEdge;
+
+                const padding = 10;
+                let x;
+
+                // Position label to stay within its color segment
+                if (labelWidth + (padding * 2) < segmentWidth) {
+                  // Label fits, center it in the segment
+                  x = leftEdge + (segmentWidth / 2);
+                } else {
+                  // Label is tight, position from left with padding
+                  x = leftEdge + (labelWidth / 2) + padding;
+                }
+
+                // Ensure label doesn't exceed right edge of segment
+                const labelRightEdge = x + (labelWidth / 2);
+                if (labelRightEdge > rightEdge - padding) {
+                  x = rightEdge - (labelWidth / 2) - padding;
+                }
+
+                // Ensure label doesn't go before left edge of segment
+                const labelLeftEdge = x - (labelWidth / 2);
+                if (labelLeftEdge < leftEdge + padding) {
+                  x = leftEdge + (labelWidth / 2) + padding;
+                }
+
+                ctx.textAlign = 'center';
                 const y = bar.y;
 
                 ctx.fillText(label, x, y);
@@ -735,10 +801,43 @@ export default {
 
                 ctx.fillStyle = '#fff';
                 ctx.font = 'bold 14px Arial';
-                ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
-                const x = bar.x;
+                // Measure label width
+                const labelWidth = ctx.measureText(label).width;
+
+                // For stacked horizontal bars:
+                // bar.base is the starting x position (left edge of this segment)
+                // bar.x is the ending x position (right edge of this segment)
+                const leftEdge = bar.base;
+                const rightEdge = bar.x;
+                const segmentWidth = rightEdge - leftEdge;
+
+                const padding = 10;
+                let x;
+
+                // Position label to stay within its color segment
+                if (labelWidth + (padding * 2) < segmentWidth) {
+                  // Label fits, center it in the segment
+                  x = leftEdge + (segmentWidth / 2);
+                } else {
+                  // Label is tight, position from left with padding
+                  x = leftEdge + (labelWidth / 2) + padding;
+                }
+
+                // Ensure label doesn't exceed right edge of segment
+                const labelRightEdge = x + (labelWidth / 2);
+                if (labelRightEdge > rightEdge - padding) {
+                  x = rightEdge - (labelWidth / 2) - padding;
+                }
+
+                // Ensure label doesn't go before left edge of segment
+                const labelLeftEdge = x - (labelWidth / 2);
+                if (labelLeftEdge < leftEdge + padding) {
+                  x = leftEdge + (labelWidth / 2) + padding;
+                }
+
+                ctx.textAlign = 'center';
                 const y = bar.y;
 
                 ctx.fillText(label, x, y);
