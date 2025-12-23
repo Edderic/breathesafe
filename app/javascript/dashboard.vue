@@ -25,6 +25,15 @@
         <div class="charts-row">
           <div class="chart-container">
             <h3>Filtration Efficiency Data</h3>
+            <div class="measurement-explanation">
+              <strong>Filtration efficiency data</strong> measures how well the mask material filters particles when properly sealed to the face.
+              It comes from two sources: (1) <strong>Aaron Collins (MaskNerd)</strong> sealed masks to his face using both hands and estimated
+              filtration efficiency using a PortaCount at normal breathing rates, and (2) <strong>N99 Mode Fit Tests</strong> where other people perform Aaron's procedure and save the data in the
+              optional "Normal Breathing (SEALED)" exercise. The data is expressed as <strong>avg_sealed_ff</strong> (average sealed
+              fit factor), calculated as the arithmetic mean of 1/(1-filtration_efficiency) across fit tests that have that optional exercise filled in. For example, 98.8% filtration = 83.33 fit factor.
+              <strong>Why it matters:</strong> This data helps predict mask protection and is used to estimate N95 fit factor scores (i.e. measurements of leakage) when direct N95 mode
+              data isn't available. If your N99 fit factor during regular testing is close to the sealed fit factor, you have a well-fitting mask.
+            </div>
             <canvas ref="filtrationChart"></canvas>
             <div class="chart-legend">
               <div class="legend-item">
@@ -40,6 +49,10 @@
 
           <div class="chart-container">
             <h3>Breathability Scores</h3>
+            <div class="measurement-explanation">
+              <strong>Breathability</strong> measures the breathing resistance of a mask, expressed in pascals (Pa).
+              Lower values mean easier breathing. This helps users understand comfort and wearability alongside protection data.
+            </div>
             <canvas ref="breathabilityChart"></canvas>
             <div class="chart-legend">
               <div class="legend-item">
@@ -71,6 +84,35 @@
         </div>
 
         <div class="charts-row">
+          <div class="chart-container">
+            <h3>Fit Test Types</h3>
+            <div class="measurement-explanation">
+              <strong>N95 Mode</strong>: Direct N95 quantitative fit testing.
+              <strong>N99 Mode</strong>: N99 quantitative fit testing converted to N95 estimates using sealed filtration data.
+              <strong>QLFT</strong>: Qualitative fit testing (pass/fail based on taste/smell).
+              <strong>User Seal Check</strong>: Self-reported seal check results.
+            </div>
+            <canvas ref="fitTestTypesChart"></canvas>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <span class="legend-color" style="background-color: #4CAF50;"></span>
+                <span>N95 Mode: {{ stats.fit_tests.by_type.n95_mode }}</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color" style="background-color: #2196F3;"></span>
+                <span>N99 Mode: {{ stats.fit_tests.by_type.n99_mode }}</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color" style="background-color: #FF9800;"></span>
+                <span>QLFT: {{ stats.fit_tests.by_type.qlft }}</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color" style="background-color: #9C27B0;"></span>
+                <span>User Seal Check: {{ stats.fit_tests.by_type.user_seal_check }}</span>
+              </div>
+            </div>
+          </div>
+
           <div class="chart-container">
             <h3>Facial Measurements by Type</h3>
             <div class="measurement-explanation">
@@ -105,7 +147,9 @@
               </div>
             </div>
           </div>
+        </div>
 
+        <div class="charts-row">
           <div class="chart-container">
             <h3>Overall Pass Rate</h3>
             <canvas ref="overallPassRateChart"></canvas>
@@ -324,6 +368,7 @@ export default {
 
       this.renderFiltrationChart();
       this.renderBreathabilityChart();
+      this.renderFitTestTypesChart();
       this.renderFacialMeasurementsChart();
       this.renderOverallPassRateChart();
       this.renderPassRateByMaskChart();
@@ -383,6 +428,60 @@ export default {
           plugins: {
             legend: {
               display: false
+            }
+          }
+        }
+      });
+    },
+    renderFitTestTypesChart() {
+      const ctx = this.$refs.fitTestTypesChart;
+      if (!ctx) return;
+
+      const total = this.stats.fit_tests.by_type.n95_mode +
+                    this.stats.fit_tests.by_type.n99_mode +
+                    this.stats.fit_tests.by_type.qlft +
+                    this.stats.fit_tests.by_type.user_seal_check;
+
+      this.charts.fitTestTypes = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['N95\nMode', 'N99\nMode', 'QLFT', 'User Seal\nCheck'],
+          datasets: [{
+            label: 'Fit Tests',
+            data: [
+              this.stats.fit_tests.by_type.n95_mode,
+              this.stats.fit_tests.by_type.n99_mode,
+              this.stats.fit_tests.by_type.qlft,
+              this.stats.fit_tests.by_type.user_seal_check
+            ],
+            backgroundColor: ['#4CAF50', '#2196F3', '#FF9800', '#9C27B0'],
+            borderWidth: 1,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                afterLabel: (context) => {
+                  const value = context.parsed.y;
+                  const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                  return `${percentage}% of fit tests with facial measurements`;
+                }
+              }
             }
           }
         }

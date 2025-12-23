@@ -80,6 +80,9 @@ class DashboardService
       # Count fit tests missing facial measurements
       fit_tests_missing_fm = FitTest.where(facial_measurement_id: nil).count
 
+      # Calculate fit test type breakdown
+      fit_test_types = calculate_fit_test_types(fit_tests_data)
+
       # Calculate pass rates
       pass_rates = calculate_pass_rates(fit_tests_data)
 
@@ -87,7 +90,22 @@ class DashboardService
         total: total_fit_tests,
         facial_measurements: facial_measurement_stats,
         missing_facial_measurements: fit_tests_missing_fm,
+        by_type: fit_test_types,
         pass_rates: pass_rates
+      }
+    end
+
+    def calculate_fit_test_types(fit_tests_data)
+      # Count fit tests by source/type
+      # The 'source' field indicates which service provided the data
+      type_counts = fit_tests_data.group_by { |ft| ft['source'] }.transform_values(&:count)
+
+      # Map service names to user-friendly names
+      {
+        'n95_mode' => type_counts['N95ModeService'] || 0,
+        'n99_mode' => type_counts['N99ModeToN95ModeConverterService'] || 0,
+        'qlft' => type_counts['QlftService'] || 0,
+        'user_seal_check' => type_counts['UserSealCheckFacialMeasurementsService'] || 0
       }
     end
 
