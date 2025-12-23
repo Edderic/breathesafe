@@ -34,7 +34,9 @@
               <strong>Why it matters:</strong> This data helps predict mask protection and is used to estimate N95 fit factor scores (i.e. measurements of leakage) when direct N95 mode
               data isn't available. If your N99 fit factor during regular testing is close to the sealed fit factor, you have a well-fitting mask.
             </div>
-            <canvas ref="filtrationChart"></canvas>
+            <div class="stacked-bar-wrapper">
+              <canvas ref="filtrationChart"></canvas>
+            </div>
             <div class="chart-legend">
               <div class="legend-item">
                 <span class="legend-color" style="background-color: #4CAF50;"></span>
@@ -53,14 +55,16 @@
               <strong>Breathability</strong> measures the breathing resistance of a mask, expressed in pascals (Pa).
               Lower values mean easier breathing. This helps users understand comfort and wearability alongside protection data.
             </div>
-            <canvas ref="breathabilityChart"></canvas>
+            <div class="stacked-bar-wrapper">
+              <canvas ref="breathabilityChart"></canvas>
+            </div>
             <div class="chart-legend">
               <div class="legend-item">
-                <span class="legend-color" style="background-color: #2196F3;"></span>
+                <span class="legend-color" style="background-color: #4CAF50;"></span>
                 <span>With Scores: {{ stats.masks.with_breathability }}</span>
               </div>
               <div class="legend-item">
-                <span class="legend-color" style="background-color: #FF9800;"></span>
+                <span class="legend-color" style="background-color: #f44336;"></span>
                 <span>Without Scores: {{ stats.masks.without_breathability }}</span>
               </div>
             </div>
@@ -152,7 +156,9 @@
         <div class="charts-row">
           <div class="chart-container">
             <h3>Overall Pass Rate</h3>
-            <canvas ref="overallPassRateChart"></canvas>
+            <div class="stacked-bar-wrapper">
+              <canvas ref="overallPassRateChart"></canvas>
+            </div>
             <div class="chart-stats">
               <p><strong>Pass Rate:</strong> {{ stats.fit_tests.pass_rates.overall.pass_rate }}%</p>
               <p><strong>Passed:</strong> {{ stats.fit_tests.pass_rates.overall.passed }} / {{ stats.fit_tests.pass_rates.overall.total }}</p>
@@ -379,58 +385,172 @@ export default {
       const ctx = this.$refs.filtrationChart;
       if (!ctx) return;
 
+      const withData = this.stats.masks.with_filtration_data;
+      const missingData = this.stats.masks.missing_filtration_data;
+      const total = this.stats.masks.total;
+
       this.charts.filtration = new Chart(ctx, {
-        type: 'doughnut',
+        type: 'bar',
         data: {
-          labels: ['With Data', 'Missing Data'],
+          labels: ['Filtration Efficiency'],
           datasets: [{
-            data: [
-              this.stats.masks.with_filtration_data,
-              this.stats.masks.missing_filtration_data
-            ],
-            backgroundColor: ['#4CAF50', '#f44336'],
-            borderWidth: 2,
+            label: 'With Data',
+            data: [withData],
+            backgroundColor: '#4CAF50',
+            borderWidth: 1,
+            borderColor: '#fff'
+          }, {
+            label: 'Missing Data',
+            data: [missingData],
+            backgroundColor: '#f44336',
+            borderWidth: 1,
             borderColor: '#fff'
           }]
         },
         options: {
+          indexAxis: 'y',
           responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: {
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              stacked: true,
+              beginAtZero: true,
+              max: total
+            },
+            y: {
+              stacked: true,
               display: false
             }
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const label = context.dataset.label || '';
+                  const value = context.parsed.x;
+                  const percentage = ((value / total) * 100).toFixed(1);
+                  return `${label}: ${value} (${percentage}%)`;
+                }
+              }
+            }
           }
-        }
+        },
+        plugins: [{
+          id: 'dataLabels',
+          afterDatasetsDraw: (chart) => {
+            const ctx = chart.ctx;
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+              const meta = chart.getDatasetMeta(datasetIndex);
+              meta.data.forEach((bar, index) => {
+                const value = dataset.data[index];
+                if (value === 0) return;
+
+                const percentage = ((value / total) * 100).toFixed(1);
+                const label = `${value} (${percentage}%)`;
+
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                const x = bar.x;
+                const y = bar.y;
+
+                ctx.fillText(label, x, y);
+              });
+            });
+          }
+        }]
       });
     },
     renderBreathabilityChart() {
       const ctx = this.$refs.breathabilityChart;
       if (!ctx) return;
 
+      const withScores = this.stats.masks.with_breathability;
+      const withoutScores = this.stats.masks.without_breathability;
+      const total = this.stats.masks.total;
+
       this.charts.breathability = new Chart(ctx, {
-        type: 'doughnut',
+        type: 'bar',
         data: {
-          labels: ['With Scores', 'Without Scores'],
+          labels: ['Breathability'],
           datasets: [{
-            data: [
-              this.stats.masks.with_breathability,
-              this.stats.masks.without_breathability
-            ],
-            backgroundColor: ['#2196F3', '#FF9800'],
-            borderWidth: 2,
+            label: 'With Scores',
+            data: [withScores],
+            backgroundColor: '#4CAF50',
+            borderWidth: 1,
+            borderColor: '#fff'
+          }, {
+            label: 'Without Scores',
+            data: [withoutScores],
+            backgroundColor: '#f44336',
+            borderWidth: 1,
             borderColor: '#fff'
           }]
         },
         options: {
+          indexAxis: 'y',
           responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: {
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              stacked: true,
+              beginAtZero: true,
+              max: total
+            },
+            y: {
+              stacked: true,
               display: false
             }
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const label = context.dataset.label || '';
+                  const value = context.parsed.x;
+                  const percentage = ((value / total) * 100).toFixed(1);
+                  return `${label}: ${value} (${percentage}%)`;
+                }
+              }
+            }
           }
-        }
+        },
+        plugins: [{
+          id: 'dataLabels',
+          afterDatasetsDraw: (chart) => {
+            const ctx = chart.ctx;
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+              const meta = chart.getDatasetMeta(datasetIndex);
+              meta.data.forEach((bar, index) => {
+                const value = dataset.data[index];
+                if (value === 0) return;
+
+                const percentage = ((value / total) * 100).toFixed(1);
+                const label = `${value} (${percentage}%)`;
+
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                const x = bar.x;
+                const y = bar.y;
+
+                ctx.fillText(label, x, y);
+              });
+            });
+          }
+        }]
       });
     },
     renderFitTestTypesChart() {
@@ -546,29 +666,86 @@ export default {
       const ctx = this.$refs.overallPassRateChart;
       if (!ctx) return;
 
-      const passRate = this.stats.fit_tests.pass_rates.overall.pass_rate;
-      const failRate = 100 - passRate;
+      const passed = this.stats.fit_tests.pass_rates.overall.passed;
+      const failed = this.stats.fit_tests.pass_rates.overall.total - passed;
+      const total = this.stats.fit_tests.pass_rates.overall.total;
 
       this.charts.overallPassRate = new Chart(ctx, {
-        type: 'doughnut',
+        type: 'bar',
         data: {
-          labels: ['Passed', 'Failed'],
+          labels: ['Overall Pass Rate'],
           datasets: [{
-            data: [passRate, failRate],
-            backgroundColor: ['#4CAF50', '#f44336'],
-            borderWidth: 2,
+            label: 'Passed',
+            data: [passed],
+            backgroundColor: '#4CAF50',
+            borderWidth: 1,
+            borderColor: '#fff'
+          }, {
+            label: 'Failed',
+            data: [failed],
+            backgroundColor: '#f44336',
+            borderWidth: 1,
             borderColor: '#fff'
           }]
         },
         options: {
+          indexAxis: 'y',
           responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: {
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              stacked: true,
+              beginAtZero: true,
+              max: total
+            },
+            y: {
+              stacked: true,
               display: false
             }
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  const label = context.dataset.label || '';
+                  const value = context.parsed.x;
+                  const percentage = ((value / total) * 100).toFixed(1);
+                  return `${label}: ${value} (${percentage}%)`;
+                }
+              }
+            }
           }
-        }
+        },
+        plugins: [{
+          id: 'dataLabels',
+          afterDatasetsDraw: (chart) => {
+            const ctx = chart.ctx;
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+              const meta = chart.getDatasetMeta(datasetIndex);
+              meta.data.forEach((bar, index) => {
+                const value = dataset.data[index];
+                if (value === 0) return;
+
+                const percentage = ((value / total) * 100).toFixed(1);
+                const label = `${value} (${percentage}%)`;
+
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                const x = bar.x;
+                const y = bar.y;
+
+                ctx.fillText(label, x, y);
+              });
+            });
+          }
+        }]
       });
     },
     renderPassRateByMaskChart() {
@@ -1012,6 +1189,17 @@ export default {
 
 .chart-wrapper canvas {
   max-height: 400px;
+}
+
+.stacked-bar-wrapper {
+  position: relative;
+  height: 80px;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.stacked-bar-wrapper canvas {
+  max-height: 80px;
 }
 
 .chart-legend {
