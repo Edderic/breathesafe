@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-container">
-    <h1 class="dashboard-title">BreatheSafe Dashboard</h1>
+    <h1 class="dashboard-title">Breathesafe Dashboard</h1>
 
     <div v-if="loading" class="loading">
       <p>Loading dashboard data...</p>
@@ -149,6 +149,35 @@
                 <span class="legend-color" style="background-color: #757575;"></span>
                 <span>No Measurements: {{ stats.fit_tests.facial_measurements.users_with_no_measurements }}</span>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="charts-row">
+          <div class="chart-container">
+            <h3>Gender & Sex</h3>
+            <canvas ref="genderChart"></canvas>
+            <div class="chart-stats">
+              <p><strong>Total:</strong> {{ stats.fit_tests.demographics.gender_and_sex.reduce((sum, item) => sum + item.fit_tests, 0) }} fit tests</p>
+              <p><strong>Unique Users:</strong> {{ stats.fit_tests.demographics.gender_and_sex.reduce((sum, item) => sum + item.unique_users, 0) }}</p>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <h3>Race & Ethnicity</h3>
+            <canvas ref="raceChart"></canvas>
+            <div class="chart-stats">
+              <p><strong>Total:</strong> {{ stats.fit_tests.demographics.race_ethnicity.reduce((sum, item) => sum + item.fit_tests, 0) }} fit tests</p>
+              <p><strong>Unique Users:</strong> {{ stats.fit_tests.demographics.race_ethnicity.reduce((sum, item) => sum + item.unique_users, 0) }}</p>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <h3>Age Range</h3>
+            <canvas ref="ageChart"></canvas>
+            <div class="chart-stats">
+              <p><strong>Total:</strong> {{ stats.fit_tests.demographics.age.reduce((sum, item) => sum + item.fit_tests, 0) }} fit tests</p>
+              <p><strong>Unique Users:</strong> {{ stats.fit_tests.demographics.age.reduce((sum, item) => sum + item.unique_users, 0) }}</p>
             </div>
           </div>
         </div>
@@ -376,6 +405,9 @@ export default {
       this.renderBreathabilityChart();
       this.renderFitTestTypesChart();
       this.renderFacialMeasurementsChart();
+      this.renderGenderChart();
+      this.renderRaceChart();
+      this.renderAgeChart();
       this.renderOverallPassRateChart();
       this.renderPassRateByMaskChart();
       this.renderPassRateByStrapChart();
@@ -721,6 +753,183 @@ export default {
                     'Has neither traditional nor ARKit'
                   ];
                   return labels[context.dataIndex];
+                }
+              }
+            }
+          }
+        }
+      });
+    },
+    renderGenderChart() {
+      const ctx = this.$refs.genderChart;
+      if (!ctx) return;
+
+      const data = this.stats.fit_tests.demographics.gender_and_sex;
+      const labels = data.map(item => item.name);
+      const fitTests = data.map(item => item.fit_tests);
+      const uniqueUsers = data.map(item => item.unique_users);
+
+      // Generate colors
+      const colors = this.generateColors(data.length);
+
+      this.charts.gender = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Fit Tests',
+            data: fitTests,
+            backgroundColor: colors.map(c => c + 'CC'),
+            borderWidth: 1,
+            borderColor: '#fff'
+          }, {
+            label: 'Unique Users',
+            data: uniqueUsers,
+            backgroundColor: colors.map(c => c + '80'),
+            borderWidth: 1,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                afterLabel: (context) => {
+                  const dataIndex = context.dataIndex;
+                  const item = data[dataIndex];
+                  return `Fit Tests: ${item.fit_tests}\nUnique Users: ${item.unique_users}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    },
+    renderRaceChart() {
+      const ctx = this.$refs.raceChart;
+      if (!ctx) return;
+
+      const data = this.stats.fit_tests.demographics.race_ethnicity;
+      const labels = data.map(item => item.name);
+      const fitTests = data.map(item => item.fit_tests);
+      const uniqueUsers = data.map(item => item.unique_users);
+
+      // Generate colors
+      const colors = this.generateColors(data.length);
+
+      this.charts.race = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Fit Tests',
+            data: fitTests,
+            backgroundColor: colors.map(c => c + 'CC'),
+            borderWidth: 1,
+            borderColor: '#fff'
+          }, {
+            label: 'Unique Users',
+            data: uniqueUsers,
+            backgroundColor: colors.map(c => c + '80'),
+            borderWidth: 1,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                afterLabel: (context) => {
+                  const dataIndex = context.dataIndex;
+                  const item = data[dataIndex];
+                  return `Fit Tests: ${item.fit_tests}\nUnique Users: ${item.unique_users}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    },
+    renderAgeChart() {
+      const ctx = this.$refs.ageChart;
+      if (!ctx) return;
+
+      const data = this.stats.fit_tests.demographics.age;
+      const labels = data.map(item => item.name);
+      const fitTests = data.map(item => item.fit_tests);
+      const uniqueUsers = data.map(item => item.unique_users);
+
+      // Generate colors
+      const colors = this.generateColors(data.length);
+
+      this.charts.age = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Fit Tests',
+            data: fitTests,
+            backgroundColor: colors.map(c => c + 'CC'),
+            borderWidth: 1,
+            borderColor: '#fff'
+          }, {
+            label: 'Unique Users',
+            data: uniqueUsers,
+            backgroundColor: colors.map(c => c + '80'),
+            borderWidth: 1,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom'
+            },
+            tooltip: {
+              callbacks: {
+                afterLabel: (context) => {
+                  const dataIndex = context.dataIndex;
+                  const item = data[dataIndex];
+                  return `Fit Tests: ${item.fit_tests}\nUnique Users: ${item.unique_users}`;
                 }
               }
             }
@@ -1101,6 +1310,30 @@ export default {
       } else {
         return baseColor; // Full color
       }
+    },
+    generateColors(count) {
+      // Generate a diverse set of colors for demographic charts
+      const baseColors = [
+        '#4CAF50', // Green
+        '#2196F3', // Blue
+        '#FF9800', // Orange
+        '#9C27B0', // Purple
+        '#F44336', // Red
+        '#00BCD4', // Cyan
+        '#FFC107', // Amber
+        '#E91E63', // Pink
+        '#3F51B5', // Indigo
+        '#8BC34A', // Light Green
+        '#FF5722', // Deep Orange
+        '#673AB7', // Deep Purple
+      ];
+
+      // If we need more colors than we have, cycle through them
+      const colors = [];
+      for (let i = 0; i < count; i++) {
+        colors.push(baseColors[i % baseColors.length]);
+      }
+      return colors;
     },
     lightenColor(color, amount) {
       // Convert hex to RGB

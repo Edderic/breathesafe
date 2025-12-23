@@ -83,6 +83,9 @@ class DashboardService
       # Calculate fit test type breakdown
       fit_test_types = calculate_fit_test_types(fit_tests_data)
 
+      # Calculate demographics
+      demographics = calculate_demographics(fit_tests_data)
+
       # Calculate pass rates
       pass_rates = calculate_pass_rates(fit_tests_data)
 
@@ -91,6 +94,7 @@ class DashboardService
         facial_measurements: facial_measurement_stats,
         missing_facial_measurements: fit_tests_missing_fm,
         by_type: fit_test_types,
+        demographics: demographics,
         pass_rates: pass_rates
       }
     end
@@ -107,6 +111,176 @@ class DashboardService
         'qlft' => type_counts['QlftService'] || 0,
         'user_seal_check' => type_counts['UserSealCheckFacialMeasurementsService'] || 0
       }
+    end
+
+    def calculate_demographics(fit_tests_data)
+      # Get unique user IDs from fit tests
+      user_ids = fit_tests_data.map { |ft| ft['user_id'] }.compact.uniq
+
+      # Get profiles for these users
+      profiles = Profile.where(user_id: user_ids)
+
+      # Calculate gender and sex breakdown
+      gender_stats = calculate_demographic_breakdown(
+        fit_tests_data,
+        profiles,
+        'gender_and_sex',
+        'Gender & Sex'
+      )
+
+      # Calculate race and ethnicity breakdown
+      race_stats = calculate_demographic_breakdown(
+        fit_tests_data,
+        profiles,
+        'race_ethnicity',
+        'Race & Ethnicity'
+      )
+
+      # Calculate age breakdown
+      age_stats = calculate_age_breakdown(fit_tests_data, profiles)
+
+      {
+        'gender_and_sex' => gender_stats,
+        'race_ethnicity' => race_stats,
+        'age' => age_stats
+      }
+    end
+
+    def calculate_demographic_breakdown(fit_tests_data, profiles, field_name, _label)
+      # Group fit tests by user
+      fit_tests_by_user = fit_tests_data.group_by { |ft| ft['user_id'] }
+
+      # Count fit tests and unique users by demographic value
+      demographic_counts = {}
+
+      profiles.each do |profile|
+        value = profile.send(field_name)
+        value = 'Prefer not to say' if value.blank?
+
+        demographic_counts[value] ||= { fit_tests: 0, unique_users: 0 }
+        demographic_counts[value][:unique_users] += 1
+        demographic_counts[value][:fit_tests] += fit_tests_by_user[profile.user_id]&.count || 0
+      end
+
+      # Handle users without profiles
+      users_without_profile = fit_tests_by_user.keys - profiles.map(&:user_id)
+      if users_without_profile.any?
+        demographic_counts['Prefer not to say'] ||= { fit_tests: 0, unique_users: 0 }
+        demographic_counts['Prefer not to say'][:unique_users] += users_without_profile.count
+        users_without_profile.each do |user_id|
+          demographic_counts['Prefer not to say'][:fit_tests] += fit_tests_by_user[user_id]&.count || 0
+        end
+      end
+
+      # Combine groups with less than 5 individuals into "Prefer not to say"
+      small_groups = demographic_counts.select { |k, v| v[:unique_users] < 5 && k != 'Prefer not to say' }
+      if small_groups.any?
+        demographic_counts['Prefer not to say'] ||= { fit_tests: 0, unique_users: 0 }
+        small_groups.each do |key, counts|
+          demographic_counts['Prefer not to say'][:fit_tests] += counts[:fit_tests]
+          demographic_counts['Prefer not to say'][:unique_users] += counts[:unique_users]
+          demographic_counts.delete(key)
+        end
+      end
+
+      # Convert to array format for frontend
+      demographic_counts.map do |value, counts|
+        {
+          'name' => value,
+          'fit_tests' => counts[:fit_tests],
+          'unique_users' => counts[:unique_users]
+        }
+      end.sort_by { |item| -item['fit_tests'] }
+    end
+
+    def calculate_age_breakdown(fit_tests_data, profiles)
+      # Group fit tests by user
+      fit_tests_by_user = fit_tests_data.group_by { |ft| ft['user_id'] }
+
+      # Define age ranges
+      current_year = Time.current.year
+      age_ranges = [
+        { label: '18-25', min: current_year - 25, max: current_year - 18 },
+        { label: '26-35', min: current_year - 35, max: current_year - 26 },
+        { label: '36-45', min: current_year - 45, max: current_year - 36 },
+        { label: '46-55', min: current_year - 55, max: current_year - 46 },
+        { label: '56-65', min: current_year - 65, max: current_year - 56 },
+        { label: '66+', min: 0, max: current_year - 66 }
+      ]
+
+      # Count fit tests and unique users by age range
+      age_counts = {}
+      age_ranges.each { |range| age_counts[range[:label]] = { fit_tests: 0, unique_users: 0 } }
+      age_counts['Prefer not to say'] = { fit_tests: 0, unique_users: 0 }
+
+      profiles.each do |profile|
+        year_of_birth = profile.year_of_birth
+
+        if year_of_birth.blank?
+          age_counts['Prefer not to say'][:unique_users] += 1
+          age_counts['Prefer not to say'][:fit_tests] += fit_tests_by_user[profile.user_id]&.count || 0
+          next
+        end
+
+        # Find matching age range
+        age_range = age_ranges.find do |range|
+          if range[:label] == '66+'
+            year_of_birth.to_i <= range[:max]
+          else
+            year_of_birth.to_i >= range[:min] && year_of_birth.to_i <= range[:max]
+          end
+        end
+
+        if age_range
+          age_counts[age_range[:label]][:unique_users] += 1
+          age_counts[age_range[:label]][:fit_tests] += fit_tests_by_user[profile.user_id]&.count || 0
+        else
+          age_counts['Prefer not to say'][:unique_users] += 1
+          age_counts['Prefer not to say'][:fit_tests] += fit_tests_by_user[profile.user_id]&.count || 0
+        end
+      end
+
+      # Handle users without profiles
+      users_without_profile = fit_tests_by_user.keys - profiles.map(&:user_id)
+      if users_without_profile.any?
+        age_counts['Prefer not to say'][:unique_users] += users_without_profile.count
+        users_without_profile.each do |user_id|
+          age_counts['Prefer not to say'][:fit_tests] += fit_tests_by_user[user_id]&.count || 0
+        end
+      end
+
+      # Combine groups with less than 5 individuals into "Prefer not to say"
+      small_groups = age_counts.select { |k, v| v[:unique_users] < 5 && k != 'Prefer not to say' }
+      if small_groups.any?
+        small_groups.each do |key, counts|
+          age_counts['Prefer not to say'][:fit_tests] += counts[:fit_tests]
+          age_counts['Prefer not to say'][:unique_users] += counts[:unique_users]
+          age_counts.delete(key)
+        end
+      end
+
+      # Convert to array format for frontend, maintaining age range order
+      result = []
+      age_ranges.each do |range|
+        next unless age_counts[range[:label]]
+
+        result << {
+          'name' => range[:label],
+          'fit_tests' => age_counts[range[:label]][:fit_tests],
+          'unique_users' => age_counts[range[:label]][:unique_users]
+        }
+      end
+
+      # Add "Prefer not to say" at the end
+      if age_counts['Prefer not to say'][:fit_tests].positive? || age_counts['Prefer not to say'][:unique_users].positive?
+        result << {
+          'name' => 'Prefer not to say',
+          'fit_tests' => age_counts['Prefer not to say'][:fit_tests],
+          'unique_users' => age_counts['Prefer not to say'][:unique_users]
+        }
+      end
+
+      result
     end
 
     def calculate_facial_measurement_stats(fit_tests_data)
