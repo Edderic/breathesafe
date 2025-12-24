@@ -7,6 +7,7 @@
 
     <div class='container chunk'>
       <ClosableMessage @onclose='messages = []' :messages='messages'/>
+      <ClosableMessage @onclose='helpMessages = []' :messages='helpMessages'/>
       <br>
     </div>
 
@@ -249,6 +250,9 @@
               <tr>
                 <th>Procedure</th>
                 <td>
+                  <CircularButton text="?" @click="showHelpMessage('procedure')" />
+                </td>
+                <td>
                   <select v-model='fitTestProcedure' @change='onFitTestProcedureChange' :disabled='!createOrEdit'>
                     <option :value='null'>-- Select --</option>
                     <option value='qualitative_full_osha'>qualitative: Full OSHA</option>
@@ -259,10 +263,10 @@
               </tr>
 
               <!-- Instructions row -->
-              <tr v-if='fitTestProcedure && aerosol'>
+              <tr v-if='fitTestProcedure'>
                 <th>Instructions</th>
-                <td>
-                  <CircularButton text="?" @click="showInstructions" />
+                <td colspan="2">
+                  <CircularButton text="?" @click="showHelpMessage('instructions')" />
                 </td>
               </tr>
 
@@ -270,6 +274,9 @@
               <template v-if='fitTestProcedure === "qualitative_full_osha"'>
                 <tr>
                   <th>Solution</th>
+                  <td>
+                    <CircularButton text="?" @click="showHelpMessage('solution')" />
+                  </td>
                   <td>
                     <select v-model='qualitativeAerosolSolution' :disabled='!createOrEdit'>
                       <option>Saccharin</option>
@@ -284,6 +291,9 @@
                 <tr>
                   <th>Testing mode</th>
                   <td>
+                    <CircularButton text="?" @click="showHelpMessage('testingMode')" />
+                  </td>
+                  <td>
                     <select v-model='quantitativeTestingMode' :disabled='!createOrEdit'>
                       <option>N95</option>
                       <option>N99</option>
@@ -293,6 +303,9 @@
                 <tr>
                   <th>Aerosol</th>
                   <td>
+                    <CircularButton text="?" @click="showHelpMessage('aerosol')" />
+                  </td>
+                  <td>
                     <select v-model='quantitativeAerosolSolution' :disabled='!createOrEdit'>
                       <option>Ambient</option>
                     </select>
@@ -301,10 +314,51 @@
                 <tr>
                   <th>Initial count (particles / cm3)</th>
                   <td>
+                    <CircularButton text="?" @click="showHelpMessage('initialCount')" />
+                  </td>
+                  <td>
                     <input type='number' v-model='initialCountPerCm3' :disabled='!createOrEdit'>
                   </td>
                 </tr>
               </template>
+
+              <!-- Mask modifications field -->
+              <tr v-if='fitTestProcedure'>
+                <th>Is mask modified?</th>
+                <td>
+                  <CircularButton text="?" @click="showHelpMessage('maskModified')" />
+                </td>
+                <td>
+                  <select v-model='maskModifications' :disabled='!createOrEdit'>
+                    <option :value='false'>false</option>
+                    <option :value='true'>true</option>
+                  </select>
+                </td>
+              </tr>
+
+              <!-- Notes field -->
+              <tr v-if='fitTestProcedure'>
+                <th>Notes</th>
+                <td>
+                  <CircularButton text="?" @click="showHelpMessage('notes')" />
+                </td>
+                <td>
+                  <textarea
+                    v-if='fitTestProcedure === "qualitative_full_osha"'
+                    v-model='qualitativeAerosolNotes'
+                    :disabled='!createOrEdit'
+                    cols="30"
+                    rows="10">
+                  </textarea>
+                  <textarea
+                    v-else
+                    v-model='quantitativeAerosolNotes'
+                    :disabled='!createOrEdit'
+                    cols="30"
+                    rows="10">
+                  </textarea>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -354,32 +408,6 @@
           </template>
         </div>
 
-        <!-- Notes tab -->
-        <div v-show='secondaryTabToShow == "Notes" && fitTestProcedure'>
-          <table>
-            <tbody>
-              <tr>
-                <th>Notes</th>
-                <td>
-                  <textarea
-                    v-if='fitTestProcedure === "qualitative_full_osha"'
-                    v-model='qualitativeAerosolNotes'
-                    :disabled='!createOrEdit'
-                    cols="30"
-                    rows="10">
-                  </textarea>
-                  <textarea
-                    v-else
-                    v-model='quantitativeAerosolNotes'
-                    :disabled='!createOrEdit'
-                    cols="30"
-                    rows="10">
-                  </textarea>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
 
         <br>
         <div class='row buttons'>
@@ -496,9 +524,6 @@ export default {
         },
         {
           text: 'Results'
-        },
-        {
-          text: 'Notes'
         },
       ],
       tabToShowOptions: [
@@ -735,6 +760,8 @@ export default {
       quantitativeAerosolProcedure: 'Not applicable',
       quantitativeAerosolInitialCount: 0,
       quantitativeAerosolNotes: '',
+      maskModifications: false,
+      helpMessages: [],
       originalQualitativeExercises: [
         {
           name: 'Normal breathing',
@@ -1130,7 +1157,8 @@ export default {
         mask_id: this.selectedMask && this.selectedMask.id,
         user_seal_check: this.userSealCheck,
         results: this.results,
-        facial_hair: this.facialHair
+        facial_hair: this.facialHair,
+        modifications: this.maskModifications
       }
     },
     createOrEdit() {
@@ -1401,6 +1429,34 @@ export default {
         this.messages.push({ str: paragraph })
       })
     },
+    showHelpMessage(type) {
+      this.helpMessages = []
+
+      const helpTexts = {
+        procedure: "There are three options: 1 qualitative, and 2 quantitative. If you have a qualitative fit testing equipment that you'd like to use for fit testing, please choose the qualitative option. If you have a quantitative device such as a PortaCount, you can either pick the OSHA Full or the OSHA Fast Facepiece Respirator option. The latter has half the number of exercises and is faster to do. I recommend that if you don't have a lot of time.",
+        instructions: this.instructionTitle && this.instructionParagraphs ?
+          [this.instructionTitle, ...this.instructionParagraphs].join('\n\n') :
+          'Instructions will appear here once you select a procedure.',
+        solution: 'Select the solution used for qualitative fit testing. Saccharin and Bitrex are common options.',
+        testingMode: 'N95 mode tests at the N95 filtration level. N99 mode tests at the higher N99 filtration level.',
+        aerosol: "Could be 'ambient', 'salt', 'smoke', etc. The distribution of particles in the harder-to-filter region (e.g. 0.1-0.3 microns) could be different across aerosol types. Smoke typically has more on this end than other types. N99-mode testing could score lower if smoke is used.",
+        initialCount: "For N99 mode testing with an 8020A, it's recommended to have at least 1000 particles / cm3. For N95 mode with a TSI 8095 N95 mode companion on the TSI 8020A, it's recommended to have at least 70 particles / cm3.",
+        maskModified: "What is a mask modification? Here are some examples: Adding extra functionality that was not provided by the manufacturer, e.g. cutting filter fabric, using a stapler to make a tighter fit, using adjustable earloop bands that did NOT come with the unit, using tape to seal gaps, etc.",
+        notes: "Useful to get into more details here especially if there is a mask modification. What did you modify?"
+      }
+
+      if (type === 'instructions' && this.instructionTitle && this.instructionParagraphs) {
+        // For instructions, add title and paragraphs as separate messages
+        this.helpMessages.push({ str: this.instructionTitle })
+        this.instructionParagraphs.forEach(paragraph => {
+          this.helpMessages.push({ str: paragraph })
+        })
+      } else if (helpTexts[type]) {
+        this.helpMessages.push({ str: helpTexts[type] })
+      } else {
+        this.helpMessages.push({ str: 'Help information not available.' })
+      }
+    },
     updateSearch(event, userOrMask) {
       if (userOrMask == 'mask') {
         this.selectedMask = {
@@ -1556,6 +1612,7 @@ export default {
             this.comfort = fitTestData.comfort
             this.userSealCheck = fitTestData.user_seal_check
             this.facialHair = fitTestData.facial_hair
+            this.maskModifications = fitTestData.modifications || false
             if (!this.facialHair) {
               this.facialHair = {
                 beard_length_mm: '0mm',
@@ -1668,6 +1725,20 @@ export default {
             }
           )
 
+      }
+    },
+    validateMaskModifications() {
+      // If mask is modified, notes are required
+      if (this.maskModifications === true) {
+        const notes = this.fitTestProcedure === 'qualitative_full_osha' ?
+          this.qualitativeAerosolNotes :
+          this.quantitativeAerosolNotes
+
+        if (!notes || notes.trim() === '') {
+          this.messages.push({
+            str: 'Notes are required when mask is modified. Please describe the modifications.'
+          })
+        }
       }
     },
     validateQLFT(part) {
@@ -1964,6 +2035,9 @@ export default {
 
         // Sync to old structure before validation
         this.syncProceduresFromFitTestProcedure()
+
+        // Validate mask modifications and notes
+        this.validateMaskModifications()
 
         // Validate based on procedure type
         if (this.fitTestProcedure === 'qualitative_full_osha') {

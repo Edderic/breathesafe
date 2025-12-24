@@ -44,6 +44,7 @@ class FitTest < ApplicationRecord
         'comfort' => ft.comfort,
         'results' => ft.results,
         'user_seal_check' => ft.user_seal_check,
+        'modifications' => ft.modifications,
         'created_at' => ft.created_at,
         'updated_at' => ft.updated_at,
 
@@ -136,6 +137,7 @@ class FitTest < ApplicationRecord
       'comfort' => fit_test.comfort,
       'results' => fit_test.results,
       'user_seal_check' => fit_test.user_seal_check,
+      'modifications' => fit_test.modifications,
       'created_at' => fit_test.created_at,
       'updated_at' => fit_test.updated_at,
 

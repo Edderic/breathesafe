@@ -247,6 +247,7 @@ class FitTestsController < ApplicationController
       :fit_test_id,
       :mask_id,
       :quantitative_fit_testing_device_id,
+      :modifications,
       facial_hair: %w[
         beard_length_mm
         beard_cover_technique
