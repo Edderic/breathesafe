@@ -45,6 +45,7 @@ class FitTest < ApplicationRecord
         'results' => ft.results,
         'user_seal_check' => ft.user_seal_check,
         'modifications' => ft.modifications,
+        'notes' => ft.notes,
         'created_at' => ft.created_at,
         'updated_at' => ft.updated_at,
 
@@ -138,6 +139,7 @@ class FitTest < ApplicationRecord
       'results' => fit_test.results,
       'user_seal_check' => fit_test.user_seal_check,
       'modifications' => fit_test.modifications,
+      'notes' => fit_test.notes,
       'created_at' => fit_test.created_at,
       'updated_at' => fit_test.updated_at,
 
@@ -183,11 +185,17 @@ class FitTest < ApplicationRecord
     # Apply json_parse logic for specific columns
     %w[facial_hair comfort results user_seal_check image_urls].each do |col|
       row[col] = if !row[col]
-                   []
+                   col == 'image_urls' ? [] : {}
                  elsif col == 'image_urls'
-                   [row['image_urls'].gsub('{', '').gsub('}', '').gsub('"', '')]
-                 else
+                   if row['image_urls'].is_a?(String)
+                     [row['image_urls'].gsub('{', '').gsub('}', '').gsub('"', '')]
+                   else
+                     row['image_urls']
+                   end
+                 elsif row[col].is_a?(String)
                    JSON.parse(row[col])
+                 else
+                   row[col] # Already parsed (JSONB returns hash/array)
                  end
     end
 

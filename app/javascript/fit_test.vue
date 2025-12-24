@@ -344,15 +344,7 @@
                 </td>
                 <td>
                   <textarea
-                    v-if='fitTestProcedure === "qualitative_full_osha"'
-                    v-model='qualitativeAerosolNotes'
-                    :disabled='!createOrEdit'
-                    cols="30"
-                    rows="10">
-                  </textarea>
-                  <textarea
-                    v-else
-                    v-model='quantitativeAerosolNotes'
+                    v-model='notes'
                     :disabled='!createOrEdit'
                     cols="30"
                     rows="10">
@@ -755,12 +747,11 @@ export default {
       masks: [],
       qualitativeProcedure: null,
       qualitativeAerosolSolution: 'Saccharin',
-      qualitativeAerosolNotes: '',
       quantitativeAerosolSolution: 'Ambient',
       quantitativeAerosolProcedure: 'Not applicable',
       quantitativeAerosolInitialCount: 0,
-      quantitativeAerosolNotes: '',
       maskModifications: false,
+      notes: '',
       helpMessages: [],
       originalQualitativeExercises: [
         {
@@ -1136,8 +1127,7 @@ export default {
           'procedure': this.qualitativeProcedure,
           'aerosol': {
             solution: qualAerSolToSave,
-          },
-          'notes': this.qualitativeNotes,
+          }
         },
         'quantitative': {
           'testing_mode': this.quantitativeTestingMode,
@@ -1146,8 +1136,7 @@ export default {
           'aerosol': {
             'initial_count_per_cm3': this.initialCountPerCm3,
             solution: quantAerSolToSave,
-          },
-          'notes': this.quantitativeNotes,
+          }
         }
       }
     },
@@ -1158,7 +1147,8 @@ export default {
         user_seal_check: this.userSealCheck,
         results: this.results,
         facial_hair: this.facialHair,
-        modifications: this.maskModifications
+        modifications: this.maskModifications,
+        notes: this.notes
       }
     },
     createOrEdit() {
@@ -1613,6 +1603,7 @@ export default {
             this.userSealCheck = fitTestData.user_seal_check
             this.facialHair = fitTestData.facial_hair
             this.maskModifications = fitTestData.modifications || false
+            this.notes = fitTestData.notes || ''
             if (!this.facialHair) {
               this.facialHair = {
                 beard_length_mm: '0mm',
@@ -1623,13 +1614,11 @@ export default {
             let results = fitTestData.results
 
             this.qualitativeAerosolSolution = results.qualitative?.aerosol?.solution
-            this.qualitativeNotes = results.qualitative?.notes
             this.qualitativeProcedure = results.qualitative?.procedure
             this.qualitativeExercises = results.qualitative?.exercises || []
 
             this.quantitativeTestingMode = results.quantitative?.testing_mode
             this.quantitativeAerosolSolution = results.quantitative?.aerosol?.solution
-            this.quantitativeNotes = results.quantitative?.notes
             this.quantitativeProcedure = results.quantitative?.procedure
 
             this.setQuantitativeExercises(results.quantitative?.exercises || [])
@@ -1730,11 +1719,7 @@ export default {
     validateMaskModifications() {
       // If mask is modified, notes are required
       if (this.maskModifications === true) {
-        const notes = this.fitTestProcedure === 'qualitative_full_osha' ?
-          this.qualitativeAerosolNotes :
-          this.quantitativeAerosolNotes
-
-        if (!notes || notes.trim() === '') {
+        if (!this.notes || this.notes.trim() === '') {
           this.messages.push({
             str: 'Notes are required when mask is modified. Please describe the modifications.'
           })
