@@ -23,6 +23,8 @@
         :columnMatching="columnMatching"
         :userMatching="userMatching"
         :maskMatching="maskMatching"
+        :maskModdedValuesMatching="maskModdedValuesMatching"
+        :maskModdedValuesMatchingSkipped="!hasMaskModdedColumnMatched"
         :userSealCheckMatching="userSealCheckMatching"
         :testingModeMatching="testingModeMatching"
         :qlftValuesMatching="qlftValuesMatching"
@@ -258,6 +260,7 @@
                       <option value="Deep breathing">Deep breathing</option>
                       <option value="Testing mode">Testing mode (QLFT / N99 / N95)</option>
                       <option value="QLFT -> solution">QLFT -> solution</option>
+                      <option value="mask_modded">mask_modded</option>
                       <option value="facial hair beard length mm">facial hair beard length mm</option>
                       <option value='comfort -> "Is there enough room to talk?"'>comfort -> "Is there enough room to talk?"</option>
                       <option value='comfort -> "How comfortable is the position of the mask on the nose?"'>comfort -> "How comfortable is the position of the mask on the nose?"</option>
@@ -465,6 +468,90 @@
           <Button shadow='true' class='button' text="Back" @click='goToPreviousStep'/>
           <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
           <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='maskMatchingRows.length === 0 || isSaving'/>
+        </div>
+        <br>
+        <br>
+      </div>
+
+      <!-- Mask Modification Values Matching Step -->
+      <div v-show='currentStep == "Mask Modification Values Matching"' class='right-pane narrow-width'>
+        <div class='display'>
+          <h2 class='text-align-center'>Mask Modification Values Matching</h2>
+          <h3 class='text-align-center'>Match file mask modification values to Breathesafe boolean values</h3>
+
+          <div v-if="!hasMaskModdedColumnMatched" class='text-align-center' style='margin-top: 2em; padding: 1em; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;'>
+            <p style='margin: 0; color: #856404;'>
+              ℹ️ No column was matched to the mask_modded field. This section is not applicable. All fit tests will be assumed to have unmodified masks (mask_modded = false). Click Next to continue.
+            </p>
+          </div>
+
+          <div v-else>
+            <div class='mask-modded-values-matching-header'>
+              <Button shadow='true' class='button match-button' text="Match" @click='attemptMaskModdedValuesAutoMatch' :disabled='maskModdedValuesMatchingRows.length === 0'/>
+            </div>
+
+            <!-- Match Confirmation Popup for Mask Modded Values Matching -->
+            <Popup v-if="showMaskModdedValuesMatchConfirmation" @onclose="cancelMaskModdedValuesMatchConfirmation">
+              <div class='match-confirmation-content'>
+                <h3>Confirm Mask Modification Values Matching</h3>
+                <p>The following mappings will overwrite existing selections:</p>
+                <ul class='match-overwrites-list'>
+                  <li v-for="(breathesafeValue, fileValue) in pendingMaskModdedValuesMatchOverwrites" :key="fileValue">
+                    <strong>{{ fileValue }}</strong> → {{ breathesafeValue }}
+                  </li>
+                </ul>
+                <p>Do you want to proceed?</p>
+                <div class='match-confirmation-buttons'>
+                  <Button shadow='true' class='button' text="Cancel" @click='cancelMaskModdedValuesMatchConfirmation'/>
+                  <Button shadow='true' class='button' text="Confirm" @click='confirmMaskModdedValuesMatchOverwrite'/>
+                </div>
+              </div>
+            </Popup>
+
+            <div v-if="maskModdedValuesMatchingRows.length > 0" class='mask-modded-values-matching-table content'>
+              <table>
+                <thead>
+                  <tr>
+                    <th>File mask modification values</th>
+                    <th>Breathesafe mask_modded value</th>
+                    <th>Similarity Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, index) in maskModdedValuesMatchingRows" :key="index">
+                    <td>{{ row.fileValue }}</td>
+                    <td>
+                      <select
+                        v-model="row.selectedBreathesafeValue"
+                        @change="updateMaskModdedValuesMatching"
+                        class="mask-modded-values-select"
+                        :disabled="isCompleted"
+                      >
+                        <option :value="null">-- Select --</option>
+                        <option :value="true">true (modified)</option>
+                        <option :value="false">false (unmodified)</option>
+                      </select>
+                    </td>
+                    <td class="similarity-score-cell">
+                      <span v-if="getMaskModdedValuesSimilarityScore(row) !== null" class="similarity-score">
+                        {{ formatSimilarityScore(getMaskModdedValuesSimilarityScore(row)) }}
+                      </span>
+                      <span v-else class="similarity-score-empty">--</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-else class='text-align-center'>
+              <p>No mask modification data found. Please complete column matching first.</p>
+            </div>
+          </div>
+        </div>
+        <br>
+        <div class='row buttons'>
+          <Button shadow='true' class='button' text="Back" @click='goToPreviousStep'/>
+          <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
+          <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled='hasMaskModdedColumnMatched && (maskModdedValuesMatchingRows.length === 0 || hasUnmappedMaskModdedValues || isSaving)'/>
         </div>
         <br>
         <br>
@@ -984,6 +1071,19 @@ export default {
         row => !row.selectedBreathesafeValue || row.selectedBreathesafeValue === ''
       )
     },
+    hasMaskModdedColumnMatched() {
+      // Check if mask_modded column is matched
+      if (!this.columnMatching || typeof this.columnMatching !== 'object') {
+        return false
+      }
+      const columnMatchingValues = Object.values(this.columnMatching)
+      return columnMatchingValues.includes('mask_modded')
+    },
+    hasUnmappedMaskModdedValues() {
+      return this.maskModdedValuesMatchingRows.some(
+        row => row.selectedBreathesafeValue === null || row.selectedBreathesafeValue === undefined
+      )
+    },
     unmappedQlftValuesCount() {
       if (!this.fitTestDataRows || this.fitTestDataRows.length === 0) {
         return 0
@@ -1084,6 +1184,11 @@ export default {
       showTestingModeMatchConfirmation: false,
       pendingTestingModeMatchOverwrites: {},
       pendingTestingModeMatches: {},
+      maskModdedValuesMatching: null,
+      maskModdedValuesMatchingRows: [],
+      showMaskModdedValuesMatchConfirmation: false,
+      pendingMaskModdedValuesMatchOverwrites: {},
+      pendingMaskModdedValuesMatches: {},
       qlftValuesMatchingRows: [],
       showQlftValuesMatchConfirmation: false,
       pendingQlftValuesMatchOverwrites: {},
@@ -1822,6 +1927,11 @@ export default {
         await this.initializeMaskMatching()
       }
 
+      // If navigating to Mask Modification Values Matching, initialize mask modded values matching
+      if (stepKey === 'Mask Modification Values Matching' && this.bulkFitTestsImportId) {
+        await this.initializeMaskModdedValuesMatching()
+      }
+
       // If navigating to User Seal Check Matching, initialize USC matching
       if (stepKey === 'User Seal Check Matching' && this.bulkFitTestsImportId) {
         await this.initializeUserSealCheckMatching()
@@ -1945,6 +2055,22 @@ export default {
         return // Navigation will happen in saveMaskMatching if successful
       }
 
+      // If we're on the "Mask Modification Values Matching" step
+      if (this.currentStep === 'Mask Modification Values Matching') {
+        if (this.hasMaskModdedColumnMatched) {
+          await this.saveMaskModdedValuesMatching()
+          return // Navigation will happen in saveMaskModdedValuesMatching if successful
+        } else {
+          // If no mask_modded column is matched, skip this step
+          if (!this.completedSteps.includes('Mask Modification Values Matching')) {
+            this.completedSteps.push('Mask Modification Values Matching')
+          }
+          this.currentStep = 'User Seal Check Matching'
+          await this.initializeUserSealCheckMatching()
+          return
+        }
+      }
+
       // If we're on the "User Seal Check Matching" step, check if it should be skipped
       if (this.currentStep === 'User Seal Check Matching') {
         if (this.hasUSCColumnsMatched) {
@@ -1993,6 +2119,7 @@ export default {
         'Column Matching',
         'User Matching',
         'Mask Matching',
+        'Mask Modification Values Matching',
         'User Seal Check Matching',
         'Testing Mode Values Matching',
         'QLFT Values Matching',
@@ -2949,6 +3076,198 @@ export default {
       this.pendingTestingModeMatchOverwrites = {}
       this.pendingTestingModeMatches = {}
     },
+    async initializeMaskModdedValuesMatching() {
+      // Parse CSV data and extract unique mask_modded values from column mapped to "mask_modded"
+      if (!this.csvFullContent || !this.columnMatching) {
+        this.maskModdedValuesMatchingRows = []
+        return
+      }
+
+      // Find column mapped to "mask_modded"
+      const maskModdedColumn = Object.keys(this.columnMatching).find(
+        col => this.columnMatching[col] === 'mask_modded'
+      )
+
+      if (!maskModdedColumn) {
+        this.maskModdedValuesMatchingRows = []
+        return
+      }
+
+      // Parse CSV lines
+      const csvLines = this.csvFullContent.split('\n').filter(line => line.trim() !== '')
+      if (csvLines.length <= this.headerRowIndex) {
+        this.maskModdedValuesMatchingRows = []
+        return
+      }
+
+      // Get header row
+      const headerRow = this.parseCSVLine(csvLines[this.headerRowIndex])
+      // Find column index case-insensitively
+      const maskModdedColumnIndex = headerRow.findIndex(col =>
+        col && col.trim().toLowerCase() === maskModdedColumn.trim().toLowerCase()
+      )
+
+      if (maskModdedColumnIndex === -1) {
+        this.maskModdedValuesMatchingRows = []
+        return
+      }
+
+      // Extract unique mask_modded values from data rows (skip header row)
+      const uniqueMaskModdedValues = new Set()
+      for (let i = this.headerRowIndex + 1; i < csvLines.length; i++) {
+        const row = this.parseCSVLine(csvLines[i])
+        if (row[maskModdedColumnIndex]) {
+          const value = row[maskModdedColumnIndex].trim()
+          if (value) {
+            uniqueMaskModdedValues.add(value)
+          }
+        }
+      }
+
+      // Create rows for each unique mask_modded value
+      const rows = Array.from(uniqueMaskModdedValues).map(fileValue => ({
+        fileValue: fileValue,
+        selectedBreathesafeValue: null
+      }))
+
+      // Load saved matching if available
+      if (this.maskModdedValuesMatching && Object.keys(this.maskModdedValuesMatching).length > 0) {
+        rows.forEach(row => {
+          if (this.maskModdedValuesMatching[row.fileValue] !== undefined) {
+            row.selectedBreathesafeValue = this.maskModdedValuesMatching[row.fileValue]
+          }
+        })
+      }
+
+      this.maskModdedValuesMatchingRows = rows
+    },
+    updateMaskModdedValuesMatching() {
+      // Update maskModdedValuesMatching object when selections change
+      // This will be saved when user clicks Next
+    },
+    getMaskModdedValuesSimilarityScore(row) {
+      // Get similarity score between File mask_modded value and selected Breathesafe boolean value
+      if (row.selectedBreathesafeValue === null || row.selectedBreathesafeValue === undefined) {
+        return null
+      }
+
+      const breathesafeValueStr = row.selectedBreathesafeValue ? 'true' : 'false'
+      return this.calculateSimilarity(row.fileValue, breathesafeValueStr)
+    },
+    attemptMaskModdedValuesAutoMatch() {
+      if (!this.maskModdedValuesMatchingRows || this.maskModdedValuesMatchingRows.length === 0) {
+        return
+      }
+
+      const matches = {}
+      const overwrites = {}
+
+      // Smart defaults for common boolean representations
+      const trueValues = ['true', 'yes', '1', 'modified', 'mod', 'y', 't']
+      const falseValues = ['false', 'no', '0', 'unmodified', 'unmod', 'n', 'f']
+
+      this.maskModdedValuesMatchingRows.forEach(row => {
+        const fileValueLower = row.fileValue.toLowerCase().trim()
+        let bestMatch = null
+
+        // Check if it matches true values
+        if (trueValues.includes(fileValueLower)) {
+          bestMatch = true
+        } else if (falseValues.includes(fileValueLower)) {
+          bestMatch = false
+        }
+
+        if (bestMatch !== null) {
+          // Check if row already has this value selected
+          const alreadyHasBestMatch = row.selectedBreathesafeValue === bestMatch
+
+          if (alreadyHasBestMatch) {
+            return
+          }
+
+          // Check if row has a different selection that would be overwritten
+          if (row.selectedBreathesafeValue !== null && row.selectedBreathesafeValue !== undefined && row.selectedBreathesafeValue !== bestMatch) {
+            overwrites[row.fileValue] = bestMatch
+          }
+
+          matches[row.fileValue] = bestMatch
+        }
+      })
+
+      // If there are overwrites, ask for confirmation
+      if (Object.keys(overwrites).length > 0) {
+        this.pendingMaskModdedValuesMatchOverwrites = overwrites
+        this.pendingMaskModdedValuesMatches = matches
+        this.showMaskModdedValuesMatchConfirmation = true
+      } else {
+        // No overwrites, apply matches directly
+        this.applyMaskModdedValuesMatches(matches)
+      }
+    },
+    applyMaskModdedValuesMatches(matches) {
+      // Apply matches to rows
+      this.maskModdedValuesMatchingRows.forEach(row => {
+        if (matches[row.fileValue] !== undefined) {
+          row.selectedBreathesafeValue = matches[row.fileValue]
+        }
+      })
+      this.updateMaskModdedValuesMatching()
+    },
+    confirmMaskModdedValuesMatchOverwrite() {
+      // Merge pending matches with overwrites
+      const allMatches = { ...this.pendingMaskModdedValuesMatches, ...this.pendingMaskModdedValuesMatchOverwrites }
+      this.applyMaskModdedValuesMatches(allMatches)
+      this.cancelMaskModdedValuesMatchConfirmation()
+    },
+    cancelMaskModdedValuesMatchConfirmation() {
+      this.showMaskModdedValuesMatchConfirmation = false
+      this.pendingMaskModdedValuesMatchOverwrites = {}
+      this.pendingMaskModdedValuesMatches = {}
+    },
+    async saveMaskModdedValuesMatching() {
+      // Build mask_modded values matching object: { "file_value": boolean }
+      const matching = {}
+      this.maskModdedValuesMatchingRows.forEach(row => {
+        if (row.selectedBreathesafeValue !== null && row.selectedBreathesafeValue !== undefined) {
+          matching[row.fileValue] = row.selectedBreathesafeValue
+        }
+      })
+
+      // Check authentication before saving
+      const isAuthenticated = await this.checkAuthentication()
+      if (!isAuthenticated) {
+        return
+      }
+
+      this.isSaving = true
+      this.messages = []
+
+      try {
+        const response = await axios.put(`/bulk_fit_tests_imports/${this.bulkFitTestsImportId}.json`, {
+          bulk_fit_tests_import: {
+            mask_modded_values_matching: matching
+          }
+        })
+
+        if (response.status === 200) {
+          this.maskModdedValuesMatching = matching
+          // Mark step as completed
+          if (!this.completedSteps.includes('Mask Modification Values Matching')) {
+            this.completedSteps.push('Mask Modification Values Matching')
+          }
+          // Move to User Seal Check Matching step
+          this.currentStep = 'User Seal Check Matching'
+          await this.initializeUserSealCheckMatching()
+        } else {
+          const errorMessages = response.data.messages || ['Failed to save mask modification values matching.']
+          this.messages = errorMessages.map(msg => ({ str: msg }))
+        }
+      } catch (error) {
+        this.messages = [{ str: `Error saving mask modification values matching: ${error.message}` }]
+      } finally {
+        this.isSaving = false
+      }
+    },
     async saveTestingModeMatching() {
       // Validate that all file testing mode values have a mapping
       const unmappedRows = this.testingModeMatchingRows.filter(
@@ -3432,6 +3751,24 @@ export default {
             }
           }
         }
+        // Mask modded column (if mapped)
+        const maskModdedCsvColumn = Object.keys(this.columnMatching).find(
+          col => this.columnMatching[col] === 'mask_modded'
+        )
+        let maskModded = false
+        if (maskModdedCsvColumn) {
+          const maskModdedIdx = headerRow.findIndex(col => col && col.trim().toLowerCase() === maskModdedCsvColumn.trim().toLowerCase())
+          if (maskModdedIdx >= 0) {
+            const raw = csvRow[maskModdedIdx]
+            if (raw != null && raw.trim() !== '') {
+              const trimmed = raw.trim()
+              // Map file value to boolean using maskModdedValuesMatching
+              if (this.maskModdedValuesMatching && this.maskModdedValuesMatching[trimmed] !== undefined) {
+                maskModded = this.maskModdedValuesMatching[trimmed]
+              }
+            }
+          }
+        }
         // USC columns (if mapped)
         const sizingQ = 'USC -> What do you think about the sizing of this mask relative to your face?'
         const airQ = 'USC -> How much air movement on your face along the seal of the mask did you feel?'
@@ -3563,6 +3900,7 @@ export default {
           exerciseHasInvalidN95N99Value,
           beardLengthMm,
           beardLengthInvalid,
+          maskModded,
           uscSizing,
           uscAirMovement,
           uscSizingFile,
@@ -3801,24 +4139,9 @@ export default {
           // Update local state
           this.maskMatching = maskMatching
 
-          // Move to User Seal Check Matching step
-          const steps = [
-            'Import File',
-            'Column Matching',
-            'User Matching',
-            'Mask Matching',
-            'User Seal Check Matching',
-            'Fit Test Data Matching'
-          ]
-          const currentIndex = steps.indexOf(this.currentStep)
-          if (currentIndex < steps.length - 1) {
-            const nextStep = steps[currentIndex + 1]
-            this.currentStep = nextStep
-            // Initialize User Seal Check Matching immediately to avoid empty view until refresh
-            if (nextStep === 'User Seal Check Matching') {
-              await this.initializeUserSealCheckMatching()
-            }
-          }
+          // Move to Mask Modification Values Matching step
+          this.currentStep = 'Mask Modification Values Matching'
+          await this.initializeMaskModdedValuesMatching()
 
           // Mark Mask Matching as completed
           if (!this.completedSteps.includes('Mask Matching')) {
@@ -3934,6 +4257,7 @@ export default {
         'Column Matching',
         'User Matching',
         'Mask Matching',
+        'Mask Modification Values Matching',
         'User Seal Check Matching',
         'Testing Mode Values Matching',
         'QLFT Values Matching',
@@ -4035,6 +4359,13 @@ export default {
             this.maskMatching = bulkImport.mask_matching
           } else {
             this.maskMatching = {}
+          }
+
+          // Load mask_modded_values_matching if available
+          if (bulkImport.mask_modded_values_matching) {
+            this.maskModdedValuesMatching = bulkImport.mask_modded_values_matching
+          } else {
+            this.maskModdedValuesMatching = {}
           }
 
           // Load user_seal_check_matching if available
@@ -4209,7 +4540,8 @@ export default {
             user_id: row.managedUserId, // This is the managed_user_id, which is the user_id
             mask_id: row.maskId,
             testing_mode: row.testingMode,
-            exercises: exercises
+            exercises: exercises,
+            mask_modded: row.maskModded || false
           }
           if (row.beardLengthMm && !row.beardLengthInvalid) {
             payload.facial_hair = { beard_length_mm: `${row.beardLengthMm}mm` }

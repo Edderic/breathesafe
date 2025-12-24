@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_251_224_154_703) do
+ActiveRecord::Schema[7.0].define(version: 20_251_224_233_755) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -83,6 +83,7 @@ ActiveRecord::Schema[7.0].define(version: 20_251_224_154_703) do
     t.jsonb 'testing_mode_matching', default: {}
     t.jsonb 'qlft_values_matching', default: {}
     t.jsonb 'comfort_matching', default: {}
+    t.jsonb 'mask_modded_values_matching', default: {}, null: false
     t.index ['user_id'], name: 'index_bulk_fit_tests_imports_on_user_id'
   end
 
@@ -156,7 +157,7 @@ ActiveRecord::Schema[7.0].define(version: 20_251_224_154_703) do
     t.bigint 'quantitative_fit_testing_device_id'
     t.bigint 'user_id'
     t.bigint 'bulk_fit_tests_import_id'
-    t.boolean 'modifications', default: false, null: false
+    t.boolean 'mask_modded', default: false, null: false
     t.text 'notes'
     t.index ['bulk_fit_tests_import_id'], name: 'index_fit_tests_on_bulk_fit_tests_import_id'
     t.index ['facial_measurement_id'], name: 'index_fit_tests_on_facial_measurement_id'

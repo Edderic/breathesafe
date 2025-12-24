@@ -1147,7 +1147,7 @@ export default {
         user_seal_check: this.userSealCheck,
         results: this.results,
         facial_hair: this.facialHair,
-        modifications: this.maskModifications,
+        mask_modded: this.maskModifications,
         notes: this.notes
       }
     },
@@ -1602,7 +1602,7 @@ export default {
             this.comfort = fitTestData.comfort
             this.userSealCheck = fitTestData.user_seal_check
             this.facialHair = fitTestData.facial_hair
-            this.maskModifications = fitTestData.modifications || false
+            this.maskModifications = fitTestData.mask_modded || false
             this.notes = fitTestData.notes || ''
             if (!this.facialHair) {
               this.facialHair = {

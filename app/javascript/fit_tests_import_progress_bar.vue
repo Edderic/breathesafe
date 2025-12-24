@@ -101,6 +101,14 @@ export default {
     userSealCheckMatchingSkipped: {
       type: Boolean,
       default: false
+    },
+    maskModdedValuesMatching: {
+      type: Object,
+      default: null
+    },
+    maskModdedValuesMatchingSkipped: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -111,6 +119,7 @@ export default {
         { key: 'Column Matching', name: 'Column Matching' },
         { key: 'User Matching', name: 'User Matching' },
         { key: 'Mask Matching', name: 'Mask Matching' },
+        { key: 'Mask Modification Values Matching', name: 'Mask Modification Values Matching' },
         { key: 'User Seal Check Matching', name: 'User Seal Check Matching' },
         { key: 'Testing Mode Values Matching', name: 'Testing Mode Values Matching' },
         { key: 'QLFT Values Matching', name: 'QLFT Values Matching' },
@@ -148,6 +157,11 @@ export default {
       // Mask Matching step is completed if maskMatching exists and is complete
       if (this.maskMatching && this.isMaskMatchingComplete()) {
         completed.push('Mask Matching')
+      }
+
+      // Mask Modification Values Matching step is completed if maskModdedValuesMatching exists and is complete, or if skipped
+      if (this.maskModdedValuesMatchingSkipped || (this.maskModdedValuesMatching && this.isMaskModdedValuesMatchingComplete())) {
+        completed.push('Mask Modification Values Matching')
       }
 
       // User Seal Check Matching step is completed if userSealCheckMatching exists and is complete
@@ -193,6 +207,9 @@ export default {
       return this.computedCompletedSteps.includes(stepKey)
     },
     isStepSkipped(stepKey) {
+      if (stepKey === 'Mask Modification Values Matching') {
+        return this.maskModdedValuesMatchingSkipped
+      }
       if (stepKey === 'User Seal Check Matching') {
         return this.userSealCheckMatchingSkipped
       }
@@ -228,6 +245,14 @@ export default {
             return 'Masks Matched'
           }
           return 'Not Selected'
+        case 'Mask Modification Values Matching':
+          if (this.maskModdedValuesMatchingSkipped) {
+            return 'Skipped'
+          }
+          if (this.maskModdedValuesMatching && this.isMaskModdedValuesMatchingComplete()) {
+            return 'Mask Modded Values Matched'
+          }
+          return 'Not Selected'
         case 'User Seal Check Matching':
           if (this.userSealCheckMatchingSkipped) {
             return '⚠️ No matching'
@@ -260,7 +285,7 @@ export default {
       const value = this.getStepValue(stepKey)
 
       // For all steps that show actual values, show actual values or "Not Selected"
-      const stepsWithValues = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'User Seal Check Matching', 'Testing Mode Values Matching', 'QLFT Values Matching', 'Comfort Matching']
+      const stepsWithValues = ['Import File', 'Column Matching', 'User Matching', 'Mask Matching', 'Mask Modification Values Matching', 'User Seal Check Matching', 'Testing Mode Values Matching', 'QLFT Values Matching', 'Comfort Matching']
 
       if (stepsWithValues.includes(stepKey)) {
         if (value === 'Not Selected' || !value) {
@@ -290,6 +315,10 @@ export default {
     isMaskMatchingComplete() {
       // Placeholder: return true if mask matching is complete
       return this.maskMatching && Object.keys(this.maskMatching).length > 0
+    },
+    isMaskModdedValuesMatchingComplete() {
+      // Return true if mask modded values matching is complete
+      return this.maskModdedValuesMatching && Object.keys(this.maskModdedValuesMatching).length > 0
     },
     isUserSealCheckMatchingComplete() {
       // Placeholder: return true if user seal check matching is complete
