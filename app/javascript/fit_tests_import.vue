@@ -1757,7 +1757,9 @@ export default {
       keysToRemove.forEach(key => this.dismissedValidationErrors.delete(key))
     },
     parseCSVLine(line) {
-      // Simple CSV parser that handles quoted fields
+      // CSV parser that handles quoted fields with embedded newlines
+      // Note: This method should only be called with complete logical lines
+      // (lines where all quoted fields are closed)
       const result = []
       let current = ''
       let inQuotes = false
@@ -1779,6 +1781,7 @@ export default {
           result.push(current)
           current = ''
         } else {
+          // Add character (including newlines if inside quotes)
           current += char
         }
       }
@@ -1787,6 +1790,61 @@ export default {
       result.push(current)
 
       return result
+    },
+    parseCSVWithQuotedNewlines(csvContent) {
+      // Parse CSV content handling newlines within quoted fields
+      const lines = []
+      let currentLine = ''
+      let inQuotes = false
+
+      for (let i = 0; i < csvContent.length; i++) {
+        const char = csvContent[i]
+        const nextChar = csvContent[i + 1]
+
+        if (char === '"') {
+          if (inQuotes && nextChar === '"') {
+            // Escaped quote
+            currentLine += '""'
+            i++ // Skip next quote
+          } else {
+            // Toggle quote state
+            inQuotes = !inQuotes
+            currentLine += char
+          }
+        } else if ((char === '\n' || (char === '\r' && nextChar === '\n')) && !inQuotes) {
+          // End of line (not inside quotes)
+          if (currentLine.trim() !== '') {
+            lines.push(currentLine)
+          }
+          currentLine = ''
+          if (char === '\r') i++ // Skip \n in \r\n
+        } else if (char === '\r' && nextChar !== '\n' && !inQuotes) {
+          // Mac-style line ending
+          if (currentLine.trim() !== '') {
+            lines.push(currentLine)
+          }
+          currentLine = ''
+        } else {
+          currentLine += char
+        }
+      }
+
+      // Add the last line if not empty
+      if (currentLine.trim() !== '') {
+        lines.push(currentLine)
+      }
+
+      return lines
+    },
+    getParsedCSVLines() {
+      // Parse CSV content once and cache the result
+      // This handles newlines within quoted fields correctly
+      if (!this.csvFullContent) {
+        return []
+      }
+
+      // Use the new parser that handles quoted newlines
+      return this.parseCSVWithQuotedNewlines(this.csvFullContent)
     },
     formatFileSize(bytes) {
       if (bytes === 0) return '0 Bytes'
@@ -2463,8 +2521,8 @@ export default {
         return
       }
 
-      // Parse CSV lines
-      const csvLines = this.csvFullContent.split('\n').filter(line => line.trim() !== '')
+      // Parse CSV lines (handling newlines within quoted fields)
+      const csvLines = this.getParsedCSVLines()
       if (csvLines.length <= this.headerRowIndex) {
         this.userMatchingRows = []
         return
@@ -2472,12 +2530,19 @@ export default {
 
       // Get header row
       const headerRow = this.parseCSVLine(csvLines[this.headerRowIndex])
-      const managerEmailIndex = headerRow.indexOf(managerEmailColumn)
-      const userNameIndex = headerRow.indexOf(userNameColumn)
+      // Use case-insensitive matching for column names
+      const managerEmailIndex = headerRow.findIndex(col =>
+        col && col.trim().toLowerCase() === managerEmailColumn.trim().toLowerCase()
+      )
+      const userNameIndex = headerRow.findIndex(col =>
+        col && col.trim().toLowerCase() === userNameColumn.trim().toLowerCase()
+      )
 
       if (managerEmailIndex === -1 || userNameIndex === -1) {
         this.userMatchingRows = []
-        this.messages = [{ str: 'Could not find manager email or user name columns in CSV.' }]
+        const debugInfo = `Could not find columns in CSV. Looking for: manager email="${managerEmailColumn}" (found: ${managerEmailIndex !== -1}), user name="${userNameColumn}" (found: ${userNameIndex !== -1}). CSV headers: ${headerRow.join(', ')}`
+        console.error(debugInfo)
+        this.messages = [{ str: `Could not find manager email or user name columns in CSV. Manager email column "${managerEmailColumn}" ${managerEmailIndex === -1 ? 'NOT FOUND' : 'found'}. User name column "${userNameColumn}" ${userNameIndex === -1 ? 'NOT FOUND' : 'found'}.` }]
         return
       }
 
