@@ -258,6 +258,7 @@
                     <option value='qualitative_full_osha'>qualitative: Full OSHA</option>
                     <option value='quantitative_osha_fast'>quantitative: OSHA Fast Face Piece Respirators</option>
                     <option value='quantitative_full_osha'>quantitative: Full OSHA</option>
+                    <option value='quantitative_w1'>quantitative: W1</option>
                   </select>
                 </td>
               </tr>
@@ -554,6 +555,20 @@ export default {
         },
         'Normal breathing (SEALED)': {
           'description': 'The purpose of this exercise is to get an estimate of filtration efficiency of the mask material. The test subject shall seal the mask to their face using their hands as best as they can. For each hand, the tester can create a letter C. With the thumb and pointer finger holding the C position, squeeze the edges of the mask to the face. If the test subject feels that all air is going through the filter (i.e. no gaps), then you can enter the associated fit factor here. Otherwise, leave blank'
+        }
+      },
+      w1Exercises: {
+        'Normal breathing': {
+          'description': 'Breathe normally.'
+        },
+        'Deep breathing': {
+          'description': 'Take deep breaths.'
+        },
+        'Jaw movement': {
+          'description': 'Read the rainbow passage without speaking out loud: When the sunlight strikes raindrops in the air, they act as a prism and form a rainbow. The rainbow is a division of white light into many beautiful colors. These take the shape of a long round arch, with its path high above, and its two ends apparently beyond the horizon. There is, according to legend, a boiling pot of gold at one end. People look, but no one ever finds it. When a man looks for something beyond his reach, his friends say he is looking for the pot of gold at the end of the rainbow.'
+        },
+        'Head movement': {
+          'description': 'Look up, down, left, right. Repeat.'
         }
       },
       oshaExercises: {
@@ -909,6 +924,24 @@ export default {
           fit_factor: null
         }
       ],
+      quantitativeExercisesW1: [
+        {
+          name: 'Normal breathing',
+          fit_factor: null
+        },
+        {
+          name: 'Deep breathing',
+          fit_factor: null
+        },
+        {
+          name: 'Jaw movement',
+          fit_factor: null
+        },
+        {
+          name: 'Head movement',
+          fit_factor: null
+        }
+      ],
       selectedMask: {
         id: null,
         uniqueInternalModelCode: '',
@@ -985,6 +1018,9 @@ export default {
       if (this.fitTestProcedure === 'quantitative_full_osha' ||
           (this.quantitativeProcedure == 'Full OSHA' && !this.fitTestProcedure)) {
         return this.quantitativeExercisesFullOsha
+      } else if (this.fitTestProcedure === 'quantitative_w1' ||
+                 (this.quantitativeProcedure == 'W1' && !this.fitTestProcedure)) {
+        return this.quantitativeExercisesW1
       }
 
       return this.quantitativeExercisesOSHAFastFFR
@@ -1370,13 +1406,23 @@ export default {
       if (this.quantitativeProcedure == 'Full OSHA') {
         this.quantitativeExercisesFullOsha = exercises
         return
+      } else if (this.quantitativeProcedure == 'W1') {
+        this.quantitativeExercisesW1 = exercises
+        return
       }
 
       // If procedure is not set, infer from number of exercises
-      // Full OSHA typically has 9 exercises, OSHA Fast has 5
+      // Full OSHA typically has 9 exercises, OSHA Fast has 5, W1 has 4
       if (!this.quantitativeProcedure && exercises && exercises.length >= 8) {
         this.quantitativeExercisesFullOsha = exercises
         return
+      } else if (!this.quantitativeProcedure && exercises && exercises.length === 4) {
+        // Check if it's W1 by looking for specific exercise names
+        const exerciseNames = exercises.map(ex => ex.name.toLowerCase())
+        if (exerciseNames.includes('jaw movement') || exerciseNames.includes('head movement')) {
+          this.quantitativeExercisesW1 = exercises
+          return
+        }
       }
 
       this.quantitativeExercisesOSHAFastFFR = exercises
@@ -1391,12 +1437,14 @@ export default {
     showDescription(name) {
       this.messages = []
 
-      // Check both exercise sets to find the description
+      // Check all exercise sets to find the description
       let description = null
       if (this.oshaExercises && this.oshaExercises[name]) {
         description = this.oshaExercises[name].description
       } else if (this.oshaFastFFRExercises && this.oshaFastFFRExercises[name]) {
         description = this.oshaFastFFRExercises[name].description
+      } else if (this.w1Exercises && this.w1Exercises[name]) {
+        description = this.w1Exercises[name].description
       }
 
       if (description) {
@@ -2136,6 +2184,9 @@ export default {
         } else if (this.quantitativeProcedure === 'Full OSHA') {
           this.fitTestProcedure = 'quantitative_full_osha'
           return
+        } else if (this.quantitativeProcedure === 'W1') {
+          this.fitTestProcedure = 'quantitative_w1'
+          return
         }
       } else {
         // If no explicit procedure, try to infer from exercise data
@@ -2143,9 +2194,17 @@ export default {
         if (rawQuantitativeExercises && Array.isArray(rawQuantitativeExercises) && rawQuantitativeExercises.length > 0) {
           const hasQuantData = rawQuantitativeExercises.some(ex => ex && ex.fit_factor != null && String(ex.fit_factor).trim() !== '')
           if (hasQuantData) {
-            // Infer procedure type based on number of exercises
-            // Full OSHA typically has 9 exercises, OSHA Fast has 5
+            // Infer procedure type based on number of exercises and exercise names
             const exerciseCount = rawQuantitativeExercises.length
+            const exerciseNames = rawQuantitativeExercises.map(ex => (ex.name || '').toLowerCase())
+
+            // Check for W1 specific exercises (4 exercises with specific names)
+            if (exerciseCount === 4 && (exerciseNames.includes('jaw movement') || exerciseNames.includes('head movement'))) {
+              this.fitTestProcedure = 'quantitative_w1'
+              return
+            }
+
+            // Full OSHA typically has 9 exercises, OSHA Fast has 5
             if (exerciseCount >= 8) {
               this.fitTestProcedure = 'quantitative_full_osha'
               return
@@ -2207,6 +2266,9 @@ export default {
       } else if (this.fitTestProcedure === 'quantitative_full_osha') {
         this.qualitativeProcedure = 'Skipping'
         this.quantitativeProcedure = 'Full OSHA'
+      } else if (this.fitTestProcedure === 'quantitative_w1') {
+        this.qualitativeProcedure = 'Skipping'
+        this.quantitativeProcedure = 'W1'
       }
     },
     // Get exercises based on fitTestProcedure
@@ -2216,6 +2278,8 @@ export default {
       } else if (this.fitTestProcedure === 'quantitative_osha_fast') {
         return this.quantitativeExercises || []
       } else if (this.fitTestProcedure === 'quantitative_full_osha') {
+        return this.quantitativeExercises || []
+      } else if (this.fitTestProcedure === 'quantitative_w1') {
         return this.quantitativeExercises || []
       }
       return []
@@ -2259,6 +2323,16 @@ export default {
             { name: 'Bending over', fit_factor: null },
             { name: 'Normal breathing', fit_factor: null },
             { name: 'Normal breathing (SEALED)', fit_factor: null }
+          ])
+        }
+      } else if (this.fitTestProcedure === 'quantitative_w1') {
+        // Only initialize if not already set
+        if (!this.quantitativeExercisesW1 || this.quantitativeExercisesW1.length === 0) {
+          this.setQuantitativeExercises([
+            { name: 'Normal breathing', fit_factor: null },
+            { name: 'Deep breathing', fit_factor: null },
+            { name: 'Jaw movement', fit_factor: null },
+            { name: 'Head movement', fit_factor: null }
           ])
         }
       }
