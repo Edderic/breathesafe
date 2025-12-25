@@ -254,6 +254,8 @@
                       <option value="procedure">procedure</option>
                       <option value="Bending over">Bending over</option>
                       <option value="Talking">Talking</option>
+                      <option value="Jaw movement">Jaw movement</option>
+                      <option value="Head movement">Head movement</option>
                       <option value="Turning head side to side">Turning head side to side</option>
                       <option value="Moving head up and down">Moving head up and down</option>
                       <option value="Normal breathing 1">Normal breathing 1</option>
@@ -907,6 +909,8 @@
                   <th>Comfort - Face/Cheeks</th>
                   <th>Bending over</th>
                   <th>Talking</th>
+                  <th>Jaw movement</th>
+                  <th>Head movement</th>
                   <th>Turning head side to side</th>
                   <th>Moving head up and down</th>
                   <th>Normal breathing 1</th>
@@ -966,6 +970,8 @@
                   <td>{{ row.comfortFace || '--' }}</td>
                   <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.bendingOver) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.bendingOver) }">{{ row.exercises.bendingOver !== null && row.exercises.bendingOver !== undefined ? row.exercises.bendingOver : '--' }}</td>
                   <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.talking) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.talking) }">{{ row.exercises.talking !== null && row.exercises.talking !== undefined ? row.exercises.talking : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.jawMovement) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.jawMovement) }">{{ row.exercises.jawMovement !== null && row.exercises.jawMovement !== undefined ? row.exercises.jawMovement : '--' }}</td>
+                  <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.headMovement) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.headMovement) }">{{ row.exercises.headMovement !== null && row.exercises.headMovement !== undefined ? row.exercises.headMovement : '--' }}</td>
                   <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.turningHeadSideToSide) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.turningHeadSideToSide) }">{{ row.exercises.turningHeadSideToSide !== null && row.exercises.turningHeadSideToSide !== undefined ? row.exercises.turningHeadSideToSide : '--' }}</td>
                   <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.movingHeadUpAndDown) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.movingHeadUpAndDown) }">{{ row.exercises.movingHeadUpAndDown !== null && row.exercises.movingHeadUpAndDown !== undefined ? row.exercises.movingHeadUpAndDown : '--' }}</td>
                   <td :class="{ 'qlft-unmapped-value': (row.exerciseHasUnmappedQlftValue && row.exerciseHasUnmappedQlftValue.normalBreathing1) || (row.exerciseHasInvalidN95N99Value && row.exerciseHasInvalidN95N99Value.normalBreathing1) }">{{ row.exercises.normalBreathing1 !== null && row.exercises.normalBreathing1 !== undefined ? row.exercises.normalBreathing1 : '--' }}</td>
@@ -4098,6 +4104,8 @@ export default {
       const exerciseColumns = {
         bendingOver: this.findExerciseColumn('Bending over'),
         talking: this.findExerciseColumn('Talking'),
+        jawMovement: this.findExerciseColumn('Jaw movement'),
+        headMovement: this.findExerciseColumn('Head movement'),
         turningHeadSideToSide: this.findExerciseColumn('Turning head side to side'),
         movingHeadUpAndDown: this.findExerciseColumn('Moving head up and down'),
         normalBreathing1: this.findExerciseColumn('Normal breathing 1'),
