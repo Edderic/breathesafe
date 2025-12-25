@@ -46,6 +46,7 @@ class FitTest < ApplicationRecord
         'user_seal_check' => ft.user_seal_check,
         'mask_modded' => ft.mask_modded,
         'notes' => ft.notes,
+        'procedure' => ft.procedure,
         'created_at' => ft.created_at,
         'updated_at' => ft.updated_at,
 
@@ -140,6 +141,7 @@ class FitTest < ApplicationRecord
       'user_seal_check' => fit_test.user_seal_check,
       'mask_modded' => fit_test.mask_modded,
       'notes' => fit_test.notes,
+      'procedure' => fit_test.procedure,
       'created_at' => fit_test.created_at,
       'updated_at' => fit_test.updated_at,
 

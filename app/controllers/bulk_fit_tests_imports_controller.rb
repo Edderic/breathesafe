@@ -177,6 +177,7 @@ class BulkFitTestsImportsController < ApplicationController
             exercises = fit_test_data[:exercises] || fit_test_data['exercises'] || {}
             mask_modded = fit_test_data[:mask_modded] || fit_test_data['mask_modded'] || false
             notes = fit_test_data[:notes] || fit_test_data['notes']
+            procedure = fit_test_data[:procedure] || fit_test_data['procedure']
 
             # user_id is already the managed_user_id (user_id from ManagedUser)
             # No conversion needed - managed_user_id IS the user_id
@@ -294,6 +295,8 @@ class BulkFitTestsImportsController < ApplicationController
             }
             # Only add notes if present (skip if nil/empty)
             fit_test_params[:notes] = notes if notes.present?
+            # Only add procedure if present (skip if nil/empty)
+            fit_test_params[:procedure] = procedure if procedure.present?
 
             FitTest.create!(fit_test_params)
           end
@@ -435,7 +438,8 @@ class BulkFitTestsImportsController < ApplicationController
       qlft_values_matching: {},
       comfort_matching: {},
       fit_testing_matching: {},
-      mask_modded_values_matching: {}
+      mask_modded_values_matching: {},
+      procedure_values_matching: {}
     )
   end
 

@@ -25,6 +25,7 @@
         :maskMatching="maskMatching"
         :maskModdedValuesMatching="maskModdedValuesMatching"
         :maskModdedValuesMatchingSkipped="!hasMaskModdedColumnMatched"
+        :procedureValuesMatching="procedureValuesMatching"
         :userSealCheckMatching="userSealCheckMatching"
         :testingModeMatching="testingModeMatching"
         :qlftValuesMatching="qlftValuesMatching"
@@ -250,6 +251,7 @@
                       <option value="user name">user name</option>
                       <option value="Mask.unique_internal_model_code">Mask.unique_internal_model_code</option>
                       <option value="notes">notes</option>
+                      <option value="procedure">procedure</option>
                       <option value="Bending over">Bending over</option>
                       <option value="Talking">Talking</option>
                       <option value="Turning head side to side">Turning head side to side</option>
@@ -617,6 +619,87 @@
         </div>
       </div>
 
+      <!-- Procedure Values Matching Step -->
+      <div v-show='currentStep == "Procedure Values Matching"' class='right-pane narrow-width'>
+        <div class='display'>
+          <h2 class='text-align-center'>Procedure Values Matching</h2>
+          <h3 class='text-align-center'>Match file procedure values to Breathesafe procedure values</h3>
+
+          <div v-if="!hasProcedureColumnMatched" class='text-align-center' style='margin-top: 2em; padding: 1em; background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;'>
+            <p style='margin: 0; color: #856404;'>
+              ⚠️ No column was matched to the procedure field. Procedure mapping is required. Please go to the Column Matching section by
+              <a href="#" @click.prevent="navigateToStep('Column Matching')" style='color: #007bff; text-decoration: underline; cursor: pointer;'>clicking here</a> to map a column to "procedure".
+            </p>
+          </div>
+
+          <div v-else>
+            <div class='procedure-matching-header'>
+              <Button shadow='true' class='button match-button' text="Match" @click='attemptProcedureAutoMatch' :disabled='procedureMatchingRows.length === 0'/>
+            </div>
+
+            <!-- Match Confirmation Popup for Procedure Matching -->
+            <Popup v-if="showProcedureMatchConfirmation" @onclose="cancelProcedureMatchConfirmation">
+              <div class='match-confirmation-content'>
+                <h3>Confirm Procedure Matching</h3>
+                <p>The following mappings will overwrite existing selections:</p>
+                <ul class='match-overwrites-list'>
+                  <li v-for="(breathesafeValue, fileValue) in pendingProcedureMatchOverwrites" :key="fileValue">
+                    <strong>{{ fileValue }}</strong> → {{ breathesafeValue }}
+                  </li>
+                </ul>
+                <p>Do you want to proceed?</p>
+                <div class='match-confirmation-buttons'>
+                  <Button shadow='true' class='button' text="Cancel" @click='cancelProcedureMatchConfirmation'/>
+                  <Button shadow='true' class='button' text="Confirm" @click='confirmProcedureMatchOverwrite'/>
+                </div>
+              </div>
+            </Popup>
+
+            <div v-if="procedureMatchingRows.length > 0" class='procedure-matching-table content'>
+              <table>
+                <thead>
+                  <tr>
+                    <th>File procedure values</th>
+                    <th>Breathesafe procedure values</th>
+                    <th>Similarity Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, index) in procedureMatchingRows" :key="index">
+                    <td>{{ row.fileValue }}</td>
+                    <td>
+                      <select
+                        v-model="row.selectedBreathesafeValue"
+                        @change="updateProcedureMatching"
+                        class="procedure-select"
+                        :disabled="isCompleted"
+                      >
+                        <option :value="''">-- Select --</option>
+                        <option value="qualitative_full_osha">qualitative_full_osha</option>
+                        <option value="quantitative_osha_fast">quantitative_osha_fast</option>
+                        <option value="quantitative_full_osha">quantitative_full_osha</option>
+                        <option value="quantitative_w1">quantitative_w1</option>
+                      </select>
+                    </td>
+                    <td>{{ row.similarityScore !== undefined ? row.similarityScore.toFixed(2) : 'N/A' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div v-else class='text-align-center'>
+              <p>No procedure values found. Please complete column matching first.</p>
+            </div>
+          </div>
+        </div>
+
+        <br>
+        <div class='row buttons'>
+          <Button shadow='true' class='button' text="Back" @click='goToPreviousStep'/>
+          <Button shadow='true' class='button' text="Cancel" @click='cancelImport'/>
+          <Button shadow='true' class='button' text="Next" @click='goToNextStep' :disabled="!hasProcedureColumnMatched || hasUnmappedProcedureValues"/>
+        </div>
+      </div>
+
       <!-- Testing Mode Values Matching Step -->
       <div v-show='currentStep == "Testing Mode Values Matching"' class='right-pane narrow-width'>
         <div class='display'>
@@ -816,6 +899,7 @@
                   <th>Testing mode</th>
                   <th>Beard length (mm)</th>
                   <th v-if="hasNotesColumnMatched">Notes</th>
+                  <th v-if="hasProcedureColumnMatched">Procedure</th>
                   <th>USC sizing</th>
                   <th>USC air movement</th>
                   <th>Comfort - Nose</th>
@@ -867,6 +951,9 @@
                   </td>
                   <td v-if="hasNotesColumnMatched" :title="row.notes || ''">
                     {{ truncateNotes(row.notes) }}
+                  </td>
+                  <td v-if="hasProcedureColumnMatched">
+                    {{ row.procedure || '--' }}
                   </td>
                   <td>
                     {{ row.uscSizing || '--' }}
@@ -1092,9 +1179,22 @@ export default {
       const columnMatchingValues = Object.values(this.columnMatching)
       return columnMatchingValues.includes('notes')
     },
+    hasProcedureColumnMatched() {
+      // Check if procedure column is matched
+      if (!this.columnMatching || typeof this.columnMatching !== 'object') {
+        return false
+      }
+      const columnMatchingValues = Object.values(this.columnMatching)
+      return columnMatchingValues.includes('procedure')
+    },
     hasUnmappedMaskModdedValues() {
       return this.maskModdedValuesMatchingRows.some(
         row => row.selectedBreathesafeValue === null || row.selectedBreathesafeValue === undefined
+      )
+    },
+    hasUnmappedProcedureValues() {
+      return this.procedureMatchingRows.some(
+        row => !row.selectedBreathesafeValue || row.selectedBreathesafeValue === ''
       )
     },
     unmappedQlftValuesCount() {
@@ -1202,6 +1302,11 @@ export default {
       showMaskModdedValuesMatchConfirmation: false,
       pendingMaskModdedValuesMatchOverwrites: {},
       pendingMaskModdedValuesMatches: {},
+      procedureValuesMatching: null,
+      procedureMatchingRows: [],
+      showProcedureMatchConfirmation: false,
+      pendingProcedureMatchOverwrites: {},
+      pendingProcedureMatches: {},
       qlftValuesMatchingRows: [],
       showQlftValuesMatchConfirmation: false,
       pendingQlftValuesMatchOverwrites: {},
@@ -1959,6 +2064,11 @@ export default {
         await this.initializeUserSealCheckMatching()
       }
 
+      // If navigating to Procedure Values Matching, initialize procedure matching
+      if (stepKey === 'Procedure Values Matching' && this.bulkFitTestsImportId) {
+        await this.initializeProcedureMatching()
+      }
+
       // If navigating to Testing Mode Values Matching, initialize testing mode matching
       if (stepKey === 'Testing Mode Values Matching' && this.bulkFitTestsImportId) {
         await this.initializeTestingModeMatching()
@@ -2101,8 +2211,8 @@ export default {
           if (!this.completedSteps.includes('User Seal Check Matching')) {
             this.completedSteps.push('User Seal Check Matching')
           }
-          this.currentStep = 'Testing Mode Values Matching'
-          await this.initializeTestingModeMatching()
+          this.currentStep = 'Procedure Values Matching'
+          await this.initializeProcedureMatching()
           return
         } else {
           // If no USC columns are matched, mark as skipped
@@ -2110,10 +2220,16 @@ export default {
           if (!this.completedSteps.includes('User Seal Check Matching')) {
             this.completedSteps.push('User Seal Check Matching')
           }
-          this.currentStep = 'Testing Mode Values Matching'
-          await this.initializeTestingModeMatching()
+          this.currentStep = 'Procedure Values Matching'
+          await this.initializeProcedureMatching()
           return
         }
+      }
+
+      // If we're on the "Procedure Values Matching" step, save procedure matching data
+      if (this.currentStep === 'Procedure Values Matching') {
+        await this.saveProcedureMatching()
+        return // Navigation will happen in saveProcedureMatching if successful
       }
 
       // If we're on the "Testing Mode Values Matching" step, save testing mode matching data
@@ -2143,6 +2259,7 @@ export default {
         'Mask Matching',
         'Mask Modification Values Matching',
         'User Seal Check Matching',
+        'Procedure Values Matching',
         'Testing Mode Values Matching',
         'QLFT Values Matching',
         'Comfort Matching',
@@ -3290,6 +3407,252 @@ export default {
         this.isSaving = false
       }
     },
+    async initializeProcedureMatching() {
+      // Parse CSV data and extract unique procedure values from column mapped to "procedure"
+      if (!this.csvFullContent || !this.columnMatching) {
+        this.procedureMatchingRows = []
+        return
+      }
+
+      // Find column mapped to "procedure"
+      const procedureColumn = Object.keys(this.columnMatching).find(
+        col => this.columnMatching[col] === 'procedure'
+      )
+
+      if (!procedureColumn) {
+        this.procedureMatchingRows = []
+        return
+      }
+
+      // Parse CSV lines
+      const csvLines = this.csvFullContent.split('\n').filter(line => line.trim() !== '')
+      if (csvLines.length <= this.headerRowIndex) {
+        this.procedureMatchingRows = []
+        return
+      }
+
+      // Get header row
+      const headerRow = this.parseCSVLine(csvLines[this.headerRowIndex])
+      // Find column index case-insensitively
+      const procedureColumnIndex = headerRow.findIndex(col =>
+        col && col.trim().toLowerCase() === procedureColumn.trim().toLowerCase()
+      )
+
+      if (procedureColumnIndex === -1) {
+        this.procedureMatchingRows = []
+        return
+      }
+
+      // Extract unique procedure values from data rows (skip header row)
+      const uniqueProcedureValues = new Set()
+      for (let i = this.headerRowIndex + 1; i < csvLines.length; i++) {
+        const row = this.parseCSVLine(csvLines[i])
+        if (row[procedureColumnIndex]) {
+          const value = row[procedureColumnIndex].trim()
+          if (value) {
+            uniqueProcedureValues.add(value)
+          }
+        }
+      }
+
+      // Load existing matching if available
+      let existingMatching = {}
+      if (this.procedureValuesMatching) {
+        existingMatching = this.procedureValuesMatching
+      }
+
+      // Create rows for each unique procedure value
+      this.procedureMatchingRows = Array.from(uniqueProcedureValues).map(fileValue => {
+        return {
+          fileValue: fileValue,
+          selectedBreathesafeValue: existingMatching[fileValue] || '',
+          similarityScore: 0
+        }
+      })
+
+      // Calculate similarity scores for each row
+      this.procedureMatchingRows.forEach(row => {
+        row.similarityScore = this.getProcedureSimilarityScore(row.fileValue)
+      })
+    },
+    updateProcedureMatching() {
+      // This method is called when a procedure value is manually selected
+      // No need to do anything here as v-model handles the update
+    },
+    getProcedureSimilarityScore(fileValue) {
+      const procedureOptions = [
+        'qualitative_full_osha',
+        'quantitative_osha_fast',
+        'quantitative_full_osha',
+        'quantitative_w1'
+      ]
+
+      let maxScore = 0
+      procedureOptions.forEach(option => {
+        const score = this.calculateSimilarity(fileValue.toLowerCase(), option.toLowerCase())
+        if (score > maxScore) {
+          maxScore = score
+        }
+      })
+
+      return maxScore
+    },
+    attemptProcedureAutoMatch() {
+      const procedureOptions = [
+        'qualitative_full_osha',
+        'quantitative_osha_fast',
+        'quantitative_full_osha',
+        'quantitative_w1'
+      ]
+
+      // Smart defaults for common variations
+      const smartDefaults = {
+        'w1': 'quantitative_w1',
+        'quantitative w1': 'quantitative_w1',
+        'quantitative: w1': 'quantitative_w1',
+        'full osha': 'quantitative_full_osha',
+        'osha full': 'quantitative_full_osha',
+        'quantitative full osha': 'quantitative_full_osha',
+        'quantitative: full osha': 'quantitative_full_osha',
+        'osha fast': 'quantitative_osha_fast',
+        'fast osha': 'quantitative_osha_fast',
+        'quantitative osha fast': 'quantitative_osha_fast',
+        'quantitative: osha fast': 'quantitative_osha_fast',
+        'qualitative': 'qualitative_full_osha',
+        'qlft': 'qualitative_full_osha',
+        'qualitative full osha': 'qualitative_full_osha',
+        'qualitative: full osha': 'qualitative_full_osha'
+      }
+
+      const pendingMatches = {}
+      const pendingOverwrites = {}
+
+      this.procedureMatchingRows.forEach(row => {
+        const fileValueLower = row.fileValue.toLowerCase().trim()
+
+        // Check smart defaults first
+        let bestMatch = smartDefaults[fileValueLower]
+
+        // If no smart default, find best match by similarity
+        if (!bestMatch) {
+          let maxScore = 0.5 // Minimum threshold
+          procedureOptions.forEach(option => {
+            const score = this.calculateSimilarity(fileValueLower, option.toLowerCase())
+            if (score > maxScore) {
+              maxScore = score
+              bestMatch = option
+            }
+          })
+        }
+
+        if (bestMatch) {
+          if (row.selectedBreathesafeValue && row.selectedBreathesafeValue !== bestMatch) {
+            // There's an existing selection that would be overwritten
+            pendingOverwrites[row.fileValue] = bestMatch
+          } else {
+            // No existing selection or same as current
+            pendingMatches[row.fileValue] = bestMatch
+          }
+        }
+      })
+
+      // Apply non-conflicting matches immediately
+      Object.keys(pendingMatches).forEach(fileValue => {
+        const row = this.procedureMatchingRows.find(r => r.fileValue === fileValue)
+        if (row) {
+          row.selectedBreathesafeValue = pendingMatches[fileValue]
+        }
+      })
+
+      // If there are overwrites, show confirmation popup
+      if (Object.keys(pendingOverwrites).length > 0) {
+        this.pendingProcedureMatchOverwrites = pendingOverwrites
+        this.pendingProcedureMatches = pendingMatches
+        this.showProcedureMatchConfirmation = true
+      } else {
+        // Update the matching data
+        this.updateProcedureMatching()
+      }
+    },
+    applyProcedureMatches() {
+      // Apply all pending matches (including overwrites)
+      const allMatches = { ...this.pendingProcedureMatches, ...this.pendingProcedureMatchOverwrites }
+
+      Object.keys(allMatches).forEach(fileValue => {
+        const row = this.procedureMatchingRows.find(r => r.fileValue === fileValue)
+        if (row) {
+          row.selectedBreathesafeValue = allMatches[fileValue]
+        }
+      })
+
+      this.updateProcedureMatching()
+      this.cancelProcedureMatchConfirmation()
+    },
+    confirmProcedureMatchOverwrite() {
+      this.applyProcedureMatches()
+      this.cancelProcedureMatchConfirmation()
+    },
+    cancelProcedureMatchConfirmation() {
+      this.showProcedureMatchConfirmation = false
+      this.pendingProcedureMatchOverwrites = {}
+      this.pendingProcedureMatches = {}
+    },
+    async saveProcedureMatching() {
+      // Validate that all file procedure values have a mapping
+      const unmappedRows = this.procedureMatchingRows.filter(
+        row => !row.selectedBreathesafeValue || row.selectedBreathesafeValue === ''
+      )
+
+      if (unmappedRows.length > 0) {
+        this.messages = [{
+          str: `Please map all procedure values. ${unmappedRows.length} value(s) are unmapped: ${unmappedRows.map(r => r.fileValue).join(', ')}`
+        }]
+        return
+      }
+
+      // Build procedure matching object: { "file_value": "breathesafe_value" }
+      const matching = {}
+      this.procedureMatchingRows.forEach(row => {
+        if (row.selectedBreathesafeValue) {
+          matching[row.fileValue] = row.selectedBreathesafeValue
+        }
+      })
+
+      // Check authentication before saving
+      const isAuthenticated = await this.checkAuthentication()
+      if (!isAuthenticated) {
+        return
+      }
+
+      this.isSaving = true
+      this.messages = []
+
+      try {
+        const response = await axios.put(`/bulk_fit_tests_imports/${this.bulkFitTestsImportId}.json`, {
+          bulk_fit_tests_import: {
+            procedure_values_matching: matching
+          }
+        })
+
+        if (response.status === 200) {
+          this.procedureValuesMatching = matching
+          // Mark step as completed
+          if (!this.completedSteps.includes('Procedure Values Matching')) {
+            this.completedSteps.push('Procedure Values Matching')
+          }
+          // Move to Testing Mode Values Matching step
+          this.currentStep = 'Testing Mode Values Matching'
+          await this.initializeTestingModeMatching()
+        } else {
+          const errorMessages = response.data.messages || ['Failed to save procedure values matching.']
+          this.messages = errorMessages.map(msg => ({ str: msg }))
+        }
+      } catch (error) {
+        this.messages = [{ str: `Error saving procedure values matching: ${error.message}` }]
+      } finally {
+        this.isSaving = false
+      }
+    },
     async saveTestingModeMatching() {
       // Validate that all file testing mode values have a mapping
       const unmappedRows = this.testingModeMatchingRows.filter(
@@ -3810,6 +4173,24 @@ export default {
             }
           }
         }
+        // Procedure column (if mapped)
+        const procedureCsvColumn = Object.keys(this.columnMatching).find(
+          col => this.columnMatching[col] === 'procedure'
+        )
+        let procedure = null
+        if (procedureCsvColumn) {
+          const procedureIdx = headerRow.findIndex(col => col && col.trim().toLowerCase() === procedureCsvColumn.trim().toLowerCase())
+          if (procedureIdx >= 0) {
+            const raw = csvRow[procedureIdx]
+            if (raw != null && raw.trim() !== '') {
+              const trimmed = raw.trim()
+              // Map file value to internal value using procedureValuesMatching
+              if (this.procedureValuesMatching && this.procedureValuesMatching[trimmed]) {
+                procedure = this.procedureValuesMatching[trimmed]
+              }
+            }
+          }
+        }
         // USC columns (if mapped)
         const sizingQ = 'USC -> What do you think about the sizing of this mask relative to your face?'
         const airQ = 'USC -> How much air movement on your face along the seal of the mask did you feel?'
@@ -3943,6 +4324,7 @@ export default {
           beardLengthInvalid,
           maskModded,
           notes,
+          procedure,
           uscSizing,
           uscAirMovement,
           uscSizingFile,
@@ -4301,6 +4683,7 @@ export default {
         'Mask Matching',
         'Mask Modification Values Matching',
         'User Seal Check Matching',
+        'Procedure Values Matching',
         'Testing Mode Values Matching',
         'QLFT Values Matching',
         'Fit Test Data Matching'
@@ -4408,6 +4791,13 @@ export default {
             this.maskModdedValuesMatching = bulkImport.mask_modded_values_matching
           } else {
             this.maskModdedValuesMatching = {}
+          }
+
+          // Load procedure_values_matching if available
+          if (bulkImport.procedure_values_matching) {
+            this.procedureValuesMatching = bulkImport.procedure_values_matching
+          } else {
+            this.procedureValuesMatching = {}
           }
 
           // Load user_seal_check_matching if available

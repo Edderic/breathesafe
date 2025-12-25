@@ -1184,7 +1184,8 @@ export default {
         results: this.results,
         facial_hair: this.facialHair,
         mask_modded: this.maskModifications,
-        notes: this.notes
+        notes: this.notes,
+        procedure: this.fitTestProcedure
       }
     },
     createOrEdit() {
@@ -1652,6 +1653,12 @@ export default {
             this.facialHair = fitTestData.facial_hair
             this.maskModifications = fitTestData.mask_modded || false
             this.notes = fitTestData.notes || ''
+
+            // Load procedure if available
+            if (fitTestData.procedure) {
+              this.fitTestProcedure = fitTestData.procedure
+            }
+
             if (!this.facialHair) {
               this.facialHair = {
                 beard_length_mm: '0mm',

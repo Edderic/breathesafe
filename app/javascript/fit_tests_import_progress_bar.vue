@@ -109,6 +109,10 @@ export default {
     maskModdedValuesMatchingSkipped: {
       type: Boolean,
       default: false
+    },
+    procedureValuesMatching: {
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -121,6 +125,7 @@ export default {
         { key: 'Mask Matching', name: 'Mask Matching' },
         { key: 'Mask Modification Values Matching', name: 'Mask Modification Values Matching' },
         { key: 'User Seal Check Matching', name: 'User Seal Check Matching' },
+        { key: 'Procedure Values Matching', name: 'Procedure Values Matching' },
         { key: 'Testing Mode Values Matching', name: 'Testing Mode Values Matching' },
         { key: 'QLFT Values Matching', name: 'QLFT Values Matching' },
         { key: 'Comfort Matching', name: 'Comfort Matching' },
@@ -167,6 +172,11 @@ export default {
       // User Seal Check Matching step is completed if userSealCheckMatching exists and is complete
       if (this.userSealCheckMatching && this.isUserSealCheckMatchingComplete()) {
         completed.push('User Seal Check Matching')
+      }
+
+      // Procedure Values Matching step is completed if procedureValuesMatching exists and is complete
+      if (this.procedureValuesMatching && this.isProcedureValuesMatchingComplete()) {
+        completed.push('Procedure Values Matching')
       }
 
       // Testing Mode Values Matching step is completed if testingModeMatching exists and is complete
@@ -261,6 +271,11 @@ export default {
             return 'User Seal Checks Matched'
           }
           return 'Not Selected'
+        case 'Procedure Values Matching':
+          if (this.procedureValuesMatching && this.isProcedureValuesMatchingComplete()) {
+            return 'Procedures Matched'
+          }
+          return 'Not Selected'
         case 'Testing Mode Values Matching':
           if (this.testingModeMatching && this.isTestingModeMatchingComplete()) {
             return 'Testing Modes Matched'
@@ -323,6 +338,10 @@ export default {
     isUserSealCheckMatchingComplete() {
       // Placeholder: return true if user seal check matching is complete
       return this.userSealCheckMatching && Object.keys(this.userSealCheckMatching).length > 0
+    },
+    isProcedureValuesMatchingComplete() {
+      // Return true if procedure values matching is complete
+      return this.procedureValuesMatching && Object.keys(this.procedureValuesMatching).length > 0
     },
     isTestingModeMatchingComplete() {
       // Return true if testing mode matching is complete
