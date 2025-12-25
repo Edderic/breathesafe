@@ -249,6 +249,7 @@
                       <option value="last name">last name</option>
                       <option value="user name">user name</option>
                       <option value="Mask.unique_internal_model_code">Mask.unique_internal_model_code</option>
+                      <option value="notes">notes</option>
                       <option value="Bending over">Bending over</option>
                       <option value="Talking">Talking</option>
                       <option value="Turning head side to side">Turning head side to side</option>
@@ -814,6 +815,7 @@
                   <th>Breathesafe mask id</th>
                   <th>Testing mode</th>
                   <th>Beard length (mm)</th>
+                  <th v-if="hasNotesColumnMatched">Notes</th>
                   <th>USC sizing</th>
                   <th>USC air movement</th>
                   <th>Comfort - Nose</th>
@@ -862,6 +864,9 @@
                     <span :class="{ 'qlft-unmapped-value': row.beardLengthInvalid }">
                       {{ row.beardLengthMm ? row.beardLengthMm : '--' }}
                     </span>
+                  </td>
+                  <td v-if="hasNotesColumnMatched" :title="row.notes || ''">
+                    {{ truncateNotes(row.notes) }}
                   </td>
                   <td>
                     {{ row.uscSizing || '--' }}
@@ -1078,6 +1083,14 @@ export default {
       }
       const columnMatchingValues = Object.values(this.columnMatching)
       return columnMatchingValues.includes('mask_modded')
+    },
+    hasNotesColumnMatched() {
+      // Check if notes column is matched
+      if (!this.columnMatching || typeof this.columnMatching !== 'object') {
+        return false
+      }
+      const columnMatchingValues = Object.values(this.columnMatching)
+      return columnMatchingValues.includes('notes')
     },
     hasUnmappedMaskModdedValues() {
       return this.maskModdedValuesMatchingRows.some(
@@ -1908,6 +1921,15 @@ export default {
       }
       // Format normalized probability as percentage with 1 decimal place
       return (score * 100).toFixed(1) + '%'
+    },
+    truncateNotes(notes) {
+      if (!notes) {
+        return '--'
+      }
+      if (notes.length <= 100) {
+        return notes
+      }
+      return notes.substring(0, 100) + '...'
     },
     async navigateToStep(stepKey) {
       this.currentStep = stepKey
@@ -3769,6 +3791,25 @@ export default {
             }
           }
         }
+        // Notes column (if mapped)
+        const notesCsvColumn = Object.keys(this.columnMatching).find(
+          col => this.columnMatching[col] === 'notes'
+        )
+        let notes = null
+        if (notesCsvColumn) {
+          const notesIdx = headerRow.findIndex(col => col && col.trim().toLowerCase() === notesCsvColumn.trim().toLowerCase())
+          if (notesIdx >= 0) {
+            const raw = csvRow[notesIdx]
+            if (raw != null && raw.trim() !== '') {
+              let trimmed = raw.trim()
+              // Truncate to 10,000 characters if needed
+              if (trimmed.length > 10000) {
+                trimmed = trimmed.substring(0, 10000)
+              }
+              notes = trimmed
+            }
+          }
+        }
         // USC columns (if mapped)
         const sizingQ = 'USC -> What do you think about the sizing of this mask relative to your face?'
         const airQ = 'USC -> How much air movement on your face along the seal of the mask did you feel?'
@@ -3901,6 +3942,7 @@ export default {
           beardLengthMm,
           beardLengthInvalid,
           maskModded,
+          notes,
           uscSizing,
           uscAirMovement,
           uscSizingFile,
@@ -4542,6 +4584,10 @@ export default {
             testing_mode: row.testingMode,
             exercises: exercises,
             mask_modded: row.maskModded || false
+          }
+          // Add notes if present (skip if null/empty to avoid saving empty notes)
+          if (row.notes) {
+            payload.notes = row.notes
           }
           if (row.beardLengthMm && !row.beardLengthInvalid) {
             payload.facial_hair = { beard_length_mm: `${row.beardLengthMm}mm` }

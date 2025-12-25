@@ -176,6 +176,7 @@ class BulkFitTestsImportsController < ApplicationController
             comfort = fit_test_data[:comfort] || fit_test_data['comfort']
             exercises = fit_test_data[:exercises] || fit_test_data['exercises'] || {}
             mask_modded = fit_test_data[:mask_modded] || fit_test_data['mask_modded'] || false
+            notes = fit_test_data[:notes] || fit_test_data['notes']
 
             # user_id is already the managed_user_id (user_id from ManagedUser)
             # No conversion needed - managed_user_id IS the user_id
@@ -281,7 +282,7 @@ class BulkFitTestsImportsController < ApplicationController
             end
 
             # Create fit test
-            FitTest.create!(
+            fit_test_params = {
               user_id: user_id,
               mask_id: mask_id,
               bulk_fit_tests_import_id: bulk_import.id,
@@ -290,7 +291,11 @@ class BulkFitTestsImportsController < ApplicationController
               comfort: comfort,
               results: results,
               mask_modded: mask_modded
-            )
+            }
+            # Only add notes if present (skip if nil/empty)
+            fit_test_params[:notes] = notes if notes.present?
+
+            FitTest.create!(fit_test_params)
           end
 
           # Mark import as completed and store fit_tests_to_add
