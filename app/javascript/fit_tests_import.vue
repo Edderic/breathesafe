@@ -1854,8 +1854,12 @@ export default {
         'last name', // Profile.last_name
         'user name', // Profile.first_name + Profile.last_name
         'Mask.unique_internal_model_code',
+        'notes',
+        'procedure',
         'Bending over',
         'Talking',
+        'Jaw movement',
+        'Head movement',
         'Turning head side to side',
         'Moving head up and down',
         'Normal breathing 1',
@@ -1865,6 +1869,7 @@ export default {
         'Deep breathing',
         'Testing mode',
         'QLFT -> solution',
+        'mask_modded',
         'facial hair beard length mm',
         'comfort -> "Is there enough room to talk?"',
         'comfort -> "How comfortable is the position of the mask on the nose?"',
