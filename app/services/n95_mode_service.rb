@@ -23,12 +23,17 @@ class N95ModeService
             exercises ->> 'name' AS exercise_name,
             CASE#{' '}
               WHEN exercises ->> 'fit_factor' = '' THEN NULL
-              ELSE (exercises ->> 'fit_factor')::numeric#{' '}
+              WHEN exercises ->> 'fit_factor' IS NULL THEN NULL
+              WHEN LOWER(exercises ->> 'fit_factor') = 'aborted' THEN NULL
+              WHEN exercises ->> 'fit_factor' ~ '^[0-9]+\.?[0-9]*$' THEN (exercises ->> 'fit_factor')::numeric
+              ELSE NULL
             END as exercise_fit_factor,
             CASE#{' '}
               WHEN exercises ->> 'fit_factor' = '' THEN NULL
-              WHEN (exercises ->> 'fit_factor')::numeric IS NULL THEN NULL
-              ELSE 1 / (exercises ->> 'fit_factor')::numeric#{' '}
+              WHEN exercises ->> 'fit_factor' IS NULL THEN NULL
+              WHEN LOWER(exercises ->> 'fit_factor') = 'aborted' THEN NULL
+              WHEN exercises ->> 'fit_factor' ~ '^[0-9]+\.?[0-9]*$' THEN 1 / (exercises ->> 'fit_factor')::numeric
+              ELSE NULL
             END AS inverse_exercise_fit_factor
             FROM n95_exercises, jsonb_array_elements(results -> 'quantitative' -> 'exercises') as exercises
             WHERE exercises ->> 'name' != 'Normal breathing (SEALED)'

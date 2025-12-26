@@ -11,7 +11,13 @@ class FacialMeasurementsToFit
             SELECT n99_exercises.id,
             mask_id,
             exercises ->> 'name' AS exercise_name,
-            (exercises ->> 'fit_factor')::numeric as exercise_fit_factor
+            CASE
+              WHEN exercises ->> 'fit_factor' = '' THEN NULL
+              WHEN exercises ->> 'fit_factor' IS NULL THEN NULL
+              WHEN LOWER(exercises ->> 'fit_factor') = 'aborted' THEN NULL
+              WHEN exercises ->> 'fit_factor' ~ '^[0-9]+\.?[0-9]*$' THEN (exercises ->> 'fit_factor')::numeric
+              ELSE NULL
+            END as exercise_fit_factor
             FROM n99_exercises, jsonb_array_elements(results -> 'quantitative' -> 'exercises') as exercises
         ), n99_filtration_efficiency_from_exercises AS (
             SELECT * FROM n99_exercise_name_and_fit_factors
