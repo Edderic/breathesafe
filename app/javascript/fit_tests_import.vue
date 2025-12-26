@@ -2955,7 +2955,12 @@ export default {
           return
         }
 
-        const response = await axios.get('/masks.json')
+        // Request all masks without pagination for bulk import matching
+        const response = await axios.get('/masks.json', {
+          params: {
+            per_page: 10000 // Request a very large number to get all masks
+          }
+        })
 
         if (response.status === 200 && response.data.masks) {
           // Filter masks where duplicate_of is null
