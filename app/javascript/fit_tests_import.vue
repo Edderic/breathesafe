@@ -491,7 +491,7 @@
           </div>
 
           <div v-else>
-            <div class='mask-modded-values-matching-header'>
+            <div class='mask-modded-values-matching-header justify-content-center'>
               <Button shadow='true' class='button match-button' text="Match" @click='attemptMaskModdedValuesAutoMatch' :disabled='maskModdedValuesMatchingRows.length === 0'/>
             </div>
 
@@ -513,7 +513,7 @@
               </div>
             </Popup>
 
-            <div v-if="maskModdedValuesMatchingRows.length > 0" class='mask-modded-values-matching-table content'>
+            <div v-if="maskModdedValuesMatchingRows.length > 0" class='mask-matching-table content'>
               <table>
                 <thead>
                   <tr>
@@ -635,7 +635,7 @@
           </div>
 
           <div v-else>
-            <div class='procedure-matching-header'>
+            <div class='procedure-matching-header justify-content-center'>
               <Button shadow='true' class='button match-button' text="Match" @click='attemptProcedureAutoMatch' :disabled='procedureMatchingRows.length === 0'/>
             </div>
 
@@ -657,7 +657,7 @@
               </div>
             </Popup>
 
-            <div v-if="procedureMatchingRows.length > 0" class='procedure-matching-table content'>
+            <div v-if="procedureMatchingRows.length > 0" class='mask-matching-table content'>
               <table>
                 <thead>
                   <tr>
