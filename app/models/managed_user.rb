@@ -20,24 +20,38 @@ class ManagedUser < ApplicationRecord
     Rails.logger.debug "ManagedUser.for_manager_id: Collecting managed_ids took: #{(Time.current - collect_start) * 1000}ms, found #{managed_ids.length} unique IDs"
 
     # Preload latest facial measurements for all managed users efficiently
-    # Use PostgreSQL's DISTINCT ON to get only the latest measurement per user in a single query
+    # Use PostgreSQL's DISTINCT ON to get separate latest measurements for traditional and iOS
     facial_measurement_start = Time.current
     if managed_ids.any?
-      # Use raw SQL with DISTINCT ON for efficiency (PostgreSQL-specific)
-      # This gets the latest facial measurement per user in a single query
-      # Use sanitize_sql_array for safe parameter binding
-      sql = ActiveRecord::Base.sanitize_sql_array([
-                                                    <<-SQL.squish, managed_ids
+      # Get latest traditional facial measurements (where arkit IS NULL or empty)
+      traditional_sql = ActiveRecord::Base.sanitize_sql_array([
+                                                                <<-SQL.squish, managed_ids
           SELECT DISTINCT ON (user_id) *
           FROM facial_measurements
           WHERE user_id IN (?)
+            AND (arkit IS NULL OR arkit = '{}')
           ORDER BY user_id, created_at DESC
-                                                    SQL
-                                                  ])
-      latest_facial_measurements = FacialMeasurement.find_by_sql(sql).index_by(&:user_id)
-      Rails.logger.debug "ManagedUser.for_manager_id: Facial measurement query took: #{(Time.current - facial_measurement_start) * 1000}ms, loaded #{latest_facial_measurements.length} measurements"
+                                                                SQL
+                                                              ])
+      latest_traditional_measurements = FacialMeasurement.find_by_sql(traditional_sql).index_by(&:user_id)
+
+      # Get latest iOS facial measurements (where arkit IS NOT NULL and not empty)
+      ios_sql = ActiveRecord::Base.sanitize_sql_array([
+                                                        <<-SQL.squish, managed_ids
+          SELECT DISTINCT ON (user_id) *
+          FROM facial_measurements
+          WHERE user_id IN (?)
+            AND arkit IS NOT NULL
+            AND arkit != '{}'
+          ORDER BY user_id, created_at DESC
+                                                        SQL
+                                                      ])
+      latest_ios_measurements = FacialMeasurement.find_by_sql(ios_sql).index_by(&:user_id)
+
+      Rails.logger.debug "ManagedUser.for_manager_id: Facial measurement query took: #{(Time.current - facial_measurement_start) * 1000}ms, loaded #{latest_traditional_measurements.length} traditional + #{latest_ios_measurements.length} iOS measurements"
     else
-      latest_facial_measurements = {}
+      latest_traditional_measurements = {}
+      latest_ios_measurements = {}
       Rails.logger.debug 'ManagedUser.for_manager_id: No managed_ids, skipped facial measurement query'
     end
 
@@ -58,7 +72,8 @@ class ManagedUser < ApplicationRecord
     loop_start = Time.current
     managed_users.each do |mu|
       profile = mu.managed.profile
-      latest_facial_measurement = latest_facial_measurements[mu.managed_id]
+      latest_traditional_measurement = latest_traditional_measurements[mu.managed_id]
+      latest_ios_measurement = latest_ios_measurements[mu.managed_id]
 
       # Calculate demographics completion percentage
       demog_percent_complete = 0
@@ -77,12 +92,32 @@ class ManagedUser < ApplicationRecord
         demog_percent_complete = (completed_demog_fields.to_f / demog_fields.length * 100).round
       end
 
-      # Calculate facial measurements completion percentage
+      # Calculate facial measurements completion percentage (ARKit/iOS)
+      # Use the latest iOS-specific measurement
       fm_percent_complete = 0
-      if latest_facial_measurement
+      if latest_ios_measurement
         # Use the percent_complete method from FacialMeasurement
         # This calculates based on aggregated ARKit measurements (nose, strap, top_cheek, mid_cheek, chin)
-        fm_percent_complete = latest_facial_measurement.percent_complete.to_f
+        fm_percent_complete = latest_ios_measurement.percent_complete.to_f
+      end
+
+      # Calculate traditional facial measurements completion percentage
+      # Use the latest traditional-specific measurement
+      traditional_fm_percent_complete = 0
+      traditional_fm_count = 0
+      traditional_fm_total = 6
+      if latest_traditional_measurement
+        traditional_measurements = [
+          latest_traditional_measurement.face_width,
+          latest_traditional_measurement.face_length,
+          latest_traditional_measurement.bitragion_subnasale_arc,
+          latest_traditional_measurement.nasal_root_breadth,
+          latest_traditional_measurement.nose_bridge_height,
+          latest_traditional_measurement.nose_protrusion
+        ]
+        # Count measurements that are present and non-zero
+        traditional_fm_count = traditional_measurements.count { |val| val.present? && val.to_f != 0 }
+        traditional_fm_percent_complete = (traditional_fm_count.to_f / traditional_fm_total * 100).round
       end
 
       # Get unique masks tested count
@@ -99,6 +134,9 @@ class ManagedUser < ApplicationRecord
         # Calculated completion percentages
         'demog_percent_complete' => demog_percent_complete,
         'fm_percent_complete' => fm_percent_complete,
+        'traditional_fm_percent_complete' => traditional_fm_percent_complete,
+        'traditional_fm_count' => traditional_fm_count,
+        'traditional_fm_total' => traditional_fm_total,
         'num_unique_masks_tested' => num_unique_masks_tested
       }
 
@@ -157,26 +195,30 @@ class ManagedUser < ApplicationRecord
                    })
       end
 
-      # Add facial measurement data if available
-      if latest_facial_measurement
+      # Add facial measurement data from both sources if available
+      # Prefer traditional measurement for traditional fields, iOS measurement for arkit
+      if latest_traditional_measurement || latest_ios_measurement
+        measurement_for_traditional_fields = latest_traditional_measurement || latest_ios_measurement
+        measurement_for_ios_fields = latest_ios_measurement || latest_traditional_measurement
+
         row.merge!({
-                     'facial_measurement_id' => latest_facial_measurement.id,
-                     'source' => latest_facial_measurement.source,
-                     'face_width' => latest_facial_measurement.face_width,
-                     'jaw_width' => latest_facial_measurement.jaw_width,
-                     'face_depth' => latest_facial_measurement.face_depth,
-                     'face_length' => latest_facial_measurement.face_length,
-                     'lower_face_length' => latest_facial_measurement.lower_face_length,
-                     'bitragion_menton_arc' => latest_facial_measurement.bitragion_menton_arc,
-                     'bitragion_subnasale_arc' => latest_facial_measurement.bitragion_subnasale_arc,
-                     'cheek_fullness' => latest_facial_measurement.cheek_fullness,
-                     'nasal_root_breadth' => latest_facial_measurement.nasal_root_breadth,
-                     'nose_protrusion' => latest_facial_measurement.nose_protrusion,
-                     'nose_bridge_height' => latest_facial_measurement.nose_bridge_height,
-                     'lip_width' => latest_facial_measurement.lip_width,
-                     'head_circumference' => latest_facial_measurement.head_circumference,
-                     'nose_breadth' => latest_facial_measurement.nose_breadth,
-                     'arkit' => latest_facial_measurement.arkit
+                     'facial_measurement_id' => measurement_for_traditional_fields.id,
+                     'source' => measurement_for_traditional_fields.source,
+                     'face_width' => measurement_for_traditional_fields.face_width,
+                     'jaw_width' => measurement_for_traditional_fields.jaw_width,
+                     'face_depth' => measurement_for_traditional_fields.face_depth,
+                     'face_length' => measurement_for_traditional_fields.face_length,
+                     'lower_face_length' => measurement_for_traditional_fields.lower_face_length,
+                     'bitragion_menton_arc' => measurement_for_traditional_fields.bitragion_menton_arc,
+                     'bitragion_subnasale_arc' => measurement_for_traditional_fields.bitragion_subnasale_arc,
+                     'cheek_fullness' => measurement_for_traditional_fields.cheek_fullness,
+                     'nasal_root_breadth' => measurement_for_traditional_fields.nasal_root_breadth,
+                     'nose_protrusion' => measurement_for_traditional_fields.nose_protrusion,
+                     'nose_bridge_height' => measurement_for_traditional_fields.nose_bridge_height,
+                     'lip_width' => measurement_for_traditional_fields.lip_width,
+                     'head_circumference' => measurement_for_traditional_fields.head_circumference,
+                     'nose_breadth' => measurement_for_traditional_fields.nose_breadth,
+                     'arkit' => measurement_for_ios_fields.arkit
                    })
       end
 
@@ -197,11 +239,21 @@ class ManagedUser < ApplicationRecord
     return [] unless managed_user
 
     profile = managed_user.managed.profile
-    # For single user, we can still optimize by using a more efficient query
-    latest_facial_measurement = FacialMeasurement.where(user_id: managed_user.managed_id)
-                                                 .order(created_at: :desc)
-                                                 .limit(1)
-                                                 .first
+
+    # Get latest traditional facial measurement (where arkit IS NULL or empty)
+    latest_traditional_measurement = FacialMeasurement.where(user_id: managed_user.managed_id)
+                                                      .where('arkit IS NULL OR arkit = ?', '{}')
+                                                      .order(created_at: :desc)
+                                                      .limit(1)
+                                                      .first
+
+    # Get latest iOS facial measurement (where arkit IS NOT NULL and not empty)
+    latest_ios_measurement = FacialMeasurement.where(user_id: managed_user.managed_id)
+                                              .where.not(arkit: nil)
+                                              .where.not(arkit: '{}')
+                                              .order(created_at: :desc)
+                                              .limit(1)
+                                              .first
 
     # Calculate demographics completion percentage
     demog_percent_complete = 0
@@ -220,12 +272,32 @@ class ManagedUser < ApplicationRecord
       demog_percent_complete = (completed_demog_fields.to_f / demog_fields.length * 100).round
     end
 
-    # Calculate facial measurements completion percentage
+    # Calculate facial measurements completion percentage (ARKit/iOS)
+    # Use the latest iOS-specific measurement
     fm_percent_complete = 0
-    if latest_facial_measurement
+    if latest_ios_measurement
       # Use the percent_complete method from FacialMeasurement
       # This calculates based on aggregated ARKit measurements (nose, strap, top_cheek, mid_cheek, chin)
-      fm_percent_complete = latest_facial_measurement.percent_complete.to_f
+      fm_percent_complete = latest_ios_measurement.percent_complete.to_f
+    end
+
+    # Calculate traditional facial measurements completion percentage
+    # Use the latest traditional-specific measurement
+    traditional_fm_percent_complete = 0
+    traditional_fm_count = 0
+    traditional_fm_total = 6
+    if latest_traditional_measurement
+      traditional_measurements = [
+        latest_traditional_measurement.face_width,
+        latest_traditional_measurement.face_length,
+        latest_traditional_measurement.bitragion_subnasale_arc,
+        latest_traditional_measurement.nasal_root_breadth,
+        latest_traditional_measurement.nose_bridge_height,
+        latest_traditional_measurement.nose_protrusion
+      ]
+      # Count measurements that are present and non-zero
+      traditional_fm_count = traditional_measurements.count { |val| val.present? && val.to_f != 0 }
+      traditional_fm_percent_complete = (traditional_fm_count.to_f / traditional_fm_total * 100).round
     end
 
     # Get unique masks tested count
@@ -245,6 +317,9 @@ class ManagedUser < ApplicationRecord
       # Calculated completion percentages
       'demog_percent_complete' => demog_percent_complete,
       'fm_percent_complete' => fm_percent_complete,
+      'traditional_fm_percent_complete' => traditional_fm_percent_complete,
+      'traditional_fm_count' => traditional_fm_count,
+      'traditional_fm_total' => traditional_fm_total,
       'num_unique_masks_tested' => num_unique_masks_tested
     }
 
@@ -303,26 +378,31 @@ class ManagedUser < ApplicationRecord
                  })
     end
 
-    # Add facial measurement data if available
-    if latest_facial_measurement
+    # Add facial measurement data from both sources if available
+    # Prefer traditional measurement for traditional fields, iOS measurement for arkit
+    if latest_traditional_measurement || latest_ios_measurement
+      # Use whichever measurement exists, preferring traditional for traditional fields
+      measurement_for_traditional_fields = latest_traditional_measurement || latest_ios_measurement
+      measurement_for_ios_fields = latest_ios_measurement || latest_traditional_measurement
+
       row.merge!({
-                   'facial_measurement_id' => latest_facial_measurement.id,
-                   'source' => latest_facial_measurement.source,
-                   'face_width' => latest_facial_measurement.face_width,
-                   'jaw_width' => latest_facial_measurement.jaw_width,
-                   'face_depth' => latest_facial_measurement.face_depth,
-                   'face_length' => latest_facial_measurement.face_length,
-                   'lower_face_length' => latest_facial_measurement.lower_face_length,
-                   'bitragion_menton_arc' => latest_facial_measurement.bitragion_menton_arc,
-                   'bitragion_subnasale_arc' => latest_facial_measurement.bitragion_subnasale_arc,
-                   'cheek_fullness' => latest_facial_measurement.cheek_fullness,
-                   'nasal_root_breadth' => latest_facial_measurement.nasal_root_breadth,
-                   'nose_protrusion' => latest_facial_measurement.nose_protrusion,
-                   'nose_bridge_height' => latest_facial_measurement.nose_bridge_height,
-                   'lip_width' => latest_facial_measurement.lip_width,
-                   'head_circumference' => latest_facial_measurement.head_circumference,
-                   'nose_breadth' => latest_facial_measurement.nose_breadth,
-                   'arkit' => latest_facial_measurement.arkit
+                   'facial_measurement_id' => measurement_for_traditional_fields.id,
+                   'source' => measurement_for_traditional_fields.source,
+                   'face_width' => measurement_for_traditional_fields.face_width,
+                   'jaw_width' => measurement_for_traditional_fields.jaw_width,
+                   'face_depth' => measurement_for_traditional_fields.face_depth,
+                   'face_length' => measurement_for_traditional_fields.face_length,
+                   'lower_face_length' => measurement_for_traditional_fields.lower_face_length,
+                   'bitragion_menton_arc' => measurement_for_traditional_fields.bitragion_menton_arc,
+                   'bitragion_subnasale_arc' => measurement_for_traditional_fields.bitragion_subnasale_arc,
+                   'cheek_fullness' => measurement_for_traditional_fields.cheek_fullness,
+                   'nasal_root_breadth' => measurement_for_traditional_fields.nasal_root_breadth,
+                   'nose_protrusion' => measurement_for_traditional_fields.nose_protrusion,
+                   'nose_bridge_height' => measurement_for_traditional_fields.nose_bridge_height,
+                   'lip_width' => measurement_for_traditional_fields.lip_width,
+                   'head_circumference' => measurement_for_traditional_fields.head_circumference,
+                   'nose_breadth' => measurement_for_traditional_fields.nose_breadth,
+                   'arkit' => measurement_for_ios_fields.arkit
                  })
 
       # Calculate missing ratio if needed
@@ -379,20 +459,37 @@ class ManagedUser < ApplicationRecord
     managed_users = query.to_a
     managed_ids = managed_users.map(&:managed_id)
 
-    # Preload facial measurements
-    latest_facial_measurements = if managed_ids.any?
-                                   sql = ActiveRecord::Base.sanitize_sql_array([
-                                                                                 <<-SQL.squish, managed_ids
-                                     SELECT DISTINCT ON (user_id) *
-                                     FROM facial_measurements
-                                     WHERE user_id IN (?)
-                                     ORDER BY user_id, created_at DESC
-                                                                                 SQL
-                                                                               ])
-                                   FacialMeasurement.find_by_sql(sql).index_by(&:user_id)
-                                 else
-                                   {}
-                                 end
+    # Preload facial measurements - separate queries for traditional and iOS
+    latest_traditional_measurements = if managed_ids.any?
+                                        traditional_sql = ActiveRecord::Base.sanitize_sql_array([
+                                                                                                  <<-SQL.squish, managed_ids
+                                          SELECT DISTINCT ON (user_id) *
+                                          FROM facial_measurements
+                                          WHERE user_id IN (?)
+                                            AND (arkit IS NULL OR arkit = '{}')
+                                          ORDER BY user_id, created_at DESC
+                                                                                                  SQL
+                                                                                                ])
+                                        FacialMeasurement.find_by_sql(traditional_sql).index_by(&:user_id)
+                                      else
+                                        {}
+                                      end
+
+    latest_ios_measurements = if managed_ids.any?
+                                ios_sql = ActiveRecord::Base.sanitize_sql_array([
+                                                                                  <<-SQL.squish, managed_ids
+                                  SELECT DISTINCT ON (user_id) *
+                                  FROM facial_measurements
+                                  WHERE user_id IN (?)
+                                    AND arkit IS NOT NULL
+                                    AND arkit != '{}'
+                                  ORDER BY user_id, created_at DESC
+                                                                                  SQL
+                                                                                ])
+                                FacialMeasurement.find_by_sql(ios_sql).index_by(&:user_id)
+                              else
+                                {}
+                              end
 
     # Preload mask counts
     unique_mask_counts = if managed_ids.any?
@@ -408,7 +505,8 @@ class ManagedUser < ApplicationRecord
     # Build result array with calculations
     managed_users.map do |mu|
       profile = mu.managed.profile
-      latest_facial_measurement = latest_facial_measurements[mu.managed_id]
+      latest_traditional_measurement = latest_traditional_measurements[mu.managed_id]
+      latest_ios_measurement = latest_ios_measurements[mu.managed_id]
 
       # Calculate demographics completion
       demog_fields = []
@@ -423,11 +521,35 @@ class ManagedUser < ApplicationRecord
       completed_demog_fields = demog_fields.count(&:present?)
       demog_percent_complete = demog_fields.any? ? (completed_demog_fields.to_f / demog_fields.length * 100).round : 0
 
-      # Calculate facial measurements completion
-      fm_percent_complete = latest_facial_measurement ? latest_facial_measurement.percent_complete.to_f : 0
+      # Calculate facial measurements completion (ARKit/iOS)
+      # Use the latest iOS-specific measurement
+      fm_percent_complete = latest_ios_measurement ? latest_ios_measurement.percent_complete.to_f : 0
+
+      # Calculate traditional facial measurements completion
+      # Use the latest traditional-specific measurement
+      traditional_fm_percent_complete = 0
+      traditional_fm_count = 0
+      traditional_fm_total = 6
+      if latest_traditional_measurement
+        traditional_measurements = [
+          latest_traditional_measurement.face_width,
+          latest_traditional_measurement.face_length,
+          latest_traditional_measurement.bitragion_subnasale_arc,
+          latest_traditional_measurement.nasal_root_breadth,
+          latest_traditional_measurement.nose_bridge_height,
+          latest_traditional_measurement.nose_protrusion
+        ]
+        # Count measurements that are present and non-zero
+        traditional_fm_count = traditional_measurements.count { |val| val.present? && val.to_f != 0 }
+        traditional_fm_percent_complete = (traditional_fm_count.to_f / traditional_fm_total * 100).round
+      end
 
       # Get unique masks tested
       num_unique_masks_tested = unique_mask_counts[mu.managed_id] || 0
+
+      # Use whichever measurement exists for facial measurement fields
+      measurement_for_traditional_fields = latest_traditional_measurement || latest_ios_measurement
+      measurement_for_ios_fields = latest_ios_measurement || latest_traditional_measurement
 
       # Build hash with all data (using ActiveRecord objects for proper decryption)
       {
@@ -461,24 +583,27 @@ class ManagedUser < ApplicationRecord
         'profile_id' => profile&.id,
         'demog_percent_complete' => demog_percent_complete,
         'fm_percent_complete' => fm_percent_complete,
+        'traditional_fm_percent_complete' => traditional_fm_percent_complete,
+        'traditional_fm_count' => traditional_fm_count,
+        'traditional_fm_total' => traditional_fm_total,
         'num_unique_masks_tested' => num_unique_masks_tested,
-        'facial_measurement_id' => latest_facial_measurement&.id,
-        'source' => latest_facial_measurement&.source,
-        'face_width' => latest_facial_measurement&.face_width,
-        'jaw_width' => latest_facial_measurement&.jaw_width,
-        'face_depth' => latest_facial_measurement&.face_depth,
-        'face_length' => latest_facial_measurement&.face_length,
-        'lower_face_length' => latest_facial_measurement&.lower_face_length,
-        'bitragion_menton_arc' => latest_facial_measurement&.bitragion_menton_arc,
-        'bitragion_subnasale_arc' => latest_facial_measurement&.bitragion_subnasale_arc,
-        'cheek_fullness' => latest_facial_measurement&.cheek_fullness,
-        'nasal_root_breadth' => latest_facial_measurement&.nasal_root_breadth,
-        'nose_protrusion' => latest_facial_measurement&.nose_protrusion,
-        'nose_bridge_height' => latest_facial_measurement&.nose_bridge_height,
-        'lip_width' => latest_facial_measurement&.lip_width,
-        'head_circumference' => latest_facial_measurement&.head_circumference,
-        'nose_breadth' => latest_facial_measurement&.nose_breadth,
-        'arkit' => latest_facial_measurement&.arkit,
+        'facial_measurement_id' => measurement_for_traditional_fields&.id,
+        'source' => measurement_for_traditional_fields&.source,
+        'face_width' => measurement_for_traditional_fields&.face_width,
+        'jaw_width' => measurement_for_traditional_fields&.jaw_width,
+        'face_depth' => measurement_for_traditional_fields&.face_depth,
+        'face_length' => measurement_for_traditional_fields&.face_length,
+        'lower_face_length' => measurement_for_traditional_fields&.lower_face_length,
+        'bitragion_menton_arc' => measurement_for_traditional_fields&.bitragion_menton_arc,
+        'bitragion_subnasale_arc' => measurement_for_traditional_fields&.bitragion_subnasale_arc,
+        'cheek_fullness' => measurement_for_traditional_fields&.cheek_fullness,
+        'nasal_root_breadth' => measurement_for_traditional_fields&.nasal_root_breadth,
+        'nose_protrusion' => measurement_for_traditional_fields&.nose_protrusion,
+        'nose_bridge_height' => measurement_for_traditional_fields&.nose_bridge_height,
+        'lip_width' => measurement_for_traditional_fields&.lip_width,
+        'head_circumference' => measurement_for_traditional_fields&.head_circumference,
+        'nose_breadth' => measurement_for_traditional_fields&.nose_breadth,
+        'arkit' => measurement_for_ios_fields&.arkit,
         'missing_ratio' => 0.0
       }
     end
@@ -495,6 +620,8 @@ class ManagedUser < ApplicationRecord
                  'manager_email'
                when 'demog_percent_complete'
                  'demog_percent_complete'
+               when 'traditional_fm_percent_complete'
+                 'traditional_fm_percent_complete'
                when 'fm_percent_complete'
                  'fm_percent_complete'
                when 'num_unique_masks_tested'

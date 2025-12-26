@@ -33,6 +33,7 @@ class ManagedUsersController < ApplicationController
         'name' => 'profiles.first_name',
         'manager_email' => 'users.email',
         'demog_percent_complete' => 'demog_percent_complete',
+        'traditional_fm_percent_complete' => 'traditional_fm_percent_complete',
         'fm_percent_complete' => 'fm_percent_complete',
         'num_unique_masks_tested' => 'num_unique_masks_tested'
       }

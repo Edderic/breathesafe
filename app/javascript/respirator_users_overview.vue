@@ -40,8 +40,14 @@
                   {{ currentOrder === 'asc' ? '↑' : '↓' }}
                 </span>
               </th>
+              <th @click='toggleSort("traditional_fm_percent_complete")' class='sortable-header'>
+                Trad
+                <span class='sort-indicator' v-if='currentSort === "traditional_fm_percent_complete"'>
+                  {{ currentOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
               <th @click='toggleSort("fm_percent_complete")' class='sortable-header'>
-                Face
+                iOS
                 <span class='sort-indicator' v-if='currentSort === "fm_percent_complete"'>
                   {{ currentOrder === 'asc' ? '↑' : '↓' }}
                 </span>
@@ -68,6 +74,15 @@
                   :maxVal=1
                   :value='1 - r.demogPercentComplete / 100'
                   :text='percentage(r.demogPercentComplete)'
+                  class='colored-cell'
+                />
+              </td>
+              <td @click="visit(r.managedId, 'Facial Measurements')" class='colored-cell' >
+                <ColoredCell
+                  :colorScheme="evenlySpacedColorScheme"
+                  :maxVal=1
+                  :value='1 - r.traditionalFmPercentComplete / 100'
+                  :text='formatTraditionalFmCompletion(r)'
                   class='colored-cell'
                 />
               </td>
@@ -124,8 +139,14 @@
                   {{ currentOrder === 'asc' ? '↑' : '↓' }}
                 </span>
               </th>
+              <th @click='toggleSort("traditional_fm_percent_complete")' class='sortable-header'>
+                Traditional Facial measurements Completion
+                <span class='sort-indicator' v-if='currentSort === "traditional_fm_percent_complete"'>
+                  {{ currentOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </th>
               <th @click='toggleSort("fm_percent_complete")' class='sortable-header'>
-                Face Measurements Completion
+                iOS Face Scan Completion
                 <span class='sort-indicator' v-if='currentSort === "fm_percent_complete"'>
                   {{ currentOrder === 'asc' ? '↑' : '↓' }}
                 </span>
@@ -152,6 +173,15 @@
                   :maxVal=1
                   :value='1 - r.demogPercentComplete / 100'
                   :text='percentage(r.demogPercentComplete)'
+                  class='colored-cell'
+                />
+              </td>
+              <td @click="visit(r.managedId, 'Facial Measurements')" class='colored-cell' >
+                <ColoredCell
+                  :colorScheme="evenlySpacedColorScheme"
+                  :maxVal=1
+                  :value='1 - r.traditionalFmPercentComplete / 100'
+                  :text='formatTraditionalFmCompletion(r)'
                   class='colored-cell'
                 />
               </td>
@@ -232,6 +262,10 @@ export default {
     metricToShow: {
       type: String,
       default: "Demographics"
+    },
+    filterTraditionalFm: {
+      type: String,
+      default: "all"
     }
   },
   data() {
@@ -282,17 +316,33 @@ export default {
       }
     },
     displayables() {
-      if (this.search == "") {
-        return this.managedUsers
-      } else {
+      let filtered = this.managedUsers
+
+      // Apply search filter
+      if (this.search !== "") {
         let lowerSearch = this.search.toLowerCase()
-        return this.managedUsers.filter(
+        filtered = filtered.filter(
           function(mu) {
             return mu.firstName.toLowerCase().match(lowerSearch)
               || mu.lastName.toLowerCase().match(lowerSearch)
           }
         )
       }
+
+      // Apply traditional facial measurements filter
+      if (this.filterTraditionalFm === 'incomplete') {
+        filtered = filtered.filter(mu => {
+          const percent = mu.traditionalFmPercentComplete || 0
+          return percent < 100
+        })
+      } else if (this.filterTraditionalFm === 'complete') {
+        filtered = filtered.filter(mu => {
+          const percent = mu.traditionalFmPercentComplete || 0
+          return percent === 100
+        })
+      }
+
+      return filtered
     },
     isAdminView() {
       return this.$route.query.admin === 'true' && this.currentUser?.admin
@@ -489,6 +539,12 @@ export default {
     },
     percentage(num) {
       return `${num}%`
+    },
+    formatTraditionalFmCompletion(user) {
+      const count = user.traditionalFmCount || 0
+      const total = user.traditionalFmTotal || 6
+      const percent = user.traditionalFmPercentComplete || 0
+      return `${count}/${total} (${percent}%)`
     },
     visit(profileId, tabToShow) {
       this.$router.push({

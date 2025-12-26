@@ -10,6 +10,14 @@
       <div class='row justify-content-center'>
         <input id='search' type="text" v-model='search'>
         <SearchIcon height='2em' width='2em'/>
+
+        <button class='icon' @click='showFilterPopup = true'>
+          <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="8 10 70 70"
+            width="2em" height="2em"
+            >
+            <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' :fill='filterButtonColor'/>
+          </svg>
+        </button>
       </div>
 
       <Pagination
@@ -26,6 +34,7 @@
         ref="overview"
         :search="search"
         :metricToShow="metricToShow"
+        :filterTraditionalFm="filterTraditionalFm"
         @pagination-update="handlePaginationUpdate"
       />
     </div>
@@ -65,6 +74,30 @@
           <li><strong>Switch between views:</strong> Use the "Absolute" and "Z-Score" tabs to see measurements in different formats</li>
           <li><strong>Search:</strong> Use the search box to filter users by name or manager email</li>
         </ul>
+      </div>
+    </Popup>
+
+    <Popup v-if='showFilterPopup' @onclose='showFilterPopup = false'>
+      <div style='padding: 1em;'>
+        <h3>Filter Traditional Facial Measurements</h3>
+        <div style='margin: 1em 0;'>
+          <label style='display: block; margin: 0.5em 0;'>
+            <input type="radio" value="all" v-model="filterTraditionalFm" @change="applyFilter">
+            Show All
+          </label>
+        </div>
+        <div style='margin: 1em 0;'>
+          <label style='display: block; margin: 0.5em 0;'>
+            <input type="radio" value="incomplete" v-model="filterTraditionalFm" @change="applyFilter">
+            Incomplete (&lt; 100%)
+          </label>
+        </div>
+        <div style='margin: 1em 0;'>
+          <label style='display: block; margin: 0.5em 0;'>
+            <input type="radio" value="complete" v-model="filterTraditionalFm" @change="applyFilter">
+            Complete (100%)
+          </label>
+        </div>
       </div>
     </Popup>
 
@@ -155,6 +188,8 @@ export default {
       facialMeasurementView: "Absolute",
       facialMeasurementsData: [],
       showHelp: false,
+      showFilterPopup: false,
+      filterTraditionalFm: 'all', // 'all', 'incomplete', 'complete'
       currentPage: 1,
       perPage: 25,
       totalCount: 0
@@ -199,6 +234,9 @@ export default {
         ]
     ),
 
+    filterButtonColor() {
+      return this.filterTraditionalFm !== 'all' ? '#4CAF50' : '#ddd'
+    },
     evenlySpacedColorScheme() {
       return genColorSchemeBounds(0, 1, 5)
     },
@@ -301,6 +339,11 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useProfileStore, ['loadProfile']),
+    applyFilter() {
+      // Close the popup
+      this.showFilterPopup = false
+      // The filtering will be handled by the child component via the prop
+    },
     handlePaginationUpdate(paginationData) {
       this.currentPage = paginationData.currentPage
       this.perPage = paginationData.perPage
@@ -552,6 +595,24 @@ export default {
     color: white;
     text-shadow: 1px 1px 2px black;
     padding: 1em;
+  }
+
+  .icon {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .icon:hover {
+    opacity: 0.7;
+  }
+
+  .filter-button {
+    transition: fill 0.3s ease;
   }
 
   .quote {
