@@ -14,15 +14,15 @@ class UsersController < ApplicationController
 
       if params[:email].present?
         user = User.find_by(email: params[:email])
-        if user
-          users = [{
-            id: user.id,
-            email: user.email,
-            admin: user.admin
-          }]
-        else
-          users = []
-        end
+        users = if user
+                  [{
+                    id: user.id,
+                    email: user.email,
+                    admin: user.admin
+                  }]
+                else
+                  []
+                end
       else
         messages = ['Email parameter is required.']
       end

@@ -513,16 +513,16 @@ class BulkFitTestsImportsController < ApplicationController
     mask_matching.each do |file_mask_name, value|
       next unless value == '__to_be_created__'
 
-      # Create mask with file_mask_name as unique_internal_model_code
+      # Find or create mask with file_mask_name as unique_internal_model_code
       # Author should be set to the manager (bulk_import.user)
       ActiveRecord::Base.transaction do
-        new_mask = Mask.create!(
-          unique_internal_model_code: file_mask_name,
-          author_id: bulk_import.user_id,
-          bulk_fit_tests_import_id: bulk_import.id
-        )
+        # Use find_or_create_by to handle existing masks gracefully
+        new_mask = Mask.find_or_create_by!(unique_internal_model_code: file_mask_name) do |mask|
+          mask.author_id = bulk_import.user_id
+          mask.bulk_fit_tests_import_id = bulk_import.id
+        end
 
-        # Update mask_matching with the created mask's ID
+        # Update mask_matching with the mask's ID (whether found or created)
         updated_mask_matching[file_mask_name] = new_mask.id.to_s
       end
     end
