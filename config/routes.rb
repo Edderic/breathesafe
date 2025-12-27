@@ -105,7 +105,7 @@ Rails.application.routes.draw do
   resources :mask_breakdowns, only: %i[index show create update]
 
   # Mask events (admin only)
-  get 'masks/:mask_id/events', to: 'mask_events#index'
+  get 'masks/:mask_id/events', to: 'mask_events#index', defaults: { format: :json }
 
   # Admin routes
   namespace :admin do
