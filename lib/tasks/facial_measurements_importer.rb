@@ -3,13 +3,26 @@
 
 # Import facial measurements from CSV string
 # Usage:
-#   csv_string = File.read('./data/wayne-community-fit-testing-breathesafe - facial_measurements.csv')
-#   importer = FacialMeasurementsImporter.new(
-#     csv_string: csv_string,
-#     manager_email: 'wilier-tome-02@icloud.com',
-#     source: 'wcft'
-#   )
-#   importer.import
+# load './Facial_measurements_importer.rb'
+# csv_string = File.read('/Users/eddericugaddan/Downloads/Fit Predictor Upload - Dec 24 2025/Facial Measurements-Table 1.csv')
+# importer = FacialMeasurementsImporter.new(
+#   csv_string: csv_string,
+#   manager_email: '...',
+#   source: 'wcft'
+# )
+# importer.import
+#
+#
+# Need:
+#
+#   user_id: managed_user.managed_id,
+#   source: @source,
+#   face_width: row[:face_width_mm]&.to_f,
+#   face_length: row[:face_length_mm]&.to_f,
+#   nose_bridge_height: row[:nose_bridge_height_mm]&.to_f,
+#   nasal_root_breadth: row[:nasal_root_breadth_mm]&.to_f,
+#   nose_protrusion: row[:nose_protrusion_mm]&.to_f,
+#   bitragion_subnasale_arc: row[:bitragion_subnasale_arc_mm]&.to_f,
 
 require 'csv'
 require 'date'

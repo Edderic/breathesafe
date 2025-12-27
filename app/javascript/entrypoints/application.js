@@ -48,6 +48,7 @@ import Disclaimer from '../disclaimer.vue';
 import Venues from '../map_events.vue'
 import Landing from '../landing.vue'
 import Mask from '../add_mask.vue'
+import MaskBreakdown from '../mask_breakdown.vue'
 import FitTest from '../fit_test.vue'
 import FitTests from '../fit_tests.vue'
 import FitTestsImport from '../fit_tests_import.vue'
@@ -117,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/consent_form', component: ConsentForm, name: 'ConsentForm' },
     { path: '/privacy', component: PrivacyPolicy, name: 'PrivacyPolicy' },
     { path: '/admin/study_participants', component: AdminStudyParticipants, name: 'AdminStudyParticipants' },
+    { path: '/admin/masks/unique_internal_model_code_breakdown', component: MaskBreakdown, name: 'MaskBreakdown' },
   ]
 
   // 3. Create the router instance and pass the `routes` option

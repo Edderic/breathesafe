@@ -101,6 +101,9 @@ Rails.application.routes.draw do
 
   resources :facial_measurements_fit_tests, only: %i[create index]
 
+  # Mask breakdowns (admin only)
+  resources :mask_breakdowns, only: %i[index show create update]
+
   # Admin routes
   namespace :admin do
     resources :study_participants, only: [:index] do

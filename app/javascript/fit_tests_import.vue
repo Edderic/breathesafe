@@ -5043,6 +5043,8 @@ export default {
           const exercises = {}
           if (row.exercises.bendingOver) exercises['Bending over'] = row.exercises.bendingOver
           if (row.exercises.talking) exercises['Talking'] = row.exercises.talking
+          if (row.exercises.jawMovement) exercises['Jaw movement'] = row.exercises.jawMovement
+          if (row.exercises.headMovement) exercises['Head movement'] = row.exercises.headMovement
           if (row.exercises.turningHeadSideToSide) exercises['Turning head side to side'] = row.exercises.turningHeadSideToSide
           if (row.exercises.movingHeadUpAndDown) exercises['Moving head up and down'] = row.exercises.movingHeadUpAndDown
           if (row.exercises.normalBreathing1) exercises['Normal breathing 1'] = row.exercises.normalBreathing1
@@ -5061,6 +5063,10 @@ export default {
           // Add notes if present (skip if null/empty to avoid saving empty notes)
           if (row.notes) {
             payload.notes = row.notes
+          }
+          // Add procedure if present
+          if (row.procedure) {
+            payload.procedure = row.procedure
           }
           if (row.beardLengthMm && !row.beardLengthInvalid) {
             payload.facial_hair = { beard_length_mm: `${row.beardLengthMm}mm` }

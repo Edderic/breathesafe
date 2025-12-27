@@ -16,11 +16,23 @@ class Mask < ApplicationRecord
                              dependent: :restrict_with_exception, inverse_of: :mask_a
   has_many :mask_pairs_as_b, class_name: 'MaskPair', foreign_key: 'mask_b_id',
                              dependent: :restrict_with_exception, inverse_of: :mask_b
+  has_many :mask_breakdowns, dependent: :destroy
+  has_many :mask_states, dependent: :destroy
+  has_many :mask_events, dependent: :destroy
 
   validates :unique_internal_model_code, presence: true
   validates :unique_internal_model_code, uniqueness: true
   validate :cannot_be_duplicate_of_self
   validate :cannot_create_circular_reference
+
+  # Create initial mask state snapshot after creation
+  after_create :create_initial_state
+
+  # Regenerate mask state from events
+  def regenerate
+    computed_state = MaskStatusBuilder.build_and_serialize(mask_id: id)
+    update_column(:current_state, computed_state)
+  end
 
   def self.find_targeted_but_untested_masks(manager_id)
     results = Mask.connection.exec_query(
@@ -529,6 +541,43 @@ class Mask < ApplicationRecord
   end
 
   private
+
+  def create_initial_state
+    # Create a snapshot of the mask's initial state
+    mask_states.create!(
+      unique_internal_model_code: unique_internal_model_code,
+      modifications: modifications,
+      image_urls: image_urls,
+      author_ids: author_ids,
+      where_to_buy_urls: where_to_buy_urls,
+      strap_type: strap_type,
+      mass_grams: mass_grams,
+      height_mm: height_mm,
+      width_mm: width_mm,
+      depth_mm: depth_mm,
+      has_gasket: has_gasket,
+      initial_cost_us_dollars: initial_cost_us_dollars,
+      sources: sources,
+      notes: notes,
+      filter_type: filter_type,
+      filtration_efficiencies: filtration_efficiencies,
+      breathability: breathability,
+      style: style,
+      filter_change_cost_us_dollars: filter_change_cost_us_dollars,
+      age_range: age_range,
+      color: color,
+      has_exhalation_valve: has_exhalation_valve,
+      author_id: author_id,
+      perimeter_mm: perimeter_mm,
+      payable_datetimes: payable_datetimes,
+      colors: colors,
+      duplicate_of: duplicate_of,
+      brand_id: brand_id,
+      bulk_fit_tests_import_id: bulk_fit_tests_import_id
+    )
+  rescue StandardError => e
+    Rails.logger.error("Failed to create initial state for mask #{id}: #{e.message}")
+  end
 
   def cannot_be_duplicate_of_self
     return if duplicate_of.blank?

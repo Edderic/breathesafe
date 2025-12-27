@@ -17,6 +17,7 @@
         <router-link class='desktop clickable side-padding' :to='{ name: "Masks"}' @click='toggleShowSubNavBar("Masks")'>Masks</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "FitTests"}' @click='toggleShowSubNavBar("FitTests")'>Fit Tests</router-link>
         <router-link class="desktop clickable side-padding" :to="{ name: 'AdminStudyParticipants'}" @click="toggleShowSubNavBar('AdminStudyParticipants')" v-if="isAdmin">Study Participants</router-link>
+        <router-link class="desktop clickable side-padding" :to="{ name: 'MaskBreakdown'}" @click="toggleShowSubNavBar('MaskBreakdown')" v-if="isAdmin">Mask Breakdown</router-link>
         <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn @click='showSubNavBar = null'>Sign up/Sign in</router-link>
         <a class='desktop clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn"  >Sign out</a>
 
@@ -32,6 +33,7 @@
       <router-link class='mobile-row clickable side-padding' :to='{ name: "Masks"}' @click='toggleShowSubNavBar("Masks")'>Masks</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "FitTests"}' @click='toggleShowSubNavBar("FitTests")'>Fit Tests</router-link>
       <router-link class="mobile-row clickable side-padding" :to="{ name: 'AdminStudyParticipants'}" @click="toggleShowSubNavBar('AdminStudyParticipants')" v-if="isAdmin">Study Participants</router-link>
+      <router-link class="mobile-row clickable side-padding" :to="{ name: 'MaskBreakdown'}" @click="toggleShowSubNavBar('MaskBreakdown')" v-if="isAdmin">Mask Breakdown</router-link>
       <h2 class='vertical-centered'>Misc</h2>
 
       <router-link class='mobile-row clickable side-padding' to='/signin' v-if=!signedIn>Sign up/Sign in</router-link>

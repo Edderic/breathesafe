@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_251_226_223_950) do
+ActiveRecord::Schema[7.0].define(version: 20_251_227_020_431) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -206,6 +206,21 @@ ActiveRecord::Schema[7.0].define(version: 20_251_226_223_950) do
     t.index ['user_id'], name: 'index_mask_breakdowns_on_user_id'
   end
 
+  create_table 'mask_events', force: :cascade do |t|
+    t.bigint 'mask_id', null: false
+    t.bigint 'user_id', null: false, comment: 'Admin user who created this event'
+    t.string 'event_type', null: false, comment: 'Type of event (e.g., breakdown_updated, color_changed)'
+    t.jsonb 'data', default: {}, null: false, comment: 'Event-specific payload'
+    t.text 'notes', comment: 'Optional notes about this event'
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.index ['data'], name: 'index_mask_events_on_data', using: :gin
+    t.index ['event_type'], name: 'index_mask_events_on_event_type'
+    t.index %w[mask_id created_at], name: 'index_mask_events_on_mask_id_and_created_at'
+    t.index ['mask_id'], name: 'index_mask_events_on_mask_id'
+    t.index ['user_id'], name: 'index_mask_events_on_user_id'
+  end
+
   create_table 'mask_kit_statuses', force: :cascade do |t|
     t.uuid 'uuid', null: false
     t.integer 'mask_uuid', null: false
@@ -226,6 +241,46 @@ ActiveRecord::Schema[7.0].define(version: 20_251_226_223_950) do
     t.index ['mask_a_id'], name: 'index_mask_pairs_on_mask_a_id'
     t.index ['mask_b_id'], name: 'index_mask_pairs_on_mask_b_id'
     t.check_constraint 'mask_a_id <> mask_b_id', name: 'check_mask_pair_not_self_reference'
+  end
+
+  create_table 'mask_states', force: :cascade do |t|
+    t.bigint 'mask_id', null: false
+    t.string 'unique_internal_model_code'
+    t.text 'modifications'
+    t.jsonb 'image_urls', default: []
+    t.jsonb 'author_ids', default: []
+    t.jsonb 'where_to_buy_urls', default: []
+    t.string 'strap_type'
+    t.float 'mass_grams'
+    t.float 'height_mm'
+    t.float 'width_mm'
+    t.float 'depth_mm'
+    t.boolean 'has_gasket'
+    t.float 'initial_cost_us_dollars'
+    t.jsonb 'sources', default: []
+    t.text 'notes'
+    t.string 'filter_type'
+    t.jsonb 'filtration_efficiencies', default: []
+    t.jsonb 'breathability', default: {}
+    t.string 'style'
+    t.float 'filter_change_cost_us_dollars'
+    t.string 'age_range'
+    t.string 'color'
+    t.boolean 'has_exhalation_valve'
+    t.bigint 'author_id'
+    t.float 'perimeter_mm'
+    t.jsonb 'payable_datetimes', default: []
+    t.jsonb 'colors', default: []
+    t.integer 'duplicate_of'
+    t.bigint 'brand_id'
+    t.bigint 'bulk_fit_tests_import_id'
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.index ['author_id'], name: 'index_mask_states_on_author_id'
+    t.index ['brand_id'], name: 'index_mask_states_on_brand_id'
+    t.index ['bulk_fit_tests_import_id'], name: 'index_mask_states_on_bulk_fit_tests_import_id'
+    t.index %w[mask_id created_at], name: 'index_mask_states_on_mask_id_and_created_at'
+    t.index ['mask_id'], name: 'index_mask_states_on_mask_id'
   end
 
   create_table 'masks', force: :cascade do |t|
@@ -260,9 +315,11 @@ ActiveRecord::Schema[7.0].define(version: 20_251_226_223_950) do
     t.integer 'duplicate_of'
     t.bigint 'brand_id'
     t.bigint 'bulk_fit_tests_import_id'
+    t.jsonb 'current_state', default: {}, null: false, comment: 'Cached computed state from events'
     t.index ['author_id'], name: 'index_masks_on_author_id'
     t.index ['brand_id'], name: 'index_masks_on_brand_id'
     t.index ['bulk_fit_tests_import_id'], name: 'index_masks_on_bulk_fit_tests_import_id'
+    t.index ['current_state'], name: 'index_masks_on_current_state', using: :gin
     t.index ['duplicate_of'], name: 'index_masks_on_duplicate_of'
     t.index ['unique_internal_model_code'], name: 'index_masks_on_unique_internal_model_code', unique: true
   end
@@ -533,8 +590,14 @@ ActiveRecord::Schema[7.0].define(version: 20_251_226_223_950) do
   add_foreign_key 'managed_users', 'users', column: 'manager_id'
   add_foreign_key 'mask_breakdowns', 'masks'
   add_foreign_key 'mask_breakdowns', 'users'
+  add_foreign_key 'mask_events', 'masks'
+  add_foreign_key 'mask_events', 'users'
   add_foreign_key 'mask_pairs', 'masks', column: 'mask_a_id', on_delete: :restrict
   add_foreign_key 'mask_pairs', 'masks', column: 'mask_b_id', on_delete: :restrict
+  add_foreign_key 'mask_states', 'brands'
+  add_foreign_key 'mask_states', 'bulk_fit_tests_imports'
+  add_foreign_key 'mask_states', 'masks'
+  add_foreign_key 'mask_states', 'users', column: 'author_id'
   add_foreign_key 'masks', 'brands', on_delete: :nullify
   add_foreign_key 'masks', 'bulk_fit_tests_imports'
   add_foreign_key 'masks', 'masks', column: 'duplicate_of', on_delete: :nullify
