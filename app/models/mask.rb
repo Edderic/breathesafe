@@ -16,7 +16,6 @@ class Mask < ApplicationRecord
                              dependent: :restrict_with_exception, inverse_of: :mask_a
   has_many :mask_pairs_as_b, class_name: 'MaskPair', foreign_key: 'mask_b_id',
                              dependent: :restrict_with_exception, inverse_of: :mask_b
-  has_many :mask_breakdowns, dependent: :destroy
   has_many :mask_states, dependent: :destroy
   has_many :mask_events, dependent: :destroy
 

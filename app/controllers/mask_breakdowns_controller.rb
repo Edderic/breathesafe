@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class MaskBreakdownsController < ApplicationController
+  include MaskTokenizer
+
   before_action :authenticate_user!
   before_action :require_admin!
 
@@ -11,23 +13,28 @@ class MaskBreakdownsController < ApplicationController
                 .select(:id, :unique_internal_model_code)
                 .to_a
 
-    # Get latest breakdown for each mask
+    # Get latest breakdown event for each mask
     mask_data = masks.map do |mask|
-      latest_breakdown = MaskBreakdown.latest_for_mask(mask.id).first
-      tokens = MaskBreakdown.tokenize(mask.unique_internal_model_code)
+      latest_event = MaskEvent.where(mask_id: mask.id, event_type: 'breakdown_updated')
+                              .order(created_at: :desc)
+                              .limit(1)
+                              .first
+
+      tokens = MaskTokenizer.tokenize(mask.unique_internal_model_code)
+      breakdown = latest_event&.data&.dig('breakdown') || []
 
       {
         id: mask.id,
         unique_internal_model_code: mask.unique_internal_model_code,
         tokens: tokens,
-        breakdown: latest_breakdown&.breakdown || [],
-        breakdown_id: latest_breakdown&.id,
-        breakdown_complete: latest_breakdown&.complete? || false,
-        breakdown_updated_at: latest_breakdown&.updated_at,
-        breakdown_user: if latest_breakdown&.user
+        breakdown: breakdown,
+        breakdown_id: latest_event&.id,
+        breakdown_complete: breakdown.present? && breakdown.all? { |item| item.values.first.present? },
+        breakdown_updated_at: latest_event&.updated_at,
+        breakdown_user: if latest_event&.user
                           {
-                            id: latest_breakdown.user.id,
-                            email: latest_breakdown.user.email
+                            id: latest_event.user.id,
+                            email: latest_event.user.email
                           }
                         end
       }
@@ -37,7 +44,7 @@ class MaskBreakdownsController < ApplicationController
       masks: mask_data,
       total_count: masks.length,
       completed_count: mask_data.count { |m| m[:breakdown_complete] },
-      categories: MaskBreakdown::VALID_CATEGORIES
+      categories: MaskTokenizer::VALID_CATEGORIES
     }
   end
 
@@ -45,97 +52,107 @@ class MaskBreakdownsController < ApplicationController
   # Returns a specific mask with its breakdown
   def show
     mask = Mask.find(params[:id])
-    latest_breakdown = MaskBreakdown.latest_for_mask(mask.id).first
-    tokens = MaskBreakdown.tokenize(mask.unique_internal_model_code)
+    latest_event = MaskEvent.where(mask_id: mask.id, event_type: 'breakdown_updated')
+                            .order(created_at: :desc)
+                            .limit(1)
+                            .first
+
+    tokens = MaskTokenizer.tokenize(mask.unique_internal_model_code)
+    breakdown = latest_event&.data&.dig('breakdown') || []
 
     render json: {
       id: mask.id,
       unique_internal_model_code: mask.unique_internal_model_code,
       tokens: tokens,
-      breakdown: latest_breakdown&.breakdown || [],
-      breakdown_id: latest_breakdown&.id,
-      breakdown_complete: latest_breakdown&.complete? || false,
-      breakdown_updated_at: latest_breakdown&.updated_at,
-      breakdown_user: if latest_breakdown&.user
+      breakdown: breakdown,
+      breakdown_id: latest_event&.id,
+      breakdown_complete: breakdown.present? && breakdown.all? { |item| item.values.first.present? },
+      breakdown_updated_at: latest_event&.updated_at,
+      breakdown_user: if latest_event&.user
                         {
-                          id: latest_breakdown.user.id,
-                          email: latest_breakdown.user.email
+                          id: latest_event.user.id,
+                          email: latest_event.user.email
                         }
                       end,
-      categories: MaskBreakdown::VALID_CATEGORIES
+      categories: MaskTokenizer::VALID_CATEGORIES
     }
   end
 
   # POST /mask_breakdowns.json
-  # Creates or updates a breakdown for a mask
+  # Creates a breakdown event for a mask
   def create
     mask = Mask.find(params[:mask_id])
     breakdown_data = params[:breakdown] || []
 
-    # Create new breakdown record
-    mask_breakdown = MaskBreakdown.new(
+    # Create a breakdown_updated event
+    mask_event = MaskEvent.new(
       mask: mask,
       user: current_user,
-      breakdown: breakdown_data,
+      event_type: 'breakdown_updated',
+      data: { breakdown: breakdown_data },
       notes: params[:notes]
     )
 
-    if mask_breakdown.save
+    if mask_event.save
+      # The after_create callback on MaskEvent will trigger mask.regenerate
       render json: {
         success: true,
         breakdown: {
-          id: mask_breakdown.id,
-          mask_id: mask_breakdown.mask_id,
-          breakdown: mask_breakdown.breakdown,
-          complete: mask_breakdown.complete?,
-          updated_at: mask_breakdown.updated_at,
+          id: mask_event.id,
+          mask_id: mask_event.mask_id,
+          breakdown: breakdown_data,
+          complete: breakdown_data.all? { |item| item.values.first.present? },
+          updated_at: mask_event.updated_at,
           user: {
-            id: mask_breakdown.user.id,
-            email: mask_breakdown.user.email
+            id: mask_event.user.id,
+            email: mask_event.user.email
           }
         }
       }, status: :created
     else
       render json: {
         success: false,
-        errors: mask_breakdown.errors.full_messages
+        errors: mask_event.errors.full_messages
       }, status: :unprocessable_entity
     end
   end
 
   # PATCH/PUT /mask_breakdowns/:id.json
-  # Updates an existing breakdown
+  # Creates a new breakdown event (append-only, never updates)
   def update
-    mask_breakdown = MaskBreakdown.find(params[:id])
+    # Find the previous event to get the mask
+    previous_event = MaskEvent.find(params[:id])
     breakdown_data = params[:breakdown] || []
 
-    # Create a new record instead of updating (for audit trail)
-    new_breakdown = MaskBreakdown.new(
-      mask: mask_breakdown.mask,
+    # Create a new breakdown_updated event
+    mask_event = MaskEvent.new(
+      mask: previous_event.mask,
       user: current_user,
-      breakdown: breakdown_data,
+      event_type: 'breakdown_updated',
+      data: { breakdown: breakdown_data },
       notes: params[:notes]
     )
 
-    if new_breakdown.save
+    if mask_event.save
+      # The after_create callback on MaskEvent will trigger mask.regenerate
       render json: {
         success: true,
         breakdown: {
-          id: new_breakdown.id,
-          mask_id: new_breakdown.mask_id,
-          breakdown: new_breakdown.breakdown,
-          complete: new_breakdown.complete?,
-          updated_at: new_breakdown.updated_at,
+          id: mask_event.id,
+          mask_id: mask_event.mask_id,
+          breakdown: breakdown_data,
+          complete: breakdown_data.all? { |item| item.values.first.present? },
+          updated_at: mask_event.updated_at,
           user: {
-            id: new_breakdown.user.id,
-            email: new_breakdown.user.email
+            id: mask_event.user.id,
+            email: mask_event.user.email
           }
         }
       }
     else
       render json: {
         success: false,
-        errors: new_breakdown.errors.full_messages
+        errors: mask_event.errors.full_messages
       }, status: :unprocessable_entity
     end
   end

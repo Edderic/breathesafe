@@ -53,7 +53,12 @@
     <!-- Current Mask Classification -->
     <div v-else-if="currentMask" class="classification-section">
       <div class="mask-header">
-        <h2>{{ currentMask.unique_internal_model_code }}</h2>
+        <div class="mask-title-row">
+          <h2>{{ currentMask.unique_internal_model_code }}</h2>
+          <button @click="showEventHistory = true" class="btn-history">
+            📋 View History
+          </button>
+        </div>
         <div class="mask-meta">
           <span>Mask {{ currentMaskIndex + 1 }} of {{ filteredMasks.length }}</span>
           <span v-if="currentMask.breakdown_user">
@@ -150,15 +155,30 @@
         </div>
       </div>
     </div>
+
+    <!-- Event History Modal -->
+    <Popup v-if="showEventHistory" @onclose="showEventHistory = false">
+      <MaskEventHistory
+        :maskId="currentMask.id"
+        :maskName="currentMask.unique_internal_model_code"
+        @close="showEventHistory = false"
+      />
+    </Popup>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
 import { setupCSRF } from './misc.js'
+import Popup from './pop_up.vue'
+import MaskEventHistory from './mask_event_history.vue'
 
 export default {
   name: 'MaskBreakdown',
+  components: {
+    Popup,
+    MaskEventHistory
+  },
   data() {
     return {
       masks: [],
@@ -169,6 +189,7 @@ export default {
       saving: false,
       messages: [],
       filterMode: 'incomplete', // 'all', 'incomplete', 'complete'
+      showEventHistory: false
     }
   },
   computed: {
@@ -435,9 +456,31 @@ export default {
   margin-bottom: 2rem;
 }
 
+.mask-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
 .mask-header h2 {
-  margin: 0 0 0.5rem 0;
+  margin: 0;
   color: #333;
+}
+
+.btn-history {
+  padding: 0.5rem 1rem;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.btn-history:hover {
+  background: #1976D2;
 }
 
 .mask-meta {

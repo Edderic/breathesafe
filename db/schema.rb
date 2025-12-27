@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_251_227_020_431) do
+ActiveRecord::Schema[7.0].define(version: 20_251_227_031_022) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -190,20 +190,6 @@ ActiveRecord::Schema[7.0].define(version: 20_251_227_020_431) do
     t.datetime 'updated_at', null: false
     t.index ['managed_id'], name: 'index_managed_users_on_managed_id'
     t.index ['manager_id'], name: 'index_managed_users_on_manager_id'
-  end
-
-  create_table 'mask_breakdowns', force: :cascade do |t|
-    t.bigint 'mask_id', null: false
-    t.bigint 'user_id', null: false, comment: 'Admin user who created/edited this breakdown'
-    t.jsonb 'breakdown', default: []
-    t.text 'notes', comment: 'Optional notes about this breakdown'
-    t.datetime 'created_at', null: false
-    t.datetime 'updated_at', null: false
-    t.index ['breakdown'], name: 'index_mask_breakdowns_on_breakdown', using: :gin
-    t.index %w[mask_id updated_at], name: 'index_mask_breakdowns_on_mask_id_and_updated_at',
-                                    order: { updated_at: :desc }
-    t.index ['mask_id'], name: 'index_mask_breakdowns_on_mask_id'
-    t.index ['user_id'], name: 'index_mask_breakdowns_on_user_id'
   end
 
   create_table 'mask_events', force: :cascade do |t|
@@ -588,8 +574,6 @@ ActiveRecord::Schema[7.0].define(version: 20_251_227_020_431) do
   add_foreign_key 'fit_tests', 'users'
   add_foreign_key 'managed_users', 'users', column: 'managed_id'
   add_foreign_key 'managed_users', 'users', column: 'manager_id'
-  add_foreign_key 'mask_breakdowns', 'masks'
-  add_foreign_key 'mask_breakdowns', 'users'
   add_foreign_key 'mask_events', 'masks'
   add_foreign_key 'mask_events', 'users'
   add_foreign_key 'mask_pairs', 'masks', column: 'mask_a_id', on_delete: :restrict
