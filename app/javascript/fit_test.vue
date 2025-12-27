@@ -1635,14 +1635,26 @@ export default {
         await axios.get(
           `/fit_tests/${this.$route.params.id}.json`,
         )
-          .then(response => {
+          .then(async response => {
             let data = response.data
             let fitTestData = response.data.fit_test
 
             this.id = fitTestData.id
             this.hasExistingFitTestUser = !!fitTestData.user_id
 
-            const foundMask = this.masks.filter((m) => m.id == fitTestData.mask_id)[0]
+            // Try to find mask in already loaded masks
+            let foundMask = this.masks.filter((m) => m.id == fitTestData.mask_id)[0]
+
+            // If mask not found in loaded masks, fetch it directly
+            if (!foundMask && fitTestData.mask_id) {
+              try {
+                const maskResponse = await axios.get(`/masks/${fitTestData.mask_id}.json`)
+                foundMask = deepSnakeToCamel(maskResponse.data.mask)
+              } catch (error) {
+                console.error('Failed to load mask:', error)
+              }
+            }
+
             this.selectedMask = foundMask || {
               id: null,
               uniqueInternalModelCode: '',

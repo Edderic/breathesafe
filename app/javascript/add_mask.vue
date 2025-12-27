@@ -1285,12 +1285,8 @@ export default {
         })
         .catch(error => {
           if (error.message) {
-            debugger
-
             this.addMessages([error.message])
           } else {
-            debugger
-
             this.addMessages(error.response.data.messages)
           }
         })
