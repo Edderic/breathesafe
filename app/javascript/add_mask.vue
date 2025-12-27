@@ -1,5 +1,6 @@
 <template>
   <div class='main-container align-items-center'>
+
     <!-- Progress Bar for New/Edit Mode -->
     <div class='columns' v-if='newOrEditMode'>
       <MaskProgressBar
@@ -32,12 +33,21 @@
        explanation="Facial measurement graphs display fit testing results, where green points denote passing a fit test, and red points denote failing a fit test. You can input your facial measurements to see if this mask probably fits your face. The closer you are to green points, the higher the likelihood. If your measurements are not close to anyone else's, then the recommender fit probability might not be accurate."
     />
 
-    <div :class="['main', 'main-section', { 'with-sidebar': newOrEditMode }]" v-show="displayTab == 'Misc. Info'">
-
+    <div :class="['main', 'main-section', { 'with-sidebar': newOrEditMode }]" >
       <div class='header'>
         <div class='header-row'>
           <h2 class='tagline'>{{tagline}}</h2>
+          <TabSet
+            :options='tabToShowOptions'
+            :tabToShow='displayTab'
+            @update='handleDisplayTabChange'
+          />
         </div>
+      </div>
+    </div>
+
+    <div :class="['main', 'main-section', { 'with-sidebar': newOrEditMode }]" v-show="displayTab == 'Misc. Info'">
+      <div class='header'>
         <div class='container chunk'>
           <ClosableMessage @onclose='messages = []' :messages='messages'/>
           <br>
@@ -48,6 +58,9 @@
         </Button>
 
         <br>
+      </div>
+
+      <div v-if='showMode' class='tab-set-container'>
       </div>
 
       <div :class='{ grid: true, view: showMode, edit: !showMode, triple: columnCount == 3, quad: columnCount == 4}'>
@@ -398,6 +411,7 @@
       <br>
 
     </div>
+
     <div :class="['grid', 'bar-charts', 'main-section', { 'with-sidebar': newOrEditMode }]" v-show='showMode &&  displayTab == "Fit Testing"'>
       <div class='card'>
         <h3 class='title'>Counts</h3>
@@ -602,13 +616,13 @@ export default {
       depthMm: null,
       perimeterMm: null,
       tabToShow: "Basic Info",
-      displayTab: "Fit Testing",
+      displayTab: "Misc. Info",
       tabToShowOptions: [
         {
-          text: "Fit Testing",
+          text: "Misc. Info",
         },
         {
-          text: "Misc. Info",
+          text: "Fit Testing",
         },
       ],
       tabEditOptions: [
@@ -1440,6 +1454,25 @@ export default {
         query: combinedQuery
       })
     },
+    handleDisplayTabChange(option) {
+      let routeName = this.$route.name
+
+      let newQuery = {
+        displayTab: option.name
+      }
+
+      let combinedQuery = Object.assign(
+        JSON.parse(
+          JSON.stringify(this.$route.query)
+        ),
+        newQuery
+      )
+
+      this.$router.push({
+        name: routeName,
+        query: combinedQuery
+      })
+    },
     visitMasks() {
       this.$router.push({
         name: 'Masks',
@@ -1473,6 +1506,12 @@ export default {
   }
   .main-container {
     top:2em;
+  }
+  .tab-set-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 2rem;
   }
   .add-facial-measurements-button {
     margin: 1em auto;
