@@ -179,6 +179,18 @@ class BulkFitTestsImportsController < ApplicationController
             notes = fit_test_data[:notes] || fit_test_data['notes']
             procedure = fit_test_data[:procedure] || fit_test_data['procedure']
 
+            # Validate user_id
+            if user_id.nil? || user_id.zero?
+              raise ActiveRecord::RecordInvalid.new(FitTest.new),
+                    'Invalid user_id: User ID is missing or invalid. Please refresh the import and re-match users.'
+            end
+
+            # Validate that user exists
+            unless User.exists?(user_id)
+              raise ActiveRecord::RecordInvalid.new(FitTest.new),
+                    "Invalid user_id: User with ID #{user_id} does not exist. Please refresh the import and re-match users."
+            end
+
             # user_id is already the managed_user_id (user_id from ManagedUser)
             # No conversion needed - managed_user_id IS the user_id
 
@@ -313,6 +325,17 @@ class BulkFitTestsImportsController < ApplicationController
         to_render = {
           bulk_fit_tests_import: JSON.parse(bulk_import.reload.to_json),
           messages: []
+        }
+      rescue ActiveRecord::RecordInvalid => e
+        # Transaction will automatically rollback on exception
+        status = 422
+        error_msg = e.message
+        # Provide more helpful message for user validation errors
+        if error_msg.include?('User ID is missing or invalid') || error_msg.include?('does not exist')
+          error_msg = "#{error_msg} This usually happens when reusing a deleted import. Please refresh the page and start a new import from the beginning."
+        end
+        to_render = {
+          messages: [error_msg]
         }
       rescue StandardError => e
         # Transaction will automatically rollback on exception
