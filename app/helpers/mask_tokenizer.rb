@@ -7,7 +7,7 @@ module MaskTokenizer
     return [] if unique_internal_model_code.blank?
 
     # Split by space, hyphen, em-dash, and comma
-    tokens = unique_internal_model_code.split(/[\s\-—,]+/)
+    tokens = unique_internal_model_code.split(/[\s\-—,\[\]()]+/)
     tokens.reject(&:blank?)
   end
 
