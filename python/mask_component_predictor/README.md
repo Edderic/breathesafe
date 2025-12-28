@@ -199,6 +199,16 @@ PORT=1234 rails mask_predictor:test
 
 ## Heroku Deployment
 
+### Prerequisites
+
+The app uses **Heroku multi-buildpack** to run both Ruby (Rails) and Python (CRF service) on the same dyno.
+
+**Required files** (already configured):
+- `.buildpacks` - Specifies Python and Ruby buildpacks
+- `requirements.txt` (root) - Python dependencies for both buildpacks
+- `runtime.txt` (root) - Python version (3.11.7)
+- `Procfile` - Process definitions
+
 ### 1. Configure Multi-Buildpack
 
 ```bash
@@ -209,22 +219,26 @@ heroku buildpacks:add heroku/ruby
 
 Or use `.buildpacks` file (already configured).
 
-### 2. Set Environment Variable
-
-```bash
-heroku config:set MASK_PREDICTOR_URL=http://localhost:5000
-```
-
-### 3. Deploy
+### 2. Deploy
 
 ```bash
 git push heroku main
 ```
 
-The `release` phase in `Procfile` will automatically:
-1. Run migrations
-2. Export training data
-3. Train the CRF model
+The deployment will:
+1. **Build phase**: Install Python dependencies from `requirements.txt`
+2. **Build phase**: Install Ruby gems
+3. **Release phase**: Run `rails db:migrate`
+4. **Release phase**: Run `rails mask_predictor:train` (exports data + trains model)
+
+### 3. Start Python Service
+
+The `python_service` process in `Procfile` runs the Flask API via gunicorn.
+
+```bash
+# Scale up the python_service dyno
+heroku ps:scale python_service=1
+```
 
 ### 4. Run Python Service
 
