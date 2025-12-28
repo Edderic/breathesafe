@@ -7,7 +7,7 @@ python3 --version
 
 echo ""
 echo "Installing Python dependencies..."
-pip3 install --user -r requirements.txt
+python3 -m pip install --user -r requirements.txt
 
 echo ""
 echo "Verifying sklearn_crfsuite installation..."

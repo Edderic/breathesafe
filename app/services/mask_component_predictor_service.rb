@@ -14,7 +14,38 @@ class MaskComponentPredictorService
                        end
 
   class << self
+    # Delegate to Lambda or Flask service based on configuration
     def predict(mask_name)
+      if use_lambda?
+        MaskComponentPredictorLambdaService.predict(mask_name)
+      else
+        predict_flask(mask_name)
+      end
+    end
+
+    def predict_batch(mask_names)
+      if use_lambda?
+        MaskComponentPredictorLambdaService.predict_batch(mask_names)
+      else
+        predict_batch_flask(mask_names)
+      end
+    end
+
+    def health_check
+      if use_lambda?
+        MaskComponentPredictorLambdaService.health_check
+      else
+        health_check_flask
+      end
+    end
+
+    private
+
+    def use_lambda?
+      Rails.application.config.use_lambda_predictor
+    end
+
+    def predict_flask(mask_name)
       uri = URI("#{PYTHON_SERVICE_URL}/predict")
       http = Net::HTTP.new(uri.host, uri.port)
       request = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')
@@ -34,7 +65,7 @@ class MaskComponentPredictorService
       fallback_prediction(mask_name)
     end
 
-    def predict_batch(mask_names)
+    def predict_batch_flask(mask_names)
       uri = URI("#{PYTHON_SERVICE_URL}/predict_batch")
       http = Net::HTTP.new(uri.host, uri.port)
       request = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')
@@ -54,7 +85,7 @@ class MaskComponentPredictorService
       mask_names.map { |name| fallback_prediction(name) }
     end
 
-    def health_check
+    def health_check_flask
       uri = URI("#{PYTHON_SERVICE_URL}/health")
       response = Net::HTTP.get_response(uri)
 
@@ -66,8 +97,6 @@ class MaskComponentPredictorService
     rescue StandardError => e
       { 'status' => 'error', 'message' => e.message, 'model_loaded' => false }
     end
-
-    private
 
     def format_result(result)
       {
