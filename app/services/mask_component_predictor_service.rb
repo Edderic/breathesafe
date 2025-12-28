@@ -99,7 +99,7 @@ class MaskComponentPredictorService
           strap: [],
           filter_type: [],
           valved: [],
-          misc: tokens[2..-1] || []
+          misc: tokens[2..] || []
         },
         confidence: 0.0,
         fallback: true
