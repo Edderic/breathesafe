@@ -139,7 +139,7 @@ def evaluate_model(crf, X_test, y_test):
     y_pred = crf.predict(X_test)
 
     # Flatten predictions and labels for metrics
-    labels = list(crf.classes_)
+    labels = sorted(list(crf.classes_))
 
     print("\n" + "="*80)
     print("EVALUATION RESULTS")
@@ -150,9 +150,16 @@ def evaluate_model(crf, X_test, y_test):
 
     # Per-category metrics
     print("\nPer-category metrics:")
-    print(metrics.flat_classification_report(
-        y_test, y_pred, labels=labels, digits=3
-    ))
+    try:
+        print(metrics.flat_classification_report(
+            y_test, y_pred, labels=labels, digits=3
+        ))
+    except TypeError:
+        # Fallback for sklearn version compatibility
+        from sklearn.metrics import classification_report
+        y_test_flat = [label for seq in y_test for label in seq]
+        y_pred_flat = [label for seq in y_pred for label in seq]
+        print(classification_report(y_test_flat, y_pred_flat, labels=labels, digits=3, zero_division=0))
 
     return y_pred
 
@@ -212,23 +219,35 @@ def main():
 
     print(f"\n✓ Model saved to {model_path}")
 
-    # Show top features for each category
+    # Show top features for each category (optional, may not work with all CRF versions)
     print("\n" + "="*80)
     print("TOP FEATURES PER CATEGORY")
     print("="*80)
 
-    for label in crf.classes_:
-        print(f"\n{label.upper()}:")
-        top_features = sorted(
-            [(feat, weight) for feat, weight in crf.state_features_.items()
-             if feat.startswith(f'{label}:')],
-            key=lambda x: abs(x[1]),
-            reverse=True
-        )[:10]
+    try:
+        for label in crf.classes_:
+            print(f"\n{label.upper()}:")
+            # state_features_ format varies by version, try to handle both
+            if hasattr(crf, 'state_features_'):
+                state_features = crf.state_features_
+                if isinstance(state_features, dict):
+                    top_features = sorted(
+                        [(feat, weight) for feat, weight in state_features.items()
+                         if isinstance(feat, str) and feat.startswith(f'{label}:')],
+                        key=lambda x: abs(x[1]),
+                        reverse=True
+                    )[:10]
 
-        for feat, weight in top_features:
-            feat_name = feat.split(':', 1)[1] if ':' in feat else feat
-            print(f"  {feat_name:40s} {weight:+.3f}")
+                    for feat, weight in top_features:
+                        feat_name = feat.split(':', 1)[1] if ':' in feat else feat
+                        print(f"  {feat_name:40s} {weight:+.3f}")
+            else:
+                print("  (Feature inspection not available for this CRF version)")
+    except Exception as e:
+        print(f"  (Could not display features: {e})")
+
+    print("\n" + "="*80)
+    print("✓ Training complete!")
 
 
 if __name__ == '__main__':

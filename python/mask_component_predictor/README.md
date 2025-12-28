@@ -61,10 +61,19 @@ This creates `crf_model.pkl`.
 
 ```bash
 cd python/mask_component_predictor
-python3 app.py
+python3 app.py [PORT]
 ```
 
-Service runs on `http://localhost:5000`
+Service runs on `http://localhost:5000` by default.
+
+**Custom Port:**
+```bash
+# Start on port 1234
+python3 app.py 1234
+
+# Or use environment variable
+PORT=1234 python3 app.py
+```
 
 ### 5. Test the Service
 
@@ -171,6 +180,21 @@ results = MaskComponentPredictorService.predict_batch([
 # Health check
 health = MaskComponentPredictorService.health_check
 # => {"status"=>"ok", "model_loaded"=>true}
+```
+
+### Configuration
+
+The service URL can be configured via environment variables:
+
+```bash
+# Option 1: Full URL (production)
+export MASK_PREDICTOR_URL=http://localhost:5000
+
+# Option 2: Port only (development)
+export MASK_PREDICTOR_PORT=1234
+
+# Option 3: For testing with custom port
+PORT=1234 rails mask_predictor:test
 ```
 
 ## Heroku Deployment

@@ -4,7 +4,14 @@ require 'net/http'
 require 'json'
 
 class MaskComponentPredictorService
-  PYTHON_SERVICE_URL = ENV.fetch('MASK_PREDICTOR_URL', 'http://localhost:5000')
+  # Allow configurable port via environment variable
+  # Usage: MASK_PREDICTOR_PORT=1234 or MASK_PREDICTOR_URL=http://localhost:1234
+  PYTHON_SERVICE_URL = if ENV['MASK_PREDICTOR_URL']
+                         ENV['MASK_PREDICTOR_URL']
+                       else
+                         port = ENV.fetch('MASK_PREDICTOR_PORT', '5000')
+                         "http://localhost:#{port}"
+                       end
 
   class << self
     def predict(mask_name)

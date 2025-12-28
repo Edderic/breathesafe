@@ -65,15 +65,26 @@ namespace :mask_predictor do
     end
   end
 
-  desc 'Test mask component predictor'
+  desc 'Test mask component predictor (optional: PORT=5000)'
   task test: :environment do
     require 'net/http'
     require 'json'
 
+    # Get port from environment variable or default to 5000
+    port = ENV['PORT'] || '5000'
+    base_url = "http://localhost:#{port}"
+
     # Check if Python service is running
     begin
-      uri = URI('http://localhost:5000/health')
+      uri = URI("#{base_url}/health")
       response = Net::HTTP.get_response(uri)
+
+      if response.code != '200'
+        puts "Error: Python service returned status #{response.code}"
+        puts "Start with: cd python/mask_component_predictor && python3 app.py #{port}"
+        exit 1
+      end
+
       health = JSON.parse(response.body)
 
       unless health['model_loaded']
@@ -82,8 +93,17 @@ namespace :mask_predictor do
         exit 1
       end
     rescue Errno::ECONNREFUSED
-      puts "Error: Python service not running"
-      puts "Start with: cd python/mask_component_predictor && python3 app.py"
+      puts "Error: Python service not running on port #{port}"
+      puts "Start with: cd python/mask_component_predictor && python3 app.py #{port}"
+      exit 1
+    rescue JSON::ParserError => e
+      puts "Error: Invalid response from Python service"
+      puts "Response body: #{response&.body&.inspect}"
+      puts "Make sure the service is running: cd python/mask_component_predictor && python3 app.py #{port}"
+      exit 1
+    rescue StandardError => e
+      puts "Error connecting to Python service: #{e.class} - #{e.message}"
+      puts "Start with: cd python/mask_component_predictor && python3 app.py #{port}"
       exit 1
     end
 
@@ -95,11 +115,11 @@ namespace :mask_predictor do
       'BreatheTeq - Large'
     ]
 
-    puts "Testing mask component predictor..."
+    puts "Testing mask component predictor on port #{port}..."
     puts '-' * 80
 
     test_masks.each do |mask_name|
-      uri = URI('http://localhost:5000/predict')
+      uri = URI("#{base_url}/predict")
       http = Net::HTTP.new(uri.host, uri.port)
       request = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')
       request.body = { mask_name: mask_name }.to_json
