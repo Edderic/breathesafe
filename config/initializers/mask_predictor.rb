@@ -28,5 +28,5 @@ elsif ENV['USE_FLASK_PREDICTOR'] == 'true'
   port = ENV.fetch('MASK_PREDICTOR_PORT', '5000')
   Rails.logger.info "✓ Mask predictor: Flask service (port #{port})"
 else
-  Rails.logger.info "✓ Mask predictor: Inline Python (pre-trained model)"
+  Rails.logger.info '✓ Mask predictor: Inline Python (pre-trained model)'
 end

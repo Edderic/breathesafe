@@ -6,7 +6,7 @@ require 'json'
 # Service to predict mask components using pre-trained CRF model
 # This service calls a Python script directly, avoiding the need for a separate Flask service
 class MaskComponentPredictorInlineService
-  PYTHON_SCRIPT_PATH = Rails.root.join('python', 'mask_component_predictor', 'predict_inline.py')
+  PYTHON_SCRIPT_PATH = Rails.root.join('python/mask_component_predictor/predict_inline.py')
 
   class << self
     # Predict components for a single mask name
@@ -85,7 +85,7 @@ class MaskComponentPredictorInlineService
     private
 
     def model_path
-      Rails.root.join('python', 'mask_component_predictor', 'crf_model.pkl')
+      Rails.root.join('python/mask_component_predictor/crf_model.pkl')
     end
 
     def format_result(result)
