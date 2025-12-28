@@ -14,28 +14,35 @@ class MaskComponentPredictorService
                        end
 
   class << self
-    # Delegate to Lambda or Flask service based on configuration
+    # Delegate to appropriate predictor based on configuration
+    # Priority: Lambda > Flask > Inline (default)
     def predict(mask_name)
       if use_lambda?
         MaskComponentPredictorLambdaService.predict(mask_name)
-      else
+      elsif use_flask?
         predict_flask(mask_name)
+      else
+        MaskComponentPredictorInlineService.predict(mask_name)
       end
     end
 
     def predict_batch(mask_names)
       if use_lambda?
         MaskComponentPredictorLambdaService.predict_batch(mask_names)
-      else
+      elsif use_flask?
         predict_batch_flask(mask_names)
+      else
+        MaskComponentPredictorInlineService.predict_batch(mask_names)
       end
     end
 
     def health_check
       if use_lambda?
         MaskComponentPredictorLambdaService.health_check
-      else
+      elsif use_flask?
         health_check_flask
+      else
+        MaskComponentPredictorInlineService.health_check
       end
     end
 
@@ -43,6 +50,11 @@ class MaskComponentPredictorService
 
     def use_lambda?
       Rails.application.config.use_lambda_predictor
+    end
+
+    def use_flask?
+      # Use Flask if explicitly enabled via environment variable
+      ENV['USE_FLASK_PREDICTOR'] == 'true'
     end
 
     def predict_flask(mask_name)

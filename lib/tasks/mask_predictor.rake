@@ -67,45 +67,23 @@ namespace :mask_predictor do
 
   desc 'Test mask component predictor (optional: PORT=5000)'
   task test: :environment do
-    require 'net/http'
-    require 'json'
+    # Check health
+    health = MaskComponentPredictorService.health_check
+    puts "Health Check:"
+    puts "  Status: #{health['status']}"
+    puts "  Model Loaded: #{health['model_loaded']}"
+    puts "  Type: #{health['type']}"
+    puts "  Model Path: #{health['model_path']}" if health['model_path']
+    puts ""
 
-    # Get port from environment variable or default to 5000
-    port = ENV['PORT'] || '5000'
-    base_url = "http://localhost:#{port}"
-
-    # Check if Python service is running
-    begin
-      uri = URI("#{base_url}/health")
-      response = Net::HTTP.get_response(uri)
-
-      if response.code != '200'
-        puts "Error: Python service returned status #{response.code}"
-        puts "Start with: cd python/mask_component_predictor && python3 app.py #{port}"
-        exit 1
-      end
-
-      health = JSON.parse(response.body)
-
-      unless health['model_loaded']
-        puts "Error: Model not loaded in Python service"
-        puts "Run: rails mask_predictor:train"
-        exit 1
-      end
-    rescue Errno::ECONNREFUSED
-      puts "Error: Python service not running on port #{port}"
-      puts "Start with: cd python/mask_component_predictor && python3 app.py #{port}"
-      exit 1
-    rescue JSON::ParserError => e
-      puts "Error: Invalid response from Python service"
-      puts "Response body: #{response&.body&.inspect}"
-      puts "Make sure the service is running: cd python/mask_component_predictor && python3 app.py #{port}"
-      exit 1
-    rescue StandardError => e
-      puts "Error connecting to Python service: #{e.class} - #{e.message}"
-      puts "Start with: cd python/mask_component_predictor && python3 app.py #{port}"
+    unless health['model_loaded']
+      puts "Error: Model not loaded"
+      puts "Run: rails mask_predictor:train"
       exit 1
     end
+
+    puts "✓ Predictor service is ready"
+    puts ""
 
     # Test with some examples
     test_masks = [
@@ -115,26 +93,20 @@ namespace :mask_predictor do
       'BreatheTeq - Large'
     ]
 
-    puts "Testing mask component predictor on port #{port}..."
+    puts "Testing mask component predictor..."
     puts '-' * 80
 
     test_masks.each do |mask_name|
-      uri = URI("#{base_url}/predict")
-      http = Net::HTTP.new(uri.host, uri.port)
-      request = Net::HTTP::Post.new(uri.path, 'Content-Type' => 'application/json')
-      request.body = { mask_name: mask_name }.to_json
-
-      response = http.request(request)
-      result = JSON.parse(response.body)
+      result = MaskComponentPredictorService.predict(mask_name)
 
       puts "\nMask: #{mask_name}"
       puts "Breakdown:"
-      result['breakdown'].each do |item|
+      result[:breakdown].each do |item|
         token = item.keys.first
         category = item.values.first
         puts "  #{token} -> #{category}"
       end
-      puts "Confidence: #{(result['confidence'] * 100).round(1)}%" if result['confidence']
+      puts "Confidence: #{(result[:confidence] * 100).round(1)}%" if result[:confidence]
     end
 
     puts "\n" + '-' * 80
