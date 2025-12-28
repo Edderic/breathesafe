@@ -83,10 +83,10 @@ class MaskComponentPredictorLambdaService
 
     def invoke_lambda(payload)
       response = lambda_client.invoke({
-        function_name: FUNCTION_NAME,
-        invocation_type: 'RequestResponse',
-        payload: JSON.generate(payload)
-      })
+                                        function_name: FUNCTION_NAME,
+                                        invocation_type: 'RequestResponse',
+                                        payload: JSON.generate(payload)
+                                      })
 
       JSON.parse(response.payload.read)
     end
