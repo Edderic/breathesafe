@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# Explicitly require service classes for production
+require_dependency 'mask_component_predictor_service'
+require_dependency 'mask_component_predictor_inline_service'
+require_dependency 'mask_component_predictor_lambda_service'
+
 # Mask Component Predictor Configuration
 #
 # This initializer sets up the mask component predictor service.
