@@ -1,0 +1,6386 @@
+[
+  {
+    "mask_id": 1,
+    "mask_name": "3M 1860s",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "1860s": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 2,
+    "mask_name": "Canada Masq Q100 XS",
+    "breakdown": [
+      {
+        "Canada": "brand"
+      },
+      {
+        "Masq": "brand"
+      },
+      {
+        "Q100": "model"
+      },
+      {
+        "XS": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 3,
+    "mask_name": "Champak PC520 Medium",
+    "breakdown": [
+      {
+        "Champak": "brand"
+      },
+      {
+        "PC520": "model"
+      },
+      {
+        "Medium": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 4,
+    "mask_name": "Halyard Fluidshield 46827 Small",
+    "breakdown": [
+      {
+        "Halyard": "brand"
+      },
+      {
+        "Fluidshield": "model"
+      },
+      {
+        "46827": "model"
+      },
+      {
+        "Small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 5,
+    "mask_name": "Canada Masq Q100 Small",
+    "breakdown": [
+      {
+        "Canada": "brand"
+      },
+      {
+        "Masq": "brand"
+      },
+      {
+        "Q100": "model"
+      },
+      {
+        "Small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 6,
+    "mask_name": "Savewo 3D Meow 2-6 years",
+    "breakdown": [
+      {
+        "Savewo": "brand"
+      },
+      {
+        "3D": "model"
+      },
+      {
+        "Meow": "model"
+      },
+      {
+        "2": "size"
+      },
+      {
+        "6": "size"
+      },
+      {
+        "years": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 7,
+    "mask_name": "Savewo 3D Meow 7-13 years",
+    "breakdown": [
+      {
+        "Savewo": "brand"
+      },
+      {
+        "3D": "model"
+      },
+      {
+        "Meow": "model"
+      },
+      {
+        "7": "size"
+      },
+      {
+        "13": "size"
+      },
+      {
+        "years": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 8,
+    "mask_name": "Shawmut Protex SR9520S - Small",
+    "breakdown": [
+      {
+        "Shawmut": "brand"
+      },
+      {
+        "Protex": "model"
+      },
+      {
+        "SR9520S": "model"
+      },
+      {
+        "Small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 9,
+    "mask_name": "Trident S",
+    "breakdown": [
+      {
+        "Trident": "brand"
+      },
+      {
+        "S": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 10,
+    "mask_name": "Trident XS",
+    "breakdown": [
+      {
+        "Trident": "brand"
+      },
+      {
+        "XS": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 11,
+    "mask_name": "Vogmask Organic Medium",
+    "breakdown": [
+      {
+        "Vogmask": "brand"
+      },
+      {
+        "Organic": "misc"
+      },
+      {
+        "Medium": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 12,
+    "mask_name": "Vogmask Small",
+    "breakdown": [
+      {
+        "Vogmask": "brand"
+      },
+      {
+        "Small": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 13,
+    "mask_name": "Zimi 7711 w/ Earloops, Exhalation Valve",
+    "breakdown": [
+      {
+        "Zimi": "brand"
+      },
+      {
+        "7711": "model"
+      },
+      {
+        "w/": "misc"
+      },
+      {
+        "Earloops": "strap"
+      },
+      {
+        "Exhalation": "valved"
+      },
+      {
+        "Valve": "valved"
+      }
+    ]
+  },
+  {
+    "mask_id": 14,
+    "mask_name": "Zimi 7711 w/ Earloops, no Exhalation Valve",
+    "breakdown": [
+      {
+        "Zimi": "brand"
+      },
+      {
+        "7711": "model"
+      },
+      {
+        "w/": "misc"
+      },
+      {
+        "Earloops": "strap"
+      },
+      {
+        "no": "valved"
+      },
+      {
+        "Exhalation": "valved"
+      },
+      {
+        "Valve": "valved"
+      }
+    ]
+  },
+  {
+    "mask_id": 15,
+    "mask_name": "Zimi 7711 w/ Headband, Exhalation Valve",
+    "breakdown": [
+      {
+        "Zimi": "brand"
+      },
+      {
+        "7711": "model"
+      },
+      {
+        "w/": "misc"
+      },
+      {
+        "Headband": "strap"
+      },
+      {
+        "Exhalation": "valved"
+      },
+      {
+        "Valve": "valved"
+      }
+    ]
+  },
+  {
+    "mask_id": 16,
+    "mask_name": "Zimi 7711 w/ Headband, no Exhalation Valve",
+    "breakdown": [
+      {
+        "Zimi": "brand"
+      },
+      {
+        "7711": "model"
+      },
+      {
+        "w/": "misc"
+      },
+      {
+        "Headband": "strap"
+      },
+      {
+        "no": "valved"
+      },
+      {
+        "Exhalation": "valved"
+      },
+      {
+        "Valve": "valved"
+      }
+    ]
+  },
+  {
+    "mask_id": 18,
+    "mask_name": "3M Aura 9205+ N95",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "Aura": "model"
+      },
+      {
+        "9205+": "model"
+      },
+      {
+        "N95": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 19,
+    "mask_name": "4CAir Kids Mask",
+    "breakdown": [
+      {
+        "4CAir": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "Mask": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 20,
+    "mask_name": "ACI Surgical N95 Respirator",
+    "breakdown": [
+      {
+        "ACI": "brand"
+      },
+      {
+        "Surgical": "style"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "Respirator": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 21,
+    "mask_name": "Aegle N95 Foldable Respirator",
+    "breakdown": [
+      {
+        "Aegle": "brand"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "Foldable": "style"
+      },
+      {
+        "Respirator": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 22,
+    "mask_name": "AER Standard Fit, Small",
+    "breakdown": [
+      {
+        "AER": "brand"
+      },
+      {
+        "Standard": "size"
+      },
+      {
+        "Fit": "size"
+      },
+      {
+        "Small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 23,
+    "mask_name": "Ahotop Kid Sized KN95 Face Mask",
+    "breakdown": [
+      {
+        "Ahotop": "brand"
+      },
+      {
+        "Kid": "size"
+      },
+      {
+        "Sized": "size"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 24,
+    "mask_name": "AKGK KN95 Face Mask",
+    "breakdown": [
+      {
+        "AKGK": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 25,
+    "mask_name": "All Keeper KF94 - Yellow Dust & Epidemics Prevention Mask",
+    "breakdown": [
+      {
+        "All": "brand"
+      },
+      {
+        "Keeper": "brand"
+      },
+      {
+        "KF94": "style"
+      },
+      {
+        "Yellow": "color"
+      },
+      {
+        "Dust": "misc"
+      },
+      {
+        "&": "misc"
+      },
+      {
+        "Epidemics": "misc"
+      },
+      {
+        "Prevention": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 26,
+    "mask_name": "All Keeper KF94 Face Safety Mask",
+    "breakdown": [
+      {
+        "All": "brand"
+      },
+      {
+        "Keeper": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Safety": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 27,
+    "mask_name": "AnanBros Barbeador KN95 Face Mask",
+    "breakdown": [
+      {
+        "AnanBros": "brand"
+      },
+      {
+        "Barbeador": "model"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 28,
+    "mask_name": "AnanBros KN95 Face Mask for Kids",
+    "breakdown": [
+      {
+        "AnanBros": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Kids": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 29,
+    "mask_name": "ANYGUARD KF94 Face Mask",
+    "breakdown": [
+      {
+        "ANYGUARD": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 30,
+    "mask_name": "AOTDAOU KF94 Leaf Mask",
+    "breakdown": [
+      {
+        "AOTDAOU": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Leaf": "model"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 31,
+    "mask_name": "AOTDAOU KN95 Kids Mask",
+    "breakdown": [
+      {
+        "AOTDAOU": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 32,
+    "mask_name": "Aoxing KN95 Advanced Filtration Respirator",
+    "breakdown": [
+      {
+        "Aoxing": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Advanced": "misc"
+      },
+      {
+        "Filtration": "misc"
+      },
+      {
+        "Respirator": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 33,
+    "mask_name": "Armbrust Kids KN95[US Made]",
+    "breakdown": [
+      {
+        "Armbrust": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "US": "misc"
+      },
+      {
+        "Made": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 34,
+    "mask_name": "Armbrust KN95 GB2626-2019",
+    "breakdown": [
+      {
+        "Armbrust": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "GB2626": "filter_type"
+      },
+      {
+        "2019": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 35,
+    "mask_name": "ARUN - KN95 Face Mask",
+    "breakdown": [
+      {
+        "ARUN": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 36,
+    "mask_name": "Be Healthy Posh KF94 - Kids",
+    "breakdown": [
+      {
+        "Be": "brand"
+      },
+      {
+        "Healthy": "brand"
+      },
+      {
+        "Posh": "model"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Kids": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 37,
+    "mask_name": "BIO-th Protective Mask",
+    "breakdown": [
+      {
+        "BIO": "brand"
+      },
+      {
+        "th": "brand"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 38,
+    "mask_name": "Birdy Friends Kids Mask",
+    "breakdown": [
+      {
+        "Birdy": "brand"
+      },
+      {
+        "Friends": "model"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 39,
+    "mask_name": "BLSCODE - Non-Medical Protective KN95 Masks",
+    "breakdown": [
+      {
+        "BLSCODE": "brand"
+      },
+      {
+        "Non": "misc"
+      },
+      {
+        "Medical": "misc"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 40,
+    "mask_name": "Blue 2D KF94 Kids Mask",
+    "breakdown": [
+      {
+        "Blue": "brand"
+      },
+      {
+        "2D": "model"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 41,
+    "mask_name": "Blue Tiger Kids Mask",
+    "breakdown": [
+      {
+        "Blue": "brand"
+      },
+      {
+        "Tiger": "model"
+      },
+      {
+        "Kids": "style"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 42,
+    "mask_name": "BluNa Kids KF94 Face Protective Mask",
+    "breakdown": [
+      {
+        "BluNa": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "KF94": "style"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 43,
+    "mask_name": "Bluna Kids Mask",
+    "breakdown": [
+      {
+        "Bluna": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 44,
+    "mask_name": "BNX KN95 Face Mask",
+    "breakdown": [
+      {
+        "BNX": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 45,
+    "mask_name": "Bona Fide Masks Powecom KN95 kids",
+    "breakdown": [
+      {
+        "Bona": "misc"
+      },
+      {
+        "Fide": "misc"
+      },
+      {
+        "Masks": "misc"
+      },
+      {
+        "Powecom": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "kids": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 46,
+    "mask_name": "Boncare KN95 Face Mask",
+    "breakdown": [
+      {
+        "Boncare": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 47,
+    "mask_name": "BOTN Kids Mask",
+    "breakdown": [
+      {
+        "BOTN": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 48,
+    "mask_name": "BreatheTeq - Small",
+    "breakdown": [
+      {
+        "BreatheTeq": "brand"
+      },
+      {
+        "Small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 49,
+    "mask_name": "Breatheze KN95 Face Mask",
+    "breakdown": [
+      {
+        "Breatheze": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 50,
+    "mask_name": "BUGGYBOP KN95 Disposable Face Mask",
+    "breakdown": [
+      {
+        "BUGGYBOP": "brand"
+      },
+      {
+        "KN95": "style"
+      },
+      {
+        "Disposable": "misc"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 51,
+    "mask_name": "Chengde Kids KN95 Face Masks",
+    "breakdown": [
+      {
+        "Chengde": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 52,
+    "mask_name": "Clean & Science Klaring KF94 Face Mask",
+    "breakdown": [
+      {
+        "Clean": "brand"
+      },
+      {
+        "&": "brand"
+      },
+      {
+        "Science": "brand"
+      },
+      {
+        "Klaring": "model"
+      },
+      {
+        "KF94": "style"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 53,
+    "mask_name": "Clean Top White Kids KF94 Face Mask",
+    "breakdown": [
+      {
+        "Clean": "brand"
+      },
+      {
+        "Top": "model"
+      },
+      {
+        "White": "color"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "KF94": "style"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 54,
+    "mask_name": "Cleantop Evergreen KF94 Small - White/Black",
+    "breakdown": [
+      {
+        "Cleantop": "brand"
+      },
+      {
+        "Evergreen": "model"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "White/Black": "color"
+      }
+    ]
+  },
+  {
+    "mask_id": 55,
+    "mask_name": "Coast - KN95 CE Certified Face Mask",
+    "breakdown": [
+      {
+        "Coast": "brand"
+      },
+      {
+        "KN95": "style"
+      },
+      {
+        "CE": "filter_type"
+      },
+      {
+        "Certified": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 56,
+    "mask_name": "CocoMong XXS Toddler Mask\n[Note this is almost identical in size to U&I Bio, but has printing]",
+    "breakdown": [
+      {
+        "CocoMong": "brand"
+      },
+      {
+        "XXS": "size"
+      },
+      {
+        "Toddler": "size"
+      },
+      {
+        "Mask": "misc"
+      },
+      {
+        "Note": "misc"
+      },
+      {
+        "this": "misc"
+      },
+      {
+        "is": "misc"
+      },
+      {
+        "almost": "misc"
+      },
+      {
+        "identical": "misc"
+      },
+      {
+        "in": "misc"
+      },
+      {
+        "size": "misc"
+      },
+      {
+        "to": "misc"
+      },
+      {
+        "U&I": "misc"
+      },
+      {
+        "Bio": "misc"
+      },
+      {
+        "but": "misc"
+      },
+      {
+        "has": "misc"
+      },
+      {
+        "printing": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 57,
+    "mask_name": "COVAFLU - KN95 Fold Flat Face Masks",
+    "breakdown": [
+      {
+        "COVAFLU": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Fold": "style"
+      },
+      {
+        "Flat": "style"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 58,
+    "mask_name": "Covaflu Face Mask",
+    "breakdown": [
+      {
+        "Covaflu": "brand"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 59,
+    "mask_name": "Daddy's Choice Purism - Protective KN95 Face Mask",
+    "breakdown": [
+      {
+        "Daddy's": "brand"
+      },
+      {
+        "Choice": "brand"
+      },
+      {
+        "Purism": "model"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "KN95": "style"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 60,
+    "mask_name": "Demetech N95 Respirator - Fold Style",
+    "breakdown": [
+      {
+        "Demetech": "brand"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "Respirator": "misc"
+      },
+      {
+        "Fold": "style"
+      },
+      {
+        "Style": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 61,
+    "mask_name": "Demetech N95 Respirator DT-N95-CH - Cup Style",
+    "breakdown": [
+      {
+        "Demetech": "brand"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "Respirator": "misc"
+      },
+      {
+        "DT": "model"
+      },
+      {
+        "N95": "model"
+      },
+      {
+        "CH": "model"
+      },
+      {
+        "Cup": "style"
+      },
+      {
+        "Style": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 62,
+    "mask_name": "Dobu 500 NIOSH N95",
+    "breakdown": [
+      {
+        "Dobu": "brand"
+      },
+      {
+        "500": "model"
+      },
+      {
+        "NIOSH": "misc"
+      },
+      {
+        "N95": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 63,
+    "mask_name": "Dolce Calma KN95 Face Mask",
+    "breakdown": [
+      {
+        "Dolce": "brand"
+      },
+      {
+        "Calma": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 64,
+    "mask_name": "Dr. Puri - Small",
+    "breakdown": [
+      {
+        "Dr.": "brand"
+      },
+      {
+        "Puri": "brand"
+      },
+      {
+        "Small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 65,
+    "mask_name": "Dr. Puri Stylish Black Micro-Dust Protection Mask",
+    "breakdown": [
+      {
+        "Dr.": "brand"
+      },
+      {
+        "Puri": "brand"
+      },
+      {
+        "Stylish": "misc"
+      },
+      {
+        "Black": "misc"
+      },
+      {
+        "Micro": "misc"
+      },
+      {
+        "Dust": "misc"
+      },
+      {
+        "Protection": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 66,
+    "mask_name": "Dr. Smile K KF94 Disposable Face Masks",
+    "breakdown": [
+      {
+        "Dr.": "brand"
+      },
+      {
+        "Smile": "brand"
+      },
+      {
+        "K": "misc"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Disposable": "misc"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 67,
+    "mask_name": "EHH KF94 Mask",
+    "breakdown": [
+      {
+        "EHH": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 68,
+    "mask_name": "ETIQA Airlight Round Kids",
+    "breakdown": [
+      {
+        "ETIQA": "brand"
+      },
+      {
+        "Airlight": "model"
+      },
+      {
+        "Round": "model"
+      },
+      {
+        "Kids": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 69,
+    "mask_name": "ETIQA Basic Black - Small",
+    "breakdown": [
+      {
+        "ETIQA": "brand"
+      },
+      {
+        "Basic": "model"
+      },
+      {
+        "Black": "color"
+      },
+      {
+        "Small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 70,
+    "mask_name": "Evolve Together mount fuji kids white KN95 masks",
+    "breakdown": [
+      {
+        "Evolve": "brand"
+      },
+      {
+        "Together": "brand"
+      },
+      {
+        "mount": "model"
+      },
+      {
+        "fuji": "model"
+      },
+      {
+        "kids": "size"
+      },
+      {
+        "white": "color"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 71,
+    "mask_name": "Flexmon / You & I KF94 Certified Kids Face Mask",
+    "breakdown": [
+      {
+        "Flexmon": "brand"
+      },
+      {
+        "/": "misc"
+      },
+      {
+        "You": "brand"
+      },
+      {
+        "&": "brand"
+      },
+      {
+        "I": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Certified": "filter_type"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 72,
+    "mask_name": "Gerson Model 3230 N95 Respirator",
+    "breakdown": [
+      {
+        "Gerson": "brand"
+      },
+      {
+        "Model": "misc"
+      },
+      {
+        "3230": "model"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "Respirator": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 73,
+    "mask_name": "Gerson N95 Model 3230+",
+    "breakdown": [
+      {
+        "Gerson": "brand"
+      },
+      {
+        "N95": "model"
+      },
+      {
+        "Model": "misc"
+      },
+      {
+        "3230+": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 74,
+    "mask_name": "Good Comfort KN95 Face Mask",
+    "breakdown": [
+      {
+        "Good": "brand"
+      },
+      {
+        "Comfort": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 75,
+    "mask_name": "Good Manner KF94 FDA",
+    "breakdown": [
+      {
+        "Good": "brand"
+      },
+      {
+        "Manner": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "FDA": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 76,
+    "mask_name": "Good Manner KIDS KF94 Face Mask",
+    "breakdown": [
+      {
+        "Good": "brand"
+      },
+      {
+        "Manner": "brand"
+      },
+      {
+        "KIDS": "size"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 77,
+    "mask_name": "GoodDay Happy Life - Youth Size White/Black\nGoodDay Happy Life - Size Small Cartoon Package[SAME MASK]",
+    "breakdown": [
+      {
+        "GoodDay": "brand"
+      },
+      {
+        "Happy": "brand"
+      },
+      {
+        "Life": "brand"
+      },
+      {
+        "Youth": "size"
+      },
+      {
+        "Size": "size"
+      },
+      {
+        "White/Black": "color"
+      },
+      {
+        "GoodDay": "brand"
+      },
+      {
+        "Happy": "brand"
+      },
+      {
+        "Life": "brand"
+      },
+      {
+        "Size": "size"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "Cartoon": "misc"
+      },
+      {
+        "Package": "misc"
+      },
+      {
+        "SAME": "misc"
+      },
+      {
+        "MASK": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 78,
+    "mask_name": "GRZ FFP2 Face Mask",
+    "breakdown": [
+      {
+        "GRZ": "brand"
+      },
+      {
+        "FFP2": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 79,
+    "mask_name": "H.A.C PLUS KF94 Face Mask",
+    "breakdown": [
+      {
+        "H.A.C": "brand"
+      },
+      {
+        "PLUS": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 80,
+    "mask_name": "HALIDODO - KN95 Protective Cup Dust Masks",
+    "breakdown": [
+      {
+        "HALIDODO": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "Cup": "misc"
+      },
+      {
+        "Dust": "misc"
+      },
+      {
+        "Masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 81,
+    "mask_name": "HANMAUM 3D Face Safety Mask",
+    "breakdown": [
+      {
+        "HANMAUM": "brand"
+      },
+      {
+        "3D": "model"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Safety": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 82,
+    "mask_name": "Happy Life Good Day KF94 Kids Mask (Black)",
+    "breakdown": [
+      {
+        "Happy": "brand"
+      },
+      {
+        "Life": "brand"
+      },
+      {
+        "Good": "brand"
+      },
+      {
+        "Day": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "Mask": "misc"
+      },
+      {
+        "Black": "color"
+      }
+    ]
+  },
+  {
+    "mask_id": 83,
+    "mask_name": "HAPPYDAY KF94 Face Mask",
+    "breakdown": [
+      {
+        "HAPPYDAY": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 84,
+    "mask_name": "HappyLife Gooday Kids Mask - XSmall",
+    "breakdown": [
+      {
+        "HappyLife": "brand"
+      },
+      {
+        "Gooday": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "Mask": "misc"
+      },
+      {
+        "XSmall": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 85,
+    "mask_name": "HDX Home Depot H-950 N95 Mask",
+    "breakdown": [
+      {
+        "HDX": "brand"
+      },
+      {
+        "Home": "brand"
+      },
+      {
+        "Depot": "brand"
+      },
+      {
+        "H": "model"
+      },
+      {
+        "950": "model"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 86,
+    "mask_name": "HOM - KN95 Protective Facemasks",
+    "breakdown": [
+      {
+        "HOM": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "Facemasks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 87,
+    "mask_name": "Homeland Hardware KN95 face mask",
+    "breakdown": [
+      {
+        "Homeland": "brand"
+      },
+      {
+        "Hardware": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "face": "misc"
+      },
+      {
+        "mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 88,
+    "mask_name": "Honeywell DF300 N95",
+    "breakdown": [
+      {
+        "Honeywell": "brand"
+      },
+      {
+        "DF300": "model"
+      },
+      {
+        "N95": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 89,
+    "mask_name": "HotoDeal - KN95 Foldable Protective Face Mask",
+    "breakdown": [
+      {
+        "HotoDeal": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Foldable": "style"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 90,
+    "mask_name": "Hotodeal KN95 Face Mask",
+    "breakdown": [
+      {
+        "Hotodeal": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 91,
+    "mask_name": "Hotodeal Zhongjianle KN95 PFE 95% Foldable Face Masks",
+    "breakdown": [
+      {
+        "Hotodeal": "brand"
+      },
+      {
+        "Zhongjianle": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "PFE": "misc"
+      },
+      {
+        "95%": "misc"
+      },
+      {
+        "Foldable": "style"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 92,
+    "mask_name": "HUHETA - KN95 5Ply Protective Masks",
+    "breakdown": [
+      {
+        "HUHETA": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "5Ply": "misc"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "Masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 93,
+    "mask_name": "Indiana Face Mask A105 Particulate Respirator",
+    "breakdown": [
+      {
+        "Indiana": "brand"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      },
+      {
+        "A105": "model"
+      },
+      {
+        "Particulate": "misc"
+      },
+      {
+        "Respirator": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 94,
+    "mask_name": "JCJZ KN95 Face Mask",
+    "breakdown": [
+      {
+        "JCJZ": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 95,
+    "mask_name": "KF94 Certified MASKOVER Premium Protective Breathable Safety Masks",
+    "breakdown": [
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Certified": "filter_type"
+      },
+      {
+        "MASKOVER": "brand"
+      },
+      {
+        "Premium": "misc"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "Breathable": "misc"
+      },
+      {
+        "Safety": "misc"
+      },
+      {
+        "Masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 96,
+    "mask_name": "KF94 Certified, TS Guard Safety Face Mask",
+    "breakdown": [
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Certified": "misc"
+      },
+      {
+        "TS": "brand"
+      },
+      {
+        "Guard": "brand"
+      },
+      {
+        "Safety": "misc"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 97,
+    "mask_name": "Kim Well's Kids Mask",
+    "breakdown": [
+      {
+        "Kim": "brand"
+      },
+      {
+        "Well's": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 98,
+    "mask_name": "Kingfa KN95 Face Mask",
+    "breakdown": [
+      {
+        "Kingfa": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 99,
+    "mask_name": "KN Flax KF94 - Face Protective Mask",
+    "breakdown": [
+      {
+        "KN": "brand"
+      },
+      {
+        "Flax": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 100,
+    "mask_name": "LG Airwasher KF94 Disposable Face Masks",
+    "breakdown": [
+      {
+        "LG": "brand"
+      },
+      {
+        "Airwasher": "model"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Disposable": "misc"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 101,
+    "mask_name": "LUCIFER 4 Layer KF94 Face Mask",
+    "breakdown": [
+      {
+        "LUCIFER": "brand"
+      },
+      {
+        "4": "misc"
+      },
+      {
+        "Layer": "misc"
+      },
+      {
+        "KF94": "style"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 102,
+    "mask_name": "Lutema M95C/Vida/LittleLivesPPE Mask",
+    "breakdown": [
+      {
+        "Lutema": "brand"
+      },
+      {
+        "M95C/Vida/LittleLivesPPE": "model"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 103,
+    "mask_name": "MedicPro N95 Mask",
+    "breakdown": [
+      {
+        "MedicPro": "brand"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 104,
+    "mask_name": "MediMask - KF94 Korea Filter",
+    "breakdown": [
+      {
+        "MediMask": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Korea": "filter_type"
+      },
+      {
+        "Filter": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 105,
+    "mask_name": "MISSAA Kids KN95 Face Mask",
+    "breakdown": [
+      {
+        "MISSAA": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 106,
+    "mask_name": "Miuphro Black KN95 Mask",
+    "breakdown": [
+      {
+        "Miuphro": "brand"
+      },
+      {
+        "Black": "color"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 107,
+    "mask_name": "NEWMARK Dr. Family 5-Ply Protective Mask",
+    "breakdown": [
+      {
+        "NEWMARK": "brand"
+      },
+      {
+        "Dr.": "brand"
+      },
+      {
+        "Family": "brand"
+      },
+      {
+        "5": "misc"
+      },
+      {
+        "Ply": "misc"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 108,
+    "mask_name": "Novita Surgical Respirator",
+    "breakdown": [
+      {
+        "Novita": "brand"
+      },
+      {
+        "Surgical": "filter_type"
+      },
+      {
+        "Respirator": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 109,
+    "mask_name": "NYBEE KF94 Mask",
+    "breakdown": [
+      {
+        "NYBEE": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 110,
+    "mask_name": "OfficeDepot BYD Care N95 Particulate Respirator",
+    "breakdown": [
+      {
+        "OfficeDepot": "brand"
+      },
+      {
+        "BYD": "brand"
+      },
+      {
+        "Care": "brand"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "Particulate": "misc"
+      },
+      {
+        "Respirator": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 111,
+    "mask_name": "OPECTICID KN95 Mask",
+    "breakdown": [
+      {
+        "OPECTICID": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 112,
+    "mask_name": "Outdoor Research - N95 Face Masks",
+    "breakdown": [
+      {
+        "Outdoor": "brand"
+      },
+      {
+        "Research": "brand"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 113,
+    "mask_name": "PalmJoy 3D Protective KN95 Mask",
+    "breakdown": [
+      {
+        "PalmJoy": "brand"
+      },
+      {
+        "3D": "model"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 114,
+    "mask_name": "Posh KF94 Kids Mask",
+    "breakdown": [
+      {
+        "Posh": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 115,
+    "mask_name": "Powecom - KN95 Black Protective Masks",
+    "breakdown": [
+      {
+        "Powecom": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Black": "color"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "Masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 116,
+    "mask_name": "Powecom KN95-SM",
+    "breakdown": [
+      {
+        "Powecom": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "SM": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 117,
+    "mask_name": "Prestige Ameritech ProGear Respirator and Surgical Mask",
+    "breakdown": [
+      {
+        "Prestige": "brand"
+      },
+      {
+        "Ameritech": "brand"
+      },
+      {
+        "ProGear": "model"
+      },
+      {
+        "Respirator": "misc"
+      },
+      {
+        "and": "misc"
+      },
+      {
+        "Surgical": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 118,
+    "mask_name": "Primacare - KN95 5-ply Face Masks",
+    "breakdown": [
+      {
+        "Primacare": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "5": "misc"
+      },
+      {
+        "ply": "misc"
+      },
+      {
+        "Masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 119,
+    "mask_name": "ProductLabs KF94 - Kids",
+    "breakdown": [
+      {
+        "ProductLabs": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Kids": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 120,
+    "mask_name": "RightCare KN95 Protective Face Mask",
+    "breakdown": [
+      {
+        "RightCare": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 121,
+    "mask_name": "Rose Mask KF94",
+    "breakdown": [
+      {
+        "Rose": "brand"
+      },
+      {
+        "Mask": "misc"
+      },
+      {
+        "KF94": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 122,
+    "mask_name": "Ryeziiio KN95 Face Mask",
+    "breakdown": [
+      {
+        "Ryeziiio": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 123,
+    "mask_name": "Savewo 3D Mask - Kids Large",
+    "breakdown": [
+      {
+        "Savewo": "brand"
+      },
+      {
+        "3D": "model"
+      },
+      {
+        "Mask": "misc"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "Large": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 124,
+    "mask_name": "SaveWo 3D Mask - Kids Small",
+    "breakdown": [
+      {
+        "SaveWo": "brand"
+      },
+      {
+        "3D": "model"
+      },
+      {
+        "Mask": "misc"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "Small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 125,
+    "mask_name": "Savewo Ultra 3D - Adult Small\n[also includes Hana Small]",
+    "breakdown": [
+      {
+        "Savewo": "brand"
+      },
+      {
+        "Ultra": "model"
+      },
+      {
+        "3D": "model"
+      },
+      {
+        "Adult": "size"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "also": "misc"
+      },
+      {
+        "includes": "misc"
+      },
+      {
+        "Hana": "misc"
+      },
+      {
+        "Small": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 126,
+    "mask_name": "SEJIN-AIRSOOM KF94 Face Mask",
+    "breakdown": [
+      {
+        "SEJIN": "brand"
+      },
+      {
+        "AIRSOOM": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 127,
+    "mask_name": "Shawmut Protex N95 Particulate Respirator - Cup Style",
+    "breakdown": [
+      {
+        "Shawmut": "brand"
+      },
+      {
+        "Protex": "model"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "Particulate": "misc"
+      },
+      {
+        "Respirator": "misc"
+      },
+      {
+        "Cup": "style"
+      },
+      {
+        "Style": "style"
+      }
+    ]
+  },
+  {
+    "mask_id": 128,
+    "mask_name": "Sheal Face Mask",
+    "breakdown": [
+      {
+        "Sheal": "brand"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 129,
+    "mask_name": "SUMFREE KF94 BLACK MASK",
+    "breakdown": [
+      {
+        "SUMFREE": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "BLACK": "color"
+      },
+      {
+        "MASK": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 130,
+    "mask_name": "Suncoo - Protective KN95 Masks",
+    "breakdown": [
+      {
+        "Suncoo": "brand"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 131,
+    "mask_name": "The Bio U&I Toddler Mask",
+    "breakdown": [
+      {
+        "The": "brand"
+      },
+      {
+        "Bio": "brand"
+      },
+      {
+        "U&I": "brand"
+      },
+      {
+        "Toddler": "size"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 132,
+    "mask_name": "Tia / BOTN - KF94 Particulate Disposble Respirator",
+    "breakdown": [
+      {
+        "Tia": "brand"
+      },
+      {
+        "/": "misc"
+      },
+      {
+        "BOTN": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Particulate": "misc"
+      },
+      {
+        "Disposble": "misc"
+      },
+      {
+        "Respirator": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 133,
+    "mask_name": "TITAN PROTECT SEKURA N95 Respirator Mask",
+    "breakdown": [
+      {
+        "TITAN": "model"
+      },
+      {
+        "PROTECT": "model"
+      },
+      {
+        "SEKURA": "model"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "Respirator": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 134,
+    "mask_name": "TRI-TITANS Kids Face Mask",
+    "breakdown": [
+      {
+        "TRI": "brand"
+      },
+      {
+        "TITANS": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 135,
+    "mask_name": "TRY Mask Premium KF94 Face Mask KN-Flax",
+    "breakdown": [
+      {
+        "TRY": "model"
+      },
+      {
+        "Mask": "model"
+      },
+      {
+        "Premium": "misc"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      },
+      {
+        "KN": "brand"
+      },
+      {
+        "Flax": "brand"
+      }
+    ]
+  },
+  {
+    "mask_id": 136,
+    "mask_name": "United States Mask Company KidsN95[Head Straps]",
+    "breakdown": [
+      {
+        "United": "brand"
+      },
+      {
+        "States": "brand"
+      },
+      {
+        "Mask": "brand"
+      },
+      {
+        "Company": "brand"
+      },
+      {
+        "KidsN95": "size"
+      },
+      {
+        "Head": "strap"
+      },
+      {
+        "Straps": "strap"
+      }
+    ]
+  },
+  {
+    "mask_id": 137,
+    "mask_name": "Vitacore CAN99e - Adult Small",
+    "breakdown": [
+      {
+        "Vitacore": "brand"
+      },
+      {
+        "CAN99e": "model"
+      },
+      {
+        "Adult": "size"
+      },
+      {
+        "Small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 138,
+    "mask_name": "Weldots Fender Premium KF94 Mask",
+    "breakdown": [
+      {
+        "Weldots": "brand"
+      },
+      {
+        "Fender": "brand"
+      },
+      {
+        "Premium": "misc"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 139,
+    "mask_name": "Welkeeps KF94 Kids Face Mask",
+    "breakdown": [
+      {
+        "Welkeeps": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 140,
+    "mask_name": "Well Before Adults KF94 Style",
+    "breakdown": [
+      {
+        "Well": "brand"
+      },
+      {
+        "Before": "brand"
+      },
+      {
+        "Adults": "size"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Style": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 141,
+    "mask_name": "Well Before Adults KN95",
+    "breakdown": [
+      {
+        "Well": "brand"
+      },
+      {
+        "Before": "brand"
+      },
+      {
+        "Adults": "size"
+      },
+      {
+        "KN95": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 142,
+    "mask_name": "Well Before Kids KN95",
+    "breakdown": [
+      {
+        "Well": "brand"
+      },
+      {
+        "Before": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "KN95": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 143,
+    "mask_name": "Well Before Kids KN95 3D (KF94 Style)",
+    "breakdown": [
+      {
+        "Well": "brand"
+      },
+      {
+        "Before": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "3D": "model"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Style": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 144,
+    "mask_name": "Wellbefore Kids KN95 Petite Regular",
+    "breakdown": [
+      {
+        "Wellbefore": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Petite": "size"
+      },
+      {
+        "Regular": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 145,
+    "mask_name": "Wellbefore Kids KN95 Petite Small",
+    "breakdown": [
+      {
+        "Wellbefore": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Petite": "size"
+      },
+      {
+        "Small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 146,
+    "mask_name": "Wellbefore Kids KN95 Petite X-Small",
+    "breakdown": [
+      {
+        "Wellbefore": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Petite": "size"
+      },
+      {
+        "X": "size"
+      },
+      {
+        "Small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 147,
+    "mask_name": "WesGen KN95 Face Mask",
+    "breakdown": [
+      {
+        "WesGen": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 148,
+    "mask_name": "WWDOLL Kids KN95 Face Mask",
+    "breakdown": [
+      {
+        "WWDOLL": "brand"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "KN95": "size"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 149,
+    "mask_name": "WWDOLL KN95 Foldable 95% PFE Protective Mask",
+    "breakdown": [
+      {
+        "WWDOLL": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Foldable": "style"
+      },
+      {
+        "95%": "filter_type"
+      },
+      {
+        "PFE": "filter_type"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 150,
+    "mask_name": "WWDOLL KN95 Foldable Protective Masks",
+    "breakdown": [
+      {
+        "WWDOLL": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Foldable": "style"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "Masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 151,
+    "mask_name": "Yongjie - KN95 Face Masks",
+    "breakdown": [
+      {
+        "Yongjie": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Masks": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 152,
+    "mask_name": "Yuikio KN95 Protective Mask",
+    "breakdown": [
+      {
+        "Yuikio": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      },
+      {
+        "Protective": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 153,
+    "mask_name": "Zerobay KF94 Face Mask",
+    "breakdown": [
+      {
+        "Zerobay": "brand"
+      },
+      {
+        "KF94": "filter_type"
+      },
+      {
+        "Face": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 154,
+    "mask_name": "Zovator (Harley) N95 Mask NIOSH N95 TC-84A-6973",
+    "breakdown": [
+      {
+        "Zovator": "brand"
+      },
+      {
+        "Harley": "model"
+      },
+      {
+        "N95": "style"
+      },
+      {
+        "Mask": "misc"
+      },
+      {
+        "NIOSH": "model"
+      },
+      {
+        "N95": "model"
+      },
+      {
+        "TC": "model"
+      },
+      {
+        "84A": "model"
+      },
+      {
+        "6973": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 155,
+    "mask_name": "3M 6100 Small for Med/Low nose",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "6100": "model"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/Low": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 156,
+    "mask_name": "3M 6200 Medium for Med/Low nose",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "6200": "model"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "for": "size"
+      },
+      {
+        "Med/Low": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 157,
+    "mask_name": "3M 6300 Large for Med/Low nose",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "6300": "model"
+      },
+      {
+        "Large": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/Low": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 158,
+    "mask_name": "3M 6501 Small for Med/High nose",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "6501": "model"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 159,
+    "mask_name": "3M 6502 Medium for Med/High nose",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "6502": "model"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 160,
+    "mask_name": "3M 6503 Large for Med/High nose",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "6503": "model"
+      },
+      {
+        "Large": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 161,
+    "mask_name": "3M 7501 Small for Med/High nose",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "7501": "model"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 162,
+    "mask_name": "3M 7502 Medium for Med/High nose",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "7502": "model"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 163,
+    "mask_name": "3M 7503 Large for High nose",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "7503": "model"
+      },
+      {
+        "Large": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 164,
+    "mask_name": "3M 6200DD Medium for Med/High nose",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "6200DD": "model"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 165,
+    "mask_name": "3M Secure-Click Small for Med/High nose",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "Secure": "model"
+      },
+      {
+        "Click": "model"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 166,
+    "mask_name": "3M Secure-Click Medium for High nose",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "Secure": "model"
+      },
+      {
+        "Click": "model"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 167,
+    "mask_name": "3M Secure-Click Large for High nose",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "Secure": "model"
+      },
+      {
+        "Click": "model"
+      },
+      {
+        "Large": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 168,
+    "mask_name": "AirBoss AirBoss L/XL for Med/High nose",
+    "breakdown": [
+      {
+        "AirBoss": "brand"
+      },
+      {
+        "AirBoss": "brand"
+      },
+      {
+        "L/XL": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 169,
+    "mask_name": "AirBoss AirBoss S/M for Med/High nose",
+    "breakdown": [
+      {
+        "AirBoss": "brand"
+      },
+      {
+        "AirBoss": "brand"
+      },
+      {
+        "S/M": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 170,
+    "mask_name": "Armbrust Breathe99 One Size for Medium nose",
+    "breakdown": [
+      {
+        "Armbrust": "brand"
+      },
+      {
+        "Breathe99": "model"
+      },
+      {
+        "One": "size"
+      },
+      {
+        "Size": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 171,
+    "mask_name": "AYYBF M601  Medium for Med/High nose",
+    "breakdown": [
+      {
+        "AYYBF": "brand"
+      },
+      {
+        "M601": "model"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 172,
+    "mask_name": "BAOMAO US-SW-10 One Size for Med/High nose",
+    "breakdown": [
+      {
+        "BAOMAO": "brand"
+      },
+      {
+        "US": "model"
+      },
+      {
+        "SW": "model"
+      },
+      {
+        "10": "model"
+      },
+      {
+        "One": "size"
+      },
+      {
+        "Size": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 173,
+    "mask_name": "CNSTRONG Clear One Size for Medium nose",
+    "breakdown": [
+      {
+        "CNSTRONG": "brand"
+      },
+      {
+        "Clear": "model"
+      },
+      {
+        "One": "size"
+      },
+      {
+        "Size": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 174,
+    "mask_name": "Dentec ComfortAir S/M for Med/High nose",
+    "breakdown": [
+      {
+        "Dentec": "brand"
+      },
+      {
+        "ComfortAir": "model"
+      },
+      {
+        "S/M": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "filter_type"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 175,
+    "mask_name": "Dentec ComfortAir Medium for High nose",
+    "breakdown": [
+      {
+        "Dentec": "brand"
+      },
+      {
+        "ComfortAir": "model"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 176,
+    "mask_name": "Dentec Comfortair M/L for Med/High nose",
+    "breakdown": [
+      {
+        "Dentec": "brand"
+      },
+      {
+        "Comfortair": "model"
+      },
+      {
+        "M/L": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 177,
+    "mask_name": "Dentec Comfortair NX M/L for Med/High nose",
+    "breakdown": [
+      {
+        "Dentec": "brand"
+      },
+      {
+        "Comfortair": "model"
+      },
+      {
+        "NX": "model"
+      },
+      {
+        "M/L": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 178,
+    "mask_name": "Drager 3500 Small for High nose",
+    "breakdown": [
+      {
+        "Drager": "brand"
+      },
+      {
+        "3500": "model"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 179,
+    "mask_name": "Drager 3500 Medium for High nose",
+    "breakdown": [
+      {
+        "Drager": "brand"
+      },
+      {
+        "3500": "model"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 180,
+    "mask_name": "Drager 3500 Large for High nose",
+    "breakdown": [
+      {
+        "Drager": "brand"
+      },
+      {
+        "3500": "model"
+      },
+      {
+        "Large": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 181,
+    "mask_name": "Elastomask Pro Elastomask Pro Small for Med/High nose",
+    "breakdown": [
+      {
+        "Elastomask": "brand"
+      },
+      {
+        "Pro": "model"
+      },
+      {
+        "Elastomask": "model"
+      },
+      {
+        "Pro": "model"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 182,
+    "mask_name": "Elastomask Pro Elastomask Pro Medium/Large for Med/High nose",
+    "breakdown": [
+      {
+        "Elastomask": "brand"
+      },
+      {
+        "Pro": "model"
+      },
+      {
+        "Elastomask": "brand"
+      },
+      {
+        "Pro": "model"
+      },
+      {
+        "Medium/Large": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 183,
+    "mask_name": "Envo Envo Classic One Size for Med/Low nose",
+    "breakdown": [
+      {
+        "Envo": "brand"
+      },
+      {
+        "Envo": "model"
+      },
+      {
+        "Classic": "model"
+      },
+      {
+        "One": "size"
+      },
+      {
+        "Size": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/Low": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 184,
+    "mask_name": "Envo Envo Pro XL for Medium nose",
+    "breakdown": [
+      {
+        "Envo": "brand"
+      },
+      {
+        "Envo": "model"
+      },
+      {
+        "Pro": "model"
+      },
+      {
+        "XL": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 185,
+    "mask_name": "Envo Envo Pro Regular for Medium nose",
+    "breakdown": [
+      {
+        "Envo": "brand"
+      },
+      {
+        "Envo": "model"
+      },
+      {
+        "Pro": "model"
+      },
+      {
+        "Regular": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 186,
+    "mask_name": "Flo Flo Kids One Size for Medium nose",
+    "breakdown": [
+      {
+        "Flo": "brand"
+      },
+      {
+        "Flo": "model"
+      },
+      {
+        "Kids": "size"
+      },
+      {
+        "One": "size"
+      },
+      {
+        "Size": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 187,
+    "mask_name": "Flo Flo Pro Med/High for Medium nose",
+    "breakdown": [
+      {
+        "Flo": "brand"
+      },
+      {
+        "Flo": "model"
+      },
+      {
+        "Pro": "model"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 188,
+    "mask_name": "Flo Flo Pro Low/Med for Low nose",
+    "breakdown": [
+      {
+        "Flo": "brand"
+      },
+      {
+        "Flo": "model"
+      },
+      {
+        "Pro": "model"
+      },
+      {
+        "Low/Med": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Low": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 189,
+    "mask_name": "Gill Gill Small/Junior for Med/Low nose",
+    "breakdown": [
+      {
+        "Gill": "brand"
+      },
+      {
+        "Gill": "model"
+      },
+      {
+        "Small/Junior": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/Low": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 190,
+    "mask_name": "Gill Gill Pro Regular for Medium nose",
+    "breakdown": [
+      {
+        "Gill": "brand"
+      },
+      {
+        "Gill": "model"
+      },
+      {
+        "Pro": "model"
+      },
+      {
+        "Regular": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 191,
+    "mask_name": "Gill Gill/Gill Pro Large for Medium nose",
+    "breakdown": [
+      {
+        "Gill": "brand"
+      },
+      {
+        "Gill/Gill": "brand"
+      },
+      {
+        "Pro": "model"
+      },
+      {
+        "Large": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 192,
+    "mask_name": "GVS Elipse S/M for High nose",
+    "breakdown": [
+      {
+        "GVS": "brand"
+      },
+      {
+        "Elipse": "model"
+      },
+      {
+        "S/M": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 193,
+    "mask_name": "GVS Elipse M/L for High nose",
+    "breakdown": [
+      {
+        "GVS": "brand"
+      },
+      {
+        "Elipse": "model"
+      },
+      {
+        "M/L": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 194,
+    "mask_name": "GVS Elipse Integra S/M for High nose",
+    "breakdown": [
+      {
+        "GVS": "brand"
+      },
+      {
+        "Elipse": "model"
+      },
+      {
+        "Integra": "model"
+      },
+      {
+        "S/M": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 195,
+    "mask_name": "GVS Elipse Integra M/L for High nose",
+    "breakdown": [
+      {
+        "GVS": "brand"
+      },
+      {
+        "Elipse": "model"
+      },
+      {
+        "Integra": "model"
+      },
+      {
+        "M/L": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 196,
+    "mask_name": "Honeywell 5500 Medium for Med/High nose",
+    "breakdown": [
+      {
+        "Honeywell": "brand"
+      },
+      {
+        "5500": "model"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 197,
+    "mask_name": "Honeywell 7700 Small for Med/High nose",
+    "breakdown": [
+      {
+        "Honeywell": "brand"
+      },
+      {
+        "7700": "model"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 198,
+    "mask_name": "Honeywell 7700 Medium for Med/High nose",
+    "breakdown": [
+      {
+        "Honeywell": "brand"
+      },
+      {
+        "7700": "model"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 199,
+    "mask_name": "Honeywell 7700 Large for Med/High nose",
+    "breakdown": [
+      {
+        "Honeywell": "brand"
+      },
+      {
+        "7700": "model"
+      },
+      {
+        "Large": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 200,
+    "mask_name": "Honeywell RU8800 Small for Medium nose",
+    "breakdown": [
+      {
+        "Honeywell": "brand"
+      },
+      {
+        "RU8800": "model"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 201,
+    "mask_name": "Honeywell RU8800 Medium/Large for Medium nose",
+    "breakdown": [
+      {
+        "Honeywell": "brand"
+      },
+      {
+        "RU8800": "model"
+      },
+      {
+        "Medium/Large": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 202,
+    "mask_name": "Jingwei 6800 One Size for Medium nose",
+    "breakdown": [
+      {
+        "Jingwei": "brand"
+      },
+      {
+        "6800": "model"
+      },
+      {
+        "One": "size"
+      },
+      {
+        "Size": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 203,
+    "mask_name": "KAMZSZMF  610 Medium for Med/High nose",
+    "breakdown": [
+      {
+        "KAMZSZMF": "brand"
+      },
+      {
+        "610": "model"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 204,
+    "mask_name": "Moldex 7000 Small for Med/High nose",
+    "breakdown": [
+      {
+        "Moldex": "brand"
+      },
+      {
+        "7000": "model"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 205,
+    "mask_name": "Moldex 7000 Medium for Med/High nose",
+    "breakdown": [
+      {
+        "Moldex": "brand"
+      },
+      {
+        "7000": "model"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 206,
+    "mask_name": "Moldex 7000 Large for Med/High nose",
+    "breakdown": [
+      {
+        "Moldex": "brand"
+      },
+      {
+        "7000": "model"
+      },
+      {
+        "Large": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 207,
+    "mask_name": "Moldex 8001 Small for Med/Low nose",
+    "breakdown": [
+      {
+        "Moldex": "model"
+      },
+      {
+        "8001": "model"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/Low": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 208,
+    "mask_name": "Moldex 8002 Medium for Medium nose",
+    "breakdown": [
+      {
+        "Moldex": "brand"
+      },
+      {
+        "8002": "model"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 209,
+    "mask_name": "MSA Advantage 290 Small for Med/High nose",
+    "breakdown": [
+      {
+        "MSA": "brand"
+      },
+      {
+        "Advantage": "model"
+      },
+      {
+        "290": "model"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 210,
+    "mask_name": "MSA Advantage 290 Medium for Med/High nose",
+    "breakdown": [
+      {
+        "MSA": "brand"
+      },
+      {
+        "Advantage": "model"
+      },
+      {
+        "290": "model"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 211,
+    "mask_name": "MSA Advantage 290 Large for Med/High nose",
+    "breakdown": [
+      {
+        "MSA": "brand"
+      },
+      {
+        "Advantage": "model"
+      },
+      {
+        "290": "model"
+      },
+      {
+        "Large": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 212,
+    "mask_name": "O2 Curve High for Med/High nose",
+    "breakdown": [
+      {
+        "O2": "brand"
+      },
+      {
+        "Curve": "model"
+      },
+      {
+        "High": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 213,
+    "mask_name": "O2 Curve Low for Med/Low nose",
+    "breakdown": [
+      {
+        "O2": "brand"
+      },
+      {
+        "Curve": "model"
+      },
+      {
+        "Low": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/Low": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 214,
+    "mask_name": "Omnimask Omnimask One Size for Med/High nose",
+    "breakdown": [
+      {
+        "Omnimask": "brand"
+      },
+      {
+        "Omnimask": "brand"
+      },
+      {
+        "One": "model"
+      },
+      {
+        "Size": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Med/High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 215,
+    "mask_name": "Scott Xcel Small for Medium nose",
+    "breakdown": [
+      {
+        "Scott": "brand"
+      },
+      {
+        "Xcel": "model"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 216,
+    "mask_name": "stealth Air Light One Size for High nose",
+    "breakdown": [
+      {
+        "stealth": "model"
+      },
+      {
+        "Air": "model"
+      },
+      {
+        "Light": "model"
+      },
+      {
+        "One": "size"
+      },
+      {
+        "Size": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "High": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 217,
+    "mask_name": "Trend Stealth S/M for Medium nose",
+    "breakdown": [
+      {
+        "Trend": "brand"
+      },
+      {
+        "Stealth": "model"
+      },
+      {
+        "S/M": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 218,
+    "mask_name": "Trend Stealth M/L for Medium nose",
+    "breakdown": [
+      {
+        "Trend": "brand"
+      },
+      {
+        "Stealth": "model"
+      },
+      {
+        "M/L": "size"
+      },
+      {
+        "for": "misc"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "nose": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 219,
+    "mask_name": "Honeywell DC365N95HC NIOSH Surgical N95 Respirator",
+    "breakdown": [
+      {
+        "Honeywell": "brand"
+      },
+      {
+        "DC365N95HC": "model"
+      },
+      {
+        "NIOSH": "misc"
+      },
+      {
+        "Surgical": "style"
+      },
+      {
+        "N95": "style"
+      },
+      {
+        "Respirator": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 220,
+    "mask_name": "Makrite 801-N95 TC-84A",
+    "breakdown": [
+      {
+        "Makrite": "brand"
+      },
+      {
+        "801": "model"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "TC": "model"
+      },
+      {
+        "84A": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 221,
+    "mask_name": "Makrite FIT+ 4803 Surgical N95 Respirator",
+    "breakdown": [
+      {
+        "Makrite": "brand"
+      },
+      {
+        "FIT+": "model"
+      },
+      {
+        "4803": "model"
+      },
+      {
+        "Surgical": "filter_type"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "Respirator": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 222,
+    "mask_name": "Makrite 9500S Surgical NIOSH N95 Size Small headstraps",
+    "breakdown": [
+      {
+        "Makrite": "brand"
+      },
+      {
+        "9500S": "model"
+      },
+      {
+        "Surgical": "style"
+      },
+      {
+        "NIOSH": "filter_type"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "Size": "size"
+      },
+      {
+        "Small": "size"
+      },
+      {
+        "headstraps": "strap"
+      }
+    ]
+  },
+  {
+    "mask_id": 223,
+    "mask_name": "Makrite 6001B",
+    "breakdown": [
+      {
+        "Makrite": "brand"
+      },
+      {
+        "6001B": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 224,
+    "mask_name": "Makrite 9601-N95",
+    "breakdown": [
+      {
+        "Makrite": "brand"
+      },
+      {
+        "9601": "model"
+      },
+      {
+        "N95": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 225,
+    "mask_name": "O&M Halyard, Inc. N95 46727",
+    "breakdown": [
+      {
+        "O&M": "brand"
+      },
+      {
+        "Halyard": "brand"
+      },
+      {
+        "Inc.": "brand"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "46727": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 226,
+    "mask_name": "Honeywell H910 Plus",
+    "breakdown": [
+      {
+        "Honeywell": "brand"
+      },
+      {
+        "H910": "model"
+      },
+      {
+        "Plus": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 227,
+    "mask_name": "3M 9502+",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "9502+": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 228,
+    "mask_name": "Innonix Respokare - Large",
+    "breakdown": [
+      {
+        "Innonix": "brand"
+      },
+      {
+        "Respokare": "model"
+      },
+      {
+        "Large": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 229,
+    "mask_name": "Innonix Respokare - Medium",
+    "breakdown": [
+      {
+        "Innonix": "brand"
+      },
+      {
+        "Respokare": "model"
+      },
+      {
+        "Medium": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 230,
+    "mask_name": "3M 1870+ AURA™",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "1870+": "model"
+      },
+      {
+        "AURA™": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 231,
+    "mask_name": "Makrite 9500-N95, M/L Size, NIOSH 84A-5411, FDA 510(k) cleared as a surgical N95",
+    "breakdown": [
+      {
+        "Makrite": "brand"
+      },
+      {
+        "9500": "model"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "M/L": "size"
+      },
+      {
+        "Size": "size"
+      },
+      {
+        "NIOSH": "model"
+      },
+      {
+        "84A": "model"
+      },
+      {
+        "5411": "model"
+      },
+      {
+        "FDA": "model"
+      },
+      {
+        "510": "model"
+      },
+      {
+        "k": "model"
+      },
+      {
+        "cleared": "misc"
+      },
+      {
+        "as": "misc"
+      },
+      {
+        "a": "misc"
+      },
+      {
+        "surgical": "misc"
+      },
+      {
+        "N95": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 233,
+    "mask_name": "Lutema M94K",
+    "breakdown": [
+      {
+        "Lutema": "brand"
+      },
+      {
+        "M94K": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 234,
+    "mask_name": "Zimi 95S Headloop",
+    "breakdown": [
+      {
+        "Zimi": "brand"
+      },
+      {
+        "95S": "model"
+      },
+      {
+        "Headloop": "strap"
+      }
+    ]
+  },
+  {
+    "mask_id": 235,
+    "mask_name": "Zimi 95S Earloop",
+    "breakdown": [
+      {
+        "Zimi": "brand"
+      },
+      {
+        "95S": "model"
+      },
+      {
+        "Earloop": "strap"
+      }
+    ]
+  },
+  {
+    "mask_id": 236,
+    "mask_name": "CanadaMasq Q100 Medium",
+    "breakdown": [
+      {
+        "CanadaMasq": "brand"
+      },
+      {
+        "Q100": "model"
+      },
+      {
+        "Medium": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 237,
+    "mask_name": "Canada Masq Q100 Large",
+    "breakdown": [
+      {
+        "Canada": "brand"
+      },
+      {
+        "Masq": "brand"
+      },
+      {
+        "Q100": "model"
+      },
+      {
+        "Large": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 238,
+    "mask_name": "BreatheTeq - XS",
+    "breakdown": [
+      {
+        "BreatheTeq": "brand"
+      },
+      {
+        "XS": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 239,
+    "mask_name": "BreatheTeq - Medium",
+    "breakdown": [
+      {
+        "BreatheTeq": "brand"
+      },
+      {
+        "Medium": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 240,
+    "mask_name": "BreatheTeq - Large",
+    "breakdown": [
+      {
+        "BreatheTeq": "brand"
+      },
+      {
+        "Large": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 241,
+    "mask_name": "BreatheTeq - X-Large",
+    "breakdown": [
+      {
+        "BreatheTeq": "brand"
+      },
+      {
+        "X": "size"
+      },
+      {
+        "Large": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 242,
+    "mask_name": "Laianzhi HYX1002 Black KN100 - Large",
+    "breakdown": [
+      {
+        "Laianzhi": "brand"
+      },
+      {
+        "HYX1002": "model"
+      },
+      {
+        "Black": "color"
+      },
+      {
+        "KN100": "filter_type"
+      },
+      {
+        "Large": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 243,
+    "mask_name": "Laianzhi HYX1002 Black KN100 - Medium",
+    "breakdown": [
+      {
+        "Laianzhi": "brand"
+      },
+      {
+        "HYX1002": "model"
+      },
+      {
+        "Black": "color"
+      },
+      {
+        "KN100": "filter_type"
+      },
+      {
+        "Medium": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 244,
+    "mask_name": "blox N95 (part BLX-9501, medical use)",
+    "breakdown": [
+      {
+        "blox": "brand"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "part": "misc"
+      },
+      {
+        "BLX": "model"
+      },
+      {
+        "9501": "model"
+      },
+      {
+        "medical": "misc"
+      },
+      {
+        "use": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 245,
+    "mask_name": "Drager X-plore 1950 - Small",
+    "breakdown": [
+      {
+        "Drager": "brand"
+      },
+      {
+        "X": "model"
+      },
+      {
+        "plore": "model"
+      },
+      {
+        "1950": "model"
+      },
+      {
+        "Small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 246,
+    "mask_name": "Drager X-plore 1950 - Medium / Large",
+    "breakdown": [
+      {
+        "Drager": "brand"
+      },
+      {
+        "X": "model"
+      },
+      {
+        "plore": "model"
+      },
+      {
+        "1950": "model"
+      },
+      {
+        "Medium": "size"
+      },
+      {
+        "/": "misc"
+      },
+      {
+        "Large": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 247,
+    "mask_name": "Zimi ZM100F",
+    "breakdown": [
+      {
+        "Zimi": "brand"
+      },
+      {
+        "ZM100F": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 248,
+    "mask_name": "Honeywell DF300",
+    "breakdown": [
+      {
+        "Honeywell": "brand"
+      },
+      {
+        "DF300": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 265,
+    "mask_name": "3M Aura 9210+ (White straps)",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "Aura": "model"
+      },
+      {
+        "9210+": "model"
+      },
+      {
+        "White": "color"
+      },
+      {
+        "straps": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 299,
+    "mask_name": "Zimi ZM100",
+    "breakdown": [
+      {
+        "Zimi": "brand"
+      },
+      {
+        "ZM100": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 331,
+    "mask_name": "Vitacore CAN99 - Adult Small",
+    "breakdown": [
+      {
+        "Vitacore": "brand"
+      },
+      {
+        "CAN99": "model"
+      },
+      {
+        "Adult": "size"
+      },
+      {
+        "Small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 332,
+    "mask_name": "Zimi ZM9233 w/ Headstraps",
+    "breakdown": [
+      {
+        "Zimi": "brand"
+      },
+      {
+        "ZM9233": "model"
+      },
+      {
+        "w/": "misc"
+      },
+      {
+        "Headstraps": "strap"
+      }
+    ]
+  },
+  {
+    "mask_id": 335,
+    "mask_name": "Zimi ZM9541 w/ Earloops",
+    "breakdown": [
+      {
+        "Zimi": "brand"
+      },
+      {
+        "ZM9541": "model"
+      },
+      {
+        "w/": "misc"
+      },
+      {
+        "Earloops": "strap"
+      }
+    ]
+  },
+  {
+    "mask_id": 336,
+    "mask_name": "Zimi ZM9541 w/Headstraps",
+    "breakdown": [
+      {
+        "Zimi": "brand"
+      },
+      {
+        "ZM9541": "model"
+      },
+      {
+        "w/Headstraps": "strap"
+      }
+    ]
+  },
+  {
+    "mask_id": 364,
+    "mask_name": "Powecom KN95 GB2626 Headstrap",
+    "breakdown": [
+      {
+        "Powecom": "brand"
+      },
+      {
+        "KN95": "misc"
+      },
+      {
+        "GB2626": "filter_type"
+      },
+      {
+        "Headstrap": "strap"
+      }
+    ]
+  },
+  {
+    "mask_id": 397,
+    "mask_name": "Trident Regular",
+    "breakdown": [
+      {
+        "Trident": "brand"
+      },
+      {
+        "Regular": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 398,
+    "mask_name": "Trident Regular Extended Length",
+    "breakdown": [
+      {
+        "Trident": "brand"
+      },
+      {
+        "Regular": "size"
+      },
+      {
+        "Extended": "size"
+      },
+      {
+        "Length": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 399,
+    "mask_name": "Trident Double Extra Large",
+    "breakdown": [
+      {
+        "Trident": "brand"
+      },
+      {
+        "Double": "size"
+      },
+      {
+        "Extra": "size"
+      },
+      {
+        "Large": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 430,
+    "mask_name": "EnvoMask",
+    "breakdown": [
+      {
+        "EnvoMask": "brand"
+      }
+    ]
+  },
+  {
+    "mask_id": 463,
+    "mask_name": "Trident Small",
+    "breakdown": [
+      {
+        "Trident": "brand"
+      },
+      {
+        "Small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 497,
+    "mask_name": "Well Before Kn95 Pro Mask with adjustable ear loops",
+    "breakdown": [
+      {
+        "Well": "brand"
+      },
+      {
+        "Before": "brand"
+      },
+      {
+        "Kn95": "filter_type"
+      },
+      {
+        "Pro": "model"
+      },
+      {
+        "Mask": "model"
+      },
+      {
+        "with": "misc"
+      },
+      {
+        "adjustable": "strap"
+      },
+      {
+        "ear": "strap"
+      },
+      {
+        "loops": "strap"
+      }
+    ]
+  },
+  {
+    "mask_id": 498,
+    "mask_name": "Wellbefore 3d kn95 pro mask with ear loops",
+    "breakdown": [
+      {
+        "Wellbefore": "brand"
+      },
+      {
+        "3d": "model"
+      },
+      {
+        "kn95": "filter_type"
+      },
+      {
+        "pro": "model"
+      },
+      {
+        "mask": "model"
+      },
+      {
+        "with": "misc"
+      },
+      {
+        "ear": "strap"
+      },
+      {
+        "loops": "strap"
+      }
+    ]
+  },
+  {
+    "mask_id": 499,
+    "mask_name": "Canadamasq CA n95f-100pa small",
+    "breakdown": [
+      {
+        "Canadamasq": "brand"
+      },
+      {
+        "CA": "model"
+      },
+      {
+        "n95f": "model"
+      },
+      {
+        "100pa": "misc"
+      },
+      {
+        "small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 529,
+    "mask_name": "respocare inonix rk-200-304-2a",
+    "breakdown": [
+      {
+        "respocare": "model"
+      },
+      {
+        "inonix": "brand"
+      },
+      {
+        "rk": "model"
+      },
+      {
+        "200": "model"
+      },
+      {
+        "304": "model"
+      },
+      {
+        "2a": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 562,
+    "mask_name": "Makrite Sekura N95",
+    "breakdown": [
+      {
+        "Makrite": "brand"
+      },
+      {
+        "Sekura": "model"
+      },
+      {
+        "N95": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 595,
+    "mask_name": "Project 3 Black Trident Tri-fold Headstraps- Regular Size, Regular Straps",
+    "breakdown": [
+      {
+        "Project": "model"
+      },
+      {
+        "3": "model"
+      },
+      {
+        "Black": "color"
+      },
+      {
+        "Trident": "brand"
+      },
+      {
+        "Tri": "style"
+      },
+      {
+        "fold": "style"
+      },
+      {
+        "Headstraps": "strap"
+      },
+      {
+        "Regular": "size"
+      },
+      {
+        "Straps": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 596,
+    "mask_name": "Project 3 Black Trident Tri-fold XS",
+    "breakdown": [
+      {
+        "Project": "model"
+      },
+      {
+        "3": "model"
+      },
+      {
+        "Black": "color"
+      },
+      {
+        "Trident": "brand"
+      },
+      {
+        "Tri": "style"
+      },
+      {
+        "fold": "style"
+      },
+      {
+        "XS": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 597,
+    "mask_name": "Project 3 Black Trident Tri-fold S",
+    "breakdown": [
+      {
+        "Project": "model"
+      },
+      {
+        "3": "model"
+      },
+      {
+        "Black": "color"
+      },
+      {
+        "Trident": "brand"
+      },
+      {
+        "Tri": "style"
+      },
+      {
+        "fold": "style"
+      },
+      {
+        "S": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 598,
+    "mask_name": "Project 3 Black Trident Tri-fold XXL",
+    "breakdown": [
+      {
+        "Project": "model"
+      },
+      {
+        "3": "model"
+      },
+      {
+        "Black": "color"
+      },
+      {
+        "Trident": "brand"
+      },
+      {
+        "Tri": "style"
+      },
+      {
+        "fold": "style"
+      },
+      {
+        "XXL": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 599,
+    "mask_name": "roject 3 Black Trident Tri-fold Headstraps- Regular/Large, Extended Straps",
+    "breakdown": [
+      {
+        "roject": "model"
+      },
+      {
+        "3": "model"
+      },
+      {
+        "Black": "color"
+      },
+      {
+        "Trident": "brand"
+      },
+      {
+        "Tri": "style"
+      },
+      {
+        "fold": "style"
+      },
+      {
+        "Headstraps": "strap"
+      },
+      {
+        "Regular/Large": "size"
+      },
+      {
+        "Extended": "size"
+      },
+      {
+        "Straps": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 628,
+    "mask_name": "Armbrust - Surgical Mask",
+    "breakdown": [
+      {
+        "Armbrust": "brand"
+      },
+      {
+        "Surgical": "style"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 629,
+    "mask_name": "Hygenix Model 88368 - Surgical Mask",
+    "breakdown": [
+      {
+        "Hygenix": "brand"
+      },
+      {
+        "Model": "misc"
+      },
+      {
+        "88368": "model"
+      },
+      {
+        "Surgical": "style"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 630,
+    "mask_name": "Maxima Procedure Mask",
+    "breakdown": [
+      {
+        "Maxima": "brand"
+      },
+      {
+        "Procedure": "filter_type"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 631,
+    "mask_name": "BNX F95B N95",
+    "breakdown": [
+      {
+        "BNX": "brand"
+      },
+      {
+        "F95B": "model"
+      },
+      {
+        "N95": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 632,
+    "mask_name": "Weldots Fender N95 w/ Headstrap",
+    "breakdown": [
+      {
+        "Weldots": "brand"
+      },
+      {
+        "Fender": "brand"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "w/": "misc"
+      },
+      {
+        "Headstrap": "strap"
+      }
+    ]
+  },
+  {
+    "mask_id": 633,
+    "mask_name": "Readimask N1901S",
+    "breakdown": [
+      {
+        "Readimask": "brand"
+      },
+      {
+        "N1901S": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 634,
+    "mask_name": "3M 8511",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "8511": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 635,
+    "mask_name": "3M 8210Plus",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "8210Plus": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 636,
+    "mask_name": "3M VFlex 9105",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "VFlex": "model"
+      },
+      {
+        "9105": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 637,
+    "mask_name": "BNX F95W",
+    "breakdown": [
+      {
+        "BNX": "brand"
+      },
+      {
+        "F95W": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 638,
+    "mask_name": "Good Manner - Yellow Dust Mask",
+    "breakdown": [
+      {
+        "Good": "brand"
+      },
+      {
+        "Manner": "brand"
+      },
+      {
+        "Yellow": "color"
+      },
+      {
+        "Dust": "misc"
+      },
+      {
+        "Mask": "misc"
+      }
+    ]
+  },
+  {
+    "mask_id": 661,
+    "mask_name": "Jackson Safety Duckbill N95",
+    "breakdown": [
+      {
+        "Jackson": "brand"
+      },
+      {
+        "Safety": "brand"
+      },
+      {
+        "Duckbill": "style"
+      },
+      {
+        "N95": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 662,
+    "mask_name": "Laianzhi HYX1002 Black KN100 – Small",
+    "breakdown": [
+      {
+        "Laianzhi": "brand"
+      },
+      {
+        "HYX1002": "model"
+      },
+      {
+        "Black": "color"
+      },
+      {
+        "KN100": "filter_type"
+      },
+      {
+        "–": "misc"
+      },
+      {
+        "Small": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 663,
+    "mask_name": "Vitacore CAN99",
+    "breakdown": [
+      {
+        "Vitacore": "brand"
+      },
+      {
+        "CAN99": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 664,
+    "mask_name": "Kimberly-Clark Kleenguard N95 Respirator 53899",
+    "breakdown": [
+      {
+        "Kimberly": "brand"
+      },
+      {
+        "Clark": "brand"
+      },
+      {
+        "Kleenguard": "model"
+      },
+      {
+        "N95": "filter_type"
+      },
+      {
+        "Respirator": "misc"
+      },
+      {
+        "53899": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 665,
+    "mask_name": "Zimi XS frame + 7711 filter headstrap",
+    "breakdown": [
+      {
+        "Zimi": "brand"
+      },
+      {
+        "XS": "size"
+      },
+      {
+        "frame": "misc"
+      },
+      {
+        "+": "misc"
+      },
+      {
+        "7711": "model"
+      },
+      {
+        "filter": "misc"
+      },
+      {
+        "headstrap": "strap"
+      }
+    ]
+  },
+  {
+    "mask_id": 666,
+    "mask_name": "Moldex 2750",
+    "breakdown": [
+      {
+        "Moldex": "brand"
+      },
+      {
+        "2750": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 667,
+    "mask_name": "Wellbefore N99 WB-N-900-M",
+    "breakdown": [
+      {
+        "Wellbefore": "brand"
+      },
+      {
+        "N99": "filter_type"
+      },
+      {
+        "WB": "model"
+      },
+      {
+        "N": "model"
+      },
+      {
+        "900": "model"
+      },
+      {
+        "M": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 668,
+    "mask_name": "Zimi 9541-02 Earloop White Valved",
+    "breakdown": [
+      {
+        "Zimi": "brand"
+      },
+      {
+        "9541": "model"
+      },
+      {
+        "02": "model"
+      },
+      {
+        "Earloop": "strap"
+      },
+      {
+        "White": "color"
+      },
+      {
+        "Valved": "valved"
+      }
+    ]
+  },
+  {
+    "mask_id": 669,
+    "mask_name": "VFlex 9105S",
+    "breakdown": [
+      {
+        "VFlex": "model"
+      },
+      {
+        "9105S": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 670,
+    "mask_name": "3M Vflex 1804",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "Vflex": "model"
+      },
+      {
+        "1804": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 671,
+    "mask_name": "ACI Duckbill N95",
+    "breakdown": [
+      {
+        "ACI": "brand"
+      },
+      {
+        "Duckbill": "style"
+      },
+      {
+        "N95": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 672,
+    "mask_name": "Mask C KN95",
+    "breakdown": [
+      {
+        "Mask": "brand"
+      },
+      {
+        "C": "brand"
+      },
+      {
+        "KN95": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 673,
+    "mask_name": "BNX EF95 KN95",
+    "breakdown": [
+      {
+        "BNX": "brand"
+      },
+      {
+        "EF95": "model"
+      },
+      {
+        "KN95": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 674,
+    "mask_name": "Benehal MS8225 N95",
+    "breakdown": [
+      {
+        "Benehal": "brand"
+      },
+      {
+        "MS8225": "model"
+      },
+      {
+        "N95": "filter_type"
+      }
+    ]
+  },
+  {
+    "mask_id": 675,
+    "mask_name": "BNX Duckbill",
+    "breakdown": [
+      {
+        "BNX": "brand"
+      },
+      {
+        "Duckbill": "style"
+      }
+    ]
+  },
+  {
+    "mask_id": 676,
+    "mask_name": "3M VFlex 91055",
+    "breakdown": [
+      {
+        "3M": "brand"
+      },
+      {
+        "VFlex": "model"
+      },
+      {
+        "91055": "model"
+      }
+    ]
+  },
+  {
+    "mask_id": 677,
+    "mask_name": "Readimask large",
+    "breakdown": [
+      {
+        "Readimask": "brand"
+      },
+      {
+        "large": "size"
+      }
+    ]
+  },
+  {
+    "mask_id": 678,
+    "mask_name": "Zimi ONE Earloop",
+    "breakdown": [
+      {
+        "Zimi": "brand"
+      },
+      {
+        "ONE": "model"
+      },
+      {
+        "Earloop": "strap"
+      }
+    ]
+  },
+  {
+    "mask_id": 679,
+    "mask_name": "Vitacore CAN99e",
+    "breakdown": [
+      {
+        "Vitacore": "brand"
+      },
+      {
+        "CAN99e": "model"
+      }
+    ]
+  }
+]

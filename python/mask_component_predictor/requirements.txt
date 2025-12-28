@@ -1,0 +1,4 @@
+flask==3.0.0
+sklearn-crfsuite==0.3.6
+python-Levenshtein==0.23.0
+gunicorn==21.2.0
