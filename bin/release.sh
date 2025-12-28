@@ -2,24 +2,17 @@
 set -e
 
 echo "=== Release Phase ==="
-echo "Python version:"
-python3 --version
 
-echo ""
-echo "Installing Python dependencies..."
-python3 -m pip install --user -r requirements.txt
-
-echo ""
-echo "Verifying sklearn_crfsuite installation..."
-python3 -c "import sklearn_crfsuite; print('✓ sklearn_crfsuite found')"
-
-echo ""
 echo "Running migrations..."
 bundle exec rails db:migrate
 
 echo ""
-echo "Training mask predictor model..."
-bundle exec rails mask_predictor:train
+echo "Verifying mask predictor model..."
+if [ -f "python/mask_component_predictor/crf_model.pkl" ]; then
+  echo "✓ Pre-trained CRF model found"
+else
+  echo "⚠️  Warning: CRF model not found, predictions will use fallback"
+fi
 
 echo ""
 echo "=== Release Phase Complete ==="
