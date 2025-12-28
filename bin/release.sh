@@ -6,12 +6,12 @@ echo "Python version:"
 python3 --version
 
 echo ""
-echo "Checking Python packages..."
-python3 -c "import sys; print('Python path:', sys.path)"
+echo "Installing Python dependencies..."
+pip3 install --user -r requirements.txt
 
 echo ""
-echo "Attempting to import sklearn_crfsuite..."
-python3 -c "import sklearn_crfsuite; print('✓ sklearn_crfsuite found')" || echo "✗ sklearn_crfsuite NOT found"
+echo "Verifying sklearn_crfsuite installation..."
+python3 -c "import sklearn_crfsuite; print('✓ sklearn_crfsuite found')"
 
 echo ""
 echo "Running migrations..."
