@@ -242,15 +242,14 @@ echo ""
 
 # Step 8: Test the function
 echo "🧪 Testing Lambda function..."
-cat > test-event.json <<EOF
-{
-  "mask_name": "3M Aura 9205+ N95"
-}
-EOF
+
+# Create test payload (must be valid JSON on a single line)
+TEST_PAYLOAD='{"mask_name":"3M Aura 9205+ N95"}'
 
 aws lambda invoke \
     --function-name $FUNCTION_NAME \
-    --payload file://test-event.json \
+    --cli-binary-format raw-in-base64-out \
+    --payload "$TEST_PAYLOAD" \
     response.json \
     --no-cli-pager \
     $AWS_OPTS > /dev/null
@@ -261,7 +260,7 @@ if [ -f response.json ]; then
     echo "Response:"
     cat response.json | python3 -m json.tool
     echo ""
-    rm response.json test-event.json
+    rm response.json
 fi
 
 # Step 9: Get function URL (if using Function URLs)

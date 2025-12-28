@@ -1,11 +1,9 @@
 # Use AWS Lambda Python base image
 FROM public.ecr.aws/lambda/python:3.11
 
-# Copy requirements
+# Copy requirements and install dependencies
 COPY requirements.txt ${LAMBDA_TASK_ROOT}/
-
-# Install dependencies
-RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements.txt --target ${LAMBDA_TASK_ROOT}
+RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements.txt --no-cache-dir
 
 # Copy function code and model
 COPY lambda_function.py ${LAMBDA_TASK_ROOT}/
