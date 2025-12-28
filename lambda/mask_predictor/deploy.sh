@@ -108,7 +108,33 @@ mkdir -p package
 # Step 3: Install Python dependencies
 echo "📦 Installing Python dependencies..."
 pip3 install -r requirements.txt -t package/ --quiet
-echo "✓ Dependencies installed"
+
+# Remove unnecessary files to reduce package size
+echo "📦 Optimizing package size..."
+cd package
+
+# Remove tests and documentation
+find . -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
+find . -type d -name "test" -exec rm -rf {} + 2>/dev/null || true
+find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+find . -name "*.pyc" -delete 2>/dev/null || true
+find . -name "*.pyo" -delete 2>/dev/null || true
+find . -name "*.dist-info" -type d -exec rm -rf {} + 2>/dev/null || true
+find . -name "*.egg-info" -type d -exec rm -rf {} + 2>/dev/null || true
+
+# Remove documentation files
+find . -name "*.md" -delete 2>/dev/null || true
+find . -name "*.txt" -delete 2>/dev/null || true
+find . -name "*.rst" -delete 2>/dev/null || true
+
+# Remove examples and benchmarks
+find . -type d -name "examples" -exec rm -rf {} + 2>/dev/null || true
+find . -type d -name "benchmarks" -exec rm -rf {} + 2>/dev/null || true
+
+cd ..
+
+PACKAGE_SIZE=$(du -sh package/ | cut -f1)
+echo "✓ Dependencies installed and optimized (${PACKAGE_SIZE})"
 echo ""
 
 # Step 4: Copy Lambda function and model
