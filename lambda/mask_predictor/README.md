@@ -40,11 +40,22 @@ This Lambda function provides a cost-effective, auto-scaling API for predicting 
 
 ```bash
 cd lambda/mask_predictor
+
+# Use 'breathesafe' profile (default)
 ./deploy.sh
+
+# Or specify a different profile
+./deploy.sh --profile myprofile
+
+# Or use default AWS profile
+./deploy.sh --profile default
+
+# Deploy to a different region
+./deploy.sh --profile breathesafe --region us-west-2
 ```
 
 This script will:
-1. ✅ Check AWS CLI configuration
+1. ✅ Check AWS CLI configuration for specified profile
 2. ✅ Train model if not exists
 3. ✅ Install Python dependencies
 4. ✅ Create deployment package (~15MB)

@@ -3,6 +3,11 @@ set -e
 
 # AWS Lambda Deployment Script for Mask Component Predictor
 # This script packages and deploys the Lambda function
+#
+# Usage:
+#   ./deploy.sh                    # Uses 'breathesafe' profile (default)
+#   ./deploy.sh --profile myprofile # Uses specified profile
+#   ./deploy.sh --profile default   # Uses default AWS profile
 
 FUNCTION_NAME="mask-component-predictor"
 REGION="us-east-1"  # Change to your preferred region
@@ -11,10 +16,50 @@ HANDLER="lambda_function.lambda_handler"
 TIMEOUT=30
 MEMORY=512
 ROLE_NAME="mask-predictor-lambda-role"
+AWS_PROFILE="breathesafe"  # Default profile
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --profile)
+            AWS_PROFILE="$2"
+            shift 2
+            ;;
+        --region)
+            REGION="$2"
+            shift 2
+            ;;
+        --help)
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --profile PROFILE    AWS profile to use (default: breathesafe)"
+            echo "  --region REGION      AWS region (default: us-east-1)"
+            echo "  --help               Show this help message"
+            echo ""
+            echo "Examples:"
+            echo "  $0                           # Use breathesafe profile"
+            echo "  $0 --profile default         # Use default profile"
+            echo "  $0 --profile prod --region us-west-2"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Run '$0 --help' for usage information"
+            exit 1
+            ;;
+    esac
+done
+
+# Set AWS CLI options
+AWS_OPTS="--profile $AWS_PROFILE --region $REGION"
 
 echo "========================================="
 echo "AWS Lambda Deployment"
 echo "========================================="
+echo ""
+echo "Profile: $AWS_PROFILE"
+echo "Region: $REGION"
 echo ""
 
 # Check if AWS CLI is installed
@@ -26,13 +71,20 @@ if ! command -v aws &> /dev/null; then
 fi
 
 # Check if AWS credentials are configured
-if ! aws sts get-caller-identity &> /dev/null; then
-    echo "❌ AWS credentials not configured. Run:"
-    echo "   aws configure"
+if ! aws sts get-caller-identity $AWS_OPTS &> /dev/null; then
+    echo "❌ AWS credentials not configured for profile '$AWS_PROFILE'"
+    echo ""
+    echo "To configure this profile, run:"
+    echo "   aws configure --profile $AWS_PROFILE"
+    echo ""
+    echo "Or to use a different profile:"
+    echo "   $0 --profile default"
     exit 1
 fi
 
-echo "✓ AWS CLI configured"
+echo "✓ AWS CLI configured for profile: $AWS_PROFILE"
+ACCOUNT_ID=$(aws sts get-caller-identity $AWS_OPTS --query Account --output text)
+echo "  Account ID: $ACCOUNT_ID"
 echo ""
 
 # Step 1: Train model if not exists
@@ -76,7 +128,7 @@ echo ""
 
 # Step 6: Create IAM role if it doesn't exist
 echo "🔐 Checking IAM role..."
-if ! aws iam get-role --role-name $ROLE_NAME &> /dev/null; then
+if ! aws iam get-role --role-name $ROLE_NAME $AWS_OPTS &> /dev/null; then
     echo "Creating IAM role: $ROLE_NAME"
 
     # Create trust policy
@@ -99,12 +151,14 @@ EOF
     aws iam create-role \
         --role-name $ROLE_NAME \
         --assume-role-policy-document file://trust-policy.json \
-        --description "Execution role for mask component predictor Lambda"
+        --description "Execution role for mask component predictor Lambda" \
+        $AWS_OPTS
 
     # Attach basic Lambda execution policy
     aws iam attach-role-policy \
         --role-name $ROLE_NAME \
-        --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole \
+        $AWS_OPTS
 
     echo "✓ IAM role created"
     echo "⏳ Waiting 10 seconds for role to propagate..."
@@ -116,20 +170,20 @@ else
 fi
 
 # Get role ARN
-ROLE_ARN=$(aws iam get-role --role-name $ROLE_NAME --query 'Role.Arn' --output text)
+ROLE_ARN=$(aws iam get-role --role-name $ROLE_NAME $AWS_OPTS --query 'Role.Arn' --output text)
 echo "   Role ARN: $ROLE_ARN"
 echo ""
 
 # Step 7: Deploy Lambda function
 echo "🚀 Deploying Lambda function..."
 
-if aws lambda get-function --function-name $FUNCTION_NAME --region $REGION &> /dev/null; then
+if aws lambda get-function --function-name $FUNCTION_NAME $AWS_OPTS &> /dev/null; then
     echo "Updating existing function..."
     aws lambda update-function-code \
         --function-name $FUNCTION_NAME \
         --zip-file fileb://deployment.zip \
-        --region $REGION \
-        --no-cli-pager
+        --no-cli-pager \
+        $AWS_OPTS
 
     echo "✓ Function code updated"
 
@@ -138,8 +192,8 @@ if aws lambda get-function --function-name $FUNCTION_NAME --region $REGION &> /d
         --function-name $FUNCTION_NAME \
         --timeout $TIMEOUT \
         --memory-size $MEMORY \
-        --region $REGION \
-        --no-cli-pager > /dev/null
+        --no-cli-pager \
+        $AWS_OPTS > /dev/null
 
     echo "✓ Function configuration updated"
 else
@@ -152,9 +206,9 @@ else
         --zip-file fileb://deployment.zip \
         --timeout $TIMEOUT \
         --memory-size $MEMORY \
-        --region $REGION \
         --description "Mask component predictor using CRF model" \
-        --no-cli-pager
+        --no-cli-pager \
+        $AWS_OPTS
 
     echo "✓ Function created"
 fi
@@ -171,9 +225,9 @@ EOF
 aws lambda invoke \
     --function-name $FUNCTION_NAME \
     --payload file://test-event.json \
-    --region $REGION \
     response.json \
-    --no-cli-pager > /dev/null
+    --no-cli-pager \
+    $AWS_OPTS > /dev/null
 
 if [ -f response.json ]; then
     echo "✓ Test invocation successful"
@@ -191,6 +245,7 @@ echo "========================================="
 echo ""
 echo "Function Name: $FUNCTION_NAME"
 echo "Region: $REGION"
+echo "Profile: $AWS_PROFILE"
 echo "Runtime: $RUNTIME"
 echo "Memory: ${MEMORY}MB"
 echo "Timeout: ${TIMEOUT}s"
@@ -203,7 +258,7 @@ echo "Or create a Function URL:"
 echo "  aws lambda create-function-url-config \\"
 echo "    --function-name $FUNCTION_NAME \\"
 echo "    --auth-type NONE \\"
-echo "    --region $REGION"
+echo "    $AWS_OPTS"
 echo ""
 echo "Clean up:"
 rm -rf package

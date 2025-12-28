@@ -25,20 +25,31 @@ All code is complete and tested! Here's what we've built:
 
 ## 🚀 Deploy in 3 Steps
 
-### Step 1: Install AWS CLI
+### Step 1: Install & Configure AWS CLI
 
 ```bash
 brew install awscli
-aws configure
+
+# Configure the 'breathesafe' profile (recommended)
+aws configure --profile breathesafe
 ```
 
-Enter your AWS credentials when prompted.
+Enter your AWS credentials when prompted:
+- AWS Access Key ID
+- AWS Secret Access Key
+- Default region: `us-east-1`
+- Default output format: `json`
 
 ### Step 2: Deploy Lambda
 
 ```bash
 cd lambda/mask_predictor
+
+# Deploy using 'breathesafe' profile (default)
 ./deploy.sh
+
+# Or use a different profile
+./deploy.sh --profile myprofile
 ```
 
 This will:
@@ -161,18 +172,23 @@ heroku config:set USE_LAMBDA_PREDICTOR=false
 Install AWS CLI:
 ```bash
 brew install awscli
-aws configure
+aws configure --profile breathesafe
 ```
 
 ### "Unable to locate credentials"
 
-Configure AWS credentials:
+Configure AWS credentials for the 'breathesafe' profile:
 ```bash
-aws configure
+aws configure --profile breathesafe
 # Enter your AWS Access Key ID
 # Enter your AWS Secret Access Key
 # Enter default region: us-east-1
 # Enter default output format: json
+```
+
+Or use a different profile:
+```bash
+./deploy.sh --profile default
 ```
 
 ### "Model not found"
