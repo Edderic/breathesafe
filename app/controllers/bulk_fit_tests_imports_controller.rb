@@ -83,18 +83,18 @@ class BulkFitTestsImportsController < ApplicationController
                              # This is an approximation - actual count depends on valid mask/user mappings
                              begin
                                import_data = import.import_data
-                               if import_data.present?
-                                 csv_lines = import_data.split("\n").reject(&:blank?)
-                                 # Get header_row_index from column_matching_mapping if available
-                                 header_row_index = import.column_matching_mapping&.dig('header_row_index')
-                                 header_row_index = header_row_index.to_i if header_row_index
-                                 header_row_index ||= 0
-                                 # Count data rows (after header)
-                                 data_rows = csv_lines.length > header_row_index ? csv_lines.length - header_row_index - 1 : 0
-                                 [data_rows, 0].max
-                               else
-                                 0
-                               end
+                               next 0 if import_data.blank?
+
+                               csv_lines = import_data.split("\n").reject(&:blank?)
+                               header_row_index = import.column_matching_mapping&.dig('header_row_index')
+                               header_row_index = header_row_index.to_i if header_row_index
+                               header_row_index ||= 0
+                               data_rows = if csv_lines.length > header_row_index
+                                             csv_lines.length - header_row_index - 1
+                                           else
+                                             0
+                                           end
+                               [data_rows, 0].max
                              rescue StandardError
                                0
                              end
@@ -188,7 +188,8 @@ class BulkFitTestsImportsController < ApplicationController
             # Validate that user exists
             unless User.exists?(user_id)
               raise ActiveRecord::RecordInvalid.new(FitTest.new),
-                    "Invalid user_id: User with ID #{user_id} does not exist. Please refresh the import and re-match users."
+                    "Invalid user_id: User with ID #{user_id} does not exist. " \
+                    'Please refresh the import and re-match users.'
             end
 
             # user_id is already the managed_user_id (user_id from ManagedUser)
@@ -332,7 +333,8 @@ class BulkFitTestsImportsController < ApplicationController
         error_msg = e.message
         # Provide more helpful message for user validation errors
         if error_msg.include?('User ID is missing or invalid') || error_msg.include?('does not exist')
-          error_msg = "#{error_msg} This usually happens when reusing a deleted import. Please refresh the page and start a new import from the beginning."
+          error_msg += ' This usually happens when reusing a deleted import. '\
+                       'Please refresh the page and start a new import from the beginning.'
         end
         to_render = {
           messages: [error_msg]
@@ -443,6 +445,33 @@ class BulkFitTestsImportsController < ApplicationController
         render json: to_render.to_json, status: status
       end
     end
+  end
+
+  def mask_matching_preview
+    bulk_import = BulkFitTestsImport.find(params[:id])
+
+    if unauthorized?
+      render json: { messages: ['Unauthorized.'] }.to_json, status: :unauthorized
+      return
+    end
+
+    unless current_user.manages?(bulk_import.user)
+      render json: { messages: ['Unauthorized.'] }.to_json, status: :unprocessable_entity
+      return
+    end
+
+    mask_names = params[:mask_names].is_a?(Array) ? params[:mask_names] : []
+    preview = MaskMatching::PreparationService.new(
+      bulk_import: bulk_import,
+      mask_names: mask_names,
+      current_user: current_user
+    ).call
+
+    render json: preview.to_json, status: :ok
+  rescue StandardError => e
+    Rails.logger.error("Mask matching preview failed: #{e.message}")
+    render json: { messages: ["Error preparing mask matching data: #{e.message}"] }.to_json,
+           status: :unprocessable_entity
   end
 
   private

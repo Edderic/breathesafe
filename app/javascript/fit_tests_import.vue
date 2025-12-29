@@ -394,7 +394,16 @@
           <h3 class='text-align-center'>Match imported masks to existing masks</h3>
 
           <div class='mask-matching-header'>
-            <Button shadow='true' class='button match-button' text="Match" @click='attemptMaskAutoMatch' :disabled='maskMatchingRows.length === 0 || loadingMasks'/>
+            <Button
+              shadow='true'
+              class='button match-button'
+              text="Match"
+              @click='attemptMaskAutoMatch'
+              :disabled='maskMatchingRows.length === 0 || loadingMasks || maskMatchingPreviewLoading'
+            />
+            <span v-if="maskMatchingPreviewLoading" class="mask-preview-status">
+              Analyzing mask names…
+            </span>
           </div>
 
           <!-- Match Confirmation Popup for Mask Matching -->
@@ -419,15 +428,58 @@
             <table>
               <thead>
                 <tr>
-                  <th>File Mask name</th>
-                  <th>Breathesafe Mask name</th>
-                  <th>Breathesafe Mask id</th>
-                  <th>Similarity Score</th>
+                  <th>From file mask</th>
+                  <th>Breathesafe mask</th>
+                  <th>Suggested matches</th>
+                  <th>Score</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(row, index) in maskMatchingRows" :key="index">
-                  <td>{{ row.fileMaskName }}</td>
+                <tr v-for="(row, index) in maskMatchingRows" :key="index" :class="{ 'has-error': row.predictionError }">
+                  <td class="mask-file-cell">
+                    <div class="mask-file-name">{{ row.fileMaskName }}</div>
+                    <div v-if="row.predictionError" class="error-text">{{ row.predictionError }}</div>
+                    <template v-else>
+                      <div class="component-summary">
+                        <div
+                          v-for="component in headlineComponents"
+                          :key="`headline-${component}`"
+                          class="component-summary-row"
+                        >
+                          <span class="component-label">{{ formatComponentLabel(component) }}:</span>
+                          <span class="component-value">
+                            {{ formatComponentTokens(getComponentTokens(row, component)) || '—' }}
+                          </span>
+                        </div>
+                      </div>
+                      <details class="component-details" v-if="hasComponentData(row)">
+                        <summary>Show component comparison</summary>
+                        <div class="component-comparison-grid">
+                          <div>
+                            <h4>From file</h4>
+                            <ul>
+                              <li v-for="component in comparisonComponents" :key="`file-${component}`">
+                                <strong>{{ formatComponentLabel(component) }}:</strong>
+                                {{ formatComponentTokens(getComponentTokens(row, component)) || '—' }}
+                              </li>
+                            </ul>
+                          </div>
+                          <div>
+                            <h4>Breathesafe</h4>
+                            <div v-if="getSelectedMaskComponents(row)">
+                              <ul>
+                                <li v-for="component in comparisonComponents" :key="`mask-${component}`">
+                                  <strong>{{ formatComponentLabel(component) }}:</strong>
+                                  {{ formatComponentTokens(getSelectedMaskComponentTokens(row, component)) || '—' }}
+                                </li>
+                              </ul>
+                            </div>
+                            <div v-else class="muted-text">Select a mask to compare.</div>
+                          </div>
+                        </div>
+                      </details>
+                    </template>
+                  </td>
                   <td>
                     <select
                       v-model="row.selectedMaskId"
@@ -441,17 +493,40 @@
                       </option>
                       <option value="__to_be_created__">To be created</option>
                     </select>
-                  </td>
-                  <td>
-                    <router-link
+                    <div
                       v-if="row.selectedMaskId && row.selectedMaskId !== '__to_be_created__'"
-                      :to="{ name: 'ShowMask', params: { id: row.selectedMaskId }, query: { displayTab: 'Misc. Info' } }"
-                      target="_blank"
-                      class="mask-id-link"
+                      class="mask-selection-meta"
                     >
-                      {{ row.selectedMaskId }}
-                    </router-link>
-                    <span v-else class="similarity-score-empty">--</span>
+                      <router-link
+                        :to="{ name: 'ShowMask', params: { id: row.selectedMaskId }, query: { displayTab: 'Misc. Info' } }"
+                        target="_blank"
+                        class="mask-id-link"
+                      >
+                        View mask #{{ row.selectedMaskId }}
+                      </router-link>
+                    </div>
+                  </td>
+                  <td class="suggestions-cell">
+                    <div v-if="getMaskRecommendations(row).length > 0">
+                      <div
+                        v-for="suggestion in getMaskRecommendations(row).slice(0, 3)"
+                        :key="suggestion.mask_id"
+                        class="suggestion-row"
+                      >
+                        <div class="suggestion-info">
+                          <span class="suggestion-name">{{ suggestion.mask_name }}</span>
+                          <span class="score-pill">{{ formatSimilarityScore(suggestion.score) }}</span>
+                        </div>
+                        <Button
+                          shadow='true'
+                          class='button suggestion-button'
+                          text="Use"
+                          @click="applyMaskRecommendation(row, suggestion.mask_id)"
+                          :disabled="isCompleted || row.selectedMaskId === suggestion.mask_id"
+                        />
+                      </div>
+                    </div>
+                    <div v-else class="muted-text">No suggestions available.</div>
                   </td>
                   <td class="similarity-score-cell">
                     <span v-if="getMaskMatchingSimilarityScore(row) !== null" class="similarity-score">
@@ -1228,8 +1303,10 @@ export default {
       }).length
     },
     deduplicatedMasks() {
-      // Filter masks where duplicate_of is null and sort alphabetically by unique_internal_model_code
-      return this.allMasks
+      // Prefer catalog masks enriched with breakdowns, fallback to the full mask list
+      const sourceMasks = this.catalogMasksWithBreakdowns.length > 0 ? this.catalogMasksWithBreakdowns : this.allMasks
+
+      return sourceMasks
         .filter(mask => mask.duplicate_of === null || mask.duplicate_of === undefined)
         .sort((a, b) => {
           const codeA = (a.unique_internal_model_code || '').toLowerCase()
@@ -1238,6 +1315,14 @@ export default {
           if (codeA > codeB) return 1
           return 0
         })
+    },
+    maskCatalogIndex() {
+      const index = {}
+      this.catalogMasksWithBreakdowns.forEach(mask => {
+        index[mask.id] = mask
+        index[mask.id.toString()] = mask
+      })
+      return index
     },
     hasUSCColumnsMatched() {
       // Check if any column matching values start with "USC ->"
@@ -1294,6 +1379,15 @@ export default {
       pendingUserMatches: {},
       maskMatchingRows: [],
       allMasks: [],
+      catalogMasksWithBreakdowns: [],
+      fromFileMaskBreakdowns: {},
+      maskMatchingRecommendations: {},
+      maskMatchingErrors: {},
+      maskMatchingPreviewLoading: false,
+      autoMatchThreshold: 0.65,
+      componentWeights: {},
+      comparisonComponents: ['brand', 'model', 'filter_type', 'size', 'strap', 'style'],
+      headlineComponents: ['brand', 'model', 'filter_type'],
       loadingMasks: false,
       showMaskMatchConfirmation: false,
       pendingMaskMatchOverwrites: {},
@@ -2942,8 +3036,9 @@ export default {
         })
       }
 
-      // Fetch deduplicated masks
+      // Fetch deduplicated masks and prediction data
       await this.fetchDeduplicatedMasks()
+      await this.fetchMaskMatchingPreview()
     },
     async fetchDeduplicatedMasks() {
       this.loadingMasks = true
@@ -2980,13 +3075,119 @@ export default {
         this.loadingMasks = false
       }
     },
+    async fetchMaskMatchingPreview() {
+      if (!this.bulkFitTestsImportId || this.maskMatchingRows.length === 0) {
+        return
+      }
+
+      this.maskMatchingPreviewLoading = true
+
+      try {
+        const payload = {
+          mask_names: this.maskMatchingRows.map(row => row.fileMaskName)
+        }
+
+        const response = await axios.post(
+          `/bulk_fit_tests_imports/${this.bulkFitTestsImportId}/mask_matching_preview.json`,
+          payload
+        )
+
+        if (response.status === 200 && response.data) {
+          const data = response.data
+          this.fromFileMaskBreakdowns = data.from_file_masks || {}
+          this.maskMatchingRecommendations = data.recommendations || {}
+          this.maskMatchingErrors = data.errors || {}
+          this.catalogMasksWithBreakdowns = data.catalog_masks || []
+          if (data.auto_match_threshold) {
+            this.autoMatchThreshold = data.auto_match_threshold
+          }
+          if (data.component_weights) {
+            this.componentWeights = data.component_weights
+          }
+          this.updateRowsWithPreviewData()
+        }
+      } catch (error) {
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          this.redirectToSignIn()
+          return
+        }
+        this.messages = [{ str: 'Error analyzing mask names. Please retry.' }]
+      } finally {
+        this.maskMatchingPreviewLoading = false
+      }
+    },
+    updateRowsWithPreviewData() {
+      if (!this.maskMatchingRows || this.maskMatchingRows.length === 0) {
+        return
+      }
+
+      this.maskMatchingRows.forEach(row => {
+        const fileData = this.fromFileMaskBreakdowns[row.fileMaskName] || null
+        const predictionError = this.maskMatchingErrors[row.fileMaskName] || null
+        this.$set(row, 'predictionError', predictionError)
+        this.$set(row, 'fromFileComponents', fileData ? fileData.components : null)
+        this.$set(row, 'fromFileBreakdown', fileData ? fileData.breakdown : null)
+        this.$set(row, 'recommendations', this.maskMatchingRecommendations[row.fileMaskName] || [])
+      })
+    },
     attemptMaskAutoMatch() {
       if (!this.maskMatchingRows || this.maskMatchingRows.length === 0) {
         return
       }
 
+      if (!this.hasRecommendationData()) {
+        this.legacyMaskAutoMatch()
+        return
+      }
+
+      const matches = {}
+      const overwrites = {}
+      const usedMaskIds = new Set()
+
+      const sortedRows = [...this.maskMatchingRows].sort((a, b) => {
+        if (a.fileMaskName < b.fileMaskName) return -1
+        if (a.fileMaskName > b.fileMaskName) return 1
+        return 0
+      })
+
+      sortedRows.forEach(row => {
+        if (row.predictionError) {
+          return
+        }
+
+        const recommendations = (this.maskMatchingRecommendations[row.fileMaskName] || []).filter(
+          rec => !usedMaskIds.has(rec.mask_id.toString())
+        )
+
+        const bestMatch = recommendations.find(rec => rec.score >= this.autoMatchThreshold)
+
+        if (bestMatch) {
+          const alreadySelected = row.selectedMaskId &&
+            row.selectedMaskId.toString() === bestMatch.mask_id.toString()
+
+          if (!alreadySelected && row.selectedMaskId && row.selectedMaskId !== '' && row.selectedMaskId !== '__to_be_created__') {
+            const existingMask = this.getMaskById(row.selectedMaskId)
+            const existingName = existingMask ? existingMask.unique_internal_model_code : `Mask ${row.selectedMaskId}`
+            overwrites[row.fileMaskName] = existingName
+          }
+
+          matches[row.fileMaskName] = bestMatch.mask_id.toString()
+          usedMaskIds.add(bestMatch.mask_id.toString())
+        } else if (!row.selectedMaskId || row.selectedMaskId === '') {
+          matches[row.fileMaskName] = '__to_be_created__'
+        }
+      })
+
+      if (Object.keys(overwrites).length > 0) {
+        this.pendingMaskMatchOverwrites = overwrites
+        this.pendingMaskMatches = matches
+        this.showMaskMatchConfirmation = true
+      } else {
+        this.applyMaskMatches(matches)
+      }
+    },
+    legacyMaskAutoMatch() {
       if (this.deduplicatedMasks.length === 0) {
-        // No masks available, assign "To be created" to all rows without selections
         const matches = {}
         this.maskMatchingRows.forEach(row => {
           if (!row.selectedMaskId || row.selectedMaskId === '') {
@@ -2999,26 +3200,20 @@ export default {
 
       const matches = {}
       const overwrites = {}
-
-      // Sort rows by file mask name for consistent processing
       const sortedRows = [...this.maskMatchingRows].sort((a, b) => {
         if (a.fileMaskName < b.fileMaskName) return -1
         if (a.fileMaskName > b.fileMaskName) return 1
         return 0
       })
-
-      // Track which masks have been matched
       const usedMaskIds = new Set()
 
-      // For each row, find the best match from available masks
       sortedRows.forEach(row => {
         let bestMask = null
         let bestSimilarity = 0
 
-        // Find best match from available masks
         this.deduplicatedMasks.forEach(mask => {
           if (usedMaskIds.has(mask.id)) {
-            return // Skip already matched masks
+            return
           }
 
           const similarity = this.calculateSimilarity(row.fileMaskName, mask.unique_internal_model_code)
@@ -3029,50 +3224,110 @@ export default {
           }
         })
 
-        // If best similarity is >= 0.4, assign the match
         if (bestSimilarity >= 0.4 && bestMask) {
-          // Check if row already has this mask selected
           const alreadyHasBestMatch = row.selectedMaskId &&
             row.selectedMaskId.toString() === bestMask.id.toString()
 
           if (alreadyHasBestMatch) {
-            // Already has the best match, mark it as used and skip
             usedMaskIds.add(bestMask.id)
           } else {
-            // Check if this would overwrite an existing selection
             if (row.selectedMaskId && row.selectedMaskId !== '' && row.selectedMaskId !== '__to_be_created__') {
-              // Would overwrite existing selection
               const existingMask = this.deduplicatedMasks.find(m => m.id.toString() === row.selectedMaskId.toString())
               const existingName = existingMask ? existingMask.unique_internal_model_code : `Mask ${row.selectedMaskId}`
-              overwrites[row.fileMaskName] = bestMask.unique_internal_model_code
+              overwrites[row.fileMaskName] = bestMask.unique_internal_model_code || existingName
             }
 
             matches[row.fileMaskName] = bestMask.id.toString()
             usedMaskIds.add(bestMask.id)
           }
-        } else {
-          // Similarity too low, assign "To be created"
-          if (!row.selectedMaskId || row.selectedMaskId === '') {
-            matches[row.fileMaskName] = '__to_be_created__'
-          } else if (row.selectedMaskId && row.selectedMaskId !== '' && row.selectedMaskId !== '__to_be_created__') {
-            // Would overwrite existing selection with "To be created"
-            const existingMask = this.deduplicatedMasks.find(m => m.id.toString() === row.selectedMaskId.toString())
-            const existingName = existingMask ? existingMask.unique_internal_model_code : `Mask ${row.selectedMaskId}`
-            overwrites[row.fileMaskName] = 'To be created'
-            matches[row.fileMaskName] = '__to_be_created__'
-          }
+        } else if (!row.selectedMaskId || row.selectedMaskId === '') {
+          matches[row.fileMaskName] = '__to_be_created__'
+        } else if (row.selectedMaskId && row.selectedMaskId !== '__to_be_created__') {
+          overwrites[row.fileMaskName] = 'To be created'
+          matches[row.fileMaskName] = '__to_be_created__'
         }
       })
 
-      // If there are overwrites, show confirmation popup
       if (Object.keys(overwrites).length > 0) {
         this.pendingMaskMatchOverwrites = overwrites
         this.pendingMaskMatches = matches
         this.showMaskMatchConfirmation = true
       } else {
-        // No overwrites, apply matches directly
         this.applyMaskMatches(matches)
       }
+    },
+    hasRecommendationData() {
+      return this.maskMatchingRecommendations && Object.keys(this.maskMatchingRecommendations).length > 0
+    },
+    getMaskRecommendations(row) {
+      if (!row) {
+        return []
+      }
+      return row.recommendations || this.maskMatchingRecommendations[row.fileMaskName] || []
+    },
+    applyMaskRecommendation(row, maskId) {
+      if (!row || !maskId) {
+        return
+      }
+      this.$set(row, 'selectedMaskId', maskId.toString())
+      this.updateMaskMatching()
+    },
+    hasComponentData(row) {
+      if (!row || !row.fromFileComponents) {
+        return false
+      }
+      return this.comparisonComponents.some(component => {
+        const tokens = row.fromFileComponents[component] || []
+        return Array.isArray(tokens) && tokens.length > 0
+      })
+    },
+    getComponentTokens(row, component) {
+      if (!row || !row.fromFileComponents) {
+        return []
+      }
+      return row.fromFileComponents[component] || []
+    },
+    getSelectedMaskComponents(row) {
+      if (!row || !row.selectedMaskId || row.selectedMaskId === '__to_be_created__') {
+        return null
+      }
+      const mask = this.getMaskById(row.selectedMaskId)
+      return mask && mask.components ? mask.components : null
+    },
+    getSelectedMaskComponentTokens(row, component) {
+      const components = this.getSelectedMaskComponents(row)
+      return components ? components[component] || [] : []
+    },
+    formatComponentLabel(component) {
+      switch (component) {
+        case 'filter_type':
+          return 'Filter type'
+        case 'brand':
+          return 'Brand'
+        case 'model':
+          return 'Model'
+        case 'size':
+          return 'Size'
+        case 'strap':
+          return 'Strap'
+        case 'style':
+          return 'Style'
+        default:
+          return component ? component.charAt(0).toUpperCase() + component.slice(1) : ''
+      }
+    },
+    formatComponentTokens(tokens) {
+      return Array.isArray(tokens) && tokens.length > 0 ? tokens.join(', ') : ''
+    },
+    getMaskById(maskId) {
+      if (!maskId && maskId !== 0) {
+        return null
+      }
+      const key = maskId.toString()
+      if (this.maskCatalogIndex[key]) {
+        return this.maskCatalogIndex[key]
+      }
+      return this.allMasks.find(mask => mask.id && mask.id.toString() === key) || null
     },
     applyMaskMatches(matches) {
       // Apply the matches to maskMatchingRows
@@ -3099,6 +3354,13 @@ export default {
       // Get similarity score between File mask name and selected Breathesafe mask
       if (!row.selectedMaskId || row.selectedMaskId === '' || row.selectedMaskId === '__to_be_created__') {
         return null
+      }
+
+      const recommendationMatch = this.getMaskRecommendations(row).find(rec =>
+        rec.mask_id.toString() === row.selectedMaskId.toString()
+      )
+      if (recommendationMatch) {
+        return recommendationMatch.score
       }
 
       const selectedMask = this.deduplicatedMasks.find(m => m.id.toString() === row.selectedMaskId.toString())
@@ -4335,8 +4597,8 @@ export default {
           continue // Skip rows with unmapped or to-be-created masks
         }
 
-        // Find mask name from all masks (not just deduplicated)
-        const mask = this.allMasks.find(m => m.id.toString() === maskId.toString())
+        // Find mask name from cached catalog (fallback to allMasks)
+        const mask = this.getMaskById(maskId)
         const maskName = mask ? mask.unique_internal_model_code : `Mask ${maskId}`
 
         // Look up managed_user_id from user_matching
@@ -4868,6 +5130,9 @@ export default {
           } else {
             this.maskMatching = {}
           }
+
+          this.fromFileMaskBreakdowns = bulkImport.from_file_mask_breakdowns || {}
+          this.maskMatchingErrors = bulkImport.from_file_mask_breakdown_errors || {}
 
           // Load mask_modded_values_matching if available
           if (bulkImport.mask_modded_values_matching) {
@@ -5501,6 +5766,103 @@ input[type="file"] {
 
 .mask-matching-table tbody tr:hover {
   background-color: #f8f9fa;
+}
+
+.mask-preview-status {
+  margin-left: 1rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.mask-file-cell {
+  min-width: 260px;
+}
+
+.mask-file-name {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.component-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  font-size: 0.9rem;
+  margin-top: 0.35rem;
+}
+
+.component-summary-row {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.component-label {
+  font-weight: 600;
+}
+
+.component-details {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.component-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.muted-text {
+  color: #777;
+  font-size: 0.85rem;
+}
+
+.suggestions-cell {
+  min-width: 240px;
+}
+
+.suggestion-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px dashed #eee;
+  padding: 0.25rem 0;
+}
+
+.suggestion-info {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  max-width: 70%;
+}
+
+.suggestion-name {
+  font-weight: 600;
+}
+
+.score-pill {
+  display: inline-block;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background-color: #eef4ff;
+  color: #3252a8;
+  font-size: 0.75rem;
+  margin-top: 0.15rem;
+}
+
+.suggestion-button {
+  margin-left: 0.75rem;
+  min-width: auto;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.mask-selection-meta {
+  margin-top: 0.35rem;
+}
+
+.mask-matching-table tbody tr.has-error {
+  background-color: #fff6f6;
 }
 
 .testing-mode-matching-header {

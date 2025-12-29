@@ -62,6 +62,7 @@ Rails.application.routes.draw do
   put 'bulk_fit_tests_imports/:id', to: 'bulk_fit_tests_imports#update'
   delete 'bulk_fit_tests_imports/:id', to: 'bulk_fit_tests_imports#destroy'
   post 'bulk_fit_tests_imports/:id/complete_import', to: 'bulk_fit_tests_imports#complete_import'
+  post 'bulk_fit_tests_imports/:id/mask_matching_preview', to: 'bulk_fit_tests_imports#mask_matching_preview'
 
   post 'managed_users', to: 'managed_users#create'
   get 'managed_users', to: 'managed_users#index'
