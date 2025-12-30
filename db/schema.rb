@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_251_227_031_022) do
+ActiveRecord::Schema[7.0].define(version: 20_251_229_121_945) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -85,6 +85,8 @@ ActiveRecord::Schema[7.0].define(version: 20_251_227_031_022) do
     t.jsonb 'comfort_matching', default: {}
     t.jsonb 'mask_modded_values_matching', default: {}, null: false
     t.jsonb 'procedure_values_matching', default: {}, null: false
+    t.jsonb 'from_file_mask_breakdowns', default: {}, null: false
+    t.jsonb 'from_file_mask_breakdown_errors', default: {}, null: false
     t.index ['user_id'], name: 'index_bulk_fit_tests_imports_on_user_id'
   end
 

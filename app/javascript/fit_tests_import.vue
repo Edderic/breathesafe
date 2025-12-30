@@ -3105,6 +3105,9 @@ export default {
             this.componentWeights = data.component_weights
           }
           this.updateRowsWithPreviewData()
+
+          // Remove any prior error banner about preview failures
+          this.messages = this.messages.filter(message => message.str !== 'Error analyzing mask names. Please retry.')
         }
       } catch (error) {
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {

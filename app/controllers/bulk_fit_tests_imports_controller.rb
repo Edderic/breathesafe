@@ -467,7 +467,7 @@ class BulkFitTestsImportsController < ApplicationController
       current_user: current_user
     ).call
 
-    render json: preview.to_json, status: :ok
+    render json: preview, status: :ok
   rescue StandardError => e
     Rails.logger.error("Mask matching preview failed: #{e.message}")
     render json: { messages: ["Error preparing mask matching data: #{e.message}"] }.to_json,
