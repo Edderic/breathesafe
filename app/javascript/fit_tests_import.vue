@@ -404,6 +404,9 @@
             <span v-if="maskMatchingPreviewLoading" class="mask-preview-status">
               Analyzing mask names…
             </span>
+            <span v-else-if="maskMatchingPreviewError" class="mask-preview-error">
+              {{ maskMatchingPreviewError }}
+            </span>
           </div>
 
           <!-- Match Confirmation Popup for Mask Matching -->
@@ -1388,6 +1391,8 @@ export default {
       componentWeights: {},
       comparisonComponents: ['brand', 'model', 'filter_type', 'size', 'strap', 'style'],
       headlineComponents: ['brand', 'model', 'filter_type'],
+      maskMatchingPreviewError: null,
+      maskPreviewErrorText: 'Error analyzing mask names. Please retry.',
       loadingMasks: false,
       showMaskMatchConfirmation: false,
       pendingMaskMatchOverwrites: {},
@@ -1417,6 +1422,7 @@ export default {
     }
   },
   async mounted() {
+    this.removeMaskPreviewMessage()
     setupCSRF()
 
     // Check if we're returning from sign-in (check for attempt-name in query)
@@ -3105,16 +3111,15 @@ export default {
             this.componentWeights = data.component_weights
           }
           this.updateRowsWithPreviewData()
-
-          // Remove any prior error banner about preview failures
-          this.messages = this.messages.filter(message => message.str !== 'Error analyzing mask names. Please retry.')
+          this.maskMatchingPreviewError = null
+          this.removeMaskPreviewMessage()
         }
       } catch (error) {
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
           this.redirectToSignIn()
           return
         }
-        this.messages = [{ str: 'Error analyzing mask names. Please retry.' }]
+        this.maskMatchingPreviewError = this.maskPreviewErrorText
       } finally {
         this.maskMatchingPreviewLoading = false
       }
@@ -3127,10 +3132,10 @@ export default {
       this.maskMatchingRows.forEach(row => {
         const fileData = this.fromFileMaskBreakdowns[row.fileMaskName] || null
         const predictionError = this.maskMatchingErrors[row.fileMaskName] || null
-        this.$set(row, 'predictionError', predictionError)
-        this.$set(row, 'fromFileComponents', fileData ? fileData.components : null)
-        this.$set(row, 'fromFileBreakdown', fileData ? fileData.breakdown : null)
-        this.$set(row, 'recommendations', this.maskMatchingRecommendations[row.fileMaskName] || [])
+        row.predictionError = predictionError
+        row.fromFileComponents = fileData ? fileData.components : null
+        row.fromFileBreakdown = fileData ? fileData.breakdown : null
+        row.recommendations = this.maskMatchingRecommendations[row.fileMaskName] || []
       })
     },
     attemptMaskAutoMatch() {
@@ -3262,6 +3267,9 @@ export default {
     hasRecommendationData() {
       return this.maskMatchingRecommendations && Object.keys(this.maskMatchingRecommendations).length > 0
     },
+    removeMaskPreviewMessage() {
+      this.messages = this.messages.filter(message => message.str !== this.maskPreviewErrorText)
+    },
     getMaskRecommendations(row) {
       if (!row) {
         return []
@@ -3272,7 +3280,7 @@ export default {
       if (!row || !maskId) {
         return
       }
-      this.$set(row, 'selectedMaskId', maskId.toString())
+      row.selectedMaskId = maskId.toString()
       this.updateMaskMatching()
     },
     hasComponentData(row) {
@@ -5775,6 +5783,13 @@ input[type="file"] {
   margin-left: 1rem;
   font-size: 0.9rem;
   color: #666;
+}
+
+.mask-preview-error {
+  margin-left: 1rem;
+  font-size: 0.9rem;
+  color: #c53030;
+  font-weight: 600;
 }
 
 .mask-file-cell {
