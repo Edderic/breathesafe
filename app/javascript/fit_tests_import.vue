@@ -3028,7 +3028,11 @@ export default {
       // Convert to array and create rows
       this.maskMatchingRows = Array.from(uniqueMaskNames).map(maskName => ({
         fileMaskName: maskName,
-        selectedMaskId: null
+        selectedMaskId: null,
+        predictionError: null,
+        fromFileComponents: null,
+        fromFileBreakdown: null,
+        recommendations: []
       }))
 
       // Load saved mask matching if it exists
@@ -3129,13 +3133,17 @@ export default {
         return
       }
 
-      this.maskMatchingRows.forEach(row => {
+      this.maskMatchingRows = this.maskMatchingRows.map(row => {
         const fileData = this.fromFileMaskBreakdowns[row.fileMaskName] || null
         const predictionError = this.maskMatchingErrors[row.fileMaskName] || null
-        row.predictionError = predictionError
-        row.fromFileComponents = fileData ? fileData.components : null
-        row.fromFileBreakdown = fileData ? fileData.breakdown : null
-        row.recommendations = this.maskMatchingRecommendations[row.fileMaskName] || []
+
+        return {
+          ...row,
+          predictionError,
+          fromFileComponents: fileData ? fileData.components : null,
+          fromFileBreakdown: fileData ? fileData.breakdown : null,
+          recommendations: this.maskMatchingRecommendations[row.fileMaskName] || []
+        }
       })
     },
     attemptMaskAutoMatch() {
