@@ -3158,7 +3158,6 @@ export default {
 
       const matches = {}
       const overwrites = {}
-      const usedMaskIds = new Set()
 
       const sortedRows = [...this.maskMatchingRows].sort((a, b) => {
         if (a.fileMaskName < b.fileMaskName) return -1
@@ -3171,9 +3170,7 @@ export default {
           return
         }
 
-        const recommendations = (this.maskMatchingRecommendations[row.fileMaskName] || []).filter(
-          rec => !usedMaskIds.has(rec.mask_id.toString())
-        )
+        const recommendations = this.maskMatchingRecommendations[row.fileMaskName] || []
 
         const bestMatch = recommendations.find(rec => rec.score >= this.autoMatchThreshold)
 
@@ -3188,7 +3185,6 @@ export default {
           }
 
           matches[row.fileMaskName] = bestMatch.mask_id.toString()
-          usedMaskIds.add(bestMatch.mask_id.toString())
         } else if (!row.selectedMaskId || row.selectedMaskId === '') {
           matches[row.fileMaskName] = '__to_be_created__'
         }
@@ -3221,17 +3217,12 @@ export default {
         if (a.fileMaskName > b.fileMaskName) return 1
         return 0
       })
-      const usedMaskIds = new Set()
 
       sortedRows.forEach(row => {
         let bestMask = null
         let bestSimilarity = 0
 
         this.deduplicatedMasks.forEach(mask => {
-          if (usedMaskIds.has(mask.id)) {
-            return
-          }
-
           const similarity = this.calculateSimilarity(row.fileMaskName, mask.unique_internal_model_code)
 
           if (similarity > bestSimilarity) {
@@ -3244,9 +3235,7 @@ export default {
           const alreadyHasBestMatch = row.selectedMaskId &&
             row.selectedMaskId.toString() === bestMask.id.toString()
 
-          if (alreadyHasBestMatch) {
-            usedMaskIds.add(bestMask.id)
-          } else {
+          if (!alreadyHasBestMatch) {
             if (row.selectedMaskId && row.selectedMaskId !== '' && row.selectedMaskId !== '__to_be_created__') {
               const existingMask = this.deduplicatedMasks.find(m => m.id.toString() === row.selectedMaskId.toString())
               const existingName = existingMask ? existingMask.unique_internal_model_code : `Mask ${row.selectedMaskId}`
@@ -3254,7 +3243,6 @@ export default {
             }
 
             matches[row.fileMaskName] = bestMask.id.toString()
-            usedMaskIds.add(bestMask.id)
           }
         } else if (!row.selectedMaskId || row.selectedMaskId === '') {
           matches[row.fileMaskName] = '__to_be_created__'

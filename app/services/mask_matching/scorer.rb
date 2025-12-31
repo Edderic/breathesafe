@@ -12,7 +12,7 @@ module MaskMatching
       style: 0.04
     }.freeze
 
-    AUTO_MATCH_THRESHOLD = 0.65
+    AUTO_MATCH_THRESHOLD = 0.5
 
     class << self
       def score(file_components, mask_components)
