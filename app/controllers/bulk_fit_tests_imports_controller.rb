@@ -168,7 +168,9 @@ class BulkFitTestsImportsController < ApplicationController
         ActiveRecord::Base.transaction do
           fit_tests_data.each do |fit_test_data|
             # Extract data
-            user_id = fit_test_data[:user_id] || fit_test_data['user_id']
+            user_id_param = fit_test_data[:user_id] || fit_test_data['user_id']
+            user_id_string = user_id_param.to_s.strip
+            user_id = user_id_string.to_i if user_id_string.match?(/\A\d+\z/)
             mask_id = fit_test_data[:mask_id] || fit_test_data['mask_id']
             testing_mode = fit_test_data[:testing_mode] || fit_test_data['testing_mode']
             facial_hair = fit_test_data[:facial_hair] || fit_test_data['facial_hair']
@@ -180,7 +182,7 @@ class BulkFitTestsImportsController < ApplicationController
             procedure = fit_test_data[:procedure] || fit_test_data['procedure']
 
             # Validate user_id
-            if user_id.nil? || user_id.zero?
+            if user_id_string.blank? || user_id.nil? || user_id.zero?
               raise ActiveRecord::RecordInvalid.new(FitTest.new),
                     'Invalid user_id: User ID is missing or invalid. Please refresh the import and re-match users.'
             end
