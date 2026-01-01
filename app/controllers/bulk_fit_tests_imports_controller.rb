@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class BulkFitTestsImportsController < ApplicationController
+  MAX_VALID_BEARD_LENGTH_MM = 10
   def create
     if unauthorized?
       status = 401
@@ -174,6 +175,7 @@ class BulkFitTestsImportsController < ApplicationController
             mask_id = fit_test_data[:mask_id] || fit_test_data['mask_id']
             testing_mode = fit_test_data[:testing_mode] || fit_test_data['testing_mode']
             facial_hair = fit_test_data[:facial_hair] || fit_test_data['facial_hair']
+            facial_hair = sanitize_facial_hair(facial_hair)
             user_seal_check = fit_test_data[:user_seal_check] || fit_test_data['user_seal_check']
             comfort = fit_test_data[:comfort] || fit_test_data['comfort']
             exercises = fit_test_data[:exercises] || fit_test_data['exercises'] || {}
@@ -477,6 +479,55 @@ class BulkFitTestsImportsController < ApplicationController
   end
 
   private
+
+  def sanitize_facial_hair(facial_hair_param)
+    return nil if facial_hair_param.blank?
+
+    facial_hair_hash =
+      if facial_hair_param.respond_to?(:to_unsafe_h)
+        facial_hair_param.to_unsafe_h
+      elsif facial_hair_param.respond_to?(:to_h)
+        facial_hair_param.to_h
+      else
+        facial_hair_param
+      end
+
+    sanitized = facial_hair_hash.deep_dup
+    numeric_value = sanitized['beard_length_mm'] || sanitized[:beard_length_mm]
+    sanitized_beard_length = sanitize_beard_length_mm(numeric_value)
+
+    sanitized.delete('beard_length_mm')
+    sanitized.delete(:beard_length_mm)
+    sanitized['beard_length_mm'] = sanitized_beard_length if sanitized_beard_length
+
+    sanitized.presence
+  end
+
+  def sanitize_beard_length_mm(value)
+    numeric_value = extract_numeric_millimeters(value)
+    return '0mm' if numeric_value.nil?
+    return '0mm' if numeric_value <= 0
+    return '0mm' if numeric_value > MAX_VALID_BEARD_LENGTH_MM
+
+    "#{format_millimeter_value(numeric_value)}mm"
+  end
+
+  def extract_numeric_millimeters(value)
+    return nil if value.blank?
+
+    numeric_string = value.to_s.strip.gsub(/[^\d.]/, '')
+    return nil if numeric_string.blank?
+
+    Float(numeric_string)
+  rescue ArgumentError
+    nil
+  end
+
+  def format_millimeter_value(value)
+    return '0' if value.zero?
+
+    (value % 1).zero? ? value.to_i.to_s : format('%.2f', value).sub(/\.?0+$/, '')
+  end
 
   def bulk_import_params
     params.require(:bulk_fit_tests_import).permit(

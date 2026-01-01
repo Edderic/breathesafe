@@ -1891,6 +1891,29 @@ export default {
 
       return result
     },
+    normalizeBeardLength(value) {
+      if (value == null) {
+        return null
+      }
+
+      const numericValue = parseFloat(value)
+      if (Number.isNaN(numericValue)) {
+        return null
+      }
+
+      if (numericValue <= 0) {
+        return '0'
+      }
+
+      if (numericValue > 10) {
+        // Bulk imports occasionally contain placeholder values that are orders of magnitude too large.
+        // Treat anything beyond the realistic grooming range as a clean shave.
+        return '0'
+      }
+
+      const rounded = Math.round(numericValue * 100) / 100
+      return rounded.toString().replace(/\.0+$/, '').replace(/(\.\d*[1-9])0+$/, '$1')
+    },
     parseCSVWithQuotedNewlines(csvContent) {
       // Parse CSV content handling newlines within quoted fields
       const lines = []
@@ -4481,7 +4504,12 @@ export default {
               const trimmed = raw.trim()
               const numericMatch = trimmed.match(/^\d+(\.\d+)?$/)
               if (numericMatch) {
-                beardLengthMm = trimmed
+                const normalized = this.normalizeBeardLength(trimmed)
+                if (normalized === null) {
+                  beardLengthInvalid = true
+                } else {
+                  beardLengthMm = normalized
+                }
               } else {
                 beardLengthInvalid = true
               }
@@ -5340,7 +5368,7 @@ export default {
           if (row.procedure) {
             payload.procedure = row.procedure
           }
-          if (row.beardLengthMm && !row.beardLengthInvalid) {
+          if (row.beardLengthMm !== null && !row.beardLengthInvalid) {
             payload.facial_hair = { beard_length_mm: `${row.beardLengthMm}mm` }
           }
           // Build user_seal_check payload from row USC mapping
