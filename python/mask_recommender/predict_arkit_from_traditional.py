@@ -62,7 +62,23 @@ def parse_args() -> argparse.Namespace:
     "--cookie",
     default=None,
     help="Optional Cookie header value for authenticated requests "
-    '(example: "_session_id=abc123")',
+    '(example: "_session_id=abc123"). If not provided, you must pass '
+    "--email/--password for programmatic login.",
+  )
+  parser.add_argument(
+    "--email",
+    default=None,
+    help="Service-account email for programmatic login.",
+  )
+  parser.add_argument(
+    "--password",
+    default=None,
+    help="Service-account password for programmatic login.",
+  )
+  parser.add_argument(
+    "--logout",
+    action="store_true",
+    help="If set, call users/log_out at the end when login credentials were used.",
   )
   parser.add_argument(
     "--output-file",
@@ -86,6 +102,33 @@ def build_session(cookie: str | None) -> requests.Session:
     session.headers.update({"Cookie": cookie})
   session.headers.update({"Accept": "application/json"})
   return session
+
+
+def login_with_credentials(
+  session: requests.Session, base_url: str, email: str, password: str
+) -> None:
+  login_url = f"{base_url}/users/log_in.json"
+  logging.info("Logging in via %s", login_url)
+  response = session.post(
+    login_url,
+    json={"user": {"email": email, "password": password}},
+    timeout=30,
+  )
+  if response.status_code != 200:
+    raise RuntimeError(f"Login failed ({response.status_code}): {response.text}")
+  logging.info("Login successful; session cookie established.")
+
+
+def logout(session: requests.Session, base_url: str) -> None:
+  logout_url = f"{base_url}/users/log_out.json"
+  logging.info("Logging out via %s", logout_url)
+  response = session.delete(logout_url, timeout=30)
+  if response.status_code != 200:
+    logging.warning(
+      "Logout returned status %s: %s", response.status_code, response.text
+    )
+  else:
+    logging.info("Logout successful.")
 
 
 def fetch_json(session: requests.Session, url: str) -> Dict:
@@ -185,8 +228,19 @@ def main() -> None:
     format="%(asctime)s %(levelname)s %(message)s",
   )
   args = parse_args()
-  session = build_session(args.cookie)
   base_url = args.base_url.rstrip("/")
+  session = build_session(args.cookie)
+
+  logged_in = False
+  if args.cookie:
+    logging.info("Using provided cookie for authentication.")
+  elif args.email and args.password:
+    login_with_credentials(session, base_url, args.email, args.password)
+    logged_in = True
+  else:
+    raise SystemExit(
+      "Authentication required. Provide either --cookie or --email/--password."
+    )
 
   summary_url = f"{base_url}/facial_measurements/summary.json"
   fit_tests_url = f"{base_url}/facial_measurements_fit_tests.json"
@@ -225,6 +279,9 @@ def main() -> None:
     index=False,
   )
   logging.info("Wrote predictions to %s", args.output_file)
+
+  if logged_in and args.logout:
+    logout(session, base_url)
 
 
 if __name__ == "__main__":
