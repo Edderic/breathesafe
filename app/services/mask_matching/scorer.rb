@@ -81,13 +81,9 @@ module MaskMatching
           final_score *= model_score
         end
 
-        if conflicting_age_group?(file_age_group, mask_age_group)
-          final_score *= 0.05
-        end
+        final_score *= 0.05 if conflicting_age_group?(file_age_group, mask_age_group)
 
-        if conflicting_size?(file_size, mask_size)
-          final_score *= 0.1
-        end
+        final_score *= 0.1 if conflicting_size?(file_size, mask_size)
 
         {
           score: final_score.clamp(0.0, 1.0),
@@ -249,8 +245,8 @@ module MaskMatching
       end
 
       def deep_dup_components(components)
-        components.each_with_object({}) do |(key, value), acc|
-          acc[key] = value.is_a?(Array) ? value.map(&:dup) : value
+        components.transform_values do |value|
+          value.is_a?(Array) ? value.map(&:dup) : value
         end
       end
 

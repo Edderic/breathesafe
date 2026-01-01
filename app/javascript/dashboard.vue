@@ -283,7 +283,7 @@ export default {
       charts: {},
       // Pagination and sorting for Pass Rates by Mask
       maskCurrentPage: 1,
-      maskPerPage: 10,
+      maskPerPage: 20,
       maskSortBy: 'pass_rate', // 'pass_rate', 'sample_size', 'name'
       maskSortOrder: 'desc' // 'asc' or 'desc'
     };
@@ -1095,15 +1095,21 @@ export default {
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          indexAxis: 'y',
           scales: {
-            x: {
+            y: {
               beginAtZero: true,
               max: 100,
               ticks: {
                 callback: function(value) {
                   return value + '%';
                 }
+              }
+            },
+            x: {
+              ticks: {
+                autoSkip: false,
+                maxRotation: 60,
+                minRotation: 40
               }
             }
           },
