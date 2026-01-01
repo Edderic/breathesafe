@@ -114,7 +114,7 @@ def login_with_credentials(
     json={"user": {"email": email, "password": password}},
     timeout=30,
   )
-  if response.status_code != 200:
+  if response.status_code not in (200, 201):
     raise RuntimeError(f"Login failed ({response.status_code}): {response.text}")
   logging.info("Login successful; session cookie established.")
 
