@@ -530,6 +530,15 @@
                       </div>
                     </div>
                     <div v-else class="muted-text">No suggestions available.</div>
+                    <div class="mark-to-be-created">
+                      <Button
+                        shadow='true'
+                        class='button secondary suggestion-button'
+                        text="Mark 'to be created'"
+                        @click="markMaskToBeCreated(row)"
+                        :disabled="isCompleted"
+                      />
+                    </div>
                   </td>
                   <td class="similarity-score-cell">
                     <span v-if="getMaskMatchingSimilarityScore(row) !== null" class="similarity-score">
@@ -3300,6 +3309,13 @@ export default {
         return
       }
       row.selectedMaskId = maskId.toString()
+      this.updateMaskMatching()
+    },
+    markMaskToBeCreated(row) {
+      if (!row) {
+        return
+      }
+      row.selectedMaskId = '__to_be_created__'
       this.updateMaskMatching()
     },
     hasComponentData(row) {
