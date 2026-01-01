@@ -14,10 +14,41 @@ module MaskMatching
 
     AUTO_MATCH_THRESHOLD = 0.5
 
+    KID_KEYWORDS = %w[kid kids child children youth toddler tween infant junior teen].freeze
+    ADULT_KEYWORDS = %w[adult men womens women's mens unisex].freeze
+
+    SIZE_PATTERNS = {
+      xlarge: [/extra[\s-]?large/, /\bxl\b/, /\b2xl\b/, /\bxxl\b/],
+      large: [/\blarge\b/, /\blg\b/, /\bl\b(?![a-z])/],
+      medium: [/\bmedium\b/, /\bmed\b/, /\bmd\b/, /\bregular\b/],
+      small: [/\bsmall\b/, /\bsm\b/, /\bs\b(?![a-z])/],
+      petite: [/petite/]
+    }.freeze
+
+    BRAND_HINTS = {
+      /aura\s?92\d+/ => '3m',
+      /\b3m\b/ => '3m',
+      /can99/ => 'vitacore',
+      /vitacore/ => 'vitacore',
+      /wellbefore/ => 'wellbefore',
+      /laianzhi/ => 'laianzhi',
+      /hyx1002/ => 'laianzhi',
+      /readimask/ => 'readimask',
+      /medimask/ => 'medimask'
+    }.freeze
+
     class << self
       def score(file_components, mask_components)
-        file_components = symbolize_component_keys(file_components)
-        mask_components = symbolize_component_keys(mask_components)
+        file_components = deep_dup_components(symbolize_component_keys(file_components))
+        mask_components = deep_dup_components(symbolize_component_keys(mask_components))
+
+        backfill_brand_from_model!(file_components)
+        backfill_brand_from_model!(mask_components)
+
+        file_age_group = detect_age_group(file_components, default: :adult)
+        mask_age_group = detect_age_group(mask_components)
+        file_size = detect_size(file_components)
+        mask_size = detect_size(mask_components)
 
         details = {}
         weighted_total = 0.0
@@ -40,10 +71,23 @@ module MaskMatching
         brand_score = details.dig(:brand, :score) || 0.0
         model_score = details.dig(:model, :score) || 0.0
 
-        # Penalize heavily if brand/model diverge
         final_score = base_score
-        final_score *= brand_score if brand_score.positive? && brand_score < 0.6
-        final_score *= 0.85 if model_score.positive? && model_score < 0.5
+
+        if brand_present?(file_components) && brand_present?(mask_components) && brand_score < 0.95
+          final_score *= brand_score
+        end
+
+        if model_present?(file_components) && model_present?(mask_components) && model_score < 0.5
+          final_score *= model_score
+        end
+
+        if conflicting_age_group?(file_age_group, mask_age_group)
+          final_score *= 0.05
+        end
+
+        if conflicting_size?(file_size, mask_size)
+          final_score *= 0.1
+        end
 
         {
           score: final_score.clamp(0.0, 1.0),
@@ -202,6 +246,74 @@ module MaskMatching
           sym_key = key.respond_to?(:to_sym) ? key.to_sym : key
           acc[sym_key] = value
         end
+      end
+
+      def deep_dup_components(components)
+        components.each_with_object({}) do |(key, value), acc|
+          acc[key] = value.is_a?(Array) ? value.map(&:dup) : value
+        end
+      end
+
+      def backfill_brand_from_model!(components)
+        return if brand_present?(components)
+
+        inferred = infer_brand_from_tokens(components)
+        return if inferred.blank?
+
+        components[:brand] ||= []
+        components[:brand] << inferred
+      end
+
+      def infer_brand_from_tokens(components)
+        tokens = flattened_tokens(components)
+        BRAND_HINTS.each do |regex, brand|
+          return brand if tokens.any? { |token| token.match?(regex) }
+        end
+        nil
+      end
+
+      def detect_age_group(components, default: nil)
+        tokens = flattened_tokens(components)
+        return :kids if tokens.any? { |token| KID_KEYWORDS.any? { |kw| token.include?(kw) } }
+        return :adult if tokens.any? { |token| ADULT_KEYWORDS.any? { |kw| token.include?(kw) } }
+
+        default
+      end
+
+      def detect_size(components)
+        tokens = flattened_tokens(components)
+        SIZE_PATTERNS.each do |size, patterns|
+          return size if tokens.any? { |token| patterns.any? { |regex| token.match?(regex) } }
+        end
+        nil
+      end
+
+      def flattened_tokens(components)
+        components
+          .values
+          .flat_map { |value| Array(value) }
+          .compact
+          .map { |token| token.to_s.downcase }
+      end
+
+      def brand_present?(components)
+        Array(components[:brand]).any?(&:present?)
+      end
+
+      def model_present?(components)
+        Array(components[:model]).any?(&:present?)
+      end
+
+      def conflicting_age_group?(file_group, mask_group)
+        return false if file_group.nil? || mask_group.nil?
+
+        file_group != mask_group
+      end
+
+      def conflicting_size?(file_size, mask_size)
+        return false if file_size.nil? || mask_size.nil?
+
+        file_size != mask_size
       end
     end
   end
