@@ -26,12 +26,12 @@ from typing import Dict, List
 import numpy as np
 import pandas as pd
 import requests
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
 
 FEATURE_COLUMNS = [
   "face_width",
@@ -174,17 +174,10 @@ def train_model(df: pd.DataFrame) -> Pipeline:
   pipeline = Pipeline(
     steps=[
       ("imputer", SimpleImputer(strategy="median")),
-      ("scaler", StandardScaler(with_mean=False)),
+      ("scaler", StandardScaler()),
       (
         "model",
-        MultiOutputRegressor(
-          RandomForestRegressor(
-            n_estimators=400,
-            random_state=42,
-            n_jobs=-1,
-            min_samples_leaf=5,
-          )
-        ),
+        MultiOutputRegressor(LinearRegression()),
       ),
     ]
   )
