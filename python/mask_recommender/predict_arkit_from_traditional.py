@@ -25,13 +25,18 @@ from typing import Dict, List
 
 import numpy as np
 import pandas as pd
-import requests
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
+from python.mask_recommender.breathesafe_network import (
+  build_session,
+  login_with_credentials,
+  logout,
+  fetch_json,
+)
 
 FEATURE_COLUMNS = [
   "face_width",
@@ -101,48 +106,6 @@ def parse_args() -> argparse.Namespace:
     help="Optional path to persist the trained model as a pickle file.",
   )
   return parser.parse_args()
-
-
-def build_session(cookie: str | None) -> requests.Session:
-  session = requests.Session()
-  if cookie:
-    session.headers.update({"Cookie": cookie})
-  session.headers.update({"Accept": "application/json"})
-  return session
-
-
-def login_with_credentials(
-  session: requests.Session, base_url: str, email: str, password: str
-) -> None:
-  login_url = f"{base_url}/users/log_in.json"
-  logging.info("Logging in via %s", login_url)
-  response = session.post(
-    login_url,
-    json={"user": {"email": email, "password": password}},
-    timeout=30,
-  )
-  if response.status_code not in (200, 201):
-    raise RuntimeError(f"Login failed ({response.status_code}): {response.text}")
-  logging.info("Login successful; session cookie established.")
-
-
-def logout(session: requests.Session, base_url: str) -> None:
-  logout_url = f"{base_url}/users/log_out.json"
-  logging.info("Logging out via %s", logout_url)
-  response = session.delete(logout_url, timeout=30)
-  if response.status_code != 200:
-    logging.warning(
-      "Logout returned status %s: %s", response.status_code, response.text
-    )
-  else:
-    logging.info("Logout successful.")
-
-
-def fetch_json(session: requests.Session, url: str) -> Dict:
-  logging.info("Fetching %s", url)
-  response = session.get(url, timeout=60)
-  response.raise_for_status()
-  return response.json()
 
 
 def prepare_dataframe(
