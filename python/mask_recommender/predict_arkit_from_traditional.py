@@ -88,6 +88,13 @@ def parse_args() -> argparse.Namespace:
     "that lacked ARKit aggregates.",
   )
   parser.add_argument(
+    "--users-output-file",
+    type=Path,
+    default=Path("python/mask_recommender/user_arkit_table.csv"),
+    help="Where to store the CSV representing user-level ARKit aggregates "
+    "(actual or predicted).",
+  )
+  parser.add_argument(
     "--model-path",
     type=Path,
     default=Path("python/mask_recommender/arkit_prediction_model.pkl"),
@@ -150,6 +157,32 @@ def prepare_dataframe(
       df[col] = np.nan
 
   return df
+
+
+def build_user_table(df: pd.DataFrame, pipeline: Pipeline) -> pd.DataFrame:
+  if "user_id" not in df.columns:
+    raise RuntimeError(
+      "facial_measurements/summary payload must include user_id for each row."
+    )
+
+  table_df = df.copy()
+  has_actual = table_df[TARGET_COLUMNS].notna().all(axis=1)
+  missing_mask = ~has_actual
+
+  logging.info(
+    "User summary: %d rows total | %d with actual ARKit aggregates | %d needing predictions.",
+    len(table_df),
+    has_actual.sum(),
+    missing_mask.sum(),
+  )
+
+  if missing_mask.any():
+    features = table_df.loc[missing_mask, FEATURE_COLUMNS]
+    predictions = pipeline.predict(features)
+    table_df.loc[missing_mask, TARGET_COLUMNS] = predictions
+
+  table_df["actual"] = has_actual
+  return table_df
 
 
 def train_model(df: pd.DataFrame) -> Pipeline:
@@ -248,6 +281,13 @@ def main() -> None:
 
     joblib.dump(model, args.model_path)
     logging.info("Saved trained model to %s", args.model_path)
+
+  user_table_df = build_user_table(summary_df, model)
+  args.users_output_file.parent.mkdir(parents=True, exist_ok=True)
+  user_table_df[
+    ["user_id"] + FEATURE_COLUMNS + TARGET_COLUMNS + ["actual"]
+  ].to_csv(args.users_output_file, index=False)
+  logging.info("Wrote user-level ARKit aggregates to %s", args.users_output_file)
 
   fit_tests_payload = fetch_json(session, fit_tests_url)[
     "fit_tests_with_facial_measurements"
