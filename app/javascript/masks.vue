@@ -290,9 +290,11 @@ export default {
     },
     async loadData(toQuery) {
       this.setWaiting(true);
-
-
-      this.setWaiting(false);
+      try {
+        await this.loadMasks();
+      } finally {
+        this.setWaiting(false);
+      }
     },
     hideSortFilterPopUp() {
       this.showPopup = false
