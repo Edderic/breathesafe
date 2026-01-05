@@ -2,7 +2,7 @@
 
 class FitTestsWithFacialMeasurementsService
   class << self
-    def call(mask_id: nil, with_demographics: false)
+    def call(mask_id: nil, with_demographics: false, exclude_nil_pass: true, include_without_facial_measurements: false)
       n95_mode_experimental_scores = N95ModeService.call(mask_id: mask_id).to_a
       n95_mode_estimate_scores_from_n99 = N99ModeToN95ModeConverterService.call(mask_id: mask_id).to_a
       # If each exercise that is NOT NULL is passed, then qlft_score for that
@@ -12,7 +12,8 @@ class FitTestsWithFacialMeasurementsService
 
       results = n95_mode_experimental_scores | n95_mode_estimate_scores_from_n99 | qlft_scores | user_seal_check_scores
 
-      results = results.reject { |r| r['qlft_pass'].nil? }
+      results = results.reject { |r| r['qlft_pass'].nil? } if exclude_nil_pass
+      results = results.select { |r| r['facial_measurement_id'].present? } unless include_without_facial_measurements
 
       # Add demographics if requested
       results = add_demographics(results) if with_demographics

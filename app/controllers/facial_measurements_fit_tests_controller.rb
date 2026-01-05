@@ -67,7 +67,9 @@ class FacialMeasurementsFitTestsController < ApplicationController
     end
 
     fit_tests_with_facial_measurements = FitTestsWithFacialMeasurementsService.call(
-      with_demographics: with_demographics
+      with_demographics: with_demographics,
+      exclude_nil_pass: false,
+      include_without_facial_measurements: true
     )
 
     to_render = {
@@ -103,7 +105,9 @@ class FacialMeasurementsFitTestsController < ApplicationController
     fit_tests_with_facial_measurements = \
       FitTestsWithFacialMeasurementsService.call(
         mask_id: mask_id,
-        with_demographics: with_demographics
+        with_demographics: with_demographics,
+        exclude_nil_pass: false,
+        include_without_facial_measurements: true
       )
 
     to_render = {

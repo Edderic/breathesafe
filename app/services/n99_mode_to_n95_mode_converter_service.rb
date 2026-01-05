@@ -459,7 +459,7 @@ class N99ModeToN95ModeConverterService
       # Add z-scores for each row and remove arkit key
       facial_measurements_with_aggregated.map do |row|
         z_scores = FacialMeasurementOutliersService.compute_z_scores(row, stats)
-        row.merge(z_scores).except('arkit', 'facial_measurement_id')
+        row.merge(z_scores).except('arkit')
       end
     end
   end
