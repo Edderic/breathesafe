@@ -30,7 +30,7 @@ from sklearn.multioutput import MultiOutputRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
-from python.mask_recommender.breathesafe_network import (
+from breathesafe_network import (
   build_session,
   login_with_credentials,
   logout,
