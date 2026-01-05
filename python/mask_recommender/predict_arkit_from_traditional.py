@@ -25,7 +25,6 @@ from typing import Dict, List
 
 import numpy as np
 import pandas as pd
-from sklearn.impute import SimpleImputer
 from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.pipeline import Pipeline
@@ -119,43 +118,52 @@ def prepare_dataframe(
     else:
       df[col] = np.nan
 
+  if "user_id" not in df.columns:
+    raise RuntimeError("facial_measurements/summary payload must include user_id.")
+
+  df["user_id"] = pd.to_numeric(df["user_id"], errors="coerce")
   return df
 
 
-def build_user_table(df: pd.DataFrame, pipeline: Pipeline) -> pd.DataFrame:
+def build_user_table(df: pd.DataFrame, pipeline: Pipeline):
   if "user_id" not in df.columns:
     raise RuntimeError(
       "facial_measurements/summary payload must include user_id for each row."
     )
 
-  table_df = df.copy()
+  table_df = df.set_index("user_id")
   has_actual = table_df[TARGET_COLUMNS].notna().all(axis=1)
-  missing_mask = ~has_actual
+  has_full_features = table_df[FEATURE_COLUMNS].notna().all(axis=1)
+  prediction_mask = (~has_actual) & has_full_features
 
   logging.info(
-    "User summary: %d rows total | %d with actual ARKit aggregates | %d needing predictions.",
+    "User summary: %d rows total | %d with actual ARKit aggregates | %d eligible for prediction.",
     len(table_df),
     has_actual.sum(),
-    missing_mask.sum(),
+    prediction_mask.sum(),
   )
 
-  if missing_mask.any():
-    features = table_df.loc[missing_mask, FEATURE_COLUMNS]
+  predicted_rows = pd.DataFrame(columns=TARGET_COLUMNS)
+  if prediction_mask.any():
+    features = table_df.loc[prediction_mask, FEATURE_COLUMNS]
     predictions = pipeline.predict(features)
-    table_df.loc[missing_mask, TARGET_COLUMNS] = predictions
+    table_df.loc[prediction_mask, TARGET_COLUMNS] = predictions
+    predicted_rows = table_df.loc[prediction_mask, TARGET_COLUMNS].copy()
 
   table_df["actual"] = has_actual
-  return table_df
+  return table_df.reset_index(), predicted_rows
 
 
 def train_model(df: pd.DataFrame) -> Pipeline:
   feature_df = df[FEATURE_COLUMNS]
   target_df = df[TARGET_COLUMNS]
 
-  valid_rows = target_df.dropna().index
-  if len(valid_rows) == 0:
+  target_complete = target_df.notna().all(axis=1)
+  feature_complete = feature_df.notna().all(axis=1)
+  valid_rows = target_complete & feature_complete
+  if valid_rows.sum() == 0:
     raise RuntimeError(
-      "No rows contain complete ARKit aggregates. Cannot train model."
+      "No rows contain complete traditional + ARKit aggregates. Cannot train model."
     )
 
   X_train = feature_df.loc[valid_rows]
@@ -169,7 +177,6 @@ def train_model(df: pd.DataFrame) -> Pipeline:
 
   pipeline = Pipeline(
     steps=[
-      ("imputer", SimpleImputer(strategy="median")),
       ("scaler", StandardScaler()),
       (
         "model",
@@ -194,19 +201,19 @@ def predict_missing_arkit(
   df = df.copy()
   aggregated = df[TARGET_COLUMNS]
   missing_mask = aggregated.isna().all(axis=1)
+  feature_complete = df[FEATURE_COLUMNS].notna().all(axis=1)
+  eligible_mask = missing_mask & feature_complete
 
   logging.info(
-    "Found %d / %d fit tests lacking ARKit aggregates.",
-    missing_mask.sum(),
+    "Found %d / %d fit tests lacking ARKit aggregates and eligible for prediction.",
+    eligible_mask.sum(),
     len(df),
   )
 
-  if missing_mask.any():
-    features = df.loc[missing_mask, FEATURE_COLUMNS].apply(
-      pd.to_numeric, errors="coerce"
-    )
+  if eligible_mask.any():
+    features = df.loc[eligible_mask, FEATURE_COLUMNS]
     predicted = pipeline.predict(features)
-    df.loc[missing_mask, TARGET_COLUMNS] = predicted
+    df.loc[eligible_mask, TARGET_COLUMNS] = predicted
 
   return df
 
@@ -245,7 +252,7 @@ def main() -> None:
     joblib.dump(model, args.model_path)
     logging.info("Saved trained model to %s", args.model_path)
 
-  user_table_df = build_user_table(summary_df, model)
+  user_table_df, _ = build_user_table(summary_df, model)
   args.users_output_file.parent.mkdir(parents=True, exist_ok=True)
   user_table_df[
     ["user_id"] + FEATURE_COLUMNS + TARGET_COLUMNS + ["actual"]

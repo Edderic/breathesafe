@@ -34,7 +34,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
-from python.mask_recommender.breathesafe_network import (
+from breathesafe_network import (
   build_session,
   fetch_facial_measurements_fit_tests,
 )
@@ -58,6 +58,12 @@ def parse_args() -> argparse.Namespace:
     type=Path,
     default=Path("python/mask_recommender/predicted_fit_tests.csv"),
     help="CSV produced by predict_arkit_from_traditional.py.",
+  )
+  parser.add_argument(
+    "--user-table",
+    type=Path,
+    default=Path("python/mask_recommender/user_arkit_table.csv"),
+    help="CSV emitted by predict_arkit_from_traditional.py containing per-user aggregates and the 'actual' flag.",
   )
   parser.add_argument(
     "--fit-tests-base-url",
@@ -156,15 +162,6 @@ def compute_user_measurements(predicted_df: pd.DataFrame) -> pd.DataFrame:
   return grouped
 
 
-def users_with_complete_measurements(user_measurements: pd.DataFrame) -> pd.Index:
-  return user_measurements.dropna(subset=TARGET_COLUMNS).index
-
-
-def users_missing_measurements(user_measurements: pd.DataFrame) -> pd.Index:
-  mask = user_measurements[TARGET_COLUMNS].isna().any(axis=1)
-  return user_measurements[mask].index
-
-
 def nearest_neighbor_predictions(
   target_user: int,
   mask_matrix: Dict[int, Dict[int, int]],
@@ -216,6 +213,11 @@ def main() -> None:
   args = parse_args()
 
   predicted_df = pd.read_csv(args.predicted_fit_tests)
+  user_table = pd.read_csv(args.user_table)
+  if "user_id" not in user_table.columns:
+    raise RuntimeError("--user-table must include a 'user_id' column.")
+  user_table = user_table.set_index("user_id")
+
   session = build_session(None)
   fit_tests_payload = fetch_facial_measurements_fit_tests(
     base_url=args.fit_tests_base_url,
@@ -224,9 +226,10 @@ def main() -> None:
   fit_tests_df = pd.DataFrame(fit_tests_payload)
   fit_tests_df["pass_flag"] = derive_pass_column(fit_tests_df)
 
-  user_measurements = compute_user_measurements(predicted_df)
-  complete_users = set(users_with_complete_measurements(user_measurements))
-  missing_users = set(users_missing_measurements(user_measurements))
+  neighbor_measurements = user_table.dropna(subset=TARGET_COLUMNS)
+  complete_users = set(neighbor_measurements.index)
+
+  missing_users = list(user_table[user_table[TARGET_COLUMNS].isna().any(axis=1)].index)
 
   mask_matrix = build_user_mask_matrix(fit_tests_df)
   available_neighbors = [u for u in complete_users if u in mask_matrix]
@@ -244,7 +247,7 @@ def main() -> None:
       target_user=user_id,
       mask_matrix=mask_matrix,
       available_users=available_neighbors,
-      user_measurements=user_measurements,
+      user_measurements=neighbor_measurements,
       neighbors=args.neighbors,
       min_similarity=args.min_similarity,
     )
@@ -258,17 +261,17 @@ def main() -> None:
 
   # Apply predictions back to predicted_df
   for user_id, values in user_predictions.items():
+    user_mask = (predicted_df["user_id"] == user_id)
     for idx, column in enumerate(TARGET_COLUMNS):
-      mask = (predicted_df["user_id"] == user_id) & predicted_df[column].isna()
+      mask = user_mask & predicted_df[column].isna()
       predicted_df.loc[mask, column] = values[idx]
 
   args.output_fit_tests.parent.mkdir(parents=True, exist_ok=True)
   predicted_df.to_csv(args.output_fit_tests, index=False)
 
-  user_table = user_measurements.copy()
-  user_table["actual"] = True
   for user_id, values in user_predictions.items():
-    user_table.loc[user_id, TARGET_COLUMNS] = values
+    for idx, column in enumerate(TARGET_COLUMNS):
+      user_table.loc[user_id, column] = values[idx]
     user_table.loc[user_id, "actual"] = False
 
   args.user_output.parent.mkdir(parents=True, exist_ok=True)
