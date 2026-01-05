@@ -1,10 +1,7 @@
-import itertools
-
-import numpy as np
 import pandas as pd
 import torch
 from breathesafe_network import (build_session, fetch_json,
-                                 login_with_credentials, logout)
+                                 fetch_facial_measurements_fit_tests)
 
 """
 Notes
@@ -28,6 +25,8 @@ uniform distribution
 (FFRs). Long nose vs short nose could make a big difference in fit
 (relative to FFR — FFR is more flexible.)
 
+TODO: incorporate fit testing data that has no facial measurements associated with
+them. Incorporate those here.
 
 TODO: some iOS aggregated facial measurements are from actual face scans, while
 others are just predicted. For those that are predicted, set requires_grad
@@ -313,61 +312,9 @@ if __name__ == '__main__':
     # users of fit tests associated with masks that have perimeters
     user_arkit_for_masks_that_have_perimeters = get_users(fit_tests_df, with_perimeter, user_arkit_table)
     #
-    # Come up with a script called
-    # python/mask_recommender/predict_arkit_from_fit_test_data.py.
-    #
-    # This script will make use of ./python/mask_recommender/predicted_fit_tests.csv
-    # and fit_tests_df.
-    #
-    # Goal: there are some fit tests where the associated user does not have facial
-    # measurements (predicted aggregates or actual aggregates from ARKit).
-    #
-    # I'd like to predict facial measurements for those users by using the fit
-    # testing results of people in the data set. I'm thinking that it would be a
-    # good idea to use Nearest Neighbor matching on the fit test data to select the
-    # most similar people in terms of fit testing results to the person who is
-    # missing facial measurement data, and then do a weighted average of those
-    # facial measurements (e.g. nose_mm, chin_mm, top_cheek_mm, mid_cheek_mm, strap_mm)
-    #
-    # Find people who have fit test results that are similar to one who does
-    # not have facial measurement data.
-    #
-    # Challenges: fit tests are sparse, e.g. Let's say we are interested in
-    # predicting facial measurements for an individual O, who passed with masks A
-    # and B.
-    #
-    # Let's say there are the following individuals:
-    # An individual P with facial measurements passed in masks A and B
-    # An individual Q with facial measurements who only passed with mask A, did not do a fit test with B
-    # An individual R with facial measurements only passed with mask B, and did # not do a fit test with A
-    # An individual S with facial measurements failed with both A and B
-    # An individual T with facial measurements failed with A, did not do a fit test with B
-    # An individual U with facial measurements failed with B, did not do a fit test with A
-    #
-    # Individual O should be closest to P, then Q and R, then T and U, then S,
-    # in that order
-    #
-    # I suppose we can represent the other individuals as vectors, where the
-    # dimensions are the masks that the individual-of-interest that we have
-    # data for, where 1 is pass, -1 is fail, and 0 is for unknown.
-    #
-    # P: [1, 1]
-    # Q: [1, 0]
-    # R: [0, 1]
-    # S: [-1, -1]
-    # T: [-1, 0]
-    # U: [0. -1]
-    #
-    # Cosine(O, P): [1, 1] dot [1, 1] / ((\sum_i i^2) * (\sum_j j^2)) = 2 / 2 = # 1
-    # Cosine(O, Q): [1, 1] dot [1, 0] / ((\sum_i i^2) * (\sum_j j^2)) = 1 / (sqrt(2) * 1) = 0.707
-    # Cosine(O, R): [1, 1] dot [0, 1] / ((\sum_i i^2) * (\sum_j j^2)) = 1 / (1 * sqrt(2)) = 0.707
-    # Cosine(O, S): [1, 1] dot [-1, -1] / ((\sum_i i^2) * (\sum_j j^2)) = -2 / (sqrt(2) * sqrt(2)) = -1
-    # Cosine(O, T): [1, 1] dot [-1, 0] / ((\sum_i i^2) * (\sum_j j^2)) = -1 / (sqrt(2) * 1) = -0.707
-    # Cosine(O, U): [1, 1] dot [0, -1] / ((\sum_i i^2) * (\sum_j j^2)) = -1 / (1 * sqrt(2)) = -0.707
-    #
-    # Ask me clarifying questions.
-    #
-    # I'd like the script to consume the local CSVs for now.
+
+    user_arkit_for_masks_that_have_perimeters
+    import pdb; pdb.set_trace()
 
     user_and_facial_measurements_for_face_perimeter_calculation = torch.from_numpy(
         user_arkit_for_masks_that_have_perimeters[FACIAL_FEATURE_COLUMNS].to_numpy()
