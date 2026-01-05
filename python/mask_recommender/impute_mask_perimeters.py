@@ -23,6 +23,8 @@ from breathesafe_network import (
   build_session,
   fetch_json,
   fetch_facial_measurements_fit_tests,
+  login_with_credentials,
+  logout,
 )
 
 FEATURE_COLUMNS = [
@@ -97,6 +99,21 @@ def parse_args() -> argparse.Namespace:
     type=Path,
     default=Path("python/mask_recommender/predicted_fit_tests.csv"),
     help="CSV produced by predict_arkit_from_traditional.py",
+  )
+  parser.add_argument(
+    "--email",
+    default=None,
+    help="Service-account email for programmatic login.",
+  )
+  parser.add_argument(
+    "--password",
+    default=None,
+    help="Service-account password for programmatic login.",
+  )
+  parser.add_argument(
+    "--cookie",
+    default=None,
+    help="Optional Cookie header value if you already have a session.",
   )
   parser.add_argument(
     "--output-file",
@@ -195,7 +212,15 @@ def co_test_estimate(
 def main() -> None:
   logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
   args = parse_args()
-  session = build_session(None)
+  session = build_session(args.cookie)
+  logged_in = False
+  if args.cookie:
+    logging.info("Using provided cookie for authentication.")
+  elif args.email and args.password:
+    login_with_credentials(session, args.base_url, args.email, args.password)
+    logged_in = True
+  else:
+    logging.warning("Proceeding without authentication; some endpoints may fail.")
 
   masks_df = fetch_masks(session, args.base_url)
   if masks_df.empty:
@@ -204,6 +229,7 @@ def main() -> None:
   fit_tests_payload = fetch_facial_measurements_fit_tests(
     base_url=args.base_url,
     session=session,
+    include_without_facial_measurements=True,
   )
   fit_tests_df = add_pass_flag(pd.DataFrame(fit_tests_payload))
 
@@ -324,9 +350,18 @@ def main() -> None:
     )
 
   output_df = pd.DataFrame(records)
+  total_fit_tests = output_df["fit_tests"].sum()
+  logging.info(
+    "mask_perimeter_imputations: %d rows | total_fit_tests=%d",
+    len(output_df),
+    total_fit_tests,
+  )
   args.output_file.parent.mkdir(parents=True, exist_ok=True)
   output_df.to_csv(args.output_file, index=False)
   logging.info("Wrote imputation table to %s", args.output_file)
+
+  if logged_in:
+    logout(session, args.base_url)
 
 
 if __name__ == "__main__":

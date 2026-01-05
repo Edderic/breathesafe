@@ -52,12 +52,20 @@ def fetch_json(session: requests.Session, url: str) -> Dict:
   return response.json()
 
 
-def fetch_facial_measurements_fit_tests(base_url='http://localhost:3000', session=None):
-    fit_tests_url = f"{base_url}/facial_measurements_fit_tests.json"
-    if session is None:
-        session = build_session(None)
+def fetch_facial_measurements_fit_tests(
+  base_url='http://localhost:3000',
+  session=None,
+  include_without_facial_measurements=False,
+):
+  base = base_url.rstrip('/')
+  params = ""
+  if include_without_facial_measurements:
+    params = "?include_without_facial_measurements=true"
+  fit_tests_url = f"{base}/facial_measurements_fit_tests.json{params}"
+  if session is None:
+    session = build_session(None)
 
-    return fetch_json(session, fit_tests_url)[
-        "fit_tests_with_facial_measurements"
-    ]
+  return fetch_json(session, fit_tests_url)[
+    "fit_tests_with_facial_measurements"
+  ]
 

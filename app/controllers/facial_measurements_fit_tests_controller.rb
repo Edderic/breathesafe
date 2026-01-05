@@ -66,10 +66,13 @@ class FacialMeasurementsFitTestsController < ApplicationController
       return
     end
 
+    include_without = ActiveModel::Type::Boolean.new.cast(
+      params[:include_without_facial_measurements]
+    )
     fit_tests_with_facial_measurements = FitTestsWithFacialMeasurementsService.call(
       with_demographics: with_demographics,
       exclude_nil_pass: false,
-      include_without_facial_measurements: true
+      include_without_facial_measurements: include_without
     )
 
     to_render = {
@@ -102,12 +105,15 @@ class FacialMeasurementsFitTestsController < ApplicationController
       return
     end
 
-    fit_tests_with_facial_measurements = \
+    include_without = ActiveModel::Type::Boolean.new.cast(
+      params[:include_without_facial_measurements]
+    )
+    fit_tests_with_facial_measurements =
       FitTestsWithFacialMeasurementsService.call(
         mask_id: mask_id,
         with_demographics: with_demographics,
         exclude_nil_pass: false,
-        include_without_facial_measurements: true
+        include_without_facial_measurements: include_without
       )
 
     to_render = {
