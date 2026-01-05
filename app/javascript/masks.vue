@@ -34,6 +34,7 @@
 
     <div class='container chunk'>
       <RecommendPopup
+        v-if="showPopup == 'Recommend'"
         :showPopup='showPopup == "Recommend"'
         :facialMeasurements='facialMeasurements'
         @hidePopUp='showPopup = false'
@@ -290,8 +291,6 @@ export default {
     async loadData(toQuery) {
       this.setWaiting(true);
 
-      this.updateFacialMeasurements(toQuery)
-      await this.updateFacialMeasurement()
 
       this.setWaiting(false);
     },
