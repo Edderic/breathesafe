@@ -82,6 +82,10 @@
             <div class="stat-label">Total Fit Tests</div>
           </div>
           <div class="stat-card">
+            <div class="stat-value">{{ stats.fit_tests.total_unique }}</div>
+            <div class="stat-label">Total Unique Fit Tests</div>
+          </div>
+          <div class="stat-card">
             <div class="stat-value">{{ stats.fit_tests.missing_facial_measurements }}</div>
             <div class="stat-label">Missing Facial Measurements</div>
           </div>

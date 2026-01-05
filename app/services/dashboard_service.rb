@@ -89,8 +89,11 @@ class DashboardService
       # Calculate pass rates
       pass_rates = calculate_pass_rates(fit_tests_data)
 
+      unique_count = fit_tests_data.map { |ft| ft['id'] }.compact.uniq.count
+
       {
         total: total_fit_tests,
+        total_unique: unique_count,
         facial_measurements: facial_measurement_stats,
         missing_facial_measurements: fit_tests_missing_fm,
         by_type: fit_test_types,
