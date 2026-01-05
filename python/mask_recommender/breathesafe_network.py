@@ -50,3 +50,14 @@ def fetch_json(session: requests.Session, url: str) -> Dict:
   response = session.get(url, timeout=60)
   response.raise_for_status()
   return response.json()
+
+
+def fetch_facial_measurements_fit_tests(base_url='http://localhost:3000', session=None):
+    fit_tests_url = f"{base_url}/facial_measurements_fit_tests.json"
+    if session is None:
+        session = build_session(None)
+
+    return fetch_json(session, fit_tests_url)[
+        "fit_tests_with_facial_measurements"
+    ]
+

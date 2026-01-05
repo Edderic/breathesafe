@@ -295,13 +295,10 @@ if __name__ == '__main__':
     # [ ] Get a table of masks and perimeters
 
     base_url = 'http://localhost:3000'
-    fit_tests_url = f"{base_url}/facial_measurements_fit_tests.json"
     masks_url = f"{base_url}/masks.json?per_page=1000"
 
     session = build_session(None)
-    fit_tests_payload = fetch_json(session, fit_tests_url)[
-        "fit_tests_with_facial_measurements"
-    ]
+    fit_tests_payload = fetch_facial_measurements_fit_tests(session=session)
 
     masks_df = get_masks(session, masks_url)
 
@@ -315,24 +312,24 @@ if __name__ == '__main__':
 
     # users of fit tests associated with masks that have perimeters
     user_arkit_for_masks_that_have_perimeters = get_users(fit_tests_df, with_perimeter, user_arkit_table)
-    # users WITHOUT facial measurements WITHOUT fit tests: don't care
-    # users with facial measurements WITHOUT fit tests: don't care
     #
-    # users with facial measurements WITH fit tests: care
-    # users MISSING facial measurements WITH fit tests: technically offers some
-    # information, but we'd have to do some imputation of their facial features.
+    # Come up with a script called
+    # python/mask_recommender/predict_arkit_from_fit_test_data.py.
     #
-    # Could use fit test results to find similar people who do have facial
-    # measurement data
+    # This script will make use of ./python/mask_recommender/predicted_fit_tests.csv
+    # and fit_tests_df.
     #
-    # - unique_internal_model_code
-    # - perimeter_mm
-    # - style
-    # - strap type
-    # - fit_test pass / fail
+    # Goal: there are some fit tests where the associated user does not have facial
+    # measurements (predicted aggregates or actual aggregates from ARKit).
     #
-    # Goal: predict facial measurement data from fit tests as a starting point.
-    # 1. Find people who are fit test results that are similar to one who does
+    # I'd like to predict facial measurements for those users by using the fit
+    # testing results of people in the data set. I'm thinking that it would be a
+    # good idea to use Nearest Neighbor matching on the fit test data to select the
+    # most similar people in terms of fit testing results to the person who is
+    # missing facial measurement data, and then do a weighted average of those
+    # facial measurements (e.g. nose_mm, chin_mm, top_cheek_mm, mid_cheek_mm, strap_mm)
+    #
+    # Find people who have fit test results that are similar to one who does
     # not have facial measurement data.
     #
     # Challenges: fit tests are sparse, e.g. Let's say we are interested in
@@ -352,7 +349,7 @@ if __name__ == '__main__':
     #
     # I suppose we can represent the other individuals as vectors, where the
     # dimensions are the masks that the individual-of-interest that we have
-    # data for.
+    # data for, where 1 is pass, -1 is fail, and 0 is for unknown.
     #
     # P: [1, 1]
     # Q: [1, 0]
@@ -368,9 +365,9 @@ if __name__ == '__main__':
     # Cosine(O, T): [1, 1] dot [-1, 0] / ((\sum_i i^2) * (\sum_j j^2)) = -1 / (sqrt(2) * 1) = -0.707
     # Cosine(O, U): [1, 1] dot [0, -1] / ((\sum_i i^2) * (\sum_j j^2)) = -1 / (1 * sqrt(2)) = -0.707
     #
+    # Ask me clarifying questions.
     #
-    #
-    #
+    # I'd like the script to consume the local CSVs for now.
 
     user_and_facial_measurements_for_face_perimeter_calculation = torch.from_numpy(
         user_arkit_for_masks_that_have_perimeters[FACIAL_FEATURE_COLUMNS].to_numpy()
