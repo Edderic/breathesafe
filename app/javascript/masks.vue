@@ -81,7 +81,16 @@
       :showUniqueNumFitTesters='true'
       :viewMaskOnClick='true'
       :facialMeasurements='facialMeasurements'
+      :showProbaFit='false'
     />
+    <Pagination
+      :current-page="currentPage"
+      :per-page="perPage"
+      :total-count="totalCount"
+      item-name="masks"
+      @page-change="onPageChange"
+    />
+
 
     <br>
     <br>
@@ -113,8 +122,9 @@ import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useFacialMeasurementStore } from './stores/facial_measurement_store.js';
 import { useMainStore } from './stores/main_store';
-import { Respirator, displayableMasks, sortedDisplayableMasks } from './masks.js'
+import { Respirator } from './masks.js'
 import HelpPopup from './help_popup.vue'
+import Pagination from './pagination.vue'
 import { useMasksStore } from './stores/masks_store'
 
 
@@ -199,6 +209,9 @@ export default {
         'Duckbill',
         'Elastomeric',
       ],
+      currentPage: 1,
+      perPage: 12,
+      totalCount: 0,
     }
   },
   props: {
@@ -237,15 +250,20 @@ export default {
     facialMeasurements() {
       return getFacialMeasurements.bind(this)()
     },
+    onPageChange(page) {
+      if (page === this.currentPage) return
+      const newQuery = Object.assign({}, this.$route.query, { page })
+      this.$router.push({ name: 'Masks', query: newQuery })
+    },
 
     perimColorScheme() {
       return perimeterColorScheme()
     },
     displayables() {
-      return displayableMasks.bind(this)(this.masks)
+      return this.masks;
     },
     sortedDisplayables() {
-      return sortedDisplayableMasks.bind(this)(this.displayables)
+      return this.masks;
     },
     messages() {
       return this.errorMessages;
@@ -286,12 +304,19 @@ export default {
       this.setFilterQuery(toQuery, 'filterForStrapType')
       this.setFilterQuery(toQuery, 'filterForStyle')
 
+      const page = parseInt(toQuery.page, 10)
+      this.currentPage = Number.isNaN(page) || page < 1 ? 1 : page
+
       await this.loadData(toQuery)
     },
     async loadData(toQuery) {
       this.setWaiting(true);
       try {
-        await this.loadMasks();
+        if (!toQuery.page || Number(toQuery.page) < 1) {
+          this.updateQuery({ ...toQuery, page: 1 })
+        } else {
+          await this.loadMasks();
+        }
       } finally {
         this.setWaiting(false);
       }
@@ -325,7 +350,8 @@ export default {
     },
     updateSearch(event) {
       let newQuery = {
-        search: event.target.value
+        search: event.target.value,
+        page: 1
       }
 
       let combinedQuery = Object.assign(
@@ -341,7 +367,9 @@ export default {
     },
     updateQuery(args) {
       args['name'] = 'Masks'
-      this.$router.push(args)
+      const query = Object.assign({}, this.$route.query, args.query || {})
+      query.page = 1
+      this.$router.push({ ...args, query })
     },
 
     triggerRouterForFacialMeasurementUpdate(event, key) {
@@ -403,26 +431,29 @@ export default {
       await this.loadMasks()
     },
     async loadMasks() {
-      // TODO: make this more flexible so parents can load data of their children
-      await axios.get(
-        `/masks.json`,
-      )
-        .then(response => {
-          let data = response.data
-          if (response.data.masks) {
-            this.masks = []
+      const params = {
+        page: this.currentPage,
+        per_page: this.perPage,
+        search: this.search,
+        sort_by: this.sortByField,
+        sort_order: this.sortByStatus,
+        filter_color: this.filterForColor,
+        filter_style: this.filterForStyle,
+        filter_strap_type: this.filterForStrapType
+      }
 
-            for (let m of data.masks) {
-              this.masks.push(new Respirator(m))
-            }
-          }
-
-          // whatever you want
-        })
-        .catch(error => {
-          this.message = "Failed to load masks."
-          // whatever you want
-        })
+      try {
+        const response = await axios.get('/masks.json', { params })
+        const data = response.data
+        if (data.masks) {
+          this.masks = data.masks.map(m => new Respirator(m))
+        } else {
+          this.masks = []
+        }
+        this.totalCount = data.total_count || 0
+      } catch (error) {
+        this.message = "Failed to load masks."
+      }
     },
     sortBy(field) {
       if (this.sortByField == field) {

@@ -43,8 +43,8 @@
         </div>
         <table v-if='showStats'>
           <tr>
-            <th>Proba Fit</th>
-            <td rowspan='1'>
+            <th v-if="showProbaFit">Proba Fit</th>
+            <td v-if="showProbaFit" rowspan='1'>
               <ColoredCell
                class='risk-score'
                :colorScheme="fitColorScheme"
@@ -172,6 +172,9 @@ export default {
       default: false
     },
     showStats: {
+      default: true
+    },
+    showProbaFit: {
       default: true
     }
   },
