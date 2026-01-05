@@ -231,6 +231,7 @@ def main() -> None:
     base_groups[base_name] = group[["size_code", "perimeter_mm"]]
 
   passers_by_mask: Dict[int, List[int]] = {}
+  mask_fit_test_counts: Dict[int, int] = {}
   user_known_mask_values: Dict[int, List[float]] = {}
   for _, row in fit_tests_df.iterrows():
     mask_id = row.get("mask_id")
@@ -240,6 +241,7 @@ def main() -> None:
       continue
     mask_id = int(mask_id)
     user_id = int(user_id)
+    mask_fit_test_counts[mask_id] = mask_fit_test_counts.get(mask_id, 0) + 1
     passers_by_mask.setdefault(mask_id, []).append(user_id)
     if mask_id in known_mask_perimeters:
       user_known_mask_values.setdefault(user_id, []).append(known_mask_perimeters[mask_id])
@@ -256,6 +258,7 @@ def main() -> None:
           "unique_internal_model_code": mask.get("unique_internal_model_code"),
           "style": mask.get("style"),
           "strap_type": mask.get("strap_type"),
+          "fit_tests": mask_fit_test_counts.get(mask_id, 0),
           "perimeter_mm": existing,
           "source": "existing",
           "details": "",
@@ -313,6 +316,7 @@ def main() -> None:
         "strap_type": mask.get("strap_type"),
         "base_name": base_name,
         "size_code": size_code,
+        "fit_tests": mask_fit_test_counts.get(mask_id, 0),
         "perimeter_mm": imputed_value,
         "source": source,
         "details": detail,
