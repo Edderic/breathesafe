@@ -15,6 +15,12 @@ Outputs:
 - Updated fit-test level CSV with predicted aggregates filled in.
 - User-level table (`user_predictions.csv`) summarizing which users were imputed,
   neighbor counts, and the `actual` flag (False for imputed rows).
+
+To run:
+    python ./python/mask_recommender/predict_arkit_from_fit_test_data.py \
+        --predicted-fit-tests=python/mask_recommender/predicted_fit_tests.csv
+
+
 """
 
 from __future__ import annotations
@@ -27,6 +33,11 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+
+from python.mask_recommender.breathesafe_network import (
+  build_session,
+  fetch_facial_measurements_fit_tests,
+)
 
 TARGET_COLUMNS = [
   "nose_mm",
@@ -49,10 +60,10 @@ def parse_args() -> argparse.Namespace:
     help="CSV produced by predict_arkit_from_traditional.py.",
   )
   parser.add_argument(
-    "--fit-tests",
-    type=Path,
-    default=Path("python/mask_recommender/fit_tests_with_facial_measurements.csv"),
-    help="Local CSV/JSON export from facial_measurements_fit_tests endpoint.",
+    "--fit-tests-base-url",
+    type=str,
+    default="http://localhost:3000",
+    help="Base URL hosting the facial_measurements_fit_tests endpoint.",
   )
   parser.add_argument(
     "--output-fit-tests",
@@ -79,20 +90,6 @@ def parse_args() -> argparse.Namespace:
     help="Minimum cosine similarity required (inclusive).",
   )
   return parser.parse_args()
-
-
-def load_fit_tests_table(path: Path) -> pd.DataFrame:
-  if not path.exists():
-    raise FileNotFoundError(f"Fit tests file not found: {path}")
-
-  if path.suffix.lower() == ".json":
-    with path.open("r", encoding="utf-8") as f:
-      data = json.load(f)
-    if isinstance(data, dict) and "fit_tests_with_facial_measurements" in data:
-      data = data["fit_tests_with_facial_measurements"]
-    return pd.DataFrame(data)
-
-  return pd.read_csv(path)
 
 
 def normalize_pass_value(value) -> Optional[int]:
@@ -219,7 +216,12 @@ def main() -> None:
   args = parse_args()
 
   predicted_df = pd.read_csv(args.predicted_fit_tests)
-  fit_tests_df = load_fit_tests_table(args.fit_tests)
+  session = build_session(None)
+  fit_tests_payload = fetch_facial_measurements_fit_tests(
+    base_url=args.fit_tests_base_url,
+    session=session,
+  )
+  fit_tests_df = pd.DataFrame(fit_tests_payload)
   fit_tests_df["pass_flag"] = derive_pass_column(fit_tests_df)
 
   user_measurements = compute_user_measurements(predicted_df)
