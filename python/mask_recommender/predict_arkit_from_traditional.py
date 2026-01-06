@@ -22,6 +22,7 @@ import json
 import logging
 from pathlib import Path
 from typing import Dict, List
+import joblib
 
 import numpy as np
 import pandas as pd
@@ -218,15 +219,23 @@ def predict_missing_arkit(
     return df
 
 
-def predict_arkit_from_traditional(args):
-    base_url = args.base_url.rstrip("/")
-    session = build_session(args.cookie)
+def predict_arkit_from_traditional(
+    base_url,
+    cookie=None,
+    email=None,
+    password=None,
+    model_path=None,
+    users_output_file=None,
+    output_file=None
+):
+    base_url = base_url.rstrip("/")
+    session = build_session(cookie)
 
     logged_in = False
-    if args.cookie:
+    if cookie:
         logging.info("Using provided cookie for authentication.")
-    elif args.email and args.password:
-        login_with_credentials(session, base_url, args.email, args.password)
+    elif email and password:
+        login_with_credentials(session, base_url, email, password)
         logged_in = True
     else:
         raise SystemExit(
@@ -240,19 +249,19 @@ def predict_arkit_from_traditional(args):
     summary_df = prepare_dataframe(summary_payload, FEATURE_COLUMNS, TARGET_COLUMNS)
 
     model = train_model(summary_df)
-    if args.model_path:
-        args.model_path.parent.mkdir(parents=True, exist_ok=True)
-        import joblib
+    if model_path:
+        model_path.parent.mkdir(parents=True, exist_ok=True)
 
-        joblib.dump(model, args.model_path)
-        logging.info("Saved trained model to %s", args.model_path)
+        joblib.dump(model, model_path)
+        logging.info("Saved trained model to %s", model_path)
 
     user_table_df, _ = build_user_table(summary_df, model)
-    args.users_output_file.parent.mkdir(parents=True, exist_ok=True)
+    if users_output_file:
+        users_output_file.parent.mkdir(parents=True, exist_ok=True)
     user_table_df[
         ["user_id"] + FEATURE_COLUMNS + TARGET_COLUMNS + ["actual"]
-    ].to_csv(args.users_output_file, index=False)
-    logging.info("Wrote user-level ARKit aggregates to %s", args.users_output_file)
+    ].to_csv(users_output_file, index=False)
+    logging.info("Wrote user-level ARKit aggregates to %s", users_output_file)
 
     fit_tests_payload = fetch_json(session, fit_tests_url)[
         "fit_tests_with_facial_measurements"
@@ -273,8 +282,17 @@ def predict_arkit_from_traditional(args):
 
     enriched_df = predict_missing_arkit(model, fit_tests_df)
 
-    args.output_file.parent.mkdir(parents=True, exist_ok=True)
-    return enriched_df[["fit_test_id", "user_id", "mask_id"] + FEATURE_COLUMNS + TARGET_COLUMNS]
+    output = enriched_df[["fit_test_id", "user_id", "mask_id"] + FEATURE_COLUMNS + TARGET_COLUMNS]
+
+    if output_file:
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+
+        output.to_csv(
+            output_file,
+            index=False,
+        )
+
+    return output
 
 
 def main() -> None:
@@ -283,12 +301,13 @@ def main() -> None:
         format="%(asctime)s %(levelname)s %(message)s",
     )
     args = parse_args()
-    arkit_predictions = predict_arkit_from_traditional(args)
-
-    arkit_predictions.to_csv(
-        args.output_file,
-        index=False,
+    arkit_predictions = predict_arkit_from_traditional(
+        base_url=args.base_url,
+        cookie=args.cookie,
+        email=args.email,
+        password=args.password
     )
+
     logging.info("Wrote predictions to %s", args.output_file)
 
 
