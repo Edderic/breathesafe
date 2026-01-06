@@ -23,6 +23,7 @@ from breathesafe_network import (
   build_session,
   fetch_json,
   fetch_facial_measurements_fit_tests,
+  fetch_dashboard_stats,
   login_with_credentials,
   logout,
 )
@@ -352,10 +353,16 @@ def main() -> None:
   output_df = pd.DataFrame(records)
   total_fit_tests = output_df["fit_tests"].sum()
   logging.info(
-    "mask_perimeter_imputations: %d rows | total_fit_tests=%d",
+    "mask_perimeter_imputations: %d rows | fit_tests_sum=%d",
     len(output_df),
     total_fit_tests,
   )
+  try:
+    dashboard_stats = fetch_dashboard_stats(args.base_url, session=session)
+    unique_fit_tests = dashboard_stats["fit_tests"]["total_unique"]
+    logging.info("dashboard total_unique_fit_tests=%s", unique_fit_tests)
+  except Exception as exc:
+    logging.warning("Failed to fetch dashboard stats: %s", exc)
   args.output_file.parent.mkdir(parents=True, exist_ok=True)
   output_df.to_csv(args.output_file, index=False)
   logging.info("Wrote imputation table to %s", args.output_file)

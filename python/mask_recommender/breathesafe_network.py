@@ -69,3 +69,12 @@ def fetch_facial_measurements_fit_tests(
     "fit_tests_with_facial_measurements"
   ]
 
+
+def fetch_dashboard_stats(base_url='http://localhost:3000', session=None):
+  base = base_url.rstrip('/')
+  url = f"{base}/dashboard/stats.json"
+  if session is None:
+    session = build_session(None)
+
+  return fetch_json(session, url)
+

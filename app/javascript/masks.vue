@@ -76,6 +76,14 @@
       />
     </div>
 
+    <Pagination
+      :current-page="currentPage"
+      :per-page="perPage"
+      :total-count="totalCount"
+      item-name="masks"
+      @page-change="onPageChange"
+    />
+
     <MaskCards
       :cards='sortedDisplayables'
       :showUniqueNumFitTesters='true'
@@ -250,19 +258,11 @@ export default {
     facialMeasurements() {
       return getFacialMeasurements.bind(this)()
     },
-    onPageChange(page) {
-      if (page === this.currentPage) return
-      const newQuery = Object.assign({}, this.$route.query, { page })
-      this.$router.push({ name: 'Masks', query: newQuery })
-    },
 
     perimColorScheme() {
       return perimeterColorScheme()
     },
     displayables() {
-      return this.masks;
-    },
-    sortedDisplayables() {
       return this.masks;
     },
     messages() {
@@ -312,11 +312,7 @@ export default {
     async loadData(toQuery) {
       this.setWaiting(true);
       try {
-        if (!toQuery.page || Number(toQuery.page) < 1) {
-          this.updateQuery({ ...toQuery, page: 1 })
-        } else {
-          await this.loadMasks();
-        }
+        await this.loadMasks();
       } finally {
         this.setWaiting(false);
       }
@@ -367,8 +363,7 @@ export default {
     },
     updateQuery(args) {
       args['name'] = 'Masks'
-      const query = Object.assign({}, this.$route.query, args.query || {})
-      query.page = 1
+      const query = Object.assign({}, this.$route.query, args.query || {}, { page: 1 })
       this.$router.push({ ...args, query })
     },
 
@@ -454,6 +449,11 @@ export default {
       } catch (error) {
         this.message = "Failed to load masks."
       }
+    },
+    onPageChange(page) {
+      if (page === this.currentPage) return
+      const newQuery = Object.assign({}, this.$route.query, { page })
+      this.$router.push({ name: 'Masks', query: newQuery })
     },
     sortBy(field) {
       if (this.sortByField == field) {

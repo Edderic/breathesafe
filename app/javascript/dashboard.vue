@@ -86,6 +86,10 @@
             <div class="stat-label">Total Unique Fit Tests</div>
           </div>
           <div class="stat-card">
+            <div class="stat-value">{{ stats.fit_tests.unique_user_mask_pairs }}</div>
+            <div class="stat-label">Unique User-Mask Pairs</div>
+          </div>
+          <div class="stat-card">
             <div class="stat-value">{{ stats.fit_tests.missing_facial_measurements }}</div>
             <div class="stat-label">Missing Facial Measurements</div>
           </div>
