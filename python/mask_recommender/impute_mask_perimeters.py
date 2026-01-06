@@ -278,13 +278,15 @@ def main() -> None:
   for _, mask in masks_df.iterrows():
     mask_id = int(mask["id"])
     existing = mask.get("perimeter_mm")
-    if not np.isnan(existing):
+    if pd.notna(existing):
       records.append(
         {
           "mask_id": mask_id,
           "unique_internal_model_code": mask.get("unique_internal_model_code"),
           "style": mask.get("style"),
           "strap_type": mask.get("strap_type"),
+          "base_name": mask.get("base_name", ""),
+          "size_code": mask.get("size_code", "unknown"),
           "fit_tests": mask_fit_test_counts.get(mask_id, 0),
           "perimeter_mm": existing,
           "source": "existing",
@@ -331,9 +333,16 @@ def main() -> None:
       if style in style_medians.index:
         imputed_value = float(style_medians.loc[style])
         source = "style_median"
-      else:
+      elif pd.notna(global_median):
         imputed_value = float(global_median)
         source = "global_median"
+
+    if imputed_value is not None and pd.isna(imputed_value):
+      imputed_value = None
+
+    if imputed_value is None:
+      source = "insufficient_data"
+      detail = ""
 
     records.append(
       {
@@ -347,6 +356,29 @@ def main() -> None:
         "perimeter_mm": imputed_value,
         "source": source,
         "details": detail,
+      }
+    )
+
+  recorded_ids = {record["mask_id"] for record in records}
+
+  # Add masks that still have no perimeter data and weren't imputed
+  missing_masks = masks_df[
+    masks_df["perimeter_mm"].isna() & ~masks_df["id"].isin(recorded_ids)
+  ]
+  for _, mask in missing_masks.iterrows():
+    mask_id = int(mask["id"])
+    records.append(
+      {
+        "mask_id": mask_id,
+        "unique_internal_model_code": mask.get("unique_internal_model_code"),
+        "style": mask.get("style"),
+        "strap_type": mask.get("strap_type"),
+        "base_name": mask.get("base_name", ""),
+        "size_code": mask.get("size_code", "unknown"),
+        "fit_tests": mask_fit_test_counts.get(mask_id, 0),
+        "perimeter_mm": None,
+        "source": "insufficient_data",
+        "details": "",
       }
     )
 
