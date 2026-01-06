@@ -256,43 +256,16 @@ def predict_arkit_from_traditional(
         logging.info("Saved trained model to %s", model_path)
 
     user_table_df, _ = build_user_table(summary_df, model)
+
     if users_output_file:
         users_output_file.parent.mkdir(parents=True, exist_ok=True)
-    user_table_df[
-        ["user_id"] + FEATURE_COLUMNS + TARGET_COLUMNS + ["actual"]
-    ].to_csv(users_output_file, index=False)
-    logging.info("Wrote user-level ARKit aggregates to %s", users_output_file)
+        user_table_df[
+            ["user_id"] + FEATURE_COLUMNS + TARGET_COLUMNS + ["actual"]
+        ].to_csv(users_output_file, index=False)
 
-    fit_tests_payload = fetch_json(session, fit_tests_url)[
-        "fit_tests_with_facial_measurements"
-    ]
+        logging.info("Wrote user-level ARKit aggregates to %s", users_output_file)
 
-    logout(session, base_url)
-
-    fit_tests_df = prepare_dataframe(fit_tests_payload, FEATURE_COLUMNS, TARGET_COLUMNS)
-    fit_tests_df["fit_test_id"] = [
-        row.get("id") for row in fit_tests_payload
-    ]
-    fit_tests_df["user_id"] = [
-        row.get("user_id") for row in fit_tests_payload
-    ]
-    fit_tests_df["mask_id"] = [
-        row.get("mask_id") for row in fit_tests_payload
-    ]
-
-    enriched_df = predict_missing_arkit(model, fit_tests_df)
-
-    output = enriched_df[["fit_test_id", "user_id", "mask_id"] + FEATURE_COLUMNS + TARGET_COLUMNS]
-
-    if output_file:
-        output_file.parent.mkdir(parents=True, exist_ok=True)
-
-        output.to_csv(
-            output_file,
-            index=False,
-        )
-
-    return output
+    return user_table_df
 
 
 def main() -> None:

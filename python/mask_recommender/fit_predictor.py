@@ -1,8 +1,11 @@
+import logging
+import os
 import pandas as pd
 import torch
 from breathesafe_network import (build_session, fetch_json,
                                  fetch_facial_measurements_fit_tests)
 
+from predict_arkit_from_traditional import predict_arkit_from_traditional
 """
 Notes
 
@@ -80,7 +83,7 @@ def initialize_betas(diff_keys, num_users, num_masks, style_types):
         Size: (num_users, num_masks, len(STYLE_TYPES), len(diff_keys)).
     """
 
-    return torch.rand((num_users, num_masks, len(style_types4)), len(diff_keys))
+    return torch.rand((num_users, num_masks, len(style_types)), len(diff_keys))
 
 
 def produce_beta_tensor_diff_styles(beta_style_diff_bins, styles, diff_bins, num_users, num_masks):
@@ -293,18 +296,32 @@ if __name__ == '__main__':
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
 
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
+    )
+
     base_url = 'http://localhost:3000'
     masks_url = f"{base_url}/masks.json?per_page=1000"
 
     session = build_session(None)
     fit_tests_payload = fetch_facial_measurements_fit_tests(session=session)
+    fit_tests_df = pd.DataFrame(fit_tests_payload)
 
     masks_df = get_masks(session, masks_url)
+    email = os.getenv('BREATHESAFE_SERVICE_EMAIL')
+    password = os.getenv('BREATHESAFE_SERVICE_PASSWORD')
+
+    user_arkit_facial_measurements_with_imputation = predict_arkit_from_traditional(
+        base_url=base_url,
+        email=email,
+        password=password
+    )
+    user_arkit_facial_measurements_with_imputation
 
     user_arkit_table = pd.read_csv('./python/mask_recommender/user_arkit_table.csv')
     predicted_fit_tests = pd.read_csv('./python/mask_recommender/predicted_fit_tests.csv')
 
-    fit_tests_df = pd.DataFrame(fit_tests_payload)
     sorted_tested_masks = get_sorted_tested_masks(fit_tests_df)
 
     with_perimeter = sorted_tested_masks[sorted_tested_masks['perimeter_mm'].notna()]
