@@ -218,12 +218,7 @@ def predict_missing_arkit(
   return df
 
 
-def main() -> None:
-  logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(message)s",
-  )
-  args = parse_args()
+def predict_arkit_from_traditional(args):
   base_url = args.base_url.rstrip("/")
   session = build_session(args.cookie)
 
@@ -263,6 +258,8 @@ def main() -> None:
     "fit_tests_with_facial_measurements"
   ]
 
+  logout(session, base_url)
+
   fit_tests_df = prepare_dataframe(fit_tests_payload, FEATURE_COLUMNS, TARGET_COLUMNS)
   fit_tests_df["fit_test_id"] = [
     row.get("id") for row in fit_tests_payload
@@ -277,14 +274,22 @@ def main() -> None:
   enriched_df = predict_missing_arkit(model, fit_tests_df)
 
   args.output_file.parent.mkdir(parents=True, exist_ok=True)
-  enriched_df[["fit_test_id", "user_id", "mask_id"] + FEATURE_COLUMNS + TARGET_COLUMNS].to_csv(
+  return enriched_df[["fit_test_id", "user_id", "mask_id"] + FEATURE_COLUMNS + TARGET_COLUMNS]
+
+
+def main() -> None:
+  logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+  )
+  args = parse_args()
+  arkit_predictions = predict_arkit_from_traditional(args)
+
+  arkit_predictions.to_csv(
     args.output_file,
     index=False,
   )
   logging.info("Wrote predictions to %s", args.output_file)
-
-  if logged_in and args.logout:
-    logout(session, base_url)
 
 
 if __name__ == "__main__":
