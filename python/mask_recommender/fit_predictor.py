@@ -1,11 +1,13 @@
 import logging
 import os
+
 import pandas as pd
 import torch
-from breathesafe_network import (build_session, fetch_json,
-                                 fetch_facial_measurements_fit_tests)
-
+from breathesafe_network import (build_session,
+                                 fetch_facial_measurements_fit_tests,
+                                 fetch_json)
 from predict_arkit_from_traditional import predict_arkit_from_traditional
+
 """
 Notes
 
@@ -36,6 +38,9 @@ others are just predicted. For those that are predicted, set requires_grad
 = True, but for those that are from actual face scans, set requires_grad
 to False,
 
+Maybe instead of user vs. masks, really it should be more like
+facial measurements vs. mask. The latter allows the same user being represented
+more than once, as they age (and their facial measurements change)?
 
 """
 
@@ -312,12 +317,23 @@ if __name__ == '__main__':
     email = os.getenv('BREATHESAFE_SERVICE_EMAIL')
     password = os.getenv('BREATHESAFE_SERVICE_PASSWORD')
 
-    user_arkit_facial_measurements_with_imputation = predict_arkit_from_traditional(
+    fit_tests_with_imputed_arkit_via_traditional_facial_measurements = predict_arkit_from_traditional(
         base_url=base_url,
         email=email,
         password=password
     )
-    user_arkit_facial_measurements_with_imputation
+    fit_tests_with_imputed_arkit_via_traditional_facial_measurements
+
+    import pdb; pdb.set_trace()
+    fit_tests_with_imputed_arkit_via_traditional_facial_measurements
+    num_with_arkit = fit_tests_with_imputed_arkit_via_traditional_facial_measurements['nose_mm'].notna().sum()
+    total = fit_tests_with_imputed_arkit_via_traditional_facial_measurements.shape[0]
+    logging.info(f"Proportion of fit tests with ARKit data: {num_with_arkit} / {total}: {round(num_with_arkit / total * 100, 2)}%")
+    fit_tests_with_imputed_arkit_via_traditional_facial_measurements['nose_mm'].notna().sum()
+
+    fit_tests_df.columns
+    fit_tests_df[fit_tests_df['id'] == 1]
+    import pdb; pdb.set_trace()
 
     user_arkit_table = pd.read_csv('./python/mask_recommender/user_arkit_table.csv')
     predicted_fit_tests = pd.read_csv('./python/mask_recommender/predicted_fit_tests.csv')

@@ -24,6 +24,9 @@ class FacialMeasurementsService
   end
 
   def call
+    # Returns latest traditional measurements and latest arkit measurements per
+    # user, though technically a user can have multiple measurements over time
+    # that change,  e.g. a kid growing up.
     traditional_measurements = latest_traditional_measurements
     arkit_measurements = latest_arkit_measurements
 

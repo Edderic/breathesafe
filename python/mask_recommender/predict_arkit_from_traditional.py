@@ -203,6 +203,8 @@ def predict_missing_arkit(
     aggregated = df[TARGET_COLUMNS]
     missing_mask = aggregated.isna().all(axis=1)
     feature_complete = df[FEATURE_COLUMNS].notna().all(axis=1)
+    import pdb; pdb.set_trace()
+
     eligible_mask = missing_mask & feature_complete
 
     logging.info(
@@ -265,7 +267,52 @@ def predict_arkit_from_traditional(
 
         logging.info("Wrote user-level ARKit aggregates to %s", users_output_file)
 
-    return user_table_df
+    fit_tests_payload = fetch_json(session, fit_tests_url)[
+        "fit_tests_with_facial_measurements"
+    ]
+
+    logout(session, base_url)
+
+    fit_tests_df = prepare_dataframe(fit_tests_payload, FEATURE_COLUMNS, TARGET_COLUMNS)
+
+    with_present_qlft_pass = fit_tests_df[fit_tests_df['qlft_pass'].notna()]
+
+    fit_tests_enhanced_with_traditional_to_arkit_model = with_present_qlft_pass.merge(user_table_df, on='user_id', how='left', suffixes=('', '_imputation'))
+
+    for col in TARGET_COLUMNS:
+        imputed_col = f"{col}_imputation"
+        if imputed_col not in fit_tests_enhanced_with_traditional_to_arkit_model.columns:
+            continue
+
+        if col in fit_tests_enhanced_with_traditional_to_arkit_model.columns:
+            missing_mask = fit_tests_enhanced_with_traditional_to_arkit_model[col].isna()
+            fit_tests_enhanced_with_traditional_to_arkit_model.loc[
+                missing_mask, col
+            ] = fit_tests_enhanced_with_traditional_to_arkit_model.loc[
+                missing_mask, imputed_col
+            ]
+        else:
+            fit_tests_enhanced_with_traditional_to_arkit_model[col] = fit_tests_enhanced_with_traditional_to_arkit_model[
+                imputed_col
+            ]
+
+    fit_tests_enhanced_with_traditional_to_arkit_model = fit_tests_enhanced_with_traditional_to_arkit_model.drop(
+        [f"{col}_imputation" for col in TARGET_COLUMNS],
+        axis=1,
+        errors="ignore",
+    )
+
+    output = fit_tests_enhanced_with_traditional_to_arkit_model
+
+    if output_file:
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+
+        output.to_csv(
+            output_file,
+            index=False,
+        )
+
+    return output
 
 
 def main() -> None:
