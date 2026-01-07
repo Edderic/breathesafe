@@ -70,10 +70,11 @@ class MasksController < ApplicationController
       per_page: per_page
     }
     messages = []
+    status = 200
 
     respond_to do |format|
       format.json do
-        render json: to_render.to_json, status: status, messages: messages
+        render json: to_render.merge(messages: messages), status: status
       end
     end
   end

@@ -265,6 +265,9 @@ export default {
     displayables() {
       return this.masks;
     },
+    sortedDisplayables() {
+      return this.displayables;
+    },
     messages() {
       return this.errorMessages;
     },
