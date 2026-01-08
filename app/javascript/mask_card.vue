@@ -629,7 +629,7 @@ export default {
     grid-template-columns: 16.66% 16.66% 16.66% 16.66% 16.66% 16.66%;
     grid-template-rows: auto;
     overflow-y: auto;
-    height: 75vh;
+    height: 77vh;
   }
 
   tbody tr:hover {
@@ -685,6 +685,9 @@ export default {
   @media(max-width: 1050px) {
     .masks {
       grid-template-columns: 33% 33% 33%;
+
+      position: relative;
+      top: 2em;
     }
   }
   @media(max-width: 700px) {
@@ -703,6 +706,9 @@ export default {
     .masks {
       grid-template-columns: 50% 50%;
       overflow: auto;
+
+      position: relative;
+      top: 2em;
     }
 
     #search {
