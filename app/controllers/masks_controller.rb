@@ -93,7 +93,7 @@ class MasksController < ApplicationController
                        else
                          Mask.with_privacy_aggregations(mask_ids)
                        end
-    mask_id_lookup = mask_ids.each_with_object({}) { |id, memo| memo[id] = true }
+    mask_id_lookup = mask_ids.index_with { |_id| true }
     aggregated_masks.select! do |mask|
       mask_id_lookup[mask['id']] || mask_id_lookup[mask[:id]]
     end
@@ -253,7 +253,6 @@ class MasksController < ApplicationController
   private
 
   def sort_value(mask, column)
-
     value = mask[column] || mask[column.to_s]
 
     return unless value
