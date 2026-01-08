@@ -1,35 +1,44 @@
 <template>
   <div class='align-items-center flex-dir-col sticky'>
-    <div class='flex align-items-center row'>
-      <h2 class='tagline'>Masks</h2>
-      <CircularButton text="+" @click="newMask" />
-      <CircularButton text="?" @click="showPopup = 'Help'"/>
-    </div>
+    <div class='top-controls'>
+      <div class='flex align-items-center row'>
+        <h2 class='tagline'>Masks</h2>
+        <CircularButton text="+" @click="newMask" />
+        <CircularButton text="?" @click="showPopup = 'Help'"/>
+      </div>
 
-    <div class='row'>
-      <input id='search' type="text" :value='search' @change='updateSearch'>
-      <SearchIcon height='2em' width='1em'/>
+      <div class='row bar'>
+        <input id='search' type="text" :value='search' @change='updateSearch'>
+        <SearchIcon height='2em' width='1em'/>
 
-      <button class='icon' @click='showPopup = "Recommend"'>
-        R
-      </button>
+        <button class='icon' @click='showPopup = "Recommend"'>
+          R
+        </button>
 
-      <button class='icon' @click='showPopup = "Sort"'>
-        ⇵
-      </button>
+        <button class='icon' @click='showPopup = "Sort"'>
+          ⇵
+        </button>
 
-      <button class='icon' @click='showPopup = "Filter"'>
-        <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="8 10 70 70"
-          width="2em" height="2em"
-          >
-          <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' :fill='filterButtonColor'/>
-        </svg>
-      </button>
-    </div>
+        <button class='icon' @click='showPopup = "Filter"'>
+          <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="8 10 70 70"
+                                                                                       width="2em" height="2em"
+                                                                                                   >
+                                                                                                   <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' :fill='filterButtonColor'/>
+          </svg>
+        </button>
+        <Pagination
+          :current-page="currentPage"
+          :per-page="perPage"
+          :total-count="totalCount"
+          item-name="masks"
+          @page-change="onPageChange"
+        />
+      </div>
 
-    <div class='container chunk'>
-      <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
-      <br>
+      <div class='container chunk'>
+        <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
+        <br>
+      </div>
     </div>
 
     <div class='container chunk'>
@@ -76,13 +85,6 @@
       />
     </div>
 
-    <Pagination
-      :current-page="currentPage"
-      :per-page="perPage"
-      :total-count="totalCount"
-      item-name="masks"
-      @page-change="onPageChange"
-    />
 
     <MaskCards
       :cards='sortedDisplayables'
@@ -146,6 +148,7 @@ export default {
     FilterPopup,
     HelpPopup,
     MaskCards,
+    Pagination,
     Popup,
     PersonIcon,
     RecommendPopup,
@@ -534,12 +537,11 @@ export default {
     flex-direction: row;
   }
 
-
-
   .flex-dir-col {
     display: flex;
     flex-direction: column;
   }
+
   p {
 
     margin: 1em;
@@ -668,6 +670,18 @@ export default {
       justify-content: center;
       align-items: center;
       min-width: 3em;
+  }
+
+  .top-controls {
+    margin: 1em 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .bar {
+    max-height: 3em;
   }
 
   @media(max-width: 700px) {

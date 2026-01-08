@@ -81,7 +81,7 @@ export default {
 
 <style scoped>
   .pagination-container {
-    margin: 1em;
+    margin: 0 1em;
     display: flex;
     flex-direction: column;
     align-items: center;
