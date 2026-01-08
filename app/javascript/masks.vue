@@ -681,16 +681,18 @@ export default {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    padding-top: 4em;
+    padding-top: 1em;
   }
 
   @media(max-width: 1000px) {
     .top-controls {
       flex-direction: column;
+      margin-top: 4em;
     }
     .bar {
       flex-direction: column;
     }
+    margin-top: 4em;
   }
   @media(max-width: 768px) {
     .top-controls {
