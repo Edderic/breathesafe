@@ -66,7 +66,7 @@
                :colorScheme="fitFactorColorScheme"
                :maxVal=1000
                :value='m.avgSealedFitFactor'
-                :text="`${Math.round(m.avgSealedFitFactor)} (${m.countSealedFitFactor})`"
+                :text="formatMeasurement(m.avgSealedFitFactor, m.countSealedFitFactor)"
                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
                :exception='exceptionMissingObject'
                />
@@ -80,7 +80,7 @@
                :colorScheme="breathabilityColorScheme"
                :maxVal=250
                :value='m.avgBreathabilityPa'
-                :text="`${Math.round(m.avgBreathabilityPa)} pa (${m.countBreathability})`"
+                :text="formatMeasurement(m.avgBreathabilityPa, m.countBreathability, ' pa')"
                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
                :exception='exceptionMissingObject'
                />
@@ -363,6 +363,13 @@ export default {
           query: combinedQuery
         }
       )
+    },
+    formatMeasurement(value, count, suffix = '') {
+      if (value === null || value === undefined || isNaN(value)) {
+        return `N/A (${count || 0})`
+      }
+
+      return `${Math.round(value)}${suffix} (${count || 0})`
     },
     sortingStatus(field) {
       if (this.sortByField == field) {
