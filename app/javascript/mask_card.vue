@@ -33,13 +33,15 @@
     </div>
     <div class='masks'>
 
-      <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in cards' @click='selectMask(m.id)'>
+      <div class='card flex align-items-center justify-content-center' v-for='m in cards' @click='selectMask(m.id)'>
 
-        <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
-        <div class='description'>
-          <span>
-            {{m.uniqueInternalModelCode}}
-          </span>
+        <div class='image-and-name'>
+          <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
+          <div class='description'>
+            <span>
+              {{m.uniqueInternalModelCode}}
+            </span>
+          </div>
         </div>
         <table v-if='showStats'>
           <tr>
@@ -499,7 +501,8 @@ export default {
   }
 
   .card {
-    padding: 1em 0;
+    flex-direction: column;
+    padding: 1em;
   }
 
   .card:hover {
@@ -633,7 +636,7 @@ export default {
 
   .masks {
     display: grid;
-    grid-template-columns: 16.66% 16.66% 16.66% 16.66% 16.66% 16.66%;
+    grid-template-columns: 25% 25% 25% 25%;
     grid-template-rows: auto;
     overflow-y: auto;
     height: 77vh;
@@ -675,21 +678,23 @@ export default {
     margin: 1em;
   }
 
+  .image-and-name {
+    display: flex;
+    justify-content: center;
+    height: 10em;
+    align-items: center;
+  }
+
   h3 {
     padding-left: 1em;
     padding-right: 1em;
   }
-  @media(max-width: 1500px) {
-    .masks {
-      grid-template-columns: 20% 20% 20% 20% 20%;
-    }
-  }
-  @media(max-width: 1300px) {
+  @media(max-width: 1515px) {
     .masks {
       grid-template-columns: 25% 25% 25% 25%;
     }
   }
-  @media(max-width: 1050px) {
+  @media(max-width: 1250px) {
     .masks {
       grid-template-columns: 33% 33% 33%;
 
@@ -697,7 +702,7 @@ export default {
       top: 2em;
     }
   }
-  @media(max-width: 700px) {
+  @media(max-width: 930px) {
     img {
       width: 100vw;
     }
@@ -716,6 +721,7 @@ export default {
 
       position: relative;
       top: 2em;
+      height: 66vh;
     }
 
     #search {
@@ -728,9 +734,32 @@ export default {
     }
 
     .thumbnail {
-      max-height:none;
+      max-height: 7em;
     }
 
+  }
+
+  @media(max-width: 600px) {
+    .image-and-name {
+      flex-direction: column;
+    }
+
+    img {
+      max-height: 50em;
+    }
+    .masks {
+      grid-template-columns: 100%;
+      overflow: auto;
+
+      position: relative;
+      top: 2em;
+    }
+    .card {
+      padding: 1em 0;
+      display: grid;
+      grid-template-columns: 50% 50%;
+
+    }
   }
 
 </style>

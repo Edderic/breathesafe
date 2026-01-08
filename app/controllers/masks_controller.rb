@@ -4,6 +4,17 @@
 class MasksController < ApplicationController
   skip_before_action :verify_authenticity_token
 
+  SORT_COLUMN_MAP = {
+    'probaFit' => 'proba_fit',
+    'avgSealedFitFactor' => 'avg_sealed_fit_factor',
+    'avgBreathabilityPa' => 'avg_breathability_pa',
+    'uniqueFitTestersCount' => 'unique_fit_testers_count',
+    'perimeterMm' => 'perimeter_mm',
+    'uniqueInternalModelCode' => 'unique_internal_model_code',
+    'fitTestCount' => 'fit_test_count'
+  }.freeze
+  DEFAULT_SORT_COLUMN = 'unique_internal_model_code'
+
   def create
     if unauthorized?
       status = 401
@@ -38,13 +49,6 @@ class MasksController < ApplicationController
   end
 
   def index
-    allowed_sort_columns = %w[
-      unique_fit_testers_count
-      fit_test_count
-      perimeter_mm
-      unique_internal_model_code
-    ]
-
     permitted = params.permit(
       :page,
       :per_page,
@@ -62,7 +66,8 @@ class MasksController < ApplicationController
     filter_color = permitted[:filter_color].presence
     filter_style = permitted[:filter_style].presence
     filter_strap_type = permitted[:filter_strap_type].presence
-    sort_by = allowed_sort_columns.include?(permitted[:sort_by]) ? permitted[:sort_by] : 'id'
+    sort_param = permitted[:sort_by].presence
+    sort_column = SORT_COLUMN_MAP.fetch(sort_param, DEFAULT_SORT_COLUMN)
     sort_order = permitted[:sort_order] == 'descending' ? :desc : :asc
 
     masks_query = Mask.all
@@ -71,22 +76,41 @@ class MasksController < ApplicationController
     masks_query = masks_query.where(strap_type: filter_strap_type) if filter_strap_type && filter_strap_type != 'none'
     masks_query = masks_query.where('colors @> ?', [filter_color].to_json) if filter_color && filter_color != 'none'
 
-    total_count = masks_query.count
-    offset = (page - 1) * per_page
-    ordered_scope = sort_by == 'id' ? masks_query.order(:id) : masks_query.order(sort_by => sort_order)
-    mask_ids = ordered_scope.offset(offset).limit(per_page).pluck(:id)
+    mask_ids = masks_query.order(:id).pluck(:id)
+    if mask_ids.empty?
+      return render json: {
+        masks: [],
+        total_count: 0,
+        page: page,
+        per_page: per_page,
+        messages: []
+      }, status: :ok
+    end
+    total_count = mask_ids.size
 
-    masks = if current_user&.admin
-              Mask.with_admin_aggregations(mask_ids)
-            else
-              Mask.with_privacy_aggregations(mask_ids)
-            end
+    aggregated_masks = if current_user&.admin
+                         Mask.with_admin_aggregations(mask_ids)
+                       else
+                         Mask.with_privacy_aggregations(mask_ids)
+                       end
+    mask_id_lookup = mask_ids.each_with_object({}) { |id, memo| memo[id] = true }
+    aggregated_masks.select! do |mask|
+      mask_id_lookup[mask['id']] || mask_id_lookup[mask[:id]]
+    end
 
-    masks_by_id = masks.index_by { |mask| mask['id'] || mask[:id] }
-    ordered_masks = mask_ids.filter_map { |mask_id| masks_by_id[mask_id] }
+    decorated_masks = aggregated_masks.map do |mask|
+      [mask, sort_value(mask, sort_column)]
+    end
+    non_nil, nils = decorated_masks.partition { |(_, value)| !value.nil? }
+    non_nil.sort_by! { |(_, value)| value }
+    non_nil.reverse! if sort_order == :desc
+    sorted_masks = non_nil.map(&:first) + nils.map(&:first)
+
+    start_index = (page - 1) * per_page
+    paginated_masks = sorted_masks.slice(start_index, per_page) || []
 
     to_render = {
-      masks: ordered_masks,
+      masks: paginated_masks,
       total_count: total_count,
       page: page,
       per_page: per_page
@@ -224,5 +248,28 @@ class MasksController < ApplicationController
         breathability_source
       ]
     )
+  end
+
+  private
+
+  def sort_value(mask, column)
+
+    value = mask[column] || mask[column.to_s]
+
+    return unless value
+
+    if numeric?(value)
+      value.to_f
+    elsif value.is_a?(String)
+      value.downcase
+    else
+      value
+    end
+  end
+
+  def numeric?(value)
+    return value.match?(/\A-?\d+(\.\d+)?\z/) if value.is_a?(String)
+
+    value.is_a?(Numeric)
   end
 end
