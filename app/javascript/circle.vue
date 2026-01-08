@@ -81,6 +81,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: center;
   }
   .pair:hover {
     cursor:pointer;

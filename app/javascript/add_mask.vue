@@ -35,34 +35,21 @@
 
     <div :class="['main', 'main-section', { 'with-sidebar': newOrEditMode }]" >
       <div class='header'>
-        <div class='header-row'>
-          <h2 class='tagline'>{{tagline}}</h2>
-          <TabSet
-            :options='tabToShowOptions'
-            :tabToShow='displayTab'
-            @update='handleDisplayTabChange'
-          />
-        </div>
+        <h2 class='tagline'>{{tagline}}</h2>
+        <TabSet
+          v-if='!newOrEditMode'
+          :options='tabToShowOptions'
+          :tabToShow='displayTab'
+          @update='handleDisplayTabChange'
+        />
+        <ClosableMessage @onclose='messages = []' :messages='messages'/>
       </div>
+      <Button v-show='!newMode && displayTab == "Fit Testing"' id='contextualize-button' class='icon' @click='showPopup = "Contextualize"'>
+        Contextualize
+      </Button>
     </div>
 
     <div :class="['main', 'main-section', { 'with-sidebar': newOrEditMode }]" v-show="displayTab == 'Misc. Info'">
-      <div class='header'>
-        <div class='container chunk'>
-          <ClosableMessage @onclose='messages = []' :messages='messages'/>
-          <br>
-        </div>
-
-        <Button v-show='!newMode && displayTab == "Fit Testing"' id='contextualize-button' class='icon' @click='showPopup = "Contextualize"'>
-          Contextualize
-        </Button>
-
-        <br>
-      </div>
-
-      <div v-if='showMode' class='tab-set-container'>
-      </div>
-
       <div :class='{ grid: true, view: showMode, edit: !showMode, triple: columnCount == 3, quad: columnCount == 4}'>
         <table v-if='tabToShow == "Image & Purchasing" || showMode'>
           <tbody>
@@ -105,17 +92,246 @@
                                                             >
                                                             <a :href="purchasingUrl" v-if="!newOrEditMode">{{shortHand(purchasingUrl)}}</a>
               </td>
-                <td>
-                  <CircularButton text="x" @click="deletePurchasingUrl(index)" v-show='newOrEditMode && userCanEdit'/>
-                </td>
-                <td>
-                </td>
+              <td>
+                <CircularButton text="x" @click="deletePurchasingUrl(index)" v-show='newOrEditMode && userCanEdit'/>
+              </td>
             </tr>
           </tbody>
 
         </table>
 
-        <table v-if='tabToShow == "Basic Info"'>
+        <table v-if='tabToShow == "Basic Info"' class='one-column'>
+          <tbody>
+            <tr>
+              <th>Unique Internal Model Code</th>
+              <td>
+                <span class='full-width has-minimal-width ' v-show="!newOrEditMode">
+                  {{uniqueInternalModelCode }}
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <th>Initial cost (US Dollars)</th>
+                       <ColoredCell
+                           v-show='!newOrEditMode'
+                           class='risk-score'
+                           :colorScheme="costColorScheme"
+                           :maxVal=1
+                           :value='initialCostUsDollars'
+                           :exception='exceptionDollarObject'
+                           :text='dollarText(initialCostUsDollars)'
+                           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                           :title='dollarText(initialCostUsDollars)'
+                           />
+             </tr>
+
+          </tbody>
+          <tbody>
+
+            <tr>
+              <th>Colors</th>
+              <td colspan='1' class='colors'>
+
+              <span v-for='opt in colorOptions' class='filterCheckbox' >
+                <Circle :color='opt' :selected='colors.includes(opt)' :for='`color${opt}`' @click='filterFor("Color", opt)' v-if='newOrEditMode || colors.includes(opt)'/>
+              </span>
+
+              </td>
+            </tr>
+
+            <tr>
+              <th >Filter type</th>
+              <td colspan='1' class='text-align-center'>
+                <select
+                    v-model="filterType"
+                    v-show="newOrEditMode"
+                    >
+                    <option>cloth</option>
+                    <option>surgical</option>
+                    <option>ASTM Lvl 3</option>
+                    <option>ASTM</option>
+                    <option>CE</option>
+                    <option>E100</option>
+                    <option>FFP2 Rated</option>
+                    <option>FFP3</option>
+                    <option>KF80</option>
+                    <option>KF94</option>
+                    <option>KN95</option>
+                    <option>KN100</option>
+                    <option>N95</option>
+                    <option>N99</option>
+                    <option>N100</option>
+                    <option>Non-Rated</option>
+                    <option>P95</option>
+                    <option>P99</option>
+                    <option>P100</option>
+                    <option>PM2.5</option>
+                </select>
+
+                <span v-show='!newOrEditMode'>{{filterType}}</span>
+              </td>
+            </tr>
+            <tr>
+              <th >Style</th>
+              <td colspan='1' class='text-align-center'>
+                <select
+                    v-model="style"
+                    v-show="newOrEditMode"
+                    >
+                    <option>Bifold</option>
+                    <option>Bifold &amp; Gasket</option>
+                    <option>Boat</option>
+                    <option>Cotton + High Filtration Efficiency Material</option>
+                    <option>Cup</option>
+                    <option>Duckbill</option>
+                    <option>Elastomeric</option>
+                    <option>Surgical</option>
+                    <option>Adhesive</option>
+                </select>
+                <span v-show='!newOrEditMode'>{{style}}</span>
+              </td>
+            </tr>
+
+            <tr>
+              <th colspan='1'>Strap type</th>
+              <td colspan='1' class='text-align-center'>
+                <select
+                    v-model="strapType"
+                    v-show="newOrEditMode"
+                    >
+                    <option>Earloop</option>
+                    <option>Adjustable Earloop</option>
+                    <option>Headstrap</option>
+                    <option>Adjustable Headstrap</option>
+                    <option>Strapless</option>
+                </select>
+                <span v-show='!newOrEditMode'>{{strapType}}</span>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Has exhalation valve</th>
+              <td v-show='!newOrEditMode'>{{hasExhalationValve}}</td>
+              <td v-show="newOrEditMode">
+                <input type="text" v-model='hasExhalationValve'>
+              </td>
+            </tr>
+
+            <tr>
+               <th colspan=2><h3>Dimensions</h3></th>
+            </tr>
+            <tr>
+              <th>Perimeter (mm)</th>
+              <td>
+                <input type="number" v-model="perimeterMm" v-show="newOrEditMode">
+                <ColoredCell
+                    v-show='!newOrEditMode'
+                    class='risk-score'
+                    :colorScheme="perimColorScheme"
+                    :maxVal=1
+                    :value='perimeterMm'
+                    :exception='exceptionObjectBlank'
+                    :text='distanceText(perimeterMm, "mm")'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                    :title='distanceText(perimeterMm, "mm")'
+                    />
+              </td>
+            </tr>
+            <tr>
+              <th>Mass (grams)</th>
+              <td>
+                <input type="number" v-model="massGrams" v-show="newOrEditMode">
+
+                <ColoredCell
+                    v-show='!newOrEditMode'
+                    class='risk-score'
+                    :colorScheme="massColorScheme"
+                    :maxVal=1
+                    :value='massGrams'
+                    :exception='exceptionObjectBlank'
+                    :text='massText(massGrams)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                    :title='massText(massGrams)'
+                    />
+              </td>
+            </tr>
+
+          </tbody>
+          <tbody v-for="(f, index) in filtrationEfficiencies" class='text-align-center'>
+            <tr>
+              <td colspan='2'>
+                <h3>Filtration & Breathability</h3>
+              </td>
+            </tr>
+
+            <tr>
+              <th v-show='newOrEditMode'>Filtration Efficiency (Percent)</th>
+              <th v-show='!newOrEditMode'>Filtration Efficiency</th>
+
+              <td colspan='1'>
+                <input type="number" :value='f.filtrationEfficiencyPercent' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyPercent')"
+                       v-show="newOrEditMode"
+                       >
+                       <ColoredCell
+                           v-show='!newOrEditMode'
+                           class='risk-score'
+                           :colorScheme="colorInterpolationScheme"
+                           :maxVal=1
+                           :value='filtrationEfficiencyValue(f.filtrationEfficiencyPercent)'
+                           :text='percentText(f.filtrationEfficiencyPercent)'
+                           :exception='exceptionObject'
+                           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%', }"
+                           :title='f.filtrationEfficiencyPercent'
+                           />
+              </td>
+            </tr>
+
+            <tr>
+              <th v-show='newOrEditMode'>Breathability (Pa)</th>
+              <th v-show='!newOrEditMode'>Breathability</th>
+              <td colspan='1'>
+                <input type="number" :value='breathability[index].breathabilityPascals' @change="updateArrayOfObj($event, 'breathability', index, 'breathabilityPascals')"
+                       v-show="newOrEditMode"
+                       >
+                       <ColoredCell
+                           class='risk-score'
+                           v-show='!newOrEditMode'
+                           :colorScheme="breathabilityInterpolationScheme"
+                           :maxVal=1
+                           :value='breathability[index].breathabilityPascals'
+                           :text='breathabilityText(breathability[index].breathabilityPascals)'
+                           :exception='exceptionObjectBlank'
+                           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                           :title='breathabilityText(breathability[index].breathabilityPascals)'
+                           />
+              </td>
+            </tr>
+
+            <tr>
+              <th colspan='1'>Source</th>
+              <a v-show='!newOrEditMode' :href="f.filtrationEfficiencySource">link</a>
+            </tr>
+
+            <tr>
+              <th class='notes' colspan='1'>Notes</th>
+              <td colspan='1' class='notes' v-show='!newOrEditMode'>{{f.filtrationEfficiencyNotes}}</td>
+            </tr>
+
+            <tr>
+              <td colspan='2' v-show='newOrEditMode'>
+                <textarea cols="30" rows="10" @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyNotes')"></textarea>
+              </td>
+            </tr>
+
+            <tr class='text-align-center'>
+              <td colspan='2'>
+                <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='newMode || userCanEdit && editMode'/>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <table v-if='tabToShow == "Basic Info"' class='desktop'>
           <thead>
              <tr>
                <td colspan='2'>
@@ -248,7 +464,7 @@
           </tbody>
         </table>
 
-        <table v-if='tabToShow == "Dimensions" || mode=="Show"'>
+        <table v-if='tabToShow == "Dimensions" || mode=="Show"' class='desktop'>
           <thead>
              <tr>
                <th colspan=1><h3>Dimensions</h3></th>
@@ -295,7 +511,7 @@
             </tr>
           </tbody>
         </table>
-        <table v-if='tabToShow == "Filtration & Breathability" || mode=="Show"'>
+        <table v-if='tabToShow == "Filtration & Breathability" || mode=="Show"' class='desktop'>
           <tbody>
             <tr v-if='newOrEditMode'>
               <td colspan='2'>
@@ -391,11 +607,6 @@
         </table>
       </div>
 
-      <table v-if='tabToShow == "Basic Info"'>
-        <tbody>
-
-        </tbody>
-      </table>
       <br>
 
       <div class="buttons justify-content-center">
@@ -1710,14 +1921,8 @@ export default {
     background-color: white;
     display: flex;
     justify-content: center;
-    padding-top: 1em;
-  }
-
-  .header-row {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
     align-items: center;
+    padding-top: 1em;
   }
 
   .main-section.with-sidebar {
@@ -1742,6 +1947,7 @@ export default {
 
   .filterCheckbox {
     display: flex;
+    flex-direction: column;
   }
 
   .contextualizePopup  {
@@ -1755,6 +1961,10 @@ export default {
   #contextualize-button {
     margin-left: 2em;
     margin-right: 2em;
+  }
+
+  .one-column {
+    display: none;
   }
 
   @media(max-width: 1300px) {
@@ -1773,13 +1983,28 @@ export default {
     }
   }
   @media(max-width: 1170px) {
-    .grid.triple, .grid.view.triple, .grid.view.quad {
-      grid-template-columns: 100%;
-    }
     .main-section {
     }
   }
   @media(max-width: 700px) {
+    .desktop {
+      display: none;
+    }
+    .header {
+      flex-direction: column;
+    }
+    .one-column {
+      display: table;
+    }
+
+    .grid.view, .grid.view.triple, .grid.view.quad {
+      grid-template-columns: 100%;
+    }
+
+    th, td {
+      width: 1em;
+    }
+
     img {
       width: 100vw;
     }
@@ -1842,7 +2067,6 @@ export default {
     }
 
     .colors {
-      min-width: 85vw;
     }
   }
 

@@ -99,7 +99,6 @@ import ClosableMessage from './closable_message.vue'
 import ColoredCell from './colored_cell.vue'
 import PersonIcon from './person_icon.vue'
 import Popup from './pop_up.vue'
-import TabSet from './tab_set.vue'
 import { deepSnakeToCamel } from './misc.js'
 import { assignBoundsToColorScheme, colorPaletteFall, convertColorListToCutpoints, generateEvenSpacedBounds } from './colors.js'
 import SearchIcon from './search_icon.vue'
@@ -124,8 +123,7 @@ export default {
     PersonIcon,
     SearchIcon,
     SortingStatus,
-    SurveyQuestion,
-    TabSet
+    SurveyQuestion
   },
   data() {
     return {
