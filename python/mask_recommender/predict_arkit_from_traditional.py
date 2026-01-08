@@ -304,6 +304,10 @@ def predict_arkit_from_traditional(
 
     output = fit_tests_enhanced_with_traditional_to_arkit_model
 
+    num_with_arkit = output['nose_mm'].notna().sum()
+    total = output.shape[0]
+    logging.info(f"Proportion of fit tests with ARKit data after imputation with via traditional facial measurements: {num_with_arkit} / {total}: {round(num_with_arkit / total * 100, 2)}%")
+
     if output_file:
         output_file.parent.mkdir(parents=True, exist_ok=True)
 

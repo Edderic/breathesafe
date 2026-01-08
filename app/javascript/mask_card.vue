@@ -320,8 +320,13 @@ export default {
       })
     },
     selectMask(id) {
-      this.toggleMaskCardPopup()
-      this.selectedMask = this.masks.filter((m) => m.id == id)[0]
+      const mask = this.cards.find((m) => m.id === id)
+      if (!mask) {
+        return
+      }
+
+      this.selectedMask = mask
+
       // query: this.facialMeasurements
       let query = { }
       for (let facialMeasurement in this.facialMeasurements) {
@@ -336,6 +341,8 @@ export default {
           },
           query: query
         })
+      } else {
+        this.toggleMaskCardPopup()
       }
     },
     filterFor(string) {

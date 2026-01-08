@@ -38,43 +38,63 @@ class MasksController < ApplicationController
   end
 
   def index
-    # Extract pagination and search parameters
-    page = params[:page]&.to_i || 1
-    per_page = params[:per_page]&.to_i || 6
-    search = params[:search]
+    allowed_sort_columns = %w[
+      unique_fit_testers_count
+      fit_test_count
+      perimeter_mm
+      unique_internal_model_code
+    ]
 
-    # Get base query
+    permitted = params.permit(
+      :page,
+      :per_page,
+      :search,
+      :sort_by,
+      :sort_order,
+      :filter_color,
+      :filter_style,
+      :filter_strap_type
+    )
+
+    page = permitted[:page].to_i.positive? ? permitted[:page].to_i : 1
+    per_page = permitted[:per_page].to_i.positive? ? permitted[:per_page].to_i : 12
+    search = permitted[:search].presence
+    filter_color = permitted[:filter_color].presence
+    filter_style = permitted[:filter_style].presence
+    filter_strap_type = permitted[:filter_strap_type].presence
+    sort_by = allowed_sort_columns.include?(permitted[:sort_by]) ? permitted[:sort_by] : 'id'
+    sort_order = permitted[:sort_order] == 'descending' ? :desc : :asc
+
     masks_query = Mask.all
+    masks_query = masks_query.where('unique_internal_model_code ILIKE ?', "%#{search}%") if search
+    masks_query = masks_query.where(style: filter_style) if filter_style && filter_style != 'none'
+    masks_query = masks_query.where(strap_type: filter_strap_type) if filter_strap_type && filter_strap_type != 'none'
+    masks_query = masks_query.where('colors @> ?', [filter_color].to_json) if filter_color && filter_color != 'none'
 
-    # Apply search filter if provided
-    masks_query = masks_query.where('unique_internal_model_code ILIKE ?', "%#{search}%") if search.present?
-
-    # Get total count before pagination
     total_count = masks_query.count
-
-    # Apply pagination
     offset = (page - 1) * per_page
-    mask_ids = masks_query.order(:id).offset(offset).limit(per_page).pluck(:id)
+    ordered_scope = sort_by == 'id' ? masks_query.order(:id) : masks_query.order(sort_by => sort_order)
+    mask_ids = ordered_scope.offset(offset).limit(per_page).pluck(:id)
 
-    # Get masks with aggregations
     masks = if current_user&.admin
               Mask.with_admin_aggregations(mask_ids)
             else
               Mask.with_privacy_aggregations(mask_ids)
             end
 
+    masks_by_id = masks.index_by { |mask| mask['id'] || mask[:id] }
+    ordered_masks = mask_ids.filter_map { |mask_id| masks_by_id[mask_id] }
+
     to_render = {
-      masks: masks,
+      masks: ordered_masks,
       total_count: total_count,
       page: page,
       per_page: per_page
     }
-    messages = []
-    status = 200
 
     respond_to do |format|
       format.json do
-        render json: to_render.merge(messages: messages), status: status
+        render json: to_render.merge(messages: []), status: :ok
       end
     end
   end
