@@ -31,7 +31,7 @@
         If this individual did not receive a mask kit but are expecting to have received one, please contact <a href="mailto:info@breathesafe.xyz">info@breathesafe.xyz</a>. If the individual does have access to masks that were not shipped by Breathesafe LLC, said individual can still add user seal check and fit test data by clicking on the plus button above.
       </p>
     </div>
-    <div class='masks' :style='gridTemplateColumns'>
+    <div class='masks'>
 
       <div class='card flex flex-dir-col align-items-center justify-content-center' v-for='m in cards' @click='selectMask(m.id)'>
 
@@ -208,7 +208,7 @@ export default {
         gridTemplateColumns = "50% 50%"
       }
       else {
-        gridTemplateColumns = "33% 33% 33%"
+        gridTemplateColumns = "16.66% 16.66% 16.66% 16.66% 16.66% 16.66%"
       }
 
       return {
@@ -626,7 +626,7 @@ export default {
 
   .masks {
     display: grid;
-    grid-template-columns: 33% 33% 33%;
+    grid-template-columns: 16.66% 16.66% 16.66% 16.66% 16.66% 16.66%;
     grid-template-rows: auto;
     overflow-y: auto;
     height: 75vh;
@@ -672,6 +672,21 @@ export default {
     padding-left: 1em;
     padding-right: 1em;
   }
+  @media(max-width: 1500px) {
+    .masks {
+      grid-template-columns: 20% 20% 20% 20% 20%;
+    }
+  }
+  @media(max-width: 1300px) {
+    .masks {
+      grid-template-columns: 25% 25% 25% 25%;
+    }
+  }
+  @media(max-width: 1050px) {
+    .masks {
+      grid-template-columns: 33% 33% 33%;
+    }
+  }
   @media(max-width: 700px) {
     img {
       width: 100vw;
@@ -685,12 +700,9 @@ export default {
     .edit-facial-measurements {
       flex-direction: column;
     }
-  }
-  @media(max-width: 700px) {
     .masks {
-      grid-template-columns: 100%;
+      grid-template-columns: 50% 50%;
       overflow: auto;
-      height: 65vh;
     }
 
     #search {
@@ -703,7 +715,6 @@ export default {
     }
 
     .thumbnail {
-      max-width:70vw;
       max-height:none;
     }
 

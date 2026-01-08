@@ -1,31 +1,34 @@
 <template>
   <div class='align-items-center flex-dir-col sticky'>
     <div class='top-controls'>
-      <div class='flex align-items-center row'>
-        <h2 class='tagline'>Masks</h2>
-        <CircularButton text="+" @click="newMask" />
-        <CircularButton text="?" @click="showPopup = 'Help'"/>
-      </div>
+      <div class='bar'>
+        <div class='flex align-items-center row'>
+          <h2 class='tagline'>Masks</h2>
+          <CircularButton text="+" @click="newMask" />
+          <CircularButton text="?" @click="showPopup = 'Help'"/>
+        </div>
 
-      <div class='row bar'>
-        <input id='search' type="text" :value='search' @change='updateSearch'>
-        <SearchIcon height='2em' width='1em'/>
+        <div class='row'>
+          <input id='search' type="text" :value='search' @change='updateSearch'>
+          <SearchIcon height='2em' width='1em'/>
 
-        <button class='icon' @click='showPopup = "Recommend"'>
-          R
-        </button>
+          <button class='icon' @click='showPopup = "Recommend"'>
+            R
+          </button>
 
-        <button class='icon' @click='showPopup = "Sort"'>
-          ⇵
-        </button>
+          <button class='icon' @click='showPopup = "Sort"'>
+            ⇵
+          </button>
 
-        <button class='icon' @click='showPopup = "Filter"'>
-          <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="8 10 70 70"
-                                                                                       width="2em" height="2em"
-                                                                                                   >
-                                                                                                   <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' :fill='filterButtonColor'/>
-          </svg>
-        </button>
+          <button class='icon' @click='showPopup = "Filter"'>
+            <svg class='filter-button' xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="8 10 70 70"
+                                                                                         width="2em" height="2em"
+                                                                                                     >
+                                                                                                     <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' :fill='filterButtonColor'/>
+            </svg>
+          </button>
+        </div>
+
         <Pagination
           :current-page="currentPage"
           :per-page="perPage"
@@ -93,14 +96,6 @@
       :facialMeasurements='facialMeasurements'
       :showProbaFit='false'
     />
-    <Pagination
-      :current-page="currentPage"
-      :per-page="perPage"
-      :total-count="totalCount"
-      item-name="masks"
-      @page-change="onPageChange"
-    />
-
 
     <br>
     <br>
@@ -632,7 +627,7 @@ export default {
 
   .grid {
     display: grid;
-    grid-template-columns: 33% 33% 33%;
+    grid-template-columns: 25% 25% 25% 25%;
     grid-template-rows: auto;
     overflow-y: auto;
     height: 75vh;
@@ -682,14 +677,30 @@ export default {
 
   .bar {
     max-height: 3em;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding-top: 4em;
   }
 
+  @media(max-width: 1000px) {
+    .top-controls {
+      flex-direction: column;
+    }
+    .bar {
+      flex-direction: column;
+    }
+  }
+  @media(max-width: 768px) {
+    .top-controls {
+      flex-direction: column;
+    }
+  }
   @media(max-width: 700px) {
     .grid {
       grid-template-columns: 50% 50%;
     }
-  }
-  @media(max-width: 700px) {
     img {
       width: 100vw;
     }
@@ -702,8 +713,6 @@ export default {
     .edit-facial-measurements {
       flex-direction: column;
     }
-  }
-  @media(max-width: 700px) {
     .grid {
       grid-template-columns: 100%;
     }

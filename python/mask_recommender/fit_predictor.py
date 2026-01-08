@@ -8,6 +8,8 @@ from breathesafe_network import (build_session,
                                  fetch_json)
 from predict_arkit_from_traditional import predict_arkit_from_traditional
 
+from utils import display_percentage
+
 """
 Notes
 
@@ -322,18 +324,29 @@ if __name__ == '__main__':
         email=email,
         password=password
     )
-    fit_tests_with_imputed_arkit_via_traditional_facial_measurements
 
-    import pdb; pdb.set_trace()
-    fit_tests_with_imputed_arkit_via_traditional_facial_measurements
-    num_with_arkit = fit_tests_with_imputed_arkit_via_traditional_facial_measurements['nose_mm'].notna().sum()
-    total = fit_tests_with_imputed_arkit_via_traditional_facial_measurements.shape[0]
-    logging.info(f"Proportion of fit tests with ARKit data: {num_with_arkit} / {total}: {round(num_with_arkit / total * 100, 2)}%")
-    fit_tests_with_imputed_arkit_via_traditional_facial_measurements['nose_mm'].notna().sum()
+    missing_facial_measurement_id = fit_tests_with_imputed_arkit_via_traditional_facial_measurements['facial_measurement_id'].isna().sum()
+    total_num_fit_tests = fit_tests_with_imputed_arkit_via_traditional_facial_measurements.shape[0]
 
-    fit_tests_df.columns
-    fit_tests_df[fit_tests_df['id'] == 1]
+    logging.info(f"Fit tests with qlft_pass not nil missing facial_measurement_id: {missing_facial_measurement_id} / {total_num_fit_tests}: {display_percentage(missing_facial_measurement_id, total_num_fit_tests)}")
+
+    total_fit_tests_missing_style = fit_tests_with_imputed_arkit_via_traditional_facial_measurements['style'].isna().sum()
+    logging.info(f"Total # fit tests missing style: {total_fit_tests_missing_style}")
+
+    total_fit_tests_missing_parameter_mm = fit_tests_with_imputed_arkit_via_traditional_facial_measurements['perimeter_mm'].isna().sum()
+    fit_tests_missing_parameters = fit_tests_with_imputed_arkit_via_traditional_facial_measurements[
+        fit_tests_with_imputed_arkit_via_traditional_facial_measurements['perimeter_mm'].isna()
+    ]
+
+    tested_missing_perimeter_mm = fit_tests_missing_parameters.groupby(
+        ['mask_id', 'unique_internal_model_code']
+    ).count()[['id']].sort_values(by='id', ascending=False)
+
+    logging.info(f"masks with fit tests that are missing perimeter_mm: {tested_missing_perimeter_mm}")
     import pdb; pdb.set_trace()
+
+
+    logging.info(f"Total # fit tests missing parameter_mm: {total_fit_tests_missing_parameter_mm}")
 
     user_arkit_table = pd.read_csv('./python/mask_recommender/user_arkit_table.csv')
     predicted_fit_tests = pd.read_csv('./python/mask_recommender/predicted_fit_tests.csv')
