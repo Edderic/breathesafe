@@ -22,17 +22,6 @@
       />
     </div>
 
-    <RecommendPopup
-      class='contextualizePopup'
-      title='Contextualize'
-      :showPopup='showPopup == "Contextualize"'
-      :facialMeasurements='facialMeasurements'
-      :hideButton='true'
-      @hidePopUp='showPopup = false'
-      @updateFacialMeasurement='triggerRouterForFacialMeasurementUpdate'
-       explanation="Facial measurement graphs display fit testing results, where green points denote passing a fit test, and red points denote failing a fit test. You can input your facial measurements to see if this mask probably fits your face. The closer you are to green points, the higher the likelihood. If your measurements are not close to anyone else's, then the recommender fit probability might not be accurate."
-    />
-
     <div :class="['main', 'main-section', { 'with-sidebar': newOrEditMode }]" >
       <div class='header'>
         <h2 class='tagline'>{{tagline}}</h2>
@@ -44,9 +33,6 @@
         />
         <ClosableMessage @onclose='messages = []' :messages='messages'/>
       </div>
-      <Button v-show='!newMode && displayTab == "Fit Testing"' id='contextualize-button' class='icon' @click='showPopup = "Contextualize"'>
-        Contextualize
-      </Button>
     </div>
 
     <div :class="['main', 'main-section', { 'with-sidebar': newOrEditMode }]" v-show="displayTab == 'Misc. Info'">
