@@ -12,10 +12,6 @@
           <input id='search' type="text" :value='search' @change='updateSearch'>
           <SearchIcon height='2em' width='1em'/>
 
-          <button class='icon' @click='showPopup = "Recommend"'>
-            R
-          </button>
-
           <button class='icon' @click='showPopup = "Sort"'>
             ⇵
           </button>
