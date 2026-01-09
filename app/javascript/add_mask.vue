@@ -450,7 +450,7 @@
           </tbody>
         </table>
 
-        <table v-if='tabToShow == "Dimensions" || mode=="Show"' class='desktop'>
+        <table v-if='tabToShow == "Dimensions" || mode=="Show"'>
           <thead>
              <tr>
                <th colspan=1><h3>Dimensions</h3></th>
@@ -497,10 +497,11 @@
             </tr>
           </tbody>
         </table>
-        <table v-if='tabToShow == "Filtration & Breathability" || mode=="Show"' class='desktop'>
+        <table v-if='tabToShow == "Filtration & Breathability" || mode=="Show"'>
           <tbody>
             <tr v-if='newOrEditMode'>
-              <td colspan='2'>
+              <th class='text-align-left'>Filtration &amp; Breathability</th>
+              <td class='text-align-right'>
                 <CircularButton text="+" @click="addFiltEffAndBreathability" v-if='newOrEditMode'/>
               </td>
             </tr>
@@ -599,7 +600,7 @@
         <Button shadow='true' class='button' text="Edit" @click='switchToEditMode' v-if='showMode && canUpdate'/>
         <Button shadow='true' class='button' text="Delete" @click='deleteMask' v-if='deletable && !showMode && canUpdate'/>
         <Button shadow='true' class='button' text="Cancel" @click='handleCancel' v-if='newOrEditMode && canUpdate'/>
-        <Button shadow='true' class='button' text="Save" @click='saveMask' v-if='newOrEditMode && canUpdate'/>
+        <Button shadow='true' class='button' text="Save & Continue" @click='saveAndContinue' v-if='newOrEditMode && canUpdate'/>
         <Button shadow='true' class='button' text="Add Fit Testing Data" v-if='showMode' @click='tryAddingFitTest'/>
       </div>
 
@@ -1524,11 +1525,11 @@ export default {
           })
       }
     },
-    async saveMask() {
+    async persistMask() {
       this.runValidations()
 
       if (this.messages.length > 0) {
-        return;
+        return null
       }
 
       let maskId = this.$route.params.id;
@@ -1543,15 +1544,7 @@ export default {
           .then(response => {
             let data = response.data
             // whatever you want
-
-            this.$router.push({
-              name: 'ShowMask',
-              params: {
-                id: maskId
-              }
-            })
-
-            this.mode = 'Show'
+            return data
           })
           .catch(error => {
             for(let errorMessage of error.response.data.messages) {
@@ -1560,6 +1553,10 @@ export default {
               })
             }
           })
+        if (this.messages.length > 0) {
+          return null
+        }
+        return maskId
       } else {
 
         // create
@@ -1571,18 +1568,9 @@ export default {
           .then(response => {
             let data = response.data
             // whatever you want
-            this.$router.push(
-              {
-                name: 'ShowMask',
-                params: {
-                  id: data.mask.id
-                }
-              }
-            )
-
             this.id = data.mask.id
             this.authorId = data.mask.author_id
-            this.mode = 'Show'
+            return data
           })
           .catch(error => {
             if (error.message) {
@@ -1591,7 +1579,55 @@ export default {
               this.addMessages(error.response.data.messages)
             }
           })
+        if (this.messages.length > 0) {
+          return null
+        }
+        return this.id
       }
+    },
+    nextEditStep() {
+      const steps = [
+        'Basic Info',
+        'Image & Purchasing',
+        'Dimensions',
+        'Filtration & Breathability'
+      ]
+      const currentIndex = steps.indexOf(this.tabToShow)
+      if (currentIndex === -1) {
+        return steps[0]
+      }
+      if (currentIndex >= steps.length - 1) {
+        return null
+      }
+      return steps[currentIndex + 1]
+    },
+    async saveAndContinue() {
+      const savedId = await this.persistMask()
+      if (!savedId) {
+        return
+      }
+
+      const nextStep = this.nextEditStep()
+      if (nextStep) {
+        this.tabToShow = nextStep
+        this.displayTab = 'Misc. Info'
+        this.$router.push({
+          name: 'EditMask',
+          params: { id: savedId },
+          query: {
+            tabToShow: nextStep,
+            displayTab: 'Misc. Info'
+          }
+        })
+        return
+      }
+
+      this.$router.push({
+        name: 'ShowMask',
+        params: { id: savedId },
+        query: { displayTab: 'Misc. Info' }
+      })
+      this.mode = 'Show'
     },
     setDisplay(opt, name) {
       if (!name) {
@@ -1985,10 +2021,6 @@ export default {
 
     .grid.view, .grid.view.triple, .grid.view.quad {
       grid-template-columns: 100%;
-    }
-
-    th, td {
-      width: 1em;
     }
 
     img {
