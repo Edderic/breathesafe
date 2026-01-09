@@ -86,7 +86,7 @@
 
         </table>
 
-        <table v-if='tabToShow == "Basic Info"' class='one-column'>
+        <table v-if='tabToShow == "Basic Info" || showMode' class='one-column'>
           <tbody>
             <tr>
               <th>Unique Internal Model Code</th>
@@ -206,7 +206,7 @@
           </tbody>
         </table>
 
-        <table v-if='tabToShow == "Basic Info"' class='desktop'>
+        <table v-if='tabToShow == "Basic Info" || showMode' class='desktop'>
           <thead>
              <tr>
                <td colspan='2'>
@@ -1054,9 +1054,9 @@ export default {
     await this.load(toQuery, {}, toName, {})
 
     this.$watch(
-      () => this.$route.query,
-      (toQuery, fromQuery) => {
-        this.load(toQuery, fromQuery, "", {})
+      () => this.$route.fullPath,
+      () => {
+        this.load(this.$route.query, {}, "", {})
       }
     )
 
@@ -1512,6 +1512,9 @@ export default {
         return
       }
 
+      if (window.innerWidth < 700) {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
       this.$router.push({
         name: 'ShowMask',
         params: { id: savedId },
@@ -1571,6 +1574,10 @@ export default {
         ),
         newQuery
       )
+
+      if (window.innerWidth < 700) {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
 
       this.$router.push({
         name: routeName,
