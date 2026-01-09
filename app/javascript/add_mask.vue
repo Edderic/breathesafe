@@ -509,12 +509,6 @@
 
           <tbody v-for="(f, index) in filtrationEfficiencies" class='text-align-center'>
             <tr>
-              <td colspan='2'>
-                <h3>Filtration & Breathability</h3>
-              </td>
-            </tr>
-
-            <tr>
               <th v-show='newOrEditMode'>Filtration Efficiency (Percent)</th>
               <th v-show='!newOrEditMode'>Filtration Efficiency</th>
 
@@ -1369,9 +1363,13 @@ export default {
           }
         )
       } else {
+        this.tabToShow = 'Basic Info'
+        this.displayTab = 'Misc. Info'
         this.$router.push(
           {
             name: "ShowMask",
+            params: { id: this.$route.params.id },
+            query: { displayTab: 'Misc. Info', tabToShow: 'Basic Info' }
           }
         )
       }
