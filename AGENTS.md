@@ -30,7 +30,11 @@
 - CI runs RuboCop, RSpec, and Python test suites before deployment (see `DEPLOYMENT.md`).
 
 ## Commit & Pull Request Guidelines
-- Recent commit messages are short, plain-English phrases (for example `improve masks ui`, `rubocop`).
+- First lines of commit messages are short, plain-English phrases (for example `improve masks ui`, `rubocop`).
+- Verbose / detailed summaries can be added in the commit message after the
+  first line.
+- There are git hooks for pre-commit and pre-push, such as running rubocop,
+  running rspec tests, etc. They should pass.
 - Open PRs against the `development` branch and include a brief summary plus test notes; tests must pass before merging.
 - Deployment to staging/production is automated from `development` once checks succeed (see `DEPLOYMENT.md`).
 
