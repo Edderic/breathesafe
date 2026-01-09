@@ -203,117 +203,6 @@
               </td>
             </tr>
 
-            <tr>
-               <th colspan=2><h3>Dimensions</h3></th>
-            </tr>
-            <tr>
-              <th>Perimeter (mm)</th>
-              <td>
-                <input type="number" v-model="perimeterMm" v-show="newOrEditMode">
-                <ColoredCell
-                    v-show='!newOrEditMode'
-                    class='risk-score'
-                    :colorScheme="perimColorScheme"
-                    :maxVal=1
-                    :value='perimeterMm'
-                    :exception='exceptionObjectBlank'
-                    :text='distanceText(perimeterMm, "mm")'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                    :title='distanceText(perimeterMm, "mm")'
-                    />
-              </td>
-            </tr>
-            <tr>
-              <th>Mass (grams)</th>
-              <td>
-                <input type="number" v-model="massGrams" v-show="newOrEditMode">
-
-                <ColoredCell
-                    v-show='!newOrEditMode'
-                    class='risk-score'
-                    :colorScheme="massColorScheme"
-                    :maxVal=1
-                    :value='massGrams'
-                    :exception='exceptionObjectBlank'
-                    :text='massText(massGrams)'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                    :title='massText(massGrams)'
-                    />
-              </td>
-            </tr>
-
-          </tbody>
-          <tbody v-for="(f, index) in filtrationEfficiencies" class='text-align-center'>
-            <tr>
-              <td colspan='2'>
-                <h3>Filtration & Breathability</h3>
-              </td>
-            </tr>
-
-            <tr>
-              <th v-show='newOrEditMode'>Filtration Efficiency (Percent)</th>
-              <th v-show='!newOrEditMode'>Filtration Efficiency</th>
-
-              <td colspan='1'>
-                <input type="number" :value='f.filtrationEfficiencyPercent' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyPercent')"
-                       v-show="newOrEditMode"
-                       >
-                       <ColoredCell
-                           v-show='!newOrEditMode'
-                           class='risk-score'
-                           :colorScheme="colorInterpolationScheme"
-                           :maxVal=1
-                           :value='filtrationEfficiencyValue(f.filtrationEfficiencyPercent)'
-                           :text='percentText(f.filtrationEfficiencyPercent)'
-                           :exception='exceptionObject'
-                           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%', }"
-                           :title='f.filtrationEfficiencyPercent'
-                           />
-              </td>
-            </tr>
-
-            <tr>
-              <th v-show='newOrEditMode'>Breathability (Pa)</th>
-              <th v-show='!newOrEditMode'>Breathability</th>
-              <td colspan='1'>
-                <input type="number" :value='breathability[index].breathabilityPascals' @change="updateArrayOfObj($event, 'breathability', index, 'breathabilityPascals')"
-                       v-show="newOrEditMode"
-                       >
-                       <ColoredCell
-                           class='risk-score'
-                           v-show='!newOrEditMode'
-                           :colorScheme="breathabilityInterpolationScheme"
-                           :maxVal=1
-                           :value='breathability[index].breathabilityPascals'
-                           :text='breathabilityText(breathability[index].breathabilityPascals)'
-                           :exception='exceptionObjectBlank'
-                           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                           :title='breathabilityText(breathability[index].breathabilityPascals)'
-                           />
-              </td>
-            </tr>
-
-            <tr>
-              <th colspan='1'>Source</th>
-              <a v-show='!newOrEditMode' :href="f.filtrationEfficiencySource">link</a>
-            </tr>
-
-            <tr>
-              <th class='notes' colspan='1'>Notes</th>
-              <td colspan='1' class='notes' v-show='!newOrEditMode'>{{f.filtrationEfficiencyNotes}}</td>
-            </tr>
-
-            <tr>
-              <td colspan='2' v-show='newOrEditMode'>
-                <textarea cols="30" rows="10" @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyNotes')"></textarea>
-              </td>
-            </tr>
-
-            <tr class='text-align-center'>
-              <td colspan='2'>
-                <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='newMode || userCanEdit && editMode'/>
-              </td>
-            </tr>
           </tbody>
         </table>
 
@@ -1606,6 +1495,9 @@ export default {
       }
 
       const nextStep = this.nextEditStep()
+      if (window.innerWidth < 700) {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
       if (nextStep) {
         this.tabToShow = nextStep
         this.displayTab = 'Misc. Info'
