@@ -11,12 +11,6 @@
           </tr>
         </thead>
         <tbody>
-          <tr @click='sortBy("probaFit")'>
-            <th >Probability of Fit</th>
-            <td>
-              <SortingStatus :status='sortingStatus("probaFit")'/>
-            </td>
-          </tr>
           <tr @click='sortBy("avgSealedFitFactor")'>
             <th>Filtration factor</th>
             <td>
