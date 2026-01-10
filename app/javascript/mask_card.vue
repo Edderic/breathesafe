@@ -44,9 +44,9 @@
           </div>
         </div>
         <table v-if='showStats'>
-          <tr>
-            <th v-if="showProbaFit">Proba Fit</th>
-            <td v-if="showProbaFit" rowspan='1'>
+          <tr v-if="showProbaFit">
+            <th>Proba Fit</th>
+            <td colspan="3">
               <ColoredCell
                class='risk-score'
                :colorScheme="fitColorScheme"
@@ -59,14 +59,25 @@
             </td>
           </tr>
           <tr>
-            <th>Filtration factor</th>
+            <th>Filtration Factor</th>
             <td>
               <ColoredCell
                class='risk-score'
                :colorScheme="fitFactorColorScheme"
                :maxVal=1000
                :value='m.avgSealedFitFactor'
-                :text="formatMeasurement(m.avgSealedFitFactor, m.countSealedFitFactor)"
+               :text="formatValue(m.avgSealedFitFactor)"
+               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
+               :exception='exceptionMissingObject'
+               />
+            </td>
+            <th># Fit Tests</th>
+            <td>
+              <ColoredCell
+               class='risk-score'
+               :colorScheme="fitTestCountColorScheme"
+               :value='m.fitTestCount'
+               :text="formatCount(m.fitTestCount)"
                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
                :exception='exceptionMissingObject'
                />
@@ -80,11 +91,28 @@
                :colorScheme="breathabilityColorScheme"
                :maxVal=250
                :value='m.avgBreathabilityPa'
-                :text="formatMeasurement(m.avgBreathabilityPa, m.countBreathability, ' pa')"
+               :text="formatValue(m.avgBreathabilityPa, ' pa')"
                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
                :exception='exceptionMissingObject'
                />
             </td>
+            <th>Style</th>
+            <td>{{ formatText(m.style) }}</td>
+          </tr>
+          <tr>
+            <th>Perimeter (mm)</th>
+            <td>
+              <ColoredCell
+               class='risk-score'
+               :colorScheme="perimColorScheme"
+               :value='m.perimeterMm'
+               :text="formatValue(m.perimeterMm)"
+               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
+               :exception='exceptionMissingObject'
+               />
+            </td>
+            <th>Strap Type</th>
+            <td>{{ formatText(m.strapType) }}</td>
           </tr>
         </table>
       </div>
@@ -247,6 +275,18 @@ export default {
 
       return assignBoundsToColorScheme(scheme, evenSpacedBounds)
     },
+    fitTestCountColorScheme() {
+      const counts = this.cards.map((mask) => mask.fitTestCount || 0)
+      const maximum = Math.max(1, ...counts)
+      const numObjects = 6
+      const evenSpacedBounds = generateEvenSpacedBounds(0, maximum, numObjects)
+
+      const scheme = convertColorListToCutpoints(
+        JSON.parse(JSON.stringify(colorPaletteFall))
+      )
+
+      return assignBoundsToColorScheme(scheme, evenSpacedBounds)
+    },
     fitColorScheme() {
       const minimum = 0
       const maximum = 1
@@ -364,12 +404,26 @@ export default {
         }
       )
     },
-    formatMeasurement(value, count, suffix = '') {
+    formatValue(value, suffix = '') {
       if (value === null || value === undefined || isNaN(value)) {
-        return `N/A (${count || 0})`
+        return 'N/A'
       }
 
-      return `${Math.round(value)}${suffix} (${count || 0})`
+      return `${Math.round(value)}${suffix}`
+    },
+    formatCount(value) {
+      if (value === null || value === undefined || isNaN(value)) {
+        return 'N/A'
+      }
+
+      return `${Math.round(value)}`
+    },
+    formatText(value) {
+      if (!value) {
+        return 'N/A'
+      }
+
+      return value
     },
     sortingStatus(field) {
       if (this.sortByField == field) {
@@ -768,4 +822,3 @@ export default {
   }
 
 </style>
-
