@@ -7,7 +7,8 @@ export const useMasksStore = defineStore('masks', {
     sortByField: undefined,
     filterForColor: 'none',
     filterForStrapType: 'none',
-    filterForStyle: 'none'
+    filterForStyle: 'none',
+    filterForMissing: []
   }),
   actions: {
     setSortByStatus(status) {
@@ -25,10 +26,22 @@ export const useMasksStore = defineStore('masks', {
     setFilterForStyle(style) {
       this.filterForStyle = style || 'none'
     },
+    setFilterForMissing(missing) {
+      this.filterForMissing = missing || []
+    },
 
     setFilterQuery(query, key) {
       if (key == 'search') {
         this[key] = query[key] || ''
+      } else if (key == 'filterForMissing') {
+        const rawValue = query[key]
+        if (!rawValue || rawValue === 'none') {
+          this[key] = []
+        } else if (Array.isArray(rawValue)) {
+          this[key] = rawValue.filter((value) => value && value !== 'none')
+        } else {
+          this[key] = rawValue.split(',').map((value) => value.trim()).filter((value) => value)
+        }
       } else if (query[key]) {
         this[key] = query[key]
       }
@@ -37,6 +50,7 @@ export const useMasksStore = defineStore('masks', {
       this.filterForColor = 'none'
       this.filterForStrapType = 'none'
       this.filterForStyle = 'none'
+      this.filterForMissing = []
     }
   }
 })

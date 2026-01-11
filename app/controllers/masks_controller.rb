@@ -57,7 +57,8 @@ class MasksController < ApplicationController
       :sort_order,
       :filter_color,
       :filter_style,
-      :filter_strap_type
+      :filter_strap_type,
+      :filter_missing
     )
 
     page = permitted[:page].to_i.positive? ? permitted[:page].to_i : 1
@@ -66,6 +67,7 @@ class MasksController < ApplicationController
     filter_color = permitted[:filter_color].presence
     filter_style = permitted[:filter_style].presence
     filter_strap_type = permitted[:filter_strap_type].presence
+    filter_missing = permitted[:filter_missing].presence
     sort_param = permitted[:sort_by].presence
     sort_column = SORT_COLUMN_MAP.fetch(sort_param, DEFAULT_SORT_COLUMN)
     sort_order = permitted[:sort_order] == 'descending' ? :desc : :asc
@@ -97,6 +99,17 @@ class MasksController < ApplicationController
     aggregated_masks.select! do |mask|
       mask_id_lookup[mask['id']] || mask_id_lookup[mask[:id]]
     end
+
+    if filter_missing.present? && filter_missing != 'none'
+      missing_filters = filter_missing.to_s.split(',').map(&:strip).reject(&:blank?)
+      if missing_filters.any?
+        aggregated_masks = aggregated_masks.select do |mask|
+          missing_filters.all? { |missing_filter| matches_missing_filter?(mask, missing_filter) }
+        end
+      end
+    end
+
+    total_count = aggregated_masks.size
 
     decorated_masks = aggregated_masks.map do |mask|
       [mask, sort_value(mask, sort_column)]
@@ -146,6 +159,30 @@ class MasksController < ApplicationController
       format.json do
         render json: to_render.to_json, status: status, messages: messages
       end
+    end
+  end
+
+  private
+
+  def matches_missing_filter?(mask, filter_missing)
+    case filter_missing
+    when 'strap_type'
+      value = mask['strap_type'] || mask[:strap_type]
+      value.blank?
+    when 'style'
+      value = mask['style'] || mask[:style]
+      value.blank?
+    when 'perimeter'
+      value = mask['perimeter_mm'] || mask[:perimeter_mm]
+      value.nil? || value.to_f.zero?
+    when 'filtration_factor'
+      value = mask['avg_sealed_fit_factor'] || mask[:avg_sealed_fit_factor]
+      value.nil? || value.to_f <= 0
+    when 'breathability'
+      value = mask['avg_breathability_pa'] || mask[:avg_breathability_pa]
+      value.nil? || value.to_f <= 0
+    else
+      false
     end
   end
 

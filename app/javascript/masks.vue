@@ -75,6 +75,8 @@
         :filterForColor='filterForColor'
         :filterForStyle='filterForStyle'
         :filterForStrapType='filterForStrapType'
+        :filterForMissing='filterForMissing'
+        :showMissingFilters='true'
         :filterForTargeted='filterForTargeted'
         :filterForNotTargeted='filterForNotTargeted'
         :sortByField='sortByField'
@@ -248,7 +250,8 @@ export default {
           'sortByField',
           'filterForColor',
           'filterForStrapType',
-          'filterForStyle'
+          'filterForStyle',
+          'filterForMissing'
         ]
     ),
     facialMeasurements() {
@@ -273,7 +276,8 @@ export default {
     hasActiveFilters() {
       return this.filterForColor !== 'none' ||
              this.filterForStrapType !== 'none' ||
-             this.filterForStyle !== 'none'
+             this.filterForStyle !== 'none' ||
+             this.filterForMissing.length > 0
     },
   },
 
@@ -302,6 +306,7 @@ export default {
       this.setFilterQuery(toQuery, 'filterForColor')
       this.setFilterQuery(toQuery, 'filterForStrapType')
       this.setFilterQuery(toQuery, 'filterForStyle')
+      this.setFilterQuery(toQuery, 'filterForMissing')
 
       const page = parseInt(toQuery.page, 10)
       this.currentPage = Number.isNaN(page) || page < 1 ? 1 : page
@@ -433,7 +438,8 @@ export default {
         sort_order: this.sortByStatus,
         filter_color: this.filterForColor,
         filter_style: this.filterForStyle,
-        filter_strap_type: this.filterForStrapType
+        filter_strap_type: this.filterForStrapType,
+        filter_missing: this.filterForMissing.length ? this.filterForMissing.join(',') : 'none'
       }
 
       try {

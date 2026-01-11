@@ -3,7 +3,7 @@
   <Popup @onclose='hidePopup' v-if='showPopup'>
     <div  style='padding: 1em;'>
       <h3>Filter for:</h3>
-      <div class='wide'>
+      <div class='grid'>
         <div>
           <div>Color</div>
           <span v-for='opt in colorOptions' class='filterCheckbox' >
@@ -23,9 +23,8 @@
             </tr>
           </table>
         </div>
-      </div>
 
-      <div>
+        <div>
           <div>Strap type</div>
           <table>
             <tr class='options'>
@@ -36,6 +35,20 @@
             </tr>
           </table>
           <br>
+        </div>
+
+      <div v-if="showMissingFilters">
+          <div>Missing</div>
+          <table>
+            <tr class='options'>
+              <td v-for='opt in missingOptions' :key="opt.value">
+                <input :id='`missing${opt.value}`' type="checkbox" :checked='isMissingSelected(opt.value)' @click='toggleMissingFilter(opt.value)'>
+                <label :for='`missing${opt.value}`'>{{opt.label}}</label>
+              </td>
+            </tr>
+          </table>
+            <br>
+        </div>
       </div>
 
       <br>
@@ -67,6 +80,13 @@ export default {
   data() {
     return {
       search: "",
+      missingOptions: [
+        { label: 'Strap type', value: 'strap_type' },
+        { label: 'Style', value: 'style' },
+        { label: 'Perimeter', value: 'perimeter' },
+        { label: 'Filtration factor', value: 'filtration_factor' },
+        { label: 'Breathability', value: 'breathability' }
+      ]
     }
   },
   props: {
@@ -106,6 +126,12 @@ export default {
     filterForNotTargeted: {
       default: true
     },
+    filterForMissing: {
+      default: () => []
+    },
+    showMissingFilters: {
+      default: false
+    },
   },
   computed: {
   },
@@ -133,6 +159,28 @@ export default {
       }
 
       let combinedQuery = Object.assign(
+        JSON.parse(
+          JSON.stringify(this.$route.query)
+        ),
+        newQuery
+      )
+
+      this.$emit('filterFor', {
+        query: combinedQuery
+      })
+    },
+    isMissingSelected(value) {
+      return this.filterForMissing.includes(value)
+    },
+    toggleMissingFilter(value) {
+      const filterForString = 'filterForMissing'
+      const nextValues = this.filterForMissing.includes(value)
+        ? this.filterForMissing.filter((item) => item !== value)
+        : [...this.filterForMissing, value]
+      const newQuery = {}
+      newQuery[filterForString] = nextValues.length ? nextValues.join(',') : 'none'
+
+      const combinedQuery = Object.assign(
         JSON.parse(
           JSON.stringify(this.$route.query)
         ),
@@ -312,10 +360,10 @@ export default {
 
   .grid {
     display: grid;
-    grid-template-columns: 33% 33% 33%;
+    grid-template-columns: 50% 50%;
     grid-template-rows: auto;
     overflow-y: auto;
-    height: 75vh;
+    min-width: 30em;
   }
 
   .targeted {
