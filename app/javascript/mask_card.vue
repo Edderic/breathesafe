@@ -69,7 +69,7 @@
                   <div class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('filtration', 'min') }}</div>
                   <div class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('filtration', 'max') }}</div>
                 </div>
-                <div v-else class='stat-na'>N/A</div>
+                <div v-else class='stat-na'>{{ statMissingText('filtration') }}</div>
               </div>
             </td>
             <th># Fit Tests</th>
@@ -82,7 +82,7 @@
                   <div class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('fit_tests', 'min') }}</div>
                   <div class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('fit_tests', 'max') }}</div>
                 </div>
-                <div v-else class='stat-na'>N/A</div>
+                <div v-else class='stat-na'>{{ statMissingText('fit_tests') }}</div>
               </div>
             </td>
           </tr>
@@ -97,7 +97,7 @@
                   <div class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('breathability', 'min') }}</div>
                   <div class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('breathability', 'max') }}</div>
                 </div>
-                <div v-else class='stat-na'>N/A</div>
+                <div v-else class='stat-na'>{{ statMissingText('breathability') }}</div>
               </div>
             </td>
             <th>Style</th>
@@ -114,7 +114,7 @@
                   <div class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('perimeter', 'min') }}</div>
                   <div class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('perimeter', 'max') }}</div>
                 </div>
-                <div v-else class='stat-na'>N/A</div>
+                <div v-else class='stat-na'>{{ statMissingText('perimeter') }}</div>
               </div>
             </td>
             <th>Strap Type</th>
@@ -459,7 +459,7 @@ export default {
     },
     statAxisLabel(type, position) {
       if (type === 'filtration') {
-        return position === 'min' ? '0' : '4'
+        return position === 'min' ? '10^0' : '10^4'
       }
       if (type === 'breathability') {
         const min = this.dataContext.breathability_min
@@ -467,7 +467,9 @@ export default {
         if (min === null || max === null || min === undefined || max === undefined) {
           return null
         }
-        return position === 'min' ? this.formatValue(min, ' pa') : this.formatValue(max, ' pa')
+        const orderedMin = Math.min(min, max)
+        const orderedMax = Math.max(min, max)
+        return position === 'min' ? this.formatValue(orderedMin, ' pa') : this.formatValue(orderedMax, ' pa')
       }
       if (type === 'perimeter') {
         const min = this.dataContext.perimeter_min
@@ -485,6 +487,12 @@ export default {
         return position === 'min' ? '0' : this.formatCount(max)
       }
       return null
+    },
+    statMissingText(type) {
+      if (type === 'perimeter') {
+        return 'Missing'
+      }
+      return 'N/A'
     },
     statRowColors() {
       return {
