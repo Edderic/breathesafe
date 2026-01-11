@@ -205,6 +205,33 @@ describe Mask do
     end
   end
 
+  describe '.with_admin_aggregations' do
+    let(:author) { create(:user) }
+    let(:mask) do
+      create(:mask,
+             author: author,
+             breathability: [
+               {
+                 breathability_pascals: 100,
+                 breathability_pascals_notes: nil,
+                 breathability_pascals_source: nil
+               },
+               {
+                 breathability_pascals: 200,
+                 breathability_pascals_notes: nil,
+                 breathability_pascals_source: nil
+               }
+             ])
+    end
+
+    it 'preserves aggregated fields when merging admin demographics' do
+      result = described_class.with_admin_aggregations([mask.id])
+
+      expect(result.first['avg_breathability_pa']).to eq(150.0)
+      expect(result.first['count_breathability']).to eq(2)
+    end
+  end
+
   describe 'duplicate_of validations' do
     let(:author) { create(:user) }
     let(:mask_a) { create(:mask, author: author, unique_internal_model_code: 'MASK-A') }

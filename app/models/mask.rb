@@ -30,7 +30,7 @@ class Mask < ApplicationRecord
   # Regenerate mask state from events
   def regenerate
     computed_state = MaskStatusBuilder.build_and_serialize(mask_id: id)
-    update_column(:current_state, computed_state)
+    update!(current_state: computed_state)
   end
 
   def self.find_targeted_but_untested_masks(manager_id)
@@ -195,7 +195,7 @@ class Mask < ApplicationRecord
   end
 
   def self.with_admin_aggregations(mask_ids = nil)
-    with_aggregations(mask_ids)
+    aggregations = with_aggregations(mask_ids)
 
     masks = if mask_ids
               Mask.where(id: mask_ids)
@@ -206,8 +206,12 @@ class Mask < ApplicationRecord
     # Calculate demographics without privacy thresholds for admin
     masks.each { |m| m.calculate_demographics!(apply_privacy_threshold: false) }
 
+    aggregation_lookup = aggregations.index_by { |mask| mask['id'] || mask[:id] }
+
     masks.map do |m|
-      JSON.parse(m.to_json)
+      admin_data = JSON.parse(m.to_json)
+      aggregated_data = aggregation_lookup[m.id] || {}
+      admin_data.merge(aggregated_data)
     end
   end
 

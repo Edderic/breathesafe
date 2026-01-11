@@ -88,7 +88,11 @@ FactoryBot.define do
     confirmed_at { Time.current }
     admin { false }
     # Set consent fields by default so test users don't see consent form
-    consent_form_version_accepted { Rails.application.config.x.consent_form_version }
+    consent_form_version_accepted do
+      version = Rails.application.config.x.consent_form_version
+      version = nil if version == '{}' || version.blank?
+      version || 'v1'
+    end
     consent_form_accepted_at { Time.current }
 
     trait :unconfirmed do
