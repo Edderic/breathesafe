@@ -484,7 +484,7 @@ export default {
         return mask.avgBreathabilityPa === null || mask.avgBreathabilityPa === undefined || isNaN(mask.avgBreathabilityPa) || mask.avgBreathabilityPa <= 0
       }
       if (type === 'perimeter') {
-        return mask.perimeterMm === null || mask.perimeterMm === undefined || isNaN(mask.perimeterMm)
+        return mask.perimeterMm === null || mask.perimeterMm === undefined || isNaN(mask.perimeterMm) || mask.perimeterMm <= 0
       }
       if (type === 'fit_tests') {
         return mask.fitTestCount === null || mask.fitTestCount === undefined || isNaN(mask.fitTestCount)

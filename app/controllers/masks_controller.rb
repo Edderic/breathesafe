@@ -88,7 +88,7 @@ class MasksController < ApplicationController
         messages: []
       }, status: :ok
     end
-    total_count = mask_ids.size
+    mask_ids.size
 
     aggregated_masks = if current_user&.admin
                          Mask.with_admin_aggregations(mask_ids)
@@ -289,8 +289,6 @@ class MasksController < ApplicationController
       ]
     )
   end
-
-  private
 
   def sort_value(mask, column)
     value = mask[column] || mask[column.to_s]
