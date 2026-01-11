@@ -62,27 +62,35 @@
             <th>Filtration Factor</th>
             <td>
               <div class='stat-cell'>
-                <div v-if="statPercent('filtration', m) !== null" class='stat-bar-wrapper'>
+                <div v-if="statIsMissing('filtration', m)" class='stat-bar-wrapper stat-bar-missing'>
+                  <div class='stat-bar-axis'></div>
+                  <div class='stat-bar stat-bar-missing-fill'></div>
+                  <div class='stat-bar-label'>{{ statMissingText('filtration') }}</div>
+                </div>
+                <div v-else class='stat-bar-wrapper'>
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar' :style="statBarStyle(statPercent('filtration', m), 'filtration')"></div>
                   <div class='stat-bar-label'>{{ statLabel('filtration', m) }}</div>
-                  <div class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('filtration', 'min') }}</div>
-                  <div class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('filtration', 'max') }}</div>
+                  <div v-if="statAxisLabel('filtration', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('filtration', 'min') }}</div>
+                  <div v-if="statAxisLabel('filtration', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('filtration', 'max') }}</div>
                 </div>
-                <div v-else class='stat-na'>{{ statMissingText('filtration') }}</div>
               </div>
             </td>
             <th># Fit Tests</th>
             <td>
               <div class='stat-cell'>
-                <div v-if="statPercent('fit_tests', m) !== null" class='stat-bar-wrapper'>
+                <div v-if="statIsMissing('fit_tests', m)" class='stat-bar-wrapper stat-bar-missing'>
+                  <div class='stat-bar-axis'></div>
+                  <div class='stat-bar stat-bar-missing-fill'></div>
+                  <div class='stat-bar-label'>{{ statMissingText('fit_tests') }}</div>
+                </div>
+                <div v-else class='stat-bar-wrapper'>
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar' :style="statBarStyle(statPercent('fit_tests', m), 'fit_tests')"></div>
                   <div class='stat-bar-label'>{{ statLabel('fit_tests', m) }}</div>
-                  <div class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('fit_tests', 'min') }}</div>
-                  <div class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('fit_tests', 'max') }}</div>
+                  <div v-if="statAxisLabel('fit_tests', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('fit_tests', 'min') }}</div>
+                  <div v-if="statAxisLabel('fit_tests', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('fit_tests', 'max') }}</div>
                 </div>
-                <div v-else class='stat-na'>{{ statMissingText('fit_tests') }}</div>
               </div>
             </td>
           </tr>
@@ -90,14 +98,18 @@
             <th>Breathability</th>
             <td>
               <div class='stat-cell'>
-                <div v-if="statPercent('breathability', m) !== null" class='stat-bar-wrapper'>
+                <div v-if="statIsMissing('breathability', m)" class='stat-bar-wrapper stat-bar-missing'>
+                  <div class='stat-bar-axis'></div>
+                  <div class='stat-bar stat-bar-missing-fill'></div>
+                  <div class='stat-bar-label'>{{ statMissingText('breathability') }}</div>
+                </div>
+                <div v-else class='stat-bar-wrapper'>
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar' :style="statBarStyle(statPercent('breathability', m), 'breathability')"></div>
                   <div class='stat-bar-label'>{{ statLabel('breathability', m) }}</div>
-                  <div class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('breathability', 'min') }}</div>
-                  <div class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('breathability', 'max') }}</div>
+                  <div v-if="statAxisLabel('breathability', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('breathability', 'min') }}</div>
+                  <div v-if="statAxisLabel('breathability', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('breathability', 'max') }}</div>
                 </div>
-                <div v-else class='stat-na'>{{ statMissingText('breathability') }}</div>
               </div>
             </td>
             <th>Style</th>
@@ -107,14 +119,18 @@
             <th>Perimeter (mm)</th>
             <td>
               <div class='stat-cell'>
-                <div v-if="statPercent('perimeter', m) !== null" class='stat-bar-wrapper'>
+                <div v-if="statIsMissing('perimeter', m)" class='stat-bar-wrapper stat-bar-missing'>
+                  <div class='stat-bar-axis'></div>
+                  <div class='stat-bar stat-bar-missing-fill'></div>
+                  <div class='stat-bar-label'>{{ statMissingText('perimeter') }}</div>
+                </div>
+                <div v-else class='stat-bar-wrapper'>
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar' :style="statBarStyle(statPercent('perimeter', m), 'perimeter')"></div>
                   <div class='stat-bar-label'>{{ statLabel('perimeter', m) }}</div>
-                  <div class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('perimeter', 'min') }}</div>
-                  <div class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('perimeter', 'max') }}</div>
+                  <div v-if="statAxisLabel('perimeter', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('perimeter', 'min') }}</div>
+                  <div v-if="statAxisLabel('perimeter', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('perimeter', 'max') }}</div>
                 </div>
-                <div v-else class='stat-na'>{{ statMissingText('perimeter') }}</div>
               </div>
             </td>
             <th>Strap Type</th>
@@ -393,7 +409,7 @@ export default {
     statPercent(type, mask) {
       if (type === 'filtration') {
         const value = mask.avgSealedFitFactor
-        if (value === null || value === undefined || isNaN(value) || value <= 0) {
+        if (this.statIsMissing(type, mask)) {
           return null
         }
         const logValue = Math.log10(value)
@@ -404,7 +420,7 @@ export default {
         const value = mask.avgBreathabilityPa
         const min = this.dataContext.breathability_min
         const max = this.dataContext.breathability_max
-        if (value === null || value === undefined || isNaN(value) || min === null || max === null || min === undefined || max === undefined) {
+        if (this.statIsMissing(type, mask) || min === null || max === null || min === undefined || max === undefined) {
           return null
         }
         const scaled = this.minMaxScale(value, min, max, { zeroRangeValue: 0 })
@@ -415,7 +431,7 @@ export default {
         const value = mask.perimeterMm
         const min = this.dataContext.perimeter_min
         const max = this.dataContext.perimeter_max
-        if (value === null || value === undefined || isNaN(value) || min === null || max === null || min === undefined || max === undefined) {
+        if (this.statIsMissing(type, mask) || min === null || max === null || min === undefined || max === undefined) {
           return null
         }
         const scaled = this.minMaxScale(value, min, max, { zeroRangeValue: 1 })
@@ -425,7 +441,7 @@ export default {
       if (type === 'fit_tests') {
         const value = mask.fitTestCount
         const max = this.dataContext.fit_test_count_max
-        if (value === null || value === undefined || isNaN(value) || max === null || max === undefined) {
+        if (this.statIsMissing(type, mask) || max === null || max === undefined) {
           return null
         }
         if (max <= 0) {
@@ -441,6 +457,9 @@ export default {
         return this.formatValue(mask.avgSealedFitFactor)
       }
       if (type === 'breathability') {
+        if (this.statIsMissing(type, mask)) {
+          return this.statMissingText(type)
+        }
         return this.formatValue(mask.avgBreathabilityPa, ' pa')
       }
       if (type === 'perimeter') {
@@ -457,6 +476,21 @@ export default {
         backgroundColor: this.statRowColors()[type]
       }
     },
+    statIsMissing(type, mask) {
+      if (type === 'filtration') {
+        return mask.avgSealedFitFactor === null || mask.avgSealedFitFactor === undefined || isNaN(mask.avgSealedFitFactor) || mask.avgSealedFitFactor <= 0
+      }
+      if (type === 'breathability') {
+        return mask.avgBreathabilityPa === null || mask.avgBreathabilityPa === undefined || isNaN(mask.avgBreathabilityPa) || mask.avgBreathabilityPa <= 0
+      }
+      if (type === 'perimeter') {
+        return mask.perimeterMm === null || mask.perimeterMm === undefined || isNaN(mask.perimeterMm)
+      }
+      if (type === 'fit_tests') {
+        return mask.fitTestCount === null || mask.fitTestCount === undefined || isNaN(mask.fitTestCount)
+      }
+      return true
+    },
     statAxisLabel(type, position) {
       if (type === 'filtration') {
         return position === 'min' ? '10^0' : '10^4'
@@ -469,7 +503,11 @@ export default {
         }
         const orderedMin = Math.min(min, max)
         const orderedMax = Math.max(min, max)
-        return position === 'min' ? this.formatValue(orderedMin, ' pa') : this.formatValue(orderedMax, ' pa')
+        const labelValue = position === 'min' ? orderedMin : orderedMax
+        if (labelValue <= 0) {
+          return 'Missing'
+        }
+        return this.formatValue(labelValue, ' pa')
       }
       if (type === 'perimeter') {
         const min = this.dataContext.perimeter_min
@@ -489,10 +527,7 @@ export default {
       return null
     },
     statMissingText(type) {
-      if (type === 'perimeter') {
-        return 'Missing'
-      }
-      return 'N/A'
+      return 'Missing'
     },
     statRowColors() {
       return {
@@ -867,6 +902,13 @@ export default {
   }
   .stat-bar-tick-right {
     right: 0.4em;
+  }
+  .stat-bar-missing {
+    background-color: #e0e0e0;
+  }
+  .stat-bar-missing-fill {
+    width: 100%;
+    background-color: #b5b5b5;
   }
   .stat-na {
     font-weight: bold;

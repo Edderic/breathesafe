@@ -34,7 +34,7 @@ class MasksDataContextualizer
         SELECT
           MIN(masks.perimeter_mm) AS perimeter_min,
           MAX(masks.perimeter_mm) AS perimeter_max,
-          MIN(breathability_aggregates.avg_breathability_pa) AS breathability_min,
+          MIN(NULLIF(breathability_aggregates.avg_breathability_pa, 0)) AS breathability_min,
           MAX(breathability_aggregates.avg_breathability_pa) AS breathability_max,
           MAX(COALESCE(fit_test_counts_per_mask.fit_test_count, 0)) AS fit_test_count_max
         FROM masks
