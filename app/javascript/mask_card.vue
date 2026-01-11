@@ -503,7 +503,7 @@ export default {
         }
         const orderedMin = Math.min(min, max)
         const orderedMax = Math.max(min, max)
-        const labelValue = position === 'min' ? orderedMin : orderedMax
+        const labelValue = position === 'min' ? orderedMax : orderedMin
         if (labelValue <= 0) {
           return 'Missing'
         }
