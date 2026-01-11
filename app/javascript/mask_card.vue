@@ -113,7 +113,7 @@
               </div>
             </td>
             <th>Style</th>
-            <td>{{ formatText(m.style) }}</td>
+            <td>{{ formatText(m.style, 'Missing') }}</td>
           </tr>
           <tr>
             <th>Perimeter (mm)</th>
@@ -134,7 +134,7 @@
               </div>
             </td>
             <th>Strap Type</th>
-            <td>{{ formatText(m.strapType) }}</td>
+            <td>{{ formatText(m.strapType, 'Missing') }}</td>
           </tr>
         </table>
       </div>
@@ -399,9 +399,9 @@ export default {
 
       return `${Math.round(value)}`
     },
-    formatText(value) {
+    formatText(value, missingText = 'N/A') {
       if (!value) {
-        return 'N/A'
+        return missingText
       }
 
       return value
