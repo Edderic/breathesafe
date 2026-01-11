@@ -87,6 +87,7 @@
 
     <MaskCards
       :cards='sortedDisplayables'
+      :dataContext='maskDataContext'
       :showUniqueNumFitTesters='true'
       :viewMaskOnClick='true'
       :facialMeasurements='facialMeasurements'
@@ -214,6 +215,7 @@ export default {
       currentPage: 1,
       perPage: 12,
       totalCount: 0,
+      maskDataContext: {},
     }
   },
   props: {
@@ -443,6 +445,7 @@ export default {
           this.masks = []
         }
         this.totalCount = data.total_count || 0
+        this.maskDataContext = data.context || {}
       } catch (error) {
         this.message = "Failed to load masks."
       }

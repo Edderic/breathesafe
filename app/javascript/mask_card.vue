@@ -61,40 +61,38 @@
           <tr>
             <th>Filtration Factor</th>
             <td>
-              <ColoredCell
-               class='risk-score'
-               :colorScheme="fitFactorColorScheme"
-               :maxVal=1000
-               :value='m.avgSealedFitFactor'
-               :text="formatValue(m.avgSealedFitFactor)"
-               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
-               :exception='exceptionMissingObject'
-               />
+              <div class='stat-cell'>
+                <div v-if="statPercent('filtration', m) !== null" class='stat-bar-wrapper'>
+                  <div class='stat-bar-axis'></div>
+                  <div class='stat-bar' :style="statBarStyle(statPercent('filtration', m), 'filtration')"></div>
+                  <div class='stat-bar-label'>{{ statLabel('filtration', m) }}</div>
+                </div>
+                <div v-else class='stat-na'>N/A</div>
+              </div>
             </td>
             <th># Fit Tests</th>
             <td>
-              <ColoredCell
-               class='risk-score'
-               :colorScheme="fitTestCountColorScheme"
-               :value='m.fitTestCount'
-               :text="formatCount(m.fitTestCount)"
-               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
-               :exception='exceptionMissingObject'
-               />
+              <div class='stat-cell'>
+                <div v-if="statPercent('fit_tests', m) !== null" class='stat-bar-wrapper'>
+                  <div class='stat-bar-axis'></div>
+                  <div class='stat-bar' :style="statBarStyle(statPercent('fit_tests', m), 'fit_tests')"></div>
+                  <div class='stat-bar-label'>{{ statLabel('fit_tests', m) }}</div>
+                </div>
+                <div v-else class='stat-na'>N/A</div>
+              </div>
             </td>
           </tr>
           <tr>
             <th>Breathability</th>
             <td>
-              <ColoredCell
-               class='risk-score'
-               :colorScheme="breathabilityColorScheme"
-               :maxVal=250
-               :value='m.avgBreathabilityPa'
-               :text="formatValue(m.avgBreathabilityPa, ' pa')"
-               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
-               :exception='exceptionMissingObject'
-               />
+              <div class='stat-cell'>
+                <div v-if="statPercent('breathability', m) !== null" class='stat-bar-wrapper'>
+                  <div class='stat-bar-axis'></div>
+                  <div class='stat-bar' :style="statBarStyle(statPercent('breathability', m), 'breathability')"></div>
+                  <div class='stat-bar-label'>{{ statLabel('breathability', m) }}</div>
+                </div>
+                <div v-else class='stat-na'>N/A</div>
+              </div>
             </td>
             <th>Style</th>
             <td>{{ formatText(m.style) }}</td>
@@ -102,14 +100,14 @@
           <tr>
             <th>Perimeter (mm)</th>
             <td>
-              <ColoredCell
-               class='risk-score'
-               :colorScheme="perimColorScheme"
-               :value='m.perimeterMm'
-               :text="formatValue(m.perimeterMm)"
-               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
-               :exception='exceptionMissingObject'
-               />
+              <div class='stat-cell'>
+                <div v-if="statPercent('perimeter', m) !== null" class='stat-bar-wrapper'>
+                  <div class='stat-bar-axis'></div>
+                  <div class='stat-bar' :style="statBarStyle(statPercent('perimeter', m), 'perimeter')"></div>
+                  <div class='stat-bar-label'>{{ statLabel('perimeter', m) }}</div>
+                </div>
+                <div v-else class='stat-na'>N/A</div>
+              </div>
             </td>
             <th>Strap Type</th>
             <td>{{ formatText(m.strapType) }}</td>
@@ -133,7 +131,6 @@ import SearchIcon from './search_icon.vue'
 import SortingStatus from './sorting_status.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
-import { perimeterColorScheme } from './colors.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
@@ -204,6 +201,9 @@ export default {
     },
     showProbaFit: {
       default: true
+    },
+    dataContext: {
+      default: () => ({})
     }
   },
   computed: {
@@ -244,49 +244,6 @@ export default {
       }
     },
 
-    perimColorScheme() {
-      return perimeterColorScheme()
-    },
-
-    breathabilityColorScheme() {
-      const minimum = 50
-      const maximum = 400
-      const numObjects = 6
-      const evenSpacedBounds = generateEvenSpacedBounds(minimum, maximum, numObjects)
-
-      let copyColorPaletteFall = JSON.parse(JSON.stringify(colorPaletteFall)).reverse()
-
-      const scheme = convertColorListToCutpoints(
-        copyColorPaletteFall
-      )
-
-      return assignBoundsToColorScheme(scheme, evenSpacedBounds)
-    },
-
-    fitFactorColorScheme() {
-      const minimum = 1
-      const maximum = 100
-      const numObjects = 6
-      const evenSpacedBounds = generateEvenSpacedBounds(minimum, maximum, numObjects)
-
-      const scheme = convertColorListToCutpoints(
-        JSON.parse(JSON.stringify(colorPaletteFall))
-      )
-
-      return assignBoundsToColorScheme(scheme, evenSpacedBounds)
-    },
-    fitTestCountColorScheme() {
-      const counts = this.cards.map((mask) => mask.fitTestCount || 0)
-      const maximum = Math.max(1, ...counts)
-      const numObjects = 6
-      const evenSpacedBounds = generateEvenSpacedBounds(0, maximum, numObjects)
-
-      const scheme = convertColorListToCutpoints(
-        JSON.parse(JSON.stringify(colorPaletteFall))
-      )
-
-      return assignBoundsToColorScheme(scheme, evenSpacedBounds)
-    },
     fitColorScheme() {
       const minimum = 0
       const maximum = 1
@@ -424,6 +381,94 @@ export default {
       }
 
       return value
+    },
+    statPercent(type, mask) {
+      if (type === 'filtration') {
+        const value = mask.avgSealedFitFactor
+        if (value === null || value === undefined || isNaN(value) || value <= 0) {
+          return null
+        }
+        const logValue = Math.log10(value)
+        return this.clampPercent(logValue / 4)
+      }
+
+      if (type === 'breathability') {
+        const value = mask.avgBreathabilityPa
+        const min = this.dataContext.breathability_min
+        const max = this.dataContext.breathability_max
+        if (value === null || value === undefined || isNaN(value) || min === null || max === null || min === undefined || max === undefined) {
+          return null
+        }
+        const scaled = this.minMaxScale(value, min, max, { zeroRangeValue: 0 })
+        return this.clampPercent(1 - scaled)
+      }
+
+      if (type === 'perimeter') {
+        const value = mask.perimeterMm
+        const min = this.dataContext.perimeter_min
+        const max = this.dataContext.perimeter_max
+        if (value === null || value === undefined || isNaN(value) || min === null || max === null || min === undefined || max === undefined) {
+          return null
+        }
+        const scaled = this.minMaxScale(value, min, max, { zeroRangeValue: 1 })
+        return this.clampPercent(scaled)
+      }
+
+      if (type === 'fit_tests') {
+        const value = mask.fitTestCount
+        const max = this.dataContext.fit_test_count_max
+        if (value === null || value === undefined || isNaN(value) || max === null || max === undefined) {
+          return null
+        }
+        if (max <= 0) {
+          return 0
+        }
+        return this.clampPercent(value / max)
+      }
+
+      return null
+    },
+    statLabel(type, mask) {
+      if (type === 'filtration') {
+        return this.formatValue(mask.avgSealedFitFactor)
+      }
+      if (type === 'breathability') {
+        return this.formatValue(mask.avgBreathabilityPa, ' pa')
+      }
+      if (type === 'perimeter') {
+        return this.formatValue(mask.perimeterMm)
+      }
+      if (type === 'fit_tests') {
+        return this.formatCount(mask.fitTestCount)
+      }
+      return 'N/A'
+    },
+    statBarStyle(percent, type) {
+      return {
+        width: `${Math.round(percent * 100)}%`,
+        backgroundColor: this.statRowColors()[type]
+      }
+    },
+    statRowColors() {
+      return {
+        filtration: '#c0392b',
+        breathability: '#e67e22',
+        perimeter: '#16a085',
+        fit_tests: '#2980b9'
+      }
+    },
+    clampPercent(value) {
+      if (value === null || value === undefined || isNaN(value)) {
+        return null
+      }
+      return Math.max(0, Math.min(1, value))
+    },
+    minMaxScale(value, min, max, { zeroRangeValue }) {
+      const range = max - min
+      if (range <= 0) {
+        return zeroRangeValue
+      }
+      return (value - min) / range
     },
     sortingStatus(field) {
       if (this.sortByField == field) {
@@ -727,6 +772,46 @@ export default {
     padding-left: 0.5em;
     padding-right: 0.5em;
     text-align: center;
+  }
+  .stat-cell {
+    min-width: 9em;
+  }
+  .stat-bar-wrapper {
+    position: relative;
+    height: 2.25em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.4em;
+    background-color: #f1f1f1;
+    overflow: hidden;
+  }
+  .stat-bar-axis {
+    position: absolute;
+    left: 0.5em;
+    right: 0.5em;
+    bottom: 0.35em;
+    height: 2px;
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+  .stat-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 0.4em;
+    opacity: 0.9;
+  }
+  .stat-bar-label {
+    position: relative;
+    z-index: 1;
+    font-weight: bold;
+    color: #111;
+    text-shadow: 1px 1px 2px #fff;
+  }
+  .stat-na {
+    font-weight: bold;
+    color: #444;
   }
 
   .popup {

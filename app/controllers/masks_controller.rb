@@ -109,11 +109,14 @@ class MasksController < ApplicationController
     start_index = (page - 1) * per_page
     paginated_masks = sorted_masks.slice(start_index, per_page) || []
 
+    data_context = MasksDataContextualizer.call
+
     to_render = {
       masks: paginated_masks,
       total_count: total_count,
       page: page,
-      per_page: per_page
+      per_page: per_page,
+      context: data_context
     }
 
     respond_to do |format|
