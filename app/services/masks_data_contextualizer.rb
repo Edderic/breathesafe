@@ -54,11 +54,11 @@ class MasksDataContextualizer
     private
 
     def to_float(value)
-      value.nil? ? nil : value.to_f
+      value&.to_f
     end
 
     def to_integer(value)
-      value.nil? ? nil : value.to_i
+      value&.to_i
     end
   end
 end

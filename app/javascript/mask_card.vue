@@ -66,6 +66,8 @@
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar' :style="statBarStyle(statPercent('filtration', m), 'filtration')"></div>
                   <div class='stat-bar-label'>{{ statLabel('filtration', m) }}</div>
+                  <div class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('filtration', 'min') }}</div>
+                  <div class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('filtration', 'max') }}</div>
                 </div>
                 <div v-else class='stat-na'>N/A</div>
               </div>
@@ -77,6 +79,8 @@
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar' :style="statBarStyle(statPercent('fit_tests', m), 'fit_tests')"></div>
                   <div class='stat-bar-label'>{{ statLabel('fit_tests', m) }}</div>
+                  <div class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('fit_tests', 'min') }}</div>
+                  <div class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('fit_tests', 'max') }}</div>
                 </div>
                 <div v-else class='stat-na'>N/A</div>
               </div>
@@ -90,6 +94,8 @@
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar' :style="statBarStyle(statPercent('breathability', m), 'breathability')"></div>
                   <div class='stat-bar-label'>{{ statLabel('breathability', m) }}</div>
+                  <div class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('breathability', 'min') }}</div>
+                  <div class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('breathability', 'max') }}</div>
                 </div>
                 <div v-else class='stat-na'>N/A</div>
               </div>
@@ -105,6 +111,8 @@
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar' :style="statBarStyle(statPercent('perimeter', m), 'perimeter')"></div>
                   <div class='stat-bar-label'>{{ statLabel('perimeter', m) }}</div>
+                  <div class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('perimeter', 'min') }}</div>
+                  <div class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('perimeter', 'max') }}</div>
                 </div>
                 <div v-else class='stat-na'>N/A</div>
               </div>
@@ -449,6 +457,35 @@ export default {
         backgroundColor: this.statRowColors()[type]
       }
     },
+    statAxisLabel(type, position) {
+      if (type === 'filtration') {
+        return position === 'min' ? '0' : '4'
+      }
+      if (type === 'breathability') {
+        const min = this.dataContext.breathability_min
+        const max = this.dataContext.breathability_max
+        if (min === null || max === null || min === undefined || max === undefined) {
+          return null
+        }
+        return position === 'min' ? this.formatValue(min, ' pa') : this.formatValue(max, ' pa')
+      }
+      if (type === 'perimeter') {
+        const min = this.dataContext.perimeter_min
+        const max = this.dataContext.perimeter_max
+        if (min === null || max === null || min === undefined || max === undefined) {
+          return null
+        }
+        return position === 'min' ? this.formatValue(min) : this.formatValue(max)
+      }
+      if (type === 'fit_tests') {
+        const max = this.dataContext.fit_test_count_max
+        if (max === null || max === undefined) {
+          return null
+        }
+        return position === 'min' ? '0' : this.formatCount(max)
+      }
+      return null
+    },
     statRowColors() {
       return {
         filtration: '#c0392b',
@@ -740,7 +777,7 @@ export default {
 
   .masks {
     display: grid;
-    grid-template-columns: 25% 25% 25% 25%;
+    grid-template-columns: 33% 33% 33%;
     grid-template-rows: auto;
     overflow-y: auto;
     height: 77vh;
@@ -809,6 +846,20 @@ export default {
     color: #111;
     text-shadow: 1px 1px 2px #fff;
   }
+  .stat-bar-tick {
+    position: absolute;
+    bottom: 0.15em;
+    font-size: 0.7em;
+    color: #333;
+    opacity: 0.75;
+    z-index: 1;
+  }
+  .stat-bar-tick-left {
+    left: 0.4em;
+  }
+  .stat-bar-tick-right {
+    right: 0.4em;
+  }
   .stat-na {
     font-weight: bold;
     color: #444;
@@ -833,14 +884,14 @@ export default {
     padding-left: 1em;
     padding-right: 1em;
   }
-  @media(max-width: 1515px) {
+  @media(max-width: 1580px) {
     .masks {
-      grid-template-columns: 25% 25% 25% 25%;
+      grid-template-columns: 50% 50%;
     }
   }
   @media(max-width: 1250px) {
     .masks {
-      grid-template-columns: 33% 33% 33%;
+      grid-template-columns: 100%;
 
       position: relative;
       top: 2em;
@@ -860,7 +911,7 @@ export default {
       flex-direction: column;
     }
     .masks {
-      grid-template-columns: 50% 50%;
+      grid-template-columns: 100%;
       overflow: auto;
 
       position: relative;
