@@ -353,17 +353,20 @@
               <th>Perimeter (mm)</th>
               <td>
                 <input type="number" v-model="perimeterMm" v-show="newOrEditMode">
-                <ColoredCell
-                    v-show='!newOrEditMode'
-                    class='risk-score'
-                    :colorScheme="perimColorScheme"
-                    :maxVal=1
-                    :value='perimeterMm'
-                    :exception='exceptionObjectBlank'
-                    :text='distanceText(perimeterMm, "mm")'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                    :title='distanceText(perimeterMm, "mm")'
-                    />
+                <div v-show='!newOrEditMode' class='stat-cell'>
+                  <div v-if="statIsMissing('perimeter')" class='stat-bar-wrapper stat-bar-missing'>
+                    <div class='stat-bar-axis'></div>
+                    <div class='stat-bar stat-bar-missing-fill'></div>
+                    <div class='stat-bar-label'>{{ statMissingText('perimeter') }}</div>
+                  </div>
+                  <div v-else class='stat-bar-wrapper'>
+                    <div class='stat-bar-axis'></div>
+                    <div class='stat-bar' :style="statBarStyle(statPercent('perimeter'), 'perimeter')"></div>
+                    <div class='stat-bar-label'>{{ statLabel('perimeter') }}</div>
+                    <div v-if="statAxisLabel('perimeter', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('perimeter', 'min') }}</div>
+                    <div v-if="statAxisLabel('perimeter', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('perimeter', 'max') }}</div>
+                  </div>
+                </div>
               </td>
             </tr>
             <tr>
@@ -396,47 +399,22 @@
             </tr>
           </tbody>
 
-          <tbody v-for="(f, index) in filtrationEfficiencies" class='text-align-center'>
+          <tbody v-if='newOrEditMode' v-for="(f, index) in filtrationEfficiencies" class='text-align-center'>
             <tr>
-              <th v-show='newOrEditMode'>Filtration Efficiency (Percent)</th>
-              <th v-show='!newOrEditMode'>Filtration Efficiency</th>
-
+              <th>Filtration Efficiency (Percent)</th>
               <td colspan='1'>
                 <input type="number" :value='f.filtrationEfficiencyPercent' @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyPercent')"
                        v-show="newOrEditMode"
                        >
-                       <ColoredCell
-                           v-show='!newOrEditMode'
-                           class='risk-score'
-                           :colorScheme="colorInterpolationScheme"
-                           :maxVal=1
-                           :value='filtrationEfficiencyValue(f.filtrationEfficiencyPercent)'
-                           :text='percentText(f.filtrationEfficiencyPercent)'
-                           :exception='exceptionObject'
-                           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%', }"
-                           :title='f.filtrationEfficiencyPercent'
-                           />
               </td>
             </tr>
 
             <tr>
-              <th v-show='newOrEditMode'>Breathability (Pa)</th>
-              <th v-show='!newOrEditMode'>Breathability</th>
+              <th>Breathability (Pa)</th>
               <td colspan='1'>
                 <input type="number" :value='breathability[index].breathabilityPascals' @change="updateArrayOfObj($event, 'breathability', index, 'breathabilityPascals')"
                        v-show="newOrEditMode"
                        >
-                       <ColoredCell
-                           class='risk-score'
-                           v-show='!newOrEditMode'
-                           :colorScheme="breathabilityInterpolationScheme"
-                           :maxVal=1
-                           :value='breathability[index].breathabilityPascals'
-                           :text='breathabilityText(breathability[index].breathabilityPascals)'
-                           :exception='exceptionObjectBlank'
-                           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                           :title='breathabilityText(breathability[index].breathabilityPascals)'
-                           />
               </td>
             </tr>
 
@@ -452,7 +430,6 @@
 
                        v-show="newOrEditMode"
                        >
-                       <a v-show='!newOrEditMode' :href="f.filtrationEfficiencySource">link</a>
               </td>
 
             </tr>
@@ -462,7 +439,6 @@
             </tr>
 
             <tr>
-              <td colspan='2' class='notes' v-show='!newOrEditMode'>{{f.filtrationEfficiencyNotes}}</td>
               <td colspan='2' v-show='newOrEditMode'>
                 <textarea cols="30" rows="10" @change="updateArrayOfObj($event, 'filtrationEfficiencies', index, 'filtrationEfficiencyNotes')"></textarea>
               </td>
@@ -471,6 +447,47 @@
             <tr class='text-align-center'>
               <td colspan='2'>
                 <CircularButton text="x" @click="deleteArrayOfObj($event, 'filtrationEfficiencies', index)" v-if='newMode || userCanEdit && editMode'/>
+              </td>
+            </tr>
+          </tbody>
+          <tbody v-else class='text-align-center'>
+            <tr>
+              <th>Filtration Factor</th>
+              <td colspan='1'>
+                <div class='stat-cell'>
+                  <div v-if="statIsMissing('filtration')" class='stat-bar-wrapper stat-bar-missing'>
+                    <div class='stat-bar-axis'></div>
+                    <div class='stat-bar stat-bar-missing-fill'></div>
+                    <div class='stat-bar-label'>{{ statMissingText('filtration') }}</div>
+                  </div>
+                  <div v-else class='stat-bar-wrapper'>
+                    <div class='stat-bar-axis'></div>
+                    <div class='stat-bar' :style="statBarStyle(statPercent('filtration'), 'filtration')"></div>
+                    <div class='stat-bar-label'>{{ statLabel('filtration') }}</div>
+                    <div v-if="statAxisLabel('filtration', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('filtration', 'min') }}</div>
+                    <div v-if="statAxisLabel('filtration', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('filtration', 'max') }}</div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Breathability</th>
+              <td colspan='1'>
+                <div class='stat-cell'>
+                  <div v-if="statIsMissing('breathability')" class='stat-bar-wrapper stat-bar-missing'>
+                    <div class='stat-bar-axis'></div>
+                    <div class='stat-bar stat-bar-missing-fill'></div>
+                    <div class='stat-bar-label'>{{ statMissingText('breathability') }}</div>
+                  </div>
+                  <div v-else class='stat-bar-wrapper'>
+                    <div class='stat-bar-axis'></div>
+                    <div class='stat-bar' :style="statBarStyle(statPercent('breathability'), 'breathability')"></div>
+                    <div class='stat-bar-label'>{{ statLabel('breathability') }}</div>
+                    <div v-if="statAxisLabel('breathability', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('breathability', 'min') }}</div>
+                    <div v-if="statAxisLabel('breathability', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('breathability', 'max') }}</div>
+                  </div>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -731,6 +748,7 @@ export default {
       filtrationEfficiencies: [],
       breathability: [],
       filterChangeCostUsDollars: 0,
+      dataContext: {},
       strapType: 'Headstrap',
       style: '',
       imageUrls: [''],
@@ -1208,6 +1226,125 @@ export default {
 
       return "?"
     },
+    formatValue(value, suffix = '') {
+      if (value === null || value === undefined || isNaN(value)) {
+        return 'Missing'
+      }
+
+      return `${Math.round(value)}${suffix}`
+    },
+    statPercent(type) {
+      if (type === 'filtration') {
+        if (this.statIsMissing(type)) {
+          return null
+        }
+        const logValue = Math.log10(this.avgSealedFitFactor)
+        return this.clampPercent(logValue / 4)
+      }
+
+      if (type === 'breathability') {
+        const min = this.dataContext.breathability_min
+        const max = this.dataContext.breathability_max
+        if (this.statIsMissing(type) || min === null || max === null || min === undefined || max === undefined) {
+          return null
+        }
+        const scaled = this.minMaxScale(this.avgBreathabilityPa, min, max, { zeroRangeValue: 0 })
+        return this.clampPercent(1 - scaled)
+      }
+
+      if (type === 'perimeter') {
+        const min = this.dataContext.perimeter_min
+        const max = this.dataContext.perimeter_max
+        if (this.statIsMissing(type) || min === null || max === null || min === undefined || max === undefined) {
+          return null
+        }
+        const scaled = this.minMaxScale(this.perimeterMm, min, max, { zeroRangeValue: 1 })
+        return this.clampPercent(scaled)
+      }
+
+      return null
+    },
+    statLabel(type) {
+      if (type === 'filtration') {
+        return this.formatValue(this.avgSealedFitFactor)
+      }
+      if (type === 'breathability') {
+        return this.formatValue(this.avgBreathabilityPa, ' pa')
+      }
+      if (type === 'perimeter') {
+        return this.formatValue(this.perimeterMm)
+      }
+      return 'Missing'
+    },
+    statBarStyle(percent, type) {
+      return {
+        width: `${Math.round(percent * 100)}%`,
+        backgroundColor: this.statRowColors()[type]
+      }
+    },
+    statRowColors() {
+      return {
+        filtration: '#c0392b',
+        breathability: '#e67e22',
+        perimeter: '#16a085'
+      }
+    },
+    statAxisLabel(type, position) {
+      if (type === 'filtration') {
+        return position === 'min' ? '10^0' : '10^4'
+      }
+      if (type === 'breathability') {
+        const min = this.dataContext.breathability_min
+        const max = this.dataContext.breathability_max
+        if (min === null || max === null || min === undefined || max === undefined) {
+          return null
+        }
+        const orderedMin = Math.min(min, max)
+        const orderedMax = Math.max(min, max)
+        const labelValue = position === 'min' ? orderedMax : orderedMin
+        if (labelValue <= 0) {
+          return 'Missing'
+        }
+        return this.formatValue(labelValue, ' pa')
+      }
+      if (type === 'perimeter') {
+        const min = this.dataContext.perimeter_min
+        const max = this.dataContext.perimeter_max
+        if (min === null || max === null || min === undefined || max === undefined) {
+          return null
+        }
+        return position === 'min' ? this.formatValue(min) : this.formatValue(max)
+      }
+      return null
+    },
+    statIsMissing(type) {
+      if (type === 'filtration') {
+        return this.avgSealedFitFactor === null || this.avgSealedFitFactor === undefined || isNaN(this.avgSealedFitFactor) || this.avgSealedFitFactor <= 0
+      }
+      if (type === 'breathability') {
+        return this.avgBreathabilityPa === null || this.avgBreathabilityPa === undefined || isNaN(this.avgBreathabilityPa) || this.avgBreathabilityPa <= 0
+      }
+      if (type === 'perimeter') {
+        return this.perimeterMm === null || this.perimeterMm === undefined || isNaN(this.perimeterMm) || this.perimeterMm <= 0
+      }
+      return true
+    },
+    statMissingText() {
+      return 'Missing'
+    },
+    clampPercent(value) {
+      if (value === null || value === undefined || isNaN(value)) {
+        return null
+      }
+      return Math.max(0, Math.min(1, value))
+    },
+    minMaxScale(value, min, max, { zeroRangeValue }) {
+      const range = max - min
+      if (range <= 0) {
+        return zeroRangeValue
+      }
+      return (value - min) / range
+    },
     maskImageAlt(index) {
       return `Image #${index} for ${this.uniqueInternalModelCode}`
     },
@@ -1379,6 +1516,8 @@ export default {
           for(let k of this.ageOptions) {
             this.ageAggregates[k] = data.mask[k]
           }
+
+          this.dataContext = data.context || {}
 
 
         })
@@ -1692,6 +1831,63 @@ export default {
     border-radius: 100%;
     width: 5em;
     height: 5em;
+  }
+  .stat-cell {
+    min-width: 9em;
+  }
+  .stat-bar-wrapper {
+    position: relative;
+    height: 2.25em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.4em;
+    background-color: #f1f1f1;
+    overflow: hidden;
+  }
+  .stat-bar-axis {
+    position: absolute;
+    left: 0.5em;
+    right: 0.5em;
+    bottom: 0.35em;
+    height: 2px;
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+  .stat-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 0.4em;
+    opacity: 0.9;
+  }
+  .stat-bar-label {
+    position: relative;
+    z-index: 1;
+    font-weight: bold;
+    color: #111;
+    text-shadow: 1px 1px 2px #fff;
+  }
+  .stat-bar-tick {
+    position: absolute;
+    bottom: 0.15em;
+    font-size: 0.7em;
+    color: #333;
+    opacity: 0.75;
+    z-index: 1;
+  }
+  .stat-bar-tick-left {
+    left: 0.4em;
+  }
+  .stat-bar-tick-right {
+    right: 0.4em;
+  }
+  .stat-bar-missing {
+    background-color: #e0e0e0;
+  }
+  .stat-bar-missing-fill {
+    width: 100%;
+    background-color: #b5b5b5;
   }
 
   .flex-dir-col {

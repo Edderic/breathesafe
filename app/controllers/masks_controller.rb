@@ -152,7 +152,8 @@ class MasksController < ApplicationController
            end
 
     to_render = {
-      mask: mask
+      mask: mask,
+      context: MasksDataContextualizer.call
     }
 
     respond_to do |format|
