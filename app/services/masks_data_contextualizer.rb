@@ -36,7 +36,11 @@ class MasksDataContextualizer
           MAX(masks.perimeter_mm) AS perimeter_max,
           MIN(NULLIF(breathability_aggregates.avg_breathability_pa, 0)) AS breathability_min,
           MAX(breathability_aggregates.avg_breathability_pa) AS breathability_max,
-          MAX(COALESCE(fit_test_counts_per_mask.fit_test_count, 0)) AS fit_test_count_max
+          MAX(COALESCE(fit_test_counts_per_mask.fit_test_count, 0)) AS fit_test_count_max,
+          MIN(masks.initial_cost_us_dollars) AS initial_cost_min,
+          MAX(masks.initial_cost_us_dollars) AS initial_cost_max,
+          MIN(masks.mass_grams) AS mass_min,
+          MAX(masks.mass_grams) AS mass_max
         FROM masks
         LEFT JOIN fit_test_counts_per_mask ON fit_test_counts_per_mask.mask_id = masks.id
         LEFT JOIN breathability_aggregates ON breathability_aggregates.id = masks.id
@@ -47,7 +51,11 @@ class MasksDataContextualizer
         breathability_max: to_float(stats['breathability_max']),
         perimeter_min: to_float(stats['perimeter_min']),
         perimeter_max: to_float(stats['perimeter_max']),
-        fit_test_count_max: to_integer(stats['fit_test_count_max'])
+        fit_test_count_max: to_integer(stats['fit_test_count_max']),
+        initial_cost_min: to_float(stats['initial_cost_min']),
+        initial_cost_max: to_float(stats['initial_cost_max']),
+        mass_min: to_float(stats['mass_min']),
+        mass_max: to_float(stats['mass_max'])
       }
     end
 

@@ -233,17 +233,20 @@
                        v-show="newOrEditMode"
                        >
 
-                       <ColoredCell
-                           v-show='!newOrEditMode'
-                           class='risk-score'
-                           :colorScheme="costColorScheme"
-                           :maxVal=1
-                           :value='initialCostUsDollars'
-                           :exception='exceptionDollarObject'
-                           :text='dollarText(initialCostUsDollars)'
-                           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                           :title='dollarText(initialCostUsDollars)'
-                           />
+                       <div v-show='!newOrEditMode' class='stat-cell'>
+                         <div v-if="statIsMissing('cost')" class='stat-bar-wrapper stat-bar-missing'>
+                           <div class='stat-bar-axis'></div>
+                           <div class='stat-bar stat-bar-missing-fill'></div>
+                           <div class='stat-bar-label'>{{ statMissingText('cost') }}</div>
+                         </div>
+                         <div v-else class='stat-bar-wrapper'>
+                           <div class='stat-bar-axis'></div>
+                           <div class='stat-bar' :style="statBarStyle(statPercent('cost'), 'cost')"></div>
+                           <div class='stat-bar-label'>{{ statLabel('cost') }}</div>
+                           <div v-if="statAxisLabel('cost', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('cost', 'min') }}</div>
+                           <div v-if="statAxisLabel('cost', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('cost', 'max') }}</div>
+                         </div>
+                       </div>
               </td>
             </tr>
 
@@ -518,17 +521,20 @@
             <tr>
               <th>Mass (grams)</th>
               <td>
-                <ColoredCell
-                    v-show='!newOrEditMode'
-                    class='risk-score'
-                    :colorScheme="massColorScheme"
-                    :maxVal=1
-                    :value='massGrams'
-                    :exception='exceptionObjectBlank'
-                    :text='massText(massGrams)'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                    :title='massText(massGrams)'
-                    />
+                <div class='stat-cell'>
+                  <div v-if="statIsMissing('mass')" class='stat-bar-wrapper stat-bar-missing'>
+                    <div class='stat-bar-axis'></div>
+                    <div class='stat-bar stat-bar-missing-fill'></div>
+                    <div class='stat-bar-label'>{{ statMissingText('mass') }}</div>
+                  </div>
+                  <div v-else class='stat-bar-wrapper'>
+                    <div class='stat-bar-axis'></div>
+                    <div class='stat-bar' :style="statBarStyle(statPercent('mass'), 'mass')"></div>
+                    <div class='stat-bar-label'>{{ statLabel('mass') }}</div>
+                    <div v-if="statAxisLabel('mass', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('mass', 'min') }}</div>
+                    <div v-if="statAxisLabel('mass', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('mass', 'max') }}</div>
+                  </div>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -1264,6 +1270,13 @@ export default {
 
       return "?"
     },
+    formatCurrency(value) {
+      if (value === null || value === undefined || isNaN(value)) {
+        return 'Missing'
+      }
+
+      return `$${Number(value).toFixed(2)}`
+    },
     formatValue(value, suffix = '') {
       if (value === null || value === undefined || isNaN(value)) {
         return 'Missing'
@@ -1300,6 +1313,26 @@ export default {
         return this.clampPercent(scaled)
       }
 
+      if (type === 'cost') {
+        const min = this.dataContext.initial_cost_min
+        const max = this.dataContext.initial_cost_max
+        if (this.statIsMissing(type) || min === null || max === null || min === undefined || max === undefined) {
+          return null
+        }
+        const scaled = this.minMaxScale(this.initialCostUsDollars, min, max, { zeroRangeValue: 0 })
+        return this.clampPercent(scaled)
+      }
+
+      if (type === 'mass') {
+        const min = this.dataContext.mass_min
+        const max = this.dataContext.mass_max
+        if (this.statIsMissing(type) || min === null || max === null || min === undefined || max === undefined) {
+          return null
+        }
+        const scaled = this.minMaxScale(this.massGrams, min, max, { zeroRangeValue: 0 })
+        return this.clampPercent(scaled)
+      }
+
       return null
     },
     statLabel(type) {
@@ -1311,6 +1344,12 @@ export default {
       }
       if (type === 'perimeter') {
         return this.formatValue(this.perimeterMm)
+      }
+      if (type === 'cost') {
+        return this.formatCurrency(this.initialCostUsDollars)
+      }
+      if (type === 'mass') {
+        return this.formatValue(this.massGrams, ' g')
       }
       return 'Missing'
     },
@@ -1324,7 +1363,9 @@ export default {
       return {
         filtration: '#c0392b',
         breathability: '#e67e22',
-        perimeter: '#16a085'
+        perimeter: '#16a085',
+        cost: 'rgb(188, 163, 255)',
+        mass: 'rgb(169, 249, 255)'
       }
     },
     statAxisLabel(type, position) {
@@ -1353,6 +1394,22 @@ export default {
         }
         return position === 'min' ? this.formatValue(min) : this.formatValue(max)
       }
+      if (type === 'cost') {
+        const min = this.dataContext.initial_cost_min
+        const max = this.dataContext.initial_cost_max
+        if (min === null || max === null || min === undefined || max === undefined) {
+          return null
+        }
+        return position === 'min' ? this.formatCurrency(min) : this.formatCurrency(max)
+      }
+      if (type === 'mass') {
+        const min = this.dataContext.mass_min
+        const max = this.dataContext.mass_max
+        if (min === null || max === null || min === undefined || max === undefined) {
+          return null
+        }
+        return position === 'min' ? this.formatValue(min, ' g') : this.formatValue(max, ' g')
+      }
       return null
     },
     statIsMissing(type) {
@@ -1364,6 +1421,12 @@ export default {
       }
       if (type === 'perimeter') {
         return this.perimeterMm === null || this.perimeterMm === undefined || isNaN(this.perimeterMm) || this.perimeterMm <= 0
+      }
+      if (type === 'cost') {
+        return this.initialCostUsDollars === null || this.initialCostUsDollars === undefined || isNaN(this.initialCostUsDollars)
+      }
+      if (type === 'mass') {
+        return this.massGrams === null || this.massGrams === undefined || isNaN(this.massGrams)
       }
       return true
     },
