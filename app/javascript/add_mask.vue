@@ -1426,7 +1426,7 @@ export default {
         return this.initialCostUsDollars === null || this.initialCostUsDollars === undefined || isNaN(this.initialCostUsDollars)
       }
       if (type === 'mass') {
-        return this.massGrams === null || this.massGrams === undefined || isNaN(this.massGrams)
+        return this.massGrams === null || this.massGrams === undefined || isNaN(this.massGrams) || this.massGrams <= 0
       }
       return true
     },
