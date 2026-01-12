@@ -342,7 +342,7 @@
         <table v-if='tabToShow == "Dimensions" || mode=="Show"'>
           <thead>
              <tr>
-               <th colspan=1><h3>Dimensions</h3></th>
+               <th colspan=2><h3>Dimensions</h3></th>
                <td>
                 <CircularButton text="?" @click="showHelp = true" v-if='newOrEditMode'/>
                </td>
@@ -451,6 +451,9 @@
             </tr>
           </tbody>
           <tbody v-else class='text-align-center'>
+            <tr>
+              <th colspan='2' class='text-align-left'>Filtration &amp; Breathability</th>
+            </tr>
             <tr>
               <th>Filtration Factor</th>
               <td colspan='1'>
@@ -887,7 +890,7 @@ export default {
       return { x: noseProtrusion, y: faceWidth }
     },
     columnCount() {
-      if (this.filtrationEfficiencies.length > 0) {
+      if (this.filtrationEfficiencies.length > 0 || this.avgSealedFitFactor || this.avgBreathabilityPa) {
         return 4
       }
       return 3
