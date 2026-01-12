@@ -621,10 +621,17 @@ class BulkFitTestsImportsController < ApplicationController
       # Find or create mask with file_mask_name as unique_internal_model_code
       # Author should be set to the manager (bulk_import.user)
       ActiveRecord::Base.transaction do
-        # Use find_or_create_by to handle existing masks gracefully
-        new_mask = Mask.find_or_create_by!(unique_internal_model_code: file_mask_name) do |mask|
-          mask.author_id = bulk_import.user_id
-          mask.bulk_fit_tests_import_id = bulk_import.id
+        new_mask = Mask.find_or_initialize_by(unique_internal_model_code: file_mask_name)
+        if new_mask.new_record?
+          new_mask.author_id = bulk_import.user_id
+          new_mask.save!
+
+          MaskEvent.create!(
+            mask: new_mask,
+            user: bulk_import.user,
+            event_type: 'bulk_import_updated',
+            data: { 'bulk_fit_tests_import_id' => bulk_import.id }
+          )
         end
 
         # Update mask_matching with the mask's ID (whether found or created)
