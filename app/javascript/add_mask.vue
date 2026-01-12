@@ -1423,7 +1423,7 @@ export default {
         return this.perimeterMm === null || this.perimeterMm === undefined || isNaN(this.perimeterMm) || this.perimeterMm <= 0
       }
       if (type === 'cost') {
-        return this.initialCostUsDollars === null || this.initialCostUsDollars === undefined || isNaN(this.initialCostUsDollars)
+        return this.initialCostUsDollars === null || this.initialCostUsDollars === undefined || isNaN(this.initialCostUsDollars) || this.initialCostUsDollars <= 0
       }
       if (type === 'mass') {
         return this.massGrams === null || this.massGrams === undefined || isNaN(this.massGrams) || this.massGrams <= 0
