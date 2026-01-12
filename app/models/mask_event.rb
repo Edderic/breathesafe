@@ -30,11 +30,13 @@ class MaskEvent < ApplicationRecord
     author_updated
     brand_updated
     strap_type_updated
+    image_urls_updated
     mass_updated
     dimensions_updated
     gasket_updated
     cost_updated
     sources_updated
+    modifications_updated
     notes_updated
     filter_type_updated
     age_range_updated
@@ -75,6 +77,8 @@ class MaskEvent < ApplicationRecord
       errors.add(:data, 'breakdown must be an array') unless data['breakdown'].is_a?(Array)
     when 'colors_updated'
       errors.add(:data, 'colors must be an array') unless data['colors'].is_a?(Array)
+    when 'image_urls_updated'
+      errors.add(:data, 'urls must be an array') unless data['urls'].is_a?(Array)
     end
   end
 

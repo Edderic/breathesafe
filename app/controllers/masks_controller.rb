@@ -186,6 +186,140 @@ class MasksController < ApplicationController
     end
   end
 
+  def build_mask_events(mask, updates)
+    events = []
+
+    if updates.key?(:unique_internal_model_code) && updates[:unique_internal_model_code] != mask.unique_internal_model_code
+      events << { event_type: 'unique_internal_model_code_updated',
+                  data: { 'unique_internal_model_code' => updates[:unique_internal_model_code] } }
+    end
+
+    if updates.key?(:colors) && updates[:colors] != mask.colors
+      events << { event_type: 'colors_updated', data: { 'action' => 'set', 'colors' => updates[:colors] } }
+    end
+
+    if updates.key?(:color) && updates[:color] != mask.color
+      events << { event_type: 'color_changed', data: { 'color' => updates[:color] } }
+    end
+
+    if updates.key?(:notes) && updates[:notes] != mask.notes
+      events << { event_type: 'notes_updated', data: { 'notes' => updates[:notes] } }
+    end
+
+    if updates.key?(:modifications) && updates[:modifications] != mask.modifications
+      events << { event_type: 'modifications_updated', data: { 'modifications' => updates[:modifications] } }
+    end
+
+    if updates.key?(:mass_grams) && updates[:mass_grams] != mask.mass_grams
+      events << { event_type: 'mass_updated', data: { 'mass_grams' => updates[:mass_grams] } }
+    end
+
+    if (updates.key?(:height_mm) && updates[:height_mm] != mask.height_mm) ||
+       (updates.key?(:width_mm) && updates[:width_mm] != mask.width_mm) ||
+       (updates.key?(:depth_mm) && updates[:depth_mm] != mask.depth_mm)
+      events << {
+        event_type: 'dimensions_updated',
+        data: {
+          'height_mm' => updates[:height_mm],
+          'width_mm' => updates[:width_mm],
+          'depth_mm' => updates[:depth_mm]
+        }.compact
+      }
+    end
+
+    if updates.key?(:perimeter_mm) && updates[:perimeter_mm] != mask.perimeter_mm
+      events << { event_type: 'perimeter_updated', data: { 'perimeter_mm' => updates[:perimeter_mm] } }
+    end
+
+    if updates.key?(:filter_type) && updates[:filter_type] != mask.filter_type
+      events << { event_type: 'filter_type_updated', data: { 'filter_type' => updates[:filter_type] } }
+    end
+
+    if updates.key?(:filtration_efficiencies) && updates[:filtration_efficiencies] != mask.filtration_efficiencies
+      events << {
+        event_type: 'filtration_efficiencies_updated',
+        data: { 'action' => 'set', 'efficiencies' => updates[:filtration_efficiencies] }
+      }
+    end
+
+    if updates.key?(:has_exhalation_valve) && updates[:has_exhalation_valve] != mask.has_exhalation_valve
+      events << {
+        event_type: 'exhalation_valve_updated',
+        data: { 'has_exhalation_valve' => updates[:has_exhalation_valve] }
+      }
+    end
+
+    if updates.key?(:breathability) && updates[:breathability] != mask.breathability
+      events << { event_type: 'breathability_updated', data: { 'breathability' => updates[:breathability] } }
+    end
+
+    if (updates.key?(:initial_cost_us_dollars) && updates[:initial_cost_us_dollars] != mask.initial_cost_us_dollars) ||
+       (updates.key?(:filter_change_cost_us_dollars) && updates[:filter_change_cost_us_dollars] != mask.filter_change_cost_us_dollars)
+      cost_data = {}
+      cost_data['initial_cost_us_dollars'] = updates[:initial_cost_us_dollars] if updates.key?(:initial_cost_us_dollars)
+      if updates.key?(:filter_change_cost_us_dollars)
+        cost_data['filter_change_cost_us_dollars'] =
+          updates[:filter_change_cost_us_dollars]
+      end
+      events << { event_type: 'cost_updated', data: cost_data }
+    end
+
+    if updates.key?(:style) && updates[:style] != mask.style
+      events << { event_type: 'style_updated', data: { 'style' => updates[:style] } }
+    end
+
+    if updates.key?(:image_urls) && updates[:image_urls] != mask.image_urls
+      events << { event_type: 'image_urls_updated', data: { 'action' => 'set', 'urls' => updates[:image_urls] } }
+    end
+
+    if updates.key?(:where_to_buy_urls) && updates[:where_to_buy_urls] != mask.where_to_buy_urls
+      events << { event_type: 'where_to_buy_urls_updated',
+                  data: { 'action' => 'set', 'urls' => updates[:where_to_buy_urls] } }
+    end
+
+    if updates.key?(:strap_type) && updates[:strap_type] != mask.strap_type
+      events << { event_type: 'strap_type_updated', data: { 'strap_type' => updates[:strap_type] } }
+    end
+
+    if updates.key?(:author_id) && updates[:author_id] != mask.author_id
+      events << { event_type: 'author_updated', data: { 'author_id' => updates[:author_id] } }
+    end
+
+    if updates.key?(:brand_id) && updates[:brand_id] != mask.brand_id
+      events << { event_type: 'brand_updated', data: { 'brand_id' => updates[:brand_id] } }
+    end
+
+    if updates.key?(:has_gasket) && updates[:has_gasket] != mask.has_gasket
+      events << { event_type: 'gasket_updated', data: { 'has_gasket' => updates[:has_gasket] } }
+    end
+
+    if updates.key?(:sources) && updates[:sources] != mask.sources
+      events << { event_type: 'sources_updated', data: { 'action' => 'set', 'sources' => updates[:sources] } }
+    end
+
+    if updates.key?(:age_range) && updates[:age_range] != mask.age_range
+      events << { event_type: 'age_range_updated', data: { 'age_range' => updates[:age_range] } }
+    end
+
+    if updates.key?(:payable_datetimes) && updates[:payable_datetimes] != mask.payable_datetimes
+      events << { event_type: 'payable_datetimes_updated',
+                  data: { 'action' => 'set', 'datetimes' => updates[:payable_datetimes] } }
+    end
+
+    if updates.key?(:bulk_fit_tests_import_id) && updates[:bulk_fit_tests_import_id] != mask.bulk_fit_tests_import_id
+      events << {
+        event_type: 'bulk_import_updated',
+        data: { 'bulk_fit_tests_import_id' => updates[:bulk_fit_tests_import_id] }
+      }
+    end
+
+    if updates.key?(:duplicate_of) && updates[:duplicate_of] != mask.duplicate_of
+      events << { event_type: 'duplicate_marked', data: { 'duplicate_of' => updates[:duplicate_of] } }
+    end
+
+    events
+  end
+
   def update
     # TODO: For now, only current user can access facial measurements
     # Later on, parents should be able to view / edit their children's data
@@ -202,14 +336,38 @@ class MasksController < ApplicationController
       status = 401
       to_render = {}
       messages = ['Current user is not the author.']
-    elsif mask.update(mask_data)
-      status = 204
-      to_render = {}
-      messages = []
     else
-      status = 400 # bad request
-      to_render = {}
-      messages = []
+      updates = mask_data.to_h.deep_symbolize_keys
+      events = build_mask_events(mask, updates)
+
+      if events.empty?
+        status = 204
+        to_render = {}
+        messages = []
+      else
+        begin
+          MaskEvent.transaction do
+            events.each do |event|
+              MaskEvent.create!(
+                mask: mask,
+                user: current_user,
+                event_type: event[:event_type],
+                data: event[:data]
+              )
+            end
+
+            mask.update!(MaskStatusBuilder.build_and_serialize(mask_id: mask.id))
+          end
+
+          status = 204
+          to_render = {}
+          messages = []
+        rescue ActiveRecord::RecordInvalid => e
+          status = 400 # bad request
+          to_render = {}
+          messages = Array(e.record&.errors&.full_messages || e.message)
+        end
+      end
     end
 
     respond_to do |format|

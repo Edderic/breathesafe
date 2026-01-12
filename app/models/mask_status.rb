@@ -48,6 +48,8 @@ class MaskStatus
       apply_brand_update(event)
     when 'strap_type_updated'
       apply_strap_type_update(event)
+    when 'image_urls_updated'
+      apply_image_urls_update(event)
     when 'mass_updated'
       apply_mass_update(event)
     when 'dimensions_updated'
@@ -58,6 +60,8 @@ class MaskStatus
       apply_cost_update(event)
     when 'sources_updated'
       apply_sources_update(event)
+    when 'modifications_updated'
+      apply_modifications_update(event)
     when 'notes_updated'
       apply_notes_update(event)
     when 'filter_type_updated'
@@ -176,6 +180,19 @@ class MaskStatus
     @attributes['strap_type'] = event.data['strap_type']
   end
 
+  def apply_image_urls_update(event)
+    @attributes['image_urls'] ||= []
+
+    case event.data['action']
+    when 'add'
+      @attributes['image_urls'] |= Array(event.data['urls'])
+    when 'remove'
+      @attributes['image_urls'] -= Array(event.data['urls'])
+    when 'set'
+      @attributes['image_urls'] = event.data['urls']
+    end
+  end
+
   def apply_mass_update(event)
     @attributes['mass_grams'] = event.data['mass_grams']
   end
@@ -212,6 +229,10 @@ class MaskStatus
     when 'set'
       @attributes['sources'] = event.data['sources']
     end
+  end
+
+  def apply_modifications_update(event)
+    @attributes['modifications'] = event.data['modifications']
   end
 
   def apply_notes_update(event)
