@@ -339,7 +339,7 @@
           </tbody>
         </table>
 
-        <table v-if='tabToShow == "Dimensions" || mode=="Show"'>
+        <table v-if='tabToShow == "Dimensions"'>
           <thead>
              <tr>
                <th colspan=2><h3>Dimensions</h3></th>
@@ -389,7 +389,7 @@
             </tr>
           </tbody>
         </table>
-        <table v-if='tabToShow == "Filtration & Breathability" || mode=="Show"'>
+        <table v-if='tabToShow == "Filtration & Breathability"'>
           <tbody>
             <tr v-if='newOrEditMode'>
               <th class='text-align-left'>Filtration &amp; Breathability</th>
@@ -450,13 +450,36 @@
               </td>
             </tr>
           </tbody>
-          <tbody v-else class='text-align-center'>
+        </table>
+        <table v-if='showMode'>
+          <thead>
+             <tr>
+               <th colspan=2><h3>Dimensions &amp; Filtration</h3></th>
+             </tr>
+          </thead>
+          <tbody>
             <tr>
-              <th colspan='2' class='text-align-left'>Filtration &amp; Breathability</th>
+              <th>Perimeter (mm)</th>
+              <td>
+                <div class='stat-cell'>
+                  <div v-if="statIsMissing('perimeter')" class='stat-bar-wrapper stat-bar-missing'>
+                    <div class='stat-bar-axis'></div>
+                    <div class='stat-bar stat-bar-missing-fill'></div>
+                    <div class='stat-bar-label'>{{ statMissingText('perimeter') }}</div>
+                  </div>
+                  <div v-else class='stat-bar-wrapper'>
+                    <div class='stat-bar-axis'></div>
+                    <div class='stat-bar' :style="statBarStyle(statPercent('perimeter'), 'perimeter')"></div>
+                    <div class='stat-bar-label'>{{ statLabel('perimeter') }}</div>
+                    <div v-if="statAxisLabel('perimeter', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('perimeter', 'min') }}</div>
+                    <div v-if="statAxisLabel('perimeter', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('perimeter', 'max') }}</div>
+                  </div>
+                </div>
+              </td>
             </tr>
             <tr>
               <th>Filtration Factor</th>
-              <td colspan='1'>
+              <td>
                 <div class='stat-cell'>
                   <div v-if="statIsMissing('filtration')" class='stat-bar-wrapper stat-bar-missing'>
                     <div class='stat-bar-axis'></div>
@@ -473,10 +496,9 @@
                 </div>
               </td>
             </tr>
-
             <tr>
               <th>Breathability</th>
-              <td colspan='1'>
+              <td>
                 <div class='stat-cell'>
                   <div v-if="statIsMissing('breathability')" class='stat-bar-wrapper stat-bar-missing'>
                     <div class='stat-bar-axis'></div>
@@ -491,6 +513,22 @@
                     <div v-if="statAxisLabel('breathability', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('breathability', 'max') }}</div>
                   </div>
                 </div>
+              </td>
+            </tr>
+            <tr>
+              <th>Mass (grams)</th>
+              <td>
+                <ColoredCell
+                    v-show='!newOrEditMode'
+                    class='risk-score'
+                    :colorScheme="massColorScheme"
+                    :maxVal=1
+                    :value='massGrams'
+                    :exception='exceptionObjectBlank'
+                    :text='massText(massGrams)'
+                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
+                    :title='massText(massGrams)'
+                    />
               </td>
             </tr>
           </tbody>
@@ -890,9 +928,6 @@ export default {
       return { x: noseProtrusion, y: faceWidth }
     },
     columnCount() {
-      if (this.filtrationEfficiencies.length > 0 || this.avgSealedFitFactor || this.avgBreathabilityPa) {
-        return 4
-      }
       return 3
     },
     canUpdate() {
