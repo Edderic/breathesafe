@@ -412,6 +412,8 @@ class MasksController < ApplicationController
     end
   end
 
+  public :update, :delete
+
   def mask_data
     params.require(:mask).permit(
       :author_id,
