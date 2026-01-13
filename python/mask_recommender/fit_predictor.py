@@ -299,6 +299,107 @@ def get_users_by_masks_by_types(user_ones, sorted_tested_masks, by):
     return torch.cat(type_tensors)
 
 
+def _is_truthy(value):
+    if isinstance(value, bool):
+        return value
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return False
+    return str(value).strip().lower() in ['true', '1', 'yes', 'y']
+
+
+def _normalize_pass(value):
+    if isinstance(value, bool):
+        return int(value)
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return None
+    normalized = str(value).strip().lower()
+    if normalized in ['true', '1', 'pass', 'passed', 'yes', 'y']:
+        return 1
+    if normalized in ['false', '0', 'fail', 'failed', 'no', 'n']:
+        return 0
+    return None
+
+
+def prepare_training_data(fit_tests_df):
+    filtered = fit_tests_df.copy()
+    filtered = filtered[filtered['perimeter_mm'].notna()]
+
+    if 'mask_modded' in filtered.columns:
+        mask_modded_flags = filtered['mask_modded'].apply(_is_truthy)
+        filtered = filtered[~mask_modded_flags]
+    else:
+        logging.info("mask_modded column not found; skipping modded filtering.")
+
+    filtered['facial_perimeter_mm'] = filtered[FACIAL_FEATURE_COLUMNS].sum(axis=1, min_count=1)
+    filtered = filtered[filtered['facial_perimeter_mm'].notna()]
+
+    filtered['qlft_pass_normalized'] = filtered['qlft_pass'].apply(_normalize_pass)
+    filtered = filtered[filtered['qlft_pass_normalized'].notna()]
+
+    feature_cols = [
+        'perimeter_mm',
+        'facial_perimeter_mm',
+        'strap_type',
+        'style',
+        'unique_internal_model_code'
+    ]
+    filtered = filtered[feature_cols + ['qlft_pass_normalized']]
+    return filtered
+
+
+def build_feature_matrix(filtered_df):
+    categorical_cols = ['strap_type', 'style', 'unique_internal_model_code']
+    features = pd.get_dummies(filtered_df, columns=categorical_cols, dummy_na=True)
+    target = features.pop('qlft_pass_normalized')
+    return features, target
+
+
+def train_predictor(features, target, epochs=50, learning_rate=0.01):
+    x = torch.tensor(features.to_numpy(), dtype=torch.float32)
+    y = torch.tensor(target.to_numpy(), dtype=torch.float32).unsqueeze(1)
+
+    num_rows = x.shape[0]
+    permutation = torch.randperm(num_rows)
+    split_index = int(num_rows * 0.8)
+    train_idx = permutation[:split_index]
+    val_idx = permutation[split_index:]
+
+    x_train, y_train = x[train_idx], y[train_idx]
+    x_val, y_val = x[val_idx], y[val_idx]
+
+    model = torch.nn.Sequential(
+        torch.nn.Linear(x.shape[1], 32),
+        torch.nn.ReLU(),
+        torch.nn.Linear(32, 16),
+        torch.nn.ReLU(),
+        torch.nn.Linear(16, 1)
+    )
+
+    loss_fn = torch.nn.BCEWithLogitsLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+    for epoch in range(epochs):
+        model.train()
+        optimizer.zero_grad()
+        logits = model(x_train)
+        loss = loss_fn(logits, y_train)
+        loss.backward()
+        optimizer.step()
+
+        if (epoch + 1) % 10 == 0 or epoch == 0:
+            model.eval()
+            with torch.no_grad():
+                val_logits = model(x_val)
+                val_loss = loss_fn(val_logits, y_val).item()
+                preds = (torch.sigmoid(val_logits) >= 0.5).float()
+                accuracy = (preds == y_val).float().mean().item()
+            logging.info(
+                f"epoch={epoch + 1} train_loss={loss.item():.4f} val_loss={val_loss:.4f} val_acc={accuracy:.3f}"
+            )
+
+    return model
+
+
 if __name__ == '__main__':
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
@@ -342,9 +443,25 @@ if __name__ == '__main__':
         ['mask_id', 'unique_internal_model_code']
     ).count()[['id']].sort_values(by='id', ascending=False)
 
-    logging.info(f"masks with fit tests that are missing perimeter_mm: {tested_missing_perimeter_mm}")
-    import pdb; pdb.set_trace()
+    cleaned_fit_tests = prepare_training_data(
+        fit_tests_with_imputed_arkit_via_traditional_facial_measurements
+    )
+    logging.info(
+        "Fit tests after filtering: %s / %s",
+        cleaned_fit_tests.shape[0],
+        fit_tests_with_imputed_arkit_via_traditional_facial_measurements.shape[0]
+    )
 
+    if cleaned_fit_tests.empty:
+        logging.warning("No fit tests available after filtering. Exiting.")
+        raise SystemExit(0)
+
+    features, target = build_feature_matrix(cleaned_fit_tests)
+    model = train_predictor(features, target, epochs=50, learning_rate=0.01)
+
+    logging.info("Model training complete. Feature count: %s", features.shape[1])
+
+    logging.info(f"masks with fit tests that are missing perimeter_mm: {tested_missing_perimeter_mm}")
 
     logging.info(f"Total # fit tests missing parameter_mm: {total_fit_tests_missing_parameter_mm}")
 
