@@ -351,6 +351,7 @@ def build_feature_matrix(filtered_df):
     categorical_cols = ['strap_type', 'style', 'unique_internal_model_code']
     features = pd.get_dummies(filtered_df, columns=categorical_cols, dummy_na=True)
     target = features.pop('qlft_pass_normalized')
+    features = features.apply(pd.to_numeric, errors='coerce').fillna(0)
     return features, target
 
 
