@@ -14,6 +14,8 @@ class FitTestsWithFacialMeasurementsService
 
       results = results.reject { |r| r['qlft_pass'].nil? } if exclude_nil_pass
       results = results.select { |r| r['facial_measurement_id'].present? } unless include_without_facial_measurements
+      results = exclude_testing_manager_results(results)
+      results = attach_facial_measurements(results)
 
       # Add demographics if requested
       results = add_demographics(results) if with_demographics
@@ -36,6 +38,16 @@ class FitTestsWithFacialMeasurementsService
     end
 
     private
+
+    def exclude_testing_manager_results(results)
+      manager = User.find_by(email: 'testing@breathesafe.xyz')
+      return results unless manager
+
+      managed_user_ids = ManagedUser.where(manager_id: manager.id).pluck(:managed_id)
+      return results if managed_user_ids.empty?
+
+      results.reject { |r| managed_user_ids.include?(r['user_id']) }
+    end
 
     def add_demographics(results)
       # Get unique user_ids to batch load profiles
@@ -65,6 +77,22 @@ class FitTestsWithFacialMeasurementsService
         result['age_bracket'] = calculate_age_bracket(profile, created_at)
 
         result
+      end
+    end
+
+    def attach_facial_measurements(results)
+      fm_ids = results.map { |r| r['facial_measurement_id'] }.compact.uniq
+      measurements_by_id = FacialMeasurement.where(id: fm_ids).index_by(&:id)
+
+      results.map do |result|
+        facial_measurement = measurements_by_id[result['facial_measurement_id']]
+        next result unless facial_measurement
+
+        measurement_data = FacialMeasurement::COLUMNS.index_with do |column|
+          facial_measurement.public_send(column)
+        end
+
+        result.merge(measurement_data)
       end
     end
 

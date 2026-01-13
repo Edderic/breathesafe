@@ -84,7 +84,7 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
           r['id'] == n99_fit_test_for_3m_1870.id && r['source'] == 'N99ModeToN95ModeConverterService'
         end
         expect(row).not_to be_nil
-        expect(row['n95_mode_hmff']).to be > 100
+        expect(row['n95_mode_hmff'].to_f).to be > 100
         expect(row['qlft_pass']).to be true
         expect(row['unique_internal_model_code']).to eq('3M 1870+ AURA™')
       end
@@ -157,13 +157,13 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
         qlft_result = results.find { |r| r['id'] == qlft_test.id }
 
         # Verify N95 test results
-        expect(n95_result['n95_mode_hmff']).to be > 100
+        expect(n95_result['n95_mode_hmff'].to_f).to be > 100
         expect(n95_result['qlft_pass']).to be true
         expect(n95_result['face_width']).to eq(facial_measurement.face_width)
         expect(n95_result['user_seal_check']).not_to be_nil
 
         # Verify N99 test results
-        expect(n99_result['n95_mode_hmff']).to be > 100
+        expect(n99_result['n95_mode_hmff'].to_f).to be > 100
         expect(n99_result['qlft_pass']).to be true
         expect(n99_result['face_width']).to eq(facial_measurement.face_width)
         expect(n99_result['user_seal_check']).not_to be_nil
@@ -220,7 +220,7 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
         n95_result = results.find { |r| r['id'] == failing_n95_test.id }
         qlft_result = results.find { |r| r['id'] == failing_qlft_test.id }
 
-        expect(n95_result['n95_mode_hmff']).to be < 100
+        expect(n95_result['n95_mode_hmff'].to_f).to be < 100
         expect(n95_result['qlft_pass']).to be false
         expect(qlft_result['qlft_pass']).to be false
       end
@@ -250,11 +250,11 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
       end
 
       it 'returns results with null facial measurements' do
-        results = described_class.call.to_a
+        results = described_class.call(include_without_facial_measurements: true).to_a
         expect(results.length).to eq(1)
 
         result = results.first
-        expect(result['n95_mode_hmff']).to be > 100
+        expect(result['n95_mode_hmff'].to_f).to be > 100
         expect(result['face_width']).to be_nil
         expect(result['jaw_width']).to be_nil
       end
@@ -264,6 +264,60 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
       it 'returns empty array' do
         results = described_class.call.to_a
         expect(results).to be_empty
+      end
+    end
+
+    context 'when testing manager has managed users' do
+      let(:testing_manager) { create(:user, email: 'testing@breathesafe.xyz') }
+      let(:managed_user) { create(:user) }
+      let(:managed_facial_measurement) { create(:facial_measurement, :complete, user: managed_user) }
+      let!(:managed_fit_test) do
+        create(:fit_test,
+               :with_just_right_mask,
+               user: managed_user,
+               mask: mask,
+               quantitative_fit_testing_device: measurement_device,
+               facial_measurement: managed_facial_measurement,
+               results: {
+                 'quantitative' => {
+                   'testing_mode' => 'N95',
+                   'exercises' => [
+                     { 'name' => 'Exercise 1', 'fit_factor' => '200' },
+                     { 'name' => 'Normal breathing (SEALED)', 'fit_factor' => '200' }
+                   ]
+                 }
+               })
+      end
+
+      let!(:regular_fit_test) do
+        create(:fit_test,
+               :with_just_right_mask,
+               user: user,
+               mask: mask,
+               quantitative_fit_testing_device: measurement_device,
+               facial_measurement: facial_measurement,
+               results: {
+                 'quantitative' => {
+                   'testing_mode' => 'N95',
+                   'exercises' => [
+                     { 'name' => 'Exercise 1', 'fit_factor' => '200' },
+                     { 'name' => 'Normal breathing (SEALED)', 'fit_factor' => '200' }
+                   ]
+                 }
+               })
+      end
+
+      before do
+        ManagedUser.create!(manager: testing_manager, managed: managed_user)
+      end
+
+      it 'excludes fit tests for users managed by the testing account' do
+        results = described_class.call.to_a
+        user_ids = results.map { |r| r['user_id'] }.uniq
+
+        expect(user_ids).to include(user.id)
+        expect(user_ids).not_to include(managed_user.id)
+        expect(results.any? { |r| r['id'] == managed_fit_test.id }).to be false
       end
     end
   end
