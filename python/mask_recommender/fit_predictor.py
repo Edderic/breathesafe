@@ -1,5 +1,6 @@
 import logging
 import os
+import argparse
 
 import pandas as pd
 import torch
@@ -352,6 +353,8 @@ def build_feature_matrix(filtered_df):
     features = pd.get_dummies(filtered_df, columns=categorical_cols, dummy_na=True)
     target = features.pop('qlft_pass_normalized')
     features = features.apply(pd.to_numeric, errors='coerce').fillna(0)
+    features = features.astype(float)
+    target = pd.to_numeric(target, errors='coerce').fillna(0).astype(float)
     return features, target
 
 
@@ -402,6 +405,10 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Train fit predictor model.')
+    parser.add_argument('--epochs', type=int, default=50, help='Number of training epochs.')
+    parser.add_argument('--learning-rate', type=float, default=0.01, help='Learning rate for optimizer.')
+    args = parser.parse_args()
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
 
@@ -458,7 +465,7 @@ if __name__ == '__main__':
         raise SystemExit(0)
 
     features, target = build_feature_matrix(cleaned_fit_tests)
-    model = train_predictor(features, target, epochs=50, learning_rate=0.01)
+    model = train_predictor(features, target, epochs=args.epochs, learning_rate=args.learning_rate)
 
     logging.info("Model training complete. Feature count: %s", features.shape[1])
 
