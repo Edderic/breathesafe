@@ -4,6 +4,7 @@ import argparse
 
 import pandas as pd
 import torch
+import matplotlib.pyplot as plt
 from breathesafe_network import (build_session,
                                  fetch_facial_measurements_fit_tests,
                                  fetch_json)
@@ -381,6 +382,8 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
 
     loss_fn = torch.nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    train_losses = []
+    val_losses = []
 
     for epoch in range(epochs):
         model.train()
@@ -389,6 +392,7 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
         loss = loss_fn(logits, y_train)
         loss.backward()
         optimizer.step()
+        train_losses.append(loss.item())
 
         if (epoch + 1) % 10 == 0 or epoch == 0:
             model.eval()
@@ -397,17 +401,29 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
                 val_loss = loss_fn(val_logits, y_val).item()
                 preds = (torch.sigmoid(val_logits) >= 0.5).float()
                 accuracy = (preds == y_val).float().mean().item()
+                true_pos = ((preds == 1) & (y_val == 1)).float().sum().item()
+                false_pos = ((preds == 1) & (y_val == 0)).float().sum().item()
+                false_neg = ((preds == 0) & (y_val == 1)).float().sum().item()
+                precision = true_pos / (true_pos + false_pos) if (true_pos + false_pos) else 0.0
+                recall = true_pos / (true_pos + false_neg) if (true_pos + false_neg) else 0.0
             logging.info(
-                f"epoch={epoch + 1} train_loss={loss.item():.4f} val_loss={val_loss:.4f} val_acc={accuracy:.3f}"
+                f"epoch={epoch + 1} train_loss={loss.item():.4f} val_loss={val_loss:.4f} "
+                f"val_acc={accuracy:.3f} val_precision={precision:.3f} val_recall={recall:.3f}"
             )
+        model.eval()
+        with torch.no_grad():
+            val_logits = model(x_val)
+            val_loss = loss_fn(val_logits, y_val).item()
+        val_losses.append(val_loss)
 
-    return model
+    return model, train_losses, val_losses
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train fit predictor model.')
     parser.add_argument('--epochs', type=int, default=50, help='Number of training epochs.')
     parser.add_argument('--learning-rate', type=float, default=0.01, help='Learning rate for optimizer.')
+    parser.add_argument('--loss-plot', default='python/mask_recommender/fit_predictor_training_loss.png', help='Path to save training loss plot.')
     args = parser.parse_args()
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
@@ -465,9 +481,24 @@ if __name__ == '__main__':
         raise SystemExit(0)
 
     features, target = build_feature_matrix(cleaned_fit_tests)
-    model = train_predictor(features, target, epochs=args.epochs, learning_rate=args.learning_rate)
+    model, train_losses, val_losses = train_predictor(features, target, epochs=args.epochs, learning_rate=args.learning_rate)
 
     logging.info("Model training complete. Feature count: %s", features.shape[1])
+    if train_losses:
+        plt.figure(figsize=(8, 4))
+        epochs = range(1, len(train_losses) + 1)
+        plt.plot(epochs, train_losses, label='train loss')
+        if val_losses:
+            plt.plot(epochs, val_losses, label='val loss')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.title('Training Loss')
+        plt.grid(True, linestyle='--', alpha=0.4)
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(args.loss_plot)
+        plt.close()
+        logging.info("Saved training loss plot to %s", args.loss_plot)
 
     logging.info(f"masks with fit tests that are missing perimeter_mm: {tested_missing_perimeter_mm}")
 
