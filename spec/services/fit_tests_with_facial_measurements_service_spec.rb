@@ -320,5 +320,35 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
         expect(results.any? { |r| r['id'] == managed_fit_test.id }).to be false
       end
     end
+
+    context 'when mask_modded is present on fit tests' do
+      let!(:modded_fit_test) do
+        create(:fit_test,
+               :with_just_right_mask,
+               user: user,
+               mask: mask,
+               quantitative_fit_testing_device: measurement_device,
+               facial_measurement: facial_measurement,
+               mask_modded: true,
+               results: {
+                 'quantitative' => {
+                   'testing_mode' => 'N95',
+                   'exercises' => [
+                     { 'name' => 'Exercise 1', 'fit_factor' => '200' },
+                     { 'name' => 'Normal breathing (SEALED)', 'fit_factor' => '200' }
+                   ]
+                 }
+               })
+      end
+
+      it 'includes mask_modded in the service output' do
+        results = described_class.call.to_a
+        row = results.find { |r| r['id'] == modded_fit_test.id }
+
+        expect(row).not_to be_nil
+        expect(row).to have_key('mask_modded')
+        expect(row['mask_modded']).to be true
+      end
+    end
   end
 end

@@ -71,6 +71,7 @@ FACIAL_FEATURE_COLUMNS = [
     'chin_mm',
     'top_cheek_mm',
     'mid_cheek_mm',
+    'strap_mm',
 ]
 
 
@@ -332,15 +333,12 @@ def prepare_training_data(fit_tests_df):
     else:
         logging.info("mask_modded column not found; skipping modded filtering.")
 
-    filtered['facial_perimeter_mm'] = filtered[FACIAL_FEATURE_COLUMNS].sum(axis=1, min_count=1)
-    filtered = filtered[filtered['facial_perimeter_mm'].notna()]
+    filtered = filtered.dropna(subset=FACIAL_FEATURE_COLUMNS)
 
     filtered['qlft_pass_normalized'] = filtered['qlft_pass'].apply(_normalize_pass)
     filtered = filtered[filtered['qlft_pass_normalized'].notna()]
 
-    feature_cols = [
-        'perimeter_mm',
-        'facial_perimeter_mm',
+    feature_cols = ['perimeter_mm'] + FACIAL_FEATURE_COLUMNS + [
         'strap_type',
         'style',
         'unique_internal_model_code'
@@ -466,6 +464,9 @@ if __name__ == '__main__':
     tested_missing_perimeter_mm = fit_tests_missing_parameters.groupby(
         ['mask_id', 'unique_internal_model_code']
     ).count()[['id']].sort_values(by='id', ascending=False)
+
+    import pdb; pdb.set_trace()
+    fit_tests_with_imputed_arkit_via_traditional_facial_measurements
 
     cleaned_fit_tests = prepare_training_data(
         fit_tests_with_imputed_arkit_via_traditional_facial_measurements
