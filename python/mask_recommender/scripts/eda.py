@@ -65,6 +65,19 @@ def build_bins():
     return edges, labels
 
 
+def wilson_interval(successes, total, z):
+    if total == 0:
+        return None, None
+    p_hat = successes / total
+    z2 = z ** 2
+    denom = 1 + z2 / total
+    center = (p_hat + z2 / (2 * total)) / denom
+    margin = (z / denom) * ((p_hat * (1 - p_hat) / total) + (z2 / (4 * total ** 2))) ** 0.5
+    lower = max(0.0, center - margin)
+    upper = min(1.0, center + margin)
+    return lower, upper
+
+
 def main():
     parser = argparse.ArgumentParser(description="EDA for qlft pass vs. perimeter difference.")
     parser.add_argument("--output-dir", required=True, help="Directory to save PNG plots.")
@@ -111,6 +124,24 @@ def main():
         sample_count=("qlft_pass_normalized", "size"),
     )
     grouped = grouped.reset_index()
+    grouped["pass_count"] = (
+        (grouped["pass_rate"] * grouped["sample_count"])
+        .fillna(0)
+        .round()
+        .astype(int)
+    )
+    grouped[["ci99_lower", "ci99_upper"]] = grouped.apply(
+        lambda row: pd.Series(
+            wilson_interval(row["pass_count"], row["sample_count"], z=2.576)
+        ),
+        axis=1,
+    )
+    grouped[["ci50_lower", "ci50_upper"]] = grouped.apply(
+        lambda row: pd.Series(
+            wilson_interval(row["pass_count"], row["sample_count"], z=0.674)
+        ),
+        axis=1,
+    )
 
     combos = list(grouped.groupby(["style", "strap_type"]))
     if not combos:
@@ -129,7 +160,22 @@ def main():
         col = index % cols
         ax = axes[row][col]
         subset = subset.set_index("diff_bin").reindex(labels).reset_index()
-        ax.plot(range(len(labels)), subset["pass_rate"], marker="o")
+        x_positions = range(len(labels))
+        ax.plot(x_positions, subset["pass_rate"], marker="o")
+        ax.fill_between(
+            x_positions,
+            subset["ci99_lower"],
+            subset["ci99_upper"],
+            alpha=0.15,
+            label="99% CI"
+        )
+        ax.fill_between(
+            x_positions,
+            subset["ci50_lower"],
+            subset["ci50_upper"],
+            alpha=0.3,
+            label="50% CI"
+        )
         ax.set_ylim(0, 1)
         ax.set_xlim(x_min, x_max)
         ax.set_title(f"{style} / {strap_type}")
@@ -141,6 +187,8 @@ def main():
             ax.set_xlabel("Facial perimeter - mask perimeter (mm)")
         if col == 0:
             ax.set_ylabel("QLFT pass probability")
+        if row == 0 and col == 0:
+            ax.legend(loc="upper right", fontsize="small")
 
     for index in range(num_plots, rows * cols):
         row = index // cols
