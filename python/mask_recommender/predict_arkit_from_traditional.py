@@ -116,6 +116,7 @@ def prepare_dataframe(
     for col in feature_cols + target_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
+            df[col] = df[col].where(df[col] > 0, np.nan)
         else:
             df[col] = np.nan
 
@@ -271,7 +272,8 @@ def predict_arkit_from_traditional(
         "fit_tests_with_facial_measurements"
     ]
 
-    logout(session, base_url)
+    if logged_in:
+        logout(session, base_url)
 
     fit_tests_df = prepare_dataframe(fit_tests_payload, FEATURE_COLUMNS, TARGET_COLUMNS)
 
