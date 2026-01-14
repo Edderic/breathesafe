@@ -1,0 +1,41 @@
+name: Train Mask Recommender
+
+on:
+  schedule:
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: "Environment to train against (development|staging|production)"
+        required: false
+        default: "production"
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r python/mask_recommender/requirements.txt
+
+      - name: Train model and upload artifacts
+        env:
+          RAILS_ENV: ${{ github.event.inputs.target_env || 'production' }}
+          BREATHESAFE_BASE_URL: ${{ github.event.inputs.target_env == 'staging' && 'https://staging.breathesafe.xyz' || 'https://www.breathesafe.xyz' }}
+          BREATHESAFE_SERVICE_EMAIL: ${{ secrets.BREATHESAFE_SERVICE_EMAIL }}
+          BREATHESAFE_SERVICE_PASSWORD: ${{ secrets.BREATHESAFE_SERVICE_PASSWORD }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          python python/mask_recommender/train.py

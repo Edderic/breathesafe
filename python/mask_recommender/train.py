@@ -1,10 +1,14 @@
 import logging
 import os
 import argparse
+import json
+from datetime import datetime, timezone
 
 import pandas as pd
 import torch
 import matplotlib.pyplot as plt
+import boto3
+from sklearn.metrics import roc_auc_score, precision_score, recall_score
 from breathesafe_network import (build_session,
                                  fetch_facial_measurements_fit_tests,
                                  fetch_json)
@@ -323,7 +327,7 @@ def _normalize_pass(value):
     return None
 
 
-def prepare_training_data(fit_tests_df):
+def filter_fit_tests(fit_tests_df):
     filtered = fit_tests_df.copy()
     filtered = filtered[filtered['perimeter_mm'].notna()]
 
@@ -337,8 +341,14 @@ def prepare_training_data(fit_tests_df):
 
     filtered['qlft_pass_normalized'] = filtered['qlft_pass'].apply(_normalize_pass)
     filtered = filtered[filtered['qlft_pass_normalized'].notna()]
+    return filtered
+
+
+def prepare_training_data(fit_tests_df):
+    filtered = filter_fit_tests(fit_tests_df)
 
     feature_cols = ['perimeter_mm'] + FACIAL_FEATURE_COLUMNS + [
+        'facial_hair_beard_length_mm',
         'strap_type',
         'style',
         'unique_internal_model_code'
@@ -414,14 +424,53 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
             val_loss = loss_fn(val_logits, y_val).item()
         val_losses.append(val_loss)
 
-    return model, train_losses, val_losses
+    return model, train_losses, val_losses, x_val, y_val
+
+
+def _env_name():
+    env = os.environ.get('RAILS_ENV', '').strip().lower()
+    if env in ('production', 'staging', 'development'):
+        return env
+    return 'development'
+
+
+def _s3_bucket():
+    mapping = {
+        'production': 'breathesafe',
+        'staging': 'breathesafe-staging',
+        'development': 'breathesafe-development',
+    }
+    return mapping[_env_name()]
+
+
+def _s3_region():
+    return os.environ.get('S3_BUCKET_REGION') or os.environ.get('AWS_REGION') or 'us-east-1'
+
+
+def _upload_file_to_s3(local_path, key):
+    bucket = _s3_bucket()
+    s3 = boto3.client('s3', region_name=_s3_region())
+    s3.upload_file(local_path, bucket, key)
+    return f"s3://{bucket}/{key}"
+
+
+def _upload_json_to_s3(payload, key):
+    bucket = _s3_bucket()
+    s3 = boto3.client('s3', region_name=_s3_region())
+    s3.put_object(
+        Bucket=bucket,
+        Key=key,
+        Body=json.dumps(payload, indent=2).encode('utf-8'),
+        ContentType='application/json'
+    )
+    return f"s3://{bucket}/{key}"
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train fit predictor model.')
     parser.add_argument('--epochs', type=int, default=50, help='Number of training epochs.')
     parser.add_argument('--learning-rate', type=float, default=0.01, help='Learning rate for optimizer.')
-    parser.add_argument('--loss-plot', default='python/mask_recommender/fit_predictor_training_loss.png', help='Path to save training loss plot.')
+    parser.add_argument('--loss-plot', default='python/mask_recommender/training_loss.png', help='Path to save training loss plot.')
     args = parser.parse_args()
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
@@ -431,7 +480,7 @@ if __name__ == '__main__':
         format="%(asctime)s %(levelname)s %(message)s",
     )
 
-    base_url = 'http://localhost:3000'
+    base_url = os.environ.get('BREATHESAFE_BASE_URL', 'http://localhost:3000')
     masks_url = f"{base_url}/masks.json?per_page=1000"
 
     session = build_session(None)
@@ -465,8 +514,9 @@ if __name__ == '__main__':
         ['mask_id', 'unique_internal_model_code']
     ).count()[['id']].sort_values(by='id', ascending=False)
 
-    import pdb; pdb.set_trace()
-    fit_tests_with_imputed_arkit_via_traditional_facial_measurements
+    filtered_fit_tests = filter_fit_tests(
+        fit_tests_with_imputed_arkit_via_traditional_facial_measurements
+    )
 
     cleaned_fit_tests = prepare_training_data(
         fit_tests_with_imputed_arkit_via_traditional_facial_measurements
@@ -482,7 +532,12 @@ if __name__ == '__main__':
         raise SystemExit(0)
 
     features, target = build_feature_matrix(cleaned_fit_tests)
-    model, train_losses, val_losses = train_predictor(features, target, epochs=args.epochs, learning_rate=args.learning_rate)
+    model, train_losses, val_losses, x_val, y_val = train_predictor(
+        features,
+        target,
+        epochs=args.epochs,
+        learning_rate=args.learning_rate
+    )
 
     logging.info("Model training complete. Feature count: %s", features.shape[1])
     if train_losses:
@@ -505,47 +560,108 @@ if __name__ == '__main__':
 
     logging.info(f"Total # fit tests missing parameter_mm: {total_fit_tests_missing_parameter_mm}")
 
-    user_arkit_table = pd.read_csv('./python/mask_recommender/user_arkit_table.csv')
-    predicted_fit_tests = pd.read_csv('./python/mask_recommender/predicted_fit_tests.csv')
+    model.eval()
+    with torch.no_grad():
+        val_logits = model(x_val)
+        val_probs = torch.sigmoid(val_logits).squeeze().cpu().numpy()
+        val_labels = y_val.squeeze().cpu().numpy()
 
-    sorted_tested_masks = get_sorted_tested_masks(fit_tests_df)
+    threshold = 0.5
+    val_preds = (val_probs >= threshold).astype(float)
+    try:
+        roc_auc = roc_auc_score(val_labels, val_probs)
+    except ValueError:
+        roc_auc = None
 
-    with_perimeter = sorted_tested_masks[sorted_tested_masks['perimeter_mm'].notna()]
+    val_precision = precision_score(val_labels, val_preds, zero_division=0)
+    val_recall = recall_score(val_labels, val_preds, zero_division=0)
 
-    # users of fit tests associated with masks that have perimeters
-    user_arkit_for_masks_that_have_perimeters = get_users(fit_tests_df, with_perimeter, user_arkit_table)
-    #
+    feature_columns = list(features.columns)
+    categorical_columns = ['strap_type', 'style', 'unique_internal_model_code']
+    timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
+    prefix = f"mask_recommender/models/{timestamp}"
 
-    user_arkit_for_masks_that_have_perimeters
-    import pdb; pdb.set_trace()
+    model_path = f"/tmp/mask_recommender_model_{timestamp}.pt"
+    torch.save(model.state_dict(), model_path)
+    model_key = f"{prefix}/model_state_dict.pt"
+    model_uri = _upload_file_to_s3(model_path, model_key)
 
-    user_and_facial_measurements_for_face_perimeter_calculation = torch.from_numpy(
-        user_arkit_for_masks_that_have_perimeters[FACIAL_FEATURE_COLUMNS].to_numpy()
-    )
+    mask_data = {}
+    for _, row in masks_df.iterrows():
+        mask_id = row.get('id')
+        if pd.isna(mask_id):
+            continue
+        mask_data[str(int(mask_id))] = {
+            'id': int(mask_id),
+            'unique_internal_model_code': row.get('unique_internal_model_code', ''),
+            'perimeter_mm': row.get('perimeter_mm', None),
+            'strap_type': row.get('strap_type', ''),
+            'style': row.get('style', ''),
+        }
 
-    user_ones = torch.ones((user_arkit_for_masks_that_have_perimeters.shape[0], 1))
+    mask_data_key = f"{prefix}/mask_data.json"
+    mask_data_uri = _upload_json_to_s3(mask_data, mask_data_key)
 
-    user_face_perimeter = user_and_facial_measurements_for_face_perimeter_calculation.sum(axis=1).unsqueeze(1)
-    # filter
-    users_by_masks_by_strap_types = get_users_by_masks_by_types(user_ones, sorted_tested_masks, by='strap_type')
+    actual_series = fit_tests_with_imputed_arkit_via_traditional_facial_measurements.get('actual')
+    if actual_series is None:
+        actual_series = pd.Series([None] * total_num_fit_tests)
+    actual_series = actual_series.fillna(False).astype(bool)
+    actual_count = int(actual_series.sum())
+    predicted_count = int(total_num_fit_tests - actual_count)
 
-    mask_perimeters = torch.from_numpy(with_perimeter['perimeter_mm'].to_numpy()).unsqueeze(0)
-    num_masks = with_perimeter.shape[0]
+    training_actual_count = 0
+    training_predicted_count = 0
+    if 'actual' in filtered_fit_tests.columns:
+        training_actual_count = int(filtered_fit_tests['actual'].fillna(False).astype(bool).sum())
+        training_predicted_count = int(filtered_fit_tests.shape[0] - training_actual_count)
 
-    mask_ones = torch.ones((num_masks, 1))
+    metrics = {
+        'timestamp': timestamp,
+        'environment': _env_name(),
+        'threshold': threshold,
+        'val_loss': val_losses[-1] if val_losses else None,
+        'roc_auc': roc_auc,
+        'val_precision': val_precision,
+        'val_recall': val_recall,
+        'train_samples': int(features.shape[0]),
+        'val_samples': int(y_val.shape[0]),
+        'fit_tests_total': int(total_num_fit_tests),
+        'fit_tests_total_actual_arkit': actual_count,
+        'fit_tests_total_predicted_arkit': predicted_count,
+        'fit_tests_training_total': int(filtered_fit_tests.shape[0]),
+        'fit_tests_training_actual_arkit': training_actual_count,
+        'fit_tests_training_predicted_arkit': training_predicted_count,
+    }
+    metrics_key = f"{prefix}/metrics.json"
+    metrics_uri = _upload_json_to_s3(metrics, metrics_key)
 
-    difference = compute_difference(mask_perimeters, user_face_perimeter, mask_ones, user_ones)
-    import pdb; pdb.set_trace()
+    metadata = {
+        'timestamp': timestamp,
+        'environment': _env_name(),
+        'feature_columns': feature_columns,
+        'categorical_columns': categorical_columns,
+        'hidden_sizes': [32, 16],
+        'threshold': threshold,
+        'model_class': 'torch.nn.Sequential',
+    }
+    metadata_key = f"{prefix}/model_metadata.json"
+    metadata_uri = _upload_json_to_s3(metadata, metadata_key)
 
-    diff_bins = produce_diff_bins(user_ones, difference, start=-60, end=60, interval=10)
-    diff_bins.shape
+    latest_payload = {
+        'timestamp': timestamp,
+        'model_key': model_key,
+        'model_uri': model_uri,
+        'metrics_key': metrics_key,
+        'metrics_uri': metrics_uri,
+        'metadata_key': metadata_key,
+        'metadata_uri': metadata_uri,
+        'mask_data_key': mask_data_key,
+        'mask_data_uri': mask_data_uri,
+    }
+    latest_key = "mask_recommender/models/latest.json"
+    latest_uri = _upload_json_to_s3(latest_payload, latest_key)
 
-    sorted_styles = sorted(list(with_perimeter['style'].unique()))
-    beta_style_diff_bins = torch.rand((diff_bins.shape[0] * len(sorted_styles), 1), requires_grad=True)
-
-    results = calc_preds(
-        beta_style_diff_bins,
-        diff_bins,
-        user_ones,
-        users_by_masks_by_strap_types,
-        betas)
+    logging.info("Uploaded model to %s", model_uri)
+    logging.info("Uploaded metadata to %s", metadata_uri)
+    logging.info("Uploaded metrics to %s", metrics_uri)
+    logging.info("Updated latest pointer at %s", latest_uri)
