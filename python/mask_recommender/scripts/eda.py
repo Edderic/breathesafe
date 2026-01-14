@@ -78,78 +78,14 @@ def wilson_interval(successes, total, z):
     return lower, upper
 
 
-def main():
-    parser = argparse.ArgumentParser(description="EDA for qlft pass vs. perimeter difference.")
-    parser.add_argument("--output-dir", required=True, help="Directory to save PNG plots.")
-    parser.add_argument("--base-url", default="http://localhost:3000", help="Base URL for API.")
-    parser.add_argument("--grid-cols", type=int, default=3, help="Number of subplot columns.")
-    parser.add_argument("--output-file", default="qlft_pass_by_diff.png", help="Output PNG filename.")
-    args = parser.parse_args()
-
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(message)s",
-    )
-
-    os.makedirs(args.output_dir, exist_ok=True)
-
-    email = os.getenv("BREATHESAFE_SERVICE_EMAIL")
-    password = os.getenv("BREATHESAFE_SERVICE_PASSWORD")
-
-    df = predict_arkit_from_traditional(
-        base_url=args.base_url,
-        email=email,
-        password=password,
-    )
-
-    df = df[df["perimeter_mm"].notna()]
-    if "mask_modded" in df.columns:
-        df = df[~df["mask_modded"].apply(lambda v: normalize_bool(v) is True)]
-    else:
-        logging.warning("mask_modded column missing; skipping modded filtering.")
-
-    df["facial_perimeter_mm"] = df[FACIAL_COMPONENTS].sum(axis=1, min_count=len(FACIAL_COMPONENTS))
-    df = df[df["facial_perimeter_mm"].notna()]
-
-    df["qlft_pass_normalized"] = df["qlft_pass"].apply(normalize_bool)
-    df = df[df["qlft_pass_normalized"].notna()]
-
-    df["perimeter_diff"] = df["facial_perimeter_mm"] - df["perimeter_mm"]
-
-    edges, labels = build_bins()
-    df["diff_bin"] = pd.cut(df["perimeter_diff"], bins=edges, labels=labels, right=False)
-
-    grouped = df.groupby(["style", "strap_type", "diff_bin"]).agg(
-        pass_rate=("qlft_pass_normalized", "mean"),
-        sample_count=("qlft_pass_normalized", "size"),
-    )
-    grouped = grouped.reset_index()
-    grouped["pass_count"] = (
-        (grouped["pass_rate"] * grouped["sample_count"])
-        .fillna(0)
-        .round()
-        .astype(int)
-    )
-    grouped[["ci99_lower", "ci99_upper"]] = grouped.apply(
-        lambda row: pd.Series(
-            wilson_interval(row["pass_count"], row["sample_count"], z=2.576)
-        ),
-        axis=1,
-    )
-    grouped[["ci50_lower", "ci50_upper"]] = grouped.apply(
-        lambda row: pd.Series(
-            wilson_interval(row["pass_count"], row["sample_count"], z=0.674)
-        ),
-        axis=1,
-    )
-
+def render_plots(grouped, labels, output_path, cols):
     combos = list(grouped.groupby(["style", "strap_type"]))
     if not combos:
         logging.warning("No style/strap combos found after filtering.")
         return
 
     num_plots = len(combos)
-    cols = max(1, args.grid_cols)
+    cols = max(1, cols)
     rows = (num_plots + cols - 1) // cols
 
     fig, axes = plt.subplots(rows, cols, figsize=(cols * 5, rows * 4), squeeze=False, sharey=True)
@@ -196,10 +132,146 @@ def main():
         fig.delaxes(axes[row][col])
 
     fig.tight_layout()
-    output_path = os.path.join(args.output_dir, args.output_file)
     fig.savefig(output_path)
     plt.close(fig)
     logging.info("Saved %s", output_path)
+
+
+def compute_grouped(df, labels):
+    grouped = df.groupby(["style", "strap_type", "diff_bin"], observed=False).agg(
+        pass_rate=("qlft_pass_normalized", "mean"),
+        sample_count=("qlft_pass_normalized", "size"),
+    )
+    grouped = grouped.reset_index()
+    grouped["pass_count"] = (
+        (grouped["pass_rate"] * grouped["sample_count"])
+        .fillna(0)
+        .round()
+        .astype(int)
+    )
+    grouped[["ci99_lower", "ci99_upper"]] = grouped.apply(
+        lambda row: pd.Series(
+            wilson_interval(row["pass_count"], row["sample_count"], z=2.576)
+        ),
+        axis=1,
+    )
+    grouped[["ci50_lower", "ci50_upper"]] = grouped.apply(
+        lambda row: pd.Series(
+            wilson_interval(row["pass_count"], row["sample_count"], z=0.674)
+        ),
+        axis=1,
+    )
+    return grouped
+
+
+def render_scatter_plots(df_all, labels, output_path, cols):
+    filtered_sets = [
+        ("All", df_all),
+    ]
+    if "actual" in df_all.columns:
+        filtered_sets.append(("Actual", df_all[df_all["actual"] == True]))
+
+    combos = sorted(df_all[["style", "strap_type"]].dropna().drop_duplicates().itertuples(index=False, name=None))
+    if not combos:
+        logging.warning("No style/strap combos found for scatter plots.")
+        return
+
+    rows = len(combos)
+    cols = max(cols, 2) if len(filtered_sets) > 1 else 1
+    fig, axes = plt.subplots(rows, cols, figsize=(cols * 5, rows * 4), squeeze=False, sharex=True, sharey=True)
+
+    for row_index, (style, strap_type) in enumerate(combos):
+        for col_index, (label, df_subset) in enumerate(filtered_sets):
+            ax = axes[row_index][col_index]
+            subset = df_subset[(df_subset["style"] == style) & (df_subset["strap_type"] == strap_type)]
+            if subset.empty:
+                ax.set_axis_off()
+                continue
+
+            colors = subset["qlft_pass_normalized"].map(lambda v: "green" if v else "red")
+            ax.scatter(
+                subset["facial_perimeter_mm"],
+                subset["perimeter_mm"],
+                c=colors,
+                alpha=0.6
+            )
+            if row_index == 0:
+                ax.set_title(f"{label}")
+            if col_index == 0:
+                ax.set_ylabel("Mask perimeter (mm)")
+            if row_index == rows - 1:
+                ax.set_xlabel("Facial perimeter (mm)")
+            ax.grid(True, linestyle="--", alpha=0.3)
+        axes[row_index][0].set_ylabel(f"{style} / {strap_type}\nMask perimeter (mm)")
+
+    fig.tight_layout()
+    fig.savefig(output_path)
+    plt.close(fig)
+    logging.info("Saved %s", output_path)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="EDA for qlft pass vs. perimeter difference.")
+    parser.add_argument("--output-dir", required=True, help="Directory to save PNG plots.")
+    parser.add_argument("--base-url", default="http://localhost:3000", help="Base URL for API.")
+    parser.add_argument("--grid-cols", type=int, default=3, help="Number of subplot columns.")
+    parser.add_argument("--output-file", default="qlft_pass_by_diff.png", help="Output PNG filename.")
+    args = parser.parse_args()
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
+    )
+
+    os.makedirs(args.output_dir, exist_ok=True)
+
+    email = os.getenv("BREATHESAFE_SERVICE_EMAIL")
+    password = os.getenv("BREATHESAFE_SERVICE_PASSWORD")
+
+    df = predict_arkit_from_traditional(
+        base_url=args.base_url,
+        email=email,
+        password=password,
+    )
+
+    df = df[df["perimeter_mm"].notna()]
+    if "mask_modded" in df.columns:
+        df = df[~df["mask_modded"].apply(lambda v: normalize_bool(v) is True)]
+    else:
+        logging.warning("mask_modded column missing; skipping modded filtering.")
+
+    df["facial_perimeter_mm"] = df[FACIAL_COMPONENTS].sum(axis=1, min_count=len(FACIAL_COMPONENTS))
+    df = df[df["facial_perimeter_mm"].notna()]
+
+    df["qlft_pass_normalized"] = df["qlft_pass"].apply(normalize_bool)
+    df = df[df["qlft_pass_normalized"].notna()]
+
+    df["perimeter_diff"] = df["facial_perimeter_mm"] - df["perimeter_mm"]
+
+    edges, labels = build_bins()
+    df["diff_bin"] = pd.cut(df["perimeter_diff"], bins=edges, labels=labels, right=False)
+
+    grouped = compute_grouped(df, labels)
+    output_path = os.path.join(args.output_dir, args.output_file)
+    render_plots(grouped, labels, output_path, args.grid_cols)
+
+    if "actual" in df.columns:
+        actual_df = df[df["actual"] == True]
+        if actual_df.empty:
+            logging.warning("No rows with actual ARKit data; skipping actual-only plot.")
+        else:
+            grouped_actual = compute_grouped(actual_df, labels)
+            base_name, ext = os.path.splitext(args.output_file)
+            actual_filename = f"{base_name}_actual_arkit{ext or '.png'}"
+            actual_path = os.path.join(args.output_dir, actual_filename)
+            render_plots(grouped_actual, labels, actual_path, args.grid_cols)
+    else:
+        logging.warning("actual column missing; skipping actual-only plot.")
+
+    scatter_base, scatter_ext = os.path.splitext(args.output_file)
+    scatter_filename = f"{scatter_base}_scatter{scatter_ext or '.png'}"
+    scatter_path = os.path.join(args.output_dir, scatter_filename)
+    render_scatter_plots(df, labels, scatter_path, args.grid_cols)
 
 
 if __name__ == "__main__":
