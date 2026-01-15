@@ -450,6 +450,13 @@ def _s3_region():
 def _upload_file_to_s3(local_path, key):
     bucket = _s3_bucket()
     s3 = boto3.client('s3', region_name=_s3_region())
+    profile = os.environ.get('AWS_PROFILE')
+    logging.info(
+        "S3 upload using bucket=%s region=%s profile=%s",
+        bucket,
+        _s3_region(),
+        profile or "default"
+    )
     s3.upload_file(local_path, bucket, key)
     return f"s3://{bucket}/{key}"
 
@@ -457,6 +464,13 @@ def _upload_file_to_s3(local_path, key):
 def _upload_json_to_s3(payload, key):
     bucket = _s3_bucket()
     s3 = boto3.client('s3', region_name=_s3_region())
+    profile = os.environ.get('AWS_PROFILE')
+    logging.info(
+        "S3 upload using bucket=%s region=%s profile=%s",
+        bucket,
+        _s3_region(),
+        profile or "default"
+    )
     s3.put_object(
         Bucket=bucket,
         Key=key,
