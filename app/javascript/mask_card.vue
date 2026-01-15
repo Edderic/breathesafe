@@ -37,14 +37,15 @@
 
         <table v-if='showStats'>
           <tr >
-            <td colspan='2'>
+            <td :colspan="showProbaFit ? 2 : 4">
               <div class='image-and-name'>
                 <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
               </div>
             </td>
 
-            <th colspan='1'>Probability of Fit</th>
-            <td colspan="1">
+            <template v-if="showProbaFit">
+              <th colspan='1'>Probability of Fit</th>
+              <td colspan="1">
               <div class='stat-cell'>
                 <div v-if="statIsMissing('proba_fit', m)" class='stat-bar-wrapper stat-bar-missing'>
                   <div class='stat-bar-axis'></div>
@@ -59,7 +60,8 @@
                   <div v-if="statAxisLabel('proba_fit', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('proba_fit', 'max') }}</div>
                 </div>
               </div>
-            </td>
+              </td>
+            </template>
           </tr>
           <tr>
             <td colspan='4'>
