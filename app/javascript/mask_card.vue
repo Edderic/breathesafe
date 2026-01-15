@@ -36,7 +36,40 @@
       <div class='card flex align-items-center justify-content-center' v-for='m in cards' @click='selectMask(m.id)'>
 
         <table v-if='showStats'>
-          <tr >
+          <tr class="mobile-only">
+            <td class="mobile-image-cell">
+              <div class='image-and-name'>
+                <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
+              </div>
+            </td>
+            <td class="mobile-title-cell">
+              <div class='description'>
+                <span>
+                  {{m.uniqueInternalModelCode}}
+                </span>
+              </div>
+            </td>
+          </tr>
+          <tr v-if="showProbaFit" class="mobile-only">
+            <th>Probability of Fit</th>
+            <td>
+              <div class='stat-cell'>
+                <div v-if="statIsMissing('proba_fit', m)" class='stat-bar-wrapper stat-bar-missing'>
+                  <div class='stat-bar-axis'></div>
+                  <div class='stat-bar stat-bar-missing-fill'></div>
+                  <div class='stat-bar-label'>{{ statMissingText('proba_fit') }}</div>
+                </div>
+                <div v-else class='stat-bar-wrapper'>
+                  <div class='stat-bar-axis'></div>
+                  <div class='stat-bar' :style="statBarStyle(statPercent('proba_fit', m), 'proba_fit')"></div>
+                  <div class='stat-bar-label'>{{ statLabel('proba_fit', m) }}</div>
+                  <div v-if="statAxisLabel('proba_fit', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('proba_fit', 'min') }}</div>
+                  <div v-if="statAxisLabel('proba_fit', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('proba_fit', 'max') }}</div>
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr class="desktop-only">
             <td :colspan="showProbaFit ? 2 : 4">
               <div class='image-and-name'>
                 <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
@@ -63,7 +96,7 @@
               </td>
             </template>
           </tr>
-          <tr>
+          <tr class="desktop-only">
             <td colspan='4'>
               <div class='description'>
                 <span>
@@ -951,6 +984,41 @@ export default {
     color: #444;
   }
 
+  @media (max-width: 500px) {
+    table {
+      width: 100%;
+    }
+
+    tr {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+    }
+
+    th,
+    td {
+      width: 100%;
+    }
+
+    .desktop-only {
+      display: none;
+    }
+
+    .mobile-only {
+      display: grid;
+    }
+
+    .mobile-title-cell .description {
+      text-align: left;
+    }
+  }
+
+  @media (min-width: 501px) {
+    .mobile-only {
+      display: none;
+    }
+  }
+
   .popup {
     top: 3em;
   }
@@ -1040,6 +1108,11 @@ export default {
       display: grid;
       grid-template-columns: 100%;
 
+    }
+    th, td {
+      padding-left: 0;
+      padding-right: 0;
+      text-align: center;
     }
   }
 
