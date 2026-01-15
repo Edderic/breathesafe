@@ -45,7 +45,7 @@
         </div>
         <table v-if='showStats'>
           <tr v-if="showProbaFit">
-            <th>Proba Fit</th>
+            <th>Probability of Fit</th>
             <td colspan="3">
               <ColoredCell
                class='risk-score'

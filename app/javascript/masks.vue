@@ -93,7 +93,7 @@
       :showUniqueNumFitTesters='true'
       :viewMaskOnClick='true'
       :facialMeasurements='facialMeasurements'
-      :showProbaFit='false'
+      :showProbaFit='shouldShowProbaFit'
     />
 
     <br>
@@ -218,6 +218,7 @@ export default {
       perPage: 12,
       totalCount: 0,
       maskDataContext: {},
+      recommenderPayloadHandled: false,
     }
   },
   props: {
@@ -279,6 +280,11 @@ export default {
              this.filterForStyle !== 'none' ||
              this.filterForMissing.length > 0
     },
+    shouldShowProbaFit() {
+      const hasPayload = !!this.$route.query.recommenderPayload
+      const hasProbaFit = this.masks.some((mask) => mask.probaFit !== undefined && mask.probaFit !== null)
+      return hasPayload || hasProbaFit || this.sortByField === 'probaFit'
+    },
   },
 
   async created() {
@@ -310,6 +316,9 @@ export default {
 
       const page = parseInt(toQuery.page, 10)
       this.currentPage = Number.isNaN(page) || page < 1 ? 1 : page
+      if (await this.maybeLoadRecommenderPayload(toQuery)) {
+        return
+      }
 
       await this.loadData(toQuery)
     },
@@ -424,6 +433,57 @@ export default {
           // whatever you want
         })
 
+    },
+    async maybeLoadRecommenderPayload(toQuery) {
+      if (this.recommenderPayloadHandled) {
+        return false
+      }
+
+      const payloadParam = toQuery.recommenderPayload
+      if (!payloadParam) {
+        return false
+      }
+
+      const facialMeasurements = this.decodeRecommenderPayload(payloadParam)
+      if (!facialMeasurements) {
+        this.message = "Failed to decode recommendations payload."
+        this.recommenderPayloadHandled = true
+        return false
+      }
+
+      this.recommenderPayloadHandled = true
+      this.setWaiting(true)
+      try {
+        await axios.post(
+          `/mask_recommender.json`,
+          { facial_measurements: facialMeasurements }
+        )
+          .then(response => {
+            let data = response.data
+            if (data) {
+              this.masks = []
+              for (let m of data) {
+                this.masks.push(new Respirator(m))
+              }
+            }
+          })
+          .catch(() => {
+            this.message = "Failed to load mask recommendations."
+          })
+      } finally {
+        this.setWaiting(false)
+      }
+      return true
+    },
+    decodeRecommenderPayload(payload) {
+      try {
+        const base64 = payload.replace(/-/g, '+').replace(/_/g, '/')
+        const padded = base64 + '='.repeat((4 - base64.length % 4) % 4)
+        const json = atob(padded)
+        return JSON.parse(json)
+      } catch (error) {
+        return null
+      }
     },
     async loadStuff() {
       // TODO: load the profile for the current user
