@@ -7,5 +7,6 @@ tqdm
 scikit-learn
 matplotlib
 pyarrow
+torch
 psycopg2-binary
 
