@@ -45,15 +45,20 @@
 
             <th colspan='1'>Probability of Fit</th>
             <td colspan="1">
-              <ColoredCell
-               class='risk-score'
-               :colorScheme="fitColorScheme"
-               :maxVal=1
-               :value='m.probaFit'
-               :text="`${Math.round(m.probaFit * 100, 3)}% (${m.uniqueFitTestersCount})`"
-               :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
-               :exception='exceptionMissingObject'
-               />
+              <div class='stat-cell'>
+                <div v-if="statIsMissing('proba_fit', m)" class='stat-bar-wrapper stat-bar-missing'>
+                  <div class='stat-bar-axis'></div>
+                  <div class='stat-bar stat-bar-missing-fill'></div>
+                  <div class='stat-bar-label'>{{ statMissingText('proba_fit') }}</div>
+                </div>
+                <div v-else class='stat-bar-wrapper'>
+                  <div class='stat-bar-axis'></div>
+                  <div class='stat-bar' :style="statBarStyle(statPercent('proba_fit', m), 'proba_fit')"></div>
+                  <div class='stat-bar-label'>{{ statLabel('proba_fit', m) }}</div>
+                  <div v-if="statAxisLabel('proba_fit', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('proba_fit', 'min') }}</div>
+                  <div v-if="statAxisLabel('proba_fit', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('proba_fit', 'max') }}</div>
+                </div>
+              </div>
             </td>
           </tr>
           <tr>
@@ -457,6 +462,14 @@ export default {
         return this.clampPercent(value / max)
       }
 
+      if (type === 'proba_fit') {
+        const value = mask.probaFit
+        if (this.statIsMissing(type, mask)) {
+          return null
+        }
+        return this.clampPercent(value)
+      }
+
       return null
     },
     statLabel(type, mask) {
@@ -474,6 +487,13 @@ export default {
       }
       if (type === 'fit_tests') {
         return this.formatCount(mask.fitTestCount)
+      }
+      if (type === 'proba_fit') {
+        if (this.statIsMissing(type, mask)) {
+          return this.statMissingText(type)
+        }
+        const percent = Math.round(mask.probaFit * 100)
+        return `${percent}%`
       }
       return 'N/A'
     },
@@ -495,6 +515,9 @@ export default {
       }
       if (type === 'fit_tests') {
         return mask.fitTestCount === null || mask.fitTestCount === undefined || isNaN(mask.fitTestCount)
+      }
+      if (type === 'proba_fit') {
+        return mask.probaFit === null || mask.probaFit === undefined || isNaN(mask.probaFit)
       }
       return true
     },
@@ -531,6 +554,9 @@ export default {
         }
         return position === 'min' ? '0' : this.formatCount(max)
       }
+      if (type === 'proba_fit') {
+        return position === 'min' ? '0%' : '100%'
+      }
       return null
     },
     statMissingText(type) {
@@ -541,7 +567,8 @@ export default {
         filtration: '#c0392b',
         breathability: '#e67e22',
         perimeter: '#16a085',
-        fit_tests: '#2980b9'
+        fit_tests: '#2980b9',
+        proba_fit: '#8e44ad'
       }
     },
     clampPercent(value) {
