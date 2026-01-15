@@ -421,7 +421,9 @@ class N99ModeToN95ModeConverterService
                          begin
                            fm.aggregated_arkit_measurements
                          rescue StandardError => e
-                           Rails.logger.error("Error computing aggregated measurements for FM #{facial_measurement_id}: #{e.message}")
+                           Rails.logger.error(
+                             "Error computing aggregated measurements for FM #{facial_measurement_id}: #{e.message}"
+                           )
                            {
                              nose_mm: nil,
                              strap_mm: nil,

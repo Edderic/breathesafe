@@ -4,7 +4,7 @@ namespace :brands do
   desc 'Prepopulate brands table with brand names'
   task prepopulate: :environment do
     # Cleaned list: removed duplicates (TRI-TITANS, Trident) and fixed missing comma after 4CAir
-    BRAND_NAMES = [
+    brand_names = [
       '3M',
       '4CAir',
       'AER',
@@ -147,29 +147,27 @@ namespace :brands do
       'stealth'
     ].freeze
 
-    puts "Prepopulating brands table with #{BRAND_NAMES.length} brand names..."
+    puts "Prepopulating brands table with #{brand_names.length} brand names..."
 
     created_count = 0
     skipped_count = 0
     error_count = 0
     errors = []
 
-    BRAND_NAMES.each do |brand_name|
-      begin
-        brand = Brand.find_or_create_by(name: brand_name)
-        if brand.persisted? && brand.previous_changes.key?('id')
-          created_count += 1
-          puts "Created: #{brand_name}"
-        else
-          skipped_count += 1
-          puts "Skipped (already exists): #{brand_name}"
-        end
-      rescue StandardError => e
-        error_count += 1
-        error_message = "Error processing '#{brand_name}': #{e.message}"
-        errors << error_message
-        puts "ERROR: #{error_message}"
+    brand_names.each do |brand_name|
+      brand = Brand.find_or_create_by(name: brand_name)
+      if brand.persisted? && brand.previous_changes.key?('id')
+        created_count += 1
+        puts "Created: #{brand_name}"
+      else
+        skipped_count += 1
+        puts "Skipped (already exists): #{brand_name}"
       end
+    rescue StandardError => e
+      error_count += 1
+      error_message = "Error processing '#{brand_name}': #{e.message}"
+      errors << error_message
+      puts "ERROR: #{error_message}"
     end
 
     puts "\nSummary:"

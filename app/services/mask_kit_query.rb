@@ -60,20 +60,30 @@ class MaskKitQuery
     # Convert ActiveRecord::Result to array of hashes directly (much faster than to_json + parse)
     convert_start = Time.current
     results = sql_results_raw.to_a
-    Rails.logger.debug "MaskKitQuery: SQL results conversion took: #{(Time.current - convert_start) * 1000}ms, converted #{results.length} rows"
+    Rails.logger.debug(
+      "MaskKitQuery: SQL results conversion took: #{(Time.current - convert_start) * 1000}ms, " \
+      "converted #{results.length} rows"
+    )
 
     # Decrypt the profile data for each result
     # Collect all managed_ids that need decryption
     decrypt_start = Time.current
     managed_ids_needing_decryption = results.select do |result|
       result['managed_id'] && result['first_name'].is_a?(String) && result['first_name'].start_with?('{"p":')
-    end.map { |result| result['managed_id'] }.uniq
-    Rails.logger.debug "MaskKitQuery: Collecting managed_ids for decryption took: #{(Time.current - decrypt_start) * 1000}ms, found #{managed_ids_needing_decryption.length} IDs"
+    end
+    managed_ids_needing_decryption = managed_ids_needing_decryption.map { |result| result['managed_id'] }.uniq
+    Rails.logger.debug(
+      "MaskKitQuery: Collecting managed_ids for decryption took: #{(Time.current - decrypt_start) * 1000}ms, " \
+      "found #{managed_ids_needing_decryption.length} IDs"
+    )
 
     # Preload all profiles in a single query
     profile_load_start = Time.current
     profiles_by_user_id = Profile.where(user_id: managed_ids_needing_decryption).index_by(&:user_id)
-    Rails.logger.debug "MaskKitQuery: Profile preload took: #{(Time.current - profile_load_start) * 1000}ms, loaded #{profiles_by_user_id.length} profiles"
+    Rails.logger.debug(
+      "MaskKitQuery: Profile preload took: #{(Time.current - profile_load_start) * 1000}ms, " \
+      "loaded #{profiles_by_user_id.length} profiles"
+    )
 
     # Update results using preloaded profiles
     profile_update_start = Time.current
@@ -89,10 +99,15 @@ class MaskKitQuery
           result['last_name'] = profile.last_name
         end
       rescue StandardError => e
-        Rails.logger.warn "Failed to decrypt profile data for user #{result['managed_id']}: #{e.message}"
+        Rails.logger.warn(
+          "Failed to decrypt profile data for user #{result['managed_id']}: #{e.message}"
+        )
       end
     end
-    Rails.logger.debug "MaskKitQuery: Profile decryption loop took: #{(Time.current - profile_update_start) * 1000}ms, processed #{results.length} results"
+    Rails.logger.debug(
+      "MaskKitQuery: Profile decryption loop took: #{(Time.current - profile_update_start) * 1000}ms, " \
+      "processed #{results.length} results"
+    )
 
     json_parse_start = Time.current
     parsed_results = FitTest.json_parse(
@@ -105,7 +120,9 @@ class MaskKitQuery
       ]
     )
     Rails.logger.debug "MaskKitQuery: FitTest.json_parse took: #{(Time.current - json_parse_start) * 1000}ms"
-    Rails.logger.debug "MaskKitQuery.managed_by total time: #{(Time.current - start_time) * 1000}ms"
+    Rails.logger.debug(
+      "MaskKitQuery.managed_by total time: #{(Time.current - start_time) * 1000}ms"
+    )
 
     parsed_results
   end

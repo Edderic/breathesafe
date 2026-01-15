@@ -109,9 +109,15 @@ class FacialMeasurementsImporter
       # Update existing measurement
       if existing_measurement.update(facial_data)
         @stats[:updated] += 1
-        Rails.logger.debug "✓ Updated facial measurement for user: #{anonymous_first_name} (ID: #{managed_user.managed_id})"
+        Rails.logger.debug(
+          "✓ Updated facial measurement for user: #{anonymous_first_name} " \
+          "(ID: #{managed_user.managed_id})"
+        )
       else
-        @stats[:errors] << "Row #{@stats[:total_rows]}: Failed to update - #{existing_measurement.errors.full_messages.join(', ')}"
+        @stats[:errors] << [
+          "Row #{@stats[:total_rows]}: Failed to update -",
+          existing_measurement.errors.full_messages.join(', ')
+        ].join(' ')
         @stats[:skipped] += 1
       end
     else
@@ -119,9 +125,15 @@ class FacialMeasurementsImporter
       facial_measurement = FacialMeasurement.new(facial_data)
       if facial_measurement.save
         @stats[:created] += 1
-        Rails.logger.debug "✓ Created facial measurement for user: #{anonymous_first_name} (ID: #{managed_user.managed_id})"
+        Rails.logger.debug(
+          "✓ Created facial measurement for user: #{anonymous_first_name} " \
+          "(ID: #{managed_user.managed_id})"
+        )
       else
-        @stats[:errors] << "Row #{@stats[:total_rows]}: Failed to create - #{facial_measurement.errors.full_messages.join(', ')}"
+        @stats[:errors] << [
+          "Row #{@stats[:total_rows]}: Failed to create -",
+          facial_measurement.errors.full_messages.join(', ')
+        ].join(' ')
         @stats[:skipped] += 1
       end
     end

@@ -8,7 +8,11 @@ namespace :fit_tests do
     total = FitTest.where(mask_modded: nil).count
     puts "Found #{total} fit tests to backfill"
 
-    updated = FitTest.where(mask_modded: nil).update_all(mask_modded: false)
+    updated = 0
+    FitTest.where(mask_modded: nil).find_each do |fit_test|
+      fit_test.update!(mask_modded: false)
+      updated += 1
+    end
     puts "Updated #{updated} fit tests to have mask_modded = false"
 
     puts 'Backfill complete!'

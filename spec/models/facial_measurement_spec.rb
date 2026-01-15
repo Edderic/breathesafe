@@ -291,7 +291,8 @@ RSpec.describe FacialMeasurement, type: :model do
           arkit: arkit
         )
         expect(measurement).not_to be_valid
-        expect(measurement.errors[:arkit]).to include('hash for key \'14-818\' in average_measurements must have \'value\' key')
+        error_message = "hash for key '14-818' in average_measurements must have 'value' key"
+        expect(measurement.errors[:arkit]).to include(error_message)
       end
     end
 
@@ -310,7 +311,8 @@ RSpec.describe FacialMeasurement, type: :model do
           arkit: arkit
         )
         expect(measurement).not_to be_valid
-        expect(measurement.errors[:arkit]).to include(match(/value for key '14-818' in average_measurements must be a positive float/))
+        error_regex = /value for key '14-818' in average_measurements must be a positive float/
+        expect(measurement.errors[:arkit]).to include(match(error_regex))
       end
 
       it 'is invalid with zero' do
@@ -327,7 +329,8 @@ RSpec.describe FacialMeasurement, type: :model do
           arkit: arkit
         )
         expect(measurement).not_to be_valid
-        expect(measurement.errors[:arkit]).to include(match(/value for key '14-818' in average_measurements must be a positive float/))
+        error_regex = /value for key '14-818' in average_measurements must be a positive float/
+        expect(measurement.errors[:arkit]).to include(match(error_regex))
       end
 
       it 'is invalid with string' do
@@ -344,7 +347,8 @@ RSpec.describe FacialMeasurement, type: :model do
           arkit: arkit
         )
         expect(measurement).not_to be_valid
-        expect(measurement.errors[:arkit]).to include(match(/value for key '14-818' in average_measurements must be a positive float/))
+        error_regex = /value for key '14-818' in average_measurements must be a positive float/
+        expect(measurement.errors[:arkit]).to include(match(error_regex))
       end
 
       it 'is invalid with nil' do
@@ -361,7 +365,8 @@ RSpec.describe FacialMeasurement, type: :model do
           arkit: arkit
         )
         expect(measurement).not_to be_valid
-        expect(measurement.errors[:arkit]).to include(match(/value for key '14-818' in average_measurements must be a positive float/))
+        error_regex = /value for key '14-818' in average_measurements must be a positive float/
+        expect(measurement.errors[:arkit]).to include(match(error_regex))
       end
     end
 
@@ -379,7 +384,8 @@ RSpec.describe FacialMeasurement, type: :model do
           arkit: arkit
         )
         expect(measurement).not_to be_valid
-        expect(measurement.errors[:arkit]).to include('hash for key \'14-818\' in average_measurements must have \'description\' key')
+        error_message = "hash for key '14-818' in average_measurements must have 'description' key"
+        expect(measurement.errors[:arkit]).to include(error_message)
       end
     end
 
@@ -398,7 +404,8 @@ RSpec.describe FacialMeasurement, type: :model do
           arkit: arkit
         )
         expect(measurement).not_to be_valid
-        expect(measurement.errors[:arkit]).to include(match(/description for key '14-818' in average_measurements must be a string/))
+        error_regex = /description for key '14-818' in average_measurements must be a string/
+        expect(measurement.errors[:arkit]).to include(match(error_regex))
       end
 
       it 'is invalid with hash' do
@@ -415,7 +422,8 @@ RSpec.describe FacialMeasurement, type: :model do
           arkit: arkit
         )
         expect(measurement).not_to be_valid
-        expect(measurement.errors[:arkit]).to include(match(/description for key '14-818' in average_measurements must be a string/))
+        error_regex = /description for key '14-818' in average_measurements must be a string/
+        expect(measurement.errors[:arkit]).to include(match(error_regex))
       end
 
       it 'is invalid with nil' do
@@ -432,7 +440,8 @@ RSpec.describe FacialMeasurement, type: :model do
           arkit: arkit
         )
         expect(measurement).not_to be_valid
-        expect(measurement.errors[:arkit]).to include(match(/description for key '14-818' in average_measurements must be a string/))
+        error_regex = /description for key '14-818' in average_measurements must be a string/
+        expect(measurement.errors[:arkit]).to include(match(error_regex))
       end
     end
 

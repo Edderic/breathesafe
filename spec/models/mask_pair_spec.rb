@@ -116,7 +116,8 @@ describe MaskPair do
         mask_with_lower_id = mask_a.id < mask_b.id ? mask_a : mask_b
         mask_with_higher_id = mask_a.id < mask_b.id ? mask_b : mask_a
 
-        pair = build(:mask_pair, mask_a: mask_with_higher_id, mask_b: mask_with_lower_id, name_distance: 0.5, history: [])
+        pair = build(:mask_pair, mask_a: mask_with_higher_id, mask_b: mask_with_lower_id, name_distance: 0.5,
+                                 history: [])
         original_a_id = pair.mask_a_id
         original_b_id = pair.mask_b_id
 
@@ -163,7 +164,7 @@ describe MaskPair do
     end
 
     it 'enforces foreign key constraint with RESTRICT on delete' do
-      pair = create(:mask_pair, mask_a: mask_a, mask_b: mask_b, name_distance: 0.5, history: [])
+      create(:mask_pair, mask_a: mask_a, mask_b: mask_b, name_distance: 0.5, history: [])
 
       expect { mask_a.destroy }.to raise_error(ActiveRecord::DeleteRestrictionError)
     end

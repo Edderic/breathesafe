@@ -29,7 +29,7 @@ namespace :mask_predictor do
     puts "Collected #{training_data.length} annotated masks"
 
     # Write to JSON file
-    output_path = Rails.root.join('python', 'mask_component_predictor', 'training_data.json')
+    output_path = Rails.root.join('python/mask_component_predictor/training_data.json')
     File.write(output_path, JSON.pretty_generate(training_data))
 
     puts "✓ Training data exported to #{output_path}"
@@ -54,7 +54,7 @@ namespace :mask_predictor do
     puts '-' * 80
 
     # Run Python training script
-    python_dir = Rails.root.join('python', 'mask_component_predictor')
+    python_dir = Rails.root.join('python/mask_component_predictor')
     result = system("cd #{python_dir} && python3 train_model.py")
 
     if result
@@ -69,21 +69,21 @@ namespace :mask_predictor do
   task test: :environment do
     # Check health
     health = MaskComponentPredictorService.health_check
-    puts "Health Check:"
+    puts 'Health Check:'
     puts "  Status: #{health['status']}"
     puts "  Model Loaded: #{health['model_loaded']}"
     puts "  Type: #{health['type']}"
     puts "  Model Path: #{health['model_path']}" if health['model_path']
-    puts ""
+    puts ''
 
     unless health['model_loaded']
-      puts "Error: Model not loaded"
-      puts "Run: rails mask_predictor:train"
+      puts 'Error: Model not loaded'
+      puts 'Run: rails mask_predictor:train'
       exit 1
     end
 
-    puts "✓ Predictor service is ready"
-    puts ""
+    puts '✓ Predictor service is ready'
+    puts ''
 
     # Test with some examples
     test_masks = [
@@ -93,14 +93,14 @@ namespace :mask_predictor do
       'BreatheTeq - Large'
     ]
 
-    puts "Testing mask component predictor..."
+    puts 'Testing mask component predictor...'
     puts '-' * 80
 
     test_masks.each do |mask_name|
       result = MaskComponentPredictorService.predict(mask_name)
 
       puts "\nMask: #{mask_name}"
-      puts "Breakdown:"
+      puts 'Breakdown:'
       result[:breakdown].each do |item|
         token = item.keys.first
         category = item.values.first
@@ -109,7 +109,7 @@ namespace :mask_predictor do
       puts "Confidence: #{(result[:confidence] * 100).round(1)}%" if result[:confidence]
     end
 
-    puts "\n" + '-' * 80
-    puts "✓ Tests completed"
+    puts "\n#{'-' * 80}"
+    puts '✓ Tests completed'
   end
 end

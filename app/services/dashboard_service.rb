@@ -189,13 +189,15 @@ class DashboardService
       end
 
       # Convert to array format for frontend
-      demographic_counts.map do |value, counts|
+      result = demographic_counts.map do |value, counts|
         {
           'name' => value,
           'fit_tests' => counts[:fit_tests],
           'unique_users' => counts[:unique_users]
         }
-      end.sort_by { |item| -item['fit_tests'] }
+      end
+
+      result.sort_by { |item| -item['fit_tests'] }
     end
 
     def calculate_age_breakdown(fit_tests_data, profiles)
@@ -277,11 +279,12 @@ class DashboardService
       end
 
       # Add "Prefer not to say" at the end
-      if age_counts['Prefer not to say'][:fit_tests].positive? || age_counts['Prefer not to say'][:unique_users].positive?
+      prefer_not_to_say = age_counts['Prefer not to say']
+      if prefer_not_to_say[:fit_tests].positive? || prefer_not_to_say[:unique_users].positive?
         result << {
           'name' => 'Prefer not to say',
-          'fit_tests' => age_counts['Prefer not to say'][:fit_tests],
-          'unique_users' => age_counts['Prefer not to say'][:unique_users]
+          'fit_tests' => prefer_not_to_say[:fit_tests],
+          'unique_users' => prefer_not_to_say[:unique_users]
         }
       end
 
@@ -403,7 +406,9 @@ class DashboardService
           'passed' => passed,
           'pass_rate' => pass_rate
         }
-      end.compact.sort_by { |item| -item['pass_rate'] }
+      end
+      result = result.compact
+      result = result.sort_by { |item| -item['pass_rate'] }
 
       Rails.logger.info "Dashboard: calculate_pass_rate_by_attribute for #{group_key}: #{result.inspect}"
       result

@@ -10,14 +10,20 @@ class ManagedUser < ApplicationRecord
     query_start = Time.current
     managed_users = ManagedUser.includes(managed: :profile)
                                .where(manager_id: args[:manager_id])
-    Rails.logger.debug "ManagedUser.for_manager_id: Initial query took: #{(Time.current - query_start) * 1000}ms, found #{managed_users.length} managed users"
+    Rails.logger.debug(
+      "ManagedUser.for_manager_id: Initial query took: #{(Time.current - query_start) * 1000}ms, " \
+      "found #{managed_users.length} managed users"
+    )
 
     result = []
 
     # Collect all managed_ids to preload facial measurements
     collect_start = Time.current
     managed_ids = managed_users.map(&:managed_id).compact.uniq
-    Rails.logger.debug "ManagedUser.for_manager_id: Collecting managed_ids took: #{(Time.current - collect_start) * 1000}ms, found #{managed_ids.length} unique IDs"
+    Rails.logger.debug(
+      "ManagedUser.for_manager_id: Collecting managed_ids took: #{(Time.current - collect_start) * 1000}ms, " \
+      "found #{managed_ids.length} unique IDs"
+    )
 
     # Preload latest facial measurements for all managed users efficiently
     # Use PostgreSQL's DISTINCT ON to get separate latest measurements for traditional and iOS
@@ -48,7 +54,12 @@ class ManagedUser < ApplicationRecord
                                                       ])
       latest_ios_measurements = FacialMeasurement.find_by_sql(ios_sql).index_by(&:user_id)
 
-      Rails.logger.debug "ManagedUser.for_manager_id: Facial measurement query took: #{(Time.current - facial_measurement_start) * 1000}ms, loaded #{latest_traditional_measurements.length} traditional + #{latest_ios_measurements.length} iOS measurements"
+      Rails.logger.debug(
+        'ManagedUser.for_manager_id: Facial measurement query took: ' \
+        "#{(Time.current - facial_measurement_start) * 1000}ms, loaded " \
+        "#{latest_traditional_measurements.length} traditional + " \
+        "#{latest_ios_measurements.length} iOS measurements"
+      )
     else
       latest_traditional_measurements = {}
       latest_ios_measurements = {}
@@ -67,7 +78,10 @@ class ManagedUser < ApplicationRecord
                          else
                            {}
                          end
-    Rails.logger.debug "ManagedUser.for_manager_id: Unique mask count query took: #{(Time.current - mask_count_start) * 1000}ms, found #{unique_mask_counts.length} users"
+    Rails.logger.debug(
+      "ManagedUser.for_manager_id: Unique mask count query took: #{(Time.current - mask_count_start) * 1000}ms, " \
+      "found #{unique_mask_counts.length} users"
+    )
 
     loop_start = Time.current
     managed_users.each do |mu|
@@ -224,7 +238,10 @@ class ManagedUser < ApplicationRecord
 
       result << row
     end
-    Rails.logger.debug "ManagedUser.for_manager_id: Main loop took: #{(Time.current - loop_start) * 1000}ms, processed #{result.length} rows"
+    Rails.logger.debug(
+      "ManagedUser.for_manager_id: Main loop took: #{(Time.current - loop_start) * 1000}ms, " \
+      "processed #{result.length} rows"
+    )
     Rails.logger.debug "ManagedUser.for_manager_id total time: #{(Time.current - start_time) * 1000}ms"
 
     result
@@ -461,31 +478,31 @@ class ManagedUser < ApplicationRecord
 
     # Preload facial measurements - separate queries for traditional and iOS
     latest_traditional_measurements = if managed_ids.any?
-                                        traditional_sql = ActiveRecord::Base.sanitize_sql_array([
-                                                                                                  <<-SQL.squish, managed_ids
-                                          SELECT DISTINCT ON (user_id) *
-                                          FROM facial_measurements
-                                          WHERE user_id IN (?)
-                                            AND (arkit IS NULL OR arkit = '{}')
-                                          ORDER BY user_id, created_at DESC
-                                                                                                  SQL
-                                                                                                ])
+                                        traditional_sql = ActiveRecord::Base.sanitize_sql_array(
+                                          [<<~SQL.squish, managed_ids]
+                                            SELECT DISTINCT ON (user_id) *
+                                            FROM facial_measurements
+                                            WHERE user_id IN (?)
+                                              AND (arkit IS NULL OR arkit = '{}')
+                                            ORDER BY user_id, created_at DESC
+                                          SQL
+                                        )
                                         FacialMeasurement.find_by_sql(traditional_sql).index_by(&:user_id)
                                       else
                                         {}
                                       end
 
     latest_ios_measurements = if managed_ids.any?
-                                ios_sql = ActiveRecord::Base.sanitize_sql_array([
-                                                                                  <<-SQL.squish, managed_ids
-                                  SELECT DISTINCT ON (user_id) *
-                                  FROM facial_measurements
-                                  WHERE user_id IN (?)
-                                    AND arkit IS NOT NULL
-                                    AND arkit != '{}'
-                                  ORDER BY user_id, created_at DESC
-                                                                                  SQL
-                                                                                ])
+                                ios_sql = ActiveRecord::Base.sanitize_sql_array(
+                                  [<<~SQL.squish, managed_ids]
+                                    SELECT DISTINCT ON (user_id) *
+                                    FROM facial_measurements
+                                    WHERE user_id IN (?)
+                                      AND arkit IS NOT NULL
+                                      AND arkit != '{}'
+                                    ORDER BY user_id, created_at DESC
+                                  SQL
+                                )
                                 FacialMeasurement.find_by_sql(ios_sql).index_by(&:user_id)
                               else
                                 {}

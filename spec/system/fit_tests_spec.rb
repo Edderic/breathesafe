@@ -24,7 +24,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
   end
 
   describe 'Authentication scenarios' do
-    context 'as a manager with managed users' do
+    context 'when a manager has managed users' do
       before do
         sign_in manager
         visit '/#/fit_tests/new'
@@ -41,7 +41,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
       end
     end
 
-    context 'as an admin' do
+    context 'when an admin signs in' do
       before do
         sign_in admin
         visit '/#/fit_tests/new'
@@ -53,7 +53,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
       end
     end
 
-    context 'as an unauthorized user' do
+    context 'when an unauthorized user signs in' do
       before do
         sign_in unauthorized_user
       end
@@ -312,7 +312,11 @@ RSpec.describe 'Fit Test Creation', type: :system do
 
     it 'handles network timeout gracefully' do
       # Simulate network timeout by stubbing the request
-      allow_any_instance_of(ActionDispatch::Request).to receive(:remote_ip).and_raise(Timeout::Error)
+      allow(ActionDispatch::Request).to receive(:new).and_wrap_original do |method, *args|
+        request = method.call(*args)
+        allow(request).to receive(:remote_ip).and_raise(Timeout::Error)
+        request
+      end
 
       select_user(managed_user)
       click_button('Save and Continue')
@@ -382,6 +386,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
 
       # If there are validation errors, they should be displayed
       # This is a placeholder for actual validation error testing
+      expect(page).to have_content('User Seal Check')
     end
   end
 
@@ -453,6 +458,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
 
       # Should still show selected mask (if stored in route params or session)
       # This depends on implementation
+      expect(page).to have_content('Facial Hair')
     end
   end
 
@@ -518,13 +524,13 @@ RSpec.describe 'Fit Test Creation', type: :system do
       complete_full_fit_test_flow
 
       # Should redirect to fit tests page or show success message
-      expect(page).to have_content(/success|created|saved/i).or have_current_path(/#\/fit_tests/)
+      expect(page).to have_content(/success|created|saved/i).or have_current_path(%r{#/fit_tests})
     end
 
     it 'redirects to fit tests page after completion' do
       complete_full_fit_test_flow
 
-      expect(page).to have_current_path(/#\/fit_tests/)
+      expect(page).to have_current_path(%r{#/fit_tests})
     end
   end
 
@@ -537,7 +543,11 @@ RSpec.describe 'Fit Test Creation', type: :system do
     visit '/' # Establish session first
 
     # Get CSRF token from the page
-    csrf_token = page.find('meta[name="csrf-token"]', visible: false)['content'] rescue nil
+    csrf_token = begin
+      page.find('meta[name="csrf-token"]', visible: false)['content']
+    rescue StandardError
+      nil
+    end
 
     # Make an HTTP request to authenticate and get the session cookie
     base_url = "http://#{Capybara.current_session.server.host}:#{Capybara.current_session.server.port}"
@@ -578,7 +588,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
       }
 
       # Extract additional cookie attributes if present
-      cookie_parts[1..-1].each do |part|
+      cookie_parts[1..].each do |part|
         part = part.strip
         if part.start_with?('domain=')
           domain = part.split('=')[1]
@@ -590,7 +600,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
       end
 
       # For localhost, don't set domain attribute
-      cookie_hash.delete(:domain) if Capybara.current_session.server.host == '127.0.0.1' || Capybara.current_session.server.host == 'localhost'
+      cookie_hash.delete(:domain) if ['127.0.0.1', 'localhost'].include?(Capybara.current_session.server.host)
 
       page.driver.browser.manage.add_cookie(cookie_hash)
     end
@@ -630,8 +640,14 @@ RSpec.describe 'Fit Test Creation', type: :system do
   def fill_user_seal_check
     # Fill in user seal check questions
     # This depends on the actual form structure
-    select 'Somewhere in-between too small and too big', from: 'What do you think about the sizing of this mask relative to your face?' if page.has_select?('What do you think about the sizing of this mask relative to your face?')
-    select 'No air movement', from: '...how much air movement on your face along the seal of the mask did you feel?' if page.has_select?('...how much air movement on your face along the seal of the mask did you feel?')
+    if page.has_select?('What do you think about the sizing of this mask relative to your face?')
+      select 'Somewhere in-between too small and too big',
+             from: 'What do you think about the sizing of this mask relative to your face?'
+    end
+    return unless page.has_select?('...how much air movement on your face along the seal of the mask did you feel?')
+
+    select 'No air movement',
+           from: '...how much air movement on your face along the seal of the mask did you feel?'
   end
 
   def select_fit_test_procedure(procedure)
@@ -682,10 +698,19 @@ RSpec.describe 'Fit Test Creation', type: :system do
 
   def fill_comfort
     # Fill in comfort questions
-    select '4', from: 'How comfortable is the position of the mask on the nose?' if page.has_select?('How comfortable is the position of the mask on the nose?')
-    select 'Yes', from: 'Is there adequate room for eye protection?' if page.has_select?('Is there adequate room for eye protection?')
+    if page.has_select?('How comfortable is the position of the mask on the nose?')
+      select '4',
+             from: 'How comfortable is the position of the mask on the nose?'
+    end
+    if page.has_select?('Is there adequate room for eye protection?')
+      select 'Yes',
+             from: 'Is there adequate room for eye protection?'
+    end
     select 'Yes', from: 'Is there enough room to talk?' if page.has_select?('Is there enough room to talk?')
-    select '4', from: 'How comfortable is the position of the mask on face and cheeks?' if page.has_select?('How comfortable is the position of the mask on face and cheeks?')
+    return unless page.has_select?('How comfortable is the position of the mask on face and cheeks?')
+
+    select '4',
+           from: 'How comfortable is the position of the mask on face and cheeks?'
   end
 
   def fill_in_fit_factor(exercise_name, value)

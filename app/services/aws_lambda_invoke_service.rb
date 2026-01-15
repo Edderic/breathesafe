@@ -64,8 +64,6 @@ class AwsLambdaInvokeService
     end
 
     def local_mode?
-      return false
-
       env = ENV.fetch('HEROKU_ENVIRONMENT', Rails.env.to_s).to_s.downcase
       %w[development dev].include?(env)
     end

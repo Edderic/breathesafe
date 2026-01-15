@@ -289,7 +289,7 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
                })
       end
 
-      let!(:regular_fit_test) do
+      let(:regular_fit_test) do
         create(:fit_test,
                :with_just_right_mask,
                user: user,
@@ -309,6 +309,7 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
 
       before do
         ManagedUser.create!(manager: testing_manager, managed: managed_user)
+        regular_fit_test
       end
 
       it 'excludes fit tests for users managed by the testing account' do

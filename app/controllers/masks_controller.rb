@@ -190,7 +190,8 @@ class MasksController < ApplicationController
   def build_mask_events(mask, updates)
     events = []
 
-    if updates.key?(:unique_internal_model_code) && updates[:unique_internal_model_code] != mask.unique_internal_model_code
+    if updates.key?(:unique_internal_model_code) &&
+       updates[:unique_internal_model_code] != mask.unique_internal_model_code
       events << { event_type: 'unique_internal_model_code_updated',
                   data: { 'unique_internal_model_code' => updates[:unique_internal_model_code] } }
     end
@@ -254,8 +255,10 @@ class MasksController < ApplicationController
       events << { event_type: 'breathability_updated', data: { 'breathability' => updates[:breathability] } }
     end
 
-    if (updates.key?(:initial_cost_us_dollars) && updates[:initial_cost_us_dollars] != mask.initial_cost_us_dollars) ||
-       (updates.key?(:filter_change_cost_us_dollars) && updates[:filter_change_cost_us_dollars] != mask.filter_change_cost_us_dollars)
+    if (updates.key?(:initial_cost_us_dollars) &&
+        updates[:initial_cost_us_dollars] != mask.initial_cost_us_dollars) ||
+       (updates.key?(:filter_change_cost_us_dollars) &&
+        updates[:filter_change_cost_us_dollars] != mask.filter_change_cost_us_dollars)
       cost_data = {}
       cost_data['initial_cost_us_dollars'] = updates[:initial_cost_us_dollars] if updates.key?(:initial_cost_us_dollars)
       if updates.key?(:filter_change_cost_us_dollars)

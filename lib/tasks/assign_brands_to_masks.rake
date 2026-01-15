@@ -88,9 +88,13 @@ namespace :masks do
       # Score 3: Word containment - check if any brand word is contained in any mask word
       word_containment_score = 0.0
       if brand_words.any? && mask_words.any?
-        word_containment_score = brand_words.any? { |brand_word|
+        word_containment_score = if brand_words.any? do |brand_word|
           mask_words.any? { |mask_word| mask_word.include?(brand_word) }
-        } ? 1.0 : 0.0
+        end
+                                   1.0
+                                 else
+                                   0.0
+                                 end
       end
 
       # Average the three scores
@@ -102,7 +106,7 @@ namespace :masks do
     total_masks = masks.count
 
     if total_masks.zero?
-      puts "No masks found without brand_id. All masks already have brands assigned."
+      puts 'No masks found without brand_id. All masks already have brands assigned.'
       exit 0
     end
 
@@ -124,9 +128,9 @@ namespace :masks do
 
     masks.each_with_index do |mask, index|
       current_number = index + 1
-      puts "=" * 80
+      puts '=' * 80
       puts "Processing mask #{current_number} of #{total_masks}"
-      puts "=" * 80
+      puts '=' * 80
       puts "Mask ID: #{mask.id}"
       puts "Unique Internal Model Code: #{mask.unique_internal_model_code}"
       puts "Current Brand ID: #{mask.brand_id || 'None'}"
@@ -163,27 +167,25 @@ namespace :masks do
         current_page_matches = matches_above_threshold[start_index...end_index]
 
         puts "Top matches (score >= #{threshold}):"
-        puts "-" * 80
-        puts "0. Skip this mask"
+        puts '-' * 80
+        puts '0. Skip this mask'
         current_page_matches.each_with_index do |match, idx|
           number = start_index + idx + 1
           brand = match[:brand]
           score = match[:score]
           puts "#{number}. Brand: #{brand.name} (ID: #{brand.id}) - Score: #{score.round(4)}"
         end
-        if end_index < total_matches
-          puts "m. Show more options (#{end_index} of #{total_matches} shown)"
-        end
-        puts "-" * 80
+        puts "m. Show more options (#{end_index} of #{total_matches} shown)" if end_index < total_matches
+        puts '-' * 80
         puts
 
         # Get user input
         begin
           max_choice = end_index
           print "Enter your choice (0-#{max_choice}"
-          print ", m for more" if end_index < total_matches
-          print "): "
-          input = STDIN.gets.chomp.strip.downcase
+          print ', m for more' if end_index < total_matches
+          print '): '
+          input = $stdin.gets.chomp.strip.downcase
 
           if input == 'm'
             if end_index < total_matches
@@ -191,7 +193,7 @@ namespace :masks do
               puts
               next
             else
-              puts "No more options to show."
+              puts 'No more options to show.'
               redo
             end
           end
@@ -229,7 +231,7 @@ namespace :masks do
           exit
         rescue StandardError => e
           puts "Error processing input: #{e.message}"
-          puts "Skipping this mask."
+          puts 'Skipping this mask.'
           skipped_count += 1
           break
         end
@@ -239,20 +241,20 @@ namespace :masks do
     end
 
     # Summary
-    puts "\n" + "=" * 80
-    puts "SUMMARY"
-    puts "=" * 80
+    puts "\n#{'=' * 80}"
+    puts 'SUMMARY'
+    puts '=' * 80
     puts "Total masks processed: #{total_masks}"
     puts "Brands assigned: #{assigned_count}"
     puts "Masks skipped: #{skipped_count}"
     puts
 
     if auto_skipped_mask_ids.any?
-      puts "Auto-skipped mask IDs (no matches above threshold):"
+      puts 'Auto-skipped mask IDs (no matches above threshold):'
       puts auto_skipped_mask_ids.join(', ')
       puts
     end
 
-    puts "Task completed!"
+    puts 'Task completed!'
   end
 end

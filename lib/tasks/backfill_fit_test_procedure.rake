@@ -15,14 +15,14 @@ namespace :fit_tests do
       procedure = detect_procedure(fit_test)
 
       if procedure
-        fit_test.update_column(:procedure, procedure)
+        fit_test.update!(procedure: procedure)
         updated += 1
       else
         skipped += 1
       end
 
       # Progress indicator every 100 records
-      if (updated + skipped) % 100 == 0
+      if ((updated + skipped) % 100).zero?
         puts "Processed #{updated + skipped}/#{total} (#{updated} updated, #{skipped} skipped)"
       end
     end
@@ -41,8 +41,8 @@ namespace :fit_tests do
     quantitative_procedure = quantitative['procedure']
 
     # Check qualitative procedure
-    if qualitative_procedure && qualitative_procedure != 'Skipping'
-      return 'qualitative_full_osha' if qualitative_procedure == 'Full OSHA'
+    if qualitative_procedure && qualitative_procedure != 'Skipping' && (qualitative_procedure == 'Full OSHA')
+      return 'qualitative_full_osha'
     end
 
     # Check quantitative procedure
@@ -54,7 +54,7 @@ namespace :fit_tests do
 
     # Try to infer from exercise data
     quantitative_exercises = quantitative['exercises']
-    if quantitative_exercises && quantitative_exercises.is_a?(Array) && quantitative_exercises.length > 0
+    if quantitative_exercises.is_a?(Array) && quantitative_exercises.length.positive?
       has_quant_data = quantitative_exercises.any? { |ex| ex && ex['fit_factor'] && ex['fit_factor'].to_s.strip != '' }
 
       if has_quant_data
@@ -77,7 +77,7 @@ namespace :fit_tests do
 
     # Check qualitative exercises
     qualitative_exercises = qualitative['exercises']
-    if qualitative_exercises && qualitative_exercises.is_a?(Array) && qualitative_exercises.length > 0
+    if qualitative_exercises.is_a?(Array) && qualitative_exercises.length.positive?
       has_qual_data = qualitative_exercises.any? { |ex| ex && ex['result'] && ex['result'].to_s.strip != '' }
       return 'qualitative_full_osha' if has_qual_data
     end

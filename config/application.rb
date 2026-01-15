@@ -26,11 +26,15 @@ module Breathesafe
 
     # Configure encryption
     encryption_creds = Rails.application.credentials.encryption || {}
-    config.active_record.encryption.primary_key = ENV['ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY'] || encryption_creds[:primary_key]
-    config.active_record.encryption.key_derivation_salt = ENV['ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT'] || encryption_creds[:key_derivation_salt]
-    config.active_record.encryption.deterministic_key = ENV['ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY'] || encryption_creds[:primary_key]
+    encryption_primary = ENV['ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY']
+    encryption_salt = ENV['ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT']
+    encryption_deterministic = ENV['ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY']
 
-    if (Rails.env.test? || ENV['CI']) &&
+    config.active_record.encryption.primary_key = encryption_primary || encryption_creds[:primary_key]
+    config.active_record.encryption.key_derivation_salt = encryption_salt || encryption_creds[:key_derivation_salt]
+    config.active_record.encryption.deterministic_key = encryption_deterministic || encryption_creds[:primary_key]
+
+    if (Rails.env.test? || ENV['CI'].present?) &&
        (config.active_record.encryption.primary_key.nil? ||
         config.active_record.encryption.key_derivation_salt.nil? ||
         config.active_record.encryption.deterministic_key.nil?)

@@ -26,7 +26,7 @@ namespace :fit_tests do
       end
 
       if notes.present?
-        fit_test.update_column(:notes, notes)
+        fit_test.update!(notes: notes)
         migrated += 1
         puts "Migrated notes for FitTest ##{fit_test.id}"
       else

@@ -28,19 +28,6 @@ class ManagedUsersController < ApplicationController
       # Validate sort order
       sort_order = nil unless %w[asc desc].include?(sort_order)
 
-      # Map frontend field names to database columns/calculations
-      sort_column_map = {
-        'name' => 'profiles.first_name',
-        'manager_email' => 'users.email',
-        'demog_percent_complete' => 'demog_percent_complete',
-        'traditional_fm_percent_complete' => 'traditional_fm_percent_complete',
-        'fm_percent_complete' => 'fm_percent_complete',
-        'num_unique_masks_tested' => 'num_unique_masks_tested'
-      }
-
-      # Only apply sorting if both field and order are valid
-      "#{sort_column_map[sort_field]} #{sort_order.upcase}" if sort_field && sort_order && sort_column_map[sort_field]
-
       if show_all_users
         # Admin viewing all users - get all managed users across all managers
         # Use for_manager_id_with_sort which can handle sorting
