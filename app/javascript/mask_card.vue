@@ -35,18 +35,16 @@
 
       <div class='card flex align-items-center justify-content-center' v-for='m in cards' @click='selectMask(m.id)'>
 
-        <div class='image-and-name'>
-          <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
-          <div class='description'>
-            <span>
-              {{m.uniqueInternalModelCode}}
-            </span>
-          </div>
-        </div>
         <table v-if='showStats'>
-          <tr v-if="showProbaFit">
-            <th>Probability of Fit</th>
-            <td colspan="3">
+          <tr >
+            <td colspan='2'>
+              <div class='image-and-name'>
+                <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
+              </div>
+            </td>
+
+            <th colspan='1'>Probability of Fit</th>
+            <td colspan="1">
               <ColoredCell
                class='risk-score'
                :colorScheme="fitColorScheme"
@@ -56,6 +54,15 @@
                :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black'  }"
                :exception='exceptionMissingObject'
                />
+            </td>
+          </tr>
+          <tr>
+            <td colspan='4'>
+              <div class='description'>
+                <span>
+                  {{m.uniqueInternalModelCode}}
+                </span>
+              </div>
             </td>
           </tr>
           <tr>
@@ -413,7 +420,7 @@ export default {
           return null
         }
         const logValue = Math.log10(value)
-        return this.clampPercent(logValue / 4)
+        return this.clampPercent(logValue / 3)
       }
 
       if (type === 'breathability') {
@@ -493,7 +500,7 @@ export default {
     },
     statAxisLabel(type, position) {
       if (type === 'filtration') {
-        return position === 'min' ? '10^0' : '10^4'
+        return position === 'min' ? '10^0' : '10^3'
       }
       if (type === 'breathability') {
         const min = this.dataContext.breathability_min
@@ -1002,7 +1009,7 @@ export default {
     .card {
       padding: 1em 0;
       display: grid;
-      grid-template-columns: 50% 50%;
+      grid-template-columns: 100%;
 
     }
   }

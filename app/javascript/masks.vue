@@ -766,7 +766,7 @@ export default {
   }
   @media(max-width: 700px) {
     .grid {
-      grid-template-columns: 50% 50%;
+      grid-template-columns: 100%;
     }
     img {
       width: 100vw;
