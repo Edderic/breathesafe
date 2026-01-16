@@ -28,14 +28,14 @@ class UserSealCheckService
       sizing = parsed.dig('sizing', sizing_question) || parsed.dig(:sizing, sizing_question)
       air_movement = parsed.dig('positive', air_movement_question) || parsed.dig(:positive, air_movement_question)
 
+      # Fail if "Too big" or "Too small" is selected
+      return 'fail' if ['Too big', 'Too small'].include?(sizing.to_s)
+
       # Check if sizing question is missing
       return 'incomplete' if sizing.nil? || sizing.to_s.strip.empty?
 
       # Check if air movement question is missing
       return 'incomplete' if air_movement.nil? || air_movement.to_s.strip.empty?
-
-      # Fail if "Too big" or "Too small" is selected
-      return 'fail' if ['Too big', 'Too small'].include?(sizing.to_s)
 
       # Fail if "A lot of air movement" is selected
       return 'fail' if air_movement.to_s == 'A lot of air movement'
