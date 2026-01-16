@@ -200,8 +200,8 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
         expect(response).to have_http_status(:ok)
         result = JSON.parse(response.body)['fit_tests_with_facial_measurements']
 
-        # Verify all three types of fit tests are included
-        expect(result.length).to eq(3)
+        # Verify all three types of fit tests plus user seal checks are included
+        expect(result.length).to eq(6)
 
         # Verify each fit test has facial measurement data
         result.each do |fit_test|
@@ -251,11 +251,11 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
 
         json_response = JSON.parse(response.body)
         expect(json_response['fit_tests_with_facial_measurements']).to be_an(Array)
-        expect(json_response['fit_tests_with_facial_measurements'].length).to eq(1)
+        expect(json_response['fit_tests_with_facial_measurements'].length).to eq(2)
 
-        result = json_response['fit_tests_with_facial_measurements'].first
-        expect(result['mask_id']).to eq(mask.id)
-        expect(result['id']).to eq(n95_fit_test.id)
+        results = json_response['fit_tests_with_facial_measurements']
+        expect(results.map { |row| row['mask_id'] }.uniq).to eq([mask.id])
+        expect(results.map { |row| row['id'] }).to include(n95_fit_test.id)
       end
 
       it 'returns empty array when mask has no fit tests' do
@@ -316,11 +316,11 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
 
         json_response = JSON.parse(response.body)
         expect(json_response['fit_tests_with_facial_measurements']).to be_an(Array)
-        expect(json_response['fit_tests_with_facial_measurements'].length).to eq(1)
+        expect(json_response['fit_tests_with_facial_measurements'].length).to eq(2)
 
-        result = json_response['fit_tests_with_facial_measurements'].first
-        expect(result['mask_id']).to eq(mask.id)
-        expect(result['id']).to eq(n95_fit_test.id)
+        results = json_response['fit_tests_with_facial_measurements']
+        expect(results.map { |row| row['mask_id'] }.uniq).to eq([mask.id])
+        expect(results.map { |row| row['id'] }).to include(n95_fit_test.id)
       end
     end
   end
