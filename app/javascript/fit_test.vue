@@ -1303,16 +1303,16 @@ export default {
       }
     },
     async loadQuery(toQuery, fromQuery) {
+      if (this.$route.name == 'NewFitTest') {
+        this.mode = 'Create'
+      }
+
       if (!this.currentUser) {
         signIn.call(this)
       } else {
         // Initialize mask pagination from URL
         if (toQuery.maskPage) {
           this.maskCurrentPage = parseInt(toQuery.maskPage) || 1
-        }
-
-        if (this.$route.name == 'NewFitTest') {
-          this.mode = 'Create'
         }
 
         if (this.$route.name == 'NewFitTest' && toQuery.userId && toQuery.maskId) {

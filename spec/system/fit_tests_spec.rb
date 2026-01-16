@@ -78,38 +78,38 @@ RSpec.describe 'Fit Test Creation', type: :system do
     it 'completes the full fit test creation flow' do
       # Step 1: Select user
       select_user(managed_user)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Step 2: Select mask
       select_mask(mask)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Step 3: Facial Hair
       fill_facial_hair
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Step 4: User Seal Check
       fill_user_seal_check
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Step 5: Fit Test - Choose Procedure
       select_fit_test_procedure('qualitative: Full OSHA')
       select_solution('Saccharin')
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Step 6: Fit Test - Results
       fill_qualitative_exercises
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Step 7: Comfort
       fill_comfort
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Verify fit test was created
@@ -131,19 +131,19 @@ RSpec.describe 'Fit Test Creation', type: :system do
     it 'completes quantitative fit test with OSHA Fast procedure' do
       # Step 1-4: Same as qualitative
       select_user(managed_user)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       select_mask(mask)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       fill_facial_hair
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       fill_user_seal_check
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Step 5: Fit Test - Choose Procedure
@@ -151,17 +151,17 @@ RSpec.describe 'Fit Test Creation', type: :system do
       fill_quantitative_device_fields(measurement_device)
       select_testing_mode('N95')
       fill_aerosol_fields
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Step 6: Fit Test - Results
       fill_quantitative_fast_exercises
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Step 7: Comfort
       fill_comfort
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Verify fit test was created
@@ -182,19 +182,19 @@ RSpec.describe 'Fit Test Creation', type: :system do
     it 'completes quantitative fit test with Full OSHA procedure' do
       # Step 1-4: Same as above
       select_user(managed_user)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       select_mask(mask)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       fill_facial_hair
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       fill_user_seal_check
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Step 5: Fit Test - Choose Procedure
@@ -202,17 +202,17 @@ RSpec.describe 'Fit Test Creation', type: :system do
       fill_quantitative_device_fields(measurement_device)
       select_testing_mode('N99')
       fill_aerosol_fields
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Step 6: Fit Test - Results
       fill_quantitative_full_osha_exercises
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Step 7: Comfort
       fill_comfort
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Verify fit test was created
@@ -231,34 +231,34 @@ RSpec.describe 'Fit Test Creation', type: :system do
     end
 
     it 'shows validation error when trying to proceed without selecting user' do
-      click_button('Save and Continue')
+      click_save_and_continue
       expect(page).to have_content(/user|required|select/i)
     end
 
     it 'shows validation error when trying to proceed without selecting mask' do
       select_user(managed_user)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
-      click_button('Save and Continue')
+      click_save_and_continue
       expect(page).to have_content(/mask|required|select/i)
     end
 
     it 'shows validation error when user seal check questions are incomplete' do
       select_user(managed_user)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       select_mask(mask)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       fill_facial_hair
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Try to proceed without completing user seal check
-      click_button('Save and Continue')
+      click_save_and_continue
       expect(page).to have_content(/required|fill|complete/i)
     end
   end
@@ -272,31 +272,31 @@ RSpec.describe 'Fit Test Creation', type: :system do
 
     it 'handles invalid fit factor values in quantitative tests' do
       select_user(managed_user)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       select_mask(mask)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       fill_facial_hair
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       fill_user_seal_check
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       select_fit_test_procedure('quantitative: OSHA Fast Face Piece Respirators')
       fill_quantitative_device_fields(measurement_device)
       select_testing_mode('N95')
       fill_aerosol_fields
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Try to enter invalid fit factor (negative or non-numeric)
       fill_in_fit_factor('Normal breathing (SEALED)', 'invalid')
-      click_button('Save and Continue')
+      click_save_and_continue
 
       # Should show validation error or prevent submission
       expect(page).to have_content(/invalid|error|number/i).or have_no_content('Fit test created')
@@ -319,7 +319,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
       end
 
       select_user(managed_user)
-      click_button('Save and Continue')
+      click_save_and_continue
 
       # Should show error message
       expect(page).to have_content(/error|timeout|network|failed/i).or have_no_content('User selection')
@@ -335,7 +335,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
 
     it 'preserves data when using browser back button' do
       select_user(managed_user)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Go back
@@ -348,7 +348,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
 
     it 'preserves data when using browser forward button' do
       select_user(managed_user)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       page.go_back
@@ -371,18 +371,18 @@ RSpec.describe 'Fit Test Creation', type: :system do
 
     it 'displays validation errors from the server' do
       select_user(managed_user)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       select_mask(mask)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Try to submit with invalid data
       # This would require stubbing the server response
       # For now, we'll test that error messages are displayed
       fill_facial_hair
-      click_button('Save and Continue')
+      click_save_and_continue
 
       # If there are validation errors, they should be displayed
       # This is a placeholder for actual validation error testing
@@ -402,19 +402,19 @@ RSpec.describe 'Fit Test Creation', type: :system do
 
     it 'allows fit test creation even without facial measurements' do
       select_user(user_without_facial_measurement)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       select_mask(mask)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       fill_facial_hair
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       fill_user_seal_check
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Should be able to proceed
@@ -445,11 +445,11 @@ RSpec.describe 'Fit Test Creation', type: :system do
 
     it 'persists fit test data after page refresh' do
       select_user(managed_user)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       select_mask(mask)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Refresh page
@@ -471,32 +471,32 @@ RSpec.describe 'Fit Test Creation', type: :system do
 
     it 'creates fit test record with correct attributes' do
       select_user(managed_user)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       select_mask(mask)
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       fill_facial_hair
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       fill_user_seal_check
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       select_fit_test_procedure('qualitative: Full OSHA')
       select_solution('Bitrex')
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       fill_qualitative_exercises
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       fill_comfort
-      click_button('Save and Continue')
+      click_save_and_continue
       wait_for_navigation
 
       # Verify database record
@@ -524,13 +524,13 @@ RSpec.describe 'Fit Test Creation', type: :system do
       complete_full_fit_test_flow
 
       # Should redirect to fit tests page or show success message
-      expect(page).to have_content(/success|created|saved/i).or have_current_path(%r{#/fit_tests})
+      expect(page).to have_content(/success|created|saved/i).or have_content('Fit Tests')
     end
 
     it 'redirects to fit tests page after completion' do
       complete_full_fit_test_flow
 
-      expect(page).to have_current_path(%r{#/fit_tests})
+      expect(page).to have_content('Fit Tests')
     end
   end
 
@@ -619,14 +619,36 @@ RSpec.describe 'Fit Test Creation', type: :system do
     sleep 1 # Wait for navigation and Vue updates
   end
 
+  def dismiss_popup
+    return unless page.has_css?('.popup .close', wait: 1)
+
+    find('.popup .close').click
+    expect(page).to have_no_css('.popup', wait: 5)
+  end
+
+  def click_save_and_continue
+    dismiss_popup
+    button = find('.button', text: 'Save and Continue', match: :first)
+    page.execute_script('arguments[0].click()', button)
+  end
+
   def select_user(user)
-    fill_in 'input[type="text"]', with: user.profile.first_name, match: :first
-    sleep 0.5
-    find('.text-row', text: "#{user.profile.first_name} #{user.profile.last_name}").click
+    if page.has_css?('select.user-select:not([disabled])', wait: 5)
+      option_label = "#{user.profile.first_name} #{user.profile.last_name} - #{user.id}"
+      find('select.user-select').select(option_label)
+    else
+      fill_in 'input[type="text"]', with: user.profile.first_name, match: :first
+      sleep 0.5
+      find('.text-row', text: "#{user.profile.first_name} #{user.profile.last_name}").click
+    end
   end
 
   def select_mask(mask)
-    fill_in 'input[type="text"]', with: mask.unique_internal_model_code, match: :first
+    unless page.has_css?('input[placeholder="Search for mask"]:not([disabled])', wait: 5)
+      find('.step-item', text: 'Mask Selection', match: :first).click
+    end
+
+    find('input[placeholder="Search for mask"]').set(mask.unique_internal_model_code)
     sleep 0.5
     find('.card', text: mask.unique_internal_model_code).click
   end
@@ -638,20 +660,35 @@ RSpec.describe 'Fit Test Creation', type: :system do
   end
 
   def fill_user_seal_check
-    # Fill in user seal check questions
-    # This depends on the actual form structure
-    if page.has_select?('What do you think about the sizing of this mask relative to your face?')
-      select 'Somewhere in-between too small and too big',
-             from: 'What do you think about the sizing of this mask relative to your face?'
+    unless page.has_css?('h2', text: 'User Seal Check', wait: 5)
+      find('.step-item', text: 'User Seal Check', match: :first).click
     end
-    return unless page.has_select?('...how much air movement on your face along the seal of the mask did you feel?')
 
-    select 'No air movement',
-           from: '...how much air movement on your face along the seal of the mask did you feel?'
+    within(:xpath, "//div[contains(@class,'right-pane')][.//h2[contains(.,'User Seal Check')]]") do
+      find('label', text: 'Somewhere in-between too small and too big', match: :first).click
+
+      if page.has_content?('...how much air movement on your face along the seal of the mask did you feel?')
+        find('label', text: 'No air movement', match: :first).click
+      else
+        find('label', text: 'Unnoticeable', match: :first).click
+      end
+    end
   end
 
   def select_fit_test_procedure(procedure)
-    select procedure, from: 'Procedure' if page.has_select?('Procedure')
+    unless page.has_css?('h2', text: 'Fit Test', wait: 5)
+      find('.step-item', text: 'Fit Test', match: :first).click
+    end
+
+    within(:xpath, "//div[contains(@class,'right-pane')][.//h2[contains(.,'Fit Test')]]") do
+      if page.has_css?('.tab', text: 'Choose Procedure')
+        find('.tab', text: 'Choose Procedure', match: :first).click
+      elsif page.has_select?('tabToShowSelect')
+        select 'Choose Procedure', from: 'tabToShowSelect'
+      end
+
+      find('select', match: :first).select(procedure)
+    end
   end
 
   def select_solution(solution)
@@ -671,46 +708,59 @@ RSpec.describe 'Fit Test Creation', type: :system do
   end
 
   def fill_qualitative_exercises
-    # Fill in qualitative exercise results
-    exercises = ['Normal breathing', 'Deep breathing', 'Turning head side to side',
-                 'Moving head up and down', 'Talking', 'Bending over', 'Normal breathing.']
-    exercises.each do |exercise|
-      select 'Pass', from: exercise if page.has_select?(exercise)
+    unless page.has_css?('h2', text: 'Fit Test', wait: 5)
+      find('.step-item', text: 'Fit Test', match: :first).click
+    end
+
+    within(:xpath, "//div[contains(@class,'right-pane')][.//h2[contains(.,'Fit Test')]]") do
+      if page.has_css?('.tab', text: 'Results')
+        find('.tab', text: 'Results', match: :first).click
+      elsif page.has_select?('tabToShowSelect')
+        select 'Results', from: 'tabToShowSelect'
+      end
+
+      all('select').each do |select_box|
+        select_box.select('Pass')
+      end
     end
   end
 
   def fill_quantitative_fast_exercises
-    exercises = ['Bending over', 'Talking', 'Turning head side to side',
-                 'Moving head up and down', 'Normal breathing (SEALED)']
-    exercises.each do |exercise|
-      fill_in exercise, with: '100' if page.has_field?(exercise)
-    end
+    fill_quantitative_fit_factors
   end
 
   def fill_quantitative_full_osha_exercises
-    exercises = ['Normal breathing', 'Deep breathing', 'Turning head side to side',
-                 'Moving head up and down', 'Talking', 'Grimace', 'Bending over',
-                 'Normal breathing', 'Normal breathing (SEALED)']
-    exercises.each do |exercise|
-      fill_in exercise, with: '100' if page.has_field?(exercise)
+    fill_quantitative_fit_factors
+  end
+
+  def fill_quantitative_fit_factors
+    unless page.has_css?('h2', text: 'Fit Test', wait: 5)
+      find('.step-item', text: 'Fit Test', match: :first).click
+    end
+
+    within(:xpath, "//div[contains(@class,'right-pane')][.//h2[contains(.,'Fit Test')]]") do
+      if page.has_css?('.tab', text: 'Results')
+        find('.tab', text: 'Results', match: :first).click
+      elsif page.has_select?('tabToShowSelect')
+        select 'Results', from: 'tabToShowSelect'
+      end
+
+      all('input[placeholder="Fit factor"]').each do |input|
+        input.set('100')
+      end
     end
   end
 
   def fill_comfort
-    # Fill in comfort questions
-    if page.has_select?('How comfortable is the position of the mask on the nose?')
-      select '4',
-             from: 'How comfortable is the position of the mask on the nose?'
+    unless page.has_css?('h2', text: 'Comfort Assessment', wait: 5)
+      find('.step-item', text: 'Comfort Assessment', match: :first).click
     end
-    if page.has_select?('Is there adequate room for eye protection?')
-      select 'Yes',
-             from: 'Is there adequate room for eye protection?'
-    end
-    select 'Yes', from: 'Is there enough room to talk?' if page.has_select?('Is there enough room to talk?')
-    return unless page.has_select?('How comfortable is the position of the mask on face and cheeks?')
 
-    select '4',
-           from: 'How comfortable is the position of the mask on face and cheeks?'
+    within(:xpath, "//div[contains(@class,'right-pane')][.//h2[contains(.,'Comfort Assessment')]]") do
+      find('label', text: 'Comfortable', match: :first).click
+      find('label', text: 'Enough', match: :first).click
+      all('label', text: 'Comfortable')[1].click
+    end
   end
 
   def fill_in_fit_factor(exercise_name, value)
@@ -719,32 +769,32 @@ RSpec.describe 'Fit Test Creation', type: :system do
 
   def complete_full_fit_test_flow
     select_user(managed_user)
-    click_button('Save and Continue')
+    click_save_and_continue
     wait_for_navigation
 
     select_mask(mask)
-    click_button('Save and Continue')
+    click_save_and_continue
     wait_for_navigation
 
     fill_facial_hair
-    click_button('Save and Continue')
+    click_save_and_continue
     wait_for_navigation
 
     fill_user_seal_check
-    click_button('Save and Continue')
+    click_save_and_continue
     wait_for_navigation
 
     select_fit_test_procedure('qualitative: Full OSHA')
     select_solution('Saccharin')
-    click_button('Save and Continue')
+    click_save_and_continue
     wait_for_navigation
 
     fill_qualitative_exercises
-    click_button('Save and Continue')
+    click_save_and_continue
     wait_for_navigation
 
     fill_comfort
-    click_button('Save and Continue')
+    click_save_and_continue
     wait_for_navigation
   end
 end

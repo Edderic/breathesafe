@@ -94,6 +94,27 @@ FactoryBot.define do
       version || 'v1'
     end
     consent_form_accepted_at { Time.current }
+    forms do
+      accepted_at = Time.current.utc.iso8601
+      {
+        'consent_form' => {
+          'version_accepted' => Rails.application.config.consent_form_version || 'v1',
+          'accepted_at' => accepted_at
+        },
+        'disclaimer' => {
+          'version_accepted' => Rails.application.config.disclaimer_version || 'v1',
+          'accepted_at' => accepted_at
+        },
+        'terms_of_service' => {
+          'version_accepted' => Rails.application.config.terms_of_service_version || 'v1',
+          'accepted_at' => accepted_at
+        },
+        'privacy_policy' => {
+          'version_accepted' => Rails.application.config.privacy_policy_version || 'v1',
+          'accepted_at' => accepted_at
+        }
+      }
+    end
 
     trait :unconfirmed do
       confirmed_at { nil }

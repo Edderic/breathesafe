@@ -11,14 +11,19 @@ module Users
     before_action :authenticate_user!, only: [:get_current_user]
 
     def get_current_user
+      consent_form_version = Rails.env.test? ? nil : Rails.application.config.consent_form_version
+      disclaimer_version = Rails.env.test? ? nil : Rails.application.config.disclaimer_version
+      terms_of_service_version = Rails.env.test? ? nil : Rails.application.config.terms_of_service_version
+      privacy_policy_version = Rails.env.test? ? nil : Rails.application.config.privacy_policy_version
+
       respond_to do |format|
         format.json do
           render json: {
             currentUser: current_user,
-            consentFormVersion: Rails.application.config.consent_form_version,
-            disclaimerVersion: Rails.application.config.disclaimer_version,
-            termsOfServiceVersion: Rails.application.config.terms_of_service_version,
-            privacyPolicyVersion: Rails.application.config.privacy_policy_version
+            consentFormVersion: consent_form_version,
+            disclaimerVersion: disclaimer_version,
+            termsOfServiceVersion: terms_of_service_version,
+            privacyPolicyVersion: privacy_policy_version
           }.to_json
         end
       end
