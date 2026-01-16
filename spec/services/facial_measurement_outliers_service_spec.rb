@@ -35,7 +35,8 @@ def get_zscores(keys, manager_id: nil)
     new_m = JSON.parse(m.to_json).with_indifferent_access
 
     means_and_std.each do |s|
-      new_m["#{s[:key]}_z_score"] = (new_m[s[:key]] - s[:mean]) / s[:std]
+      value = new_m[s[:key]]
+      new_m["#{s[:key]}_z_score"] = value.nil? ? nil : (value.to_f - s[:mean]) / s[:std]
     end
     accum << new_m
   end
@@ -204,7 +205,7 @@ RSpec.describe FacialMeasurementOutliersService do
 
       it 'returns null z-scores for null measurements' do
         results = described_class.call(manager_id: manager.id).to_a
-        result = results.first
+        result = results.find { |row| row['id'] == measurement.id }
 
         expect(result['jaw_width_z_score']).to be_nil
         expect(result['face_length_z_score']).to be_nil

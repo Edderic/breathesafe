@@ -117,6 +117,10 @@ class FacialMeasurementOutliersService
         SQL
       end
 
+      manager_select = manager_id ? 'manager.email as manager_email' : 'NULL as manager_email'
+      zscore_select = zscore_cols.to_s.strip
+      zscore_select = zscore_select.empty? ? '' : ",\n            #{zscore_select}"
+
       <<-SQL
         zscored_sql AS (
           SELECT
@@ -126,8 +130,7 @@ class FacialMeasurementOutliersService
             p.first_name,
             p.last_name,
             (p.first_name || ' ' || p.last_name) as full_name,
-            #{manager_id ? 'manager.email as manager_email,' : 'NULL as manager_email,'}
-            #{zscore_cols},
+            #{manager_select}#{zscore_select}
           FROM latest_facial_measurements fm
           INNER JOIN users u ON u.id = fm.user_id
           INNER JOIN profiles p ON p.user_id = fm.user_id
@@ -142,16 +145,101 @@ class FacialMeasurementOutliersService
     end
 
     def call(manager_id: nil, facial_measurement_id_of_lower_bound: nil, facial_measurement_id_of_upper_bound: nil)
-      sql = <<-SQL
-        WITH
-        #{latest_measurements_sql},
-        #{measurement_stats_sql(manager_id: manager_id, lower_bound_id: facial_measurement_id_of_lower_bound, upper_bound_id: facial_measurement_id_of_upper_bound)},
-        #{zscored_sql(manager_id:, facial_measurement_id_of_lower_bound:, facial_measurement_id_of_upper_bound:)}
+      normalize_value = lambda do |value|
+        return nil if value.nil?
 
-        SELECT * FROM zscored_sql
-      SQL
+        value = value.presence if value.respond_to?(:presence)
+        return nil if value.nil?
 
-      ActiveRecord::Base.connection.exec_query(sql)
+        numeric = value.to_f
+        numeric.zero? ? nil : numeric
+      end
+
+      scope = FacialMeasurement.all
+      manager_email = nil
+      if manager_id
+        managed_user_ids = ManagedUser.where(manager_id: manager_id).pluck(:managed_id)
+        return [] if managed_user_ids.empty?
+
+        scope = scope.where(user_id: managed_user_ids)
+        manager_email = User.find_by(id: manager_id)&.email
+      end
+
+      measurements = scope.to_a
+      latest_measurements = measurements.group_by(&:user_id).values.map do |rows|
+        rows.max_by { |row| [row.created_at || Time.zone.at(0), row.id] }
+      end
+
+      lower_bound = facial_measurement_id_of_lower_bound &&
+                    FacialMeasurement.find_by(id: facial_measurement_id_of_lower_bound)
+      upper_bound = facial_measurement_id_of_upper_bound &&
+                    FacialMeasurement.find_by(id: facial_measurement_id_of_upper_bound)
+
+      if lower_bound || upper_bound
+        latest_measurements.select! do |measurement|
+          bound_columns = FacialMeasurement::COLUMNS - %w[head_circumference nose_breadth]
+          bound_columns.all? do |column|
+            value_num = normalize_value.call(measurement.public_send(column))
+            lower_num = normalize_value.call(lower_bound&.public_send(column))
+            upper_num = normalize_value.call(upper_bound&.public_send(column))
+
+            (lower_num.nil? || value_num.nil? || value_num >= lower_num) &&
+              (upper_num.nil? || value_num.nil? || value_num <= upper_num)
+          end
+        end
+      end
+
+      stats = FacialMeasurement::COLUMNS.index_with do |column|
+        values = latest_measurements.map do |measurement|
+          normalize_value.call(measurement.public_send(column)) || 0.0
+        end
+        if values.empty?
+          { mean: nil, std: nil }
+        else
+          mean = values.sum / values.length
+          e_of_x_squared = values.sum { |value| value**2 } / values.length
+          std = Math.sqrt(e_of_x_squared - mean**2)
+          { mean: mean, std: std }
+        end
+      end
+
+      user_ids = latest_measurements.map(&:user_id)
+      users_by_id = User.where(id: user_ids).index_by(&:id)
+      profiles_by_user_id = Profile.where(user_id: user_ids).index_by(&:user_id)
+
+      rows = latest_measurements.map do |measurement|
+        user = users_by_id[measurement.user_id]
+        profile = profiles_by_user_id[measurement.user_id]
+        full_name = [profile&.first_name, profile&.last_name].compact.join(' ')
+
+        row = {
+          'id' => measurement.id,
+          'user_id' => measurement.user_id,
+          'user_email' => user&.email,
+          'first_name' => profile&.first_name,
+          'last_name' => profile&.last_name,
+          'full_name' => full_name,
+          'manager_email' => manager_email
+        }
+
+        FacialMeasurement::COLUMNS.each do |column|
+          raw_value = measurement.public_send(column)
+          value_num = normalize_value.call(raw_value)
+          row[column] = raw_value.presence
+
+          mean = stats[column][:mean]
+          std = stats[column][:std]
+          row["#{column}_z_score"] = if value_num.nil? || mean.nil? || std.nil? || std.zero?
+                                       nil
+                                     else
+                                       (value_num - mean) / std
+                                     end
+        end
+
+        row
+      end
+
+      rows.sort_by { |row| [row['last_name'].to_s, row['first_name'].to_s] }
     end
   end
 end
