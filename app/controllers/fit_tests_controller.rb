@@ -183,7 +183,13 @@ class FitTestsController < ApplicationController
   def delete
     fit_test = FitTest.find(params[:id])
 
-    if fit_test.destroy
+    if !current_user
+      status = 401
+      messages = ['Unauthorized.']
+    elsif !current_user.manages?(fit_test.user)
+      status = 401
+      messages = ['Unauthorized.']
+    elsif fit_test.destroy
       status = 200
       messages = []
     else
