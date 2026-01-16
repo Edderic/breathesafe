@@ -23,9 +23,9 @@ class MaskKitQuery
     u = User.find(manager_id)
     Rails.logger.debug "MaskKitQuery: User.find took: #{(Time.current - user_find_start) * 1000}ms"
 
-    where_clause = "    WHERE mu.manager_id = #{manager_id.to_i}"
-
-    where_clause = '' if u.admin?
+    admin = u.admin?
+    where_clause = admin ? '' : "WHERE manager.id = #{manager_id.to_i}"
+    join_type = admin ? 'LEFT JOIN' : 'INNER JOIN'
 
     sql_start = Time.current
     sql_results_raw = ActiveRecord::Base.connection.exec_query(
@@ -42,15 +42,27 @@ class MaskKitQuery
         #{Mask.average_filtration_efficiencies_sql}
 
         SELECT
-          users.email,
+          masks.*,
+          ss.to_user_uuid as email,
           profiles.first_name,
           profiles.last_name,
-          managed_id
-        FROM users
-        LEFT JOIN managed_users mu
-          ON mu.managed_id = users.id
+          mu.managed_id,
+          mks.uuid as mask_kit_uuid,
+          COALESCE(ftc.num_fit_tests_per_mask_user, 0) as num_fit_tests_per_mask_user
+        FROM masks
+        #{join_type} mask_kit_statuses mks
+          ON mks.mask_uuid = masks.id
+        #{join_type} shipping_status_joins ssj
+          ON ssj.shippable_uuid = mks.uuid AND ssj.shippable_type = 'MaskKitStatus'
+        #{join_type} shipping_statuses ss
+          ON ss.uuid = ssj.shipping_uuid
+        #{join_type} users manager
+          ON manager.email = ss.to_user_uuid
+        #{join_type} managed_users mu
+          ON mu.manager_id = manager.id
         LEFT JOIN profiles ON profiles.user_id = mu.managed_id
-
+        LEFT JOIN fit_test_counts_per_mask_user ftc
+          ON ftc.mask_id = masks.id AND ftc.user_id = mu.managed_id
 
         #{where_clause}
       SQL
