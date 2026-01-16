@@ -476,6 +476,13 @@ FactoryBot.define do
     end
   end
 
+  factory :mask_pair do
+    association :mask_a, factory: :mask
+    association :mask_b, factory: :mask
+    name_distance { 0.5 }
+    history { [] }
+  end
+
   factory :measurement_device do
     association :owner, factory: :user
     measurement_device_type { 'quantitative_fit_testing' }
