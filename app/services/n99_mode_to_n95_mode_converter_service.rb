@@ -406,6 +406,9 @@ class N99ModeToN95ModeConverterService
 
       # Convert ActiveRecord::Result to array of hashes
       results = JSON.parse(results.to_json)
+      results.each do |row|
+        row['n95_mode_hmff'] = row['n95_mode_hmff'].to_f if row['n95_mode_hmff'].present?
+      end
 
       # Load FacialMeasurements through ActiveRecord to get decrypted data
       fm_ids = results.map { |row| row['facial_measurement_id'] }.compact.uniq
@@ -414,6 +417,17 @@ class N99ModeToN95ModeConverterService
       # Compute aggregated ARKit measurements in Ruby
       facial_measurements_with_aggregated = results.map do |row|
         facial_measurement_id = row['facial_measurement_id']
+
+        measurement_data = if facial_measurement_id
+                             fm = facial_measurements_by_id[facial_measurement_id]
+                             if fm
+                               FacialMeasurement::COLUMNS.index_with { |column| fm.public_send(column) }
+                             else
+                               {}
+                             end
+                           else
+                             {}
+                           end
 
         aggregated = if facial_measurement_id
                        fm = facial_measurements_by_id[facial_measurement_id]
@@ -453,17 +467,45 @@ class N99ModeToN95ModeConverterService
 
         # Convert symbol keys to string keys to match SQL result format
         aggregated_string_keys = aggregated.transform_keys(&:to_s)
-        row.merge(aggregated_string_keys)
+        row.merge(aggregated_string_keys).merge(measurement_data)
       end
 
       # Compute stats on aggregated measurements
       stats = FacialMeasurementOutliersService.compute_aggregated_stats(facial_measurements_with_aggregated)
+      standard_stats = compute_standard_stats(facial_measurements_with_aggregated)
 
       # Add z-scores for each row and remove arkit key
       facial_measurements_with_aggregated.map do |row|
         z_scores = FacialMeasurementOutliersService.compute_z_scores(row, stats)
-        row.merge(z_scores).except('arkit')
+        standard_z_scores = compute_standard_z_scores(row, standard_stats)
+        row.merge(z_scores).merge(standard_z_scores).except('arkit')
       end
     end
+
+    def compute_standard_stats(rows)
+      FacialMeasurement::COLUMNS.index_with do |column|
+        values = rows.map { |row| row[column] }.compact.map(&:to_f)
+        if values.empty?
+          { mean: nil, std: nil }
+        else
+          mean = values.sum / values.length
+          variance = values.sum { |value| (value - mean)**2 } / values.length
+          { mean: mean, std: Math.sqrt(variance) }
+        end
+      end
+    end
+
+    def compute_standard_z_scores(row, stats)
+      stats.each_with_object({}) do |(column, stat), accum|
+        value = row[column]
+        accum["#{column}_z_score"] = if value.nil? || stat[:mean].nil? || stat[:std].nil? || stat[:std].zero?
+                                       nil
+                                     else
+                                       (value.to_f - stat[:mean]) / stat[:std]
+                                     end
+      end
+    end
+
+    private :compute_standard_stats, :compute_standard_z_scores
   end
 end
