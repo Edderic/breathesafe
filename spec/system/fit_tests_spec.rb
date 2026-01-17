@@ -168,7 +168,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
       expect(FitTest.count).to eq(1)
       fit_test = FitTest.last
       expect(fit_test.results['quantitative']).to be_present
-      expect(fit_test.results['quantitative']['procedure']).to eq('OSHA Fast Face Piece Respirators')
+      expect(fit_test.results['quantitative']['procedure']).to eq('OSHA Fast Filtering Face Piece Respirators')
     end
   end
 
@@ -626,8 +626,17 @@ RSpec.describe 'Fit Test Creation', type: :system do
     expect(page).to have_no_css('.popup', wait: 5)
   end
 
+  def dismiss_all_popups
+    3.times do
+      break unless page.has_css?('.popup .close', wait: 1)
+
+      find('.popup .close').click
+      expect(page).to have_no_css('.popup', wait: 5)
+    end
+  end
+
   def click_save_and_continue
-    dismiss_popup
+    dismiss_all_popups
     button = find('.button', text: 'Save and Continue', match: :first)
     page.execute_script('arguments[0].click()', button)
   end
@@ -681,6 +690,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
     end
 
     within(:xpath, "//div[contains(@class,'right-pane')][.//h2[contains(.,'Fit Test')]]") do
+      dismiss_all_popups
       if page.has_css?('.tab', text: 'Choose Procedure')
         find('.tab', text: 'Choose Procedure', match: :first).click
       elsif page.has_select?('tabToShowSelect')
@@ -688,6 +698,10 @@ RSpec.describe 'Fit Test Creation', type: :system do
       end
 
       find('select', match: :first).select(procedure)
+
+      if procedure.start_with?('quantitative')
+        all('input[type="number"]').first&.set('1000')
+      end
     end
   end
 
@@ -713,6 +727,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
     end
 
     within(:xpath, "//div[contains(@class,'right-pane')][.//h2[contains(.,'Fit Test')]]") do
+      dismiss_popup
       if page.has_css?('.tab', text: 'Results')
         find('.tab', text: 'Results', match: :first).click
       elsif page.has_select?('tabToShowSelect')
@@ -739,10 +754,15 @@ RSpec.describe 'Fit Test Creation', type: :system do
     end
 
     within(:xpath, "//div[contains(@class,'right-pane')][.//h2[contains(.,'Fit Test')]]") do
+      dismiss_all_popups
       if page.has_css?('.tab', text: 'Results')
         find('.tab', text: 'Results', match: :first).click
       elsif page.has_select?('tabToShowSelect')
         select 'Results', from: 'tabToShowSelect'
+      end
+
+      if page.has_field?('Initial count (particles / cm3)')
+        fill_in 'Initial count (particles / cm3)', with: '1000'
       end
 
       all('input[placeholder="Fit factor"]').each do |input|
