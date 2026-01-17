@@ -7,7 +7,11 @@ class AddFormsToUsers < ActiveRecord::Migration[7.0]
 
     # Migrate existing consent_form data into the new forms structure
     say_with_time 'Migrating existing consent form data to forms jsonb field' do
-      User.find_each do |user|
+      migration_user = Class.new(ActiveRecord::Base) do
+        self.table_name = 'users'
+      end
+
+      migration_user.find_each do |user|
         forms_data = {}
 
         # Migrate consent_form data if it exists
