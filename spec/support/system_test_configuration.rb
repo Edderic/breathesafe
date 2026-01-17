@@ -174,10 +174,16 @@ Capybara.app_host = 'http://localhost:3001'
 
 Capybara.register_driver :selenium_chrome_headless do |app|
   options = Selenium::WebDriver::Chrome::Options.new
-  options.add_argument(ENV['CI'] ? '--headless' : '--headless=new')
+  if ENV['CI_NO_HEADLESS']
+    # Use xvfb in CI when running headed.
+  else
+    options.add_argument(ENV['CI'] ? '--headless' : '--headless=new')
+  end
   options.add_argument('--no-sandbox')
   options.add_argument('--disable-dev-shm-usage')
   options.add_argument('--disable-gpu')
+  options.add_argument('--disable-software-rasterizer')
+  options.add_argument('--no-zygote')
   options.add_argument('--window-size=1400,1400')
   options.add_argument('--disable-web-security')
   options.add_argument('--allow-running-insecure-content')
