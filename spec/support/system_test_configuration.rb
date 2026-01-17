@@ -174,13 +174,14 @@ Capybara.app_host = 'http://localhost:3001'
 
 Capybara.register_driver :selenium_chrome_headless do |app|
   options = Selenium::WebDriver::Chrome::Options.new
-  options.add_argument('--headless')
+  options.add_argument('--headless=new')
   options.add_argument('--no-sandbox')
   options.add_argument('--disable-dev-shm-usage')
   options.add_argument('--disable-gpu')
   options.add_argument('--window-size=1400,1400')
   options.add_argument('--disable-web-security')
   options.add_argument('--allow-running-insecure-content')
+  options.binary = ENV['CHROME_BIN'] if ENV['CHROME_BIN']
 
   # Use Selenium's built-in driver manager which handles ChromeDriver automatically
   # This works better with newer Chrome versions and avoids webdrivers version lookup issues
