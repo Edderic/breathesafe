@@ -78,7 +78,7 @@ end
 require 'webdrivers'
 
 # Disable webdrivers in CI so Selenium Manager handles ChromeDriver.
-Webdrivers.disable! if ENV['CI']
+Webdrivers.disable! if ENV['CI'] && Webdrivers.respond_to?(:disable!)
 
 # With Selenium 4.x, we can use the built-in driver manager instead of webdrivers
 # Disable webdrivers auto-update to let Selenium's driver manager handle ChromeDriver
