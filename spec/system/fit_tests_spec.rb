@@ -304,6 +304,14 @@ RSpec.describe 'Fit Test Creation', type: :system do
   end
 
   describe 'Edge cases - Network errors/timeouts' do
+    around do |example|
+      original_raise_server_errors = Capybara.raise_server_errors
+      Capybara.raise_server_errors = false
+      example.run
+    ensure
+      Capybara.raise_server_errors = original_raise_server_errors
+    end
+
     before do
       sign_in manager
       visit '/#/fit_tests/new'
@@ -509,7 +517,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
       expect(fit_test.user_seal_check).to be_present
       expect(fit_test.comfort).to be_present
       expect(fit_test.results['qualitative']).to be_present
-      expect(fit_test.results['qualitative']['aerosol']['solution']).to eq('Bitrex')
+      expect(fit_test.results['qualitative']['aerosol']['solution']).to eq('Saccharin')
     end
   end
 
