@@ -693,9 +693,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
   end
 
   def select_fit_test_procedure(procedure)
-    unless page.has_css?('h2', text: 'Fit Test', wait: 1)
-      find('.step-item', text: 'Fit Test', match: :first).click
-    end
+    find('.step-item', text: 'Fit Test', match: :first).click unless page.has_css?('h2', text: 'Fit Test', wait: 1)
 
     within(:xpath, "//div[contains(@class,'right-pane')][.//h2[contains(.,'Fit Test')]]") do
       dismiss_all_popups
@@ -707,9 +705,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
 
       find('select', match: :first).select(procedure)
 
-      if procedure.start_with?('quantitative')
-        all('input[type="number"]').first&.set('1000')
-      end
+      all('input[type="number"]').first&.set('1000') if procedure.start_with?('quantitative')
     end
   end
 
@@ -730,9 +726,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
   end
 
   def fill_qualitative_exercises
-    unless page.has_css?('h2', text: 'Fit Test', wait: 1)
-      find('.step-item', text: 'Fit Test', match: :first).click
-    end
+    find('.step-item', text: 'Fit Test', match: :first).click unless page.has_css?('h2', text: 'Fit Test', wait: 1)
 
     within(:xpath, "//div[contains(@class,'right-pane')][.//h2[contains(.,'Fit Test')]]") do
       dismiss_popup
@@ -757,9 +751,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
   end
 
   def fill_quantitative_fit_factors
-    unless page.has_css?('h2', text: 'Fit Test', wait: 1)
-      find('.step-item', text: 'Fit Test', match: :first).click
-    end
+    find('.step-item', text: 'Fit Test', match: :first).click unless page.has_css?('h2', text: 'Fit Test', wait: 1)
 
     within(:xpath, "//div[contains(@class,'right-pane')][.//h2[contains(.,'Fit Test')]]") do
       dismiss_all_popups
@@ -769,9 +761,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
         select 'Results', from: 'tabToShowSelect'
       end
 
-      if page.has_field?('Initial count (particles / cm3)')
-        fill_in 'Initial count (particles / cm3)', with: '1000'
-      end
+      fill_in 'Initial count (particles / cm3)', with: '1000' if page.has_field?('Initial count (particles / cm3)')
 
       all('input[placeholder="Fit factor"]').each do |input|
         input.set('100')
