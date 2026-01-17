@@ -1,19 +1,18 @@
-import logging
-import os
 import argparse
 import json
+import logging
+import os
 from datetime import datetime, timezone
 
+import boto3
+import matplotlib.pyplot as plt
 import pandas as pd
 import torch
-import matplotlib.pyplot as plt
-import boto3
-from sklearn.metrics import roc_auc_score, precision_score, recall_score
 from breathesafe_network import (build_session,
                                  fetch_facial_measurements_fit_tests,
                                  fetch_json)
 from predict_arkit_from_traditional import predict_arkit_from_traditional
-
+from sklearn.metrics import precision_score, recall_score, roc_auc_score
 from utils import display_percentage
 
 """
@@ -381,14 +380,19 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
     x_val, y_val = x[val_idx], y[val_idx]
 
     model = torch.nn.Sequential(
-        torch.nn.Linear(x.shape[1], 32),
+        torch.nn.Linear(x.shape[1], 128),
+        torch.nn.ReLU(),
+        torch.nn.Linear(128, 64),
+        torch.nn.ReLU(),
+        torch.nn.Linear(64, 32),
         torch.nn.ReLU(),
         torch.nn.Linear(32, 16),
         torch.nn.ReLU(),
-        torch.nn.Linear(16, 1)
+        torch.nn.Linear(16, 1),
+        torch.nn.Sigmoid()
     )
 
-    loss_fn = torch.nn.BCEWithLogitsLoss()
+    loss_fn = torch.nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     train_losses = []
     val_losses = []
@@ -396,8 +400,8 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
     for epoch in range(epochs):
         model.train()
         optimizer.zero_grad()
-        logits = model(x_train)
-        loss = loss_fn(logits, y_train)
+        probs = model(x_train)
+        loss = loss_fn(probs, y_train)
         loss.backward()
         optimizer.step()
         train_losses.append(loss.item())
@@ -405,9 +409,9 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
         if (epoch + 1) % 10 == 0 or epoch == 0:
             model.eval()
             with torch.no_grad():
-                val_logits = model(x_val)
-                val_loss = loss_fn(val_logits, y_val).item()
-                preds = (torch.sigmoid(val_logits) >= 0.5).float()
+                val_probs = model(x_val)
+                val_loss = loss_fn(val_probs, y_val).item()
+                preds = (val_probs >= 0.5).float()
                 accuracy = (preds == y_val).float().mean().item()
                 true_pos = ((preds == 1) & (y_val == 1)).float().sum().item()
                 false_pos = ((preds == 1) & (y_val == 0)).float().sum().item()
@@ -420,8 +424,8 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
             )
         model.eval()
         with torch.no_grad():
-            val_logits = model(x_val)
-            val_loss = loss_fn(val_logits, y_val).item()
+            val_probs = model(x_val)
+            val_loss = loss_fn(val_probs, y_val).item()
         val_losses.append(val_loss)
 
     return model, train_losses, val_losses, x_val, y_val
@@ -546,6 +550,7 @@ if __name__ == '__main__':
         raise SystemExit(0)
 
     features, target = build_feature_matrix(cleaned_fit_tests)
+
     model, train_losses, val_losses, x_val, y_val = train_predictor(
         features,
         target,
@@ -642,7 +647,7 @@ if __name__ == '__main__':
 
         model.eval()
         with torch.no_grad():
-            probs = torch.sigmoid(model(x_infer)).squeeze().cpu().numpy()
+            probs = model(x_infer).squeeze().cpu().numpy()
 
         ground_truth = build_ground_truth_map(user_id)
         recommendations = []
@@ -710,8 +715,7 @@ if __name__ == '__main__':
 
     model.eval()
     with torch.no_grad():
-        val_logits = model(x_val)
-        val_probs = torch.sigmoid(val_logits).squeeze().cpu().numpy()
+        val_probs = model(x_val).squeeze().cpu().numpy()
         val_labels = y_val.squeeze().cpu().numpy()
 
     threshold = 0.5
