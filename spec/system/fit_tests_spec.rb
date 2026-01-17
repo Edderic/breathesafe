@@ -619,7 +619,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
   end
 
   def wait_for_page_load
-    expect(page).to have_selector('body', wait: 10)
+    expect(page).to have_selector('body', wait: 1)
     sleep 0.5 # Allow Vue to render
   end
 
@@ -631,7 +631,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
     return unless page.has_css?('.popup .close', wait: 1)
 
     find('.popup .close').click
-    expect(page).to have_no_css('.popup', wait: 5)
+    expect(page).to have_no_css('.popup', wait: 2)
   end
 
   def dismiss_all_popups
@@ -639,7 +639,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
       break unless page.has_css?('.popup .close', wait: 1)
 
       find('.popup .close').click
-      expect(page).to have_no_css('.popup', wait: 5)
+      expect(page).to have_no_css('.popup', wait: 2)
     end
   end
 
@@ -650,7 +650,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
   end
 
   def select_user(user)
-    if page.has_css?('select.user-select:not([disabled])', wait: 5)
+    if page.has_css?('select.user-select:not([disabled])', wait: 1)
       option_label = "#{user.profile.first_name} #{user.profile.last_name} - #{user.id}"
       find('select.user-select').select(option_label)
     else
@@ -661,7 +661,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
   end
 
   def select_mask(mask)
-    unless page.has_css?('input[placeholder="Search for mask"]:not([disabled])', wait: 5)
+    unless page.has_css?('input[placeholder="Search for mask"]:not([disabled])', wait: 1)
       find('.step-item', text: 'Mask Selection', match: :first).click
     end
 
@@ -677,7 +677,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
   end
 
   def fill_user_seal_check
-    unless page.has_css?('h2', text: 'User Seal Check', wait: 5)
+    unless page.has_css?('h2', text: 'User Seal Check', wait: 1)
       find('.step-item', text: 'User Seal Check', match: :first).click
     end
 
@@ -693,7 +693,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
   end
 
   def select_fit_test_procedure(procedure)
-    unless page.has_css?('h2', text: 'Fit Test', wait: 5)
+    unless page.has_css?('h2', text: 'Fit Test', wait: 1)
       find('.step-item', text: 'Fit Test', match: :first).click
     end
 
@@ -730,7 +730,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
   end
 
   def fill_qualitative_exercises
-    unless page.has_css?('h2', text: 'Fit Test', wait: 5)
+    unless page.has_css?('h2', text: 'Fit Test', wait: 1)
       find('.step-item', text: 'Fit Test', match: :first).click
     end
 
@@ -757,7 +757,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
   end
 
   def fill_quantitative_fit_factors
-    unless page.has_css?('h2', text: 'Fit Test', wait: 5)
+    unless page.has_css?('h2', text: 'Fit Test', wait: 1)
       find('.step-item', text: 'Fit Test', match: :first).click
     end
 
@@ -780,7 +780,7 @@ RSpec.describe 'Fit Test Creation', type: :system do
   end
 
   def fill_comfort
-    unless page.has_css?('h2', text: 'Comfort Assessment', wait: 5)
+    unless page.has_css?('h2', text: 'Comfort Assessment', wait: 1)
       find('.step-item', text: 'Comfort Assessment', match: :first).click
     end
 
