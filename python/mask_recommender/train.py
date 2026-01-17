@@ -554,6 +554,140 @@ if __name__ == '__main__':
     )
 
     logging.info("Model training complete. Feature count: %s", features.shape[1])
+    feature_columns = list(features.columns)
+    categorical_columns = ['strap_type', 'style', 'unique_internal_model_code']
+
+    def build_inference_features(rows, columns):
+        encoded = pd.get_dummies(rows, columns=categorical_columns, dummy_na=True)
+        for column in columns:
+            if column not in encoded.columns:
+                encoded[column] = 0
+        encoded = encoded[columns]
+        encoded = encoded.apply(pd.to_numeric, errors='coerce').fillna(0).astype(float)
+        return encoded
+
+    def get_latest_user_features(user_id):
+        user_rows = fit_tests_with_imputed_arkit_via_traditional_facial_measurements[
+            fit_tests_with_imputed_arkit_via_traditional_facial_measurements['user_id'] == user_id
+        ]
+        if user_rows.empty:
+            return None
+        user_rows = user_rows.dropna(subset=FACIAL_FEATURE_COLUMNS)
+        if user_rows.empty:
+            return None
+        user_rows = user_rows.copy()
+        if 'created_at' in user_rows.columns:
+            user_rows['created_at_parsed'] = pd.to_datetime(user_rows['created_at'], errors='coerce')
+            user_rows = user_rows.sort_values(by='created_at_parsed', ascending=False)
+        return user_rows.iloc[0]
+
+    def build_ground_truth_map(user_id):
+        user_rows = fit_tests_with_imputed_arkit_via_traditional_facial_measurements[
+            fit_tests_with_imputed_arkit_via_traditional_facial_measurements['user_id'] == user_id
+        ].copy()
+        if user_rows.empty:
+            return {}
+        if 'created_at' in user_rows.columns:
+            user_rows['created_at_parsed'] = pd.to_datetime(user_rows['created_at'], errors='coerce')
+            user_rows = user_rows.sort_values(by='created_at_parsed', ascending=False)
+        ground_truth = {}
+        for _, row in user_rows.iterrows():
+            mask_id = row.get('mask_id')
+            if pd.isna(mask_id) or mask_id in ground_truth:
+                continue
+            normalized = _normalize_pass(row.get('qlft_pass'))
+            if normalized is None:
+                ground_truth[int(mask_id)] = None
+            else:
+                ground_truth[int(mask_id)] = 'pass' if normalized == 1 else 'fail'
+        return ground_truth
+
+    mask_candidates = masks_df.copy()
+    mask_candidates = mask_candidates[
+        mask_candidates['perimeter_mm'].notna() &
+        (mask_candidates['perimeter_mm'] > 0) &
+        mask_candidates['strap_type'].notna() &
+        mask_candidates['style'].notna() &
+        mask_candidates['unique_internal_model_code'].notna()
+    ]
+    mask_candidates = mask_candidates[
+        mask_candidates['strap_type'].astype(str).str.strip().ne('') &
+        mask_candidates['style'].astype(str).str.strip().ne('') &
+        mask_candidates['unique_internal_model_code'].astype(str).str.strip().ne('')
+    ]
+
+    recommendation_output = {
+        'timestamp': datetime.now(timezone.utc).isoformat(),
+        'users': []
+    }
+    for user_id in [99, 101]:
+        user_row = get_latest_user_features(user_id)
+        if user_row is None:
+            logging.warning("No usable facial features for user_id=%s; skipping recommendations.", user_id)
+            continue
+
+        base_features = {
+            'perimeter_mm': mask_candidates['perimeter_mm'].to_numpy(),
+            'facial_hair_beard_length_mm': user_row.get('facial_hair_beard_length_mm') or 0,
+            'strap_type': mask_candidates['strap_type'].to_numpy(),
+            'style': mask_candidates['style'].to_numpy(),
+            'unique_internal_model_code': mask_candidates['unique_internal_model_code'].to_numpy(),
+        }
+        for column in FACIAL_FEATURE_COLUMNS:
+            base_features[column] = user_row.get(column)
+
+        inference_rows = pd.DataFrame(base_features)
+        inference_features = build_inference_features(inference_rows, feature_columns)
+        x_infer = torch.tensor(inference_features.to_numpy(), dtype=torch.float32)
+
+        model.eval()
+        with torch.no_grad():
+            probs = torch.sigmoid(model(x_infer)).squeeze().cpu().numpy()
+
+        ground_truth = build_ground_truth_map(user_id)
+        recommendations = []
+        for idx, mask_row in mask_candidates.reset_index(drop=True).iterrows():
+            mask_id = int(mask_row['id'])
+            recommendations.append({
+                'user_id': int(user_id),
+                'mask_id': mask_id,
+                'unique_internal_model_code': mask_row.get('unique_internal_model_code', ''),
+                'probability_of_fit': float(probs[idx]),
+                'ground_truth': ground_truth.get(mask_id)
+            })
+        recommendations.sort(key=lambda row: row['probability_of_fit'], reverse=True)
+
+        eval_rows = [row for row in recommendations if row['ground_truth'] in ('pass', 'fail')]
+        precision = None
+        recall = None
+        if eval_rows:
+            preds = [1 if row['probability_of_fit'] >= 0.5 else 0 for row in eval_rows]
+            labels = [1 if row['ground_truth'] == 'pass' else 0 for row in eval_rows]
+            true_pos = sum(1 for p, y in zip(preds, labels) if p == 1 and y == 1)
+            false_pos = sum(1 for p, y in zip(preds, labels) if p == 1 and y == 0)
+            false_neg = sum(1 for p, y in zip(preds, labels) if p == 0 and y == 1)
+            precision = true_pos / (true_pos + false_pos) if (true_pos + false_pos) else 0.0
+            recall = true_pos / (true_pos + false_neg) if (true_pos + false_neg) else 0.0
+
+        recommendation_output['users'].append({
+            'user_id': int(user_id),
+            'feature_source_fit_test_id': int(user_row.get('id')),
+            'metrics': {
+                'threshold': 0.5,
+                'precision': precision,
+                'recall': recall,
+                'ground_truth_count': len(eval_rows)
+            },
+            'recommendations': recommendations
+        })
+
+    recommendations_path = os.path.join(
+        os.path.dirname(args.loss_plot),
+        f"recommendations_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}.json"
+    )
+    with open(recommendations_path, 'w', encoding='utf-8') as handle:
+        json.dump(recommendation_output, handle, indent=2)
+    logging.info("Saved recommendation preview to %s", recommendations_path)
     if train_losses:
         plt.figure(figsize=(8, 4))
         epochs = range(1, len(train_losses) + 1)
@@ -590,8 +724,6 @@ if __name__ == '__main__':
     val_precision = precision_score(val_labels, val_preds, zero_division=0)
     val_recall = recall_score(val_labels, val_preds, zero_division=0)
 
-    feature_columns = list(features.columns)
-    categorical_columns = ['strap_type', 'style', 'unique_internal_model_code']
     timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
     prefix = f"mask_recommender/models/{timestamp}"
 
