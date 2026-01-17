@@ -35,6 +35,22 @@ jobs:
         ruby-version: '3.3.9'
         bundler-cache: true
 
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: yarn
+
+    - name: Install JS dependencies
+      run: |
+        yarn install --frozen-lockfile
+
+    - name: Build Vite assets (test)
+      env:
+        RAILS_ENV: test
+      run: |
+        bin/vite build --clear --mode=test
+
     - name: Install system dependencies
       run: |
         sudo apt-get update
