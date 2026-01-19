@@ -6,13 +6,14 @@ from datetime import datetime, timezone
 
 import boto3
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import torch
 from breathesafe_network import (build_session,
                                  fetch_facial_measurements_fit_tests,
                                  fetch_json)
 from predict_arkit_from_traditional import predict_arkit_from_traditional
-from sklearn.metrics import precision_score, recall_score, roc_auc_score
+from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
 from utils import display_percentage
 
 """
@@ -378,6 +379,8 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
 
     x_train, y_train = x[train_idx], y[train_idx]
     x_val, y_val = x[val_idx], y[val_idx]
+    train_positive_rate = float(y_train.mean().item()) if y_train.numel() else 0.0
+    val_positive_rate = float(y_val.mean().item()) if y_val.numel() else 0.0
 
     model = torch.nn.Sequential(
         torch.nn.Linear(x.shape[1], 128),
@@ -392,16 +395,27 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
         torch.nn.Sigmoid()
     )
 
-    loss_fn = torch.nn.BCELoss()
+    loss_fn = torch.nn.BCELoss(reduction='none')
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     train_losses = []
     val_losses = []
+    pos_count = float(y_train.sum().item())
+    neg_count = float((1 - y_train).sum().item())
+    pos_weight = (neg_count / pos_count) if pos_count > 0 else 1.0
+    pos_weight_tensor = torch.tensor(pos_weight, dtype=torch.float32)
+    logging.info(
+        "Training balance: train_pos_rate=%.3f val_pos_rate=%.3f pos_weight=%.3f",
+        train_positive_rate,
+        val_positive_rate,
+        pos_weight
+    )
 
     for epoch in range(epochs):
         model.train()
         optimizer.zero_grad()
         probs = model(x_train)
-        loss = loss_fn(probs, y_train)
+        sample_weights = torch.where(y_train == 1, pos_weight_tensor, torch.tensor(1.0))
+        loss = (loss_fn(probs, y_train) * sample_weights).mean()
         loss.backward()
         optimizer.step()
         train_losses.append(loss.item())
@@ -410,7 +424,8 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
             model.eval()
             with torch.no_grad():
                 val_probs = model(x_val)
-                val_loss = loss_fn(val_probs, y_val).item()
+                val_weights = torch.where(y_val == 1, pos_weight_tensor, torch.tensor(1.0))
+                val_loss = (loss_fn(val_probs, y_val) * val_weights).mean().item()
                 preds = (val_probs >= 0.5).float()
                 accuracy = (preds == y_val).float().mean().item()
                 true_pos = ((preds == 1) & (y_val == 1)).float().sum().item()
@@ -425,7 +440,8 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
         model.eval()
         with torch.no_grad():
             val_probs = model(x_val)
-            val_loss = loss_fn(val_probs, y_val).item()
+            val_weights = torch.where(y_val == 1, pos_weight_tensor, torch.tensor(1.0))
+            val_loss = (loss_fn(val_probs, y_val) * val_weights).mean().item()
         val_losses.append(val_loss)
 
     return model, train_losses, val_losses, x_val, y_val
@@ -621,6 +637,31 @@ if __name__ == '__main__':
         mask_candidates['unique_internal_model_code'].astype(str).str.strip().ne('')
     ]
 
+    model.eval()
+    with torch.no_grad():
+        val_probs = model(x_val).squeeze().cpu().numpy()
+        val_labels = y_val.squeeze().cpu().numpy()
+
+    if val_probs.size:
+        logging.info(
+            "Validation probabilities: min=%.4f mean=%.4f max=%.4f",
+            float(np.min(val_probs)),
+            float(np.mean(val_probs)),
+            float(np.max(val_probs))
+        )
+
+    best_threshold = 0.5
+    best_f1 = 0.0
+    if val_probs.size:
+        threshold_grid = np.arange(0.05, 0.96, 0.01)
+        for candidate in threshold_grid:
+            candidate_preds = (val_probs >= candidate).astype(float)
+            candidate_f1 = f1_score(val_labels, candidate_preds, zero_division=0)
+            if candidate_f1 > best_f1:
+                best_f1 = candidate_f1
+                best_threshold = float(candidate)
+    logging.info("Selected threshold=%.2f with val_f1=%.3f", best_threshold, best_f1)
+
     recommendation_output = {
         'timestamp': datetime.now(timezone.utc).isoformat(),
         'users': []
@@ -666,7 +707,7 @@ if __name__ == '__main__':
         precision = None
         recall = None
         if eval_rows:
-            preds = [1 if row['probability_of_fit'] >= 0.5 else 0 for row in eval_rows]
+            preds = [1 if row['probability_of_fit'] >= best_threshold else 0 for row in eval_rows]
             labels = [1 if row['ground_truth'] == 'pass' else 0 for row in eval_rows]
             true_pos = sum(1 for p, y in zip(preds, labels) if p == 1 and y == 1)
             false_pos = sum(1 for p, y in zip(preds, labels) if p == 1 and y == 0)
@@ -678,7 +719,7 @@ if __name__ == '__main__':
             'user_id': int(user_id),
             'feature_source_fit_test_id': int(user_row.get('id')),
             'metrics': {
-                'threshold': 0.5,
+                'threshold': best_threshold,
                 'precision': precision,
                 'recall': recall,
                 'ground_truth_count': len(eval_rows)
@@ -713,12 +754,7 @@ if __name__ == '__main__':
 
     logging.info(f"Total # fit tests missing parameter_mm: {total_fit_tests_missing_parameter_mm}")
 
-    model.eval()
-    with torch.no_grad():
-        val_probs = model(x_val).squeeze().cpu().numpy()
-        val_labels = y_val.squeeze().cpu().numpy()
-
-    threshold = 0.5
+    threshold = best_threshold
     val_preds = (val_probs >= threshold).astype(float)
     try:
         roc_auc = roc_auc_score(val_labels, val_probs)
@@ -771,6 +807,7 @@ if __name__ == '__main__':
         'threshold': threshold,
         'val_loss': val_losses[-1] if val_losses else None,
         'roc_auc': roc_auc,
+        'val_f1': best_f1,
         'val_precision': val_precision,
         'val_recall': val_recall,
         'train_samples': int(features.shape[0]),
