@@ -234,11 +234,11 @@ def main():
     }
 
     with pm.Model(coords=coords) as model:
-        mask_idx = pm.MutableData("mask_idx", train_mask_idx)
-        bin_idx = pm.MutableData("bin_idx", train_bin)
-        beard_len = pm.MutableData("beard_length", train_beard)
-        earloop = pm.MutableData("is_earloop", train_ear)
-        headstrap = pm.MutableData("is_headstrap", train_head)
+        mask_idx = pm.Data("mask_idx", train_mask_idx)
+        bin_idx = pm.Data("bin_idx", train_bin)
+        beard_len = pm.Data("beard_length", train_beard)
+        earloop = pm.Data("is_earloop", train_ear)
+        headstrap = pm.Data("is_headstrap", train_head)
 
         alpha_style_bin = pm.HalfNormal(
             "alpha_perimeter_bin_style",
