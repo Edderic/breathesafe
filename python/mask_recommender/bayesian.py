@@ -4,6 +4,8 @@ import logging
 import os
 from datetime import datetime, timezone
 
+import arviz as az
+import boto3
 import numpy as np
 import pandas as pd
 import pymc as pm
@@ -19,12 +21,45 @@ FACIAL_FEATURE_COLUMNS = [
     'chin_mm',
     'top_cheek_mm',
     'mid_cheek_mm',
-    'strap_mm',
 ]
 
 
 pytensor.config.cxx = ""
 pytensor.config.mode = "FAST_COMPILE"
+
+
+def _env_name():
+    env = os.environ.get('RAILS_ENV', '').strip().lower()
+    if env in ('production', 'staging', 'development'):
+        return env
+    return 'development'
+
+
+def _s3_bucket():
+    mapping = {
+        'production': 'breathesafe',
+        'staging': 'breathesafe-staging',
+        'development': 'breathesafe-development',
+    }
+    return mapping[_env_name()]
+
+
+def _s3_region():
+    return os.environ.get('S3_BUCKET_REGION') or os.environ.get('AWS_REGION') or 'us-east-1'
+
+
+def _upload_file_to_s3(local_path, key):
+    bucket = _s3_bucket()
+    s3 = boto3.client('s3', region_name=_s3_region())
+    profile = os.environ.get('AWS_PROFILE')
+    logging.info(
+        "S3 upload using bucket=%s region=%s profile=%s",
+        bucket,
+        _s3_region(),
+        profile or "default"
+    )
+    s3.upload_file(local_path, bucket, key)
+    return f"s3://{bucket}/{key}"
 
 
 def _normalize_pass(value):
@@ -119,6 +154,87 @@ def sigmoid(values):
     return 1 / (1 + np.exp(-values))
 
 
+def build_bayesian_model(
+    coords,
+    mask_style_idx,
+    train_mask_idx,
+    train_bin,
+    train_beard,
+    train_ear,
+    train_head,
+    train_labels,
+    args,
+):
+    with pm.Model(coords=coords) as model:
+        mask_idx = pm.Data("mask_idx", train_mask_idx)
+        bin_idx = pm.Data("bin_idx", train_bin)
+        beard_len = pm.Data("beard_length", train_beard)
+        earloop = pm.Data("is_earloop", train_ear)
+        headstrap = pm.Data("is_headstrap", train_head)
+
+        alpha_style_bin = pm.HalfNormal(
+            "alpha_perimeter_bin_style",
+            sigma=10,
+            dims=("style", "bin")
+        )
+        beta_style_bin = pm.HalfNormal(
+            "beta_perimeter_bin_style",
+            sigma=10,
+            dims=("style", "bin")
+        )
+
+        alpha_mask_bin = alpha_style_bin[mask_style_idx]
+        beta_mask_bin = beta_style_bin[mask_style_idx]
+
+        p_mask = pm.Beta(
+            "p_mask",
+            alpha=alpha_mask_bin,
+            beta=beta_mask_bin,
+            dims=("mask", "bin")
+        )
+
+        beta_facial_hair = pm.Normal("beta_facial_hair", mu=0, sigma=1)
+        beta_earloop = pm.Normal("beta_earloop", mu=0, sigma=1)
+        beta_headstrap = pm.Normal("beta_headstrap", mu=1, sigma=1)
+        alpha = pm.Normal("alpha", mu=0, sigma=3)
+
+        p_facial_hair_strap = pm.math.sigmoid(
+            beta_facial_hair * beard_len
+            + beta_earloop * earloop
+            + beta_headstrap * headstrap
+            + alpha
+        )
+        p = pm.Deterministic("p", p_mask[mask_idx, bin_idx] * p_facial_hair_strap)
+        pm.Bernoulli("qlft_pass", p=p, observed=train_labels)
+
+        trace = pm.sample(
+            draws=args.draws,
+            tune=args.tune,
+            target_accept=args.target_accept,
+            random_seed=args.seed,
+            progressbar=True,
+        )
+
+    return model, trace
+
+
+def predict_from_trace(trace, mask_idx, bin_idx, beard, earloop, headstrap):
+    p_mask_mean = trace.posterior["p_mask"].mean(dim=("chain", "draw")).values
+    beta_facial_hair_mean = float(trace.posterior["beta_facial_hair"].mean().values)
+    beta_earloop_mean = float(trace.posterior["beta_earloop"].mean().values)
+    beta_headstrap_mean = float(trace.posterior["beta_headstrap"].mean().values)
+    alpha_mean = float(trace.posterior["alpha"].mean().values)
+
+    linear = (
+        beta_facial_hair_mean * beard
+        + beta_earloop_mean * earloop
+        + beta_headstrap_mean * headstrap
+        + alpha_mean
+    )
+    p_facial = sigmoid(linear)
+    return p_mask_mean[mask_idx, bin_idx] * p_facial
+
+
 def evaluate_predictions(val_probs, val_labels):
     threshold_grid = np.arange(0.05, 0.96, 0.01)
     best_threshold = 0.5
@@ -150,6 +266,7 @@ def evaluate_predictions(val_probs, val_labels):
 def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     args = parse_args()
+    run_timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
 
     session = build_session(None)
     fit_tests_payload = fetch_facial_measurements_fit_tests(session=session)
@@ -238,70 +355,32 @@ def main():
         "bin": list(bin_labels),
     }
 
-    with pm.Model(coords=coords) as model:
-        mask_idx = pm.Data("mask_idx", train_mask_idx)
-        bin_idx = pm.Data("bin_idx", train_bin)
-        beard_len = pm.Data("beard_length", train_beard)
-        earloop = pm.Data("is_earloop", train_ear)
-        headstrap = pm.Data("is_headstrap", train_head)
-
-        alpha_style_bin = pm.HalfNormal(
-            "alpha_perimeter_bin_style",
-            sigma=10,
-            dims=("style", "bin")
-        )
-        beta_style_bin = pm.HalfNormal(
-            "beta_perimeter_bin_style",
-            sigma=10,
-            dims=("style", "bin")
-        )
-
-        alpha_mask_bin = alpha_style_bin[mask_style_idx]
-        beta_mask_bin = beta_style_bin[mask_style_idx]
-
-        p_mask = pm.Beta(
-            "p_mask",
-            alpha=alpha_mask_bin,
-            beta=beta_mask_bin,
-            dims=("mask", "bin")
-        )
-
-        beta_facial_hair = pm.Normal("beta_facial_hair", mu=0, sigma=1)
-        beta_earloop = pm.Normal("beta_earloop", mu=0, sigma=1)
-        beta_headstrap = pm.Normal("beta_headstrap", mu=1, sigma=1)
-        alpha = pm.Normal("alpha", mu=0, sigma=3)
-
-        p_facial_hair_strap = pm.math.sigmoid(
-            beta_facial_hair * beard_len
-            + beta_earloop * earloop
-            + beta_headstrap * headstrap
-            + alpha
-        )
-        p = pm.Deterministic("p", p_mask[mask_idx, bin_idx] * p_facial_hair_strap)
-        pm.Bernoulli("qlft_pass", p=p, observed=train_labels)
-
-        trace = pm.sample(
-            draws=args.draws,
-            tune=args.tune,
-            target_accept=args.target_accept,
-            random_seed=args.seed,
-            progressbar=True,
-        )
-
-    p_mask_mean = trace.posterior["p_mask"].mean(dim=("chain", "draw")).values
-    beta_facial_hair_mean = float(trace.posterior["beta_facial_hair"].mean().values)
-    beta_earloop_mean = float(trace.posterior["beta_earloop"].mean().values)
-    beta_headstrap_mean = float(trace.posterior["beta_headstrap"].mean().values)
-    alpha_mean = float(trace.posterior["alpha"].mean().values)
-
-    val_linear = (
-        beta_facial_hair_mean * val_beard
-        + beta_earloop_mean * val_ear
-        + beta_headstrap_mean * val_head
-        + alpha_mean
+    _, trace = build_bayesian_model(
+        coords,
+        mask_style_idx,
+        train_mask_idx,
+        train_bin,
+        train_beard,
+        train_ear,
+        train_head,
+        train_labels,
+        args,
     )
-    val_p_facial = sigmoid(val_linear)
-    val_probs = p_mask_mean[val_mask_idx, val_bin] * val_p_facial
+
+    trace_path = f"/tmp/mask_recommender_bayesian_trace_{run_timestamp}.nc"
+    az.to_netcdf(trace, trace_path)
+    trace_key = f"mask_recommender/models/{run_timestamp}/bayesian_trace.nc"
+    trace_uri = _upload_file_to_s3(trace_path, trace_key)
+    logging.info("Uploaded trace to %s", trace_uri)
+
+    val_probs = predict_from_trace(
+        trace,
+        val_mask_idx,
+        val_bin,
+        val_beard,
+        val_ear,
+        val_head,
+    )
 
     bayesian_metrics = evaluate_predictions(val_probs, val_labels)
 
@@ -338,6 +417,7 @@ def main():
         "samples_total": int(fit_tests.shape[0]),
         "samples_train": int(train_idx.shape[0]),
         "samples_val": int(val_idx.shape[0]),
+        "trace_uri": trace_uri,
         "val_auc": bayesian_metrics["auc"],
         "val_f1": bayesian_metrics["f1"],
         "val_precision": bayesian_metrics["precision"],
