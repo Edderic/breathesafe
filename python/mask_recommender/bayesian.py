@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import numpy as np
 import pandas as pd
 import pymc as pm
+import pytensor
 import torch
 from breathesafe_network import build_session, fetch_facial_measurements_fit_tests
 from predict_arkit_from_traditional import predict_arkit_from_traditional
@@ -20,6 +21,10 @@ FACIAL_FEATURE_COLUMNS = [
     'mid_cheek_mm',
     'strap_mm',
 ]
+
+
+pytensor.config.cxx = ""
+pytensor.config.mode = "FAST_COMPILE"
 
 
 def _normalize_pass(value):
