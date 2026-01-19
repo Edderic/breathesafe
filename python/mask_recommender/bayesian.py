@@ -7,8 +7,11 @@ from datetime import datetime, timezone
 import numpy as np
 import pandas as pd
 import pymc as pm
+import torch
+from breathesafe_network import build_session, fetch_facial_measurements_fit_tests
 from predict_arkit_from_traditional import predict_arkit_from_traditional
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
+from train import build_feature_matrix, train_predictor_with_split
 
 FACIAL_FEATURE_COLUMNS = [
     'nose_mm',
@@ -48,8 +51,8 @@ def parse_args():
         help="Base URL for the Breathesafe API.",
     )
     parser.add_argument("--cookie", help="Session cookie for authentication.")
-    parser.add_argument("--email", help="Email for authentication.")
-    parser.add_argument("--password", help="Password for authentication.")
+    parser.add_argument("--email", help="Email for authentication (optional).")
+    parser.add_argument("--password", help="Password for authentication (optional).")
     parser.add_argument("--draws", type=int, default=1000, help="Posterior draws.")
     parser.add_argument("--tune", type=int, default=1000, help="Tuning steps.")
     parser.add_argument(
@@ -63,6 +66,18 @@ def parse_args():
         "--output-json",
         default=None,
         help="Optional path to write metrics JSON output.",
+    )
+    parser.add_argument(
+        "--nn-epochs",
+        type=int,
+        default=50,
+        help="Epochs for the baseline neural network comparison.",
+    )
+    parser.add_argument(
+        "--nn-learning-rate",
+        type=float,
+        default=0.01,
+        help="Learning rate for the baseline neural network comparison.",
     )
     return parser.parse_args()
 
@@ -99,16 +114,55 @@ def sigmoid(values):
     return 1 / (1 + np.exp(-values))
 
 
+def evaluate_predictions(val_probs, val_labels):
+    threshold_grid = np.arange(0.05, 0.96, 0.01)
+    best_threshold = 0.5
+    best_f1 = 0.0
+    for candidate in threshold_grid:
+        preds = (val_probs >= candidate).astype(int)
+        candidate_f1 = f1_score(val_labels, preds, zero_division=0)
+        if candidate_f1 > best_f1:
+            best_f1 = candidate_f1
+            best_threshold = float(candidate)
+
+    val_preds = (val_probs >= best_threshold).astype(int)
+    precision = precision_score(val_labels, val_preds, zero_division=0)
+    recall = recall_score(val_labels, val_preds, zero_division=0)
+    try:
+        roc_auc = roc_auc_score(val_labels, val_probs)
+    except ValueError:
+        roc_auc = None
+
+    return {
+        "auc": roc_auc,
+        "f1": best_f1,
+        "precision": precision,
+        "recall": recall,
+        "threshold": best_threshold,
+    }
+
+
 def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     args = parse_args()
 
-    fit_tests = predict_arkit_from_traditional(
-        base_url=args.base_url,
-        cookie=args.cookie,
-        email=args.email,
-        password=args.password,
-    )
+    session = build_session(None)
+    fit_tests_payload = fetch_facial_measurements_fit_tests(session=session)
+    fit_tests = pd.DataFrame(fit_tests_payload)
+
+    email = args.email or os.getenv('BREATHESAFE_SERVICE_EMAIL')
+    password = args.password or os.getenv('BREATHESAFE_SERVICE_PASSWORD')
+    if email and password:
+        fit_tests = predict_arkit_from_traditional(
+            base_url=args.base_url,
+            cookie=args.cookie,
+            email=email,
+            password=password,
+        )
+    else:
+        logging.info(
+            "BREATHESAFE_SERVICE_EMAIL/PASSWORD not set; skipping ARKit imputation."
+        )
 
     fit_tests = prepare_fit_tests(fit_tests)
     if fit_tests.empty:
@@ -244,41 +298,68 @@ def main():
     val_p_facial = sigmoid(val_linear)
     val_probs = p_mask_mean[val_mask_idx, val_bin] * val_p_facial
 
-    threshold_grid = np.arange(0.05, 0.96, 0.01)
-    best_threshold = 0.5
-    best_f1 = 0.0
-    for candidate in threshold_grid:
-        preds = (val_probs >= candidate).astype(int)
-        candidate_f1 = f1_score(val_labels, preds, zero_division=0)
-        if candidate_f1 > best_f1:
-            best_f1 = candidate_f1
-            best_threshold = float(candidate)
+    bayesian_metrics = evaluate_predictions(val_probs, val_labels)
 
-    val_preds = (val_probs >= best_threshold).astype(int)
-    precision = precision_score(val_labels, val_preds, zero_division=0)
-    recall = recall_score(val_labels, val_preds, zero_division=0)
-    try:
-        roc_auc = roc_auc_score(val_labels, val_probs)
-    except ValueError:
-        roc_auc = None
+    baseline_df = fit_tests[
+        [
+            "perimeter_mm",
+            "facial_hair_beard_length_mm",
+            "strap_type",
+            "style",
+            "unique_internal_model_code",
+            "qlft_pass_normalized",
+        ]
+        + FACIAL_FEATURE_COLUMNS
+    ].copy()
+    baseline_features, baseline_target = build_feature_matrix(baseline_df)
+    baseline_model, _, _, baseline_x_val, baseline_y_val = train_predictor_with_split(
+        baseline_features,
+        baseline_target,
+        train_idx,
+        val_idx,
+        epochs=args.nn_epochs,
+        learning_rate=args.nn_learning_rate,
+    )
+    baseline_model.eval()
+    with torch.no_grad():
+        baseline_val_probs = (
+            baseline_model(baseline_x_val).squeeze().cpu().numpy()
+        )
+        baseline_val_labels = baseline_y_val.squeeze().cpu().numpy()
+    baseline_metrics = evaluate_predictions(baseline_val_probs, baseline_val_labels)
 
     metrics = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "samples_total": int(fit_tests.shape[0]),
         "samples_train": int(train_idx.shape[0]),
         "samples_val": int(val_idx.shape[0]),
-        "val_auc": roc_auc,
-        "val_f1": best_f1,
-        "val_precision": precision,
-        "val_recall": recall,
-        "val_threshold": best_threshold,
+        "val_auc": bayesian_metrics["auc"],
+        "val_f1": bayesian_metrics["f1"],
+        "val_precision": bayesian_metrics["precision"],
+        "val_recall": bayesian_metrics["recall"],
+        "val_threshold": bayesian_metrics["threshold"],
+        "comparison": {
+            "bayesian": bayesian_metrics,
+            "neural_net": baseline_metrics,
+        },
     }
 
-    logging.info("Validation AUC: %s", f"{roc_auc:.3f}" if roc_auc is not None else "n/a")
-    logging.info("Validation F1: %.3f", best_f1)
-    logging.info("Validation precision: %.3f", precision)
-    logging.info("Validation recall: %.3f", recall)
-    logging.info("Selected threshold: %.2f", best_threshold)
+    logging.info(
+        "Bayesian metrics -> AUC=%s F1=%.3f precision=%.3f recall=%.3f threshold=%.2f",
+        f"{bayesian_metrics['auc']:.3f}" if bayesian_metrics["auc"] is not None else "n/a",
+        bayesian_metrics["f1"],
+        bayesian_metrics["precision"],
+        bayesian_metrics["recall"],
+        bayesian_metrics["threshold"],
+    )
+    logging.info(
+        "Neural net metrics -> AUC=%s F1=%.3f precision=%.3f recall=%.3f threshold=%.2f",
+        f"{baseline_metrics['auc']:.3f}" if baseline_metrics["auc"] is not None else "n/a",
+        baseline_metrics["f1"],
+        baseline_metrics["precision"],
+        baseline_metrics["recall"],
+        baseline_metrics["threshold"],
+    )
 
     output_path = args.output_json
     if not output_path:

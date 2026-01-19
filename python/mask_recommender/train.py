@@ -367,23 +367,9 @@ def build_feature_matrix(filtered_df):
     return features, target
 
 
-def train_predictor(features, target, epochs=50, learning_rate=0.01):
-    x = torch.tensor(features.to_numpy(), dtype=torch.float32)
-    y = torch.tensor(target.to_numpy(), dtype=torch.float32).unsqueeze(1)
-
-    num_rows = x.shape[0]
-    permutation = torch.randperm(num_rows)
-    split_index = int(num_rows * 0.8)
-    train_idx = permutation[:split_index]
-    val_idx = permutation[split_index:]
-
-    x_train, y_train = x[train_idx], y[train_idx]
-    x_val, y_val = x[val_idx], y[val_idx]
-    train_positive_rate = float(y_train.mean().item()) if y_train.numel() else 0.0
-    val_positive_rate = float(y_val.mean().item()) if y_val.numel() else 0.0
-
+def _initialize_model(feature_count):
     model = torch.nn.Sequential(
-        torch.nn.Linear(x.shape[1], 128),
+        torch.nn.Linear(feature_count, 128),
         torch.nn.ReLU(),
         torch.nn.Linear(128, 64),
         torch.nn.ReLU(),
@@ -394,6 +380,13 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
         torch.nn.Linear(16, 1),
         torch.nn.Sigmoid()
     )
+    return model
+
+
+def _train_with_split(x_train, y_train, x_val, y_val, epochs=50, learning_rate=0.01):
+    train_positive_rate = float(y_train.mean().item()) if y_train.numel() else 0.0
+    val_positive_rate = float(y_val.mean().item()) if y_val.numel() else 0.0
+    model = _initialize_model(x_train.shape[1])
 
     loss_fn = torch.nn.BCELoss(reduction='none')
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
@@ -444,7 +437,43 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
             val_loss = (loss_fn(val_probs, y_val) * val_weights).mean().item()
         val_losses.append(val_loss)
 
+    return model, train_losses, val_losses
+
+
+def train_predictor_with_split(features, target, train_idx, val_idx, epochs=50, learning_rate=0.01):
+    x = torch.tensor(features.to_numpy(), dtype=torch.float32)
+    y = torch.tensor(target.to_numpy(), dtype=torch.float32).unsqueeze(1)
+
+    x_train, y_train = x[train_idx], y[train_idx]
+    x_val, y_val = x[val_idx], y[val_idx]
+
+    model, train_losses, val_losses = _train_with_split(
+        x_train,
+        y_train,
+        x_val,
+        y_val,
+        epochs=epochs,
+        learning_rate=learning_rate
+    )
+
     return model, train_losses, val_losses, x_val, y_val
+
+
+def train_predictor(features, target, epochs=50, learning_rate=0.01):
+    num_rows = features.shape[0]
+    permutation = torch.randperm(num_rows)
+    split_index = int(num_rows * 0.8)
+    train_idx = permutation[:split_index]
+    val_idx = permutation[split_index:]
+
+    return train_predictor_with_split(
+        features,
+        target,
+        train_idx,
+        val_idx,
+        epochs=epochs,
+        learning_rate=learning_rate
+    )
 
 
 def _env_name():
