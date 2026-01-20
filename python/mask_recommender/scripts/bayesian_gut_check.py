@@ -10,6 +10,7 @@ import arviz as az
 import boto3
 import numpy as np
 import pandas as pd
+import torch
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -100,6 +101,51 @@ def _find_local_trace():
     return str(latest)
 
 
+def _download_latest_nn_model():
+    bucket = _s3_bucket()
+    s3 = boto3.client('s3', region_name=_s3_region())
+    latest_key = "mask_recommender/models/latest.json"
+    response = s3.get_object(Bucket=bucket, Key=latest_key)
+    payload = json.loads(response["Body"].read().decode("utf-8"))
+    model_key = payload["model_key"]
+    metadata_key = payload["metadata_key"]
+
+    model_path = f"/tmp/{os.path.basename(model_key)}"
+    metadata_path = f"/tmp/{os.path.basename(metadata_key)}"
+    s3.download_file(bucket, model_key, model_path)
+    s3.download_file(bucket, metadata_key, metadata_path)
+    return payload, model_path, metadata_path
+
+
+def _build_nn_model(feature_count):
+    return torch.nn.Sequential(
+        torch.nn.Linear(feature_count, 128),
+        torch.nn.ReLU(),
+        torch.nn.Linear(128, 64),
+        torch.nn.ReLU(),
+        torch.nn.Linear(64, 32),
+        torch.nn.ReLU(),
+        torch.nn.Linear(32, 16),
+        torch.nn.ReLU(),
+        torch.nn.Linear(16, 1),
+        torch.nn.Sigmoid(),
+    )
+
+
+def _predict_nn(inference_rows, model, feature_columns):
+    categorical_columns = ['strap_type', 'style', 'unique_internal_model_code']
+    encoded = pd.get_dummies(inference_rows, columns=categorical_columns, dummy_na=True)
+    for column in feature_columns:
+        if column not in encoded.columns:
+            encoded[column] = 0
+    encoded = encoded[feature_columns]
+    encoded = encoded.apply(pd.to_numeric, errors='coerce').fillna(0).astype(float)
+    x_infer = torch.tensor(encoded.to_numpy(), dtype=torch.float32)
+    model.eval()
+    with torch.no_grad():
+        return model(x_infer).squeeze().cpu().numpy()
+
+
 def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     args = parse_args()
@@ -137,6 +183,13 @@ def main():
 
     bin_edges, _ = build_perimeter_bins()
 
+    nn_payload, nn_model_path, nn_metadata_path = _download_latest_nn_model()
+    with open(nn_metadata_path, "r", encoding="utf-8") as handle:
+        nn_metadata = json.load(handle)
+    feature_columns = nn_metadata["feature_columns"]
+    nn_model = _build_nn_model(len(feature_columns))
+    nn_model.load_state_dict(torch.load(nn_model_path, map_location="cpu"))
+
     def predict_bayesian(inference_rows):
         face_perimeter = inference_rows[BAYESIAN_FACE_COLUMNS].sum(axis=1)
         perimeter_diff = face_perimeter - inference_rows["perimeter_mm"]
@@ -164,21 +217,52 @@ def main():
         )
 
     run_timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
-    local_output = f"/tmp/bayesian_recommendations_{run_timestamp}.json"
+    local_bayesian_output = f"/tmp/bayesian_recommendations_{run_timestamp}.json"
     preview = build_recommendation_preview(
         user_ids=[99, 101],
         fit_tests_df=fit_tests,
         mask_candidates=mask_candidates,
         predict_fn=predict_bayesian,
-        output_path=local_output,
+        output_path=local_bayesian_output,
+    )
+
+    local_nn_output = f"/tmp/neural_net_recommendations_{run_timestamp}.json"
+    build_recommendation_preview(
+        user_ids=[99, 101],
+        fit_tests_df=fit_tests,
+        mask_candidates=mask_candidates,
+        predict_fn=lambda rows: _predict_nn(rows, nn_model, feature_columns),
+        output_path=local_nn_output,
     )
 
     output_key = args.output_key
     if not output_key:
         output_key = f"mask_recommender/models/{run_timestamp}/bayesian_recommendations.json"
 
-    output_uri = _upload_file_to_s3(local_output, output_key)
-    logging.info("Saved Bayesian recommendations to %s (trace=%s)", output_uri, trace_key)
+    output_uri = _upload_file_to_s3(local_bayesian_output, output_key)
+    nn_output_key = f"mask_recommender/models/{run_timestamp}/neural_net_recommendations.json"
+    nn_output_uri = _upload_file_to_s3(local_nn_output, nn_output_key)
+    latest_key = "mask_recommender/models/bayesian_gut_check_latest.json"
+    latest_payload = {
+        "timestamp": run_timestamp,
+        "trace_key": trace_key,
+        "bayesian_recommendations_key": output_key,
+        "bayesian_recommendations_uri": output_uri,
+        "neural_net_recommendations_key": nn_output_key,
+        "neural_net_recommendations_uri": nn_output_uri,
+        "nn_model_key": nn_payload.get("model_key"),
+        "nn_metadata_key": nn_payload.get("metadata_key"),
+    }
+    latest_path = f"/tmp/bayesian_gut_check_latest_{run_timestamp}.json"
+    with open(latest_path, "w", encoding="utf-8") as handle:
+        json.dump(latest_payload, handle, indent=2)
+    latest_uri = _upload_file_to_s3(latest_path, latest_key)
+
+    logging.info(
+        "Saved Bayesian recommendations to %s (trace=%s)", output_uri, trace_key
+    )
+    logging.info("Saved neural net recommendations to %s", nn_output_uri)
+    logging.info("Updated gut check pointer at %s", latest_uri)
 
 
 if __name__ == "__main__":
