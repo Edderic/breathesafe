@@ -262,6 +262,8 @@ def main():
         "Saved Bayesian recommendations to %s (trace=%s)", output_uri, trace_key
     )
     logging.info("Saved neural net recommendations to %s", nn_output_uri)
+    logging.info("Local Bayesian recommendations: %s", local_bayesian_output)
+    logging.info("Local neural net recommendations: %s", local_nn_output)
     logging.info("Updated gut check pointer at %s", latest_uri)
 
 
