@@ -2,10 +2,10 @@
 
 class FacialMeasurement < ApplicationRecord
   RECOMMENDER_COLUMNS = %w[
-    bitragion_subnasale_arc
-    face_width
-    face_length
-    nose_protrusion
+    nose_mm
+    chin_mm
+    top_cheek_mm
+    mid_cheek_mm
   ].freeze
 
   COLUMNS = [

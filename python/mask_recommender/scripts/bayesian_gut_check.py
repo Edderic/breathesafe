@@ -13,10 +13,12 @@ import pandas as pd
 import torch
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.append(str(REPO_ROOT))
+SCRIPTS_ROOT = REPO_ROOT / "scripts"
+for path in (REPO_ROOT, SCRIPTS_ROOT):
+    if str(path) not in sys.path:
+        sys.path.append(str(path))
 
-from bayesian import build_perimeter_bins, predict_from_trace  # noqa: E402
+from train_bayesian import build_perimeter_bins, predict_from_trace  # noqa: E402
 from data_prep import (BAYESIAN_FACE_COLUMNS, FACIAL_FEATURE_COLUMNS,  # noqa: E402
                        filter_fit_tests_for_bayesian, get_masks,
                        load_fit_tests_with_imputation)

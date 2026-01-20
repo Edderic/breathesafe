@@ -3,6 +3,9 @@ name: Train Mask Recommender
 on:
   schedule:
     - cron: '0 2 * * 0'
+  push:
+    tags:
+      - 'deploy-ml-*'
   workflow_dispatch:
     inputs:
       target_env:
@@ -28,7 +31,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r python/mask_recommender/requirements.txt
 
-      - name: Train model and upload artifacts
+      - name: Train Bayesian model and upload artifacts
         env:
           RAILS_ENV: ${{ github.event.inputs.target_env || 'production' }}
           BREATHESAFE_BASE_URL: ${{ github.event.inputs.target_env == 'staging' && 'https://staging.breathesafe.xyz' || 'https://www.breathesafe.xyz' }}
@@ -38,4 +41,75 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          python python/mask_recommender/train.py
+          python python/mask_recommender/scripts/train_bayesian.py
+
+  deploy:
+    needs: train
+    runs-on: ubuntu-latest
+    environment: production
+    if: startsWith(github.ref, 'refs/tags/deploy-ml-')
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Lambda image
+        id: build-image
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          REPO: mask-recommender
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          IMAGE_URI="$REGISTRY/$REPO:$IMAGE_TAG"
+          LATEST_URI="$REGISTRY/$REPO:latest"
+
+          aws ecr describe-repositories --repository-names "$REPO" >/dev/null 2>&1 || \
+            aws ecr create-repository --repository-name "$REPO" >/dev/null
+
+          docker build \
+            -f python/mask_recommender/inference/Dockerfile \
+            -t "$IMAGE_URI" \
+            -t "$LATEST_URI" \
+            python/mask_recommender
+
+          docker push "$IMAGE_URI"
+          docker push "$LATEST_URI"
+
+          echo "image_uri_latest=$LATEST_URI" >> $GITHUB_OUTPUT
+
+      - name: Update Lambda code (staging)
+        env:
+          FUNCTION_NAME: mask-recommender-staging
+          IMAGE_URI: ${{ steps.build-image.outputs.image_uri_latest }}
+        run: |
+          set -euo pipefail
+          aws lambda update-function-code \
+            --function-name "$FUNCTION_NAME" \
+            --image-uri "$IMAGE_URI" \
+            >/dev/null
+          aws lambda wait function-updated --function-name "$FUNCTION_NAME"
+
+      - name: Update Lambda code (production)
+        env:
+          FUNCTION_NAME: mask-recommender-production
+          IMAGE_URI: ${{ steps.build-image.outputs.image_uri_latest }}
+        run: |
+          set -euo pipefail
+          aws lambda update-function-code \
+            --function-name "$FUNCTION_NAME" \
+            --image-uri "$IMAGE_URI" \
+            >/dev/null
+          aws lambda wait function-updated --function-name "$FUNCTION_NAME"

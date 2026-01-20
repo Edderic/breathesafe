@@ -11,7 +11,7 @@ import pandas as pd
 import pymc as pm
 import pytensor
 import torch
-from data_prep import (BAYESIAN_FACE_COLUMNS, FACIAL_FEATURE_COLUMNS,
+from data_prep import (BAYESIAN_FACE_COLUMNS, FACIAL_FEATURE_COLUMNS, get_masks,
                        filter_fit_tests_for_bayesian,
                        load_fit_tests_with_imputation)
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
@@ -333,10 +333,42 @@ def main():
     trace_key = f"mask_recommender/models/{run_timestamp}/bayesian_trace.nc"
     trace_uri = _upload_file_to_s3(trace_path, trace_key)
     logging.info("Uploaded trace to %s", trace_uri)
+
+    base_url = args.base_url.rstrip("/")
+    masks_url = f"{base_url}/masks.json?per_page=1000"
+    masks_df = get_masks(session=None, masks_url=masks_url)
+    mask_data = {}
+    for _, row in masks_df.iterrows():
+        mask_id = row.get('id')
+        if pd.isna(mask_id):
+            continue
+        mask_data[str(int(mask_id))] = {
+            'id': int(mask_id),
+            'unique_internal_model_code': row.get('unique_internal_model_code', ''),
+            'perimeter_mm': row.get('perimeter_mm', None),
+            'strap_type': row.get('strap_type', ''),
+            'style': row.get('style', ''),
+        }
+
+    mask_data_key = f"mask_recommender/models/{run_timestamp}/mask_data.json"
+    mask_data_uri = _upload_json_to_s3(mask_data, mask_data_key)
+
+    metadata = {
+        'timestamp': run_timestamp,
+        'environment': _env_name(),
+        'mask_index': list(mask_index),
+        'bin_edges': bin_edges,
+    }
+    metadata_key = f"mask_recommender/models/{run_timestamp}/bayesian_metadata.json"
+    metadata_uri = _upload_json_to_s3(metadata, metadata_key)
     latest_payload = {
         "timestamp": run_timestamp,
         "trace_key": trace_key,
         "trace_uri": trace_uri,
+        "mask_data_key": mask_data_key,
+        "mask_data_uri": mask_data_uri,
+        "metadata_key": metadata_key,
+        "metadata_uri": metadata_uri,
     }
     latest_key = "mask_recommender/models/bayesian_latest.json"
     latest_uri = _upload_json_to_s3(latest_payload, latest_key)

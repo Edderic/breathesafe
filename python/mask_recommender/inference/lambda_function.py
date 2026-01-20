@@ -5,8 +5,8 @@ import time
 from typing import Dict, List
 
 import boto3
-import pandas as pd
-import torch
+import arviz as az
+import numpy as np
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -16,19 +16,25 @@ FACIAL_FEATURE_COLUMNS = [
     'chin_mm',
     'top_cheek_mm',
     'mid_cheek_mm',
-    'strap_mm',
 ]
+
+
+def _sigmoid(values):
+    return 1 / (1 + np.exp(-values))
+
+
+def _compute_face_perimeter(facial_features: Dict) -> float:
+    return sum(float(facial_features.get(col, 0) or 0) for col in FACIAL_FEATURE_COLUMNS)
 
 
 class MaskRecommenderInference:
     def __init__(self):
         self.s3_client = boto3.client('s3', region_name=self._s3_region())
         self.bucket = self._bucket_name()
-        self.model = None
+        self.trace = None
         self.mask_data = None
-        self.feature_columns = None
-        self.categorical_columns = None
-        self.threshold = 0.5
+        self.mask_index = None
+        self.bin_edges = None
         self.last_loaded_at = None
         self.latest_payload = None
         self.refresh_seconds = int(os.environ.get('MODEL_REFRESH_SECONDS', '300'))
@@ -63,24 +69,24 @@ class MaskRecommenderInference:
             self.load_model(force=True)
 
     def load_model(self, force: bool = False) -> None:
-        if not force and self.model is not None:
+        if not force and self.trace is not None:
             return
 
-        latest_key = 'mask_recommender/models/latest.json'
-        latest_path = '/tmp/mask_recommender_latest.json'
+        latest_key = 'mask_recommender/models/bayesian_latest.json'
+        latest_path = '/tmp/mask_recommender_bayesian_latest.json'
         self._download_file(latest_key, latest_path)
         with open(latest_path, 'r') as f:
             latest_payload = json.load(f)
 
-        model_key = latest_payload['model_key']
+        trace_key = latest_payload['trace_key']
         metadata_key = latest_payload['metadata_key']
         mask_data_key = latest_payload['mask_data_key']
 
-        model_path = '/tmp/mask_recommender_model.pt'
-        metadata_path = '/tmp/mask_recommender_metadata.json'
-        mask_data_path = '/tmp/mask_recommender_mask_data.json'
+        trace_path = '/tmp/mask_recommender_bayesian_trace.nc'
+        metadata_path = '/tmp/mask_recommender_bayesian_metadata.json'
+        mask_data_path = '/tmp/mask_recommender_bayesian_mask_data.json'
 
-        self._download_file(model_key, model_path)
+        self._download_file(trace_key, trace_path)
         self._download_file(metadata_key, metadata_path)
         self._download_file(mask_data_key, mask_data_path)
 
@@ -90,23 +96,9 @@ class MaskRecommenderInference:
         with open(mask_data_path, 'r') as f:
             self.mask_data = json.load(f)
 
-        self.feature_columns = metadata['feature_columns']
-        self.categorical_columns = metadata['categorical_columns']
-        self.threshold = metadata.get('threshold', 0.5)
-
-        hidden_sizes = metadata.get('hidden_sizes', [32, 16])
-        input_dim = len(self.feature_columns)
-        model = torch.nn.Sequential(
-            torch.nn.Linear(input_dim, hidden_sizes[0]),
-            torch.nn.ReLU(),
-            torch.nn.Linear(hidden_sizes[0], hidden_sizes[1]),
-            torch.nn.ReLU(),
-            torch.nn.Linear(hidden_sizes[1], 1)
-        )
-        model.load_state_dict(torch.load(model_path, map_location='cpu'))
-        model.eval()
-
-        self.model = model
+        self.mask_index = metadata['mask_index']
+        self.bin_edges = metadata['bin_edges']
+        self.trace = az.from_netcdf(trace_path)
         self.last_loaded_at = time.time()
         self.latest_payload = latest_payload
 
@@ -114,49 +106,58 @@ class MaskRecommenderInference:
             "Loaded model %s from s3://%s/%s",
             latest_payload.get('timestamp'),
             self.bucket,
-            model_key
+            trace_key
         )
-
-    def _build_feature_frame(self, facial_features: Dict) -> pd.DataFrame:
-        rows = []
-        for mask_id, mask_info in self.mask_data.items():
-            perimeter = mask_info.get('perimeter_mm')
-            if perimeter is None or (isinstance(perimeter, float) and pd.isna(perimeter)):
-                perimeter = 0
-            row = {
-                'mask_id': int(mask_id),
-                'perimeter_mm': perimeter,
-                'strap_type': mask_info.get('strap_type') or '',
-                'style': mask_info.get('style') or '',
-                'unique_internal_model_code': mask_info.get('unique_internal_model_code') or '',
-                'facial_hair_beard_length_mm': facial_features.get('facial_hair_beard_length_mm', 0) or 0,
-            }
-            for col in FACIAL_FEATURE_COLUMNS:
-                row[col] = facial_features.get(col, 0) or 0
-            rows.append(row)
-        df = pd.DataFrame(rows)
-        df = pd.get_dummies(df, columns=self.categorical_columns, dummy_na=True)
-        df = df.reindex(columns=self.feature_columns, fill_value=0)
-        return df
 
     def recommend_masks(self, facial_features: Dict) -> List[Dict]:
         self._maybe_refresh()
 
-        if not self.model or not self.mask_data:
+        if not self.trace or not self.mask_data:
             logger.error('Model or mask data not loaded; returning empty recommendations.')
             return []
 
-        features = self._build_feature_frame(facial_features)
-        inputs = torch.tensor(features.to_numpy(), dtype=torch.float32)
-        with torch.no_grad():
-            logits = self.model(inputs).squeeze(1)
-            probs = torch.sigmoid(logits).cpu().numpy()
+        mask_map = {code: idx for idx, code in enumerate(self.mask_index)}
+        face_perimeter = _compute_face_perimeter(facial_features)
+        beard = float(facial_features.get('facial_hair_beard_length_mm', 0) or 0)
+        bin_edges = np.array(self.bin_edges, dtype=float)
+
+        p_mask_mean = self.trace.posterior["p_mask"].mean(dim=("chain", "draw")).values
+        beta_facial_hair = float(self.trace.posterior["beta_facial_hair"].mean().values)
+        beta_earloop = float(self.trace.posterior["beta_earloop"].mean().values)
+        beta_headstrap = float(self.trace.posterior["beta_headstrap"].mean().values)
+        alpha = float(self.trace.posterior["alpha"].mean().values)
 
         recommendations = []
-        for idx, (mask_id, mask_info) in enumerate(self.mask_data.items()):
+        for mask_id, mask_info in self.mask_data.items():
+            mask_code = mask_info.get('unique_internal_model_code') or ''
+            mask_idx = mask_map.get(str(mask_code))
+            if mask_idx is None:
+                continue
+
+            perimeter = mask_info.get('perimeter_mm')
+            if perimeter is None:
+                continue
+            try:
+                perimeter = float(perimeter)
+            except (TypeError, ValueError):
+                continue
+
+            diff = face_perimeter - perimeter
+            bin_idx = int(np.digitize(diff, bin_edges[1:-1], right=False))
+            strap_type = (mask_info.get('strap_type') or '').lower()
+            earloop = 1 if 'earloop' in strap_type else 0
+            headstrap = 1 if 'headstrap' in strap_type else 0
+
+            p_facial = _sigmoid(
+                beta_facial_hair * beard
+                + beta_earloop * earloop
+                + beta_headstrap * headstrap
+                + alpha
+            )
+            prob = float(p_mask_mean[mask_idx, bin_idx] * p_facial)
             recommendations.append({
                 'mask_id': int(mask_id),
-                'proba_fit': float(probs[idx]),
+                'proba_fit': prob,
                 'mask_info': mask_info,
             })
 
@@ -169,10 +170,13 @@ def handler(event, context):
         facial_features = event.get('facial_measurements', {})
         recommender = MaskRecommenderInference()
         recommendations = recommender.recommend_masks(facial_features)
+        mask_id_map = {str(idx): rec['mask_id'] for idx, rec in enumerate(recommendations)}
+        proba_map = {str(idx): rec['proba_fit'] for idx, rec in enumerate(recommendations)}
         return {
             'statusCode': 200,
             'body': json.dumps({
-                'recommendations': recommendations,
+                'mask_id': mask_id_map,
+                'proba_fit': proba_map,
                 'model': recommender.latest_payload,
             })
         }
