@@ -2,7 +2,13 @@ import argparse
 import json
 import logging
 import os
+import sys
+from pathlib import Path
 from datetime import datetime, timezone
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.append(str(REPO_ROOT))
 
 import arviz as az
 import boto3
