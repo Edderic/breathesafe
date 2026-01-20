@@ -2,18 +2,24 @@ import argparse
 import json
 import logging
 import os
+import sys
 from datetime import datetime, timezone
+from pathlib import Path
 
 import arviz as az
 import boto3
 import numpy as np
 import pandas as pd
 
-from bayesian import build_perimeter_bins, predict_from_trace
-from data_prep import (BAYESIAN_FACE_COLUMNS, FACIAL_FEATURE_COLUMNS,
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.append(str(REPO_ROOT))
+
+from bayesian import build_perimeter_bins, predict_from_trace  # noqa: E402
+from data_prep import (BAYESIAN_FACE_COLUMNS, FACIAL_FEATURE_COLUMNS,  # noqa: E402
                        filter_fit_tests_for_bayesian, get_masks,
                        load_fit_tests_with_imputation)
-from qa import build_mask_candidates, build_recommendation_preview
+from qa import build_mask_candidates, build_recommendation_preview  # noqa: E402
 
 
 def parse_args():
@@ -71,17 +77,27 @@ def _upload_file_to_s3(local_path, key):
 def _download_latest_trace():
     bucket = _s3_bucket()
     s3 = boto3.client('s3', region_name=_s3_region())
-    response = s3.list_objects_v2(Bucket=bucket, Prefix="mask_recommender/models/")
-    candidates = [
-        obj for obj in response.get("Contents", [])
-        if obj["Key"].endswith("bayesian_trace.nc")
-    ]
+    latest_key = "mask_recommender/models/bayesian_latest.json"
+    try:
+        response = s3.get_object(Bucket=bucket, Key=latest_key)
+        payload = json.loads(response["Body"].read().decode("utf-8"))
+        trace_key = payload["trace_key"]
+        local_path = f"/tmp/{os.path.basename(trace_key)}"
+        s3.download_file(bucket, trace_key, local_path)
+        return trace_key, local_path
+    except s3.exceptions.NoSuchKey:
+        local_trace = _find_local_trace()
+        if local_trace:
+            return "local", local_trace
+        raise
+
+
+def _find_local_trace():
+    candidates = list(Path("/tmp").glob("mask_recommender_bayesian_trace_*.nc"))
     if not candidates:
-        raise RuntimeError("No bayesian_trace.nc found in S3.")
-    latest = max(candidates, key=lambda obj: obj["LastModified"])
-    local_path = f"/tmp/{os.path.basename(latest['Key'])}"
-    s3.download_file(bucket, latest["Key"], local_path)
-    return latest["Key"], local_path
+        return None
+    latest = max(candidates, key=lambda path: path.stat().st_mtime)
+    return str(latest)
 
 
 def main():

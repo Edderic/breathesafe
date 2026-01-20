@@ -15,7 +15,6 @@ from data_prep import (BAYESIAN_FACE_COLUMNS, FACIAL_FEATURE_COLUMNS,
                        filter_fit_tests_for_bayesian,
                        load_fit_tests_with_imputation)
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
-from train import build_feature_matrix, train_predictor_with_split
 
 
 pytensor.config.cxx = ""
@@ -53,6 +52,25 @@ def _upload_file_to_s3(local_path, key):
         profile or "default"
     )
     s3.upload_file(local_path, bucket, key)
+    return f"s3://{bucket}/{key}"
+
+
+def _upload_json_to_s3(payload, key):
+    bucket = _s3_bucket()
+    s3 = boto3.client('s3', region_name=_s3_region())
+    profile = os.environ.get('AWS_PROFILE')
+    logging.info(
+        "S3 upload using bucket=%s region=%s profile=%s",
+        bucket,
+        _s3_region(),
+        profile or "default"
+    )
+    s3.put_object(
+        Bucket=bucket,
+        Key=key,
+        Body=json.dumps(payload, indent=2).encode('utf-8'),
+        ContentType='application/json'
+    )
     return f"s3://{bucket}/{key}"
 
 
@@ -315,6 +333,14 @@ def main():
     trace_key = f"mask_recommender/models/{run_timestamp}/bayesian_trace.nc"
     trace_uri = _upload_file_to_s3(trace_path, trace_key)
     logging.info("Uploaded trace to %s", trace_uri)
+    latest_payload = {
+        "timestamp": run_timestamp,
+        "trace_key": trace_key,
+        "trace_uri": trace_uri,
+    }
+    latest_key = "mask_recommender/models/bayesian_latest.json"
+    latest_uri = _upload_json_to_s3(latest_payload, latest_key)
+    logging.info("Updated Bayesian latest pointer at %s", latest_uri)
 
     val_probs = predict_from_trace(
         trace,
@@ -326,6 +352,8 @@ def main():
     )
 
     bayesian_metrics = evaluate_predictions(val_probs, val_labels)
+
+    from train import build_feature_matrix, train_predictor_with_split
 
     baseline_df = fit_tests[
         [
