@@ -11,17 +11,11 @@ import pandas as pd
 import pymc as pm
 import pytensor
 import torch
-from breathesafe_network import build_session, fetch_facial_measurements_fit_tests
-from predict_arkit_from_traditional import predict_arkit_from_traditional
+from data_prep import (BAYESIAN_FACE_COLUMNS, FACIAL_FEATURE_COLUMNS,
+                       filter_fit_tests_for_bayesian,
+                       load_fit_tests_with_imputation)
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
 from train import build_feature_matrix, train_predictor_with_split
-
-FACIAL_FEATURE_COLUMNS = [
-    'nose_mm',
-    'chin_mm',
-    'top_cheek_mm',
-    'mid_cheek_mm',
-]
 
 
 pytensor.config.cxx = ""
@@ -62,27 +56,6 @@ def _upload_file_to_s3(local_path, key):
     return f"s3://{bucket}/{key}"
 
 
-def _normalize_pass(value):
-    if isinstance(value, bool):
-        return int(value)
-    if value is None or (isinstance(value, float) and pd.isna(value)):
-        return None
-    normalized = str(value).strip().lower()
-    if normalized in ['true', '1', 'pass', 'passed', 'yes', 'y']:
-        return 1
-    if normalized in ['false', '0', 'fail', 'failed', 'no', 'n']:
-        return 0
-    return None
-
-
-def _is_truthy(value):
-    if isinstance(value, bool):
-        return value
-    if value is None or (isinstance(value, float) and pd.isna(value)):
-        return False
-    return str(value).strip().lower() in ['true', '1', 'yes', 'y']
-
-
 def parse_args():
     parser = argparse.ArgumentParser(description="Train a Bayesian mask fit model.")
     parser.add_argument(
@@ -120,24 +93,6 @@ def parse_args():
         help="Learning rate for the baseline neural network comparison.",
     )
     return parser.parse_args()
-
-
-def prepare_fit_tests(df):
-    filtered = df.copy()
-    filtered = filtered[filtered["perimeter_mm"].notna()]
-    filtered = filtered[filtered["perimeter_mm"] > 0]
-
-    if "mask_modded" in filtered.columns:
-        filtered = filtered[~filtered["mask_modded"].apply(_is_truthy)]
-
-    filtered = filtered.dropna(subset=FACIAL_FEATURE_COLUMNS)
-    filtered = filtered[filtered["unique_internal_model_code"].notna()]
-    filtered = filtered[filtered["style"].notna()]
-    filtered = filtered[filtered["strap_type"].notna()]
-
-    filtered["qlft_pass_normalized"] = filtered["qlft_pass"].apply(_normalize_pass)
-    filtered = filtered[filtered["qlft_pass_normalized"].notna()]
-    return filtered
 
 
 def build_perimeter_bins():
@@ -268,30 +223,18 @@ def main():
     args = parse_args()
     run_timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
 
-    session = build_session(None)
-    fit_tests_payload = fetch_facial_measurements_fit_tests(session=session)
-    fit_tests = pd.DataFrame(fit_tests_payload)
-
-    email = args.email or os.getenv('BREATHESAFE_SERVICE_EMAIL')
-    password = args.password or os.getenv('BREATHESAFE_SERVICE_PASSWORD')
-    if email and password:
-        fit_tests = predict_arkit_from_traditional(
-            base_url=args.base_url,
-            cookie=args.cookie,
-            email=email,
-            password=password,
-        )
-    else:
-        logging.info(
-            "BREATHESAFE_SERVICE_EMAIL/PASSWORD not set; skipping ARKit imputation."
-        )
-
-    fit_tests = prepare_fit_tests(fit_tests)
+    fit_tests = load_fit_tests_with_imputation(
+        base_url=args.base_url,
+        email=args.email,
+        password=args.password,
+        cookie=args.cookie,
+    )
+    fit_tests = filter_fit_tests_for_bayesian(fit_tests)
     if fit_tests.empty:
         logging.warning("No fit tests available after filtering.")
         raise SystemExit(0)
 
-    fit_tests["face_perimeter_mm"] = fit_tests[FACIAL_FEATURE_COLUMNS].sum(axis=1)
+    fit_tests["face_perimeter_mm"] = fit_tests[BAYESIAN_FACE_COLUMNS].sum(axis=1)
     fit_tests["facial_hair_beard_length_mm"] = (
         fit_tests["facial_hair_beard_length_mm"].fillna(0).astype(float)
     )
