@@ -9,4 +9,6 @@ matplotlib
 pyarrow
 torch
 psycopg2-binary
-
+arviz
+pymc
+pytensor
