@@ -396,6 +396,8 @@ def _initialize_model(feature_count):
         torch.nn.ReLU(),
         torch.nn.Linear(num_masks_times_num_bins_plus_other_features, num_masks_times_num_bins_plus_other_features),
         torch.nn.ReLU(),
+        torch.nn.Linear(num_masks_times_num_bins_plus_other_features, num_masks_times_num_bins_plus_other_features),
+        torch.nn.ReLU(),
         torch.nn.Linear(num_masks_times_num_bins_plus_other_features, 1),
         torch.nn.Sigmoid()
     )
