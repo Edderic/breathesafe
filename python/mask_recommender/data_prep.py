@@ -52,7 +52,10 @@ def is_truthy(value):
 
 def load_fit_tests_with_imputation(base_url, session=None, email=None, password=None, cookie=None):
     session = session or build_session(None)
-    fit_tests_payload = fetch_facial_measurements_fit_tests(session=session)
+    fit_tests_payload = fetch_facial_measurements_fit_tests(
+        base_url=base_url,
+        session=session
+    )
     fit_tests = pd.DataFrame(fit_tests_payload)
 
     email = email or os.getenv('BREATHESAFE_SERVICE_EMAIL')
