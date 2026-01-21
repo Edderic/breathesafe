@@ -352,22 +352,39 @@ def filter_fit_tests(fit_tests_df):
     return filtered
 
 
-def prepare_training_data(fit_tests_df, use_facial_perimeter=False):
+def prepare_training_data(
+    fit_tests_df,
+    use_facial_perimeter=False,
+    use_diff_perimeter_bins=False
+):
     filtered = filter_fit_tests(fit_tests_df)
 
-    feature_cols = ['perimeter_mm']
-    if use_facial_perimeter:
+    feature_cols = []
+    if use_diff_perimeter_bins:
         filtered['facial_perimeter_mm'] = filtered[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
-        feature_cols.append('facial_perimeter_mm')
+        filtered['perimeter_diff'] = filtered['facial_perimeter_mm'] - filtered['perimeter_mm']
+        filtered['perimeter_diff_bin'] = pd.cut(
+            filtered['perimeter_diff'],
+            bins=_diff_bin_edges(),
+            labels=_diff_bin_labels(),
+            right=False
+        )
+        diff_dummies = pd.get_dummies(filtered['perimeter_diff_bin'])
+        filtered = pd.concat([filtered, diff_dummies], axis=1)
+        feature_cols += list(diff_dummies.columns)
     else:
-        feature_cols += FACIAL_FEATURE_COLUMNS
+        feature_cols = ['perimeter_mm']
+        if use_facial_perimeter:
+            filtered['facial_perimeter_mm'] = filtered[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
+            feature_cols.append('facial_perimeter_mm')
+        else:
+            feature_cols += FACIAL_FEATURE_COLUMNS
     feature_cols += [
         'facial_hair_beard_length_mm',
         'strap_type',
         'style',
         'unique_internal_model_code'
     ]
-    filtered = filtered[feature_cols + ['qlft_pass_normalized']]
     filtered = filtered[feature_cols + ['qlft_pass_normalized']]
     return filtered
 
@@ -390,6 +407,14 @@ def _diff_bin_edges():
     edges.extend(list(range(-120, 121, 15)))
     edges.append(float('inf'))
     return edges
+
+
+def _diff_bin_labels():
+    edges = _diff_bin_edges()
+    labels = []
+    for left, right in zip(edges[:-1], edges[1:]):
+        labels.append(f"diff_bin_{left}_to_{right}")
+    return labels
 
 
 def _set_num_masks_times_num_bins_plus_other_features(mask_candidates):
@@ -640,6 +665,7 @@ if __name__ == '__main__':
     parser.add_argument('--focal-alpha', type=float, default=0.25, help='Alpha for focal loss.')
     parser.add_argument('--focal-gamma', type=float, default=2.0, help='Gamma for focal loss.')
     parser.add_argument('--use-facial-perimeter', action='store_true', help='Use summed facial perimeter instead of component features.')
+    parser.add_argument('--use-diff-perimeter-bins', action='store_true', help='Use perimeter difference bins instead of raw perimeter features.')
     args = parser.parse_args()
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
@@ -695,9 +721,13 @@ if __name__ == '__main__':
         fit_tests_with_imputed_arkit_via_traditional_facial_measurements
     )
 
+    if args.use_facial_perimeter and args.use_diff_perimeter_bins:
+        raise SystemExit("Cannot use --use-facial-perimeter and --use-diff-perimeter-bins together.")
+
     cleaned_fit_tests = prepare_training_data(
         fit_tests_with_imputed_arkit_via_traditional_facial_measurements,
-        use_facial_perimeter=args.use_facial_perimeter
+        use_facial_perimeter=args.use_facial_perimeter,
+        use_diff_perimeter_bins=args.use_diff_perimeter_bins
     )
     logging.info(
         "Fit tests after filtering: %s / %s",
@@ -726,7 +756,23 @@ if __name__ == '__main__':
     categorical_columns = ['strap_type', 'style', 'unique_internal_model_code']
 
     def predict_nn(inference_rows):
-        if args.use_facial_perimeter:
+        if args.use_diff_perimeter_bins:
+            inference_rows = inference_rows.copy()
+            inference_rows['facial_perimeter_mm'] = inference_rows[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
+            inference_rows['perimeter_diff'] = inference_rows['facial_perimeter_mm'] - inference_rows['perimeter_mm']
+            inference_rows['perimeter_diff_bin'] = pd.cut(
+                inference_rows['perimeter_diff'],
+                bins=_diff_bin_edges(),
+                labels=_diff_bin_labels(),
+                right=False
+            )
+            diff_dummies = pd.get_dummies(inference_rows['perimeter_diff_bin'])
+            inference_rows = pd.concat([inference_rows, diff_dummies], axis=1)
+            inference_rows = inference_rows.drop(
+                columns=FACIAL_FEATURE_COLUMNS + ['perimeter_mm', 'facial_perimeter_mm', 'perimeter_diff', 'perimeter_diff_bin'],
+                errors='ignore'
+            )
+        elif args.use_facial_perimeter:
             inference_rows = inference_rows.copy()
             inference_rows['facial_perimeter_mm'] = inference_rows[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
             inference_rows = inference_rows.drop(columns=FACIAL_FEATURE_COLUMNS, errors='ignore')
