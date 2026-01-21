@@ -41,6 +41,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
+          echo "BREATHESAFE_SERVICE_EMAIL set? $([[ -n \"${BREATHESAFE_SERVICE_EMAIL}\" ]] && echo yes || echo no)"
+          echo "BREATHESAFE_SERVICE_PASSWORD set? $([[ -n \"${BREATHESAFE_SERVICE_PASSWORD}\" ]] && echo yes || echo no)"
           python python/mask_recommender/scripts/train_bayesian.py
 
   deploy:
