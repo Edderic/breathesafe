@@ -405,7 +405,7 @@ def main():
         + FACIAL_FEATURE_COLUMNS
     ].copy()
     baseline_features, baseline_target = build_feature_matrix(baseline_df)
-    baseline_model, _, _, baseline_x_val, baseline_y_val = train_predictor_with_split(
+    baseline_model, _, _, _, _, baseline_x_val, baseline_y_val = train_predictor_with_split(
         baseline_features,
         baseline_target,
         train_idx,

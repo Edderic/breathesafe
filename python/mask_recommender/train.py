@@ -13,7 +13,7 @@ from breathesafe_network import (build_session,
                                  fetch_facial_measurements_fit_tests,
                                  fetch_json)
 from predict_arkit_from_traditional import predict_arkit_from_traditional
-from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
+from sklearn.metrics import auc, f1_score, precision_score, recall_score, roc_auc_score, roc_curve
 from qa import build_mask_candidates, build_recommendation_preview
 from utils import display_percentage
 
@@ -394,6 +394,8 @@ def _initialize_model(feature_count):
     model = torch.nn.Sequential(
         torch.nn.Linear(feature_count, num_masks_times_num_bins_plus_other_features),
         torch.nn.ReLU(),
+        torch.nn.Linear(num_masks_times_num_bins_plus_other_features, num_masks_times_num_bins_plus_other_features),
+        torch.nn.ReLU(),
         torch.nn.Linear(num_masks_times_num_bins_plus_other_features, 1),
         torch.nn.Sigmoid()
     )
@@ -473,7 +475,7 @@ def train_predictor_with_split(features, target, train_idx, val_idx, epochs=50, 
         learning_rate=learning_rate
     )
 
-    return model, train_losses, val_losses, x_val, y_val
+    return model, train_losses, val_losses, x_train, y_train, x_val, y_val
 
 
 def train_predictor(features, target, epochs=50, learning_rate=0.01):
@@ -621,7 +623,7 @@ if __name__ == '__main__':
 
     features, target = build_feature_matrix(cleaned_fit_tests)
 
-    model, train_losses, val_losses, x_val, y_val = train_predictor(
+    model, train_losses, val_losses, x_train, y_train, x_val, y_val = train_predictor(
         features,
         target,
         epochs=args.epochs,
@@ -644,8 +646,14 @@ if __name__ == '__main__':
         with torch.no_grad():
             return model(x_infer).squeeze().cpu().numpy()
 
+    images_dir = "python/mask_recommender/images"
+    os.makedirs(images_dir, exist_ok=True)
+    timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
+
     model.eval()
     with torch.no_grad():
+        train_probs = model(x_train).squeeze().cpu().numpy()
+        train_labels = y_train.squeeze().cpu().numpy()
         val_probs = model(x_val).squeeze().cpu().numpy()
         val_labels = y_val.squeeze().cpu().numpy()
 
@@ -670,8 +678,8 @@ if __name__ == '__main__':
     logging.info("Selected threshold=%.2f with val_f1=%.3f", best_threshold, best_f1)
 
     recommendations_path = os.path.join(
-        os.path.dirname(args.loss_plot),
-        f"recommendations_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}.json"
+        images_dir,
+        f"recommendations_{timestamp}.json"
     )
     build_recommendation_preview(
         user_ids=[99, 101],
@@ -683,6 +691,7 @@ if __name__ == '__main__':
     )
     logging.info("Saved recommendation preview to %s", recommendations_path)
     if train_losses:
+        loss_plot_path = os.path.join(images_dir, f"{timestamp}_training_loss.png")
         plt.figure(figsize=(8, 4))
         epochs = range(1, len(train_losses) + 1)
         plt.plot(epochs, train_losses, label='train loss')
@@ -694,9 +703,32 @@ if __name__ == '__main__':
         plt.grid(True, linestyle='--', alpha=0.4)
         plt.legend()
         plt.tight_layout()
-        plt.savefig(args.loss_plot)
+        plt.savefig(loss_plot_path)
         plt.close()
-        logging.info("Saved training loss plot to %s", args.loss_plot)
+        logging.info("Saved training loss plot to %s", loss_plot_path)
+
+    roc_plot_path = os.path.join(images_dir, f"{timestamp}_roc_auc.png")
+    plt.figure(figsize=(8, 4))
+    try:
+        train_fpr, train_tpr, _ = roc_curve(train_labels, train_probs)
+        plt.plot(train_fpr, train_tpr, label='train', linewidth=2)
+    except ValueError:
+        logging.warning("Skipping train ROC curve due to missing class labels.")
+    try:
+        val_fpr, val_tpr, _ = roc_curve(val_labels, val_probs)
+        plt.plot(val_fpr, val_tpr, label='validation', linewidth=2)
+    except ValueError:
+        logging.warning("Skipping validation ROC curve due to missing class labels.")
+    plt.plot([0, 1], [0, 1], linestyle='--', color='gray')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC-AUC Curves')
+    plt.grid(True, linestyle='--', alpha=0.4)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(roc_plot_path)
+    plt.close()
+    logging.info("Saved ROC-AUC plot to %s", roc_plot_path)
 
     logging.info(f"masks with fit tests that are missing perimeter_mm: {tested_missing_perimeter_mm}")
 
@@ -712,7 +744,6 @@ if __name__ == '__main__':
     val_precision = precision_score(val_labels, val_preds, zero_division=0)
     val_recall = recall_score(val_labels, val_preds, zero_division=0)
 
-    timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
     prefix = f"mask_recommender/models/{timestamp}"
 
     model_path = f"/tmp/mask_recommender_model_{timestamp}.pt"
