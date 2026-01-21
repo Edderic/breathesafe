@@ -79,6 +79,13 @@ FACIAL_FEATURE_COLUMNS = [
     'strap_mm',
 ]
 
+FACIAL_PERIMETER_COMPONENTS = [
+    'nose_mm',
+    'chin_mm',
+    'top_cheek_mm',
+    'mid_cheek_mm',
+]
+
 
 def initialize_betas(diff_keys, num_users, num_masks, style_types):
     """
@@ -345,15 +352,22 @@ def filter_fit_tests(fit_tests_df):
     return filtered
 
 
-def prepare_training_data(fit_tests_df):
+def prepare_training_data(fit_tests_df, use_facial_perimeter=False):
     filtered = filter_fit_tests(fit_tests_df)
 
-    feature_cols = ['perimeter_mm'] + FACIAL_FEATURE_COLUMNS + [
+    feature_cols = ['perimeter_mm']
+    if use_facial_perimeter:
+        filtered['facial_perimeter_mm'] = filtered[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
+        feature_cols.append('facial_perimeter_mm')
+    else:
+        feature_cols += FACIAL_FEATURE_COLUMNS
+    feature_cols += [
         'facial_hair_beard_length_mm',
         'strap_type',
         'style',
         'unique_internal_model_code'
     ]
+    filtered = filtered[feature_cols + ['qlft_pass_normalized']]
     filtered = filtered[feature_cols + ['qlft_pass_normalized']]
     return filtered
 
@@ -625,6 +639,7 @@ if __name__ == '__main__':
     parser.add_argument('--loss-type', default='bce', choices=['bce', 'focal'], help='Loss function to use.')
     parser.add_argument('--focal-alpha', type=float, default=0.25, help='Alpha for focal loss.')
     parser.add_argument('--focal-gamma', type=float, default=2.0, help='Gamma for focal loss.')
+    parser.add_argument('--use-facial-perimeter', action='store_true', help='Use summed facial perimeter instead of component features.')
     args = parser.parse_args()
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
@@ -681,7 +696,8 @@ if __name__ == '__main__':
     )
 
     cleaned_fit_tests = prepare_training_data(
-        fit_tests_with_imputed_arkit_via_traditional_facial_measurements
+        fit_tests_with_imputed_arkit_via_traditional_facial_measurements,
+        use_facial_perimeter=args.use_facial_perimeter
     )
     logging.info(
         "Fit tests after filtering: %s / %s",
@@ -710,6 +726,10 @@ if __name__ == '__main__':
     categorical_columns = ['strap_type', 'style', 'unique_internal_model_code']
 
     def predict_nn(inference_rows):
+        if args.use_facial_perimeter:
+            inference_rows = inference_rows.copy()
+            inference_rows['facial_perimeter_mm'] = inference_rows[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
+            inference_rows = inference_rows.drop(columns=FACIAL_FEATURE_COLUMNS, errors='ignore')
         encoded = pd.get_dummies(inference_rows, columns=categorical_columns, dummy_na=True)
         for column in feature_columns:
             if column not in encoded.columns:
