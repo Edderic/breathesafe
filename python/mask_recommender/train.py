@@ -404,7 +404,25 @@ def _initialize_model(feature_count):
     return model
 
 
-def _train_with_split(x_train, y_train, x_val, y_val, epochs=50, learning_rate=0.01):
+def _focal_loss(probs, targets, alpha=0.25, gamma=2.0, eps=1e-6):
+    probs = torch.clamp(probs, eps, 1 - eps)
+    p_t = torch.where(targets == 1, probs, 1 - probs)
+    alpha_t = torch.where(targets == 1, alpha, 1 - alpha)
+    loss = -alpha_t * (1 - p_t) ** gamma * torch.log(p_t)
+    return loss
+
+
+def _train_with_split(
+    x_train,
+    y_train,
+    x_val,
+    y_val,
+    epochs=50,
+    learning_rate=0.01,
+    loss_type="bce",
+    focal_alpha=0.25,
+    focal_gamma=2.0,
+):
     train_positive_rate = float(y_train.mean().item()) if y_train.numel() else 0.0
     val_positive_rate = float(y_val.mean().item()) if y_val.numel() else 0.0
     model = _initialize_model(x_train.shape[1])
@@ -418,18 +436,27 @@ def _train_with_split(x_train, y_train, x_val, y_val, epochs=50, learning_rate=0
     pos_weight = (neg_count / pos_count) if pos_count > 0 else 1.0
     pos_weight_tensor = torch.tensor(pos_weight, dtype=torch.float32)
     logging.info(
-        "Training balance: train_pos_rate=%.3f val_pos_rate=%.3f pos_weight=%.3f",
+        "Training balance: train_pos_rate=%.3f val_pos_rate=%.3f pos_weight=%.3f loss=%s",
         train_positive_rate,
         val_positive_rate,
-        pos_weight
+        pos_weight,
+        loss_type
     )
 
     for epoch in range(epochs):
         model.train()
         optimizer.zero_grad()
         probs = model(x_train)
-        sample_weights = torch.where(y_train == 1, pos_weight_tensor, torch.tensor(1.0))
-        loss = (loss_fn(probs, y_train) * sample_weights).mean()
+        if loss_type == "focal":
+            loss = _focal_loss(
+                probs,
+                y_train,
+                alpha=focal_alpha,
+                gamma=focal_gamma
+            ).mean()
+        else:
+            sample_weights = torch.where(y_train == 1, pos_weight_tensor, torch.tensor(1.0))
+            loss = (loss_fn(probs, y_train) * sample_weights).mean()
         loss.backward()
         optimizer.step()
         train_losses.append(loss.item())
@@ -438,8 +465,16 @@ def _train_with_split(x_train, y_train, x_val, y_val, epochs=50, learning_rate=0
             model.eval()
             with torch.no_grad():
                 val_probs = model(x_val)
-                val_weights = torch.where(y_val == 1, pos_weight_tensor, torch.tensor(1.0))
-                val_loss = (loss_fn(val_probs, y_val) * val_weights).mean().item()
+                if loss_type == "focal":
+                    val_loss = _focal_loss(
+                        val_probs,
+                        y_val,
+                        alpha=focal_alpha,
+                        gamma=focal_gamma
+                    ).mean().item()
+                else:
+                    val_weights = torch.where(y_val == 1, pos_weight_tensor, torch.tensor(1.0))
+                    val_loss = (loss_fn(val_probs, y_val) * val_weights).mean().item()
                 preds = (val_probs >= 0.5).float()
                 accuracy = (preds == y_val).float().mean().item()
                 true_pos = ((preds == 1) & (y_val == 1)).float().sum().item()
@@ -454,14 +489,32 @@ def _train_with_split(x_train, y_train, x_val, y_val, epochs=50, learning_rate=0
         model.eval()
         with torch.no_grad():
             val_probs = model(x_val)
-            val_weights = torch.where(y_val == 1, pos_weight_tensor, torch.tensor(1.0))
-            val_loss = (loss_fn(val_probs, y_val) * val_weights).mean().item()
+            if loss_type == "focal":
+                val_loss = _focal_loss(
+                    val_probs,
+                    y_val,
+                    alpha=focal_alpha,
+                    gamma=focal_gamma
+                ).mean().item()
+            else:
+                val_weights = torch.where(y_val == 1, pos_weight_tensor, torch.tensor(1.0))
+                val_loss = (loss_fn(val_probs, y_val) * val_weights).mean().item()
         val_losses.append(val_loss)
 
     return model, train_losses, val_losses
 
 
-def train_predictor_with_split(features, target, train_idx, val_idx, epochs=50, learning_rate=0.01):
+def train_predictor_with_split(
+    features,
+    target,
+    train_idx,
+    val_idx,
+    epochs=50,
+    learning_rate=0.01,
+    loss_type="bce",
+    focal_alpha=0.25,
+    focal_gamma=2.0,
+):
     x = torch.tensor(features.to_numpy(), dtype=torch.float32)
     y = torch.tensor(target.to_numpy(), dtype=torch.float32).unsqueeze(1)
 
@@ -474,13 +527,24 @@ def train_predictor_with_split(features, target, train_idx, val_idx, epochs=50, 
         x_val,
         y_val,
         epochs=epochs,
-        learning_rate=learning_rate
+        learning_rate=learning_rate,
+        loss_type=loss_type,
+        focal_alpha=focal_alpha,
+        focal_gamma=focal_gamma
     )
 
-    return model, train_losses, val_losses, x_train, y_train, x_val, y_val
+    return model, train_losses, val_losses, x_train, y_train, x_val, y_val, train_idx, val_idx
 
 
-def train_predictor(features, target, epochs=50, learning_rate=0.01):
+def train_predictor(
+    features,
+    target,
+    epochs=50,
+    learning_rate=0.01,
+    loss_type="bce",
+    focal_alpha=0.25,
+    focal_gamma=2.0,
+):
     num_rows = features.shape[0]
     permutation = torch.randperm(num_rows)
     split_index = int(num_rows * 0.8)
@@ -493,7 +557,10 @@ def train_predictor(features, target, epochs=50, learning_rate=0.01):
         train_idx,
         val_idx,
         epochs=epochs,
-        learning_rate=learning_rate
+        learning_rate=learning_rate,
+        loss_type=loss_type,
+        focal_alpha=focal_alpha,
+        focal_gamma=focal_gamma
     )
 
 
@@ -555,6 +622,9 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=50, help='Number of training epochs.')
     parser.add_argument('--learning-rate', type=float, default=0.01, help='Learning rate for optimizer.')
     parser.add_argument('--loss-plot', default='python/mask_recommender/training_loss.png', help='Path to save training loss plot.')
+    parser.add_argument('--loss-type', default='bce', choices=['bce', 'focal'], help='Loss function to use.')
+    parser.add_argument('--focal-alpha', type=float, default=0.25, help='Alpha for focal loss.')
+    parser.add_argument('--focal-gamma', type=float, default=2.0, help='Gamma for focal loss.')
     args = parser.parse_args()
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
@@ -625,11 +695,14 @@ if __name__ == '__main__':
 
     features, target = build_feature_matrix(cleaned_fit_tests)
 
-    model, train_losses, val_losses, x_train, y_train, x_val, y_val = train_predictor(
+    model, train_losses, val_losses, x_train, y_train, x_val, y_val, train_idx, val_idx = train_predictor(
         features,
         target,
         epochs=args.epochs,
-        learning_rate=args.learning_rate
+        learning_rate=args.learning_rate,
+        loss_type=args.loss_type,
+        focal_alpha=args.focal_alpha,
+        focal_gamma=args.focal_gamma
     )
 
     logging.info("Model training complete. Feature count: %s", features.shape[1])
@@ -731,6 +804,19 @@ if __name__ == '__main__':
     plt.savefig(roc_plot_path)
     plt.close()
     logging.info("Saved ROC-AUC plot to %s", roc_plot_path)
+
+    val_results_path = os.path.join(images_dir, f"{timestamp}_validation_results.json")
+    val_frame = features.iloc[val_idx].copy()
+    val_frame["probability_of_fit"] = val_probs
+    val_frame["ground_truth"] = val_labels
+    val_frame["prediction"] = (val_probs >= best_threshold).astype(int)
+    val_frame["correct"] = val_frame["prediction"] == val_frame["ground_truth"]
+    val_frame["confidence"] = np.maximum(val_probs, 1 - val_probs)
+    val_frame = val_frame.sort_values(by="confidence", ascending=False)
+    val_results = val_frame.to_dict(orient="records")
+    with open(val_results_path, "w", encoding="utf-8") as handle:
+        json.dump(val_results, handle, indent=2)
+    logging.info("Saved validation results to %s", val_results_path)
 
     logging.info(f"masks with fit tests that are missing perimeter_mm: {tested_missing_perimeter_mm}")
 
