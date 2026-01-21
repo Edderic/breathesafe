@@ -368,17 +368,33 @@ def build_feature_matrix(filtered_df):
     return features, target
 
 
+num_masks_times_num_bins_plus_other_features = None
+
+
+def _diff_bin_edges():
+    edges = [-float('inf')]
+    edges.extend(list(range(-120, 121, 15)))
+    edges.append(float('inf'))
+    return edges
+
+
+def _set_num_masks_times_num_bins_plus_other_features(mask_candidates):
+    num_masks = int(mask_candidates.shape[0])
+    num_bins = len(_diff_bin_edges()) - 1
+    num_styles = int(mask_candidates['style'].dropna().nunique())
+    other_features = 1 + 2 + num_styles
+    return num_masks * num_bins + other_features
+
+
 def _initialize_model(feature_count):
+    if num_masks_times_num_bins_plus_other_features is None:
+        raise RuntimeError(
+            "num_masks_times_num_bins_plus_other_features must be set before model initialization."
+        )
     model = torch.nn.Sequential(
-        torch.nn.Linear(feature_count, 128),
+        torch.nn.Linear(feature_count, num_masks_times_num_bins_plus_other_features),
         torch.nn.ReLU(),
-        torch.nn.Linear(128, 64),
-        torch.nn.ReLU(),
-        torch.nn.Linear(64, 32),
-        torch.nn.ReLU(),
-        torch.nn.Linear(32, 16),
-        torch.nn.ReLU(),
-        torch.nn.Linear(16, 1),
+        torch.nn.Linear(num_masks_times_num_bins_plus_other_features, 1),
         torch.nn.Sigmoid()
     )
     return model
@@ -552,6 +568,15 @@ if __name__ == '__main__':
     fit_tests_df = pd.DataFrame(fit_tests_payload)
 
     masks_df = get_masks(session, masks_url)
+    mask_candidates = build_mask_candidates(masks_df)
+    global num_masks_times_num_bins_plus_other_features
+    num_masks_times_num_bins_plus_other_features = _set_num_masks_times_num_bins_plus_other_features(
+        mask_candidates
+    )
+    logging.info(
+        "num_masks_times_num_bins_plus_other_features=%s",
+        num_masks_times_num_bins_plus_other_features
+    )
     email = os.getenv('BREATHESAFE_SERVICE_EMAIL')
     password = os.getenv('BREATHESAFE_SERVICE_PASSWORD')
 
@@ -619,8 +644,6 @@ if __name__ == '__main__':
         model.eval()
         with torch.no_grad():
             return model(x_infer).squeeze().cpu().numpy()
-
-    mask_candidates = build_mask_candidates(masks_df)
 
     model.eval()
     with torch.no_grad():
