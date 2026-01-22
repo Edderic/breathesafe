@@ -2,7 +2,13 @@ import argparse
 import json
 import logging
 import os
+import sys
+from pathlib import Path
 from datetime import datetime, timezone
+
+REPO_ROOT = Path(__file__).resolve().parents[0]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 import boto3
 import matplotlib.pyplot as plt
@@ -705,7 +711,10 @@ if __name__ == '__main__':
     masks_url = f"{base_url}/masks.json?per_page=1000"
 
     session = build_session(None)
-    fit_tests_payload = fetch_facial_measurements_fit_tests(session=session)
+    fit_tests_payload = fetch_facial_measurements_fit_tests(
+        base_url=base_url,
+        session=session,
+    )
     fit_tests_df = pd.DataFrame(fit_tests_payload)
 
     masks_df = get_masks(session, masks_url)
