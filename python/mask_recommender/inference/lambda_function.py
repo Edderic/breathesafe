@@ -34,6 +34,16 @@ class MaskRecommenderInference:
         self.last_loaded_at = None
         self.latest_payload = None
         self.refresh_seconds = int(os.environ.get('MODEL_REFRESH_SECONDS', '300'))
+        logger.info(
+            "Lambda init: function=%s version=%s image_tag=%s",
+            os.environ.get("AWS_LAMBDA_FUNCTION_NAME"),
+            os.environ.get("AWS_LAMBDA_FUNCTION_VERSION"),
+            os.environ.get("IMAGE_TAG"),
+        )
+        logger.info(
+            "Lambda init: image_digest=%s",
+            os.environ.get("IMAGE_DIGEST"),
+        )
         self.load_model(force=True)
 
     def _env_name(self) -> str:
