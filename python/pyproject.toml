@@ -29,6 +29,7 @@ requests = "*"
 [tool.poetry.dev-dependencies]
 pytest = '*'
 jupyterlab = '*'
+moto = '*'
 #graphviz = "^0.19.1"
 #pygraphviz = "^1.9" # may need to `brew install graphviz` #jonathan is having issues with 'brew install graphviz' https://panoramaed.slack.com/archives/C02LYGQ1TS8/p1646408275747849?thread_ts=1646408175.680529&cid=C02LYGQ1TS8
 
