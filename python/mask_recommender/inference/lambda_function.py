@@ -7,7 +7,13 @@ from typing import Dict, List
 import boto3
 import pandas as pd
 import torch
-from feature_builder import FACIAL_FEATURE_COLUMNS, build_feature_frame
+try:
+    from feature_builder import FACIAL_FEATURE_COLUMNS, build_feature_frame
+except ModuleNotFoundError:
+    from mask_recommender.feature_builder import (  # type: ignore
+        FACIAL_FEATURE_COLUMNS,
+        build_feature_frame,
+    )
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
