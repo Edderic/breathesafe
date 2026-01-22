@@ -461,6 +461,8 @@ def _initialize_model(feature_count):
         torch.nn.ReLU(),
         torch.nn.Linear(feature_count, feature_count),
         torch.nn.ReLU(),
+        torch.nn.Linear(feature_count, feature_count),
+        torch.nn.ReLU(),
         torch.nn.Linear(feature_count, 1),
         torch.nn.Sigmoid()
     )
@@ -691,6 +693,7 @@ if __name__ == '__main__':
     parser.add_argument('--use-facial-perimeter', action='store_true', help='Use summed facial perimeter instead of component features.')
     parser.add_argument('--use-diff-perimeter-bins', action='store_true', help='Use perimeter difference bins instead of raw perimeter features.')
     parser.add_argument('--use-diff-perimeter-mask-bins', action='store_true', help='Include per-mask perimeter difference bin features.')
+    parser.add_argument('--exclude-mask-code', action='store_true', help='Exclude unique_internal_model_code from categorical features.')
     args = parser.parse_args()
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
@@ -782,6 +785,8 @@ if __name__ == '__main__':
     logging.info("Model training complete. Feature count: %s", features.shape[1])
     feature_columns = list(features.columns)
     categorical_columns = ['strap_type', 'style', 'unique_internal_model_code']
+    if args.exclude_mask_code:
+        categorical_columns = ['strap_type', 'style']
 
     def predict_nn(inference_rows):
         if args.use_diff_perimeter_bins or args.use_diff_perimeter_mask_bins:
