@@ -85,7 +85,7 @@ jobs:
             -f python/mask_recommender/inference/Dockerfile \
             -t "$IMAGE_URI" \
             -t "$LATEST_URI" \
-            python/mask_recommender
+            python/mask_recommender/inference
 
           docker push "$IMAGE_URI"
           docker push "$LATEST_URI"
