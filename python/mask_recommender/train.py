@@ -902,14 +902,18 @@ if __name__ == '__main__':
 
     roc_plot_path = os.path.join(images_dir, f"{timestamp}_roc_auc.png")
     plt.figure(figsize=(8, 4))
+    train_auc = None
+    val_auc = None
     try:
         train_fpr, train_tpr, _ = roc_curve(train_labels, train_probs)
-        plt.plot(train_fpr, train_tpr, label='train', linewidth=2)
+        train_auc = auc(train_fpr, train_tpr)
+        plt.plot(train_fpr, train_tpr, label=f'train (AUC={train_auc:.3f})', linewidth=2)
     except ValueError:
         logging.warning("Skipping train ROC curve due to missing class labels.")
     try:
         val_fpr, val_tpr, _ = roc_curve(val_labels, val_probs)
-        plt.plot(val_fpr, val_tpr, label='validation', linewidth=2)
+        val_auc = auc(val_fpr, val_tpr)
+        plt.plot(val_fpr, val_tpr, label=f'validation (AUC={val_auc:.3f})', linewidth=2)
     except ValueError:
         logging.warning("Skipping validation ROC curve due to missing class labels.")
     plt.plot([0, 1], [0, 1], linestyle='--', color='gray')
