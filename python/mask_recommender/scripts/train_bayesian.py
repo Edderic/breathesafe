@@ -20,6 +20,7 @@ import torch
 from data_prep import (BAYESIAN_FACE_COLUMNS, FACIAL_FEATURE_COLUMNS, get_masks,
                        filter_fit_tests_for_bayesian,
                        load_fit_tests_with_imputation)
+from qa import build_mask_candidates
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
 
 
@@ -431,6 +432,11 @@ def main():
         + FACIAL_FEATURE_COLUMNS
     ].copy()
     baseline_features, baseline_target = build_feature_matrix(baseline_df)
+    mask_candidates = build_mask_candidates(masks_df)
+    import train as train_module
+    train_module.num_masks_times_num_bins_plus_other_features = train_module._set_num_masks_times_num_bins_plus_other_features(
+        mask_candidates
+    )
     baseline_model, _, _, _, _, baseline_x_val, baseline_y_val, _, _ = train_predictor_with_split(
         baseline_features,
         baseline_target,
