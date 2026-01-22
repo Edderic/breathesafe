@@ -6,10 +6,10 @@ RSpec.describe MaskRecommenderController, type: :controller do
   describe 'POST #create' do
     let(:facial_payload) do
       {
-        face_width: 140,
-        face_length: 120,
-        nose_protrusion: 25,
-        bitragion_subnasale_arc: 230,
+        nose_mm: 44,
+        chin_mm: 46,
+        top_cheek_mm: 48,
+        mid_cheek_mm: 50,
         facial_hair_beard_length_mm: 0
       }
     end
