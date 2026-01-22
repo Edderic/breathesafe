@@ -7,18 +7,10 @@ from typing import Dict, List
 import boto3
 import pandas as pd
 import torch
+from feature_builder import FACIAL_FEATURE_COLUMNS, build_feature_frame
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-FACIAL_FEATURE_COLUMNS = [
-    'nose_mm',
-    'chin_mm',
-    'top_cheek_mm',
-    'mid_cheek_mm',
-    'strap_mm',
-]
-
 
 class MaskRecommenderInference:
     def __init__(self):
@@ -30,6 +22,9 @@ class MaskRecommenderInference:
         self.categorical_columns = None
         self.threshold = 0.5
         self.model_input_dim = None
+        self.use_facial_perimeter = False
+        self.use_diff_perimeter_bins = False
+        self.use_diff_perimeter_mask_bins = False
         self.last_loaded_at = None
         self.latest_payload = None
         self.refresh_seconds = int(os.environ.get('MODEL_REFRESH_SECONDS', '300'))
@@ -105,6 +100,9 @@ class MaskRecommenderInference:
         self.feature_columns = metadata['feature_columns']
         self.categorical_columns = metadata['categorical_columns']
         self.threshold = metadata.get('threshold', 0.5)
+        self.use_facial_perimeter = metadata.get('use_facial_perimeter', False)
+        self.use_diff_perimeter_bins = metadata.get('use_diff_perimeter_bins', False)
+        self.use_diff_perimeter_mask_bins = metadata.get('use_diff_perimeter_mask_bins', False)
 
         state_dict = torch.load(model_path, map_location='cpu')
         hidden_sizes = self._infer_hidden_sizes(state_dict)
@@ -139,11 +137,11 @@ class MaskRecommenderInference:
             model_key
         )
 
-    def _build_feature_frame(self, facial_features: Dict) -> pd.DataFrame:
+    def _build_inference_rows(self, facial_features: Dict) -> pd.DataFrame:
         rows = []
         for mask_id, mask_info in self.mask_data.items():
             perimeter = mask_info.get('perimeter_mm')
-            if perimeter is None or (isinstance(perimeter, float) and pd.isna(perimeter)):
+            if perimeter is None:
                 perimeter = 0
             row = {
                 'mask_id': int(mask_id),
@@ -156,16 +154,7 @@ class MaskRecommenderInference:
             for col in FACIAL_FEATURE_COLUMNS:
                 row[col] = facial_features.get(col, 0) or 0
             rows.append(row)
-        df = pd.DataFrame(rows)
-        df = pd.get_dummies(df, columns=self.categorical_columns, dummy_na=True)
-        df = df.reindex(columns=self.feature_columns, fill_value=0)
-        if self.model_input_dim is not None and df.shape[1] != self.model_input_dim:
-            if df.shape[1] < self.model_input_dim:
-                for idx in range(df.shape[1], self.model_input_dim):
-                    df[f"__pad_{idx}"] = 0
-            else:
-                df = df.iloc[:, : self.model_input_dim]
-        return df
+        return pd.DataFrame(rows)
 
     def recommend_masks(self, facial_features: Dict) -> List[Dict]:
         self._maybe_refresh()
@@ -174,8 +163,16 @@ class MaskRecommenderInference:
             logger.error('Model or mask data not loaded; returning empty recommendations.')
             return []
 
-        features = self._build_feature_frame(facial_features)
-        inputs = torch.tensor(features.to_numpy(), dtype=torch.float32)
+        inference_rows = self._build_inference_rows(facial_features)
+        encoded = build_feature_frame(
+            inference_rows,
+            feature_columns=self.feature_columns,
+            categorical_columns=self.categorical_columns,
+            use_facial_perimeter=self.use_facial_perimeter,
+            use_diff_perimeter_bins=self.use_diff_perimeter_bins,
+            use_diff_perimeter_mask_bins=self.use_diff_perimeter_mask_bins
+        )
+        inputs = torch.tensor(encoded.to_numpy(), dtype=torch.float32)
         with torch.no_grad():
             logits = self.model(inputs).squeeze(1)
             probs = torch.sigmoid(logits).cpu().numpy()

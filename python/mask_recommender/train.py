@@ -18,6 +18,9 @@ import torch
 from breathesafe_network import (build_session,
                                  fetch_facial_measurements_fit_tests,
                                  fetch_json)
+from feature_builder import (FACIAL_FEATURE_COLUMNS, FACIAL_PERIMETER_COMPONENTS,
+                             build_feature_frame, diff_bin_edges,
+                             diff_bin_index, diff_bin_labels)
 from predict_arkit_from_traditional import predict_arkit_from_traditional
 from sklearn.metrics import auc, f1_score, precision_score, recall_score, roc_auc_score, roc_curve
 from qa import build_mask_candidates, build_recommendation_preview
@@ -76,22 +79,6 @@ STYLE_TYPES = [
     'Adhesive',
     'Elastomeric'
 ]
-
-FACIAL_FEATURE_COLUMNS = [
-    'nose_mm',
-    'chin_mm',
-    'top_cheek_mm',
-    'mid_cheek_mm',
-    'strap_mm',
-]
-
-FACIAL_PERIMETER_COMPONENTS = [
-    'nose_mm',
-    'chin_mm',
-    'top_cheek_mm',
-    'mid_cheek_mm',
-]
-
 
 def initialize_betas(diff_keys, num_users, num_masks, style_types):
     """
@@ -370,12 +357,12 @@ def prepare_training_data(
     if use_diff_perimeter_bins or use_diff_perimeter_mask_bins:
         filtered['facial_perimeter_mm'] = filtered[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
         filtered['perimeter_diff'] = filtered['facial_perimeter_mm'] - filtered['perimeter_mm']
-        filtered['perimeter_diff_bin_index'] = _diff_bin_index(filtered['perimeter_diff'])
+        filtered['perimeter_diff_bin_index'] = diff_bin_index(filtered['perimeter_diff'])
         if use_diff_perimeter_bins:
             filtered['perimeter_diff_bin'] = pd.cut(
                 filtered['perimeter_diff'],
-                bins=_diff_bin_edges(),
-                labels=_diff_bin_labels(),
+                bins=diff_bin_edges(),
+                labels=diff_bin_labels(),
                 right=False
             )
             diff_dummies = pd.get_dummies(filtered['perimeter_diff_bin'])
@@ -425,33 +412,9 @@ def build_feature_matrix(filtered_df):
 num_masks_times_num_bins_plus_other_features = None
 
 
-def _diff_bin_edges():
-    edges = [-float('inf')]
-    edges.extend(list(range(-120, 121, 15)))
-    edges.append(float('inf'))
-    return edges
-
-
-def _diff_bin_labels():
-    edges = _diff_bin_edges()
-    labels = []
-    for left, right in zip(edges[:-1], edges[1:]):
-        labels.append(f"diff_bin_{left}_to_{right}")
-    return labels
-
-
-def _diff_bin_index(series):
-    return pd.cut(
-        series,
-        bins=_diff_bin_edges(),
-        labels=False,
-        right=False
-    ).astype(int)
-
-
 def _set_num_masks_times_num_bins_plus_other_features(mask_candidates):
     num_masks = int(mask_candidates.shape[0])
-    num_bins = len(_diff_bin_edges()) - 1
+    num_bins = len(diff_bin_edges()) - 1
     num_styles = int(mask_candidates['style'].dropna().nunique())
     other_features = 1 + 2 + num_styles
     return num_masks * num_bins + other_features
@@ -806,53 +769,14 @@ if __name__ == '__main__':
         categorical_columns = ['strap_type', 'style']
 
     def predict_nn(inference_rows):
-        if args.use_diff_perimeter_bins or args.use_diff_perimeter_mask_bins:
-            inference_rows = inference_rows.copy()
-            inference_rows['facial_perimeter_mm'] = inference_rows[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
-            inference_rows['perimeter_diff'] = inference_rows['facial_perimeter_mm'] - inference_rows['perimeter_mm']
-            inference_rows['perimeter_diff_bin_index'] = _diff_bin_index(inference_rows['perimeter_diff'])
-            if args.use_diff_perimeter_bins:
-                inference_rows['perimeter_diff_bin'] = pd.cut(
-                    inference_rows['perimeter_diff'],
-                    bins=_diff_bin_edges(),
-                    labels=_diff_bin_labels(),
-                    right=False
-                )
-                diff_dummies = pd.get_dummies(inference_rows['perimeter_diff_bin'])
-                inference_rows = pd.concat([inference_rows, diff_dummies], axis=1)
-            if args.use_diff_perimeter_mask_bins:
-                mask_bins = pd.DataFrame(
-                    0,
-                    index=inference_rows.index,
-                    columns=inference_rows['unique_internal_model_code'].astype(str)
-                )
-                mask_bins = mask_bins.loc[:, ~mask_bins.columns.duplicated()]
-                mask_codes = inference_rows['unique_internal_model_code'].astype(str)
-                mask_bins.values[range(len(mask_bins)), mask_bins.columns.get_indexer(mask_codes)] = inference_rows[
-                    'perimeter_diff_bin_index'
-                ].values
-                mask_bins.columns = [f"mask_bin_{col}" for col in mask_bins.columns]
-                inference_rows = pd.concat([inference_rows, mask_bins], axis=1)
-            inference_rows = inference_rows.drop(
-                columns=FACIAL_FEATURE_COLUMNS + [
-                    'perimeter_mm',
-                    'facial_perimeter_mm',
-                    'perimeter_diff',
-                    'perimeter_diff_bin',
-                    'perimeter_diff_bin_index'
-                ],
-                errors='ignore'
-            )
-        elif args.use_facial_perimeter:
-            inference_rows = inference_rows.copy()
-            inference_rows['facial_perimeter_mm'] = inference_rows[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
-            inference_rows = inference_rows.drop(columns=FACIAL_FEATURE_COLUMNS, errors='ignore')
-        encoded = pd.get_dummies(inference_rows, columns=categorical_columns, dummy_na=True)
-        for column in feature_columns:
-            if column not in encoded.columns:
-                encoded[column] = 0
-        encoded = encoded[feature_columns]
-        encoded = encoded.apply(pd.to_numeric, errors='coerce').fillna(0).astype(float)
+        encoded = build_feature_frame(
+            inference_rows,
+            feature_columns=feature_columns,
+            categorical_columns=categorical_columns,
+            use_facial_perimeter=args.use_facial_perimeter,
+            use_diff_perimeter_bins=args.use_diff_perimeter_bins,
+            use_diff_perimeter_mask_bins=args.use_diff_perimeter_mask_bins
+        )
         x_infer = torch.tensor(encoded.to_numpy(), dtype=torch.float32)
         model.eval()
         with torch.no_grad():
@@ -1038,6 +962,10 @@ if __name__ == '__main__':
         'hidden_sizes': _extract_hidden_sizes(model),
         'threshold': threshold,
         'model_class': 'torch.nn.Sequential',
+        'use_facial_perimeter': args.use_facial_perimeter,
+        'use_diff_perimeter_bins': args.use_diff_perimeter_bins,
+        'use_diff_perimeter_mask_bins': args.use_diff_perimeter_mask_bins,
+        'exclude_mask_code': args.exclude_mask_code,
     }
     metadata_key = f"{prefix}/model_metadata.json"
     metadata_uri = _upload_json_to_s3(metadata, metadata_key)
