@@ -457,13 +457,11 @@ def _initialize_model(feature_count):
             "num_masks_times_num_bins_plus_other_features must be set before model initialization."
         )
     model = torch.nn.Sequential(
-        torch.nn.Linear(feature_count, num_masks_times_num_bins_plus_other_features),
+        torch.nn.Linear(feature_count, feature_count),
         torch.nn.ReLU(),
-        torch.nn.Linear(num_masks_times_num_bins_plus_other_features, num_masks_times_num_bins_plus_other_features),
+        torch.nn.Linear(feature_count, feature_count),
         torch.nn.ReLU(),
-        torch.nn.Linear(num_masks_times_num_bins_plus_other_features, num_masks_times_num_bins_plus_other_features),
-        torch.nn.ReLU(),
-        torch.nn.Linear(num_masks_times_num_bins_plus_other_features, 1),
+        torch.nn.Linear(feature_count, 1),
         torch.nn.Sigmoid()
     )
     return model
