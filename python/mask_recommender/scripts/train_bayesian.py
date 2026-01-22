@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
-    sys.path.append(str(REPO_ROOT))
+    sys.path.insert(0, str(REPO_ROOT))
 
 import arviz as az
 import boto3
@@ -116,6 +116,23 @@ def parse_args():
         default=0.01,
         help="Learning rate for the baseline neural network comparison.",
     )
+    parser.add_argument(
+        "--use-advi",
+        action="store_true",
+        help="Use ADVI instead of MCMC sampling.",
+    )
+    parser.add_argument(
+        "--advi-steps",
+        type=int,
+        default=20000,
+        help="Number of ADVI optimization steps.",
+    )
+    parser.add_argument(
+        "--advi-draws",
+        type=int,
+        default=1000,
+        help="Posterior draws sampled from ADVI approximation.",
+    )
     return parser.parse_args()
 
 
@@ -186,13 +203,22 @@ def build_bayesian_model(
         p = pm.Deterministic("p", p_mask[mask_idx, bin_idx] * p_facial_hair_strap)
         pm.Bernoulli("qlft_pass", p=p, observed=train_labels)
 
-        trace = pm.sample(
-            draws=args.draws,
-            tune=args.tune,
-            target_accept=args.target_accept,
-            random_seed=args.seed,
-            progressbar=True,
-        )
+        if args.use_advi:
+            approx = pm.fit(
+                n=args.advi_steps,
+                method="advi",
+                random_seed=args.seed,
+                progressbar=True,
+            )
+            trace = approx.sample(args.advi_draws, random_seed=args.seed)
+        else:
+            trace = pm.sample(
+                draws=args.draws,
+                tune=args.tune,
+                target_accept=args.target_accept,
+                random_seed=args.seed,
+                progressbar=True,
+            )
 
     return model, trace
 
