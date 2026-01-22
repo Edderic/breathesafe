@@ -461,8 +461,6 @@ def _initialize_model(feature_count):
         torch.nn.ReLU(),
         torch.nn.Linear(feature_count, feature_count),
         torch.nn.ReLU(),
-        torch.nn.Linear(feature_count, feature_count),
-        torch.nn.ReLU(),
         torch.nn.Linear(feature_count, 1),
         torch.nn.Sigmoid()
     )
