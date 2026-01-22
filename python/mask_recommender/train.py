@@ -473,6 +473,16 @@ def _initialize_model(feature_count):
     return model
 
 
+def _extract_hidden_sizes(model):
+    hidden_sizes = []
+    for layer in model:
+        if isinstance(layer, torch.nn.Linear):
+            hidden_sizes.append(int(layer.out_features))
+    if not hidden_sizes:
+        return []
+    return hidden_sizes[:-1]
+
+
 def _focal_loss(probs, targets, alpha=0.25, gamma=2.0, eps=1e-6):
     probs = torch.clamp(probs, eps, 1 - eps)
     p_t = torch.where(targets == 1, probs, 1 - probs)
@@ -1025,7 +1035,7 @@ if __name__ == '__main__':
         'environment': _env_name(),
         'feature_columns': feature_columns,
         'categorical_columns': categorical_columns,
-        'hidden_sizes': [32, 16],
+        'hidden_sizes': _extract_hidden_sizes(model),
         'threshold': threshold,
         'model_class': 'torch.nn.Sequential',
     }

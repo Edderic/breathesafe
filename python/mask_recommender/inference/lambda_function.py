@@ -29,6 +29,7 @@ class MaskRecommenderInference:
         self.feature_columns = None
         self.categorical_columns = None
         self.threshold = 0.5
+        self.model_input_dim = None
         self.last_loaded_at = None
         self.latest_payload = None
         self.refresh_seconds = int(os.environ.get('MODEL_REFRESH_SECONDS', '300'))
@@ -54,6 +55,17 @@ class MaskRecommenderInference:
 
     def _download_file(self, key: str, local_path: str) -> None:
         self.s3_client.download_file(self.bucket, key, local_path)
+
+    def _infer_hidden_sizes(self, state_dict: Dict) -> List[int]:
+        weight_keys = [
+            key for key in state_dict.keys()
+            if key.endswith('.weight') and key.split('.')[0].isdigit()
+        ]
+        weight_keys.sort(key=lambda key: int(key.split('.')[0]))
+        if len(weight_keys) < 3:
+            raise RuntimeError("Unexpected model format; unable to infer hidden sizes.")
+        sizes = [int(state_dict[key].shape[0]) for key in weight_keys[:-1]]
+        return sizes
 
     def _maybe_refresh(self) -> None:
         if self.last_loaded_at is None:
@@ -94,8 +106,18 @@ class MaskRecommenderInference:
         self.categorical_columns = metadata['categorical_columns']
         self.threshold = metadata.get('threshold', 0.5)
 
-        hidden_sizes = metadata.get('hidden_sizes', [32, 16])
+        state_dict = torch.load(model_path, map_location='cpu')
+        hidden_sizes = self._infer_hidden_sizes(state_dict)
         input_dim = len(self.feature_columns)
+        expected_input_dim = int(state_dict["0.weight"].shape[1])
+        if expected_input_dim != input_dim:
+            logger.warning(
+                "Feature column count (%s) does not match model input dim (%s).",
+                input_dim,
+                expected_input_dim,
+            )
+            input_dim = expected_input_dim
+        self.model_input_dim = input_dim
         model = torch.nn.Sequential(
             torch.nn.Linear(input_dim, hidden_sizes[0]),
             torch.nn.ReLU(),
@@ -103,7 +125,7 @@ class MaskRecommenderInference:
             torch.nn.ReLU(),
             torch.nn.Linear(hidden_sizes[1], 1)
         )
-        model.load_state_dict(torch.load(model_path, map_location='cpu'))
+        model.load_state_dict(state_dict)
         model.eval()
 
         self.model = model
@@ -137,6 +159,12 @@ class MaskRecommenderInference:
         df = pd.DataFrame(rows)
         df = pd.get_dummies(df, columns=self.categorical_columns, dummy_na=True)
         df = df.reindex(columns=self.feature_columns, fill_value=0)
+        if self.model_input_dim is not None and df.shape[1] != self.model_input_dim:
+            if df.shape[1] < self.model_input_dim:
+                for idx in range(df.shape[1], self.model_input_dim):
+                    df[f"__pad_{idx}"] = 0
+            else:
+                df = df.iloc[:, : self.model_input_dim]
         return df
 
     def recommend_masks(self, facial_features: Dict) -> List[Dict]:
