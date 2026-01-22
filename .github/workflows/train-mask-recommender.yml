@@ -43,7 +43,7 @@ jobs:
         run: |
           echo "BREATHESAFE_SERVICE_EMAIL set? $([[ -n \"${BREATHESAFE_SERVICE_EMAIL}\" ]] && echo yes || echo no)"
           echo "BREATHESAFE_SERVICE_PASSWORD set? $([[ -n \"${BREATHESAFE_SERVICE_PASSWORD}\" ]] && echo yes || echo no)"
-          python python/mask_recommender/train.py
+          python python/mask_recommender/train.py --epochs 600 --learning-rate 0.00008
 
   deploy:
     needs: train
