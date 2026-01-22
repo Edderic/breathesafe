@@ -124,7 +124,7 @@ jobs:
         conda env create -f python/mask_recommender/random_forest/environment.yml || conda env update -f python/mask_recommender/random_forest/environment.yml
         conda activate mask_recommender_rf
 
-    - name: Run Python tests (inference + random_forest)
+    - name: Run Python tests (inference + random_forest + recommender)
       env:
         PYTHONPATH: ${{ github.workspace }}
       run: |
@@ -133,4 +133,5 @@ jobs:
         conda activate mask_recommender_rf
         python -m pytest \
           python/mask_recommender/random_forest/tests \
+          python/mask_recommender/tests \
           -v
