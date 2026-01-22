@@ -355,23 +355,40 @@ def filter_fit_tests(fit_tests_df):
 def prepare_training_data(
     fit_tests_df,
     use_facial_perimeter=False,
-    use_diff_perimeter_bins=False
+    use_diff_perimeter_bins=False,
+    use_diff_perimeter_mask_bins=False
 ):
     filtered = filter_fit_tests(fit_tests_df)
 
     feature_cols = []
-    if use_diff_perimeter_bins:
+    if use_diff_perimeter_bins or use_diff_perimeter_mask_bins:
         filtered['facial_perimeter_mm'] = filtered[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
         filtered['perimeter_diff'] = filtered['facial_perimeter_mm'] - filtered['perimeter_mm']
-        filtered['perimeter_diff_bin'] = pd.cut(
-            filtered['perimeter_diff'],
-            bins=_diff_bin_edges(),
-            labels=_diff_bin_labels(),
-            right=False
-        )
-        diff_dummies = pd.get_dummies(filtered['perimeter_diff_bin'])
-        filtered = pd.concat([filtered, diff_dummies], axis=1)
-        feature_cols += list(diff_dummies.columns)
+        filtered['perimeter_diff_bin_index'] = _diff_bin_index(filtered['perimeter_diff'])
+        if use_diff_perimeter_bins:
+            filtered['perimeter_diff_bin'] = pd.cut(
+                filtered['perimeter_diff'],
+                bins=_diff_bin_edges(),
+                labels=_diff_bin_labels(),
+                right=False
+            )
+            diff_dummies = pd.get_dummies(filtered['perimeter_diff_bin'])
+            filtered = pd.concat([filtered, diff_dummies], axis=1)
+            feature_cols += list(diff_dummies.columns)
+        if use_diff_perimeter_mask_bins:
+            mask_bins = pd.DataFrame(
+                0,
+                index=filtered.index,
+                columns=filtered['unique_internal_model_code'].astype(str)
+            )
+            mask_bins = mask_bins.loc[:, ~mask_bins.columns.duplicated()]
+            mask_codes = filtered['unique_internal_model_code'].astype(str)
+            mask_bins.values[range(len(mask_bins)), mask_bins.columns.get_indexer(mask_codes)] = filtered[
+                'perimeter_diff_bin_index'
+            ].values
+            mask_bins.columns = [f"mask_bin_{col}" for col in mask_bins.columns]
+            filtered = pd.concat([filtered, mask_bins], axis=1)
+            feature_cols += list(mask_bins.columns)
     else:
         feature_cols = ['perimeter_mm']
         if use_facial_perimeter:
@@ -415,6 +432,15 @@ def _diff_bin_labels():
     for left, right in zip(edges[:-1], edges[1:]):
         labels.append(f"diff_bin_{left}_to_{right}")
     return labels
+
+
+def _diff_bin_index(series):
+    return pd.cut(
+        series,
+        bins=_diff_bin_edges(),
+        labels=False,
+        right=False
+    ).astype(int)
 
 
 def _set_num_masks_times_num_bins_plus_other_features(mask_candidates):
@@ -666,6 +692,7 @@ if __name__ == '__main__':
     parser.add_argument('--focal-gamma', type=float, default=2.0, help='Gamma for focal loss.')
     parser.add_argument('--use-facial-perimeter', action='store_true', help='Use summed facial perimeter instead of component features.')
     parser.add_argument('--use-diff-perimeter-bins', action='store_true', help='Use perimeter difference bins instead of raw perimeter features.')
+    parser.add_argument('--use-diff-perimeter-mask-bins', action='store_true', help='Include per-mask perimeter difference bin features.')
     args = parser.parse_args()
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
@@ -723,11 +750,14 @@ if __name__ == '__main__':
 
     if args.use_facial_perimeter and args.use_diff_perimeter_bins:
         raise SystemExit("Cannot use --use-facial-perimeter and --use-diff-perimeter-bins together.")
+    if args.use_facial_perimeter and args.use_diff_perimeter_mask_bins:
+        raise SystemExit("Cannot use --use-facial-perimeter and --use-diff-perimeter-mask-bins together.")
 
     cleaned_fit_tests = prepare_training_data(
         fit_tests_with_imputed_arkit_via_traditional_facial_measurements,
         use_facial_perimeter=args.use_facial_perimeter,
-        use_diff_perimeter_bins=args.use_diff_perimeter_bins
+        use_diff_perimeter_bins=args.use_diff_perimeter_bins,
+        use_diff_perimeter_mask_bins=args.use_diff_perimeter_mask_bins
     )
     logging.info(
         "Fit tests after filtering: %s / %s",
@@ -756,20 +786,41 @@ if __name__ == '__main__':
     categorical_columns = ['strap_type', 'style', 'unique_internal_model_code']
 
     def predict_nn(inference_rows):
-        if args.use_diff_perimeter_bins:
+        if args.use_diff_perimeter_bins or args.use_diff_perimeter_mask_bins:
             inference_rows = inference_rows.copy()
             inference_rows['facial_perimeter_mm'] = inference_rows[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
             inference_rows['perimeter_diff'] = inference_rows['facial_perimeter_mm'] - inference_rows['perimeter_mm']
-            inference_rows['perimeter_diff_bin'] = pd.cut(
-                inference_rows['perimeter_diff'],
-                bins=_diff_bin_edges(),
-                labels=_diff_bin_labels(),
-                right=False
-            )
-            diff_dummies = pd.get_dummies(inference_rows['perimeter_diff_bin'])
-            inference_rows = pd.concat([inference_rows, diff_dummies], axis=1)
+            inference_rows['perimeter_diff_bin_index'] = _diff_bin_index(inference_rows['perimeter_diff'])
+            if args.use_diff_perimeter_bins:
+                inference_rows['perimeter_diff_bin'] = pd.cut(
+                    inference_rows['perimeter_diff'],
+                    bins=_diff_bin_edges(),
+                    labels=_diff_bin_labels(),
+                    right=False
+                )
+                diff_dummies = pd.get_dummies(inference_rows['perimeter_diff_bin'])
+                inference_rows = pd.concat([inference_rows, diff_dummies], axis=1)
+            if args.use_diff_perimeter_mask_bins:
+                mask_bins = pd.DataFrame(
+                    0,
+                    index=inference_rows.index,
+                    columns=inference_rows['unique_internal_model_code'].astype(str)
+                )
+                mask_bins = mask_bins.loc[:, ~mask_bins.columns.duplicated()]
+                mask_codes = inference_rows['unique_internal_model_code'].astype(str)
+                mask_bins.values[range(len(mask_bins)), mask_bins.columns.get_indexer(mask_codes)] = inference_rows[
+                    'perimeter_diff_bin_index'
+                ].values
+                mask_bins.columns = [f"mask_bin_{col}" for col in mask_bins.columns]
+                inference_rows = pd.concat([inference_rows, mask_bins], axis=1)
             inference_rows = inference_rows.drop(
-                columns=FACIAL_FEATURE_COLUMNS + ['perimeter_mm', 'facial_perimeter_mm', 'perimeter_diff', 'perimeter_diff_bin'],
+                columns=FACIAL_FEATURE_COLUMNS + [
+                    'perimeter_mm',
+                    'facial_perimeter_mm',
+                    'perimeter_diff',
+                    'perimeter_diff_bin',
+                    'perimeter_diff_bin_index'
+                ],
                 errors='ignore'
             )
         elif args.use_facial_perimeter:
