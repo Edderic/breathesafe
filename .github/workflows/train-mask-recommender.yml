@@ -96,13 +96,14 @@ jobs:
             --query 'imageDetails[0].imageDigest' \
             --output text)
 
+          echo "image_uri_tag=$IMAGE_URI" >> $GITHUB_OUTPUT
           echo "image_uri_latest=$LATEST_URI" >> $GITHUB_OUTPUT
           echo "image_digest=$IMAGE_DIGEST" >> $GITHUB_OUTPUT
 
       - name: Update Lambda code (staging)
         env:
           FUNCTION_NAME: mask-recommender-staging
-          IMAGE_URI: ${{ steps.build-image.outputs.image_uri_latest }}
+          IMAGE_URI: ${{ steps.build-image.outputs.image_uri_tag }}
           IMAGE_TAG: ${{ github.sha }}
           IMAGE_DIGEST: ${{ steps.build-image.outputs.image_digest }}
           ENVIRONMENT: staging
@@ -135,7 +136,7 @@ jobs:
       - name: Update Lambda code (production)
         env:
           FUNCTION_NAME: mask-recommender-production
-          IMAGE_URI: ${{ steps.build-image.outputs.image_uri_latest }}
+          IMAGE_URI: ${{ steps.build-image.outputs.image_uri_tag }}
           IMAGE_TAG: ${{ github.sha }}
           IMAGE_DIGEST: ${{ steps.build-image.outputs.image_digest }}
           ENVIRONMENT: production
