@@ -191,7 +191,7 @@ class MaskRecommenderInference:
         inputs = torch.tensor(encoded.to_numpy(), dtype=torch.float32)
         with torch.no_grad():
             logits = self.model(inputs).squeeze(1)
-            probs = torch.sigmoid(logits).cpu().numpy()
+            probs = torch.sigmoid(logits).cpu().tolist()
 
         recommendations = []
         for idx, (mask_id, mask_info) in enumerate(self.mask_data.items()):
