@@ -105,6 +105,7 @@ jobs:
           IMAGE_URI: ${{ steps.build-image.outputs.image_uri_latest }}
           IMAGE_TAG: ${{ github.sha }}
           IMAGE_DIGEST: ${{ steps.build-image.outputs.image_digest }}
+          ENVIRONMENT: staging
         run: |
           set -euo pipefail
           aws lambda update-function-code \
@@ -122,6 +123,7 @@ jobs:
               env = {}
           env["IMAGE_TAG"] = os.environ.get("IMAGE_TAG")
           env["IMAGE_DIGEST"] = os.environ.get("IMAGE_DIGEST")
+          env["ENVIRONMENT"] = os.environ.get("ENVIRONMENT")
           print(json.dumps({"Variables": env}))
           PY
           aws lambda update-function-configuration \
@@ -136,6 +138,7 @@ jobs:
           IMAGE_URI: ${{ steps.build-image.outputs.image_uri_latest }}
           IMAGE_TAG: ${{ github.sha }}
           IMAGE_DIGEST: ${{ steps.build-image.outputs.image_digest }}
+          ENVIRONMENT: production
         run: |
           set -euo pipefail
           aws lambda update-function-code \
@@ -153,6 +156,7 @@ jobs:
               env = {}
           env["IMAGE_TAG"] = os.environ.get("IMAGE_TAG")
           env["IMAGE_DIGEST"] = os.environ.get("IMAGE_DIGEST")
+          env["ENVIRONMENT"] = os.environ.get("ENVIRONMENT")
           print(json.dumps({"Variables": env}))
           PY
           aws lambda update-function-configuration \
