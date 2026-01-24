@@ -399,8 +399,9 @@ def prepare_training_data(
     return filtered
 
 
-def build_feature_matrix(filtered_df):
-    categorical_cols = ['strap_type', 'style', 'unique_internal_model_code']
+def build_feature_matrix(filtered_df, categorical_cols=None):
+    if categorical_cols is None:
+        categorical_cols = ['strap_type', 'style', 'unique_internal_model_code']
     features = pd.get_dummies(filtered_df, columns=categorical_cols, dummy_na=True)
     target = features.pop('qlft_pass_normalized')
     features = features.apply(pd.to_numeric, errors='coerce').fillna(0)
@@ -750,7 +751,11 @@ if __name__ == '__main__':
         logging.warning("No fit tests available after filtering. Exiting.")
         raise SystemExit(0)
 
-    features, target = build_feature_matrix(cleaned_fit_tests)
+    categorical_columns = ['strap_type', 'style', 'unique_internal_model_code']
+    if args.exclude_mask_code:
+        categorical_columns = ['strap_type', 'style']
+
+    features, target = build_feature_matrix(cleaned_fit_tests, categorical_columns)
 
     model, train_losses, val_losses, x_train, y_train, x_val, y_val, train_idx, val_idx = train_predictor(
         features,
@@ -764,10 +769,6 @@ if __name__ == '__main__':
 
     logging.info("Model training complete. Feature count: %s", features.shape[1])
     feature_columns = list(features.columns)
-    categorical_columns = ['strap_type', 'style', 'unique_internal_model_code']
-    if args.exclude_mask_code:
-        categorical_columns = ['strap_type', 'style']
-
     def predict_nn(inference_rows):
         encoded = build_feature_frame(
             inference_rows,
