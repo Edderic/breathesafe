@@ -118,6 +118,10 @@ def build_recommendation_preview(
         recommendation_output['users'].append({
             'user_id': int(user_id),
             'feature_source_fit_test_id': int(user_row.get('id')),
+            'facial_measurements': {
+                column: user_row.get(column)
+                for column in FACIAL_FEATURE_COLUMNS
+            },
             'metrics': {
                 'threshold': threshold,
                 'precision': precision,
