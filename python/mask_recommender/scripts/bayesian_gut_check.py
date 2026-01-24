@@ -17,7 +17,7 @@ for path in (REPO_ROOT, SCRIPTS_ROOT):
     if str(path) not in sys.path:
         sys.path.append(str(path))
 
-from train_bayesian import build_perimeter_bins, predict_from_trace  # noqa: E402
+from train_bayesian import predict_from_trace  # noqa: E402
 from data_prep import (BAYESIAN_FACE_COLUMNS, FACIAL_FEATURE_COLUMNS,  # noqa: E402
                        filter_fit_tests_for_bayesian, get_masks,
                        load_fit_tests_with_imputation)
@@ -138,17 +138,9 @@ def main():
         mask_candidates["unique_internal_model_code"].astype(str).isin(mask_map.keys())
     ].copy()
 
-    bin_edges, _ = build_perimeter_bins()
-
     def predict_bayesian(inference_rows):
         face_perimeter = inference_rows[BAYESIAN_FACE_COLUMNS].sum(axis=1)
         perimeter_diff = face_perimeter - inference_rows["perimeter_mm"]
-        bin_idx = pd.cut(
-            perimeter_diff,
-            bins=bin_edges,
-            labels=False,
-            right=False,
-        ).astype(int)
 
         strap_normalized = inference_rows["strap_type"].astype(str).str.strip().str.lower()
         earloop = strap_normalized.str.contains("earloop").astype(int).to_numpy()
@@ -160,7 +152,7 @@ def main():
         return predict_from_trace(
             trace,
             mask_idx,
-            bin_idx,
+            perimeter_diff.to_numpy(),
             beard,
             earloop,
             headstrap,
