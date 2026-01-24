@@ -155,7 +155,7 @@ def build_bayesian_model(
     coords,
     mask_style_idx,
     train_mask_idx,
-    train_diff,
+    train_bin,
     train_beard,
     train_ear,
     train_head,
@@ -164,55 +164,44 @@ def build_bayesian_model(
 ):
     with pm.Model(coords=coords) as model:
         mask_idx = pm.Data("mask_idx", train_mask_idx)
-        diff = pm.Data("perimeter_diff", train_diff)
+        bin_idx = pm.Data("bin_idx", train_bin)
         beard_len = pm.Data("beard_length", train_beard)
         earloop = pm.Data("is_earloop", train_ear)
         headstrap = pm.Data("is_headstrap", train_head)
 
-        alpha_mask_style = pm.HalfNormal("alpha_mask_style", sigma=5, dims="style")
-        beta_mask_style = pm.HalfNormal("beta_mask_style", sigma=5, dims="style")
-
-        alpha_mask = pm.HalfNormal(
-            "alpha_mask",
-            sigma=alpha_mask_style[mask_style_idx],
-            dims="mask",
+        alpha_style_bin = pm.HalfNormal(
+            "alpha_perimeter_bin_style",
+            sigma=10,
+            dims=("style", "bin")
         )
-        beta_mask = pm.HalfNormal(
-            "beta_mask",
-            sigma=beta_mask_style[mask_style_idx],
-            dims="mask",
+        beta_style_bin = pm.HalfNormal(
+            "beta_perimeter_bin_style",
+            sigma=10,
+            dims=("style", "bin")
         )
 
-        diff_scaled = pm.math.sigmoid(diff)
-        diff_scaled = pm.math.clip(diff_scaled, 1e-6, 1 - 1e-6)
+        alpha_mask_bin = alpha_style_bin[mask_style_idx]
+        beta_mask_bin = beta_style_bin[mask_style_idx]
 
-        a_style = pm.Normal("a_style", mu=0, sigma=0.5, dims="style")
-        b_style = pm.Normal("b_style", mu=0, sigma=50, dims="style")
-        c_style = pm.Normal("c_style", mu=0, sigma=5, dims="style")
-
-        a_mask = pm.Normal("a_mask", mu=a_style[mask_style_idx], sigma=0.5, dims="mask")
-        b_mask = pm.Normal("b_mask", mu=b_style[mask_style_idx], sigma=20, dims="mask")
-        c_mask = pm.Normal("c_mask", mu=c_style[mask_style_idx], sigma=5, dims="mask")
+        p_mask = pm.Beta(
+            "p_mask",
+            alpha=alpha_mask_bin,
+            beta=beta_mask_bin,
+            dims=("mask", "bin")
+        )
 
         beta_facial_hair = pm.Normal("beta_facial_hair", mu=0, sigma=1)
         beta_earloop = pm.Normal("beta_earloop", mu=0, sigma=1)
         beta_headstrap = pm.Normal("beta_headstrap", mu=1, sigma=1)
         alpha = pm.Normal("alpha", mu=0, sigma=3)
 
-        perimeter_score = (
-            a_mask[mask_idx] * diff ** 2
-            + b_mask[mask_idx] * diff
-            + c_mask[mask_idx]
-        )
-        p = pm.math.sigmoid(
-            perimeter_score
-            + beta_facial_hair * beard_len
+        p_facial_hair_strap = pm.math.sigmoid(
+            beta_facial_hair * beard_len
             + beta_earloop * earloop
             + beta_headstrap * headstrap
             + alpha
         )
-        p = pm.math.clip(p, 1e-6, 1 - 1e-6)
-        pm.Deterministic("p", p)
+        p = pm.Deterministic("p", p_mask[mask_idx, bin_idx] * p_facial_hair_strap)
         pm.Bernoulli("qlft_pass", p=p, observed=train_labels)
 
         if args.use_advi:
@@ -235,28 +224,21 @@ def build_bayesian_model(
     return model, trace
 
 
-def predict_from_trace(trace, mask_idx, diff, beard, earloop, headstrap):
-    a_mask_mean = trace.posterior["a_mask"].mean(dim=("chain", "draw")).values
-    b_mask_mean = trace.posterior["b_mask"].mean(dim=("chain", "draw")).values
-    c_mask_mean = trace.posterior["c_mask"].mean(dim=("chain", "draw")).values
+def predict_from_trace(trace, mask_idx, bin_idx, beard, earloop, headstrap):
+    p_mask_mean = trace.posterior["p_mask"].mean(dim=("chain", "draw")).values
     beta_facial_hair_mean = float(trace.posterior["beta_facial_hair"].mean().values)
     beta_earloop_mean = float(trace.posterior["beta_earloop"].mean().values)
     beta_headstrap_mean = float(trace.posterior["beta_headstrap"].mean().values)
     alpha_mean = float(trace.posterior["alpha"].mean().values)
 
-    perimeter_score = (
-        a_mask_mean[mask_idx] * diff ** 2
-        + b_mask_mean[mask_idx] * diff
-        + c_mask_mean[mask_idx]
-    )
     linear = (
-        perimeter_score
-        + beta_facial_hair_mean * beard
+        beta_facial_hair_mean * beard
         + beta_earloop_mean * earloop
         + beta_headstrap_mean * headstrap
         + alpha_mean
     )
-    return sigmoid(linear)
+    p_facial = sigmoid(linear)
+    return p_mask_mean[mask_idx, bin_idx] * p_facial
 
 
 def evaluate_predictions(val_probs, val_labels):
@@ -308,6 +290,15 @@ def main():
         fit_tests["facial_hair_beard_length_mm"].fillna(0).astype(float)
     )
     fit_tests["perimeter_diff"] = fit_tests["face_perimeter_mm"] - fit_tests["perimeter_mm"]
+    bin_edges, bin_labels = build_perimeter_bins()
+    fit_tests["perimeter_bin"] = pd.cut(
+        fit_tests["perimeter_diff"],
+        bins=bin_edges,
+        labels=False,
+        right=False,
+    )
+    fit_tests = fit_tests[fit_tests["perimeter_bin"].notna()].copy()
+    fit_tests["perimeter_bin"] = fit_tests["perimeter_bin"].astype(int)
 
     fit_tests["strap_type_normalized"] = (
         fit_tests["strap_type"].astype(str).str.strip().str.lower()
@@ -339,13 +330,13 @@ def main():
     def split_array(values):
         return values[train_idx], values[val_idx]
 
-    perimeter_diff = fit_tests["perimeter_diff"].to_numpy(dtype=float)
+    perimeter_bin = fit_tests["perimeter_bin"].to_numpy(dtype=int)
     beard = fit_tests["facial_hair_beard_length_mm"].to_numpy(dtype=float)
     is_earloop = fit_tests["is_earloop"].to_numpy(dtype=int)
     is_headstrap = fit_tests["is_headstrap"].to_numpy(dtype=int)
     labels = fit_tests["qlft_pass_normalized"].to_numpy(dtype=int)
 
-    train_diff, val_diff = split_array(perimeter_diff)
+    train_bin, val_bin = split_array(perimeter_bin)
     train_beard, val_beard = split_array(beard)
     train_ear, val_ear = split_array(is_earloop)
     train_head, val_head = split_array(is_headstrap)
@@ -355,13 +346,14 @@ def main():
     coords = {
         "style": list(style_index),
         "mask": list(mask_index),
+        "bin": list(bin_labels),
     }
 
     _, trace = build_bayesian_model(
         coords,
         mask_style_idx,
         train_mask_idx,
-        train_diff,
+        train_bin,
         train_beard,
         train_ear,
         train_head,
@@ -398,6 +390,7 @@ def main():
         'timestamp': run_timestamp,
         'environment': _env_name(),
         'mask_index': list(mask_index),
+        'bin_edges': bin_edges,
     }
     metadata_key = f"mask_recommender/models/{run_timestamp}/bayesian_metadata.json"
     metadata_uri = _upload_json_to_s3(metadata, metadata_key)
@@ -417,7 +410,7 @@ def main():
     val_probs = predict_from_trace(
         trace,
         val_mask_idx,
-        val_diff,
+        val_bin,
         val_beard,
         val_ear,
         val_head,
