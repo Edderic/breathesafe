@@ -554,6 +554,7 @@ def _train_with_split(
     focal_gamma=2.0,
     train_weights=None,
     val_weights=None,
+    disable_class_weighting=False,
 ):
     train_positive_rate = float(y_train.mean().item()) if y_train.numel() else 0.0
     val_positive_rate = float(y_val.mean().item()) if y_val.numel() else 0.0
@@ -574,6 +575,8 @@ def _train_with_split(
         pos_weight,
         loss_type
     )
+    if disable_class_weighting:
+        logging.info("Class weighting disabled because focus examples are present.")
 
     if train_weights is None:
         train_weights = torch.ones_like(y_train)
@@ -593,7 +596,10 @@ def _train_with_split(
             )
             loss = (loss * train_weights).mean()
         else:
-            class_weights = torch.where(y_train == 1, pos_weight_tensor, torch.tensor(1.0))
+            if disable_class_weighting:
+                class_weights = torch.ones_like(y_train)
+            else:
+                class_weights = torch.where(y_train == 1, pos_weight_tensor, torch.tensor(1.0))
             loss = (loss_fn(probs, y_train) * class_weights * train_weights).mean()
         loss.backward()
         optimizer.step()
@@ -612,7 +618,10 @@ def _train_with_split(
                     )
                     val_loss = (val_loss * val_weights).mean().item()
                 else:
-                    class_weights = torch.where(y_val == 1, pos_weight_tensor, torch.tensor(1.0))
+                    if disable_class_weighting:
+                        class_weights = torch.ones_like(y_val)
+                    else:
+                        class_weights = torch.where(y_val == 1, pos_weight_tensor, torch.tensor(1.0))
                     val_loss = (loss_fn(val_probs, y_val) * class_weights * val_weights).mean().item()
                 preds = (val_probs >= 0.5).float()
                 accuracy = (preds == y_val).float().mean().item()
@@ -655,6 +664,7 @@ def train_predictor_with_split(
     focal_alpha=0.25,
     focal_gamma=2.0,
     sample_weights=None,
+    disable_class_weighting=False,
 ):
     x = torch.tensor(features.to_numpy(), dtype=torch.float32)
     y = torch.tensor(target.to_numpy(), dtype=torch.float32).unsqueeze(1)
@@ -679,6 +689,7 @@ def train_predictor_with_split(
         focal_gamma=focal_gamma,
         train_weights=train_weights,
         val_weights=val_weights,
+        disable_class_weighting=disable_class_weighting,
     )
 
     return model, train_losses, val_losses, x_train, y_train, x_val, y_val, train_idx, val_idx
@@ -692,6 +703,7 @@ def train_predictor(
     loss_type="bce",
     focal_alpha=0.25,
     focal_gamma=2.0,
+    disable_class_weighting=False,
 ):
     num_rows = features.shape[0]
     permutation = torch.randperm(num_rows)
@@ -708,7 +720,8 @@ def train_predictor(
         learning_rate=learning_rate,
         loss_type=loss_type,
         focal_alpha=focal_alpha,
-        focal_gamma=focal_gamma
+        focal_gamma=focal_gamma,
+        disable_class_weighting=disable_class_weighting,
     )
 
 
@@ -890,7 +903,8 @@ if __name__ == '__main__':
             learning_rate=args.learning_rate,
             loss_type=args.loss_type,
             focal_alpha=args.focal_alpha,
-            focal_gamma=args.focal_gamma
+            focal_gamma=args.focal_gamma,
+            disable_class_weighting=bool(args.focus),
         )
     else:
         base_count = cleaned_fit_tests.shape[0] - focus_cleaned.shape[0]
@@ -920,6 +934,7 @@ if __name__ == '__main__':
             focal_alpha=args.focal_alpha,
             focal_gamma=args.focal_gamma,
             sample_weights=sample_weights,
+            disable_class_weighting=True,
         )
 
     logging.info("Model training complete. Feature count: %s", features.shape[1])
