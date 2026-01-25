@@ -12,6 +12,7 @@ if str(REPO_ROOT) not in sys.path:
 
 import arviz as az
 import boto3
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pymc as pm
@@ -21,7 +22,8 @@ from data_prep import (BAYESIAN_FACE_COLUMNS, FACIAL_FEATURE_COLUMNS, get_masks,
                        filter_fit_tests_for_bayesian,
                        load_fit_tests_with_imputation)
 from qa import build_mask_candidates, build_recommendation_preview
-from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
+from sklearn.metrics import (auc, f1_score, precision_score, recall_score,
+                             roc_auc_score, roc_curve)
 from train import load_focus_examples
 
 
@@ -466,6 +468,14 @@ def main():
     )
 
     bayesian_metrics = evaluate_predictions(val_probs, val_labels)
+    train_probs = predict_from_trace(
+        trace,
+        train_mask_idx,
+        train_bin,
+        train_beard,
+        train_ear,
+        train_head,
+    )
 
     from train import build_feature_matrix, train_predictor_with_split
 
@@ -534,6 +544,31 @@ def main():
         threshold=bayesian_metrics["threshold"],
     )
     logging.info("Saved recommendation preview to %s", recommendations_path)
+
+    roc_plot_path = os.path.join(images_dir, f"{run_timestamp}_roc_auc.png")
+    plt.figure(figsize=(8, 4))
+    try:
+        train_fpr, train_tpr, _ = roc_curve(train_labels, train_probs)
+        train_auc = auc(train_fpr, train_tpr)
+        plt.plot(train_fpr, train_tpr, label=f"train (AUC={train_auc:.3f})", linewidth=2)
+    except ValueError:
+        logging.warning("Skipping train ROC curve due to missing class labels.")
+    try:
+        val_fpr, val_tpr, _ = roc_curve(val_labels, val_probs)
+        val_auc = auc(val_fpr, val_tpr)
+        plt.plot(val_fpr, val_tpr, label=f"validation (AUC={val_auc:.3f})", linewidth=2)
+    except ValueError:
+        logging.warning("Skipping validation ROC curve due to missing class labels.")
+    plt.plot([0, 1], [0, 1], linestyle="--", color="gray")
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("Bayesian ROC-AUC")
+    plt.grid(True, linestyle="--", alpha=0.4)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(roc_plot_path)
+    plt.close()
+    logging.info("Saved ROC-AUC plot to %s", roc_plot_path)
     baseline_model, _, _, _, _, baseline_x_val, baseline_y_val, _, _ = train_predictor_with_split(
         baseline_features,
         baseline_target,
