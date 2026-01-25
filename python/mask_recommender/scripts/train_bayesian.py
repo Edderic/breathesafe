@@ -20,8 +20,9 @@ import torch
 from data_prep import (BAYESIAN_FACE_COLUMNS, FACIAL_FEATURE_COLUMNS, get_masks,
                        filter_fit_tests_for_bayesian,
                        load_fit_tests_with_imputation)
-from qa import build_mask_candidates
+from qa import build_mask_candidates, build_recommendation_preview
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score
+from train import load_focus_examples
 
 
 pytensor.config.cxx = ""
@@ -134,6 +135,13 @@ def parse_args():
         default=1000,
         help="Posterior draws sampled from ADVI approximation.",
     )
+    parser.add_argument("--focus", help="Path to focus examples JSON.")
+    parser.add_argument(
+        "--focus-weight",
+        type=float,
+        default=5.0,
+        help="Default weight for focus examples without a weight override.",
+    )
     return parser.parse_args()
 
 
@@ -160,6 +168,7 @@ def build_bayesian_model(
     train_ear,
     train_head,
     train_labels,
+    train_weights,
     args,
 ):
     with pm.Model(coords=coords) as model:
@@ -168,6 +177,7 @@ def build_bayesian_model(
         beard_len = pm.Data("beard_length", train_beard)
         earloop = pm.Data("is_earloop", train_ear)
         headstrap = pm.Data("is_headstrap", train_head)
+        sample_weight = pm.Data("sample_weight", train_weights)
 
         alpha_style_bin = pm.HalfNormal(
             "alpha_perimeter_bin_style",
@@ -202,7 +212,8 @@ def build_bayesian_model(
             + alpha
         )
         p = pm.Deterministic("p", p_mask[mask_idx, bin_idx] * p_facial_hair_strap)
-        pm.Bernoulli("qlft_pass", p=p, observed=train_labels)
+        loglik = pm.logp(pm.Bernoulli.dist(p=p), train_labels)
+        pm.Potential("weighted_loglik", (loglik * sample_weight).sum())
 
         if args.use_advi:
             approx = pm.fit(
@@ -280,10 +291,40 @@ def main():
         password=args.password,
         cookie=args.cookie,
     )
-    fit_tests = filter_fit_tests_for_bayesian(fit_tests)
-    if fit_tests.empty:
+    base_fit_tests = filter_fit_tests_for_bayesian(fit_tests)
+    if base_fit_tests.empty:
         logging.warning("No fit tests available after filtering.")
         raise SystemExit(0)
+
+    base_url = args.base_url.rstrip("/")
+    masks_url = f"{base_url}/masks.json?per_page=1000"
+    masks_df = get_masks(session=None, masks_url=masks_url)
+
+    focus_fit_tests = pd.DataFrame()
+    focus_weights = pd.Series(dtype=float)
+    if args.focus:
+        focus_df, focus_weights = load_focus_examples(args.focus, masks_df, args.focus_weight)
+        if focus_df.empty:
+            logging.warning("No focus examples loaded from %s", args.focus)
+        else:
+            focus_fit_tests = filter_fit_tests_for_bayesian(focus_df)
+            focus_weights = focus_weights.reindex(focus_fit_tests.index)
+            if focus_fit_tests.empty:
+                logging.warning("Focus examples filtered out after validation.")
+
+    if not focus_fit_tests.empty:
+        focus_fit_tests = focus_fit_tests.reset_index(drop=True)
+        focus_weights = focus_weights.reset_index(drop=True)
+        base_fit_tests = base_fit_tests.reset_index(drop=True)
+        fit_tests = pd.concat([base_fit_tests, focus_fit_tests], ignore_index=True)
+        focus_indices = np.arange(base_fit_tests.shape[0], fit_tests.shape[0])
+        sample_weights = np.ones(fit_tests.shape[0], dtype=float)
+        sample_weights[focus_indices] = focus_weights.to_numpy(dtype=float)
+    else:
+        base_fit_tests = base_fit_tests.reset_index(drop=True)
+        fit_tests = base_fit_tests
+        focus_indices = np.array([], dtype=int)
+        sample_weights = np.ones(fit_tests.shape[0], dtype=float)
 
     fit_tests["face_perimeter_mm"] = fit_tests[BAYESIAN_FACE_COLUMNS].sum(axis=1)
     fit_tests["facial_hair_beard_length_mm"] = (
@@ -321,11 +362,14 @@ def main():
     mask_style_idx = mask_table["style_normalized"].map(style_map).to_numpy(dtype=int)
 
     rng = np.random.default_rng(args.seed)
-    indices = np.arange(fit_tests.shape[0])
+    base_count = base_fit_tests.shape[0]
+    indices = np.arange(base_count)
     rng.shuffle(indices)
-    split_index = int(fit_tests.shape[0] * (1 - args.val_split))
+    split_index = int(base_count * (1 - args.val_split))
     train_idx = indices[:split_index]
     val_idx = indices[split_index:]
+    if focus_indices.size:
+        train_idx = np.concatenate([train_idx, focus_indices])
 
     def split_array(values):
         return values[train_idx], values[val_idx]
@@ -342,6 +386,7 @@ def main():
     train_head, val_head = split_array(is_headstrap)
     train_mask_idx, val_mask_idx = split_array(fit_tests["mask_index"].to_numpy(dtype=int))
     train_labels, val_labels = split_array(labels)
+    train_weights, val_weights = split_array(sample_weights)
 
     coords = {
         "style": list(style_index),
@@ -358,6 +403,7 @@ def main():
         train_ear,
         train_head,
         train_labels,
+        train_weights,
         args,
     )
 
@@ -367,9 +413,6 @@ def main():
     trace_uri = _upload_file_to_s3(trace_path, trace_key)
     logging.info("Uploaded trace to %s", trace_uri)
 
-    base_url = args.base_url.rstrip("/")
-    masks_url = f"{base_url}/masks.json?per_page=1000"
-    masks_df = get_masks(session=None, masks_url=masks_url)
     mask_data = {}
     for _, row in masks_df.iterrows():
         mask_id = row.get('id')
@@ -391,6 +434,9 @@ def main():
         'environment': _env_name(),
         'mask_index': list(mask_index),
         'bin_edges': bin_edges,
+        'focus_count': int(focus_indices.size),
+        'focus_weight_min': float(np.min(sample_weights)) if sample_weights.size else None,
+        'focus_weight_max': float(np.max(sample_weights)) if sample_weights.size else None,
     }
     metadata_key = f"mask_recommender/models/{run_timestamp}/bayesian_metadata.json"
     metadata_uri = _upload_json_to_s3(metadata, metadata_key)
@@ -406,6 +452,9 @@ def main():
     latest_key = "mask_recommender/models/bayesian_latest.json"
     latest_uri = _upload_json_to_s3(latest_payload, latest_key)
     logging.info("Updated Bayesian latest pointer at %s", latest_uri)
+
+    images_dir = "python/mask_recommender/images"
+    os.makedirs(images_dir, exist_ok=True)
 
     val_probs = predict_from_trace(
         trace,
@@ -433,10 +482,58 @@ def main():
     ].copy()
     baseline_features, baseline_target = build_feature_matrix(baseline_df)
     mask_candidates = build_mask_candidates(masks_df)
+    mask_candidates = mask_candidates[
+        mask_candidates["unique_internal_model_code"].astype(str).isin(mask_map.keys())
+    ].copy()
     import train as train_module
     train_module.num_masks_times_num_bins_plus_other_features = train_module._set_num_masks_times_num_bins_plus_other_features(
         mask_candidates
     )
+
+    def predict_bayesian(inference_rows):
+        face_perimeter = inference_rows[BAYESIAN_FACE_COLUMNS].sum(axis=1)
+        perimeter_diff = face_perimeter - inference_rows["perimeter_mm"]
+        bin_idx = pd.cut(
+            perimeter_diff,
+            bins=bin_edges,
+            labels=False,
+            right=False,
+        ).astype(int)
+
+        strap_normalized = inference_rows["strap_type"].astype(str).str.strip().str.lower()
+        earloop = strap_normalized.str.contains("earloop").astype(int).to_numpy()
+        headstrap = strap_normalized.str.contains("headstrap").astype(int).to_numpy()
+
+        mask_idx = (
+            inference_rows["unique_internal_model_code"]
+            .astype(str)
+            .map(mask_map)
+            .to_numpy()
+        )
+        beard = inference_rows["facial_hair_beard_length_mm"].fillna(0).to_numpy()
+
+        return predict_from_trace(
+            trace,
+            mask_idx,
+            bin_idx,
+            beard,
+            earloop,
+            headstrap,
+        )
+
+    recommendations_path = os.path.join(
+        images_dir,
+        f"recommendations_{run_timestamp}.json"
+    )
+    build_recommendation_preview(
+        user_ids=[99, 101],
+        fit_tests_df=base_fit_tests,
+        mask_candidates=mask_candidates,
+        predict_fn=predict_bayesian,
+        output_path=recommendations_path,
+        threshold=bayesian_metrics["threshold"],
+    )
+    logging.info("Saved recommendation preview to %s", recommendations_path)
     baseline_model, _, _, _, _, baseline_x_val, baseline_y_val, _, _ = train_predictor_with_split(
         baseline_features,
         baseline_target,
@@ -458,6 +555,9 @@ def main():
         "samples_total": int(fit_tests.shape[0]),
         "samples_train": int(train_idx.shape[0]),
         "samples_val": int(val_idx.shape[0]),
+        "focus_count": int(focus_indices.size),
+        "focus_weight_min": float(np.min(sample_weights)) if sample_weights.size else None,
+        "focus_weight_max": float(np.max(sample_weights)) if sample_weights.size else None,
         "trace_uri": trace_uri,
         "val_auc": bayesian_metrics["auc"],
         "val_f1": bayesian_metrics["f1"],
