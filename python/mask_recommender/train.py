@@ -792,7 +792,10 @@ if __name__ == '__main__':
     parser.add_argument('--exclude-mask-code', action='store_true', help='Exclude unique_internal_model_code from categorical features.')
     parser.add_argument('--focus', help='Path to focus examples JSON for upweighted training.')
     parser.add_argument('--focus-weight', type=float, default=5.0, help='Weight multiplier for focus examples.')
+    parser.add_argument('--class-reweight', action='store_true', help='Reweight loss by class balance.')
     args = parser.parse_args()
+    if args.focus and args.class_reweight:
+        raise SystemExit("Cannot use --class-reweight with --focus.")
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
 
@@ -904,7 +907,7 @@ if __name__ == '__main__':
             loss_type=args.loss_type,
             focal_alpha=args.focal_alpha,
             focal_gamma=args.focal_gamma,
-            disable_class_weighting=bool(args.focus),
+            disable_class_weighting=not args.class_reweight,
         )
     else:
         base_count = cleaned_fit_tests.shape[0] - focus_cleaned.shape[0]
@@ -934,7 +937,7 @@ if __name__ == '__main__':
             focal_alpha=args.focal_alpha,
             focal_gamma=args.focal_gamma,
             sample_weights=sample_weights,
-            disable_class_weighting=True,
+            disable_class_weighting=not args.class_reweight,
         )
 
     logging.info("Model training complete. Feature count: %s", features.shape[1])
