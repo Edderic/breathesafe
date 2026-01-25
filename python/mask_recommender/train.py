@@ -2,6 +2,7 @@ import argparse
 import json
 import logging
 import os
+import re
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
@@ -79,6 +80,92 @@ STYLE_TYPES = [
     'Adhesive',
     'Elastomeric'
 ]
+
+
+def _normalize_focus_label(value):
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return None
+    normalized = str(value).strip().lower()
+    if normalized in ['pass', 'passed', 'true', '1', 'yes', 'y']:
+        return 'pass'
+    if normalized in ['fail', 'failed', 'false', '0', 'no', 'n']:
+        return 'fail'
+    return None
+
+
+def load_focus_examples(path, masks_df, default_weight):
+    with open(path, 'r', encoding='utf-8') as handle:
+        raw = handle.read()
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        cleaned = re.sub(r",\s*([}\]])", r"\1", raw)
+        try:
+            payload = json.loads(cleaned)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Focus examples JSON is invalid: {path}") from exc
+
+    mask_lookup = masks_df.set_index('id')
+    rows = []
+    weights = []
+    for user in payload.get('users', []):
+        facial = user.get('facial_measurements') or {}
+        missing_face = [col for col in FACIAL_FEATURE_COLUMNS if facial.get(col) is None]
+        if missing_face:
+            logging.warning("Skipping focus user due to missing facial fields: %s", missing_face)
+            continue
+        facial_hair = facial.get('facial_hair_beard_length_mm')
+        if facial_hair is None:
+            facial_hair = user.get('facial_hair_beard_length_mm')
+        if facial_hair is None:
+            logging.warning(
+                "Skipping focus user due to missing facial_hair_beard_length_mm (keys=%s)",
+                sorted(facial.keys())
+            )
+            continue
+
+        for rec in user.get('recommendations', []):
+            label = _normalize_focus_label(rec.get('ground_truth'))
+            if label is None:
+                continue
+            mask_id = rec.get('mask_id')
+            if mask_id is None or mask_id not in mask_lookup.index:
+                logging.warning("Skipping focus rec due to missing mask_id=%s", mask_id)
+                continue
+            mask_row = mask_lookup.loc[mask_id]
+            missing_mask = [
+                field for field in ['perimeter_mm', 'strap_type', 'style', 'unique_internal_model_code']
+                if pd.isna(mask_row.get(field)) or str(mask_row.get(field)).strip() == ''
+            ]
+            if missing_mask:
+                logging.warning("Skipping focus rec due to missing mask fields: %s", missing_mask)
+                continue
+
+            row = {
+                'mask_id': int(mask_id),
+                'unique_internal_model_code': mask_row.get('unique_internal_model_code'),
+                'perimeter_mm': mask_row.get('perimeter_mm'),
+                'strap_type': mask_row.get('strap_type'),
+                'style': mask_row.get('style'),
+                'qlft_pass': label,
+                'facial_hair_beard_length_mm': facial_hair,
+            }
+            for column in FACIAL_FEATURE_COLUMNS:
+                row[column] = facial.get(column)
+            rows.append(row)
+            weight = rec.get('weight', default_weight)
+            try:
+                weight = float(weight)
+            except (TypeError, ValueError):
+                weight = default_weight
+            weights.append(weight)
+
+    if not rows:
+        return pd.DataFrame(), pd.Series(dtype=float)
+
+    focus_df = pd.DataFrame(rows)
+    focus_weights = pd.Series(weights, index=focus_df.index, dtype=float)
+    return focus_df, focus_weights
 
 def initialize_betas(diff_keys, num_users, num_masks, style_types):
     """
@@ -465,6 +552,8 @@ def _train_with_split(
     loss_type="bce",
     focal_alpha=0.25,
     focal_gamma=2.0,
+    train_weights=None,
+    val_weights=None,
 ):
     train_positive_rate = float(y_train.mean().item()) if y_train.numel() else 0.0
     val_positive_rate = float(y_val.mean().item()) if y_val.numel() else 0.0
@@ -486,6 +575,11 @@ def _train_with_split(
         loss_type
     )
 
+    if train_weights is None:
+        train_weights = torch.ones_like(y_train)
+    if val_weights is None:
+        val_weights = torch.ones_like(y_val)
+
     for epoch in range(epochs):
         model.train()
         optimizer.zero_grad()
@@ -496,10 +590,11 @@ def _train_with_split(
                 y_train,
                 alpha=focal_alpha,
                 gamma=focal_gamma
-            ).mean()
+            )
+            loss = (loss * train_weights).mean()
         else:
-            sample_weights = torch.where(y_train == 1, pos_weight_tensor, torch.tensor(1.0))
-            loss = (loss_fn(probs, y_train) * sample_weights).mean()
+            class_weights = torch.where(y_train == 1, pos_weight_tensor, torch.tensor(1.0))
+            loss = (loss_fn(probs, y_train) * class_weights * train_weights).mean()
         loss.backward()
         optimizer.step()
         train_losses.append(loss.item())
@@ -514,10 +609,11 @@ def _train_with_split(
                         y_val,
                         alpha=focal_alpha,
                         gamma=focal_gamma
-                    ).mean().item()
+                    )
+                    val_loss = (val_loss * val_weights).mean().item()
                 else:
-                    val_weights = torch.where(y_val == 1, pos_weight_tensor, torch.tensor(1.0))
-                    val_loss = (loss_fn(val_probs, y_val) * val_weights).mean().item()
+                    class_weights = torch.where(y_val == 1, pos_weight_tensor, torch.tensor(1.0))
+                    val_loss = (loss_fn(val_probs, y_val) * class_weights * val_weights).mean().item()
                 preds = (val_probs >= 0.5).float()
                 accuracy = (preds == y_val).float().mean().item()
                 true_pos = ((preds == 1) & (y_val == 1)).float().sum().item()
@@ -538,10 +634,11 @@ def _train_with_split(
                     y_val,
                     alpha=focal_alpha,
                     gamma=focal_gamma
-                ).mean().item()
+                )
+                val_loss = (val_loss * val_weights).mean().item()
             else:
-                val_weights = torch.where(y_val == 1, pos_weight_tensor, torch.tensor(1.0))
-                val_loss = (loss_fn(val_probs, y_val) * val_weights).mean().item()
+                class_weights = torch.where(y_val == 1, pos_weight_tensor, torch.tensor(1.0))
+                val_loss = (loss_fn(val_probs, y_val) * class_weights * val_weights).mean().item()
         val_losses.append(val_loss)
 
     return model, train_losses, val_losses
@@ -557,12 +654,18 @@ def train_predictor_with_split(
     loss_type="bce",
     focal_alpha=0.25,
     focal_gamma=2.0,
+    sample_weights=None,
 ):
     x = torch.tensor(features.to_numpy(), dtype=torch.float32)
     y = torch.tensor(target.to_numpy(), dtype=torch.float32).unsqueeze(1)
 
     x_train, y_train = x[train_idx], y[train_idx]
     x_val, y_val = x[val_idx], y[val_idx]
+    train_weights = None
+    val_weights = None
+    if sample_weights is not None:
+        train_weights = sample_weights[train_idx].unsqueeze(1)
+        val_weights = sample_weights[val_idx].unsqueeze(1)
 
     model, train_losses, val_losses = _train_with_split(
         x_train,
@@ -573,7 +676,9 @@ def train_predictor_with_split(
         learning_rate=learning_rate,
         loss_type=loss_type,
         focal_alpha=focal_alpha,
-        focal_gamma=focal_gamma
+        focal_gamma=focal_gamma,
+        train_weights=train_weights,
+        val_weights=val_weights,
     )
 
     return model, train_losses, val_losses, x_train, y_train, x_val, y_val, train_idx, val_idx
@@ -672,6 +777,8 @@ if __name__ == '__main__':
     parser.add_argument('--use-diff-perimeter-bins', action='store_true', help='Use perimeter difference bins instead of raw perimeter features.')
     parser.add_argument('--use-diff-perimeter-mask-bins', action='store_true', help='Include per-mask perimeter difference bin features.')
     parser.add_argument('--exclude-mask-code', action='store_true', help='Exclude unique_internal_model_code from categorical features.')
+    parser.add_argument('--focus', help='Path to focus examples JSON for upweighted training.')
+    parser.add_argument('--focus-weight', type=float, default=5.0, help='Weight multiplier for focus examples.')
     args = parser.parse_args()
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
@@ -755,17 +862,65 @@ if __name__ == '__main__':
     if args.exclude_mask_code:
         categorical_columns = ['strap_type', 'style']
 
+    focus_cleaned = pd.DataFrame()
+    focus_weights = pd.Series(dtype=float)
+    if args.focus:
+        focus_df, focus_weights = load_focus_examples(args.focus, masks_df, args.focus_weight)
+        if focus_df.empty:
+            logging.warning("No focus examples loaded from %s", args.focus)
+        else:
+            focus_cleaned = prepare_training_data(
+                focus_df,
+                use_facial_perimeter=args.use_facial_perimeter,
+                use_diff_perimeter_bins=args.use_diff_perimeter_bins,
+                use_diff_perimeter_mask_bins=args.use_diff_perimeter_mask_bins
+            )
+
+    if not focus_cleaned.empty:
+        focus_weights = focus_weights.reindex(focus_cleaned.index)
+        cleaned_fit_tests = pd.concat([cleaned_fit_tests, focus_cleaned], ignore_index=True)
+
     features, target = build_feature_matrix(cleaned_fit_tests, categorical_columns)
 
-    model, train_losses, val_losses, x_train, y_train, x_val, y_val, train_idx, val_idx = train_predictor(
-        features,
-        target,
-        epochs=args.epochs,
-        learning_rate=args.learning_rate,
-        loss_type=args.loss_type,
-        focal_alpha=args.focal_alpha,
-        focal_gamma=args.focal_gamma
-    )
+    if focus_cleaned.empty:
+        model, train_losses, val_losses, x_train, y_train, x_val, y_val, train_idx, val_idx = train_predictor(
+            features,
+            target,
+            epochs=args.epochs,
+            learning_rate=args.learning_rate,
+            loss_type=args.loss_type,
+            focal_alpha=args.focal_alpha,
+            focal_gamma=args.focal_gamma
+        )
+    else:
+        base_count = cleaned_fit_tests.shape[0] - focus_cleaned.shape[0]
+        base_indices = torch.randperm(base_count)
+        split_index = int(base_count * 0.8)
+        base_train_idx = base_indices[:split_index]
+        base_val_idx = base_indices[split_index:]
+        focus_indices = torch.arange(base_count, cleaned_fit_tests.shape[0])
+        train_idx = torch.cat([base_train_idx, focus_indices])
+        val_idx = base_val_idx
+
+        sample_weights = torch.ones(cleaned_fit_tests.shape[0], dtype=torch.float32)
+        focus_weight_values = torch.tensor(
+            focus_weights.to_numpy(dtype=float),
+            dtype=torch.float32
+        )
+        sample_weights[focus_indices] = focus_weight_values
+
+        model, train_losses, val_losses, x_train, y_train, x_val, y_val, train_idx, val_idx = train_predictor_with_split(
+            features,
+            target,
+            train_idx,
+            val_idx,
+            epochs=args.epochs,
+            learning_rate=args.learning_rate,
+            loss_type=args.loss_type,
+            focal_alpha=args.focal_alpha,
+            focal_gamma=args.focal_gamma,
+            sample_weights=sample_weights,
+        )
 
     logging.info("Model training complete. Feature count: %s", features.shape[1])
     feature_columns = list(features.columns)

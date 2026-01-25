@@ -119,8 +119,15 @@ def build_recommendation_preview(
             'user_id': int(user_id),
             'feature_source_fit_test_id': int(user_row.get('id')),
             'facial_measurements': {
-                column: user_row.get(column)
-                for column in FACIAL_FEATURE_COLUMNS
+                **{
+                    column: float(user_row.get(column)) if pd.notna(user_row.get(column)) else None
+                    for column in FACIAL_FEATURE_COLUMNS
+                },
+                'facial_hair_beard_length_mm': (
+                    float(user_row.get('facial_hair_beard_length_mm'))
+                    if pd.notna(user_row.get('facial_hair_beard_length_mm'))
+                    else None
+                ),
             },
             'metrics': {
                 'threshold': threshold,
