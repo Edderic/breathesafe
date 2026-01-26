@@ -157,18 +157,10 @@ def test_training_and_inference_alignment(monkeypatch, tmp_path):
         self.use_diff_perimeter_bins = False
         self.use_diff_perimeter_mask_bins = False
 
-    class FakeSession:
-        def get_scoped_config(self):
-            return {}
+    def fake_boto3_client(*args, **kwargs):
+        return object()
 
-    class FakeBotoSession:
-        def __init__(self, *args, **kwargs):
-            self._session = FakeSession()
-
-        def client(self, *args, **kwargs):
-            return object()
-
-    monkeypatch.setattr(boto3.session, "Session", FakeBotoSession)
+    monkeypatch.setattr(boto3, "client", fake_boto3_client)
 
     monkeypatch.setattr(
         lambda_function.MaskRecommenderInference,
