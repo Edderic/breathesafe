@@ -132,6 +132,7 @@ jobs:
         PYTHONPATH: ${{ github.workspace }}
       run: |
         set -euo pipefail
+        export ADDR2LINE="${ADDR2LINE:-addr2line}"
         source "$HOME/miniforge/bin/activate"
         conda activate mask_recommender_rf
         python -m pytest \
