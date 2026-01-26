@@ -3,6 +3,7 @@
 require 'logger'
 require 'active_support/core_ext/integer/time'
 
+# Staging environment - inherits from production but with some overrides
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -58,7 +59,7 @@ Rails.application.configure do
   # Prepend all log lines with the following tags.
   config.log_tags = [:request_id]
 
-  # Use a shared cache store in production.
+  # Use a shared cache store in staging.
   redis_url = ENV['REDIS_URL'] || ENV['REDIS_TLS_URL']
   config.cache_store = if redis_url.present?
                          [:redis_cache_store, { url: redis_url }]
@@ -68,7 +69,7 @@ Rails.application.configure do
 
   # Use a real queuing backend for Active Job (and separate queues per environment).
   config.active_job.queue_adapter = :sidekiq
-  # config.active_job.queue_name_prefix = "breathesafe_production"
+  # config.active_job.queue_name_prefix = "breathesafe_staging"
 
   config.action_mailer.perform_caching = false
 
@@ -76,8 +77,11 @@ Rails.application.configure do
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   config.action_mailer.raise_delivery_errors = false
   config.action_mailer.delivery_method = :smtp
-  config.action_mailer.default_url_options = { host: 'www.breathesafe.xyz', protocol: 'https',
-                                               from: 'info@breathesafe.xyz' }
+  config.action_mailer.default_url_options = {
+    host: ENV.fetch('STAGING_HOST', 'breathesafe-staging.herokuapp.com'),
+    protocol: 'https',
+    from: ENV.fetch('STAGING_FROM_EMAIL', 'info@breathesafe.xyz')
+  }
 
   # Use SendGrid if API key is available, otherwise use test delivery method
   if ENV['SENDGRID_API_KEY'].present?
@@ -94,7 +98,7 @@ Rails.application.configure do
     # Fallback to test delivery method if SendGrid is not configured
     # This prevents registration failures when email is not configured
     config.action_mailer.delivery_method = :test
-    Rails.logger.warn('SENDGRID_API_KEY not set in production - using test email delivery method')
+    Rails.logger.warn('SENDGRID_API_KEY not set - using test email delivery method')
   end
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to

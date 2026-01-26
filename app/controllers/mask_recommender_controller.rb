@@ -30,11 +30,17 @@ class MaskRecommenderController < ApplicationController
       expires_in: MaskRecommenderJob::CACHE_TTL
     )
 
-    MaskRecommenderJob.perform_later(
-      job_id: job_id,
-      facial_measurements: facial_measurements.to_h.stringify_keys,
-      function_base: function_base
-    )
+    begin
+      MaskRecommenderJob.perform_later(
+        job_id: job_id,
+        facial_measurements: facial_measurements.to_h.stringify_keys,
+        function_base: function_base
+      )
+    rescue RedisClient::CannotConnectError => e
+      Rails.cache.delete(cache_key)
+      render json: { error: e.message }, status: :service_unavailable
+      return
+    end
 
     render json: { job_id: job_id, status: 'queued' }, status: :accepted
   end
