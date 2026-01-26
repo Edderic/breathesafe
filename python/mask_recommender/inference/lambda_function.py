@@ -157,7 +157,7 @@ class MaskRecommenderInference:
         rows = []
         for mask_id, mask_info in self.mask_data.items():
             perimeter = mask_info.get('perimeter_mm')
-            if perimeter is None:
+            if perimeter is None or (isinstance(perimeter, float) and pd.isna(perimeter)):
                 perimeter = 0
             row = {
                 'mask_id': int(mask_id),

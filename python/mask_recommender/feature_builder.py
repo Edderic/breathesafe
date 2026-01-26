@@ -32,8 +32,9 @@ def diff_bin_labels():
 
 
 def diff_bin_index(series):
+    cleaned = pd.to_numeric(series, errors="coerce").fillna(0)
     return pd.cut(
-        series,
+        cleaned,
         bins=diff_bin_edges(),
         labels=False,
         right=False
@@ -48,6 +49,12 @@ def apply_perimeter_features(
 ):
     if use_diff_perimeter_bins or use_diff_perimeter_mask_bins:
         inference_rows = inference_rows.copy()
+        numeric_columns = FACIAL_PERIMETER_COMPONENTS + ["perimeter_mm"]
+        inference_rows[numeric_columns] = (
+            inference_rows[numeric_columns]
+            .apply(pd.to_numeric, errors="coerce")
+            .fillna(0)
+        )
         inference_rows["facial_perimeter_mm"] = inference_rows[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
         inference_rows["perimeter_diff"] = inference_rows["facial_perimeter_mm"] - inference_rows["perimeter_mm"]
         inference_rows["perimeter_diff_bin_index"] = diff_bin_index(inference_rows["perimeter_diff"])
