@@ -61,6 +61,7 @@ gem 'pg'
 gem 'pry-rails'
 gem 'rgeo'
 gem 'selenium-webdriver', '~> 4.25.0'
+gem 'sidekiq'
 gem 'vite_rails'
 
 group :development, :test do
