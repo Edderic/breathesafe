@@ -20,6 +20,41 @@ class MaskRecommenderController < ApplicationController
     end
   end
 
+  def create_async
+    function_base = params[:function_base] || params.dig(:mask_recommender, :function_base) || 'mask-recommender'
+    job_id = SecureRandom.uuid
+    cache_key = MaskRecommenderJob.cache_key(job_id)
+    Rails.cache.write(
+      cache_key,
+      { status: 'queued', created_at: Time.current.iso8601 },
+      expires_in: MaskRecommenderJob::CACHE_TTL
+    )
+
+    MaskRecommenderJob.perform_later(
+      job_id: job_id,
+      facial_measurements: facial_measurements.to_h.stringify_keys,
+      function_base: function_base
+    )
+
+    render json: { job_id: job_id, status: 'queued' }, status: :accepted
+  end
+
+  def status
+    job_id = params[:id].to_s
+    payload = Rails.cache.read(MaskRecommenderJob.cache_key(job_id))
+
+    if payload.blank?
+      render json: { error: 'not_found' }, status: :not_found
+      return
+    end
+
+    if payload[:status] == 'complete'
+      render json: payload, status: :ok
+    else
+      render json: payload.except(:result), status: :ok
+    end
+  end
+
   def facial_measurements
     params.require(:facial_measurements).permit(
       *FacialMeasurement::RECOMMENDER_COLUMNS.map(&:to_sym),

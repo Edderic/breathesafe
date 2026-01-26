@@ -85,6 +85,8 @@ Rails.application.routes.draw do
   get 'mask_kit/:managed_user_id', to: 'mask_kit#index'
 
   post 'mask_recommender', to: 'mask_recommender#create'
+  post 'mask_recommender/async', to: 'mask_recommender#create_async'
+  get 'mask_recommender/async/:id', to: 'mask_recommender#status'
   get 'mask_recommender/recommender_columns', to: 'mask_recommender#recommender_columns'
 
   controller :pages do
