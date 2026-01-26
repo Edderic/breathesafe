@@ -135,11 +135,15 @@ jobs:
         set +u
         source "$HOME/miniforge/bin/activate"
         set -u
+        set +u
         conda activate mask_recommender_rf
+        set -u
         python -m pytest \
           python/mask_recommender/random_forest/tests \
           -v
+        set +u
         conda activate mask_recommender
+        set -u
         python -m pytest \
           python/mask_recommender/tests \
           -v
