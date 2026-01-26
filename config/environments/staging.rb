@@ -64,6 +64,7 @@ Rails.application.configure do
   config.cache_store = if redis_url.present?
                          cache_options = { url: redis_url }
                          if redis_url.start_with?('rediss://')
+                           cache_options[:ssl] = true
                            cache_options[:ssl_params] = { verify_mode: OpenSSL::SSL::VERIFY_NONE }
                          end
                          [:redis_cache_store, cache_options]
