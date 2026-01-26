@@ -16,6 +16,7 @@ dependencies:
   - matplotlib
   - numpy
   - numpyro
+  - pytorch
   - opencv
   - openpyxl
   - pandas
@@ -24,7 +25,7 @@ dependencies:
   - psycopg2
   - pytest
   - pymc
-  - python
+  - python=3.11
   - scikit-learn
   - seaborn
   - pip
@@ -34,4 +35,3 @@ dependencies:
     - graphica
   - selenium
   - tqdm
-
