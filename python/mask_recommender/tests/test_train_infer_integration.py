@@ -103,7 +103,7 @@ def _masks_df():
     )
 
 
-def test_training_and_inference_alignment(monkeypatch):
+def test_training_and_inference_alignment(monkeypatch, tmp_path):
     fit_tests_df = _fit_tests_df()
     masks_df = _masks_df()
     mask_candidates = build_mask_candidates(masks_df)
@@ -158,6 +158,16 @@ def test_training_and_inference_alignment(monkeypatch):
         "load_model",
         fake_load_model,
     )
+
+    config_path = tmp_path / "aws_config"
+    config_path.write_text("[profile breathesafe]\nregion = us-east-1\n")
+    credentials_path = tmp_path / "aws_credentials"
+    credentials_path.write_text(
+        "[breathesafe]\naws_access_key_id = test\naws_secret_access_key = test\n"
+    )
+    monkeypatch.setenv("AWS_PROFILE", "breathesafe")
+    monkeypatch.setenv("AWS_CONFIG_FILE", str(config_path))
+    monkeypatch.setenv("AWS_SHARED_CREDENTIALS_FILE", str(credentials_path))
 
     recommender = lambda_function.MaskRecommenderInference()
     facial_features = {
