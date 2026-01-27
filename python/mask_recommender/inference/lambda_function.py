@@ -194,6 +194,9 @@ class MaskRecommenderInference:
         if non_finite_mask.any().any():
             bad_cols = non_finite_mask.any().loc[lambda s: s].index.tolist()
             logger.warning("Non-finite values detected in columns: %s", ", ".join(bad_cols))
+        inference_rows[numeric_columns] = (
+            numeric_frame.replace([float("inf"), float("-inf")], float("nan")).fillna(0)
+        )
 
         encoded = build_feature_frame(
             inference_rows,
