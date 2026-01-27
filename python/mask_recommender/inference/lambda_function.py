@@ -180,6 +180,21 @@ class MaskRecommenderInference:
             return []
 
         inference_rows = self._build_inference_rows(facial_features)
+        numeric_columns = FACIAL_FEATURE_COLUMNS + ["perimeter_mm"]
+        numeric_frame = pd.DataFrame(
+            {
+                col: pd.to_numeric(inference_rows.get(col), errors="coerce")
+                for col in numeric_columns
+            }
+        )
+        non_finite_mask = ~numeric_frame.replace(
+            [float("inf"), float("-inf")],
+            float("nan")
+        ).notna()
+        if non_finite_mask.any().any():
+            bad_cols = non_finite_mask.any().loc[lambda s: s].index.tolist()
+            logger.warning("Non-finite values detected in columns: %s", ", ".join(bad_cols))
+
         encoded = build_feature_frame(
             inference_rows,
             feature_columns=self.feature_columns,
