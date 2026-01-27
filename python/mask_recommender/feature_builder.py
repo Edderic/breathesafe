@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 FACIAL_FEATURE_COLUMNS = [
@@ -75,9 +76,15 @@ def apply_perimeter_features(
             )
             mask_bins = mask_bins.loc[:, ~mask_bins.columns.duplicated()]
             mask_codes = inference_rows["unique_internal_model_code"].astype(str)
-            mask_bins.values[range(len(mask_bins)), mask_bins.columns.get_indexer(mask_codes)] = inference_rows[
-                "perimeter_diff_bin_index"
-            ].values
+            mask_indexer = mask_bins.columns.get_indexer(mask_codes)
+            valid_mask = mask_indexer >= 0
+            mask_bins_array = mask_bins.to_numpy(copy=True)
+            row_positions = np.arange(len(mask_bins))[valid_mask]
+            mask_bins_array[
+                row_positions,
+                mask_indexer[valid_mask]
+            ] = inference_rows.loc[valid_mask, "perimeter_diff_bin_index"].values
+            mask_bins = pd.DataFrame(mask_bins_array, index=mask_bins.index, columns=mask_bins.columns)
             mask_bins.columns = [f"mask_bin_{col}" for col in mask_bins.columns]
             inference_rows = pd.concat([inference_rows, mask_bins], axis=1)
         inference_rows = inference_rows.drop(
