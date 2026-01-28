@@ -556,7 +556,7 @@ export default {
       if (this.statNeedsMarker(type)) {
         const gradient = this.gradientForType(type)
         return {
-          width: '100%',
+          width: `${Math.round(percent * 100)}%`,
           background: gradient || this.statRowColors()[type]
         }
       }
