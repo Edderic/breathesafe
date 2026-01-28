@@ -1066,11 +1066,11 @@ export default {
   .stat-bar-marker {
     position: absolute;
     width: 2px;
-    top: -0.15em;
-    bottom: -0.15em;
+    top: 0;
+    bottom: 0;
     background-color: #ffffff;
     box-shadow: 0 0 2px rgba(0, 0, 0, 0.6);
-    z-index: 1;
+    z-index: 2;
   }
   .stat-bar-label {
     position: relative;
