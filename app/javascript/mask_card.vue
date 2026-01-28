@@ -194,6 +194,11 @@
                 <div v-else class='stat-bar-wrapper'>
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar' :style="statBarStyle(statPercent('fit_tests', m), 'fit_tests')"></div>
+                  <div
+                    v-if="statNeedsMarker('fit_tests')"
+                    class='stat-bar-marker'
+                    :style="statMarkerStyle(statPercent('fit_tests', m), 'fit_tests')"
+                  ></div>
                   <div class='stat-bar-label'>{{ statLabel('fit_tests', m) }}</div>
                   <div v-if="statAxisLabel('fit_tests', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('fit_tests', 'min') }}</div>
                   <div v-if="statAxisLabel('fit_tests', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('fit_tests', 'max') }}</div>
@@ -579,7 +584,7 @@ export default {
       }
     },
     statNeedsMarker(type) {
-      return ['filtration', 'breathability', 'proba_fit'].includes(type)
+      return ['filtration', 'breathability', 'proba_fit', 'fit_tests'].includes(type)
     },
     statMarkerStyle(percent, type) {
       const clamped = this.clampPercent(percent)
@@ -601,6 +606,9 @@ export default {
       if (type === 'proba_fit') {
         return this.probaFitGradient(percent)
       }
+      if (type === 'fit_tests') {
+        return this.fitTestsGradient(percent)
+      }
       return null
     },
     filtrationGradient(percent) {
@@ -608,7 +616,7 @@ export default {
       const red = '#c0392b'
       const yellow = '#f1c40f'
       const green = '#27ae60'
-      return `linear-gradient(90deg, ${red} 0%, ${red} ${scaledStops[0]}%, ${yellow} ${scaledStops[0]}%, ${yellow} ${scaledStops[1]}%, ${green} ${scaledStops[1]}%, ${green} 100%)`
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} ${scaledStops[0]}%, ${green} 100%)`
     },
     breathabilityGradient(percent) {
       const min = this.dataContext.breathability_min
@@ -630,14 +638,21 @@ export default {
       const axisStop33 = scalePosition(p33)
       const axisStop66 = scalePosition(p66)
       const scaledStops = this.scaleStopsForBar([axisStop33, axisStop66], percent)
-      return `linear-gradient(90deg, ${red} 0%, ${red} ${scaledStops[0]}%, ${yellow} ${scaledStops[0]}%, ${yellow} ${scaledStops[1]}%, ${green} ${scaledStops[1]}%, ${green} 100%)`
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} ${scaledStops[0]}%, ${green} 100%)`
     },
     probaFitGradient(percent) {
       const scaledStops = this.scaleStopsForBar([33.333, 66.666], percent)
       const red = '#c0392b'
       const yellow = '#f1c40f'
       const green = '#27ae60'
-      return `linear-gradient(90deg, ${red} 0%, ${red} ${scaledStops[0]}%, ${yellow} ${scaledStops[0]}%, ${yellow} ${scaledStops[1]}%, ${green} ${scaledStops[1]}%, ${green} 100%)`
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} ${scaledStops[0]}%, ${green} 100%)`
+    },
+    fitTestsGradient(percent) {
+      const scaledStops = this.scaleStopsForBar([33.333, 66.666], percent)
+      const red = '#c0392b'
+      const yellow = '#f1c40f'
+      const green = '#27ae60'
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} ${scaledStops[0]}%, ${green} 100%)`
     },
     scaleStopsForBar(stops, percent) {
       const clamped = this.clampPercent(percent)
