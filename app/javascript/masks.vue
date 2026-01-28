@@ -418,10 +418,12 @@ export default {
       )
         .then(response => {
           let data = response.data
-          if (data) {
-            this.masks = []
-            for (let m of data) {
-              this.masks.push(new Respirator(m))
+          const masks = data && data.masks ? data.masks : data
+          if (masks) {
+            this.masks = masks.map((m) => new Respirator(m))
+            this.totalCount = masks.length
+            if (data && data.context) {
+              this.maskDataContext = data.context
             }
           }
 
@@ -459,10 +461,12 @@ export default {
         )
           .then(response => {
             let data = response.data
-            if (data) {
-              this.masks = []
-              for (let m of data) {
-                this.masks.push(new Respirator(m))
+            const masks = data && data.masks ? data.masks : data
+            if (masks) {
+              this.masks = masks.map((m) => new Respirator(m))
+              this.totalCount = masks.length
+              if (data && data.context) {
+                this.maskDataContext = data.context
               }
             }
           })
