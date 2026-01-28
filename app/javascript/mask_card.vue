@@ -533,10 +533,50 @@ export default {
       return 'N/A'
     },
     statBarStyle(percent, type) {
+      if (type === 'filtration') {
+        return {
+          width: `${Math.round(percent * 100)}%`,
+          background: this.filtrationGradient()
+        }
+      }
+      if (type === 'breathability') {
+        const gradient = this.breathabilityGradient()
+        return {
+          width: `${Math.round(percent * 100)}%`,
+          background: gradient || this.statRowColors()[type]
+        }
+      }
       return {
         width: `${Math.round(percent * 100)}%`,
         backgroundColor: this.statRowColors()[type]
       }
+    },
+    filtrationGradient() {
+      const red = '#c0392b'
+      const yellow = '#f1c40f'
+      const green = '#27ae60'
+      return `linear-gradient(90deg, ${red} 0%, ${red} 33.333%, ${yellow} 33.333%, ${yellow} 66.666%, ${green} 66.666%, ${green} 100%)`
+    },
+    breathabilityGradient() {
+      const min = this.dataContext.breathability_min
+      const max = this.dataContext.breathability_max
+      if (min === null || max === null || min === undefined || max === undefined) {
+        return null
+      }
+      const orderedMin = Math.min(min, max)
+      const orderedMax = Math.max(min, max)
+      if (orderedMax <= orderedMin) {
+        return null
+      }
+      const p33 = orderedMin + (orderedMax - orderedMin) * 0.3333333333333333
+      const p66 = orderedMin + (orderedMax - orderedMin) * 0.6666666666666666
+      const red = '#c0392b'
+      const yellow = '#f1c40f'
+      const green = '#27ae60'
+      const scalePosition = (value) => ((value - orderedMin) / (orderedMax - orderedMin)) * 100
+      const stop33 = scalePosition(p33)
+      const stop66 = scalePosition(p66)
+      return `linear-gradient(90deg, ${green} 0%, ${green} ${stop33}%, ${yellow} ${stop33}%, ${yellow} ${stop66}%, ${red} ${stop66}%, ${red} 100%)`
     },
     statIsMissing(type, mask) {
       if (type === 'filtration') {
