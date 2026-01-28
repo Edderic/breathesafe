@@ -123,20 +123,20 @@
                 </div>
               </div>
             </td>
-            <th># Fit Tests</th>
+            <th>Perimeter (mm)</th>
             <td>
               <div class='stat-cell'>
-                <div v-if="statIsMissing('fit_tests', m)" class='stat-bar-wrapper stat-bar-missing'>
+                <div v-if="statIsMissing('perimeter', m)" class='stat-bar-wrapper stat-bar-missing'>
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar stat-bar-missing-fill'></div>
-                  <div class='stat-bar-label'>{{ statMissingText('fit_tests') }}</div>
+                  <div class='stat-bar-label'>{{ statMissingText('perimeter') }}</div>
                 </div>
                 <div v-else class='stat-bar-wrapper'>
                   <div class='stat-bar-axis'></div>
-                  <div class='stat-bar' :style="statBarStyle(statPercent('fit_tests', m), 'fit_tests')"></div>
-                  <div class='stat-bar-label'>{{ statLabel('fit_tests', m) }}</div>
-                  <div v-if="statAxisLabel('fit_tests', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('fit_tests', 'min') }}</div>
-                  <div v-if="statAxisLabel('fit_tests', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('fit_tests', 'max') }}</div>
+                  <div class='stat-bar' :style="statBarStyle(statPercent('perimeter', m), 'perimeter')"></div>
+                  <div class='stat-bar-label'>{{ statLabel('perimeter', m) }}</div>
+                  <div v-if="statAxisLabel('perimeter', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('perimeter', 'min') }}</div>
+                  <div v-if="statAxisLabel('perimeter', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('perimeter', 'max') }}</div>
                 </div>
               </div>
             </td>
@@ -163,20 +163,20 @@
             <td>{{ formatText(m.style, 'Missing') }}</td>
           </tr>
           <tr>
-            <th>Perimeter (mm)</th>
+            <th># Fit Tests</th>
             <td>
               <div class='stat-cell'>
-                <div v-if="statIsMissing('perimeter', m)" class='stat-bar-wrapper stat-bar-missing'>
+                <div v-if="statIsMissing('fit_tests', m)" class='stat-bar-wrapper stat-bar-missing'>
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar stat-bar-missing-fill'></div>
-                  <div class='stat-bar-label'>{{ statMissingText('perimeter') }}</div>
+                  <div class='stat-bar-label'>{{ statMissingText('fit_tests') }}</div>
                 </div>
                 <div v-else class='stat-bar-wrapper'>
                   <div class='stat-bar-axis'></div>
-                  <div class='stat-bar' :style="statBarStyle(statPercent('perimeter', m), 'perimeter')"></div>
-                  <div class='stat-bar-label'>{{ statLabel('perimeter', m) }}</div>
-                  <div v-if="statAxisLabel('perimeter', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('perimeter', 'min') }}</div>
-                  <div v-if="statAxisLabel('perimeter', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('perimeter', 'max') }}</div>
+                  <div class='stat-bar' :style="statBarStyle(statPercent('fit_tests', m), 'fit_tests')"></div>
+                  <div class='stat-bar-label'>{{ statLabel('fit_tests', m) }}</div>
+                  <div v-if="statAxisLabel('fit_tests', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('fit_tests', 'min') }}</div>
+                  <div v-if="statAxisLabel('fit_tests', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('fit_tests', 'max') }}</div>
                 </div>
               </div>
             </td>
