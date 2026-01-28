@@ -554,7 +554,7 @@ export default {
     },
     statBarStyle(percent, type) {
       if (this.statNeedsMarker(type)) {
-        const gradient = this.gradientForType(type)
+        const gradient = this.gradientForType(type, percent)
         return {
           width: `${Math.round(percent * 100)}%`,
           background: gradient || this.statRowColors()[type]
@@ -591,25 +591,26 @@ export default {
         left: `calc(${position}% - 1px)`
       }
     },
-    gradientForType(type) {
+    gradientForType(type, percent) {
       if (type === 'filtration') {
-        return this.filtrationGradient()
+        return this.filtrationGradient(percent)
       }
       if (type === 'breathability') {
-        return this.breathabilityGradient()
+        return this.breathabilityGradient(percent)
       }
       if (type === 'proba_fit') {
-        return this.probaFitGradient()
+        return this.probaFitGradient(percent)
       }
       return null
     },
-    filtrationGradient() {
+    filtrationGradient(percent) {
+      const scaledStops = this.scaleStopsForBar([33.333, 66.666], percent)
       const red = '#c0392b'
       const yellow = '#f1c40f'
       const green = '#27ae60'
-      return `linear-gradient(90deg, ${red} 0%, ${red} 33.333%, ${yellow} 33.333%, ${yellow} 66.666%, ${green} 66.666%, ${green} 100%)`
+      return `linear-gradient(90deg, ${red} 0%, ${red} ${scaledStops[0]}%, ${yellow} ${scaledStops[0]}%, ${yellow} ${scaledStops[1]}%, ${green} ${scaledStops[1]}%, ${green} 100%)`
     },
-    breathabilityGradient() {
+    breathabilityGradient(percent) {
       const min = this.dataContext.breathability_min
       const max = this.dataContext.breathability_max
       if (min === null || max === null || min === undefined || max === undefined) {
@@ -626,15 +627,28 @@ export default {
       const yellow = '#f1c40f'
       const green = '#27ae60'
       const scalePosition = (value) => ((value - orderedMin) / (orderedMax - orderedMin)) * 100
-      const stop33 = scalePosition(p33)
-      const stop66 = scalePosition(p66)
-      return `linear-gradient(90deg, ${red} 0%, ${red} ${stop33}%, ${yellow} ${stop33}%, ${yellow} ${stop66}%, ${green} ${stop66}%, ${green} 100%)`
+      const axisStop33 = scalePosition(p33)
+      const axisStop66 = scalePosition(p66)
+      const scaledStops = this.scaleStopsForBar([axisStop33, axisStop66], percent)
+      return `linear-gradient(90deg, ${red} 0%, ${red} ${scaledStops[0]}%, ${yellow} ${scaledStops[0]}%, ${yellow} ${scaledStops[1]}%, ${green} ${scaledStops[1]}%, ${green} 100%)`
     },
-    probaFitGradient() {
+    probaFitGradient(percent) {
+      const scaledStops = this.scaleStopsForBar([33.333, 66.666], percent)
       const red = '#c0392b'
       const yellow = '#f1c40f'
       const green = '#27ae60'
-      return `linear-gradient(90deg, ${red} 0%, ${red} 33.333%, ${yellow} 33.333%, ${yellow} 66.666%, ${green} 66.666%, ${green} 100%)`
+      return `linear-gradient(90deg, ${red} 0%, ${red} ${scaledStops[0]}%, ${yellow} ${scaledStops[0]}%, ${yellow} ${scaledStops[1]}%, ${green} ${scaledStops[1]}%, ${green} 100%)`
+    },
+    scaleStopsForBar(stops, percent) {
+      const clamped = this.clampPercent(percent)
+      if (clamped === null || clamped <= 0) {
+        return stops.map(() => 100)
+      }
+      const barWidth = clamped * 100
+      return stops.map((stop) => {
+        const scaled = (stop / barWidth) * 100
+        return Math.max(0, Math.min(100, scaled))
+      })
     },
     statIsMissing(type, mask) {
       if (type === 'filtration') {
