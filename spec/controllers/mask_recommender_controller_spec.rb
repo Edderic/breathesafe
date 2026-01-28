@@ -14,11 +14,17 @@ RSpec.describe MaskRecommenderController, type: :controller do
       }
     end
 
+    let(:inferred_masks) do
+      [
+        { 'id' => 1, 'proba_fit' => 0.9, 'name' => 'Mask A' },
+        { 'id' => 2, 'proba_fit' => 0.7, 'name' => 'Mask B' }
+      ]
+    end
+    let(:context) { { 'perimeter_min' => 100, 'perimeter_max' => 200 } }
+
     before do
-      allow(MaskRecommender).to receive(:infer).and_return([
-                                                             { 'id' => 1, 'proba_fit' => 0.9, 'name' => 'Mask A' },
-                                                             { 'id' => 2, 'proba_fit' => 0.7, 'name' => 'Mask B' }
-                                                           ])
+      allow(MaskRecommender).to receive(:infer).and_return(inferred_masks)
+      allow(MasksDataContextualizer).to receive(:call).and_return(context)
     end
 
     it 'calls MaskRecommender.infer with function_base override when provided (top-level)' do
@@ -31,8 +37,8 @@ RSpec.describe MaskRecommenderController, type: :controller do
                                                             function_base: 'mask-recommender-rf')
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
-      expect(body).to be_an(Array)
-      expect(body.length).to eq(2)
+      expect(body['masks']).to eq(inferred_masks)
+      expect(body['context']).to eq(context)
     end
 
     it 'calls MaskRecommender.infer with nested function_base override when provided' do
@@ -55,6 +61,14 @@ RSpec.describe MaskRecommenderController, type: :controller do
         expect(arg_hash).not_to have_key('extra')
       end
       expect(response).to have_http_status(:ok)
+    end
+
+    it 'returns context with recommendations' do
+      post :create, params: { facial_measurements: facial_payload }, as: :json
+
+      body = JSON.parse(response.body)
+      expect(body['masks']).to eq(inferred_masks)
+      expect(body['context']).to eq(context)
     end
   end
 end
