@@ -27,12 +27,14 @@ class MaskRecommender
       mask_ids = mask_map.map { |_k, v| v }
       proba_fits = proba_map.map { |_k, v| v }
       masks = Mask.with_aggregations.to_a
+      masks_by_id = masks.index_by { |m| m['id'] }
       mask_ids_without_recommendation = masks.map { |m| m['id'] } - mask_ids
 
       collection = []
       mask_ids.each.with_index do |mask_id, index|
         proba_fit = proba_fits[index]
-        mask = masks.find { |m| m['id'] == mask_id }
+        mask = masks_by_id[mask_id]
+        next unless mask_perimeter_present?(mask)
 
         collection << {
           'id' => mask_id,
@@ -44,7 +46,8 @@ class MaskRecommender
 
       mask_ids_without_recommendation.each.with_index do |mask_id, _index|
         proba_fit = nil
-        mask = masks.find { |m| m['id'] == mask_id }
+        mask = masks_by_id[mask_id]
+        next unless mask_perimeter_present?(mask)
 
         collection << {
           'id' => mask_id,
@@ -93,6 +96,18 @@ class MaskRecommender
       return Oj.load(response) if response.is_a?(String)
 
       raise TypeError, "Unexpected Lambda response type: #{response.class}"
+    end
+
+    def mask_perimeter_present?(mask)
+      return false if mask.nil?
+
+      raw = mask['perimeter_mm'] || mask['perimeterMm']
+      return false if raw.nil?
+
+      value = Float(raw)
+      value.positive?
+    rescue ArgumentError, TypeError
+      false
     end
   end
 end

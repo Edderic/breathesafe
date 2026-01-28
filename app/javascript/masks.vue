@@ -420,7 +420,6 @@ export default {
           let data = response.data
           if (data) {
             this.masks = []
-
             for (let m of data) {
               this.masks.push(new Respirator(m))
             }

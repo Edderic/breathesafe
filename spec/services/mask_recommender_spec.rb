@@ -29,8 +29,8 @@ RSpec.describe MaskRecommender, type: :service do
 
     it 'sends correct payload and maps the lambda response' do
       masks = [
-        { 'id' => 111, 'name' => 'Mask A', 'style' => 'Cup' },
-        { 'id' => 222, 'name' => 'Mask B', 'style' => 'Duckbill' }
+        { 'id' => 111, 'name' => 'Mask A', 'style' => 'Cup', 'perimeter_mm' => 300 },
+        { 'id' => 222, 'name' => 'Mask B', 'style' => 'Duckbill', 'perimeter_mm' => 310 }
       ]
 
       body = {
@@ -67,6 +67,34 @@ RSpec.describe MaskRecommender, type: :service do
       expect(by_id[111]['proba_fit']).to be_nil
       expect(by_id[222]['name']).to eq('Mask B')
       expect(by_id[111]['name']).to eq('Mask A')
+    end
+
+    it 'filters out masks missing perimeter_mm' do
+      masks = [
+        { 'id' => 111, 'name' => 'Mask A', 'perimeter_mm' => 300 },
+        { 'id' => 222, 'name' => 'Mask B', 'perimeter_mm' => nil },
+        { 'id' => 333, 'name' => 'Mask C', 'perimeter_mm' => 0 }
+      ]
+
+      body = {
+        'mask_id' => { '0' => 111, '1' => 222, '2' => 333 },
+        'proba_fit' => { '0' => 0.9, '1' => 0.4, '2' => 0.2 }
+      }
+
+      allow(Mask).to receive(:with_aggregations).and_return(masks)
+
+      allow(AwsLambdaInvokeService).to receive(:call)
+        .with(
+          function_name: 'mask-recommender-staging',
+          payload: hash_including(
+            method: 'infer',
+            facial_measurements: facial
+          )
+        ).and_return({ 'body' => Oj.dump(body) })
+
+      result = described_class.infer(facial)
+
+      expect(result.map { |row| row['id'] }).to eq([111])
     end
   end
 
