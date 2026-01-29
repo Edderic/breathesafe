@@ -59,13 +59,18 @@
                   <div class='stat-bar stat-bar-missing-fill'></div>
                   <div class='stat-bar-label'>{{ statMissingText('proba_fit') }}</div>
                 </div>
-                <div v-else class='stat-bar-wrapper'>
+                <div v-else class='stat-bar-wrapper' :style="statBarWrapperStyle('proba_fit')">
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar' :style="statBarStyle(statPercent('proba_fit', m), 'proba_fit')"></div>
                   <div
                     v-if="statNeedsMarker('proba_fit')"
                     class='stat-bar-marker'
                     :style="statMarkerStyle(statPercent('proba_fit', m), 'proba_fit')"
+                  ></div>
+                  <div
+                    v-if="statNeedsMarker('proba_fit')"
+                    class='stat-bar-cover'
+                    :style="statCoverStyle(statPercent('proba_fit', m), 'proba_fit')"
                   ></div>
                   <div class='stat-bar-label'>{{ statLabel('proba_fit', m) }}</div>
                   <div v-if="statAxisLabel('proba_fit', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('proba_fit', 'min') }}</div>
@@ -90,13 +95,18 @@
                   <div class='stat-bar stat-bar-missing-fill'></div>
                   <div class='stat-bar-label'>{{ statMissingText('proba_fit') }}</div>
                 </div>
-                <div v-else class='stat-bar-wrapper'>
+                <div v-else class='stat-bar-wrapper' :style="statBarWrapperStyle('proba_fit')">
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar' :style="statBarStyle(statPercent('proba_fit', m), 'proba_fit')"></div>
                   <div
                     v-if="statNeedsMarker('proba_fit')"
                     class='stat-bar-marker'
                     :style="statMarkerStyle(statPercent('proba_fit', m), 'proba_fit')"
+                  ></div>
+                  <div
+                    v-if="statNeedsMarker('proba_fit')"
+                    class='stat-bar-cover'
+                    :style="statCoverStyle(statPercent('proba_fit', m), 'proba_fit')"
                   ></div>
                   <div class='stat-bar-label'>{{ statLabel('proba_fit', m) }}</div>
                   <div v-if="statAxisLabel('proba_fit', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('proba_fit', 'min') }}</div>
@@ -124,13 +134,18 @@
                   <div class='stat-bar stat-bar-missing-fill'></div>
                   <div class='stat-bar-label'>{{ statMissingText('filtration') }}</div>
                 </div>
-                <div v-else class='stat-bar-wrapper'>
+                <div v-else class='stat-bar-wrapper' :style="statBarWrapperStyle('filtration')">
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar' :style="statBarStyle(statPercent('filtration', m), 'filtration')"></div>
                   <div
                     v-if="statNeedsMarker('filtration')"
                     class='stat-bar-marker'
                     :style="statMarkerStyle(statPercent('filtration', m), 'filtration')"
+                  ></div>
+                  <div
+                    v-if="statNeedsMarker('filtration')"
+                    class='stat-bar-cover'
+                    :style="statCoverStyle(statPercent('filtration', m), 'filtration')"
                   ></div>
                   <div class='stat-bar-label'>{{ statLabel('filtration', m) }}</div>
                   <div v-if="statAxisLabel('filtration', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('filtration', 'min') }}</div>
@@ -165,13 +180,18 @@
                   <div class='stat-bar stat-bar-missing-fill'></div>
                   <div class='stat-bar-label'>{{ statMissingText('breathability') }}</div>
                 </div>
-                <div v-else class='stat-bar-wrapper'>
+                <div v-else class='stat-bar-wrapper' :style="statBarWrapperStyle('breathability')">
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar' :style="statBarStyle(statPercent('breathability', m), 'breathability')"></div>
                   <div
                     v-if="statNeedsMarker('breathability')"
                     class='stat-bar-marker'
                     :style="statMarkerStyle(statPercent('breathability', m), 'breathability')"
+                  ></div>
+                  <div
+                    v-if="statNeedsMarker('breathability')"
+                    class='stat-bar-cover'
+                    :style="statCoverStyle(statPercent('breathability', m), 'breathability')"
                   ></div>
                   <div class='stat-bar-label'>{{ statLabel('breathability', m) }}</div>
                   <div v-if="statAxisLabel('breathability', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('breathability', 'min') }}</div>
@@ -191,13 +211,18 @@
                   <div class='stat-bar stat-bar-missing-fill'></div>
                   <div class='stat-bar-label'>{{ statMissingText('fit_tests') }}</div>
                 </div>
-                <div v-else class='stat-bar-wrapper'>
+                <div v-else class='stat-bar-wrapper' :style="statBarWrapperStyle('fit_tests')">
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar' :style="statBarStyle(statPercent('fit_tests', m), 'fit_tests')"></div>
                   <div
                     v-if="statNeedsMarker('fit_tests')"
                     class='stat-bar-marker'
                     :style="statMarkerStyle(statPercent('fit_tests', m), 'fit_tests')"
+                  ></div>
+                  <div
+                    v-if="statNeedsMarker('fit_tests')"
+                    class='stat-bar-cover'
+                    :style="statCoverStyle(statPercent('fit_tests', m), 'fit_tests')"
                   ></div>
                   <div class='stat-bar-label'>{{ statLabel('fit_tests', m) }}</div>
                   <div v-if="statAxisLabel('fit_tests', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('fit_tests', 'min') }}</div>
@@ -559,10 +584,9 @@ export default {
     },
     statBarStyle(percent, type) {
       if (this.statNeedsMarker(type)) {
-        const gradient = this.gradientForType(type, percent)
         return {
-          width: `${Math.round(percent * 100)}%`,
-          background: gradient || this.statRowColors()[type]
+          width: '100%',
+          backgroundColor: 'transparent'
         }
       }
       if (type === 'filtration') {
@@ -583,6 +607,15 @@ export default {
         backgroundColor: this.statRowColors()[type]
       }
     },
+    statBarWrapperStyle(type) {
+      if (this.statNeedsMarker(type)) {
+        const gradient = this.gradientForType(type)
+        return {
+          background: gradient || this.statRowColors()[type]
+        }
+      }
+      return {}
+    },
     statNeedsMarker(type) {
       return ['filtration', 'breathability', 'proba_fit', 'fit_tests'].includes(type)
     },
@@ -596,29 +629,39 @@ export default {
         left: `calc(${position}% - 1px)`
       }
     },
-    gradientForType(type, percent) {
+    statCoverStyle(percent, type) {
+      const clamped = this.clampPercent(percent)
+      if (clamped === null) {
+        return {}
+      }
+      const position = Math.round(clamped * 10000) / 100
+      return {
+        left: `calc(${position}% + 1px)`,
+        backgroundColor: '#f1f1f1'
+      }
+    },
+    gradientForType(type) {
       if (type === 'filtration') {
-        return this.filtrationGradient(percent)
+        return this.filtrationGradient()
       }
       if (type === 'breathability') {
-        return this.breathabilityGradient(percent)
+        return this.breathabilityGradient()
       }
       if (type === 'proba_fit') {
-        return this.probaFitGradient(percent)
+        return this.probaFitGradient()
       }
       if (type === 'fit_tests') {
-        return this.fitTestsGradient(percent)
+        return this.fitTestsGradient()
       }
       return null
     },
-    filtrationGradient(percent) {
-      const scaledStops = this.scaleStopsForBar([33.333, 66.666], percent)
+    filtrationGradient() {
       const red = '#c0392b'
       const yellow = '#f1c40f'
       const green = '#27ae60'
-      return `linear-gradient(90deg, ${red} 0%, ${yellow} ${scaledStops[0]}%, ${green} 100%)`
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} 33.333%, ${green} 100%)`
     },
-    breathabilityGradient(percent) {
+    breathabilityGradient() {
       const min = this.dataContext.breathability_min
       const max = this.dataContext.breathability_max
       if (min === null || max === null || min === undefined || max === undefined) {
@@ -637,33 +680,19 @@ export default {
       const scalePosition = (value) => ((value - orderedMin) / (orderedMax - orderedMin)) * 100
       const axisStop33 = scalePosition(p33)
       const axisStop66 = scalePosition(p66)
-      const scaledStops = this.scaleStopsForBar([axisStop33, axisStop66], percent)
-      return `linear-gradient(90deg, ${red} 0%, ${yellow} ${scaledStops[0]}%, ${green} 100%)`
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} ${axisStop33}%, ${green} 100%)`
     },
-    probaFitGradient(percent) {
-      const scaledStops = this.scaleStopsForBar([33.333, 66.666], percent)
+    probaFitGradient() {
       const red = '#c0392b'
       const yellow = '#f1c40f'
       const green = '#27ae60'
-      return `linear-gradient(90deg, ${red} 0%, ${yellow} ${scaledStops[0]}%, ${green} 100%)`
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} 33.333%, ${green} 100%)`
     },
-    fitTestsGradient(percent) {
-      const scaledStops = this.scaleStopsForBar([33.333, 66.666], percent)
+    fitTestsGradient() {
       const red = '#c0392b'
       const yellow = '#f1c40f'
       const green = '#27ae60'
-      return `linear-gradient(90deg, ${red} 0%, ${yellow} ${scaledStops[0]}%, ${green} 100%)`
-    },
-    scaleStopsForBar(stops, percent) {
-      const clamped = this.clampPercent(percent)
-      if (clamped === null || clamped <= 0) {
-        return stops.map(() => 100)
-      }
-      const barWidth = clamped * 100
-      return stops.map((stop) => {
-        const scaled = (stop / barWidth) * 100
-        return Math.max(0, Math.min(100, scaled))
-      })
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} 33.333%, ${green} 100%)`
     },
     statIsMissing(type, mask) {
       if (type === 'filtration') {
@@ -1069,6 +1098,7 @@ export default {
     bottom: 0.35em;
     height: 2px;
     background-color: rgba(0, 0, 0, 0.2);
+    z-index: 1;
   }
   .stat-bar {
     position: absolute;
@@ -1087,9 +1117,17 @@ export default {
     box-shadow: 0 0 2px rgba(0, 0, 0, 0.6);
     z-index: 2;
   }
+  .stat-bar-cover {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background-color: #f1f1f1;
+    z-index: 1;
+  }
   .stat-bar-label {
     position: relative;
-    z-index: 1;
+    z-index: 3;
     font-weight: bold;
     color: #111;
     text-shadow: 1px 1px 2px #fff;
