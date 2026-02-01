@@ -64,3 +64,6 @@ tags
 *.pyc
 
 data
+
+# Local ML artifacts
+/python/mask_recommender/local_models

@@ -1,0 +1,186 @@
+import json
+import os
+import sys
+from pathlib import Path
+
+import pandas as pd
+import torch
+from flask import Flask, jsonify, request
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT))
+
+from mask_recommender.feature_builder import (  # noqa: E402
+    FACIAL_FEATURE_COLUMNS,
+    build_feature_frame,
+)
+
+APP = Flask(__name__)
+
+
+def _default_model_dir() -> Path:
+    return Path(__file__).resolve().parents[1] / "local_models"
+
+
+def _find_latest_model_dir(base_dir: Path) -> Path:
+    if base_dir.is_file():
+        return base_dir.parent
+
+    if (base_dir / "model_state_dict.pt").exists():
+        return base_dir
+
+    if not base_dir.exists():
+        raise FileNotFoundError(f"Model directory not found: {base_dir}")
+
+    candidates = [
+        entry for entry in base_dir.iterdir()
+        if entry.is_dir() and (entry / "model_state_dict.pt").exists()
+    ]
+    if not candidates:
+        raise FileNotFoundError(
+            f"No model artifacts found in {base_dir}. Expected model_state_dict.pt"
+        )
+
+    return sorted(candidates)[-1]
+
+
+def _load_artifacts(model_dir: Path):
+    model_path = model_dir / "model_state_dict.pt"
+    metadata_path = model_dir / "model_metadata.json"
+    mask_data_path = model_dir / "mask_data.json"
+
+    with metadata_path.open("r", encoding="utf-8") as handle:
+        metadata = json.load(handle)
+    with mask_data_path.open("r", encoding="utf-8") as handle:
+        mask_data = json.load(handle)
+
+    feature_columns = metadata["feature_columns"]
+    categorical_columns = metadata["categorical_columns"]
+    hidden_sizes = metadata.get("hidden_sizes", [32, 16])
+    input_dim = len(feature_columns)
+    model = torch.nn.Sequential(
+        torch.nn.Linear(input_dim, hidden_sizes[0]),
+        torch.nn.ReLU(),
+        torch.nn.Linear(hidden_sizes[0], hidden_sizes[1]),
+        torch.nn.ReLU(),
+        torch.nn.Linear(hidden_sizes[1], 1),
+    )
+    state_dict = torch.load(model_path, map_location="cpu")
+    model.load_state_dict(state_dict)
+    model.eval()
+
+    return {
+        "model": model,
+        "feature_columns": feature_columns,
+        "categorical_columns": categorical_columns,
+        "mask_data": mask_data,
+        "metadata": metadata,
+    }
+
+
+def _extract_facial_measurements(payload):
+    if not payload:
+        return {}
+
+    if "facial_measurements" in payload:
+        return payload.get("facial_measurements") or {}
+
+    nested = payload.get("mask_recommender") or {}
+    return nested.get("facial_measurements") or {}
+
+
+def _build_inference_rows(mask_data, facial_features):
+    rows = []
+    for mask_id, mask_info in mask_data.items():
+        perimeter = mask_info.get("perimeter_mm")
+        if perimeter is None or (isinstance(perimeter, float) and pd.isna(perimeter)):
+            perimeter = 0
+        row = {
+            "mask_id": int(mask_id),
+            "perimeter_mm": perimeter,
+            "strap_type": mask_info.get("strap_type") or "",
+            "style": mask_info.get("style") or "",
+            "unique_internal_model_code": mask_info.get("unique_internal_model_code") or "",
+            "facial_hair_beard_length_mm": facial_features.get("facial_hair_beard_length_mm", 0) or 0,
+        }
+        for col in FACIAL_FEATURE_COLUMNS:
+            row[col] = facial_features.get(col, 0) or 0
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def _infer(payload, artifacts):
+    facial_features = _extract_facial_measurements(payload)
+    inference_rows = _build_inference_rows(artifacts["mask_data"], facial_features)
+
+    numeric_columns = FACIAL_FEATURE_COLUMNS + ["perimeter_mm"]
+    numeric_frame = pd.DataFrame(
+        {
+            col: pd.to_numeric(inference_rows.get(col), errors="coerce")
+            for col in numeric_columns
+        }
+    )
+    numeric_frame = numeric_frame.replace([float("inf"), float("-inf")], float("nan")).fillna(0)
+    inference_rows[numeric_columns] = numeric_frame
+
+    encoded = build_feature_frame(
+        inference_rows,
+        feature_columns=artifacts["feature_columns"],
+        categorical_columns=artifacts["categorical_columns"],
+        use_facial_perimeter=artifacts["metadata"].get("use_facial_perimeter", False),
+        use_diff_perimeter_bins=artifacts["metadata"].get("use_diff_perimeter_bins", False),
+        use_diff_perimeter_mask_bins=artifacts["metadata"].get("use_diff_perimeter_mask_bins", False),
+    )
+
+    inputs = torch.tensor(encoded.to_numpy(), dtype=torch.float32)
+    with torch.no_grad():
+        logits = artifacts["model"](inputs).squeeze(1)
+        probs = torch.sigmoid(logits).cpu().tolist()
+
+    recommendations = []
+    for idx, (mask_id, mask_info) in enumerate(artifacts["mask_data"].items()):
+        recommendations.append({
+            "mask_id": int(mask_id),
+            "proba_fit": float(probs[idx]),
+            "mask_info": mask_info,
+        })
+
+    recommendations.sort(key=lambda item: item["proba_fit"], reverse=True)
+    mask_id_map = {str(idx): rec["mask_id"] for idx, rec in enumerate(recommendations)}
+    proba_map = {str(idx): rec["proba_fit"] for idx, rec in enumerate(recommendations)}
+    return {
+        "mask_id": mask_id_map,
+        "proba_fit": proba_map,
+        "model": {
+            "timestamp": artifacts["metadata"].get("timestamp"),
+            "environment": artifacts["metadata"].get("environment"),
+        }
+    }
+
+
+@APP.route("/mask_recommender", methods=["POST"])
+@APP.route("/mask_recommender.json", methods=["POST"])
+def recommend_masks():
+    return jsonify(_infer(request.get_json(silent=True) or {}, APP.config["artifacts"]))
+
+
+@APP.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok"})
+
+
+def main():
+    model_dir = Path(os.environ.get("MASK_RECOMMENDER_LOCAL_MODEL_DIR", ""))
+    if not model_dir.as_posix():
+        model_dir = _default_model_dir()
+
+    resolved_dir = _find_latest_model_dir(model_dir)
+    APP.config["artifacts"] = _load_artifacts(resolved_dir)
+
+    host = os.environ.get("MASK_RECOMMENDER_LOCAL_HOST", "127.0.0.1")
+    port = int(os.environ.get("MASK_RECOMMENDER_LOCAL_PORT", "5055"))
+    APP.run(host=host, port=port)
+
+
+if __name__ == "__main__":
+    main()
