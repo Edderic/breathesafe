@@ -576,7 +576,25 @@ export default {
         return
       }
 
-      this.$router.push({ name: 'Masks', query })
+      const payload = this.encodeRecommenderPayload(query)
+      this.$router.push({
+        name: 'Masks',
+        query: {
+          recommenderPayload: payload
+        }
+      })
+    },
+    encodeRecommenderPayload(payload) {
+      try {
+        const json = JSON.stringify(payload)
+        const base64 = btoa(json)
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_')
+          .replace(/=+$/, '')
+        return base64
+      } catch (error) {
+        return ''
+      }
     },
     backgroundColorForRecommender(r) {
       const allPresent = this.recommenderColumns.every(col => {

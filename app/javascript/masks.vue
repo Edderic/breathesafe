@@ -455,28 +455,56 @@ export default {
       this.recommenderPayloadHandled = true
       this.setWaiting(true)
       try {
-        await axios.post(
-          `/mask_recommender.json`,
-          { facial_measurements: facialMeasurements }
-        )
-          .then(response => {
-            let data = response.data
-            const masks = data && data.masks ? data.masks : data
-            if (masks) {
-              this.masks = masks.map((m) => new Respirator(m))
-              this.totalCount = masks.length
-              if (data && data.context) {
-                this.maskDataContext = data.context
-              }
-            }
-          })
-          .catch(() => {
-            this.message = "Failed to load mask recommendations."
-          })
+        await this.requestAsyncRecommendations(facialMeasurements)
       } finally {
         this.setWaiting(false)
       }
       return true
+    },
+    async requestAsyncRecommendations(facialMeasurements) {
+      try {
+        const startResponse = await axios.post(
+          `/mask_recommender/async.json`,
+          { facial_measurements: facialMeasurements }
+        )
+        const jobId = startResponse?.data?.job_id
+        if (!jobId) {
+          this.message = "Failed to start mask recommendations."
+          return
+        }
+        await this.pollRecommendationStatus(jobId)
+      } catch (error) {
+        this.message = "Failed to load mask recommendations."
+      }
+    },
+    async pollRecommendationStatus(jobId) {
+      try {
+        const response = await axios.get(`/mask_recommender/async/${jobId}.json`)
+        const status = response?.data?.status
+        if (status === 'complete') {
+          const data = response.data?.result
+          const masks = data && data.masks ? data.masks : data
+          if (masks) {
+            this.masks = masks.map((m) => new Respirator(m))
+            this.totalCount = masks.length
+            if (data && data.context) {
+              this.maskDataContext = data.context
+            }
+          }
+          return
+        }
+        if (status === 'failed') {
+          this.message = response?.data?.error || "Failed to load mask recommendations."
+          return
+        }
+      } catch (error) {
+        this.message = "Failed to load mask recommendations."
+        return
+      }
+
+      setTimeout(() => {
+        this.pollRecommendationStatus(jobId)
+      }, 1000)
     },
     decodeRecommenderPayload(payload) {
       try {
