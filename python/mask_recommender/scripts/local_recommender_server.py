@@ -170,8 +170,10 @@ def health():
 
 
 def main():
-    model_dir = Path(os.environ.get("MASK_RECOMMENDER_LOCAL_MODEL_DIR", ""))
-    if not model_dir.as_posix():
+    model_dir_env = os.environ.get("MASK_RECOMMENDER_LOCAL_MODEL_DIR")
+    if model_dir_env:
+        model_dir = Path(model_dir_env).expanduser()
+    else:
         model_dir = _default_model_dir()
 
     resolved_dir = _find_latest_model_dir(model_dir)
