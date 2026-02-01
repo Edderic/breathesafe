@@ -514,10 +514,12 @@ export default {
         const camel = col.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
         const baseKey = `${camel}`
         const mmKey = `${camel}Mm`
-        if (!r[baseKey]) {
+        const rawValue = r[baseKey]
+        const parsed = rawValue === null || rawValue === undefined ? NaN : parseFloat(rawValue)
+        if (!Number.isFinite(parsed) || parsed <= 0) {
           missing.push(baseKey)
         } else {
-          query[mmKey] = r[baseKey]
+          query[mmKey] = parsed
         }
       }
 
