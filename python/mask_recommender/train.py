@@ -816,6 +816,7 @@ def main(argv=None):
 
     masks_df = get_masks(session, masks_url)
     mask_candidates = build_mask_candidates(masks_df)
+    global num_masks_times_num_bins_plus_other_features
     num_masks_times_num_bins_plus_other_features = _set_num_masks_times_num_bins_plus_other_features(
         mask_candidates
     )
