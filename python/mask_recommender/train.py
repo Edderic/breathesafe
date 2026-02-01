@@ -778,7 +778,7 @@ def _upload_json_to_s3(payload, key):
     return f"s3://{bucket}/{key}"
 
 
-if __name__ == '__main__':
+def main(argv=None):
     parser = argparse.ArgumentParser(description='Train fit predictor model.')
     parser.add_argument('--epochs', type=int, default=50, help='Number of training epochs.')
     parser.add_argument('--learning-rate', type=float, default=0.01, help='Learning rate for optimizer.')
@@ -793,7 +793,7 @@ if __name__ == '__main__':
     parser.add_argument('--focus', help='Path to focus examples JSON for upweighted training.')
     parser.add_argument('--focus-weight', type=float, default=5.0, help='Weight multiplier for focus examples.')
     parser.add_argument('--class-reweight', action='store_true', help='Reweight loss by class balance.')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.focus and args.class_reweight:
         raise SystemExit("Cannot use --class-reweight with --focus.")
     # [ ] Get a table of users and facial features
@@ -1162,3 +1162,9 @@ if __name__ == '__main__':
     logging.info("Uploaded metadata to %s", metadata_uri)
     logging.info("Uploaded metrics to %s", metrics_uri)
     logging.info("Updated latest pointer at %s", latest_uri)
+
+    return latest_payload
+
+
+if __name__ == '__main__':
+    main()
