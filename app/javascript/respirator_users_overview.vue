@@ -506,15 +506,62 @@ export default {
         this.recommenderColumns = []
       }
     },
+    computeArkitAggregates(arkitData) {
+      if (!arkitData || !arkitData.averageMeasurements) {
+        return null
+      }
+
+      const entries = Object.values(arkitData.averageMeasurements)
+      if (!entries.length) {
+        return null
+      }
+
+      const totals = {
+        noseMm: 0,
+        strapMm: 0,
+        topCheekMm: 0,
+        midCheekMm: 0,
+        chinMm: 0
+      }
+
+      entries.forEach(entry => {
+        const description = (entry && entry.description) ? entry.description.toLowerCase() : ''
+        const value = Number(entry && entry.value)
+        if (!Number.isFinite(value)) {
+          return
+        }
+
+        if (description.includes('nose')) {
+          totals.noseMm += value
+        } else if (description.includes('strap')) {
+          totals.strapMm += value
+        } else if (description.includes('top') && description.includes('cheek')) {
+          totals.topCheekMm += value
+        } else if (description.includes('mid') && description.includes('cheek')) {
+          totals.midCheekMm += value
+        } else if (description.includes('chin')) {
+          totals.chinMm += value
+        }
+      })
+
+      return totals
+    },
     maybeRecommend(r) {
       const missing = []
       const query = {}
 
+      const arkitAggregates = this.computeArkitAggregates(r.arkit)
+
       for (const col of this.recommenderColumns) {
         const camel = col.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
         const baseKey = `${camel}`
-        const mmKey = `${camel}Mm`
-        const rawValue = r[baseKey]
+        const mmKey = camel.endsWith('Mm') ? camel : `${camel}Mm`
+        const source = r.facialMeasurements || r.facial_measurements || r
+        const rawValue = (arkitAggregates && arkitAggregates[mmKey])
+          ?? (arkitAggregates && arkitAggregates[baseKey])
+          ?? source[baseKey]
+          ?? source[mmKey]
+          ?? source[col]
         const parsed = rawValue === null || rawValue === undefined ? NaN : parseFloat(rawValue)
         if (!Number.isFinite(parsed) || parsed <= 0) {
           missing.push(baseKey)
