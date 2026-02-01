@@ -566,8 +566,20 @@ export default {
         if (!Number.isFinite(parsed) || parsed <= 0) {
           missing.push(baseKey)
         } else {
-          query[mmKey] = parsed
+          query[col] = parsed
         }
+      }
+
+      if (arkitAggregates && Number.isFinite(arkitAggregates.strapMm) && arkitAggregates.strapMm > 0) {
+        query.strap_mm = arkitAggregates.strapMm
+      }
+
+      if (r.facialHairBeardLengthMm !== undefined && r.facialHairBeardLengthMm !== null) {
+        query.facial_hair_beard_length_mm = parseFloat(r.facialHairBeardLengthMm) || 0
+      } else if (r.facial_hair_beard_length_mm !== undefined && r.facial_hair_beard_length_mm !== null) {
+        query.facial_hair_beard_length_mm = parseFloat(r.facial_hair_beard_length_mm) || 0
+      } else {
+        query.facial_hair_beard_length_mm = 0
       }
 
       if (missing.length > 0) {

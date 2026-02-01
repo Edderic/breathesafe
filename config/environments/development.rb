@@ -73,4 +73,8 @@ Rails.application.configure do
 
   # Devise recommendation
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+
+  # Ensure caching is enabled in development for async recommender status polling.
+  config.action_controller.perform_caching = true
+  config.cache_store = :memory_store
 end

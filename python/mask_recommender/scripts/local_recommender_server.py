@@ -177,7 +177,13 @@ def main():
         model_dir = _default_model_dir()
 
     resolved_dir = _find_latest_model_dir(model_dir)
-    APP.config["artifacts"] = _load_artifacts(resolved_dir)
+    artifacts = _load_artifacts(resolved_dir)
+    APP.config["artifacts"] = artifacts
+
+    timestamp = artifacts["metadata"].get("timestamp")
+    environment = artifacts["metadata"].get("environment")
+    print(f"Loaded local model from: {resolved_dir}")
+    print(f"Model timestamp: {timestamp} (env={environment})")
 
     host = os.environ.get("MASK_RECOMMENDER_LOCAL_HOST", "127.0.0.1")
     port = int(os.environ.get("MASK_RECOMMENDER_LOCAL_PORT", "5055"))
