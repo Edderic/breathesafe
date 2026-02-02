@@ -142,10 +142,15 @@ jobs:
           if [ -z "${ACCOUNT_ID}" ]; then
             ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
           fi
-          REGION=$(aws configure get region)
+          REGION=$(aws configure get region || true)
           if [ -z "${REGION}" ]; then
-            REGION="${AWS_REGION}"
+            REGION="${AWS_REGION:-}"
           fi
+          if [ -z "${ACCOUNT_ID}" ] || [ -z "${REGION}" ]; then
+            echo "Missing ACCOUNT_ID or REGION (ACCOUNT_ID='${ACCOUNT_ID}', REGION='${REGION}')" >&2
+            exit 1
+          fi
+          echo "Using ACCOUNT_ID=${ACCOUNT_ID} REGION=${REGION}"
           aws ecr set-repository-policy \
             --repository-name "$REPO" \
             --policy-text "{
