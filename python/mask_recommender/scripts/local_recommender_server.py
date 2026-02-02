@@ -3,6 +3,7 @@ import os
 import sys
 from pathlib import Path
 
+import boto3
 import pandas as pd
 import torch
 from flask import Flask, jsonify, request
@@ -18,8 +19,55 @@ from mask_recommender.feature_builder import (  # noqa: E402
 APP = Flask(__name__)
 
 
-def _default_model_dir() -> Path:
+def _env_name() -> str:
+    env = os.environ.get("RAILS_ENV", "").strip().lower()
+    if env in ("production", "staging", "development"):
+        return env
+    return "development"
+
+
+def _s3_bucket() -> str:
+    mapping = {
+        "production": "breathesafe",
+        "staging": "breathesafe-staging",
+        "development": "breathesafe-development",
+    }
+    return mapping[_env_name()]
+
+
+def _s3_region() -> str:
+    return os.environ.get("S3_BUCKET_REGION") or os.environ.get("AWS_REGION") or "us-east-1"
+
+
+def _model_root() -> Path:
+    override = os.environ.get("MASK_RECOMMENDER_LOCAL_MODEL_DIR")
+    if override:
+        return Path(override).expanduser()
     return Path(__file__).resolve().parents[1] / "local_models"
+
+
+def _download_latest_from_s3() -> Path:
+    s3 = boto3.client("s3", region_name=_s3_region())
+    bucket = _s3_bucket()
+    latest_key = "mask_recommender/models/latest.json"
+    payload = json.loads(
+        s3.get_object(Bucket=bucket, Key=latest_key)["Body"].read().decode("utf-8")
+    )
+    timestamp = payload.get("timestamp") or "latest"
+    output_dir = _model_root() / str(timestamp)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    for key_name in ("model_key", "metadata_key", "mask_data_key"):
+        key = payload[key_name]
+        filename = Path(key).name
+        target = output_dir / filename
+        s3.download_file(bucket, key, str(target))
+
+    return output_dir
+
+
+def _default_model_dir() -> Path:
+    return _model_root()
 
 
 def _find_latest_model_dir(base_dir: Path) -> Path:
@@ -167,6 +215,26 @@ def recommend_masks():
 @APP.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
+
+
+@APP.route("/reload", methods=["POST"])
+def reload_model():
+    try:
+        s3_dir = _download_latest_from_s3()
+        resolved_dir = _find_latest_model_dir(s3_dir)
+        artifacts = _load_artifacts(resolved_dir)
+        APP.config["artifacts"] = artifacts
+
+        timestamp = artifacts["metadata"].get("timestamp")
+        environment = artifacts["metadata"].get("environment")
+    except Exception as exc:
+        return jsonify({"status": "error", "error": str(exc)}), 500
+    return jsonify({
+        "status": "reloaded",
+        "model_dir": str(resolved_dir),
+        "timestamp": timestamp,
+        "environment": environment,
+    })
 
 
 def main():
