@@ -46,6 +46,23 @@ class MaskRecommenderController < ApplicationController
     render json: { job_id: job_id, status: 'queued' }, status: :accepted
   end
 
+  def train
+    unless current_user&.admin
+      render json: { error: 'forbidden' }, status: :forbidden
+      return
+    end
+
+    job_id = SecureRandom.uuid
+    payload = {
+      environment: ENV.fetch('HEROKU_ENVIRONMENT', 'development'),
+      job_id: job_id
+    }
+    result = MaskRecommenderTraining.call(payload: payload)
+    render json: { job_id: job_id, status: 'started', result: result }, status: :ok
+  rescue StandardError => e
+    render json: { error: e.message }, status: :internal_server_error
+  end
+
   def status
     job_id = params[:id].to_s
     payload = Rails.cache.read(MaskRecommenderJob.cache_key(job_id))

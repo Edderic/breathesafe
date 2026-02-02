@@ -4,6 +4,7 @@
       <div class='bar'>
         <div class='flex align-items-center row'>
           <h2 class='tagline'>Masks</h2>
+          <CircularButton v-if="isAdmin" text="R" @click="retrainModel" />
           <CircularButton text="+" @click="newMask" />
           <CircularButton text="?" @click="showPopup = 'Help'"/>
         </div>
@@ -48,6 +49,14 @@
         @hidePopUp='showPopup = false'
         @updateFacialMeasurement='triggerRouterForFacialMeasurementUpdate'
       />
+
+      <Popup
+        v-if="showPopup == 'Retrain'"
+        @onclose='showPopup = false'
+      >
+        <h3>Training started</h3>
+        <p>Job ID: {{ retrainJobId }}</p>
+      </Popup>
 
       <HelpPopup
         :showPopup='showPopup == "Help"'
@@ -183,6 +192,7 @@ export default {
       filterForTargeted: true,
       filterForNotTargeted: true,
       showPopup: false,
+      retrainJobId: null,
       exceptionMissingObject: {
         color: {
           r: '200',
@@ -228,6 +238,7 @@ export default {
         useMainStore,
         [
           'currentUser',
+          'isAdmin',
           'isWaiting'
         ]
     ),
@@ -321,6 +332,24 @@ export default {
       }
 
       await this.loadData(toQuery)
+    },
+    async retrainModel() {
+      this.errorMessages = []
+      this.setWaiting(true)
+      try {
+        const response = await axios.post('/mask_recommender/train.json')
+        this.retrainJobId = response?.data?.job_id || null
+        if (!this.retrainJobId) {
+          this.errorMessages = ['Retraining started, but no job id was returned.']
+          return
+        }
+        this.showPopup = 'Retrain'
+      } catch (error) {
+        const message = error?.response?.data?.error || error?.message || 'Unable to retrain model.'
+        this.errorMessages = [message]
+      } finally {
+        this.setWaiting(false)
+      }
     },
     async loadData(toQuery) {
       this.setWaiting(true);
