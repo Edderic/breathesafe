@@ -214,6 +214,7 @@ def _train(payload):
         os.environ["RAILS_ENV"] = str(env)
     if base_url:
         os.environ["BREATHESAFE_BASE_URL"] = str(base_url)
+    os.environ.setdefault("MPLBACKEND", "Agg")
 
     from mask_recommender.train import main as train_main  # noqa: E402
 
