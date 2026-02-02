@@ -132,6 +132,32 @@ jobs:
           echo "image_uri_latest=$LATEST_URI" >> $GITHUB_OUTPUT
           echo "image_digest=$IMAGE_DIGEST" >> $GITHUB_OUTPUT
 
+      - name: Allow training Lambda to pull image
+        env:
+          REPO: mask-recommender-training
+          ROLE_NAME: lambda-ex
+          ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ACCOUNT_ID}" ]; then
+            ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
+          fi
+          aws ecr set-repository-policy \
+            --repository-name "$REPO" \
+            --policy-text "{
+              \"Version\": \"2008-10-17\",
+              \"Statement\": [{
+                \"Sid\": \"LambdaEcrRead\",
+                \"Effect\": \"Allow\",
+                \"Principal\": {\"AWS\": \"arn:aws:iam::${ACCOUNT_ID}:role/${ROLE_NAME}\"},
+                \"Action\": [
+                  \"ecr:BatchGetImage\",
+                  \"ecr:GetDownloadUrlForLayer\",
+                  \"ecr:BatchCheckLayerAvailability\"
+                ]
+              }]
+            }"
+
       - name: Update Lambda code (staging)
         env:
           FUNCTION_NAME: mask-recommender-staging
