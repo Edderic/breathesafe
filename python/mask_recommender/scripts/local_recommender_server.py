@@ -218,11 +218,14 @@ def _train(payload):
     from mask_recommender.train import main as train_main  # noqa: E402
 
     result = train_main()
+
+    reload_status = reload_model().get_json()
     return {
         "statusCode": 200,
         "body": json.dumps({
             "message": "Training completed successfully",
             "result": result,
+            "reload": reload_status,
         }),
     }
 
