@@ -206,10 +206,34 @@ def _infer(payload, artifacts):
     }
 
 
+def _train(payload):
+    env = (payload or {}).get("environment") or os.environ.get("ENVIRONMENT") or "development"
+    base_url = (payload or {}).get("base_url") or os.environ.get("BREATHESAFE_BASE_URL")
+    if env:
+        os.environ["ENVIRONMENT"] = str(env)
+        os.environ["RAILS_ENV"] = str(env)
+    if base_url:
+        os.environ["BREATHESAFE_BASE_URL"] = str(base_url)
+
+    from mask_recommender.train import main as train_main  # noqa: E402
+
+    result = train_main()
+    return {
+        "statusCode": 200,
+        "body": json.dumps({
+            "message": "Training completed successfully",
+            "result": result,
+        }),
+    }
+
+
 @APP.route("/mask_recommender", methods=["POST"])
 @APP.route("/mask_recommender.json", methods=["POST"])
 def recommend_masks():
-    return jsonify(_infer(request.get_json(silent=True) or {}, APP.config["artifacts"]))
+    payload = request.get_json(silent=True) or {}
+    if payload.get("method") == "train":
+        return jsonify(_train(payload))
+    return jsonify(_infer(payload, APP.config["artifacts"]))
 
 
 @APP.route("/health", methods=["GET"])
