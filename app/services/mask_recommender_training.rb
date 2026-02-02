@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
-# Invokes the training AWS Lambda function for the current environment.
+# Invokes the training entrypoint on the shared mask-recommender Lambda
+# for the current environment.
 #
 # Environment selection is based on HEROKU_ENVIRONMENT:
-# - "production", "prod" => mask-recommender-training-production
-# - "staging" or blank => mask-recommender-training-staging
-# - "development", "dev" => mask-recommender-training-development
+# - "production", "prod" => mask-recommender-production
+# - "staging" or blank => mask-recommender-staging
+# - "development", "dev" => mask-recommender-development
 #
 # Usage:
 #   MaskRecommenderTraining.call(payload: { some: "data" })
@@ -14,6 +15,7 @@ class MaskRecommenderTraining
   class << self
     def call(payload: {}, region: AwsLambdaInvokeService::DEFAULT_REGION)
       function_name = build_function_name(resolve_environment)
+      payload = payload.merge(method: 'train') unless payload.key?(:method)
       AwsLambdaInvokeService.call(function_name: function_name, payload: payload, region: region)
     end
 
@@ -31,7 +33,7 @@ class MaskRecommenderTraining
     end
 
     def build_function_name(env)
-      "mask-recommender-training-#{env}"
+      "mask-recommender-#{env}"
     end
   end
 end

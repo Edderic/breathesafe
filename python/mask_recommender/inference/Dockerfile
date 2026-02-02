@@ -1,14 +1,13 @@
 FROM public.ecr.aws/lambda/python:3.12
 
 # Copy requirements.txt
-COPY inference/requirements.txt ${LAMBDA_TASK_ROOT}/requirements.txt
+COPY requirements.txt ${LAMBDA_TASK_ROOT}/requirements.txt
 
-# Install the specified packages
+# Install dependencies for inference + training.
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy function code
-COPY inference/lambda_function.py ${LAMBDA_TASK_ROOT}/lambda_function.py
-COPY feature_builder.py ${LAMBDA_TASK_ROOT}/feature_builder.py
+# Copy function code + shared modules.
+COPY . ${LAMBDA_TASK_ROOT}
 
-# Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
+# Set the CMD to your handler
 CMD [ "lambda_function.handler" ]
