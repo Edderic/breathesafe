@@ -69,10 +69,10 @@ class AwsLambdaInvokeService
     end
 
     # Call the locally served lambda (same payload shape & response body)
-    # Assumes ./scripts/run_lambda_locally.sh serves HTTP on localhost:3000
+    # Assumes ./scripts/run_local_recommender.sh serves HTTP on localhost:5055
     def invoke_local(function_name:, payload: {})
       Rails.logger.debug("Running lambda #{function_name}...")
-      uri = URI.parse(ENV.fetch('LOCAL_LAMBDA_URL', 'http://localhost:9000/2015-03-31/functions/function/invocations'))
+      uri = URI.parse(ENV.fetch('LOCAL_LAMBDA_URL', 'http://127.0.0.1:5055/mask_recommender'))
       http = Net::HTTP.new(uri.host, uri.port)
       http.read_timeout = 900
       req = Net::HTTP::Post.new(uri.request_uri)
