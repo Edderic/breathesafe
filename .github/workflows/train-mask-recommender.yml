@@ -167,6 +167,7 @@ jobs:
                 \"Condition\": {
                   \"ArnLike\": {
                     \"aws:SourceArn\": [
+                      \"arn:aws:lambda:${REGION}:${ACCOUNT_ID}:function:mask-recommender-training-development\",
                       \"arn:aws:lambda:${REGION}:${ACCOUNT_ID}:function:mask-recommender-training-staging\",
                       \"arn:aws:lambda:${REGION}:${ACCOUNT_ID}:function:mask-recommender-training-production\"
                     ]
@@ -257,6 +258,62 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           IMAGE_DIGEST: ${{ steps.build-training-image.outputs.image_digest }}
           ENVIRONMENT: staging
+          BREATHESAFE_BASE_URL: https://staging.breathesafe.xyz
+          BREATHESAFE_SERVICE_EMAIL: ${{ secrets.BREATHESAFE_SERVICE_EMAIL }}
+          BREATHESAFE_SERVICE_PASSWORD: ${{ secrets.BREATHESAFE_SERVICE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          ROLE_ARN=$(aws lambda get-function-configuration \
+            --function-name mask-recommender-staging \
+            --query 'Role' \
+            --output text)
+
+          if aws lambda get-function --function-name "$FUNCTION_NAME" >/dev/null 2>&1; then
+            aws lambda update-function-code \
+              --function-name "$FUNCTION_NAME" \
+              --image-uri "$IMAGE_URI" \
+              >/dev/null
+          else
+            aws lambda create-function \
+              --function-name "$FUNCTION_NAME" \
+              --package-type Image \
+              --code ImageUri="$IMAGE_URI" \
+              --role "$ROLE_ARN" \
+              --timeout 900 \
+              --memory-size 3008 \
+              >/dev/null
+          fi
+          aws lambda wait function-updated --function-name "$FUNCTION_NAME"
+          ENV_JSON=$(aws lambda get-function-configuration --function-name "$FUNCTION_NAME" --query 'Environment.Variables' --output json)
+          python - <<'PY' > /tmp/lambda_env.json
+          import json
+          import os
+
+          env = json.loads(os.environ.get("ENV_JSON") or "{}")
+          if env is None:
+              env = {}
+          env["IMAGE_TAG"] = os.environ.get("IMAGE_TAG")
+          env["IMAGE_DIGEST"] = os.environ.get("IMAGE_DIGEST")
+          env["ENVIRONMENT"] = os.environ.get("ENVIRONMENT")
+          env["RAILS_ENV"] = os.environ.get("ENVIRONMENT")
+          env["BREATHESAFE_BASE_URL"] = os.environ.get("BREATHESAFE_BASE_URL")
+          env["BREATHESAFE_SERVICE_EMAIL"] = os.environ.get("BREATHESAFE_SERVICE_EMAIL")
+          env["BREATHESAFE_SERVICE_PASSWORD"] = os.environ.get("BREATHESAFE_SERVICE_PASSWORD")
+          print(json.dumps({"Variables": env}))
+          PY
+          aws lambda update-function-configuration \
+            --function-name "$FUNCTION_NAME" \
+            --environment file:///tmp/lambda_env.json \
+            >/dev/null
+          aws lambda wait function-updated --function-name "$FUNCTION_NAME"
+
+      - name: Update training Lambda (development)
+        env:
+          FUNCTION_NAME: mask-recommender-training-development
+          IMAGE_URI: ${{ steps.build-training-image.outputs.image_uri_tag }}
+          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_DIGEST: ${{ steps.build-training-image.outputs.image_digest }}
+          ENVIRONMENT: development
           BREATHESAFE_BASE_URL: https://staging.breathesafe.xyz
           BREATHESAFE_SERVICE_EMAIL: ${{ secrets.BREATHESAFE_SERVICE_EMAIL }}
           BREATHESAFE_SERVICE_PASSWORD: ${{ secrets.BREATHESAFE_SERVICE_PASSWORD }}
