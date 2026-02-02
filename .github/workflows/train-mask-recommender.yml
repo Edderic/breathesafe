@@ -142,12 +142,33 @@ jobs:
           if [ -z "${ACCOUNT_ID}" ]; then
             ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
           fi
+          REGION=$(aws configure get region)
+          if [ -z "${REGION}" ]; then
+            REGION="${AWS_REGION}"
+          fi
           aws ecr set-repository-policy \
             --repository-name "$REPO" \
             --policy-text "{
               \"Version\": \"2008-10-17\",
               \"Statement\": [{
-                \"Sid\": \"LambdaEcrRead\",
+                \"Sid\": \"LambdaServicePull\",
+                \"Effect\": \"Allow\",
+                \"Principal\": {\"Service\": \"lambda.amazonaws.com\"},
+                \"Action\": [
+                  \"ecr:BatchGetImage\",
+                  \"ecr:GetDownloadUrlForLayer\",
+                  \"ecr:BatchCheckLayerAvailability\"
+                ],
+                \"Condition\": {
+                  \"ArnLike\": {
+                    \"aws:SourceArn\": [
+                      \"arn:aws:lambda:${REGION}:${ACCOUNT_ID}:function:mask-recommender-training-staging\",
+                      \"arn:aws:lambda:${REGION}:${ACCOUNT_ID}:function:mask-recommender-training-production\"
+                    ]
+                  }
+                }
+              }, {
+                \"Sid\": \"LambdaRolePull\",
                 \"Effect\": \"Allow\",
                 \"Principal\": {\"AWS\": \"arn:aws:iam::${ACCOUNT_ID}:role/${ROLE_NAME}\"},
                 \"Action\": [
