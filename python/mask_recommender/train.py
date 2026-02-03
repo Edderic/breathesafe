@@ -790,12 +790,8 @@ def main(argv=None):
     parser.add_argument('--use-diff-perimeter-bins', action='store_true', help='Use perimeter difference bins instead of raw perimeter features.')
     parser.add_argument('--use-diff-perimeter-mask-bins', action='store_true', help='Include per-mask perimeter difference bin features.')
     parser.add_argument('--exclude-mask-code', action='store_true', help='Exclude unique_internal_model_code from categorical features.')
-    parser.add_argument('--focus', help='Path to focus examples JSON for upweighted training.')
-    parser.add_argument('--focus-weight', type=float, default=5.0, help='Weight multiplier for focus examples.')
     parser.add_argument('--class-reweight', action='store_true', help='Reweight loss by class balance.')
     args = parser.parse_args(argv)
-    if args.focus and args.class_reweight:
-        raise SystemExit("Cannot use --class-reweight with --focus.")
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
 
@@ -879,67 +875,18 @@ def main(argv=None):
     if args.exclude_mask_code:
         categorical_columns = ['strap_type', 'style']
 
-    focus_cleaned = pd.DataFrame()
-    focus_weights = pd.Series(dtype=float)
-    if args.focus:
-        focus_df, focus_weights = load_focus_examples(args.focus, masks_df, args.focus_weight)
-        if focus_df.empty:
-            logging.warning("No focus examples loaded from %s", args.focus)
-        else:
-            focus_cleaned = prepare_training_data(
-                focus_df,
-                use_facial_perimeter=args.use_facial_perimeter,
-                use_diff_perimeter_bins=args.use_diff_perimeter_bins,
-                use_diff_perimeter_mask_bins=args.use_diff_perimeter_mask_bins
-            )
-
-    if not focus_cleaned.empty:
-        focus_weights = focus_weights.reindex(focus_cleaned.index)
-        cleaned_fit_tests = pd.concat([cleaned_fit_tests, focus_cleaned], ignore_index=True)
-
     features, target = build_feature_matrix(cleaned_fit_tests, categorical_columns)
 
-    if focus_cleaned.empty:
-        model, train_losses, val_losses, x_train, y_train, x_val, y_val, train_idx, val_idx = train_predictor(
-            features,
-            target,
-            epochs=args.epochs,
-            learning_rate=args.learning_rate,
-            loss_type=args.loss_type,
-            focal_alpha=args.focal_alpha,
-            focal_gamma=args.focal_gamma,
-            class_weighting=args.class_reweight,
-        )
-    else:
-        base_count = cleaned_fit_tests.shape[0] - focus_cleaned.shape[0]
-        base_indices = torch.randperm(base_count)
-        split_index = int(base_count * 0.8)
-        base_train_idx = base_indices[:split_index]
-        base_val_idx = base_indices[split_index:]
-        focus_indices = torch.arange(base_count, cleaned_fit_tests.shape[0])
-        train_idx = torch.cat([base_train_idx, focus_indices])
-        val_idx = base_val_idx
-
-        sample_weights = torch.ones(cleaned_fit_tests.shape[0], dtype=torch.float32)
-        focus_weight_values = torch.tensor(
-            focus_weights.to_numpy(dtype=float),
-            dtype=torch.float32
-        )
-        sample_weights[focus_indices] = focus_weight_values
-
-        model, train_losses, val_losses, x_train, y_train, x_val, y_val, train_idx, val_idx = train_predictor_with_split(
-            features,
-            target,
-            train_idx,
-            val_idx,
-            epochs=args.epochs,
-            learning_rate=args.learning_rate,
-            loss_type=args.loss_type,
-            focal_alpha=args.focal_alpha,
-            focal_gamma=args.focal_gamma,
-            sample_weights=sample_weights,
-            class_weighting=args.class_reweight,
-        )
+    model, train_losses, val_losses, x_train, y_train, x_val, y_val, train_idx, val_idx = train_predictor(
+        features,
+        target,
+        epochs=args.epochs,
+        learning_rate=args.learning_rate,
+        loss_type=args.loss_type,
+        focal_alpha=args.focal_alpha,
+        focal_gamma=args.focal_gamma,
+        class_weighting=args.class_reweight,
+    )
 
     logging.info("Model training complete. Feature count: %s", features.shape[1])
     feature_columns = list(features.columns)
