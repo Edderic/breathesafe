@@ -2,7 +2,6 @@ import argparse
 import json
 import logging
 import os
-import re
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
@@ -81,91 +80,6 @@ STYLE_TYPES = [
     'Elastomeric'
 ]
 
-
-def _normalize_focus_label(value):
-    if value is None or (isinstance(value, float) and pd.isna(value)):
-        return None
-    normalized = str(value).strip().lower()
-    if normalized in ['pass', 'passed', 'true', '1', 'yes', 'y']:
-        return 'pass'
-    if normalized in ['fail', 'failed', 'false', '0', 'no', 'n']:
-        return 'fail'
-    return None
-
-
-def load_focus_examples(path, masks_df, default_weight):
-    with open(path, 'r', encoding='utf-8') as handle:
-        raw = handle.read()
-    try:
-        payload = json.loads(raw)
-    except json.JSONDecodeError:
-        cleaned = re.sub(r",\s*([}\]])", r"\1", raw)
-        try:
-            payload = json.loads(cleaned)
-        except json.JSONDecodeError as exc:
-            raise ValueError(f"Focus examples JSON is invalid: {path}") from exc
-
-    mask_lookup = masks_df.set_index('id')
-    rows = []
-    weights = []
-    for user in payload.get('users', []):
-        facial = user.get('facial_measurements') or {}
-        missing_face = [col for col in FACIAL_FEATURE_COLUMNS if facial.get(col) is None]
-        if missing_face:
-            logging.warning("Skipping focus user due to missing facial fields: %s", missing_face)
-            continue
-        facial_hair = facial.get('facial_hair_beard_length_mm')
-        if facial_hair is None:
-            facial_hair = user.get('facial_hair_beard_length_mm')
-        if facial_hair is None:
-            logging.warning(
-                "Skipping focus user due to missing facial_hair_beard_length_mm (keys=%s)",
-                sorted(facial.keys())
-            )
-            continue
-
-        for rec in user.get('recommendations', []):
-            label = _normalize_focus_label(rec.get('ground_truth'))
-            if label is None:
-                continue
-            mask_id = rec.get('mask_id')
-            if mask_id is None or mask_id not in mask_lookup.index:
-                logging.warning("Skipping focus rec due to missing mask_id=%s", mask_id)
-                continue
-            mask_row = mask_lookup.loc[mask_id]
-            missing_mask = [
-                field for field in ['perimeter_mm', 'strap_type', 'style', 'unique_internal_model_code']
-                if pd.isna(mask_row.get(field)) or str(mask_row.get(field)).strip() == ''
-            ]
-            if missing_mask:
-                logging.warning("Skipping focus rec due to missing mask fields: %s", missing_mask)
-                continue
-
-            row = {
-                'mask_id': int(mask_id),
-                'unique_internal_model_code': mask_row.get('unique_internal_model_code'),
-                'perimeter_mm': mask_row.get('perimeter_mm'),
-                'strap_type': mask_row.get('strap_type'),
-                'style': mask_row.get('style'),
-                'qlft_pass': label,
-                'facial_hair_beard_length_mm': facial_hair,
-            }
-            for column in FACIAL_FEATURE_COLUMNS:
-                row[column] = facial.get(column)
-            rows.append(row)
-            weight = rec.get('weight', default_weight)
-            try:
-                weight = float(weight)
-            except (TypeError, ValueError):
-                weight = default_weight
-            weights.append(weight)
-
-    if not rows:
-        return pd.DataFrame(), pd.Series(dtype=float)
-
-    focus_df = pd.DataFrame(rows)
-    focus_weights = pd.Series(weights, index=focus_df.index, dtype=float)
-    return focus_df, focus_weights
 
 def initialize_betas(diff_keys, num_users, num_masks, style_types):
     """
