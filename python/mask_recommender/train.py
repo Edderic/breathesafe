@@ -692,6 +692,63 @@ def _upload_json_to_s3(payload, key):
     return f"s3://{bucket}/{key}"
 
 
+def predict_proba(
+    has_facial_measurements,
+    alpha_dist_ideal,
+    beta_dist_ideal,
+    mask_nose_mm_neg_pos_inf,
+    mask_chin_mm_neg_pos_inf,
+    mask_top_cheek_mm_neg_pos_inf,
+    mask_mid_cheek_mm_neg_pos_inf,
+    mask_dummies_over_fit_tests,
+    face_nose_mm,
+    face_top_cheek_mm,
+    face_mid_cheek_mm,
+    face_chin_mm,
+    beta_is_headstraps,
+    beta_is_adjustable,
+    beta_beard_length,
+    is_headstraps,
+    is_adjustable,
+    facial_hair_beard_length_mm,
+    alpha_misc_fit
+
+):
+    # exponentiate to guarantee that values are in (0, inf)
+    mask_nose_mm = torch.exp(mask_nose_mm_neg_pos_inf)
+    mask_chin_mm = torch.exp(mask_chin_mm_neg_pos_inf)
+    mask_top_cheek_mm = torch.exp(mask_top_cheek_mm_neg_pos_inf)
+    mask_mid_cheek_mm = torch.exp(mask_mid_cheek_mm_neg_pos_inf)
+
+    mask_nose_over_fit_tests = (mask_dummies_over_fit_tests @ mask_nose_mm.T)
+    mask_chin_over_fit_tests = (mask_dummies_over_fit_tests @ mask_chin_mm.T)
+    mask_top_cheek_over_fit_tests = (mask_dummies_over_fit_tests @ mask_top_cheek_mm.T)
+    mask_mid_cheek_over_fit_tests = (mask_dummies_over_fit_tests @ mask_top_cheek_mm.T)
+
+    distance = torch.sqrt(
+        (face_nose_mm - mask_nose_over_fit_tests)**2
+        + (face_chin_mm - mask_chin_over_fit_tests)**2
+        + (face_top_cheek_mm - mask_top_cheek_over_fit_tests)**2
+        + (face_mid_cheek_mm - mask_mid_cheek_over_fit_tests)**2
+    )
+
+    # TODO: ideal_face_fit_probability only matters if style is not:
+    # - adhesive
+    # - PAPR
+    # - baggy blues
+    ideal_face_fit_probability = torch.exp(-(beta_dist_ideal * distance + alpha_dist_ideal))
+
+    # Take into account strap tension (e.g. headstraps vs. earloops, beard
+    # length)
+    misc_fit_probability = torch.sigmoid(
+        beta_is_headstraps * is_headstraps
+        + beta_is_adjustable * is_adjustable
+        + beta_beard_length * facial_hair_beard_length_mm
+        + alpha_misc_fit
+    )
+
+    return ideal_face_fit_probability * misc_fit_probability
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Train fit predictor model.')
     parser.add_argument('--epochs', type=int, default=50, help='Number of training epochs.')
@@ -780,6 +837,76 @@ def main(argv=None):
         cleaned_fit_tests.shape[0],
         fit_tests_with_imputed_arkit_via_traditional_facial_measurements.shape[0]
     )
+
+    has_facial_measurements = fit_tests_with_imputed_arkit_via_traditional_facial_measurements[
+        fit_tests_with_imputed_arkit_via_traditional_facial_measurements['nose_mm'].notna()
+        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['chin_mm'].notna()
+        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['mid_cheek_mm'].notna()
+        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['top_cheek_mm'].notna()
+        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['qlft_pass'].notna()
+        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['perimeter_mm'].notna()
+        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['style'].notna()
+        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['strap_type'].notna()
+        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['strap_type'].notna()
+    ]
+
+    facial_hair_beard_length_mm = torch.from_numpy(
+        has_facial_measurements['facial_hair_beard_length_mm'].to_numpy()
+    ).unsqueeze(-1).float()
+
+    face_nose_mm = torch.from_numpy(has_facial_measurements['nose_mm'].to_numpy()).unsqueeze(-1).float()
+    face_chin_mm = torch.from_numpy(has_facial_measurements['chin_mm'].to_numpy()).unsqueeze(-1).float()
+    face_top_cheek_mm = torch.from_numpy(has_facial_measurements['top_cheek_mm'].to_numpy()).unsqueeze(-1).float()
+    face_mid_cheek_mm = torch.from_numpy(has_facial_measurements['mid_cheek_mm'].to_numpy()).unsqueeze(-1).float()
+
+    mask_dummies_over_fit_tests = torch.from_numpy(pd.get_dummies(has_facial_measurements['mask_id']).to_numpy()).float()
+    mask_ids = has_facial_measurements['mask_id'].sort_values().unique()
+
+    # TODO: should we standardize the facial measurements to be between 0 and 1?
+    # TODO: Search for passing fit tests for a given mask, then average them.
+    # Assign those as initial values for said mask.
+    # If there are no passing fit tests, impute with the average across all the
+    # fit testers who do have facial measurements.
+    mask_nose_mm_neg_pos_inf = torch.rand((1, len(mask_ids)), requires_grad=True)
+    mask_chin_mm_neg_pos_inf = torch.rand((1, len(mask_ids)), requires_grad=True)
+    mask_top_cheek_mm_neg_pos_inf = torch.rand((1, len(mask_ids)), requires_grad=True)
+    mask_mid_cheek_mm_neg_pos_inf = torch.rand((1, len(mask_ids)), requires_grad=True)
+
+    # TODO: some styles do not have an "ideal" face (e.g. PAPRs, baggy blues)
+    beta_dist_ideal = torch.rand(1, requires_grad=True)
+    alpha_dist_ideal = torch.rand(1, requires_grad=True)
+    alpha_misc_fit = torch.rand(1, requires_grad=True)
+    beta_is_headstraps = torch.rand(1, requires_grad=True)
+    beta_is_adjustable = torch.rand(1, requires_grad=True)
+    beta_beard_length = torch.rand(1, requires_grad=True)
+
+    is_headstraps = torch.from_numpy(has_facial_measurements['strap_type'].str.contains('eadstrap').to_numpy()).unsqueeze(-1).float()
+    is_adjustable = torch.from_numpy(has_facial_measurements['strap_type'].str.contains('djustable').to_numpy()).unsqueeze(-1).float()
+
+    overall_fit_probability = predict_proba(
+        has_facial_measurements,
+        alpha_dist_ideal,
+        beta_dist_ideal,
+        mask_nose_mm_neg_pos_inf,
+        mask_chin_mm_neg_pos_inf,
+        mask_top_cheek_mm_neg_pos_inf,
+        mask_mid_cheek_mm_neg_pos_inf,
+        mask_dummies_over_fit_tests,
+        face_nose_mm,
+        face_top_cheek_mm,
+        face_mid_cheek_mm,
+        face_chin_mm,
+        beta_is_headstraps,
+        beta_is_adjustable,
+        beta_beard_length,
+        is_headstraps,
+        is_adjustable,
+        facial_hair_beard_length_mm,
+        alpha_misc_fit
+    )
+
+
+
 
     if cleaned_fit_tests.empty:
         logging.warning("No fit tests available after filtering. Exiting.")
