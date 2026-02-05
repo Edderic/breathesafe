@@ -15,6 +15,7 @@ from mask_recommender.feature_builder import (  # noqa: E402
     FACIAL_FEATURE_COLUMNS,
     build_feature_frame,
 )
+from mask_recommender.prob_model import predict_prob_model  # noqa: E402
 
 APP = Flask(__name__)
 
@@ -58,6 +59,26 @@ def _download_latest_from_s3() -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     for key_name in ("model_key", "metadata_key", "mask_data_key"):
+        key = payload[key_name]
+        filename = Path(key).name
+        target = output_dir / filename
+        s3.download_file(bucket, key, str(target))
+
+    return output_dir
+
+
+def _download_latest_prob_from_s3() -> Path:
+    s3 = boto3.client("s3", region_name=_s3_region())
+    bucket = _s3_bucket()
+    latest_key = "mask_recommender/models/prob_latest.json"
+    payload = json.loads(
+        s3.get_object(Bucket=bucket, Key=latest_key)["Body"].read().decode("utf-8")
+    )
+    timestamp = payload.get("timestamp") or "latest"
+    output_dir = _model_root() / f"prob_{timestamp}"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    for key_name in ("params_key", "metadata_key", "mask_data_key"):
         key = payload[key_name]
         filename = Path(key).name
         target = output_dir / filename
@@ -123,6 +144,25 @@ def _load_artifacts(model_dir: Path):
         "categorical_columns": categorical_columns,
         "mask_data": mask_data,
         "metadata": metadata,
+    }
+
+
+def _load_prob_artifacts(model_dir: Path):
+    params_path = model_dir / "prob_model_params.pt"
+    metadata_path = model_dir / "prob_model_metadata.json"
+    mask_data_path = model_dir / "prob_mask_data.json"
+
+    with metadata_path.open("r", encoding="utf-8") as handle:
+        metadata = json.load(handle)
+    with mask_data_path.open("r", encoding="utf-8") as handle:
+        mask_data = json.load(handle)
+
+    params = torch.load(params_path, map_location="cpu")
+
+    return {
+        "params": params,
+        "metadata": metadata,
+        "mask_data": mask_data,
     }
 
 
@@ -206,6 +246,34 @@ def _infer(payload, artifacts):
     }
 
 
+def _infer_prob(payload, artifacts):
+    facial_features = _extract_facial_measurements(payload)
+    inference_rows = _build_inference_rows(artifacts["mask_data"], facial_features)
+    probs = predict_prob_model(
+        artifacts["params"],
+        inference_rows,
+        artifacts["metadata"]["mask_id_index"],
+        artifacts["metadata"]["style_categories"],
+    )
+
+    recommendations = []
+    for idx, (mask_id, mask_info) in enumerate(artifacts["mask_data"].items()):
+        recommendations.append({
+            "mask_id": int(mask_id),
+            "proba_fit": float(probs[idx]),
+            "mask_info": mask_info,
+        })
+
+    recommendations.sort(key=lambda item: item["proba_fit"], reverse=True)
+    mask_id_map = {str(idx): rec["mask_id"] for idx, rec in enumerate(recommendations)}
+    proba_map = {str(idx): rec["proba_fit"] for idx, rec in enumerate(recommendations)}
+    return {
+        "mask_id": mask_id_map,
+        "proba_fit": proba_map,
+        "model": artifacts["metadata"],
+    }
+
+
 def _train(payload):
     env = (payload or {}).get("environment") or os.environ.get("ENVIRONMENT") or "development"
     base_url = (payload or {}).get("base_url") or os.environ.get("BREATHESAFE_BASE_URL")
@@ -237,6 +305,11 @@ def recommend_masks():
     payload = request.get_json(silent=True) or {}
     if payload.get("method") == "train":
         return jsonify(_train(payload))
+    if payload.get("model_type") == "prob":
+        if "prob_artifacts" not in APP.config:
+            prob_dir = _download_latest_prob_from_s3()
+            APP.config["prob_artifacts"] = _load_prob_artifacts(prob_dir)
+        return jsonify(_infer_prob(payload, APP.config["prob_artifacts"]))
     return jsonify(_infer(payload, APP.config["artifacts"]))
 
 

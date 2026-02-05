@@ -18,11 +18,11 @@ import torch
 from breathesafe_network import (build_session,
                                  fetch_facial_measurements_fit_tests,
                                  fetch_json)
-from feature_builder import (FACIAL_FEATURE_COLUMNS,
-                             FACIAL_PERIMETER_COMPONENTS, build_feature_frame,
+from feature_builder import (FACIAL_FEATURE_COLUMNS, build_feature_frame,
                              diff_bin_edges, diff_bin_index, diff_bin_labels)
 from predict_arkit_from_traditional import predict_arkit_from_traditional
 from qa import build_mask_candidates, build_recommendation_preview
+from prob_model import normalize_qlft_pass, predict_prob_model, train_prob_model
 from sklearn.metrics import (auc, f1_score, precision_score, recall_score,
                              roc_auc_score, roc_curve)
 from utils import display_percentage
@@ -700,203 +700,11 @@ def _upload_json_to_s3(payload, key):
     return f"s3://{bucket}/{key}"
 
 
-def predict_proba(
-    params,
-    data
-):
-    beta_style_effects_for_ideal_facial_meas_on_fit_tests = (
-        data['style_dummies_over_fit_tests']
-        @ params['beta_style_effect_on_ideal_facial_measurements']
-    )
-
-    alpha_style_effects_for_ideal_facial_meas_on_fit_tests = (
-        data['style_dummies_over_fit_tests']
-        @ params['alpha_style_effect_on_ideal_facial_measurements']
-    )
-
-    # (|fit_tests| x |facial_measurement types|)
-    fit_tests_by_facial_measurements_style_effects_neg_inf_to_pos_inf = (
-
-        beta_style_effects_for_ideal_facial_meas_on_fit_tests
-        * data['perimeter_mm']
-        + alpha_style_effects_for_ideal_facial_meas_on_fit_tests
-    )
-
-    # Ensure they are positive
-    fit_tests_by_facial_measurements_style_effects = torch.exp(
-        fit_tests_by_facial_measurements_style_effects_neg_inf_to_pos_inf
-    )
-
-    distance = torch.sqrt(
-        (
-            data['face_nose_mm']
-            - fit_tests_by_facial_measurements_style_effects[:, 0]
-        )**2
-        + (
-            data['face_chin_mm']
-            - fit_tests_by_facial_measurements_style_effects[:, 1]
-        )**2
-        + (
-            data['face_top_cheek_mm']
-            - fit_tests_by_facial_measurements_style_effects[:, 2]
-        )**2
-        + (
-            data['face_mid_cheek_mm']
-            - fit_tests_by_facial_measurements_style_effects[:, 3]
-        )**2
-    )
-
-    # |fit_tests| x 1
-    beta_mask_effects_on_fit_based_on_distance = (
-        data['mask_dummies_over_fit_tests']
-        @
-        params['beta_mask_effect_on_fit_based_on_distance']
-    )
-
-    # |fit_tests| x 1
-    alpha_mask_effects_on_fit_based_on_distance = (
-        data['mask_dummies_over_fit_tests']
-        @
-        params['alpha_mask_effect_on_fit_based_on_distance']
-    )
-
-    # TODO: ideal_face_fit_probability only matters if style is not:
-    # - adhesive
-    # - PAPR
-    # - baggy blues
-    ideal_face_fit_probability = torch.exp(
-        -(
-            (
-                beta_mask_effects_on_fit_based_on_distance
-                +
-                params['beta_dist_ideal']
-            )
-            * distance +
-            (
-                alpha_mask_effects_on_fit_based_on_distance
-                + params['alpha_dist_ideal']
-            )
-        )
-    )
-
-    # Take into account strap tension (e.g. headstraps vs. earloops, beard
-    # length)
-    misc_fit_probability = torch.sigmoid(
-        params['beta_is_headstraps'] * data['is_headstraps']
-        + params['beta_is_adjustable'] * data['is_adjustable']
-        + params['beta_beard_length'] * data['facial_hair_beard_length_mm']
-        + params['alpha_misc_fit']
-    )
-
-    return ideal_face_fit_probability * misc_fit_probability
-
-
-def init_params(mask_ids, data):
-    """
-    Initialize model parameters.
-    """
-    # TODO: should we standardize the facial measurements to be between 0 and 1?
-    #
-    # TODO: Search for passing fit tests for a given mask, then average them.
-    # Assign those as initial values for said mask.
-    # If there are no passing fit tests, impute with the average across all the
-    # fit testers who do have facial measurements.
-    #
-    beta_strap_type_from_mask_perimeter_to_facial_measurement = torch.rand((len(STRAP_TYPES), len(mask_ids)), requires_grad=True)
-    alpha_strap_type_from_mask_perimeter_to_facial_measurement = torch.rand((1, len(mask_ids)), requires_grad=True)
-
-    # Style influences the relationship between mask perimeter and the ideal
-    # facial features of a mask
-    beta_style_effect_on_ideal_facial_measurements = torch.rand(
-        (
-            data['style_len'], len(FACIAL_PERIMETER_COMPONENTS)
-        ), requires_grad=True
-    )
-
-    alpha_style_effect_on_ideal_facial_measurements = torch.rand(
-        (
-            data['style_len'], len(FACIAL_PERIMETER_COMPONENTS)
-        ), requires_grad=True
-    )
-
-    # Based on how close the distance is to the ideal (which is based on the
-    # style), a specific mask's design could affect the probability of fit
-    beta_mask_effect_on_fit_based_on_distance = torch.rand(
-        (
-            len(mask_ids), 1
-        )
-    )
-
-    alpha_mask_effect_on_fit_based_on_distance = torch.rand(
-        (
-            len(mask_ids), 1
-        )
-    )
-
-    mask_facial_measurement_mm_neg_pos_inf = torch.rand((len(FACIAL_PERIMETER_COMPONENTS), len(mask_ids)))
-
-    beta_dist_ideal = torch.rand(1, requires_grad=True)
-    alpha_dist_ideal = torch.rand(1, requires_grad=True)
-    alpha_misc_fit = torch.rand(1, requires_grad=True)
-    beta_is_headstraps = torch.rand(1, requires_grad=True)
-    beta_is_adjustable = torch.rand(1, requires_grad=True)
-    beta_beard_length = torch.rand(1, requires_grad=True)
-
-    # TODO: some styles do not have an "ideal" face (e.g. PAPRs, baggy blues)
-    return {
-        'beta_mask_effect_on_fit_based_on_distance': beta_mask_effect_on_fit_based_on_distance,
-        'alpha_mask_effect_on_fit_based_on_distance': alpha_mask_effect_on_fit_based_on_distance,
-        'beta_style_effect_on_ideal_facial_measurements': beta_style_effect_on_ideal_facial_measurements,
-        'alpha_style_effect_on_ideal_facial_measurements': alpha_style_effect_on_ideal_facial_measurements,
-        'beta_strap_type_from_mask_perimeter_to_facial_measurement': beta_strap_type_from_mask_perimeter_to_facial_measurement,
-        'alpha_strap_type_from_mask_perimeter_to_facial_measurement': alpha_strap_type_from_mask_perimeter_to_facial_measurement,
-        'mask_facial_measurement_mm_neg_pos_inf': mask_facial_measurement_mm_neg_pos_inf,
-        'beta_dist_ideal': beta_dist_ideal,
-        'alpha_dist_ideal': alpha_dist_ideal,
-        'alpha_misc_fit': alpha_misc_fit,
-        'beta_is_headstraps': beta_is_headstraps,
-        'beta_is_adjustable': beta_is_adjustable,
-        'beta_beard_length': beta_beard_length
-    }
-
-
-def init_data(has_facial_measurements):
-    face_nose_mm = torch.from_numpy(has_facial_measurements['nose_mm'].to_numpy()).unsqueeze(-1).float()
-    face_chin_mm = torch.from_numpy(has_facial_measurements['chin_mm'].to_numpy()).unsqueeze(-1).float()
-    face_top_cheek_mm = torch.from_numpy(has_facial_measurements['top_cheek_mm'].to_numpy()).unsqueeze(-1).float()
-    face_mid_cheek_mm = torch.from_numpy(has_facial_measurements['mid_cheek_mm'].to_numpy()).unsqueeze(-1).float()
-    perimeter_mm = torch.from_numpy(has_facial_measurements['perimeter_mm'].to_numpy()).unsqueeze(-1).float()
-
-    is_headstraps = torch.from_numpy(has_facial_measurements['strap_type'].str.contains('eadstrap').to_numpy()).unsqueeze(-1).float()
-    is_adjustable = torch.from_numpy(has_facial_measurements['strap_type'].str.contains('djustable').to_numpy()).unsqueeze(-1).float()
-
-    facial_hair_beard_length_mm = torch.from_numpy(
-        has_facial_measurements['facial_hair_beard_length_mm'].to_numpy()
-    ).unsqueeze(-1).float()
-
-    mask_dummies_over_fit_tests = torch.from_numpy(pd.get_dummies(has_facial_measurements['mask_id']).to_numpy()).float()
-    style_dummies = pd.get_dummies(has_facial_measurements['style']).to_numpy()
-    style_dummies_over_fit_tests = torch.from_numpy(style_dummies).float()
-
-    return {
-        'style_len': style_dummies.shape[1],
-        'style_dummies_over_fit_tests': style_dummies_over_fit_tests,
-        'face_nose_mm': face_nose_mm,
-        'face_top_cheek_mm': face_top_cheek_mm,
-        'face_mid_cheek_mm': face_mid_cheek_mm,
-        'face_chin_mm': face_chin_mm,
-        'is_headstraps': is_headstraps,
-        'is_adjustable': is_adjustable,
-        'facial_hair_beard_length_mm': facial_hair_beard_length_mm,
-        'mask_dummies_over_fit_tests': mask_dummies_over_fit_tests,
-        'perimeter_mm': perimeter_mm
-    }
-
-
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Train fit predictor model.')
     parser.add_argument('--epochs', type=int, default=50, help='Number of training epochs.')
     parser.add_argument('--learning-rate', type=float, default=0.01, help='Learning rate for optimizer.')
+    parser.add_argument('--model-type', default='nn', choices=['nn', 'prob'], help='Model type to train.')
     parser.add_argument('--loss-plot', default='python/mask_recommender/training_loss.png', help='Path to save training loss plot.')
     parser.add_argument('--loss-type', default='bce', choices=['bce', 'focal'], help='Loss function to use.')
     parser.add_argument('--focal-alpha', type=float, default=0.25, help='Alpha for focal loss.')
@@ -982,35 +790,113 @@ def main(argv=None):
         fit_tests_with_imputed_arkit_via_traditional_facial_measurements.shape[0]
     )
 
-    has_facial_measurements = fit_tests_with_imputed_arkit_via_traditional_facial_measurements[
-        fit_tests_with_imputed_arkit_via_traditional_facial_measurements['nose_mm'].notna()
-        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['chin_mm'].notna()
-        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['mid_cheek_mm'].notna()
-        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['top_cheek_mm'].notna()
-        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['qlft_pass'].notna()
-        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['perimeter_mm'].notna()
-        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['style'].notna()
-        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['strap_type'].notna()
-        & fit_tests_with_imputed_arkit_via_traditional_facial_measurements['strap_type'].notna()
-    ]
-
-    mask_ids = has_facial_measurements['mask_id'].sort_values().unique()
-
-    data = init_data(has_facial_measurements)
-    params = init_params(mask_ids, data)
-
-    # TODO: linear combination of perimeter_mm and some random variables should
-    # predict ideal nose_mm, chin_mm, etc.
-    overall_fit_probability = predict_proba(
-        params,
-        data
-    )
-    import pdb; pdb.set_trace()
-
-
     if cleaned_fit_tests.empty:
         logging.warning("No fit tests available after filtering. Exiting.")
         raise SystemExit(0)
+
+    if args.model_type == 'prob':
+        timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
+        mask_id_index = sorted(cleaned_fit_tests['mask_id'].dropna().unique())
+        style_categories = sorted(cleaned_fit_tests['style'].dropna().unique())
+
+        num_rows = cleaned_fit_tests.shape[0]
+        permutation = torch.randperm(num_rows)
+        split_index = int(num_rows * 0.8)
+        train_idx = permutation[:split_index]
+        val_idx = permutation[split_index:]
+
+        train_df = cleaned_fit_tests.iloc[train_idx]
+        val_df = cleaned_fit_tests.iloc[val_idx]
+
+        params, prob_losses = train_prob_model(
+            train_df,
+            mask_id_index,
+            style_categories,
+            epochs=args.epochs,
+            learning_rate=args.learning_rate,
+        )
+
+        val_probs = predict_prob_model(params, val_df, mask_id_index, style_categories)
+        val_labels = normalize_qlft_pass(val_df["qlft_pass"]).to_numpy()
+        val_preds = (val_probs >= 0.5).astype(float)
+
+        try:
+            roc_auc = roc_auc_score(val_labels, val_probs)
+        except ValueError:
+            roc_auc = None
+
+        val_precision = precision_score(val_labels, val_preds, zero_division=0)
+        val_recall = recall_score(val_labels, val_preds, zero_division=0)
+        val_f1 = f1_score(val_labels, val_preds, zero_division=0)
+
+        prefix = f"mask_recommender/models/{timestamp}"
+
+        params_path = f"/tmp/mask_recommender_prob_params_{timestamp}.pt"
+        torch.save({key: value.detach().cpu() for key, value in params.items()}, params_path)
+        params_key = f"{prefix}/prob_model_params.pt"
+        params_uri = _upload_file_to_s3(params_path, params_key)
+
+        mask_data = {}
+        for _, row in masks_df.iterrows():
+            mask_id = row.get('id')
+            if pd.isna(mask_id):
+                continue
+            mask_data[str(int(mask_id))] = {
+                'id': int(mask_id),
+                'unique_internal_model_code': row.get('unique_internal_model_code', ''),
+                'perimeter_mm': row.get('perimeter_mm', None),
+                'strap_type': row.get('strap_type', ''),
+                'style': row.get('style', ''),
+            }
+
+        mask_data_key = f"{prefix}/prob_mask_data.json"
+        mask_data_uri = _upload_json_to_s3(mask_data, mask_data_key)
+
+        metadata = {
+            'timestamp': timestamp,
+            'environment': _env_name(),
+            'model_type': 'prob',
+            'mask_id_index': mask_id_index,
+            'style_categories': style_categories,
+        }
+        metadata_key = f"{prefix}/prob_model_metadata.json"
+        metadata_uri = _upload_json_to_s3(metadata, metadata_key)
+
+        metrics = {
+            'timestamp': timestamp,
+            'environment': _env_name(),
+            'roc_auc': roc_auc,
+            'val_f1': val_f1,
+            'val_precision': val_precision,
+            'val_recall': val_recall,
+            'train_samples': int(train_df.shape[0]),
+            'val_samples': int(val_df.shape[0]),
+            'losses': prob_losses,
+        }
+        metrics_key = f"{prefix}/prob_metrics.json"
+        metrics_uri = _upload_json_to_s3(metrics, metrics_key)
+
+        latest_payload = {
+            'timestamp': timestamp,
+            'model_type': 'prob',
+            'params_key': params_key,
+            'params_uri': params_uri,
+            'metadata_key': metadata_key,
+            'metadata_uri': metadata_uri,
+            'mask_data_key': mask_data_key,
+            'mask_data_uri': mask_data_uri,
+            'metrics_key': metrics_key,
+            'metrics_uri': metrics_uri,
+        }
+        latest_key = "mask_recommender/models/prob_latest.json"
+        latest_uri = _upload_json_to_s3(latest_payload, latest_key)
+
+        logging.info("Uploaded prob model params to %s", params_uri)
+        logging.info("Uploaded prob metadata to %s", metadata_uri)
+        logging.info("Uploaded prob metrics to %s", metrics_uri)
+        logging.info("Updated prob latest pointer at %s", latest_uri)
+
+        return latest_payload
 
     categorical_columns = ['strap_type', 'style', 'unique_internal_model_code']
     if args.exclude_mask_code:

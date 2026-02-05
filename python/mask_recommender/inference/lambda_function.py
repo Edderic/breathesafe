@@ -9,11 +9,13 @@ import pandas as pd
 import torch
 try:
     from feature_builder import FACIAL_FEATURE_COLUMNS, build_feature_frame
+    from prob_model import predict_prob_model
 except ModuleNotFoundError:
     from mask_recommender.feature_builder import (  # type: ignore
         FACIAL_FEATURE_COLUMNS,
         build_feature_frame,
     )
+    from mask_recommender.prob_model import predict_prob_model  # type: ignore
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -31,6 +33,10 @@ class MaskRecommenderInference:
         self.use_facial_perimeter = False
         self.use_diff_perimeter_bins = False
         self.use_diff_perimeter_mask_bins = False
+        self.prob_params = None
+        self.prob_metadata = None
+        self.prob_mask_data = None
+        self.prob_last_loaded_at = None
         self.last_loaded_at = None
         self.latest_payload = None
         self.refresh_seconds = int(os.environ.get('MODEL_REFRESH_SECONDS', '300'))
@@ -84,6 +90,13 @@ class MaskRecommenderInference:
             return
         if (time.time() - self.last_loaded_at) > self.refresh_seconds:
             self.load_model(force=True)
+
+    def _maybe_refresh_prob(self) -> None:
+        if self.prob_last_loaded_at is None:
+            self.load_prob_model(force=True)
+            return
+        if (time.time() - self.prob_last_loaded_at) > self.refresh_seconds:
+            self.load_prob_model(force=True)
 
     def load_model(self, force: bool = False) -> None:
         if not force and self.model is not None:
@@ -153,9 +166,46 @@ class MaskRecommenderInference:
             model_key
         )
 
-    def _build_inference_rows(self, facial_features: Dict) -> pd.DataFrame:
+    def load_prob_model(self, force: bool = False) -> None:
+        if not force and self.prob_params is not None:
+            return
+
+        latest_key = 'mask_recommender/models/prob_latest.json'
+        latest_path = '/tmp/mask_recommender_prob_latest.json'
+        self._download_file(latest_key, latest_path)
+        with open(latest_path, 'r') as f:
+            latest_payload = json.load(f)
+
+        params_key = latest_payload['params_key']
+        metadata_key = latest_payload['metadata_key']
+        mask_data_key = latest_payload['mask_data_key']
+
+        params_path = '/tmp/mask_recommender_prob_params.pt'
+        metadata_path = '/tmp/mask_recommender_prob_metadata.json'
+        mask_data_path = '/tmp/mask_recommender_prob_mask_data.json'
+
+        self._download_file(params_key, params_path)
+        self._download_file(metadata_key, metadata_path)
+        self._download_file(mask_data_key, mask_data_path)
+
+        with open(metadata_path, 'r') as f:
+            self.prob_metadata = json.load(f)
+
+        with open(mask_data_path, 'r') as f:
+            self.prob_mask_data = json.load(f)
+
+        self.prob_params = torch.load(params_path, map_location='cpu')
+        self.prob_last_loaded_at = time.time()
+        logger.info(
+            "Loaded prob model %s from s3://%s/%s",
+            latest_payload.get('timestamp'),
+            self.bucket,
+            params_key
+        )
+
+    def _build_inference_rows(self, mask_data: Dict, facial_features: Dict) -> pd.DataFrame:
         rows = []
-        for mask_id, mask_info in self.mask_data.items():
+        for mask_id, mask_info in mask_data.items():
             perimeter = mask_info.get('perimeter_mm')
             if perimeter is None or (isinstance(perimeter, float) and pd.isna(perimeter)):
                 perimeter = 0
@@ -179,7 +229,7 @@ class MaskRecommenderInference:
             logger.error('Model or mask data not loaded; returning empty recommendations.')
             return []
 
-        inference_rows = self._build_inference_rows(facial_features)
+        inference_rows = self._build_inference_rows(self.mask_data, facial_features)
         numeric_columns = FACIAL_FEATURE_COLUMNS + ["perimeter_mm"]
         numeric_frame = pd.DataFrame(
             {
@@ -222,12 +272,44 @@ class MaskRecommenderInference:
         recommendations.sort(key=lambda x: x['proba_fit'], reverse=True)
         return recommendations
 
+    def recommend_masks_prob(self, facial_features: Dict) -> List[Dict]:
+        self._maybe_refresh_prob()
+        if not self.prob_params or not self.prob_metadata or not self.prob_mask_data:
+            logger.error('Prob model or mask data not loaded; returning empty recommendations.')
+            return []
+
+        inference_rows = self._build_inference_rows(self.prob_mask_data, facial_features)
+        probs = predict_prob_model(
+            self.prob_params,
+            inference_rows,
+            self.prob_metadata['mask_id_index'],
+            self.prob_metadata['style_categories'],
+        )
+
+        recommendations = []
+        for idx, (mask_id, mask_info) in enumerate(self.prob_mask_data.items()):
+            recommendations.append({
+                'mask_id': int(mask_id),
+                'proba_fit': float(probs[idx]),
+                'mask_info': mask_info,
+            })
+
+        recommendations.sort(key=lambda x: x['proba_fit'], reverse=True)
+        return recommendations
+
 
 def handler(event, context):
     try:
-        facial_features = event.get('facial_measurements', {})
+        payload = event or {}
+        facial_features = payload.get('facial_measurements', {})
+        model_type = payload.get('model_type')
         recommender = MaskRecommenderInference()
-        recommendations = recommender.recommend_masks(facial_features)
+        if model_type == 'prob':
+            recommendations = recommender.recommend_masks_prob(facial_features)
+            model_payload = recommender.prob_metadata
+        else:
+            recommendations = recommender.recommend_masks(facial_features)
+            model_payload = recommender.latest_payload
         mask_id_map = {str(idx): rec['mask_id'] for idx, rec in enumerate(recommendations)}
         proba_map = {str(idx): rec['proba_fit'] for idx, rec in enumerate(recommendations)}
         return {
@@ -235,7 +317,7 @@ def handler(event, context):
             'body': json.dumps({
                 'mask_id': mask_id_map,
                 'proba_fit': proba_map,
-                'model': recommender.latest_payload,
+                'model': model_payload,
             })
         }
     except Exception as exc:
