@@ -9,7 +9,7 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
   let(:facial_measurement) { create(:facial_measurement, :complete, user: user) }
 
   describe '.call' do
-    context 'when 3M 1870+ AURA N99 to N95 conversion' do
+    context 'when when 3M 1870+ AURA N99 to N95 conversion' do
       let(:special_mask) { create(:mask, unique_internal_model_code: '3M 1870+ AURA™') }
 
       let!(:n99_fit_test_for_3m_1870) do
