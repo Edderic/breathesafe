@@ -43,7 +43,7 @@ jobs:
         run: |
           echo "BREATHESAFE_SERVICE_EMAIL set? $([[ -n \"${BREATHESAFE_SERVICE_EMAIL}\" ]] && echo yes || echo no)"
           echo "BREATHESAFE_SERVICE_PASSWORD set? $([[ -n \"${BREATHESAFE_SERVICE_PASSWORD}\" ]] && echo yes || echo no)"
-          python python/mask_recommender/train.py --epochs 200 --learning-rate=0.0001 --use-diff-perimeter-bins
+          python python/mask_recommender/train.py --epochs 1000 --learning-rate=0.0001 --use-diff-perimeter-bins
   deploy:
     needs: train
     runs-on: ubuntu-latest
