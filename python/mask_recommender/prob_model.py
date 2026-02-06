@@ -87,35 +87,23 @@ def build_prob_data(
 
 
 def init_params(mask_ids: List[int], data: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
-    beta_mask_for_distance_a = torch.zeros(
-        (len(mask_ids), 1), requires_grad=True
+    beta_mask_for_distance_a = torch.nn.Parameter(torch.zeros((len(mask_ids), 1)))
+    beta_mask_for_distance_b = torch.nn.Parameter(torch.zeros((len(mask_ids), 1)))
+    beta_mask_for_distance_c = torch.nn.Parameter(torch.zeros((len(mask_ids), 1)))
+
+    beta_style_for_distance_a = torch.nn.Parameter(
+        torch.rand((data['style_len'], 1)) - 0.5
     )
+    beta_style_for_distance_b = torch.nn.Parameter(torch.rand((data['style_len'], 1)))
+    beta_style_for_distance_c = torch.nn.Parameter(torch.rand((data['style_len'], 1)))
 
-    beta_mask_for_distance_b = torch.zeros(
-        (len(mask_ids), 1), requires_grad=True
-    )
-
-    beta_mask_for_distance_c = torch.zeros(
-        (len(mask_ids), 1), requires_grad=True
-    )
-
-    beta_style_for_distance_a = torch.rand(
-        (data['style_len'], 1), requires_grad=True
-    ) - 0.5
-
-    beta_style_for_distance_b = torch.rand(
-        (data['style_len'], 1), requires_grad=True
-    )
-
-    beta_style_for_distance_c = torch.rand(
-        (data['style_len'], 1), requires_grad=True
-    )
-
-    beta_is_headstraps = torch.rand(1, requires_grad=True)
-    beta_is_adjustable = torch.rand(1, requires_grad=True)
-    beta_beard_length = torch.rand(1, requires_grad=True)
+    alpha_misc_fit = torch.nn.Parameter(torch.rand(1))
+    beta_is_headstraps = torch.nn.Parameter(torch.rand(1))
+    beta_is_adjustable = torch.nn.Parameter(torch.rand(1))
+    beta_beard_length = torch.nn.Parameter(torch.rand(1))
 
     return {
+        "alpha_misc_fit": alpha_misc_fit,
         "beta_mask_for_distance_a": beta_mask_for_distance_a,
         "beta_mask_for_distance_b": beta_mask_for_distance_b,
         "beta_mask_for_distance_c": beta_mask_for_distance_c,
