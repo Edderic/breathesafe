@@ -171,7 +171,7 @@ def predict_proba(params: Dict[str, torch.Tensor], data: Dict[str, torch.Tensor]
     )
 
     fit_tests_by_facial_measurements_style_effects = torch.exp(
-        torch.clamp(fit_tests_by_facial_measurements_style_effects_neg_inf_to_pos_inf, -10.0, 10.0)
+        fit_tests_by_facial_measurements_style_effects_neg_inf_to_pos_inf
     )
 
     target_nose = fit_tests_by_facial_measurements_style_effects[:, 0].unsqueeze(-1)
