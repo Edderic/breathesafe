@@ -4,7 +4,6 @@ from typing import Dict, List, Tuple
 import numpy as np
 import pandas as pd
 import torch
-
 from feature_builder import FACIAL_PERIMETER_COMPONENTS
 
 STRAP_TYPES = [
@@ -93,12 +92,32 @@ def init_params(mask_ids: List[int], data: Dict[str, torch.Tensor]) -> Dict[str,
         (1, len(mask_ids)), requires_grad=True
     )
 
-    beta_style_effect_on_ideal_facial_measurements = torch.rand(
-        (data["style_len"], len(FACIAL_PERIMETER_COMPONENTS)), requires_grad=True
+    face_means = torch.tensor(
+        [
+            float(data["face_nose_mm"].mean()),
+            float(data["face_chin_mm"].mean()),
+            float(data["face_top_cheek_mm"].mean()),
+            float(data["face_mid_cheek_mm"].mean()),
+        ],
+        dtype=torch.float32,
     )
-    alpha_style_effect_on_ideal_facial_measurements = torch.rand(
-        (data["style_len"], len(FACIAL_PERIMETER_COMPONENTS)), requires_grad=True
-    )
+    face_means = torch.clamp(face_means, min=1e-3)
+    beta_base = torch.zeros_like(face_means)
+    alpha_base = torch.log(face_means)
+    noise_scale = 0.05
+    beta_noise = torch.randn(
+        (data["style_len"], len(FACIAL_PERIMETER_COMPONENTS)),
+        dtype=torch.float32,
+    ) * (beta_base.abs() * noise_scale + 1e-6)
+
+    alpha_noise = torch.randn(
+        (data["style_len"], len(FACIAL_PERIMETER_COMPONENTS)),
+        dtype=torch.float32,
+    ) * (alpha_base.abs() * noise_scale + 1e-6)
+
+    # This can just be set to beta_noise
+    beta_style_effect_on_ideal_facial_measurements = (beta_base + beta_noise).requires_grad_()
+    alpha_style_effect_on_ideal_facial_measurements = (alpha_base + alpha_noise).requires_grad_()
 
     beta_mask_effect_on_fit_based_on_distance = torch.rand(
         (len(mask_ids), 1), requires_grad=True
@@ -152,26 +171,19 @@ def predict_proba(params: Dict[str, torch.Tensor], data: Dict[str, torch.Tensor]
     )
 
     fit_tests_by_facial_measurements_style_effects = torch.exp(
-        fit_tests_by_facial_measurements_style_effects_neg_inf_to_pos_inf
+        torch.clamp(fit_tests_by_facial_measurements_style_effects_neg_inf_to_pos_inf, -10.0, 10.0)
     )
 
+    target_nose = fit_tests_by_facial_measurements_style_effects[:, 0].unsqueeze(-1)
+    target_chin = fit_tests_by_facial_measurements_style_effects[:, 1].unsqueeze(-1)
+    target_top_cheek = fit_tests_by_facial_measurements_style_effects[:, 2].unsqueeze(-1)
+    target_mid_cheek = fit_tests_by_facial_measurements_style_effects[:, 3].unsqueeze(-1)
+
     distance = torch.sqrt(
-        (
-            data["face_nose_mm"]
-            - fit_tests_by_facial_measurements_style_effects[:, 0]
-        ) ** 2
-        + (
-            data["face_chin_mm"]
-            - fit_tests_by_facial_measurements_style_effects[:, 1]
-        ) ** 2
-        + (
-            data["face_top_cheek_mm"]
-            - fit_tests_by_facial_measurements_style_effects[:, 2]
-        ) ** 2
-        + (
-            data["face_mid_cheek_mm"]
-            - fit_tests_by_facial_measurements_style_effects[:, 3]
-        ) ** 2
+        (data["face_nose_mm"] - target_nose) ** 2
+        + (data["face_chin_mm"] - target_chin) ** 2
+        + (data["face_top_cheek_mm"] - target_top_cheek) ** 2
+        + (data["face_mid_cheek_mm"] - target_mid_cheek) ** 2
     )
 
     beta_mask_effects_on_fit_based_on_distance = (
@@ -184,19 +196,18 @@ def predict_proba(params: Dict[str, torch.Tensor], data: Dict[str, torch.Tensor]
         @ params["alpha_mask_effect_on_fit_based_on_distance"]
     )
 
-    ideal_face_fit_probability = torch.exp(
-        -(
-            (
-                beta_mask_effects_on_fit_based_on_distance
-                + params["beta_dist_ideal"]
-            )
-            * distance
-            + (
-                alpha_mask_effects_on_fit_based_on_distance
-                + params["alpha_dist_ideal"]
-            )
+    logit_face_fit = -(
+        (
+            beta_mask_effects_on_fit_based_on_distance
+            + params["beta_dist_ideal"]
+        )
+        * distance
+        + (
+            alpha_mask_effects_on_fit_based_on_distance
+            + params["alpha_dist_ideal"]
         )
     )
+    ideal_face_fit_probability = torch.sigmoid(logit_face_fit)
 
     misc_fit_probability = torch.sigmoid(
         params["beta_is_headstraps"] * data["is_headstraps"]
@@ -226,7 +237,7 @@ def train_prob_model(
     losses = []
     for epoch in range(epochs):
         optimizer.zero_grad()
-        probs = predict_proba(params, data).clamp(1e-6, 1 - 1e-6)
+        probs = predict_proba(params, data)
         loss = loss_fn(probs, labels)
         loss.backward()
         optimizer.step()
