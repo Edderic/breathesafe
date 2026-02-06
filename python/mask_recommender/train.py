@@ -18,7 +18,8 @@ import torch
 from breathesafe_network import (build_session,
                                  fetch_facial_measurements_fit_tests,
                                  fetch_json)
-from feature_builder import (FACIAL_FEATURE_COLUMNS, build_feature_frame,
+from feature_builder import (FACIAL_FEATURE_COLUMNS,
+                             FACIAL_PERIMETER_COMPONENTS, build_feature_frame,
                              diff_bin_edges, diff_bin_index, diff_bin_labels)
 from predict_arkit_from_traditional import predict_arkit_from_traditional
 from qa import build_mask_candidates, build_recommendation_preview
