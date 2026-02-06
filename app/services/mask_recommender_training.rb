@@ -12,9 +12,16 @@
 #   MaskRecommenderTraining.call(payload: { some: "data" })
 # Returns the parsed JSON response from the Lambda.
 class MaskRecommenderTraining
+  WORKFLOW_PARITY_CONFIG = {
+    epochs: 1000,
+    learning_rate: 0.0001,
+    use_diff_perimeter_bins: true
+  }.freeze
+
   class << self
     def call(payload: {}, region: AwsLambdaInvokeService::DEFAULT_REGION)
       function_name = build_function_name(resolve_environment)
+      payload = WORKFLOW_PARITY_CONFIG.merge(payload)
       payload = payload.merge(method: 'train') unless payload.key?(:method)
       AwsLambdaInvokeService.call(function_name: function_name, payload: payload, region: region)
     end

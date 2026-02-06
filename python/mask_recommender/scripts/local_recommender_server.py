@@ -286,7 +286,27 @@ def _train(payload):
 
     from mask_recommender.train import main as train_main  # noqa: E402
 
-    result = train_main()
+    train_argv = []
+    if (payload or {}).get("epochs") is not None:
+        train_argv.extend(["--epochs", str(payload["epochs"])])
+    if (payload or {}).get("learning_rate") is not None:
+        train_argv.extend(["--learning-rate", str(payload["learning_rate"])])
+    if (payload or {}).get("model_type"):
+        train_argv.extend(["--model-type", str(payload["model_type"])])
+    if (payload or {}).get("loss_type"):
+        train_argv.extend(["--loss-type", str(payload["loss_type"])])
+    if (payload or {}).get("class_reweight"):
+        train_argv.append("--class-reweight")
+    if (payload or {}).get("use_facial_perimeter"):
+        train_argv.append("--use-facial-perimeter")
+    if (payload or {}).get("use_diff_perimeter_bins"):
+        train_argv.append("--use-diff-perimeter-bins")
+    if (payload or {}).get("use_diff_perimeter_mask_bins"):
+        train_argv.append("--use-diff-perimeter-mask-bins")
+    if (payload or {}).get("exclude_mask_code"):
+        train_argv.append("--exclude-mask-code")
+
+    result = train_main(train_argv)
 
     reload_status = reload_model().get_json()
     return {

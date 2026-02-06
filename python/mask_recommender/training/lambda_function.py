@@ -6,6 +6,30 @@ from train import main
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+
+def _build_train_argv(event):
+    event = event or {}
+    argv = []
+    if event.get('epochs') is not None:
+        argv.extend(['--epochs', str(event['epochs'])])
+    if event.get('learning_rate') is not None:
+        argv.extend(['--learning-rate', str(event['learning_rate'])])
+    if event.get('model_type'):
+        argv.extend(['--model-type', str(event['model_type'])])
+    if event.get('loss_type'):
+        argv.extend(['--loss-type', str(event['loss_type'])])
+    if event.get('class_reweight'):
+        argv.append('--class-reweight')
+    if event.get('use_facial_perimeter'):
+        argv.append('--use-facial-perimeter')
+    if event.get('use_diff_perimeter_bins'):
+        argv.append('--use-diff-perimeter-bins')
+    if event.get('use_diff_perimeter_mask_bins'):
+        argv.append('--use-diff-perimeter-mask-bins')
+    if event.get('exclude_mask_code'):
+        argv.append('--exclude-mask-code')
+    return argv
+
 def handler(event, context):
     """
     Lambda handler for training the mask recommender model
@@ -28,8 +52,11 @@ def handler(event, context):
         if base_url:
             os.environ['BREATHESAFE_BASE_URL'] = str(base_url)
 
+        train_argv = _build_train_argv(event)
+        logger.info("Training argv: %s", train_argv)
+
         # Call the main training function
-        result = main()
+        result = main(train_argv)
 
         logger.info("Training completed successfully")
 
