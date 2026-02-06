@@ -47,6 +47,7 @@ def build_prob_data(
     face_top_cheek_mm = torch.from_numpy(fit_tests["top_cheek_mm"].to_numpy()).unsqueeze(-1).float()
     face_mid_cheek_mm = torch.from_numpy(fit_tests["mid_cheek_mm"].to_numpy()).unsqueeze(-1).float()
     perimeter_mm = torch.from_numpy(fit_tests["perimeter_mm"].to_numpy()).unsqueeze(-1).float()
+    face_perimeter_mm = face_nose_mm + face_chin_mm + face_top_cheek_mm + face_mid_cheek_mm
 
     is_headstraps = torch.from_numpy(
         fit_tests["strap_type"].astype(str).str.contains("eadstrap").to_numpy()
@@ -70,6 +71,7 @@ def build_prob_data(
     style_dummies_over_fit_tests = torch.from_numpy(style_dummies.to_numpy()).float()
 
     return {
+        "face_perimeter_mm": face_perimeter_mm,
         "style_len": style_dummies.shape[1],
         "style_dummies_over_fit_tests": style_dummies_over_fit_tests,
         "face_nose_mm": face_nose_mm,
@@ -85,69 +87,41 @@ def build_prob_data(
 
 
 def init_params(mask_ids: List[int], data: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
-    beta_strap_type_from_mask_perimeter_to_facial_measurement = torch.rand(
-        (len(STRAP_TYPES), len(mask_ids)), requires_grad=True
-    )
-    alpha_strap_type_from_mask_perimeter_to_facial_measurement = torch.rand(
-        (1, len(mask_ids)), requires_grad=True
-    )
-
-    face_means = torch.tensor(
-        [
-            float(data["face_nose_mm"].mean()),
-            float(data["face_chin_mm"].mean()),
-            float(data["face_top_cheek_mm"].mean()),
-            float(data["face_mid_cheek_mm"].mean()),
-        ],
-        dtype=torch.float32,
-    )
-    face_means = torch.clamp(face_means, min=1e-3)
-    beta_base = torch.zeros_like(face_means)
-    alpha_base = torch.log(face_means)
-    noise_scale = 0.05
-    beta_noise = torch.randn(
-        (data["style_len"], len(FACIAL_PERIMETER_COMPONENTS)),
-        dtype=torch.float32,
-    ) * (beta_base.abs() * noise_scale + 1e-6)
-
-    alpha_noise = torch.randn(
-        (data["style_len"], len(FACIAL_PERIMETER_COMPONENTS)),
-        dtype=torch.float32,
-    ) * (alpha_base.abs() * noise_scale + 1e-6)
-
-    # This can just be set to beta_noise
-    beta_style_effect_on_ideal_facial_measurements = (beta_base + beta_noise).requires_grad_()
-    alpha_style_effect_on_ideal_facial_measurements = (alpha_base + alpha_noise).requires_grad_()
-
-    beta_mask_effect_on_fit_based_on_distance = torch.rand(
-        (len(mask_ids), 1), requires_grad=True
-    )
-    alpha_mask_effect_on_fit_based_on_distance = torch.rand(
+    beta_mask_for_distance_a = torch.zeros(
         (len(mask_ids), 1), requires_grad=True
     )
 
-    mask_facial_measurement_mm_neg_pos_inf = torch.rand(
-        (len(FACIAL_PERIMETER_COMPONENTS), len(mask_ids)), requires_grad=True
+    beta_mask_for_distance_b = torch.zeros(
+        (len(mask_ids), 1), requires_grad=True
     )
 
-    beta_dist_ideal = torch.rand(1, requires_grad=True)
-    alpha_dist_ideal = torch.rand(1, requires_grad=True)
-    alpha_misc_fit = torch.rand(1, requires_grad=True)
+    beta_mask_for_distance_c = torch.zeros(
+        (len(mask_ids), 1), requires_grad=True
+    )
+
+    beta_style_for_distance_a = torch.rand(
+        (data['style_len'], 1), requires_grad=True
+    ) - 0.5
+
+    beta_style_for_distance_b = torch.rand(
+        (data['style_len'], 1), requires_grad=True
+    )
+
+    beta_style_for_distance_c = torch.rand(
+        (data['style_len'], 1), requires_grad=True
+    )
+
     beta_is_headstraps = torch.rand(1, requires_grad=True)
     beta_is_adjustable = torch.rand(1, requires_grad=True)
     beta_beard_length = torch.rand(1, requires_grad=True)
 
     return {
-        "beta_mask_effect_on_fit_based_on_distance": beta_mask_effect_on_fit_based_on_distance,
-        "alpha_mask_effect_on_fit_based_on_distance": alpha_mask_effect_on_fit_based_on_distance,
-        "beta_style_effect_on_ideal_facial_measurements": beta_style_effect_on_ideal_facial_measurements,
-        "alpha_style_effect_on_ideal_facial_measurements": alpha_style_effect_on_ideal_facial_measurements,
-        "beta_strap_type_from_mask_perimeter_to_facial_measurement": beta_strap_type_from_mask_perimeter_to_facial_measurement,
-        "alpha_strap_type_from_mask_perimeter_to_facial_measurement": alpha_strap_type_from_mask_perimeter_to_facial_measurement,
-        "mask_facial_measurement_mm_neg_pos_inf": mask_facial_measurement_mm_neg_pos_inf,
-        "beta_dist_ideal": beta_dist_ideal,
-        "alpha_dist_ideal": alpha_dist_ideal,
-        "alpha_misc_fit": alpha_misc_fit,
+        "beta_mask_for_distance_a": beta_mask_for_distance_a,
+        "beta_mask_for_distance_b": beta_mask_for_distance_b,
+        "beta_mask_for_distance_c": beta_mask_for_distance_c,
+        "beta_style_for_distance_a": beta_style_for_distance_a,
+        "beta_style_for_distance_b": beta_style_for_distance_b,
+        "beta_style_for_distance_c": beta_style_for_distance_c,
         "beta_is_headstraps": beta_is_headstraps,
         "beta_is_adjustable": beta_is_adjustable,
         "beta_beard_length": beta_beard_length,
@@ -155,68 +129,56 @@ def init_params(mask_ids: List[int], data: Dict[str, torch.Tensor]) -> Dict[str,
 
 
 def predict_proba(params: Dict[str, torch.Tensor], data: Dict[str, torch.Tensor]) -> torch.Tensor:
-    beta_style_effects_for_ideal_facial_meas_on_fit_tests = (
-        data["style_dummies_over_fit_tests"]
-        @ params["beta_style_effect_on_ideal_facial_measurements"]
+    face_vs_mask_perimeter_distance = torch.abs(
+        data["face_perimeter_mm"] - data["perimeter_mm"]
     )
 
-    alpha_style_effects_for_ideal_facial_meas_on_fit_tests = (
-        data["style_dummies_over_fit_tests"]
-        @ params["alpha_style_effect_on_ideal_facial_measurements"]
-    )
-
-    fit_tests_by_facial_measurements_style_effects_neg_inf_to_pos_inf = (
-        beta_style_effects_for_ideal_facial_meas_on_fit_tests * data["perimeter_mm"]
-        + alpha_style_effects_for_ideal_facial_meas_on_fit_tests
-    )
-
-    fit_tests_by_facial_measurements_style_effects = torch.exp(
-        fit_tests_by_facial_measurements_style_effects_neg_inf_to_pos_inf
-    )
-
-    target_nose = fit_tests_by_facial_measurements_style_effects[:, 0].unsqueeze(-1)
-    target_chin = fit_tests_by_facial_measurements_style_effects[:, 1].unsqueeze(-1)
-    target_top_cheek = fit_tests_by_facial_measurements_style_effects[:, 2].unsqueeze(-1)
-    target_mid_cheek = fit_tests_by_facial_measurements_style_effects[:, 3].unsqueeze(-1)
-
-    distance = torch.sqrt(
-        (data["face_nose_mm"] - target_nose) ** 2
-        + (data["face_chin_mm"] - target_chin) ** 2
-        + (data["face_top_cheek_mm"] - target_top_cheek) ** 2
-        + (data["face_mid_cheek_mm"] - target_mid_cheek) ** 2
-    )
-
-    beta_mask_effects_on_fit_based_on_distance = (
+    beta_mask_for_dist_a = (
         data["mask_dummies_over_fit_tests"]
-        @ params["beta_mask_effect_on_fit_based_on_distance"]
+        @ params["beta_mask_for_distance_a"]
     )
 
-    alpha_mask_effects_on_fit_based_on_distance = (
+    beta_style_for_dist_a = (
+        data["style_dummies_over_fit_tests"]
+        @ params["beta_style_for_distance_a"]
+    )
+
+    beta_mask_for_dist_b = (
         data["mask_dummies_over_fit_tests"]
-        @ params["alpha_mask_effect_on_fit_based_on_distance"]
+        @ params["beta_mask_for_distance_b"]
     )
 
-    logit_face_fit = -(
-        (
-            beta_mask_effects_on_fit_based_on_distance
-            + params["beta_dist_ideal"]
-        )
-        * distance
-        + (
-            alpha_mask_effects_on_fit_based_on_distance
-            + params["alpha_dist_ideal"]
-        )
+    beta_style_for_dist_b = (
+        data["style_dummies_over_fit_tests"]
+        @ params["beta_style_for_distance_b"]
     )
-    ideal_face_fit_probability = torch.sigmoid(logit_face_fit)
 
-    misc_fit_probability = torch.sigmoid(
-        params["beta_is_headstraps"] * data["is_headstraps"]
+    beta_mask_for_dist_c = (
+        data["mask_dummies_over_fit_tests"]
+        @ params["beta_mask_for_distance_c"]
+    )
+
+    beta_style_for_dist_c = (
+        data["style_dummies_over_fit_tests"]
+        @ params["beta_style_for_distance_c"]
+    )
+
+    results = torch.sigmoid(
+        (beta_style_for_dist_a + beta_mask_for_dist_a)
+        * (
+            face_vs_mask_perimeter_distance
+            + beta_style_for_dist_b
+            + beta_mask_for_dist_b
+        )**2
+        + params["beta_is_headstraps"] * data["is_headstraps"]
         + params["beta_is_adjustable"] * data["is_adjustable"]
         + params["beta_beard_length"] * data["facial_hair_beard_length_mm"]
         + params["alpha_misc_fit"]
+        + beta_mask_for_dist_c
+        + beta_style_for_dist_c
     )
 
-    return ideal_face_fit_probability * misc_fit_probability
+    return results
 
 
 def train_prob_model(
