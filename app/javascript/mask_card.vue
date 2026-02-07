@@ -515,8 +515,9 @@ export default {
 
       if (type === 'breathability') {
         const value = mask.avgBreathabilityPa
-        const min = this.dataContext.breathability_min
-        const max = this.dataContext.breathability_max
+        const bounds = this.breathabilityBounds()
+        const min = bounds.min
+        const max = bounds.max
         if (this.statIsMissing(type, mask) || min === null || max === null || min === undefined || max === undefined) {
           return null
         }
@@ -537,7 +538,7 @@ export default {
 
       if (type === 'fit_tests') {
         const value = mask.fitTestCount
-        const max = this.dataContext.fit_test_count_max
+        const max = this.fitTestCountMax()
         if (this.statIsMissing(type, mask) || max === null || max === undefined) {
           return null
         }
@@ -665,8 +666,9 @@ export default {
       return `linear-gradient(90deg, ${red} 0%, ${yellow} 33.333%, ${green} 100%)`
     },
     breathabilityGradient() {
-      const min = this.dataContext.breathability_min
-      const max = this.dataContext.breathability_max
+      const bounds = this.breathabilityBounds()
+      const min = bounds.min
+      const max = bounds.max
       if (min === null || max === null || min === undefined || max === undefined) {
         return null
       }
@@ -720,8 +722,9 @@ export default {
         return position === 'min' ? '10^0' : '10^3'
       }
       if (type === 'breathability') {
-        const min = this.dataContext.breathability_min
-        const max = this.dataContext.breathability_max
+        const bounds = this.breathabilityBounds()
+        const min = bounds.min
+        const max = bounds.max
         if (min === null || max === null || min === undefined || max === undefined) {
           return null
         }
@@ -742,7 +745,7 @@ export default {
         return position === 'min' ? this.formatValue(min) : this.formatValue(max)
       }
       if (type === 'fit_tests') {
-        const max = this.dataContext.fit_test_count_max
+        const max = this.fitTestCountMax()
         if (max === null || max === undefined) {
           return null
         }
@@ -755,6 +758,41 @@ export default {
     },
     statMissingText(type) {
       return 'Missing'
+    },
+    breathabilityBounds() {
+      const contextMin = this.dataContext.breathability_min
+      const contextMax = this.dataContext.breathability_max
+      if (contextMin !== null && contextMin !== undefined && contextMax !== null && contextMax !== undefined) {
+        return { min: contextMin, max: contextMax }
+      }
+
+      const values = (this.cards || [])
+        .map((m) => m.avgBreathabilityPa)
+        .filter((v) => v !== null && v !== undefined && !isNaN(v) && Number(v) > 0)
+        .map((v) => Number(v))
+
+      if (values.length === 0) {
+        return { min: null, max: null }
+      }
+
+      return { min: Math.min(...values), max: Math.max(...values) }
+    },
+    fitTestCountMax() {
+      const contextMax = this.dataContext.fit_test_count_max
+      if (contextMax !== null && contextMax !== undefined) {
+        return contextMax
+      }
+
+      const values = (this.cards || [])
+        .map((m) => m.fitTestCount)
+        .filter((v) => v !== null && v !== undefined && !isNaN(v))
+        .map((v) => Number(v))
+
+      if (values.length === 0) {
+        return null
+      }
+
+      return Math.max(...values)
     },
     statRowColors() {
       return {
