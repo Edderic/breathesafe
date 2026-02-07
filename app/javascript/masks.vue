@@ -228,7 +228,7 @@ export default {
       perPage: 12,
       totalCount: 0,
       maskDataContext: {},
-      recommenderPayloadHandled: false,
+      lastHandledRecommenderPayload: null,
       recommenderWarmupKey: 'mask_recommender_warmup_done',
     }
   },
@@ -488,23 +488,25 @@ export default {
 
     },
     async maybeLoadRecommenderPayload(toQuery) {
-      if (this.recommenderPayloadHandled) {
-        return false
-      }
-
       const payloadParam = toQuery.recommenderPayload
       if (!payloadParam) {
         return false
       }
 
+      // If we already loaded this exact payload and currently have recommendation
+      // probabilities on screen, keep that state and avoid loading generic masks.
+      const hasProbaFit = this.masks.some((mask) => mask.probaFit !== undefined && mask.probaFit !== null)
+      if (payloadParam === this.lastHandledRecommenderPayload && hasProbaFit) {
+        return true
+      }
+
       const facialMeasurements = this.decodeRecommenderPayload(payloadParam)
       if (!facialMeasurements) {
         this.message = "Failed to decode recommendations payload."
-        this.recommenderPayloadHandled = true
-        return false
+        return true
       }
 
-      this.recommenderPayloadHandled = true
+      this.lastHandledRecommenderPayload = payloadParam
       this.setWaiting(true)
       try {
         await this.requestAsyncRecommendations(facialMeasurements)
