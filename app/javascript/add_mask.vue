@@ -1536,7 +1536,8 @@ export default {
           this.$router.push({
             'name': 'NewFitTest',
             'query': {
-              maskId: this.id
+              maskId: this.id,
+              maskCode: this.uniqueInternalModelCode,
             }
           })
         }

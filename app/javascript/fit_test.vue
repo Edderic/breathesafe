@@ -1307,6 +1307,16 @@ export default {
         this.mode = 'Create'
       }
 
+      // Optimistically set selected mask from query so progress updates immediately.
+      if (toQuery.maskId || toQuery.maskCode) {
+        this.selectedMask = {
+          id: toQuery.maskId ? parseInt(toQuery.maskId) : null,
+          uniqueInternalModelCode: toQuery.maskCode || '',
+          hasExhalationValve: false,
+        }
+        this.searchMask = this.selectedMask.uniqueInternalModelCode
+      }
+
       if (!this.currentUser) {
         signIn.call(this)
       } else {
@@ -1391,11 +1401,26 @@ export default {
         await this.loadFitTest()
 
         if (toQuery.maskId) {
-          const foundMask = this.masks.filter((m) => m.id == parseInt(toQuery.maskId))[0]
-          this.selectedMask = foundMask || {
-            id: null,
-            uniqueInternalModelCode: '',
-            hasExhalationValve: false
+          let foundMask = this.masks.filter((m) => m.id == parseInt(toQuery.maskId))[0]
+
+          // Fallback to direct lookup when mask isn't in current paginated list.
+          if (!foundMask) {
+            try {
+              const response = await axios.get(`/masks/${toQuery.maskId}.json`)
+              foundMask = deepSnakeToCamel(response.data.mask)
+            } catch (error) {
+              // Keep optimistic query-based mask if direct fetch fails.
+            }
+          }
+
+          if (foundMask) {
+            this.selectedMask = foundMask
+          } else if (!this.selectedMask || !this.selectedMask.uniqueInternalModelCode) {
+            this.selectedMask = {
+              id: parseInt(toQuery.maskId),
+              uniqueInternalModelCode: toQuery.maskCode || '',
+              hasExhalationValve: false
+            }
           }
           this.searchMask = this.selectedMask && this.selectedMask.uniqueInternalModelCode
         }
