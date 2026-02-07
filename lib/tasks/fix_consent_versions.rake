@@ -32,9 +32,9 @@ namespace :consent do
         fixed_count = 0
         invalid_users.find_each do |user|
           old_value = user.consent_form_version_accepted
-          # # rubocop:disable python/mask_recommender/train.py
+          # .py
           # rubocop:disable Rails/SkipsModelValidations
-          # # rubocop:enable python/mask_recommender/train.py
+          # .py
           user.update_column(:consent_form_version_accepted, current_version)
           # rubocop:enable Rails/SkipsModelValidations
           puts "  ✓ Fixed User ID #{user.id}: #{old_value.inspect} -> #{current_version}"
