@@ -527,8 +527,9 @@ export default {
 
       if (type === 'perimeter') {
         const value = mask.perimeterMm
-        const min = this.dataContext.perimeter_min
-        const max = this.dataContext.perimeter_max
+        const bounds = this.perimeterBounds()
+        const min = bounds.min
+        const max = bounds.max
         if (this.statIsMissing(type, mask) || min === null || max === null || min === undefined || max === undefined) {
           return null
         }
@@ -610,6 +611,12 @@ export default {
         return {
           width: width,
           background: this.fitTestsGradient()
+        }
+      }
+      if (type === 'perimeter') {
+        return {
+          width: width,
+          backgroundColor: '#a3a8ad'
         }
       }
       return {
@@ -737,8 +744,9 @@ export default {
         return this.formatValue(labelValue, ' pa')
       }
       if (type === 'perimeter') {
-        const min = this.dataContext.perimeter_min
-        const max = this.dataContext.perimeter_max
+        const bounds = this.perimeterBounds()
+        const min = bounds.min
+        const max = bounds.max
         if (min === null || max === null || min === undefined || max === undefined) {
           return null
         }
@@ -768,6 +776,24 @@ export default {
 
       const values = (this.cards || [])
         .map((m) => m.avgBreathabilityPa)
+        .filter((v) => v !== null && v !== undefined && !isNaN(v) && Number(v) > 0)
+        .map((v) => Number(v))
+
+      if (values.length === 0) {
+        return { min: null, max: null }
+      }
+
+      return { min: Math.min(...values), max: Math.max(...values) }
+    },
+    perimeterBounds() {
+      const contextMin = this.dataContext.perimeter_min
+      const contextMax = this.dataContext.perimeter_max
+      if (contextMin !== null && contextMin !== undefined && contextMax !== null && contextMax !== undefined) {
+        return { min: contextMin, max: contextMax }
+      }
+
+      const values = (this.cards || [])
+        .map((m) => m.perimeterMm)
         .filter((v) => v !== null && v !== undefined && !isNaN(v) && Number(v) > 0)
         .map((v) => Number(v))
 
