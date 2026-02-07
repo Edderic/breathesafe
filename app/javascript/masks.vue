@@ -493,10 +493,9 @@ export default {
         return false
       }
 
-      // If we already loaded this exact payload and currently have recommendation
-      // probabilities on screen, keep that state and avoid loading generic masks.
-      const hasProbaFit = this.masks.some((mask) => mask.probaFit !== undefined && mask.probaFit !== null)
-      if (payloadParam === this.lastHandledRecommenderPayload && hasProbaFit) {
+      // Never fall back to generic /masks.json while a recommender payload is present.
+      // If this payload was already queued/loaded, keep waiting for async results.
+      if (payloadParam === this.lastHandledRecommenderPayload) {
         return true
       }
 
