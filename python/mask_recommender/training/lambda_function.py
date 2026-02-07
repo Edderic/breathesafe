@@ -6,6 +6,29 @@ from train import main
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+def _resolve_env(event):
+    requested = (event or {}).get('environment') or os.environ.get('ENVIRONMENT')
+    if requested:
+        return str(requested).strip().lower()
+
+    fn_name = (os.environ.get('AWS_LAMBDA_FUNCTION_NAME') or '').strip().lower()
+    if fn_name.endswith('-production'):
+        return 'production'
+    if fn_name.endswith('-staging'):
+        return 'staging'
+    if fn_name.endswith('-development'):
+        return 'development'
+    return 'staging'
+
+
+def _default_base_url_for_env(env):
+    mapping = {
+        'production': 'https://www.breathesafe.xyz',
+        'staging': 'https://staging.breathesafe.xyz',
+        'development': 'http://localhost:3000',
+    }
+    return mapping.get(env, 'https://staging.breathesafe.xyz')
+
 
 def _build_train_argv(event):
     event = event or {}
@@ -40,7 +63,7 @@ def handler(event, context):
         logger.info("Starting training process")
 
         # Allow caller to specify environment and S3 bucket
-        env = (event or {}).get('environment') or os.environ.get('ENVIRONMENT') or 'staging'
+        env = _resolve_env(event)
         bucket = (event or {}).get('s3_bucket') or os.environ.get('S3_BUCKET_NAME')
         region = (event or {}).get('s3_bucket_region') or os.environ.get('S3_BUCKET_REGION')
         base_url = (event or {}).get('base_url') or os.environ.get('BREATHESAFE_BASE_URL')
@@ -51,8 +74,9 @@ def handler(event, context):
             os.environ['S3_BUCKET_NAME'] = str(bucket)
         if region:
             os.environ['S3_BUCKET_REGION'] = str(region)
-        if base_url:
-            os.environ['BREATHESAFE_BASE_URL'] = str(base_url)
+        resolved_base_url = str(base_url) if base_url else _default_base_url_for_env(env)
+        os.environ['BREATHESAFE_BASE_URL'] = resolved_base_url
+        logger.info("Training env=%s base_url=%s", env, resolved_base_url)
 
         train_argv = _build_train_argv(event)
         logger.info("Training argv: %s", train_argv)
