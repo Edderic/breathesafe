@@ -583,37 +583,40 @@ export default {
       return 'N/A'
     },
     statBarStyle(percent, type) {
-      if (this.statNeedsMarker(type)) {
-        return {
-          width: '100%',
-          backgroundColor: 'transparent'
-        }
-      }
+      const clamped = this.clampPercent(percent)
+      const width = clamped === null ? '0%' : `${Math.round(clamped * 100)}%`
+
       if (type === 'filtration') {
         return {
-          width: `${Math.round(percent * 100)}%`,
+          width: width,
           background: this.filtrationGradient()
         }
       }
       if (type === 'breathability') {
         const gradient = this.breathabilityGradient()
         return {
-          width: `${Math.round(percent * 100)}%`,
+          width: width,
           background: gradient || this.statRowColors()[type]
         }
       }
+      if (type === 'proba_fit') {
+        return {
+          width: width,
+          background: this.probaFitGradient()
+        }
+      }
+      if (type === 'fit_tests') {
+        return {
+          width: width,
+          background: this.fitTestsGradient()
+        }
+      }
       return {
-        width: `${Math.round(percent * 100)}%`,
+        width: width,
         backgroundColor: this.statRowColors()[type]
       }
     },
     statBarWrapperStyle(type) {
-      if (this.statNeedsMarker(type)) {
-        const gradient = this.gradientForType(type)
-        return {
-          background: gradient || this.statRowColors()[type]
-        }
-      }
       return {}
     },
     statNeedsMarker(type) {
