@@ -76,6 +76,15 @@ class MaskRecommender
       parse_lambda_body(response)
     end
 
+    def warmup(function_base: 'mask-recommender')
+      heroku_env = ENV.fetch('HEROKU_ENVIRONMENT', 'development')
+      response = AwsLambdaInvokeService.call(
+        function_name: "#{function_base}-#{heroku_env}",
+        payload: { method: 'warmup' }
+      )
+      parse_lambda_body(response)
+    end
+
     private
 
     # Handles various Lambda proxy integration response shapes:

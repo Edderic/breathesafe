@@ -4,7 +4,6 @@ from typing import Dict, List, Tuple
 import numpy as np
 import pandas as pd
 import torch
-from feature_builder import FACIAL_PERIMETER_COMPONENTS
 
 STRAP_TYPES = [
     "Earloop",

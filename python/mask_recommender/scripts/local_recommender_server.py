@@ -327,6 +327,21 @@ def recommend_masks():
     payload = request.get_json(silent=True) or {}
     if payload.get("method") == "train":
         return jsonify(_train(payload))
+    if payload.get("method") == "warmup":
+        if payload.get("model_type") == "prob":
+            if "prob_artifacts" not in APP.config:
+                prob_dir = _download_latest_prob_from_s3()
+                APP.config["prob_artifacts"] = _load_prob_artifacts(prob_dir)
+            return jsonify({
+                "status": "warmed",
+                "model_type": "prob",
+                "model": APP.config["prob_artifacts"]["metadata"],
+            })
+        return jsonify({
+            "status": "warmed",
+            "model_type": "nn",
+            "model": APP.config["artifacts"]["metadata"],
+        })
     if payload.get("model_type") == "prob":
         if "prob_artifacts" not in APP.config:
             prob_dir = _download_latest_prob_from_s3()

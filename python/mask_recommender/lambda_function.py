@@ -32,4 +32,6 @@ def handler(event, context):
     logger.info("Combined lambda dispatch: method=%s", method)
     if method == "train":
         return train_handler(payload, context)
+    if method == "warmup":
+        return infer_handler({"method": "warmup", "model_type": payload.get("model_type")}, context)
     return infer_handler(payload, context)

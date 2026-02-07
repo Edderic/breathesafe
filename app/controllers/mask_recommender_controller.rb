@@ -63,6 +63,14 @@ class MaskRecommenderController < ApplicationController
     render json: { error: e.message }, status: :internal_server_error
   end
 
+  def warmup
+    function_base = params[:function_base] || params.dig(:mask_recommender, :function_base) || 'mask-recommender'
+    result = MaskRecommender.warmup(function_base: function_base)
+    render json: { status: 'ok', result: result }, status: :ok
+  rescue StandardError => e
+    render json: { error: e.message }, status: :internal_server_error
+  end
+
   def status
     job_id = params[:id].to_s
     payload = Rails.cache.read(MaskRecommenderJob.cache_key(job_id))

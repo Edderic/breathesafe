@@ -273,6 +273,7 @@ export default {
       missingFacialMeasurementsForRecommender: [],
       userId: 0,
       recommenderColumns: [],
+      recommenderWarmupKey: 'mask_recommender_warmup_done',
       expandedUsers: {}, // Track expansion state for each user
       currentSort: null,
       currentOrder: null
@@ -398,6 +399,7 @@ export default {
     this.currentSort = this.$route.query.sort || null
     this.currentOrder = this.$route.query.order || null
 
+    this.maybeWarmupRecommender()
     await this.getCurrentUser()
     if (this.currentUser) {
       await this.loadData()
@@ -440,6 +442,27 @@ export default {
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
+    maybeWarmupRecommender() {
+      try {
+        if (window.sessionStorage.getItem(this.recommenderWarmupKey) === '1') {
+          return
+        }
+      } catch (_error) {
+        return
+      }
+
+      axios.post('/mask_recommender/warmup.json')
+        .then(() => {
+          try {
+            window.sessionStorage.setItem(this.recommenderWarmupKey, '1')
+          } catch (_error) {
+            // Ignore browser storage errors and keep UX non-blocking.
+          }
+        })
+        .catch(() => {
+          // Warmup is best effort; don't surface errors to the user.
+        })
+    },
     emitPaginationUpdate() {
       this.$emit('pagination-update', {
         currentPage: this.currentPage,

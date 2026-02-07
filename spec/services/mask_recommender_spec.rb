@@ -135,4 +135,29 @@ RSpec.describe MaskRecommender, type: :service do
       expect(result.dig('metrics', 'val_acc')).to be_within(1e-6).of(0.8)
     end
   end
+
+  describe '.warmup' do
+    it 'sends warmup payload and returns parsed body' do
+      body = {
+        'status' => 'warmed',
+        'model_type' => 'nn'
+      }
+
+      allow(AwsLambdaInvokeService).to receive(:call)
+        .with(
+          function_name: 'mask-recommender-staging',
+          payload: { method: 'warmup' }
+        ).and_return({ 'body' => Oj.dump(body) })
+
+      result = described_class.warmup
+
+      expect(AwsLambdaInvokeService).to have_received(:call)
+        .with(
+          function_name: 'mask-recommender-staging',
+          payload: { method: 'warmup' }
+        )
+      expect(result['status']).to eq('warmed')
+      expect(result['model_type']).to eq('nn')
+    end
+  end
 end

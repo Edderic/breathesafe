@@ -229,6 +229,7 @@ export default {
       totalCount: 0,
       maskDataContext: {},
       recommenderPayloadHandled: false,
+      recommenderWarmupKey: 'mask_recommender_warmup_done',
     }
   },
   props: {
@@ -301,6 +302,7 @@ export default {
   async created() {
     // TODO: a parent might input data on behalf of their children.
     // Currently, this.loadStuff() assumes We're loading the profile for the current user
+    this.maybeWarmupRecommender()
     await this.load.bind(this)(this.$route.query, undefined)
 
     this.$watch(
@@ -316,6 +318,27 @@ export default {
     ...mapActions(useMasksStore, [
       'setFilterQuery'
     ]),
+    maybeWarmupRecommender() {
+      try {
+        if (window.sessionStorage.getItem(this.recommenderWarmupKey) === '1') {
+          return
+        }
+      } catch (_error) {
+        return
+      }
+
+      axios.post('/mask_recommender/warmup.json')
+        .then(() => {
+          try {
+            window.sessionStorage.setItem(this.recommenderWarmupKey, '1')
+          } catch (_error) {
+            // Ignore browser storage errors and keep UX non-blocking.
+          }
+        })
+        .catch(() => {
+          // Warmup is best effort; don't surface errors to the user.
+        })
+    },
     async load(toQuery, previousQuery) {
       this.setFilterQuery(toQuery, 'search')
       this.setFilterQuery(toQuery, 'sortByStatus')

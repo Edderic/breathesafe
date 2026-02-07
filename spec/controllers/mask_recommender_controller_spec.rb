@@ -71,4 +71,27 @@ RSpec.describe MaskRecommenderController, type: :controller do
       expect(body['context']).to eq(context)
     end
   end
+
+  describe 'POST #warmup' do
+    it 'calls MaskRecommender.warmup and returns ok' do
+      allow(MaskRecommender).to receive(:warmup).and_return({ 'status' => 'warmed' })
+
+      post :warmup, params: {}, as: :json
+
+      expect(MaskRecommender).to have_received(:warmup).with(function_base: 'mask-recommender')
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body['status']).to eq('ok')
+      expect(body['result']).to eq({ 'status' => 'warmed' })
+    end
+
+    it 'passes function_base override for warmup' do
+      allow(MaskRecommender).to receive(:warmup).and_return({ 'status' => 'warmed' })
+
+      post :warmup, params: { function_base: 'mask-recommender-rf' }, as: :json
+
+      expect(MaskRecommender).to have_received(:warmup).with(function_base: 'mask-recommender-rf')
+      expect(response).to have_http_status(:ok)
+    end
+  end
 end

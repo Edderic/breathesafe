@@ -301,9 +301,25 @@ class MaskRecommenderInference:
 def handler(event, context):
     try:
         payload = event or {}
+        method = payload.get("method")
         facial_features = payload.get('facial_measurements', {})
         model_type = payload.get('model_type')
         recommender = MaskRecommenderInference()
+        if method == "warmup":
+            if model_type == "prob":
+                recommender.load_prob_model(force=True)
+                warmed_model = recommender.prob_metadata
+            else:
+                recommender.load_model(force=True)
+                warmed_model = recommender.latest_payload
+            return {
+                'statusCode': 200,
+                'body': json.dumps({
+                    'status': 'warmed',
+                    'model_type': model_type or 'nn',
+                    'model': warmed_model,
+                })
+            }
         if model_type == 'prob':
             recommendations = recommender.recommend_masks_prob(facial_features)
             model_payload = recommender.prob_metadata
