@@ -521,12 +521,10 @@ export default {
 
       this.lastHandledRecommenderPayload = payloadParam
       this.isRecommenderLoading = true
-      this.setWaiting(true)
       try {
         await this.requestAsyncRecommendations(facialMeasurements)
       } finally {
         this.isRecommenderLoading = false
-        this.setWaiting(false)
       }
       return true
     },
