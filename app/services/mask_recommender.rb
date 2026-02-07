@@ -4,16 +4,18 @@ class MaskRecommender
   class << self
     # New primary entrypoint for inference
     def infer(facial_measurements, mask_ids: nil, function_base: 'mask-recommender')
-      heroku_env = ENV.fetch('HEROKU_ENVIRONMENT', 'development')
+      heroku_env = lambda_environment
 
       payload = {
         method: 'infer',
         facial_measurements: facial_measurements
       }
       payload[:mask_ids] = mask_ids if mask_ids.present?
+      function_name = "#{function_base}-#{heroku_env}"
+      Rails.logger.info("MaskRecommender.infer invoking #{function_name}")
 
       response = AwsLambdaInvokeService.call(
-        function_name: "#{function_base}-#{heroku_env}",
+        function_name: function_name,
         payload: payload
       )
 
@@ -64,15 +66,17 @@ class MaskRecommender
     # Trigger training on the unified PyTorch Lambda
     # Accepts optional parameters like epochs:, data_url:, target_col:
     def train(epochs: 20, data_url: nil, target_col: 'target', function_base: 'mask-recommender')
-      heroku_env = ENV.fetch('HEROKU_ENVIRONMENT', 'staging')
+      heroku_env = lambda_environment
 
       payload = { method: 'train' }
       payload[:epochs] = epochs if epochs
       payload[:data_url] = data_url if data_url
       payload[:target_col] = target_col if target_col
+      function_name = "#{function_base}-#{heroku_env}"
+      Rails.logger.info("MaskRecommender.train invoking #{function_name}")
 
       response = AwsLambdaInvokeService.call(
-        function_name: "#{function_base}-#{heroku_env}",
+        function_name: function_name,
         payload: payload
       )
 
@@ -80,9 +84,11 @@ class MaskRecommender
     end
 
     def warmup(function_base: 'mask-recommender')
-      heroku_env = ENV.fetch('HEROKU_ENVIRONMENT', 'development')
+      heroku_env = lambda_environment
+      function_name = "#{function_base}-#{heroku_env}"
+      Rails.logger.info("MaskRecommender.warmup invoking #{function_name}")
       response = AwsLambdaInvokeService.call(
-        function_name: "#{function_base}-#{heroku_env}",
+        function_name: function_name,
         payload: { method: 'warmup' }
       )
       parse_lambda_body(response)
@@ -120,6 +126,16 @@ class MaskRecommender
       value.positive?
     rescue ArgumentError, TypeError
       false
+    end
+
+    def lambda_environment
+      explicit = ENV['HEROKU_ENVIRONMENT']
+      return explicit if explicit.present?
+
+      return 'production' if Rails.env.production?
+      return 'test' if Rails.env.test?
+
+      'development'
     end
   end
 end
