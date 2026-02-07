@@ -95,6 +95,17 @@
       />
     </div>
 
+    <div
+      v-if="isRecommenderLoading"
+      class="recommender-loading-overlay"
+    >
+      <div class="recommender-loading-content">
+        <div class="recommender-spinner" />
+        <p class="recommender-loading-message">
+          Creating a recommendation sometimes takes up to a minute. Thank you for your patience.
+        </p>
+      </div>
+    </div>
 
     <MaskCards
       :cards='sortedDisplayables'
@@ -230,6 +241,7 @@ export default {
       maskDataContext: {},
       lastHandledRecommenderPayload: null,
       recommenderWarmupKey: 'mask_recommender_warmup_done',
+      isRecommenderLoading: false,
     }
   },
   props: {
@@ -490,6 +502,7 @@ export default {
     async maybeLoadRecommenderPayload(toQuery) {
       const payloadParam = toQuery.recommenderPayload
       if (!payloadParam) {
+        this.isRecommenderLoading = false
         return false
       }
 
@@ -501,15 +514,18 @@ export default {
 
       const facialMeasurements = this.decodeRecommenderPayload(payloadParam)
       if (!facialMeasurements) {
+        this.isRecommenderLoading = false
         this.message = "Failed to decode recommendations payload."
         return true
       }
 
       this.lastHandledRecommenderPayload = payloadParam
+      this.isRecommenderLoading = true
       this.setWaiting(true)
       try {
         await this.requestAsyncRecommendations(facialMeasurements)
       } finally {
+        this.isRecommenderLoading = false
         this.setWaiting(false)
       }
       return true
@@ -531,33 +547,33 @@ export default {
       }
     },
     async pollRecommendationStatus(jobId) {
-      try {
-        const response = await axios.get(`/mask_recommender/async/${jobId}.json`)
-        const status = response?.data?.status
-        if (status === 'complete') {
-          const data = response.data?.result
-          const masks = data && data.masks ? data.masks : data
-          if (masks) {
-            this.masks = masks.map((m) => new Respirator(m))
-            this.totalCount = masks.length
-            if (data && data.context) {
-              this.maskDataContext = data.context
+      while (true) {
+        try {
+          const response = await axios.get(`/mask_recommender/async/${jobId}.json`)
+          const status = response?.data?.status
+          if (status === 'complete') {
+            const data = response.data?.result
+            const masks = data && data.masks ? data.masks : data
+            if (masks) {
+              this.masks = masks.map((m) => new Respirator(m))
+              this.totalCount = masks.length
+              if (data && data.context) {
+                this.maskDataContext = data.context
+              }
             }
+            return
           }
+          if (status === 'failed') {
+            this.message = response?.data?.error || "Failed to load mask recommendations."
+            return
+          }
+        } catch (error) {
+          this.message = "Failed to load mask recommendations."
           return
         }
-        if (status === 'failed') {
-          this.message = response?.data?.error || "Failed to load mask recommendations."
-          return
-        }
-      } catch (error) {
-        this.message = "Failed to load mask recommendations."
-        return
-      }
 
-      setTimeout(() => {
-        this.pollRecommendationStatus(jobId)
-      }, 1000)
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+      }
     },
     decodeRecommenderPayload(payload) {
       try {
@@ -831,6 +847,46 @@ export default {
     justify-content: center;
     align-items: center;
     padding-top: 1em;
+  }
+
+  .recommender-loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: all;
+  }
+
+  .recommender-loading-content {
+    max-width: 32em;
+    text-align: center;
+    padding: 1.5em;
+  }
+
+  .recommender-spinner {
+    width: 2.75em;
+    height: 2.75em;
+    margin: 0 auto 0.9em;
+    border-radius: 50%;
+    border: 0.35em solid #d9d9d9;
+    border-top-color: #2c3e50;
+    animation: recommender-spin 0.9s linear infinite;
+  }
+
+  .recommender-loading-message {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.4;
+    color: #222;
+  }
+
+  @keyframes recommender-spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   @media(max-width: 1000px) {
