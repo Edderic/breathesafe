@@ -62,6 +62,47 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Ensure Lambda role can read/write model artifacts
+        env:
+          ROLE_NAME: lambda-ex
+          POLICY_NAME: MaskRecommenderArtifactsAccess
+        run: |
+          set -euo pipefail
+          cat > /tmp/lambda-s3-artifacts-policy.json <<'JSON'
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Sid": "ListArtifactBuckets",
+                "Effect": "Allow",
+                "Action": [
+                  "s3:ListBucket"
+                ],
+                "Resource": [
+                  "arn:aws:s3:::breathesafe",
+                  "arn:aws:s3:::breathesafe-development"
+                ]
+              },
+              {
+                "Sid": "ReadWriteArtifactObjects",
+                "Effect": "Allow",
+                "Action": [
+                  "s3:GetObject",
+                  "s3:PutObject"
+                ],
+                "Resource": [
+                  "arn:aws:s3:::breathesafe/mask_recommender/models/*",
+                  "arn:aws:s3:::breathesafe-development/mask_recommender/models/*"
+                ]
+              }
+            ]
+          }
+          JSON
+          aws iam put-role-policy \
+            --role-name "$ROLE_NAME" \
+            --policy-name "$POLICY_NAME" \
+            --policy-document file:///tmp/lambda-s3-artifacts-policy.json
+
       - name: Login to Amazon ECR
         id: ecr-login
         uses: aws-actions/amazon-ecr-login@v2
