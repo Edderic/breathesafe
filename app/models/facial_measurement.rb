@@ -6,6 +6,7 @@ class FacialMeasurement < ApplicationRecord
     chin_mm
     top_cheek_mm
     mid_cheek_mm
+    strap_mm
   ].freeze
 
   COLUMNS = [

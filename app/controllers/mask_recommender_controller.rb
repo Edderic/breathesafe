@@ -90,6 +90,7 @@ class MaskRecommenderController < ApplicationController
   def facial_measurements
     params.require(:facial_measurements).permit(
       *FacialMeasurement::RECOMMENDER_COLUMNS.map(&:to_sym),
+      :strap_mm,
       :facial_hair_beard_length_mm
     )
   end
