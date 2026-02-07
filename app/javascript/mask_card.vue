@@ -602,8 +602,8 @@ export default {
       }
       if (type === 'proba_fit') {
         return {
-          width: width,
-          background: this.probaFitGradient()
+          width: '100%',
+          backgroundColor: 'transparent'
         }
       }
       if (type === 'fit_tests') {
@@ -636,6 +636,9 @@ export default {
       }
       if (type === 'fit_tests') {
         return { background: this.fitTestsGradient() }
+      }
+      if (type === 'proba_fit') {
+        return { background: this.probaFitGradient() }
       }
       return {}
     },
