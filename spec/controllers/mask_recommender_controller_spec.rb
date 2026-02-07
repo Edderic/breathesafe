@@ -94,4 +94,16 @@ RSpec.describe MaskRecommenderController, type: :controller do
       expect(response).to have_http_status(:ok)
     end
   end
+
+  describe 'GET #status' do
+    it 'returns queued when cache payload is missing' do
+      allow(Rails.cache).to receive(:read).and_return(nil)
+
+      get :status, params: { id: 'missing-job-id' }, as: :json
+
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body['status']).to eq('queued')
+    end
+  end
 end

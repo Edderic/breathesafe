@@ -76,7 +76,7 @@ class MaskRecommenderController < ApplicationController
     payload = Rails.cache.read(MaskRecommenderJob.cache_key(job_id))
 
     if payload.blank?
-      render json: { error: 'not_found' }, status: :not_found
+      render json: { status: 'queued' }, status: :ok
       return
     end
 
