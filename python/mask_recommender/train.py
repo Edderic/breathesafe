@@ -715,6 +715,11 @@ def main(argv=None):
     parser.add_argument('--use-diff-perimeter-mask-bins', action='store_true', help='Include per-mask perimeter difference bin features.')
     parser.add_argument('--exclude-mask-code', action='store_true', help='Exclude unique_internal_model_code from categorical features.')
     parser.add_argument('--class-reweight', action='store_true', help='Reweight loss by class balance.')
+    parser.add_argument(
+        '--retrain-with-full',
+        action='store_true',
+        help='After split metrics, retrain from scratch on the full dataset before saving artifacts.',
+    )
     args = parser.parse_args(argv)
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
@@ -829,6 +834,17 @@ def main(argv=None):
         val_precision = precision_score(val_labels, val_preds, zero_division=0)
         val_recall = recall_score(val_labels, val_preds, zero_division=0)
         val_f1 = f1_score(val_labels, val_preds, zero_division=0)
+        saved_model_scope = 'split_train'
+        if args.retrain_with_full:
+            logging.info("Retraining probabilistic model on full dataset for artifact save.")
+            params, _ = train_prob_model(
+                cleaned_fit_tests,
+                mask_id_index,
+                style_categories,
+                epochs=args.epochs,
+                learning_rate=args.learning_rate,
+            )
+            saved_model_scope = 'full_dataset'
 
         prefix = f"mask_recommender/models/{timestamp}"
 
@@ -859,6 +875,9 @@ def main(argv=None):
             'model_type': 'prob',
             'mask_id_index': mask_id_index,
             'style_categories': style_categories,
+            'retrain_with_full': bool(args.retrain_with_full),
+            'saved_model_training_scope': saved_model_scope,
+            'validation_metrics_source': 'split_validation',
         }
         metadata_key = f"{prefix}/prob_model_metadata.json"
         metadata_uri = _upload_json_to_s3(metadata, metadata_key)
@@ -873,6 +892,9 @@ def main(argv=None):
             'train_samples': int(train_df.shape[0]),
             'val_samples': int(val_df.shape[0]),
             'losses': prob_losses,
+            'retrain_with_full': bool(args.retrain_with_full),
+            'saved_model_training_scope': saved_model_scope,
+            'validation_metrics_source': 'split_validation',
         }
         metrics_key = f"{prefix}/prob_metrics.json"
         metrics_uri = _upload_json_to_s3(metrics, metrics_key)
@@ -948,6 +970,23 @@ def main(argv=None):
                 best_f1 = candidate_f1
                 best_threshold = float(candidate)
     logging.info("Selected threshold=%.2f with val_f1=%.3f", best_threshold, best_f1)
+    saved_model_scope = 'split_train'
+    if args.retrain_with_full:
+        logging.info("Retraining NN model on full dataset for artifact save.")
+        full_idx = torch.arange(features.shape[0])
+        model, _, _, _, _, _, _, _, _ = train_predictor_with_split(
+            features,
+            target,
+            full_idx,
+            full_idx,
+            epochs=args.epochs,
+            learning_rate=args.learning_rate,
+            loss_type=args.loss_type,
+            focal_alpha=args.focal_alpha,
+            focal_gamma=args.focal_gamma,
+            class_weighting=args.class_reweight,
+        )
+        saved_model_scope = 'full_dataset'
 
     recommendations_path = os.path.join(
         images_dir,
@@ -1101,6 +1140,9 @@ def main(argv=None):
         'fit_tests_training_total': int(filtered_fit_tests.shape[0]),
         'fit_tests_training_actual_arkit': training_actual_count,
         'fit_tests_training_predicted_arkit': training_predicted_count,
+        'retrain_with_full': bool(args.retrain_with_full),
+        'saved_model_training_scope': saved_model_scope,
+        'validation_metrics_source': 'split_validation',
     }
     metrics_key = f"{prefix}/metrics.json"
     metrics_uri = _upload_json_to_s3(metrics, metrics_key)
@@ -1117,6 +1159,9 @@ def main(argv=None):
         'use_diff_perimeter_bins': args.use_diff_perimeter_bins,
         'use_diff_perimeter_mask_bins': args.use_diff_perimeter_mask_bins,
         'exclude_mask_code': args.exclude_mask_code,
+        'retrain_with_full': bool(args.retrain_with_full),
+        'saved_model_training_scope': saved_model_scope,
+        'validation_metrics_source': 'split_validation',
     }
     metadata_key = f"{prefix}/model_metadata.json"
     metadata_uri = _upload_json_to_s3(metadata, metadata_key)

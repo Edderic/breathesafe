@@ -305,6 +305,8 @@ def _train(payload):
         train_argv.append("--use-diff-perimeter-mask-bins")
     if (payload or {}).get("exclude_mask_code"):
         train_argv.append("--exclude-mask-code")
+    if (payload or {}).get("retrain_with_full"):
+        train_argv.append("--retrain-with-full")
 
     result = train_main(train_argv)
 

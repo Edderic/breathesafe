@@ -28,6 +28,8 @@ def _build_train_argv(event):
         argv.append('--use-diff-perimeter-mask-bins')
     if event.get('exclude_mask_code'):
         argv.append('--exclude-mask-code')
+    if event.get('retrain_with_full'):
+        argv.append('--retrain-with-full')
     return argv
 
 def handler(event, context):
