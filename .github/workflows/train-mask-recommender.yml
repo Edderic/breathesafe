@@ -106,6 +106,8 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           IMAGE_DIGEST: ${{ steps.build-image.outputs.image_digest }}
           ENVIRONMENT: staging
+          BREATHESAFE_SERVICE_EMAIL: ${{ secrets.BREATHESAFE_SERVICE_EMAIL }}
+          BREATHESAFE_SERVICE_PASSWORD: ${{ secrets.BREATHESAFE_SERVICE_PASSWORD }}
         run: |
           set -euo pipefail
           aws lambda update-function-code \
@@ -124,6 +126,12 @@ jobs:
           env["IMAGE_TAG"] = os.environ.get("IMAGE_TAG")
           env["IMAGE_DIGEST"] = os.environ.get("IMAGE_DIGEST")
           env["ENVIRONMENT"] = os.environ.get("ENVIRONMENT")
+          email = os.environ.get("BREATHESAFE_SERVICE_EMAIL")
+          password = os.environ.get("BREATHESAFE_SERVICE_PASSWORD")
+          if email:
+              env["BREATHESAFE_SERVICE_EMAIL"] = email
+          if password:
+              env["BREATHESAFE_SERVICE_PASSWORD"] = password
           print(json.dumps({"Variables": env}))
           PY
           aws lambda update-function-configuration \
@@ -139,6 +147,8 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           IMAGE_DIGEST: ${{ steps.build-image.outputs.image_digest }}
           ENVIRONMENT: production
+          BREATHESAFE_SERVICE_EMAIL: ${{ secrets.BREATHESAFE_SERVICE_EMAIL }}
+          BREATHESAFE_SERVICE_PASSWORD: ${{ secrets.BREATHESAFE_SERVICE_PASSWORD }}
         run: |
           set -euo pipefail
           aws lambda update-function-code \
@@ -157,6 +167,12 @@ jobs:
           env["IMAGE_TAG"] = os.environ.get("IMAGE_TAG")
           env["IMAGE_DIGEST"] = os.environ.get("IMAGE_DIGEST")
           env["ENVIRONMENT"] = os.environ.get("ENVIRONMENT")
+          email = os.environ.get("BREATHESAFE_SERVICE_EMAIL")
+          password = os.environ.get("BREATHESAFE_SERVICE_PASSWORD")
+          if email:
+              env["BREATHESAFE_SERVICE_EMAIL"] = email
+          if password:
+              env["BREATHESAFE_SERVICE_PASSWORD"] = password
           print(json.dumps({"Variables": env}))
           PY
           aws lambda update-function-configuration \
