@@ -685,7 +685,7 @@ export default {
       const red = '#c0392b'
       const yellow = '#f1c40f'
       const green = '#27ae60'
-      return `linear-gradient(90deg, ${red} 0%, ${red} 33.333%, ${yellow} 50%, ${yellow} 66.667%, ${green} 100%)`
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} 33.333%, ${green} 100%)`
     },
     breathabilityGradient() {
       const bounds = this.breathabilityBounds()
@@ -700,15 +700,12 @@ export default {
         return null
       }
       const p33 = orderedMin + (orderedMax - orderedMin) * 0.3333333333333333
-      const p66 = orderedMin + (orderedMax - orderedMin) * 0.6666666666666666
       const red = '#c0392b'
       const yellow = '#f1c40f'
       const green = '#27ae60'
       const scalePosition = (value) => ((value - orderedMin) / (orderedMax - orderedMin)) * 100
       const axisStop33 = scalePosition(p33)
-      const axisStop66 = scalePosition(p66)
-      const axisMid = (axisStop33 + axisStop66) / 2
-      return `linear-gradient(90deg, ${red} 0%, ${red} ${axisStop33}%, ${yellow} ${axisMid}%, ${yellow} ${axisStop66}%, ${green} 100%)`
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} ${axisStop33}%, ${green} 100%)`
     },
     probaFitGradient() {
       const red = '#c0392b'
@@ -720,7 +717,7 @@ export default {
       const red = '#c0392b'
       const yellow = '#f1c40f'
       const green = '#27ae60'
-      return `linear-gradient(90deg, ${red} 0%, ${red} 33.333%, ${yellow} 50%, ${yellow} 66.667%, ${green} 100%)`
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} 33.333%, ${green} 100%)`
     },
     statIsMissing(type, mask) {
       if (type === 'filtration') {
