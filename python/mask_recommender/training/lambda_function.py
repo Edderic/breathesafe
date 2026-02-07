@@ -64,6 +64,9 @@ def handler(event, context):
         # Keep matplotlib/joblib caches on writable storage in Lambda.
         os.environ.setdefault('MPLCONFIGDIR', '/tmp/matplotlib')
         os.makedirs(os.environ['MPLCONFIGDIR'], exist_ok=True)
+        # Force training visual outputs to writable storage in Lambda.
+        os.environ['MASK_RECOMMENDER_IMAGES_DIR'] = '/tmp/mask_recommender/images'
+        os.makedirs(os.environ['MASK_RECOMMENDER_IMAGES_DIR'], exist_ok=True)
 
         # Allow caller to specify environment and S3 bucket
         env = _resolve_env(event)

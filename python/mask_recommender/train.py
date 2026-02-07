@@ -1,4 +1,5 @@
 import argparse
+import io
 import json
 import logging
 import os
@@ -675,6 +676,10 @@ def _is_lambda_runtime():
 def _images_output_dir():
     override = os.environ.get('MASK_RECOMMENDER_IMAGES_DIR')
     if override:
+        if _is_lambda_runtime():
+            normalized = override.strip()
+            if normalized.startswith("python/") or normalized.startswith("./python/"):
+                return "/tmp/mask_recommender/images"
         return override
     if _is_lambda_runtime():
         return "/tmp/mask_recommender/images"
@@ -719,6 +724,25 @@ def _upload_json_to_s3(payload, key):
         Key=key,
         Body=json.dumps(payload, indent=2).encode('utf-8'),
         ContentType='application/json'
+    )
+    return f"s3://{bucket}/{key}"
+
+
+def _upload_png_bytes_to_s3(png_bytes, key):
+    bucket = _s3_bucket()
+    s3 = boto3.client('s3', region_name=_s3_region())
+    profile = os.environ.get('AWS_PROFILE')
+    logging.info(
+        "S3 upload using bucket=%s region=%s profile=%s",
+        bucket,
+        _s3_region(),
+        profile or "default"
+    )
+    s3.put_object(
+        Bucket=bucket,
+        Key=key,
+        Body=png_bytes,
+        ContentType='image/png'
     )
     return f"s3://{bucket}/{key}"
 
@@ -1029,17 +1053,18 @@ def main(argv=None):
        with torch.no_grad():
            return model(x_infer).squeeze().cpu().numpy()
 
-    build_recommendation_preview(
+    recommendation_preview = build_recommendation_preview(
         user_ids=[99, 101],
         fit_tests_df=fit_tests_with_imputed_arkit_via_traditional_facial_measurements,
         mask_candidates=mask_candidates,
         predict_fn=predict_nn,
-        output_path=recommendations_path,
+        output_path=None if _should_upload_visual_artifacts_to_s3() else recommendations_path,
         threshold=best_threshold,
     )
     recommendations_artifact = recommendations_path
     if _should_upload_visual_artifacts_to_s3():
-        recommendations_uri = _upload_visual_artifact(recommendations_path, timestamp)
+        recommendations_key = f"mask_recommender/models/{timestamp}/recommendations_{timestamp}.json"
+        recommendations_uri = _upload_json_to_s3(recommendation_preview, recommendations_key)
         recommendations_artifact = recommendations_uri
         logging.info("Saved recommendation preview to %s", recommendations_uri)
     else:
@@ -1058,15 +1083,19 @@ def main(argv=None):
         plt.grid(True, linestyle='--', alpha=0.4)
         plt.legend()
         plt.tight_layout()
-        plt.savefig(loss_plot_path)
-        plt.close()
         loss_plot_artifact = loss_plot_path
         if _should_upload_visual_artifacts_to_s3():
-            loss_plot_uri = _upload_visual_artifact(loss_plot_path, timestamp)
+            loss_buf = io.BytesIO()
+            plt.savefig(loss_buf, format='png')
+            loss_buf.seek(0)
+            loss_plot_key = f"mask_recommender/models/{timestamp}/{timestamp}_training_loss.png"
+            loss_plot_uri = _upload_png_bytes_to_s3(loss_buf.getvalue(), loss_plot_key)
             loss_plot_artifact = loss_plot_uri
             logging.info("Saved training loss plot to %s", loss_plot_uri)
         else:
+            plt.savefig(loss_plot_path)
             logging.info("Saved training loss plot to %s", loss_plot_path)
+        plt.close()
 
     roc_plot_path = os.path.join(images_dir, f"{timestamp}_roc_auc.png")
     plt.figure(figsize=(8, 4))
@@ -1091,15 +1120,19 @@ def main(argv=None):
     plt.grid(True, linestyle='--', alpha=0.4)
     plt.legend()
     plt.tight_layout()
-    plt.savefig(roc_plot_path)
-    plt.close()
     roc_plot_artifact = roc_plot_path
     if _should_upload_visual_artifacts_to_s3():
-        roc_plot_uri = _upload_visual_artifact(roc_plot_path, timestamp)
+        roc_buf = io.BytesIO()
+        plt.savefig(roc_buf, format='png')
+        roc_buf.seek(0)
+        roc_plot_key = f"mask_recommender/models/{timestamp}/{timestamp}_roc_auc.png"
+        roc_plot_uri = _upload_png_bytes_to_s3(roc_buf.getvalue(), roc_plot_key)
         roc_plot_artifact = roc_plot_uri
         logging.info("Saved ROC-AUC plot to %s", roc_plot_uri)
     else:
+        plt.savefig(roc_plot_path)
         logging.info("Saved ROC-AUC plot to %s", roc_plot_path)
+    plt.close()
 
     val_results_path = os.path.join(images_dir, f"{timestamp}_validation_results.json")
     val_frame = features.iloc[val_idx].copy()
@@ -1110,14 +1143,15 @@ def main(argv=None):
     val_frame["confidence"] = np.maximum(val_probs, 1 - val_probs)
     val_frame = val_frame.sort_values(by="confidence", ascending=False)
     val_results = val_frame.to_dict(orient="records")
-    with open(val_results_path, "w", encoding="utf-8") as handle:
-        json.dump(val_results, handle, indent=2)
     val_results_artifact = val_results_path
     if _should_upload_visual_artifacts_to_s3():
-        val_results_uri = _upload_visual_artifact(val_results_path, timestamp)
+        val_results_key = f"mask_recommender/models/{timestamp}/{timestamp}_validation_results.json"
+        val_results_uri = _upload_json_to_s3(val_results, val_results_key)
         val_results_artifact = val_results_uri
         logging.info("Saved validation results to %s", val_results_uri)
     else:
+        with open(val_results_path, "w", encoding="utf-8") as handle:
+            json.dump(val_results, handle, indent=2)
         logging.info("Saved validation results to %s", val_results_path)
 
     logging.info(f"masks with fit tests that are missing perimeter_mm: {tested_missing_perimeter_mm}")
