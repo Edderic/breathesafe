@@ -1,7 +1,6 @@
 import json
 import os
 import logging
-from train import main
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -62,6 +61,10 @@ def handler(event, context):
     try:
         logger.info("Starting training process")
 
+        # Keep matplotlib/joblib caches on writable storage in Lambda.
+        os.environ.setdefault('MPLCONFIGDIR', '/tmp/matplotlib')
+        os.makedirs(os.environ['MPLCONFIGDIR'], exist_ok=True)
+
         # Allow caller to specify environment and S3 bucket
         env = _resolve_env(event)
         bucket = (event or {}).get('s3_bucket') or os.environ.get('S3_BUCKET_NAME')
@@ -82,6 +85,7 @@ def handler(event, context):
         logger.info("Training argv: %s", train_argv)
 
         # Call the main training function
+        from train import main  # Lazy import: avoids loading training stack on infer cold-start.
         result = main(train_argv)
 
         logger.info("Training completed successfully")

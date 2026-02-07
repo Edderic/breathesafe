@@ -668,6 +668,28 @@ def _s3_region():
     return os.environ.get('S3_BUCKET_REGION') or os.environ.get('AWS_REGION') or 'us-east-1'
 
 
+def _is_lambda_runtime():
+    return bool(os.environ.get('AWS_LAMBDA_FUNCTION_NAME'))
+
+
+def _images_output_dir():
+    override = os.environ.get('MASK_RECOMMENDER_IMAGES_DIR')
+    if override:
+        return override
+    if _is_lambda_runtime():
+        return "/tmp/mask_recommender/images"
+    return "python/mask_recommender/images"
+
+
+def _should_upload_visual_artifacts_to_s3():
+    return _env_name() in ("staging", "production")
+
+
+def _upload_visual_artifact(local_path, timestamp):
+    key = f"mask_recommender/models/{timestamp}/{os.path.basename(local_path)}"
+    return _upload_file_to_s3(local_path, key)
+
+
 def _upload_file_to_s3(local_path, key):
     bucket = _s3_bucket()
     s3 = boto3.client('s3', region_name=_s3_region())
@@ -940,7 +962,7 @@ def main(argv=None):
 
     logging.info("Model training complete. Feature count: %s", features.shape[1])
     feature_columns = list(features.columns)
-    images_dir = "python/mask_recommender/images"
+    images_dir = _images_output_dir()
     os.makedirs(images_dir, exist_ok=True)
     timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
 
@@ -1015,7 +1037,14 @@ def main(argv=None):
         output_path=recommendations_path,
         threshold=best_threshold,
     )
-    logging.info("Saved recommendation preview to %s", recommendations_path)
+    recommendations_artifact = recommendations_path
+    if _should_upload_visual_artifacts_to_s3():
+        recommendations_uri = _upload_visual_artifact(recommendations_path, timestamp)
+        recommendations_artifact = recommendations_uri
+        logging.info("Saved recommendation preview to %s", recommendations_uri)
+    else:
+        logging.info("Saved recommendation preview to %s", recommendations_path)
+    loss_plot_artifact = None
     if train_losses:
         loss_plot_path = os.path.join(images_dir, f"{timestamp}_training_loss.png")
         plt.figure(figsize=(8, 4))
@@ -1031,7 +1060,13 @@ def main(argv=None):
         plt.tight_layout()
         plt.savefig(loss_plot_path)
         plt.close()
-        logging.info("Saved training loss plot to %s", loss_plot_path)
+        loss_plot_artifact = loss_plot_path
+        if _should_upload_visual_artifacts_to_s3():
+            loss_plot_uri = _upload_visual_artifact(loss_plot_path, timestamp)
+            loss_plot_artifact = loss_plot_uri
+            logging.info("Saved training loss plot to %s", loss_plot_uri)
+        else:
+            logging.info("Saved training loss plot to %s", loss_plot_path)
 
     roc_plot_path = os.path.join(images_dir, f"{timestamp}_roc_auc.png")
     plt.figure(figsize=(8, 4))
@@ -1058,7 +1093,13 @@ def main(argv=None):
     plt.tight_layout()
     plt.savefig(roc_plot_path)
     plt.close()
-    logging.info("Saved ROC-AUC plot to %s", roc_plot_path)
+    roc_plot_artifact = roc_plot_path
+    if _should_upload_visual_artifacts_to_s3():
+        roc_plot_uri = _upload_visual_artifact(roc_plot_path, timestamp)
+        roc_plot_artifact = roc_plot_uri
+        logging.info("Saved ROC-AUC plot to %s", roc_plot_uri)
+    else:
+        logging.info("Saved ROC-AUC plot to %s", roc_plot_path)
 
     val_results_path = os.path.join(images_dir, f"{timestamp}_validation_results.json")
     val_frame = features.iloc[val_idx].copy()
@@ -1071,7 +1112,13 @@ def main(argv=None):
     val_results = val_frame.to_dict(orient="records")
     with open(val_results_path, "w", encoding="utf-8") as handle:
         json.dump(val_results, handle, indent=2)
-    logging.info("Saved validation results to %s", val_results_path)
+    val_results_artifact = val_results_path
+    if _should_upload_visual_artifacts_to_s3():
+        val_results_uri = _upload_visual_artifact(val_results_path, timestamp)
+        val_results_artifact = val_results_uri
+        logging.info("Saved validation results to %s", val_results_uri)
+    else:
+        logging.info("Saved validation results to %s", val_results_path)
 
     logging.info(f"masks with fit tests that are missing perimeter_mm: {tested_missing_perimeter_mm}")
 
@@ -1140,6 +1187,10 @@ def main(argv=None):
         'fit_tests_training_total': int(filtered_fit_tests.shape[0]),
         'fit_tests_training_actual_arkit': training_actual_count,
         'fit_tests_training_predicted_arkit': training_predicted_count,
+        'recommendations_artifact': recommendations_artifact,
+        'training_loss_artifact': loss_plot_artifact,
+        'roc_auc_artifact': roc_plot_artifact,
+        'validation_results_artifact': val_results_artifact,
         'retrain_with_full': bool(args.retrain_with_full),
         'saved_model_training_scope': saved_model_scope,
         'validation_metrics_source': 'split_validation',
