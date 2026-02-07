@@ -24,21 +24,24 @@ class MaskRecommender
       proba_map = body.is_a?(Hash) ? body['proba_fit'] : nil
       raise "Invalid lambda response shape: #{body.inspect}" if !mask_map.is_a?(Hash) || !proba_map.is_a?(Hash)
 
-      mask_ids = mask_map.map { |_k, v| v }
-      proba_fits = proba_map.map { |_k, v| v }
+      recommended_pairs = mask_map.each_with_object([]) do |(key, mask_id), rows|
+        next unless proba_map.key?(key)
+
+        rows << [mask_id, proba_map[key]]
+      end
+      recommended_mask_ids = recommended_pairs.map(&:first)
       masks = Mask.with_aggregations.to_a
       masks_by_id = masks.index_by { |m| m['id'] }
-      mask_ids_without_recommendation = masks.map { |m| m['id'] } - mask_ids
+      mask_ids_without_recommendation = masks.map { |m| m['id'] } - recommended_mask_ids
 
       collection = []
-      mask_ids.each.with_index do |mask_id, index|
-        proba_fit = proba_fits[index]
+      recommended_pairs.each do |mask_id, proba_fit|
         mask = masks_by_id[mask_id]
         next unless mask_perimeter_present?(mask)
 
         collection << {
           'id' => mask_id,
-          'proba_fit' => proba_fit
+          'proba_fit' => proba_fit.to_f
         }.merge(JSON.parse(mask.to_json))
       end
 

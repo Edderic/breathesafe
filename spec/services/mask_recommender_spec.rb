@@ -96,6 +96,29 @@ RSpec.describe MaskRecommender, type: :service do
 
       expect(result.map { |row| row['id'] }).to eq([111])
     end
+
+    it 'maps mask_id to proba_fit by lambda key, not hash order' do
+      masks = [
+        { 'id' => 111, 'name' => 'Mask A', 'perimeter_mm' => 300 },
+        { 'id' => 222, 'name' => 'Mask B', 'perimeter_mm' => 310 }
+      ]
+
+      # Intentionally mismatched insertion order between maps.
+      body = {
+        'mask_id' => { '1' => 111, '0' => 222 },
+        'proba_fit' => { '0' => 0.9, '1' => 0.1 }
+      }
+
+      allow(Mask).to receive(:with_aggregations).and_return(masks)
+      allow(AwsLambdaInvokeService).to receive(:call)
+        .and_return({ 'body' => Oj.dump(body) })
+
+      result = described_class.infer(facial)
+      by_id = result.index_by { |row| row['id'] }
+
+      expect(by_id[222]['proba_fit']).to be_within(1e-6).of(0.9)
+      expect(by_id[111]['proba_fit']).to be_within(1e-6).of(0.1)
+    end
   end
 
   describe '.train' do
