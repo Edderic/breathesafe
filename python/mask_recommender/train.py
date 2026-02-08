@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import torch
+from botocore.exceptions import ClientError
 from breathesafe_network import (build_session,
                                  fetch_facial_measurements_fit_tests,
                                  fetch_json)
@@ -747,6 +748,18 @@ def _upload_png_bytes_to_s3(png_bytes, key):
     return f"s3://{bucket}/{key}"
 
 
+def _best_effort_visual_upload(upload_fn, artifact_name, fallback_artifact=None):
+    """
+    Visual/debug artifacts should not fail the entire training run.
+    Model + metadata + metrics uploads remain strict.
+    """
+    try:
+        return upload_fn()
+    except (ClientError, OSError, RuntimeError, ValueError) as exc:
+        logging.warning("Skipping %s upload due to error: %s", artifact_name, exc)
+        return fallback_artifact
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Train fit predictor model.')
     parser.add_argument('--epochs', type=int, default=50, help='Number of training epochs.')
@@ -1064,9 +1077,14 @@ def main(argv=None):
     recommendations_artifact = recommendations_path
     if _should_upload_visual_artifacts_to_s3():
         recommendations_key = f"mask_recommender/models/{timestamp}/recommendations_{timestamp}.json"
-        recommendations_uri = _upload_json_to_s3(recommendation_preview, recommendations_key)
+        recommendations_uri = _best_effort_visual_upload(
+            lambda: _upload_json_to_s3(recommendation_preview, recommendations_key),
+            "recommendation preview",
+            fallback_artifact=None,
+        )
         recommendations_artifact = recommendations_uri
-        logging.info("Saved recommendation preview to %s", recommendations_uri)
+        if recommendations_uri:
+            logging.info("Saved recommendation preview to %s", recommendations_uri)
     else:
         logging.info("Saved recommendation preview to %s", recommendations_path)
     loss_plot_artifact = None
@@ -1089,9 +1107,14 @@ def main(argv=None):
             plt.savefig(loss_buf, format='png')
             loss_buf.seek(0)
             loss_plot_key = f"mask_recommender/models/{timestamp}/{timestamp}_training_loss.png"
-            loss_plot_uri = _upload_png_bytes_to_s3(loss_buf.getvalue(), loss_plot_key)
+            loss_plot_uri = _best_effort_visual_upload(
+                lambda: _upload_png_bytes_to_s3(loss_buf.getvalue(), loss_plot_key),
+                "training loss plot",
+                fallback_artifact=None,
+            )
             loss_plot_artifact = loss_plot_uri
-            logging.info("Saved training loss plot to %s", loss_plot_uri)
+            if loss_plot_uri:
+                logging.info("Saved training loss plot to %s", loss_plot_uri)
         else:
             plt.savefig(loss_plot_path)
             logging.info("Saved training loss plot to %s", loss_plot_path)
@@ -1126,9 +1149,14 @@ def main(argv=None):
         plt.savefig(roc_buf, format='png')
         roc_buf.seek(0)
         roc_plot_key = f"mask_recommender/models/{timestamp}/{timestamp}_roc_auc.png"
-        roc_plot_uri = _upload_png_bytes_to_s3(roc_buf.getvalue(), roc_plot_key)
+        roc_plot_uri = _best_effort_visual_upload(
+            lambda: _upload_png_bytes_to_s3(roc_buf.getvalue(), roc_plot_key),
+            "ROC plot",
+            fallback_artifact=None,
+        )
         roc_plot_artifact = roc_plot_uri
-        logging.info("Saved ROC-AUC plot to %s", roc_plot_uri)
+        if roc_plot_uri:
+            logging.info("Saved ROC-AUC plot to %s", roc_plot_uri)
     else:
         plt.savefig(roc_plot_path)
         logging.info("Saved ROC-AUC plot to %s", roc_plot_path)
@@ -1146,9 +1174,14 @@ def main(argv=None):
     val_results_artifact = val_results_path
     if _should_upload_visual_artifacts_to_s3():
         val_results_key = f"mask_recommender/models/{timestamp}/{timestamp}_validation_results.json"
-        val_results_uri = _upload_json_to_s3(val_results, val_results_key)
+        val_results_uri = _best_effort_visual_upload(
+            lambda: _upload_json_to_s3(val_results, val_results_key),
+            "validation results",
+            fallback_artifact=None,
+        )
         val_results_artifact = val_results_uri
-        logging.info("Saved validation results to %s", val_results_uri)
+        if val_results_uri:
+            logging.info("Saved validation results to %s", val_results_uri)
     else:
         with open(val_results_path, "w", encoding="utf-8") as handle:
             json.dump(val_results, handle, indent=2)
