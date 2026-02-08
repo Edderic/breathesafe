@@ -489,9 +489,19 @@
                     <div class='stat-bar stat-bar-missing-fill'></div>
                     <div class='stat-bar-label'>{{ statMissingText('filtration') }}</div>
                   </div>
-                  <div v-else class='stat-bar-wrapper'>
+                  <div v-else class='stat-bar-wrapper' :style="statBarWrapperStyle('filtration')">
                     <div class='stat-bar-axis'></div>
                     <div class='stat-bar' :style="statBarStyle(statPercent('filtration'), 'filtration')"></div>
+                    <div
+                      v-if="statNeedsMarker('filtration')"
+                      class='stat-bar-marker'
+                      :style='statMarkerStyle(statPercent("filtration"), "filtration")'
+                    ></div>
+                    <div
+                      v-if="statNeedsMarker('filtration')"
+                      class='stat-bar-cover'
+                      :style='statCoverStyle(statPercent("filtration"), "filtration")'
+                    ></div>
                     <div class='stat-bar-label'>{{ statLabel('filtration') }}</div>
                     <div v-if="statAxisLabel('filtration', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('filtration', 'min') }}</div>
                     <div v-if="statAxisLabel('filtration', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('filtration', 'max') }}</div>
@@ -508,9 +518,19 @@
                     <div class='stat-bar stat-bar-missing-fill'></div>
                     <div class='stat-bar-label'>{{ statMissingText('breathability') }}</div>
                   </div>
-                  <div v-else class='stat-bar-wrapper'>
+                  <div v-else class='stat-bar-wrapper' :style="statBarWrapperStyle('breathability')">
                     <div class='stat-bar-axis'></div>
                     <div class='stat-bar' :style="statBarStyle(statPercent('breathability'), 'breathability')"></div>
+                    <div
+                      v-if="statNeedsMarker('breathability')"
+                      class='stat-bar-marker'
+                      :style='statMarkerStyle(statPercent("breathability"), "breathability")'
+                    ></div>
+                    <div
+                      v-if="statNeedsMarker('breathability')"
+                      class='stat-bar-cover'
+                      :style='statCoverStyle(statPercent("breathability"), "breathability")'
+                    ></div>
                     <div class='stat-bar-label'>{{ statLabel('breathability') }}</div>
                     <div v-if="statAxisLabel('breathability', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('breathability', 'min') }}</div>
                     <div v-if="statAxisLabel('breathability', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('breathability', 'max') }}</div>
@@ -1354,10 +1374,91 @@ export default {
       return 'Missing'
     },
     statBarStyle(percent, type) {
+      const clamped = this.clampPercent(percent)
+      const width = clamped === null ? '0%' : `${Math.round(clamped * 100)}%`
+
+      if (type === 'filtration' || type === 'breathability') {
+        return {
+          width: '100%',
+          backgroundColor: 'transparent'
+        }
+      }
+
+      if (type === 'perimeter') {
+        return {
+          width: width,
+          backgroundColor: '#a3a8ad'
+        }
+      }
+
       return {
-        width: `${Math.round(percent * 100)}%`,
+        width: width,
         backgroundColor: this.statRowColors()[type]
       }
+    },
+    statBarWrapperStyle(type) {
+      if (type === 'filtration') {
+        return { background: this.filtrationGradient() }
+      }
+      if (type === 'breathability') {
+        const gradient = this.breathabilityGradient()
+        if (!gradient) {
+          return {}
+        }
+        return { background: gradient }
+      }
+      return {}
+    },
+    statNeedsMarker(type) {
+      return ['filtration', 'breathability'].includes(type)
+    },
+    statMarkerStyle(percent) {
+      const clamped = this.clampPercent(percent)
+      if (clamped === null) {
+        return {}
+      }
+      const position = Math.round(clamped * 10000) / 100
+      return {
+        left: `calc(${position}% - 1px)`
+      }
+    },
+    statCoverStyle(percent) {
+      const clamped = this.clampPercent(percent)
+      if (clamped === null) {
+        return {}
+      }
+      const position = Math.round(clamped * 10000) / 100
+      return {
+        left: `calc(${position}% + 1px)`,
+        backgroundColor: '#f1f1f1'
+      }
+    },
+    filtrationGradient() {
+      const red = '#c0392b'
+      const yellow = '#f1c40f'
+      const green = '#27ae60'
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} 33.333%, ${green} 100%)`
+    },
+    breathabilityGradient() {
+      const min = this.dataContext.breathability_min
+      const max = this.dataContext.breathability_max
+      if (min === null || max === null || min === undefined || max === undefined) {
+        return null
+      }
+
+      const orderedMin = Math.min(min, max)
+      const orderedMax = Math.max(min, max)
+      if (orderedMax <= orderedMin) {
+        return null
+      }
+
+      const p33 = orderedMin + (orderedMax - orderedMin) * 0.3333333333333333
+      const red = '#c0392b'
+      const yellow = '#f1c40f'
+      const green = '#27ae60'
+      const scalePosition = (value) => ((value - orderedMin) / (orderedMax - orderedMin)) * 100
+      const axisStop33 = scalePosition(p33)
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} ${axisStop33}%, ${green} 100%)`
     },
     statRowColors() {
       return {
@@ -1954,6 +2055,7 @@ export default {
     bottom: 0.35em;
     height: 2px;
     background-color: rgba(0, 0, 0, 0.2);
+    z-index: 1;
   }
   .stat-bar {
     position: absolute;
@@ -1963,9 +2065,26 @@ export default {
     border-radius: 0.4em;
     opacity: 0.9;
   }
+  .stat-bar-marker {
+    position: absolute;
+    width: 2px;
+    top: 0;
+    bottom: 0;
+    background-color: #ffffff;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.6);
+    z-index: 2;
+  }
+  .stat-bar-cover {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background-color: #f1f1f1;
+    z-index: 1;
+  }
   .stat-bar-label {
     position: relative;
-    z-index: 1;
+    z-index: 3;
     font-weight: bold;
     color: #111;
     text-shadow: 1px 1px 2px #fff;
