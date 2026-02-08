@@ -13,8 +13,9 @@
 # Returns the parsed JSON response from the Lambda.
 class MaskRecommenderTraining
   WORKFLOW_PARITY_CONFIG = {
-    epochs: 1000,
+    epochs: 600,
     learning_rate: 0.0001,
+    use_diff_perimeter_bins: true,
     retrain_with_full: true
   }.freeze
 
