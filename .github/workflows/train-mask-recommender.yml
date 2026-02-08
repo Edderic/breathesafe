@@ -98,10 +98,23 @@ jobs:
             ]
           }
           JSON
-          aws iam put-role-policy \
+          set +e
+          POLICY_ERR=$(aws iam put-role-policy \
             --role-name "$ROLE_NAME" \
             --policy-name "$POLICY_NAME" \
-            --policy-document file:///tmp/lambda-s3-artifacts-policy.json
+            --policy-document file:///tmp/lambda-s3-artifacts-policy.json \
+            2>&1)
+          POLICY_STATUS=$?
+          set -e
+          if [ "$POLICY_STATUS" -ne 0 ]; then
+            if echo "$POLICY_ERR" | grep -q "AccessDenied"; then
+              echo "Warning: unable to update IAM role policy from workflow (AccessDenied). Continuing deploy."
+              echo "$POLICY_ERR"
+            else
+              echo "$POLICY_ERR"
+              exit "$POLICY_STATUS"
+            fi
+          fi
 
       - name: Login to Amazon ECR
         id: ecr-login
