@@ -292,7 +292,19 @@ export default {
       return this.masks;
     },
     sortedDisplayables() {
-      return this.displayables;
+      const displayables = [...this.displayables]
+
+      if (this.shouldShowProbaFit) {
+        return displayables.sort((a, b) => {
+          const aVal = Number(a.probaFit)
+          const bVal = Number(b.probaFit)
+          const aNum = Number.isFinite(aVal) ? aVal : -Infinity
+          const bNum = Number.isFinite(bVal) ? bVal : -Infinity
+          return bNum - aNum
+        })
+      }
+
+      return displayables;
     },
     messages() {
       return this.errorMessages;
