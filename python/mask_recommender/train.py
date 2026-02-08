@@ -24,8 +24,9 @@ from feature_builder import (FACIAL_FEATURE_COLUMNS,
                              FACIAL_PERIMETER_COMPONENTS, build_feature_frame,
                              diff_bin_edges, diff_bin_index, diff_bin_labels)
 from predict_arkit_from_traditional import predict_arkit_from_traditional
+from prob_model import (normalize_qlft_pass, predict_prob_model,
+                        train_prob_model)
 from qa import build_mask_candidates, build_recommendation_preview
-from prob_model import normalize_qlft_pass, predict_prob_model, train_prob_model
 from sklearn.metrics import (auc, f1_score, precision_score, recall_score,
                              roc_auc_score, roc_curve)
 from utils import display_percentage
@@ -429,8 +430,9 @@ def _set_num_masks_times_num_bins_plus_other_features(mask_candidates):
     num_masks = int(mask_candidates.shape[0])
     num_bins = len(diff_bin_edges()) - 1
     num_styles = int(mask_candidates['style'].dropna().nunique())
-    other_features = 1 + 2 + num_styles
-    return num_masks * num_bins + other_features
+    num_strap_types = int(mask_candidates['strap_type'].dropna().nunique())
+    other_features = 1 + 2 + num_styles + num_strap_types
+    return num_masks * num_bins + num_styles * num_bins + other_features
 
 
 def _initialize_model(feature_count):
