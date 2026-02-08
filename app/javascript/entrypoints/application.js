@@ -118,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/consent_form', component: ConsentForm, name: 'ConsentForm' },
     { path: '/privacy', component: PrivacyPolicy, name: 'PrivacyPolicy' },
     { path: '/admin/study_participants', component: AdminStudyParticipants, name: 'AdminStudyParticipants' },
+    { path: '/admin/masks/breakdowns', component: MaskBreakdown, name: 'MaskBreakdownV2' },
     { path: '/admin/masks/unique_internal_model_code_breakdown', component: MaskBreakdown, name: 'MaskBreakdown' },
   ]
 

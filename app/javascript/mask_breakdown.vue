@@ -39,6 +39,45 @@
       </label>
     </div>
 
+    <!-- Paginated Breakdown Table -->
+    <div class="table-section" v-if="masks.length > 0">
+      <table class="breakdown-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Mask</th>
+            <th v-for="category in categories" :key="`hdr-${category}`">
+              {{ formatCategory(category) }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="(mask, rowIndex) in masks"
+            :key="mask.id"
+            :class="{ active: currentMask && currentMask.id === mask.id }"
+            @click="selectMask(rowIndex)"
+          >
+            <td>{{ mask.id }}</td>
+            <td class="mask-name-cell">{{ mask.unique_internal_model_code }}</td>
+            <td v-for="category in categories" :key="`${mask.id}-${category}`">
+              {{ formatTokens(mask.breakdown_columns?.[category]) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination-controls" v-if="totalPages > 1">
+        <button class="btn btn-secondary" :disabled="currentPage <= 1" @click="changePage(currentPage - 1)">
+          Previous Page
+        </button>
+        <span>Page {{ currentPage }} / {{ totalPages }}</span>
+        <button class="btn btn-secondary" :disabled="currentPage >= totalPages" @click="changePage(currentPage + 1)">
+          Next Page
+        </button>
+      </div>
+    </div>
+
     <!-- Loading State -->
     <div v-if="loading" class="loading">
       <p>Loading masks...</p>
@@ -189,26 +228,27 @@ export default {
       saving: false,
       messages: [],
       filterMode: 'incomplete', // 'all', 'incomplete', 'complete'
-      showEventHistory: false
+      showEventHistory: false,
+      currentPage: 1,
+      perPage: 100,
+      totalPages: 1,
+      filteredCount: 0,
+      totalMasksCount: 0,
+      completedMasksCount: 0
     }
   },
   computed: {
     filteredMasks() {
-      if (this.filterMode === 'incomplete') {
-        return this.masks.filter(m => !m.breakdown_complete)
-      } else if (this.filterMode === 'complete') {
-        return this.masks.filter(m => m.breakdown_complete)
-      }
       return this.masks
     },
     currentMask() {
       return this.filteredMasks[this.currentMaskIndex] || null
     },
     totalCount() {
-      return this.masks.length
+      return this.totalMasksCount
     },
     completedCount() {
-      return this.masks.filter(m => m.breakdown_complete).length
+      return this.completedMasksCount
     },
     remainingCount() {
       return this.totalCount - this.completedCount
@@ -225,16 +265,30 @@ export default {
     await this.loadMasks()
   },
   methods: {
-    async loadMasks() {
+    async loadMasks(page = 1) {
       this.loading = true
       this.messages = []
 
       try {
-        const response = await axios.get('/mask_breakdowns.json')
+        const response = await axios.get('/mask_breakdowns.json', {
+          params: {
+            page: page,
+            per_page: this.perPage,
+            filter: this.filterMode
+          }
+        })
         this.masks = response.data.masks
         this.categories = response.data.categories
+        this.currentPage = response.data.pagination?.page || page
+        this.perPage = response.data.pagination?.per_page || this.perPage
+        this.totalPages = response.data.pagination?.total_pages || 1
+        this.filteredCount = response.data.filtered_count || this.masks.length
+        this.totalMasksCount = response.data.total_count || this.masks.length
+        this.completedMasksCount = response.data.completed_count || 0
 
-        // Initialize with first mask
+        if (this.currentMaskIndex >= this.masks.length) {
+          this.currentMaskIndex = 0
+        }
         if (this.currentMask) {
           this.initializeTokenCategories()
         }
@@ -302,6 +356,7 @@ export default {
             this.masks[maskIndex].breakdown_complete = response.data.breakdown.complete
             this.masks[maskIndex].breakdown_updated_at = response.data.breakdown.updated_at
             this.masks[maskIndex].breakdown_user = response.data.breakdown.user
+            this.masks[maskIndex].breakdown_columns = this.buildBreakdownColumns(breakdown)
           }
 
           this.messages.push({
@@ -322,6 +377,35 @@ export default {
       } finally {
         this.saving = false
       }
+    },
+    buildBreakdownColumns(breakdown) {
+      const columns = {}
+      this.categories.forEach(category => {
+        columns[category] = []
+      })
+      ;(breakdown || []).forEach(entry => {
+        if (!entry || typeof entry !== 'object') return
+        const token = Object.keys(entry)[0]
+        const category = entry[token]
+        if (!token || !category || !columns[category]) return
+        columns[category].push(token)
+      })
+      Object.keys(columns).forEach(category => {
+        columns[category] = [...new Set(columns[category])]
+      })
+      return columns
+    },
+    formatTokens(tokens) {
+      if (!tokens || tokens.length === 0) return ''
+      return tokens.join(', ')
+    },
+    selectMask(index) {
+      this.currentMaskIndex = index
+      this.initializeTokenCategories()
+      this.messages = []
+    },
+    async changePage(page) {
+      await this.loadMasks(page)
     },
     nextMask() {
       if (this.currentMaskIndex < this.filteredMasks.length - 1) {
@@ -355,11 +439,9 @@ export default {
     }
   },
   watch: {
-    filterMode() {
-      // Reset to first mask when filter changes
+    async filterMode() {
       this.currentMaskIndex = 0
-      this.initializeTokenCategories()
-      this.messages = []
+      await this.loadMasks(1)
     }
   }
 }
@@ -434,6 +516,57 @@ export default {
 
 .filter-controls input[type="radio"] {
   margin-right: 0.5rem;
+}
+
+.table-section {
+  margin-bottom: 2rem;
+  max-height: 70vh;
+  overflow: auto;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.breakdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.breakdown-table th,
+.breakdown-table td {
+  border: 1px solid #e5e5e5;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.breakdown-table th {
+  background: #f6f8fa;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.breakdown-table tr.active {
+  background: #edf7ed;
+}
+
+.breakdown-table tr:hover {
+  background: #f7f7f7;
+  cursor: pointer;
+}
+
+.mask-name-cell {
+  min-width: 260px;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 .loading, .no-masks {
