@@ -438,12 +438,15 @@ def _initialize_model(feature_count):
         raise RuntimeError(
             "num_masks_times_num_bins_plus_other_features must be set before model initialization."
         )
+    outer_dim = int(num_masks_times_num_bins_plus_other_features)
+    if outer_dim <= 0:
+        raise RuntimeError(
+            "num_masks_times_num_bins_plus_other_features must be a positive integer."
+        )
     model = torch.nn.Sequential(
-        torch.nn.Linear(feature_count, feature_count),
+        torch.nn.Linear(feature_count, outer_dim),
         torch.nn.ReLU(),
-        torch.nn.Linear(feature_count, feature_count),
-        torch.nn.ReLU(),
-        torch.nn.Linear(feature_count, 1),
+        torch.nn.Linear(outer_dim, 1),
         torch.nn.Sigmoid()
     )
     return model
