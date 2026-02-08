@@ -1,3 +1,6 @@
+import json
+import re
+
 import numpy as np
 import pandas as pd
 
@@ -15,6 +18,93 @@ FACIAL_PERIMETER_COMPONENTS = [
     "top_cheek_mm",
     "mid_cheek_mm",
 ]
+
+
+def _extract_breakdown(current_state):
+    if current_state is None or (isinstance(current_state, float) and pd.isna(current_state)):
+        return []
+
+    payload = current_state
+    if isinstance(payload, str):
+        raw = payload.strip()
+        if not raw:
+            return []
+        try:
+            payload = json.loads(raw)
+        except (json.JSONDecodeError, TypeError):
+            return []
+
+    if not isinstance(payload, dict):
+        return []
+
+    # Common shape from Rails is:
+    # {"current_state": {"breakdown": [{"3M":"brand"},{"Aura":"model"}, ...]}}
+    nested = payload.get("current_state")
+    if isinstance(nested, dict):
+        breakdown = nested.get("breakdown")
+    else:
+        breakdown = payload.get("breakdown")
+
+    return breakdown if isinstance(breakdown, list) else []
+
+
+def _tokenize_mask_code(unique_internal_model_code):
+    if unique_internal_model_code is None:
+        return []
+    text = str(unique_internal_model_code).strip()
+    if not text:
+        return []
+    return [token for token in re.split(r"[\s\-—,\[\]\(\)/]+", text) if token]
+
+
+def derive_brand_model(unique_internal_model_code, current_state=None):
+    brand = None
+    model = None
+
+    breakdown = _extract_breakdown(current_state)
+    for entry in breakdown:
+        if not isinstance(entry, dict) or not entry:
+            continue
+        token, label = next(iter(entry.items()))
+        label_normalized = str(label).strip().lower()
+        if brand is None and label_normalized == "brand":
+            brand = str(token).strip()
+        if model is None and label_normalized == "model":
+            model = str(token).strip()
+        if brand and model:
+            break
+
+    fallback_tokens = _tokenize_mask_code(unique_internal_model_code)
+    if not brand and fallback_tokens:
+        brand = fallback_tokens[0]
+    if not model and len(fallback_tokens) > 1:
+        model = fallback_tokens[1]
+
+    parts = [part for part in [brand, model] if part]
+    return " ".join(parts).strip()
+
+
+def add_brand_model_column(frame):
+    if frame is None or frame.empty:
+        return frame
+
+    current_state_series = frame.get("current_state")
+    if current_state_series is None:
+        current_state_series = pd.Series([None] * len(frame), index=frame.index)
+
+    derived = [
+        derive_brand_model(code, state)
+        for code, state in zip(frame["unique_internal_model_code"], current_state_series)
+    ]
+
+    result = frame.copy()
+    if "brand_model" in result.columns:
+        existing = result["brand_model"].fillna("").astype(str).str.strip()
+        result["brand_model"] = np.where(existing.ne(""), existing, derived)
+    else:
+        result["brand_model"] = derived
+
+    return result
 
 
 def diff_bin_edges():
@@ -121,6 +211,10 @@ def build_feature_frame(
         use_diff_perimeter_bins=use_diff_perimeter_bins,
         use_diff_perimeter_mask_bins=use_diff_perimeter_mask_bins
     )
+    transformed = add_brand_model_column(transformed)
+    for column in categorical_columns:
+        if column not in transformed.columns:
+            transformed[column] = ""
     encoded = pd.get_dummies(transformed, columns=categorical_columns, dummy_na=True)
     for column in feature_columns:
         if column not in encoded.columns:

@@ -125,7 +125,7 @@ def test_training_and_inference_alignment(monkeypatch, tmp_path):
     )
 
     feature_columns = list(features.columns)
-    categorical_columns = ["strap_type", "style", "unique_internal_model_code"]
+    categorical_columns = ["strap_type", "style", "brand_model", "unique_internal_model_code"]
     user_row = fit_tests_df.iloc[0]
     inference_rows = build_inference_rows(user_row, mask_candidates)
     encoded = build_feature_frame(

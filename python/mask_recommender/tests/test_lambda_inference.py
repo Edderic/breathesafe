@@ -36,6 +36,7 @@ def test_lambda_recommendations_with_facial_inputs(monkeypatch):
                 "perimeter_mm": 300,
                 "strap_type": "Earloop",
                 "style": "Cup",
+                "brand_model": "MASK A",
                 "unique_internal_model_code": "MASK-A",
                 "facial_hair_beard_length_mm": 0,
                 "nose_mm": facial_features["nose_mm"],
@@ -49,6 +50,7 @@ def test_lambda_recommendations_with_facial_inputs(monkeypatch):
                 "perimeter_mm": 320,
                 "strap_type": "Headstrap",
                 "style": "Bifold",
+                "brand_model": "MASK B",
                 "unique_internal_model_code": "MASK-B",
                 "facial_hair_beard_length_mm": 0,
                 "nose_mm": facial_features["nose_mm"],
@@ -60,7 +62,7 @@ def test_lambda_recommendations_with_facial_inputs(monkeypatch):
         ]
     )
 
-    categorical_columns = ["strap_type", "style", "unique_internal_model_code"]
+    categorical_columns = ["strap_type", "style", "brand_model", "unique_internal_model_code"]
     expected = pd.get_dummies(inference_rows, columns=categorical_columns, dummy_na=True)
     feature_columns = list(expected.columns)
 

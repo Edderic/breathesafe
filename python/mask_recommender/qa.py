@@ -3,21 +3,24 @@ from datetime import datetime, timezone
 
 import pandas as pd
 from data_prep import FACIAL_FEATURE_COLUMNS, normalize_pass
+from feature_builder import add_brand_model_column
 
 
 def build_mask_candidates(masks_df):
-    mask_candidates = masks_df.copy()
+    mask_candidates = add_brand_model_column(masks_df.copy())
     mask_candidates = mask_candidates[
         mask_candidates['perimeter_mm'].notna() &
         (mask_candidates['perimeter_mm'] > 0) &
         mask_candidates['strap_type'].notna() &
         mask_candidates['style'].notna() &
-        mask_candidates['unique_internal_model_code'].notna()
+        mask_candidates['unique_internal_model_code'].notna() &
+        mask_candidates['brand_model'].notna()
     ]
     mask_candidates = mask_candidates[
         mask_candidates['strap_type'].astype(str).str.strip().ne('') &
         mask_candidates['style'].astype(str).str.strip().ne('') &
-        mask_candidates['unique_internal_model_code'].astype(str).str.strip().ne('')
+        mask_candidates['unique_internal_model_code'].astype(str).str.strip().ne('') &
+        mask_candidates['brand_model'].astype(str).str.strip().ne('')
     ]
     return mask_candidates
 
@@ -62,6 +65,7 @@ def build_inference_rows(user_row, mask_candidates):
         'facial_hair_beard_length_mm': user_row.get('facial_hair_beard_length_mm') or 0,
         'strap_type': mask_candidates['strap_type'].to_numpy(),
         'style': mask_candidates['style'].to_numpy(),
+        'brand_model': mask_candidates['brand_model'].to_numpy(),
         'unique_internal_model_code': mask_candidates['unique_internal_model_code'].to_numpy(),
     }
     for column in FACIAL_FEATURE_COLUMNS:

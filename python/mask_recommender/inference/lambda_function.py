@@ -8,12 +8,14 @@ import boto3
 import pandas as pd
 import torch
 try:
-    from feature_builder import FACIAL_FEATURE_COLUMNS, build_feature_frame
+    from feature_builder import (FACIAL_FEATURE_COLUMNS, build_feature_frame,
+                                 derive_brand_model)
     from prob_model import predict_prob_model
 except ModuleNotFoundError:
     from mask_recommender.feature_builder import (  # type: ignore
         FACIAL_FEATURE_COLUMNS,
         build_feature_frame,
+        derive_brand_model,
     )
     from mask_recommender.prob_model import predict_prob_model  # type: ignore
 
@@ -218,6 +220,10 @@ class MaskRecommenderInference:
                 'perimeter_mm': perimeter,
                 'strap_type': mask_info.get('strap_type') or '',
                 'style': mask_info.get('style') or '',
+                'brand_model': mask_info.get('brand_model') or derive_brand_model(
+                    mask_info.get('unique_internal_model_code'),
+                    mask_info.get('current_state')
+                ),
                 'unique_internal_model_code': mask_info.get('unique_internal_model_code') or '',
                 'facial_hair_beard_length_mm': facial_features.get('facial_hair_beard_length_mm', 0) or 0,
             }

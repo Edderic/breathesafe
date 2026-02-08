@@ -1,6 +1,6 @@
 import pandas as pd
 
-from mask_recommender.feature_builder import build_feature_frame
+from mask_recommender.feature_builder import build_feature_frame, derive_brand_model
 
 
 def test_build_feature_frame_matches_get_dummies():
@@ -11,6 +11,7 @@ def test_build_feature_frame_matches_get_dummies():
                 "perimeter_mm": 300,
                 "strap_type": "Earloop",
                 "style": "Cup",
+                "brand_model": "MASK A",
                 "unique_internal_model_code": "MASK-A",
                 "facial_hair_beard_length_mm": 0,
                 "nose_mm": 40,
@@ -24,6 +25,7 @@ def test_build_feature_frame_matches_get_dummies():
                 "perimeter_mm": 320,
                 "strap_type": "Headstrap",
                 "style": "Bifold",
+                "brand_model": "MASK B",
                 "unique_internal_model_code": "MASK-B",
                 "facial_hair_beard_length_mm": 2,
                 "nose_mm": 42,
@@ -34,7 +36,7 @@ def test_build_feature_frame_matches_get_dummies():
             },
         ]
     )
-    categorical_columns = ["strap_type", "style", "unique_internal_model_code"]
+    categorical_columns = ["strap_type", "style", "brand_model", "unique_internal_model_code"]
     expected = pd.get_dummies(
         inference_rows,
         columns=categorical_columns,
@@ -51,3 +53,17 @@ def test_build_feature_frame_matches_get_dummies():
     )
 
     pd.testing.assert_frame_equal(encoded, expected)
+
+
+def test_derive_brand_model_prefers_breakdown_and_falls_back_to_code():
+    current_state = {
+        "current_state": {
+            "breakdown": [
+                {"3M": "brand"},
+                {"Aura": "model"},
+                {"9205+": "size"},
+            ]
+        }
+    }
+    assert derive_brand_model("3M Aura 9205+", current_state) == "3M Aura"
+    assert derive_brand_model("GVS Elipse S/M for High nose", None) == "GVS Elipse"

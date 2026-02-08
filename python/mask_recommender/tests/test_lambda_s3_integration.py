@@ -75,13 +75,14 @@ def test_lambda_loads_model_from_s3_and_recommends():
                     "perimeter_mm": 300,
                     "strap_type": "Earloop",
                     "style": "Cup",
+                    "brand_model": "MASK A",
                     "unique_internal_model_code": "MASK-A",
                     "facial_hair_beard_length_mm": 0,
                     **facial_features,
                 }
             ]
         )
-        categorical_columns = ["strap_type", "style", "unique_internal_model_code"]
+        categorical_columns = ["strap_type", "style", "brand_model", "unique_internal_model_code"]
         expected = pd.get_dummies(inference_rows, columns=categorical_columns, dummy_na=True)
         feature_columns = list(expected.columns)
 

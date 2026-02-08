@@ -77,7 +77,10 @@ def main():
     if cleaned_fit_tests.empty:
         raise SystemExit("No fit tests available after filtering.")
 
-    features, target = build_feature_matrix(cleaned_fit_tests, ['strap_type', 'style', 'unique_internal_model_code'])
+    features, target = build_feature_matrix(
+        cleaned_fit_tests,
+        ['strap_type', 'style', 'brand_model', 'unique_internal_model_code']
+    )
 
     num_rows = features.shape[0]
     permutation = torch.randperm(num_rows)
@@ -149,7 +152,7 @@ def main():
     logging.info("Saved ROC-AUC comparison plot to %s", roc_plot_path)
 
     feature_columns = list(features.columns)
-    categorical_columns = ['strap_type', 'style', 'unique_internal_model_code']
+    categorical_columns = ['strap_type', 'style', 'brand_model', 'unique_internal_model_code']
 
     def predict_nn(inference_rows):
         encoded = build_feature_frame(

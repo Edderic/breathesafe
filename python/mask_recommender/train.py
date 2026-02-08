@@ -23,7 +23,8 @@ from breathesafe_network import (build_session,
                                  fetch_json)
 from feature_builder import (FACIAL_FEATURE_COLUMNS,
                              FACIAL_PERIMETER_COMPONENTS, build_feature_frame,
-                             diff_bin_edges, diff_bin_index, diff_bin_labels)
+                             diff_bin_edges, diff_bin_index, diff_bin_labels,
+                             add_brand_model_column, derive_brand_model)
 from predict_arkit_from_traditional import predict_arkit_from_traditional
 from prob_model import (normalize_qlft_pass, predict_prob_model,
                         train_prob_model)
@@ -366,6 +367,7 @@ def prepare_training_data(
     use_diff_perimeter_mask_bins=False
 ):
     filtered = filter_fit_tests(fit_tests_df)
+    filtered = add_brand_model_column(filtered)
 
     feature_cols = []
     if use_diff_perimeter_bins or use_diff_perimeter_mask_bins:
@@ -407,6 +409,7 @@ def prepare_training_data(
         'facial_hair_beard_length_mm',
         'strap_type',
         'style',
+        'brand_model',
         'unique_internal_model_code'
     ]
     filtered = filtered[feature_cols + ['qlft_pass_normalized']]
@@ -415,7 +418,7 @@ def prepare_training_data(
 
 def build_feature_matrix(filtered_df, categorical_cols=None):
     if categorical_cols is None:
-        categorical_cols = ['strap_type', 'style', 'unique_internal_model_code']
+        categorical_cols = ['strap_type', 'style', 'brand_model', 'unique_internal_model_code']
     features = pd.get_dummies(filtered_df, columns=categorical_cols, dummy_na=True)
     target = features.pop('qlft_pass_normalized')
     features = features.apply(pd.to_numeric, errors='coerce').fillna(0)
@@ -928,6 +931,10 @@ def main(argv=None):
             mask_data[str(int(mask_id))] = {
                 'id': int(mask_id),
                 'unique_internal_model_code': row.get('unique_internal_model_code', ''),
+                'brand_model': derive_brand_model(
+                    row.get('unique_internal_model_code', ''),
+                    row.get('current_state')
+                ),
                 'perimeter_mm': row.get('perimeter_mm', None),
                 'strap_type': row.get('strap_type', ''),
                 'style': row.get('style', ''),
@@ -988,9 +995,9 @@ def main(argv=None):
 
         return latest_payload
 
-    categorical_columns = ['strap_type', 'style', 'unique_internal_model_code']
+    categorical_columns = ['strap_type', 'style', 'brand_model', 'unique_internal_model_code']
     if args.exclude_mask_code:
-        categorical_columns = ['strap_type', 'style']
+        categorical_columns = ['strap_type', 'style', 'brand_model']
 
     features, target = build_feature_matrix(cleaned_fit_tests, categorical_columns)
 
@@ -1226,6 +1233,10 @@ def main(argv=None):
         mask_data[str(int(mask_id))] = {
             'id': int(mask_id),
             'unique_internal_model_code': row.get('unique_internal_model_code', ''),
+            'brand_model': derive_brand_model(
+                row.get('unique_internal_model_code', ''),
+                row.get('current_state')
+            ),
             'perimeter_mm': row.get('perimeter_mm', None),
             'strap_type': row.get('strap_type', ''),
             'style': row.get('style', ''),
