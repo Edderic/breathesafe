@@ -2,7 +2,7 @@ import json
 import logging
 import os
 import time
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import boto3
 import pandas as pd
@@ -73,16 +73,21 @@ class MaskRecommenderInference:
     def _download_file(self, key: str, local_path: str) -> None:
         self.s3_client.download_file(self.bucket, key, local_path)
 
-    def _infer_hidden_sizes(self, state_dict: Dict) -> List[int]:
-        weight_keys = [
-            key for key in state_dict.keys()
-            if key.endswith('.weight') and key.split('.')[0].isdigit()
-        ]
-        weight_keys.sort(key=lambda key: int(key.split('.')[0]))
-        if len(weight_keys) < 3:
-            raise RuntimeError("Unexpected model format; unable to infer hidden sizes.")
-        sizes = [int(state_dict[key].shape[0]) for key in weight_keys[:-1]]
-        return sizes
+    def _infer_linear_specs(self, state_dict: Dict) -> List[Tuple[int, int, int]]:
+        specs = []
+        for key, value in state_dict.items():
+            if not key.endswith('.weight'):
+                continue
+            layer_token = key.split('.')[0]
+            if not layer_token.isdigit() or value.ndim != 2:
+                continue
+            layer_idx = int(layer_token)
+            out_features, in_features = int(value.shape[0]), int(value.shape[1])
+            specs.append((layer_idx, in_features, out_features))
+        specs.sort(key=lambda item: item[0])
+        if len(specs) < 2:
+            raise RuntimeError("Unexpected model format; unable to infer linear layers.")
+        return specs
 
     def _maybe_refresh(self) -> None:
         if self.last_loaded_at is None:
@@ -134,9 +139,9 @@ class MaskRecommenderInference:
         self.use_diff_perimeter_mask_bins = metadata.get('use_diff_perimeter_mask_bins', False)
 
         state_dict = torch.load(model_path, map_location='cpu')
-        hidden_sizes = self._infer_hidden_sizes(state_dict)
+        linear_specs = self._infer_linear_specs(state_dict)
         input_dim = len(self.feature_columns)
-        expected_input_dim = int(state_dict["0.weight"].shape[1])
+        expected_input_dim = linear_specs[0][1]
         if expected_input_dim != input_dim:
             logger.warning(
                 "Feature column count (%s) does not match model input dim (%s).",
@@ -145,13 +150,12 @@ class MaskRecommenderInference:
             )
             input_dim = expected_input_dim
         self.model_input_dim = input_dim
-        model = torch.nn.Sequential(
-            torch.nn.Linear(input_dim, hidden_sizes[0]),
-            torch.nn.ReLU(),
-            torch.nn.Linear(hidden_sizes[0], hidden_sizes[1]),
-            torch.nn.ReLU(),
-            torch.nn.Linear(hidden_sizes[1], 1)
-        )
+        layers = []
+        for idx, (_, in_features, out_features) in enumerate(linear_specs):
+            layers.append(torch.nn.Linear(in_features, out_features))
+            if idx < len(linear_specs) - 1:
+                layers.append(torch.nn.ReLU())
+        model = torch.nn.Sequential(*layers)
         model.load_state_dict(state_dict)
         model.eval()
 

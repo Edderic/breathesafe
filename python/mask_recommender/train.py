@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import sys
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -423,7 +424,9 @@ def build_feature_matrix(filtered_df, categorical_cols=None):
     return features, target
 
 
-num_masks_times_num_bins_plus_other_features = None
+@dataclass(frozen=True)
+class TrainModelConfig:
+    outer_dim: int
 
 
 def _set_num_masks_times_num_bins_plus_other_features(mask_candidates):
@@ -435,15 +438,11 @@ def _set_num_masks_times_num_bins_plus_other_features(mask_candidates):
     return num_masks * num_bins + num_styles * num_bins + other_features
 
 
-def _initialize_model(feature_count):
-    if num_masks_times_num_bins_plus_other_features is None:
-        raise RuntimeError(
-            "num_masks_times_num_bins_plus_other_features must be set before model initialization."
-        )
-    outer_dim = int(num_masks_times_num_bins_plus_other_features)
+def _initialize_model(feature_count, outer_dim):
+    outer_dim = int(outer_dim)
     if outer_dim <= 0:
         raise RuntimeError(
-            "num_masks_times_num_bins_plus_other_features must be a positive integer."
+            "outer_dim must be a positive integer."
         )
     model = torch.nn.Sequential(
         torch.nn.Linear(feature_count, outer_dim),
@@ -477,6 +476,7 @@ def _train_with_split(
     y_train,
     x_val,
     y_val,
+    outer_dim,
     epochs=50,
     learning_rate=0.01,
     loss_type="bce",
@@ -488,7 +488,7 @@ def _train_with_split(
 ):
     train_positive_rate = float(y_train.mean().item()) if y_train.numel() else 0.0
     val_positive_rate = float(y_val.mean().item()) if y_val.numel() else 0.0
-    model = _initialize_model(x_train.shape[1])
+    model = _initialize_model(x_train.shape[1], outer_dim=outer_dim)
 
     loss_fn = torch.nn.BCELoss(reduction='none')
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
@@ -588,6 +588,7 @@ def train_predictor_with_split(
     target,
     train_idx,
     val_idx,
+    outer_dim,
     epochs=50,
     learning_rate=0.01,
     loss_type="bce",
@@ -612,6 +613,7 @@ def train_predictor_with_split(
         y_train,
         x_val,
         y_val,
+        outer_dim=outer_dim,
         epochs=epochs,
         learning_rate=learning_rate,
         loss_type=loss_type,
@@ -628,6 +630,7 @@ def train_predictor_with_split(
 def train_predictor(
     features,
     target,
+    outer_dim,
     epochs=50,
     learning_rate=0.01,
     loss_type="bce",
@@ -646,6 +649,7 @@ def train_predictor(
         target,
         train_idx,
         val_idx,
+        outer_dim=outer_dim,
         epochs=epochs,
         learning_rate=learning_rate,
         loss_type=loss_type,
@@ -805,13 +809,12 @@ def main(argv=None):
 
     masks_df = get_masks(session, masks_url)
     mask_candidates = build_mask_candidates(masks_df)
-    global num_masks_times_num_bins_plus_other_features
-    num_masks_times_num_bins_plus_other_features = _set_num_masks_times_num_bins_plus_other_features(
-        mask_candidates
+    model_config = TrainModelConfig(
+        outer_dim=_set_num_masks_times_num_bins_plus_other_features(mask_candidates)
     )
     logging.info(
         "num_masks_times_num_bins_plus_other_features=%s",
-        num_masks_times_num_bins_plus_other_features
+        model_config.outer_dim
     )
     email = os.getenv('BREATHESAFE_SERVICE_EMAIL')
     password = os.getenv('BREATHESAFE_SERVICE_PASSWORD')
@@ -994,6 +997,7 @@ def main(argv=None):
     model, train_losses, val_losses, x_train, y_train, x_val, y_val, train_idx, val_idx = train_predictor(
         features,
         target,
+        outer_dim=model_config.outer_dim,
         epochs=args.epochs,
         learning_rate=args.learning_rate,
         loss_type=args.loss_type,
@@ -1043,6 +1047,7 @@ def main(argv=None):
             target,
             full_idx,
             full_idx,
+            outer_dim=model_config.outer_dim,
             epochs=args.epochs,
             learning_rate=args.learning_rate,
             loss_type=args.loss_type,
@@ -1276,6 +1281,7 @@ def main(argv=None):
         'feature_columns': feature_columns,
         'categorical_columns': categorical_columns,
         'hidden_sizes': _extract_hidden_sizes(model),
+        'outer_dim': model_config.outer_dim,
         'threshold': threshold,
         'model_class': 'torch.nn.Sequential',
         'use_facial_perimeter': args.use_facial_perimeter,

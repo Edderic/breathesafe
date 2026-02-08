@@ -111,9 +111,7 @@ def test_training_and_inference_alignment(monkeypatch, tmp_path):
     fit_tests_df = _fit_tests_df()
     masks_df = _masks_df()
     mask_candidates = build_mask_candidates(masks_df)
-    train_module.num_masks_times_num_bins_plus_other_features = (
-        train_module._set_num_masks_times_num_bins_plus_other_features(mask_candidates)
-    )
+    outer_dim = train_module._set_num_masks_times_num_bins_plus_other_features(mask_candidates)
 
     cleaned = train_module.prepare_training_data(fit_tests_df)
     features, target = train_module.build_feature_matrix(cleaned)
@@ -121,6 +119,7 @@ def test_training_and_inference_alignment(monkeypatch, tmp_path):
     model, _, _, _, _, _, _, _, _ = train_module.train_predictor(
         features,
         target,
+        outer_dim=outer_dim,
         epochs=2,
         learning_rate=0.01,
     )

@@ -57,10 +57,7 @@ def main():
     masks_url = f"{base_url}/masks.json?per_page=1000"
     masks_df = get_masks(session, masks_url)
     mask_candidates = build_mask_candidates(masks_df)
-    import train as train_module
-    train_module.num_masks_times_num_bins_plus_other_features = _set_num_masks_times_num_bins_plus_other_features(
-        mask_candidates
-    )
+    outer_dim = _set_num_masks_times_num_bins_plus_other_features(mask_candidates)
 
     email = os.getenv('BREATHESAFE_SERVICE_EMAIL')
     password = os.getenv('BREATHESAFE_SERVICE_PASSWORD')
@@ -93,6 +90,7 @@ def main():
         target,
         train_idx,
         val_idx,
+        outer_dim=outer_dim,
         epochs=args.epochs,
         learning_rate=args.learning_rate,
     )

@@ -496,9 +496,7 @@ def main():
         mask_candidates["unique_internal_model_code"].astype(str).isin(mask_map.keys())
     ].copy()
     import train as train_module
-    train_module.num_masks_times_num_bins_plus_other_features = train_module._set_num_masks_times_num_bins_plus_other_features(
-        mask_candidates
-    )
+    outer_dim = train_module._set_num_masks_times_num_bins_plus_other_features(mask_candidates)
 
     def predict_bayesian(inference_rows):
         face_perimeter = inference_rows[BAYESIAN_FACE_COLUMNS].sum(axis=1)
@@ -574,6 +572,7 @@ def main():
         baseline_target,
         train_idx,
         val_idx,
+        outer_dim=outer_dim,
         epochs=args.nn_epochs,
         learning_rate=args.nn_learning_rate,
     )

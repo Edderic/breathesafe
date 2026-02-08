@@ -125,16 +125,28 @@ def _load_artifacts(model_dir: Path):
 
     feature_columns = metadata["feature_columns"]
     categorical_columns = metadata["categorical_columns"]
-    hidden_sizes = metadata.get("hidden_sizes", [32, 16])
-    input_dim = len(feature_columns)
-    model = torch.nn.Sequential(
-        torch.nn.Linear(input_dim, hidden_sizes[0]),
-        torch.nn.ReLU(),
-        torch.nn.Linear(hidden_sizes[0], hidden_sizes[1]),
-        torch.nn.ReLU(),
-        torch.nn.Linear(hidden_sizes[1], 1),
-    )
     state_dict = torch.load(model_path, map_location="cpu")
+    linear_specs = []
+    for key, value in state_dict.items():
+        if not key.endswith(".weight"):
+            continue
+        if value.ndim != 2:
+            continue
+        layer_idx = int(key.split(".")[0])
+        out_features, in_features = int(value.shape[0]), int(value.shape[1])
+        linear_specs.append((layer_idx, in_features, out_features))
+    linear_specs = sorted(linear_specs, key=lambda x: x[0])
+    if not linear_specs:
+        raise RuntimeError(f"No linear layers found in model state dict: {model_path}")
+
+    layers = []
+    for idx, (_, in_features, out_features) in enumerate(linear_specs):
+        layers.append(torch.nn.Linear(in_features, out_features))
+        if idx < len(linear_specs) - 1:
+            layers.append(torch.nn.ReLU())
+    layers.append(torch.nn.Sigmoid())
+    model = torch.nn.Sequential(*layers)
+
     model.load_state_dict(state_dict)
     model.eval()
 

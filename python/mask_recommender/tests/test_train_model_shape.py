@@ -1,15 +1,11 @@
 import torch
+import pytest
 
 from mask_recommender import train as train_module
 
 
 def test_initialize_model_uses_configured_outer_dimension():
-    original_outer_dim = train_module.num_masks_times_num_bins_plus_other_features
-    train_module.num_masks_times_num_bins_plus_other_features = 17
-    try:
-        model = train_module._initialize_model(feature_count=9)
-    finally:
-        train_module.num_masks_times_num_bins_plus_other_features = original_outer_dim
+    model = train_module._initialize_model(feature_count=9, outer_dim=17)
 
     assert isinstance(model[0], torch.nn.Linear)
     assert isinstance(model[2], torch.nn.Linear)
@@ -17,3 +13,8 @@ def test_initialize_model_uses_configured_outer_dimension():
     assert model[0].out_features == 17
     assert model[2].in_features == 17
     assert model[2].out_features == 1
+
+
+def test_initialize_model_rejects_non_positive_outer_dim():
+    with pytest.raises(RuntimeError, match="outer_dim must be a positive integer"):
+        train_module._initialize_model(feature_count=9, outer_dim=0)
