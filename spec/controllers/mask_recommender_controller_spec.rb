@@ -20,10 +20,11 @@ RSpec.describe MaskRecommenderController, type: :controller do
         { 'id' => 2, 'proba_fit' => 0.7, 'name' => 'Mask B' }
       ]
     end
+    let(:model_meta) { { 'timestamp' => '20260208000000' } }
     let(:context) { { 'perimeter_min' => 100, 'perimeter_max' => 200 } }
 
     before do
-      allow(MaskRecommender).to receive(:infer).and_return(inferred_masks)
+      allow(MaskRecommender).to receive(:infer_with_meta).and_return({ masks: inferred_masks, model: model_meta })
       allow(MasksDataContextualizer).to receive(:call).and_return(context)
     end
 
@@ -33,12 +34,15 @@ RSpec.describe MaskRecommenderController, type: :controller do
         function_base: 'mask-recommender-rf'
       }, as: :json
 
-      expect(MaskRecommender).to have_received(:infer).with(facial_payload.stringify_keys,
-                                                            function_base: 'mask-recommender-rf')
+      expect(MaskRecommender).to have_received(:infer_with_meta).with(
+        facial_payload.stringify_keys,
+        function_base: 'mask-recommender-rf'
+      )
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
       expect(body['masks']).to eq(inferred_masks)
       expect(body['context']).to eq(context)
+      expect(body['model']).to eq(model_meta)
     end
 
     it 'calls MaskRecommender.infer with nested function_base override when provided' do
@@ -47,8 +51,10 @@ RSpec.describe MaskRecommenderController, type: :controller do
         mask_recommender: { function_base: 'mask-recommender' }
       }, as: :json
 
-      expect(MaskRecommender).to have_received(:infer).with(facial_payload.stringify_keys,
-                                                            function_base: 'mask-recommender')
+      expect(MaskRecommender).to have_received(:infer_with_meta).with(
+        facial_payload.stringify_keys,
+        function_base: 'mask-recommender'
+      )
       expect(response).to have_http_status(:ok)
     end
 
@@ -57,7 +63,7 @@ RSpec.describe MaskRecommenderController, type: :controller do
       post :create, params: { facial_measurements: noisy }, as: :json
 
       # Controller will stringify and permit
-      expect(MaskRecommender).to have_received(:infer) do |arg_hash, **_opts|
+      expect(MaskRecommender).to have_received(:infer_with_meta) do |arg_hash, **_opts|
         expect(arg_hash).not_to have_key('extra')
       end
       expect(response).to have_http_status(:ok)
@@ -69,6 +75,7 @@ RSpec.describe MaskRecommenderController, type: :controller do
       body = JSON.parse(response.body)
       expect(body['masks']).to eq(inferred_masks)
       expect(body['context']).to eq(context)
+      expect(body['model']).to eq(model_meta)
     end
   end
 
