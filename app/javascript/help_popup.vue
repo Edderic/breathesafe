@@ -4,6 +4,9 @@
     @onclose="$emit('hidePopUp')"
   >
     <h2>Help Guide</h2>
+    <p v-if="recommenderModelTimestamp" class="model-version-line">
+      Recommender model version: {{ recommenderModelTimestamp }}
+    </p>
 
     <div class="section">
       <h4>Searching Masks</h4>
@@ -12,7 +15,7 @@
 
     <div class="section">
       <h4>Recommendations</h4>
-      <p>Click the "R" button to get personalized mask recommendations based on your facial measurements.</p>
+      <p>Use the MasqFit app once it is available in the iOS App Store. After a face scan, it will lead you to the mask page here, with added information about which masks are most likely to fit your face.</p>
     </div>
 
     <div class="section">
@@ -43,7 +46,11 @@
 
         <tr>
           <th>Filtration factor</th>
-          <td>An estimate of filtration efficiency. <strong>If you have your mask sealed to your face (i.e. great fit)</strong>, this metric captures how many times cleaner the air is that you're breathing in with the mask, compared to not wearing one. <strong>If you don't have a good seal, then you are getting lower than this protection factor.</strong> For example, assuming you have a great fit, and this is 100, then the air you're breathing in should be close to 100 times cleaner of particulates, in the 0.02 - 1 micron range. This is measured by a PortaCount with normal breathing rates. Multiple results from the same mask are averaged.</td>
+          <td>A number between 1 and infinity, describing how much cleaner the air is in the range of 0.02 - 1 microns when wearing a mask, relative to the surroundings, assuming that one has a good seal. E.g. A filtration factor of 100 means that if the mask is fully sealed to the face, that the air being breathed in is 100 times cleaner, in the 0.02 - 1 microns range.</td>
+        </tr>
+        <tr>
+          <th>Breathability</th>
+          <td>Measured in Pascals. Lower is better. This describes the vacuum pressure when you're breathing in air through a well-fitting mask. The lower the pascals, the easier it is to pull / push air through the filter media.</td>
         </tr>
       </table>
     </div>
@@ -65,6 +72,10 @@ export default {
     showPopup: {
       type: Boolean,
       required: true
+    },
+    recommenderModelTimestamp: {
+      type: String,
+      default: null
     }
   }
 }
@@ -73,6 +84,12 @@ export default {
 <style scoped>
 .section {
   margin-bottom: 1.5em;
+}
+
+.model-version-line {
+  margin: 0.25em 0 1em 0;
+  color: #444;
+  font-size: 0.95em;
 }
 
 .section h4 {

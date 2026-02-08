@@ -2,8 +2,61 @@
 
 class MaskRecommender
   class << self
+    def infer_with_meta(facial_measurements, mask_ids: nil, function_base: 'mask-recommender')
+      response = invoke_lambda_infer(
+        facial_measurements,
+        mask_ids: mask_ids,
+        function_base: function_base
+      )
+      body = parse_lambda_body(response)
+      collection = build_mask_collection(body)
+      model = body.is_a?(Hash) && body['model'].is_a?(Hash) ? body['model'] : nil
+      { masks: collection, model: model }
+    end
+
     # New primary entrypoint for inference
     def infer(facial_measurements, mask_ids: nil, function_base: 'mask-recommender')
+      infer_with_meta(
+        facial_measurements,
+        mask_ids: mask_ids,
+        function_base: function_base
+      )[:masks]
+    end
+
+    # Trigger training on the unified PyTorch Lambda
+    # Accepts optional parameters like epochs:, data_url:, target_col:
+    def train(epochs: 20, data_url: nil, target_col: 'target', function_base: 'mask-recommender')
+      heroku_env = lambda_environment
+
+      payload = { method: 'train' }
+      payload[:epochs] = epochs if epochs
+      payload[:data_url] = data_url if data_url
+      payload[:target_col] = target_col if target_col
+      function_name = "#{function_base}-#{heroku_env}"
+      Rails.logger.info("MaskRecommender.train invoking #{function_name}")
+
+      response = AwsLambdaInvokeService.call(
+        function_name: function_name,
+        payload: payload
+      )
+
+      parse_lambda_body(response)
+    end
+
+    def warmup(function_base: 'mask-recommender')
+      heroku_env = lambda_environment
+      function_name = "#{function_base}-#{heroku_env}"
+      Rails.logger.info("MaskRecommender.warmup invoking #{function_name}")
+      response = AwsLambdaInvokeService.call(
+        function_name: function_name,
+        payload: { method: 'warmup' }
+      )
+      parse_lambda_body(response)
+    end
+
+    private
+
+    def invoke_lambda_infer(facial_measurements, mask_ids:, function_base:)
       heroku_env = lambda_environment
 
       payload = {
@@ -14,12 +67,13 @@ class MaskRecommender
       function_name = "#{function_base}-#{heroku_env}"
       Rails.logger.info("MaskRecommender.infer invoking #{function_name}")
 
-      response = AwsLambdaInvokeService.call(
+      AwsLambdaInvokeService.call(
         function_name: function_name,
         payload: payload
       )
+    end
 
-      body = parse_lambda_body(response)
+    def build_mask_collection(body)
       raise "Lambda error: #{body['error']}" if body.is_a?(Hash) && body['error'].present?
 
       mask_map = body.is_a?(Hash) ? body['mask_id'] : nil
@@ -62,39 +116,6 @@ class MaskRecommender
 
       collection
     end
-
-    # Trigger training on the unified PyTorch Lambda
-    # Accepts optional parameters like epochs:, data_url:, target_col:
-    def train(epochs: 20, data_url: nil, target_col: 'target', function_base: 'mask-recommender')
-      heroku_env = lambda_environment
-
-      payload = { method: 'train' }
-      payload[:epochs] = epochs if epochs
-      payload[:data_url] = data_url if data_url
-      payload[:target_col] = target_col if target_col
-      function_name = "#{function_base}-#{heroku_env}"
-      Rails.logger.info("MaskRecommender.train invoking #{function_name}")
-
-      response = AwsLambdaInvokeService.call(
-        function_name: function_name,
-        payload: payload
-      )
-
-      parse_lambda_body(response)
-    end
-
-    def warmup(function_base: 'mask-recommender')
-      heroku_env = lambda_environment
-      function_name = "#{function_base}-#{heroku_env}"
-      Rails.logger.info("MaskRecommender.warmup invoking #{function_name}")
-      response = AwsLambdaInvokeService.call(
-        function_name: function_name,
-        payload: { method: 'warmup' }
-      )
-      parse_lambda_body(response)
-    end
-
-    private
 
     # Handles various Lambda proxy integration response shapes:
     # - {"statusCode":200, "body":"{...}"}

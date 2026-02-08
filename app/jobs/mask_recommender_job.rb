@@ -17,17 +17,20 @@ class MaskRecommenderJob < ApplicationJob
       expires_in: CACHE_TTL
     )
 
-    masks = MaskRecommender.infer(
+    inference = MaskRecommender.infer_with_meta(
       facial_measurements,
       function_base: function_base
     )
+    masks = inference[:masks]
+    model = inference[:model]
 
     Rails.cache.write(
       cache_key,
       {
         status: 'complete',
         completed_at: Time.current.iso8601,
-        result: masks
+        result: masks,
+        model: model
       },
       expires_in: CACHE_TTL
     )

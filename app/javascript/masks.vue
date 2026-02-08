@@ -60,6 +60,7 @@
 
       <HelpPopup
         :showPopup='showPopup == "Help"'
+        :recommenderModelTimestamp="recommenderModelTimestamp"
         @hidePopUp='showPopup = false'
       />
 
@@ -242,6 +243,7 @@ export default {
       lastHandledRecommenderPayload: null,
       recommenderWarmupKey: 'mask_recommender_warmup_done',
       isRecommenderLoading: false,
+      recommenderModelTimestamp: null,
     }
   },
   props: {
@@ -503,6 +505,7 @@ export default {
       const payloadParam = toQuery.recommenderPayload
       if (!payloadParam) {
         this.isRecommenderLoading = false
+        this.recommenderModelTimestamp = null
         return false
       }
 
@@ -515,12 +518,14 @@ export default {
       const facialMeasurements = this.decodeRecommenderPayload(payloadParam)
       if (!facialMeasurements) {
         this.isRecommenderLoading = false
+        this.recommenderModelTimestamp = null
         this.message = "Failed to decode recommendations payload."
         return true
       }
 
       this.lastHandledRecommenderPayload = payloadParam
       this.isRecommenderLoading = true
+      this.recommenderModelTimestamp = null
       try {
         await this.requestAsyncRecommendations(facialMeasurements)
       } finally {
@@ -552,6 +557,8 @@ export default {
           if (status === 'complete') {
             const data = response.data?.result
             const masks = data && data.masks ? data.masks : data
+            const modelTimestamp = response?.data?.model?.timestamp
+            this.recommenderModelTimestamp = modelTimestamp || null
             if (masks) {
               this.masks = masks.map((m) => new Respirator(m))
               this.totalCount = masks.length

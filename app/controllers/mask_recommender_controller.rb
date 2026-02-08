@@ -11,12 +11,17 @@ class MaskRecommenderController < ApplicationController
     status = 200
     # Prefer explicit function_base param (nested or top-level)
     function_base = params[:function_base] || params.dig(:mask_recommender, :function_base) || 'mask-recommender'
-    masks = MaskRecommender.infer(facial_measurements.to_h.stringify_keys, function_base: function_base)
+    inference = MaskRecommender.infer_with_meta(
+      facial_measurements.to_h.stringify_keys,
+      function_base: function_base
+    )
+    masks = inference[:masks]
+    model = inference[:model]
     data_context = MasksDataContextualizer.call
 
     respond_to do |format|
       format.json do
-        render json: { masks: masks, context: data_context }.to_json, status: status
+        render json: { masks: masks, context: data_context, model: model }.to_json, status: status
       end
     end
   end
