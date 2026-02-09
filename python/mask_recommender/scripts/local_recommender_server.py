@@ -144,7 +144,6 @@ def _load_artifacts(model_dir: Path):
         layers.append(torch.nn.Linear(in_features, out_features))
         if idx < len(linear_specs) - 1:
             layers.append(torch.nn.ReLU())
-    layers.append(torch.nn.Sigmoid())
     model = torch.nn.Sequential(*layers)
 
     model.load_state_dict(state_dict)

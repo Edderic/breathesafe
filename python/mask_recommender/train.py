@@ -435,7 +435,7 @@ class TrainModelConfig:
 
 def _set_num_masks_times_num_bins_plus_other_features(mask_candidates):
     num_masks = int(mask_candidates.shape[0])
-    num_bins = len(diff_bin_edges()) - 1
+    num_bins = len(diff_bin_edges())
     num_styles = int(mask_candidates['style'].dropna().nunique())
     num_strap_types = int(mask_candidates['strap_type'].dropna().nunique())
     num_brand_models = int(mask_candidates['brand_model'].dropna().nunique())
