@@ -439,9 +439,9 @@ def _set_num_masks_times_num_bins_plus_other_features(mask_candidates):
     num_styles = int(mask_candidates['style'].dropna().nunique())
     num_strap_types = int(mask_candidates['strap_type'].dropna().nunique())
     num_brand_models = int(mask_candidates['brand_model'].dropna().nunique())
-    other_features = 1 + 2 + num_styles + num_strap_types
+    other_features = 1 + num_strap_types
     return (
-        num_masks + num_brand_models + num_bins + num_styles + other_features
+        (num_masks + num_brand_models) * num_bins + num_styles * num_bins + other_features
     )
 
 
