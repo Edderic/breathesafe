@@ -23,9 +23,11 @@ from breathesafe_network import (build_session,
                                  fetch_json)
 from feature_builder import (FACIAL_FEATURE_COLUMNS,
                              FACIAL_PERIMETER_COMPONENTS,
+                             ABS_PERIMETER_DIFF_STYLE_PREFIX,
                              PERIMETER_DIFF_SQ_STYLE_PREFIX,
                              PERIMETER_DIFF_STYLE_PREFIX,
                              add_brand_model_column,
+                             add_strap_type_features,
                              add_style_perimeter_interactions, build_feature_frame,
                              derive_brand_model, diff_bin_edges,
                              diff_bin_index, diff_bin_labels,
@@ -373,6 +375,7 @@ def prepare_training_data(
 ):
     filtered = filter_fit_tests(fit_tests_df)
     filtered = add_brand_model_column(filtered)
+    filtered = add_strap_type_features(filtered)
 
     feature_cols = []
     if use_diff_perimeter_bins or use_diff_perimeter_mask_bins:
@@ -413,16 +416,21 @@ def prepare_training_data(
             [
                 column for column in filtered.columns
                 if column.startswith(PERIMETER_DIFF_STYLE_PREFIX)
+                or column.startswith(ABS_PERIMETER_DIFF_STYLE_PREFIX)
                 or column.startswith(PERIMETER_DIFF_SQ_STYLE_PREFIX)
             ]
         )
 
-        feature_cols = ['perimeter_diff', 'perimeter_diff_sq'] + interaction_cols
+        feature_cols = ['perimeter_diff', 'abs_perimeter_diff', 'perimeter_diff_sq'] + interaction_cols
         if use_facial_perimeter:
             feature_cols.append('facial_perimeter_mm')
         else:
             feature_cols += FACIAL_FEATURE_COLUMNS
     feature_cols += [
+        'strap_is_earloop_like',
+        'strap_is_headstrap_like',
+        'strap_is_adjustable',
+        'strap_type_strength',
         'facial_hair_beard_length_mm',
         'strap_type',
         'style',
@@ -456,8 +464,10 @@ def _set_num_masks_times_num_bins_plus_other_features(mask_candidates):
     num_strap_types = int(mask_candidates['strap_type'].dropna().nunique())
     num_brand_models = int(mask_candidates['brand_model'].dropna().nunique())
     other_features = 1 + num_strap_types
+    # For each bin, there's a quadratic term for the number of styles: ax2 +
+    # bx...
     return (
-        (num_masks + num_brand_models) * num_bins + num_styles * num_bins + other_features
+        (num_masks + num_brand_models + num_styles) * num_bins * 2 + other_features
     )
 
 

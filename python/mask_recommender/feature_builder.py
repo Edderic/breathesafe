@@ -21,11 +21,19 @@ FACIAL_PERIMETER_COMPONENTS = [
 
 STYLE_INTERACTION_PREFIX = "style_term_"
 PERIMETER_DIFF_STYLE_PREFIX = "perimeter_diff_x_"
+ABS_PERIMETER_DIFF_STYLE_PREFIX = "abs_perimeter_diff_x_"
 PERIMETER_DIFF_SQ_STYLE_PREFIX = "perimeter_diff_sq_x_"
 MM_PER_CM = 10.0
 # Increase style-specific penalty from squared perimeter mismatch so large
 # perimeter/style mismatches influence ranking more strongly.
 PERIMETER_DIFF_SQ_STYLE_INTERACTION_MULTIPLIER = 10.0
+
+STRAP_FEATURE_COLUMNS = [
+    "strap_is_earloop_like",
+    "strap_is_headstrap_like",
+    "strap_is_adjustable",
+    "strap_type_strength",
+]
 
 
 def _extract_breakdown(current_state):
@@ -136,12 +144,17 @@ def add_style_perimeter_interactions(frame):
         return frame
 
     result = frame.copy()
+    if "abs_perimeter_diff" not in result.columns:
+        result["abs_perimeter_diff"] = result["perimeter_diff"].abs()
     style_series = result["style"].fillna("unknown").astype(str).str.strip()
     style_series = style_series.replace("", "unknown")
     style_dummies = pd.get_dummies(style_series, prefix=STYLE_INTERACTION_PREFIX.rstrip("_"))
 
     for column in style_dummies.columns:
         result[f"{PERIMETER_DIFF_STYLE_PREFIX}{column}"] = result["perimeter_diff"] * style_dummies[column]
+        result[f"{ABS_PERIMETER_DIFF_STYLE_PREFIX}{column}"] = (
+            result["abs_perimeter_diff"] * style_dummies[column]
+        )
         result[f"{PERIMETER_DIFF_SQ_STYLE_PREFIX}{column}"] = (
             result["perimeter_diff_sq"]
             * style_dummies[column]
@@ -160,8 +173,39 @@ def scale_perimeter_diff_features(frame):
 
     result = frame.copy()
     result["perimeter_diff"] = result["perimeter_diff"] / MM_PER_CM
+    result["abs_perimeter_diff"] = result["perimeter_diff"].abs()
     if "perimeter_diff_sq" in result.columns:
         result["perimeter_diff_sq"] = result["perimeter_diff_sq"] / (MM_PER_CM ** 2)
+    return result
+
+
+def add_strap_type_features(frame):
+    if frame is None or frame.empty:
+        return frame
+
+    result = frame.copy()
+    strap_series = result.get("strap_type")
+    if strap_series is None:
+        strap_series = pd.Series([""] * len(result), index=result.index)
+    strap_series = strap_series.fillna("").astype(str).str.strip().str.lower()
+
+    is_earloop = strap_series.isin(["earloop", "adjustable earloop"])
+    is_headstrap = strap_series.isin(["headstrap", "adjustable headstrap"])
+    is_adjustable = strap_series.str.contains("adjustable", regex=False)
+
+    strength_map = {
+        "earloop": -1.0,
+        "adjustable earloop": -0.6,
+        "headstrap": 0.8,
+        "adjustable headstrap": 1.0,
+        "strapless": -0.2,
+    }
+    strap_strength = strap_series.map(strength_map).fillna(0.0)
+
+    result["strap_is_earloop_like"] = is_earloop.astype(float)
+    result["strap_is_headstrap_like"] = is_headstrap.astype(float)
+    result["strap_is_adjustable"] = is_adjustable.astype(float)
+    result["strap_type_strength"] = strap_strength.astype(float)
     return result
 
 
@@ -196,6 +240,8 @@ def apply_perimeter_features(
     use_diff_perimeter_bins=False,
     use_diff_perimeter_mask_bins=False
 ):
+    inference_rows = add_strap_type_features(inference_rows)
+
     if use_diff_perimeter_bins or use_diff_perimeter_mask_bins:
         inference_rows = inference_rows.copy()
         numeric_columns = FACIAL_PERIMETER_COMPONENTS + ["perimeter_mm"]
