@@ -24,6 +24,7 @@ PERIMETER_DIFF_STYLE_PREFIX = "perimeter_diff_x_"
 ABS_PERIMETER_DIFF_STYLE_PREFIX = "abs_perimeter_diff_x_"
 PERIMETER_DIFF_SQ_STYLE_PREFIX = "perimeter_diff_sq_x_"
 STRAP_STYLE_INTERACTION_PREFIX = "strap_style_x_"
+STRAP_PERIMETER_INTERACTION_PREFIX = "strap_perimeter_x_"
 MM_PER_CM = 10.0
 # Increase style-specific penalty from squared perimeter mismatch so large
 # perimeter/style mismatches influence ranking more strongly.
@@ -241,6 +242,37 @@ def add_strap_style_interactions(frame):
     return result
 
 
+def add_strap_perimeter_interactions(frame):
+    if frame is None or frame.empty:
+        return frame
+
+    required_perimeter_features = [
+        "perimeter_diff",
+        "abs_perimeter_diff",
+        "perimeter_diff_sq",
+    ]
+    if any(column not in frame.columns for column in required_perimeter_features):
+        return frame
+
+    required_strap_features = [
+        "strap_type_strength",
+        "strap_is_earloop_like",
+        "strap_is_headstrap_like",
+    ]
+    if any(column not in frame.columns for column in required_strap_features):
+        return frame
+
+    result = frame.copy()
+    for strap_column in required_strap_features:
+        for perimeter_column in required_perimeter_features:
+            interaction_column = (
+                f"{STRAP_PERIMETER_INTERACTION_PREFIX}{strap_column}_x_{perimeter_column}"
+            )
+            result[interaction_column] = result[strap_column] * result[perimeter_column]
+
+    return result
+
+
 def diff_bin_edges():
     edges = [-float("inf")]
     edges.extend(list(range(-120, 121, 15)))
@@ -273,7 +305,6 @@ def apply_perimeter_features(
     use_diff_perimeter_mask_bins=False
 ):
     inference_rows = add_strap_type_features(inference_rows)
-    inference_rows = add_strap_style_interactions(inference_rows)
 
     if use_diff_perimeter_bins or use_diff_perimeter_mask_bins:
         inference_rows = inference_rows.copy()
@@ -314,6 +345,7 @@ def apply_perimeter_features(
             mask_bins = pd.DataFrame(mask_bins_array, index=mask_bins.index, columns=mask_bins.columns)
             mask_bins.columns = [f"mask_bin_{col}" for col in mask_bins.columns]
             inference_rows = pd.concat([inference_rows, mask_bins], axis=1)
+        inference_rows = add_strap_style_interactions(inference_rows)
         inference_rows = inference_rows.drop(
             columns=FACIAL_FEATURE_COLUMNS + [
                 "perimeter_mm",
@@ -339,6 +371,8 @@ def apply_perimeter_features(
         inference_rows["perimeter_diff_sq"] = inference_rows["perimeter_diff"] ** 2
         inference_rows = scale_perimeter_diff_features(inference_rows)
         inference_rows = add_style_perimeter_interactions(inference_rows)
+        inference_rows = add_strap_style_interactions(inference_rows)
+        inference_rows = add_strap_perimeter_interactions(inference_rows)
         inference_rows = inference_rows.drop(columns=FACIAL_FEATURE_COLUMNS, errors="ignore")
         return inference_rows
 
@@ -354,6 +388,8 @@ def apply_perimeter_features(
     inference_rows["perimeter_diff_sq"] = inference_rows["perimeter_diff"] ** 2
     inference_rows = scale_perimeter_diff_features(inference_rows)
     inference_rows = add_style_perimeter_interactions(inference_rows)
+    inference_rows = add_strap_style_interactions(inference_rows)
+    inference_rows = add_strap_perimeter_interactions(inference_rows)
 
     return inference_rows
 

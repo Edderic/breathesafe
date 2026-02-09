@@ -21,18 +21,18 @@ from botocore.exceptions import ClientError
 from breathesafe_network import (build_session,
                                  fetch_facial_measurements_fit_tests,
                                  fetch_json)
-from feature_builder import (FACIAL_FEATURE_COLUMNS,
+from feature_builder import (ABS_PERIMETER_DIFF_STYLE_PREFIX,
+                             FACIAL_FEATURE_COLUMNS,
                              FACIAL_PERIMETER_COMPONENTS,
-                             ABS_PERIMETER_DIFF_STYLE_PREFIX,
                              PERIMETER_DIFF_SQ_STYLE_PREFIX,
                              PERIMETER_DIFF_STYLE_PREFIX,
                              STRAP_STYLE_INTERACTION_PREFIX,
                              add_brand_model_column,
                              add_strap_style_interactions,
                              add_strap_type_features,
-                             add_style_perimeter_interactions, build_feature_frame,
-                             derive_brand_model, diff_bin_edges,
-                             diff_bin_index, diff_bin_labels,
+                             add_style_perimeter_interactions,
+                             build_feature_frame, derive_brand_model,
+                             diff_bin_edges, diff_bin_index, diff_bin_labels,
                              scale_perimeter_diff_features)
 from predict_arkit_from_traditional import predict_arkit_from_traditional
 from prob_model import (normalize_qlft_pass, predict_prob_model,
@@ -471,7 +471,8 @@ def _set_num_masks_times_num_bins_plus_other_features(mask_candidates):
     # For each bin, there's a quadratic term for the number of styles: ax2 +
     # bx...
     return (
-        (num_masks + num_brand_models + num_styles) * num_bins * 2 + other_features
+        (num_masks + num_brand_models + num_styles + num_strap_types) * num_bins
+        * 2 + other_features
     )
 
 
