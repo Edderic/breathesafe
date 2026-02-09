@@ -23,17 +23,12 @@ STYLE_INTERACTION_PREFIX = "style_term_"
 PERIMETER_DIFF_STYLE_PREFIX = "perimeter_diff_x_"
 ABS_PERIMETER_DIFF_STYLE_PREFIX = "abs_perimeter_diff_x_"
 PERIMETER_DIFF_SQ_STYLE_PREFIX = "perimeter_diff_sq_x_"
-NEG_PERIMETER_DIFF_STYLE_PREFIX = "neg_perimeter_diff_x_"
-NEG_PERIMETER_DIFF_SQ_STYLE_PREFIX = "neg_perimeter_diff_sq_x_"
 STRAP_STYLE_INTERACTION_PREFIX = "strap_style_x_"
-STRAP_PERIMETER_INTERACTION_PREFIX = "strap_perimeter_x_"
 MM_PER_CM = 10.0
 # Increase style-specific penalty from squared perimeter mismatch so large
 # perimeter/style mismatches influence ranking more strongly.
 ABS_PERIMETER_DIFF_STYLE_INTERACTION_MULTIPLIER = 6.0
 PERIMETER_DIFF_SQ_STYLE_INTERACTION_MULTIPLIER = 25.0
-NEG_PERIMETER_DIFF_STYLE_INTERACTION_MULTIPLIER = 12.0
-NEG_PERIMETER_DIFF_SQ_STYLE_INTERACTION_MULTIPLIER = 40.0
 
 STRAP_FEATURE_COLUMNS = [
     "strap_is_earloop_like",
@@ -153,10 +148,6 @@ def add_style_perimeter_interactions(frame):
     result = frame.copy()
     if "abs_perimeter_diff" not in result.columns:
         result["abs_perimeter_diff"] = result["perimeter_diff"].abs()
-    if "perimeter_diff_neg" not in result.columns:
-        result["perimeter_diff_neg"] = (-result["perimeter_diff"]).clip(lower=0)
-    if "perimeter_diff_neg_sq" not in result.columns:
-        result["perimeter_diff_neg_sq"] = result["perimeter_diff_neg"] ** 2
     style_series = result["style"].fillna("unknown").astype(str).str.strip()
     style_series = style_series.replace("", "unknown")
     style_dummies = pd.get_dummies(style_series, prefix=STYLE_INTERACTION_PREFIX.rstrip("_"))
@@ -173,16 +164,6 @@ def add_style_perimeter_interactions(frame):
             * style_dummies[column]
             * PERIMETER_DIFF_SQ_STYLE_INTERACTION_MULTIPLIER
         )
-        result[f"{NEG_PERIMETER_DIFF_STYLE_PREFIX}{column}"] = (
-            result["perimeter_diff_neg"]
-            * style_dummies[column]
-            * NEG_PERIMETER_DIFF_STYLE_INTERACTION_MULTIPLIER
-        )
-        result[f"{NEG_PERIMETER_DIFF_SQ_STYLE_PREFIX}{column}"] = (
-            result["perimeter_diff_neg_sq"]
-            * style_dummies[column]
-            * NEG_PERIMETER_DIFF_SQ_STYLE_INTERACTION_MULTIPLIER
-        )
 
     return result
 
@@ -197,8 +178,6 @@ def scale_perimeter_diff_features(frame):
     result = frame.copy()
     result["perimeter_diff"] = result["perimeter_diff"] / MM_PER_CM
     result["abs_perimeter_diff"] = result["perimeter_diff"].abs()
-    result["perimeter_diff_neg"] = (-result["perimeter_diff"]).clip(lower=0)
-    result["perimeter_diff_neg_sq"] = result["perimeter_diff_neg"] ** 2
     if "perimeter_diff_sq" in result.columns:
         result["perimeter_diff_sq"] = result["perimeter_diff_sq"] / (MM_PER_CM ** 2)
     return result
@@ -261,39 +240,6 @@ def add_strap_style_interactions(frame):
                 f"{STRAP_STYLE_INTERACTION_PREFIX}{strap_column}_x_{style_column}"
             )
             result[interaction_column] = result[strap_column] * style_mask
-
-    return result
-
-
-def add_strap_perimeter_interactions(frame):
-    if frame is None or frame.empty:
-        return frame
-
-    required_perimeter_features = [
-        "perimeter_diff",
-        "abs_perimeter_diff",
-        "perimeter_diff_sq",
-        "perimeter_diff_neg",
-        "perimeter_diff_neg_sq",
-    ]
-    if any(column not in frame.columns for column in required_perimeter_features):
-        return frame
-
-    required_strap_features = [
-        "strap_type_strength",
-        "strap_is_earloop_like",
-        "strap_is_headstrap_like",
-    ]
-    if any(column not in frame.columns for column in required_strap_features):
-        return frame
-
-    result = frame.copy()
-    for strap_column in required_strap_features:
-        for perimeter_column in required_perimeter_features:
-            interaction_column = (
-                f"{STRAP_PERIMETER_INTERACTION_PREFIX}{strap_column}_x_{perimeter_column}"
-            )
-            result[interaction_column] = result[strap_column] * result[perimeter_column]
 
     return result
 
@@ -397,7 +343,6 @@ def apply_perimeter_features(
         inference_rows = scale_perimeter_diff_features(inference_rows)
         inference_rows = add_style_perimeter_interactions(inference_rows)
         inference_rows = add_strap_style_interactions(inference_rows)
-        inference_rows = add_strap_perimeter_interactions(inference_rows)
         inference_rows = inference_rows.drop(columns=FACIAL_FEATURE_COLUMNS, errors="ignore")
         return inference_rows
 
@@ -414,7 +359,6 @@ def apply_perimeter_features(
     inference_rows = scale_perimeter_diff_features(inference_rows)
     inference_rows = add_style_perimeter_interactions(inference_rows)
     inference_rows = add_strap_style_interactions(inference_rows)
-    inference_rows = add_strap_perimeter_interactions(inference_rows)
 
     return inference_rows
 
