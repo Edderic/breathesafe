@@ -58,8 +58,8 @@ def _tokenize_mask_code(unique_internal_model_code):
 
 
 def derive_brand_model(unique_internal_model_code, current_state=None):
-    brand = None
-    model = None
+    brand_tokens = []
+    model_tokens = []
 
     breakdown = _extract_breakdown(current_state)
     for entry in breakdown:
@@ -67,18 +67,30 @@ def derive_brand_model(unique_internal_model_code, current_state=None):
             continue
         token, label = next(iter(entry.items()))
         label_normalized = str(label).strip().lower()
-        if brand is None and label_normalized == "brand":
-            brand = str(token).strip()
-        if model is None and label_normalized == "model":
-            model = str(token).strip()
-        if brand and model:
-            break
+        token_normalized = str(token).strip()
+        if not token_normalized:
+            continue
+        if label_normalized == "brand":
+            brand_tokens.append(token_normalized)
+        if label_normalized == "model":
+            model_tokens.append(token_normalized)
+
+    # Keep first-seen order while de-duplicating.
+    brand_tokens = list(dict.fromkeys(brand_tokens))
+    model_tokens = list(dict.fromkeys(model_tokens))
+
+    brand = " ".join(brand_tokens).strip() if brand_tokens else None
+    model = " ".join(model_tokens).strip() if model_tokens else None
+    has_labeled_breakdown = bool(brand_tokens or model_tokens)
 
     fallback_tokens = _tokenize_mask_code(unique_internal_model_code)
-    if not brand and fallback_tokens:
-        brand = fallback_tokens[0]
-    if not model and len(fallback_tokens) > 1:
-        model = fallback_tokens[1]
+    # Only infer brand/model from raw mask code when no labeled breakdown exists.
+    # If breakdown explicitly contains only brand (or only model), preserve that.
+    if not has_labeled_breakdown:
+        if not brand and fallback_tokens:
+            brand = fallback_tokens[0]
+        if not model and len(fallback_tokens) > 1:
+            model = fallback_tokens[1]
 
     parts = [part for part in [brand, model] if part]
     return " ".join(parts).strip()
@@ -212,6 +224,8 @@ def build_feature_frame(
         use_diff_perimeter_mask_bins=use_diff_perimeter_mask_bins
     )
     transformed = add_brand_model_column(transformed)
+
+
     for column in categorical_columns:
         if column not in transformed.columns:
             transformed[column] = ""

@@ -67,3 +67,13 @@ def test_derive_brand_model_prefers_breakdown_and_falls_back_to_code():
     }
     assert derive_brand_model("3M Aura 9205+", current_state) == "3M Aura"
     assert derive_brand_model("GVS Elipse S/M for High nose", None) == "GVS Elipse"
+
+    brand_only_state = {
+        "current_state": {
+            "breakdown": [
+                {"Trident": "brand"},
+                {"Regular": "size"},
+            ]
+        }
+    }
+    assert derive_brand_model("Trident Regular", brand_only_state) == "Trident"
