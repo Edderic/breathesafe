@@ -459,11 +459,6 @@ def _set_num_masks_times_num_bins_plus_other_features(mask_candidates):
     )
 
 
-def _default_outer_dim(base_dim):
-    base_dim = int(base_dim)
-    return min(1024, max(256, 2 * base_dim))
-
-
 def _initialize_model(feature_count, outer_dim):
     outer_dim = int(outer_dim)
     if outer_dim <= 0:
@@ -835,16 +830,11 @@ def main(argv=None):
 
     masks_df = get_masks(session, masks_url)
     mask_candidates = build_mask_candidates(masks_df)
-    base_dim = _set_num_masks_times_num_bins_plus_other_features(mask_candidates)
     model_config = TrainModelConfig(
-        outer_dim=_default_outer_dim(base_dim)
+        outer_dim=_set_num_masks_times_num_bins_plus_other_features(mask_candidates)
     )
     logging.info(
         "num_masks_times_num_bins_plus_other_features=%s",
-        base_dim
-    )
-    logging.info(
-        "outer_dim=%s",
         model_config.outer_dim
     )
     email = os.getenv('BREATHESAFE_SERVICE_EMAIL')
