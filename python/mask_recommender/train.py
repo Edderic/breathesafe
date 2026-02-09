@@ -26,7 +26,9 @@ from feature_builder import (FACIAL_FEATURE_COLUMNS,
                              ABS_PERIMETER_DIFF_STYLE_PREFIX,
                              PERIMETER_DIFF_SQ_STYLE_PREFIX,
                              PERIMETER_DIFF_STYLE_PREFIX,
+                             STRAP_STYLE_INTERACTION_PREFIX,
                              add_brand_model_column,
+                             add_strap_style_interactions,
                              add_strap_type_features,
                              add_style_perimeter_interactions, build_feature_frame,
                              derive_brand_model, diff_bin_edges,
@@ -376,6 +378,7 @@ def prepare_training_data(
     filtered = filter_fit_tests(fit_tests_df)
     filtered = add_brand_model_column(filtered)
     filtered = add_strap_type_features(filtered)
+    filtered = add_strap_style_interactions(filtered)
 
     feature_cols = []
     if use_diff_perimeter_bins or use_diff_perimeter_mask_bins:
@@ -418,6 +421,7 @@ def prepare_training_data(
                 if column.startswith(PERIMETER_DIFF_STYLE_PREFIX)
                 or column.startswith(ABS_PERIMETER_DIFF_STYLE_PREFIX)
                 or column.startswith(PERIMETER_DIFF_SQ_STYLE_PREFIX)
+                or column.startswith(STRAP_STYLE_INTERACTION_PREFIX)
             ]
         )
 

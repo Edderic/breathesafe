@@ -23,6 +23,7 @@ STYLE_INTERACTION_PREFIX = "style_term_"
 PERIMETER_DIFF_STYLE_PREFIX = "perimeter_diff_x_"
 ABS_PERIMETER_DIFF_STYLE_PREFIX = "abs_perimeter_diff_x_"
 PERIMETER_DIFF_SQ_STYLE_PREFIX = "perimeter_diff_sq_x_"
+STRAP_STYLE_INTERACTION_PREFIX = "strap_style_x_"
 MM_PER_CM = 10.0
 # Increase style-specific penalty from squared perimeter mismatch so large
 # perimeter/style mismatches influence ranking more strongly.
@@ -209,6 +210,37 @@ def add_strap_type_features(frame):
     return result
 
 
+def add_strap_style_interactions(frame):
+    if frame is None or frame.empty:
+        return frame
+    if "style" not in frame.columns:
+        return frame
+
+    required_strap_features = [
+        "strap_is_earloop_like",
+        "strap_is_headstrap_like",
+        "strap_is_adjustable",
+        "strap_type_strength",
+    ]
+    if any(column not in frame.columns for column in required_strap_features):
+        return frame
+
+    result = frame.copy()
+    style_series = result["style"].fillna("unknown").astype(str).str.strip()
+    style_series = style_series.replace("", "unknown")
+    style_dummies = pd.get_dummies(style_series, prefix=STYLE_INTERACTION_PREFIX.rstrip("_"))
+
+    for style_column in style_dummies.columns:
+        style_mask = style_dummies[style_column]
+        for strap_column in required_strap_features:
+            interaction_column = (
+                f"{STRAP_STYLE_INTERACTION_PREFIX}{strap_column}_x_{style_column}"
+            )
+            result[interaction_column] = result[strap_column] * style_mask
+
+    return result
+
+
 def diff_bin_edges():
     edges = [-float("inf")]
     edges.extend(list(range(-120, 121, 15)))
@@ -241,6 +273,7 @@ def apply_perimeter_features(
     use_diff_perimeter_mask_bins=False
 ):
     inference_rows = add_strap_type_features(inference_rows)
+    inference_rows = add_strap_style_interactions(inference_rows)
 
     if use_diff_perimeter_bins or use_diff_perimeter_mask_bins:
         inference_rows = inference_rows.copy()
