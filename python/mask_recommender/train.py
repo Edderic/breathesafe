@@ -415,7 +415,7 @@ def prepare_training_data(
             ]
         )
 
-        feature_cols = ['perimeter_mm', 'perimeter_diff', 'perimeter_diff_sq'] + interaction_cols
+        feature_cols = ['perimeter_diff', 'perimeter_diff_sq'] + interaction_cols
         if use_facial_perimeter:
             feature_cols.append('facial_perimeter_mm')
         else:
