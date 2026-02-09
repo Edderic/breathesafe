@@ -24,12 +24,21 @@ class MaskRecommender
     end
 
     # Trigger training on the unified PyTorch Lambda
-    # Accepts optional parameters like epochs:, data_url:, target_col:
-    def train(epochs: 20, data_url: nil, target_col: 'target', function_base: 'mask-recommender')
+    # Accepts optional parameters like epochs:, learning_rate:, retrain_with_full:, data_url:, target_col:
+    def train(
+      epochs: 600,
+      learning_rate: 0.00005,
+      retrain_with_full: true,
+      data_url: nil,
+      target_col: 'target',
+      function_base: 'mask-recommender'
+    )
       heroku_env = lambda_environment
 
       payload = { method: 'train' }
       payload[:epochs] = epochs if epochs
+      payload[:learning_rate] = learning_rate if learning_rate
+      payload[:retrain_with_full] = retrain_with_full unless retrain_with_full.nil?
       payload[:data_url] = data_url if data_url
       payload[:target_col] = target_col if target_col
       function_name = "#{function_base}-#{heroku_env}"

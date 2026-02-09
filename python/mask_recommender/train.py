@@ -781,8 +781,8 @@ def _best_effort_visual_upload(upload_fn, artifact_name, fallback_artifact=None)
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Train fit predictor model.')
-    parser.add_argument('--epochs', type=int, default=50, help='Number of training epochs.')
-    parser.add_argument('--learning-rate', type=float, default=0.01, help='Learning rate for optimizer.')
+    parser.add_argument('--epochs', type=int, default=600, help='Number of training epochs.')
+    parser.add_argument('--learning-rate', type=float, default=0.00005, help='Learning rate for optimizer.')
     parser.add_argument('--model-type', default='nn', choices=['nn', 'prob'], help='Model type to train.')
     parser.add_argument('--loss-plot', default='python/mask_recommender/training_loss.png', help='Path to save training loss plot.')
     parser.add_argument('--loss-type', default='bce', choices=['bce', 'focal'], help='Loss function to use.')
@@ -796,8 +796,16 @@ def main(argv=None):
     parser.add_argument(
         '--retrain-with-full',
         action='store_true',
+        dest='retrain_with_full',
         help='After split metrics, retrain from scratch on the full dataset before saving artifacts.',
     )
+    parser.add_argument(
+        '--no-retrain-with-full',
+        action='store_false',
+        dest='retrain_with_full',
+        help='Disable full-dataset retraining before artifact save.',
+    )
+    parser.set_defaults(retrain_with_full=True)
     args = parser.parse_args(argv)
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
