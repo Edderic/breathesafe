@@ -26,8 +26,8 @@ class MaskRecommender
     # Trigger training on the unified PyTorch Lambda
     # Accepts optional parameters like epochs:, learning_rate:, retrain_with_full:, data_url:, target_col:
     def train(
-      epochs: 300,
-      learning_rate: 0.00005,
+      epochs: 100,
+      learning_rate: 0.0001,
       retrain_with_full: true,
       data_url: nil,
       target_col: 'target',
