@@ -400,9 +400,12 @@ def prepare_training_data(
             filtered = pd.concat([filtered, mask_bins], axis=1)
             feature_cols += list(mask_bins.columns)
     else:
-        feature_cols = ['perimeter_mm']
+        filtered['facial_perimeter_mm'] = filtered[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
+        filtered['perimeter_diff'] = filtered['facial_perimeter_mm'] - filtered['perimeter_mm']
+        filtered['perimeter_diff_sq'] = filtered['perimeter_diff'] ** 2
+
+        feature_cols = ['perimeter_mm', 'perimeter_diff', 'perimeter_diff_sq']
         if use_facial_perimeter:
-            filtered['facial_perimeter_mm'] = filtered[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
             feature_cols.append('facial_perimeter_mm')
         else:
             feature_cols += FACIAL_FEATURE_COLUMNS

@@ -203,8 +203,28 @@ def apply_perimeter_features(
 
     if use_facial_perimeter:
         inference_rows = inference_rows.copy()
+        numeric_columns = FACIAL_PERIMETER_COMPONENTS + ["perimeter_mm"]
+        inference_rows[numeric_columns] = (
+            inference_rows[numeric_columns]
+            .apply(pd.to_numeric, errors="coerce")
+            .fillna(0)
+        )
         inference_rows["facial_perimeter_mm"] = inference_rows[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
+        inference_rows["perimeter_diff"] = inference_rows["facial_perimeter_mm"] - inference_rows["perimeter_mm"]
+        inference_rows["perimeter_diff_sq"] = inference_rows["perimeter_diff"] ** 2
         inference_rows = inference_rows.drop(columns=FACIAL_FEATURE_COLUMNS, errors="ignore")
+        return inference_rows
+
+    inference_rows = inference_rows.copy()
+    numeric_columns = FACIAL_PERIMETER_COMPONENTS + ["perimeter_mm"]
+    inference_rows[numeric_columns] = (
+        inference_rows[numeric_columns]
+        .apply(pd.to_numeric, errors="coerce")
+        .fillna(0)
+    )
+    inference_rows["facial_perimeter_mm"] = inference_rows[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
+    inference_rows["perimeter_diff"] = inference_rows["facial_perimeter_mm"] - inference_rows["perimeter_mm"]
+    inference_rows["perimeter_diff_sq"] = inference_rows["perimeter_diff"] ** 2
 
     return inference_rows
 
