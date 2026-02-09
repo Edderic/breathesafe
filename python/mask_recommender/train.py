@@ -24,10 +24,14 @@ from breathesafe_network import (build_session,
 from feature_builder import (ABS_PERIMETER_DIFF_STYLE_PREFIX,
                              FACIAL_FEATURE_COLUMNS,
                              FACIAL_PERIMETER_COMPONENTS,
+                             NEG_PERIMETER_DIFF_SQ_STYLE_PREFIX,
+                             NEG_PERIMETER_DIFF_STYLE_PREFIX,
                              PERIMETER_DIFF_SQ_STYLE_PREFIX,
                              PERIMETER_DIFF_STYLE_PREFIX,
+                             STRAP_PERIMETER_INTERACTION_PREFIX,
                              STRAP_STYLE_INTERACTION_PREFIX,
                              add_brand_model_column,
+                             add_strap_perimeter_interactions,
                              add_strap_style_interactions,
                              add_strap_type_features,
                              add_style_perimeter_interactions,
@@ -415,17 +419,27 @@ def prepare_training_data(
         filtered['perimeter_diff_sq'] = filtered['perimeter_diff'] ** 2
         filtered = scale_perimeter_diff_features(filtered)
         filtered = add_style_perimeter_interactions(filtered)
+        filtered = add_strap_perimeter_interactions(filtered)
         interaction_cols = sorted(
             [
                 column for column in filtered.columns
                 if column.startswith(PERIMETER_DIFF_STYLE_PREFIX)
                 or column.startswith(ABS_PERIMETER_DIFF_STYLE_PREFIX)
                 or column.startswith(PERIMETER_DIFF_SQ_STYLE_PREFIX)
+                or column.startswith(NEG_PERIMETER_DIFF_STYLE_PREFIX)
+                or column.startswith(NEG_PERIMETER_DIFF_SQ_STYLE_PREFIX)
                 or column.startswith(STRAP_STYLE_INTERACTION_PREFIX)
+                or column.startswith(STRAP_PERIMETER_INTERACTION_PREFIX)
             ]
         )
 
-        feature_cols = ['perimeter_diff', 'abs_perimeter_diff', 'perimeter_diff_sq'] + interaction_cols
+        feature_cols = [
+            'perimeter_diff',
+            'abs_perimeter_diff',
+            'perimeter_diff_sq',
+            'perimeter_diff_neg',
+            'perimeter_diff_neg_sq'
+        ] + interaction_cols
         if use_facial_perimeter:
             feature_cols.append('facial_perimeter_mm')
         else:
