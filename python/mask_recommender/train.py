@@ -23,10 +23,7 @@ from breathesafe_network import (build_session,
                                  fetch_json)
 from feature_builder import (FACIAL_FEATURE_COLUMNS,
                              FACIAL_PERIMETER_COMPONENTS,
-                             PERIMETER_DIFF_SQ_STYLE_PREFIX,
-                             PERIMETER_DIFF_STYLE_PREFIX,
-                             add_brand_model_column,
-                             add_style_perimeter_interactions, build_feature_frame,
+                             add_brand_model_column, build_feature_frame,
                              derive_brand_model, diff_bin_edges,
                              diff_bin_index, diff_bin_labels)
 from predict_arkit_from_traditional import predict_arkit_from_traditional
@@ -406,16 +403,8 @@ def prepare_training_data(
         filtered['facial_perimeter_mm'] = filtered[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
         filtered['perimeter_diff'] = filtered['facial_perimeter_mm'] - filtered['perimeter_mm']
         filtered['perimeter_diff_sq'] = filtered['perimeter_diff'] ** 2
-        filtered = add_style_perimeter_interactions(filtered)
-        interaction_cols = sorted(
-            [
-                column for column in filtered.columns
-                if column.startswith(PERIMETER_DIFF_STYLE_PREFIX)
-                or column.startswith(PERIMETER_DIFF_SQ_STYLE_PREFIX)
-            ]
-        )
 
-        feature_cols = ['perimeter_mm', 'perimeter_diff', 'perimeter_diff_sq'] + interaction_cols
+        feature_cols = ['perimeter_mm', 'perimeter_diff', 'perimeter_diff_sq']
         if use_facial_perimeter:
             feature_cols.append('facial_perimeter_mm')
         else:
