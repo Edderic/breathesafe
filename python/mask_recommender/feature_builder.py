@@ -22,6 +22,10 @@ FACIAL_PERIMETER_COMPONENTS = [
 STYLE_INTERACTION_PREFIX = "style_term_"
 PERIMETER_DIFF_STYLE_PREFIX = "perimeter_diff_x_"
 PERIMETER_DIFF_SQ_STYLE_PREFIX = "perimeter_diff_sq_x_"
+MM_PER_CM = 10.0
+# Increase style-specific penalty from squared perimeter mismatch so large
+# perimeter/style mismatches influence ranking more strongly.
+PERIMETER_DIFF_SQ_STYLE_INTERACTION_MULTIPLIER = 10.0
 
 
 def _extract_breakdown(current_state):
@@ -138,8 +142,26 @@ def add_style_perimeter_interactions(frame):
 
     for column in style_dummies.columns:
         result[f"{PERIMETER_DIFF_STYLE_PREFIX}{column}"] = result["perimeter_diff"] * style_dummies[column]
-        result[f"{PERIMETER_DIFF_SQ_STYLE_PREFIX}{column}"] = result["perimeter_diff_sq"] * style_dummies[column]
+        result[f"{PERIMETER_DIFF_SQ_STYLE_PREFIX}{column}"] = (
+            result["perimeter_diff_sq"]
+            * style_dummies[column]
+            * PERIMETER_DIFF_SQ_STYLE_INTERACTION_MULTIPLIER
+        )
 
+    return result
+
+
+def scale_perimeter_diff_features(frame):
+    """Convert perimeter difference features from mm-space to cm-space."""
+    if frame is None or frame.empty:
+        return frame
+    if "perimeter_diff" not in frame.columns:
+        return frame
+
+    result = frame.copy()
+    result["perimeter_diff"] = result["perimeter_diff"] / MM_PER_CM
+    if "perimeter_diff_sq" in result.columns:
+        result["perimeter_diff_sq"] = result["perimeter_diff_sq"] / (MM_PER_CM ** 2)
     return result
 
 
@@ -236,6 +258,7 @@ def apply_perimeter_features(
         inference_rows["facial_perimeter_mm"] = inference_rows[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
         inference_rows["perimeter_diff"] = inference_rows["facial_perimeter_mm"] - inference_rows["perimeter_mm"]
         inference_rows["perimeter_diff_sq"] = inference_rows["perimeter_diff"] ** 2
+        inference_rows = scale_perimeter_diff_features(inference_rows)
         inference_rows = add_style_perimeter_interactions(inference_rows)
         inference_rows = inference_rows.drop(columns=FACIAL_FEATURE_COLUMNS, errors="ignore")
         return inference_rows
@@ -250,6 +273,7 @@ def apply_perimeter_features(
     inference_rows["facial_perimeter_mm"] = inference_rows[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
     inference_rows["perimeter_diff"] = inference_rows["facial_perimeter_mm"] - inference_rows["perimeter_mm"]
     inference_rows["perimeter_diff_sq"] = inference_rows["perimeter_diff"] ** 2
+    inference_rows = scale_perimeter_diff_features(inference_rows)
     inference_rows = add_style_perimeter_interactions(inference_rows)
 
     return inference_rows

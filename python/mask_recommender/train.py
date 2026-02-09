@@ -28,7 +28,8 @@ from feature_builder import (FACIAL_FEATURE_COLUMNS,
                              add_brand_model_column,
                              add_style_perimeter_interactions, build_feature_frame,
                              derive_brand_model, diff_bin_edges,
-                             diff_bin_index, diff_bin_labels)
+                             diff_bin_index, diff_bin_labels,
+                             scale_perimeter_diff_features)
 from predict_arkit_from_traditional import predict_arkit_from_traditional
 from prob_model import (normalize_qlft_pass, predict_prob_model,
                         train_prob_model)
@@ -406,6 +407,7 @@ def prepare_training_data(
         filtered['facial_perimeter_mm'] = filtered[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
         filtered['perimeter_diff'] = filtered['facial_perimeter_mm'] - filtered['perimeter_mm']
         filtered['perimeter_diff_sq'] = filtered['perimeter_diff'] ** 2
+        filtered = scale_perimeter_diff_features(filtered)
         filtered = add_style_perimeter_interactions(filtered)
         interaction_cols = sorted(
             [
