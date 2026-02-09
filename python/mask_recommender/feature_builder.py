@@ -194,8 +194,8 @@ def add_strap_type_features(frame):
     is_adjustable = strap_series.str.contains("adjustable", regex=False)
 
     strength_map = {
-        "earloop": -1.0,
-        "adjustable earloop": -0.6,
+        "earloop": -2.0,
+        "adjustable earloop": -1.4,
         "headstrap": 0.8,
         "adjustable headstrap": 1.0,
         "strapless": -0.2,
