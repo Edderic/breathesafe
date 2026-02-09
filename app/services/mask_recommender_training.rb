@@ -15,7 +15,6 @@ class MaskRecommenderTraining
   WORKFLOW_PARITY_CONFIG = {
     epochs: 600,
     learning_rate: 0.0001,
-    use_diff_perimeter_bins: true,
     retrain_with_full: true
   }.freeze
 
