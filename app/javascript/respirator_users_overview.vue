@@ -530,26 +530,11 @@ export default {
       }
     },
     computeArkitAggregates(arkitData) {
-      let normalizedArkitData = arkitData
-      if (typeof normalizedArkitData === 'string') {
-        try {
-          normalizedArkitData = JSON.parse(normalizedArkitData)
-        } catch (e) {
-          normalizedArkitData = null
-        }
-      }
-
-      if (!normalizedArkitData) {
+      if (!arkitData || !arkitData.averageMeasurements) {
         return null
       }
 
-      const averageMeasurements =
-        normalizedArkitData.averageMeasurements || normalizedArkitData.average_measurements
-      if (!averageMeasurements) {
-        return null
-      }
-
-      const entries = Object.values(averageMeasurements)
+      const entries = Object.values(arkitData.averageMeasurements)
       if (!entries.length) {
         return null
       }
@@ -584,44 +569,22 @@ export default {
 
       return totals
     },
-    measurementValueFromSources(row, baseKey, mmKey, columnName, arkitAggregates) {
-      if (arkitAggregates) {
-        const fromArkit = arkitAggregates[mmKey] ?? arkitAggregates[baseKey]
-        if (fromArkit !== null && fromArkit !== undefined) {
-          return fromArkit
-        }
-      }
-
-      const user = row && row.user ? row.user : {}
-      const candidateSources = [
-        row,
-        row && row.facialMeasurements ? row.facialMeasurements : null,
-        row && row.facial_measurements ? row.facial_measurements : null,
-        user,
-        user && user.facialMeasurements ? user.facialMeasurements : null,
-        user && user.facial_measurements ? user.facial_measurements : null
-      ].filter(Boolean)
-
-      for (const source of candidateSources) {
-        const value = source[baseKey] ?? source[mmKey] ?? source[columnName]
-        if (value !== null && value !== undefined) {
-          return value
-        }
-      }
-
-      return undefined
-    },
     maybeRecommend(r) {
       const missing = []
       const query = {}
 
-      const arkitAggregates = this.computeArkitAggregates(r.arkit || (r.user && r.user.arkit))
+      const arkitAggregates = this.computeArkitAggregates(r.arkit)
 
       for (const col of this.recommenderColumns) {
         const camel = col.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
         const baseKey = `${camel}`
         const mmKey = camel.endsWith('Mm') ? camel : `${camel}Mm`
-        const rawValue = this.measurementValueFromSources(r, baseKey, mmKey, col, arkitAggregates)
+        const source = r.facialMeasurements || r.facial_measurements || r
+        const rawValue = (arkitAggregates && arkitAggregates[mmKey])
+          ?? (arkitAggregates && arkitAggregates[baseKey])
+          ?? source[baseKey]
+          ?? source[mmKey]
+          ?? source[col]
         const parsed = rawValue === null || rawValue === undefined ? NaN : parseFloat(rawValue)
         if (!Number.isFinite(parsed) || parsed <= 0) {
           missing.push(baseKey)
@@ -634,14 +597,13 @@ export default {
         query.strap_mm = arkitAggregates.strapMm
       }
 
-      const facialHairRaw =
-        r.facialHairBeardLengthMm
-        ?? r.facial_hair_beard_length_mm
-        ?? (r.facialMeasurements && (r.facialMeasurements.facialHairBeardLengthMm ?? r.facialMeasurements.facial_hair_beard_length_mm))
-        ?? (r.facial_measurements && (r.facial_measurements.facialHairBeardLengthMm ?? r.facial_measurements.facial_hair_beard_length_mm))
-        ?? (r.user && r.user.facialHairBeardLengthMm)
-        ?? (r.user && r.user.facial_hair_beard_length_mm)
-      query.facial_hair_beard_length_mm = parseFloat(facialHairRaw) || 0
+      if (r.facialHairBeardLengthMm !== undefined && r.facialHairBeardLengthMm !== null) {
+        query.facial_hair_beard_length_mm = parseFloat(r.facialHairBeardLengthMm) || 0
+      } else if (r.facial_hair_beard_length_mm !== undefined && r.facial_hair_beard_length_mm !== null) {
+        query.facial_hair_beard_length_mm = parseFloat(r.facial_hair_beard_length_mm) || 0
+      } else {
+        query.facial_hair_beard_length_mm = 0
+      }
 
       if (missing.length > 0) {
         this.missingFacialMeasurementsForRecommender = missing
