@@ -322,10 +322,12 @@ export default {
   mounted() {
     // Add keyboard event listener for Escape key
     document.addEventListener('keydown', this.handleKeydown);
+    window.addEventListener('breathesafe-auth-expired', this.handleAuthExpired);
   },
   beforeUnmount() {
     // Remove keyboard event listener
     document.removeEventListener('keydown', this.handleKeydown);
+    window.removeEventListener('breathesafe-auth-expired', this.handleAuthExpired);
   },
   watch: {
     '$route': {
@@ -559,6 +561,9 @@ export default {
       if (event.key === 'Escape' && this.showHelp) {
         this.showHelp = false;
       }
+    },
+    handleAuthExpired() {
+      signIn.call(this)
     },
     async loadFacialMeasurementsData() {
       try {

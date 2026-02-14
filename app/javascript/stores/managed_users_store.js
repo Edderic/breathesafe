@@ -4,6 +4,33 @@ import axios from 'axios'
 import { useMainStore } from './main_store'
 import { RespiratorUser } from '../respirator_user.js'
 
+function shouldForceReauth(error) {
+  const status = error && error.response && error.response.status
+  if (status === 401 || status === 403) {
+    return true
+  }
+
+  const messages = (error && error.response && error.response.data && error.response.data.messages) || []
+  const messageText = Array.isArray(messages) ? messages.join(' ').toLowerCase() : ''
+  if (status === 422 && messageText.includes('validation error')) {
+    return true
+  }
+
+  if (messageText.includes('please log in') || messageText.includes('unauthorized')) {
+    return true
+  }
+
+  return false
+}
+
+function emitAuthExpired() {
+  try {
+    window.dispatchEvent(new CustomEvent('breathesafe-auth-expired'))
+  } catch (_error) {
+    // Ignore environments without window/event support.
+  }
+}
+
 // useStore could be anything like useUser, useCart
 // the first argument is a unique id of the store across your application
 export const useManagedUserStore = defineStore('managedUsers', {
@@ -86,6 +113,14 @@ export const useManagedUserStore = defineStore('managedUsers', {
           }
         })
         .catch(error => {
+          if (shouldForceReauth(error)) {
+            mainStore.currentUser = undefined
+            mainStore.signedIn = false
+            mainStore.addMessages(['Session expired. Please sign in again.'])
+            emitAuthExpired()
+            return
+          }
+
           if (error && error.response && error.response.data && error.response.data.messages) {
             mainStore.addMessages(error.response.data.messages)
           } else {
@@ -109,6 +144,14 @@ export const useManagedUserStore = defineStore('managedUsers', {
           )
         })
         .catch(error => {
+          if (shouldForceReauth(error)) {
+            mainStore.currentUser = undefined
+            mainStore.signedIn = false
+            mainStore.addMessages(['Session expired. Please sign in again.'])
+            emitAuthExpired()
+            return
+          }
+
           const msgs = error && error.response && error.response.data && error.response.data.messages
           if (Array.isArray(msgs)) {
             mainStore.addMessages(msgs)
@@ -135,6 +178,14 @@ export const useManagedUserStore = defineStore('managedUsers', {
 
           })
           .catch(error => {
+            if (shouldForceReauth(error)) {
+              mainStore.currentUser = undefined
+              mainStore.signedIn = false
+              mainStore.addMessages(['Session expired. Please sign in again.'])
+              emitAuthExpired()
+              return
+            }
+
             if (error && error.response && error.response.data && error.response.data.messages) {
               mainStore.addMessages(error.response.data.messages)
             } else {
