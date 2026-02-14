@@ -133,20 +133,20 @@
                 </div>
               </div>
             </td>
-            <th>Perimeter (mm)</th>
+            <th>Initial Cost (USD)</th>
             <td>
               <div class='stat-cell'>
-                <div v-if="statIsMissing('perimeter', m)" class='stat-bar-wrapper stat-bar-missing'>
+                <div v-if="statIsMissing('cost', m)" class='stat-bar-wrapper stat-bar-missing'>
                   <div class='stat-bar-axis'></div>
                   <div class='stat-bar stat-bar-missing-fill'></div>
-                  <div class='stat-bar-label'>{{ statMissingText('perimeter') }}</div>
+                  <div class='stat-bar-label'>{{ statMissingText('cost') }}</div>
                 </div>
                 <div v-else class='stat-bar-wrapper'>
                   <div class='stat-bar-axis'></div>
-                  <div class='stat-bar' :style="statBarStyle(statPercent('perimeter', m), 'perimeter')"></div>
-                  <div class='stat-bar-label'>{{ statLabel('perimeter', m) }}</div>
-                  <div v-if="statAxisLabel('perimeter', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('perimeter', 'min') }}</div>
-                  <div v-if="statAxisLabel('perimeter', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('perimeter', 'max') }}</div>
+                  <div class='stat-bar' :style="statBarStyle(statPercent('cost', m), 'cost')"></div>
+                  <div class='stat-bar-label'>{{ statLabel('cost', m) }}</div>
+                  <div v-if="statAxisLabel('cost', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('cost', 'min') }}</div>
+                  <div v-if="statAxisLabel('cost', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('cost', 'max') }}</div>
                 </div>
               </div>
             </td>
@@ -476,6 +476,13 @@ export default {
 
       return `${Math.round(value)}`
     },
+    formatCurrency(value) {
+      if (value === null || value === undefined || isNaN(value)) {
+        return 'Missing'
+      }
+
+      return `$${Number(value).toFixed(2)}`
+    },
     formatText(value, missingText = 'N/A') {
       if (!value) {
         return missingText
@@ -516,6 +523,17 @@ export default {
         const scaled = this.minMaxScale(value, min, max, { zeroRangeValue: 1 })
         return this.clampPercent(scaled)
       }
+      if (type === 'cost') {
+        const value = mask.initialCostUsDollars
+        const bounds = this.costBounds()
+        const min = bounds.min
+        const max = bounds.max
+        if (this.statIsMissing(type, mask) || min === null || max === null || min === undefined || max === undefined) {
+          return null
+        }
+        const scaled = this.minMaxScale(value, min, max, { zeroRangeValue: 0 })
+        return this.clampPercent(scaled)
+      }
 
       if (type === 'fit_tests') {
         const value = mask.fitTestCount
@@ -551,6 +569,9 @@ export default {
       }
       if (type === 'perimeter') {
         return this.formatValue(mask.perimeterMm)
+      }
+      if (type === 'cost') {
+        return this.formatCurrency(mask.initialCostUsDollars)
       }
       if (type === 'fit_tests') {
         return this.formatCount(mask.fitTestCount)
@@ -709,6 +730,9 @@ export default {
       if (type === 'perimeter') {
         return mask.perimeterMm === null || mask.perimeterMm === undefined || isNaN(mask.perimeterMm) || mask.perimeterMm <= 0
       }
+      if (type === 'cost') {
+        return mask.initialCostUsDollars === null || mask.initialCostUsDollars === undefined || isNaN(mask.initialCostUsDollars) || mask.initialCostUsDollars <= 0
+      }
       if (type === 'fit_tests') {
         return mask.fitTestCount === null || mask.fitTestCount === undefined || isNaN(mask.fitTestCount)
       }
@@ -744,6 +768,15 @@ export default {
           return null
         }
         return position === 'min' ? this.formatValue(min) : this.formatValue(max)
+      }
+      if (type === 'cost') {
+        const bounds = this.costBounds()
+        const min = bounds.min
+        const max = bounds.max
+        if (min === null || max === null || min === undefined || max === undefined) {
+          return null
+        }
+        return position === 'min' ? this.formatCurrency(min) : this.formatCurrency(max)
       }
       if (type === 'fit_tests') {
         const max = this.fitTestCountMax()
@@ -813,11 +846,30 @@ export default {
 
       return Math.max(...values)
     },
+    costBounds() {
+      const contextMin = this.dataContext.initial_cost_min
+      const contextMax = this.dataContext.initial_cost_max
+      if (contextMin !== null && contextMin !== undefined && contextMax !== null && contextMax !== undefined) {
+        return { min: contextMin, max: contextMax }
+      }
+
+      const values = (this.cards || [])
+        .map((m) => m.initialCostUsDollars)
+        .filter((v) => v !== null && v !== undefined && !isNaN(v) && Number(v) > 0)
+        .map((v) => Number(v))
+
+      if (values.length === 0) {
+        return { min: null, max: null }
+      }
+
+      return { min: Math.min(...values), max: Math.max(...values) }
+    },
     statRowColors() {
       return {
         filtration: '#c0392b',
         breathability: '#e67e22',
         perimeter: '#16a085',
+        cost: 'rgb(188, 163, 255)',
         fit_tests: '#2980b9',
         proba_fit: '#8e44ad'
       }
