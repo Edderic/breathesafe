@@ -76,6 +76,27 @@ class MaskRecommenderController < ApplicationController
     render json: { error: e.message }, status: :internal_server_error
   end
 
+  def debug
+    unless current_user
+      render json: { error: 'unauthorized' }, status: :unauthorized
+      return
+    end
+
+    raw = params.to_unsafe_h
+    payload = {
+      event: raw['event'],
+      level: raw['level'],
+      managed_id: raw['managed_id'],
+      payload: raw['payload']
+    }
+
+    Rails.logger.info("[RecommendMasksDebug] user_id=#{current_user.id} #{payload.to_json}")
+    head :accepted
+  rescue StandardError => e
+    Rails.logger.error("[RecommendMasksDebug] failed: #{e.message}")
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
+
   def status
     job_id = params[:id].to_s
     payload = Rails.cache.read(MaskRecommenderJob.cache_key(job_id))

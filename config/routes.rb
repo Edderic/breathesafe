@@ -87,6 +87,7 @@ Rails.application.routes.draw do
   post 'mask_recommender', to: 'mask_recommender#create'
   post 'mask_recommender/train', to: 'mask_recommender#train'
   post 'mask_recommender/warmup', to: 'mask_recommender#warmup'
+  post 'mask_recommender/debug', to: 'mask_recommender#debug'
   post 'mask_recommender/async', to: 'mask_recommender#create_async'
   get 'mask_recommender/async/:id', to: 'mask_recommender#status'
   get 'mask_recommender/recommender_columns', to: 'mask_recommender#recommender_columns'

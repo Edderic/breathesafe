@@ -5,7 +5,7 @@
       <br>
     </div>
 
-    <Popup v-if='missingFacialMeasurementsForRecommender.length > 0' @onclose='missingFacialMeasurementsForRecommender = []'>
+    <Popup v-if='missingFacialMeasurementsForRecommender.length > 0' @onclose='missingFacialMeasurementsForRecommender = []; recommenderDebugInfo = ""'>
       <p>
       User is missing at least one facial measurement needed for mask recommendations:
       <ul>
@@ -14,6 +14,7 @@
         </router-link>
       </ul>
       </p>
+      <pre v-if='recommenderDebugInfo' class='recommender-debug'>{{ recommenderDebugInfo }}</pre>
     </Popup>
 
     <div :class='{main: true, scrollable: managedUsers.length == 0}'>
@@ -272,6 +273,7 @@ export default {
     return {
       missingFacialMeasurementsForRecommender: [],
       userId: 0,
+      recommenderDebugInfo: '',
       recommenderColumns: [],
       recommenderWarmupKey: 'mask_recommender_warmup_done',
       expandedUsers: {}, // Track expansion state for each user
@@ -569,7 +571,46 @@ export default {
 
       return totals
     },
-    maybeRecommend(r) {
+emitRecommendDebug(level, eventName, payload) {
+  const entry = {
+    event: eventName,
+    level,
+    managed_id: payload && payload.managedId ? payload.managedId : null,
+    payload
+  }
+
+  axios.post('/mask_recommender/debug.json', entry).catch(() => {
+    // Ignore network failures for debug-only logging.
+  })
+
+  try {
+    const handlers = window.webkit && window.webkit.messageHandlers ? window.webkit.messageHandlers : null
+    if (handlers) {
+      const handlerNames = ['log', 'logger', 'console', 'debug', 'jsLogger']
+      handlerNames.forEach(name => {
+        const handler = handlers[name]
+        if (handler && typeof handler.postMessage === 'function') {
+          handler.postMessage({
+            source: 'RecommendMasks',
+            at: new Date().toISOString(),
+            ...entry
+          })
+        }
+      })
+    }
+  } catch (e) {
+    // Ignore bridge failures and keep console fallback below.
+  }
+
+  if (level === 'warn') {
+    console.warn(`[RecommendMasks] ${eventName}`, payload)
+  } else {
+    console.info(`[RecommendMasks] ${eventName}`, payload)
+  }
+},
+
+maybeRecommend(r) {
+
       const missing = []
       const query = {}
 
@@ -605,13 +646,34 @@ export default {
         query.facial_hair_beard_length_mm = 0
       }
 
+      const debugPayload = {
+        managedId: r.managedId,
+        query,
+        missing,
+        rowKeys: Object.keys(r || {}),
+        hasArkit: !!r.arkit,
+        arkitKeys: r.arkit ? Object.keys(r.arkit) : [],
+        facialMeasurementsKeys: r.facialMeasurements ? Object.keys(r.facialMeasurements) : [],
+        facial_measurementsKeys: r.facial_measurements ? Object.keys(r.facial_measurements) : []
+      }
+      this.recommenderDebugInfo = JSON.stringify(debugPayload, null, 2)
+      this.emitRecommendDebug('info', 'Built payload candidate', debugPayload)
+
       if (missing.length > 0) {
+        // Debug-only visibility into row shape mismatches for recommendation payload construction.
+        this.emitRecommendDebug('warn', 'Missing facial measurements for managed user', debugPayload)
         this.missingFacialMeasurementsForRecommender = missing
         this.userId = r.managedId
         return
       }
 
       const payload = this.encodeRecommenderPayload(query)
+      this.recommenderDebugInfo = JSON.stringify({ ...debugPayload, payload }, null, 2)
+      this.emitRecommendDebug('info', 'Encoded payload', {
+        managedId: r.managedId,
+        query,
+        payload
+      })
       this.$router.push({
         name: 'Masks',
         query: {
@@ -895,4 +957,17 @@ export default {
     }
   }
 
+</style>
+
+<style scoped>
+  .recommender-debug {
+    max-height: 220px;
+    overflow: auto;
+    padding: 0.5em;
+    background: #f6f6f6;
+    border: 1px solid #ddd;
+    white-space: pre-wrap;
+    word-break: break-word;
+    text-align: left;
+  }
 </style>
