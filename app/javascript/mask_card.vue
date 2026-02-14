@@ -133,7 +133,7 @@
                 </div>
               </div>
             </td>
-            <th>Initial Cost (USD)</th>
+            <th>Affordability (USD)</th>
             <td>
               <div class='stat-cell'>
                 <div v-if="statIsMissing('cost', m)" class='stat-bar-wrapper stat-bar-missing'>
@@ -532,7 +532,7 @@ export default {
           return null
         }
         const scaled = this.minMaxScale(value, min, max, { zeroRangeValue: 0 })
-        return this.clampPercent(scaled)
+        return this.clampPercent(1 - scaled)
       }
 
       if (type === 'fit_tests') {
@@ -776,7 +776,7 @@ export default {
         if (min === null || max === null || min === undefined || max === undefined) {
           return null
         }
-        return position === 'min' ? this.formatCurrency(min) : this.formatCurrency(max)
+        return position === 'min' ? this.formatCurrency(max) : this.formatCurrency(min)
       }
       if (type === 'fit_tests') {
         const max = this.fitTestCountMax()
