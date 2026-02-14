@@ -13,18 +13,14 @@ module Users
         messages = ['Unauthorized.']
         facial_measurement = {}
 
-      elsif !current_user.manages?(
-        for_user
-      )
+      elsif !current_user.manages?(for_user)
         status = 422
-        ['Not managed by current user.']
+        messages = ['Not managed by current user.']
+        facial_measurement = {}
       else
         # TODO: check that current_user is authorized to create a facial
         # measurement for given user_id
-
-        facial_measurement = FacialMeasurement.create(
-          facial_measurement_data
-        )
+        facial_measurement = FacialMeasurement.create(facial_measurement_data)
 
         if facial_measurement.errors.full_messages.size.positive?
           status = 422
@@ -52,20 +48,23 @@ module Users
       if !current_user
         status = 401
         messages = ['Unauthorized.']
-        to_render = {
-          messages: messages
-        }
+        to_render = { messages: messages }
 
-      elsif !current_user.manages?(
-        User.find(params['user_id'])
-      )
+      elsif !current_user.manages?(User.find(params['user_id']))
         status = 422
-        ['Not managed by current user']
+        to_render = { messages: ['Not managed by current user.'] }
       else
+        measurements = FacialMeasurement.where(user_id: params['user_id']).order(created_at: :desc)
+        parsed_measurements = JSON.parse(measurements.to_json)
+
+        recommender = normalized_recommender_measurements(measurements.first)
         to_render = {
-          facial_measurements: JSON.parse(FacialMeasurement.where(user_id: params['user_id']).to_json),
+          facial_measurements: parsed_measurements,
+          recommender_measurements: recommender,
+          recommender_measurements_camel: recommender.transform_keys { |k| snake_to_camel(k) },
           messages: []
         }
+        status = 200
       end
 
       respond_to do |format|
@@ -139,6 +138,40 @@ module Users
         'user_id',
         arkit: {} # Permit arkit as a hash (JSONB column)
       )
+    end
+
+    private
+
+    def normalized_recommender_measurements(latest_measurement)
+      return empty_recommender_measurements if latest_measurement.nil?
+
+      aggregated = latest_measurement.aggregated_arkit_measurements
+      return aggregated if aggregated.values.any?(&:present?)
+
+      # Fallback for payloads that still use averageMeasurements (camelCase).
+      arkit = latest_measurement.arkit
+      if arkit.is_a?(Hash) && arkit['averageMeasurements'].is_a?(Hash)
+        normalized_arkit = arkit.deep_dup
+        normalized_arkit['average_measurements'] ||= normalized_arkit['averageMeasurements']
+        fallback = FacialMeasurement.new(arkit: normalized_arkit).aggregated_arkit_measurements
+        return fallback if fallback.values.any?(&:present?)
+      end
+
+      empty_recommender_measurements
+    end
+
+    def empty_recommender_measurements
+      {
+        'nose_mm' => nil,
+        'chin_mm' => nil,
+        'top_cheek_mm' => nil,
+        'mid_cheek_mm' => nil,
+        'strap_mm' => nil
+      }
+    end
+
+    def snake_to_camel(key)
+      key.to_s.gsub(/_([a-z])/) { Regexp.last_match(1).upcase }
     end
   end
 end
