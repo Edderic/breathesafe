@@ -1436,7 +1436,7 @@ export default {
 
     .top-controls {
       flex-direction: column;
-      margin-top: 4em;
+      margin-top: 2em;
     }
     .bar {
       flex-direction: column;
