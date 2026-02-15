@@ -122,29 +122,32 @@
       <table class="mask-metrics-table">
         <thead>
           <tr>
-            <th class="sticky-column">Feature</th>
+            <th class="sticky-column">Mask</th>
             <th
-              v-for="m in sortedDisplayables"
-              :key="`mask-column-${m.id}`"
+              v-for="row in tableMetricRows"
+              :key="`feature-column-${row.key}`"
+              class="metric-label"
             >
-              <button
-                class="mask-column-button"
-                @click="viewMask(m.id)"
-              >
-                {{ m.uniqueInternalModelCode }}
-              </button>
+              {{ row.label }}
             </th>
           </tr>
         </thead>
         <tbody>
           <tr
-            v-for="row in tableMetricRows"
-            :key="`metric-row-${row.key}`"
+            v-for="m in sortedDisplayables"
+            :key="`mask-row-${m.id}`"
           >
-            <th class="sticky-column metric-label">{{ row.label }}</th>
+            <th class="sticky-column">
+              <button
+                class="mask-row-button"
+                @click="viewMask(m.id)"
+              >
+                {{ m.uniqueInternalModelCode }}
+              </button>
+            </th>
             <td
-              v-for="m in sortedDisplayables"
-              :key="`metric-cell-${row.key}-${m.id}`"
+              v-for="row in tableMetricRows"
+              :key="`metric-cell-${m.id}-${row.key}`"
             >
               <ColoredCell
                 :value="metricCellScore(row.key, m)"
@@ -403,6 +406,13 @@ export default {
     )
 
   },
+  mounted() {
+    this.updateTableViewportHeight()
+    window.addEventListener('resize', this.updateTableViewportHeight)
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.updateTableViewportHeight)
+  },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'setWaiting']),
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
@@ -431,8 +441,22 @@ export default {
           // Warmup is best effort; don't surface errors to the user.
         })
     },
+    updateTableViewportHeight() {
+      const wrapper = this.$el?.querySelector('.mask-metrics-table-wrapper')
+      const footer = document.querySelector('footer')
+      if (!wrapper) {
+        return
+      }
+
+      const top = wrapper.getBoundingClientRect().top
+      const footerHeight = footer ? footer.getBoundingClientRect().height : 0
+      const available = Math.max(200, window.innerHeight - top - footerHeight - 8)
+
+      wrapper.style.setProperty('--table-viewport-height', `${available}px`)
+    },
     toggleResultsView() {
       this.showTableView = !this.showTableView
+      this.$nextTick(() => this.updateTableViewportHeight())
     },
     metricCellScore(metricKey, mask) {
       if (metricKey === 'proba_fit') {
@@ -1109,8 +1133,10 @@ export default {
   .mask-metrics-table-wrapper {
     width: 100%;
     overflow-x: auto;
+    overflow-y: auto;
     padding: 0 1em;
     box-sizing: border-box;
+    height: var(--table-viewport-height, 70vh);
   }
 
   .mask-metrics-table {
@@ -1141,7 +1167,7 @@ export default {
     font-weight: 700;
   }
 
-  .mask-column-button {
+  .mask-row-button {
     background: transparent;
     border: none;
     font-size: 0.85em;
