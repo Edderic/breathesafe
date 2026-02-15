@@ -1190,7 +1190,6 @@ export default {
   .mask-metrics-table td {
     border: 1px solid #ddd;
     min-width: 10em;
-    padding: 0.3em;
     text-align: center;
     vertical-align: middle;
   }
@@ -1365,6 +1364,11 @@ export default {
     .main {
       overflow: auto;
       height: 65vh;
+    }
+
+    .mask-metrics-table th,
+    .mask-metrics-table td {
+      min-width: 5em;
     }
   }
 
