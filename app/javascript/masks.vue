@@ -122,7 +122,8 @@
       <table class="mask-metrics-table">
         <thead>
           <tr>
-            <th class="sticky-column">Mask</th>
+            <th class="sticky-column sticky-image-column">Image</th>
+            <th class="sticky-column sticky-mask-column">Mask</th>
             <th
               v-for="row in tableMetricRows"
               :key="`feature-column-${row.key}`"
@@ -137,7 +138,16 @@
             v-for="m in sortedDisplayables"
             :key="`mask-row-${m.id}`"
           >
-            <th class="sticky-column">
+            <td class="sticky-column sticky-image-column image-cell">
+              <img
+                v-if="m.imageUrls && m.imageUrls.length > 0"
+                :src="m.imageUrls[0]"
+                :alt="m.uniqueInternalModelCode"
+                class="table-mask-image"
+              >
+              <div v-else class="table-mask-image-placeholder">No image</div>
+            </td>
+            <th class="sticky-column sticky-mask-column">
               <button
                 class="mask-row-button"
                 @click="viewMask(m.id)"
@@ -1179,11 +1189,21 @@ export default {
     background-color: #f4f4f4;
   }
 
-  .mask-metrics-table th.sticky-column {
+  .mask-metrics-table th.sticky-column,
+  .mask-metrics-table td.sticky-column {
     position: sticky;
-    left: 0;
     z-index: 3;
     background-color: #f4f4f4;
+  }
+
+  .mask-metrics-table .sticky-image-column {
+    left: 0;
+    min-width: 7em;
+    width: 7em;
+  }
+
+  .mask-metrics-table .sticky-mask-column {
+    left: 7em;
     min-width: 12em;
   }
 
@@ -1191,8 +1211,36 @@ export default {
     z-index: 5;
   }
 
+  .mask-metrics-table thead .sticky-mask-column {
+    z-index: 6;
+  }
+
   .mask-metrics-table .metric-label {
     font-weight: 700;
+  }
+
+  .image-cell {
+    padding: 0.25em;
+  }
+
+  .table-mask-image {
+    display: block;
+    max-height: 4.5em;
+    max-width: 6.5em;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    margin: 0 auto;
+  }
+
+  .table-mask-image-placeholder {
+    color: #777;
+    font-size: 0.75em;
+    line-height: 1.2;
+    min-height: 4.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .mask-row-button {
