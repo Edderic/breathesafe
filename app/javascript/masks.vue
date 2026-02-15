@@ -1190,6 +1190,15 @@ export default {
     min-height: 3.5em;
   }
 
+  @media(max-width: 1238px) {
+    .sticky-column {
+      max-width: 10em;
+    }
+    .mask-row-button {
+      text-align: center;
+    }
+  }
+
   @media(max-width: 1000px) {
     .top-controls {
       flex-direction: column;
