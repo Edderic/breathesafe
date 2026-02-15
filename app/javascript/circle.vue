@@ -1,5 +1,5 @@
 <template>
-  <span class='pair' :class='{ selected: selected }'>
+  <span class='pair' :class='{ selected: selected, clickable: interactive }'>
     <div class='circle' :style='{"background-color": color, "border": border }'>&nbsp;</div>
     <div class='text'>{{color}}</div>
   </span>
@@ -52,6 +52,9 @@
       },
       selected: {
         default: false
+      },
+      interactive: {
+        default: true
       }
     },
     computed: {
@@ -83,8 +86,12 @@
     align-items: center;
     justify-content: center;
   }
-  .pair:hover {
-    cursor:pointer;
+  .pair.clickable:hover {
+    cursor: pointer;
+  }
+
+  .pair:not(.clickable) {
+    cursor: default;
   }
 
   .text {

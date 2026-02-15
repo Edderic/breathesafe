@@ -97,19 +97,34 @@
               </td>
             </tr>
             <tr>
-              <th>Initial cost (US Dollars)</th>
-                       <ColoredCell
-                           v-show='!newOrEditMode'
-                           class='risk-score'
-                           :colorScheme="costColorScheme"
-                           :maxVal=1
-                           :value='initialCostUsDollars'
-                           :exception='exceptionDollarObject'
-                           :text='dollarText(initialCostUsDollars)'
-                           :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                           :title='dollarText(initialCostUsDollars)'
-                           />
-             </tr>
+              <th>Affordability (USD)</th>
+              <td>
+                <div class='stat-cell'>
+                  <div v-if="statIsMissing('cost')" class='stat-bar-wrapper stat-bar-missing'>
+                    <div class='stat-bar-axis'></div>
+                    <div class='stat-bar stat-bar-missing-fill'></div>
+                    <div class='stat-bar-label'>{{ statMissingText('cost') }}</div>
+                  </div>
+                  <div v-else class='stat-bar-wrapper' :style="statBarWrapperStyle('cost')">
+                    <div class='stat-bar-axis'></div>
+                    <div class='stat-bar' :style="statBarStyle(statPercent('cost'), 'cost')"></div>
+                    <div
+                      v-if="statNeedsMarker('cost')"
+                      class='stat-bar-marker'
+                      :style='statMarkerStyle(statPercent("cost"), "cost")'
+                    ></div>
+                    <div
+                      v-if="statNeedsMarker('cost')"
+                      class='stat-bar-cover'
+                      :style='statCoverStyle(statPercent("cost"), "cost")'
+                    ></div>
+                    <div class='stat-bar-label'>{{ statLabel('cost') }}</div>
+                    <div v-if="statAxisLabel('cost', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('cost', 'min') }}</div>
+                    <div v-if="statAxisLabel('cost', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('cost', 'max') }}</div>
+                  </div>
+                </div>
+              </td>
+            </tr>
 
           </tbody>
           <tbody>
@@ -119,7 +134,7 @@
               <td colspan='1' class='colors'>
 
               <span v-for='opt in colorOptions' class='filterCheckbox' >
-                <Circle :color='opt' :selected='colors.includes(opt)' :for='`color${opt}`' @click='onColorClick(opt)' v-if='newOrEditMode || colors.includes(opt)'/>
+                <Circle :color='opt' :selected='colors.includes(opt)' :interactive='newOrEditMode' :for='`color${opt}`' @click='onColorClick(opt)' v-if='newOrEditMode || colors.includes(opt)'/>
               </span>
 
               </td>
@@ -226,7 +241,7 @@
             </tr>
 
             <tr>
-              <th>Initial cost (US Dollars)</th>
+              <th>Affordability (USD)</th>
               <td colspan='1' class='text-align-center'>
                 <input type="number"
                        v-model='initialCostUsDollars'
@@ -239,9 +254,19 @@
                            <div class='stat-bar stat-bar-missing-fill'></div>
                            <div class='stat-bar-label'>{{ statMissingText('cost') }}</div>
                          </div>
-                         <div v-else class='stat-bar-wrapper'>
+                         <div v-else class='stat-bar-wrapper' :style="statBarWrapperStyle('cost')">
                            <div class='stat-bar-axis'></div>
                            <div class='stat-bar' :style="statBarStyle(statPercent('cost'), 'cost')"></div>
+                           <div
+                             v-if="statNeedsMarker('cost')"
+                             class='stat-bar-marker'
+                             :style='statMarkerStyle(statPercent("cost"), "cost")'
+                           ></div>
+                           <div
+                             v-if="statNeedsMarker('cost')"
+                             class='stat-bar-cover'
+                             :style='statCoverStyle(statPercent("cost"), "cost")'
+                           ></div>
                            <div class='stat-bar-label'>{{ statLabel('cost') }}</div>
                            <div v-if="statAxisLabel('cost', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('cost', 'min') }}</div>
                            <div v-if="statAxisLabel('cost', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('cost', 'max') }}</div>
@@ -255,7 +280,7 @@
               <td colspan='1' class='colors'>
 
               <span v-for='opt in colorOptions' class='filterCheckbox' >
-                <Circle :color='opt' :selected='colors.includes(opt)' :for='`color${opt}`' @click='onColorClick(opt)' v-if='newOrEditMode || colors.includes(opt)'/>
+                <Circle :color='opt' :selected='colors.includes(opt)' :interactive='newOrEditMode' :for='`color${opt}`' @click='onColorClick(opt)' v-if='newOrEditMode || colors.includes(opt)'/>
               </span>
 
               </td>
@@ -1346,7 +1371,7 @@ export default {
           return null
         }
         const scaled = this.minMaxScale(this.initialCostUsDollars, min, max, { zeroRangeValue: 0 })
-        return this.clampPercent(scaled)
+        return this.clampPercent(1 - scaled)
       }
 
       if (type === 'mass') {
@@ -1383,7 +1408,7 @@ export default {
       const clamped = this.clampPercent(percent)
       const width = clamped === null ? '0%' : `${Math.round(clamped * 100)}%`
 
-      if (type === 'filtration' || type === 'breathability') {
+      if (type === 'filtration' || type === 'breathability' || type === 'cost') {
         return {
           width: '100%',
           backgroundColor: 'transparent'
@@ -1413,10 +1438,17 @@ export default {
         }
         return { background: gradient }
       }
+      if (type === 'cost') {
+        const gradient = this.affordabilityGradient()
+        if (!gradient) {
+          return {}
+        }
+        return { background: gradient }
+      }
       return {}
     },
     statNeedsMarker(type) {
-      return ['filtration', 'breathability'].includes(type)
+      return ['filtration', 'breathability', 'cost'].includes(type)
     },
     statMarkerStyle(percent) {
       const clamped = this.clampPercent(percent)
@@ -1466,6 +1498,24 @@ export default {
       const axisStop33 = scalePosition(p33)
       return `linear-gradient(90deg, ${red} 0%, ${yellow} ${axisStop33}%, ${green} 100%)`
     },
+    affordabilityGradient() {
+      const min = this.dataContext.initial_cost_min
+      const max = this.dataContext.initial_cost_max
+      if (min === null || max === null || min === undefined || max === undefined) {
+        return null
+      }
+
+      const orderedMin = Math.min(min, max)
+      const orderedMax = Math.max(min, max)
+      if (orderedMax <= orderedMin) {
+        return null
+      }
+
+      const red = '#c0392b'
+      const yellow = '#f1c40f'
+      const green = '#27ae60'
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} 50%, ${green} 100%)`
+    },
     statRowColors() {
       return {
         filtration: '#c0392b',
@@ -1507,7 +1557,7 @@ export default {
         if (min === null || max === null || min === undefined || max === undefined) {
           return null
         }
-        return position === 'min' ? this.formatCurrency(min) : this.formatCurrency(max)
+        return position === 'min' ? this.formatCurrency(max) : this.formatCurrency(min)
       }
       if (type === 'mass') {
         const min = this.dataContext.mass_min
