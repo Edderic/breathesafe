@@ -651,15 +651,26 @@ export default {
     },
     updateTableViewportHeight() {
       const wrapper = this.$el?.querySelector('.mask-metrics-table-wrapper')
-      const footer = document.querySelector('footer')
       if (!wrapper) {
         return
       }
 
-      const top = wrapper.getBoundingClientRect().top
-      const footerHeight = footer ? footer.getBoundingClientRect().height : 0
-      const available = Math.max(200, window.innerHeight - top - footerHeight - 8)
+      const footerCandidates = [
+        document.querySelector('footer'),
+        document.querySelector('.footer'),
+        document.querySelector('[class*=\"footer\"]'),
+      ].filter(Boolean)
+      const measuredFooterHeight = footerCandidates.reduce((maxHeight, node) => {
+        const h = node.getBoundingClientRect().height || 0
+        return h > maxHeight ? h : maxHeight
+      }, 0)
 
+      const footerHeight = Math.max(measuredFooterHeight, this.viewportWidth <= 900 ? 56 : 0)
+      const top = wrapper.getBoundingClientRect().top
+      const bottomBuffer = this.viewportWidth <= 900 ? 36 : 14
+      const available = Math.max(200, window.innerHeight - top - footerHeight - bottomBuffer)
+
+      wrapper.style.setProperty('--footer-height', `${footerHeight}px`)
       wrapper.style.setProperty('--table-viewport-height', `${available}px`)
     },
     toggleResultsView() {
@@ -1382,7 +1393,7 @@ export default {
     width: 100%;
     overflow-x: auto;
     overflow-y: auto;
-    padding: 0 1em;
+    padding: 0 1em calc(var(--footer-height, 0px) + 0.75em);
     box-sizing: border-box;
     height: var(--table-viewport-height, 70vh);
   }
@@ -1603,6 +1614,10 @@ export default {
     .main {
       overflow: auto;
       height: 65vh;
+    }
+
+    .mask-metrics-table-wrapper {
+      padding-bottom: calc(var(--footer-height, 56px) + 2.25em);
     }
 
     .mask-metrics-table th,
