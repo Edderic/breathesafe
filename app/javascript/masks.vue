@@ -123,7 +123,7 @@
         <thead>
           <tr>
             <th class="sticky-column sticky-image-column">Image</th>
-            <th class="sticky-column sticky-mask-column">Mask</th>
+            <th class="sticky-column sticky-mask-column desktop">Mask</th>
             <th
               v-for="row in tableMetricRows"
               :key="`feature-column-${row.key}`"
@@ -146,8 +146,14 @@
                 class="table-mask-image"
               >
               <div v-else class="table-mask-image-placeholder">No image</div>
+              <button
+                class="mobile-mask-name-button"
+                @click="viewMask(m.id)"
+              >
+                {{ m.uniqueInternalModelCode }}
+              </button>
             </td>
-            <th class="sticky-column sticky-mask-column">
+            <th class="sticky-column sticky-mask-column desktop">
               <button
                 class="mask-row-button"
                 @click="viewMask(m.id)"
@@ -1204,7 +1210,6 @@ export default {
 
   .mask-metrics-table .sticky-mask-column {
     left: 7em;
-    min-width: 12em;
   }
 
   .mask-metrics-table thead th.sticky-column {
@@ -1243,6 +1248,21 @@ export default {
     justify-content: center;
   }
 
+  .mobile-mask-name-button {
+    display: none;
+    background: transparent;
+    border: none;
+    margin: 0.35em auto 0;
+    padding: 0;
+    font-size: 0.7em;
+    line-height: 1.2;
+    max-width: 8.5em;
+    white-space: normal;
+    word-break: break-word;
+    text-align: center;
+    color: #222;
+  }
+
   .mask-row-button {
     background: transparent;
     border: none;
@@ -1255,7 +1275,7 @@ export default {
     min-height: 3.5em;
   }
 
-  @media(max-width: 1238px) {
+  @media(max-width: 1350px) {
     .sticky-column {
       max-width: 10em;
     }
@@ -1265,6 +1285,11 @@ export default {
   }
 
   @media(max-width: 1000px) {
+    .mask-metrics-table th,
+    .mask-metrics-table td {
+      min-width: 6em;
+    }
+
     .top-controls {
       flex-direction: column;
       margin-top: 4em;
@@ -1277,6 +1302,19 @@ export default {
   @media(max-width: 768px) {
     .top-controls {
       flex-direction: column;
+    }
+
+    .sticky-mask-column.desktop {
+      display: none;
+    }
+
+    .mask-metrics-table .sticky-image-column {
+      width: 8.5em;
+      min-width: 8.5em;
+    }
+
+    .mobile-mask-name-button {
+      display: block;
     }
   }
   @media(max-width: 700px) {
