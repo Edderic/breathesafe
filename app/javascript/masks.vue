@@ -114,7 +114,6 @@
       :showUniqueNumFitTesters='true'
       :viewMaskOnClick='true'
       :facialMeasurements='facialMeasurements'
-      :showProbaFit='shouldShowProbaFit'
     />
 
     <br>
@@ -294,7 +293,12 @@ export default {
     sortedDisplayables() {
       const displayables = [...this.displayables]
 
-      if (this.shouldShowProbaFit) {
+      const hasPayload = !!this.$route.query.recommenderPayload
+      const hasProbaFit = this.masks.some((mask) =>
+        (mask.probaFit !== undefined && mask.probaFit !== null) ||
+        (mask.proba_fit !== undefined && mask.proba_fit !== null)
+      )
+      if (hasPayload || hasProbaFit || this.sortByField === 'probaFit') {
         return displayables.sort((a, b) => {
           const aVal = Number(a.probaFit)
           const bVal = Number(b.probaFit)
@@ -317,11 +321,6 @@ export default {
              this.filterForStrapType !== 'none' ||
              this.filterForStyle !== 'none' ||
              this.filterForMissing.length > 0
-    },
-    shouldShowProbaFit() {
-      const hasPayload = !!this.$route.query.recommenderPayload
-      const hasProbaFit = this.masks.some((mask) => mask.probaFit !== undefined && mask.probaFit !== null)
-      return hasPayload || hasProbaFit || this.sortByField === 'probaFit'
     },
   },
 

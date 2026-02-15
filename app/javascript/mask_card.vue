@@ -30,7 +30,7 @@
               </div>
             </td>
           </tr>
-          <tr v-if="showProbaFit" class="mobile-only">
+          <tr class="mobile-only">
             <th>Probability of Fit</th>
             <td>
               <div class='stat-cell'>
@@ -75,9 +75,8 @@
             </td>
           </tr>
           <tr>
-            <template>
-              <th colspan='1'>Probability of Fit</th>
-              <td colspan="1">
+            <th>Probability of Fit</th>
+            <td>
               <div class='stat-cell'>
                 <div v-if="statIsMissing('proba_fit', m)" class='stat-bar-wrapper stat-bar-missing'>
                   <div class='stat-bar-axis'></div>
@@ -102,9 +101,8 @@
                   <div v-if="statAxisLabel('proba_fit', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('proba_fit', 'max') }}</div>
                 </div>
               </div>
-              </td>
-            </template>
-            </tr>
+            </td>
+          </tr>
             <tr>
             <th>Filtration Factor</th>
             <td>
@@ -274,9 +272,6 @@ export default {
     showStats: {
       default: true
     },
-    showProbaFit: {
-      default: true
-    },
     dataContext: {
       default: () => ({})
     }
@@ -333,6 +328,9 @@ export default {
     },
     messages() {
       return this.errorMessages;
+    },
+    hasRecommenderPayload() {
+      return !!(this.$route && this.$route.query && this.$route.query.recommenderPayload)
     },
   },
   async created() {
@@ -711,6 +709,9 @@ export default {
         return mask.fitTestCount === null || mask.fitTestCount === undefined || isNaN(mask.fitTestCount)
       }
       if (type === 'proba_fit') {
+        if (!this.hasRecommenderPayload) {
+          return true
+        }
         return mask.probaFit === null || mask.probaFit === undefined || isNaN(mask.probaFit)
       }
       return true
