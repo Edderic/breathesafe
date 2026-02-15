@@ -11,6 +11,12 @@
           </tr>
         </thead>
         <tbody>
+          <tr @click='sortBy("probaFit")'>
+            <th>Probability of Fit</th>
+            <td>
+              <SortingStatus :status='sortingStatus("probaFit")'/>
+            </td>
+          </tr>
           <tr @click='sortBy("avgSealedFitFactor")'>
             <th>Filtration factor</th>
             <td>
@@ -106,7 +112,7 @@ export default {
       }
 
       if (this.sortByField != field) {
-        query['sortByStatus'] = 'ascending'
+        query['sortByStatus'] = field === 'probaFit' ? 'descending' : 'ascending'
       } else {
         if (this.sortByStatus == 'ascending') {
           query['sortByStatus'] = 'descending'

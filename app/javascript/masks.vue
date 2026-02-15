@@ -28,6 +28,7 @@
         </div>
 
         <Pagination
+          v-if="!hasRecommenderPayload"
           :current-page="currentPage"
           :per-page="perPage"
           :total-count="totalCount"
@@ -358,6 +359,9 @@ export default {
       return getFacialMeasurements.bind(this)()
     },
 
+    hasRecommenderPayload() {
+      return !!this.$route.query.recommenderPayload
+    },
     perimColorScheme() {
       return perimeterColorScheme()
     },
@@ -394,27 +398,99 @@ export default {
       return { height: '4em' }
     },
     displayables() {
-      return this.masks;
+      const masks = [...this.masks]
+      if (!this.hasRecommenderPayload) {
+        return masks
+      }
+
+      const searchValue = (this.search || '').toLowerCase().trim()
+      const colorFilter = this.filterForColor
+      const styleFilter = this.filterForStyle
+      const strapFilter = this.filterForStrapType
+
+      return masks.filter((mask) => {
+        const textBlob = [
+          mask.uniqueInternalModelCode,
+          mask.style,
+          mask.strapType,
+          mask.filterType,
+          mask.color,
+          ...(mask.colors || []),
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+
+        if (searchValue && !textBlob.includes(searchValue)) {
+          return false
+        }
+
+        if (colorFilter && colorFilter !== 'none') {
+          const maskColors = [mask.color, ...(mask.colors || [])]
+            .filter(Boolean)
+            .map((c) => String(c).toLowerCase())
+          if (!maskColors.includes(String(colorFilter).toLowerCase())) {
+            return false
+          }
+        }
+
+        if (styleFilter && styleFilter !== 'none') {
+          if (String(mask.style || '').toLowerCase() !== String(styleFilter).toLowerCase()) {
+            return false
+          }
+        }
+
+        if (strapFilter && strapFilter !== 'none') {
+          if (String(mask.strapType || '').toLowerCase() !== String(strapFilter).toLowerCase()) {
+            return false
+          }
+        }
+
+        return true
+      })
+    },
+    effectiveSortField() {
+      if (!this.sortByField || this.sortByField === 'none') {
+        return this.hasRecommenderPayload ? 'probaFit' : null
+      }
+      return this.sortByField
+    },
+    effectiveSortStatus() {
+      if (!this.sortByStatus || this.sortByStatus === 'none') {
+        return this.effectiveSortField === 'probaFit' ? 'descending' : 'ascending'
+      }
+      return this.sortByStatus
     },
     sortedDisplayables() {
       const displayables = [...this.displayables]
-
-      const hasPayload = !!this.$route.query.recommenderPayload
-      const hasProbaFit = this.masks.some((mask) =>
-        (mask.probaFit !== undefined && mask.probaFit !== null) ||
-        (mask.proba_fit !== undefined && mask.proba_fit !== null)
-      )
-      if (hasPayload || hasProbaFit || this.sortByField === 'probaFit') {
-        return displayables.sort((a, b) => {
-          const aVal = Number(a.probaFit)
-          const bVal = Number(b.probaFit)
-          const aNum = Number.isFinite(aVal) ? aVal : -Infinity
-          const bNum = Number.isFinite(bVal) ? bVal : -Infinity
-          return bNum - aNum
-        })
+      if (!this.hasRecommenderPayload) {
+        return displayables
       }
 
-      return displayables;
+      const field = this.effectiveSortField
+      if (!field) {
+        return displayables
+      }
+
+      const status = this.effectiveSortStatus
+      const factor = status === 'ascending' ? 1 : -1
+
+      return displayables.sort((a, b) => {
+        const aRaw = a[field]
+        const bRaw = b[field]
+        const aNum = Number(aRaw)
+        const bNum = Number(bRaw)
+
+        if (Number.isFinite(aNum) && Number.isFinite(bNum)) {
+          return (aNum - bNum) * factor
+        }
+
+        const aStr = String(aRaw || '').toLowerCase()
+        const bStr = String(bRaw || '').toLowerCase()
+        if (aStr < bStr) return -1 * factor
+        if (aStr > bStr) return 1 * factor
+        return 0
+      })
     },
     messages() {
       return this.errorMessages;
