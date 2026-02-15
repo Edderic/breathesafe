@@ -1155,12 +1155,23 @@ export default {
     vertical-align: middle;
   }
 
+  .mask-metrics-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background-color: #f4f4f4;
+  }
+
   .mask-metrics-table th.sticky-column {
     position: sticky;
     left: 0;
     z-index: 3;
     background-color: #f4f4f4;
     min-width: 12em;
+  }
+
+  .mask-metrics-table thead th.sticky-column {
+    z-index: 5;
   }
 
   .mask-metrics-table .metric-label {
