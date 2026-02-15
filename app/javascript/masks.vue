@@ -289,6 +289,7 @@ export default {
       recommenderWarmupKey: 'mask_recommender_warmup_done',
       isRecommenderLoading: false,
       recommenderModelTimestamp: null,
+      viewportWidth: typeof window !== 'undefined' ? window.innerWidth : 1024,
       showTableView: false,
       missingMetricCell: {
         color: {
@@ -346,7 +347,19 @@ export default {
     resultsViewToggleText() {
       return this.showTableView ? 'C' : 'T'
     },
+    isNarrowTableViewport() {
+      return this.viewportWidth < 900
+    },
     tableMetricRows() {
+      if (this.isNarrowTableViewport) {
+        return [
+          { key: 'proba_fit', label: 'Fit' },
+          { key: 'filtration', label: 'Filter' },
+          { key: 'breathability', label: 'Breath' },
+          { key: 'affordability', label: 'Cost' },
+        ]
+      }
+
       return [
         { key: 'proba_fit', label: 'Probability of Fit' },
         { key: 'filtration', label: 'Filtration Factor' },
@@ -407,11 +420,11 @@ export default {
 
   },
   mounted() {
-    this.updateTableViewportHeight()
-    window.addEventListener('resize', this.updateTableViewportHeight)
+    this.handleWindowResize()
+    window.addEventListener('resize', this.handleWindowResize)
   },
   beforeUnmount() {
-    window.removeEventListener('resize', this.updateTableViewportHeight)
+    window.removeEventListener('resize', this.handleWindowResize)
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'setWaiting']),
@@ -440,6 +453,10 @@ export default {
         .catch(() => {
           // Warmup is best effort; don't surface errors to the user.
         })
+    },
+    handleWindowResize() {
+      this.viewportWidth = window.innerWidth
+      this.updateTableViewportHeight()
     },
     updateTableViewportHeight() {
       const wrapper = this.$el?.querySelector('.mask-metrics-table-wrapper')
