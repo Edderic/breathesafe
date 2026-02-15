@@ -170,9 +170,19 @@
                     <div class='stat-bar stat-bar-missing-fill'></div>
                     <div class='stat-bar-label'>{{ statMissingText('cost') }}</div>
                   </div>
-                  <div v-else class='stat-bar-wrapper'>
+                  <div v-else class='stat-bar-wrapper' :style="statBarWrapperStyle('cost')">
                     <div class='stat-bar-axis'></div>
                     <div class='stat-bar' :style="statBarStyle(statPercent('cost', m), 'cost')"></div>
+                    <div
+                      v-if="statNeedsMarker('cost')"
+                      class='stat-bar-marker'
+                      :style="statMarkerStyle(statPercent('cost', m), 'cost')"
+                    ></div>
+                    <div
+                      v-if="statNeedsMarker('cost')"
+                      class='stat-bar-cover'
+                      :style="statCoverStyle(statPercent('cost', m), 'cost')"
+                    ></div>
                     <div class='stat-bar-label'>{{ statLabel('cost', m) }}</div>
                     <div v-if="statAxisLabel('cost', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('cost', 'min') }}</div>
                     <div v-if="statAxisLabel('cost', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('cost', 'max') }}</div>
@@ -585,6 +595,12 @@ export default {
           backgroundColor: 'transparent'
         }
       }
+      if (type === 'cost') {
+        return {
+          width: '100%',
+          backgroundColor: 'transparent'
+        }
+      }
       if (type === 'perimeter') {
         return {
           width: width,
@@ -613,10 +629,13 @@ export default {
       if (type === 'proba_fit') {
         return { background: this.probaFitGradient() }
       }
+      if (type === 'cost') {
+        return { background: this.costGradient() }
+      }
       return {}
     },
     statNeedsMarker(type) {
-      return ['filtration', 'breathability', 'proba_fit', 'fit_tests'].includes(type)
+      return ['filtration', 'breathability', 'proba_fit', 'fit_tests', 'cost'].includes(type)
     },
     statMarkerStyle(percent, type) {
       const clamped = this.clampPercent(percent)
@@ -651,6 +670,9 @@ export default {
       }
       if (type === 'fit_tests') {
         return this.fitTestsGradient()
+      }
+      if (type === 'cost') {
+        return this.costGradient()
       }
       return null
     },
@@ -687,6 +709,12 @@ export default {
       return `linear-gradient(90deg, ${red} 0%, ${yellow} 33.333%, ${green} 100%)`
     },
     fitTestsGradient() {
+      const red = '#c0392b'
+      const yellow = '#f1c40f'
+      const green = '#27ae60'
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} 33.333%, ${green} 100%)`
+    },
+    costGradient() {
       const red = '#c0392b'
       const yellow = '#f1c40f'
       const green = '#27ae60'
