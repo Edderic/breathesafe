@@ -1346,13 +1346,15 @@ export default {
     }
 
     .thumbnail {
-      max-height: 7em;
+      max-height: 15em;
     }
 
   }
 
   @media(max-width: 800px) {
     .image-and-name {
+      height: 12em;
+      width: 45vw;
       flex-direction: column;
     }
 
@@ -1377,6 +1379,15 @@ export default {
       padding-left: 0;
       padding-right: 0;
       text-align: center;
+    }
+
+    .stat-cell {
+      width: 45vw;
+      max-width: 45vw;
+    }
+
+    .card .description {
+      width: 45vw;
     }
   }
 
