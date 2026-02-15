@@ -170,6 +170,7 @@
                 :text="metricCellText(row.key, m)"
                 :colorScheme="tableCellColorScheme"
                 :exception="missingMetricCell"
+                :style="coloredCellStyle"
                 padding="0.55em"
               />
             </td>
@@ -385,6 +386,12 @@ export default {
     },
     tableCellColorScheme() {
       return genColorSchemeBounds(0, 1, 5, [...colorPaletteFall].reverse())
+    },
+    coloredCellStyle() {
+      if (this.viewportWidth <= 768) {
+        return { height: '6em' }
+      }
+      return {}
     },
     displayables() {
       return this.masks;
