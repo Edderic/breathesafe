@@ -6,6 +6,7 @@
           <h2 class='tagline'>Masks</h2>
           <CircularButton v-if="isAdmin" text="R" @click="retrainModel" />
           <CircularButton text="+" @click="newMask" />
+          <CircularButton :text="resultsViewToggleText" @click="toggleResultsView" />
           <CircularButton text="?" @click="showPopup = 'Help'"/>
         </div>
 
@@ -109,12 +110,54 @@
     </div>
 
     <MaskCards
+      v-if="!showTableView"
       :cards='sortedDisplayables'
       :dataContext='maskDataContext'
       :showUniqueNumFitTesters='true'
       :viewMaskOnClick='true'
       :facialMeasurements='facialMeasurements'
     />
+
+    <div v-else class="mask-metrics-table-wrapper">
+      <table class="mask-metrics-table">
+        <thead>
+          <tr>
+            <th class="sticky-column">Feature</th>
+            <th
+              v-for="m in sortedDisplayables"
+              :key="`mask-column-${m.id}`"
+            >
+              <button
+                class="mask-column-button"
+                @click="viewMask(m.id)"
+              >
+                {{ m.uniqueInternalModelCode }}
+              </button>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="row in tableMetricRows"
+            :key="`metric-row-${row.key}`"
+          >
+            <th class="sticky-column metric-label">{{ row.label }}</th>
+            <td
+              v-for="m in sortedDisplayables"
+              :key="`metric-cell-${row.key}-${m.id}`"
+            >
+              <ColoredCell
+                :value="metricCellScore(row.key, m)"
+                :text="metricCellText(row.key, m)"
+                :colorScheme="tableCellColorScheme"
+                :exception="missingMetricCell"
+                padding="0.55em"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <br>
     <br>
@@ -141,7 +184,7 @@ import SortPopup from './sort_popup.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
 import { getFacialMeasurements } from './facial_measurements.js'
-import { perimeterColorScheme } from './colors.js'
+import { colorPaletteFall, genColorSchemeBounds, perimeterColorScheme } from './colors.js'
 import { mapActions, mapWritableState, mapState } from 'pinia';
 import { useProfileStore } from './stores/profile_store';
 import { useFacialMeasurementStore } from './stores/facial_measurement_store.js';
@@ -243,6 +286,16 @@ export default {
       recommenderWarmupKey: 'mask_recommender_warmup_done',
       isRecommenderLoading: false,
       recommenderModelTimestamp: null,
+      showTableView: false,
+      missingMetricCell: {
+        color: {
+          r: '200',
+          g: '200',
+          b: '200',
+        },
+        value: -1,
+        text: 'Missing',
+      },
     }
   },
   props: {
@@ -286,6 +339,20 @@ export default {
 
     perimColorScheme() {
       return perimeterColorScheme()
+    },
+    resultsViewToggleText() {
+      return this.showTableView ? 'C' : 'T'
+    },
+    tableMetricRows() {
+      return [
+        { key: 'proba_fit', label: 'Probability of Fit' },
+        { key: 'filtration', label: 'Filtration Factor' },
+        { key: 'breathability', label: 'Breathability (pa)' },
+        { key: 'affordability', label: 'Affordability (USD)' },
+      ]
+    },
+    tableCellColorScheme() {
+      return genColorSchemeBounds(0, 1, 5, [...colorPaletteFall].reverse())
     },
     displayables() {
       return this.masks;
@@ -363,6 +430,140 @@ export default {
         .catch(() => {
           // Warmup is best effort; don't surface errors to the user.
         })
+    },
+    toggleResultsView() {
+      this.showTableView = !this.showTableView
+    },
+    metricCellScore(metricKey, mask) {
+      if (metricKey === 'proba_fit') {
+        const value = Number(mask.probaFit)
+        if (this.metricIsMissing(metricKey, mask)) {
+          return -1
+        }
+        return this.clampPercent(value)
+      }
+
+      if (metricKey === 'filtration') {
+        const value = Number(mask.avgSealedFitFactor)
+        if (this.metricIsMissing(metricKey, mask)) {
+          return -1
+        }
+        const logValue = Math.log10(value)
+        return this.clampPercent(logValue / 3)
+      }
+
+      if (metricKey === 'breathability') {
+        if (this.metricIsMissing(metricKey, mask)) {
+          return -1
+        }
+        const bounds = this.breathabilityBounds()
+        if (bounds.min === null || bounds.max === null) {
+          return -1
+        }
+        const scaled = this.minMaxScale(Number(mask.avgBreathabilityPa), bounds.min, bounds.max, { zeroRangeValue: 0 })
+        return this.clampPercent(1 - scaled)
+      }
+
+      if (metricKey === 'affordability') {
+        if (this.metricIsMissing(metricKey, mask)) {
+          return -1
+        }
+        const bounds = this.costBounds()
+        if (bounds.min === null || bounds.max === null) {
+          return -1
+        }
+        const scaled = this.minMaxScale(Number(mask.initialCostUsDollars), bounds.min, bounds.max, { zeroRangeValue: 0 })
+        return this.clampPercent(1 - scaled)
+      }
+
+      return -1
+    },
+    metricCellText(metricKey, mask) {
+      if (this.metricIsMissing(metricKey, mask)) {
+        return 'Missing'
+      }
+
+      if (metricKey === 'proba_fit') {
+        return `${Math.round(Number(mask.probaFit) * 100)}%`
+      }
+      if (metricKey === 'filtration') {
+        return `${Math.round(Number(mask.avgSealedFitFactor))}`
+      }
+      if (metricKey === 'breathability') {
+        return `${Math.round(Number(mask.avgBreathabilityPa))} pa`
+      }
+      if (metricKey === 'affordability') {
+        return `$${Number(mask.initialCostUsDollars).toFixed(2)}`
+      }
+      return 'Missing'
+    },
+    metricIsMissing(metricKey, mask) {
+      if (metricKey === 'proba_fit') {
+        const hasRecommenderPayload = !!this.$route.query.recommenderPayload
+        const value = Number(mask.probaFit)
+        return !hasRecommenderPayload || !Number.isFinite(value)
+      }
+      if (metricKey === 'filtration') {
+        const value = Number(mask.avgSealedFitFactor)
+        return !Number.isFinite(value) || value <= 0
+      }
+      if (metricKey === 'breathability') {
+        const value = Number(mask.avgBreathabilityPa)
+        return !Number.isFinite(value) || value <= 0
+      }
+      if (metricKey === 'affordability') {
+        const value = Number(mask.initialCostUsDollars)
+        return !Number.isFinite(value) || value <= 0
+      }
+      return true
+    },
+    clampPercent(value) {
+      if (!Number.isFinite(value)) {
+        return 0
+      }
+      return Math.max(0, Math.min(1, value))
+    },
+    minMaxScale(value, min, max, { zeroRangeValue }) {
+      if (!Number.isFinite(value) || min === null || max === null) {
+        return zeroRangeValue
+      }
+      const range = max - min
+      if (range <= 0) {
+        return zeroRangeValue
+      }
+      return (value - min) / range
+    },
+    breathabilityBounds() {
+      const contextMin = this.maskDataContext.breathability_min
+      const contextMax = this.maskDataContext.breathability_max
+      if (contextMin !== null && contextMin !== undefined && contextMax !== null && contextMax !== undefined) {
+        return { min: Number(contextMin), max: Number(contextMax) }
+      }
+
+      const values = (this.sortedDisplayables || [])
+        .map((m) => Number(m.avgBreathabilityPa))
+        .filter((v) => Number.isFinite(v) && v > 0)
+
+      if (values.length === 0) {
+        return { min: null, max: null }
+      }
+      return { min: Math.min(...values), max: Math.max(...values) }
+    },
+    costBounds() {
+      const contextMin = this.maskDataContext.initial_cost_min
+      const contextMax = this.maskDataContext.initial_cost_max
+      if (contextMin !== null && contextMin !== undefined && contextMax !== null && contextMax !== undefined) {
+        return { min: Number(contextMin), max: Number(contextMax) }
+      }
+
+      const values = (this.sortedDisplayables || [])
+        .map((m) => Number(m.initialCostUsDollars))
+        .filter((v) => Number.isFinite(v) && v > 0)
+
+      if (values.length === 0) {
+        return { min: null, max: null }
+      }
+      return { min: Math.min(...values), max: Math.max(...values) }
     },
     async load(toQuery, previousQuery) {
       this.setFilterQuery(toQuery, 'search')
@@ -903,6 +1104,53 @@ export default {
     to {
       transform: rotate(360deg);
     }
+  }
+
+  .mask-metrics-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    padding: 0 1em;
+    box-sizing: border-box;
+  }
+
+  .mask-metrics-table {
+    border-collapse: collapse;
+    width: max-content;
+    min-width: 100%;
+    background-color: #fff;
+  }
+
+  .mask-metrics-table th,
+  .mask-metrics-table td {
+    border: 1px solid #ddd;
+    min-width: 10em;
+    padding: 0.3em;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .mask-metrics-table th.sticky-column {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background-color: #f4f4f4;
+    min-width: 12em;
+  }
+
+  .mask-metrics-table .metric-label {
+    font-weight: 700;
+  }
+
+  .mask-column-button {
+    background: transparent;
+    border: none;
+    font-size: 0.85em;
+    line-height: 1.25;
+    padding: 0.4em;
+    white-space: normal;
+    text-align: center;
+    width: 100%;
+    min-height: 3.5em;
   }
 
   @media(max-width: 1000px) {
