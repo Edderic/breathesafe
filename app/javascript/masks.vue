@@ -178,7 +178,7 @@
               <div
                 v-if="row.key === 'strap_type'"
                 class="table-text-cell"
-                :style="coloredCellStyle"
+                :style="tableTextCellStyle"
               >
                 {{ metricCellText(row.key, m) }}
               </div>
@@ -431,6 +431,12 @@ export default {
         return Object.assign({ height: '6em' }, baseStyle)
       }
       return Object.assign({ height: '4em' }, baseStyle)
+    },
+    tableTextCellStyle() {
+      if (this.viewportWidth <= 768) {
+        return { height: '6em' }
+      }
+      return { height: '4em' }
     },
     displayables() {
       const masks = [...this.masks]
@@ -1502,9 +1508,9 @@ export default {
     line-height: 1.2;
     padding: 0.4em;
     word-break: break-word;
-    color: #fff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 1);
-    font-weight: 600;
+    color: #222;
+    text-shadow: none;
+    font-weight: 500;
   }
 
   .mask-row-button {
