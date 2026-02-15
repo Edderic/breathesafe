@@ -60,15 +60,13 @@
             </td>
           </tr>
           <tr class="desktop-only">
-            <td :colspan="showProbaFit ? 2 : 4">
+            <td colspan="1">
               <div class='image-and-name'>
                 <img :src="m.imageUrls[0]" alt="" class='thumbnail'>
               </div>
             </td>
 
-          </tr>
-          <tr class="desktop-only">
-            <td colspan='4'>
+            <td colspan='1'>
               <div class='description'>
                 <span>
                   {{m.uniqueInternalModelCode}}
@@ -77,7 +75,7 @@
             </td>
           </tr>
           <tr>
-            <template v-if="showProbaFit">
+            <template>
               <th colspan='1'>Probability of Fit</th>
               <td colspan="1">
               <div class='stat-cell'>
@@ -1008,6 +1006,7 @@ export default {
   }
 
   .card .description {
+    width: 8em;
     padding: 1em;
   }
 
@@ -1134,7 +1133,7 @@ export default {
 
   .masks {
     display: grid;
-    grid-template-columns: 33% 33% 33%;
+    grid-template-columns: 25% 25% 25% 25%;
     grid-template-rows: auto;
     overflow-y: auto;
     height: 77vh;
@@ -1169,6 +1168,7 @@ export default {
   }
   .stat-cell {
     min-width: 9em;
+    max-width: 10em;
   }
   .stat-bar-wrapper {
     position: relative;
@@ -1303,12 +1303,12 @@ export default {
   }
   @media(max-width: 1580px) {
     .masks {
-      grid-template-columns: 50% 50%;
+      grid-template-columns: 33% 33% 33%;
     }
   }
   @media(max-width: 1250px) {
     .masks {
-      grid-template-columns: 100%;
+      grid-template-columns: 50% 50%;
 
       position: relative;
       top: 2em;
@@ -1328,7 +1328,7 @@ export default {
       flex-direction: column;
     }
     .masks {
-      grid-template-columns: 100%;
+      grid-template-columns: 50% 50%;
       overflow: auto;
 
       position: relative;
@@ -1351,7 +1351,7 @@ export default {
 
   }
 
-  @media(max-width: 600px) {
+  @media(max-width: 800px) {
     .image-and-name {
       flex-direction: column;
     }
@@ -1372,6 +1372,7 @@ export default {
       grid-template-columns: 100%;
 
     }
+
     th, td {
       padding-left: 0;
       padding-right: 0;
