@@ -166,7 +166,15 @@
               v-for="row in tableMetricRows"
               :key="`metric-cell-${m.id}-${row.key}`"
             >
+              <div
+                v-if="row.key === 'strap_type'"
+                class="table-text-cell"
+                :style="coloredCellStyle"
+              >
+                {{ metricCellText(row.key, m) }}
+              </div>
               <ColoredCell
+                v-else
                 :value="metricCellScore(row.key, m)"
                 :text="metricCellText(row.key, m)"
                 :colorScheme="tableCellColorScheme"
@@ -378,6 +386,7 @@ export default {
           { key: 'filtration', label: 'Filter' },
           { key: 'breathability', label: 'Breath' },
           { key: 'affordability', label: 'Cost' },
+          { key: 'strap_type', label: 'Strap' },
         ]
       }
 
@@ -386,6 +395,7 @@ export default {
         { key: 'filtration', label: 'Filtration Factor' },
         { key: 'breathability', label: 'Breathability (pa)' },
         { key: 'affordability', label: 'Affordability (USD)' },
+        { key: 'strap_type', label: 'Strap type' },
       ]
     },
     tableCellColorScheme() {
@@ -407,6 +417,7 @@ export default {
       const colorFilter = this.filterForColor
       const styleFilter = this.filterForStyle
       const strapFilter = this.filterForStrapType
+      const missingFilters = this.filterForMissing || []
 
       return masks.filter((mask) => {
         const textBlob = [
@@ -442,6 +453,13 @@ export default {
 
         if (strapFilter && strapFilter !== 'none') {
           if (String(mask.strapType || '').toLowerCase() !== String(strapFilter).toLowerCase()) {
+            return false
+          }
+        }
+
+        if (missingFilters.length > 0) {
+          const matchesAllMissingFilters = missingFilters.every((missingFilter) => this.matchesMissingFilter(mask, missingFilter))
+          if (!matchesAllMissingFilters) {
             return false
           }
         }
@@ -553,6 +571,29 @@ export default {
           // Warmup is best effort; don't surface errors to the user.
         })
     },
+    matchesMissingFilter(mask, filterMissing) {
+      if (filterMissing === 'strap_type') {
+        const value = mask.strapType
+        return value === null || value === undefined || String(value).trim() === ''
+      }
+      if (filterMissing === 'style') {
+        const value = mask.style
+        return value === null || value === undefined || String(value).trim() === ''
+      }
+      if (filterMissing === 'perimeter') {
+        const value = Number(mask.perimeterMm)
+        return !Number.isFinite(value) || value === 0
+      }
+      if (filterMissing === 'filtration_factor') {
+        const value = Number(mask.avgSealedFitFactor)
+        return !Number.isFinite(value) || value <= 0
+      }
+      if (filterMissing === 'breathability') {
+        const value = Number(mask.avgBreathabilityPa)
+        return !Number.isFinite(value) || value <= 0
+      }
+      return false
+    },
     handleWindowResize() {
       this.viewportWidth = window.innerWidth
       this.updateTableViewportHeight()
@@ -616,6 +657,10 @@ export default {
         return this.clampPercent(1 - scaled)
       }
 
+      if (metricKey === 'strap_type') {
+        return -1
+      }
+
       return -1
     },
     metricCellText(metricKey, mask) {
@@ -634,6 +679,9 @@ export default {
       }
       if (metricKey === 'affordability') {
         return `$${Number(mask.initialCostUsDollars).toFixed(2)}`
+      }
+      if (metricKey === 'strap_type') {
+        return mask.strapType || 'Missing'
       }
       return 'Missing'
     },
@@ -654,6 +702,9 @@ export default {
       if (metricKey === 'affordability') {
         const value = Number(mask.initialCostUsDollars)
         return !Number.isFinite(value) || value <= 0
+      }
+      if (metricKey === 'strap_type') {
+        return !mask.strapType || String(mask.strapType).trim() === ''
       }
       return true
     },
@@ -1343,6 +1394,16 @@ export default {
     word-break: break-word;
     text-align: center;
     color: #222;
+  }
+
+  .table-text-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.2;
+    padding: 0.4em;
+    word-break: break-word;
   }
 
   .mask-row-button {
