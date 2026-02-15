@@ -1316,7 +1316,6 @@ export default {
   .mask-metrics-table th,
   .mask-metrics-table td {
     border: 1px solid #ddd;
-    min-width: 10em;
     text-align: center;
     vertical-align: middle;
   }
@@ -1343,6 +1342,7 @@ export default {
 
   .mask-metrics-table .sticky-mask-column {
     left: 7em;
+
   }
 
   .mask-metrics-table thead th.sticky-column {
@@ -1355,6 +1355,7 @@ export default {
 
   .mask-metrics-table .metric-label {
     font-weight: 700;
+    padding: 1em;
   }
 
   .image-cell {
@@ -1409,16 +1410,16 @@ export default {
   .mask-row-button {
     background: transparent;
     border: none;
-    font-size: 0.85em;
+    font-size: 1em;
     line-height: 1.25;
     padding: 0.4em;
     white-space: normal;
     text-align: center;
-    width: 100%;
+    max-width: 23em;
     min-height: 3.5em;
   }
 
-  @media(max-width: 1350px) {
+  @media(max-width: 1400px) {
     .sticky-column {
       max-width: 10em;
     }
@@ -1427,7 +1428,7 @@ export default {
     }
   }
 
-  @media(max-width: 1000px) {
+  @media(max-width: 1020px) {
     .mask-metrics-table th,
     .mask-metrics-table td {
       min-width: 6em;
