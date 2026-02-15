@@ -1314,10 +1314,12 @@ export default {
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    position: relative;
+    z-index: 30;
   }
 
   .bar {
-    max-height: 3em;
+    max-height: none;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -1331,6 +1333,9 @@ export default {
     justify-content: center;
     gap: 0.45em;
     max-width: 95vw;
+    position: relative;
+    z-index: 31;
+    margin-top: 0.45em;
   }
 
   .recommender-loading-overlay {
@@ -1517,10 +1522,6 @@ export default {
   }
 
   @media(max-width: 1020px) {
-    .active-filter-pills {
-      position: relative;
-      top: 4em;
-    }
     .mask-metrics-table th,
     .mask-metrics-table td {
       min-width: 6em;
@@ -1529,10 +1530,18 @@ export default {
     .top-controls {
       flex-direction: column;
       margin-top: 3em;
+      margin-bottom: 0.75em;
     }
+
     .bar {
       flex-direction: column;
     }
+
+    .active-filter-pills {
+      margin-top: 0.65em;
+      margin-bottom: 0.35em;
+    }
+
     margin-top: 4em;
   }
   @media(max-width: 768px) {
