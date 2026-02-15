@@ -576,7 +576,7 @@ export default {
       return this.errorMessages;
     },
     filterButtonColor() {
-      return this.hasActiveFilters ? 'red' : '#aaa'
+      return '#aaa'
     },
     hasActiveFilters() {
       return this.filterForColor !== 'none' ||
