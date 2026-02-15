@@ -422,10 +422,15 @@ export default {
       return genColorSchemeBounds(0, 1, 5, [...colorPaletteFall].reverse())
     },
     coloredCellStyle() {
-      if (this.viewportWidth <= 768) {
-        return { height: '6em' }
+      const baseStyle = {
+        color: '#fff',
+        textShadow: '0 1px 4px rgba(0, 0, 0, 0.65)',
+        fontWeight: '600',
       }
-      return { height: '4em' }
+      if (this.viewportWidth <= 768) {
+        return Object.assign({ height: '6em' }, baseStyle)
+      }
+      return Object.assign({ height: '4em' }, baseStyle)
     },
     displayables() {
       const masks = [...this.masks]
@@ -1497,6 +1502,9 @@ export default {
     line-height: 1.2;
     padding: 0.4em;
     word-break: break-word;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 1);
+    font-weight: 600;
   }
 
   .mask-row-button {
