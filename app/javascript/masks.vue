@@ -37,6 +37,15 @@
         />
       </div>
 
+      <div v-if="activeFilterPills.length" class="active-filter-pills">
+        <FilterPill
+          v-for="pill in activeFilterPills"
+          :key="pill.id"
+          :label="pill.label"
+          @remove="removeFilterPill(pill)"
+        />
+      </div>
+
       <div class='container chunk'>
         <ClosableMessage @onclose='errorMessages = []' :messages='messages'/>
         <br>
@@ -209,6 +218,7 @@ import RecommendPopup from './recommend_popup.vue'
 import SearchIcon from './search_icon.vue'
 import SortingStatus from './sorting_status.vue'
 import FilterPopup from './filter_popup.vue'
+import FilterPill from './filter_pill.vue'
 import SortPopup from './sort_popup.vue'
 import SurveyQuestion from './survey_question.vue'
 import { signIn } from './session.js'
@@ -232,6 +242,7 @@ export default {
     ColoredCell,
     ClosableMessage,
     FilterPopup,
+    FilterPill,
     HelpPopup,
     MaskCards,
     Pagination,
@@ -509,6 +520,37 @@ export default {
         if (aStr > bStr) return 1 * factor
         return 0
       })
+    },
+    activeFilterPills() {
+      const pills = []
+
+      if (this.filterForColor && this.filterForColor !== 'none') {
+        pills.push({ id: `color-${this.filterForColor}`, type: 'color', value: this.filterForColor, label: `Color: ${this.filterForColor}` })
+      }
+      if (this.filterForStyle && this.filterForStyle !== 'none') {
+        pills.push({ id: `style-${this.filterForStyle}`, type: 'style', value: this.filterForStyle, label: `Style: ${this.filterForStyle}` })
+      }
+      if (this.filterForStrapType && this.filterForStrapType !== 'none') {
+        pills.push({ id: `strap-${this.filterForStrapType}`, type: 'strap_type', value: this.filterForStrapType, label: `Strap: ${this.filterForStrapType}` })
+      }
+
+      const missingLabelByValue = {
+        strap_type: 'Strap type missing',
+        style: 'Style missing',
+        perimeter: 'Perimeter missing',
+        filtration_factor: 'Filtration factor missing',
+        breathability: 'Breathability missing',
+      }
+      for (const value of this.filterForMissing || []) {
+        pills.push({
+          id: `missing-${value}`,
+          type: 'missing',
+          value,
+          label: missingLabelByValue[value] || `Missing: ${value}`,
+        })
+      }
+
+      return pills
     },
     messages() {
       return this.errorMessages;
@@ -825,6 +867,23 @@ export default {
           }
         }
       )
+    },
+    removeFilterPill(pill) {
+      const query = Object.assign({}, this.$route.query)
+
+      if (pill.type === 'color') {
+        query.filterForColor = 'none'
+      } else if (pill.type === 'style') {
+        query.filterForStyle = 'none'
+      } else if (pill.type === 'strap_type') {
+        query.filterForStrapType = 'none'
+      } else if (pill.type === 'missing') {
+        const nextValues = (this.filterForMissing || []).filter((value) => value !== pill.value)
+        query.filterForMissing = nextValues.length ? nextValues.join(',') : 'none'
+      }
+
+      query.page = 1
+      this.$router.push({ name: 'Masks', query })
     },
     updateSearch(event) {
       let newQuery = {
@@ -1254,7 +1313,15 @@ export default {
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    padding-top: 1em;
+  }
+
+  .active-filter-pills {
+    padding: 0 1em;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.45em;
+    max-width: 95vw;
   }
 
   .recommender-loading-overlay {
@@ -1429,6 +1496,10 @@ export default {
   }
 
   @media(max-width: 1020px) {
+    .active-filter-pills {
+      position: relative;
+      top: 4em;
+    }
     .mask-metrics-table th,
     .mask-metrics-table td {
       min-width: 6em;
@@ -1436,7 +1507,7 @@ export default {
 
     .top-controls {
       flex-direction: column;
-      margin-top: 2em;
+      margin-top: 3em;
     }
     .bar {
       flex-direction: column;
