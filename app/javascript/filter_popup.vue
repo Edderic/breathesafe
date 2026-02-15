@@ -436,10 +436,6 @@ export default {
     }
   }
   @media(max-width: 700px) {
-    .grid {
-      grid-template-columns: 100%;
-    }
-
     #search {
       width: 70vw;
       padding: 1em;
