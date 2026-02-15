@@ -119,7 +119,7 @@
               <td colspan='1' class='colors'>
 
               <span v-for='opt in colorOptions' class='filterCheckbox' >
-                <Circle :color='opt' :selected='colors.includes(opt)' :for='`color${opt}`' @click='filterFor("Color", opt)' v-if='newOrEditMode || colors.includes(opt)'/>
+                <Circle :color='opt' :selected='colors.includes(opt)' :for='`color${opt}`' @click='onColorClick(opt)' v-if='newOrEditMode || colors.includes(opt)'/>
               </span>
 
               </td>
@@ -255,7 +255,7 @@
               <td colspan='1' class='colors'>
 
               <span v-for='opt in colorOptions' class='filterCheckbox' >
-                <Circle :color='opt' :selected='colors.includes(opt)' :for='`color${opt}`' @click='filterFor("Color", opt)' v-if='newOrEditMode || colors.includes(opt)'/>
+                <Circle :color='opt' :selected='colors.includes(opt)' :for='`color${opt}`' @click='onColorClick(opt)' v-if='newOrEditMode || colors.includes(opt)'/>
               </span>
 
               </td>
@@ -1241,6 +1241,12 @@ export default {
       } else {
         this.colors.push(opt)
       }
+    },
+    onColorClick(opt) {
+      if (!this.newOrEditMode) {
+        return
+      }
+      this.filterFor('Color', opt)
     },
     shortHand(href) {
       return shortHandHref(href)
