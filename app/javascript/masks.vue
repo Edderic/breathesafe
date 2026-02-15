@@ -390,24 +390,33 @@ export default {
     isNarrowTableViewport() {
       return this.viewportWidth < 900
     },
+    showStrapTypeColumn() {
+      return this.viewportWidth >= 1072
+    },
     tableMetricRows() {
       if (this.isNarrowTableViewport) {
-        return [
+        const rows = [
           { key: 'proba_fit', label: 'Fit' },
           { key: 'filtration', label: 'Filter' },
           { key: 'breathability', label: 'Breath' },
           { key: 'affordability', label: 'Cost' },
-          { key: 'strap_type', label: 'Strap' },
         ]
+        if (this.showStrapTypeColumn) {
+          rows.push({ key: 'strap_type', label: 'Strap' })
+        }
+        return rows
       }
 
-      return [
+      const rows = [
         { key: 'proba_fit', label: 'Probability of Fit' },
         { key: 'filtration', label: 'Filtration Factor' },
         { key: 'breathability', label: 'Breathability (pa)' },
         { key: 'affordability', label: 'Affordability (USD)' },
-        { key: 'strap_type', label: 'Strap type' },
       ]
+      if (this.showStrapTypeColumn) {
+        rows.push({ key: 'strap_type', label: 'Strap type' })
+      }
+      return rows
     },
     tableCellColorScheme() {
       return genColorSchemeBounds(0, 1, 5, [...colorPaletteFall].reverse())
@@ -1492,6 +1501,18 @@ export default {
     }
     .mask-row-button {
       text-align: center;
+    }
+  }
+
+  @media(max-width: 1127px) {
+    .table-text-cell {
+      width: 6em;
+    }
+  }
+
+  @media(max-width: 1072px) {
+    .table-text-cell {
+      display: none;
     }
   }
 
