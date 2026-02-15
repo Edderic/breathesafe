@@ -391,7 +391,7 @@ export default {
       if (this.viewportWidth <= 768) {
         return { height: '6em' }
       }
-      return {}
+      return { height: '4em' }
     },
     displayables() {
       return this.masks;
