@@ -48,6 +48,16 @@ export const useMasksStore = defineStore('masks', {
         }
       } else if (key == 'filterForAvailable') {
         this[key] = query[key] || 'true'
+      } else if (key == 'filterForColor') {
+        this[key] = query[key] || 'none'
+      } else if (key == 'filterForStrapType') {
+        this[key] = query[key] || 'none'
+      } else if (key == 'filterForStyle') {
+        this[key] = query[key] || 'none'
+      } else if (key == 'sortByStatus') {
+        this[key] = query[key] || 'ascending'
+      } else if (key == 'sortByField') {
+        this[key] = query[key] || undefined
       } else if (query[key]) {
         this[key] = query[key]
       }

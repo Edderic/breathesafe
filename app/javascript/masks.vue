@@ -600,14 +600,13 @@ export default {
   async created() {
     // TODO: a parent might input data on behalf of their children.
     // Currently, this.loadStuff() assumes We're loading the profile for the current user
-    this.maybeWarmupRecommender()
-    await this.load.bind(this)(this.$route.query, undefined)
-
     this.$watch(
       () => this.$route.query,
       this.load.bind(this)
     )
 
+    this.maybeWarmupRecommender()
+    await this.load.bind(this)(this.$route.query, undefined)
   },
   mounted() {
     this.handleWindowResize()
@@ -842,46 +841,54 @@ export default {
     },
 
     async load(toQuery, previousQuery) {
-      const isMasksRoute = this.$route.name === 'Masks' || this.$route.path === '/masks'
+      const isMasksRoute = this.$route.name === 'Masks' || /^\/masks\/?$/.test(String(this.$route.path || ''))
       if (!isMasksRoute) {
         return
       }
-      const needsAvailableFilter = !Object.prototype.hasOwnProperty.call(toQuery, 'filterForAvailable') || !toQuery.filterForAvailable
-      if (needsAvailableFilter) {
-        const normalizedQuery = Object.assign({}, toQuery, { filterForAvailable: 'true' })
-        await this.$router.replace({ name: 'Masks', query: normalizedQuery })
-        return
-      }
-      if (toQuery.recommenderPayload) {
-        const needsSortField = !toQuery.sortByField || toQuery.sortByField === 'none'
-        const needsSortStatus = !toQuery.sortByStatus || toQuery.sortByStatus === 'none'
 
-        if (needsSortField || needsSortStatus) {
-          const normalizedQuery = Object.assign({}, toQuery, {
-            sortByField: needsSortField ? 'probaFit' : toQuery.sortByField,
-            sortByStatus: needsSortStatus ? 'descending' : toQuery.sortByStatus,
-          })
-          await this.$router.replace({ name: 'Masks', query: normalizedQuery })
-          return
+      let normalizedQuery = Object.assign({}, toQuery)
+      let didNormalize = false
+
+      const needsAvailableFilter = !Object.prototype.hasOwnProperty.call(normalizedQuery, 'filterForAvailable') || !normalizedQuery.filterForAvailable
+      if (needsAvailableFilter) {
+        normalizedQuery.filterForAvailable = 'true'
+        didNormalize = true
+      }
+
+      if (normalizedQuery.recommenderPayload) {
+        const needsSortField = !normalizedQuery.sortByField || normalizedQuery.sortByField === 'none'
+        const needsSortStatus = !normalizedQuery.sortByStatus || normalizedQuery.sortByStatus === 'none'
+
+        if (needsSortField) {
+          normalizedQuery.sortByField = 'probaFit'
+          didNormalize = true
+        }
+        if (needsSortStatus) {
+          normalizedQuery.sortByStatus = 'descending'
+          didNormalize = true
         }
       }
 
-      this.setFilterQuery(toQuery, 'search')
-      this.setFilterQuery(toQuery, 'sortByStatus')
-      this.setFilterQuery(toQuery, 'sortByField')
-      this.setFilterQuery(toQuery, 'filterForColor')
-      this.setFilterQuery(toQuery, 'filterForStrapType')
-      this.setFilterQuery(toQuery, 'filterForStyle')
-      this.setFilterQuery(toQuery, 'filterForMissing')
-      this.setFilterQuery(toQuery, 'filterForAvailable')
+      if (didNormalize) {
+        await this.$router.replace({ name: 'Masks', query: normalizedQuery })
+      }
 
-      const page = parseInt(toQuery.page, 10)
+      this.setFilterQuery(normalizedQuery, 'search')
+      this.setFilterQuery(normalizedQuery, 'sortByStatus')
+      this.setFilterQuery(normalizedQuery, 'sortByField')
+      this.setFilterQuery(normalizedQuery, 'filterForColor')
+      this.setFilterQuery(normalizedQuery, 'filterForStrapType')
+      this.setFilterQuery(normalizedQuery, 'filterForStyle')
+      this.setFilterQuery(normalizedQuery, 'filterForMissing')
+      this.setFilterQuery(normalizedQuery, 'filterForAvailable')
+
+      const page = parseInt(normalizedQuery.page, 10)
       this.currentPage = Number.isNaN(page) || page < 1 ? 1 : page
-      if (await this.maybeLoadRecommenderPayload(toQuery)) {
+      if (await this.maybeLoadRecommenderPayload(normalizedQuery)) {
         return
       }
 
-      await this.loadData(toQuery)
+      await this.loadData(normalizedQuery)
     },
     async retrainModel() {
       this.errorMessages = []
@@ -1050,7 +1057,10 @@ export default {
 
       // Never fall back to generic /masks.json while a recommender payload is present.
       // Skip only when this exact payload is currently loading or already loaded.
-      if (payloadParam === this.recommenderInFlightPayload || payloadParam === this.loadedRecommenderPayload) {
+      if (payloadParam === this.recommenderInFlightPayload) {
+        return true
+      }
+      if (payloadParam === this.loadedRecommenderPayload && this.masks.length > 0) {
         return true
       }
 
