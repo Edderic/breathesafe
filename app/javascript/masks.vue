@@ -1048,7 +1048,9 @@ export default {
       // Never fall back to generic /masks.json while a recommender payload is present.
       // If this payload was already queued/loaded, keep waiting for async results.
       if (payloadParam === this.lastHandledRecommenderPayload) {
-        return true
+        if (this.isRecommenderLoading || (this.masks && this.masks.length > 0)) {
+          return true
+        }
       }
 
       const facialMeasurements = this.decodeRecommenderPayload(payloadParam)
