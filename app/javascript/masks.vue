@@ -159,7 +159,7 @@
               <div v-else class="table-mask-image-placeholder">No image</div>
               <button
                 class="mobile-mask-name-button"
-                @click="viewMask(m.id)"
+                @click="viewMask(m)"
               >
                 {{ m.uniqueInternalModelCode }}
               </button>
@@ -167,7 +167,7 @@
             <th class="sticky-column sticky-mask-column desktop">
               <button
                 class="mask-row-button"
-                @click="viewMask(m.id)"
+                @click="viewMask(m)"
               >
                 {{ m.uniqueInternalModelCode }}
               </button>
@@ -841,6 +841,9 @@ export default {
     },
 
     async load(toQuery, previousQuery) {
+      if (this.$route.name !== 'Masks') {
+        return
+      }
       const needsAvailableFilter = !Object.prototype.hasOwnProperty.call(toQuery, 'filterForAvailable') || !toQuery.filterForAvailable
       if (needsAvailableFilter) {
         const normalizedQuery = Object.assign({}, toQuery, { filterForAvailable: 'true' })
@@ -921,15 +924,20 @@ export default {
         }
       )
     },
-    viewMask(id) {
-      this.$router.push(
-        {
-          name: "ShowMask",
-          params: {
-            id: id
-          }
+    viewMask(idOrMask) {
+      const id = typeof idOrMask === 'object' ? (idOrMask.id || idOrMask.maskId) : idOrMask
+      if (!id) {
+        console.warn('Masks: unable to navigate to mask details, missing id', idOrMask)
+        return
+      }
+
+      const targetPath = `/masks/${id}`
+      this.$router.push({ path: targetPath }).catch(() => {})
+      setTimeout(() => {
+        if (this.$route.path !== targetPath) {
+          window.location.hash = `#${targetPath}`
         }
-      )
+      }, 0)
     },
     removeFilterPill(pill) {
       const query = Object.assign({}, this.$route.query)

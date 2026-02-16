@@ -13,7 +13,7 @@
 
     <div class='masks' :style='masksGridStyle'>
 
-      <div class='card flex align-items-center justify-content-center' v-for='m in cards' @click='selectMask(m.id)'>
+      <div class='card flex align-items-center justify-content-center' v-for='m in cards' @click='selectMask(m)'>
 
         <table v-if='showStats'>
           <tr class="mobile-only">
@@ -435,28 +435,30 @@ export default {
         tabToShow: 'Facial Hair'
       })
     },
-    selectMask(id) {
-      const mask = this.cards.find((m) => m.id === id)
+    selectMask(maskOrId) {
+      const mask = typeof maskOrId === 'object'
+        ? maskOrId
+        : this.cards.find((m) => (m.id || m.maskId) === maskOrId)
+
       if (!mask) {
         return
       }
 
       this.selectedMask = mask
-
-      // query: this.facialMeasurements
-      let query = { }
-      for (let facialMeasurement in this.facialMeasurements) {
-        query[facialMeasurement] = this.facialMeasurements[facialMeasurement]['value']
-      }
-
       if (this.viewMaskOnClick) {
-        this.$router.push({
-          name: 'ShowMask',
-          params: {
-            id: this.selectedMask.id
-          },
-          query: query
-        })
+        const targetId = this.selectedMask.id || this.selectedMask.maskId
+        if (!targetId) {
+          console.warn('MaskCards: unable to navigate to mask details, missing id', this.selectedMask)
+          return
+        }
+
+        const targetPath = `/masks/${targetId}`
+        this.$router.push({ path: targetPath }).catch(() => {})
+        setTimeout(() => {
+          if (this.$route.path !== targetPath) {
+            window.location.hash = `#${targetPath}`
+          }
+        }, 0)
       } else {
         this.toggleMaskCardPopup()
       }
