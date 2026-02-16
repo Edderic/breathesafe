@@ -98,7 +98,7 @@
         :filterForStrapType='filterForStrapType'
         :filterForMissing='filterForMissing'
         :filterForAvailable='filterForAvailable'
-        :showMissingFilters='true'
+        :showMissingFilters='isAdmin'
         :filterForTargeted='filterForTargeted'
         :filterForNotTargeted='filterForNotTargeted'
         :sortByField='sortByField'
