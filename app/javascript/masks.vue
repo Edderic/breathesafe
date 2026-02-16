@@ -841,7 +841,8 @@ export default {
     },
 
     async load(toQuery, previousQuery) {
-      if (this.$route.name !== 'Masks') {
+      const isMasksRoute = this.$route.name === 'Masks' || String(this.$route.path || '').startsWith('/masks')
+      if (!isMasksRoute) {
         return
       }
       const needsAvailableFilter = !Object.prototype.hasOwnProperty.call(toQuery, 'filterForAvailable') || !toQuery.filterForAvailable
