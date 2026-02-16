@@ -1289,11 +1289,10 @@ export default {
 
       if (type === 'cost') {
         const min = 0
-        const maxRaw = this.dataContext.initial_cost_max
-        if (this.statIsMissing(type) || maxRaw === null || maxRaw === undefined) {
+        const max = 5
+        if (this.statIsMissing(type)) {
           return null
         }
-        const max = Math.max(maxRaw, 5)
         const scaled = this.minMaxScale(this.initialCostUsDollars, min, max, { zeroRangeValue: 0 })
         return this.clampPercent(1 - scaled)
       }
@@ -1423,17 +1422,8 @@ export default {
       return `linear-gradient(90deg, ${red} 0%, ${yellow} ${axisStop33}%, ${green} 100%)`
     },
     affordabilityGradient() {
-      const min = 0
-      const maxRaw = this.dataContext.initial_cost_max
-      if (maxRaw === null || maxRaw === undefined) {
-        return null
-      }
-
       const orderedMin = 0
-      const orderedMax = Math.max(maxRaw, 5)
-      if (orderedMax <= orderedMin) {
-        return null
-      }
+      const orderedMax = 5
 
       const red = '#c0392b'
       const yellow = '#f1c40f'
@@ -1477,12 +1467,8 @@ export default {
       }
       if (type === 'cost') {
         const min = 0
-        const maxRaw = this.dataContext.initial_cost_max
-        if (maxRaw === null || maxRaw === undefined) {
-          return null
-        }
-        const max = Math.max(maxRaw, 5)
-        return position === 'min' ? this.formatCurrency(max) : this.formatCurrency(0)
+        const max = 5
+        return position === 'min' ? this.formatCurrency(max) : this.formatCurrency(min)
       }
       if (type === 'mass') {
         const min = this.dataContext.mass_min
