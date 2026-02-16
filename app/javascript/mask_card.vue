@@ -356,9 +356,6 @@ export default {
       return 4
     },
     forceSingleMaskColumn() {
-      if (!this.hasRecommenderPayload) {
-        return false
-      }
       if (this.cards.length === 0) {
         return false
       }
