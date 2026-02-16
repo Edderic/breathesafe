@@ -120,8 +120,10 @@
       </div>
     </div>
 
+    <div v-if="showFilteredOutMessage" class="filtered-out-message">All masks have been filtered out</div>
+
     <MaskCards
-      v-if="!showTableView"
+      v-else-if="!showTableView"
       :cards='sortedDisplayables'
       :dataContext='maskDataContext'
       :showUniqueNumFitTesters='true'
@@ -620,6 +622,12 @@ export default {
              this.filterForStyle !== 'none' ||
              this.filterForMissing.length > 0 ||
              this.filterForAvailable === 'false'
+    },
+    hasActiveClientFilters() {
+      return !!(this.search && String(this.search).trim()) || this.hasActiveFilters
+    },
+    showFilteredOutMessage() {
+      return this.hasRecommenderPayload && this.hasActiveClientFilters && this.sortedDisplayables.length === 0
     },
   },
 
@@ -1496,6 +1504,19 @@ export default {
     font-size: 1rem;
     line-height: 1.4;
     color: #222;
+  }
+
+  .filtered-out-message {
+    width: 100%;
+    min-height: 40vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #444;
+    font-size: 1.2em;
+    font-weight: 600;
+    padding: 1em;
   }
 
   @keyframes recommender-spin {
