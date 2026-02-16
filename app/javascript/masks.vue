@@ -323,7 +323,8 @@ export default {
       perPage: 12,
       totalCount: 0,
       maskDataContext: {},
-      lastHandledRecommenderPayload: null,
+      recommenderInFlightPayload: null,
+      loadedRecommenderPayload: null,
       recommenderWarmupKey: 'mask_recommender_warmup_done',
       isRecommenderLoading: false,
       recommenderModelTimestamp: null,
@@ -1042,15 +1043,15 @@ export default {
       if (!payloadParam) {
         this.isRecommenderLoading = false
         this.recommenderModelTimestamp = null
+        this.recommenderInFlightPayload = null
+        this.loadedRecommenderPayload = null
         return false
       }
 
       // Never fall back to generic /masks.json while a recommender payload is present.
-      // If this payload was already queued/loaded, keep waiting for async results.
-      if (payloadParam === this.lastHandledRecommenderPayload) {
-        if (this.isRecommenderLoading || (this.masks && this.masks.length > 0)) {
-          return true
-        }
+      // Skip only when this exact payload is currently loading or already loaded.
+      if (payloadParam === this.recommenderInFlightPayload || payloadParam === this.loadedRecommenderPayload) {
+        return true
       }
 
       const facialMeasurements = this.decodeRecommenderPayload(payloadParam)
@@ -1061,17 +1062,18 @@ export default {
         return true
       }
 
-      this.lastHandledRecommenderPayload = payloadParam
+      this.recommenderInFlightPayload = payloadParam
       this.isRecommenderLoading = true
       this.recommenderModelTimestamp = null
       try {
-        await this.requestAsyncRecommendations(facialMeasurements)
+        await this.requestAsyncRecommendations(payloadParam, facialMeasurements)
       } finally {
+        this.recommenderInFlightPayload = null
         this.isRecommenderLoading = false
       }
       return true
     },
-    async requestAsyncRecommendations(facialMeasurements) {
+    async requestAsyncRecommendations(payloadParam, facialMeasurements) {
       try {
         const startResponse = await axios.post(
           `/mask_recommender/async.json`,
@@ -1082,12 +1084,12 @@ export default {
           this.message = "Failed to start mask recommendations."
           return
         }
-        await this.pollRecommendationStatus(jobId)
+        await this.pollRecommendationStatus(jobId, payloadParam)
       } catch (error) {
         this.message = "Failed to load mask recommendations."
       }
     },
-    async pollRecommendationStatus(jobId) {
+    async pollRecommendationStatus(jobId, payloadParam) {
       while (true) {
         try {
           const response = await axios.get(`/mask_recommender/async/${jobId}.json`)
@@ -1104,13 +1106,16 @@ export default {
                 this.maskDataContext = data.context
               }
             }
+            this.loadedRecommenderPayload = payloadParam
             return
           }
           if (status === 'failed') {
+            this.loadedRecommenderPayload = null
             this.message = response?.data?.error || "Failed to load mask recommendations."
             return
           }
         } catch (error) {
+          this.loadedRecommenderPayload = null
           this.message = "Failed to load mask recommendations."
           return
         }
