@@ -104,9 +104,14 @@
               <th>Colors</th>
               <td colspan='1' class='colors'>
 
-              <span v-for='opt in colorOptions' class='filterCheckbox' >
-                <Circle :color='opt' :selected='colors.includes(opt)' :interactive='newOrEditMode' :for='`color${opt}`' @click='onColorClick(opt)' v-if='newOrEditMode || colors.includes(opt)'/>
-              </span>
+              <MaskColorChips
+                :colors='displayableColorOptions'
+                :selectedColors='colors'
+                :selectable='newOrEditMode'
+                :interactive='newOrEditMode'
+                :showLabels='true'
+                @toggle='onColorClick'
+              />
 
               </td>
             </tr>
@@ -229,9 +234,14 @@
               <th>Colors</th>
               <td colspan='1' class='colors'>
 
-              <span v-for='opt in colorOptions' class='filterCheckbox' >
-                <Circle :color='opt' :selected='colors.includes(opt)' :interactive='newOrEditMode' :for='`color${opt}`' @click='onColorClick(opt)' v-if='newOrEditMode || colors.includes(opt)'/>
-              </span>
+              <MaskColorChips
+                :colors='displayableColorOptions'
+                :selectedColors='colors'
+                :selectable='newOrEditMode'
+                :interactive='newOrEditMode'
+                :showLabels='true'
+                @toggle='onColorClick'
+              />
 
               </td>
             </tr>
@@ -634,7 +644,7 @@
 <script>
 import axios from 'axios';
 import Button from './button.vue'
-import Circle from './circle.vue'
+import MaskColorChips from './mask_color_chips.vue'
 import { assignBoundsToColorScheme, binValue, colorPaletteFall, genColorSchemeBounds, riskColorInterpolationScheme, perimeterColorScheme } from './colors';
 import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
@@ -659,7 +669,7 @@ export default {
   name: 'Mask',
   components: {
     Button,
-    Circle,
+    MaskColorChips,
     CircularButton,
     ClosableMessage,
     ColoredCell,
@@ -935,6 +945,12 @@ export default {
     },
     perimColorScheme() {
       return perimeterColorScheme();
+    },
+    displayableColorOptions() {
+      if (this.newOrEditMode) {
+        return this.colorOptions
+      }
+      return this.colorOptions.filter((opt) => this.colors.includes(opt))
     },
 
     costColorScheme() {

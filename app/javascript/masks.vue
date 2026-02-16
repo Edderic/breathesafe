@@ -188,16 +188,10 @@
                 class="table-text-cell table-colors-cell"
                 :style="tableTextCellStyle"
               >
-                <div class="mask-colors-inline">
-                  <span
-                    v-for="(colorValue, idx) in maskColorValues(m)"
-                    :key="`table-color-${m.id}-${idx}-${colorValue}`"
-                    class="mask-color-chip"
-                    :title="colorValue"
-                    :style="{ backgroundColor: colorValue }"
-                  />
-                  <span v-if="maskColorValues(m).length === 0">Missing</span>
-                </div>
+                <MaskColorChips
+                  :colors="maskColorValues(m)"
+                  :showLabels="false"
+                />
               </div>
               <ColoredCell
                 v-else
@@ -227,6 +221,7 @@ import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import ColoredCell from './colored_cell.vue'
 import MaskCards from './mask_card.vue'
+import MaskColorChips from './mask_color_chips.vue'
 import PersonIcon from './person_icon.vue'
 import Popup from './pop_up.vue'
 import TabSet from './tab_set.vue'
@@ -262,6 +257,7 @@ export default {
     FilterPill,
     HelpPopup,
     MaskCards,
+    MaskColorChips,
     Pagination,
     Popup,
     PersonIcon,
@@ -1608,21 +1604,6 @@ export default {
     font-weight: 500;
   }
 
-  .mask-colors-inline {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3em;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .mask-color-chip {
-    width: 0.95em;
-    height: 0.95em;
-    border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    display: inline-block;
-  }
 
   .mask-row-button {
     background: transparent;
