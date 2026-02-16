@@ -96,35 +96,6 @@
                 </span>
               </td>
             </tr>
-            <tr>
-              <th>Affordability (USD)</th>
-              <td>
-                <div class='stat-cell'>
-                  <div v-if="statIsMissing('cost')" class='stat-bar-wrapper stat-bar-missing'>
-                    <div class='stat-bar-axis'></div>
-                    <div class='stat-bar stat-bar-missing-fill'></div>
-                    <div class='stat-bar-label'>{{ statMissingText('cost') }}</div>
-                  </div>
-                  <div v-else class='stat-bar-wrapper' :style="statBarWrapperStyle('cost')">
-                    <div class='stat-bar-axis'></div>
-                    <div class='stat-bar' :style="statBarStyle(statPercent('cost'), 'cost')"></div>
-                    <div
-                      v-if="statNeedsMarker('cost')"
-                      class='stat-bar-marker'
-                      :style='statMarkerStyle(statPercent("cost"), "cost")'
-                    ></div>
-                    <div
-                      v-if="statNeedsMarker('cost')"
-                      class='stat-bar-cover'
-                      :style='statCoverStyle(statPercent("cost"), "cost")'
-                    ></div>
-                    <div class='stat-bar-label'>{{ statLabel('cost') }}</div>
-                    <div v-if="statAxisLabel('cost', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('cost', 'min') }}</div>
-                    <div v-if="statAxisLabel('cost', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('cost', 'max') }}</div>
-                  </div>
-                </div>
-              </td>
-            </tr>
 
           </tbody>
           <tbody>
@@ -237,41 +208,6 @@
                 <span class='full-width has-minimal-width ' v-show="!newOrEditMode">
                   {{uniqueInternalModelCode }}
                 </span>
-              </td>
-            </tr>
-
-            <tr>
-              <th>Affordability (USD)</th>
-              <td colspan='1' class='text-align-center'>
-                <input type="number"
-                       v-model='initialCostUsDollars'
-                       v-show="newOrEditMode"
-                       >
-
-                       <div v-show='!newOrEditMode' class='stat-cell'>
-                         <div v-if="statIsMissing('cost')" class='stat-bar-wrapper stat-bar-missing'>
-                           <div class='stat-bar-axis'></div>
-                           <div class='stat-bar stat-bar-missing-fill'></div>
-                           <div class='stat-bar-label'>{{ statMissingText('cost') }}</div>
-                         </div>
-                         <div v-else class='stat-bar-wrapper' :style="statBarWrapperStyle('cost')">
-                           <div class='stat-bar-axis'></div>
-                           <div class='stat-bar' :style="statBarStyle(statPercent('cost'), 'cost')"></div>
-                           <div
-                             v-if="statNeedsMarker('cost')"
-                             class='stat-bar-marker'
-                             :style='statMarkerStyle(statPercent("cost"), "cost")'
-                           ></div>
-                           <div
-                             v-if="statNeedsMarker('cost')"
-                             class='stat-bar-cover'
-                             :style='statCoverStyle(statPercent("cost"), "cost")'
-                           ></div>
-                           <div class='stat-bar-label'>{{ statLabel('cost') }}</div>
-                           <div v-if="statAxisLabel('cost', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('cost', 'min') }}</div>
-                           <div v-if="statAxisLabel('cost', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('cost', 'max') }}</div>
-                         </div>
-                       </div>
               </td>
             </tr>
 
@@ -397,24 +333,6 @@
                 </div>
               </td>
             </tr>
-            <tr>
-              <th>Mass (grams)</th>
-              <td>
-                <input type="number" v-model="massGrams" v-show="newOrEditMode">
-
-                <ColoredCell
-                    v-show='!newOrEditMode'
-                    class='risk-score'
-                    :colorScheme="massColorScheme"
-                    :maxVal=1
-                    :value='massGrams'
-                    :exception='exceptionObjectBlank'
-                    :text='massText(massGrams)'
-                    :style="{'font-weight': 'bold', color: 'white', 'text-shadow': '1px 1px 2px black',  'border-radius': '100%' }"
-                    :title='massText(massGrams)'
-                    />
-              </td>
-            </tr>
           </tbody>
         </table>
         <table v-if='tabToShow == "Filtration & Breathability"'>
@@ -480,12 +398,36 @@
           </tbody>
         </table>
         <table v-if='showMode'>
-          <thead>
-             <tr>
-               <th colspan=2><h3>Dimensions &amp; Filtration</h3></th>
-             </tr>
-          </thead>
           <tbody>
+            <tr>
+              <th>Affordability (USD)</th>
+              <td>
+                <div class='stat-cell'>
+                  <div v-if="statIsMissing('cost')" class='stat-bar-wrapper stat-bar-missing'>
+                    <div class='stat-bar-axis'></div>
+                    <div class='stat-bar stat-bar-missing-fill'></div>
+                    <div class='stat-bar-label'>{{ statMissingText('cost') }}</div>
+                  </div>
+                  <div v-else class='stat-bar-wrapper' :style="statBarWrapperStyle('cost')">
+                    <div class='stat-bar-axis'></div>
+                    <div class='stat-bar' :style="statBarStyle(statPercent('cost'), 'cost')"></div>
+                    <div
+                      v-if="statNeedsMarker('cost')"
+                      class='stat-bar-marker'
+                      :style='statMarkerStyle(statPercent("cost"), "cost")'
+                    ></div>
+                    <div
+                      v-if="statNeedsMarker('cost')"
+                      class='stat-bar-cover'
+                      :style='statCoverStyle(statPercent("cost"), "cost")'
+                    ></div>
+                    <div class='stat-bar-label'>{{ statLabel('cost') }}</div>
+                    <div v-if="statAxisLabel('cost', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('cost', 'min') }}</div>
+                    <div v-if="statAxisLabel('cost', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('cost', 'max') }}</div>
+                  </div>
+                </div>
+              </td>
+            </tr>
             <tr>
               <th>Filtration Factor</th>
               <td>
@@ -559,25 +501,6 @@
                     <div class='stat-bar-label'>{{ statLabel('perimeter') }}</div>
                     <div v-if="statAxisLabel('perimeter', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('perimeter', 'min') }}</div>
                     <div v-if="statAxisLabel('perimeter', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('perimeter', 'max') }}</div>
-                  </div>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <th>Mass (grams)</th>
-              <td>
-                <div class='stat-cell'>
-                  <div v-if="statIsMissing('mass')" class='stat-bar-wrapper stat-bar-missing'>
-                    <div class='stat-bar-axis'></div>
-                    <div class='stat-bar stat-bar-missing-fill'></div>
-                    <div class='stat-bar-label'>{{ statMissingText('mass') }}</div>
-                  </div>
-                  <div v-else class='stat-bar-wrapper'>
-                    <div class='stat-bar-axis'></div>
-                    <div class='stat-bar' :style="statBarStyle(statPercent('mass'), 'mass')"></div>
-                    <div class='stat-bar-label'>{{ statLabel('mass') }}</div>
-                    <div v-if="statAxisLabel('mass', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('mass', 'min') }}</div>
-                    <div v-if="statAxisLabel('mass', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('mass', 'max') }}</div>
                   </div>
                 </div>
               </td>
