@@ -1401,7 +1401,7 @@ export default {
     width: 0.95em;
     height: 0.95em;
     border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(0, 0, 0, 1);
     display: inline-block;
   }
   @media(max-width: 1580px) {

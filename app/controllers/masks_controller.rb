@@ -204,7 +204,6 @@ class MasksController < ApplicationController
       events << { event_type: 'colors_updated', data: { 'action' => 'set', 'colors' => updates[:colors] } }
     end
 
-
     if updates.key?(:notes) && updates[:notes] != mask.notes
       events << { event_type: 'notes_updated', data: { 'notes' => updates[:notes] } }
     end
