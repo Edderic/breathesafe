@@ -72,6 +72,8 @@ class MaskStatus
       apply_payable_datetimes_update(event)
     when 'bulk_import_updated'
       apply_bulk_import_update(event)
+    when 'availability_updated'
+      apply_available_update(event)
     end
 
     self
@@ -262,5 +264,9 @@ class MaskStatus
 
   def apply_bulk_import_update(event)
     @attributes['bulk_fit_tests_import_id'] = event.data['bulk_fit_tests_import_id']
+  end
+
+  def apply_available_update(event)
+    @attributes['available'] = event.data['available']
   end
 end

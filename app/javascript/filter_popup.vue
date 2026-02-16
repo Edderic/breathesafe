@@ -24,6 +24,24 @@
           </table>
         </div>
 
+
+        <div>
+          <div>Availability</div>
+          <table>
+            <tr class='options'>
+              <td>
+                <input id='availableOnly' type='radio' :checked='filterForAvailable === "true"' @click='filterFor("Available", "true")'>
+                <label for='availableOnly'>Available only</label>
+              </td>
+              <td>
+                <input id='includeUnavailable' type='radio' :checked='filterForAvailable === "false"' @click='filterFor("Available", "false")'>
+                <label for='includeUnavailable'>Include unavailable</label>
+              </td>
+            </tr>
+          </table>
+          <br>
+        </div>
+
         <div>
           <div>Strap type</div>
           <table>
@@ -120,6 +138,9 @@ export default {
     filterForStyle: {
       default: "none"
     },
+    filterForAvailable: {
+      default: 'true'
+    },
     filterForTargeted: {
       default: true
     },
@@ -150,7 +171,9 @@ export default {
     filterFor(namespace, string) {
       let filterForString = ('filterFor' + namespace)
       let newQuery = {}
-      if (this[filterForString] == string) {
+      if (namespace === 'Available') {
+        newQuery[filterForString] = string
+      } else if (this[filterForString] == string) {
         // remove the filtering
         // if array
         newQuery[filterForString] = 'none'

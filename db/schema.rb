@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_251_229_121_945) do
+ActiveRecord::Schema[7.0].define(version: 20_260_216_180_000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -264,6 +264,7 @@ ActiveRecord::Schema[7.0].define(version: 20_251_229_121_945) do
     t.bigint 'bulk_fit_tests_import_id'
     t.datetime 'created_at', null: false
     t.datetime 'updated_at', null: false
+    t.boolean 'available', default: true, null: false
     t.index ['author_id'], name: 'index_mask_states_on_author_id'
     t.index ['brand_id'], name: 'index_mask_states_on_brand_id'
     t.index ['bulk_fit_tests_import_id'], name: 'index_mask_states_on_bulk_fit_tests_import_id'
@@ -304,7 +305,9 @@ ActiveRecord::Schema[7.0].define(version: 20_251_229_121_945) do
     t.bigint 'brand_id'
     t.bigint 'bulk_fit_tests_import_id'
     t.jsonb 'current_state', default: {}, null: false, comment: 'Cached computed state from events'
+    t.boolean 'available', default: true, null: false
     t.index ['author_id'], name: 'index_masks_on_author_id'
+    t.index ['available'], name: 'index_masks_on_available'
     t.index ['brand_id'], name: 'index_masks_on_brand_id'
     t.index ['bulk_fit_tests_import_id'], name: 'index_masks_on_bulk_fit_tests_import_id'
     t.index ['current_state'], name: 'index_masks_on_current_state', using: :gin

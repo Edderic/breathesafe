@@ -97,6 +97,7 @@
         :filterForStyle='filterForStyle'
         :filterForStrapType='filterForStrapType'
         :filterForMissing='filterForMissing'
+        :filterForAvailable='filterForAvailable'
         :showMissingFilters='true'
         :filterForTargeted='filterForTargeted'
         :filterForNotTargeted='filterForNotTargeted'
@@ -371,7 +372,8 @@ export default {
           'filterForColor',
           'filterForStrapType',
           'filterForStyle',
-          'filterForMissing'
+          'filterForMissing',
+          'filterForAvailable'
         ]
     ),
     facialMeasurements() {
@@ -467,6 +469,10 @@ export default {
           return false
         }
 
+        if (this.filterForAvailable !== 'false' && mask.available === false) {
+          return false
+        }
+
         if (colorFilter && colorFilter !== 'none') {
           const maskColors = [mask.color, ...(mask.colors || [])]
             .filter(Boolean)
@@ -553,6 +559,9 @@ export default {
       if (this.filterForStrapType && this.filterForStrapType !== 'none') {
         pills.push({ id: `strap-${this.filterForStrapType}`, type: 'strap_type', value: this.filterForStrapType, label: `Strap: ${this.filterForStrapType}` })
       }
+      if (this.filterForAvailable === 'false') {
+        pills.push({ id: 'available-false', type: 'available', value: 'false', label: 'Including unavailable masks' })
+      }
 
       const missingLabelByValue = {
         strap_type: 'Strap type missing',
@@ -582,7 +591,8 @@ export default {
       return this.filterForColor !== 'none' ||
              this.filterForStrapType !== 'none' ||
              this.filterForStyle !== 'none' ||
-             this.filterForMissing.length > 0
+             this.filterForMissing.length > 0 ||
+             this.filterForAvailable === 'false'
     },
   },
 
@@ -831,6 +841,12 @@ export default {
     },
 
     async load(toQuery, previousQuery) {
+      const needsAvailableFilter = !Object.prototype.hasOwnProperty.call(toQuery, 'filterForAvailable') || !toQuery.filterForAvailable
+      if (needsAvailableFilter) {
+        const normalizedQuery = Object.assign({}, toQuery, { filterForAvailable: 'true' })
+        await this.$router.replace({ name: 'Masks', query: normalizedQuery })
+        return
+      }
       if (toQuery.recommenderPayload) {
         const needsSortField = !toQuery.sortByField || toQuery.sortByField === 'none'
         const needsSortStatus = !toQuery.sortByStatus || toQuery.sortByStatus === 'none'
@@ -852,6 +868,7 @@ export default {
       this.setFilterQuery(toQuery, 'filterForStrapType')
       this.setFilterQuery(toQuery, 'filterForStyle')
       this.setFilterQuery(toQuery, 'filterForMissing')
+      this.setFilterQuery(toQuery, 'filterForAvailable')
 
       const page = parseInt(toQuery.page, 10)
       this.currentPage = Number.isNaN(page) || page < 1 ? 1 : page
@@ -926,6 +943,8 @@ export default {
       } else if (pill.type === 'missing') {
         const nextValues = (this.filterForMissing || []).filter((value) => value !== pill.value)
         query.filterForMissing = nextValues.length ? nextValues.join(',') : 'none'
+      } else if (pill.type === 'available') {
+        query.filterForAvailable = 'true'
       }
 
       query.page = 1
@@ -1112,7 +1131,8 @@ export default {
         filter_color: this.filterForColor,
         filter_style: this.filterForStyle,
         filter_strap_type: this.filterForStrapType,
-        filter_missing: this.filterForMissing.length ? this.filterForMissing.join(',') : 'none'
+        filter_missing: this.filterForMissing.length ? this.filterForMissing.join(',') : 'none',
+        filter_available: this.filterForAvailable
       }
 
       try {

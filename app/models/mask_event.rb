@@ -42,6 +42,7 @@ class MaskEvent < ApplicationRecord
     age_range_updated
     payable_datetimes_updated
     bulk_import_updated
+    availability_updated
   ].freeze
 
   # Get events for a mask in chronological order

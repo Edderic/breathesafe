@@ -189,6 +189,20 @@
               </td>
             </tr>
 
+
+            <tr>
+              <th>Available</th>
+              <td v-show='!newOrEditMode'>{{ available ? 'Yes' : 'No' }}</td>
+              <td v-show="newOrEditMode" class='text-align-center'>
+                <select v-model="available">
+                  <option :value="true">Yes</option>
+                  <option :value="false">No</option>
+                </select>
+              </td>
+            </tr>
+
+
+
           </tbody>
         </table>
 
@@ -297,6 +311,17 @@
               <td v-show='!newOrEditMode'>{{hasExhalationValve}}</td>
               <td v-show="newOrEditMode">
                 <input type="text" v-model='hasExhalationValve'>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Available</th>
+              <td v-show='!newOrEditMode'>{{ available ? 'Yes' : 'No' }}</td>
+              <td v-show="newOrEditMode" class='text-align-center'>
+                <select v-model="available">
+                  <option :value="true">Yes</option>
+                  <option :value="false">No</option>
+                </select>
               </td>
             </tr>
 
@@ -693,6 +718,7 @@ export default {
 
       ],
       hasExhalationValve: false,
+      available: true,
       exceptionObjectBlank: {
         color: {
           r: '200',
@@ -1071,7 +1097,8 @@ export default {
         where_to_buy_urls: this.whereToBuyUrls,
         author_id: this.currentUser.id,
         initial_cost_us_dollars: this.initialCostUsDollars,
-        strap_type: this.strapType
+        strap_type: this.strapType,
+        available: this.available
       }
     }
   },

@@ -58,7 +58,8 @@ class MasksController < ApplicationController
       :filter_color,
       :filter_style,
       :filter_strap_type,
-      :filter_missing
+      :filter_missing,
+      :filter_available
     )
 
     page = permitted[:page].to_i.positive? ? permitted[:page].to_i : 1
@@ -68,11 +69,14 @@ class MasksController < ApplicationController
     filter_style = permitted[:filter_style].presence
     filter_strap_type = permitted[:filter_strap_type].presence
     filter_missing = permitted[:filter_missing].presence
+    filter_available = permitted[:filter_available].to_s
     sort_param = permitted[:sort_by].presence
     sort_column = SORT_COLUMN_MAP.fetch(sort_param, DEFAULT_SORT_COLUMN)
     sort_order = permitted[:sort_order] == 'descending' ? :desc : :asc
 
     masks_query = Mask.all
+    include_unavailable = ActiveModel::Type::Boolean.new.cast(filter_available) == false
+    masks_query = masks_query.where(available: true) unless include_unavailable
     masks_query = masks_query.where('unique_internal_model_code ILIKE ?', "%#{search}%") if search
     masks_query = masks_query.where(style: filter_style) if filter_style && filter_style != 'none'
     masks_query = masks_query.where(strap_type: filter_strap_type) if filter_strap_type && filter_strap_type != 'none'
@@ -321,6 +325,10 @@ class MasksController < ApplicationController
       events << { event_type: 'duplicate_marked', data: { 'duplicate_of' => updates[:duplicate_of] } }
     end
 
+    if updates.key?(:available) && updates[:available] != mask.available
+      events << { event_type: 'availability_updated', data: { 'available' => updates[:available] } }
+    end
+
     events
   end
 
@@ -438,6 +446,7 @@ class MasksController < ApplicationController
       :filter_change_cost_us_dollars,
       :modifications,
       :notes,
+      :available,
       colors: [],
       sources: [],
       image_urls: [],

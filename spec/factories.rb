@@ -28,6 +28,7 @@ FactoryBot.define do
     perimeter_mm { 300.0 }
     payable_datetimes { [] }
     colors { [] }
+    available { true }
 
     trait :with_filtration_efficiency do
       filtration_efficiencies do

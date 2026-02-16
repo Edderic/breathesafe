@@ -576,7 +576,8 @@ class Mask < ApplicationRecord
       colors: colors,
       duplicate_of: duplicate_of,
       brand_id: brand_id,
-      bulk_fit_tests_import_id: bulk_fit_tests_import_id
+      bulk_fit_tests_import_id: bulk_fit_tests_import_id,
+      available: available
     )
   rescue StandardError => e
     Rails.logger.error("Failed to create initial state for mask #{id}: #{e.message}")

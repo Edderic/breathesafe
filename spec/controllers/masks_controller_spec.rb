@@ -37,5 +37,54 @@ RSpec.describe MasksController, type: :controller do
       expect(mask.style).to eq('Bifold')
       expect(mask.image_urls).to eq(['https://example.com/new.png'])
     end
+
+    it 'emits availability_updated when available changes' do
+      params = {
+        id: mask.id,
+        mask: {
+          available: false
+        }
+      }
+
+      expect do
+        put :update, params: params, as: :json
+      end.to change(MaskEvent, :count).by(1)
+
+      expect(response).to have_http_status(:no_content)
+      event = MaskEvent.where(mask_id: mask.id).order(:created_at).last
+      expect(event.event_type).to eq('availability_updated')
+
+      mask.reload
+      expect(mask.available).to eq(false)
+    end
+  end
+
+  describe 'GET #index' do
+    let!(:available_mask) do
+      create(:mask, author: author, available: true, unique_internal_model_code: 'AVAILABLE-MASK')
+    end
+    let!(:unavailable_mask) do
+      create(:mask, author: author, available: false, unique_internal_model_code: 'UNAVAILABLE-MASK')
+    end
+
+    it 'defaults to available-only masks' do
+      get :index, params: {}, as: :json
+
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      ids = body['masks'].map { |m| m['id'] }
+      expect(ids).to include(available_mask.id)
+      expect(ids).not_to include(unavailable_mask.id)
+    end
+
+    it 'includes unavailable masks when filter_available=false' do
+      get :index, params: { filter_available: 'false' }, as: :json
+
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      ids = body['masks'].map { |m| m['id'] }
+      expect(ids).to include(available_mask.id)
+      expect(ids).to include(unavailable_mask.id)
+    end
   end
 end
