@@ -458,7 +458,7 @@ export default {
         fontWeight: '600',
       }
       if (this.viewportWidth <= 768) {
-        return Object.assign({ height: '8em' }, baseStyle)
+        return Object.assign({ height: '11em' }, baseStyle)
       }
       return Object.assign({ height: '4em' }, baseStyle)
     },
@@ -1755,9 +1755,6 @@ export default {
     .mask-metrics-table td,
     .mask-metrics-table th {
       min-width: 4em;
-    }
-    .mask-metrics-table td div {
-      padding: 2em;
     }
   }
 
