@@ -1120,6 +1120,39 @@ export default {
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser', 'addMessages']),
+    routeLocationWithMaskParams(name, query = {}) {
+  const normalizedQuery = query || {}
+  const route = { name, query: normalizedQuery }
+  const needsMaskId = name === 'ShowMask' || name === 'EditMask'
+
+  if (!needsMaskId) {
+    return route
+  }
+
+  let maskId = this.$route.params.id || this.id
+  if (!maskId) {
+    const pathMatch = String(this.$route.path || '').match(/^\/masks\/(\d+)/)
+    if (pathMatch && pathMatch[1]) {
+      maskId = pathMatch[1]
+    }
+  }
+
+  if (!maskId) {
+    return route
+  }
+
+  if (name === 'ShowMask') {
+    return {
+      path: `/masks/${maskId}`,
+      query: normalizedQuery
+    }
+  }
+
+  return {
+    path: `/masks/${maskId}/edit`,
+    query: normalizedQuery
+  }
+},
     ...mapActions(useManagedUserStore, ['loadManagedUsers']),
     ...mapActions(useFacialMeasurementStore, ['getFacialMeasurement', 'updateFacialMeasurements']),
     triggerRouterForFacialMeasurementUpdate(event, key) {
@@ -1133,20 +1166,12 @@ export default {
         ),
         newQuery
       )
-      this.$router.push({
-        name: 'ShowMask',
-        query: combinedQuery
-      })
+      this.$router.push(this.routeLocationWithMaskParams('ShowMask', combinedQuery))
     },
     switchToEditMode() {
-      this.$router.push(
-        {
-          "name": "EditMask",
-          'query': {
-            "displayTab": this.displayTab
-          }
-        }
-      )
+      this.$router.push(this.routeLocationWithMaskParams('EditMask', {
+        displayTab: this.displayTab
+      }))
     },
     prepareScatterData(xKey, yKey) {
       return this.fitTestsWithFacialMeasurements.map(point => ({
@@ -1863,12 +1888,9 @@ export default {
         name = this.$route.name
       }
 
-      this.$router.push({
-        name: name,
-        query: {
-          displayTab: opt.name
-        }
-      })
+      this.$router.push(this.routeLocationWithMaskParams(name, {
+        displayTab: opt.name
+      }))
     },
 
     setRouteTo(opt) {
@@ -1892,10 +1914,7 @@ export default {
         newQuery
       )
 
-      this.$router.push({
-        name: routeName,
-        query: combinedQuery
-      })
+      this.$router.push(this.routeLocationWithMaskParams(routeName, combinedQuery))
     },
     navigateToStep(stepKey) {
       let routeName = this.$route.name
@@ -1915,10 +1934,7 @@ export default {
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }
 
-      this.$router.push({
-        name: routeName,
-        query: combinedQuery
-      })
+      this.$router.push(this.routeLocationWithMaskParams(routeName, combinedQuery))
     },
     handleDisplayTabChange(option) {
       let routeName = this.$route.name
@@ -1934,10 +1950,7 @@ export default {
         newQuery
       )
 
-      this.$router.push({
-        name: routeName,
-        query: combinedQuery
-      })
+      this.$router.push(this.routeLocationWithMaskParams(routeName, combinedQuery))
     },
     visitMasks() {
       this.$router.push({

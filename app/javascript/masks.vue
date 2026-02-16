@@ -841,7 +841,7 @@ export default {
     },
 
     async load(toQuery, previousQuery) {
-      const isMasksRoute = this.$route.name === 'Masks' || String(this.$route.path || '').startsWith('/masks')
+      const isMasksRoute = this.$route.name === 'Masks' || this.$route.path === '/masks'
       if (!isMasksRoute) {
         return
       }
