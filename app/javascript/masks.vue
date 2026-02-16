@@ -388,7 +388,7 @@ export default {
       return this.showTableView ? 'C' : 'T'
     },
     isNarrowTableViewport() {
-      return this.viewportWidth < 900
+      return this.viewportWidth < 1000
     },
     showStrapTypeColumn() {
       return this.viewportWidth >= 1072
@@ -428,7 +428,7 @@ export default {
         fontWeight: '600',
       }
       if (this.viewportWidth <= 768) {
-        return Object.assign({ height: '6em' }, baseStyle)
+        return Object.assign({ height: '8em' }, baseStyle)
       }
       return Object.assign({ height: '4em' }, baseStyle)
     },
@@ -1651,6 +1651,16 @@ export default {
     .mask-metrics-table th,
     .mask-metrics-table td {
       min-width: 5em;
+    }
+  }
+
+  @media(max-width: 600px) {
+    .mask-metrics-table td,
+    .mask-metrics-table th {
+      min-width: 4em;
+    }
+    .mask-metrics-table td div {
+      padding: 2em;
     }
   }
 
