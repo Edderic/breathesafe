@@ -195,6 +195,21 @@
             <th>Strap Type</th>
             <td>{{ formatText(m.strapType, 'Missing') }}</td>
           </tr>
+          <tr>
+            <th>Colors</th>
+            <td>
+              <div class='mask-colors-inline'>
+                <span
+                  v-for='(colorValue, idx) in maskColorValues(m)'
+                  :key='`card-color-${m.id}-${idx}-${colorValue}`'
+                  class='mask-color-chip'
+                  :title='colorValue'
+                  :style='{ backgroundColor: colorValue }'
+                />
+                <span v-if='maskColorValues(m).length === 0'>Missing</span>
+              </div>
+            </td>
+          </tr>
         </table>
       </div>
     </div>
@@ -506,6 +521,14 @@ export default {
       }
 
       return value
+    },
+    maskColorValues(mask) {
+      if (!mask || !Array.isArray(mask.colors)) {
+        return []
+      }
+      return mask.colors
+        .map((value) => String(value || '').trim())
+        .filter((value, index, arr) => value && arr.indexOf(value) === index)
     },
     statPercent(type, mask) {
       if (type === 'filtration') {
@@ -1365,6 +1388,22 @@ export default {
     padding-left: 1em;
     padding-right: 1em;
   }
+
+  .mask-colors-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3em;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mask-color-chip {
+    width: 0.95em;
+    height: 0.95em;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    display: inline-block;
+  }
   @media(max-width: 1580px) {
     .masks {
       grid-template-columns: 33% 33% 33%;
@@ -1456,3 +1495,4 @@ export default {
   }
 
 </style>
+

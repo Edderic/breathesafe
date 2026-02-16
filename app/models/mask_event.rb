@@ -17,7 +17,6 @@ class MaskEvent < ApplicationRecord
   # Valid event types
   VALID_EVENT_TYPES = %w[
     breakdown_updated
-    color_changed
     colors_updated
     duplicate_marked
     perimeter_updated

@@ -138,7 +138,7 @@
             <th
               v-for="row in tableMetricRows"
               :key="`feature-column-${row.key}`"
-              class="metric-label"
+               :class="['metric-label', `metric-label-${row.key}`]"
             >
               {{ row.label }}
             </th>
@@ -178,10 +178,26 @@
             >
               <div
                 v-if="row.key === 'strap_type'"
-                class="table-text-cell"
+                class="table-text-cell table-strap-cell"
                 :style="tableTextCellStyle"
               >
                 {{ metricCellText(row.key, m) }}
+              </div>
+              <div
+                v-else-if="row.key === 'colors'"
+                class="table-text-cell table-colors-cell"
+                :style="tableTextCellStyle"
+              >
+                <div class="mask-colors-inline">
+                  <span
+                    v-for="(colorValue, idx) in maskColorValues(m)"
+                    :key="`table-color-${m.id}-${idx}-${colorValue}`"
+                    class="mask-color-chip"
+                    :title="colorValue"
+                    :style="{ backgroundColor: colorValue }"
+                  />
+                  <span v-if="maskColorValues(m).length === 0">Missing</span>
+                </div>
               </div>
               <ColoredCell
                 v-else
@@ -403,6 +419,7 @@ export default {
           { key: 'filtration', label: 'Filter' },
           { key: 'breathability', label: 'Breath' },
           { key: 'affordability', label: 'Cost' },
+          { key: 'colors', label: 'Colors' },
         ]
         if (this.showStrapTypeColumn) {
           rows.push({ key: 'strap_type', label: 'Strap' })
@@ -415,6 +432,7 @@ export default {
         { key: 'filtration', label: 'Filtration Factor' },
         { key: 'breathability', label: 'Breathability (pa)' },
         { key: 'affordability', label: 'Affordability (USD)' },
+        { key: 'colors', label: 'Colors' },
       ]
       if (this.showStrapTypeColumn) {
         rows.push({ key: 'strap_type', label: 'Strap type' })
@@ -459,7 +477,6 @@ export default {
           mask.style,
           mask.strapType,
           mask.filterType,
-          mask.color,
           ...(mask.colors || []),
         ]
           .filter(Boolean)
@@ -475,7 +492,7 @@ export default {
         }
 
         if (colorFilter && colorFilter !== 'none') {
-          const maskColors = [mask.color, ...(mask.colors || [])]
+          const maskColors = [...(mask.colors || [])]
             .filter(Boolean)
             .map((c) => String(c).toLowerCase())
           if (!maskColors.includes(String(colorFilter).toLowerCase())) {
@@ -698,6 +715,14 @@ export default {
       this.showTableView = !this.showTableView
       this.$nextTick(() => this.updateTableViewportHeight())
     },
+    maskColorValues(mask) {
+      if (!mask || !Array.isArray(mask.colors)) {
+        return []
+      }
+      return mask.colors
+        .map((value) => String(value || '').trim())
+        .filter((value, index, arr) => value && arr.indexOf(value) === index)
+    },
     metricCellScore(metricKey, mask) {
       if (metricKey === 'proba_fit') {
         const value = Number(mask.probaFit)
@@ -743,6 +768,9 @@ export default {
       if (metricKey === 'strap_type') {
         return -1
       }
+      if (metricKey === 'colors') {
+        return -1
+      }
 
       return -1
     },
@@ -766,6 +794,9 @@ export default {
       if (metricKey === 'strap_type') {
         return mask.strapType || 'Missing'
       }
+      if (metricKey === 'colors') {
+        return this.maskColorValues(mask).length > 0 ? this.maskColorValues(mask).join(', ') : 'Missing'
+      }
       return 'Missing'
     },
     metricIsMissing(metricKey, mask) {
@@ -788,6 +819,9 @@ export default {
       }
       if (metricKey === 'strap_type') {
         return !mask.strapType || String(mask.strapType).trim() === ''
+      }
+      if (metricKey === 'colors') {
+        return this.maskColorValues(mask).length === 0
       }
       return true
     },
@@ -1574,6 +1608,22 @@ export default {
     font-weight: 500;
   }
 
+  .mask-colors-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3em;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mask-color-chip {
+    width: 0.95em;
+    height: 0.95em;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    display: inline-block;
+  }
+
   .mask-row-button {
     background: transparent;
     border: none;
@@ -1602,7 +1652,8 @@ export default {
   }
 
   @media(max-width: 1072px) {
-    .table-text-cell {
+    .table-strap-cell,
+    .metric-label-strap_type {
       display: none;
     }
   }

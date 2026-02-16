@@ -22,12 +22,11 @@ FactoryBot.define do
     style { 'Duckbill' }
     filter_change_cost_us_dollars { 5.0 }
     age_range { 'Adult' }
-    color { 'White' }
     has_exhalation_valve { false }
     association :author, factory: :user
     perimeter_mm { 300.0 }
     payable_datetimes { [] }
-    colors { [] }
+    colors { ['White'] }
     available { true }
 
     trait :with_filtration_efficiency do

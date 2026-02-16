@@ -204,9 +204,6 @@ class MasksController < ApplicationController
       events << { event_type: 'colors_updated', data: { 'action' => 'set', 'colors' => updates[:colors] } }
     end
 
-    if updates.key?(:color) && updates[:color] != mask.color
-      events << { event_type: 'color_changed', data: { 'color' => updates[:color] } }
-    end
 
     if updates.key?(:notes) && updates[:notes] != mask.notes
       events << { event_type: 'notes_updated', data: { 'notes' => updates[:notes] } }
@@ -430,7 +427,6 @@ class MasksController < ApplicationController
     params.require(:mask).permit(
       :author_id,
       :average_filtration_efficiency,
-      :color,
       :unique_internal_model_code,
       :filter_type,
       :style,

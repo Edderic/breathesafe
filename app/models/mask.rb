@@ -568,7 +568,6 @@ class Mask < ApplicationRecord
       style: style,
       filter_change_cost_us_dollars: filter_change_cost_us_dollars,
       age_range: age_range,
-      color: color,
       has_exhalation_valve: has_exhalation_valve,
       author_id: author_id,
       perimeter_mm: perimeter_mm,

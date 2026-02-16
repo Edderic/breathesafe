@@ -22,8 +22,6 @@ class MaskStatus
     case event.event_type
     when 'breakdown_updated'
       apply_breakdown_update(event)
-    when 'color_changed'
-      apply_color_change(event)
     when 'colors_updated'
       apply_colors_update(event)
     when 'duplicate_marked'
@@ -100,10 +98,6 @@ class MaskStatus
   def apply_breakdown_update(event)
     @attributes['current_state'] ||= {}
     @attributes['current_state']['breakdown'] = event.data['breakdown']
-  end
-
-  def apply_color_change(event)
-    @attributes['color'] = event.data['color']
   end
 
   def apply_colors_update(event)
