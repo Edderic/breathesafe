@@ -817,7 +817,7 @@ export default {
       const contextMin = this.maskDataContext.initial_cost_min
       const contextMax = this.maskDataContext.initial_cost_max
       if (contextMin !== null && contextMin !== undefined && contextMax !== null && contextMax !== undefined) {
-        return { min: Number(contextMin), max: Number(contextMax) }
+        return { min: 0, max: Math.max(Number(contextMax), 5) }
       }
 
       const values = (this.sortedDisplayables || [])
@@ -827,8 +827,9 @@ export default {
       if (values.length === 0) {
         return { min: null, max: null }
       }
-      return { min: Math.min(...values), max: Math.max(...values) }
+      return { min: 0, max: Math.max(...values, 5) }
     },
+
     async load(toQuery, previousQuery) {
       if (toQuery.recommenderPayload) {
         const needsSortField = !toQuery.sortByField || toQuery.sortByField === 'none'

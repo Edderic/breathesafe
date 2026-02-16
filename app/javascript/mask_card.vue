@@ -815,7 +815,7 @@ export default {
         if (min === null || max === null || min === undefined || max === undefined) {
           return null
         }
-        return position === 'min' ? this.formatCurrency(max) : this.formatCurrency(min)
+        return position === 'min' ? this.formatCurrency(max) : this.formatCurrency(0)
       }
       if (type === 'fit_tests') {
         const max = this.fitTestCountMax()
@@ -889,7 +889,7 @@ export default {
       const contextMin = this.dataContext.initial_cost_min
       const contextMax = this.dataContext.initial_cost_max
       if (contextMin !== null && contextMin !== undefined && contextMax !== null && contextMax !== undefined) {
-        return { min: contextMin, max: contextMax }
+        return { min: 0, max: Math.max(contextMax, 5) }
       }
 
       const values = (this.cards || [])
@@ -901,7 +901,7 @@ export default {
         return { min: null, max: null }
       }
 
-      return { min: Math.min(...values), max: Math.max(...values) }
+      return { min: 0, max: Math.max(...values, 5) }
     },
     statRowColors() {
       return {
