@@ -125,11 +125,6 @@ export default {
   border: 2px solid rgba(0, 0, 0, 1);
   display: inline-block;
 }
-
-.mask-color-chip.selected .mask-color-chip-swatch {
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.95), 0 0 0 4px rgba(0, 0, 0, 1);
-}
-
 .mask-color-chip-label {
   color: #444;
   font-size: 0.9em;

@@ -163,6 +163,12 @@
               >
                 {{ m.uniqueInternalModelCode }}
               </button>
+              <MaskColorChips
+                v-if="!showColorColumn"
+                :colors="maskColorValues(m)"
+                :showLabels="false"
+                class="image-cell-color-chips"
+              />
             </td>
             <th class="sticky-column sticky-mask-column desktop">
               <button
@@ -403,7 +409,10 @@ export default {
       return this.showTableView ? 'C' : 'T'
     },
     isNarrowTableViewport() {
-      return this.viewportWidth < 1000
+      return this.viewportWidth < 1540
+    },
+    showColorColumn() {
+      return this.viewportWidth >= 940
     },
     showStrapTypeColumn() {
       return this.viewportWidth >= 1072
@@ -415,8 +424,10 @@ export default {
           { key: 'filtration', label: 'Filter' },
           { key: 'breathability', label: 'Breath' },
           { key: 'affordability', label: 'Cost' },
-          { key: 'colors', label: 'Colors' },
         ]
+        if (this.showColorColumn) {
+          rows.push({ key: 'colors', label: 'Colors' })
+        }
         if (this.showStrapTypeColumn) {
           rows.push({ key: 'strap_type', label: 'Strap' })
         }
@@ -428,8 +439,10 @@ export default {
         { key: 'filtration', label: 'Filtration Factor' },
         { key: 'breathability', label: 'Breathability (pa)' },
         { key: 'affordability', label: 'Affordability (USD)' },
-        { key: 'colors', label: 'Colors' },
       ]
+      if (this.showColorColumn) {
+        rows.push({ key: 'colors', label: 'Colors' })
+      }
       if (this.showStrapTypeColumn) {
         rows.push({ key: 'strap_type', label: 'Strap type' })
       }
@@ -1574,6 +1587,11 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+
+  .image-cell-color-chips {
+    margin-top: 0.4em;
   }
 
   .mobile-mask-name-button {
