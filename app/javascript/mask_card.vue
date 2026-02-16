@@ -11,7 +11,7 @@
       <Button shadow='true' :class="{ tab: true }"  class='button' @click='toggleMaskCardPopup'>Cancel</Button>
     </Popup>
 
-    <div class='masks'>
+    <div class='masks' :style='masksGridStyle'>
 
       <div class='card flex align-items-center justify-content-center' v-for='m in cards' @click='selectMask(m.id)'>
 
@@ -255,7 +255,8 @@ export default {
       masks: [],
       search: "",
       sortByField: undefined,
-      sortByStatus: 'ascending'
+      sortByStatus: 'ascending',
+      viewportWidth: typeof window !== 'undefined' ? window.innerWidth : 1920
     }
   },
   props: {
@@ -342,6 +343,33 @@ export default {
     hasRecommenderPayload() {
       return !!(this.$route && this.$route.query && this.$route.query.recommenderPayload)
     },
+    expectedMaskColumns() {
+      if (this.viewportWidth <= 800) {
+        return 1
+      }
+      if (this.viewportWidth <= 1250) {
+        return 2
+      }
+      if (this.viewportWidth <= 1580) {
+        return 3
+      }
+      return 4
+    },
+    forceSingleMaskColumn() {
+      if (!this.hasRecommenderPayload) {
+        return false
+      }
+      if (this.cards.length === 0) {
+        return false
+      }
+      return this.cards.length < this.expectedMaskColumns
+    },
+    masksGridStyle() {
+      if (!this.forceSingleMaskColumn) {
+        return {}
+      }
+      return { 'grid-template-columns': '100%' }
+    },
   },
   async created() {
     // TODO: a parent might input data on behalf of their children.
@@ -378,10 +406,18 @@ export default {
       }
     )
 
+    window.addEventListener('resize', this.updateViewportWidth)
+
     this.loadStuff()
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.updateViewportWidth)
   },
   methods: {
     ...mapActions(useMainStore, ['getCurrentUser']),
+    updateViewportWidth() {
+      this.viewportWidth = window.innerWidth
+    },
     ...mapActions(useProfileStore, ['loadProfile', 'updateProfile']),
     toggleMaskCardPopup() {
       this.$emit('toggleMaskCardPopup')

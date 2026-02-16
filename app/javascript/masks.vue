@@ -830,6 +830,20 @@ export default {
       return { min: Math.min(...values), max: Math.max(...values) }
     },
     async load(toQuery, previousQuery) {
+      if (toQuery.recommenderPayload) {
+        const needsSortField = !toQuery.sortByField || toQuery.sortByField === 'none'
+        const needsSortStatus = !toQuery.sortByStatus || toQuery.sortByStatus === 'none'
+
+        if (needsSortField || needsSortStatus) {
+          const normalizedQuery = Object.assign({}, toQuery, {
+            sortByField: needsSortField ? 'probaFit' : toQuery.sortByField,
+            sortByStatus: needsSortStatus ? 'descending' : toQuery.sortByStatus,
+          })
+          await this.$router.replace({ name: 'Masks', query: normalizedQuery })
+          return
+        }
+      }
+
       this.setFilterQuery(toQuery, 'search')
       this.setFilterQuery(toQuery, 'sortByStatus')
       this.setFilterQuery(toQuery, 'sortByField')
