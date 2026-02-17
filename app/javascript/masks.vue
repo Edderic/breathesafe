@@ -150,6 +150,7 @@
           <tr
             v-for="m in sortedDisplayables"
             :key="`mask-row-${m.id}`"
+            @click="viewMask(m)"
           >
             <td class="sticky-column sticky-image-column image-cell">
               <img
@@ -161,7 +162,7 @@
               <div v-else class="table-mask-image-placeholder">No image</div>
               <button
                 class="mobile-mask-name-button"
-                @click="viewMask(m)"
+                @click.stop="viewMask(m)"
               >
                 {{ m.uniqueInternalModelCode }}
               </button>
@@ -175,7 +176,7 @@
             <th class="sticky-column sticky-mask-column desktop">
               <button
                 class="mask-row-button"
-                @click="viewMask(m)"
+                @click.stop="viewMask(m)"
               >
                 {{ m.uniqueInternalModelCode }}
               </button>
@@ -729,8 +730,17 @@ export default {
       wrapper.style.setProperty('--table-viewport-height', `${available}px`)
     },
     toggleResultsView() {
-      this.showTableView = !this.showTableView
-      this.$nextTick(() => this.updateTableViewportHeight())
+      const nextMode = this.showTableView ? 'cards' : 'table'
+      const query = Object.assign({}, this.$route.query)
+      if (nextMode === 'cards') {
+        delete query.viewMode
+      } else {
+        query.viewMode = nextMode
+      }
+
+      this.$router.push({ name: 'Masks', query }).then(() => {
+        this.$nextTick(() => this.updateTableViewportHeight())
+      })
     },
     maskColorValues(mask) {
       if (!mask || !Array.isArray(mask.colors)) {
@@ -935,6 +945,7 @@ export default {
 
       const page = parseInt(normalizedQuery.page, 10)
       this.currentPage = Number.isNaN(page) || page < 1 ? 1 : page
+      this.showTableView = normalizedQuery.viewMode === 'table'
       if (await this.maybeLoadRecommenderPayload(normalizedQuery)) {
         return
       }
