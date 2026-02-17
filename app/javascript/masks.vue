@@ -1570,7 +1570,7 @@ export default {
   .mask-metrics-table td.sticky-column {
     position: sticky;
     z-index: 3;
-    background-color: #f4f4f4;
+    background-color: #fff;
   }
 
   .mask-metrics-table .sticky-image-column {
@@ -1590,6 +1590,12 @@ export default {
 
   .mask-metrics-table thead .sticky-mask-column {
     z-index: 6;
+  }
+
+
+  .mask-metrics-table thead .sticky-image-column,
+  .mask-metrics-table thead .sticky-mask-column {
+    background-color: #f4f4f4;
   }
 
   .mask-metrics-table .metric-label {
@@ -1656,7 +1662,7 @@ export default {
 
 
   .mask-row-button {
-    background: transparent;
+    background: #fff;
     border: none;
     font-size: 1em;
     line-height: 1.25;
