@@ -305,4 +305,11 @@ export default {
   white-space: normal;
   word-break: break-word;
 }
+
+.table-responsive thead th {
+  position: sticky;
+  top: 3.25rem;
+  z-index: 10;
+  background: var(--bs-light, #f8f9fa);
+}
 </style>
