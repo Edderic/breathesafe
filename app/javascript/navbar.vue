@@ -16,14 +16,25 @@
         <router-link class='desktop clickable side-padding' :to='{ name: "RespiratorUsers"}' @click='toggleShowSubNavBar("RespiratorRecommender")'>Users</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "Masks"}' @click='toggleShowSubNavBar("Masks")'>Masks</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "FitTests"}' @click='toggleShowSubNavBar("FitTests")'>Fit Tests</router-link>
-        <router-link class="desktop clickable side-padding" :to="{ name: 'AdminStudyParticipants'}" @click="toggleShowSubNavBar('AdminStudyParticipants')" v-if="isAdmin">Study Participants</router-link>
-        <router-link class="desktop clickable side-padding" :to="{ name: 'MaskBreakdown'}" @click="toggleShowSubNavBar('MaskBreakdown')" v-if="isAdmin">Mask Breakdown</router-link>
-        <router-link class="desktop clickable side-padding" :to="{ name: 'AdminMaskDuplicates'}" @click="toggleShowSubNavBar('AdminMaskDuplicates')" v-if="isAdmin">Mask Duplicates</router-link>
+        <a
+          class="desktop clickable side-padding"
+          v-if="isAdmin"
+          href="#admin_nav"
+          @click.prevent="toggleShowSubNavBar('Admin')"
+        >
+          Admin
+        </a>
         <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn @click='showSubNavBar = null'>Sign up/Sign in</router-link>
         <a class='desktop clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn"  >Sign out</a>
 
         <Accordion class='mobile' @click='toggleMobileCol'/>
       </div>
+    </div>
+
+    <div class='row fixed-nav-bar-bottom admin-subnav desktop' v-if="isAdmin && showSubNavBar == 'Admin'">
+      <router-link class="clickable side-padding" :to="{ name: 'AdminStudyParticipants'}" @click="showSubNavBar = null">Study Participants</router-link>
+      <router-link class="clickable side-padding" :to="{ name: 'MaskBreakdown'}" @click="showSubNavBar = null">Mask Breakdown</router-link>
+      <router-link class="clickable side-padding" :to="{ name: 'AdminMaskDuplicates'}" @click="showSubNavBar = null">Mask Duplicates</router-link>
     </div>
 
     <div class='mobile-col' v-if="showMobile()">
@@ -33,9 +44,10 @@
       <router-link class='mobile-row clickable side-padding' :to='{ name: "RespiratorUsers"}' @click='toggleShowSubNavBar("RespiratorRecommender")'>Users</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "Masks"}' @click='toggleShowSubNavBar("Masks")'>Masks</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "FitTests"}' @click='toggleShowSubNavBar("FitTests")'>Fit Tests</router-link>
-      <router-link class="mobile-row clickable side-padding" :to="{ name: 'AdminStudyParticipants'}" @click="toggleShowSubNavBar('AdminStudyParticipants')" v-if="isAdmin">Study Participants</router-link>
-      <router-link class="mobile-row clickable side-padding" :to="{ name: 'MaskBreakdown'}" @click="toggleShowSubNavBar('MaskBreakdown')" v-if="isAdmin">Mask Breakdown</router-link>
-      <router-link class="mobile-row clickable side-padding" :to="{ name: 'AdminMaskDuplicates'}" @click="toggleShowSubNavBar('AdminMaskDuplicates')" v-if="isAdmin">Mask Duplicates</router-link>
+      <a class="mobile-row clickable side-padding" v-if="isAdmin" href="#admin_nav_mobile" @click.prevent="toggleShowSubNavBar('Admin')">Admin</a>
+      <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'AdminStudyParticipants'}" @click="showSubNavBar = null" v-if="isAdmin && showSubNavBar == 'Admin'">Study Participants</router-link>
+      <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'MaskBreakdown'}" @click="showSubNavBar = null" v-if="isAdmin && showSubNavBar == 'Admin'">Mask Breakdown</router-link>
+      <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'AdminMaskDuplicates'}" @click="showSubNavBar = null" v-if="isAdmin && showSubNavBar == 'Admin'">Mask Duplicates</router-link>
       <h2 class='vertical-centered'>Misc</h2>
 
       <router-link class='mobile-row clickable side-padding' to='/signin' v-if=!signedIn>Sign up/Sign in</router-link>
@@ -221,6 +233,16 @@ export default {
   .mobile-col {
     overflow: auto;
     max-height: 100vh;
+  }
+
+  .admin-subnav {
+    border-bottom: 1px solid #ddd;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .mobile-admin-link {
+    padding-left: 2.5em;
   }
   @media (max-width: 800px) {
     .desktop {
