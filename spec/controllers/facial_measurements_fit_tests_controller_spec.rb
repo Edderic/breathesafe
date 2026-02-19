@@ -205,6 +205,8 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
 
         # Verify each fit test has facial measurement data
         result.each do |fit_test|
+          expect(fit_test).to have_key('raw_mask_id')
+          expect(fit_test['raw_mask_id']).to eq(fit_test['mask_id'])
           expect(fit_test['face_width']).to be_present
           expect(fit_test['jaw_width']).to be_present
           expect(fit_test['face_depth']).to be_present
@@ -255,7 +257,42 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
 
         results = json_response['fit_tests_with_facial_measurements']
         expect(results.map { |row| row['mask_id'] }.uniq).to eq([mask.id])
+        expect(results.map { |row| row['raw_mask_id'] }.uniq).to eq([mask.id])
         expect(results.map { |row| row['id'] }).to include(n95_fit_test.id)
+      end
+
+      it 'returns canonical mask_id and original raw_mask_id for duplicate masks' do
+        canonical_mask = create(:mask)
+        duplicate_mask = create(:mask, duplicate_of: canonical_mask.id)
+        duplicate_fit_test = create(
+          :fit_test,
+          :with_just_right_mask,
+          mask: duplicate_mask,
+          user: user,
+          quantitative_fit_testing_device: measurement_device,
+          facial_measurement: facial_measurement,
+          results: {
+            'quantitative' => {
+              'testing_mode' => 'N95',
+              'exercises' => [
+                {
+                  'name' => 'Normal breathing',
+                  'fit_factor' => '200'
+                }
+              ]
+            }
+          }
+        )
+
+        get :show, params: { mask_id: duplicate_mask.id }, format: :json
+        expect(response).to have_http_status(:ok)
+
+        json_response = JSON.parse(response.body)
+        results = json_response['fit_tests_with_facial_measurements']
+        expect(results).not_to be_empty
+        expect(results.map { |row| row['raw_mask_id'] }.uniq).to eq([duplicate_mask.id])
+        expect(results.map { |row| row['mask_id'] }.uniq).to eq([canonical_mask.id])
+        expect(results.map { |row| row['id'] }).to include(duplicate_fit_test.id)
       end
 
       it 'returns empty array when mask has no fit tests' do
@@ -320,6 +357,7 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
 
         results = json_response['fit_tests_with_facial_measurements']
         expect(results.map { |row| row['mask_id'] }.uniq).to eq([mask.id])
+        expect(results.map { |row| row['raw_mask_id'] }.uniq).to eq([mask.id])
         expect(results.map { |row| row['id'] }).to include(n95_fit_test.id)
       end
     end
