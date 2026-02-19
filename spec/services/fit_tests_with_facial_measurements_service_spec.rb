@@ -260,6 +260,42 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
       end
     end
 
+    context 'with duplicate masks' do
+      let(:root_mask) { create(:mask, unique_internal_model_code: 'ROOT-MASK') }
+      let(:duplicate_mask) { create(:mask, unique_internal_model_code: 'DUP-MASK', duplicate_of: root_mask.id) }
+
+      let!(:duplicate_mask_fit_test) do
+        create(
+          :fit_test,
+          :with_just_right_mask,
+          user: user,
+          mask: duplicate_mask,
+          quantitative_fit_testing_device: measurement_device,
+          facial_measurement: facial_measurement,
+          results: {
+            'quantitative' => {
+              'testing_mode' => 'N95',
+              'exercises' => [
+                { 'name' => 'Exercise 1', 'fit_factor' => '200' },
+                { 'name' => 'Exercise 2', 'fit_factor' => '300' },
+                { 'name' => 'Normal breathing (SEALED)', 'fit_factor' => '400' }
+              ]
+            }
+          }
+        )
+      end
+
+      it 'maps duplicate mask rows to canonical root mask_id' do
+        results = described_class.call.to_a
+        row = results.find { |r| r['id'] == duplicate_mask_fit_test.id }
+
+        expect(row).not_to be_nil
+        expect(row['raw_mask_id']).to eq(duplicate_mask.id)
+        expect(row['mask_id']).to eq(root_mask.id)
+        expect(row['unique_internal_model_code']).to eq(root_mask.unique_internal_model_code)
+      end
+    end
+
     context 'with no fit tests' do
       it 'returns empty array' do
         results = described_class.call.to_a

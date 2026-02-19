@@ -103,6 +103,27 @@ RSpec.describe MasksController, type: :controller do
       expect(mask.unique_internal_model_code).to eq('3M Aura N95')
       expect(mask.current_state['breakdown']).to eq(predicted_breakdown)
     end
+
+    it 'allows admin to update a mask owned by another user' do
+      admin = create(:user, :admin)
+      allow(controller).to receive(:current_user).and_return(admin)
+
+      params = {
+        id: mask.id,
+        mask: {
+          perimeter_mm: 333
+        }
+      }
+
+      expect do
+        put :update, params: params, as: :json
+      end.to change(MaskEvent, :count).by(1)
+
+      expect(response).to have_http_status(:no_content)
+
+      mask.reload
+      expect(mask.perimeter_mm).to eq(333)
+    end
   end
 
   describe 'GET #index' do

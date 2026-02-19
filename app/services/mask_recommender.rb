@@ -3,13 +3,14 @@
 class MaskRecommender
   class << self
     def infer_with_meta(facial_measurements, mask_ids: nil, function_base: 'mask-recommender')
+      canonical_mask_ids = mask_ids.present? ? MaskDeduplicationPolicy.canonicalize_mask_ids(mask_ids) : nil
       response = invoke_lambda_infer(
         facial_measurements,
-        mask_ids: mask_ids,
+        mask_ids: canonical_mask_ids,
         function_base: function_base
       )
       body = parse_lambda_body(response)
-      collection = build_mask_collection(body)
+      collection = build_mask_collection(body, mask_ids: canonical_mask_ids)
       model = body.is_a?(Hash) && body['model'].is_a?(Hash) ? body['model'] : nil
       { masks: collection, model: model }
     end
@@ -82,7 +83,7 @@ class MaskRecommender
       )
     end
 
-    def build_mask_collection(body)
+    def build_mask_collection(body, mask_ids: nil)
       raise "Lambda error: #{body['error']}" if body.is_a?(Hash) && body['error'].present?
 
       mask_map = body.is_a?(Hash) ? body['mask_id'] : nil
@@ -96,6 +97,11 @@ class MaskRecommender
       end
       recommended_mask_ids = recommended_pairs.map(&:first)
       masks = Mask.with_aggregations.to_a
+      masks = masks.select { |mask| root_mask_row?(mask) }
+      if mask_ids.present?
+        requested_ids = mask_ids.map(&:to_i).uniq
+        masks = masks.select { |mask| requested_ids.include?((mask['id'] || mask[:id]).to_i) }
+      end
       masks_by_id = masks.index_by { |m| m['id'] }
       mask_ids_without_recommendation = masks.map { |m| m['id'] } - recommended_mask_ids
 
@@ -156,6 +162,11 @@ class MaskRecommender
       value.positive?
     rescue ArgumentError, TypeError
       false
+    end
+
+    def root_mask_row?(mask)
+      duplicate_of = mask['duplicate_of'] || mask[:duplicate_of]
+      duplicate_of.blank?
     end
 
     def lambda_environment

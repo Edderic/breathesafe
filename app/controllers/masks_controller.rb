@@ -372,11 +372,10 @@ class MasksController < ApplicationController
 
     mask = Mask.find(params[:id])
 
-    # TODO: admins should be able to update data no matter who owns it.
-    if mask.author_id != current_user.id
+    if !current_user.admin? && mask.author_id != current_user.id
       status = 401
       to_render = {}
-      messages = ['Current user is not the author.']
+      messages = ['Current user is not the author or an admin.']
     else
       updates = mask_data.to_h.deep_symbolize_keys
       events = build_mask_events(mask, updates)

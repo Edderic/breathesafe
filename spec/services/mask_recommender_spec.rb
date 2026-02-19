@@ -119,6 +119,42 @@ RSpec.describe MaskRecommender, type: :service do
       expect(by_id[222]['proba_fit']).to be_within(1e-6).of(0.9)
       expect(by_id[111]['proba_fit']).to be_within(1e-6).of(0.1)
     end
+
+    it 'canonicalizes duplicate mask_ids before inference payload' do
+      author = create(:user)
+      root_mask = create(:mask, author: author, unique_internal_model_code: 'ROOT-MASK')
+      duplicate_mask = create(:mask, author: author, unique_internal_model_code: 'DUP-MASK', duplicate_of: root_mask.id)
+
+      body = {
+        'mask_id' => { '0' => root_mask.id },
+        'proba_fit' => { '0' => 0.75 }
+      }
+
+      allow(Mask).to receive(:with_aggregations).and_return(
+        [
+          { 'id' => root_mask.id, 'name' => 'Root', 'perimeter_mm' => 300, 'duplicate_of' => nil },
+          { 'id' => duplicate_mask.id, 'name' => 'Dup', 'perimeter_mm' => 301, 'duplicate_of' => root_mask.id }
+        ]
+      )
+
+      allow(AwsLambdaInvokeService).to receive(:call)
+        .with(
+          function_name: 'mask-recommender-staging',
+          payload: hash_including(
+            method: 'infer',
+            facial_measurements: facial,
+            mask_ids: [root_mask.id]
+          )
+        ).and_return({ 'body' => Oj.dump(body) })
+
+      result = described_class.infer(facial, mask_ids: [duplicate_mask.id])
+
+      expect(AwsLambdaInvokeService).to have_received(:call).with(
+        function_name: 'mask-recommender-staging',
+        payload: hash_including(mask_ids: [root_mask.id])
+      )
+      expect(result.map { |row| row['id'] }).to eq([root_mask.id])
+    end
   end
 
   describe '.train' do

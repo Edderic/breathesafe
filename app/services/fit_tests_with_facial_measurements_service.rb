@@ -12,6 +12,7 @@ class FitTestsWithFacialMeasurementsService
 
       results = n95_mode_experimental_scores | n95_mode_estimate_scores_from_n99 | qlft_scores | user_seal_check_scores
 
+      results = canonicalize_mask_references(results)
       results = results.reject { |r| r['qlft_pass'].nil? } if exclude_nil_pass
       results = results.select { |r| r['facial_measurement_id'].present? } unless include_without_facial_measurements
       results = exclude_testing_manager_results(results)
@@ -152,6 +153,35 @@ class FitTestsWithFacialMeasurementsService
         'age_adult'
       else
         'blank'
+      end
+    end
+
+    def canonicalize_mask_references(results)
+      return results if results.blank?
+
+      raw_mask_ids = results.map { |row| row['mask_id'] || row[:mask_id] }.compact
+      canonical_by_raw = MaskDeduplicationPolicy.canonical_ids_by_mask_id(raw_mask_ids)
+      canonical_mask_ids = canonical_by_raw.values.compact.uniq
+      canonical_masks_by_id = Mask.where(id: canonical_mask_ids)
+                                  .select(:id, :unique_internal_model_code, :perimeter_mm, :strap_type, :style)
+                                  .index_by(&:id)
+
+      results.map do |row|
+        raw_mask_id = row['mask_id'] || row[:mask_id]
+        raw_mask_id_int = raw_mask_id.to_i
+        canonical_mask_id = canonical_by_raw[raw_mask_id_int] || raw_mask_id_int
+        canonical_mask = canonical_masks_by_id[canonical_mask_id]
+
+        row['raw_mask_id'] = raw_mask_id_int
+        row['mask_id'] = canonical_mask_id
+
+        next row unless canonical_mask
+
+        row['unique_internal_model_code'] = canonical_mask.unique_internal_model_code
+        row['perimeter_mm'] = canonical_mask.perimeter_mm
+        row['strap_type'] = canonical_mask.strap_type
+        row['style'] = canonical_mask.style
+        row
       end
     end
   end
