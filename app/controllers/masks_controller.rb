@@ -196,8 +196,15 @@ class MasksController < ApplicationController
 
     if updates.key?(:unique_internal_model_code) &&
        updates[:unique_internal_model_code] != mask.unique_internal_model_code
+      updated_code = updates[:unique_internal_model_code]
       events << { event_type: 'unique_internal_model_code_updated',
-                  data: { 'unique_internal_model_code' => updates[:unique_internal_model_code] } }
+                  data: { 'unique_internal_model_code' => updated_code } }
+
+      events << {
+        event_type: 'breakdown_updated',
+        data: predicted_breakdown_payload(updated_code),
+        notes: 'Auto-generated from CRF after unique_internal_model_code change'
+      }
     end
 
     if updates.key?(:colors) && updates[:colors] != mask.colors
@@ -328,6 +335,32 @@ class MasksController < ApplicationController
     events
   end
 
+  def predicted_breakdown_payload(unique_internal_model_code)
+    prediction = MaskComponentPredictorService.predict(unique_internal_model_code)
+    predicted_breakdown = prediction.is_a?(Hash) ? prediction[:breakdown] : nil
+
+    {
+      'breakdown' => sanitize_breakdown(predicted_breakdown),
+      'requires_review' => true,
+      'source' => 'crf_auto_rename',
+      'confidence' => prediction.is_a?(Hash) ? prediction[:confidence] : nil,
+      'fallback' => prediction.is_a?(Hash) ? prediction[:fallback] == true : false
+    }
+  end
+
+  def sanitize_breakdown(breakdown)
+    return [] unless breakdown.is_a?(Array)
+
+    breakdown.filter_map do |entry|
+      next unless entry.is_a?(Hash)
+
+      token, category = entry.first
+      next if token.blank? || category.blank?
+
+      { token.to_s => category.to_s }
+    end
+  end
+
   def update
     # TODO: For now, only current user can access facial measurements
     # Later on, parents should be able to view / edit their children's data
@@ -360,7 +393,8 @@ class MasksController < ApplicationController
                 mask: mask,
                 user: current_user,
                 event_type: event[:event_type],
-                data: event[:data]
+                data: event[:data],
+                notes: event[:notes]
               )
             end
 

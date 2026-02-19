@@ -25,7 +25,8 @@ class MaskBreakdownsController < ApplicationController
     all_rows = masks.map do |mask|
       latest_event = latest_events_by_mask_id[mask.id]
       breakdown = breakdown_for(mask, latest_event)
-      breakdown_complete = breakdown.present? && breakdown.all? { |item| item.values.first.present? }
+      requires_review = breakdown_requires_review?(latest_event)
+      breakdown_complete = breakdown_complete?(breakdown, requires_review)
 
       {
         id: mask.id,
@@ -35,6 +36,7 @@ class MaskBreakdownsController < ApplicationController
         breakdown_columns: build_breakdown_columns(breakdown),
         breakdown_id: latest_event&.id,
         breakdown_complete: breakdown_complete,
+        breakdown_requires_review: requires_review,
         breakdown_updated_at: latest_event&.updated_at,
         breakdown_user: if latest_event&.user
                           {
@@ -86,7 +88,8 @@ class MaskBreakdownsController < ApplicationController
                             .first
 
     tokens = MaskTokenizer.tokenize(mask.unique_internal_model_code)
-    breakdown = latest_event&.data&.dig('breakdown') || []
+    breakdown = breakdown_for(mask, latest_event)
+    requires_review = breakdown_requires_review?(latest_event)
 
     render json: {
       id: mask.id,
@@ -95,7 +98,8 @@ class MaskBreakdownsController < ApplicationController
       breakdown: breakdown,
       breakdown_columns: build_breakdown_columns(breakdown),
       breakdown_id: latest_event&.id,
-      breakdown_complete: breakdown.present? && breakdown.all? { |item| item.values.first.present? },
+      breakdown_complete: breakdown_complete?(breakdown, requires_review),
+      breakdown_requires_review: requires_review,
       breakdown_updated_at: latest_event&.updated_at,
       breakdown_user: if latest_event&.user
                         {
@@ -118,11 +122,16 @@ class MaskBreakdownsController < ApplicationController
       mask: mask,
       user: current_user,
       event_type: 'breakdown_updated',
-      data: { breakdown: breakdown_data },
+      data: {
+        breakdown: breakdown_data,
+        requires_review: false,
+        source: 'manual'
+      },
       notes: params[:notes]
     )
 
     if mask_event.save
+      complete = breakdown_complete?(breakdown_data, false)
       # The after_create callback on MaskEvent will trigger mask.regenerate
       render json: {
         success: true,
@@ -130,7 +139,8 @@ class MaskBreakdownsController < ApplicationController
           id: mask_event.id,
           mask_id: mask_event.mask_id,
           breakdown: breakdown_data,
-          complete: breakdown_data.all? { |item| item.values.first.present? },
+          complete: complete,
+          requires_review: false,
           updated_at: mask_event.updated_at,
           user: {
             id: mask_event.user.id,
@@ -158,11 +168,16 @@ class MaskBreakdownsController < ApplicationController
       mask: previous_event.mask,
       user: current_user,
       event_type: 'breakdown_updated',
-      data: { breakdown: breakdown_data },
+      data: {
+        breakdown: breakdown_data,
+        requires_review: false,
+        source: 'manual'
+      },
       notes: params[:notes]
     )
 
     if mask_event.save
+      complete = breakdown_complete?(breakdown_data, false)
       # The after_create callback on MaskEvent will trigger mask.regenerate
       render json: {
         success: true,
@@ -170,7 +185,8 @@ class MaskBreakdownsController < ApplicationController
           id: mask_event.id,
           mask_id: mask_event.mask_id,
           breakdown: breakdown_data,
-          complete: breakdown_data.all? { |item| item.values.first.present? },
+          complete: complete,
+          requires_review: false,
           updated_at: mask_event.updated_at,
           user: {
             id: mask_event.user.id,
@@ -211,6 +227,16 @@ class MaskBreakdownsController < ApplicationController
     current_state = mask.current_state || {}
     cached_breakdown = current_state.dig('current_state', 'breakdown') || current_state['breakdown']
     cached_breakdown.is_a?(Array) ? cached_breakdown : []
+  end
+
+  def breakdown_requires_review?(latest_event)
+    latest_event&.data&.dig('requires_review') == true
+  end
+
+  def breakdown_complete?(breakdown, requires_review)
+    return false if requires_review
+
+    breakdown.present? && breakdown.all? { |item| item.values.first.present? }
   end
 
   def build_breakdown_columns(breakdown)

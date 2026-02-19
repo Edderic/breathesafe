@@ -57,6 +57,52 @@ RSpec.describe MasksController, type: :controller do
       mask.reload
       expect(mask.available).to eq(false)
     end
+
+    it 'emits CRF-predicted breakdown_updated requiring review when unique_internal_model_code changes' do
+      predicted_breakdown = [
+        { '3M' => 'brand' },
+        { 'Aura' => 'model' },
+        { 'N95' => 'filter_type' }
+      ]
+
+      allow(MaskComponentPredictorService).to receive(:predict).with('3M Aura N95').and_return(
+        {
+          breakdown: predicted_breakdown,
+          confidence: 0.93,
+          fallback: false
+        }
+      )
+
+      params = {
+        id: mask.id,
+        mask: {
+          unique_internal_model_code: '3M Aura N95'
+        }
+      }
+
+      expect do
+        put :update, params: params, as: :json
+      end.to change(MaskEvent, :count).by(2)
+
+      expect(response).to have_http_status(:no_content)
+      expect(MaskComponentPredictorService).to have_received(:predict).with('3M Aura N95')
+
+      latest_events = MaskEvent.where(mask_id: mask.id).order(created_at: :desc).limit(2)
+      unique_code_event = latest_events.find { |event| event.event_type == 'unique_internal_model_code_updated' }
+      breakdown_event = latest_events.find { |event| event.event_type == 'breakdown_updated' }
+
+      expect(unique_code_event).to be_present
+      expect(breakdown_event).to be_present
+      expect(breakdown_event.data['breakdown']).to eq(predicted_breakdown)
+      expect(breakdown_event.data['requires_review']).to eq(true)
+      expect(breakdown_event.data['source']).to eq('crf_auto_rename')
+      expect(breakdown_event.data['confidence']).to eq(0.93)
+      expect(breakdown_event.notes).to include('Auto-generated from CRF')
+
+      mask.reload
+      expect(mask.unique_internal_model_code).to eq('3M Aura N95')
+      expect(mask.current_state['breakdown']).to eq(predicted_breakdown)
+    end
   end
 
   describe 'GET #index' do
