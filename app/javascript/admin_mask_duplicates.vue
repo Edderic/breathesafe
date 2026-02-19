@@ -290,7 +290,7 @@ export default {
 .admin-mask-duplicates {
   max-width: 1500px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 2rem 1rem calc(5.5rem + env(safe-area-inset-bottom));
 }
 
 .code-col {
