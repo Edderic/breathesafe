@@ -116,6 +116,10 @@ Rails.application.routes.draw do
 
   # Admin routes
   namespace :admin do
+    resources :masks, only: [] do
+      resource :duplicate_link, only: %i[create destroy], controller: 'mask_duplicates'
+    end
+
     resources :study_participants, only: [:index] do
       collection do
         post :remove_from_study
