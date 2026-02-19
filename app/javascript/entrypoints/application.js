@@ -65,6 +65,7 @@ import Registration from '../registration.vue'
 import SignIn from '../sign_in.vue'
 import TermsOfService from '../terms_of_service.vue'
 import AdminStudyParticipants from '../admin_study_participants.vue'
+import AdminMaskDuplicates from '../admin_mask_duplicates.vue'
 import { useEventStore } from '../stores/event_store.js';
 import { useMainStore } from '../stores/main_store.js';
 
@@ -120,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/admin/study_participants', component: AdminStudyParticipants, name: 'AdminStudyParticipants' },
     { path: '/admin/masks/breakdowns', component: MaskBreakdown, name: 'MaskBreakdownV2' },
     { path: '/admin/masks/unique_internal_model_code_breakdown', component: MaskBreakdown, name: 'MaskBreakdown' },
+    { path: '/admin/masks/duplicates', component: AdminMaskDuplicates, name: 'AdminMaskDuplicates' },
   ]
 
   // 3. Create the router instance and pass the `routes` option
