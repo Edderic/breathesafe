@@ -206,6 +206,22 @@
               </td>
             </tr>
 
+            <tr>
+              <th>Affordability (USD)</th>
+              <td v-show='!newOrEditMode'>{{ initialCostUsDollars }}</td>
+              <td v-show="newOrEditMode">
+                <input type="number" step="0.01" min="0" v-model="initialCostUsDollars" placeholder="e.g. 2.99">
+              </td>
+            </tr>
+
+            <tr>
+              <th>Filter Change Cost (USD)</th>
+              <td v-show='!newOrEditMode'>{{ filterChangeCostUsDollars }}</td>
+              <td v-show="newOrEditMode">
+                <input type="number" step="0.01" min="0" v-model="filterChangeCostUsDollars" placeholder="e.g. 0.50">
+              </td>
+            </tr>
+
 
 
           </tbody>
@@ -332,6 +348,22 @@
                   <option :value="true">Yes</option>
                   <option :value="false">No</option>
                 </select>
+              </td>
+            </tr>
+
+            <tr>
+              <th>Affordability (USD)</th>
+              <td v-show='!newOrEditMode'>{{ initialCostUsDollars }}</td>
+              <td v-show="newOrEditMode">
+                <input type="number" step="0.01" min="0" v-model="initialCostUsDollars" placeholder="e.g. 2.99">
+              </td>
+            </tr>
+
+            <tr>
+              <th>Filter Change Cost (USD)</th>
+              <td v-show='!newOrEditMode'>{{ filterChangeCostUsDollars }}</td>
+              <td v-show="newOrEditMode">
+                <input type="number" step="0.01" min="0" v-model="filterChangeCostUsDollars" placeholder="e.g. 0.50">
               </td>
             </tr>
 
