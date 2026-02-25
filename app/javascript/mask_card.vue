@@ -567,7 +567,14 @@ export default {
         if (this.statIsMissing(type, mask) || min === null || max === null || min === undefined || max === undefined) {
           return null
         }
-        const scaled = this.minMaxScale(value, min, max, { zeroRangeValue: 0 })
+        // Cost values are typically skewed; log scaling avoids collapsing most
+        // masks to the same marker position when a few masks are expensive.
+        const numericValue = Number(value)
+        const numericMax = Number(max)
+        if (!Number.isFinite(numericValue) || !Number.isFinite(numericMax) || numericMax <= 0) {
+          return null
+        }
+        const scaled = Math.log1p(Math.max(0, numericValue)) / Math.log1p(numericMax)
         return this.clampPercent(1 - scaled)
       }
 

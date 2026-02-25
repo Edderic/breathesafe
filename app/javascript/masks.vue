@@ -788,7 +788,14 @@ export default {
         if (bounds.min === null || bounds.max === null) {
           return -1
         }
-        const scaled = this.minMaxScale(Number(mask.initialCostUsDollars), bounds.min, bounds.max, { zeroRangeValue: 0 })
+        // Cost distributions are often highly skewed. Use log scaling so low-cost
+        // differences remain visible even when there are expensive outliers.
+        const value = Number(mask.initialCostUsDollars)
+        const max = Number(bounds.max)
+        if (!Number.isFinite(value) || !Number.isFinite(max) || max <= 0) {
+          return -1
+        }
+        const scaled = Math.log1p(Math.max(0, value)) / Math.log1p(max)
         return this.clampPercent(1 - scaled)
       }
 
