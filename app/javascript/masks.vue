@@ -202,6 +202,12 @@
                   :showLabels="false"
                 />
               </div>
+              <InitialCostBarGraph
+                v-else-if="row.key === 'affordability'"
+                :value="m.initialCostUsDollars"
+                :maxValue="costBounds().max"
+                missingText="Missing"
+              />
               <ColoredCell
                 v-else
                 :value="metricCellScore(row.key, m)"
@@ -231,6 +237,7 @@ import ClosableMessage from './closable_message.vue'
 import ColoredCell from './colored_cell.vue'
 import MaskCards from './mask_card.vue'
 import MaskColorChips from './mask_color_chips.vue'
+import InitialCostBarGraph from './initial_cost_bar_graph.vue'
 import PersonIcon from './person_icon.vue'
 import Popup from './pop_up.vue'
 import TabSet from './tab_set.vue'
@@ -267,6 +274,7 @@ export default {
     HelpPopup,
     MaskCards,
     MaskColorChips,
+    InitialCostBarGraph,
     Pagination,
     Popup,
     PersonIcon,

@@ -164,30 +164,11 @@
           <tr>
               <th>Initial Cost (USD)</th>
               <td>
-                <div class='stat-cell'>
-                  <div v-if="statIsMissing('cost', m)" class='stat-bar-wrapper stat-bar-missing'>
-                    <div class='stat-bar-axis'></div>
-                    <div class='stat-bar stat-bar-missing-fill'></div>
-                    <div class='stat-bar-label'>{{ statMissingText('cost') }}</div>
-                  </div>
-                  <div v-else class='stat-bar-wrapper' :style="statBarWrapperStyle('cost')">
-                    <div class='stat-bar-axis'></div>
-                    <div class='stat-bar' :style="statBarStyle(statPercent('cost', m), 'cost')"></div>
-                    <div
-                      v-if="statNeedsMarker('cost')"
-                      class='stat-bar-marker'
-                      :style="statMarkerStyle(statPercent('cost', m), 'cost')"
-                    ></div>
-                    <div
-                      v-if="statNeedsMarker('cost')"
-                      class='stat-bar-cover'
-                      :style="statCoverStyle(statPercent('cost', m), 'cost')"
-                    ></div>
-                    <div class='stat-bar-label'>{{ statLabel('cost', m) }}</div>
-                    <div v-if="statAxisLabel('cost', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('cost', 'min') }}</div>
-                    <div v-if="statAxisLabel('cost', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('cost', 'max') }}</div>
-                  </div>
-                </div>
+                <InitialCostBarGraph
+                  :value="m.initialCostUsDollars"
+                  :maxValue="costBounds().max"
+                  :missingText="statMissingText('cost')"
+                />
               </td>
           </tr>
 
@@ -218,6 +199,7 @@ import ColoredCell from './colored_cell.vue'
 import PersonIcon from './person_icon.vue'
 import Popup from './pop_up.vue'
 import MaskColorChips from './mask_color_chips.vue'
+import InitialCostBarGraph from './initial_cost_bar_graph.vue'
 import { deepSnakeToCamel } from './misc.js'
 import { assignBoundsToColorScheme, colorPaletteFall, convertColorListToCutpoints, generateEvenSpacedBounds } from './colors.js'
 import SearchIcon from './search_icon.vue'
@@ -239,6 +221,7 @@ export default {
     ClosableMessage,
     Popup,
     MaskColorChips,
+    InitialCostBarGraph,
     PersonIcon,
     SearchIcon,
     SortingStatus,
