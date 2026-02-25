@@ -441,7 +441,7 @@ export default {
         { key: 'proba_fit', label: 'Probability of Fit' },
         { key: 'filtration', label: 'Filtration Factor' },
         { key: 'breathability', label: 'Breathability (pa)' },
-        { key: 'affordability', label: 'Affordability (USD)' },
+        { key: 'affordability', label: 'Initial Cost (USD)' },
       ]
       if (this.showColorColumn) {
         rows.push({ key: 'colors', label: 'Colors' })

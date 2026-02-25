@@ -207,7 +207,7 @@
             </tr>
 
             <tr>
-              <th>Affordability (USD)</th>
+              <th>Initial Cost (USD)</th>
               <td v-show='!newOrEditMode'>{{ initialCostUsDollars }}</td>
               <td v-show="newOrEditMode">
                 <input type="number" step="0.01" min="0" v-model="initialCostUsDollars" placeholder="e.g. 2.99">
@@ -352,7 +352,7 @@
             </tr>
 
             <tr>
-              <th>Affordability (USD)</th>
+              <th>Initial Cost (USD)</th>
               <td v-show='!newOrEditMode'>{{ initialCostUsDollars }}</td>
               <td v-show="newOrEditMode">
                 <input type="number" step="0.01" min="0" v-model="initialCostUsDollars" placeholder="e.g. 2.99">
@@ -467,7 +467,7 @@
         <table v-if='showMode'>
           <tbody>
             <tr>
-              <th>Affordability (USD)</th>
+              <th>Initial Cost (USD)</th>
               <td>
                 <div class='stat-cell'>
                   <div v-if="statIsMissing('cost')" class='stat-bar-wrapper stat-bar-missing'>

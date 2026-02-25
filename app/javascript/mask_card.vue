@@ -162,7 +162,7 @@
             </td>
           </tr>
           <tr>
-              <th>Affordability (USD)</th>
+              <th>Initial Cost (USD)</th>
               <td>
                 <div class='stat-cell'>
                   <div v-if="statIsMissing('cost', m)" class='stat-bar-wrapper stat-bar-missing'>
@@ -1476,4 +1476,3 @@ export default {
   }
 
 </style>
-
