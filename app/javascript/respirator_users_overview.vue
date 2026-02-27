@@ -324,11 +324,15 @@ export default {
 
       // Apply search filter
       if (this.search !== "") {
-        let lowerSearch = this.search.toLowerCase()
+        let lowerSearch = this.search.toLowerCase().trim().replace(/\s+/g, ' ')
         filtered = filtered.filter(
           function(mu) {
-            return mu.firstName.toLowerCase().match(lowerSearch)
-              || mu.lastName.toLowerCase().match(lowerSearch)
+            const firstName = String(mu.firstName || '').toLowerCase()
+            const lastName = String(mu.lastName || '').toLowerCase()
+            const fullName = `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ')
+            return firstName.includes(lowerSearch)
+              || lastName.includes(lowerSearch)
+              || fullName.includes(lowerSearch)
           }
         )
       }
