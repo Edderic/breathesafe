@@ -437,9 +437,11 @@ class ManagedUser < ApplicationRecord
     sort_field = args[:sort_field]
     sort_order = args[:sort_order]
     search = args[:search]
+    managed_id = args[:managed_id]
 
     # Build the base query with all the calculations
     results = build_managed_users_query(manager_id: manager_id)
+    results = apply_managed_id_filter(results, managed_id)
     results = apply_search(results, search)
 
     # Apply sorting if specified
@@ -461,9 +463,11 @@ class ManagedUser < ApplicationRecord
     sort_field = args[:sort_field]
     sort_order = args[:sort_order]
     search = args[:search]
+    managed_id = args[:managed_id]
 
     # Build query for all users across all managers
     results = build_managed_users_query(manager_id: nil)
+    results = apply_managed_id_filter(results, managed_id)
     results = apply_search(results, search)
 
     # Apply sorting if specified
@@ -695,5 +699,12 @@ class ManagedUser < ApplicationRecord
 
       tokens.all? { |token| search_blob.include?(token) }
     end
+  end
+
+  def self.apply_managed_id_filter(results, managed_id)
+    return results if managed_id.blank?
+
+    managed_id_int = managed_id.to_i
+    results.select { |row| row['managed_id'].to_i == managed_id_int }
   end
 end

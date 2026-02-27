@@ -460,6 +460,58 @@ def build_feature_matrix(filtered_df, categorical_cols=None):
     return features, target
 
 
+def _is_binary_series(series):
+    unique_values = pd.unique(pd.to_numeric(series, errors='coerce').fillna(0))
+    if unique_values.size == 0:
+        return True
+    rounded = {float(np.round(value, 10)) for value in unique_values}
+    return rounded.issubset({0.0, 1.0})
+
+
+def fit_zscore_stats(features, row_indices):
+    if isinstance(row_indices, torch.Tensor):
+        row_indices = row_indices.detach().cpu().numpy()
+
+    if len(row_indices) == 0:
+        return {}
+
+    train_frame = features.iloc[row_indices]
+    stats = {}
+    for column in features.columns:
+        column_values = pd.to_numeric(train_frame[column], errors='coerce').fillna(0)
+        if _is_binary_series(column_values):
+            continue
+
+        mean_value = float(column_values.mean())
+        std_value = float(column_values.std(ddof=0))
+        if not np.isfinite(mean_value):
+            mean_value = 0.0
+        if not np.isfinite(std_value) or std_value == 0.0:
+            std_value = 1.0
+        stats[column] = {
+            'mean': mean_value,
+            'std': std_value,
+        }
+
+    return stats
+
+
+def apply_zscore(features, zscore_stats):
+    if not zscore_stats:
+        return features
+
+    scaled = features.copy()
+    for column, values in zscore_stats.items():
+        if column not in scaled.columns:
+            continue
+        mean_value = float(values.get('mean', 0.0))
+        std_value = float(values.get('std', 1.0))
+        if not np.isfinite(std_value) or std_value == 0.0:
+            std_value = 1.0
+        scaled[column] = (pd.to_numeric(scaled[column], errors='coerce').fillna(0) - mean_value) / std_value
+    return scaled
+
+
 @dataclass(frozen=True)
 class TrainModelConfig:
     outer_dim: int
@@ -824,6 +876,7 @@ def main(argv=None):
     parser.add_argument('--use-diff-perimeter-bins', action='store_true', help='Use perimeter difference bins instead of raw perimeter features.')
     parser.add_argument('--use-diff-perimeter-mask-bins', action='store_true', help='Include per-mask perimeter difference bin features.')
     parser.add_argument('--exclude-mask-code', action='store_true', help='Exclude unique_internal_model_code from categorical features.')
+    parser.add_argument('--zscore', action='store_true', help='Apply z-score normalization to non-binary numeric features.')
     parser.add_argument('--class-reweight', action='store_true', help='Reweight loss by class balance.')
     parser.add_argument(
         '--retrain-with-full',
@@ -918,6 +971,8 @@ def main(argv=None):
         raise SystemExit(0)
 
     if args.model_type == 'prob':
+        if args.zscore:
+            logging.info("--zscore is currently only applied to model_type=nn. Ignoring for prob model.")
         timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
         mask_id_index = sorted(cleaned_fit_tests['mask_id'].dropna().unique())
         style_categories = sorted(cleaned_fit_tests['style'].dropna().unique())
@@ -1048,9 +1103,20 @@ def main(argv=None):
 
     features, target = build_feature_matrix(cleaned_fit_tests, categorical_columns)
 
-    model, train_losses, val_losses, x_train, y_train, x_val, y_val, train_idx, val_idx = train_predictor(
-        features,
+    num_rows = features.shape[0]
+    permutation = torch.randperm(num_rows)
+    split_index = int(num_rows * 0.8)
+    train_idx = permutation[:split_index]
+    val_idx = permutation[split_index:]
+
+    split_zscore_stats = fit_zscore_stats(features, train_idx) if args.zscore else {}
+    features_for_eval = apply_zscore(features, split_zscore_stats) if args.zscore else features
+
+    model, train_losses, val_losses, x_train, y_train, x_val, y_val, train_idx, val_idx = train_predictor_with_split(
+        features_for_eval,
         target,
+        train_idx,
+        val_idx,
         outer_dim=model_config.outer_dim,
         epochs=args.epochs,
         learning_rate=args.learning_rate,
@@ -1060,8 +1126,11 @@ def main(argv=None):
         class_weighting=args.class_reweight,
     )
 
-    logging.info("Model training complete. Feature count: %s", features.shape[1])
-    feature_columns = list(features.columns)
+    zscore_stats_for_saved_model = split_zscore_stats
+    features_for_saved_model = features_for_eval
+
+    logging.info("Model training complete. Feature count: %s", features_for_eval.shape[1])
+    feature_columns = list(features_for_eval.columns)
     images_dir = _images_output_dir()
     os.makedirs(images_dir, exist_ok=True)
     timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
@@ -1095,9 +1164,12 @@ def main(argv=None):
     saved_model_scope = 'split_train'
     if args.retrain_with_full:
         logging.info("Retraining NN model on full dataset for artifact save.")
-        full_idx = torch.arange(features.shape[0])
+        if args.zscore:
+            zscore_stats_for_saved_model = fit_zscore_stats(features, np.arange(features.shape[0]))
+            features_for_saved_model = apply_zscore(features, zscore_stats_for_saved_model)
+        full_idx = torch.arange(features_for_saved_model.shape[0])
         model, _, _, _, _, _, _, _, _ = train_predictor_with_split(
-            features,
+            features_for_saved_model,
             target,
             full_idx,
             full_idx,
@@ -1125,6 +1197,8 @@ def main(argv=None):
            use_diff_perimeter_bins=args.use_diff_perimeter_bins,
            use_diff_perimeter_mask_bins=args.use_diff_perimeter_mask_bins
        )
+       if args.zscore and zscore_stats_for_saved_model:
+           encoded = apply_zscore(encoded, zscore_stats_for_saved_model)
        x_infer = torch.tensor(encoded.to_numpy(), dtype=torch.float32)
        model.eval()
        with torch.no_grad():
@@ -1227,7 +1301,7 @@ def main(argv=None):
     plt.close()
 
     val_results_path = os.path.join(images_dir, f"{timestamp}_validation_results.json")
-    val_frame = features.iloc[val_idx].copy()
+    val_frame = features_for_eval.iloc[val_idx].copy()
     val_frame["probability_of_fit"] = val_probs
     val_frame["ground_truth"] = val_labels
     val_frame["prediction"] = (val_probs >= best_threshold).astype(int)
@@ -1329,6 +1403,8 @@ def main(argv=None):
         'retrain_with_full': bool(args.retrain_with_full),
         'saved_model_training_scope': saved_model_scope,
         'validation_metrics_source': 'split_validation',
+        'zscore': bool(args.zscore),
+        'zscore_features_count': len(zscore_stats_for_saved_model),
     }
     metrics_key = f"{prefix}/metrics.json"
     metrics_uri = _upload_json_to_s3(metrics, metrics_key)
@@ -1349,6 +1425,8 @@ def main(argv=None):
         'retrain_with_full': bool(args.retrain_with_full),
         'saved_model_training_scope': saved_model_scope,
         'validation_metrics_source': 'split_validation',
+        'zscore': bool(args.zscore),
+        'zscore_stats': zscore_stats_for_saved_model,
     }
     metadata_key = f"{prefix}/model_metadata.json"
     metadata_uri = _upload_json_to_s3(metadata, metadata_key)

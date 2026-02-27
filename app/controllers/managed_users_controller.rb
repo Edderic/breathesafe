@@ -25,6 +25,7 @@ class ManagedUsersController < ApplicationController
       sort_field = params[:sort]
       sort_order = params[:order]
       search = params[:search]
+      managed_id = params[:managed_id]
 
       # Validate sort order
       sort_order = nil unless %w[asc desc].include?(sort_order)
@@ -37,7 +38,8 @@ class ManagedUsersController < ApplicationController
           per_page: per_page,
           sort_field: sort_field,
           sort_order: sort_order,
-          search: search
+          search: search,
+          managed_id: managed_id
         )
         managed_users = paginated[:rows]
         total_count = paginated[:total_count]
@@ -67,7 +69,8 @@ class ManagedUsersController < ApplicationController
             per_page: per_page,
             sort_field: sort_field,
             sort_order: sort_order,
-            search: search
+            search: search,
+            managed_id: managed_id
           )
           managed_users = paginated[:rows]
           total_count = paginated[:total_count]

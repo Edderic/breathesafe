@@ -1056,9 +1056,6 @@ export default {
       return this.isAdmin && this.adminModeEnabled
     },
     selectableUsers() {
-      if (this.useAdminAnyUserMode) {
-        return this.adminUsers
-      }
       return this.managedUsersWhoCanAddFitTestData
     },
     fitTest() {
@@ -1671,36 +1668,18 @@ export default {
     async loadAdminUsers(ids = null) {
       this.adminUsersLoading = true
       try {
-        const params = {
-          page: this.adminUsersPage,
-          per_page: this.adminUsersPerPage
-        }
-        if (!ids && this.adminUserSearch && this.adminUserSearch.trim() !== '') {
-          params.search = this.adminUserSearch.trim()
-        }
-        if (ids && ids.length > 0) {
-          params.ids = ids.join(',')
-        }
+        const managedId = ids && ids.length > 0 ? ids[0] : null
+        const search = !managedId && this.adminUserSearch && this.adminUserSearch.trim() !== ''
+          ? this.adminUserSearch.trim()
+          : null
 
-        const response = await axios.get('/admin/users.json', { params })
-        const users = response?.data?.users || []
-        const mappedUsers = users.map((user) => new RespiratorUser({
-          managedId: user.id,
-          managedUserId: user.id,
-          firstName: user.first_name || '',
-          lastName: user.last_name || '',
-          email: user.email || '',
-          profileId: null
-        }))
-        if (ids && ids.length > 0) {
-          const byId = {}
-          ;[...this.adminUsers, ...mappedUsers].forEach((user) => {
-            byId[user.managedId] = user
-          })
-          this.adminUsers = Object.values(byId)
-        } else {
-          this.adminUsers = mappedUsers
-        }
+        await this.loadManagedUsers({
+          admin: true,
+          page: this.adminUsersPage,
+          perPage: this.adminUsersPerPage,
+          search: search,
+          managedId: managedId
+        })
       } catch (error) {
         if (error && error.response && error.response.data && error.response.data.messages) {
           this.addMessages(error.response.data.messages)
@@ -1713,10 +1692,10 @@ export default {
     },
     async fetchAdminUserById(id) {
       if (!this.useAdminAnyUserMode || !id) return null
-      const existing = this.adminUsers.find((u) => u.managedId == id)
+      const existing = this.selectableUsers.find((u) => u.managedId == id)
       if (existing) return existing
       await this.loadAdminUsers([id])
-      return this.adminUsers.find((u) => u.managedId == id) || null
+      return this.selectableUsers.find((u) => u.managedId == id) || null
     },
     async loadMasks() {
       // Build query params for pagination and search

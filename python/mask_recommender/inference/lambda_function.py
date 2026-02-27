@@ -35,6 +35,8 @@ class MaskRecommenderInference:
         self.use_facial_perimeter = False
         self.use_diff_perimeter_bins = False
         self.use_diff_perimeter_mask_bins = False
+        self.zscore = False
+        self.zscore_stats = {}
         self.prob_params = None
         self.prob_metadata = None
         self.prob_mask_data = None
@@ -139,6 +141,8 @@ class MaskRecommenderInference:
         self.use_facial_perimeter = metadata.get('use_facial_perimeter', False)
         self.use_diff_perimeter_bins = metadata.get('use_diff_perimeter_bins', False)
         self.use_diff_perimeter_mask_bins = metadata.get('use_diff_perimeter_mask_bins', False)
+        self.zscore = bool(metadata.get('zscore', False))
+        self.zscore_stats = metadata.get('zscore_stats', {}) or {}
 
         state_dict = torch.load(model_path, map_location='cpu')
         linear_specs = self._infer_linear_specs(state_dict)
@@ -171,6 +175,23 @@ class MaskRecommenderInference:
             self.bucket,
             model_key
         )
+
+    def _apply_zscore(self, encoded: pd.DataFrame) -> pd.DataFrame:
+        if not self.zscore or not self.zscore_stats:
+            return encoded
+
+        transformed = encoded.copy()
+        for column, values in self.zscore_stats.items():
+            if column not in transformed.columns:
+                continue
+            mean_value = float(values.get('mean', 0.0))
+            std_value = float(values.get('std', 1.0))
+            if std_value == 0:
+                std_value = 1.0
+            transformed[column] = (
+                pd.to_numeric(transformed[column], errors="coerce").fillna(0) - mean_value
+            ) / std_value
+        return transformed
 
     def load_prob_model(self, force: bool = False) -> None:
         if not force and self.prob_params is not None:
@@ -266,6 +287,7 @@ class MaskRecommenderInference:
             use_diff_perimeter_bins=self.use_diff_perimeter_bins,
             use_diff_perimeter_mask_bins=self.use_diff_perimeter_mask_bins
         )
+        encoded = self._apply_zscore(encoded)
         inputs = torch.tensor(encoded.to_numpy(), dtype=torch.float32)
         with torch.no_grad():
             logits = self.model(inputs).squeeze(1)
