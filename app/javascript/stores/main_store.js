@@ -24,6 +24,7 @@ export const useMainStore = defineStore('main', {
     termsOfServiceVersion: undefined,
     privacyPolicyVersion: undefined,
     consentDismissedForSession: false,
+    adminModeEnabled: false,
     messages: [],
     whereabouts: {lat: 51.093048, lng: 6.842120},
   }),
@@ -89,6 +90,22 @@ export const useMainStore = defineStore('main', {
     setConsentDismissedForSession(value) {
       this.consentDismissedForSession = !!value
     },
+    setAdminModeEnabled(value) {
+      this.adminModeEnabled = !!value
+      try {
+        window.sessionStorage.setItem('breathesafe_admin_mode_enabled', this.adminModeEnabled ? '1' : '0')
+      } catch (_error) {
+        // Ignore browser storage errors and keep UX non-blocking.
+      }
+    },
+    initializeAdminMode() {
+      try {
+        const stored = window.sessionStorage.getItem('breathesafe_admin_mode_enabled')
+        this.adminModeEnabled = stored === '1'
+      } catch (_error) {
+        this.adminModeEnabled = false
+      }
+    },
     async getCurrentUser() {
       setupCSRF()
 
@@ -117,6 +134,11 @@ export const useMainStore = defineStore('main', {
             : (privacyVer ? String(privacyVer) : undefined);
 
           this.signedIn = !!response.data.currentUser;
+          if (response.data.currentUser && response.data.currentUser.admin) {
+            this.initializeAdminMode()
+          } else {
+            this.setAdminModeEnabled(false)
+          }
           console.log('this.signedIn', this.signedIn)
           // whatever you want
         })

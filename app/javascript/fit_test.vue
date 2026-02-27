@@ -39,6 +39,17 @@
             </div>
           </div>
           <div v-if="sortedUserDisplayables.length > 0" class='row justify-content-center'>
+            <div v-if="useAdminAnyUserMode" class='admin-user-search-row'>
+              <input
+                type="text"
+                class='admin-user-search-input'
+                :value='adminUserSearch'
+                @input='adminUserSearch = $event.target.value'
+                @keyup.enter='loadAdminUsers()'
+                placeholder='Search any user by name or email'
+              >
+              <Button shadow='true' class='button' text="Search" @click='loadAdminUsers()' :disabled='adminUsersLoading'/>
+            </div>
             <select
               :value="selectedUser ? selectedUser.managedId : null"
               @change='selectUserFromDropdown($event)'
@@ -46,17 +57,20 @@
               class='user-select'>
               <option :value='null'>-- Select User --</option>
               <option v-for='u in sortedUserDisplayables' :key='u.managedId' :value='u.managedId'>
-                {{u.firstName}} {{u.lastName}} - {{u.managedId}}
+                {{ userOptionLabel(u) }}
               </option>
             </select>
           </div>
 
           <div v-else class='empty-user-state'>
             <select disabled class='user-select'>
-              <option>No users available</option>
+              <option>{{ useAdminAnyUserMode ? 'No users found' : 'No users available' }}</option>
             </select>
-            <p class='text-align-center'>
+            <p class='text-align-center' v-if='!useAdminAnyUserMode'>
               Please add a user by <router-link :to="{name: 'RespiratorUsers'}">clicking here</router-link>
+            </p>
+            <p class='text-align-center' v-else>
+              Try a broader search in Admin Mode.
             </p>
           </div>
         </div>
@@ -974,6 +988,11 @@ export default {
       maskCurrentPage: 1,
       maskPerPage: 6,
       maskTotalCount: 0,
+      adminUsers: [],
+      adminUsersLoading: false,
+      adminUsersPage: 1,
+      adminUsersPerPage: 100,
+      adminUserSearch: '',
     }
   },
   props: {
@@ -983,6 +1002,8 @@ export default {
         useMainStore,
         [
           'currentUser',
+          'isAdmin',
+          'adminModeEnabled'
         ]
     ),
     ...mapState(
@@ -1030,6 +1051,15 @@ export default {
     },
     managedUsersWhoCanAddFitTestData() {
       return this.managedUsers
+    },
+    useAdminAnyUserMode() {
+      return this.isAdmin && this.adminModeEnabled
+    },
+    selectableUsers() {
+      if (this.useAdminAnyUserMode) {
+        return this.adminUsers
+      }
+      return this.managedUsersWhoCanAddFitTestData
     },
     fitTest() {
       return new FitTest({
@@ -1207,12 +1237,14 @@ export default {
       }
     },
     userDisplayables() {
-      if (this.searchUser == "") {
-        return this.managedUsersWhoCanAddFitTestData
-      } else {
-        let lowerSearch = this.searchUser.toLowerCase()
-        return this.managedUsersWhoCanAddFitTestData.filter((user) => user.fullName.toLowerCase().match(lowerSearch))
+      if (this.useAdminAnyUserMode) {
+        return this.selectableUsers
       }
+      if (this.searchUser == "") {
+        return this.selectableUsers
+      }
+      let lowerSearch = this.searchUser.toLowerCase()
+      return this.selectableUsers.filter((user) => user.fullName.toLowerCase().match(lowerSearch))
     },
     sortedUserDisplayables() {
       return [...this.userDisplayables].sort((a, b) => {
@@ -1271,6 +1303,18 @@ export default {
       return completed
     },
   },
+  watch: {
+    async useAdminAnyUserMode() {
+      await this.loadUsersForSelection()
+      if (this.selectedUser && this.selectedUser.managedId && this.useAdminAnyUserMode) {
+        const adminUser = await this.fetchAdminUserById(this.selectedUser.managedId)
+        if (adminUser) {
+          this.selectedUser = adminUser
+          this.searchUser = adminUser.fullName
+        }
+      }
+    }
+  },
   async created() {
     await this.getCurrentUser()
 
@@ -1328,8 +1372,11 @@ export default {
         if (this.$route.name == 'NewFitTest' && toQuery.userId && toQuery.maskId) {
           // handle quick way to add too small / too big
           await this.loadMasks()
-          await this.loadManagedUsers()
-          let managedUser = this.managedUsers.filter((m) => m.managedId == parseInt(toQuery.userId))[0]
+          await this.loadUsersForSelection()
+          let managedUser = this.selectableUsers.filter((m) => m.managedId == parseInt(toQuery.userId))[0]
+          if (!managedUser && this.useAdminAnyUserMode) {
+            managedUser = await this.fetchAdminUserById(parseInt(toQuery.userId))
+          }
 
           let successCallback = undefined;
           let tabToShow = 'Facial Hair'
@@ -1361,8 +1408,11 @@ export default {
           }
         } else if (this.$route.name == 'NewFitTest' && toQuery.userId) {
           // Handle case where only userId is provided (e.g., from clicking "+" button)
-          await this.loadManagedUsers()
-          let managedUser = this.managedUsers.filter((m) => m.managedId == parseInt(toQuery.userId))[0]
+          await this.loadUsersForSelection()
+          let managedUser = this.selectableUsers.filter((m) => m.managedId == parseInt(toQuery.userId))[0]
+          if (!managedUser && this.useAdminAnyUserMode) {
+            managedUser = await this.fetchAdminUserById(parseInt(toQuery.userId))
+          }
 
           if (managedUser) {
             this.selectedUser = managedUser
@@ -1395,7 +1445,7 @@ export default {
 
         }
 
-        await this.loadManagedUsers()
+        await this.loadUsersForSelection()
         await this.loadMasks()
         await this.loadMeasurementDevices()
         await this.loadFitTest()
@@ -1581,7 +1631,7 @@ export default {
       }
     },
     selectUser(id) {
-      const found = this.managedUsers.filter((m) => m.managedId == id)[0]
+      const found = this.selectableUsers.filter((m) => m.managedId == id)[0]
       if (found) {
         this.selectedUser = found
         this.searchUser = this.selectedUser.fullName
@@ -1600,6 +1650,73 @@ export default {
       if (managedId) {
         this.selectUser(managedId)
       }
+    },
+    userOptionLabel(user) {
+      const firstName = user.firstName || ''
+      const lastName = user.lastName || ''
+      const name = `${firstName} ${lastName}`.trim()
+      if (this.useAdminAnyUserMode) {
+        const email = user.email ? ` (${user.email})` : ''
+        return `${name || 'Unnamed User'} - ${user.managedId}${email}`
+      }
+      return `${name} - ${user.managedId}`
+    },
+    async loadUsersForSelection() {
+      if (this.useAdminAnyUserMode) {
+        await this.loadAdminUsers()
+      } else {
+        await this.loadManagedUsers()
+      }
+    },
+    async loadAdminUsers(ids = null) {
+      this.adminUsersLoading = true
+      try {
+        const params = {
+          page: this.adminUsersPage,
+          per_page: this.adminUsersPerPage
+        }
+        if (!ids && this.adminUserSearch && this.adminUserSearch.trim() !== '') {
+          params.search = this.adminUserSearch.trim()
+        }
+        if (ids && ids.length > 0) {
+          params.ids = ids.join(',')
+        }
+
+        const response = await axios.get('/admin/users.json', { params })
+        const users = response?.data?.users || []
+        const mappedUsers = users.map((user) => new RespiratorUser({
+          managedId: user.id,
+          managedUserId: user.id,
+          firstName: user.first_name || '',
+          lastName: user.last_name || '',
+          email: user.email || '',
+          profileId: null
+        }))
+        if (ids && ids.length > 0) {
+          const byId = {}
+          ;[...this.adminUsers, ...mappedUsers].forEach((user) => {
+            byId[user.managedId] = user
+          })
+          this.adminUsers = Object.values(byId)
+        } else {
+          this.adminUsers = mappedUsers
+        }
+      } catch (error) {
+        if (error && error.response && error.response.data && error.response.data.messages) {
+          this.addMessages(error.response.data.messages)
+        } else {
+          this.addMessages([error.message])
+        }
+      } finally {
+        this.adminUsersLoading = false
+      }
+    },
+    async fetchAdminUserById(id) {
+      if (!this.useAdminAnyUserMode || !id) return null
+      const existing = this.adminUsers.find((u) => u.managedId == id)
+      if (existing) return existing
+      await this.loadAdminUsers([id])
+      return this.adminUsers.find((u) => u.managedId == id) || null
     },
     async loadMasks() {
       // Build query params for pagination and search
@@ -1723,6 +1840,14 @@ export default {
             this.syncFitTestProcedureFromExisting(quantExercises)
 
             this.selectUser(fitTestData.user_id)
+            if (this.useAdminAnyUserMode &&
+                (!this.selectedUser || !this.selectedUser.fullName || !this.selectedUser.fullName.trim())) {
+              const adminUser = await this.fetchAdminUserById(fitTestData.user_id)
+              if (adminUser) {
+                this.selectedUser = adminUser
+                this.searchUser = adminUser.fullName
+              }
+            }
 
             // whatever you want
           })
@@ -2498,6 +2623,24 @@ export default {
     min-width: 300px;
     padding: 0.5em;
     font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .admin-user-search-row {
+    display: flex;
+    gap: 0.5em;
+    margin-bottom: 0.75em;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .admin-user-search-input {
+    min-width: 320px;
+    max-width: 560px;
+    width: 100%;
+    padding: 0.5em 0.65em;
     border: 1px solid #ccc;
     border-radius: 4px;
   }

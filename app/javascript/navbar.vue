@@ -32,6 +32,10 @@
     </div>
 
     <div class='row fixed-nav-bar-bottom admin-subnav desktop' v-if="isAdmin && showSubNavBar == 'Admin'">
+      <label class="admin-mode-toggle">
+        <input type="checkbox" :checked="adminModeEnabled" @change="toggleAdminMode">
+        <span>Admin Mode</span>
+      </label>
       <router-link class="clickable side-padding" :to="{ name: 'AdminStudyParticipants'}" @click="showSubNavBar = null">Study Participants</router-link>
       <router-link class="clickable side-padding" :to="{ name: 'MaskBreakdown'}" @click="showSubNavBar = null">Mask Breakdown</router-link>
       <router-link class="clickable side-padding" :to="{ name: 'AdminMaskDuplicates'}" @click="showSubNavBar = null">Mask Duplicates</router-link>
@@ -45,6 +49,10 @@
       <router-link class='mobile-row clickable side-padding' :to='{ name: "Masks"}' @click='toggleShowSubNavBar("Masks")'>Masks</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "FitTests"}' @click='toggleShowSubNavBar("FitTests")'>Fit Tests</router-link>
       <a class="mobile-row clickable side-padding" v-if="isAdmin" href="#admin_nav_mobile" @click.prevent="toggleShowSubNavBar('Admin')">Admin</a>
+      <label class="mobile-row clickable side-padding mobile-admin-link admin-mode-toggle mobile-admin-toggle" v-if="isAdmin && showSubNavBar == 'Admin'">
+        <input type="checkbox" :checked="adminModeEnabled" @change="toggleAdminMode">
+        <span>Admin Mode</span>
+      </label>
       <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'AdminStudyParticipants'}" @click="showSubNavBar = null" v-if="isAdmin && showSubNavBar == 'Admin'">Study Participants</router-link>
       <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'MaskBreakdown'}" @click="showSubNavBar = null" v-if="isAdmin && showSubNavBar == 'Admin'">Mask Breakdown</router-link>
       <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'AdminMaskDuplicates'}" @click="showSubNavBar = null" v-if="isAdmin && showSubNavBar == 'Admin'">Mask Duplicates</router-link>
@@ -72,7 +80,7 @@ export default {
   },
   computed: {
     ...mapStores(useMainStore),
-    ...mapState(useMainStore, ['signedIn', 'currentUser', 'isAdmin']),
+    ...mapState(useMainStore, ['signedIn', 'currentUser', 'isAdmin', 'adminModeEnabled']),
     ...mapWritableState(useMainStore, ['focusTab']),
   },
   created() {
@@ -83,8 +91,11 @@ export default {
     }
   },
   methods: {
-    ...mapActions(useMainStore, ['getCurrentUser']),
+    ...mapActions(useMainStore, ['getCurrentUser', 'setAdminModeEnabled']),
     ...mapActions(useEventStores, [ 'load']),
+    toggleAdminMode(event) {
+      this.setAdminModeEnabled(!!event.target.checked)
+    },
     toggleShowSubNavBar(string) {
       if (string == this.showSubNavBar) {
         this.showSubNavBar = null
@@ -243,6 +254,23 @@ export default {
 
   .mobile-admin-link {
     padding-left: 2.5em;
+  }
+
+  .admin-mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    padding: 0.6em 1em;
+    font-size: 0.95em;
+    white-space: nowrap;
+  }
+
+  .admin-mode-toggle input {
+    margin: 0;
+  }
+
+  .mobile-admin-toggle {
+    font-size: 1em;
   }
   @media (max-width: 800px) {
     .desktop {
