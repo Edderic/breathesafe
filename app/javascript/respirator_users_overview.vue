@@ -286,7 +286,8 @@ export default {
         useMainStore,
         [
           'currentUser',
-          'messages'
+          'messages',
+          'adminModeEnabled'
         ]
     ),
     ...mapWritableState(
@@ -348,7 +349,7 @@ export default {
       return filtered
     },
     isAdminView() {
-      return this.$route.query.admin === 'true' && this.currentUser?.admin
+      return this.currentUser?.admin && (this.$route.query.admin === 'true' || this.adminModeEnabled)
     },
     metricSortField() {
       // Map the current metric display to its sort field
@@ -439,6 +440,11 @@ export default {
       this.$nextTick(() => {
         this.emitPaginationUpdate()
       })
+    },
+    isAdminView(newValue, oldValue) {
+      if (this.currentUser && newValue !== oldValue) {
+        this.loadData(1)
+      }
     }
   },
   methods: {
