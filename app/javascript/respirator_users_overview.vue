@@ -324,15 +324,30 @@ export default {
 
       // Apply search filter
       if (this.search !== "") {
-        let lowerSearch = this.search.toLowerCase().trim().replace(/\s+/g, ' ')
+        const lowerSearch = this.search.toLowerCase().trim().replace(/\s+/g, ' ')
+        const tokens = lowerSearch.split(' ').filter(Boolean)
         filtered = filtered.filter(
           function(mu) {
             const firstName = String(mu.firstName || '').toLowerCase()
             const lastName = String(mu.lastName || '').toLowerCase()
-            const fullName = `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ')
-            return firstName.includes(lowerSearch)
-              || lastName.includes(lowerSearch)
-              || fullName.includes(lowerSearch)
+            const displayName = String(mu.fullName || '').toLowerCase().trim().replace(/\s+/g, ' ')
+            const combinedName = `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ')
+            const searchBlob = [firstName, lastName, combinedName, displayName]
+              .filter(Boolean)
+              .join(' ')
+              .replace(/\s+/g, ' ')
+
+            if (!searchBlob) {
+              return false
+            }
+
+            // Direct phrase match first.
+            if (searchBlob.includes(lowerSearch)) {
+              return true
+            }
+
+            // Fallback to token-based matching for initials / spaced queries.
+            return tokens.every((token) => searchBlob.includes(token))
           }
         )
       }
