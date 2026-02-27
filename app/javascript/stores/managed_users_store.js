@@ -46,7 +46,7 @@ export const useManagedUserStore = defineStore('managedUsers', {
     // ...mapWritableState(useMainStore, ['message']),
   },
   actions: {
-    async loadManagedUsers({ admin = false, page = 1, perPage = 25, sort = null, order = null } = {}) {
+    async loadManagedUsers({ admin = false, page = 1, perPage = 25, sort = null, order = null, search = null } = {}) {
       this.managedUsers = [];
       let mainStore = useMainStore()
       let managedUsers = [];
@@ -66,6 +66,10 @@ export const useManagedUserStore = defineStore('managedUsers', {
       if (sort && order) {
         params.append('sort', sort);
         params.append('order', order);
+      }
+
+      if (search && String(search).trim() !== '') {
+        params.append('search', String(search).trim());
       }
 
       await axios.get(

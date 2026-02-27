@@ -24,6 +24,7 @@ class ManagedUsersController < ApplicationController
       # Sorting params
       sort_field = params[:sort]
       sort_order = params[:order]
+      search = params[:search]
 
       # Validate sort order
       sort_order = nil unless %w[asc desc].include?(sort_order)
@@ -31,14 +32,15 @@ class ManagedUsersController < ApplicationController
       if show_all_users
         # Admin viewing all users - get all managed users across all managers
         # Use for_manager_id_with_sort which can handle sorting
-        managed_users = ManagedUser.for_all_users_paginated(
+        paginated = ManagedUser.for_all_users_paginated(
           page: page,
           per_page: per_page,
           sort_field: sort_field,
-          sort_order: sort_order
+          sort_order: sort_order,
+          search: search
         )
-
-        total_count = ManagedUser.count
+        managed_users = paginated[:rows]
+        total_count = paginated[:total_count]
 
         to_render = {
           managed_users: managed_users,
@@ -58,16 +60,17 @@ class ManagedUsersController < ApplicationController
 
         # Verify permission: admin can access any manager, non-admin only themselves
         if current_user.admin || manager_id == current_user.id
-          total_count = ManagedUser.where(manager_id: manager_id).count
-
           # Get paginated and sorted managed users
-          managed_users = ManagedUser.for_manager_id_paginated(
+          paginated = ManagedUser.for_manager_id_paginated(
             manager_id: manager_id,
             page: page,
             per_page: per_page,
             sort_field: sort_field,
-            sort_order: sort_order
+            sort_order: sort_order,
+            search: search
           )
+          managed_users = paginated[:rows]
+          total_count = paginated[:total_count]
 
           to_render = {
             managed_users: managed_users,

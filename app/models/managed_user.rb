@@ -436,16 +436,23 @@ class ManagedUser < ApplicationRecord
     per_page = args[:per_page] || 25
     sort_field = args[:sort_field]
     sort_order = args[:sort_order]
+    search = args[:search]
 
     # Build the base query with all the calculations
     results = build_managed_users_query(manager_id: manager_id)
+    results = apply_search(results, search)
 
     # Apply sorting if specified
     results = apply_sorting(results, sort_field, sort_order)
 
+    total_count = results.length
+
     # Apply pagination to the array
     offset = (page - 1) * per_page
-    results[offset, per_page] || []
+    {
+      rows: results[offset, per_page] || [],
+      total_count: total_count
+    }
   end
 
   def self.for_all_users_paginated(args)
@@ -453,16 +460,23 @@ class ManagedUser < ApplicationRecord
     per_page = args[:per_page] || 25
     sort_field = args[:sort_field]
     sort_order = args[:sort_order]
+    search = args[:search]
 
     # Build query for all users across all managers
     results = build_managed_users_query(manager_id: nil)
+    results = apply_search(results, search)
 
     # Apply sorting if specified
     results = apply_sorting(results, sort_field, sort_order)
 
+    total_count = results.length
+
     # Apply pagination to the array
     offset = (page - 1) * per_page
-    results[offset, per_page] || []
+    {
+      rows: results[offset, per_page] || [],
+      total_count: total_count
+    }
   end
 
   def self.build_managed_users_query(manager_id:)
@@ -660,5 +674,26 @@ class ManagedUser < ApplicationRecord
 
     # Reverse if descending
     sort_order == 'desc' ? sorted.reverse : sorted
+  end
+
+  def self.apply_search(results, search)
+    return results if search.blank?
+
+    normalized_search = search.to_s.downcase.strip.gsub(/\s+/, ' ')
+    return results if normalized_search.blank?
+
+    tokens = normalized_search.split(' ').reject(&:blank?)
+
+    results.select do |row|
+      first_name = row['first_name'].to_s.downcase
+      last_name = row['last_name'].to_s.downcase
+      full_name = "#{first_name} #{last_name}".strip.gsub(/\s+/, ' ')
+      search_blob = [first_name, last_name, full_name].join(' ').gsub(/\s+/, ' ')
+
+      next false if search_blob.blank?
+      next true if search_blob.include?(normalized_search)
+
+      tokens.all? { |token| search_blob.include?(token) }
+    end
   end
 end

@@ -278,7 +278,8 @@ export default {
       recommenderWarmupKey: 'mask_recommender_warmup_done',
       expandedUsers: {}, // Track expansion state for each user
       currentSort: null,
-      currentOrder: null
+      currentOrder: null,
+      searchDebounceTimer: null
     }
   },
   computed: {
@@ -321,36 +322,6 @@ export default {
     },
     displayables() {
       let filtered = this.managedUsers
-
-      // Apply search filter
-      if (this.search !== "") {
-        const lowerSearch = this.search.toLowerCase().trim().replace(/\s+/g, ' ')
-        const tokens = lowerSearch.split(' ').filter(Boolean)
-        filtered = filtered.filter(
-          function(mu) {
-            const firstName = String(mu.firstName || '').toLowerCase()
-            const lastName = String(mu.lastName || '').toLowerCase()
-            const displayName = String(mu.fullName || '').toLowerCase().trim().replace(/\s+/g, ' ')
-            const combinedName = `${firstName} ${lastName}`.trim().replace(/\s+/g, ' ')
-            const searchBlob = [firstName, lastName, combinedName, displayName]
-              .filter(Boolean)
-              .join(' ')
-              .replace(/\s+/g, ' ')
-
-            if (!searchBlob) {
-              return false
-            }
-
-            // Direct phrase match first.
-            if (searchBlob.includes(lowerSearch)) {
-              return true
-            }
-
-            // Fallback to token-based matching for initials / spaced queries.
-            return tokens.every((token) => searchBlob.includes(token))
-          }
-        )
-      }
 
       // Apply traditional facial measurements filter
       if (this.filterTraditionalFm === 'incomplete') {
@@ -434,6 +405,12 @@ export default {
       this.emitPaginationUpdate()
     })
   },
+  beforeUnmount() {
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer)
+      this.searchDebounceTimer = null
+    }
+  },
   watch: {
     '$route'(to, from) {
       // Reload managed users when navigating back to RespiratorUsers page
@@ -459,6 +436,14 @@ export default {
       this.$nextTick(() => {
         this.emitPaginationUpdate()
       })
+    },
+    search() {
+      if (this.searchDebounceTimer) {
+        clearTimeout(this.searchDebounceTimer)
+      }
+      this.searchDebounceTimer = setTimeout(() => {
+        this.loadData(1)
+      }, 250)
     },
     isAdminView(newValue, oldValue) {
       if (this.currentUser && newValue !== oldValue) {
@@ -501,7 +486,7 @@ export default {
       const admin = this.isAdminView
       const sort = this.currentSort
       const order = this.currentOrder
-      this.loadManagedUsers({ admin, page, perPage: 25, sort, order })
+      this.loadManagedUsers({ admin, page, perPage: 25, sort, order, search: this.search })
     },
     toggleSort(field) {
       if (this.currentSort === field) {
