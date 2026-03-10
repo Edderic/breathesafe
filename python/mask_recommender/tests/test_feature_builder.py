@@ -2,6 +2,7 @@ import pandas as pd
 
 from mask_recommender.feature_builder import (FACE_SHAPE_FEATURE_COLUMNS,
                                              MASK_SIZE_FEATURE_COLUMNS,
+                                             PERIMETER_PENALTY_FEATURE_COLUMNS,
                                              apply_perimeter_features,
                                              build_feature_frame,
                                              derive_brand_model,
@@ -61,12 +62,16 @@ def test_build_feature_frame_adds_engineered_face_shape_features():
         assert column in encoded.columns
     for column in MASK_SIZE_FEATURE_COLUMNS:
         assert column in encoded.columns
+    for column in PERIMETER_PENALTY_FEATURE_COLUMNS:
+        assert column in encoded.columns
     assert "face_style_x_nose_ratio_x_style_term_Cup" in encoded.columns
     assert "face_style_x_nose_ratio_x_style_term_Bifold" in encoded.columns
     assert encoded.loc[0, "facial_perimeter_cm"] == 20.5
     assert encoded.loc[1, "facial_perimeter_cm"] == 21.4
     assert encoded.loc[0, "strap_ratio"] > 0
     assert encoded.loc[1, "chin_to_nose_ratio"] > 1
+    assert encoded.loc[0, "abs_perimeter_diff_cu"] > 0
+    assert encoded.loc[0, "abs_perimeter_diff_gt_5cm"] == 1.0
 
 
 def test_parse_mask_sizing_separates_face_size_from_extended_straps():

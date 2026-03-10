@@ -8,6 +8,7 @@ from mask_recommender import train as train_module
 from mask_recommender.feature_builder import build_feature_frame
 from mask_recommender.inference import lambda_function
 from mask_recommender.qa import build_mask_candidates, build_inference_rows
+from mask_recommender.training.lambda_function import _build_train_argv
 
 
 def _fit_tests_df():
@@ -180,3 +181,17 @@ def test_training_and_inference_alignment(monkeypatch, tmp_path):
 
     assert len(recommendations) == 2
     assert {rec["mask_id"] for rec in recommendations} == {1, 2}
+
+
+def test_training_lambda_builds_exclude_brand_model_flag():
+    argv = _build_train_argv(
+        {
+            "epochs": 100,
+            "exclude_mask_code": True,
+            "exclude_brand_model": True,
+        }
+    )
+
+    assert "--epochs" in argv
+    assert "--exclude-mask-code" in argv
+    assert "--exclude-brand-model" in argv

@@ -21,12 +21,14 @@ from botocore.exceptions import ClientError
 from breathesafe_network import (build_session,
                                  fetch_facial_measurements_fit_tests,
                                  fetch_json)
-from feature_builder import (ABS_PERIMETER_DIFF_STYLE_PREFIX,
+from feature_builder import (ABS_PERIMETER_DIFF_CU_STYLE_PREFIX,
+                             ABS_PERIMETER_DIFF_STYLE_PREFIX,
                              FACE_SHAPE_FEATURE_COLUMNS,
                              FACE_STYLE_INTERACTION_PREFIX,
                              FACIAL_FEATURE_COLUMNS,
                              FACIAL_PERIMETER_COMPONENTS,
                              MASK_SIZE_FEATURE_COLUMNS,
+                             PERIMETER_PENALTY_FEATURE_COLUMNS,
                              PERIMETER_DIFF_SQ_STYLE_PREFIX,
                              PERIMETER_DIFF_STYLE_PREFIX,
                              STRAP_STYLE_INTERACTION_PREFIX,
@@ -445,6 +447,7 @@ def prepare_training_data(
                 column for column in filtered.columns
                 if column.startswith(PERIMETER_DIFF_STYLE_PREFIX)
                 or column.startswith(ABS_PERIMETER_DIFF_STYLE_PREFIX)
+                or column.startswith(ABS_PERIMETER_DIFF_CU_STYLE_PREFIX)
                 or column.startswith(PERIMETER_DIFF_SQ_STYLE_PREFIX)
                 or column.startswith(FACE_STYLE_INTERACTION_PREFIX)
                 or column.startswith(STRAP_STYLE_INTERACTION_PREFIX)
@@ -455,7 +458,7 @@ def prepare_training_data(
             'perimeter_diff',
             'abs_perimeter_diff',
             'perimeter_diff_sq'
-        ] + FACE_SHAPE_FEATURE_COLUMNS + MASK_SIZE_FEATURE_COLUMNS + interaction_cols
+        ] + PERIMETER_PENALTY_FEATURE_COLUMNS + FACE_SHAPE_FEATURE_COLUMNS + MASK_SIZE_FEATURE_COLUMNS + interaction_cols
         if use_facial_perimeter:
             feature_cols.append('facial_perimeter_mm')
         else:
@@ -1142,6 +1145,7 @@ def main(argv=None):
     parser.add_argument('--use-diff-perimeter-bins', action='store_true', help='Use perimeter difference bins instead of raw perimeter features.')
     parser.add_argument('--use-diff-perimeter-mask-bins', action='store_true', help='Include per-mask perimeter difference bin features.')
     parser.add_argument('--exclude-mask-code', action='store_true', help='Exclude unique_internal_model_code from categorical features.')
+    parser.add_argument('--exclude-brand-model', action='store_true', help='Exclude brand_model from categorical features.')
     parser.add_argument('--zscore', action='store_true', help='Apply z-score normalization to non-binary numeric features.')
     parser.add_argument('--class-reweight', action='store_true', help='Reweight loss by class balance.')
     parser.add_argument(
@@ -1363,9 +1367,11 @@ def main(argv=None):
 
         return latest_payload
 
-    categorical_columns = ['strap_type', 'style', 'brand_model', 'unique_internal_model_code']
-    if args.exclude_mask_code:
-        categorical_columns = ['strap_type', 'style', 'brand_model']
+    categorical_columns = ['strap_type', 'style']
+    if not args.exclude_brand_model:
+        categorical_columns.append('brand_model')
+    if not args.exclude_mask_code:
+        categorical_columns.append('unique_internal_model_code')
 
     features, target = build_feature_matrix(cleaned_fit_tests, categorical_columns)
 
@@ -1694,6 +1700,8 @@ def main(argv=None):
         'retrain_with_full': bool(args.retrain_with_full),
         'saved_model_training_scope': saved_model_scope,
         'validation_metrics_source': 'split_validation',
+        'exclude_mask_code': bool(args.exclude_mask_code),
+        'exclude_brand_model': bool(args.exclude_brand_model),
         'zscore': bool(args.zscore),
         'zscore_features_count': len(zscore_stats_for_saved_model),
     }
@@ -1713,6 +1721,7 @@ def main(argv=None):
         'use_diff_perimeter_bins': args.use_diff_perimeter_bins,
         'use_diff_perimeter_mask_bins': args.use_diff_perimeter_mask_bins,
         'exclude_mask_code': args.exclude_mask_code,
+        'exclude_brand_model': args.exclude_brand_model,
         'retrain_with_full': bool(args.retrain_with_full),
         'saved_model_training_scope': saved_model_scope,
         'validation_metrics_source': 'split_validation',

@@ -23,6 +23,7 @@ STYLE_INTERACTION_PREFIX = "style_term_"
 PERIMETER_DIFF_STYLE_PREFIX = "perimeter_diff_x_"
 ABS_PERIMETER_DIFF_STYLE_PREFIX = "abs_perimeter_diff_x_"
 PERIMETER_DIFF_SQ_STYLE_PREFIX = "perimeter_diff_sq_x_"
+ABS_PERIMETER_DIFF_CU_STYLE_PREFIX = "abs_perimeter_diff_cu_x_"
 STRAP_STYLE_INTERACTION_PREFIX = "strap_style_x_"
 FACE_STYLE_INTERACTION_PREFIX = "face_style_x_"
 MM_PER_CM = 10.0
@@ -30,6 +31,7 @@ MM_PER_CM = 10.0
 # perimeter/style mismatches influence ranking more strongly.
 ABS_PERIMETER_DIFF_STYLE_INTERACTION_MULTIPLIER = 6.0
 PERIMETER_DIFF_SQ_STYLE_INTERACTION_MULTIPLIER = 25.0
+ABS_PERIMETER_DIFF_CU_STYLE_INTERACTION_MULTIPLIER = 60.0
 
 STRAP_FEATURE_COLUMNS = [
     "strap_is_earloop_like",
@@ -68,6 +70,14 @@ MASK_SIZE_FEATURE_COLUMNS = [
     "mask_size_chin_match",
     "mask_size_top_cheek_match",
     "mask_strap_length_strap_match",
+]
+
+PERIMETER_PENALTY_FEATURE_COLUMNS = [
+    "abs_perimeter_diff_cu",
+    "abs_perimeter_diff_gt_2cm",
+    "abs_perimeter_diff_gt_3cm",
+    "abs_perimeter_diff_gt_4cm",
+    "abs_perimeter_diff_gt_5cm",
 ]
 
 
@@ -275,6 +285,8 @@ def add_style_perimeter_interactions(frame):
     result = frame.copy()
     if "abs_perimeter_diff" not in result.columns:
         result["abs_perimeter_diff"] = result["perimeter_diff"].abs()
+    if "abs_perimeter_diff_cu" not in result.columns:
+        result["abs_perimeter_diff_cu"] = result["abs_perimeter_diff"] ** 3
     style_series = result["style"].fillna("unknown").astype(str).str.strip()
     style_series = style_series.replace("", "unknown")
     style_dummies = pd.get_dummies(style_series, prefix=STYLE_INTERACTION_PREFIX.rstrip("_"))
@@ -290,6 +302,11 @@ def add_style_perimeter_interactions(frame):
             result["perimeter_diff_sq"]
             * style_dummies[column]
             * PERIMETER_DIFF_SQ_STYLE_INTERACTION_MULTIPLIER
+        )
+        result[f"{ABS_PERIMETER_DIFF_CU_STYLE_PREFIX}{column}"] = (
+            result["abs_perimeter_diff_cu"]
+            * style_dummies[column]
+            * ABS_PERIMETER_DIFF_CU_STYLE_INTERACTION_MULTIPLIER
         )
 
     return result
@@ -307,6 +324,11 @@ def scale_perimeter_diff_features(frame):
     result["abs_perimeter_diff"] = result["perimeter_diff"].abs()
     if "perimeter_diff_sq" in result.columns:
         result["perimeter_diff_sq"] = result["perimeter_diff_sq"] / (MM_PER_CM ** 2)
+    result["abs_perimeter_diff_cu"] = result["abs_perimeter_diff"] ** 3
+    result["abs_perimeter_diff_gt_2cm"] = (result["abs_perimeter_diff"] >= 2.0).astype(float)
+    result["abs_perimeter_diff_gt_3cm"] = (result["abs_perimeter_diff"] >= 3.0).astype(float)
+    result["abs_perimeter_diff_gt_4cm"] = (result["abs_perimeter_diff"] >= 4.0).astype(float)
+    result["abs_perimeter_diff_gt_5cm"] = (result["abs_perimeter_diff"] >= 5.0).astype(float)
     return result
 
 
