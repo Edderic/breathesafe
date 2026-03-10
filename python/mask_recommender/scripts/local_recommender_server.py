@@ -22,6 +22,21 @@ from mask_recommender.prob_model import predict_prob_model  # noqa: E402
 APP = Flask(__name__)
 
 
+def _apply_empirical_history_cap(probability, mask_info):
+    fit_test_count = float(mask_info.get("mask_fit_test_count", 0) or 0)
+    pass_count = float(mask_info.get("mask_pass_count", 0) or 0)
+
+    if pass_count == 0.0:
+        if fit_test_count >= 20.0:
+            return min(probability, 0.01)
+        if fit_test_count >= 10.0:
+            return min(probability, 0.05)
+        if fit_test_count >= 5.0:
+            return min(probability, 0.10)
+
+    return probability
+
+
 def _env_name() -> str:
     env = os.environ.get("RAILS_ENV", "").strip().lower()
     if env in ("production", "staging", "development"):
@@ -257,9 +272,10 @@ def _infer(payload, artifacts):
 
     recommendations = []
     for idx, (mask_id, mask_info) in enumerate(artifacts["mask_data"].items()):
+        capped_probability = _apply_empirical_history_cap(float(probs[idx]), mask_info)
         recommendations.append({
             "mask_id": int(mask_id),
-            "proba_fit": float(probs[idx]),
+            "proba_fit": capped_probability,
             "mask_info": mask_info,
         })
 

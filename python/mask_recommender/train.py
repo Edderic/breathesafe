@@ -518,6 +518,7 @@ def compute_mask_empirical_priors(fit_tests_df):
         zero_passes = passes == 0.0
         priors[int(mask_id)] = {
             'mask_fit_test_count': count,
+            'mask_pass_count': passes,
             'mask_smoothed_pass_rate': smoothed_pass_rate,
             'mask_log_fit_test_count': float(np.log1p(count)),
             'mask_smoothed_pass_logit': float(np.log(clipped_rate / (1.0 - clipped_rate))),

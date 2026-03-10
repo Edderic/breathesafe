@@ -8,6 +8,7 @@ from mask_recommender import train as train_module
 from mask_recommender.feature_builder import build_feature_frame
 from mask_recommender.inference import lambda_function
 from mask_recommender.qa import build_mask_candidates, build_inference_rows
+from mask_recommender.scripts import local_recommender_server
 from mask_recommender.training.lambda_function import _build_train_argv
 
 
@@ -236,3 +237,12 @@ def test_compute_mask_empirical_priors_and_attach_to_masks():
     assert mask_a["mask_fit_test_count"] == 2.0
     assert mask_a["mask_smoothed_pass_rate"] == 0.5
     assert mask_a["mask_empirical_badness"] == 0.5
+
+
+def test_empirical_history_cap_applies_for_zero_pass_masks():
+    bad_mask = {"mask_fit_test_count": 12, "mask_pass_count": 0}
+    okay_mask = {"mask_fit_test_count": 12, "mask_pass_count": 1}
+
+    assert lambda_function._apply_empirical_history_cap(0.36, bad_mask) == 0.05
+    assert local_recommender_server._apply_empirical_history_cap(0.36, bad_mask) == 0.05
+    assert lambda_function._apply_empirical_history_cap(0.36, okay_mask) == 0.36
