@@ -205,6 +205,8 @@ def test_fit_zscore_stats_skips_perimeter_geometry_columns():
             "perimeter_diff_sq": [1.0, 4.0, 9.0],
             "earloop_abs_diff": [0.0, 2.0, 0.0],
             "face_size_gap_cm": [3.0, -3.0, 0.0],
+            "mask_empirical_badness": [1.0, 0.5, 0.2],
+            "mask_badness_x_abs_perimeter_diff": [1.0, 1.0, 0.6],
             "nose_ratio": [0.1, 0.2, 0.3],
         }
     )
@@ -216,6 +218,8 @@ def test_fit_zscore_stats_skips_perimeter_geometry_columns():
     assert "perimeter_diff_sq" not in stats
     assert "earloop_abs_diff" not in stats
     assert "face_size_gap_cm" not in stats
+    assert "mask_empirical_badness" not in stats
+    assert "mask_badness_x_abs_perimeter_diff" not in stats
     assert "nose_ratio" in stats
 
 
@@ -224,9 +228,11 @@ def test_compute_mask_empirical_priors_and_attach_to_masks():
 
     assert priors[1]["mask_fit_test_count"] == 2.0
     assert priors[1]["mask_smoothed_pass_rate"] == 0.5
+    assert priors[1]["mask_empirical_badness"] == 0.5
 
     masks = train_module.attach_mask_empirical_priors_to_masks(_masks_df(), priors)
 
     mask_a = masks[masks["id"] == 1].iloc[0]
     assert mask_a["mask_fit_test_count"] == 2.0
     assert mask_a["mask_smoothed_pass_rate"] == 0.5
+    assert mask_a["mask_empirical_badness"] == 0.5

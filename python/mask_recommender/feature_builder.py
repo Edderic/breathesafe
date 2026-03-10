@@ -107,6 +107,12 @@ MASK_EMPIRICAL_FEATURE_COLUMNS = [
     "mask_smoothed_pass_rate",
     "mask_log_fit_test_count",
     "mask_smoothed_pass_logit",
+    "mask_empirical_badness",
+    "mask_zero_passes_min_5",
+    "mask_zero_passes_min_10",
+    "mask_fail_only_rate",
+    "mask_badness_x_abs_perimeter_diff",
+    "mask_zero_passes_min_10_x_earloop",
 ]
 
 

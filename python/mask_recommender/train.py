@@ -514,11 +514,17 @@ def compute_mask_empirical_priors(fit_tests_df):
         passes = float(row.get('sum', 0) or 0)
         smoothed_pass_rate = (passes + 1.0) / (count + 2.0)
         clipped_rate = min(max(smoothed_pass_rate, 1e-6), 1 - 1e-6)
+        empirical_badness = 1.0 - smoothed_pass_rate
+        zero_passes = passes == 0.0
         priors[int(mask_id)] = {
             'mask_fit_test_count': count,
             'mask_smoothed_pass_rate': smoothed_pass_rate,
             'mask_log_fit_test_count': float(np.log1p(count)),
             'mask_smoothed_pass_logit': float(np.log(clipped_rate / (1.0 - clipped_rate))),
+            'mask_empirical_badness': empirical_badness,
+            'mask_zero_passes_min_5': float(zero_passes and count >= 5.0),
+            'mask_zero_passes_min_10': float(zero_passes and count >= 10.0),
+            'mask_fail_only_rate': float(zero_passes),
         }
     return priors
 
@@ -533,6 +539,12 @@ def add_mask_empirical_prior_features(frame, priors_by_mask_id):
         'mask_smoothed_pass_rate': 0.5,
         'mask_log_fit_test_count': 0.0,
         'mask_smoothed_pass_logit': 0.0,
+        'mask_empirical_badness': 0.5,
+        'mask_zero_passes_min_5': 0.0,
+        'mask_zero_passes_min_10': 0.0,
+        'mask_fail_only_rate': 0.0,
+        'mask_badness_x_abs_perimeter_diff': 0.0,
+        'mask_zero_passes_min_10_x_earloop': 0.0,
     }
 
     mask_id_source = result.get('mask_id')
@@ -552,7 +564,19 @@ def add_mask_empirical_prior_features(frame, priors_by_mask_id):
         if not prior:
             continue
         for column in MASK_EMPIRICAL_FEATURE_COLUMNS:
-            result.at[idx, column] = float(prior.get(column, defaults[column]))
+            if column in prior:
+                result.at[idx, column] = float(prior.get(column, defaults[column]))
+
+    if 'abs_perimeter_diff' in result.columns:
+        result['mask_badness_x_abs_perimeter_diff'] = (
+            pd.to_numeric(result['mask_empirical_badness'], errors='coerce').fillna(0)
+            * pd.to_numeric(result['abs_perimeter_diff'], errors='coerce').fillna(0)
+        )
+    if 'strap_is_earloop_like' in result.columns:
+        result['mask_zero_passes_min_10_x_earloop'] = (
+            pd.to_numeric(result['mask_zero_passes_min_10'], errors='coerce').fillna(0)
+            * pd.to_numeric(result['strap_is_earloop_like'], errors='coerce').fillna(0)
+        )
 
     return result
 
@@ -580,7 +604,7 @@ PERIMETER_ZSCORE_EXCLUDED_COLUMNS = set(
         'face_size_gap_cm',
         'abs_face_size_gap_cm',
         'face_size_gap_sq',
-    ] + PERIMETER_PENALTY_FEATURE_COLUMNS
+    ] + PERIMETER_PENALTY_FEATURE_COLUMNS + MASK_EMPIRICAL_FEATURE_COLUMNS
 )
 
 PERIMETER_ZSCORE_EXCLUDED_PREFIXES = (
