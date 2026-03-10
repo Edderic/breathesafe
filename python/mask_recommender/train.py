@@ -103,6 +103,21 @@ STYLE_TYPES = [
     'Elastomeric'
 ]
 
+DEFAULT_PROBE_PAYLOADS = [
+    {
+        'label': 'edderic_probe_20260310',
+        'facial_measurements': {
+            'nose_mm': 46.72047233581543,
+            'chin_mm': 122.5139946937561,
+            'top_cheek_mm': 98.81752729415894,
+            'mid_cheek_mm': 95.16602277755737,
+            'strap_mm': 130.28683853149414,
+            'facial_hair_beard_length_mm': 0.0,
+        }
+    }
+]
+PROBE_WATCHLIST_FAMILIES = ['drager', 'laianzhi', 'trident', 'aura', 'zimi']
+
 
 def initialize_betas(diff_keys, num_users, num_masks, style_types):
     """
@@ -863,6 +878,246 @@ def _best_effort_visual_upload(upload_fn, artifact_name, fallback_artifact=None)
         return fallback_artifact
 
 
+def _download_json_from_s3(key):
+    bucket = _s3_bucket()
+    s3 = boto3.client('s3', region_name=_s3_region())
+    response = s3.get_object(Bucket=bucket, Key=key)
+    return json.loads(response['Body'].read().decode('utf-8'))
+
+
+def _download_state_dict_from_s3(key):
+    bucket = _s3_bucket()
+    s3 = boto3.client('s3', region_name=_s3_region())
+    response = s3.get_object(Bucket=bucket, Key=key)
+    return torch.load(io.BytesIO(response['Body'].read()), map_location='cpu')
+
+
+def _load_previous_latest_nn_artifacts():
+    latest_key = "mask_recommender/models/latest.json"
+    latest_payload = _download_json_from_s3(latest_key)
+    metadata = _download_json_from_s3(latest_payload['metadata_key'])
+    state_dict = _download_state_dict_from_s3(latest_payload['model_key'])
+    return {
+        'latest': latest_payload,
+        'metadata': metadata,
+        'state_dict': state_dict,
+    }
+
+
+def _probe_payloads():
+    raw = os.environ.get('MASK_RECOMMENDER_PROBES_JSON')
+    if not raw:
+        return DEFAULT_PROBE_PAYLOADS
+
+    payload = json.loads(raw)
+    if isinstance(payload, dict):
+        payload = [payload]
+    if not isinstance(payload, list):
+        raise ValueError("MASK_RECOMMENDER_PROBES_JSON must decode to a list or object.")
+    return payload
+
+
+def _build_model_from_state_dict(state_dict):
+    linear_specs = []
+    for key, value in state_dict.items():
+        if not key.endswith('.weight'):
+            continue
+        layer_token = key.split('.')[0]
+        if not layer_token.isdigit() or value.ndim != 2:
+            continue
+        linear_specs.append((int(layer_token), int(value.shape[1]), int(value.shape[0])))
+    linear_specs.sort(key=lambda item: item[0])
+    if len(linear_specs) < 2:
+        raise RuntimeError("Unexpected model format; unable to infer linear layers.")
+
+    layers = []
+    for idx, (_, in_features, out_features) in enumerate(linear_specs):
+        layers.append(torch.nn.Linear(in_features, out_features))
+        if idx < len(linear_specs) - 1:
+            layers.append(torch.nn.ReLU())
+
+    model = torch.nn.Sequential(*layers)
+    model.load_state_dict(state_dict)
+    model.eval()
+    return model
+
+
+def _predict_probe_probabilities(
+    model,
+    facial_measurements,
+    mask_candidates,
+    feature_columns,
+    categorical_columns,
+    use_facial_perimeter=False,
+    use_diff_perimeter_bins=False,
+    use_diff_perimeter_mask_bins=False,
+    zscore_stats=None,
+):
+    probe_frame = pd.DataFrame(
+        {
+            'perimeter_mm': mask_candidates['perimeter_mm'].to_numpy(),
+            'facial_hair_beard_length_mm': facial_measurements.get('facial_hair_beard_length_mm', 0) or 0,
+            'strap_type': mask_candidates['strap_type'].to_numpy(),
+            'style': mask_candidates['style'].to_numpy(),
+            'brand_model': mask_candidates['brand_model'].to_numpy(),
+            'unique_internal_model_code': mask_candidates['unique_internal_model_code'].to_numpy(),
+        }
+    )
+    for column in FACIAL_FEATURE_COLUMNS:
+        probe_frame[column] = facial_measurements.get(column, 0) or 0
+
+    encoded = build_feature_frame(
+        probe_frame,
+        feature_columns=feature_columns,
+        categorical_columns=categorical_columns,
+        use_facial_perimeter=use_facial_perimeter,
+        use_diff_perimeter_bins=use_diff_perimeter_bins,
+        use_diff_perimeter_mask_bins=use_diff_perimeter_mask_bins
+    )
+    if zscore_stats:
+        encoded = apply_zscore(encoded, zscore_stats)
+
+    x_probe = torch.tensor(encoded.to_numpy(), dtype=torch.float32)
+    model.eval()
+    with torch.no_grad():
+        probs = model(x_probe).squeeze().cpu().numpy()
+
+    rows = []
+    for idx, mask_row in mask_candidates.reset_index(drop=True).iterrows():
+        rows.append({
+            'mask_id': int(mask_row['id']),
+            'unique_internal_model_code': mask_row.get('unique_internal_model_code', ''),
+            'brand_model': mask_row.get('brand_model', ''),
+            'style': mask_row.get('style', ''),
+            'strap_type': mask_row.get('strap_type', ''),
+            'probability_of_fit': float(probs[idx]),
+        })
+    rows.sort(key=lambda row: row['probability_of_fit'], reverse=True)
+    return rows
+
+
+def _build_probe_diagnostics(
+    model,
+    mask_candidates,
+    feature_columns,
+    categorical_columns,
+    args,
+    zscore_stats,
+):
+    probes = _probe_payloads()
+    previous_artifacts = None
+    previous_error = None
+    try:
+        previous_artifacts = _load_previous_latest_nn_artifacts()
+    except (ClientError, OSError, RuntimeError, ValueError, KeyError, json.JSONDecodeError) as exc:
+        previous_error = str(exc)
+
+    previous_model = None
+    previous_metadata = None
+    if previous_artifacts is not None:
+        previous_model = _build_model_from_state_dict(previous_artifacts['state_dict'])
+        previous_metadata = previous_artifacts['metadata']
+
+    diagnostics = {
+        'generated_at': datetime.now(timezone.utc).isoformat(),
+        'previous_model_timestamp': previous_artifacts['latest'].get('timestamp') if previous_artifacts else None,
+        'previous_model_error': previous_error,
+        'probes': [],
+    }
+
+    for probe in probes:
+        label = probe.get('label') or f"probe_{len(diagnostics['probes']) + 1}"
+        facial_measurements = probe.get('facial_measurements') or {}
+        current_rows = _predict_probe_probabilities(
+            model,
+            facial_measurements,
+            mask_candidates,
+            feature_columns,
+            categorical_columns,
+            use_facial_perimeter=args.use_facial_perimeter,
+            use_diff_perimeter_bins=args.use_diff_perimeter_bins,
+            use_diff_perimeter_mask_bins=args.use_diff_perimeter_mask_bins,
+            zscore_stats=zscore_stats,
+        )
+        probe_payload = {
+            'label': label,
+            'facial_measurements': facial_measurements,
+            'current_top_recommendations': current_rows[:25],
+        }
+
+        if previous_model is not None and previous_metadata is not None:
+            previous_rows = _predict_probe_probabilities(
+                previous_model,
+                facial_measurements,
+                mask_candidates,
+                previous_metadata['feature_columns'],
+                previous_metadata['categorical_columns'],
+                use_facial_perimeter=previous_metadata.get('use_facial_perimeter', False),
+                use_diff_perimeter_bins=previous_metadata.get('use_diff_perimeter_bins', False),
+                use_diff_perimeter_mask_bins=previous_metadata.get('use_diff_perimeter_mask_bins', False),
+                zscore_stats=previous_metadata.get('zscore_stats', {}) if previous_metadata.get('zscore') else {},
+            )
+            previous_by_id = {row['mask_id']: row for row in previous_rows}
+            current_by_id = {row['mask_id']: row for row in current_rows}
+            deltas = []
+            for mask_id, current_row in current_by_id.items():
+                previous_row = previous_by_id.get(mask_id)
+                previous_prob = previous_row['probability_of_fit'] if previous_row else None
+                delta = None if previous_prob is None else current_row['probability_of_fit'] - previous_prob
+                deltas.append({
+                    'mask_id': mask_id,
+                    'unique_internal_model_code': current_row['unique_internal_model_code'],
+                    'brand_model': current_row['brand_model'],
+                    'style': current_row['style'],
+                    'strap_type': current_row['strap_type'],
+                    'current_probability_of_fit': current_row['probability_of_fit'],
+                    'previous_probability_of_fit': previous_prob,
+                    'delta_probability_of_fit': delta,
+                })
+
+            delta_rows = [row for row in deltas if row['delta_probability_of_fit'] is not None]
+            delta_rows.sort(key=lambda row: row['delta_probability_of_fit'])
+            probe_payload['largest_probability_drops'] = delta_rows[:25]
+            probe_payload['largest_probability_gains'] = list(reversed(delta_rows[-25:]))
+            watchlist = []
+            for family in PROBE_WATCHLIST_FAMILIES:
+                matching = [
+                    row for row in deltas
+                    if family in str(row['unique_internal_model_code']).lower()
+                    or family in str(row['brand_model']).lower()
+                ]
+                if not matching:
+                    continue
+                matching_with_delta = [row for row in matching if row['delta_probability_of_fit'] is not None]
+                watchlist.append({
+                    'family': family,
+                    'count': len(matching),
+                    'max_current_probability_of_fit': max(row['current_probability_of_fit'] for row in matching),
+                    'max_previous_probability_of_fit': (
+                        max(row['previous_probability_of_fit'] for row in matching_with_delta)
+                        if matching_with_delta else None
+                    ),
+                    'largest_gain': (
+                        max(row['delta_probability_of_fit'] for row in matching_with_delta)
+                        if matching_with_delta else None
+                    ),
+                    'largest_drop': (
+                        min(row['delta_probability_of_fit'] for row in matching_with_delta)
+                        if matching_with_delta else None
+                    ),
+                    'top_current_masks': sorted(
+                        matching,
+                        key=lambda row: row['current_probability_of_fit'],
+                        reverse=True
+                    )[:5],
+                })
+            probe_payload['watchlist_families'] = watchlist
+
+        diagnostics['probes'].append(probe_payload)
+
+    return diagnostics
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Train fit predictor model.')
     parser.add_argument('--epochs', type=int, default=600, help='Number of training epochs.')
@@ -1225,6 +1480,30 @@ def main(argv=None):
             logging.info("Saved recommendation preview to %s", recommendations_uri)
     else:
         logging.info("Saved recommendation preview to %s", recommendations_path)
+    probe_diagnostics = _build_probe_diagnostics(
+        model=model,
+        mask_candidates=mask_candidates,
+        feature_columns=feature_columns,
+        categorical_columns=categorical_columns,
+        args=args,
+        zscore_stats=zscore_stats_for_saved_model,
+    )
+    probe_diagnostics_path = os.path.join(images_dir, f"{timestamp}_probe_diagnostics.json")
+    probe_diagnostics_artifact = probe_diagnostics_path
+    if _should_upload_visual_artifacts_to_s3():
+        probe_diagnostics_key = f"mask_recommender/models/{timestamp}/{timestamp}_probe_diagnostics.json"
+        probe_diagnostics_uri = _best_effort_visual_upload(
+            lambda: _upload_json_to_s3(probe_diagnostics, probe_diagnostics_key),
+            "probe diagnostics",
+            fallback_artifact=None,
+        )
+        probe_diagnostics_artifact = probe_diagnostics_uri
+        if probe_diagnostics_uri:
+            logging.info("Saved probe diagnostics to %s", probe_diagnostics_uri)
+    else:
+        with open(probe_diagnostics_path, 'w', encoding='utf-8') as handle:
+            json.dump(probe_diagnostics, handle, indent=2)
+        logging.info("Saved probe diagnostics to %s", probe_diagnostics_path)
     loss_plot_artifact = None
     if train_losses:
         loss_plot_path = os.path.join(images_dir, f"{timestamp}_training_loss.png")
@@ -1400,6 +1679,7 @@ def main(argv=None):
         'training_loss_artifact': loss_plot_artifact,
         'roc_auc_artifact': roc_plot_artifact,
         'validation_results_artifact': val_results_artifact,
+        'probe_diagnostics_artifact': probe_diagnostics_artifact,
         'retrain_with_full': bool(args.retrain_with_full),
         'saved_model_training_scope': saved_model_scope,
         'validation_metrics_source': 'split_validation',
