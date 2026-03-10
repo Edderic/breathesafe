@@ -538,7 +538,10 @@ def add_mask_empirical_prior_features(frame, priors_by_mask_id):
     mask_id_source = result.get('mask_id')
     if mask_id_source is None:
         mask_id_source = result.get('id')
-    mask_ids = pd.to_numeric(mask_id_source, errors='coerce')
+    if mask_id_source is None or not hasattr(mask_id_source, 'items'):
+        mask_ids = pd.Series([np.nan] * len(result), index=result.index)
+    else:
+        mask_ids = pd.to_numeric(mask_id_source, errors='coerce')
     for column in MASK_EMPIRICAL_FEATURE_COLUMNS:
         result[column] = defaults[column]
 
@@ -1068,6 +1071,7 @@ def _predict_probe_probabilities(
 ):
     probe_frame = pd.DataFrame(
         {
+            'mask_id': mask_candidates['mask_id'].to_numpy(),
             'perimeter_mm': mask_candidates['perimeter_mm'].to_numpy(),
             'facial_hair_beard_length_mm': facial_measurements.get('facial_hair_beard_length_mm', 0) or 0,
             'strap_type': mask_candidates['strap_type'].to_numpy(),
