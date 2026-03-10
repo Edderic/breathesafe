@@ -1117,6 +1117,7 @@ def _build_probe_diagnostics(
     categorical_columns,
     args,
     zscore_stats,
+    mask_empirical_priors,
 ):
     probes = _probe_payloads()
     previous_artifacts = None
@@ -1610,6 +1611,7 @@ def main(argv=None):
         categorical_columns=categorical_columns,
         args=args,
         zscore_stats=zscore_stats_for_saved_model,
+        mask_empirical_priors=mask_empirical_priors,
     )
     probe_diagnostics_path = os.path.join(images_dir, f"{timestamp}_probe_diagnostics.json")
     probe_diagnostics_artifact = probe_diagnostics_path
