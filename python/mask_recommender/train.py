@@ -26,12 +26,15 @@ from feature_builder import (ABS_PERIMETER_DIFF_STYLE_PREFIX,
                              FACE_STYLE_INTERACTION_PREFIX,
                              FACIAL_FEATURE_COLUMNS,
                              FACIAL_PERIMETER_COMPONENTS,
+                             MASK_SIZE_FEATURE_COLUMNS,
                              PERIMETER_DIFF_SQ_STYLE_PREFIX,
                              PERIMETER_DIFF_STYLE_PREFIX,
                              STRAP_STYLE_INTERACTION_PREFIX,
                              add_face_shape_features,
                              add_face_style_interactions,
                              add_brand_model_column,
+                             add_mask_size_face_interactions,
+                             add_mask_size_features,
                              add_strap_style_interactions,
                              add_strap_type_features,
                              add_style_perimeter_interactions,
@@ -398,6 +401,8 @@ def prepare_training_data(
     filtered = add_brand_model_column(filtered)
     filtered = add_strap_type_features(filtered)
     filtered = add_face_shape_features(filtered)
+    filtered = add_mask_size_features(filtered)
+    filtered = add_mask_size_face_interactions(filtered)
     filtered = add_strap_style_interactions(filtered)
 
     feature_cols = []
@@ -450,7 +455,7 @@ def prepare_training_data(
             'perimeter_diff',
             'abs_perimeter_diff',
             'perimeter_diff_sq'
-        ] + FACE_SHAPE_FEATURE_COLUMNS + interaction_cols
+        ] + FACE_SHAPE_FEATURE_COLUMNS + MASK_SIZE_FEATURE_COLUMNS + interaction_cols
         if use_facial_perimeter:
             feature_cols.append('facial_perimeter_mm')
         else:

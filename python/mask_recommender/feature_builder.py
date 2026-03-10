@@ -55,6 +55,21 @@ FACE_SHAPE_FEATURE_COLUMNS = [
     "strap_sq_cm2",
 ]
 
+MASK_SIZE_FEATURE_COLUMNS = [
+    "mask_face_size_rank",
+    "mask_face_size_is_xs",
+    "mask_face_size_is_s",
+    "mask_face_size_is_regular",
+    "mask_face_size_is_large",
+    "mask_face_size_is_xxl",
+    "mask_strap_length_rank",
+    "mask_strap_length_is_extended",
+    "mask_size_face_perimeter_match",
+    "mask_size_chin_match",
+    "mask_size_top_cheek_match",
+    "mask_strap_length_strap_match",
+]
+
 
 def _extract_breakdown(current_state):
     if current_state is None or (isinstance(current_state, float) and pd.isna(current_state)):
@@ -91,6 +106,71 @@ def _tokenize_mask_code(unique_internal_model_code):
     if not text:
         return []
     return [token for token in re.split(r"[\s\-—,\[\]\(\)/]+", text) if token]
+
+
+def _size_tokens_from_breakdown(current_state):
+    tokens = []
+    for entry in _extract_breakdown(current_state):
+        if not isinstance(entry, dict) or not entry:
+            continue
+        token, label = next(iter(entry.items()))
+        label_normalized = str(label).strip().lower()
+        if label_normalized not in {"size", "strap_length", "strap_size"}:
+            continue
+        normalized = str(token).strip()
+        if normalized:
+            tokens.append(normalized.lower())
+    return tokens
+
+
+def _normalized_mask_code_text(unique_internal_model_code, current_state=None):
+    parts = []
+    if unique_internal_model_code:
+        parts.append(str(unique_internal_model_code).lower())
+    parts.extend(_size_tokens_from_breakdown(current_state))
+    return " ".join(parts)
+
+
+def parse_mask_sizing(unique_internal_model_code, current_state=None):
+    text = _normalized_mask_code_text(unique_internal_model_code, current_state=current_state)
+
+    face_size_rank = 1.0
+    face_size_bucket = "regular"
+    strap_length_rank = 0.0
+    strap_length_bucket = "regular"
+
+    if "xxxl" in text or "triple extra large" in text:
+        face_size_rank = 4.0
+        face_size_bucket = "xxl"
+    elif "xxl" in text or "double extra large" in text or "extra large" in text:
+        face_size_rank = 3.0
+        face_size_bucket = "xxl"
+    elif re.search(r"(^|[^a-z])xs([^a-z]|$)", text) or "x-small" in text or "extra small" in text:
+        face_size_rank = -2.0
+        face_size_bucket = "xs"
+    elif re.search(r"(^|[^a-z])s([^a-z]|$)", text) or "small" in text or "petite" in text:
+        face_size_rank = -1.0
+        face_size_bucket = "s"
+    elif "regular/large" in text or "regular large" in text:
+        face_size_rank = 1.0
+        face_size_bucket = "large"
+    elif "large" in text or "medium / large" in text or "medium/large" in text:
+        face_size_rank = 1.0
+        face_size_bucket = "large"
+    elif "regular" in text or "medium" in text:
+        face_size_rank = 0.0
+        face_size_bucket = "regular"
+
+    if "extended length" in text or "extended straps" in text or "extended strap" in text:
+        strap_length_rank = 1.0
+        strap_length_bucket = "extended"
+
+    return {
+        "mask_face_size_rank": face_size_rank,
+        "mask_face_size_bucket": face_size_bucket,
+        "mask_strap_length_rank": strap_length_rank,
+        "mask_strap_length_bucket": strap_length_bucket,
+    }
 
 
 def derive_brand_model(unique_internal_model_code, current_state=None):
@@ -152,6 +232,35 @@ def add_brand_model_column(frame):
     else:
         result["brand_model"] = derived
 
+    return result
+
+
+def add_mask_size_features(frame):
+    if frame is None or frame.empty:
+        return frame
+    if "unique_internal_model_code" not in frame.columns:
+        return frame
+
+    result = frame.copy()
+    current_state_series = result.get("current_state")
+    if current_state_series is None:
+        current_state_series = pd.Series([None] * len(result), index=result.index)
+
+    sizing = [
+        parse_mask_sizing(code, state)
+        for code, state in zip(result["unique_internal_model_code"], current_state_series)
+    ]
+    sizing_frame = pd.DataFrame(sizing, index=result.index)
+    result["mask_face_size_rank"] = sizing_frame["mask_face_size_rank"].astype(float)
+    result["mask_strap_length_rank"] = sizing_frame["mask_strap_length_rank"].astype(float)
+    result["mask_face_size_is_xs"] = (sizing_frame["mask_face_size_bucket"] == "xs").astype(float)
+    result["mask_face_size_is_s"] = (sizing_frame["mask_face_size_bucket"] == "s").astype(float)
+    result["mask_face_size_is_regular"] = (sizing_frame["mask_face_size_bucket"] == "regular").astype(float)
+    result["mask_face_size_is_large"] = (sizing_frame["mask_face_size_bucket"] == "large").astype(float)
+    result["mask_face_size_is_xxl"] = (sizing_frame["mask_face_size_bucket"] == "xxl").astype(float)
+    result["mask_strap_length_is_extended"] = (
+        sizing_frame["mask_strap_length_bucket"] == "extended"
+    ).astype(float)
     return result
 
 
@@ -303,6 +412,37 @@ def add_face_shape_features(frame):
     return result
 
 
+def add_mask_size_face_interactions(frame):
+    if frame is None or frame.empty:
+        return frame
+    required_columns = [
+        "mask_face_size_rank",
+        "mask_strap_length_rank",
+        "facial_perimeter_cm",
+        "chin_mm",
+        "top_cheek_mm",
+        "strap_mm",
+        "strap_ratio",
+    ]
+    if any(column not in frame.columns for column in required_columns):
+        return frame
+
+    result = frame.copy()
+    result["mask_size_face_perimeter_match"] = (
+        result["mask_face_size_rank"] * result["facial_perimeter_cm"]
+    )
+    result["mask_size_chin_match"] = (
+        result["mask_face_size_rank"] * (result["chin_mm"] / MM_PER_CM)
+    )
+    result["mask_size_top_cheek_match"] = (
+        result["mask_face_size_rank"] * (result["top_cheek_mm"] / MM_PER_CM)
+    )
+    result["mask_strap_length_strap_match"] = (
+        result["mask_strap_length_rank"] * result["strap_ratio"]
+    )
+    return result
+
+
 def add_face_style_interactions(frame):
     if frame is None or frame.empty:
         return frame
@@ -360,6 +500,8 @@ def apply_perimeter_features(
 ):
     inference_rows = add_strap_type_features(inference_rows)
     inference_rows = add_face_shape_features(inference_rows)
+    inference_rows = add_mask_size_features(inference_rows)
+    inference_rows = add_mask_size_face_interactions(inference_rows)
 
     if use_diff_perimeter_bins or use_diff_perimeter_mask_bins:
         inference_rows = inference_rows.copy()

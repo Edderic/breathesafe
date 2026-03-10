@@ -1,9 +1,11 @@
 import pandas as pd
 
 from mask_recommender.feature_builder import (FACE_SHAPE_FEATURE_COLUMNS,
+                                             MASK_SIZE_FEATURE_COLUMNS,
                                              apply_perimeter_features,
                                              build_feature_frame,
-                                             derive_brand_model)
+                                             derive_brand_model,
+                                             parse_mask_sizing)
 
 
 def test_build_feature_frame_adds_engineered_face_shape_features():
@@ -57,12 +59,34 @@ def test_build_feature_frame_adds_engineered_face_shape_features():
     assert list(encoded.columns) == expected_columns
     for column in FACE_SHAPE_FEATURE_COLUMNS:
         assert column in encoded.columns
+    for column in MASK_SIZE_FEATURE_COLUMNS:
+        assert column in encoded.columns
     assert "face_style_x_nose_ratio_x_style_term_Cup" in encoded.columns
     assert "face_style_x_nose_ratio_x_style_term_Bifold" in encoded.columns
     assert encoded.loc[0, "facial_perimeter_cm"] == 20.5
     assert encoded.loc[1, "facial_perimeter_cm"] == 21.4
     assert encoded.loc[0, "strap_ratio"] > 0
     assert encoded.loc[1, "chin_to_nose_ratio"] > 1
+
+
+def test_parse_mask_sizing_separates_face_size_from_extended_straps():
+    small = parse_mask_sizing("Project 3 Black Trident Tri-fold S")
+    assert small["mask_face_size_bucket"] == "s"
+    assert small["mask_face_size_rank"] == -1.0
+    assert small["mask_strap_length_bucket"] == "regular"
+
+    regular_extended = parse_mask_sizing(
+        "Project 3 Black Trident Tri-fold Headstraps- Regular/Large, Extended Straps"
+    )
+    assert regular_extended["mask_face_size_bucket"] == "large"
+    assert regular_extended["mask_face_size_rank"] == 1.0
+    assert regular_extended["mask_strap_length_bucket"] == "extended"
+    assert regular_extended["mask_strap_length_rank"] == 1.0
+
+    xxl = parse_mask_sizing("Project 3 Black Trident Tri-fold XXL")
+    assert xxl["mask_face_size_bucket"] == "xxl"
+    assert xxl["mask_face_size_rank"] > regular_extended["mask_face_size_rank"]
+    assert xxl["mask_strap_length_bucket"] == "regular"
 
 
 def test_derive_brand_model_prefers_breakdown_and_falls_back_to_code():
