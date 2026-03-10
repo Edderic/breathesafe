@@ -42,6 +42,8 @@ def _build_train_argv(event):
         argv.extend(['--loss-type', str(event['loss_type'])])
     if event.get('class_reweight'):
         argv.append('--class-reweight')
+    if event.get('zscore'):
+        argv.append('--zscore')
     if event.get('use_facial_perimeter'):
         argv.append('--use-facial-perimeter')
     if event.get('use_diff_perimeter_bins'):

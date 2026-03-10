@@ -15,7 +15,9 @@ class MaskRecommenderTraining
   WORKFLOW_PARITY_CONFIG = {
     epochs: 100,
     learning_rate: 0.0001,
-    retrain_with_full: true
+    retrain_with_full: true,
+    class_reweight: true,
+    zscore: true
   }.freeze
 
   class << self

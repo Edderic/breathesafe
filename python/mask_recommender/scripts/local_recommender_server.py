@@ -308,6 +308,8 @@ def _train(payload):
         train_argv.extend(["--loss-type", str(payload["loss_type"])])
     if (payload or {}).get("class_reweight"):
         train_argv.append("--class-reweight")
+    if (payload or {}).get("zscore"):
+        train_argv.append("--zscore")
     if (payload or {}).get("use_facial_perimeter"):
         train_argv.append("--use-facial-perimeter")
     if (payload or {}).get("use_diff_perimeter_bins"):
