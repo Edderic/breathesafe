@@ -8,12 +8,13 @@ import boto3
 import pandas as pd
 import torch
 try:
-    from feature_builder import (FACIAL_FEATURE_COLUMNS, build_feature_frame,
+    from feature_builder import (FACIAL_FEATURE_COLUMNS, MASK_EMPIRICAL_FEATURE_COLUMNS, build_feature_frame,
                                  derive_brand_model)
     from prob_model import predict_prob_model
 except ModuleNotFoundError:
     from mask_recommender.feature_builder import (  # type: ignore
         FACIAL_FEATURE_COLUMNS,
+        MASK_EMPIRICAL_FEATURE_COLUMNS,
         build_feature_frame,
         derive_brand_model,
     )
@@ -250,6 +251,8 @@ class MaskRecommenderInference:
             }
             for col in FACIAL_FEATURE_COLUMNS:
                 row[col] = facial_features.get(col, 0) or 0
+            for col in MASK_EMPIRICAL_FEATURE_COLUMNS:
+                row[col] = mask_info.get(col, 0) or 0
             rows.append(row)
         return pd.DataFrame(rows)
 

@@ -26,6 +26,7 @@ from feature_builder import (ABS_PERIMETER_DIFF_STYLE_PREFIX,
                              FACE_STYLE_INTERACTION_PREFIX,
                              FACIAL_FEATURE_COLUMNS,
                              FACIAL_PERIMETER_COMPONENTS,
+                             MASK_EMPIRICAL_FEATURE_COLUMNS,
                              MASK_SIZE_FEATURE_COLUMNS,
                              PERIMETER_PENALTY_FEATURE_COLUMNS,
                              PERIMETER_DIFF_SQ_STYLE_PREFIX,
@@ -395,6 +396,7 @@ def filter_fit_tests(fit_tests_df):
 
 def prepare_training_data(
     fit_tests_df,
+    mask_empirical_priors=None,
     use_facial_perimeter=False,
     use_diff_perimeter_bins=False,
     use_diff_perimeter_mask_bins=False
@@ -406,6 +408,7 @@ def prepare_training_data(
     filtered = add_mask_size_features(filtered)
     filtered = add_mask_size_face_interactions(filtered)
     filtered = add_geometry_penalty_features(filtered)
+    filtered = add_mask_empirical_prior_features(filtered, mask_empirical_priors or {})
     filtered = add_strap_style_interactions(filtered)
 
     feature_cols = []
@@ -461,7 +464,7 @@ def prepare_training_data(
             'perimeter_diff',
             'abs_perimeter_diff',
             'perimeter_diff_sq'
-        ] + PERIMETER_PENALTY_FEATURE_COLUMNS + FACE_SHAPE_FEATURE_COLUMNS + MASK_SIZE_FEATURE_COLUMNS + interaction_cols
+        ] + PERIMETER_PENALTY_FEATURE_COLUMNS + FACE_SHAPE_FEATURE_COLUMNS + MASK_SIZE_FEATURE_COLUMNS + MASK_EMPIRICAL_FEATURE_COLUMNS + interaction_cols
         if use_facial_perimeter:
             feature_cols.append('facial_perimeter_mm')
         else:
@@ -490,6 +493,71 @@ def build_feature_matrix(filtered_df, categorical_cols=None):
     features = features.astype(float)
     target = pd.to_numeric(target, errors='coerce').fillna(0).astype(float)
     return features, target
+
+
+def compute_mask_empirical_priors(fit_tests_df):
+    if fit_tests_df is None or fit_tests_df.empty:
+        return {}
+
+    grouped = (
+        fit_tests_df.groupby('mask_id', dropna=True)['qlft_pass_normalized']
+        .agg(['count', 'sum'])
+        .reset_index()
+    )
+
+    priors = {}
+    for _, row in grouped.iterrows():
+        mask_id = row.get('mask_id')
+        if pd.isna(mask_id):
+            continue
+        count = float(row.get('count', 0) or 0)
+        passes = float(row.get('sum', 0) or 0)
+        smoothed_pass_rate = (passes + 1.0) / (count + 2.0)
+        clipped_rate = min(max(smoothed_pass_rate, 1e-6), 1 - 1e-6)
+        priors[int(mask_id)] = {
+            'mask_fit_test_count': count,
+            'mask_smoothed_pass_rate': smoothed_pass_rate,
+            'mask_log_fit_test_count': float(np.log1p(count)),
+            'mask_smoothed_pass_logit': float(np.log(clipped_rate / (1.0 - clipped_rate))),
+        }
+    return priors
+
+
+def add_mask_empirical_prior_features(frame, priors_by_mask_id):
+    if frame is None or frame.empty:
+        return frame
+
+    result = frame.copy()
+    defaults = {
+        'mask_fit_test_count': 0.0,
+        'mask_smoothed_pass_rate': 0.5,
+        'mask_log_fit_test_count': 0.0,
+        'mask_smoothed_pass_logit': 0.0,
+    }
+
+    mask_id_source = result.get('mask_id')
+    if mask_id_source is None:
+        mask_id_source = result.get('id')
+    mask_ids = pd.to_numeric(mask_id_source, errors='coerce')
+    for column in MASK_EMPIRICAL_FEATURE_COLUMNS:
+        result[column] = defaults[column]
+
+    for idx, mask_id in mask_ids.items():
+        if pd.isna(mask_id):
+            continue
+        prior = priors_by_mask_id.get(int(mask_id))
+        if not prior:
+            continue
+        for column in MASK_EMPIRICAL_FEATURE_COLUMNS:
+            result.at[idx, column] = float(prior.get(column, defaults[column]))
+
+    return result
+
+
+def attach_mask_empirical_priors_to_masks(mask_frame, priors_by_mask_id):
+    if mask_frame is None or mask_frame.empty:
+        return mask_frame
+    return add_mask_empirical_prior_features(mask_frame, priors_by_mask_id)
 
 
 def _is_binary_series(series):
@@ -992,6 +1060,7 @@ def _predict_probe_probabilities(
     mask_candidates,
     feature_columns,
     categorical_columns,
+    mask_empirical_priors=None,
     use_facial_perimeter=False,
     use_diff_perimeter_bins=False,
     use_diff_perimeter_mask_bins=False,
@@ -1009,6 +1078,7 @@ def _predict_probe_probabilities(
     )
     for column in FACIAL_FEATURE_COLUMNS:
         probe_frame[column] = facial_measurements.get(column, 0) or 0
+    probe_frame = add_mask_empirical_prior_features(probe_frame, mask_empirical_priors or {})
 
     encoded = build_feature_frame(
         probe_frame,
@@ -1078,6 +1148,7 @@ def _build_probe_diagnostics(
             mask_candidates,
             feature_columns,
             categorical_columns,
+            mask_empirical_priors=mask_empirical_priors,
             use_facial_perimeter=args.use_facial_perimeter,
             use_diff_perimeter_bins=args.use_diff_perimeter_bins,
             use_diff_perimeter_mask_bins=args.use_diff_perimeter_mask_bins,
@@ -1096,6 +1167,7 @@ def _build_probe_diagnostics(
                 mask_candidates,
                 previous_metadata['feature_columns'],
                 previous_metadata['categorical_columns'],
+                mask_empirical_priors=mask_empirical_priors,
                 use_facial_perimeter=previous_metadata.get('use_facial_perimeter', False),
                 use_diff_perimeter_bins=previous_metadata.get('use_diff_perimeter_bins', False),
                 use_diff_perimeter_mask_bins=previous_metadata.get('use_diff_perimeter_mask_bins', False),
@@ -1248,6 +1320,8 @@ def main(argv=None):
     filtered_fit_tests = filter_fit_tests(
         fit_tests_with_imputed_arkit_via_traditional_facial_measurements
     )
+    mask_empirical_priors = compute_mask_empirical_priors(filtered_fit_tests)
+    mask_candidates = attach_mask_empirical_priors_to_masks(mask_candidates, mask_empirical_priors)
 
     if args.use_facial_perimeter and args.use_diff_perimeter_bins:
         raise SystemExit("Cannot use --use-facial-perimeter and --use-diff-perimeter-bins together.")
@@ -1256,6 +1330,7 @@ def main(argv=None):
 
     cleaned_fit_tests = prepare_training_data(
         fit_tests_with_imputed_arkit_via_traditional_facial_measurements,
+        mask_empirical_priors=mask_empirical_priors,
         use_facial_perimeter=args.use_facial_perimeter,
         use_diff_perimeter_bins=args.use_diff_perimeter_bins,
         use_diff_perimeter_mask_bins=args.use_diff_perimeter_mask_bins
@@ -1340,6 +1415,7 @@ def main(argv=None):
                 'perimeter_mm': row.get('perimeter_mm', None),
                 'strap_type': row.get('strap_type', ''),
                 'style': row.get('style', ''),
+                **mask_empirical_priors.get(int(mask_id), {}),
             }
 
         mask_data_key = f"{prefix}/prob_mask_data.json"
@@ -1687,6 +1763,7 @@ def main(argv=None):
             'perimeter_mm': row.get('perimeter_mm', None),
             'strap_type': row.get('strap_type', ''),
             'style': row.get('style', ''),
+            **mask_empirical_priors.get(int(mask_id), {}),
         }
 
     mask_data_key = f"{prefix}/mask_data.json"

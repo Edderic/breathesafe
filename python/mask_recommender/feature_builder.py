@@ -102,6 +102,13 @@ PERIMETER_PENALTY_FEATURE_COLUMNS = [
     "small_mask_large_face_gt_30cm",
 ]
 
+MASK_EMPIRICAL_FEATURE_COLUMNS = [
+    "mask_fit_test_count",
+    "mask_smoothed_pass_rate",
+    "mask_log_fit_test_count",
+    "mask_smoothed_pass_logit",
+]
+
 
 def _extract_breakdown(current_state):
     if current_state is None or (isinstance(current_state, float) and pd.isna(current_state)):

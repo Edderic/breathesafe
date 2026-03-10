@@ -13,6 +13,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from mask_recommender.feature_builder import (  # noqa: E402
     FACIAL_FEATURE_COLUMNS,
+    MASK_EMPIRICAL_FEATURE_COLUMNS,
     build_feature_frame,
     derive_brand_model,
 )
@@ -209,6 +210,8 @@ def _build_inference_rows(mask_data, facial_features):
         }
         for col in FACIAL_FEATURE_COLUMNS:
             row[col] = facial_features.get(col, 0) or 0
+        for col in MASK_EMPIRICAL_FEATURE_COLUMNS:
+            row[col] = mask_info.get(col, 0) or 0
         rows.append(row)
     return pd.DataFrame(rows)
 

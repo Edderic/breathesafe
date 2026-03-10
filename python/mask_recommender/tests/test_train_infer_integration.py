@@ -217,3 +217,16 @@ def test_fit_zscore_stats_skips_perimeter_geometry_columns():
     assert "earloop_abs_diff" not in stats
     assert "face_size_gap_cm" not in stats
     assert "nose_ratio" in stats
+
+
+def test_compute_mask_empirical_priors_and_attach_to_masks():
+    priors = train_module.compute_mask_empirical_priors(train_module.filter_fit_tests(_fit_tests_df()))
+
+    assert priors[1]["mask_fit_test_count"] == 2.0
+    assert priors[1]["mask_smoothed_pass_rate"] == 0.5
+
+    masks = train_module.attach_mask_empirical_priors_to_masks(_masks_df(), priors)
+
+    mask_a = masks[masks["id"] == 1].iloc[0]
+    assert mask_a["mask_fit_test_count"] == 2.0
+    assert mask_a["mask_smoothed_pass_rate"] == 0.5
