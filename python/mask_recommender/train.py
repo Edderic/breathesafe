@@ -21,8 +21,7 @@ from botocore.exceptions import ClientError
 from breathesafe_network import (build_session,
                                  fetch_facial_measurements_fit_tests,
                                  fetch_json)
-from feature_builder import (ABS_PERIMETER_DIFF_CU_STYLE_PREFIX,
-                             ABS_PERIMETER_DIFF_STYLE_PREFIX,
+from feature_builder import (ABS_PERIMETER_DIFF_STYLE_PREFIX,
                              FACE_SHAPE_FEATURE_COLUMNS,
                              FACE_STYLE_INTERACTION_PREFIX,
                              FACIAL_FEATURE_COLUMNS,
@@ -35,6 +34,7 @@ from feature_builder import (ABS_PERIMETER_DIFF_CU_STYLE_PREFIX,
                              add_face_shape_features,
                              add_face_style_interactions,
                              add_brand_model_column,
+                             add_geometry_penalty_features,
                              add_mask_size_face_interactions,
                              add_mask_size_features,
                              add_strap_style_interactions,
@@ -405,12 +405,15 @@ def prepare_training_data(
     filtered = add_face_shape_features(filtered)
     filtered = add_mask_size_features(filtered)
     filtered = add_mask_size_face_interactions(filtered)
+    filtered = add_geometry_penalty_features(filtered)
     filtered = add_strap_style_interactions(filtered)
 
     feature_cols = []
     if use_diff_perimeter_bins or use_diff_perimeter_mask_bins:
         filtered['perimeter_diff'] = filtered['facial_perimeter_mm'] - filtered['perimeter_mm']
         filtered['perimeter_diff_bin_index'] = diff_bin_index(filtered['perimeter_diff'])
+        filtered = scale_perimeter_diff_features(filtered)
+        filtered = add_geometry_penalty_features(filtered)
         if use_diff_perimeter_bins:
             filtered['perimeter_diff_bin'] = pd.cut(
                 filtered['perimeter_diff'],
@@ -439,6 +442,7 @@ def prepare_training_data(
         filtered['perimeter_diff'] = filtered['facial_perimeter_mm'] - filtered['perimeter_mm']
         filtered['perimeter_diff_sq'] = filtered['perimeter_diff'] ** 2
         filtered = scale_perimeter_diff_features(filtered)
+        filtered = add_geometry_penalty_features(filtered)
         filtered = add_style_perimeter_interactions(filtered)
         filtered = add_face_style_interactions(filtered)
         filtered = add_strap_style_interactions(filtered)
@@ -447,7 +451,6 @@ def prepare_training_data(
                 column for column in filtered.columns
                 if column.startswith(PERIMETER_DIFF_STYLE_PREFIX)
                 or column.startswith(ABS_PERIMETER_DIFF_STYLE_PREFIX)
-                or column.startswith(ABS_PERIMETER_DIFF_CU_STYLE_PREFIX)
                 or column.startswith(PERIMETER_DIFF_SQ_STYLE_PREFIX)
                 or column.startswith(FACE_STYLE_INTERACTION_PREFIX)
                 or column.startswith(STRAP_STYLE_INTERACTION_PREFIX)
@@ -497,6 +500,27 @@ def _is_binary_series(series):
     return rounded.issubset({0.0, 1.0})
 
 
+PERIMETER_ZSCORE_EXCLUDED_COLUMNS = set(
+    [
+        'perimeter_diff',
+        'abs_perimeter_diff',
+        'perimeter_diff_sq',
+    ] + PERIMETER_PENALTY_FEATURE_COLUMNS
+)
+
+PERIMETER_ZSCORE_EXCLUDED_PREFIXES = (
+    PERIMETER_DIFF_STYLE_PREFIX,
+    ABS_PERIMETER_DIFF_STYLE_PREFIX,
+    PERIMETER_DIFF_SQ_STYLE_PREFIX,
+)
+
+
+def _should_skip_zscore(column):
+    if column in PERIMETER_ZSCORE_EXCLUDED_COLUMNS:
+        return True
+    return any(column.startswith(prefix) for prefix in PERIMETER_ZSCORE_EXCLUDED_PREFIXES)
+
+
 def fit_zscore_stats(features, row_indices):
     if isinstance(row_indices, torch.Tensor):
         row_indices = row_indices.detach().cpu().numpy()
@@ -508,6 +532,8 @@ def fit_zscore_stats(features, row_indices):
     stats = {}
     for column in features.columns:
         column_values = pd.to_numeric(train_frame[column], errors='coerce').fillna(0)
+        if _should_skip_zscore(column):
+            continue
         if _is_binary_series(column_values):
             continue
 

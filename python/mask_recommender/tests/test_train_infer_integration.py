@@ -195,3 +195,23 @@ def test_training_lambda_builds_exclude_brand_model_flag():
     assert "--epochs" in argv
     assert "--exclude-mask-code" in argv
     assert "--exclude-brand-model" in argv
+
+
+def test_fit_zscore_stats_skips_perimeter_geometry_columns():
+    features = pd.DataFrame(
+        {
+            "perimeter_diff": [1.0, 2.0, 3.0],
+            "abs_perimeter_diff": [1.0, 2.0, 3.0],
+            "perimeter_diff_sq": [1.0, 4.0, 9.0],
+            "earloop_abs_diff": [0.0, 2.0, 0.0],
+            "nose_ratio": [0.1, 0.2, 0.3],
+        }
+    )
+
+    stats = train_module.fit_zscore_stats(features, [0, 1, 2])
+
+    assert "perimeter_diff" not in stats
+    assert "abs_perimeter_diff" not in stats
+    assert "perimeter_diff_sq" not in stats
+    assert "earloop_abs_diff" not in stats
+    assert "nose_ratio" in stats

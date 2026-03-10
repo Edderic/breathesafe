@@ -23,7 +23,6 @@ STYLE_INTERACTION_PREFIX = "style_term_"
 PERIMETER_DIFF_STYLE_PREFIX = "perimeter_diff_x_"
 ABS_PERIMETER_DIFF_STYLE_PREFIX = "abs_perimeter_diff_x_"
 PERIMETER_DIFF_SQ_STYLE_PREFIX = "perimeter_diff_sq_x_"
-ABS_PERIMETER_DIFF_CU_STYLE_PREFIX = "abs_perimeter_diff_cu_x_"
 STRAP_STYLE_INTERACTION_PREFIX = "strap_style_x_"
 FACE_STYLE_INTERACTION_PREFIX = "face_style_x_"
 MM_PER_CM = 10.0
@@ -31,7 +30,6 @@ MM_PER_CM = 10.0
 # perimeter/style mismatches influence ranking more strongly.
 ABS_PERIMETER_DIFF_STYLE_INTERACTION_MULTIPLIER = 6.0
 PERIMETER_DIFF_SQ_STYLE_INTERACTION_MULTIPLIER = 25.0
-ABS_PERIMETER_DIFF_CU_STYLE_INTERACTION_MULTIPLIER = 60.0
 
 STRAP_FEATURE_COLUMNS = [
     "strap_is_earloop_like",
@@ -73,11 +71,27 @@ MASK_SIZE_FEATURE_COLUMNS = [
 ]
 
 PERIMETER_PENALTY_FEATURE_COLUMNS = [
-    "abs_perimeter_diff_cu",
+    "abs_perimeter_diff_gt_1cm",
     "abs_perimeter_diff_gt_2cm",
     "abs_perimeter_diff_gt_3cm",
     "abs_perimeter_diff_gt_4cm",
     "abs_perimeter_diff_gt_5cm",
+    "bifold_abs_diff_gt_1cm",
+    "bifold_abs_diff_gt_2cm",
+    "cup_abs_diff_gt_2cm",
+    "cup_abs_diff_gt_3cm",
+    "boat_duckbill_positive_diff_gt_2cm",
+    "boat_duckbill_negative_diff_ok_band",
+    "earloop_abs_diff",
+    "earloop_abs_diff_sq",
+    "earloop_and_diff_gt_2cm",
+    "earloop_and_diff_gt_3cm",
+    "headstrap_abs_diff",
+    "xs_large_face_penalty",
+    "s_large_face_penalty",
+    "petite_large_face_penalty",
+    "kids_large_face_penalty",
+    "small_mask_large_face_gt_30cm",
 ]
 
 
@@ -285,8 +299,6 @@ def add_style_perimeter_interactions(frame):
     result = frame.copy()
     if "abs_perimeter_diff" not in result.columns:
         result["abs_perimeter_diff"] = result["perimeter_diff"].abs()
-    if "abs_perimeter_diff_cu" not in result.columns:
-        result["abs_perimeter_diff_cu"] = result["abs_perimeter_diff"] ** 3
     style_series = result["style"].fillna("unknown").astype(str).str.strip()
     style_series = style_series.replace("", "unknown")
     style_dummies = pd.get_dummies(style_series, prefix=STYLE_INTERACTION_PREFIX.rstrip("_"))
@@ -302,11 +314,6 @@ def add_style_perimeter_interactions(frame):
             result["perimeter_diff_sq"]
             * style_dummies[column]
             * PERIMETER_DIFF_SQ_STYLE_INTERACTION_MULTIPLIER
-        )
-        result[f"{ABS_PERIMETER_DIFF_CU_STYLE_PREFIX}{column}"] = (
-            result["abs_perimeter_diff_cu"]
-            * style_dummies[column]
-            * ABS_PERIMETER_DIFF_CU_STYLE_INTERACTION_MULTIPLIER
         )
 
     return result
@@ -324,11 +331,91 @@ def scale_perimeter_diff_features(frame):
     result["abs_perimeter_diff"] = result["perimeter_diff"].abs()
     if "perimeter_diff_sq" in result.columns:
         result["perimeter_diff_sq"] = result["perimeter_diff_sq"] / (MM_PER_CM ** 2)
-    result["abs_perimeter_diff_cu"] = result["abs_perimeter_diff"] ** 3
+    result["abs_perimeter_diff_gt_1cm"] = (result["abs_perimeter_diff"] >= 1.0).astype(float)
     result["abs_perimeter_diff_gt_2cm"] = (result["abs_perimeter_diff"] >= 2.0).astype(float)
     result["abs_perimeter_diff_gt_3cm"] = (result["abs_perimeter_diff"] >= 3.0).astype(float)
     result["abs_perimeter_diff_gt_4cm"] = (result["abs_perimeter_diff"] >= 4.0).astype(float)
     result["abs_perimeter_diff_gt_5cm"] = (result["abs_perimeter_diff"] >= 5.0).astype(float)
+    return result
+
+
+def add_geometry_penalty_features(frame):
+    if frame is None or frame.empty:
+        return frame
+
+    required_columns = [
+        "style",
+        "perimeter_diff",
+        "abs_perimeter_diff",
+        "perimeter_diff_sq",
+        "strap_is_earloop_like",
+        "strap_is_headstrap_like",
+        "facial_perimeter_cm",
+        "mask_face_size_is_xs",
+        "mask_face_size_is_s",
+    ]
+    if any(column not in frame.columns for column in required_columns):
+        return frame
+
+    result = frame.copy()
+    style_series = result["style"].fillna("").astype(str).str.strip().str.lower()
+    is_bifold = style_series.isin(["bifold", "bifold & gasket"])
+    is_cup = style_series.eq("cup")
+    is_boat_or_duckbill = style_series.isin(["boat", "duckbill"])
+
+    result["bifold_abs_diff_gt_1cm"] = (
+        is_bifold & (result["abs_perimeter_diff"] >= 1.0)
+    ).astype(float)
+    result["bifold_abs_diff_gt_2cm"] = (
+        is_bifold & (result["abs_perimeter_diff"] >= 2.0)
+    ).astype(float)
+    result["cup_abs_diff_gt_2cm"] = (
+        is_cup & (result["abs_perimeter_diff"] >= 2.0)
+    ).astype(float)
+    result["cup_abs_diff_gt_3cm"] = (
+        is_cup & (result["abs_perimeter_diff"] >= 3.0)
+    ).astype(float)
+    result["boat_duckbill_positive_diff_gt_2cm"] = (
+        is_boat_or_duckbill & (result["perimeter_diff"] >= 2.0)
+    ).astype(float)
+    result["boat_duckbill_negative_diff_ok_band"] = (
+        is_boat_or_duckbill
+        & (result["perimeter_diff"] <= -1.0)
+        & (result["perimeter_diff"] >= -6.0)
+    ).astype(float)
+
+    result["earloop_abs_diff"] = result["strap_is_earloop_like"] * result["abs_perimeter_diff"]
+    result["earloop_abs_diff_sq"] = result["strap_is_earloop_like"] * result["perimeter_diff_sq"]
+    result["earloop_and_diff_gt_2cm"] = (
+        result["strap_is_earloop_like"].astype(bool) & (result["abs_perimeter_diff"] >= 2.0)
+    ).astype(float)
+    result["earloop_and_diff_gt_3cm"] = (
+        result["strap_is_earloop_like"].astype(bool) & (result["abs_perimeter_diff"] >= 3.0)
+    ).astype(float)
+    result["headstrap_abs_diff"] = result["strap_is_headstrap_like"] * result["abs_perimeter_diff"]
+
+    code_series = result.get("unique_internal_model_code")
+    if code_series is None:
+        code_series = pd.Series([""] * len(result), index=result.index)
+    code_text = code_series.fillna("").astype(str).str.lower()
+    facial_perimeter_excess = (result["facial_perimeter_cm"] - 24.0).clip(lower=0.0)
+    petite_flag = code_text.str.contains("petite", regex=False)
+    kids_flag = code_text.str.contains(r"\bkids?\b|\bchild(?:ren)?\b|\byouth\b", regex=True)
+
+    result["xs_large_face_penalty"] = result["mask_face_size_is_xs"] * facial_perimeter_excess
+    result["s_large_face_penalty"] = result["mask_face_size_is_s"] * facial_perimeter_excess
+    result["petite_large_face_penalty"] = petite_flag.astype(float) * facial_perimeter_excess
+    result["kids_large_face_penalty"] = kids_flag.astype(float) * facial_perimeter_excess
+    result["small_mask_large_face_gt_30cm"] = (
+        (result["facial_perimeter_cm"] >= 30.0)
+        & (
+            result["mask_face_size_is_xs"].astype(bool)
+            | result["mask_face_size_is_s"].astype(bool)
+            | petite_flag
+            | kids_flag
+        )
+    ).astype(float)
+
     return result
 
 
@@ -535,6 +622,8 @@ def apply_perimeter_features(
         )
         inference_rows["perimeter_diff"] = inference_rows["facial_perimeter_mm"] - inference_rows["perimeter_mm"]
         inference_rows["perimeter_diff_bin_index"] = diff_bin_index(inference_rows["perimeter_diff"])
+        inference_rows = scale_perimeter_diff_features(inference_rows)
+        inference_rows = add_geometry_penalty_features(inference_rows)
         if use_diff_perimeter_bins:
             inference_rows["perimeter_diff_bin"] = pd.cut(
                 inference_rows["perimeter_diff"],
@@ -588,6 +677,7 @@ def apply_perimeter_features(
         inference_rows["perimeter_diff"] = inference_rows["facial_perimeter_mm"] - inference_rows["perimeter_mm"]
         inference_rows["perimeter_diff_sq"] = inference_rows["perimeter_diff"] ** 2
         inference_rows = scale_perimeter_diff_features(inference_rows)
+        inference_rows = add_geometry_penalty_features(inference_rows)
         inference_rows = add_style_perimeter_interactions(inference_rows)
         inference_rows = add_face_style_interactions(inference_rows)
         inference_rows = add_strap_style_interactions(inference_rows)
@@ -604,6 +694,7 @@ def apply_perimeter_features(
     inference_rows["perimeter_diff"] = inference_rows["facial_perimeter_mm"] - inference_rows["perimeter_mm"]
     inference_rows["perimeter_diff_sq"] = inference_rows["perimeter_diff"] ** 2
     inference_rows = scale_perimeter_diff_features(inference_rows)
+    inference_rows = add_geometry_penalty_features(inference_rows)
     inference_rows = add_style_perimeter_interactions(inference_rows)
     inference_rows = add_face_style_interactions(inference_rows)
     inference_rows = add_strap_style_interactions(inference_rows)
