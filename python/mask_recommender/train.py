@@ -505,6 +505,10 @@ PERIMETER_ZSCORE_EXCLUDED_COLUMNS = set(
         'perimeter_diff',
         'abs_perimeter_diff',
         'perimeter_diff_sq',
+        'mask_face_size_anchor_cm',
+        'face_size_gap_cm',
+        'abs_face_size_gap_cm',
+        'face_size_gap_sq',
     ] + PERIMETER_PENALTY_FEATURE_COLUMNS
 )
 

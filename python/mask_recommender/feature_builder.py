@@ -62,6 +62,10 @@ MASK_SIZE_FEATURE_COLUMNS = [
     "mask_face_size_is_regular",
     "mask_face_size_is_large",
     "mask_face_size_is_xxl",
+    "mask_face_size_anchor_cm",
+    "face_size_gap_cm",
+    "abs_face_size_gap_cm",
+    "face_size_gap_sq",
     "mask_strap_length_rank",
     "mask_strap_length_is_extended",
     "mask_size_face_perimeter_match",
@@ -87,6 +91,10 @@ PERIMETER_PENALTY_FEATURE_COLUMNS = [
     "earloop_and_diff_gt_2cm",
     "earloop_and_diff_gt_3cm",
     "headstrap_abs_diff",
+    "abs_face_size_gap_gt_2cm",
+    "abs_face_size_gap_gt_4cm",
+    "face_too_large_for_mask_gt_2cm",
+    "face_too_small_for_mask_gt_2cm",
     "xs_large_face_penalty",
     "s_large_face_penalty",
     "petite_large_face_penalty",
@@ -158,7 +166,7 @@ def _normalized_mask_code_text(unique_internal_model_code, current_state=None):
 def parse_mask_sizing(unique_internal_model_code, current_state=None):
     text = _normalized_mask_code_text(unique_internal_model_code, current_state=current_state)
 
-    face_size_rank = 1.0
+    face_size_rank = 0.0
     face_size_bucket = "regular"
     strap_length_rank = 0.0
     strap_length_bucket = "regular"
@@ -351,6 +359,8 @@ def add_geometry_penalty_features(frame):
         "strap_is_earloop_like",
         "strap_is_headstrap_like",
         "facial_perimeter_cm",
+        "face_size_gap_cm",
+        "abs_face_size_gap_cm",
         "mask_face_size_is_xs",
         "mask_face_size_is_s",
     ]
@@ -393,6 +403,10 @@ def add_geometry_penalty_features(frame):
         result["strap_is_earloop_like"].astype(bool) & (result["abs_perimeter_diff"] >= 3.0)
     ).astype(float)
     result["headstrap_abs_diff"] = result["strap_is_headstrap_like"] * result["abs_perimeter_diff"]
+    result["abs_face_size_gap_gt_2cm"] = (result["abs_face_size_gap_cm"] >= 2.0).astype(float)
+    result["abs_face_size_gap_gt_4cm"] = (result["abs_face_size_gap_cm"] >= 4.0).astype(float)
+    result["face_too_large_for_mask_gt_2cm"] = (result["face_size_gap_cm"] >= 2.0).astype(float)
+    result["face_too_small_for_mask_gt_2cm"] = (result["face_size_gap_cm"] <= -2.0).astype(float)
 
     code_series = result.get("unique_internal_model_code")
     if code_series is None:
@@ -537,6 +551,16 @@ def add_mask_size_face_interactions(frame):
         return frame
 
     result = frame.copy()
+    result["mask_face_size_anchor_cm"] = (
+        result["mask_face_size_is_xs"] * 22.0
+        + result["mask_face_size_is_s"] * 25.0
+        + result["mask_face_size_is_regular"] * 29.0
+        + result["mask_face_size_is_large"] * 33.0
+        + result["mask_face_size_is_xxl"] * 36.0
+    )
+    result["face_size_gap_cm"] = result["facial_perimeter_cm"] - result["mask_face_size_anchor_cm"]
+    result["abs_face_size_gap_cm"] = result["face_size_gap_cm"].abs()
+    result["face_size_gap_sq"] = result["face_size_gap_cm"] ** 2
     result["mask_size_face_perimeter_match"] = (
         result["mask_face_size_rank"] * result["facial_perimeter_cm"]
     )

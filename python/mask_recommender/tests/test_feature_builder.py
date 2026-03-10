@@ -73,6 +73,8 @@ def test_build_feature_frame_adds_engineered_face_shape_features():
     assert encoded.loc[0, "earloop_abs_diff"] > 0
     assert encoded.loc[0, "abs_perimeter_diff_gt_5cm"] == 1.0
     assert encoded.loc[1, "bifold_abs_diff_gt_1cm"] == 1.0
+    assert encoded.loc[0, "mask_face_size_anchor_cm"] == 29.0
+    assert encoded.loc[0, "abs_face_size_gap_gt_4cm"] == 1.0
 
 
 def test_parse_mask_sizing_separates_face_size_from_extended_straps():

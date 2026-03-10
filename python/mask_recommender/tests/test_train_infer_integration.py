@@ -204,6 +204,7 @@ def test_fit_zscore_stats_skips_perimeter_geometry_columns():
             "abs_perimeter_diff": [1.0, 2.0, 3.0],
             "perimeter_diff_sq": [1.0, 4.0, 9.0],
             "earloop_abs_diff": [0.0, 2.0, 0.0],
+            "face_size_gap_cm": [3.0, -3.0, 0.0],
             "nose_ratio": [0.1, 0.2, 0.3],
         }
     )
@@ -214,4 +215,5 @@ def test_fit_zscore_stats_skips_perimeter_geometry_columns():
     assert "abs_perimeter_diff" not in stats
     assert "perimeter_diff_sq" not in stats
     assert "earloop_abs_diff" not in stats
+    assert "face_size_gap_cm" not in stats
     assert "nose_ratio" in stats
