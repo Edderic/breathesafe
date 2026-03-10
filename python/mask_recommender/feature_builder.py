@@ -24,6 +24,7 @@ PERIMETER_DIFF_STYLE_PREFIX = "perimeter_diff_x_"
 ABS_PERIMETER_DIFF_STYLE_PREFIX = "abs_perimeter_diff_x_"
 PERIMETER_DIFF_SQ_STYLE_PREFIX = "perimeter_diff_sq_x_"
 STRAP_STYLE_INTERACTION_PREFIX = "strap_style_x_"
+FACE_STYLE_INTERACTION_PREFIX = "face_style_x_"
 MM_PER_CM = 10.0
 # Increase style-specific penalty from squared perimeter mismatch so large
 # perimeter/style mismatches influence ranking more strongly.
@@ -35,6 +36,23 @@ STRAP_FEATURE_COLUMNS = [
     "strap_is_headstrap_like",
     "strap_is_adjustable",
     "strap_type_strength",
+]
+
+FACE_SHAPE_FEATURE_COLUMNS = [
+    "facial_perimeter_cm",
+    "strap_ratio",
+    "nose_ratio",
+    "chin_ratio",
+    "top_cheek_ratio",
+    "mid_cheek_ratio",
+    "chin_to_nose_ratio",
+    "top_to_mid_cheek_ratio",
+    "strap_minus_perimeter_cm",
+    "nose_sq_cm2",
+    "chin_sq_cm2",
+    "top_cheek_sq_cm2",
+    "mid_cheek_sq_cm2",
+    "strap_sq_cm2",
 ]
 
 
@@ -244,6 +262,71 @@ def add_strap_style_interactions(frame):
     return result
 
 
+def add_face_shape_features(frame):
+    if frame is None or frame.empty:
+        return frame
+
+    required_columns = FACIAL_FEATURE_COLUMNS + ["perimeter_mm"]
+    if any(column not in frame.columns for column in required_columns):
+        return frame
+
+    result = frame.copy()
+    numeric_columns = required_columns
+    result[numeric_columns] = (
+        result[numeric_columns]
+        .apply(pd.to_numeric, errors="coerce")
+        .fillna(0)
+    )
+
+    facial_perimeter_mm = result[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
+    facial_perimeter_mm_safe = facial_perimeter_mm.replace(0, np.nan)
+
+    result["facial_perimeter_mm"] = facial_perimeter_mm
+    result["facial_perimeter_cm"] = facial_perimeter_mm / MM_PER_CM
+    result["strap_ratio"] = (result["strap_mm"] / facial_perimeter_mm_safe).fillna(0)
+    result["nose_ratio"] = (result["nose_mm"] / facial_perimeter_mm_safe).fillna(0)
+    result["chin_ratio"] = (result["chin_mm"] / facial_perimeter_mm_safe).fillna(0)
+    result["top_cheek_ratio"] = (result["top_cheek_mm"] / facial_perimeter_mm_safe).fillna(0)
+    result["mid_cheek_ratio"] = (result["mid_cheek_mm"] / facial_perimeter_mm_safe).fillna(0)
+
+    nose_safe = result["nose_mm"].replace(0, np.nan)
+    mid_cheek_safe = result["mid_cheek_mm"].replace(0, np.nan)
+    result["chin_to_nose_ratio"] = (result["chin_mm"] / nose_safe).fillna(0)
+    result["top_to_mid_cheek_ratio"] = (result["top_cheek_mm"] / mid_cheek_safe).fillna(0)
+    result["strap_minus_perimeter_cm"] = (result["strap_mm"] - facial_perimeter_mm) / MM_PER_CM
+
+    result["nose_sq_cm2"] = (result["nose_mm"] / MM_PER_CM) ** 2
+    result["chin_sq_cm2"] = (result["chin_mm"] / MM_PER_CM) ** 2
+    result["top_cheek_sq_cm2"] = (result["top_cheek_mm"] / MM_PER_CM) ** 2
+    result["mid_cheek_sq_cm2"] = (result["mid_cheek_mm"] / MM_PER_CM) ** 2
+    result["strap_sq_cm2"] = (result["strap_mm"] / MM_PER_CM) ** 2
+    return result
+
+
+def add_face_style_interactions(frame):
+    if frame is None or frame.empty:
+        return frame
+    if "style" not in frame.columns:
+        return frame
+    if any(column not in frame.columns for column in FACE_SHAPE_FEATURE_COLUMNS):
+        return frame
+
+    result = frame.copy()
+    style_series = result["style"].fillna("unknown").astype(str).str.strip()
+    style_series = style_series.replace("", "unknown")
+    style_dummies = pd.get_dummies(style_series, prefix=STYLE_INTERACTION_PREFIX.rstrip("_"))
+
+    for style_column in style_dummies.columns:
+        style_mask = style_dummies[style_column]
+        for face_column in FACE_SHAPE_FEATURE_COLUMNS:
+            interaction_column = (
+                f"{FACE_STYLE_INTERACTION_PREFIX}{face_column}_x_{style_column}"
+            )
+            result[interaction_column] = result[face_column] * style_mask
+
+    return result
+
+
 def diff_bin_edges():
     edges = [-float("inf")]
     edges.extend(list(range(-120, 121, 15)))
@@ -276,6 +359,7 @@ def apply_perimeter_features(
     use_diff_perimeter_mask_bins=False
 ):
     inference_rows = add_strap_type_features(inference_rows)
+    inference_rows = add_face_shape_features(inference_rows)
 
     if use_diff_perimeter_bins or use_diff_perimeter_mask_bins:
         inference_rows = inference_rows.copy()
@@ -285,7 +369,6 @@ def apply_perimeter_features(
             .apply(pd.to_numeric, errors="coerce")
             .fillna(0)
         )
-        inference_rows["facial_perimeter_mm"] = inference_rows[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
         inference_rows["perimeter_diff"] = inference_rows["facial_perimeter_mm"] - inference_rows["perimeter_mm"]
         inference_rows["perimeter_diff_bin_index"] = diff_bin_index(inference_rows["perimeter_diff"])
         if use_diff_perimeter_bins:
@@ -316,6 +399,7 @@ def apply_perimeter_features(
             mask_bins = pd.DataFrame(mask_bins_array, index=mask_bins.index, columns=mask_bins.columns)
             mask_bins.columns = [f"mask_bin_{col}" for col in mask_bins.columns]
             inference_rows = pd.concat([inference_rows, mask_bins], axis=1)
+        inference_rows = add_face_style_interactions(inference_rows)
         inference_rows = add_strap_style_interactions(inference_rows)
         inference_rows = inference_rows.drop(
             columns=FACIAL_FEATURE_COLUMNS + [
@@ -337,11 +421,11 @@ def apply_perimeter_features(
             .apply(pd.to_numeric, errors="coerce")
             .fillna(0)
         )
-        inference_rows["facial_perimeter_mm"] = inference_rows[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
         inference_rows["perimeter_diff"] = inference_rows["facial_perimeter_mm"] - inference_rows["perimeter_mm"]
         inference_rows["perimeter_diff_sq"] = inference_rows["perimeter_diff"] ** 2
         inference_rows = scale_perimeter_diff_features(inference_rows)
         inference_rows = add_style_perimeter_interactions(inference_rows)
+        inference_rows = add_face_style_interactions(inference_rows)
         inference_rows = add_strap_style_interactions(inference_rows)
         inference_rows = inference_rows.drop(columns=FACIAL_FEATURE_COLUMNS, errors="ignore")
         return inference_rows
@@ -353,11 +437,11 @@ def apply_perimeter_features(
         .apply(pd.to_numeric, errors="coerce")
         .fillna(0)
     )
-    inference_rows["facial_perimeter_mm"] = inference_rows[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
     inference_rows["perimeter_diff"] = inference_rows["facial_perimeter_mm"] - inference_rows["perimeter_mm"]
     inference_rows["perimeter_diff_sq"] = inference_rows["perimeter_diff"] ** 2
     inference_rows = scale_perimeter_diff_features(inference_rows)
     inference_rows = add_style_perimeter_interactions(inference_rows)
+    inference_rows = add_face_style_interactions(inference_rows)
     inference_rows = add_strap_style_interactions(inference_rows)
 
     return inference_rows

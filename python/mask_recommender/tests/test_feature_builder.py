@@ -1,9 +1,12 @@
 import pandas as pd
 
-from mask_recommender.feature_builder import build_feature_frame, derive_brand_model
+from mask_recommender.feature_builder import (FACE_SHAPE_FEATURE_COLUMNS,
+                                             apply_perimeter_features,
+                                             build_feature_frame,
+                                             derive_brand_model)
 
 
-def test_build_feature_frame_matches_get_dummies():
+def test_build_feature_frame_adds_engineered_face_shape_features():
     inference_rows = pd.DataFrame(
         [
             {
@@ -37,22 +40,29 @@ def test_build_feature_frame_matches_get_dummies():
         ]
     )
     categorical_columns = ["strap_type", "style", "brand_model", "unique_internal_model_code"]
-    expected = pd.get_dummies(
-        inference_rows,
+    transformed = apply_perimeter_features(inference_rows)
+    transformed = pd.get_dummies(
+        transformed,
         columns=categorical_columns,
         dummy_na=True
     )
-    feature_columns = list(expected.columns)
-    expected = expected.reindex(columns=feature_columns, fill_value=0)
-    expected = expected.apply(pd.to_numeric, errors="coerce").fillna(0).astype(float)
+    expected_columns = list(transformed.columns)
 
     encoded = build_feature_frame(
         inference_rows,
-        feature_columns=feature_columns,
+        feature_columns=expected_columns,
         categorical_columns=categorical_columns,
     )
 
-    pd.testing.assert_frame_equal(encoded, expected)
+    assert list(encoded.columns) == expected_columns
+    for column in FACE_SHAPE_FEATURE_COLUMNS:
+        assert column in encoded.columns
+    assert "face_style_x_nose_ratio_x_style_term_Cup" in encoded.columns
+    assert "face_style_x_nose_ratio_x_style_term_Bifold" in encoded.columns
+    assert encoded.loc[0, "facial_perimeter_cm"] == 20.5
+    assert encoded.loc[1, "facial_perimeter_cm"] == 21.4
+    assert encoded.loc[0, "strap_ratio"] > 0
+    assert encoded.loc[1, "chin_to_nose_ratio"] > 1
 
 
 def test_derive_brand_model_prefers_breakdown_and_falls_back_to_code():

@@ -22,11 +22,15 @@ from breathesafe_network import (build_session,
                                  fetch_facial_measurements_fit_tests,
                                  fetch_json)
 from feature_builder import (ABS_PERIMETER_DIFF_STYLE_PREFIX,
+                             FACE_SHAPE_FEATURE_COLUMNS,
+                             FACE_STYLE_INTERACTION_PREFIX,
                              FACIAL_FEATURE_COLUMNS,
                              FACIAL_PERIMETER_COMPONENTS,
                              PERIMETER_DIFF_SQ_STYLE_PREFIX,
                              PERIMETER_DIFF_STYLE_PREFIX,
                              STRAP_STYLE_INTERACTION_PREFIX,
+                             add_face_shape_features,
+                             add_face_style_interactions,
                              add_brand_model_column,
                              add_strap_style_interactions,
                              add_strap_type_features,
@@ -393,11 +397,11 @@ def prepare_training_data(
     filtered = filter_fit_tests(fit_tests_df)
     filtered = add_brand_model_column(filtered)
     filtered = add_strap_type_features(filtered)
+    filtered = add_face_shape_features(filtered)
     filtered = add_strap_style_interactions(filtered)
 
     feature_cols = []
     if use_diff_perimeter_bins or use_diff_perimeter_mask_bins:
-        filtered['facial_perimeter_mm'] = filtered[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
         filtered['perimeter_diff'] = filtered['facial_perimeter_mm'] - filtered['perimeter_mm']
         filtered['perimeter_diff_bin_index'] = diff_bin_index(filtered['perimeter_diff'])
         if use_diff_perimeter_bins:
@@ -425,17 +429,19 @@ def prepare_training_data(
             filtered = pd.concat([filtered, mask_bins], axis=1)
             feature_cols += list(mask_bins.columns)
     else:
-        filtered['facial_perimeter_mm'] = filtered[FACIAL_PERIMETER_COMPONENTS].sum(axis=1)
         filtered['perimeter_diff'] = filtered['facial_perimeter_mm'] - filtered['perimeter_mm']
         filtered['perimeter_diff_sq'] = filtered['perimeter_diff'] ** 2
         filtered = scale_perimeter_diff_features(filtered)
         filtered = add_style_perimeter_interactions(filtered)
+        filtered = add_face_style_interactions(filtered)
+        filtered = add_strap_style_interactions(filtered)
         interaction_cols = sorted(
             [
                 column for column in filtered.columns
                 if column.startswith(PERIMETER_DIFF_STYLE_PREFIX)
                 or column.startswith(ABS_PERIMETER_DIFF_STYLE_PREFIX)
                 or column.startswith(PERIMETER_DIFF_SQ_STYLE_PREFIX)
+                or column.startswith(FACE_STYLE_INTERACTION_PREFIX)
                 or column.startswith(STRAP_STYLE_INTERACTION_PREFIX)
             ]
         )
@@ -444,7 +450,7 @@ def prepare_training_data(
             'perimeter_diff',
             'abs_perimeter_diff',
             'perimeter_diff_sq'
-        ] + interaction_cols
+        ] + FACE_SHAPE_FEATURE_COLUMNS + interaction_cols
         if use_facial_perimeter:
             feature_cols.append('facial_perimeter_mm')
         else:
