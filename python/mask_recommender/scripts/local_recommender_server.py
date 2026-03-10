@@ -14,6 +14,7 @@ sys.path.insert(0, str(REPO_ROOT))
 from mask_recommender.feature_builder import (  # noqa: E402
     FACIAL_FEATURE_COLUMNS,
     build_feature_frame,
+    derive_brand_model,
 )
 from mask_recommender.prob_model import predict_prob_model  # noqa: E402
 
@@ -199,6 +200,10 @@ def _build_inference_rows(mask_data, facial_features):
             "perimeter_mm": perimeter,
             "strap_type": mask_info.get("strap_type") or "",
             "style": mask_info.get("style") or "",
+            "brand_model": mask_info.get("brand_model") or derive_brand_model(
+                mask_info.get("unique_internal_model_code"),
+                mask_info.get("current_state")
+            ),
             "unique_internal_model_code": mask_info.get("unique_internal_model_code") or "",
             "facial_hair_beard_length_mm": facial_features.get("facial_hair_beard_length_mm", 0) or 0,
         }
@@ -230,6 +235,17 @@ def _infer(payload, artifacts):
         use_diff_perimeter_bins=artifacts["metadata"].get("use_diff_perimeter_bins", False),
         use_diff_perimeter_mask_bins=artifacts["metadata"].get("use_diff_perimeter_mask_bins", False),
     )
+    if artifacts["metadata"].get("zscore") and artifacts["metadata"].get("zscore_stats"):
+        for column, values in artifacts["metadata"]["zscore_stats"].items():
+            if column not in encoded.columns:
+                continue
+            mean_value = float(values.get("mean", 0.0))
+            std_value = float(values.get("std", 1.0))
+            if std_value == 0:
+                std_value = 1.0
+            encoded[column] = (
+                pd.to_numeric(encoded[column], errors="coerce").fillna(0) - mean_value
+            ) / std_value
 
     inputs = torch.tensor(encoded.to_numpy(), dtype=torch.float32)
     with torch.no_grad():
