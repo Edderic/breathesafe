@@ -27,6 +27,8 @@ logger.setLevel(logging.INFO)
 def _apply_empirical_history_cap(probability: float, mask_info: Dict) -> float:
     fit_test_count = float(mask_info.get('mask_fit_test_count', 0) or 0)
     pass_count = float(mask_info.get('mask_pass_count', 0) or 0)
+    smoothed_pass_rate = float(mask_info.get('mask_smoothed_pass_rate', 0.5) or 0.5)
+    raw_pass_rate = (pass_count / fit_test_count) if fit_test_count > 0 else 0.5
 
     if pass_count == 0.0:
         if fit_test_count >= 20.0:
@@ -34,6 +36,16 @@ def _apply_empirical_history_cap(probability: float, mask_info: Dict) -> float:
         if fit_test_count >= 10.0:
             return min(probability, 0.05)
         if fit_test_count >= 5.0:
+            return min(probability, 0.10)
+
+    if fit_test_count >= 10.0:
+        if raw_pass_rate <= 0.05:
+            return min(probability, 0.05)
+        if raw_pass_rate <= 0.10:
+            return min(probability, 0.10)
+        if smoothed_pass_rate <= 0.05:
+            return min(probability, 0.05)
+        if smoothed_pass_rate <= 0.10:
             return min(probability, 0.10)
 
     return probability
