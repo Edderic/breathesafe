@@ -620,74 +620,13 @@ emitRecommendDebug(level, eventName, payload) {
 },
 
 maybeRecommend(r) {
-
-      const missing = []
-      const query = {}
-
-      const arkitAggregates = this.computeArkitAggregates(r.arkit)
-
-      for (const col of this.recommenderColumns) {
-        const camel = col.replace(/_([a-z])/g, (_, c) => c.toUpperCase())
-        const baseKey = `${camel}`
-        const mmKey = camel.endsWith('Mm') ? camel : `${camel}Mm`
-        const source = r.facialMeasurements || r.facial_measurements || r
-        const rawValue = (arkitAggregates && arkitAggregates[mmKey])
-          ?? (arkitAggregates && arkitAggregates[baseKey])
-          ?? source[baseKey]
-          ?? source[mmKey]
-          ?? source[col]
-        const parsed = rawValue === null || rawValue === undefined ? NaN : parseFloat(rawValue)
-        if (!Number.isFinite(parsed) || parsed <= 0) {
-          missing.push(baseKey)
-        } else {
-          query[col] = parsed
-        }
-      }
-
-      if (arkitAggregates && Number.isFinite(arkitAggregates.strapMm) && arkitAggregates.strapMm > 0) {
-        query.strap_mm = arkitAggregates.strapMm
-      }
-
-      if (r.facialHairBeardLengthMm !== undefined && r.facialHairBeardLengthMm !== null) {
-        query.facial_hair_beard_length_mm = parseFloat(r.facialHairBeardLengthMm) || 0
-      } else if (r.facial_hair_beard_length_mm !== undefined && r.facial_hair_beard_length_mm !== null) {
-        query.facial_hair_beard_length_mm = parseFloat(r.facial_hair_beard_length_mm) || 0
-      } else {
-        query.facial_hair_beard_length_mm = 0
-      }
-
-      const debugPayload = {
-        managedId: r.managedId,
-        query,
-        missing,
-        rowKeys: Object.keys(r || {}),
-        hasArkit: !!r.arkit,
-        arkitKeys: r.arkit ? Object.keys(r.arkit) : [],
-        facialMeasurementsKeys: r.facialMeasurements ? Object.keys(r.facialMeasurements) : [],
-        facial_measurementsKeys: r.facial_measurements ? Object.keys(r.facial_measurements) : []
-      }
-      this.recommenderDebugInfo = JSON.stringify(debugPayload, null, 2)
-      this.emitRecommendDebug('info', 'Built payload candidate', debugPayload)
-
-      if (missing.length > 0) {
-        // Debug-only visibility into row shape mismatches for recommendation payload construction.
-        this.emitRecommendDebug('warn', 'Missing facial measurements for managed user', debugPayload)
-        this.missingFacialMeasurementsForRecommender = missing
-        this.userId = r.managedId
-        return
-      }
-
-      const payload = this.encodeRecommenderPayload(query)
-      this.recommenderDebugInfo = JSON.stringify({ ...debugPayload, payload }, null, 2)
-      this.emitRecommendDebug('info', 'Encoded payload', {
-        managedId: r.managedId,
-        query,
-        payload
-      })
       this.$router.push({
         name: 'Masks',
         query: {
-          recommenderPayload: payload
+          recommender_user_id: r.managedId,
+          filterForAvailable: 'true',
+          sortByField: 'probaFit',
+          sortByStatus: 'descending'
         }
       })
     },

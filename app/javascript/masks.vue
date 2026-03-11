@@ -193,6 +193,13 @@
                 {{ metricCellText(row.key, m) }}
               </div>
               <div
+                v-else-if="row.key === 'observed_fit'"
+                class="table-text-cell"
+                :style="tableTextCellStyle"
+              >
+                {{ metricCellText(row.key, m) }}
+              </div>
+              <div
                 v-else-if="row.key === 'colors'"
                 class="table-text-cell table-colors-cell"
                 :style="tableTextCellStyle"
@@ -411,7 +418,7 @@ export default {
     },
 
     hasRecommenderPayload() {
-      return !!this.$route.query.recommenderPayload
+      return !!(this.$route.query.recommenderPayload || this.$route.query.recommender_user_id)
     },
     perimColorScheme() {
       return perimeterColorScheme()
@@ -432,6 +439,7 @@ export default {
       if (this.isNarrowTableViewport) {
         const rows = [
           { key: 'proba_fit', label: 'Fit' },
+          { key: 'observed_fit', label: 'Observed Fit' },
           { key: 'filtration', label: 'Filter' },
           { key: 'breathability', label: 'Breath' },
           { key: 'affordability', label: 'Cost' },
@@ -447,6 +455,7 @@ export default {
 
       const rows = [
         { key: 'proba_fit', label: 'Probability of Fit' },
+        { key: 'observed_fit', label: 'Observed Fit' },
         { key: 'filtration', label: 'Filtration Factor' },
         { key: 'breathability', label: 'Breathability (pa)' },
         { key: 'affordability', label: 'Initial Cost (USD)' },
@@ -810,6 +819,9 @@ export default {
       if (metricKey === 'strap_type') {
         return -1
       }
+      if (metricKey === 'observed_fit') {
+        return -1
+      }
       if (metricKey === 'colors') {
         return -1
       }
@@ -827,6 +839,9 @@ export default {
       if (metricKey === 'filtration') {
         return `${Math.round(Number(mask.avgSealedFitFactor))}`
       }
+      if (metricKey === 'observed_fit') {
+        return mask.observedFitLabel || 'No fit test'
+      }
       if (metricKey === 'breathability') {
         return `${Math.round(Number(mask.avgBreathabilityPa))} pa`
       }
@@ -843,13 +858,16 @@ export default {
     },
     metricIsMissing(metricKey, mask) {
       if (metricKey === 'proba_fit') {
-        const hasRecommenderPayload = !!this.$route.query.recommenderPayload
+        const hasRecommenderPayload = !!(this.$route.query.recommenderPayload || this.$route.query.recommender_user_id)
         const value = Number(mask.probaFit)
         return !hasRecommenderPayload || !Number.isFinite(value)
       }
       if (metricKey === 'filtration') {
         const value = Number(mask.avgSealedFitFactor)
         return !Number.isFinite(value) || value <= 0
+      }
+      if (metricKey === 'observed_fit') {
+        return !mask.observedFitLabel || String(mask.observedFitLabel).trim() === ''
       }
       if (metricKey === 'breathability') {
         const value = Number(mask.avgBreathabilityPa)
@@ -931,7 +949,7 @@ export default {
         didNormalize = true
       }
 
-      if (normalizedQuery.recommenderPayload) {
+      if (normalizedQuery.recommenderPayload || normalizedQuery.recommender_user_id) {
         const needsSortField = !normalizedQuery.sortByField || normalizedQuery.sortByField === 'none'
         const needsSortStatus = !normalizedQuery.sortByStatus || normalizedQuery.sortByStatus === 'none'
 
@@ -1124,7 +1142,8 @@ export default {
     },
     async maybeLoadRecommenderPayload(toQuery) {
       const payloadParam = toQuery.recommenderPayload
-      if (!payloadParam) {
+      const recommenderUserId = toQuery.recommender_user_id
+      if (!payloadParam && !recommenderUserId) {
         this.isRecommenderLoading = false
         this.recommenderModelTimestamp = null
         this.recommenderInFlightPayload = null
@@ -1134,49 +1153,56 @@ export default {
 
       // Never fall back to generic /masks.json while a recommender payload is present.
       // Skip only when this exact payload is currently loading or already loaded.
-      if (payloadParam === this.recommenderInFlightPayload) {
+      const requestKey = recommenderUserId ? `user:${recommenderUserId}` : payloadParam
+      if (requestKey === this.recommenderInFlightPayload) {
         return true
       }
-      if (payloadParam === this.loadedRecommenderPayload && this.masks.length > 0) {
-        return true
-      }
-
-      const facialMeasurements = this.decodeRecommenderPayload(payloadParam)
-      if (!facialMeasurements) {
-        this.isRecommenderLoading = false
-        this.recommenderModelTimestamp = null
-        this.message = "Failed to decode recommendations payload."
+      if (requestKey === this.loadedRecommenderPayload && this.masks.length > 0) {
         return true
       }
 
-      this.recommenderInFlightPayload = payloadParam
+      let facialMeasurements = null
+      if (payloadParam) {
+        facialMeasurements = this.decodeRecommenderPayload(payloadParam)
+        if (!facialMeasurements) {
+          this.isRecommenderLoading = false
+          this.recommenderModelTimestamp = null
+          this.message = "Failed to decode recommendations payload."
+          return true
+        }
+      }
+
+      this.recommenderInFlightPayload = requestKey
       this.isRecommenderLoading = true
       this.recommenderModelTimestamp = null
       try {
-        await this.requestAsyncRecommendations(payloadParam, facialMeasurements)
+        await this.requestAsyncRecommendations(requestKey, facialMeasurements, recommenderUserId)
       } finally {
         this.recommenderInFlightPayload = null
         this.isRecommenderLoading = false
       }
       return true
     },
-    async requestAsyncRecommendations(payloadParam, facialMeasurements) {
+    async requestAsyncRecommendations(requestKey, facialMeasurements, recommenderUserId) {
       try {
+        const requestBody = recommenderUserId
+          ? { recommender_user_id: recommenderUserId }
+          : { facial_measurements: facialMeasurements }
         const startResponse = await axios.post(
           `/mask_recommender/async.json`,
-          { facial_measurements: facialMeasurements }
+          requestBody
         )
         const jobId = startResponse?.data?.job_id
         if (!jobId) {
           this.message = "Failed to start mask recommendations."
           return
         }
-        await this.pollRecommendationStatus(jobId, payloadParam)
+        await this.pollRecommendationStatus(jobId, requestKey)
       } catch (error) {
-        this.message = "Failed to load mask recommendations."
+        this.message = error?.response?.data?.error || "Failed to load mask recommendations."
       }
     },
-    async pollRecommendationStatus(jobId, payloadParam) {
+    async pollRecommendationStatus(jobId, requestKey) {
       while (true) {
         try {
           const response = await axios.get(`/mask_recommender/async/${jobId}.json`)
@@ -1193,7 +1219,7 @@ export default {
                 this.maskDataContext = data.context
               }
             }
-            this.loadedRecommenderPayload = payloadParam
+            this.loadedRecommenderPayload = requestKey
             return
           }
           if (status === 'failed') {

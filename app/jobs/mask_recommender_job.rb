@@ -9,7 +9,7 @@ class MaskRecommenderJob < ApplicationJob
     "mask_recommender:jobs:#{job_id}"
   end
 
-  def perform(job_id:, facial_measurements:, function_base:)
+  def perform(job_id:, facial_measurements:, function_base:, recommender_user_id: nil, viewer_id: nil)
     cache_key = self.class.cache_key(job_id)
     Rails.cache.write(
       cache_key,
@@ -22,6 +22,20 @@ class MaskRecommenderJob < ApplicationJob
       function_base: function_base
     )
     masks = inference[:masks]
+    if recommender_user_id.present? && viewer_id.present?
+      viewer = User.find_by(id: viewer_id)
+      if viewer
+        summaries = MaskFitTestSummaryService.call(
+          viewer: viewer,
+          target_user_id: recommender_user_id,
+          mask_ids: masks.map { |mask| mask['id'] || mask[:id] }
+        )
+        masks = masks.map do |mask|
+          summary = summaries[(mask['id'] || mask[:id]).to_i] || {}
+          mask.merge(summary)
+        end
+      end
+    end
     model = inference[:model]
 
     Rails.cache.write(

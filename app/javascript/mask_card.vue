@@ -103,6 +103,10 @@
               </div>
             </td>
           </tr>
+          <tr v-if="hasRecommenderPayload">
+            <th>Observed Fit</th>
+            <td>{{ observedFitLabel(m) }}</td>
+          </tr>
             <tr>
             <th>Filtration Factor</th>
             <td>
@@ -335,7 +339,7 @@ export default {
       return this.errorMessages;
     },
     hasRecommenderPayload() {
-      return !!(this.$route && this.$route.query && this.$route.query.recommenderPayload)
+      return !!(this.$route && this.$route.query && (this.$route.query.recommenderPayload || this.$route.query.recommender_user_id))
     },
     expectedMaskColumns() {
       if (this.viewportWidth <= 800) {
@@ -500,6 +504,9 @@ export default {
       }
 
       return value
+    },
+    observedFitLabel(mask) {
+      return mask?.observedFitLabel || 'No fit test'
     },
     maskColorValues(mask) {
       if (!mask || !Array.isArray(mask.colors)) {
