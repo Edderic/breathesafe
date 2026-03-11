@@ -195,7 +195,7 @@
               <div
                 v-else-if="row.key === 'observed_fit'"
                 class="table-text-cell"
-                :style="tableTextCellStyle"
+                :style="observedFitCellStyle(m)"
               >
                 {{ metricCellText(row.key, m) }}
               </div>
@@ -487,6 +487,28 @@ export default {
         return { height: '6em' }
       }
       return { height: '4em' }
+    },
+    observedFitCellStyle() {
+      return (mask) => {
+        const baseStyle = Object.assign({}, this.tableTextCellStyle)
+        if (mask.qlftPass === true) {
+          return Object.assign({}, baseStyle, {
+            backgroundColor: '#2e7d32',
+            color: '#fff',
+            fontWeight: '600',
+            textShadow: '0 1px 3px rgba(0, 0, 0, 0.45)',
+          })
+        }
+        if (mask.qlftPass === false) {
+          return Object.assign({}, baseStyle, {
+            backgroundColor: '#c62828',
+            color: '#fff',
+            fontWeight: '600',
+            textShadow: '0 1px 3px rgba(0, 0, 0, 0.45)',
+          })
+        }
+        return baseStyle
+      }
     },
     displayables() {
       const masks = [...this.masks]

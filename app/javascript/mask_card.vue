@@ -105,7 +105,7 @@
           </tr>
           <tr v-if="hasRecommenderPayload">
             <th>Observed Fit</th>
-            <td>{{ observedFitLabel(m) }}</td>
+            <td :style="observedFitCellStyle(m)">{{ observedFitLabel(m) }}</td>
           </tr>
             <tr>
             <th>Filtration Factor</th>
@@ -507,6 +507,25 @@ export default {
     },
     observedFitLabel(mask) {
       return mask?.observedFitLabel || 'No fit test'
+    },
+    observedFitCellStyle(mask) {
+      if (mask?.qlftPass === true) {
+        return {
+          backgroundColor: '#2e7d32',
+          color: '#fff',
+          fontWeight: '600',
+          textShadow: '0 1px 3px rgba(0, 0, 0, 0.45)',
+        }
+      }
+      if (mask?.qlftPass === false) {
+        return {
+          backgroundColor: '#c62828',
+          color: '#fff',
+          fontWeight: '600',
+          textShadow: '0 1px 3px rgba(0, 0, 0, 0.45)',
+        }
+      }
+      return {}
     },
     maskColorValues(mask) {
       if (!mask || !Array.isArray(mask.colors)) {
