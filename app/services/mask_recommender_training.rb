@@ -17,7 +17,8 @@ class MaskRecommenderTraining
     learning_rate: 0.0001,
     retrain_with_full: true,
     class_reweight: true,
-    zscore: true
+    zscore: true,
+    exclude_brand_model: true
   }.freeze
 
   class << self
