@@ -1400,9 +1400,12 @@ def _build_custom_lr_perimeter_diff_diagnostics(
         observed_max += 1.0
 
     diff_values = np.linspace(observed_min, observed_max, 200, dtype=np.float32)
+    sort_columns = ['unique_internal_model_code']
+    if 'created_at' in cleaned_fit_tests.columns:
+        sort_columns.append('created_at')
     grouped = (
         cleaned_fit_tests
-        .sort_values(['unique_internal_model_code', 'created_at'])
+        .sort_values(sort_columns)
         .groupby('unique_internal_model_code', sort=True)
     )
     mask_codes = list(grouped.groups.keys())
