@@ -28,13 +28,12 @@ from feature_builder import (ABS_PERIMETER_DIFF_STYLE_PREFIX,
                              FACIAL_PERIMETER_COMPONENTS,
                              MASK_EMPIRICAL_FEATURE_COLUMNS,
                              MASK_SIZE_FEATURE_COLUMNS,
-                             PERIMETER_PENALTY_FEATURE_COLUMNS,
                              PERIMETER_DIFF_SQ_STYLE_PREFIX,
                              PERIMETER_DIFF_STYLE_PREFIX,
+                             PERIMETER_PENALTY_FEATURE_COLUMNS,
                              STRAP_STYLE_INTERACTION_PREFIX,
-                             add_face_shape_features,
+                             add_brand_model_column, add_face_shape_features,
                              add_face_style_interactions,
-                             add_brand_model_column,
                              add_geometry_penalty_features,
                              add_mask_size_face_interactions,
                              add_mask_size_features,
@@ -223,28 +222,6 @@ def get_users(fit_tests_df, with_perimeter, user_arkit_table):
     return user_arkit_table[user_arkit_table['user_id'].isin(user_ids)]
 
 
-def get_sorted_tested_masks(fit_tests_df):
-    """
-    Parameters:
-        fit_tests_df: pd.DataFrame
-
-    Returns: pd.DataFrame
-        Masks dataframe that has been sorted by mask_id
-    """
-
-    fit_tested_mask_ids = fit_tests_df.drop_duplicates('mask_id')['mask_id']
-    tested_masks = masks_df[masks_df['id'].isin(fit_tested_mask_ids)]
-
-    return tested_masks.drop_duplicates('mask_id').sort_values(by='mask_id')
-
-
-def compute_difference(mask_perimeters, user_face_perimeters, mask_ones, user_ones):
-    mask_perimeters_over_users = user_ones @ mask_perimeters.float()
-    user_perimeters_over_users = user_face_perimeter * mask_ones.T
-
-    return mask_perimeters_over_users - user_perimeters_over_users
-
-
 def produce_filters_diff_styles(diff_bins, user_ones, mask_vs_styles):
     """
     Produces filters where each 2D matrix denotes membership for a particular diff_bin and style.
@@ -294,32 +271,6 @@ def produce_summation(betas, users_by_masks_by_strap_types, users_by_masks_by_st
             summation += betas[:,:,:,i] * users_by_masks_by_style[:,:,:,i]
 
     return summation.sum(axis=2)
-
-def calc_preds(
-    beta_style_diff_bins,
-    diff_bins,
-    user_ones,
-    users_by_masks_by_strap_types,
-    users_by_masks_by_style, betas):
-
-    diff_bins = produce_diff_bins(user_ones, sorted_tested_masks, sorted_styles, difference, start=-50, end=50)
-    # TODO: add in strap effects
-    # TODO: consider regular vs. extended length headstraps
-    beta_tensor_diff_styles = produce_beta_tensor_diff_styles(
-        beta_style_diff_bins,
-        styles=sorted_styles,
-        diff_bins=diff_bins,
-        num_users=num_users,
-        num_masks=num_masks
-    )
-    # dist bin, style, user, mask
-
-    import pdb; pdb.set_trace()
-
-    summation = produce_summation(diff_bins, betas, users_by_masks_by_strap_types, users_by_masks_by_style)
-
-    # TODO: add in alpha
-    return torch.logistic(summation)
 
 
 def get_masks(session, masks_url):
@@ -470,6 +421,7 @@ def prepare_training_data(
         else:
             feature_cols += FACIAL_FEATURE_COLUMNS
     feature_cols += [
+        'user_id',
         'strap_is_earloop_like',
         'strap_is_headstrap_like',
         'strap_is_adjustable',
@@ -1264,6 +1216,42 @@ def _build_probe_diagnostics(
     return diagnostics
 
 
+def calc_preds(data, params):
+    fit_tests_by_mask_specific_parameters = data['fit_tests_by_masks'] @ params['mask_specific_parameters']
+    fit_tests_by_style_specific_parameters = data['fit_tests_by_styles'] @ params['style_specific_parameters']
+    fit_tests_by_mask_and_style_specific_parameters = fit_tests_by_mask_specific_parameters + fit_tests_by_style_specific_parameters
+
+    fit_tests_by_facial_feature_fit = fit_tests_by_mask_and_style_specific_parameters * data['perimeter_diffs']
+    fit_tests_by_strap_specific_parameters = data['fit_tests_by_strap_types'] @ params['strap_specific_parameters']
+
+    logits = fit_tests_by_strap_specific_parameters + fit_tests_by_facial_feature_fit.sum(axis=1).reshape(-1, 1)
+
+    return torch.sigmoid(logits)
+
+
+def prep_data_in_torch(cleaned_fit_tests):
+    fit_tests_by_strap_types = torch.from_numpy(pd.get_dummies(cleaned_fit_tests['strap_type']).astype(np.float32).to_numpy())
+    sorted_user_ids = cleaned_fit_tests['user_id'].sort_values().unique()
+    sorted_user_ids_t = torch.from_numpy(sorted_user_ids).reshape(-1, 1)
+
+    facial_perimeter_cm_t = torch.from_numpy(cleaned_fit_tests[FACIAL_MEASUREMENTS].sum(axis=1).to_numpy()).reshape(-1, 1) / 10
+    perimeter_diff_cm_t = torch.from_numpy(cleaned_fit_tests['perimeter_diff'].to_numpy()).reshape(-1, 1)
+    perimeter_diff_cm_sq_t = torch.from_numpy(cleaned_fit_tests['perimeter_diff_sq'].to_numpy()).reshape(-1, 1)
+    ones = torch.ones((perimeter_diff_cm_t.shape[0], 1))
+    perimeter_diffs = torch.concat([ perimeter_diff_cm_sq_t, perimeter_diff_cm_t, ones ], axis=1)
+
+    fit_tests_by_masks = torch.from_numpy(pd.get_dummies(cleaned_fit_tests['unique_internal_model_code']).astype(np.float32).to_numpy())
+    fit_tests_by_styles = torch.from_numpy(pd.get_dummies(cleaned_fit_tests['style']).astype(np.float32).to_numpy())
+
+    data = {
+        'fit_tests_by_masks': fit_tests_by_masks,
+        'fit_tests_by_styles': fit_tests_by_styles,
+        'fit_tests_by_strap_types': fit_tests_by_strap_types,
+        'perimeter_diffs': perimeter_diffs
+    }
+
+    return data
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Train fit predictor model.')
     parser.add_argument('--epochs', type=int, default=600, help='Number of training epochs.')
@@ -1365,6 +1353,27 @@ def main(argv=None):
         use_diff_perimeter_bins=args.use_diff_perimeter_bins,
         use_diff_perimeter_mask_bins=args.use_diff_perimeter_mask_bins
     )
+
+    mask_unique_internal_model_codes = cleaned_fit_tests['unique_internal_model_code'].sort_values().unique()
+    styles = cleaned_fit_tests['style'].sort_values().unique()
+    strap_types = cleaned_fit_tests['strap_type'].sort_values().unique()
+
+    ## Parameters
+    # square term, linear term, offset
+    mask_specific_parameters = torch.zeros((mask_unique_internal_model_codes.shape[0], 3), requires_grad=True, dtype=torch.float32)
+    style_specific_parameters = torch.rand((styles.shape[0], 3), requires_grad=True, dtype=torch.float32) - 0.5
+    strap_specific_parameters = torch.rand((strap_types.shape[0], 1), requires_grad=True)
+
+    data = prep_data_in_torch(cleaned_fit_tests)
+
+    parameters = {
+        'mask_specific_parameters': mask_specific_parameters,
+        'style_specific_parameters': style_specific_parameters,
+        'strap_specific_parameters': strap_specific_parameters,
+    }
+
+    prediction = calc_preds(data, parameters)
+
     logging.info(
         "Fit tests after filtering: %s / %s",
         cleaned_fit_tests.shape[0],
