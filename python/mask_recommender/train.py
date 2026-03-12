@@ -1366,6 +1366,157 @@ def _predict_custom_lr_probabilities(frame, parameters, category_metadata):
         return calc_preds(data, parameters).squeeze(1).cpu().numpy()
 
 
+def _custom_lr_params_with_zeroed_mask(parameters, mask_code, category_metadata):
+    cloned = {
+        key: value.detach().clone()
+        for key, value in parameters.items()
+    }
+    try:
+        mask_idx = category_metadata['mask_code_categories'].index(mask_code)
+    except ValueError:
+        return cloned
+    cloned['mask_specific_parameters'][mask_idx] = torch.zeros_like(cloned['mask_specific_parameters'][mask_idx])
+    return cloned
+
+
+def _build_custom_lr_perimeter_diff_diagnostics(
+    cleaned_fit_tests,
+    parameters,
+    category_metadata,
+    timestamp,
+):
+    if cleaned_fit_tests.empty:
+        return []
+
+    images_dir = _images_output_dir()
+    os.makedirs(images_dir, exist_ok=True)
+
+    observed_min = float(pd.to_numeric(cleaned_fit_tests['perimeter_diff'], errors='coerce').min())
+    observed_max = float(pd.to_numeric(cleaned_fit_tests['perimeter_diff'], errors='coerce').max())
+    if not np.isfinite(observed_min) or not np.isfinite(observed_max):
+        return []
+    if observed_min == observed_max:
+        observed_min -= 1.0
+        observed_max += 1.0
+
+    diff_values = np.linspace(observed_min, observed_max, 200, dtype=np.float32)
+    grouped = (
+        cleaned_fit_tests
+        .sort_values(['unique_internal_model_code', 'created_at'])
+        .groupby('unique_internal_model_code', sort=True)
+    )
+    mask_codes = list(grouped.groups.keys())
+    if not mask_codes:
+        return []
+
+    artifact_paths = []
+    per_page = 16
+    num_pages = int(np.ceil(len(mask_codes) / per_page))
+
+    for page_idx in range(num_pages):
+        page_codes = mask_codes[page_idx * per_page:(page_idx + 1) * per_page]
+        fig, axes = plt.subplots(4, 4, figsize=(20, 16), sharex=True, sharey=True)
+        axes = axes.flatten()
+
+        for ax_idx, mask_code in enumerate(page_codes):
+            ax = axes[ax_idx]
+            rows = grouped.get_group(mask_code).copy()
+            representative = rows.iloc[-1]
+            style = representative['style']
+            strap_type = representative['strap_type']
+
+            curve_frame = pd.DataFrame({
+                'unique_internal_model_code': [mask_code] * len(diff_values),
+                'style': [style] * len(diff_values),
+                'strap_type': [strap_type] * len(diff_values),
+                'perimeter_diff': diff_values,
+                'perimeter_diff_sq': diff_values ** 2,
+                'perimeter_mm': np.zeros(len(diff_values), dtype=np.float32),
+                'facial_hair_beard_length_mm': np.zeros(len(diff_values), dtype=np.float32),
+            })
+            for column in FACIAL_MEASUREMENTS:
+                curve_frame[column] = np.zeros(len(diff_values), dtype=np.float32)
+
+            specific_probs = _predict_custom_lr_probabilities(
+                curve_frame,
+                parameters=parameters,
+                category_metadata=category_metadata,
+            )
+            generic_probs = _predict_custom_lr_probabilities(
+                curve_frame,
+                parameters=_custom_lr_params_with_zeroed_mask(parameters, mask_code, category_metadata),
+                category_metadata=category_metadata,
+            )
+
+            ax.plot(diff_values, specific_probs, label='mask-specific', color='#1f77b4', linewidth=2)
+            ax.plot(diff_values, generic_probs, label='style-only', color='#ff7f0e', linewidth=2, linestyle='--')
+
+            row_diffs = pd.to_numeric(rows['perimeter_diff'], errors='coerce')
+            row_labels = pd.to_numeric(rows['qlft_pass_normalized'], errors='coerce')
+            pass_mask = row_labels == 1
+            fail_mask = row_labels == 0
+            if pass_mask.any():
+                ax.scatter(
+                    row_diffs[pass_mask],
+                    row_labels[pass_mask],
+                    color='green',
+                    alpha=0.8,
+                    s=26,
+                    label='pass',
+                )
+            if fail_mask.any():
+                ax.scatter(
+                    row_diffs[fail_mask],
+                    row_labels[fail_mask],
+                    color='red',
+                    alpha=0.8,
+                    s=26,
+                    label='fail',
+                )
+
+            ax.set_title(mask_code, fontsize=9)
+            ax.set_ylim(-0.05, 1.05)
+            ax.grid(True, linestyle='--', alpha=0.25)
+
+        for unused_ax in axes[len(page_codes):]:
+            unused_ax.axis('off')
+
+        handles, labels = axes[0].get_legend_handles_labels()
+        if handles:
+            fig.legend(handles, labels, loc='upper center', ncol=4, frameon=False)
+        fig.supxlabel('perimeter_diff')
+        fig.supylabel('probability / actual qlft pass')
+        fig.suptitle(f'Custom LR perimeter_diff diagnostics (page {page_idx + 1}/{num_pages})', y=0.995)
+        fig.tight_layout(rect=[0, 0, 1, 0.97])
+
+        output_path = os.path.join(
+            images_dir,
+            f"{timestamp}_custom_perimeter_diff_diagnostics_page_{page_idx + 1}.png"
+        )
+        if _should_upload_visual_artifacts_to_s3():
+            buf = io.BytesIO()
+            fig.savefig(buf, format='png')
+            buf.seek(0)
+            output_key = (
+                f"mask_recommender/models/{timestamp}/"
+                f"{timestamp}_custom_perimeter_diff_diagnostics_page_{page_idx + 1}.png"
+            )
+            uploaded_uri = _best_effort_visual_upload(
+                lambda: _upload_png_bytes_to_s3(buf.getvalue(), output_key),
+                f"custom perimeter diff diagnostics page {page_idx + 1}",
+                fallback_artifact=None,
+            )
+            if uploaded_uri:
+                artifact_paths.append(uploaded_uri)
+        else:
+            fig.savefig(output_path)
+            logging.info("Saved custom perimeter diff diagnostics to %s", output_path)
+            artifact_paths.append(output_path)
+        plt.close(fig)
+
+    return artifact_paths
+
+
 def train_custom_lr_with_split(
     cleaned_fit_tests,
     train_idx,
@@ -1728,6 +1879,13 @@ def main(argv=None):
                 logging.info("Saved training loss plot to %s", loss_plot_path)
             plt.close()
 
+        perimeter_diff_diagnostics_artifacts = _build_custom_lr_perimeter_diff_diagnostics(
+            cleaned_fit_tests=cleaned_fit_tests,
+            parameters=params,
+            category_metadata=category_metadata,
+            timestamp=timestamp,
+        )
+
         roc_plot_path = os.path.join(images_dir, f"{timestamp}_custom_roc_auc.png")
         plt.figure(figsize=(8, 4))
         try:
@@ -1792,6 +1950,7 @@ def main(argv=None):
             'recommendations_artifact': recommendations_artifact,
             'training_loss_artifact': loss_plot_artifact,
             'roc_auc_artifact': roc_plot_artifact,
+            'perimeter_diff_diagnostics_artifacts': perimeter_diff_diagnostics_artifacts,
             'retrain_with_full': bool(args.retrain_with_full),
             'saved_model_training_scope': saved_model_scope,
             'validation_metrics_source': 'split_validation',
