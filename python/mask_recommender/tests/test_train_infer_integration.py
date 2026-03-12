@@ -312,3 +312,86 @@ def test_local_infer_logs_empirical_cap(caplog):
         local_recommender_server._log_empirical_cap(artifacts["mask_data"]["1"], 0.36, 0.05)
 
     assert "Empirical cap applied mask=MASK-A raw=0.3600 capped=0.0500" in caplog.text
+
+
+def test_prep_data_in_torch_with_categories_uses_float32_and_stable_shapes():
+    cleaned = train_module.prepare_training_data(_fit_tests_df())
+    category_metadata = train_module._custom_lr_category_metadata(cleaned)
+
+    data = train_module.prep_data_in_torch_with_categories(
+        cleaned,
+        mask_categories=category_metadata["mask_code_categories"],
+        style_categories=category_metadata["style_categories"],
+        strap_categories=category_metadata["strap_type_categories"],
+    )
+
+    assert data["fit_tests_by_masks"].dtype == torch.float32
+    assert data["fit_tests_by_styles"].dtype == torch.float32
+    assert data["fit_tests_by_strap_types"].dtype == torch.float32
+    assert data["perimeter_diffs"].dtype == torch.float32
+    assert data["fit_tests_by_masks"].shape[1] == len(category_metadata["mask_code_categories"])
+    assert data["fit_tests_by_styles"].shape[1] == len(category_metadata["style_categories"])
+    assert data["fit_tests_by_strap_types"].shape[1] == len(category_metadata["strap_type_categories"])
+
+
+def test_local_infer_custom_scores_masks():
+    cleaned = train_module.prepare_training_data(_fit_tests_df())
+    category_metadata = train_module._custom_lr_category_metadata(cleaned)
+    full_idx = torch.arange(cleaned.shape[0])
+    train_result = train_module.train_custom_lr_with_split(
+        cleaned,
+        train_idx=full_idx,
+        val_idx=full_idx,
+        category_metadata=category_metadata,
+        epochs=2,
+        learning_rate=0.01,
+    )
+
+    artifacts = {
+        "params": train_result["params"],
+        "metadata": {
+            "timestamp": "2026-03-12",
+            "environment": "development",
+            **category_metadata,
+        },
+        "mask_data": {
+            "1": {
+                "id": 1,
+                "unique_internal_model_code": "MASK-A",
+                "perimeter_mm": 300,
+                "strap_type": "Earloop",
+                "style": "Cup",
+                "mask_fit_test_count": 2,
+                "mask_pass_count": 1,
+                "mask_smoothed_pass_rate": 0.5,
+            },
+            "2": {
+                "id": 2,
+                "unique_internal_model_code": "MASK-B",
+                "perimeter_mm": 320,
+                "strap_type": "Headstrap",
+                "style": "Bifold",
+                "mask_fit_test_count": 2,
+                "mask_pass_count": 1,
+                "mask_smoothed_pass_rate": 0.5,
+            },
+        },
+    }
+
+    result = local_recommender_server._infer_custom(
+        {
+            "model_type": "custom_lr",
+            "facial_measurements": {
+                "nose_mm": 40,
+                "chin_mm": 50,
+                "top_cheek_mm": 60,
+                "mid_cheek_mm": 55,
+                "strap_mm": 120,
+                "facial_hair_beard_length_mm": 0,
+            },
+        },
+        artifacts,
+    )
+
+    assert set(result["mask_id"].values()) == {1, 2}
+    assert all(0.0 <= proba <= 1.0 for proba in result["proba_fit"].values())

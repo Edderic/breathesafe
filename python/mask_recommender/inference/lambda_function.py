@@ -11,6 +11,7 @@ try:
     from feature_builder import (FACIAL_FEATURE_COLUMNS, MASK_EMPIRICAL_FEATURE_COLUMNS, build_feature_frame,
                                  derive_brand_model)
     from prob_model import predict_prob_model
+    from train import calc_preds, prep_data_in_torch_with_categories
 except ModuleNotFoundError:
     from mask_recommender.feature_builder import (  # type: ignore
         FACIAL_FEATURE_COLUMNS,
@@ -19,6 +20,7 @@ except ModuleNotFoundError:
         derive_brand_model,
     )
     from mask_recommender.prob_model import predict_prob_model  # type: ignore
+    from mask_recommender.train import calc_preds, prep_data_in_torch_with_categories  # type: ignore
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -69,6 +71,10 @@ class MaskRecommenderInference:
         self.prob_metadata = None
         self.prob_mask_data = None
         self.prob_last_loaded_at = None
+        self.custom_params = None
+        self.custom_metadata = None
+        self.custom_mask_data = None
+        self.custom_last_loaded_at = None
         self.last_loaded_at = None
         self.latest_payload = None
         self.refresh_seconds = int(os.environ.get('MODEL_REFRESH_SECONDS', '300'))
@@ -134,6 +140,13 @@ class MaskRecommenderInference:
             return
         if (time.time() - self.prob_last_loaded_at) > self.refresh_seconds:
             self.load_prob_model(force=True)
+
+    def _maybe_refresh_custom(self) -> None:
+        if self.custom_last_loaded_at is None:
+            self.load_custom_model(force=True)
+            return
+        if (time.time() - self.custom_last_loaded_at) > self.refresh_seconds:
+            self.load_custom_model(force=True)
 
     def load_model(self, force: bool = False) -> None:
         if not force and self.model is not None:
@@ -258,6 +271,43 @@ class MaskRecommenderInference:
             params_key
         )
 
+    def load_custom_model(self, force: bool = False) -> None:
+        if not force and self.custom_params is not None:
+            return
+
+        latest_key = 'mask_recommender/models/custom_latest.json'
+        latest_path = '/tmp/mask_recommender_custom_latest.json'
+        self._download_file(latest_key, latest_path)
+        with open(latest_path, 'r') as f:
+            latest_payload = json.load(f)
+
+        params_key = latest_payload['params_key']
+        metadata_key = latest_payload['metadata_key']
+        mask_data_key = latest_payload['mask_data_key']
+
+        params_path = '/tmp/mask_recommender_custom_params.pt'
+        metadata_path = '/tmp/mask_recommender_custom_metadata.json'
+        mask_data_path = '/tmp/mask_recommender_custom_mask_data.json'
+
+        self._download_file(params_key, params_path)
+        self._download_file(metadata_key, metadata_path)
+        self._download_file(mask_data_key, mask_data_path)
+
+        with open(metadata_path, 'r') as f:
+            self.custom_metadata = json.load(f)
+
+        with open(mask_data_path, 'r') as f:
+            self.custom_mask_data = json.load(f)
+
+        self.custom_params = torch.load(params_path, map_location='cpu')
+        self.custom_last_loaded_at = time.time()
+        logger.info(
+            "Loaded custom model %s from s3://%s/%s",
+            latest_payload.get('timestamp'),
+            self.bucket,
+            params_key
+        )
+
     def _build_inference_rows(self, mask_data: Dict, facial_features: Dict) -> pd.DataFrame:
         rows = []
         for mask_id, mask_info in mask_data.items():
@@ -360,6 +410,33 @@ class MaskRecommenderInference:
         recommendations.sort(key=lambda x: x['proba_fit'], reverse=True)
         return recommendations
 
+    def recommend_masks_custom(self, facial_features: Dict) -> List[Dict]:
+        self._maybe_refresh_custom()
+        if not self.custom_params or not self.custom_metadata or not self.custom_mask_data:
+            logger.error('Custom model or mask data not loaded; returning empty recommendations.')
+            return []
+
+        inference_rows = self._build_inference_rows(self.custom_mask_data, facial_features)
+        custom_data = prep_data_in_torch_with_categories(
+            inference_rows,
+            mask_categories=self.custom_metadata['mask_code_categories'],
+            style_categories=self.custom_metadata['style_categories'],
+            strap_categories=self.custom_metadata['strap_type_categories'],
+        )
+        with torch.no_grad():
+            probs = calc_preds(custom_data, self.custom_params).squeeze(1).cpu().tolist()
+
+        recommendations = []
+        for idx, (mask_id, mask_info) in enumerate(self.custom_mask_data.items()):
+            capped_probability = _apply_empirical_history_cap(float(probs[idx]), mask_info)
+            recommendations.append({
+                'mask_id': int(mask_id),
+                'proba_fit': capped_probability,
+                'mask_info': mask_info,
+            })
+        recommendations.sort(key=lambda x: x['proba_fit'], reverse=True)
+        return recommendations
+
 
 def handler(event, context):
     try:
@@ -372,6 +449,9 @@ def handler(event, context):
             if model_type == "prob":
                 recommender.load_prob_model(force=True)
                 warmed_model = recommender.prob_metadata
+            elif model_type == "custom_lr":
+                recommender.load_custom_model(force=True)
+                warmed_model = recommender.custom_metadata
             else:
                 recommender.load_model(force=True)
                 warmed_model = recommender.latest_payload
@@ -386,6 +466,9 @@ def handler(event, context):
         if model_type == 'prob':
             recommendations = recommender.recommend_masks_prob(facial_features)
             model_payload = recommender.prob_metadata
+        elif model_type == 'custom_lr':
+            recommendations = recommender.recommend_masks_custom(facial_features)
+            model_payload = recommender.custom_metadata
         else:
             recommendations = recommender.recommend_masks(facial_features)
             model_payload = recommender.latest_payload

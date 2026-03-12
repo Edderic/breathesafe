@@ -1230,33 +1230,220 @@ def calc_preds(data, params):
 
 
 def prep_data_in_torch(cleaned_fit_tests):
-    fit_tests_by_strap_types = torch.from_numpy(pd.get_dummies(cleaned_fit_tests['strap_type']).astype(np.float32).to_numpy())
-    sorted_user_ids = cleaned_fit_tests['user_id'].sort_values().unique()
-    sorted_user_ids_t = torch.from_numpy(sorted_user_ids).reshape(-1, 1)
+    mask_categories = sorted(cleaned_fit_tests['unique_internal_model_code'].dropna().unique())
+    style_categories = sorted(cleaned_fit_tests['style'].dropna().unique())
+    strap_categories = sorted(cleaned_fit_tests['strap_type'].dropna().unique())
+    return prep_data_in_torch_with_categories(
+        cleaned_fit_tests,
+        mask_categories=mask_categories,
+        style_categories=style_categories,
+        strap_categories=strap_categories,
+    )
 
-    facial_perimeter_cm_t = torch.from_numpy(cleaned_fit_tests[FACIAL_MEASUREMENTS].sum(axis=1).to_numpy()).reshape(-1, 1) / 10
-    perimeter_diff_cm_t = torch.from_numpy(cleaned_fit_tests['perimeter_diff'].to_numpy()).reshape(-1, 1)
-    perimeter_diff_cm_sq_t = torch.from_numpy(cleaned_fit_tests['perimeter_diff_sq'].to_numpy()).reshape(-1, 1)
-    ones = torch.ones((perimeter_diff_cm_t.shape[0], 1))
-    perimeter_diffs = torch.concat([ perimeter_diff_cm_sq_t, perimeter_diff_cm_t, ones ], axis=1)
 
-    fit_tests_by_masks = torch.from_numpy(pd.get_dummies(cleaned_fit_tests['unique_internal_model_code']).astype(np.float32).to_numpy())
-    fit_tests_by_styles = torch.from_numpy(pd.get_dummies(cleaned_fit_tests['style']).astype(np.float32).to_numpy())
+def prep_data_in_torch_with_categories(
+    frame,
+    mask_categories,
+    style_categories,
+    strap_categories,
+):
+    frame = frame.copy()
+    if 'perimeter_diff' not in frame.columns:
+        facial_perimeter_cm = frame[FACIAL_MEASUREMENTS].sum(axis=1).astype(np.float32) / 10.0
+        mask_perimeter_cm = pd.to_numeric(frame.get('perimeter_mm', 0), errors='coerce').fillna(0).astype(np.float32) / 10.0
+        frame['perimeter_diff'] = facial_perimeter_cm - mask_perimeter_cm
+    if 'perimeter_diff_sq' not in frame.columns:
+        frame['perimeter_diff_sq'] = pd.to_numeric(frame['perimeter_diff'], errors='coerce').fillna(0).astype(np.float32) ** 2
+
+    fit_tests_by_strap_types = torch.from_numpy(
+        pd.get_dummies(
+            pd.Categorical(frame['strap_type'], categories=strap_categories)
+        ).astype(np.float32).to_numpy()
+    )
+
+    facial_perimeter_cm_t = torch.from_numpy(
+        frame[FACIAL_MEASUREMENTS].sum(axis=1).to_numpy(dtype=np.float32)
+    ).reshape(-1, 1) / 10.0
+    perimeter_diff_cm_t = torch.from_numpy(
+        frame['perimeter_diff'].to_numpy(dtype=np.float32)
+    ).reshape(-1, 1)
+    perimeter_diff_cm_sq_t = torch.from_numpy(
+        frame['perimeter_diff_sq'].to_numpy(dtype=np.float32)
+    ).reshape(-1, 1)
+    ones = torch.ones((perimeter_diff_cm_t.shape[0], 1), dtype=torch.float32)
+    perimeter_diffs = torch.concat([perimeter_diff_cm_sq_t, perimeter_diff_cm_t, ones], axis=1)
+
+    fit_tests_by_masks = torch.from_numpy(
+        pd.get_dummies(
+            pd.Categorical(frame['unique_internal_model_code'], categories=mask_categories)
+        ).astype(np.float32).to_numpy()
+    )
+    fit_tests_by_styles = torch.from_numpy(
+        pd.get_dummies(
+            pd.Categorical(frame['style'], categories=style_categories)
+        ).astype(np.float32).to_numpy()
+    )
 
     data = {
         'fit_tests_by_masks': fit_tests_by_masks,
         'fit_tests_by_styles': fit_tests_by_styles,
         'fit_tests_by_strap_types': fit_tests_by_strap_types,
-        'perimeter_diffs': perimeter_diffs
+        'perimeter_diffs': perimeter_diffs,
+        'facial_perimeter_cm': facial_perimeter_cm_t,
     }
 
     return data
+
+
+def _custom_lr_category_metadata(cleaned_fit_tests):
+    return {
+        'mask_code_categories': sorted(cleaned_fit_tests['unique_internal_model_code'].dropna().unique().tolist()),
+        'style_categories': sorted(cleaned_fit_tests['style'].dropna().unique().tolist()),
+        'strap_type_categories': sorted(cleaned_fit_tests['strap_type'].dropna().unique().tolist()),
+    }
+
+
+def _subset_custom_lr_data(data, row_indices):
+    if isinstance(row_indices, torch.Tensor):
+        row_indices = row_indices.detach().cpu().long()
+    else:
+        row_indices = torch.tensor(row_indices, dtype=torch.long)
+    return {
+        key: value[row_indices]
+        for key, value in data.items()
+    }
+
+
+def _initialize_custom_lr_parameters(category_metadata):
+    mask_count = len(category_metadata['mask_code_categories'])
+    style_count = len(category_metadata['style_categories'])
+    strap_count = len(category_metadata['strap_type_categories'])
+    return {
+        'mask_specific_parameters': torch.zeros((mask_count, 3), requires_grad=True, dtype=torch.float32),
+        'style_specific_parameters': (torch.rand((style_count, 3), dtype=torch.float32) - 0.5).requires_grad_(),
+        'strap_specific_parameters': (torch.rand((strap_count, 1), dtype=torch.float32) - 0.5).requires_grad_(),
+    }
+
+
+def _detach_custom_lr_parameters(parameters):
+    return {
+        key: value.detach().cpu()
+        for key, value in parameters.items()
+    }
+
+
+def _predict_custom_lr_probabilities(frame, parameters, category_metadata):
+    data = prep_data_in_torch_with_categories(
+        frame,
+        mask_categories=category_metadata['mask_code_categories'],
+        style_categories=category_metadata['style_categories'],
+        strap_categories=category_metadata['strap_type_categories'],
+    )
+    with torch.no_grad():
+        return calc_preds(data, parameters).squeeze(1).cpu().numpy()
+
+
+def train_custom_lr_with_split(
+    cleaned_fit_tests,
+    train_idx,
+    val_idx,
+    category_metadata,
+    epochs=50,
+    learning_rate=0.01,
+    class_weighting=False,
+):
+    data = prep_data_in_torch_with_categories(
+        cleaned_fit_tests,
+        mask_categories=category_metadata['mask_code_categories'],
+        style_categories=category_metadata['style_categories'],
+        strap_categories=category_metadata['strap_type_categories'],
+    )
+    target = torch.tensor(
+        pd.to_numeric(cleaned_fit_tests['qlft_pass_normalized'], errors='coerce').fillna(0).to_numpy(dtype=np.float32)
+    ).reshape(-1, 1)
+
+    train_data = _subset_custom_lr_data(data, train_idx)
+    val_data = _subset_custom_lr_data(data, val_idx)
+    y_train = target[train_idx]
+    y_val = target[val_idx]
+
+    params = _initialize_custom_lr_parameters(category_metadata)
+    optimizer = torch.optim.Adam(list(params.values()), lr=learning_rate)
+    loss_fn = torch.nn.BCELoss(reduction='none')
+    train_losses = []
+    val_losses = []
+
+    pos_count = float(y_train.sum().item())
+    neg_count = float((1 - y_train).sum().item())
+    pos_weight = (neg_count / pos_count) if pos_count > 0 else 1.0
+    pos_weight_tensor = torch.tensor(pos_weight, dtype=torch.float32)
+
+    logging.info(
+        "Custom LR balance: train_pos_rate=%.3f val_pos_rate=%.3f pos_weight=%.3f",
+        float(y_train.mean().item()) if y_train.numel() else 0.0,
+        float(y_val.mean().item()) if y_val.numel() else 0.0,
+        pos_weight,
+    )
+    if class_weighting:
+        logging.info("Class weighting enabled.")
+
+    for epoch in range(epochs):
+        optimizer.zero_grad()
+        train_probs = calc_preds(train_data, params)
+        if class_weighting:
+            class_weights = torch.where(y_train == 1, pos_weight_tensor, torch.tensor(1.0, dtype=torch.float32))
+        else:
+            class_weights = torch.ones_like(y_train)
+        loss = (loss_fn(train_probs, y_train) * class_weights).mean()
+        loss.backward()
+        optimizer.step()
+        train_losses.append(float(loss.item()))
+
+        with torch.no_grad():
+            val_probs = calc_preds(val_data, params)
+            if class_weighting:
+                val_class_weights = torch.where(y_val == 1, pos_weight_tensor, torch.tensor(1.0, dtype=torch.float32))
+            else:
+                val_class_weights = torch.ones_like(y_val)
+            val_loss = (loss_fn(val_probs, y_val) * val_class_weights).mean().item()
+            val_losses.append(float(val_loss))
+            if (epoch + 1) % 10 == 0 or epoch == 0:
+                preds = (val_probs >= 0.5).float()
+                accuracy = (preds == y_val).float().mean().item()
+                true_pos = ((preds == 1) & (y_val == 1)).float().sum().item()
+                false_pos = ((preds == 1) & (y_val == 0)).float().sum().item()
+                false_neg = ((preds == 0) & (y_val == 1)).float().sum().item()
+                precision = true_pos / (true_pos + false_pos) if (true_pos + false_pos) else 0.0
+                recall = true_pos / (true_pos + false_neg) if (true_pos + false_neg) else 0.0
+                logging.info(
+                    "custom_lr epoch=%s train_loss=%.4f val_loss=%.4f val_acc=%.3f val_precision=%.3f val_recall=%.3f",
+                    epoch + 1,
+                    float(loss.item()),
+                    float(val_loss),
+                    accuracy,
+                    precision,
+                    recall,
+                )
+
+    with torch.no_grad():
+        final_train_probs = calc_preds(train_data, params).squeeze(1).cpu().numpy()
+        final_val_probs = calc_preds(val_data, params).squeeze(1).cpu().numpy()
+
+    return {
+        'params': _detach_custom_lr_parameters(params),
+        'train_losses': train_losses,
+        'val_losses': val_losses,
+        'train_probs': final_train_probs,
+        'val_probs': final_val_probs,
+        'y_train': y_train.squeeze(1).cpu().numpy(),
+        'y_val': y_val.squeeze(1).cpu().numpy(),
+    }
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Train fit predictor model.')
     parser.add_argument('--epochs', type=int, default=600, help='Number of training epochs.')
     parser.add_argument('--learning-rate', type=float, default=0.00005, help='Learning rate for optimizer.')
-    parser.add_argument('--model-type', default='nn', choices=['nn', 'prob'], help='Model type to train.')
+    parser.add_argument('--model-type', default='nn', choices=['nn', 'prob', 'custom_lr'], help='Model type to train.')
     parser.add_argument('--loss-plot', default='python/mask_recommender/training_loss.png', help='Path to save training loss plot.')
     parser.add_argument('--loss-type', default='bce', choices=['bce', 'focal'], help='Loss function to use.')
     parser.add_argument('--focal-alpha', type=float, default=0.25, help='Alpha for focal loss.')
@@ -1354,26 +1541,6 @@ def main(argv=None):
         use_diff_perimeter_mask_bins=args.use_diff_perimeter_mask_bins
     )
 
-    mask_unique_internal_model_codes = cleaned_fit_tests['unique_internal_model_code'].sort_values().unique()
-    styles = cleaned_fit_tests['style'].sort_values().unique()
-    strap_types = cleaned_fit_tests['strap_type'].sort_values().unique()
-
-    ## Parameters
-    # square term, linear term, offset
-    mask_specific_parameters = torch.zeros((mask_unique_internal_model_codes.shape[0], 3), requires_grad=True, dtype=torch.float32)
-    style_specific_parameters = torch.rand((styles.shape[0], 3), requires_grad=True, dtype=torch.float32) - 0.5
-    strap_specific_parameters = torch.rand((strap_types.shape[0], 1), requires_grad=True)
-
-    data = prep_data_in_torch(cleaned_fit_tests)
-
-    parameters = {
-        'mask_specific_parameters': mask_specific_parameters,
-        'style_specific_parameters': style_specific_parameters,
-        'strap_specific_parameters': strap_specific_parameters,
-    }
-
-    prediction = calc_preds(data, parameters)
-
     logging.info(
         "Fit tests after filtering: %s / %s",
         cleaned_fit_tests.shape[0],
@@ -1383,6 +1550,191 @@ def main(argv=None):
     if cleaned_fit_tests.empty:
         logging.warning("No fit tests available after filtering. Exiting.")
         raise SystemExit(0)
+
+    if args.model_type == 'custom_lr':
+        if args.zscore:
+            logging.info("--zscore is currently only applied to model_type=nn. Ignoring for custom_lr model.")
+        if args.loss_type != 'bce':
+            logging.info("--loss-type=%s is currently only applied to model_type=nn. Using BCE for custom_lr.", args.loss_type)
+        if args.use_facial_perimeter or args.use_diff_perimeter_bins or args.use_diff_perimeter_mask_bins:
+            logging.info("Perimeter feature flags are ignored for model_type=custom_lr.")
+        if args.exclude_brand_model:
+            logging.info("--exclude-brand-model is not applicable to model_type=custom_lr.")
+        if args.exclude_mask_code:
+            logging.info("--exclude-mask-code is not applicable to model_type=custom_lr.")
+
+        timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
+        category_metadata = _custom_lr_category_metadata(cleaned_fit_tests)
+        num_rows = cleaned_fit_tests.shape[0]
+        permutation = torch.randperm(num_rows)
+        split_index = int(num_rows * 0.8)
+        train_idx = permutation[:split_index]
+        val_idx = permutation[split_index:]
+
+        custom_result = train_custom_lr_with_split(
+            cleaned_fit_tests,
+            train_idx=train_idx,
+            val_idx=val_idx,
+            category_metadata=category_metadata,
+            epochs=args.epochs,
+            learning_rate=args.learning_rate,
+            class_weighting=args.class_reweight,
+        )
+
+        params = custom_result['params']
+        train_losses = custom_result['train_losses']
+        val_losses = custom_result['val_losses']
+        train_probs = custom_result['train_probs']
+        val_probs = custom_result['val_probs']
+        train_labels = custom_result['y_train']
+        val_labels = custom_result['y_val']
+
+        best_threshold = 0.5
+        best_f1 = 0.0
+        if val_probs.size:
+            threshold_grid = np.arange(0.05, 0.96, 0.01)
+            for candidate in threshold_grid:
+                candidate_preds = (val_probs >= candidate).astype(float)
+                candidate_f1 = f1_score(val_labels, candidate_preds, zero_division=0)
+                if candidate_f1 > best_f1:
+                    best_f1 = candidate_f1
+                    best_threshold = float(candidate)
+        logging.info("Selected threshold=%.2f with val_f1=%.3f", best_threshold, best_f1)
+
+        saved_model_scope = 'split_train'
+        if args.retrain_with_full:
+            logging.info("Retraining custom_lr model on full dataset for artifact save.")
+            full_idx = torch.arange(cleaned_fit_tests.shape[0])
+            full_result = train_custom_lr_with_split(
+                cleaned_fit_tests,
+                train_idx=full_idx,
+                val_idx=full_idx,
+                category_metadata=category_metadata,
+                epochs=args.epochs,
+                learning_rate=args.learning_rate,
+                class_weighting=args.class_reweight,
+            )
+            params = full_result['params']
+            saved_model_scope = 'full_dataset'
+
+        prefix = f"mask_recommender/models/{timestamp}"
+        params_path = f"/tmp/mask_recommender_custom_params_{timestamp}.pt"
+        torch.save(params, params_path)
+        params_key = f"{prefix}/custom_model_params.pt"
+        params_uri = _upload_file_to_s3(params_path, params_key)
+
+        mask_data = {}
+        for _, row in masks_df.iterrows():
+            mask_id = row.get('id')
+            if pd.isna(mask_id):
+                continue
+            mask_data[str(int(mask_id))] = {
+                'id': int(mask_id),
+                'unique_internal_model_code': row.get('unique_internal_model_code', ''),
+                'brand_model': derive_brand_model(
+                    row.get('unique_internal_model_code', ''),
+                    row.get('current_state')
+                ),
+                'perimeter_mm': row.get('perimeter_mm', None),
+                'strap_type': row.get('strap_type', ''),
+                'style': row.get('style', ''),
+                **mask_empirical_priors.get(int(mask_id), {}),
+            }
+
+        mask_data_key = f"{prefix}/custom_mask_data.json"
+        mask_data_uri = _upload_json_to_s3(mask_data, mask_data_key)
+
+        def predict_custom(inference_rows):
+            return _predict_custom_lr_probabilities(
+                inference_rows,
+                parameters=params,
+                category_metadata=category_metadata,
+            )
+
+        images_dir = _images_output_dir()
+        os.makedirs(images_dir, exist_ok=True)
+        recommendations_path = os.path.join(images_dir, f"custom_recommendations_{timestamp}.json")
+        recommendation_preview = build_recommendation_preview(
+            user_ids=[99, 101],
+            fit_tests_df=fit_tests_with_imputed_arkit_via_traditional_facial_measurements,
+            mask_candidates=mask_candidates,
+            predict_fn=predict_custom,
+            output_path=None if _should_upload_visual_artifacts_to_s3() else recommendations_path,
+            threshold=best_threshold,
+        )
+        recommendations_artifact = recommendations_path
+        if _should_upload_visual_artifacts_to_s3():
+            recommendations_key = f"mask_recommender/models/{timestamp}/custom_recommendations_{timestamp}.json"
+            recommendations_uri = _best_effort_visual_upload(
+                lambda: _upload_json_to_s3(recommendation_preview, recommendations_key),
+                "custom recommendation preview",
+                fallback_artifact=None,
+            )
+            recommendations_artifact = recommendations_uri
+        else:
+            logging.info("Saved recommendation preview to %s", recommendations_path)
+
+        try:
+            roc_auc = roc_auc_score(val_labels, val_probs)
+        except ValueError:
+            roc_auc = None
+        val_preds = (val_probs >= best_threshold).astype(float)
+        val_precision = precision_score(val_labels, val_preds, zero_division=0)
+        val_recall = recall_score(val_labels, val_preds, zero_division=0)
+
+        metrics = {
+            'timestamp': timestamp,
+            'environment': _env_name(),
+            'model_type': 'custom_lr',
+            'threshold': best_threshold,
+            'roc_auc': roc_auc,
+            'val_f1': best_f1,
+            'val_precision': val_precision,
+            'val_recall': val_recall,
+            'train_samples': int(len(train_labels)),
+            'val_samples': int(len(val_labels)),
+            'losses': train_losses,
+            'val_losses': val_losses,
+            'recommendations_artifact': recommendations_artifact,
+            'retrain_with_full': bool(args.retrain_with_full),
+            'saved_model_training_scope': saved_model_scope,
+            'validation_metrics_source': 'split_validation',
+        }
+        metrics_key = f"{prefix}/custom_metrics.json"
+        metrics_uri = _upload_json_to_s3(metrics, metrics_key)
+
+        metadata = {
+            'timestamp': timestamp,
+            'environment': _env_name(),
+            'model_type': 'custom_lr',
+            'threshold': best_threshold,
+            'retrain_with_full': bool(args.retrain_with_full),
+            'saved_model_training_scope': saved_model_scope,
+            'validation_metrics_source': 'split_validation',
+            **category_metadata,
+        }
+        metadata_key = f"{prefix}/custom_model_metadata.json"
+        metadata_uri = _upload_json_to_s3(metadata, metadata_key)
+
+        latest_payload = {
+            'timestamp': timestamp,
+            'model_type': 'custom_lr',
+            'params_key': params_key,
+            'params_uri': params_uri,
+            'metadata_key': metadata_key,
+            'metadata_uri': metadata_uri,
+            'mask_data_key': mask_data_key,
+            'mask_data_uri': mask_data_uri,
+            'metrics_key': metrics_key,
+            'metrics_uri': metrics_uri,
+        }
+        latest_key = "mask_recommender/models/custom_latest.json"
+        latest_uri = _upload_json_to_s3(latest_payload, latest_key)
+        logging.info("Uploaded custom model params to %s", params_uri)
+        logging.info("Uploaded custom metadata to %s", metadata_uri)
+        logging.info("Uploaded custom metrics to %s", metrics_uri)
+        logging.info("Updated custom latest pointer at %s", latest_uri)
+        return latest_payload
 
     if args.model_type == 'prob':
         if args.zscore:

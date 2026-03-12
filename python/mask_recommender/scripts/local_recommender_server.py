@@ -18,6 +18,7 @@ from mask_recommender.feature_builder import (  # noqa: E402
     derive_brand_model,
 )
 from mask_recommender.prob_model import predict_prob_model  # noqa: E402
+from mask_recommender.train import calc_preds, prep_data_in_torch_with_categories  # noqa: E402
 
 APP = Flask(__name__)
 APP.logger.setLevel("INFO")
@@ -130,6 +131,26 @@ def _download_latest_prob_from_s3() -> Path:
     return output_dir
 
 
+def _download_latest_custom_from_s3() -> Path:
+    s3 = boto3.client("s3", region_name=_s3_region())
+    bucket = _s3_bucket()
+    latest_key = "mask_recommender/models/custom_latest.json"
+    payload = json.loads(
+        s3.get_object(Bucket=bucket, Key=latest_key)["Body"].read().decode("utf-8")
+    )
+    timestamp = payload.get("timestamp") or "latest"
+    output_dir = _model_root() / f"custom_{timestamp}"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    for key_name in ("params_key", "metadata_key", "mask_data_key"):
+        key = payload[key_name]
+        filename = Path(key).name
+        target = output_dir / filename
+        s3.download_file(bucket, key, str(target))
+
+    return output_dir
+
+
 def _default_model_dir() -> Path:
     return _model_root()
 
@@ -213,6 +234,24 @@ def _load_prob_artifacts(model_dir: Path):
 
     params = torch.load(params_path, map_location="cpu")
 
+    return {
+        "params": params,
+        "metadata": metadata,
+        "mask_data": mask_data,
+    }
+
+
+def _load_custom_artifacts(model_dir: Path):
+    params_path = model_dir / "custom_model_params.pt"
+    metadata_path = model_dir / "custom_model_metadata.json"
+    mask_data_path = model_dir / "custom_mask_data.json"
+
+    with metadata_path.open("r", encoding="utf-8") as handle:
+        metadata = json.load(handle)
+    with mask_data_path.open("r", encoding="utf-8") as handle:
+        mask_data = json.load(handle)
+
+    params = torch.load(params_path, map_location="cpu")
     return {
         "params": params,
         "metadata": metadata,
@@ -357,6 +396,51 @@ def _infer_prob(payload, artifacts):
     }
 
 
+def _infer_custom(payload, artifacts):
+    facial_features = _extract_facial_measurements(payload)
+    inference_rows = _build_inference_rows(artifacts["mask_data"], facial_features)
+    custom_data = prep_data_in_torch_with_categories(
+        inference_rows,
+        mask_categories=artifacts["metadata"]["mask_code_categories"],
+        style_categories=artifacts["metadata"]["style_categories"],
+        strap_categories=artifacts["metadata"]["strap_type_categories"],
+    )
+
+    with torch.no_grad():
+        probs = calc_preds(custom_data, artifacts["params"]).squeeze(1).cpu().tolist()
+
+    recommendations = []
+    for idx, (mask_id, mask_info) in enumerate(artifacts["mask_data"].items()):
+        raw_probability = float(probs[idx])
+        capped_probability = _apply_empirical_history_cap(raw_probability, mask_info)
+        _log_empirical_cap(mask_info, raw_probability, capped_probability)
+        recommendations.append({
+            "mask_id": int(mask_id),
+            "proba_fit": capped_probability,
+            "mask_info": mask_info,
+        })
+
+    recommendations.sort(key=lambda item: item["proba_fit"], reverse=True)
+    mask_id_map = {str(idx): rec["mask_id"] for idx, rec in enumerate(recommendations)}
+    proba_map = {str(idx): rec["proba_fit"] for idx, rec in enumerate(recommendations)}
+    empirical_debug_map = {
+        str(idx): {
+            "mask_fit_test_count": float(rec["mask_info"].get("mask_fit_test_count", 0) or 0),
+            "mask_pass_count": float(rec["mask_info"].get("mask_pass_count", 0) or 0),
+            "mask_smoothed_pass_rate": float(rec["mask_info"].get("mask_smoothed_pass_rate", 0.5) or 0.5),
+        }
+        for idx, rec in enumerate(recommendations)
+    }
+    return {
+        "mask_id": mask_id_map,
+        "proba_fit": proba_map,
+        "model": {
+            **artifacts["metadata"],
+            "empirical_debug": empirical_debug_map,
+        }
+    }
+
+
 def _train(payload):
     env = (payload or {}).get("environment") or os.environ.get("ENVIRONMENT") or "development"
     base_url = (payload or {}).get("base_url") or os.environ.get("BREATHESAFE_BASE_URL")
@@ -424,6 +508,15 @@ def recommend_masks():
                 "model_type": "prob",
                 "model": APP.config["prob_artifacts"]["metadata"],
             })
+        if payload.get("model_type") == "custom_lr":
+            if "custom_artifacts" not in APP.config:
+                custom_dir = _download_latest_custom_from_s3()
+                APP.config["custom_artifacts"] = _load_custom_artifacts(custom_dir)
+            return jsonify({
+                "status": "warmed",
+                "model_type": "custom_lr",
+                "model": APP.config["custom_artifacts"]["metadata"],
+            })
         return jsonify({
             "status": "warmed",
             "model_type": "nn",
@@ -434,6 +527,11 @@ def recommend_masks():
             prob_dir = _download_latest_prob_from_s3()
             APP.config["prob_artifacts"] = _load_prob_artifacts(prob_dir)
         return jsonify(_infer_prob(payload, APP.config["prob_artifacts"]))
+    if payload.get("model_type") == "custom_lr":
+        if "custom_artifacts" not in APP.config:
+            custom_dir = _download_latest_custom_from_s3()
+            APP.config["custom_artifacts"] = _load_custom_artifacts(custom_dir)
+        return jsonify(_infer_custom(payload, APP.config["custom_artifacts"]))
     return jsonify(_infer(payload, APP.config["artifacts"]))
 
 
