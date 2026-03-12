@@ -509,7 +509,11 @@ export default {
       return mask?.observedFitLabel || 'No fit test'
     },
     observedFitCellStyle(mask) {
-      const passRate = Number(mask?.observedFitPassRate)
+      const rawPassRate = mask?.observedFitPassRate
+      if (rawPassRate === '' || rawPassRate === null || rawPassRate === undefined) {
+        return {}
+      }
+      const passRate = Number(rawPassRate)
       if (!Number.isFinite(passRate)) {
         return {}
       }

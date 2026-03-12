@@ -529,7 +529,11 @@ export default {
     observedFitCellStyle() {
       return (mask) => {
         const baseStyle = Object.assign({}, this.tableTextCellStyle)
-        const passRate = Number(mask.observedFitPassRate)
+        const rawPassRate = mask?.observedFitPassRate
+        if (rawPassRate === '' || rawPassRate === null || rawPassRate === undefined) {
+          return baseStyle
+        }
+        const passRate = Number(rawPassRate)
         if (!Number.isFinite(passRate)) {
           return baseStyle
         }
