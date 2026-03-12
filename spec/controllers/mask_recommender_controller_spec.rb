@@ -39,13 +39,28 @@ RSpec.describe MaskRecommenderController, type: :controller do
 
       expect(MaskRecommender).to have_received(:infer_with_meta).with(
         facial_payload.stringify_keys,
-        function_base: 'mask-recommender-rf'
+        function_base: 'mask-recommender-rf',
+        model_type: nil
       )
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
       expect(body['masks']).to eq(inferred_masks)
       expect(body['context']).to eq(context)
       expect(body['model']).to eq(model_meta)
+    end
+
+    it 'forwards model_type when provided' do
+      post :create, params: {
+        facial_measurements: facial_payload,
+        model_type: 'custom_lr'
+      }, as: :json
+
+      expect(MaskRecommender).to have_received(:infer_with_meta).with(
+        facial_payload.stringify_keys,
+        function_base: 'mask-recommender',
+        model_type: 'custom_lr'
+      )
+      expect(response).to have_http_status(:ok)
     end
 
     it 'calls MaskRecommender.infer with nested function_base override when provided' do
@@ -56,7 +71,8 @@ RSpec.describe MaskRecommenderController, type: :controller do
 
       expect(MaskRecommender).to have_received(:infer_with_meta).with(
         facial_payload.stringify_keys,
-        function_base: 'mask-recommender'
+        function_base: 'mask-recommender',
+        model_type: nil
       )
       expect(response).to have_http_status(:ok)
     end
@@ -104,7 +120,8 @@ RSpec.describe MaskRecommenderController, type: :controller do
       )
       expect(MaskRecommender).to have_received(:infer_with_meta).with(
         resolved_measurements,
-        function_base: 'mask-recommender'
+        function_base: 'mask-recommender',
+        model_type: nil
       )
 
       body = JSON.parse(response.body)
@@ -131,11 +148,23 @@ RSpec.describe MaskRecommenderController, type: :controller do
 
       post :warmup, params: {}, as: :json
 
-      expect(MaskRecommender).to have_received(:warmup).with(function_base: 'mask-recommender')
+      expect(MaskRecommender).to have_received(:warmup).with(function_base: 'mask-recommender', model_type: nil)
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
       expect(body['status']).to eq('ok')
       expect(body['result']).to eq({ 'status' => 'warmed' })
+    end
+
+    it 'forwards model_type for warmup' do
+      allow(MaskRecommender).to receive(:warmup).and_return({ 'status' => 'warmed' })
+
+      post :warmup, params: { model_type: 'custom_lr' }, as: :json
+
+      expect(MaskRecommender).to have_received(:warmup).with(
+        function_base: 'mask-recommender',
+        model_type: 'custom_lr'
+      )
+      expect(response).to have_http_status(:ok)
     end
 
     it 'passes function_base override for warmup' do
@@ -143,7 +172,7 @@ RSpec.describe MaskRecommenderController, type: :controller do
 
       post :warmup, params: { function_base: 'mask-recommender-rf' }, as: :json
 
-      expect(MaskRecommender).to have_received(:warmup).with(function_base: 'mask-recommender-rf')
+      expect(MaskRecommender).to have_received(:warmup).with(function_base: 'mask-recommender-rf', model_type: nil)
       expect(response).to have_http_status(:ok)
     end
   end

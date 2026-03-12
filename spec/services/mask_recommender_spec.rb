@@ -218,5 +218,27 @@ RSpec.describe MaskRecommender, type: :service do
       expect(result['status']).to eq('warmed')
       expect(result['model_type']).to eq('nn')
     end
+
+    it 'includes model_type when provided' do
+      body = {
+        'status' => 'warmed',
+        'model_type' => 'custom_lr'
+      }
+
+      allow(AwsLambdaInvokeService).to receive(:call)
+        .with(
+          function_name: 'mask-recommender-staging',
+          payload: { method: 'warmup', model_type: 'custom_lr' }
+        ).and_return({ 'body' => Oj.dump(body) })
+
+      result = described_class.warmup(model_type: 'custom_lr')
+
+      expect(AwsLambdaInvokeService).to have_received(:call)
+        .with(
+          function_name: 'mask-recommender-staging',
+          payload: { method: 'warmup', model_type: 'custom_lr' }
+        )
+      expect(result['model_type']).to eq('custom_lr')
+    end
   end
 end

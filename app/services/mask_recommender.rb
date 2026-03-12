@@ -2,12 +2,13 @@
 
 class MaskRecommender
   class << self
-    def infer_with_meta(facial_measurements, mask_ids: nil, function_base: 'mask-recommender')
+    def infer_with_meta(facial_measurements, mask_ids: nil, function_base: 'mask-recommender', model_type: nil)
       canonical_mask_ids = mask_ids.present? ? MaskDeduplicationPolicy.canonicalize_mask_ids(mask_ids) : nil
       response = invoke_lambda_infer(
         facial_measurements,
         mask_ids: canonical_mask_ids,
-        function_base: function_base
+        function_base: function_base,
+        model_type: model_type
       )
       body = parse_lambda_body(response)
       collection = build_mask_collection(body, mask_ids: canonical_mask_ids)
@@ -16,11 +17,12 @@ class MaskRecommender
     end
 
     # New primary entrypoint for inference
-    def infer(facial_measurements, mask_ids: nil, function_base: 'mask-recommender')
+    def infer(facial_measurements, mask_ids: nil, function_base: 'mask-recommender', model_type: nil)
       infer_with_meta(
         facial_measurements,
         mask_ids: mask_ids,
-        function_base: function_base
+        function_base: function_base,
+        model_type: model_type
       )[:masks]
     end
 
@@ -53,20 +55,23 @@ class MaskRecommender
       parse_lambda_body(response)
     end
 
-    def warmup(function_base: 'mask-recommender')
+    def warmup(function_base: 'mask-recommender', model_type: nil)
       heroku_env = lambda_environment
       function_name = "#{function_base}-#{heroku_env}"
       Rails.logger.info("MaskRecommender.warmup invoking #{function_name}")
       response = AwsLambdaInvokeService.call(
         function_name: function_name,
-        payload: { method: 'warmup' }
+        payload: {
+          method: 'warmup',
+          model_type: model_type.presence
+        }.compact
       )
       parse_lambda_body(response)
     end
 
     private
 
-    def invoke_lambda_infer(facial_measurements, mask_ids:, function_base:)
+    def invoke_lambda_infer(facial_measurements, mask_ids:, function_base:, model_type:)
       heroku_env = lambda_environment
 
       payload = {
@@ -74,6 +79,7 @@ class MaskRecommender
         facial_measurements: facial_measurements
       }
       payload[:mask_ids] = mask_ids if mask_ids.present?
+      payload[:model_type] = model_type if model_type.present?
       function_name = "#{function_base}-#{heroku_env}"
       Rails.logger.info("MaskRecommender.infer invoking #{function_name}")
 

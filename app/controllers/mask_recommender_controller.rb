@@ -15,6 +15,7 @@ class MaskRecommenderController < ApplicationController
 
   def create_async
     function_base = params[:function_base] || params.dig(:mask_recommender, :function_base) || 'mask-recommender'
+    model_type = params[:model_type].presence || params.dig(:mask_recommender, :model_type).presence
     resolved_facial_measurements = resolved_facial_measurements_payload
     if resolved_facial_measurements.is_a?(Hash) && resolved_facial_measurements[:error]
       render json: { error: resolved_facial_measurements[:error] }, status: resolved_facial_measurements[:status]
@@ -34,6 +35,7 @@ class MaskRecommenderController < ApplicationController
         job_id: job_id,
         facial_measurements: resolved_facial_measurements,
         function_base: function_base,
+        model_type: model_type,
         recommender_user_id: params[:recommender_user_id].presence,
         viewer_id: current_user&.id
       )
@@ -65,7 +67,8 @@ class MaskRecommenderController < ApplicationController
 
   def warmup
     function_base = params[:function_base] || params.dig(:mask_recommender, :function_base) || 'mask-recommender'
-    result = MaskRecommender.warmup(function_base: function_base)
+    model_type = params[:model_type].presence || params.dig(:mask_recommender, :model_type).presence
+    result = MaskRecommender.warmup(function_base: function_base, model_type: model_type)
     render json: { status: 'ok', result: result }, status: :ok
   rescue StandardError => e
     render json: { error: e.message }, status: :internal_server_error
@@ -124,6 +127,7 @@ class MaskRecommenderController < ApplicationController
 
   def build_recommendation_response
     function_base = params[:function_base] || params.dig(:mask_recommender, :function_base) || 'mask-recommender'
+    model_type = params[:model_type].presence || params.dig(:mask_recommender, :model_type).presence
     resolved_facial_measurements = resolved_facial_measurements_payload
     if resolved_facial_measurements.is_a?(Hash) && resolved_facial_measurements[:error]
       return [resolved_facial_measurements[:status],
@@ -132,7 +136,8 @@ class MaskRecommenderController < ApplicationController
 
     inference = MaskRecommender.infer_with_meta(
       resolved_facial_measurements,
-      function_base: function_base
+      function_base: function_base,
+      model_type: model_type
     )
     masks = merge_user_fit_test_summaries(inference[:masks])
     model = inference[:model]

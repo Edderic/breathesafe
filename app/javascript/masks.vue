@@ -14,6 +14,26 @@
           <input id='search' type="text" :value='search' @change='updateSearch'>
           <SearchIcon height='2em' width='1em'/>
 
+          <label
+            v-if="showModelTypeControl"
+            class="model-type-control"
+          >
+            <span class="model-type-label">Model</span>
+            <select
+              class="model-type-select"
+              :value="routeModelType || 'nn'"
+              @change="updateModelType"
+            >
+              <option
+                v-for="option in modelTypeOptions"
+                :key="option.value"
+                :value="option.value"
+              >
+                {{ option.label }}
+              </option>
+            </select>
+          </label>
+
           <button class='icon' @click='showPopup = "Sort"'>
             ⇵
           </button>
@@ -361,7 +381,7 @@ export default {
       maskDataContext: {},
       recommenderInFlightPayload: null,
       loadedRecommenderPayload: null,
-      recommenderWarmupKey: 'mask_recommender_warmup_done',
+      recommenderWarmupKeyPrefix: 'mask_recommender_warmup_done',
       isRecommenderLoading: false,
       recommenderModelTimestamp: null,
       viewportWidth: typeof window !== 'undefined' ? window.innerWidth : 1024,
@@ -385,7 +405,8 @@ export default {
         [
           'currentUser',
           'isAdmin',
-          'isWaiting'
+          'isWaiting',
+          'adminModeEnabled'
         ]
     ),
     ...mapState(
@@ -419,6 +440,23 @@ export default {
 
     hasRecommenderPayload() {
       return !!(this.$route.query.recommenderPayload || this.$route.query.recommender_user_id)
+    },
+    showModelTypeControl() {
+      return this.isAdmin && this.adminModeEnabled
+    },
+    routeModelType() {
+      const value = this.$route.query.model_type
+      return value ? String(value).trim() : null
+    },
+    modelTypeOptions() {
+      return [
+        { value: 'nn', label: 'NN' },
+        { value: 'custom_lr', label: 'Custom LR' },
+        { value: 'prob', label: 'Prob' },
+      ]
+    },
+    recommenderWarmupKey() {
+      return `${this.recommenderWarmupKeyPrefix}:${this.routeModelType || 'nn'}`
     },
     perimColorScheme() {
       return perimeterColorScheme()
@@ -701,7 +739,11 @@ export default {
         return
       }
 
-      axios.post('/mask_recommender/warmup.json')
+      const payload = {}
+      if (this.routeModelType) {
+        payload.model_type = this.routeModelType
+      }
+      axios.post('/mask_recommender/warmup.json', payload)
         .then(() => {
           try {
             window.sessionStorage.setItem(this.recommenderWarmupKey, '1')
@@ -1137,7 +1179,10 @@ export default {
 
       await axios.post(
         `/mask_recommender.json`,
-        { facial_measurements: payload }
+        {
+          facial_measurements: payload,
+          ...(this.routeModelType ? { model_type: this.routeModelType } : {})
+        }
       )
         .then(response => {
           let data = response.data
@@ -1171,7 +1216,9 @@ export default {
 
       // Never fall back to generic /masks.json while a recommender payload is present.
       // Skip only when this exact payload is currently loading or already loaded.
-      const requestKey = recommenderUserId ? `user:${recommenderUserId}` : payloadParam
+      const modelTypeKey = this.routeModelType || 'nn'
+      const requestKeyBase = recommenderUserId ? `user:${recommenderUserId}` : payloadParam
+      const requestKey = `${requestKeyBase}|model:${modelTypeKey}`
       if (requestKey === this.recommenderInFlightPayload) {
         return true
       }
@@ -1206,6 +1253,9 @@ export default {
         const requestBody = recommenderUserId
           ? { recommender_user_id: recommenderUserId }
           : { facial_measurements: facialMeasurements }
+        if (this.routeModelType) {
+          requestBody.model_type = this.routeModelType
+        }
         const startResponse = await axios.post(
           `/mask_recommender/async.json`,
           requestBody
@@ -1300,6 +1350,16 @@ export default {
       if (page === this.currentPage) return
       const newQuery = Object.assign({}, this.$route.query, { page })
       this.$router.push({ name: 'Masks', query: newQuery })
+    },
+    updateModelType(event) {
+      const nextValue = String(event?.target?.value || 'nn').trim()
+      const query = Object.assign({}, this.$route.query, { page: 1 })
+      if (!nextValue || nextValue === 'nn') {
+        delete query.model_type
+      } else {
+        query.model_type = nextValue
+      }
+      this.$router.push({ name: 'Masks', query })
     },
     sortBy(field) {
       if (this.sortByField == field) {
@@ -1510,6 +1570,34 @@ export default {
       justify-content: center;
       align-items: center;
       min-width: 3em;
+  }
+
+  .model-type-control {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    margin-left: 0.6em;
+    padding: 0.15em 0.4em;
+    border: 1px solid #d4d4d4;
+    border-radius: 0.45em;
+    background: #f7f7f7;
+  }
+
+  .model-type-label {
+    font-size: 0.82em;
+    font-weight: 600;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .model-type-select {
+    min-width: 7.5em;
+    border: 1px solid #c8c8c8;
+    border-radius: 0.35em;
+    background: #fff;
+    font-size: 0.92em;
+    padding: 0.22em 0.45em;
   }
 
   .top-controls {
