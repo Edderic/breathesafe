@@ -897,6 +897,29 @@ def _images_output_dir():
     return "python/mask_recommender/images"
 
 
+def _local_model_root():
+    override = os.environ.get('MASK_RECOMMENDER_LOCAL_MODEL_DIR')
+    if override:
+        return override
+    return "python/mask_recommender/local_models"
+
+
+def _save_local_custom_artifacts(timestamp, params, metadata, mask_data):
+    local_dir = Path(_local_model_root()) / str(timestamp)
+    local_dir.mkdir(parents=True, exist_ok=True)
+
+    params_path = local_dir / "custom_model_params.pt"
+    metadata_path = local_dir / "custom_model_metadata.json"
+    mask_data_path = local_dir / "custom_mask_data.json"
+
+    torch.save(params, params_path)
+    metadata_path.write_text(json.dumps(metadata, indent=2), encoding='utf-8')
+    mask_data_path.write_text(json.dumps(mask_data, indent=2), encoding='utf-8')
+
+    logging.info("Saved local custom artifacts to %s", local_dir)
+    return local_dir
+
+
 def _should_upload_visual_artifacts_to_s3():
     return _env_name() in ("staging", "production")
 
@@ -1715,6 +1738,12 @@ def main(argv=None):
         }
         metadata_key = f"{prefix}/custom_model_metadata.json"
         metadata_uri = _upload_json_to_s3(metadata, metadata_key)
+        local_artifact_dir = _save_local_custom_artifacts(
+            timestamp=timestamp,
+            params=params,
+            metadata=metadata,
+            mask_data=mask_data,
+        )
 
         latest_payload = {
             'timestamp': timestamp,
@@ -1727,6 +1756,7 @@ def main(argv=None):
             'mask_data_uri': mask_data_uri,
             'metrics_key': metrics_key,
             'metrics_uri': metrics_uri,
+            'local_artifact_dir': str(local_artifact_dir),
         }
         latest_key = "mask_recommender/models/custom_latest.json"
         latest_uri = _upload_json_to_s3(latest_payload, latest_key)
