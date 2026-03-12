@@ -509,23 +509,21 @@ export default {
       return mask?.observedFitLabel || 'No fit test'
     },
     observedFitCellStyle(mask) {
-      if (mask?.qlftPass === true) {
-        return {
-          backgroundColor: '#2e7d32',
-          color: '#fff',
-          fontWeight: '600',
-          textShadow: '0 1px 3px rgba(0, 0, 0, 0.45)',
-        }
+      const passRate = Number(mask?.observedFitPassRate)
+      if (!Number.isFinite(passRate)) {
+        return {}
       }
-      if (mask?.qlftPass === false) {
-        return {
-          backgroundColor: '#c62828',
-          color: '#fff',
-          fontWeight: '600',
-          textShadow: '0 1px 3px rgba(0, 0, 0, 0.45)',
-        }
+
+      const red = Math.round(198 * (1 - passRate) + 46 * passRate)
+      const green = Math.round(40 * (1 - passRate) + 125 * passRate)
+      const blue = Math.round(40 * (1 - passRate) + 50 * passRate)
+
+      return {
+        backgroundColor: `rgb(${red}, ${green}, ${blue})`,
+        color: '#fff',
+        fontWeight: '600',
+        textShadow: '0 1px 3px rgba(0, 0, 0, 0.45)',
       }
-      return {}
     },
     maskColorValues(mask) {
       if (!mask || !Array.isArray(mask.colors)) {

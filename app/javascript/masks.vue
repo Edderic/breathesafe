@@ -491,23 +491,19 @@ export default {
     observedFitCellStyle() {
       return (mask) => {
         const baseStyle = Object.assign({}, this.tableTextCellStyle)
-        if (mask.qlftPass === true) {
-          return Object.assign({}, baseStyle, {
-            backgroundColor: '#2e7d32',
-            color: '#fff',
-            fontWeight: '600',
-            textShadow: '0 1px 3px rgba(0, 0, 0, 0.45)',
-          })
+        const passRate = Number(mask.observedFitPassRate)
+        if (!Number.isFinite(passRate)) {
+          return baseStyle
         }
-        if (mask.qlftPass === false) {
-          return Object.assign({}, baseStyle, {
-            backgroundColor: '#c62828',
-            color: '#fff',
-            fontWeight: '600',
-            textShadow: '0 1px 3px rgba(0, 0, 0, 0.45)',
-          })
-        }
-        return baseStyle
+        const red = Math.round(198 * (1 - passRate) + 46 * passRate)
+        const green = Math.round(40 * (1 - passRate) + 125 * passRate)
+        const blue = Math.round(40 * (1 - passRate) + 50 * passRate)
+        return Object.assign({}, baseStyle, {
+          backgroundColor: `rgb(${red}, ${green}, ${blue})`,
+          color: '#fff',
+          fontWeight: '600',
+          textShadow: '0 1px 3px rgba(0, 0, 0, 0.45)',
+        })
       }
     },
     displayables() {

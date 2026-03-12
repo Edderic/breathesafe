@@ -21,7 +21,7 @@ class MaskFitTestSummaryService
     fit_test_rows
       .select { |row| row['user_id'].to_i == target_user_id && mask_ids.include?(row['mask_id'].to_i) }
       .group_by { |row| row['mask_id'].to_i }
-      .transform_values { |rows| summarize(rows.max_by { |row| row['created_at'] || Time.zone.at(0) }) }
+      .transform_values { |rows| summarize(rows) }
   end
 
   private
@@ -32,20 +32,25 @@ class MaskFitTestSummaryService
     @fit_test_rows ||= FitTestsWithFacialMeasurementsService.call
   end
 
-  def summarize(row)
-    qlft_pass = normalize_bool(row['qlft_pass'])
-    n95_mode_hmff = row['n95_mode_hmff'].present? ? row['n95_mode_hmff'].to_f : nil
-    procedure = row['procedure'].presence
-    testing_mode = row.dig('results', 'quantitative', 'testing_mode').presence
+  def summarize(rows)
+    latest_row = rows.max_by { |row| sortable_created_at(row['created_at']) }
+    evaluable_rows = rows.filter_map do |row|
+      normalized = normalize_bool(row['qlft_pass'])
+      next if normalized.nil?
+
+      normalized
+    end
+    fit_test_count = evaluable_rows.length
+    pass_count = evaluable_rows.count(true)
+    pass_rate = fit_test_count.positive? ? pass_count.to_f / fit_test_count : nil
 
     {
-      'latest_fit_test_id' => row['id'],
-      'latest_fit_test_at' => iso8601_time(row['created_at']),
-      'qlft_pass' => qlft_pass,
-      'n95_mode_hmff' => n95_mode_hmff,
-      'n95_mode_source' => n95_mode_source(testing_mode),
-      'procedure' => procedure,
-      'observed_fit_label' => observed_fit_label(qlft_pass:, n95_mode_hmff:, testing_mode:)
+      'latest_fit_test_id' => latest_row['id'],
+      'latest_fit_test_at' => iso8601_time(latest_row['created_at']),
+      'observed_fit_pass_count' => pass_count,
+      'observed_fit_test_count' => fit_test_count,
+      'observed_fit_pass_rate' => pass_rate,
+      'observed_fit_label' => observed_fit_label(pass_count:, fit_test_count:, pass_rate:)
     }
   end
 
@@ -56,20 +61,10 @@ class MaskFitTestSummaryService
     nil
   end
 
-  def n95_mode_source(testing_mode)
-    return 'actual' if testing_mode == 'N95'
-    return 'converted' if testing_mode == 'N99'
+  def observed_fit_label(pass_count:, fit_test_count:, pass_rate:)
+    return 'No fit test' if fit_test_count.zero? || pass_rate.nil?
 
-    nil
-  end
-
-  def observed_fit_label(qlft_pass:, n95_mode_hmff:, testing_mode:)
-    return "N95 mode #{n95_mode_hmff.round} (actual)" if n95_mode_hmff && testing_mode == 'N95'
-    return "N95 mode #{n95_mode_hmff.round} (converted)" if n95_mode_hmff && testing_mode == 'N99'
-    return 'QLFT Pass' if qlft_pass == true
-    return 'QLFT Fail' if qlft_pass == false
-
-    'No fit test'
+    "#{(pass_rate * 100).round}% (#{pass_count}/#{fit_test_count})"
   end
 
   def iso8601_time(value)
@@ -79,5 +74,13 @@ class MaskFitTestSummaryService
     Time.zone.parse(value.to_s)&.iso8601
   rescue ArgumentError, TypeError
     value.to_s
+  end
+
+  def sortable_created_at(value)
+    return value if value.respond_to?(:to_time)
+
+    Time.zone.parse(value.to_s)
+  rescue ArgumentError, TypeError
+    Time.zone.at(0)
   end
 end

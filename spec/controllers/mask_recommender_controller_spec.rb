@@ -86,10 +86,10 @@ RSpec.describe MaskRecommenderController, type: :controller do
       resolved_measurements = facial_payload.stringify_keys
       summary_map = {
         1 => {
-          'qlft_pass' => true,
-          'n95_mode_hmff' => 128.4,
-          'n95_mode_source' => 'actual',
-          'observed_fit_label' => 'N95 mode 128 (actual)'
+          'observed_fit_pass_count' => 2,
+          'observed_fit_test_count' => 3,
+          'observed_fit_pass_rate' => 2.0 / 3.0,
+          'observed_fit_label' => '67% (2/3)'
         }
       }
 
@@ -108,8 +108,8 @@ RSpec.describe MaskRecommenderController, type: :controller do
       )
 
       body = JSON.parse(response.body)
-      expect(body['masks'][0]['observed_fit_label']).to eq('N95 mode 128 (actual)')
-      expect(body['masks'][0]['qlft_pass']).to eq(true)
+      expect(body['masks'][0]['observed_fit_label']).to eq('67% (2/3)')
+      expect(body['masks'][0]['observed_fit_pass_rate']).to eq(2.0 / 3.0)
       expect(body['masks'][1]['observed_fit_label']).to be_nil
     end
 
