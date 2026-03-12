@@ -34,12 +34,10 @@ class MaskFitTestSummaryService
 
   def summarize(rows)
     latest_row = rows.max_by { |row| sortable_created_at(row['created_at']) }
-    evaluable_rows = rows.filter_map do |row|
+    evaluable_rows = rows.map do |row|
       normalized = normalize_bool(row['qlft_pass'])
-      next if normalized.nil?
-
       normalized
-    end
+    end.compact
     fit_test_count = evaluable_rows.length
     pass_count = evaluable_rows.count(true)
     pass_rate = fit_test_count.positive? ? pass_count.to_f / fit_test_count : nil

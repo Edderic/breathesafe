@@ -130,6 +130,28 @@ RSpec.describe MaskRecommenderController, type: :controller do
       expect(body['masks'][1]['observed_fit_label']).to be_nil
     end
 
+    it 'preserves failed qlft rows in observed fit summaries' do
+      allow(controller).to receive(:current_user).and_return(manager)
+      resolved_measurements = facial_payload.stringify_keys
+      summary_map = {
+        1 => {
+          'observed_fit_pass_count' => 0,
+          'observed_fit_test_count' => 1,
+          'observed_fit_pass_rate' => 0.0,
+          'observed_fit_label' => '0% (0/1)'
+        }
+      }
+
+      allow(LatestRecommenderFacialMeasurementsService).to receive(:call).and_return(resolved_measurements)
+      allow(MaskFitTestSummaryService).to receive(:call).and_return(summary_map)
+
+      post :create, params: { recommender_user_id: managed_user.id }, as: :json
+
+      body = JSON.parse(response.body)
+      expect(body['masks'][0]['observed_fit_label']).to eq('0% (0/1)')
+      expect(body['masks'][0]['observed_fit_pass_rate']).to eq(0.0)
+    end
+
     it 'returns 403 when recommender_user_id is forbidden' do
       allow(controller).to receive(:current_user).and_return(manager)
       allow(LatestRecommenderFacialMeasurementsService).to receive(:call)
