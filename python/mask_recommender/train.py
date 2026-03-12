@@ -1463,7 +1463,7 @@ def _build_custom_lr_perimeter_diff_diagnostics(
                     row_diffs[pass_mask],
                     row_labels[pass_mask],
                     color='green',
-                    alpha=0.8,
+                    alpha=0.5,
                     s=26,
                     label='pass',
                 )
@@ -1472,7 +1472,7 @@ def _build_custom_lr_perimeter_diff_diagnostics(
                     row_diffs[fail_mask],
                     row_labels[fail_mask],
                     color='red',
-                    alpha=0.8,
+                    alpha=0.5,
                     s=26,
                     label='fail',
                 )
@@ -1486,11 +1486,21 @@ def _build_custom_lr_perimeter_diff_diagnostics(
 
         handles, labels = axes[0].get_legend_handles_labels()
         if handles:
-            fig.legend(handles, labels, loc='upper center', ncol=4, frameon=False)
+            fig.legend(
+                handles,
+                labels,
+                loc='upper center',
+                bbox_to_anchor=(0.5, 0.975),
+                ncol=4,
+                frameon=False,
+            )
         fig.supxlabel('perimeter_diff')
         fig.supylabel('probability / actual qlft pass')
-        fig.suptitle(f'Custom LR perimeter_diff diagnostics (page {page_idx + 1}/{num_pages})', y=0.995)
-        fig.tight_layout(rect=[0, 0, 1, 0.97])
+        fig.suptitle(
+            f'Custom LR perimeter_diff diagnostics (page {page_idx + 1}/{num_pages})',
+            y=0.995
+        )
+        fig.tight_layout(rect=[0, 0, 1, 0.90])
 
         output_path = os.path.join(
             images_dir,
