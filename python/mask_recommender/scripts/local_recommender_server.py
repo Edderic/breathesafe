@@ -6,6 +6,7 @@ from pathlib import Path
 import boto3
 import pandas as pd
 import torch
+from botocore.exceptions import ClientError
 from flask import Flask, jsonify, request
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -89,6 +90,13 @@ def _model_root() -> Path:
     if override:
         return Path(override).expanduser()
     return Path(__file__).resolve().parents[1] / "local_models"
+
+
+def _custom_model_root() -> Path:
+    override = os.environ.get("MASK_RECOMMENDER_LOCAL_CUSTOM_MODEL_DIR")
+    if override:
+        return Path(override).expanduser()
+    return _model_root()
 
 
 def _download_latest_from_s3() -> Path:
@@ -177,6 +185,28 @@ def _find_latest_model_dir(base_dir: Path) -> Path:
     return sorted(candidates)[-1]
 
 
+def _find_latest_custom_model_dir(base_dir: Path) -> Path:
+    if base_dir.is_file():
+        return base_dir.parent
+
+    if (base_dir / "custom_model_params.pt").exists():
+        return base_dir
+
+    if not base_dir.exists():
+        raise FileNotFoundError(f"Custom model directory not found: {base_dir}")
+
+    candidates = [
+        entry for entry in base_dir.iterdir()
+        if entry.is_dir() and (entry / "custom_model_params.pt").exists()
+    ]
+    if not candidates:
+        raise FileNotFoundError(
+            f"No custom model artifacts found in {base_dir}. Expected custom_model_params.pt"
+        )
+
+    return sorted(candidates)[-1]
+
+
 def _load_artifacts(model_dir: Path):
     model_path = model_dir / "model_state_dict.pt"
     metadata_path = model_dir / "model_metadata.json"
@@ -257,6 +287,32 @@ def _load_custom_artifacts(model_dir: Path):
         "metadata": metadata,
         "mask_data": mask_data,
     }
+
+
+def _ensure_custom_artifacts():
+    if "custom_artifacts" in APP.config:
+        return APP.config["custom_artifacts"]
+
+    try:
+        local_dir = _find_latest_custom_model_dir(_custom_model_root())
+        APP.logger.info("Loaded local custom artifacts from: %s", local_dir)
+        APP.config["custom_artifacts"] = _load_custom_artifacts(local_dir)
+        return APP.config["custom_artifacts"]
+    except FileNotFoundError:
+        pass
+
+    try:
+        custom_dir = _download_latest_custom_from_s3()
+        APP.config["custom_artifacts"] = _load_custom_artifacts(custom_dir)
+        return APP.config["custom_artifacts"]
+    except ClientError as exc:
+        error_code = exc.response.get("Error", {}).get("Code")
+        if error_code == "NoSuchKey":
+            raise FileNotFoundError(
+                "No custom LR artifacts found locally, and s3://"
+                f"{_s3_bucket()}/mask_recommender/models/custom_latest.json does not exist."
+            ) from exc
+        raise
 
 
 def _extract_facial_measurements(payload):
@@ -509,13 +565,17 @@ def recommend_masks():
                 "model": APP.config["prob_artifacts"]["metadata"],
             })
         if payload.get("model_type") == "custom_lr":
-            if "custom_artifacts" not in APP.config:
-                custom_dir = _download_latest_custom_from_s3()
-                APP.config["custom_artifacts"] = _load_custom_artifacts(custom_dir)
+            try:
+                custom_artifacts = _ensure_custom_artifacts()
+            except (ClientError, FileNotFoundError) as exc:
+                return jsonify({
+                    "error": "Custom LR artifacts are not available locally or in S3.",
+                    "details": str(exc),
+                }), 503
             return jsonify({
                 "status": "warmed",
                 "model_type": "custom_lr",
-                "model": APP.config["custom_artifacts"]["metadata"],
+                "model": custom_artifacts["metadata"],
             })
         return jsonify({
             "status": "warmed",
@@ -528,10 +588,14 @@ def recommend_masks():
             APP.config["prob_artifacts"] = _load_prob_artifacts(prob_dir)
         return jsonify(_infer_prob(payload, APP.config["prob_artifacts"]))
     if payload.get("model_type") == "custom_lr":
-        if "custom_artifacts" not in APP.config:
-            custom_dir = _download_latest_custom_from_s3()
-            APP.config["custom_artifacts"] = _load_custom_artifacts(custom_dir)
-        return jsonify(_infer_custom(payload, APP.config["custom_artifacts"]))
+        try:
+            custom_artifacts = _ensure_custom_artifacts()
+        except (ClientError, FileNotFoundError) as exc:
+            return jsonify({
+                "error": "Custom LR artifacts are not available locally or in S3.",
+                "details": str(exc),
+            }), 503
+        return jsonify(_infer_custom(payload, custom_artifacts))
     return jsonify(_infer(payload, APP.config["artifacts"]))
 
 
