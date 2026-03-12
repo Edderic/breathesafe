@@ -1697,6 +1697,77 @@ def main(argv=None):
         else:
             logging.info("Saved recommendation preview to %s", recommendations_path)
 
+        loss_plot_artifact = None
+        if train_losses:
+            loss_plot_path = os.path.join(images_dir, f"{timestamp}_custom_training_loss.png")
+            plt.figure(figsize=(8, 4))
+            epochs_range = range(1, len(train_losses) + 1)
+            plt.plot(epochs_range, train_losses, label='train loss')
+            if val_losses:
+                plt.plot(epochs_range, val_losses, label='val loss')
+            plt.xlabel('Epoch')
+            plt.ylabel('Loss')
+            plt.title('Custom LR Training Loss')
+            plt.grid(True, linestyle='--', alpha=0.4)
+            plt.legend()
+            plt.tight_layout()
+            loss_plot_artifact = loss_plot_path
+            if _should_upload_visual_artifacts_to_s3():
+                loss_buf = io.BytesIO()
+                plt.savefig(loss_buf, format='png')
+                loss_buf.seek(0)
+                loss_plot_key = f"mask_recommender/models/{timestamp}/{timestamp}_custom_training_loss.png"
+                loss_plot_uri = _best_effort_visual_upload(
+                    lambda: _upload_png_bytes_to_s3(loss_buf.getvalue(), loss_plot_key),
+                    "custom training loss plot",
+                    fallback_artifact=None,
+                )
+                loss_plot_artifact = loss_plot_uri
+            else:
+                plt.savefig(loss_plot_path)
+                logging.info("Saved training loss plot to %s", loss_plot_path)
+            plt.close()
+
+        roc_plot_path = os.path.join(images_dir, f"{timestamp}_custom_roc_auc.png")
+        plt.figure(figsize=(8, 4))
+        try:
+            train_fpr, train_tpr, _ = roc_curve(train_labels, train_probs)
+            train_auc = auc(train_fpr, train_tpr)
+            plt.plot(train_fpr, train_tpr, label=f'train (AUC={train_auc:.3f})', linewidth=2)
+        except ValueError:
+            train_auc = None
+            logging.warning("Skipping custom train ROC curve due to missing class labels.")
+        try:
+            val_fpr, val_tpr, _ = roc_curve(val_labels, val_probs)
+            val_auc = auc(val_fpr, val_tpr)
+            plt.plot(val_fpr, val_tpr, label=f'validation (AUC={val_auc:.3f})', linewidth=2)
+        except ValueError:
+            val_auc = None
+            logging.warning("Skipping custom validation ROC curve due to missing class labels.")
+        plt.plot([0, 1], [0, 1], linestyle='--', color='gray')
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title('Custom LR ROC-AUC Curves')
+        plt.grid(True, linestyle='--', alpha=0.4)
+        plt.legend()
+        plt.tight_layout()
+        roc_plot_artifact = roc_plot_path
+        if _should_upload_visual_artifacts_to_s3():
+            roc_buf = io.BytesIO()
+            plt.savefig(roc_buf, format='png')
+            roc_buf.seek(0)
+            roc_plot_key = f"mask_recommender/models/{timestamp}/{timestamp}_custom_roc_auc.png"
+            roc_plot_uri = _best_effort_visual_upload(
+                lambda: _upload_png_bytes_to_s3(roc_buf.getvalue(), roc_plot_key),
+                "custom ROC plot",
+                fallback_artifact=None,
+            )
+            roc_plot_artifact = roc_plot_uri
+        else:
+            plt.savefig(roc_plot_path)
+            logging.info("Saved ROC-AUC plot to %s", roc_plot_path)
+        plt.close()
+
         try:
             roc_auc = roc_auc_score(val_labels, val_probs)
         except ValueError:
@@ -1719,6 +1790,8 @@ def main(argv=None):
             'losses': train_losses,
             'val_losses': val_losses,
             'recommendations_artifact': recommendations_artifact,
+            'training_loss_artifact': loss_plot_artifact,
+            'roc_auc_artifact': roc_plot_artifact,
             'retrain_with_full': bool(args.retrain_with_full),
             'saved_model_training_scope': saved_model_scope,
             'validation_metrics_source': 'split_validation',
