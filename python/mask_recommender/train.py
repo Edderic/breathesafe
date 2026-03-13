@@ -1240,12 +1240,13 @@ def _build_probe_diagnostics(
 
 
 def calc_preds(data, params):
-    fit_tests_by_mask_specific_parameters = data['fit_tests_by_masks'] @ params['mask_specific_parameters']
-    fit_tests_by_style_specific_parameters = data['fit_tests_by_styles'] @ params['style_specific_parameters']
+    resolved_params = _resolve_custom_lr_parameter_views(params)
+    fit_tests_by_mask_specific_parameters = data['fit_tests_by_masks'] @ resolved_params['mask_specific_parameters']
+    fit_tests_by_style_specific_parameters = data['fit_tests_by_styles'] @ resolved_params['style_specific_parameters']
     fit_tests_by_mask_and_style_specific_parameters = fit_tests_by_mask_specific_parameters + fit_tests_by_style_specific_parameters
 
     fit_tests_by_facial_feature_fit = fit_tests_by_mask_and_style_specific_parameters * data['perimeter_diffs']
-    fit_tests_by_strap_specific_parameters = data['fit_tests_by_strap_types'] @ params['strap_specific_parameters']
+    fit_tests_by_strap_specific_parameters = data['fit_tests_by_strap_types'] @ resolved_params['strap_specific_parameters']
 
     logits = fit_tests_by_strap_specific_parameters + fit_tests_by_facial_feature_fit.sum(axis=1).reshape(-1, 1)
 
@@ -1342,39 +1343,11 @@ def _initialize_custom_lr_parameters(category_metadata):
     style_count = len(category_metadata['style_categories'])
     strap_count = len(category_metadata['strap_type_categories'])
 
-    # pretty negative
-    alpha_mask = torch.zeros((mask_count, 1), requires_grad=True) - 5
-    beta_gamma_mask = torch.rand((mask_count, 2), requires_grad=True)
-
-    # Exponentiating the negative will lead to some small fraction
-    # Then multiply by -1 to convert to negative
-    alpha_exp_mask = torch.exp(alpha_mask) * -1
-
-    mask_specific_parameters = torch.concat(
-        [
-            alpha_exp_mask,
-            beta_gamma_mask
-        ],
-        axis=1
-    )
-
-    alpha_style = torch.rand((style_count, 1), requires_grad=True)
-    beta_gamma_style = torch.rand((style_count, 2), requires_grad=True)
-
-    alpha_exp_style = torch.exp(alpha_style) * -1
-
-    style_specific_parameters = torch.concat(
-        [
-            alpha_exp_style,
-            beta_gamma_style
-        ],
-        axis=1
-    )
-
-
     return {
-        'mask_specific_parameters': mask_specific_parameters,
-        'style_specific_parameters': style_specific_parameters,
+        'alpha_mask_raw': torch.full((mask_count, 1), -5.0, dtype=torch.float32, requires_grad=True),
+        'beta_gamma_mask': torch.rand((mask_count, 2), dtype=torch.float32, requires_grad=True),
+        'alpha_style_raw': torch.zeros((style_count, 1), dtype=torch.float32, requires_grad=True),
+        'beta_gamma_style': torch.rand((style_count, 2), dtype=torch.float32, requires_grad=True),
         'strap_specific_parameters': (torch.rand((strap_count, 1), dtype=torch.float32) - 0.5).requires_grad_(),
     }
 
@@ -1383,6 +1356,31 @@ def _detach_custom_lr_parameters(parameters):
     return {
         key: value.detach().cpu()
         for key, value in parameters.items()
+    }
+
+
+def _resolve_custom_lr_parameter_views(params):
+    if 'mask_specific_parameters' in params and 'style_specific_parameters' in params:
+        return params
+
+    mask_specific_parameters = torch.concat(
+        [
+            -torch.exp(params['alpha_mask_raw']),
+            params['beta_gamma_mask']
+        ],
+        axis=1
+    )
+    style_specific_parameters = torch.concat(
+        [
+            -torch.exp(params['alpha_style_raw']),
+            params['beta_gamma_style']
+        ],
+        axis=1
+    )
+    return {
+        'mask_specific_parameters': mask_specific_parameters,
+        'style_specific_parameters': style_specific_parameters,
+        'strap_specific_parameters': params['strap_specific_parameters'],
     }
 
 
@@ -1400,7 +1398,7 @@ def _predict_custom_lr_probabilities(frame, parameters, category_metadata):
 def _custom_lr_params_with_zeroed_mask(parameters, mask_code, category_metadata):
     cloned = {
         key: value.detach().clone()
-        for key, value in parameters.items()
+        for key, value in _resolve_custom_lr_parameter_views(parameters).items()
     }
     try:
         mask_idx = category_metadata['mask_code_categories'].index(mask_code)
