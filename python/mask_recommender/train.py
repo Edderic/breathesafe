@@ -1341,9 +1341,40 @@ def _initialize_custom_lr_parameters(category_metadata):
     mask_count = len(category_metadata['mask_code_categories'])
     style_count = len(category_metadata['style_categories'])
     strap_count = len(category_metadata['strap_type_categories'])
+
+    # pretty negative
+    alpha_mask = torch.zeros((mask_count, 1), requires_grad=True) - 5
+    beta_gamma_mask = torch.rand((mask_count, 2), requires_grad=True)
+
+    # Exponentiating the negative will lead to some small fraction
+    # Then multiply by -1 to convert to negative
+    alpha_exp_mask = torch.exp(alpha_mask) * -1
+
+    mask_specific_parameters = torch.concat(
+        [
+            alpha_exp_mask,
+            beta_gamma_mask
+        ],
+        axis=1
+    )
+
+    alpha_style = torch.rand((style_count, 1), requires_grad=True)
+    beta_gamma_style = torch.rand((style_count, 2), requires_grad=True)
+
+    alpha_exp_style = torch.exp(alpha_style) * -1
+
+    style_specific_parameters = torch.concat(
+        [
+            alpha_exp_style,
+            beta_gamma_style
+        ],
+        axis=1
+    )
+
+
     return {
-        'mask_specific_parameters': torch.zeros((mask_count, 3), requires_grad=True, dtype=torch.float32),
-        'style_specific_parameters': (torch.rand((style_count, 3), dtype=torch.float32) - 0.5).requires_grad_(),
+        'mask_specific_parameters': mask_specific_parameters,
+        'style_specific_parameters': style_specific_parameters,
         'strap_specific_parameters': (torch.rand((strap_count, 1), dtype=torch.float32) - 0.5).requires_grad_(),
     }
 
