@@ -1053,7 +1053,8 @@ export default {
       this.errorMessages = []
       this.setWaiting(true)
       try {
-        const response = await axios.post('/mask_recommender/train.json')
+        const payload = this.routeModelType ? { model_type: this.routeModelType } : {}
+        const response = await axios.post('/mask_recommender/train.json', payload)
         this.retrainJobId = response?.data?.job_id || null
         if (!this.retrainJobId) {
           this.errorMessages = ['Retraining started, but no job id was returned.']

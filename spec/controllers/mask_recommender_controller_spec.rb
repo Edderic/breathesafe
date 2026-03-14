@@ -199,6 +199,25 @@ RSpec.describe MaskRecommenderController, type: :controller do
     end
   end
 
+  describe 'POST #train' do
+    let(:admin) { create(:user, admin: true) }
+
+    it 'forwards model_type to MaskRecommenderTraining' do
+      allow(controller).to receive(:current_user).and_return(admin)
+      allow(MaskRecommenderTraining).to receive(:call).and_return({ 'status' => 'started' })
+
+      post :train, params: { model_type: 'custom_lr' }, as: :json
+
+      expect(MaskRecommenderTraining).to have_received(:call).with(
+        payload: hash_including(
+          environment: 'development',
+          model_type: 'custom_lr'
+        )
+      )
+      expect(response).to have_http_status(:ok)
+    end
+  end
+
   describe 'GET #status' do
     it 'returns queued when cache payload is missing' do
       allow(Rails.cache).to receive(:read).and_return(nil)

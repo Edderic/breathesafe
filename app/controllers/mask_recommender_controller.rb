@@ -55,9 +55,11 @@ class MaskRecommenderController < ApplicationController
     end
 
     job_id = SecureRandom.uuid
+    model_type = params[:model_type].presence || params.dig(:mask_recommender, :model_type).presence
     payload = {
       environment: ENV.fetch('HEROKU_ENVIRONMENT', 'development'),
-      job_id: job_id
+      job_id: job_id,
+      model_type: model_type
     }
     result = MaskRecommenderTraining.call(payload: payload)
     render json: { job_id: job_id, status: 'started', result: result }, status: :ok
