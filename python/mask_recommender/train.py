@@ -20,6 +20,7 @@ import numpy as np
 import pandas as pd
 import torch
 from botocore.exceptions import ClientError
+from matplotlib.lines import Line2D
 from breathesafe_network import (build_session,
                                  fetch_facial_measurements_fit_tests,
                                  fetch_json)
@@ -1444,8 +1445,11 @@ def _build_custom_lr_perimeter_diff_diagnostics(
         return []
 
     artifact_paths = []
+    probe_point_rows = []
     per_page = 16
     num_pages = int(np.ceil(len(mask_codes) / per_page))
+    probes = _probe_payloads()
+    probe_colors = ['#111111', '#7a3cff', '#118ab2', '#ef476f', '#2a9d8f', '#bc6c25']
 
     for page_idx in range(num_pages):
         page_codes = mask_codes[page_idx * per_page:(page_idx + 1) * per_page]
@@ -1508,6 +1512,55 @@ def _build_custom_lr_perimeter_diff_diagnostics(
                     label='fail',
                 )
 
+            mask_perimeter_mm = float(pd.to_numeric(representative.get('perimeter_mm'), errors='coerce'))
+            strap_type_value = representative['strap_type']
+            style_value = representative['style']
+            for probe_idx, probe in enumerate(probes):
+                facial_measurements = probe.get('facial_measurements') or {}
+                probe_label = probe.get('label') or f"probe_{probe_idx + 1}"
+                facial_perimeter_mm = sum(float(facial_measurements.get(column, 0) or 0) for column in FACIAL_MEASUREMENTS)
+                probe_diff_cm = (facial_perimeter_mm - mask_perimeter_mm) / 10.0
+                probe_color = probe_colors[probe_idx % len(probe_colors)]
+                ax.axvline(
+                    probe_diff_cm,
+                    color=probe_color,
+                    linestyle=':',
+                    linewidth=1.5,
+                    alpha=0.9,
+                )
+                probe_frame = pd.DataFrame({
+                    'unique_internal_model_code': [mask_code],
+                    'style': [style_value],
+                    'strap_type': [strap_type_value],
+                    'perimeter_mm': [mask_perimeter_mm],
+                    'facial_hair_beard_length_mm': [facial_measurements.get('facial_hair_beard_length_mm', 0) or 0],
+                })
+                for column in FACIAL_MEASUREMENTS:
+                    probe_frame[column] = [facial_measurements.get(column, 0) or 0]
+                probe_probability = float(
+                    _predict_custom_lr_probabilities(
+                        probe_frame,
+                        parameters=parameters,
+                        category_metadata=category_metadata,
+                    )[0]
+                )
+                ax.scatter(
+                    [probe_diff_cm],
+                    [probe_probability],
+                    color=probe_color,
+                    edgecolors='white',
+                    linewidths=0.8,
+                    s=42,
+                    zorder=5,
+                )
+                probe_point_rows.append({
+                    'page': page_idx + 1,
+                    'mask_code': mask_code,
+                    'probe_label': probe_label,
+                    'probe_perimeter_diff_cm': probe_diff_cm,
+                    'probe_probability_of_fit': probe_probability,
+                })
+
             ax.set_title(mask_code, fontsize=9)
             ax.set_ylim(-0.05, 1.05)
             ax.grid(True, linestyle='--', alpha=0.25)
@@ -1515,23 +1568,41 @@ def _build_custom_lr_perimeter_diff_diagnostics(
         for unused_ax in axes[len(page_codes):]:
             unused_ax.axis('off')
 
-        handles, labels = axes[0].get_legend_handles_labels()
-        if handles:
+        legend_handles = [
+            Line2D([0], [0], color='#1f77b4', linewidth=2, label='mask-specific'),
+            Line2D([0], [0], color='#ff7f0e', linewidth=2, linestyle='--', label='style-only'),
+            Line2D([0], [0], marker='o', color='green', linestyle='None', alpha=0.5, markersize=6, label='pass'),
+            Line2D([0], [0], marker='o', color='red', linestyle='None', alpha=0.5, markersize=6, label='fail'),
+        ]
+        for probe_idx, probe in enumerate(probes):
+            probe_label = probe.get('label') or f"probe_{probe_idx + 1}"
+            probe_color = probe_colors[probe_idx % len(probe_colors)]
+            legend_handles.append(
+                Line2D(
+                    [0], [0],
+                    color=probe_color,
+                    linestyle=':',
+                    linewidth=1.5,
+                    marker='o',
+                    markersize=5,
+                    label=f'{probe_label} actual'
+                )
+            )
+        if legend_handles:
             fig.legend(
-                handles,
-                labels,
+                handles=legend_handles,
                 loc='upper center',
-                bbox_to_anchor=(0.5, 0.975),
-                ncol=4,
+                bbox_to_anchor=(0.5, 0.965),
+                ncol=min(4, len(legend_handles)),
                 frameon=False,
             )
         fig.supxlabel('perimeter_diff')
         fig.supylabel('probability / actual qlft pass')
         fig.suptitle(
             f'Custom LR perimeter_diff diagnostics (page {page_idx + 1}/{num_pages})',
-            y=0.995
+            y=0.992
         )
-        fig.tight_layout(rect=[0, 0, 1, 0.90])
+        fig.tight_layout(rect=[0, 0, 1, 0.88])
 
         output_path = os.path.join(
             images_dir,
@@ -1557,6 +1628,19 @@ def _build_custom_lr_perimeter_diff_diagnostics(
             logging.info("Saved custom perimeter diff diagnostics to %s", output_path)
             artifact_paths.append(output_path)
         plt.close(fig)
+
+    probe_points_path = os.path.join(images_dir, f"{timestamp}_custom_perimeter_diff_probe_points.json")
+    if _should_upload_visual_artifacts_to_s3():
+        probe_points_key = f"mask_recommender/models/{timestamp}/{timestamp}_custom_perimeter_diff_probe_points.json"
+        _best_effort_visual_upload(
+            lambda: _upload_json_to_s3(probe_point_rows, probe_points_key),
+            "custom perimeter diff probe points",
+            fallback_artifact=None,
+        )
+    else:
+        with open(probe_points_path, 'w', encoding='utf-8') as handle:
+            json.dump(probe_point_rows, handle, indent=2)
+        logging.info("Saved custom perimeter diff probe points to %s", probe_points_path)
 
     return artifact_paths
 
