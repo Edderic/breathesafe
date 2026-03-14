@@ -1055,12 +1055,17 @@ export default {
       try {
         const payload = this.routeModelType ? { model_type: this.routeModelType } : {}
         const response = await axios.post('/mask_recommender/train.json', payload)
+        this.loadedRecommenderPayload = null
+        this.recommenderModelTimestamp = null
         this.retrainJobId = response?.data?.job_id || null
         if (!this.retrainJobId) {
           this.errorMessages = ['Retraining started, but no job id was returned.']
           return
         }
         this.showPopup = 'Retrain'
+        if (this.hasRecommenderPayload) {
+          await this.maybeLoadRecommenderPayload(this.$route.query)
+        }
       } catch (error) {
         const message = error?.response?.data?.error || error?.message || 'Unable to retrain model.'
         this.errorMessages = [message]
