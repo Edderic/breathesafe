@@ -1411,6 +1411,19 @@ def _custom_lr_params_with_zeroed_mask(parameters, mask_code, category_metadata)
     return cloned
 
 
+def _mask_perimeter_mm_from_training_row(row):
+    raw_perimeter_mm = pd.to_numeric(row.get('perimeter_mm'), errors='coerce')
+    if pd.notna(raw_perimeter_mm):
+        return float(raw_perimeter_mm)
+
+    facial_perimeter_mm = sum(float(row.get(column, 0) or 0) for column in FACIAL_MEASUREMENTS)
+    perimeter_diff_cm = pd.to_numeric(row.get('perimeter_diff'), errors='coerce')
+    if pd.notna(perimeter_diff_cm):
+        return float(facial_perimeter_mm - (float(perimeter_diff_cm) * 10.0))
+
+    return float(facial_perimeter_mm)
+
+
 def _build_custom_lr_perimeter_diff_diagnostics(
     cleaned_fit_tests,
     parameters,
@@ -1430,8 +1443,6 @@ def _build_custom_lr_perimeter_diff_diagnostics(
     if observed_min == observed_max:
         observed_min -= 1.0
         observed_max += 1.0
-
-    diff_values = np.linspace(observed_min, observed_max, 200, dtype=np.float32)
     sort_columns = ['unique_internal_model_code']
     if 'created_at' in cleaned_fit_tests.columns:
         sort_columns.append('created_at')
@@ -1453,7 +1464,7 @@ def _build_custom_lr_perimeter_diff_diagnostics(
 
     for page_idx in range(num_pages):
         page_codes = mask_codes[page_idx * per_page:(page_idx + 1) * per_page]
-        fig, axes = plt.subplots(4, 4, figsize=(20, 16), sharex=True, sharey=True)
+        fig, axes = plt.subplots(4, 4, figsize=(20, 16), sharex=False, sharey=True)
         axes = axes.flatten()
 
         for ax_idx, mask_code in enumerate(page_codes):
@@ -1462,6 +1473,25 @@ def _build_custom_lr_perimeter_diff_diagnostics(
             representative = rows.iloc[-1]
             style = representative['style']
             strap_type = representative['strap_type']
+            mask_perimeter_mm = _mask_perimeter_mm_from_training_row(representative)
+            probe_positions = []
+            for probe in probes:
+                facial_measurements = probe.get('facial_measurements') or {}
+                facial_perimeter_mm = sum(float(facial_measurements.get(column, 0) or 0) for column in FACIAL_MEASUREMENTS)
+                probe_positions.append((facial_perimeter_mm - mask_perimeter_mm) / 10.0)
+
+            row_diffs = pd.to_numeric(rows['perimeter_diff'], errors='coerce')
+            row_min = float(row_diffs.min()) if row_diffs.notna().any() else observed_min
+            row_max = float(row_diffs.max()) if row_diffs.notna().any() else observed_max
+            subplot_min = min([observed_min, row_min] + probe_positions)
+            subplot_max = max([observed_max, row_max] + probe_positions)
+            if subplot_min == subplot_max:
+                subplot_min -= 1.0
+                subplot_max += 1.0
+            subplot_padding = max(0.5, (subplot_max - subplot_min) * 0.05)
+            subplot_min -= subplot_padding
+            subplot_max += subplot_padding
+            diff_values = np.linspace(subplot_min, subplot_max, 200, dtype=np.float32)
 
             curve_frame = pd.DataFrame({
                 'unique_internal_model_code': [mask_code] * len(diff_values),
@@ -1489,7 +1519,6 @@ def _build_custom_lr_perimeter_diff_diagnostics(
             ax.plot(diff_values, specific_probs, label='mask-specific', color='#1f77b4', linewidth=2)
             ax.plot(diff_values, generic_probs, label='style-only', color='#ff7f0e', linewidth=2, linestyle='--')
 
-            row_diffs = pd.to_numeric(rows['perimeter_diff'], errors='coerce')
             row_labels = pd.to_numeric(rows['qlft_pass_normalized'], errors='coerce')
             pass_mask = row_labels == 1
             fail_mask = row_labels == 0
@@ -1512,7 +1541,6 @@ def _build_custom_lr_perimeter_diff_diagnostics(
                     label='fail',
                 )
 
-            mask_perimeter_mm = float(pd.to_numeric(representative.get('perimeter_mm'), errors='coerce'))
             strap_type_value = representative['strap_type']
             style_value = representative['style']
             for probe_idx, probe in enumerate(probes):
@@ -1521,12 +1549,20 @@ def _build_custom_lr_perimeter_diff_diagnostics(
                 facial_perimeter_mm = sum(float(facial_measurements.get(column, 0) or 0) for column in FACIAL_MEASUREMENTS)
                 probe_diff_cm = (facial_perimeter_mm - mask_perimeter_mm) / 10.0
                 probe_color = probe_colors[probe_idx % len(probe_colors)]
+                ax.axvspan(
+                    probe_diff_cm - 0.08,
+                    probe_diff_cm + 0.08,
+                    color=probe_color,
+                    alpha=0.14,
+                    zorder=1,
+                )
                 ax.axvline(
                     probe_diff_cm,
                     color=probe_color,
-                    linestyle=':',
-                    linewidth=1.5,
-                    alpha=0.9,
+                    linestyle='-',
+                    linewidth=2.4,
+                    alpha=0.95,
+                    zorder=2,
                 )
                 probe_frame = pd.DataFrame({
                     'unique_internal_model_code': [mask_code],
@@ -1548,10 +1584,37 @@ def _build_custom_lr_perimeter_diff_diagnostics(
                     [probe_diff_cm],
                     [probe_probability],
                     color=probe_color,
-                    edgecolors='white',
-                    linewidths=0.8,
-                    s=42,
-                    zorder=5,
+                    edgecolors='black',
+                    linewidths=1.2,
+                    s=90,
+                    marker='X',
+                    zorder=10,
+                )
+                annotation_y = min(0.97, max(0.03, probe_probability + 0.06))
+                annotation_va = 'bottom' if annotation_y >= probe_probability else 'top'
+                ax.annotate(
+                    f"{probe_label}: {probe_probability:.0%}",
+                    xy=(probe_diff_cm, probe_probability),
+                    xytext=(probe_diff_cm + 0.15, annotation_y),
+                    textcoords='data',
+                    fontsize=7,
+                    color=probe_color,
+                    fontweight='bold',
+                    ha='left',
+                    va=annotation_va,
+                    bbox={
+                        'boxstyle': 'round,pad=0.2',
+                        'fc': 'white',
+                        'ec': probe_color,
+                        'alpha': 0.9,
+                    },
+                    arrowprops={
+                        'arrowstyle': '-',
+                        'color': probe_color,
+                        'lw': 1.0,
+                        'alpha': 0.9,
+                    },
+                    zorder=11,
                 )
                 probe_point_rows.append({
                     'page': page_idx + 1,
@@ -1561,7 +1624,38 @@ def _build_custom_lr_perimeter_diff_diagnostics(
                     'probe_probability_of_fit': probe_probability,
                 })
 
+                xticks = list(ax.get_xticks())
+                xticks.append(probe_diff_cm)
+                finite_xticks = []
+                for x in xticks:
+                    try:
+                        x_value = float(x)
+                    except (TypeError, ValueError):
+                        continue
+                    if np.isfinite(x_value):
+                        finite_xticks.append(round(x_value, 2))
+                if finite_xticks:
+                    ax.set_xticks(sorted(set(finite_xticks)))
+                ax.text(
+                    0.02,
+                    0.98 - (probe_idx * 0.09),
+                    f"{probe_label}: x={probe_diff_cm:.2f}, p={probe_probability:.0%}",
+                    transform=ax.transAxes,
+                    ha='left',
+                    va='top',
+                    fontsize=7,
+                    color=probe_color,
+                    bbox={
+                        'boxstyle': 'round,pad=0.2',
+                        'fc': 'white',
+                        'ec': probe_color,
+                        'alpha': 0.9,
+                    },
+                    zorder=12,
+                )
+
             ax.set_title(mask_code, fontsize=9)
+            ax.set_xlim(subplot_min, subplot_max)
             ax.set_ylim(-0.05, 1.05)
             ax.grid(True, linestyle='--', alpha=0.25)
 
@@ -1581,8 +1675,8 @@ def _build_custom_lr_perimeter_diff_diagnostics(
                 Line2D(
                     [0], [0],
                     color=probe_color,
-                    linestyle=':',
-                    linewidth=1.5,
+                    linestyle='-',
+                    linewidth=2.4,
                     marker='o',
                     markersize=5,
                     label=f'{probe_label} actual'
