@@ -289,7 +289,9 @@ def _load_custom_artifacts(model_dir: Path):
     }
 
 
-def _ensure_custom_artifacts():
+def _ensure_custom_artifacts(force_reload=False):
+    if force_reload:
+        APP.config.pop("custom_artifacts", None)
     if "custom_artifacts" in APP.config:
         return APP.config["custom_artifacts"]
 
@@ -537,7 +539,26 @@ def _train(payload):
 
     result = train_main(train_argv)
 
-    reload_status = reload_model().get_json()
+    if (payload or {}).get("model_type") == "custom_lr":
+        custom_artifacts = _ensure_custom_artifacts(force_reload=True)
+        reload_status = {
+            "status": "reloaded",
+            "model_type": "custom_lr",
+            "timestamp": custom_artifacts["metadata"].get("timestamp"),
+            "environment": custom_artifacts["metadata"].get("environment"),
+        }
+    elif (payload or {}).get("model_type") == "prob":
+        APP.config.pop("prob_artifacts", None)
+        prob_dir = _download_latest_prob_from_s3()
+        APP.config["prob_artifacts"] = _load_prob_artifacts(prob_dir)
+        reload_status = {
+            "status": "reloaded",
+            "model_type": "prob",
+            "timestamp": APP.config["prob_artifacts"]["metadata"].get("timestamp"),
+            "environment": APP.config["prob_artifacts"]["metadata"].get("environment"),
+        }
+    else:
+        reload_status = reload_model().get_json()
     return {
         "statusCode": 200,
         "body": json.dumps({
