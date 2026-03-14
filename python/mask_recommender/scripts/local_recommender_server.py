@@ -185,6 +185,20 @@ def _find_latest_model_dir(base_dir: Path) -> Path:
     return sorted(candidates)[-1]
 
 
+def _artifact_timestamp(directory: Path, metadata_filename: str) -> str:
+    metadata_path = directory / metadata_filename
+    if metadata_path.exists():
+        try:
+            with metadata_path.open("r", encoding="utf-8") as handle:
+                metadata = json.load(handle)
+            timestamp = metadata.get("timestamp")
+            if timestamp is not None:
+                return str(timestamp)
+        except (OSError, ValueError, TypeError, json.JSONDecodeError):
+            pass
+    return directory.name
+
+
 def _find_latest_custom_model_dir(base_dir: Path) -> Path:
     if base_dir.is_file():
         return base_dir.parent
@@ -204,7 +218,10 @@ def _find_latest_custom_model_dir(base_dir: Path) -> Path:
             f"No custom model artifacts found in {base_dir}. Expected custom_model_params.pt"
         )
 
-    return sorted(candidates)[-1]
+    return max(
+        candidates,
+        key=lambda candidate: _artifact_timestamp(candidate, "custom_model_metadata.json"),
+    )
 
 
 def _load_artifacts(model_dir: Path):
