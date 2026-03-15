@@ -204,6 +204,7 @@ import PersonIcon from './person_icon.vue'
 import Popup from './pop_up.vue'
 import MaskColorChips from './mask_color_chips.vue'
 import InitialCostBarGraph from './initial_cost_bar_graph.vue'
+import { dbWideCostBounds } from './cost_bounds.js'
 import { deepSnakeToCamel } from './misc.js'
 import { assignBoundsToColorScheme, colorPaletteFall, convertColorListToCutpoints, generateEvenSpacedBounds } from './colors.js'
 import SearchIcon from './search_icon.vue'
@@ -927,22 +928,7 @@ export default {
       return Math.max(...values)
     },
     costBounds() {
-      const contextMin = this.dataContext.initial_cost_min
-      const contextMax = this.dataContext.initial_cost_max
-      if (contextMin !== null && contextMin !== undefined && contextMax !== null && contextMax !== undefined) {
-        return { min: 0, max: Math.max(contextMax, 5) }
-      }
-
-      const values = (this.cards || [])
-        .map((m) => m.initialCostUsDollars)
-        .filter((v) => v !== null && v !== undefined && !isNaN(v) && Number(v) > 0)
-        .map((v) => Number(v))
-
-      if (values.length === 0) {
-        return { min: null, max: null }
-      }
-
-      return { min: 0, max: Math.max(...values, 5) }
+      return dbWideCostBounds(this.dataContext)
     },
     statRowColors() {
       return {

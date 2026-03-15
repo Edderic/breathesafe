@@ -97,7 +97,7 @@ export default {
       const red = '#c0392b'
       const yellow = '#f1c40f'
       const green = '#27ae60'
-      return `linear-gradient(90deg, ${red} 0%, ${yellow} 33%, ${green} 100%)`
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} 50%, ${green} 100%)`
     },
     formatCurrency(value) {
       if (!Number.isFinite(value)) {

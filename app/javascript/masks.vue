@@ -317,6 +317,7 @@ import { Respirator } from './masks.js'
 import HelpPopup from './help_popup.vue'
 import Pagination from './pagination.vue'
 import { useMasksStore } from './stores/masks_store'
+import { dbWideCostBounds } from './cost_bounds.js'
 
 
 export default {
@@ -1073,20 +1074,7 @@ export default {
       return { min: Math.min(...values), max: Math.max(...values) }
     },
     costBounds() {
-      const contextMin = this.maskDataContext.initial_cost_min
-      const contextMax = this.maskDataContext.initial_cost_max
-      if (contextMin !== null && contextMin !== undefined && contextMax !== null && contextMax !== undefined) {
-        return { min: 0, max: Math.max(Number(contextMax), 5) }
-      }
-
-      const values = (this.sortedDisplayables || [])
-        .map((m) => Number(m.initialCostUsDollars))
-        .filter((v) => Number.isFinite(v) && v > 0)
-
-      if (values.length === 0) {
-        return { min: null, max: null }
-      }
-      return { min: 0, max: Math.max(...values, 5) }
+      return dbWideCostBounds(this.maskDataContext)
     },
 
     async load(toQuery, previousQuery) {

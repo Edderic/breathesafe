@@ -678,6 +678,7 @@ import { useMainStore } from './stores/main_store';
 import { useManagedUserStore } from './stores/managed_users_store';
 import ScatterPlot from './scatter_plot.vue'
 import { useFacialMeasurementStore } from './stores/facial_measurement_store'
+import { dbWideCostBounds } from './cost_bounds.js'
 
 export default {
   name: 'Mask',
@@ -1601,18 +1602,7 @@ export default {
       return (value - min) / range
     },
     costBounds() {
-      const contextMin = this.dataContext.initial_cost_min
-      const contextMax = this.dataContext.initial_cost_max
-      if (contextMin !== null && contextMin !== undefined && contextMax !== null && contextMax !== undefined) {
-        return { min: 0, max: Math.max(Number(contextMax), 5) }
-      }
-
-      const value = Number(this.initialCostUsDollars)
-      if (!Number.isFinite(value) || value <= 0) {
-        return { min: null, max: null }
-      }
-
-      return { min: 0, max: Math.max(value, 5) }
+      return dbWideCostBounds(this.dataContext)
     },
     maskImageAlt(index) {
       return `Image #${index} for ${this.uniqueInternalModelCode}`
