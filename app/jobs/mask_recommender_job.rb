@@ -39,13 +39,17 @@ class MaskRecommenderJob < ApplicationJob
       end
     end
     model = inference[:model]
+    data_context = MasksDataContextualizer.call
 
     Rails.cache.write(
       cache_key,
       {
         status: 'complete',
         completed_at: Time.current.iso8601,
-        result: masks,
+        result: {
+          masks: masks,
+          context: data_context
+        },
         model: model
       },
       expires_in: CACHE_TTL
