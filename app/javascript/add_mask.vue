@@ -1364,7 +1364,7 @@ export default {
           return null
         }
         const logValue = Math.log10(this.avgSealedFitFactor)
-        return this.clampPercent(logValue / 4)
+        return this.clampPercent(logValue / 3)
       }
 
       if (type === 'breathability') {
@@ -1541,7 +1541,7 @@ export default {
     },
     statAxisLabel(type, position) {
       if (type === 'filtration') {
-        return position === 'min' ? '10^0' : '10^4'
+        return position === 'min' ? '10^0' : '10^3'
       }
       if (type === 'breathability') {
         const min = this.dataContext.breathability_min
