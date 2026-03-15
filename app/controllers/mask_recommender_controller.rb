@@ -129,6 +129,11 @@ class MaskRecommenderController < ApplicationController
     render json: { recommender_columns: FacialMeasurement::RECOMMENDER_COLUMNS }
   end
 
+  def eligible_users
+    users = EligibleRecommenderUsersService.call(viewer: current_user)
+    render json: { users: users }, status: :ok
+  end
+
   private
 
   def build_recommendation_response

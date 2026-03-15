@@ -64,6 +64,34 @@
             >
           </label>
 
+          <label
+            v-if="showRecommenderVersion"
+            class="training-param-control recommender-version-control"
+          >
+            <span class="model-type-label">Recommender</span>
+            <span class="recommender-version-value">{{ recommenderVersionText }}</span>
+          </label>
+
+          <label
+            v-if="showRecommenderUserSelect"
+            class="training-param-control recommender-user-control"
+          >
+            <span class="model-type-label">User</span>
+            <select
+              class="model-type-select"
+              :value="routeRecommenderUserId"
+              @change="updateRecommenderUserId"
+            >
+              <option
+                v-for="user in eligibleRecommenderUsers"
+                :key="user.managedId"
+                :value="String(user.managedId)"
+              >
+                {{ user.fullName }}
+              </option>
+            </select>
+          </label>
+
           <button class='icon' @click='showPopup = "Sort"'>
             ⇵
           </button>
@@ -415,6 +443,7 @@ export default {
       recommenderWarmupKeyPrefix: 'mask_recommender_warmup_done',
       isRecommenderLoading: false,
       recommenderModelTimestamp: null,
+      eligibleRecommenderUsers: [],
       viewportWidth: typeof window !== 'undefined' ? window.innerWidth : 1024,
       showTableView: false,
       missingMetricCell: {
@@ -475,8 +504,18 @@ export default {
     hasObservedFitContext() {
       return !!this.$route.query.recommender_user_id
     },
+    routeRecommenderUserId() {
+      const value = this.$route.query.recommender_user_id
+      return value ? String(value) : ''
+    },
     showModelTypeControl() {
       return this.isAdmin && this.adminModeEnabled
+    },
+    showRecommenderVersion() {
+      return this.hasRecommenderPayload
+    },
+    showRecommenderUserSelect() {
+      return this.hasObservedFitContext && this.eligibleRecommenderUsers.length > 0
     },
     routeModelType() {
       const value = this.$route.query.model_type
@@ -533,6 +572,13 @@ export default {
     },
     recommenderWarmupKey() {
       return `${this.recommenderWarmupKeyPrefix}:${this.effectiveModelType}`
+    },
+    recommenderVersionText() {
+      const modelType = this.effectiveModelType
+      if (this.recommenderModelTimestamp) {
+        return `${modelType} · ${this.recommenderModelTimestamp}`
+      }
+      return modelType
     },
     perimColorScheme() {
       return perimeterColorScheme()
@@ -837,6 +883,20 @@ export default {
           // Warmup is best effort; don't surface errors to the user.
         })
     },
+    async loadEligibleRecommenderUsers() {
+      if (!this.hasObservedFitContext || !this.currentUser) {
+        this.eligibleRecommenderUsers = []
+        return
+      }
+
+      try {
+        const response = await axios.get('/mask_recommender/eligible_users.json')
+        const users = response?.data?.users || []
+        this.eligibleRecommenderUsers = users.map((user) => deepSnakeToCamel(user))
+      } catch (_error) {
+        this.eligibleRecommenderUsers = []
+      }
+    },
     matchesMissingFilter(mask, filterMissing) {
       if (filterMissing === 'strap_type') {
         const value = mask.strapType
@@ -1087,6 +1147,8 @@ export default {
         this.redirectToSignInForCurrentRoute()
         return
       }
+
+      await this.loadEligibleRecommenderUsers()
 
       let normalizedQuery = Object.assign({}, toQuery)
       let didNormalize = false
@@ -1460,6 +1522,17 @@ export default {
       } else {
         query.model_type = nextValue
       }
+      this.$router.push({ name: 'Masks', query })
+    },
+    updateRecommenderUserId(event) {
+      const nextValue = String(event?.target?.value || '').trim()
+      if (!nextValue) {
+        return
+      }
+      const query = Object.assign({}, this.$route.query, {
+        recommender_user_id: nextValue,
+        page: 1
+      })
       this.$router.push({ name: 'Masks', query })
     },
     updateTrainingQueryParam(key, event) {

@@ -246,4 +246,27 @@ RSpec.describe MaskRecommenderController, type: :controller do
       expect(body['status']).to eq('queued')
     end
   end
+
+  describe 'GET #eligible_users' do
+    let(:manager) { create(:user) }
+
+    it 'returns eligible recommender users for the current viewer' do
+      allow(controller).to receive(:current_user).and_return(manager)
+      allow(EligibleRecommenderUsersService).to receive(:call).with(viewer: manager).and_return(
+        [
+          { managed_id: 99, full_name: 'Jane Doe' }
+        ]
+      )
+
+      get :eligible_users, format: :json
+
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body['users']).to eq(
+        [
+          { 'managed_id' => 99, 'full_name' => 'Jane Doe' }
+        ]
+      )
+    end
+  end
 end
