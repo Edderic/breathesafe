@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class MaskRecommender
+  DEFAULT_MODEL_TYPE = 'custom_lr'
+
   class << self
     def infer_with_meta(facial_measurements, mask_ids: nil, function_base: 'mask-recommender', model_type: nil)
       canonical_mask_ids = mask_ids.present? ? MaskDeduplicationPolicy.canonicalize_mask_ids(mask_ids) : nil
@@ -63,7 +65,7 @@ class MaskRecommender
         function_name: function_name,
         payload: {
           method: 'warmup',
-          model_type: model_type.presence
+          model_type: model_type.presence || DEFAULT_MODEL_TYPE
         }.compact
       )
       parse_lambda_body(response)
@@ -76,10 +78,10 @@ class MaskRecommender
 
       payload = {
         method: 'infer',
-        facial_measurements: facial_measurements
+        facial_measurements: facial_measurements,
+        model_type: model_type.presence || DEFAULT_MODEL_TYPE
       }
       payload[:mask_ids] = mask_ids if mask_ids.present?
-      payload[:model_type] = model_type if model_type.present?
       function_name = "#{function_base}-#{heroku_env}"
       Rails.logger.info("MaskRecommender.infer invoking #{function_name}")
 

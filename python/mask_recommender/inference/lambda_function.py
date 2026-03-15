@@ -24,6 +24,7 @@ except ModuleNotFoundError:
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+DEFAULT_MODEL_TYPE = "custom_lr"
 
 
 def _apply_empirical_history_cap(probability: float, mask_info: Dict) -> float:
@@ -443,7 +444,7 @@ def handler(event, context):
         payload = event or {}
         method = payload.get("method")
         facial_features = payload.get('facial_measurements', {})
-        model_type = payload.get('model_type')
+        model_type = payload.get('model_type') or DEFAULT_MODEL_TYPE
         recommender = MaskRecommenderInference()
         if method == "warmup":
             if model_type == "prob":
@@ -459,7 +460,7 @@ def handler(event, context):
                 'statusCode': 200,
                 'body': json.dumps({
                     'status': 'warmed',
-                    'model_type': model_type or 'nn',
+                    'model_type': model_type,
                     'model': warmed_model,
                 })
             }

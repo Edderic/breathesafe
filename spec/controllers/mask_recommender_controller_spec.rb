@@ -216,6 +216,23 @@ RSpec.describe MaskRecommenderController, type: :controller do
       )
       expect(response).to have_http_status(:ok)
     end
+
+    it 'forwards epochs and learning_rate to MaskRecommenderTraining' do
+      allow(controller).to receive(:current_user).and_return(admin)
+      allow(MaskRecommenderTraining).to receive(:call).and_return({ 'status' => 'started' })
+
+      post :train, params: { model_type: 'custom_lr', epochs: 200, learning_rate: 0.01 }, as: :json
+
+      expect(MaskRecommenderTraining).to have_received(:call).with(
+        payload: hash_including(
+          environment: 'development',
+          model_type: 'custom_lr',
+          epochs: 200,
+          learning_rate: 0.01
+        )
+      )
+      expect(response).to have_http_status(:ok)
+    end
   end
 
   describe 'GET #status' do

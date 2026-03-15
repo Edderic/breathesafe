@@ -21,7 +21,7 @@
             <span class="model-type-label">Model</span>
             <select
               class="model-type-select"
-              :value="routeModelType || 'nn'"
+              :value="effectiveModelType"
               @change="updateModelType"
             >
               <option
@@ -32,6 +32,36 @@
                 {{ option.label }}
               </option>
             </select>
+          </label>
+
+          <label
+            v-if="showModelTypeControl"
+            class="training-param-control"
+          >
+            <span class="model-type-label">Epochs</span>
+            <input
+              class="training-param-input"
+              type="number"
+              min="1"
+              step="1"
+              :value="routeEpochsInput"
+              @change="updateTrainingQueryParam('epochs', $event)"
+            >
+          </label>
+
+          <label
+            v-if="showModelTypeControl"
+            class="training-param-control training-param-control-learning-rate"
+          >
+            <span class="model-type-label">LR</span>
+            <input
+              class="training-param-input"
+              type="number"
+              min="0"
+              step="0.0001"
+              :value="routeLearningRateInput"
+              @change="updateTrainingQueryParam('learning_rate', $event)"
+            >
           </label>
 
           <button class='icon' @click='showPopup = "Sort"'>
@@ -448,15 +478,40 @@ export default {
       const value = this.$route.query.model_type
       return value ? String(value).trim() : null
     },
+    effectiveModelType() {
+      return this.routeModelType || 'custom_lr'
+    },
+    routeEpochsInput() {
+      const value = this.$route.query.epochs
+      return value ? String(value).trim() : '100'
+    },
+    routeLearningRateInput() {
+      const value = this.$route.query.learning_rate
+      return value ? String(value).trim() : '0.0001'
+    },
+    routeEpochs() {
+      const value = Number.parseInt(this.routeEpochsInput, 10)
+      if (!Number.isFinite(value) || value < 1) {
+        return 100
+      }
+      return value
+    },
+    routeLearningRate() {
+      const value = Number(this.routeLearningRateInput)
+      if (!Number.isFinite(value) || value <= 0) {
+        return 0.0001
+      }
+      return value
+    },
     modelTypeOptions() {
       return [
-        { value: 'nn', label: 'NN' },
         { value: 'custom_lr', label: 'Custom LR' },
+        { value: 'nn', label: 'NN' },
         { value: 'prob', label: 'Prob' },
       ]
     },
     recommenderWarmupKey() {
-      return `${this.recommenderWarmupKeyPrefix}:${this.routeModelType || 'nn'}`
+      return `${this.recommenderWarmupKeyPrefix}:${this.effectiveModelType}`
     },
     perimColorScheme() {
       return perimeterColorScheme()
@@ -744,9 +799,7 @@ export default {
       }
 
       const payload = {}
-      if (this.routeModelType) {
-        payload.model_type = this.routeModelType
-      }
+      payload.model_type = this.effectiveModelType
       axios.post('/mask_recommender/warmup.json', payload)
         .then(() => {
           try {
@@ -1053,7 +1106,11 @@ export default {
       this.errorMessages = []
       this.setWaiting(true)
       try {
-        const payload = this.routeModelType ? { model_type: this.routeModelType } : {}
+        const payload = {
+          epochs: this.routeEpochs,
+          learning_rate: this.routeLearningRate,
+          model_type: this.effectiveModelType
+        }
         const response = await axios.post('/mask_recommender/train.json', payload)
         this.loadedRecommenderPayload = null
         this.recommenderModelTimestamp = null
@@ -1191,7 +1248,7 @@ export default {
         `/mask_recommender.json`,
         {
           facial_measurements: payload,
-          ...(this.routeModelType ? { model_type: this.routeModelType } : {})
+          model_type: this.effectiveModelType
         }
       )
         .then(response => {
@@ -1226,7 +1283,7 @@ export default {
 
       // Never fall back to generic /masks.json while a recommender payload is present.
       // Skip only when this exact payload is currently loading or already loaded.
-      const modelTypeKey = this.routeModelType || 'nn'
+      const modelTypeKey = this.effectiveModelType
       const requestKeyBase = recommenderUserId ? `user:${recommenderUserId}` : payloadParam
       const requestKey = `${requestKeyBase}|model:${modelTypeKey}`
       if (requestKey === this.recommenderInFlightPayload) {
@@ -1263,9 +1320,7 @@ export default {
         const requestBody = recommenderUserId
           ? { recommender_user_id: recommenderUserId }
           : { facial_measurements: facialMeasurements }
-        if (this.routeModelType) {
-          requestBody.model_type = this.routeModelType
-        }
+        requestBody.model_type = this.effectiveModelType
         const startResponse = await axios.post(
           `/mask_recommender/async.json`,
           requestBody
@@ -1362,13 +1417,35 @@ export default {
       this.$router.push({ name: 'Masks', query: newQuery })
     },
     updateModelType(event) {
-      const nextValue = String(event?.target?.value || 'nn').trim()
+      const nextValue = String(event?.target?.value || 'custom_lr').trim()
       const query = Object.assign({}, this.$route.query, { page: 1 })
-      if (!nextValue || nextValue === 'nn') {
+      if (!nextValue || nextValue === 'custom_lr') {
         delete query.model_type
       } else {
         query.model_type = nextValue
       }
+      this.$router.push({ name: 'Masks', query })
+    },
+    updateTrainingQueryParam(key, event) {
+      const rawValue = String(event?.target?.value || '').trim()
+      const query = Object.assign({}, this.$route.query, { page: 1 })
+
+      if (key === 'epochs') {
+        const parsed = Number.parseInt(rawValue, 10)
+        if (!Number.isFinite(parsed) || parsed < 1 || parsed === 100) {
+          delete query.epochs
+        } else {
+          query.epochs = String(parsed)
+        }
+      } else if (key === 'learning_rate') {
+        const parsed = Number(rawValue)
+        if (!Number.isFinite(parsed) || parsed <= 0 || parsed === 0.0001) {
+          delete query.learning_rate
+        } else {
+          query.learning_rate = String(parsed)
+        }
+      }
+
       this.$router.push({ name: 'Masks', query })
     },
     sortBy(field) {
@@ -1593,6 +1670,17 @@ export default {
     background: #f7f7f7;
   }
 
+  .training-param-control {
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+    margin-left: 0.45em;
+    padding: 0.15em 0.4em;
+    border: 1px solid #d4d4d4;
+    border-radius: 0.45em;
+    background: #f7f7f7;
+  }
+
   .model-type-label {
     font-size: 0.82em;
     font-weight: 600;
@@ -1608,6 +1696,19 @@ export default {
     background: #fff;
     font-size: 0.92em;
     padding: 0.22em 0.45em;
+  }
+
+  .training-param-input {
+    width: 6.5em;
+    border: 1px solid #c8c8c8;
+    border-radius: 0.35em;
+    background: #fff;
+    font-size: 0.92em;
+    padding: 0.22em 0.45em;
+  }
+
+  .training-param-control-learning-rate .training-param-input {
+    width: 7.5em;
   }
 
   .top-controls {

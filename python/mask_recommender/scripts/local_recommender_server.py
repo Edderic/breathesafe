@@ -23,6 +23,7 @@ from mask_recommender.train import calc_preds, prep_data_in_torch_with_categorie
 
 APP = Flask(__name__)
 APP.logger.setLevel("INFO")
+DEFAULT_MODEL_TYPE = "custom_lr"
 
 
 def _apply_empirical_history_cap(probability, mask_info):
@@ -593,7 +594,8 @@ def recommend_masks():
     if payload.get("method") == "train":
         return jsonify(_train(payload))
     if payload.get("method") == "warmup":
-        if payload.get("model_type") == "prob":
+        model_type = payload.get("model_type") or DEFAULT_MODEL_TYPE
+        if model_type == "prob":
             if "prob_artifacts" not in APP.config:
                 prob_dir = _download_latest_prob_from_s3()
                 APP.config["prob_artifacts"] = _load_prob_artifacts(prob_dir)
@@ -602,7 +604,7 @@ def recommend_masks():
                 "model_type": "prob",
                 "model": APP.config["prob_artifacts"]["metadata"],
             })
-        if payload.get("model_type") == "custom_lr":
+        if model_type == "custom_lr":
             try:
                 custom_artifacts = _ensure_custom_artifacts()
             except (ClientError, FileNotFoundError) as exc:
@@ -620,12 +622,13 @@ def recommend_masks():
             "model_type": "nn",
             "model": APP.config["artifacts"]["metadata"],
         })
-    if payload.get("model_type") == "prob":
+    model_type = payload.get("model_type") or DEFAULT_MODEL_TYPE
+    if model_type == "prob":
         if "prob_artifacts" not in APP.config:
             prob_dir = _download_latest_prob_from_s3()
             APP.config["prob_artifacts"] = _load_prob_artifacts(prob_dir)
         return jsonify(_infer_prob(payload, APP.config["prob_artifacts"]))
-    if payload.get("model_type") == "custom_lr":
+    if model_type == "custom_lr":
         try:
             custom_artifacts = _ensure_custom_artifacts()
         except (ClientError, FileNotFoundError) as exc:
