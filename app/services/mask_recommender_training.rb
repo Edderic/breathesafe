@@ -18,7 +18,7 @@ class MaskRecommenderTraining
       epochs: 200,
       learning_rate: 0.01,
       retrain_with_full: true,
-      class_reweight: true
+      class_reweight: false
     },
     'nn' => {
       model_type: 'nn',
