@@ -103,8 +103,9 @@ def test_handler_accepts_facial_measurements(monkeypatch):
     class DummyRecommender:
         def __init__(self):
             self.latest_payload = {"timestamp": "test"}
+            self.custom_metadata = {"timestamp": "custom-test"}
 
-        def recommend_masks(self, facial_features):
+        def recommend_masks_custom(self, facial_features):
             assert "nose_mm" in facial_features
             return [
                 {"mask_id": 10, "proba_fit": 0.9, "mask_info": {}},
