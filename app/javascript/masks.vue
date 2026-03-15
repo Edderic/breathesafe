@@ -64,18 +64,6 @@
             >
           </label>
 
-          <label
-            v-if="showModelTypeControl"
-            class="training-param-control training-param-control-checkbox"
-          >
-            <span class="model-type-label">Empirical Cap</span>
-            <input
-              type="checkbox"
-              :checked="effectiveApplyEmpiricalCap"
-              @change="updateApplyEmpiricalCap"
-            >
-          </label>
-
           <button class='icon' @click='showPopup = "Sort"'>
             ⇵
           </button>
@@ -492,23 +480,6 @@ export default {
     },
     effectiveModelType() {
       return this.routeModelType || 'custom_lr'
-    },
-    routeApplyEmpiricalCap() {
-      const value = this.$route.query.apply_empirical_cap
-      if (value === undefined) {
-        return null
-      }
-      const normalized = String(value).trim().toLowerCase()
-      if (['true', '1', 'yes', 'on'].includes(normalized)) {
-        return true
-      }
-      if (['false', '0', 'no', 'off'].includes(normalized)) {
-        return false
-      }
-      return null
-    },
-    effectiveApplyEmpiricalCap() {
-      return this.routeApplyEmpiricalCap !== false
     },
     defaultTrainingParams() {
       const defaultsByModelType = {
@@ -997,13 +968,7 @@ export default {
       }
 
       if (metricKey === 'proba_fit') {
-        const effectivePercent = Math.round(Number(mask.probaFit) * 100)
-        const rawValue = Number(mask.rawProbaFit)
-        const rawPercent = Number.isFinite(rawValue) ? Math.round(rawValue * 100) : null
-        if (this.showModelTypeControl && rawPercent !== null && rawPercent !== effectivePercent) {
-          return `${effectivePercent}% (raw ${rawPercent}%)`
-        }
-        return `${effectivePercent}%`
+        return `${Math.round(Number(mask.probaFit) * 100)}%`
       }
       if (metricKey === 'filtration') {
         return `${Math.round(Number(mask.avgSealedFitFactor))}`
@@ -1300,8 +1265,7 @@ export default {
         `/mask_recommender.json`,
         {
           facial_measurements: payload,
-          model_type: this.effectiveModelType,
-          apply_empirical_cap: this.effectiveApplyEmpiricalCap
+          model_type: this.effectiveModelType
         }
       )
         .then(response => {
@@ -1337,9 +1301,8 @@ export default {
       // Never fall back to generic /masks.json while a recommender payload is present.
       // Skip only when this exact payload is currently loading or already loaded.
       const modelTypeKey = this.effectiveModelType
-      const capKey = this.effectiveApplyEmpiricalCap ? 'cap:on' : 'cap:off'
       const requestKeyBase = recommenderUserId ? `user:${recommenderUserId}` : payloadParam
-      const requestKey = `${requestKeyBase}|model:${modelTypeKey}|${capKey}`
+      const requestKey = `${requestKeyBase}|model:${modelTypeKey}`
       if (requestKey === this.recommenderInFlightPayload) {
         return true
       }
@@ -1375,7 +1338,6 @@ export default {
           ? { recommender_user_id: recommenderUserId }
           : { facial_measurements: facialMeasurements }
         requestBody.model_type = this.effectiveModelType
-        requestBody.apply_empirical_cap = this.effectiveApplyEmpiricalCap
         const startResponse = await axios.post(
           `/mask_recommender/async.json`,
           requestBody
@@ -1478,16 +1440,6 @@ export default {
         delete query.model_type
       } else {
         query.model_type = nextValue
-      }
-      this.$router.push({ name: 'Masks', query })
-    },
-    updateApplyEmpiricalCap(event) {
-      const checked = !!event?.target?.checked
-      const query = Object.assign({}, this.$route.query, { page: 1 })
-      if (checked) {
-        delete query.apply_empirical_cap
-      } else {
-        query.apply_empirical_cap = 'false'
       }
       this.$router.push({ name: 'Masks', query })
     },

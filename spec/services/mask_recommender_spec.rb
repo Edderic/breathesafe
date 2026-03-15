@@ -35,8 +35,7 @@ RSpec.describe MaskRecommender, type: :service do
 
       body = {
         'mask_id' => { '0' => 222 },
-        'proba_fit' => { '0' => 0.9 },
-        'raw_proba_fit' => { '0' => 0.95 }
+        'proba_fit' => { '0' => 0.9 }
       }
 
       allow(Mask).to receive(:with_aggregations).and_return(masks)
@@ -65,42 +64,9 @@ RSpec.describe MaskRecommender, type: :service do
 
       by_id = result.index_by { |h| h['id'] }
       expect(by_id[222]['proba_fit']).to be_within(1e-6).of(0.9)
-      expect(by_id[222]['raw_proba_fit']).to be_within(1e-6).of(0.95)
       expect(by_id[111]['proba_fit']).to be_nil
       expect(by_id[222]['name']).to eq('Mask B')
       expect(by_id[111]['name']).to eq('Mask A')
-    end
-
-    it 'defaults to custom_lr and forwards apply_empirical_cap when provided' do
-      body = {
-        'mask_id' => { '0' => 222 },
-        'proba_fit' => { '0' => 0.9 }
-      }
-
-      allow(Mask).to receive(:with_aggregations).and_return(
-        [{ 'id' => 222, 'name' => 'Mask B', 'style' => 'Duckbill', 'perimeter_mm' => 310 }]
-      )
-
-      allow(AwsLambdaInvokeService).to receive(:call)
-        .with(
-          function_name: 'mask-recommender-staging',
-          payload: hash_including(
-            method: 'infer',
-            facial_measurements: facial,
-            model_type: 'custom_lr',
-            apply_empirical_cap: false
-          )
-        ).and_return({ 'body' => Oj.dump(body) })
-
-      described_class.infer(facial, apply_empirical_cap: false)
-
-      expect(AwsLambdaInvokeService).to have_received(:call).with(
-        function_name: 'mask-recommender-staging',
-        payload: hash_including(
-          model_type: 'custom_lr',
-          apply_empirical_cap: false
-        )
-      )
     end
 
     it 'filters out masks missing perimeter_mm' do

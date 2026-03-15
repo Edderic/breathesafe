@@ -40,8 +40,7 @@ RSpec.describe MaskRecommenderController, type: :controller do
       expect(MaskRecommender).to have_received(:infer_with_meta).with(
         facial_payload.stringify_keys,
         function_base: 'mask-recommender-rf',
-        model_type: nil,
-        apply_empirical_cap: nil
+        model_type: nil
       )
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
@@ -59,23 +58,7 @@ RSpec.describe MaskRecommenderController, type: :controller do
       expect(MaskRecommender).to have_received(:infer_with_meta).with(
         facial_payload.stringify_keys,
         function_base: 'mask-recommender',
-        model_type: 'custom_lr',
-        apply_empirical_cap: nil
-      )
-      expect(response).to have_http_status(:ok)
-    end
-
-    it 'forwards apply_empirical_cap when provided' do
-      post :create, params: {
-        facial_measurements: facial_payload,
-        apply_empirical_cap: false
-      }, as: :json
-
-      expect(MaskRecommender).to have_received(:infer_with_meta).with(
-        facial_payload.stringify_keys,
-        function_base: 'mask-recommender',
-        model_type: nil,
-        apply_empirical_cap: false
+        model_type: 'custom_lr'
       )
       expect(response).to have_http_status(:ok)
     end
@@ -89,8 +72,7 @@ RSpec.describe MaskRecommenderController, type: :controller do
       expect(MaskRecommender).to have_received(:infer_with_meta).with(
         facial_payload.stringify_keys,
         function_base: 'mask-recommender',
-        model_type: nil,
-        apply_empirical_cap: nil
+        model_type: nil
       )
       expect(response).to have_http_status(:ok)
     end
@@ -139,8 +121,7 @@ RSpec.describe MaskRecommenderController, type: :controller do
       expect(MaskRecommender).to have_received(:infer_with_meta).with(
         resolved_measurements,
         function_base: 'mask-recommender',
-        model_type: nil,
-        apply_empirical_cap: nil
+        model_type: nil
       )
 
       body = JSON.parse(response.body)

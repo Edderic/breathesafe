@@ -26,61 +26,6 @@ APP.logger.setLevel("INFO")
 DEFAULT_MODEL_TYPE = "custom_lr"
 
 
-def _truthy_flag(value, default=True):
-    if value is None:
-        return default
-    if isinstance(value, bool):
-        return value
-    if isinstance(value, (int, float)):
-        return bool(value)
-    normalized = str(value).strip().lower()
-    if normalized in {"true", "1", "yes", "y", "on"}:
-        return True
-    if normalized in {"false", "0", "no", "n", "off"}:
-        return False
-    return default
-
-
-def _apply_empirical_history_cap(probability, mask_info):
-    fit_test_count = float(mask_info.get("mask_fit_test_count", 0) or 0)
-    pass_count = float(mask_info.get("mask_pass_count", 0) or 0)
-    smoothed_pass_rate = float(mask_info.get("mask_smoothed_pass_rate", 0.5) or 0.5)
-    raw_pass_rate = (pass_count / fit_test_count) if fit_test_count > 0 else 0.5
-
-    if pass_count == 0.0:
-        if fit_test_count >= 20.0:
-            return min(probability, 0.01)
-        if fit_test_count >= 10.0:
-            return min(probability, 0.05)
-        if fit_test_count >= 5.0:
-            return min(probability, 0.10)
-
-    if fit_test_count >= 10.0:
-        if raw_pass_rate <= 0.05:
-            return min(probability, 0.05)
-        if raw_pass_rate <= 0.10:
-            return min(probability, 0.10)
-        if smoothed_pass_rate <= 0.05:
-            return min(probability, 0.05)
-        if smoothed_pass_rate <= 0.10:
-            return min(probability, 0.10)
-
-    return probability
-
-
-def _log_empirical_cap(mask_info, raw_probability, capped_probability):
-    if capped_probability >= raw_probability:
-        return
-    APP.logger.info(
-        "Empirical cap applied mask=%s raw=%.4f capped=%.4f fit_tests=%s passes=%s",
-        mask_info.get("unique_internal_model_code") or mask_info.get("id"),
-        raw_probability,
-        capped_probability,
-        mask_info.get("mask_fit_test_count", 0),
-        mask_info.get("mask_pass_count", 0),
-    )
-
-
 def _env_name() -> str:
     env = os.environ.get("RAILS_ENV", "").strip().lower()
     if env in ("production", "staging", "development"):
@@ -389,7 +334,6 @@ def _build_inference_rows(mask_data, facial_features):
 
 def _infer(payload, artifacts):
     facial_features = _extract_facial_measurements(payload)
-    apply_empirical_cap = _truthy_flag((payload or {}).get("apply_empirical_cap"), default=True)
     inference_rows = _build_inference_rows(artifacts["mask_data"], facial_features)
 
     numeric_columns = FACIAL_FEATURE_COLUMNS + ["perimeter_mm"]
@@ -429,20 +373,15 @@ def _infer(payload, artifacts):
 
     recommendations = []
     for idx, (mask_id, mask_info) in enumerate(artifacts["mask_data"].items()):
-        raw_probability = float(probs[idx])
-        capped_probability = _apply_empirical_history_cap(raw_probability, mask_info) if apply_empirical_cap else raw_probability
-        _log_empirical_cap(mask_info, raw_probability, capped_probability)
         recommendations.append({
             "mask_id": int(mask_id),
-            "proba_fit": capped_probability,
-            "raw_proba_fit": raw_probability,
+            "proba_fit": float(probs[idx]),
             "mask_info": mask_info,
         })
 
     recommendations.sort(key=lambda item: item["proba_fit"], reverse=True)
     mask_id_map = {str(idx): rec["mask_id"] for idx, rec in enumerate(recommendations)}
     proba_map = {str(idx): rec["proba_fit"] for idx, rec in enumerate(recommendations)}
-    raw_proba_map = {str(idx): rec["raw_proba_fit"] for idx, rec in enumerate(recommendations)}
     empirical_debug_map = {
         str(idx): {
             "mask_fit_test_count": float(rec["mask_info"].get("mask_fit_test_count", 0) or 0),
@@ -454,7 +393,6 @@ def _infer(payload, artifacts):
     return {
         "mask_id": mask_id_map,
         "proba_fit": proba_map,
-        "raw_proba_fit": raw_proba_map,
         "model": {
             "timestamp": artifacts["metadata"].get("timestamp"),
             "environment": artifacts["metadata"].get("environment"),
@@ -465,7 +403,6 @@ def _infer(payload, artifacts):
 
 def _infer_prob(payload, artifacts):
     facial_features = _extract_facial_measurements(payload)
-    apply_empirical_cap = _truthy_flag((payload or {}).get("apply_empirical_cap"), default=True)
     inference_rows = _build_inference_rows(artifacts["mask_data"], facial_features)
     probs = predict_prob_model(
         artifacts["params"],
@@ -476,30 +413,24 @@ def _infer_prob(payload, artifacts):
 
     recommendations = []
     for idx, (mask_id, mask_info) in enumerate(artifacts["mask_data"].items()):
-        raw_probability = float(probs[idx])
-        capped_probability = _apply_empirical_history_cap(raw_probability, mask_info) if apply_empirical_cap else raw_probability
         recommendations.append({
             "mask_id": int(mask_id),
-            "proba_fit": capped_probability,
-            "raw_proba_fit": raw_probability,
+            "proba_fit": float(probs[idx]),
             "mask_info": mask_info,
         })
 
     recommendations.sort(key=lambda item: item["proba_fit"], reverse=True)
     mask_id_map = {str(idx): rec["mask_id"] for idx, rec in enumerate(recommendations)}
     proba_map = {str(idx): rec["proba_fit"] for idx, rec in enumerate(recommendations)}
-    raw_proba_map = {str(idx): rec["raw_proba_fit"] for idx, rec in enumerate(recommendations)}
     return {
         "mask_id": mask_id_map,
         "proba_fit": proba_map,
-        "raw_proba_fit": raw_proba_map,
         "model": artifacts["metadata"],
     }
 
 
 def _infer_custom(payload, artifacts):
     facial_features = _extract_facial_measurements(payload)
-    apply_empirical_cap = _truthy_flag((payload or {}).get("apply_empirical_cap"), default=True)
     inference_rows = _build_inference_rows(artifacts["mask_data"], facial_features)
     custom_data = prep_data_in_torch_with_categories(
         inference_rows,
@@ -513,20 +444,15 @@ def _infer_custom(payload, artifacts):
 
     recommendations = []
     for idx, (mask_id, mask_info) in enumerate(artifacts["mask_data"].items()):
-        raw_probability = float(probs[idx])
-        capped_probability = _apply_empirical_history_cap(raw_probability, mask_info) if apply_empirical_cap else raw_probability
-        _log_empirical_cap(mask_info, raw_probability, capped_probability)
         recommendations.append({
             "mask_id": int(mask_id),
-            "proba_fit": capped_probability,
-            "raw_proba_fit": raw_probability,
+            "proba_fit": float(probs[idx]),
             "mask_info": mask_info,
         })
 
     recommendations.sort(key=lambda item: item["proba_fit"], reverse=True)
     mask_id_map = {str(idx): rec["mask_id"] for idx, rec in enumerate(recommendations)}
     proba_map = {str(idx): rec["proba_fit"] for idx, rec in enumerate(recommendations)}
-    raw_proba_map = {str(idx): rec["raw_proba_fit"] for idx, rec in enumerate(recommendations)}
     empirical_debug_map = {
         str(idx): {
             "mask_fit_test_count": float(rec["mask_info"].get("mask_fit_test_count", 0) or 0),
@@ -538,7 +464,6 @@ def _infer_custom(payload, artifacts):
     return {
         "mask_id": mask_id_map,
         "proba_fit": proba_map,
-        "raw_proba_fit": raw_proba_map,
         "model": {
             **artifacts["metadata"],
             "empirical_debug": empirical_debug_map,

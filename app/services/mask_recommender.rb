@@ -4,15 +4,13 @@ class MaskRecommender
   DEFAULT_MODEL_TYPE = 'custom_lr'
 
   class << self
-    def infer_with_meta(facial_measurements, mask_ids: nil, function_base: 'mask-recommender', model_type: nil,
-                        apply_empirical_cap: nil)
+    def infer_with_meta(facial_measurements, mask_ids: nil, function_base: 'mask-recommender', model_type: nil)
       canonical_mask_ids = mask_ids.present? ? MaskDeduplicationPolicy.canonicalize_mask_ids(mask_ids) : nil
       response = invoke_lambda_infer(
         facial_measurements,
         mask_ids: canonical_mask_ids,
         function_base: function_base,
-        model_type: model_type,
-        apply_empirical_cap: apply_empirical_cap
+        model_type: model_type
       )
       body = parse_lambda_body(response)
       collection = build_mask_collection(body, mask_ids: canonical_mask_ids)
@@ -21,14 +19,12 @@ class MaskRecommender
     end
 
     # New primary entrypoint for inference
-    def infer(facial_measurements, mask_ids: nil, function_base: 'mask-recommender', model_type: nil,
-              apply_empirical_cap: nil)
+    def infer(facial_measurements, mask_ids: nil, function_base: 'mask-recommender', model_type: nil)
       infer_with_meta(
         facial_measurements,
         mask_ids: mask_ids,
         function_base: function_base,
-        model_type: model_type,
-        apply_empirical_cap: apply_empirical_cap
+        model_type: model_type
       )[:masks]
     end
 
@@ -77,7 +73,7 @@ class MaskRecommender
 
     private
 
-    def invoke_lambda_infer(facial_measurements, mask_ids:, function_base:, model_type:, apply_empirical_cap:)
+    def invoke_lambda_infer(facial_measurements, mask_ids:, function_base:, model_type:)
       heroku_env = lambda_environment
 
       payload = {
@@ -86,7 +82,6 @@ class MaskRecommender
         model_type: model_type.presence || DEFAULT_MODEL_TYPE
       }
       payload[:mask_ids] = mask_ids if mask_ids.present?
-      payload[:apply_empirical_cap] = apply_empirical_cap unless apply_empirical_cap.nil?
       function_name = "#{function_base}-#{heroku_env}"
       Rails.logger.info("MaskRecommender.infer invoking #{function_name}")
 
@@ -101,7 +96,6 @@ class MaskRecommender
 
       mask_map = body.is_a?(Hash) ? body['mask_id'] : nil
       proba_map = body.is_a?(Hash) ? body['proba_fit'] : nil
-      raw_proba_map = body.is_a?(Hash) ? body['raw_proba_fit'] : nil
       raise "Invalid lambda response shape: #{body.inspect}" if !mask_map.is_a?(Hash) || !proba_map.is_a?(Hash)
 
       recommended_pairs = mask_map.each_with_object([]) do |(key, mask_id), rows|
@@ -120,14 +114,13 @@ class MaskRecommender
       mask_ids_without_recommendation = masks.map { |m| m['id'] } - recommended_mask_ids
 
       collection = []
-      recommended_pairs.each do |key, mask_id, proba_fit|
+      recommended_pairs.each do |_key, mask_id, proba_fit|
         mask = masks_by_id[mask_id]
         next unless mask_perimeter_present?(mask)
 
         collection << {
           'id' => mask_id,
-          'proba_fit' => proba_fit.to_f,
-          'raw_proba_fit' => raw_proba_map&.[](key)&.to_f
+          'proba_fit' => proba_fit.to_f
         }.merge(JSON.parse(mask.to_json))
       end
 
