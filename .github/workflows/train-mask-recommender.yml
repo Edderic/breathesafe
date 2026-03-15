@@ -31,7 +31,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r python/mask_recommender/requirements.txt
 
-      - name: Train neural network model and upload artifacts
+      - name: Train custom_lr model and upload artifacts
         env:
           RAILS_ENV: ${{ github.event.inputs.target_env || 'production' }}
           BREATHESAFE_BASE_URL: ${{ github.event.inputs.target_env == 'staging' && 'https://staging.breathesafe.xyz' || 'https://www.breathesafe.xyz' }}
@@ -43,7 +43,11 @@ jobs:
         run: |
           echo "BREATHESAFE_SERVICE_EMAIL set? $([[ -n \"${BREATHESAFE_SERVICE_EMAIL}\" ]] && echo yes || echo no)"
           echo "BREATHESAFE_SERVICE_PASSWORD set? $([[ -n \"${BREATHESAFE_SERVICE_PASSWORD}\" ]] && echo yes || echo no)"
-          python python/mask_recommender/train.py --epochs 100 --learning-rate=0.0001 --retrain-with-full
+          python python/mask_recommender/train.py \
+            --model-type custom_lr \
+            --epochs 200 \
+            --learning-rate 0.01 \
+            --retrain-with-full
   deploy:
     needs: train
     runs-on: ubuntu-latest
