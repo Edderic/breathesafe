@@ -59,8 +59,8 @@ export default {
         return {}
       }
       return {
-        width: `${Math.round(this.percent * 10000) / 100}%`,
-        backgroundColor: 'rgb(188, 163, 255)'
+        width: '100%',
+        backgroundColor: 'transparent'
       }
     },
     statMarkerStyle() {
@@ -97,7 +97,7 @@ export default {
       const red = '#c0392b'
       const yellow = '#f1c40f'
       const green = '#27ae60'
-      return `linear-gradient(90deg, ${red} 0%, ${yellow} 33.333%, ${green} 100%)`
+      return `linear-gradient(90deg, ${red} 0%, ${yellow} 33%, ${green} 100%)`
     },
     formatCurrency(value) {
       if (!Number.isFinite(value)) {
