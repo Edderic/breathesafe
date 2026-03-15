@@ -14,7 +14,7 @@ RSpec.describe MaskDuplicateChainFlattener do
 
       result = described_class.call
 
-      expect(result[:apply]).to eq(false)
+      expect(result[:apply]).to be(false)
       expect(result[:total_duplicates]).to eq(2)
       expect(result[:flatten_candidates]).to eq(1)
       expect(result[:planned]).to include(

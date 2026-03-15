@@ -55,7 +55,7 @@ RSpec.describe MasksController, type: :controller do
       expect(event.event_type).to eq('availability_updated')
 
       mask.reload
-      expect(mask.available).to eq(false)
+      expect(mask.available).to be(false)
     end
 
     it 'emits CRF-predicted breakdown_updated requiring review when unique_internal_model_code changes' do
@@ -94,7 +94,7 @@ RSpec.describe MasksController, type: :controller do
       expect(unique_code_event).to be_present
       expect(breakdown_event).to be_present
       expect(breakdown_event.data['breakdown']).to eq(predicted_breakdown)
-      expect(breakdown_event.data['requires_review']).to eq(true)
+      expect(breakdown_event.data['requires_review']).to be(true)
       expect(breakdown_event.data['source']).to eq('crf_auto_rename')
       expect(breakdown_event.data['confidence']).to eq(0.93)
       expect(breakdown_event.notes).to include('Auto-generated from CRF')

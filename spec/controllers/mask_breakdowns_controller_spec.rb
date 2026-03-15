@@ -7,8 +7,7 @@ RSpec.describe MaskBreakdownsController, type: :controller do
   let(:author) { create(:user) }
 
   before do
-    allow(controller).to receive(:authenticate_user!).and_return(true)
-    allow(controller).to receive(:current_user).and_return(admin)
+    allow(controller).to receive_messages(authenticate_user!: true, current_user: admin)
   end
 
   describe 'GET #index' do
@@ -68,8 +67,8 @@ RSpec.describe MaskBreakdownsController, type: :controller do
       expect(response).to have_http_status(:ok)
 
       body = JSON.parse(response.body)
-      expect(body['breakdown_requires_review']).to eq(true)
-      expect(body['breakdown_complete']).to eq(false)
+      expect(body['breakdown_requires_review']).to be(true)
+      expect(body['breakdown_complete']).to be(false)
     end
   end
 
@@ -87,10 +86,10 @@ RSpec.describe MaskBreakdownsController, type: :controller do
       created_event = MaskEvent.order(:created_at).last
       body = JSON.parse(response.body)
 
-      expect(created_event.data['requires_review']).to eq(false)
+      expect(created_event.data['requires_review']).to be(false)
       expect(created_event.data['source']).to eq('manual')
-      expect(body.dig('breakdown', 'requires_review')).to eq(false)
-      expect(body.dig('breakdown', 'complete')).to eq(true)
+      expect(body.dig('breakdown', 'requires_review')).to be(false)
+      expect(body.dig('breakdown', 'complete')).to be(true)
     end
   end
 end

@@ -35,7 +35,7 @@ RSpec.describe Admin::MaskDuplicatesController, type: :controller do
 
         body = JSON.parse(response.body)
         expect(body.dig('duplicate_link', 'canonical_target_mask_id')).to eq(root_mask.id)
-        expect(body.dig('duplicate_link', 'changed')).to eq(true)
+        expect(body.dig('duplicate_link', 'changed')).to be(true)
       end
 
       it 'returns validation error when linking a mask to itself' do
@@ -86,7 +86,7 @@ RSpec.describe Admin::MaskDuplicatesController, type: :controller do
       expect(event.data['duplicate_of']).to be_nil
 
       body = JSON.parse(response.body)
-      expect(body.dig('duplicate_link', 'changed')).to eq(true)
+      expect(body.dig('duplicate_link', 'changed')).to be(true)
       expect(body.dig('duplicate_link', 'duplicate_of')).to be_nil
     end
   end
