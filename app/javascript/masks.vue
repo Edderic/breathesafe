@@ -880,6 +880,20 @@ export default {
       wrapper.style.setProperty('--footer-height', `${footerHeight}px`)
       wrapper.style.setProperty('--table-viewport-height', `${available}px`)
     },
+    redirectToSignInForCurrentRoute() {
+      const query = Object.assign({}, this.$route.query, {
+        'attempt-name': 'Masks',
+      })
+
+      Object.entries(this.$route.params || {}).forEach(([key, value]) => {
+        query[`params-${key}`] = value
+      })
+
+      this.$router.replace({
+        name: 'SignIn',
+        query,
+      })
+    },
     toggleResultsView() {
       const nextMode = this.showTableView ? 'cards' : 'table'
       const query = Object.assign({}, this.$route.query)
@@ -1071,6 +1085,11 @@ export default {
     async load(toQuery, previousQuery) {
       const isMasksRoute = this.$route.name === 'Masks' || /^\/masks\/?$/.test(String(this.$route.path || ''))
       if (!isMasksRoute) {
+        return
+      }
+
+      if (toQuery?.recommender_user_id && !this.currentUser) {
+        this.redirectToSignInForCurrentRoute()
         return
       }
 
@@ -1349,6 +1368,11 @@ export default {
         }
         await this.pollRecommendationStatus(jobId, requestKey)
       } catch (error) {
+        const status = error?.response?.status
+        if (recommenderUserId && (status === 401 || status === 403)) {
+          this.redirectToSignInForCurrentRoute()
+          return
+        }
         this.message = error?.response?.data?.error || "Failed to load mask recommendations."
       }
     },
