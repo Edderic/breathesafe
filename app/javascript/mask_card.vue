@@ -290,6 +290,8 @@ export default {
         useMainStore,
         [
           'currentUser',
+          'isAdmin',
+          'adminModeEnabled',
         ]
     ),
     ...mapState(
@@ -635,6 +637,11 @@ export default {
           return this.statMissingText(type)
         }
         const percent = Math.round(mask.probaFit * 100)
+        const rawValue = Number(mask.rawProbaFit)
+        const rawPercent = Number.isFinite(rawValue) ? Math.round(rawValue * 100) : null
+        if (this.isAdmin && this.adminModeEnabled && rawPercent !== null && rawPercent !== percent) {
+          return `${percent}% (raw ${rawPercent}%)`
+        }
         return `${percent}%`
       }
       return 'N/A'

@@ -27,6 +27,21 @@ logger.setLevel(logging.INFO)
 DEFAULT_MODEL_TYPE = "custom_lr"
 
 
+def _truthy_flag(value, default=True):
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    normalized = str(value).strip().lower()
+    if normalized in {"true", "1", "yes", "y", "on"}:
+        return True
+    if normalized in {"false", "0", "no", "n", "off"}:
+        return False
+    return default
+
+
 def _apply_empirical_history_cap(probability: float, mask_info: Dict) -> float:
     fit_test_count = float(mask_info.get('mask_fit_test_count', 0) or 0)
     pass_count = float(mask_info.get('mask_pass_count', 0) or 0)
@@ -334,7 +349,7 @@ class MaskRecommenderInference:
             rows.append(row)
         return pd.DataFrame(rows)
 
-    def recommend_masks(self, facial_features: Dict) -> List[Dict]:
+    def recommend_masks(self, facial_features: Dict, apply_empirical_cap: bool = True) -> List[Dict]:
         self._maybe_refresh()
 
         if not self.model or not self.mask_data:
@@ -376,17 +391,19 @@ class MaskRecommenderInference:
 
         recommendations = []
         for idx, (mask_id, mask_info) in enumerate(self.mask_data.items()):
-            capped_probability = _apply_empirical_history_cap(float(probs[idx]), mask_info)
+            raw_probability = float(probs[idx])
+            capped_probability = _apply_empirical_history_cap(raw_probability, mask_info) if apply_empirical_cap else raw_probability
             recommendations.append({
                 'mask_id': int(mask_id),
                 'proba_fit': capped_probability,
+                'raw_proba_fit': raw_probability,
                 'mask_info': mask_info,
             })
 
         recommendations.sort(key=lambda x: x['proba_fit'], reverse=True)
         return recommendations
 
-    def recommend_masks_prob(self, facial_features: Dict) -> List[Dict]:
+    def recommend_masks_prob(self, facial_features: Dict, apply_empirical_cap: bool = True) -> List[Dict]:
         self._maybe_refresh_prob()
         if not self.prob_params or not self.prob_metadata or not self.prob_mask_data:
             logger.error('Prob model or mask data not loaded; returning empty recommendations.')
@@ -402,16 +419,19 @@ class MaskRecommenderInference:
 
         recommendations = []
         for idx, (mask_id, mask_info) in enumerate(self.prob_mask_data.items()):
+            raw_probability = float(probs[idx])
+            capped_probability = _apply_empirical_history_cap(raw_probability, mask_info) if apply_empirical_cap else raw_probability
             recommendations.append({
                 'mask_id': int(mask_id),
-                'proba_fit': float(probs[idx]),
+                'proba_fit': capped_probability,
+                'raw_proba_fit': raw_probability,
                 'mask_info': mask_info,
             })
 
         recommendations.sort(key=lambda x: x['proba_fit'], reverse=True)
         return recommendations
 
-    def recommend_masks_custom(self, facial_features: Dict) -> List[Dict]:
+    def recommend_masks_custom(self, facial_features: Dict, apply_empirical_cap: bool = True) -> List[Dict]:
         self._maybe_refresh_custom()
         if not self.custom_params or not self.custom_metadata or not self.custom_mask_data:
             logger.error('Custom model or mask data not loaded; returning empty recommendations.')
@@ -429,10 +449,12 @@ class MaskRecommenderInference:
 
         recommendations = []
         for idx, (mask_id, mask_info) in enumerate(self.custom_mask_data.items()):
-            capped_probability = _apply_empirical_history_cap(float(probs[idx]), mask_info)
+            raw_probability = float(probs[idx])
+            capped_probability = _apply_empirical_history_cap(raw_probability, mask_info) if apply_empirical_cap else raw_probability
             recommendations.append({
                 'mask_id': int(mask_id),
                 'proba_fit': capped_probability,
+                'raw_proba_fit': raw_probability,
                 'mask_info': mask_info,
             })
         recommendations.sort(key=lambda x: x['proba_fit'], reverse=True)
@@ -445,6 +467,7 @@ def handler(event, context):
         method = payload.get("method")
         facial_features = payload.get('facial_measurements', {})
         model_type = payload.get('model_type') or DEFAULT_MODEL_TYPE
+        apply_empirical_cap = _truthy_flag(payload.get('apply_empirical_cap'), default=True)
         recommender = MaskRecommenderInference()
         if method == "warmup":
             if model_type == "prob":
@@ -465,21 +488,23 @@ def handler(event, context):
                 })
             }
         if model_type == 'prob':
-            recommendations = recommender.recommend_masks_prob(facial_features)
+            recommendations = recommender.recommend_masks_prob(facial_features, apply_empirical_cap=apply_empirical_cap)
             model_payload = recommender.prob_metadata
         elif model_type == 'custom_lr':
-            recommendations = recommender.recommend_masks_custom(facial_features)
+            recommendations = recommender.recommend_masks_custom(facial_features, apply_empirical_cap=apply_empirical_cap)
             model_payload = recommender.custom_metadata
         else:
-            recommendations = recommender.recommend_masks(facial_features)
+            recommendations = recommender.recommend_masks(facial_features, apply_empirical_cap=apply_empirical_cap)
             model_payload = recommender.latest_payload
         mask_id_map = {str(idx): rec['mask_id'] for idx, rec in enumerate(recommendations)}
         proba_map = {str(idx): rec['proba_fit'] for idx, rec in enumerate(recommendations)}
+        raw_proba_map = {str(idx): rec['raw_proba_fit'] for idx, rec in enumerate(recommendations)}
         return {
             'statusCode': 200,
             'body': json.dumps({
                 'mask_id': mask_id_map,
                 'proba_fit': proba_map,
+                'raw_proba_fit': raw_proba_map,
                 'model': model_payload,
             })
         }

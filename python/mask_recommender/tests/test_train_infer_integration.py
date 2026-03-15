@@ -288,6 +288,43 @@ def test_local_infer_exposes_empirical_debug_payload():
     assert result["model"]["empirical_debug"]["0"]["mask_pass_count"] == 0.0
 
 
+def test_local_infer_can_disable_empirical_cap():
+    artifacts = {
+        "model": torch.nn.Sequential(torch.nn.Linear(2, 1)),
+        "feature_columns": ["nose_mm", "chin_mm"],
+        "categorical_columns": [],
+        "metadata": {"timestamp": "2026-03-10", "environment": "development"},
+        "mask_data": {
+            "1": {
+                "id": 1,
+                "unique_internal_model_code": "MASK-A",
+                "perimeter_mm": 300,
+                "strap_type": "Headstrap",
+                "style": "Cup",
+                "mask_fit_test_count": 12,
+                "mask_pass_count": 0,
+                "mask_smoothed_pass_rate": 0.07,
+            }
+        },
+    }
+
+    result = local_recommender_server._infer(
+        {
+            "facial_measurements": {
+                "nose_mm": 40,
+                "chin_mm": 50,
+                "top_cheek_mm": 60,
+                "mid_cheek_mm": 55,
+                "strap_mm": 120,
+            },
+            "apply_empirical_cap": False,
+        },
+        artifacts,
+    )
+
+    assert result["raw_proba_fit"]["0"] == result["proba_fit"]["0"]
+
+
 def test_local_infer_logs_empirical_cap(caplog):
     artifacts = {
         "model": torch.nn.Sequential(torch.nn.Linear(2, 1)),

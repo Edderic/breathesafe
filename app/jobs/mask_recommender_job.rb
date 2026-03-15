@@ -9,7 +9,8 @@ class MaskRecommenderJob < ApplicationJob
     "mask_recommender:jobs:#{job_id}"
   end
 
-  def perform(job_id:, facial_measurements:, function_base:, model_type: nil, recommender_user_id: nil, viewer_id: nil)
+  def perform(job_id:, facial_measurements:, function_base:, model_type: nil, apply_empirical_cap: nil,
+              recommender_user_id: nil, viewer_id: nil)
     cache_key = self.class.cache_key(job_id)
     Rails.cache.write(
       cache_key,
@@ -20,7 +21,8 @@ class MaskRecommenderJob < ApplicationJob
     inference = MaskRecommender.infer_with_meta(
       facial_measurements,
       function_base: function_base,
-      model_type: model_type
+      model_type: model_type,
+      apply_empirical_cap: apply_empirical_cap
     )
     masks = inference[:masks]
     if recommender_user_id.present? && viewer_id.present?

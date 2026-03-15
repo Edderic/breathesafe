@@ -16,6 +16,7 @@ class MaskRecommenderController < ApplicationController
   def create_async
     function_base = params[:function_base] || params.dig(:mask_recommender, :function_base) || 'mask-recommender'
     model_type = params[:model_type].presence || params.dig(:mask_recommender, :model_type).presence
+    apply_empirical_cap = apply_empirical_cap_param
     resolved_facial_measurements = resolved_facial_measurements_payload
     if resolved_facial_measurements.is_a?(Hash) && resolved_facial_measurements[:error]
       render json: { error: resolved_facial_measurements[:error] }, status: resolved_facial_measurements[:status]
@@ -36,6 +37,7 @@ class MaskRecommenderController < ApplicationController
         facial_measurements: resolved_facial_measurements,
         function_base: function_base,
         model_type: model_type,
+        apply_empirical_cap: apply_empirical_cap,
         recommender_user_id: params[:recommender_user_id].presence,
         viewer_id: current_user&.id
       )
@@ -134,6 +136,7 @@ class MaskRecommenderController < ApplicationController
   def build_recommendation_response
     function_base = params[:function_base] || params.dig(:mask_recommender, :function_base) || 'mask-recommender'
     model_type = params[:model_type].presence || params.dig(:mask_recommender, :model_type).presence
+    apply_empirical_cap = apply_empirical_cap_param
     resolved_facial_measurements = resolved_facial_measurements_payload
     if resolved_facial_measurements.is_a?(Hash) && resolved_facial_measurements[:error]
       return [resolved_facial_measurements[:status],
@@ -143,7 +146,8 @@ class MaskRecommenderController < ApplicationController
     inference = MaskRecommender.infer_with_meta(
       resolved_facial_measurements,
       function_base: function_base,
-      model_type: model_type
+      model_type: model_type,
+      apply_empirical_cap: apply_empirical_cap
     )
     masks = merge_user_fit_test_summaries(inference[:masks])
     model = inference[:model]
@@ -187,5 +191,13 @@ class MaskRecommenderController < ApplicationController
     { error: e.message, status: :unprocessable_entity }
   rescue StandardError => e
     { error: e.message, status: :unprocessable_entity }
+  end
+
+  def apply_empirical_cap_param
+    raw = params[:apply_empirical_cap]
+    raw = params.dig(:mask_recommender, :apply_empirical_cap) if raw.nil?
+    return nil if raw.nil?
+
+    ActiveModel::Type::Boolean.new.cast(raw)
   end
 end
