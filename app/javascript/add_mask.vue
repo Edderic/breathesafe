@@ -1388,12 +1388,16 @@ export default {
       }
 
       if (type === 'cost') {
-        const min = 0
-        const max = 5
         if (this.statIsMissing(type)) {
           return null
         }
-        const scaled = this.minMaxScale(this.initialCostUsDollars, min, max, { zeroRangeValue: 0 })
+        const bounds = this.costBounds()
+        const max = Number(bounds.max)
+        const value = Number(this.initialCostUsDollars)
+        if (!Number.isFinite(value) || !Number.isFinite(max) || max <= 0) {
+          return null
+        }
+        const scaled = Math.log1p(Math.max(0, value)) / Math.log1p(max)
         return this.clampPercent(1 - scaled)
       }
 
@@ -1566,9 +1570,8 @@ export default {
         return position === 'min' ? this.formatValue(min) : this.formatValue(max)
       }
       if (type === 'cost') {
-        const min = 0
-        const max = 5
-        return position === 'min' ? this.formatCurrency(max) : this.formatCurrency(min)
+        const bounds = this.costBounds()
+        return position === 'min' ? this.formatCurrency(bounds.max) : this.formatCurrency(0)
       }
       if (type === 'mass') {
         const min = this.dataContext.mass_min
@@ -1613,6 +1616,20 @@ export default {
         return zeroRangeValue
       }
       return (value - min) / range
+    },
+    costBounds() {
+      const contextMin = this.dataContext.initial_cost_min
+      const contextMax = this.dataContext.initial_cost_max
+      if (contextMin !== null && contextMin !== undefined && contextMax !== null && contextMax !== undefined) {
+        return { min: 0, max: Math.max(Number(contextMax), 5) }
+      }
+
+      const value = Number(this.initialCostUsDollars)
+      if (!Number.isFinite(value) || value <= 0) {
+        return { min: null, max: null }
+      }
+
+      return { min: 0, max: Math.max(value, 5) }
     },
     maskImageAlt(index) {
       return `Image #${index} for ${this.uniqueInternalModelCode}`
