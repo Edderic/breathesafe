@@ -481,25 +481,42 @@ export default {
     effectiveModelType() {
       return this.routeModelType || 'custom_lr'
     },
+    defaultTrainingParams() {
+      const defaultsByModelType = {
+        custom_lr: {
+          epochs: '200',
+          learning_rate: '0.01',
+        },
+        nn: {
+          epochs: '100',
+          learning_rate: '0.0001',
+        },
+        prob: {
+          epochs: '100',
+          learning_rate: '0.0001',
+        },
+      }
+      return defaultsByModelType[this.effectiveModelType] || defaultsByModelType.custom_lr
+    },
     routeEpochsInput() {
       const value = this.$route.query.epochs
-      return value ? String(value).trim() : '100'
+      return value ? String(value).trim() : this.defaultTrainingParams.epochs
     },
     routeLearningRateInput() {
       const value = this.$route.query.learning_rate
-      return value ? String(value).trim() : '0.0001'
+      return value ? String(value).trim() : this.defaultTrainingParams.learning_rate
     },
     routeEpochs() {
       const value = Number.parseInt(this.routeEpochsInput, 10)
       if (!Number.isFinite(value) || value < 1) {
-        return 100
+        return Number.parseInt(this.defaultTrainingParams.epochs, 10)
       }
       return value
     },
     routeLearningRate() {
       const value = Number(this.routeLearningRateInput)
       if (!Number.isFinite(value) || value <= 0) {
-        return 0.0001
+        return Number(this.defaultTrainingParams.learning_rate)
       }
       return value
     },
@@ -1432,14 +1449,16 @@ export default {
 
       if (key === 'epochs') {
         const parsed = Number.parseInt(rawValue, 10)
-        if (!Number.isFinite(parsed) || parsed < 1 || parsed === 100) {
+        const defaultEpochs = Number.parseInt(this.defaultTrainingParams.epochs, 10)
+        if (!Number.isFinite(parsed) || parsed < 1 || parsed === defaultEpochs) {
           delete query.epochs
         } else {
           query.epochs = String(parsed)
         }
       } else if (key === 'learning_rate') {
         const parsed = Number(rawValue)
-        if (!Number.isFinite(parsed) || parsed <= 0 || parsed === 0.0001) {
+        const defaultLearningRate = Number(this.defaultTrainingParams.learning_rate)
+        if (!Number.isFinite(parsed) || parsed <= 0 || parsed === defaultLearningRate) {
           delete query.learning_rate
         } else {
           query.learning_rate = String(parsed)
