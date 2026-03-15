@@ -469,30 +469,11 @@
             <tr>
               <th>Initial Cost (USD)</th>
               <td>
-                <div class='stat-cell'>
-                  <div v-if="statIsMissing('cost')" class='stat-bar-wrapper stat-bar-missing'>
-                    <div class='stat-bar-axis'></div>
-                    <div class='stat-bar stat-bar-missing-fill'></div>
-                    <div class='stat-bar-label'>{{ statMissingText('cost') }}</div>
-                  </div>
-                  <div v-else class='stat-bar-wrapper' :style="statBarWrapperStyle('cost')">
-                    <div class='stat-bar-axis'></div>
-                    <div class='stat-bar' :style="statBarStyle(statPercent('cost'), 'cost')"></div>
-                    <div
-                      v-if="statNeedsMarker('cost')"
-                      class='stat-bar-marker'
-                      :style='statMarkerStyle(statPercent("cost"), "cost")'
-                    ></div>
-                    <div
-                      v-if="statNeedsMarker('cost')"
-                      class='stat-bar-cover'
-                      :style='statCoverStyle(statPercent("cost"), "cost")'
-                    ></div>
-                    <div class='stat-bar-label'>{{ statLabel('cost') }}</div>
-                    <div v-if="statAxisLabel('cost', 'min')" class='stat-bar-tick stat-bar-tick-left'>{{ statAxisLabel('cost', 'min') }}</div>
-                    <div v-if="statAxisLabel('cost', 'max')" class='stat-bar-tick stat-bar-tick-right'>{{ statAxisLabel('cost', 'max') }}</div>
-                  </div>
-                </div>
+                <InitialCostBarGraph
+                  :value="initialCostUsDollars"
+                  :maxValue="costBounds().max"
+                  :missingText="statMissingText('cost')"
+                />
               </td>
             </tr>
             <tr>
@@ -682,6 +663,7 @@ import CircularButton from './circular_button.vue'
 import ClosableMessage from './closable_message.vue'
 import ColoredCell from './colored_cell.vue'
 import HorizontalStackedBar from './horizontal_stacked_bar.vue'
+import InitialCostBarGraph from './initial_cost_bar_graph.vue'
 import TabSet from './tab_set.vue'
 import MaskProgressBar from './mask_progress_bar.vue'
 import { deepSnakeToCamel, shortHandHref, round } from './misc.js'
@@ -706,6 +688,7 @@ export default {
     ClosableMessage,
     ColoredCell,
     HorizontalStackedBar,
+    InitialCostBarGraph,
     MaskProgressBar,
     Popup,
     RecommendPopup,
