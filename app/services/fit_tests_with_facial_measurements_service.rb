@@ -13,6 +13,7 @@ class FitTestsWithFacialMeasurementsService
       results = n95_mode_experimental_scores | n95_mode_estimate_scores_from_n99 | qlft_scores | user_seal_check_scores
 
       results = canonicalize_mask_references(results)
+      results = consolidate_fit_test_rows(results)
       results = results.reject { |r| r['qlft_pass'].nil? } if exclude_nil_pass
       results = results.select { |r| r['facial_measurement_id'].present? } unless include_without_facial_measurements
       results = exclude_testing_manager_results(results)
@@ -183,6 +184,61 @@ class FitTestsWithFacialMeasurementsService
         row['style'] = canonical_mask.style
         row
       end
+    end
+
+    def consolidate_fit_test_rows(results)
+      return results if results.blank?
+
+      grouped = results.group_by { |row| row['id'] || row[:id] }
+
+      grouped.values.map do |rows|
+        consolidate_fit_test_group(rows)
+      end
+    end
+
+    def consolidate_fit_test_group(rows)
+      preferred_rows = rows.sort_by do |row|
+        [
+          -qlft_priority(row_value(row, 'qlft_pass')),
+          -row_richness(row)
+        ]
+      end
+
+      merged = {}
+      preferred_rows.each do |row|
+        row.each do |key, value|
+          next if value.nil?
+          next if merged.key?(key)
+
+          merged[key] = value
+        end
+      end
+
+      preferred_row = preferred_rows.first
+      merged['source'] = row_value(preferred_row, 'source')
+      merged['qlft_pass'] = preferred_row['qlft_pass'] if preferred_row.key?('qlft_pass')
+      merged['qlft_pass'] = preferred_row[:qlft_pass] if !merged.key?('qlft_pass') && preferred_row.key?(:qlft_pass)
+      merged
+    end
+
+    def qlft_priority(value)
+      return 2 if value == false
+      return 1 if value == true
+
+      0
+    end
+
+    def row_richness(row)
+      row.count do |_, value|
+        !value.nil?
+      end
+    end
+
+    def row_value(row, key)
+      return row[key] if row.key?(key)
+      return row[key.to_sym] if row.key?(key.to_sym)
+
+      nil
     end
   end
 end

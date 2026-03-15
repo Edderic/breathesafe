@@ -226,6 +226,53 @@ RSpec.describe FitTestsWithFacialMeasurementsService do
       end
     end
 
+    context 'when user seal check fails but other sources are indeterminate' do
+      let!(:too_small_fit_test) do
+        create(
+          :fit_test,
+          user: user,
+          mask: mask,
+          quantitative_fit_testing_device: measurement_device,
+          facial_measurement: facial_measurement,
+          user_seal_check: {
+            'sizing' => {
+              'What do you think about the sizing of this mask relative to your face?' => 'Too small'
+            },
+            'negative' => {
+              '...how much air passed between your face and the mask?' => nil
+            },
+            'positive' => {
+              '...how much air movement on your face along the seal of the mask did you feel?' => nil
+            }
+          },
+          results: {
+            'qualitative' => {
+              'exercises' => [
+                { 'name' => 'Normal breathing', 'result' => nil },
+                { 'name' => 'Deep breathing', 'result' => nil }
+              ]
+            },
+            'quantitative' => {
+              'testing_mode' => 'N99',
+              'exercises' => [
+                { 'name' => 'Normal breathing', 'fit_factor' => nil },
+                { 'name' => 'Normal breathing (SEALED)', 'fit_factor' => nil }
+              ]
+            }
+          }
+        )
+      end
+
+      it 'returns one consolidated row with qlft_pass false' do
+        results = described_class.call(mask_id: mask.id, exclude_nil_pass: false).to_a
+        rows = results.select { |r| r['id'] == too_small_fit_test.id }
+
+        expect(rows.length).to eq(1)
+        expect(rows.first['qlft_pass']).to be false
+        expect(rows.first['source']).to eq('UserSealCheckFacialMeasurementsService')
+      end
+    end
+
     context 'with missing facial measurements' do
       let(:fit_test_without_measurements) do
         create(:fit_test,
