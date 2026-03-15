@@ -103,7 +103,7 @@
               </div>
             </td>
           </tr>
-          <tr v-if="hasRecommenderPayload">
+          <tr v-if="hasObservedFitContext">
             <th>Observed Fit</th>
             <td :style="observedFitCellStyle(m)">{{ observedFitLabel(m) }}</td>
           </tr>
@@ -342,6 +342,9 @@ export default {
     },
     hasRecommenderPayload() {
       return !!(this.$route && this.$route.query && (this.$route.query.recommenderPayload || this.$route.query.recommender_user_id))
+    },
+    hasObservedFitContext() {
+      return !!(this.$route && this.$route.query && this.$route.query.recommender_user_id)
     },
     expectedMaskColumns() {
       if (this.viewportWidth <= 800) {

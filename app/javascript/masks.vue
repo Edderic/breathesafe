@@ -471,6 +471,9 @@ export default {
     hasRecommenderPayload() {
       return !!(this.$route.query.recommenderPayload || this.$route.query.recommender_user_id)
     },
+    hasObservedFitContext() {
+      return !!this.$route.query.recommender_user_id
+    },
     showModelTypeControl() {
       return this.isAdmin && this.adminModeEnabled
     },
@@ -549,11 +552,13 @@ export default {
       if (this.isNarrowTableViewport) {
         const rows = [
           { key: 'proba_fit', label: 'Fit' },
-          { key: 'observed_fit', label: 'Observed Fit' },
           { key: 'filtration', label: 'Filter' },
           { key: 'breathability', label: 'Breath' },
           { key: 'affordability', label: 'Cost' },
         ]
+        if (this.hasObservedFitContext) {
+          rows.splice(1, 0, { key: 'observed_fit', label: 'Observed Fit' })
+        }
         if (this.showColorColumn) {
           rows.push({ key: 'colors', label: 'Colors' })
         }
@@ -565,11 +570,13 @@ export default {
 
       const rows = [
         { key: 'proba_fit', label: 'Probability of Fit' },
-        { key: 'observed_fit', label: 'Observed Fit' },
         { key: 'filtration', label: 'Filtration Factor' },
         { key: 'breathability', label: 'Breathability (pa)' },
         { key: 'affordability', label: 'Initial Cost (USD)' },
       ]
+      if (this.hasObservedFitContext) {
+        rows.splice(1, 0, { key: 'observed_fit', label: 'Observed Fit' })
+      }
       if (this.showColorColumn) {
         rows.push({ key: 'colors', label: 'Colors' })
       }
