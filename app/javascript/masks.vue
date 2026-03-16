@@ -1824,7 +1824,6 @@ export default {
   }
 
   .top-controls {
-    margin: 1em 0;
     display: grid;
     grid-template-columns: 100%;
     position: relative;
@@ -2095,7 +2094,6 @@ export default {
 
     .top-controls {
       flex-direction: column;
-      margin-bottom: 0.75em;
     }
 
     .active-filter-pills {

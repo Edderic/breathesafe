@@ -1404,14 +1404,12 @@ export default {
       grid-template-columns: 50% 50%;
 
       position: relative;
-      top: 2em;
     }
   }
   @media(max-width: 930px) {
     img {
       width: 100vw;
     }
-
 
     .call-to-actions {
       height: 14em;
@@ -1425,7 +1423,6 @@ export default {
       overflow: auto;
 
       position: relative;
-      top: 2em;
       height: 66vh;
     }
 
@@ -1459,7 +1456,6 @@ export default {
       overflow: auto;
 
       position: relative;
-      top: 2em;
     }
     .card {
       padding: 1em 0;
