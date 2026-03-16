@@ -2,7 +2,7 @@
   <div class='align-items-center flex-dir-col sticky'>
     <div class='top-controls'>
       <div class='bar'>
-        <div class='flex align-items-center row'>
+        <div class='flex align-items-center row control'>
           <h2 class='tagline'>Masks</h2>
           <CircularButton v-if="isAdmin" text="R" @click="retrainModel" />
           <CircularButton text="+" @click="newMask" />
@@ -10,88 +10,9 @@
           <CircularButton text="?" @click="showPopup = 'Help'"/>
         </div>
 
-        <div class='row'>
+        <div class='row control'>
           <input id='search' type="text" :value='search' @change='updateSearch'>
           <SearchIcon height='2em' width='1em'/>
-
-          <label
-            v-if="showModelTypeControl"
-            class="model-type-control"
-          >
-            <span class="model-type-label">Model</span>
-            <select
-              class="model-type-select"
-              :value="effectiveModelType"
-              @change="updateModelType"
-            >
-              <option
-                v-for="option in modelTypeOptions"
-                :key="option.value"
-                :value="option.value"
-              >
-                {{ option.label }}
-              </option>
-            </select>
-          </label>
-
-          <label
-            v-if="showModelTypeControl"
-            class="training-param-control"
-          >
-            <span class="model-type-label">Epochs</span>
-            <input
-              class="training-param-input"
-              type="number"
-              min="1"
-              step="1"
-              :value="routeEpochsInput"
-              @change="updateTrainingQueryParam('epochs', $event)"
-            >
-          </label>
-
-          <label
-            v-if="showModelTypeControl"
-            class="training-param-control training-param-control-learning-rate"
-          >
-            <span class="model-type-label">LR</span>
-            <input
-              class="training-param-input"
-              type="number"
-              min="0"
-              step="0.0001"
-              :value="routeLearningRateInput"
-              @change="updateTrainingQueryParam('learning_rate', $event)"
-            >
-          </label>
-
-          <label
-            v-if="showRecommenderVersion"
-            class="training-param-control recommender-version-control"
-          >
-            <span class="model-type-label">Recommender</span>
-            <span class="recommender-version-value">{{ recommenderVersionText }}</span>
-          </label>
-
-          <label
-            v-if="showRecommenderUserSelect"
-            class="training-param-control recommender-user-control"
-          >
-            <span class="model-type-label">User</span>
-            <select
-              class="model-type-select"
-              :value="routeRecommenderUserId"
-              @change="updateRecommenderUserId"
-            >
-              <option
-                v-for="user in eligibleRecommenderUsers"
-                :key="user.managedId"
-                :value="String(user.managedId)"
-              >
-                {{ user.fullName }}
-              </option>
-            </select>
-          </label>
-
           <button class='icon' @click='showPopup = "Sort"'>
             ⇵
           </button>
@@ -102,8 +23,88 @@
                                                                                                      >
                                                                                                      <path d='m 20 20 h 40 l -18 30 v 20 l -4 -2  v -18 z' stroke='black' :fill='filterButtonColor'/>
             </svg>
+
           </button>
         </div>
+
+        <label
+          v-if="showModelTypeControl"
+          class="model-type-control control"
+        >
+          <span class="model-type-label">Model</span>
+          <select
+            class="model-type-select"
+            :value="effectiveModelType"
+            @change="updateModelType"
+          >
+            <option
+              v-for="option in modelTypeOptions"
+              :key="option.value"
+              :value="option.value"
+            >
+              {{ option.label }}
+            </option>
+          </select>
+        </label>
+
+        <label
+          v-if="showModelTypeControl"
+          class="training-param-control control"
+        >
+          <span class="model-type-label">Epochs</span>
+          <input
+            class="training-param-input"
+            type="number"
+            min="1"
+            step="1"
+            :value="routeEpochsInput"
+            @change="updateTrainingQueryParam('epochs', $event)"
+          >
+        </label>
+
+        <label
+          v-if="showModelTypeControl"
+          class="training-param-control training-param-control-learning-rate control"
+        >
+          <span class="model-type-label">LR</span>
+          <input
+            class="training-param-input"
+            type="number"
+            min="0"
+            step="0.0001"
+            :value="routeLearningRateInput"
+            @change="updateTrainingQueryParam('learning_rate', $event)"
+          >
+        </label>
+
+        <label
+          v-if="showRecommenderUserSelect"
+          class="training-param-control recommender-user-control control"
+        >
+          <span class="model-type-label">User</span>
+          <select
+            class="model-type-select"
+            :value="routeRecommenderUserId"
+            @change="updateRecommenderUserId"
+          >
+            <option
+              v-for="user in eligibleRecommenderUsers"
+              :key="user.managedId"
+              :value="String(user.managedId)"
+            >
+              {{ user.fullName }}
+            </option>
+          </select>
+        </label>
+
+        <label
+          v-if="showRecommenderVersion"
+          class="training-param-control recommender-version-control control"
+        >
+          <span class="model-type-label">Recommender</span>
+          <span class="recommender-version-value">{{ recommenderVersionText }}</span>
+        </label>
+
 
         <Pagination
           v-if="!hasRecommenderPayload"
@@ -1824,10 +1825,8 @@ export default {
 
   .top-controls {
     margin: 1em 0;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 100%;
     position: relative;
     z-index: 30;
   }
@@ -2042,12 +2041,36 @@ export default {
     min-height: 3.5em;
   }
 
+  .control {
+    display: flex;
+    align-items: center;
+    padding: 1em;
+    justify-content: center;
+  }
+
+  .control input {
+    padding: 1.0em;
+  }
+
+  .control button {
+    padding: 1.625em;
+    height: 3em;
+  }
+
+  .control label {
+    min-height: 3.5em;
+  }
+
   @media(max-width: 1400px) {
     .sticky-column {
       max-width: 10em;
     }
     .mask-row-button {
       text-align: center;
+    }
+    .bar {
+      display: grid;
+      grid-template-columns: 50% 50%;
     }
   }
 
@@ -2072,12 +2095,7 @@ export default {
 
     .top-controls {
       flex-direction: column;
-      margin-top: 3em;
       margin-bottom: 0.75em;
-    }
-
-    .bar {
-      flex-direction: column;
     }
 
     .active-filter-pills {
@@ -2087,25 +2105,20 @@ export default {
 
     margin-top: 4em;
   }
-  @media(max-width: 768px) {
-    .top-controls {
-      flex-direction: column;
+
+  @media(max-width: 800px) {
+    .training-param-control {
+      border: 0;
     }
 
-    .sticky-mask-column.desktop {
-      display: none;
+    .control {
+      min-height: 1em;
+      padding: 0.5em;
     }
 
-    .mask-metrics-table .sticky-image-column {
-      width: 8.5em;
-      min-width: 8.5em;
+    .bar {
+      grid-template-columns: 100%;
     }
-
-    .mobile-mask-name-button {
-      display: block;
-    }
-  }
-  @media(max-width: 700px) {
     .grid {
       grid-template-columns: 100%;
     }
@@ -2121,8 +2134,10 @@ export default {
     .edit-facial-measurements {
       flex-direction: column;
     }
+
     .grid {
       grid-template-columns: 100%;
+      grid-template-rows: auto;
     }
 
     #search {
@@ -2156,6 +2171,7 @@ export default {
     .mask-metrics-table td {
       min-width: 5em;
     }
+
   }
 
   @media(max-width: 600px) {
