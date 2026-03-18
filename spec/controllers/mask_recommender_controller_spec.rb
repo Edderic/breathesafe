@@ -217,6 +217,24 @@ RSpec.describe MaskRecommenderController, type: :controller do
       expect(response).to have_http_status(:ok)
     end
 
+    it 'returns 500 when the training lambda returns an error payload' do
+      allow(controller).to receive(:current_user).and_return(admin)
+      allow(MaskRecommenderTraining).to receive(:call).and_return(
+        {
+          'statusCode' => 500,
+          'body' => {
+            'error' => 'Training failed',
+            'message' => 'Read-only file system'
+          }.to_json
+        }
+      )
+
+      post :train, params: { model_type: 'custom_lr' }, as: :json
+
+      expect(response).to have_http_status(:internal_server_error)
+      expect(JSON.parse(response.body)['error']).to eq('Read-only file system')
+    end
+
     it 'forwards epochs and learning_rate to MaskRecommenderTraining' do
       allow(controller).to receive(:current_user).and_return(admin)
       allow(MaskRecommenderTraining).to receive(:call).and_return({ 'status' => 'started' })

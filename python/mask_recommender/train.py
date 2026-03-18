@@ -904,6 +904,8 @@ def _local_model_root():
     override = os.environ.get('MASK_RECOMMENDER_LOCAL_MODEL_DIR')
     if override:
         return override
+    if _is_lambda_runtime():
+        return "/tmp/mask_recommender/local_models"
     return "python/mask_recommender/local_models"
 
 

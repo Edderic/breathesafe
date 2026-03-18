@@ -66,6 +66,13 @@ class MaskRecommenderController < ApplicationController
       learning_rate: learning_rate
     }
     result = MaskRecommenderTraining.call(payload: payload)
+    if result.is_a?(Hash) && result['statusCode'].to_i >= 400
+      lambda_body = result['body'].is_a?(String) ? JSON.parse(result['body']) : result['body']
+      error_message = lambda_body.is_a?(Hash) ? (lambda_body['message'] || lambda_body['error']) : nil
+      render json: { error: error_message || 'Training failed', result: result }, status: :internal_server_error
+      return
+    end
+
     render json: { job_id: job_id, status: 'started', result: result }, status: :ok
   rescue StandardError => e
     render json: { error: e.message }, status: :internal_server_error
