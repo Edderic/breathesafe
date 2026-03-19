@@ -87,6 +87,9 @@
             :value="routeRecommenderUserId"
             @change="updateRecommenderUserId"
           >
+            <option value="">
+              Select user
+            </option>
             <option
               v-for="user in eligibleRecommenderUsers"
               :key="user.managedId"
@@ -516,7 +519,7 @@ export default {
       return this.hasRecommenderPayload
     },
     showRecommenderUserSelect() {
-      return this.hasObservedFitContext && this.eligibleRecommenderUsers.length > 0
+      return !!this.currentUser && this.eligibleRecommenderUsers.length > 0
     },
     routeModelType() {
       const value = this.$route.query.model_type
@@ -843,6 +846,15 @@ export default {
       () => this.$route.query,
       this.load.bind(this)
     )
+    this.$watch(
+      () => this.currentUser,
+      async (currentUser, previousUser) => {
+        if (currentUser === previousUser) {
+          return
+        }
+        await this.loadEligibleRecommenderUsers()
+      }
+    )
 
     this.maybeWarmupRecommender()
     await this.load.bind(this)(this.$route.query, undefined)
@@ -885,7 +897,7 @@ export default {
         })
     },
     async loadEligibleRecommenderUsers() {
-      if (!this.hasObservedFitContext || !this.currentUser) {
+      if (!this.currentUser) {
         this.eligibleRecommenderUsers = []
         return
       }
