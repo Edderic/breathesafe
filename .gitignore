@@ -67,3 +67,24 @@ data
 
 # Local ML artifacts
 /python/mask_recommender/local_models
+
+# Local coverage output
+/coveragejs/
+
+# Local scratch files
+/scratch
+/scratch.py
+/scratch.rb
+/scratch.sql
+
+# Lambda packaging artifacts
+/lambda/mask_predictor/package/
+/lambda/mask_predictor/function/
+/lambda/mask_predictor/python/
+/lambda/mask_predictor/*.zip
+
+# Recommender experiment outputs
+/python/mask_recommender/images/
+/python/mask_recommender/recommendations_*.json
+/python/mask_recommender/bayesian_metrics_*.json
+/python/mask_recommender/training_loss.png
