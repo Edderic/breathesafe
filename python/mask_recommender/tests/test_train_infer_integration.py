@@ -19,6 +19,7 @@ def _fit_tests_df():
                 "id": 1,
                 "user_id": 100,
                 "mask_id": 1,
+                "fit_family_id": 101,
                 "unique_internal_model_code": "MASK-A",
                 "perimeter_mm": 300,
                 "strap_type": "Earloop",
@@ -36,6 +37,7 @@ def _fit_tests_df():
                 "id": 2,
                 "user_id": 101,
                 "mask_id": 2,
+                "fit_family_id": 102,
                 "unique_internal_model_code": "MASK-B",
                 "perimeter_mm": 320,
                 "strap_type": "Headstrap",
@@ -53,6 +55,7 @@ def _fit_tests_df():
                 "id": 3,
                 "user_id": 100,
                 "mask_id": 2,
+                "fit_family_id": 102,
                 "unique_internal_model_code": "MASK-B",
                 "perimeter_mm": 320,
                 "strap_type": "Headstrap",
@@ -70,6 +73,7 @@ def _fit_tests_df():
                 "id": 4,
                 "user_id": 101,
                 "mask_id": 1,
+                "fit_family_id": 101,
                 "unique_internal_model_code": "MASK-A",
                 "perimeter_mm": 300,
                 "strap_type": "Earloop",
@@ -92,6 +96,7 @@ def _masks_df():
         [
             {
                 "id": 1,
+                "fit_family_id": 101,
                 "unique_internal_model_code": "MASK-A",
                 "perimeter_mm": 300,
                 "strap_type": "Earloop",
@@ -99,6 +104,7 @@ def _masks_df():
             },
             {
                 "id": 2,
+                "fit_family_id": 102,
                 "unique_internal_model_code": "MASK-B",
                 "perimeter_mm": 320,
                 "strap_type": "Headstrap",
@@ -140,6 +146,7 @@ def test_training_and_inference_alignment(monkeypatch, tmp_path):
     mask_data = {
         str(row["id"]): {
             "id": int(row["id"]),
+            "fit_family_id": int(row["fit_family_id"]),
             "unique_internal_model_code": row["unique_internal_model_code"],
             "perimeter_mm": row["perimeter_mm"],
             "strap_type": row["strap_type"],
@@ -283,7 +290,7 @@ def test_prep_data_in_torch_with_categories_uses_float32_and_stable_shapes():
 
     data = train_module.prep_data_in_torch_with_categories(
         cleaned,
-        mask_categories=category_metadata["mask_code_categories"],
+        mask_categories=category_metadata["fit_family_categories"],
         style_categories=category_metadata["style_categories"],
         strap_categories=category_metadata["strap_type_categories"],
     )
@@ -292,7 +299,7 @@ def test_prep_data_in_torch_with_categories_uses_float32_and_stable_shapes():
     assert data["fit_tests_by_styles"].dtype == torch.float32
     assert data["fit_tests_by_strap_types"].dtype == torch.float32
     assert data["perimeter_diffs"].dtype == torch.float32
-    assert data["fit_tests_by_masks"].shape[1] == len(category_metadata["mask_code_categories"])
+    assert data["fit_tests_by_masks"].shape[1] == len(category_metadata["fit_family_categories"])
     assert data["fit_tests_by_styles"].shape[1] == len(category_metadata["style_categories"])
     assert data["fit_tests_by_strap_types"].shape[1] == len(category_metadata["strap_type_categories"])
 
@@ -320,6 +327,7 @@ def test_local_infer_custom_scores_masks():
         "mask_data": {
             "1": {
                 "id": 1,
+                "fit_family_id": 101,
                 "unique_internal_model_code": "MASK-A",
                 "perimeter_mm": 300,
                 "strap_type": "Earloop",
@@ -330,6 +338,7 @@ def test_local_infer_custom_scores_masks():
             },
             "2": {
                 "id": 2,
+                "fit_family_id": 102,
                 "unique_internal_model_code": "MASK-B",
                 "perimeter_mm": 320,
                 "strap_type": "Headstrap",
@@ -358,3 +367,65 @@ def test_local_infer_custom_scores_masks():
 
     assert set(result["mask_id"].values()) == {1, 2}
     assert all(0.0 <= proba <= 1.0 for proba in result["proba_fit"].values())
+
+
+def test_local_infer_custom_shares_scores_for_same_fit_family():
+    cleaned = train_module.prepare_training_data(_fit_tests_df())
+    category_metadata = train_module._custom_lr_category_metadata(cleaned)
+    full_idx = torch.arange(cleaned.shape[0])
+    train_result = train_module.train_custom_lr_with_split(
+        cleaned,
+        train_idx=full_idx,
+        val_idx=full_idx,
+        category_metadata=category_metadata,
+        epochs=2,
+        learning_rate=0.01,
+    )
+
+    artifacts = {
+        "params": train_result["params"],
+        "metadata": {
+            "timestamp": "2026-03-19",
+            "environment": "development",
+            **category_metadata,
+        },
+        "mask_data": {
+            "1": {
+                "id": 1,
+                "fit_family_id": 101,
+                "unique_internal_model_code": "MASK-A",
+                "perimeter_mm": 300,
+                "strap_type": "Earloop",
+                "style": "Cup",
+            },
+            "3": {
+                "id": 3,
+                "fit_family_id": 101,
+                "unique_internal_model_code": "MASK-A-BLACK",
+                "perimeter_mm": 300,
+                "strap_type": "Earloop",
+                "style": "Cup",
+            },
+        },
+    }
+
+    result = local_recommender_server._infer_custom(
+        {
+            "model_type": "custom_lr",
+            "facial_measurements": {
+                "nose_mm": 40,
+                "chin_mm": 50,
+                "top_cheek_mm": 60,
+                "mid_cheek_mm": 55,
+                "strap_mm": 120,
+                "facial_hair_beard_length_mm": 0,
+            },
+        },
+        artifacts,
+    )
+
+    probabilities_by_mask = {
+        mask_id: result["proba_fit"][index]
+        for index, mask_id in result["mask_id"].items()
+    }
+    assert probabilities_by_mask[1] == probabilities_by_mask[3]

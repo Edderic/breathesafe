@@ -19,7 +19,11 @@ from mask_recommender.feature_builder import (  # noqa: E402
     derive_brand_model,
 )
 from mask_recommender.prob_model import predict_prob_model  # noqa: E402
-from mask_recommender.train import calc_preds, prep_data_in_torch_with_categories  # noqa: E402
+from mask_recommender.train import (  # noqa: E402
+    calc_preds,
+    prep_data_in_torch_with_categories,
+    _custom_lr_mask_categories,
+)
 
 APP = Flask(__name__)
 APP.logger.setLevel("INFO")
@@ -314,6 +318,7 @@ def _build_inference_rows(mask_data, facial_features):
             perimeter = 0
         row = {
             "mask_id": int(mask_id),
+            "fit_family_id": mask_info.get("fit_family_id"),
             "perimeter_mm": perimeter,
             "strap_type": mask_info.get("strap_type") or "",
             "style": mask_info.get("style") or "",
@@ -434,7 +439,7 @@ def _infer_custom(payload, artifacts):
     inference_rows = _build_inference_rows(artifacts["mask_data"], facial_features)
     custom_data = prep_data_in_torch_with_categories(
         inference_rows,
-        mask_categories=artifacts["metadata"]["mask_code_categories"],
+        mask_categories=_custom_lr_mask_categories(artifacts["metadata"]),
         style_categories=artifacts["metadata"]["style_categories"],
         strap_categories=artifacts["metadata"]["strap_type_categories"],
     )

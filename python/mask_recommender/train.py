@@ -1258,8 +1258,39 @@ def calc_preds(data, params):
     return torch.sigmoid(logits)
 
 
+def _fit_family_key_series(frame):
+    working = frame.copy()
+    if 'fit_family_id' in working.columns:
+        fit_family_ids = pd.to_numeric(working['fit_family_id'], errors='coerce')
+    else:
+        fit_family_ids = pd.Series(np.nan, index=working.index, dtype=np.float32)
+
+    if 'mask_id' in working.columns:
+        mask_ids = pd.to_numeric(working['mask_id'], errors='coerce')
+    else:
+        mask_ids = pd.Series(np.nan, index=working.index, dtype=np.float32)
+
+    fallback_ids = fit_family_ids.fillna(mask_ids)
+    fallback_ids = fallback_ids.apply(
+        lambda value: str(int(value)) if pd.notna(value) else None
+    )
+    if 'unique_internal_model_code' in working.columns:
+        fallback_codes = working['unique_internal_model_code'].fillna('').astype(str)
+    else:
+        fallback_codes = pd.Series('', index=working.index, dtype=str)
+    fallback_codes = fallback_codes.where(fallback_codes != '', 'unknown-fit-family')
+    return fallback_ids.fillna(fallback_codes)
+
+
+def _custom_lr_mask_categories(category_metadata):
+    categories = category_metadata.get('fit_family_categories')
+    if categories:
+        return categories
+    return category_metadata.get('mask_code_categories', [])
+
+
 def prep_data_in_torch(cleaned_fit_tests):
-    mask_categories = sorted(cleaned_fit_tests['unique_internal_model_code'].dropna().unique())
+    mask_categories = sorted(_fit_family_key_series(cleaned_fit_tests).dropna().unique())
     style_categories = sorted(cleaned_fit_tests['style'].dropna().unique())
     strap_categories = sorted(cleaned_fit_tests['strap_type'].dropna().unique())
     return prep_data_in_torch_with_categories(
@@ -1277,6 +1308,7 @@ def prep_data_in_torch_with_categories(
     strap_categories,
 ):
     frame = frame.copy()
+    frame['fit_family_key'] = _fit_family_key_series(frame)
     if 'perimeter_diff' not in frame.columns:
         facial_perimeter_cm = frame[FACIAL_MEASUREMENTS].sum(axis=1).astype(np.float32) / 10.0
         mask_perimeter_cm = pd.to_numeric(frame.get('perimeter_mm', 0), errors='coerce').fillna(0).astype(np.float32) / 10.0
@@ -1304,7 +1336,7 @@ def prep_data_in_torch_with_categories(
 
     fit_tests_by_masks = torch.from_numpy(
         pd.get_dummies(
-            pd.Categorical(frame['unique_internal_model_code'], categories=mask_categories)
+            pd.Categorical(frame['fit_family_key'], categories=mask_categories)
         ).astype(np.float32).to_numpy()
     )
     fit_tests_by_styles = torch.from_numpy(
@@ -1326,7 +1358,7 @@ def prep_data_in_torch_with_categories(
 
 def _custom_lr_category_metadata(cleaned_fit_tests):
     return {
-        'mask_code_categories': sorted(cleaned_fit_tests['unique_internal_model_code'].dropna().unique().tolist()),
+        'fit_family_categories': sorted(_fit_family_key_series(cleaned_fit_tests).dropna().unique().tolist()),
         'style_categories': sorted(cleaned_fit_tests['style'].dropna().unique().tolist()),
         'strap_type_categories': sorted(cleaned_fit_tests['strap_type'].dropna().unique().tolist()),
     }
@@ -1344,7 +1376,7 @@ def _subset_custom_lr_data(data, row_indices):
 
 
 def _initialize_custom_lr_parameters(category_metadata):
-    mask_count = len(category_metadata['mask_code_categories'])
+    mask_count = len(_custom_lr_mask_categories(category_metadata))
     style_count = len(category_metadata['style_categories'])
     strap_count = len(category_metadata['strap_type_categories'])
 
@@ -1392,7 +1424,7 @@ def _resolve_custom_lr_parameter_views(params):
 def _predict_custom_lr_probabilities(frame, parameters, category_metadata):
     data = prep_data_in_torch_with_categories(
         frame,
-        mask_categories=category_metadata['mask_code_categories'],
+        mask_categories=_custom_lr_mask_categories(category_metadata),
         style_categories=category_metadata['style_categories'],
         strap_categories=category_metadata['strap_type_categories'],
     )
@@ -1400,13 +1432,13 @@ def _predict_custom_lr_probabilities(frame, parameters, category_metadata):
         return calc_preds(data, parameters).squeeze(1).cpu().numpy()
 
 
-def _custom_lr_params_with_zeroed_mask(parameters, mask_code, category_metadata):
+def _custom_lr_params_with_zeroed_mask(parameters, mask_identity, category_metadata):
     cloned = {
         key: value.detach().clone()
         for key, value in _resolve_custom_lr_parameter_views(parameters).items()
     }
     try:
-        mask_idx = category_metadata['mask_code_categories'].index(mask_code)
+        mask_idx = _custom_lr_mask_categories(category_metadata).index(mask_identity)
     except ValueError:
         return cloned
     cloned['mask_specific_parameters'][mask_idx] = torch.zeros_like(cloned['mask_specific_parameters'][mask_idx])
@@ -1475,6 +1507,7 @@ def _build_custom_lr_perimeter_diff_diagnostics(
             representative = rows.iloc[-1]
             style = representative['style']
             strap_type = representative['strap_type']
+            fit_family_key = _fit_family_key_series(pd.DataFrame([representative])).iloc[0]
             mask_perimeter_mm = _mask_perimeter_mm_from_training_row(representative)
             probe_positions = []
             for probe in probes:
@@ -1497,6 +1530,7 @@ def _build_custom_lr_perimeter_diff_diagnostics(
 
             curve_frame = pd.DataFrame({
                 'unique_internal_model_code': [mask_code] * len(diff_values),
+                'fit_family_id': [representative.get('fit_family_id')] * len(diff_values),
                 'style': [style] * len(diff_values),
                 'strap_type': [strap_type] * len(diff_values),
                 'perimeter_diff': diff_values,
@@ -1514,7 +1548,7 @@ def _build_custom_lr_perimeter_diff_diagnostics(
             )
             generic_probs = _predict_custom_lr_probabilities(
                 curve_frame,
-                parameters=_custom_lr_params_with_zeroed_mask(parameters, mask_code, category_metadata),
+                parameters=_custom_lr_params_with_zeroed_mask(parameters, fit_family_key, category_metadata),
                 category_metadata=category_metadata,
             )
 
@@ -1568,6 +1602,7 @@ def _build_custom_lr_perimeter_diff_diagnostics(
                 )
                 probe_frame = pd.DataFrame({
                     'unique_internal_model_code': [mask_code],
+                    'fit_family_id': [representative.get('fit_family_id')],
                     'style': [style_value],
                     'strap_type': [strap_type_value],
                     'perimeter_mm': [mask_perimeter_mm],
@@ -1752,7 +1787,7 @@ def train_custom_lr_with_split(
 ):
     data = prep_data_in_torch_with_categories(
         cleaned_fit_tests,
-        mask_categories=category_metadata['mask_code_categories'],
+        mask_categories=_custom_lr_mask_categories(category_metadata),
         style_categories=category_metadata['style_categories'],
         strap_categories=category_metadata['strap_type_categories'],
     )
@@ -2026,8 +2061,10 @@ def main(argv=None):
             mask_id = row.get('id')
             if pd.isna(mask_id):
                 continue
+            fit_family_id = pd.to_numeric(row.get('fit_family_id'), errors='coerce')
             mask_data[str(int(mask_id))] = {
                 'id': int(mask_id),
+                'fit_family_id': int(fit_family_id) if pd.notna(fit_family_id) else None,
                 'unique_internal_model_code': row.get('unique_internal_model_code', ''),
                 'brand_model': derive_brand_model(
                     row.get('unique_internal_model_code', ''),

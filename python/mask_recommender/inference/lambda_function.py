@@ -11,7 +11,7 @@ try:
     from feature_builder import (FACIAL_FEATURE_COLUMNS, MASK_EMPIRICAL_FEATURE_COLUMNS, build_feature_frame,
                                  derive_brand_model)
     from prob_model import predict_prob_model
-    from train import calc_preds, prep_data_in_torch_with_categories
+    from train import calc_preds, prep_data_in_torch_with_categories, _custom_lr_mask_categories
 except ModuleNotFoundError:
     from mask_recommender.feature_builder import (  # type: ignore
         FACIAL_FEATURE_COLUMNS,
@@ -20,7 +20,11 @@ except ModuleNotFoundError:
         derive_brand_model,
     )
     from mask_recommender.prob_model import predict_prob_model  # type: ignore
-    from mask_recommender.train import calc_preds, prep_data_in_torch_with_categories  # type: ignore
+    from mask_recommender.train import (  # type: ignore
+        calc_preds,
+        prep_data_in_torch_with_categories,
+        _custom_lr_mask_categories,
+    )
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -290,6 +294,7 @@ class MaskRecommenderInference:
                 perimeter = 0
             row = {
                 'mask_id': int(mask_id),
+                'fit_family_id': mask_info.get('fit_family_id'),
                 'perimeter_mm': perimeter,
                 'strap_type': mask_info.get('strap_type') or '',
                 'style': mask_info.get('style') or '',
@@ -392,7 +397,7 @@ class MaskRecommenderInference:
         inference_rows = self._build_inference_rows(self.custom_mask_data, facial_features)
         custom_data = prep_data_in_torch_with_categories(
             inference_rows,
-            mask_categories=self.custom_metadata['mask_code_categories'],
+            mask_categories=_custom_lr_mask_categories(self.custom_metadata),
             style_categories=self.custom_metadata['style_categories'],
             strap_categories=self.custom_metadata['strap_type_categories'],
         )

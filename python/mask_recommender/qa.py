@@ -67,6 +67,7 @@ def build_inference_rows(user_row, mask_candidates):
         'style': mask_candidates['style'].to_numpy(),
         'brand_model': mask_candidates['brand_model'].to_numpy(),
         'unique_internal_model_code': mask_candidates['unique_internal_model_code'].to_numpy(),
+        'fit_family_id': mask_candidates.get('fit_family_id', pd.Series([None] * len(mask_candidates))).to_numpy(),
     }
     for column in FACIAL_FEATURE_COLUMNS:
         base_features[column] = user_row.get(column)
