@@ -217,6 +217,25 @@ class FitTestsController < ApplicationController
     original_fit_test = FitTest.find(params[:id])
     user = original_fit_test.user
 
+    if !current_user
+      status = 401
+      messages = ['Unauthorized.']
+      render json: { messages: messages }.to_json, status: status
+      return
+    elsif !current_user.manages?(user)
+      status = 401
+      messages = ['Unauthorized.']
+      render json: { messages: messages }.to_json, status: status
+      return
+    end
+
+    count = clone_count
+    unless count
+      render json: { messages: ['Clone count must be an integer between 1 and 25.'] }.to_json,
+             status: :unprocessable_entity
+      return
+    end
+
     # Get latest facial measurement
     latest_facial_measurement = FacialMeasurement.latest(user)
     fm_id = latest_facial_measurement&.id
@@ -229,18 +248,21 @@ class FitTestsController < ApplicationController
     # Remove any nil values that might cause issues
     cloned_attributes = cloned_attributes.compact
 
-    fit_test = FitTest.create(cloned_attributes)
+    fit_tests = Array.new(count) { FitTest.create(cloned_attributes) }
+    fit_test = fit_tests.last
 
-    if fit_test.persisted?
+    if fit_tests.all?(&:persisted?)
       status = 201
       messages = []
       to_render = {
         fit_test: JSON.parse(fit_test.to_json),
+        fit_tests: fit_tests.map { |created_fit_test| JSON.parse(created_fit_test.to_json) },
+        count: fit_tests.length,
         messages: messages
       }
     else
       status = 422
-      messages = fit_test.errors.full_messages
+      messages = fit_tests.flat_map(&:errors).flat_map(&:full_messages).uniq
       to_render = {
         messages: messages
       }
@@ -314,6 +336,18 @@ class FitTestsController < ApplicationController
 
   def user_data
     params.require(:user).permit(:id)
+  end
+
+  def clone_count
+    raw = params[:count].presence || params.dig(:fit_test, :count).presence
+    return 1 if raw.blank?
+
+    count = raw.is_a?(Numeric) ? raw.to_i : Integer(raw.to_s, 10)
+    return nil if count < 1 || count > 25
+
+    count
+  rescue ArgumentError, TypeError
+    nil
   end
 
   def fit_test_user

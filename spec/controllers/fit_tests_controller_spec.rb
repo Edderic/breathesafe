@@ -163,4 +163,49 @@ RSpec.describe FitTestsController, type: :controller do
       expect(response).to have_http_status(:unauthorized)
     end
   end
+
+  describe 'POST #clone' do
+    let!(:fit_test) { create(:fit_test, user: managed_user) }
+
+    it 'clones once by default' do
+      create(:facial_measurement, user: managed_user)
+
+      expect do
+        post :clone, params: { id: fit_test.id }, as: :json
+      end.to change(FitTest, :count).by(1)
+
+      expect(response).to have_http_status(:created)
+      body = JSON.parse(response.body)
+      expect(body['count']).to eq(1)
+      expect(body['fit_tests'].length).to eq(1)
+    end
+
+    it 'clones multiple times when count is provided' do
+      create(:facial_measurement, user: managed_user)
+
+      expect do
+        post :clone, params: { id: fit_test.id, count: 3 }, as: :json
+      end.to change(FitTest, :count).by(3)
+
+      expect(response).to have_http_status(:created)
+      body = JSON.parse(response.body)
+      expect(body['count']).to eq(3)
+      expect(body['fit_tests'].length).to eq(3)
+    end
+
+    it 'returns 422 for invalid clone count' do
+      post :clone, params: { id: fit_test.id, count: 26 }, as: :json
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(JSON.parse(response.body)['messages']).to include('Clone count must be an integer between 1 and 25.')
+    end
+
+    it 'returns 401 when unauthorized' do
+      allow(controller).to receive(:current_user).and_return(nil)
+
+      post :clone, params: { id: fit_test.id }, as: :json
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
 end

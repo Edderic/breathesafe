@@ -61,8 +61,24 @@
             </tr>
           </table>
           <div class='actions-buttons'>
-            <Button text='Clone' @click='cloneFitTest'/>
+            <Button text='Clone' @click='startCloneFitTest'/>
             <Button text='Delete' @click='confirmDelete'/>
+          </div>
+          <div v-if='clonePromptVisible' class='clone-prompt'>
+            <p v-if='useAdminCloneMode'>How many copies do you want to create?</p>
+            <div v-if='useAdminCloneMode' class='clone-prompt-controls'>
+              <input
+                v-model.number='cloneCount'
+                type='number'
+                min='1'
+                max='25'
+                class='clone-count-input'
+              >
+              <div class='confirmation-buttons'>
+                <Button text='Clone' @click='cloneFitTest'/>
+                <Button text='Cancel' @click='cancelClonePrompt'/>
+              </div>
+            </div>
           </div>
           <div v-if='deleteConfirmation' class='delete-confirmation'>
             <p>Are you sure you want to delete this fit test?</p>
@@ -244,7 +260,9 @@ export default {
       selectedFitTestForActions: null,
       deleteConfirmation: false,
       actionMenuMessages: [],
-      actionsMenuKey: 0
+      actionsMenuKey: 0,
+      clonePromptVisible: false,
+      cloneCount: 1
     }
   },
   props: {
@@ -268,6 +286,8 @@ export default {
         useMainStore,
         [
           'currentUser',
+          'isAdmin',
+          'adminModeEnabled'
         ]
     ),
     ...mapState(
@@ -315,6 +335,9 @@ export default {
         managedId: 0
       }
 
+    },
+    useAdminCloneMode() {
+      return this.isAdmin && this.adminModeEnabled
     },
     displayables() {
       let lowerSearch = this.search.toLowerCase()
@@ -381,6 +404,8 @@ export default {
       const fitTest = this.fit_tests.find(f => f.id === fitTestId)
       if (fitTest) {
         this.deleteConfirmation = false
+        this.clonePromptVisible = false
+        this.cloneCount = 1
         this.actionMenuMessages = []
         // Create a new object reference to ensure Vue detects the change
         // Copy all properties to a new object
@@ -393,20 +418,46 @@ export default {
       this.selectedFitTestForActions = null
       this.deleteConfirmation = false
       this.actionMenuMessages = []
+      this.clonePromptVisible = false
+      this.cloneCount = 1
+    },
+    startCloneFitTest() {
+      this.deleteConfirmation = false
+      this.actionMenuMessages = []
+
+      if (this.useAdminCloneMode) {
+        this.clonePromptVisible = true
+        this.cloneCount = 1
+        return
+      }
+
+      this.cloneFitTest()
+    },
+    cancelClonePrompt() {
+      this.clonePromptVisible = false
+      this.cloneCount = 1
+      this.actionMenuMessages = []
     },
     async cloneFitTest() {
       if (!this.selectedFitTestForActions) return
 
+      const count = this.useAdminCloneMode ? parseInt(this.cloneCount, 10) : 1
+      if (!Number.isInteger(count) || count < 1 || count > 25) {
+        this.actionMenuMessages = [{ str: 'Clone count must be between 1 and 25.' }]
+        return
+      }
+
       try {
         const response = await axios.post(
           `/fit_tests/${this.selectedFitTestForActions.id}/clone`,
-          {},
+          { count: count },
           { headers: { 'Content-Type': 'application/json' } }
         )
 
         if (response.status === 201) {
           // Show success message at top of page
-          this.messages = [{ str: 'Fit test cloned successfully!' }]
+          const createdCount = response.data?.count || count
+          this.messages = [{ str: `Fit test cloned successfully${createdCount > 1 ? ` (${createdCount} copies)` : ''}!` }]
           this.closeActionsMenu()
           // Refresh the table
           await this.loadFitTests()
@@ -421,6 +472,7 @@ export default {
       }
     },
     confirmDelete() {
+      this.clonePromptVisible = false
       this.deleteConfirmation = true
       this.actionMenuMessages = []
     },
@@ -759,6 +811,24 @@ export default {
   .justify-content-center {
     display: flex;
     justify-content: center;
+  }
+
+  .clone-prompt {
+    margin: 1rem 0;
+    text-align: center;
+  }
+
+  .clone-prompt-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .clone-count-input {
+    width: 6rem;
+    padding: 0.4rem;
+    text-align: center;
   }
 
   .adaptive-wide img {

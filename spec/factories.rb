@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :mask do
-    sequence(:unique_internal_model_code) { |n| "MASK-#{n}" }
+    sequence(:unique_internal_model_code) { |n| "MASK-#{n}-#{SecureRandom.hex(4)}" }
     modifications { {} }
     image_urls { [] }
     author_ids { [] }
@@ -82,7 +82,7 @@ FactoryBot.define do
   end
 
   factory :user do
-    sequence(:email) { |n| "user#{n}@example.com" }
+    sequence(:email) { |n| "user#{n}-#{SecureRandom.hex(4)}@example.com" }
     password { 'password123' }
     password_confirmation { 'password123' }
     confirmed_at { Time.current }
