@@ -104,6 +104,7 @@ RSpec.describe FitTestsController, type: :controller do
 
   describe 'PATCH #update' do
     let(:fit_test) { create(:fit_test, user: managed_user) }
+    let(:replacement_user) { create(:user) }
     let(:mask) do
       create(:mask)
     end
@@ -123,6 +124,22 @@ RSpec.describe FitTestsController, type: :controller do
       allow(manager).to receive(:manages?).and_return(false)
       patch :update, params: { id: fit_test.id, fit_test: { mask_id: mask.id } }, as: :json
       expect(response).to have_http_status(:unauthorized)
+    end
+
+    it 'updates the fit test user and facial_measurement_id when a new managed user is selected' do
+      replacement_measurement = create(:facial_measurement, user: replacement_user)
+      allow(manager).to receive(:manages?).with(replacement_user).and_return(true)
+
+      patch :update, params: {
+        id: fit_test.id,
+        fit_test: { mask_id: mask.id },
+        user: { id: replacement_user.id }
+      }, as: :json
+
+      expect(response).to have_http_status(:no_content)
+      fit_test.reload
+      expect(fit_test.user_id).to eq(replacement_user.id)
+      expect(fit_test.facial_measurement_id).to eq(replacement_measurement.id)
     end
   end
 

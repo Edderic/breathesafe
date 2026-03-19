@@ -153,6 +153,8 @@ class FitTestsController < ApplicationController
 
   def update
     fit_test = FitTest.find(params[:id])
+    requested_user_id = params[:user].present? ? user_data[:id] : nil
+    requested_user = requested_user_id.present? ? User.find(requested_user_id) : fit_test.user
 
     if !current_user
       status = 401
@@ -161,7 +163,10 @@ class FitTestsController < ApplicationController
     elsif !current_user.manages?(fit_test_user)
       status = 401
       messages = ['Unauthorized.']
-    elsif fit_test.update(fit_test_data)
+    elsif !current_user.manages?(requested_user)
+      status = 401
+      messages = ['Unauthorized.']
+    elsif fit_test.update(update_fit_test_params(fit_test: fit_test, user: requested_user))
       status = 204
       messages = []
     else
@@ -314,5 +319,14 @@ class FitTestsController < ApplicationController
   def fit_test_user
     fit_test = FitTest.find(params[:id])
     fit_test.user
+  end
+
+  def update_fit_test_params(fit_test:, user:)
+    latest_facial_measurement = FacialMeasurement.latest(user)
+
+    fit_test_data.merge(
+      user_id: user.id,
+      facial_measurement_id: latest_facial_measurement&.id || fit_test.facial_measurement_id
+    )
   end
 end
