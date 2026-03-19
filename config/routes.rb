@@ -118,9 +118,11 @@ Rails.application.routes.draw do
   # Admin routes
   namespace :admin do
     resources :users, only: [:index]
+    resources :fit_families, only: %i[index create]
 
     resources :masks, only: [] do
       resource :duplicate_link, only: %i[create destroy], controller: 'mask_duplicates'
+      resource :fit_family, only: %i[update], controller: 'mask_fit_families'
     end
 
     resources :study_participants, only: [:index] do
