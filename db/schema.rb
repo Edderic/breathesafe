@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_260_217_121_500) do
+ActiveRecord::Schema[7.0].define(version: 20_260_319_120_000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -146,6 +146,14 @@ ActiveRecord::Schema[7.0].define(version: 20_260_217_121_500) do
     t.index %w[user_id created_at], name: 'index_facial_measurements_on_user_id_and_created_at_desc',
                                     order: { created_at: :desc }
     t.index ['user_id'], name: 'index_facial_measurements_on_user_id'
+  end
+
+  create_table 'fit_families', force: :cascade do |t|
+    t.string 'name', null: false
+    t.string 'slug', null: false
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.index ['slug'], name: 'index_fit_families_on_slug', unique: true
   end
 
   create_table 'fit_tests', force: :cascade do |t|
@@ -304,12 +312,14 @@ ActiveRecord::Schema[7.0].define(version: 20_260_217_121_500) do
     t.bigint 'bulk_fit_tests_import_id'
     t.jsonb 'current_state', default: {}, null: false, comment: 'Cached computed state from events'
     t.boolean 'available', default: true, null: false
+    t.bigint 'fit_family_id', null: false
     t.index ['author_id'], name: 'index_masks_on_author_id'
     t.index ['available'], name: 'index_masks_on_available'
     t.index ['brand_id'], name: 'index_masks_on_brand_id'
     t.index ['bulk_fit_tests_import_id'], name: 'index_masks_on_bulk_fit_tests_import_id'
     t.index ['current_state'], name: 'index_masks_on_current_state', using: :gin
     t.index ['duplicate_of'], name: 'index_masks_on_duplicate_of'
+    t.index ['fit_family_id'], name: 'index_masks_on_fit_family_id'
     t.index ['unique_internal_model_code'], name: 'index_masks_on_unique_internal_model_code', unique: true
   end
 
@@ -587,6 +597,7 @@ ActiveRecord::Schema[7.0].define(version: 20_260_217_121_500) do
   add_foreign_key 'mask_states', 'users', column: 'author_id'
   add_foreign_key 'masks', 'brands', on_delete: :nullify
   add_foreign_key 'masks', 'bulk_fit_tests_imports'
+  add_foreign_key 'masks', 'fit_families'
   add_foreign_key 'masks', 'masks', column: 'duplicate_of', on_delete: :nullify
   add_foreign_key 'masks', 'users', column: 'author_id'
   add_foreign_key 'measurement_devices', 'users', column: 'owner_id'

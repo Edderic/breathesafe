@@ -8,6 +8,7 @@ class Mask < ApplicationRecord
   belongs_to :author, class_name: 'User'
   belongs_to :brand, optional: true
   belongs_to :bulk_fit_tests_import, optional: true
+  belongs_to :fit_family
   belongs_to :duplicate_of_mask, class_name: 'Mask', foreign_key: 'duplicate_of',
                                  optional: true, inverse_of: :duplicate_masks
   has_many :duplicate_masks, class_name: 'Mask', foreign_key: 'duplicate_of',
@@ -31,6 +32,10 @@ class Mask < ApplicationRecord
   def regenerate
     computed_state = MaskStatusBuilder.build_and_serialize(mask_id: id)
     update!(current_state: computed_state)
+  end
+
+  def fit_identity
+    fit_family_id
   end
 
   def self.find_targeted_but_untested_masks(manager_id)

@@ -164,7 +164,14 @@ class FitTestsWithFacialMeasurementsService
       canonical_by_raw = MaskDeduplicationPolicy.canonical_ids_by_mask_id(raw_mask_ids)
       canonical_mask_ids = canonical_by_raw.values.compact.uniq
       canonical_masks_by_id = Mask.where(id: canonical_mask_ids)
-                                  .select(:id, :unique_internal_model_code, :perimeter_mm, :strap_type, :style)
+                                  .select(
+                                    :id,
+                                    :fit_family_id,
+                                    :unique_internal_model_code,
+                                    :perimeter_mm,
+                                    :strap_type,
+                                    :style
+                                  )
                                   .index_by(&:id)
 
       results.map do |row|
@@ -178,6 +185,7 @@ class FitTestsWithFacialMeasurementsService
 
         next row unless canonical_mask
 
+        row['fit_family_id'] = canonical_mask.fit_family_id
         row['unique_internal_model_code'] = canonical_mask.unique_internal_model_code
         row['perimeter_mm'] = canonical_mask.perimeter_mm
         row['strap_type'] = canonical_mask.strap_type

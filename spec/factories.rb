@@ -24,6 +24,7 @@ FactoryBot.define do
     age_range { 'Adult' }
     has_exhalation_valve { false }
     association :author, factory: :user
+    association :fit_family
     perimeter_mm { 300.0 }
     payable_datetimes { [] }
     colors { ['White'] }
@@ -79,6 +80,11 @@ FactoryBot.define do
     trait :with_colors do
       colors { %w[White Black Blue] }
     end
+  end
+
+  factory :fit_family do
+    sequence(:name) { |n| "Fit Family #{n}" }
+    sequence(:slug) { |n| "fit-family-#{n}-#{SecureRandom.hex(4)}" }
   end
 
   factory :user do

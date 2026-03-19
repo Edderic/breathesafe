@@ -18,10 +18,18 @@ class MaskFitTestSummaryService
     user = User.find(target_user_id)
     raise StandardError, 'forbidden' unless viewer.manages?(user)
 
-    fit_test_rows
-      .select { |row| row['user_id'].to_i == target_user_id && mask_ids.include?(row['mask_id'].to_i) }
-      .group_by { |row| row['mask_id'].to_i }
-      .transform_values { |rows| summarize(rows) }
+    matching_rows = fit_test_rows.select do |row|
+      row['user_id'].to_i == target_user_id &&
+        target_fit_family_ids.include?(fit_family_identity_for(row))
+    end
+
+    summaries_by_fit_family = matching_rows
+                              .group_by { |row| fit_family_identity_for(row) }
+                              .transform_values { |rows| summarize(rows) }
+
+    mask_ids.index_with do |mask_id|
+      summaries_by_fit_family[fit_family_id_by_mask_id[mask_id]]
+    end.compact
   end
 
   private
@@ -30,6 +38,18 @@ class MaskFitTestSummaryService
 
   def fit_test_rows
     @fit_test_rows ||= FitTestsWithFacialMeasurementsService.call
+  end
+
+  def fit_family_id_by_mask_id
+    @fit_family_id_by_mask_id ||= Mask.where(id: mask_ids).pluck(:id, :fit_family_id).to_h.transform_keys(&:to_i)
+  end
+
+  def target_fit_family_ids
+    @target_fit_family_ids ||= fit_family_id_by_mask_id.values.compact.uniq
+  end
+
+  def fit_family_identity_for(row)
+    (row['fit_family_id'] || row[:fit_family_id] || row['mask_id'] || row[:mask_id]).to_i
   end
 
   def summarize(rows)

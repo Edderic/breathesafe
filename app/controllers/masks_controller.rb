@@ -459,6 +459,7 @@ class MasksController < ApplicationController
     params.require(:mask).permit(
       :author_id,
       :average_filtration_efficiency,
+      :fit_family_id,
       :unique_internal_model_code,
       :filter_type,
       :style,
