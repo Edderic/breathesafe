@@ -8,6 +8,7 @@ import pytest
 import torch
 
 from mask_recommender.inference import lambda_function
+from mask_recommender.train import _detach_custom_lr_parameters
 
 
 try:
@@ -68,76 +69,50 @@ def test_lambda_loads_model_from_s3_and_recommends():
             "strap_mm": 120,
             "facial_hair_beard_length_mm": 0,
         }
-        inference_rows = pd.DataFrame(
-            [
-                {
-                    "mask_id": 1,
-                    "perimeter_mm": 300,
-                    "strap_type": "Earloop",
-                    "style": "Cup",
-                    "brand_model": "MASK A",
-                    "unique_internal_model_code": "MASK-A",
-                    "facial_hair_beard_length_mm": 0,
-                    **facial_features,
-                }
-            ]
+        params = _detach_custom_lr_parameters(
+            {
+                "mask_specific_parameters": torch.tensor([[0.0, 0.0, 1.0]], dtype=torch.float32),
+                "style_specific_parameters": torch.tensor([[0.0, 0.0, 0.0]], dtype=torch.float32),
+                "strap_specific_parameters": torch.tensor([[0.0]], dtype=torch.float32),
+            }
         )
-        categorical_columns = ["strap_type", "style", "brand_model", "unique_internal_model_code"]
-        expected = pd.get_dummies(inference_rows, columns=categorical_columns, dummy_na=True)
-        feature_columns = list(expected.columns)
-
-        model = torch.nn.Sequential(
-            torch.nn.Linear(len(feature_columns), 4),
-            torch.nn.ReLU(),
-            torch.nn.Linear(4, 2),
-            torch.nn.ReLU(),
-            torch.nn.Linear(2, 1),
-        )
-        torch.nn.init.zeros_(model[0].weight)
-        torch.nn.init.zeros_(model[0].bias)
-        torch.nn.init.zeros_(model[2].weight)
-        torch.nn.init.zeros_(model[2].bias)
-        torch.nn.init.zeros_(model[4].weight)
-        torch.nn.init.zeros_(model[4].bias)
-
-        model_path = tmp_dir / "model_state_dict.pt"
-        torch.save(model.state_dict(), model_path)
+        model_path = tmp_dir / "custom_model_params.pt"
+        torch.save(params, model_path)
 
         metadata = {
-            "feature_columns": feature_columns,
-            "categorical_columns": categorical_columns,
-            "hidden_sizes": [4, 2],
-            "threshold": 0.5,
-            "use_facial_perimeter": False,
-            "use_diff_perimeter_bins": False,
-            "use_diff_perimeter_mask_bins": False,
+            "timestamp": "20260101000000",
+            "model_type": "custom_lr",
+            "fit_family_categories": ["1"],
+            "style_categories": ["Cup"],
+            "strap_type_categories": ["Earloop"],
         }
-        metadata_path = tmp_dir / "model_metadata.json"
+        metadata_path = tmp_dir / "custom_model_metadata.json"
         metadata_path.write_text(json.dumps(metadata))
 
-        mask_data_path = tmp_dir / "mask_data.json"
+        mask_data["1"]["fit_family_id"] = 1
+        mask_data_path = tmp_dir / "custom_mask_data.json"
         mask_data_path.write_text(json.dumps(mask_data))
 
         prefix = "mask_recommender/models/20260101000000"
         latest_payload = {
             "timestamp": "20260101000000",
-            "model_key": f"{prefix}/model_state_dict.pt",
-            "metadata_key": f"{prefix}/model_metadata.json",
-            "mask_data_key": f"{prefix}/mask_data.json",
+            "params_key": f"{prefix}/custom_model_params.pt",
+            "metadata_key": f"{prefix}/custom_model_metadata.json",
+            "mask_data_key": f"{prefix}/custom_mask_data.json",
         }
 
-        s3.upload_file(str(model_path), bucket, latest_payload["model_key"])
+        s3.upload_file(str(model_path), bucket, latest_payload["params_key"])
         s3.upload_file(str(metadata_path), bucket, latest_payload["metadata_key"])
         s3.upload_file(str(mask_data_path), bucket, latest_payload["mask_data_key"])
         s3.put_object(
             Bucket=bucket,
-            Key="mask_recommender/models/latest.json",
+            Key="mask_recommender/models/custom_latest.json",
             Body=json.dumps(latest_payload).encode("utf-8"),
             ContentType="application/json",
         )
 
         recommender = lambda_function.MaskRecommenderInference()
-        recommendations = recommender.recommend_masks(facial_features)
+        recommendations = recommender.recommend_masks_custom(facial_features)
 
         assert len(recommendations) == 1
         assert recommendations[0]["mask_id"] == 1

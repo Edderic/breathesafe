@@ -47,8 +47,6 @@ from feature_builder import (ABS_PERIMETER_DIFF_STYLE_PREFIX,
                              scale_perimeter_diff_features)
 from predict_arkit_from_traditional import (TARGET_COLUMNS,
                                             predict_arkit_from_traditional)
-from prob_model import (normalize_qlft_pass, predict_prob_model,
-                        train_prob_model)
 from qa import build_mask_candidates, build_recommendation_preview
 from sklearn.metrics import (auc, f1_score, precision_score, recall_score,
                              roc_auc_score, roc_curve)
@@ -1935,17 +1933,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description='Train fit predictor model.')
     parser.add_argument('--epochs', type=int, default=600, help='Number of training epochs.')
     parser.add_argument('--learning-rate', type=float, default=0.00005, help='Learning rate for optimizer.')
-    parser.add_argument('--model-type', default='nn', choices=['nn', 'prob', 'custom_lr'], help='Model type to train.')
+    parser.add_argument('--model-type', default='custom_lr', choices=['custom_lr'], help='Model type to train.')
     parser.add_argument('--loss-plot', default='python/mask_recommender/training_loss.png', help='Path to save training loss plot.')
-    parser.add_argument('--loss-type', default='bce', choices=['bce', 'focal'], help='Loss function to use.')
-    parser.add_argument('--focal-alpha', type=float, default=0.25, help='Alpha for focal loss.')
-    parser.add_argument('--focal-gamma', type=float, default=2.0, help='Gamma for focal loss.')
-    parser.add_argument('--use-facial-perimeter', action='store_true', help='Use summed facial perimeter instead of component features.')
-    parser.add_argument('--use-diff-perimeter-bins', action='store_true', help='Use perimeter difference bins instead of raw perimeter features.')
-    parser.add_argument('--use-diff-perimeter-mask-bins', action='store_true', help='Include per-mask perimeter difference bin features.')
-    parser.add_argument('--exclude-mask-code', action='store_true', help='Exclude unique_internal_model_code from categorical features.')
-    parser.add_argument('--exclude-brand-model', action='store_true', help='Exclude brand_model from categorical features.')
-    parser.add_argument('--zscore', action='store_true', help='Apply z-score normalization to non-binary numeric features.')
     parser.add_argument('--class-reweight', action='store_true', help='Reweight loss by class balance.')
     parser.add_argument(
         '--retrain-with-full',
@@ -2020,17 +2009,12 @@ def main(argv=None):
     mask_empirical_priors = compute_mask_empirical_priors(filtered_fit_tests)
     mask_candidates = attach_mask_empirical_priors_to_masks(mask_candidates, mask_empirical_priors)
 
-    if args.use_facial_perimeter and args.use_diff_perimeter_bins:
-        raise SystemExit("Cannot use --use-facial-perimeter and --use-diff-perimeter-bins together.")
-    if args.use_facial_perimeter and args.use_diff_perimeter_mask_bins:
-        raise SystemExit("Cannot use --use-facial-perimeter and --use-diff-perimeter-mask-bins together.")
-
     cleaned_fit_tests = prepare_training_data(
         fit_tests_with_imputed_arkit_via_traditional_facial_measurements,
         mask_empirical_priors=mask_empirical_priors,
-        use_facial_perimeter=args.use_facial_perimeter,
-        use_diff_perimeter_bins=args.use_diff_perimeter_bins,
-        use_diff_perimeter_mask_bins=args.use_diff_perimeter_mask_bins
+        use_facial_perimeter=False,
+        use_diff_perimeter_bins=False,
+        use_diff_perimeter_mask_bins=False
     )
 
     logging.info(
@@ -2043,465 +2027,31 @@ def main(argv=None):
         logging.warning("No fit tests available after filtering. Exiting.")
         raise SystemExit(0)
 
-    if args.model_type == 'custom_lr':
-        if args.zscore:
-            logging.info("--zscore is currently only applied to model_type=nn. Ignoring for custom_lr model.")
-        if args.loss_type != 'bce':
-            logging.info("--loss-type=%s is currently only applied to model_type=nn. Using BCE for custom_lr.", args.loss_type)
-        if args.use_facial_perimeter or args.use_diff_perimeter_bins or args.use_diff_perimeter_mask_bins:
-            logging.info("Perimeter feature flags are ignored for model_type=custom_lr.")
-        if args.exclude_brand_model:
-            logging.info("--exclude-brand-model is not applicable to model_type=custom_lr.")
-        if args.exclude_mask_code:
-            logging.info("--exclude-mask-code is not applicable to model_type=custom_lr.")
-
-        timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
-        category_metadata = _custom_lr_category_metadata(cleaned_fit_tests)
-        num_rows = cleaned_fit_tests.shape[0]
-        permutation = torch.randperm(num_rows)
-        split_index = int(num_rows * 0.8)
-        train_idx = permutation[:split_index]
-        val_idx = permutation[split_index:]
-
-        custom_result = train_custom_lr_with_split(
-            cleaned_fit_tests,
-            train_idx=train_idx,
-            val_idx=val_idx,
-            category_metadata=category_metadata,
-            epochs=args.epochs,
-            learning_rate=args.learning_rate,
-            class_weighting=args.class_reweight,
-        )
-
-        params = custom_result['params']
-        train_losses = custom_result['train_losses']
-        val_losses = custom_result['val_losses']
-        train_probs = custom_result['train_probs']
-        val_probs = custom_result['val_probs']
-        train_labels = custom_result['y_train']
-        val_labels = custom_result['y_val']
-
-        best_threshold = 0.5
-        best_f1 = 0.0
-        if val_probs.size:
-            threshold_grid = np.arange(0.05, 0.96, 0.01)
-            for candidate in threshold_grid:
-                candidate_preds = (val_probs >= candidate).astype(float)
-                candidate_f1 = f1_score(val_labels, candidate_preds, zero_division=0)
-                if candidate_f1 > best_f1:
-                    best_f1 = candidate_f1
-                    best_threshold = float(candidate)
-        logging.info("Selected threshold=%.2f with val_f1=%.3f", best_threshold, best_f1)
-
-        saved_model_scope = 'split_train'
-        if args.retrain_with_full:
-            logging.info("Retraining custom_lr model on full dataset for artifact save.")
-            full_idx = torch.arange(cleaned_fit_tests.shape[0])
-            full_result = train_custom_lr_with_split(
-                cleaned_fit_tests,
-                train_idx=full_idx,
-                val_idx=full_idx,
-                category_metadata=category_metadata,
-                epochs=args.epochs,
-                learning_rate=args.learning_rate,
-                class_weighting=args.class_reweight,
-            )
-            params = full_result['params']
-            saved_model_scope = 'full_dataset'
-
-        prefix = f"mask_recommender/models/{timestamp}"
-        params_path = f"/tmp/mask_recommender_custom_params_{timestamp}.pt"
-        torch.save(params, params_path)
-        params_key = f"{prefix}/custom_model_params.pt"
-        params_uri = _upload_file_to_s3(params_path, params_key)
-
-        mask_data = {}
-        for _, row in masks_df.iterrows():
-            mask_id = row.get('id')
-            if pd.isna(mask_id):
-                continue
-            fit_family_id = pd.to_numeric(row.get('fit_family_id'), errors='coerce')
-            mask_data[str(int(mask_id))] = {
-                'id': int(mask_id),
-                'fit_family_id': int(fit_family_id) if pd.notna(fit_family_id) else None,
-                'unique_internal_model_code': row.get('unique_internal_model_code', ''),
-                'brand_model': derive_brand_model(
-                    row.get('unique_internal_model_code', ''),
-                    row.get('current_state')
-                ),
-                'perimeter_mm': row.get('perimeter_mm', None),
-                'strap_type': row.get('strap_type', ''),
-                'style': row.get('style', ''),
-                **mask_empirical_priors.get(int(mask_id), {}),
-            }
-
-        mask_data_key = f"{prefix}/custom_mask_data.json"
-        mask_data_uri = _upload_json_to_s3(mask_data, mask_data_key)
-
-        def predict_custom(inference_rows):
-            return _predict_custom_lr_probabilities(
-                inference_rows,
-                parameters=params,
-                category_metadata=category_metadata,
-            )
-
-        images_dir = _images_output_dir()
-        os.makedirs(images_dir, exist_ok=True)
-        recommendations_path = os.path.join(images_dir, f"custom_recommendations_{timestamp}.json")
-        recommendation_preview = build_recommendation_preview(
-            user_ids=[99, 101],
-            fit_tests_df=fit_tests_with_imputed_arkit_via_traditional_facial_measurements,
-            mask_candidates=mask_candidates,
-            predict_fn=predict_custom,
-            output_path=None if _should_upload_visual_artifacts_to_s3() else recommendations_path,
-            threshold=best_threshold,
-        )
-        recommendations_artifact = recommendations_path
-        if _should_upload_visual_artifacts_to_s3():
-            recommendations_key = f"mask_recommender/models/{timestamp}/custom_recommendations_{timestamp}.json"
-            recommendations_uri = _best_effort_visual_upload(
-                lambda: _upload_json_to_s3(recommendation_preview, recommendations_key),
-                "custom recommendation preview",
-                fallback_artifact=None,
-            )
-            recommendations_artifact = recommendations_uri
-        else:
-            logging.info("Saved recommendation preview to %s", recommendations_path)
-
-        loss_plot_artifact = None
-        if train_losses:
-            loss_plot_path = os.path.join(images_dir, f"{timestamp}_custom_training_loss.png")
-            plt.figure(figsize=(8, 4))
-            epochs_range = range(1, len(train_losses) + 1)
-            plt.plot(epochs_range, train_losses, label='train loss')
-            if val_losses:
-                plt.plot(epochs_range, val_losses, label='val loss')
-            plt.xlabel('Epoch')
-            plt.ylabel('Loss')
-            plt.title('Custom LR Training Loss')
-            plt.grid(True, linestyle='--', alpha=0.4)
-            plt.legend()
-            plt.tight_layout()
-            loss_plot_artifact = loss_plot_path
-            if _should_upload_visual_artifacts_to_s3():
-                loss_buf = io.BytesIO()
-                plt.savefig(loss_buf, format='png')
-                loss_buf.seek(0)
-                loss_plot_key = f"mask_recommender/models/{timestamp}/{timestamp}_custom_training_loss.png"
-                loss_plot_uri = _best_effort_visual_upload(
-                    lambda: _upload_png_bytes_to_s3(loss_buf.getvalue(), loss_plot_key),
-                    "custom training loss plot",
-                    fallback_artifact=None,
-                )
-                loss_plot_artifact = loss_plot_uri
-            else:
-                plt.savefig(loss_plot_path)
-                logging.info("Saved training loss plot to %s", loss_plot_path)
-            plt.close()
-
-        perimeter_diff_diagnostics_artifacts = _build_custom_lr_perimeter_diff_diagnostics(
-            cleaned_fit_tests=cleaned_fit_tests,
-            parameters=params,
-            category_metadata=category_metadata,
-            timestamp=timestamp,
-            mask_data=mask_data,
-            base_url=base_url,
-        )
-
-        roc_plot_path = os.path.join(images_dir, f"{timestamp}_custom_roc_auc.png")
-        plt.figure(figsize=(8, 4))
-        try:
-            train_fpr, train_tpr, _ = roc_curve(train_labels, train_probs)
-            train_auc = auc(train_fpr, train_tpr)
-            plt.plot(train_fpr, train_tpr, label=f'train (AUC={train_auc:.3f})', linewidth=2)
-        except ValueError:
-            train_auc = None
-            logging.warning("Skipping custom train ROC curve due to missing class labels.")
-        try:
-            val_fpr, val_tpr, _ = roc_curve(val_labels, val_probs)
-            val_auc = auc(val_fpr, val_tpr)
-            plt.plot(val_fpr, val_tpr, label=f'validation (AUC={val_auc:.3f})', linewidth=2)
-        except ValueError:
-            val_auc = None
-            logging.warning("Skipping custom validation ROC curve due to missing class labels.")
-        plt.plot([0, 1], [0, 1], linestyle='--', color='gray')
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.title('Custom LR ROC-AUC Curves')
-        plt.grid(True, linestyle='--', alpha=0.4)
-        plt.legend()
-        plt.tight_layout()
-        roc_plot_artifact = roc_plot_path
-        if _should_upload_visual_artifacts_to_s3():
-            roc_buf = io.BytesIO()
-            plt.savefig(roc_buf, format='png')
-            roc_buf.seek(0)
-            roc_plot_key = f"mask_recommender/models/{timestamp}/{timestamp}_custom_roc_auc.png"
-            roc_plot_uri = _best_effort_visual_upload(
-                lambda: _upload_png_bytes_to_s3(roc_buf.getvalue(), roc_plot_key),
-                "custom ROC plot",
-                fallback_artifact=None,
-            )
-            roc_plot_artifact = roc_plot_uri
-        else:
-            plt.savefig(roc_plot_path)
-            logging.info("Saved ROC-AUC plot to %s", roc_plot_path)
-        plt.close()
-
-        try:
-            roc_auc = roc_auc_score(val_labels, val_probs)
-        except ValueError:
-            roc_auc = None
-        val_preds = (val_probs >= best_threshold).astype(float)
-        val_precision = precision_score(val_labels, val_preds, zero_division=0)
-        val_recall = recall_score(val_labels, val_preds, zero_division=0)
-
-        metrics = {
-            'timestamp': timestamp,
-            'environment': _env_name(),
-            'model_type': 'custom_lr',
-            'threshold': best_threshold,
-            'roc_auc': roc_auc,
-            'val_f1': best_f1,
-            'val_precision': val_precision,
-            'val_recall': val_recall,
-            'train_samples': int(len(train_labels)),
-            'val_samples': int(len(val_labels)),
-            'losses': train_losses,
-            'val_losses': val_losses,
-            'recommendations_artifact': recommendations_artifact,
-            'training_loss_artifact': loss_plot_artifact,
-            'roc_auc_artifact': roc_plot_artifact,
-            'perimeter_diff_diagnostics_artifacts': perimeter_diff_diagnostics_artifacts,
-            'retrain_with_full': bool(args.retrain_with_full),
-            'saved_model_training_scope': saved_model_scope,
-            'validation_metrics_source': 'split_validation',
-        }
-        metrics_key = f"{prefix}/custom_metrics.json"
-        metrics_uri = _upload_json_to_s3(metrics, metrics_key)
-
-        metadata = {
-            'timestamp': timestamp,
-            'environment': _env_name(),
-            'model_type': 'custom_lr',
-            'threshold': best_threshold,
-            'retrain_with_full': bool(args.retrain_with_full),
-            'saved_model_training_scope': saved_model_scope,
-            'validation_metrics_source': 'split_validation',
-            **category_metadata,
-        }
-        metadata_key = f"{prefix}/custom_model_metadata.json"
-        metadata_uri = _upload_json_to_s3(metadata, metadata_key)
-        local_artifact_dir = _save_local_custom_artifacts(
-            timestamp=timestamp,
-            params=params,
-            metadata=metadata,
-            mask_data=mask_data,
-        )
-
-        latest_payload = {
-            'timestamp': timestamp,
-            'model_type': 'custom_lr',
-            'params_key': params_key,
-            'params_uri': params_uri,
-            'metadata_key': metadata_key,
-            'metadata_uri': metadata_uri,
-            'mask_data_key': mask_data_key,
-            'mask_data_uri': mask_data_uri,
-            'metrics_key': metrics_key,
-            'metrics_uri': metrics_uri,
-            'local_artifact_dir': str(local_artifact_dir),
-        }
-        latest_key = "mask_recommender/models/custom_latest.json"
-        latest_uri = _upload_json_to_s3(latest_payload, latest_key)
-        logging.info("Uploaded custom model params to %s", params_uri)
-        logging.info("Uploaded custom metadata to %s", metadata_uri)
-        logging.info("Uploaded custom metrics to %s", metrics_uri)
-        logging.info("Updated custom latest pointer at %s", latest_uri)
-        return latest_payload
-
-    if args.model_type == 'prob':
-        if args.zscore:
-            logging.info("--zscore is currently only applied to model_type=nn. Ignoring for prob model.")
-        timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
-        mask_id_index = sorted(cleaned_fit_tests['mask_id'].dropna().unique())
-        style_categories = sorted(cleaned_fit_tests['style'].dropna().unique())
-
-        num_rows = cleaned_fit_tests.shape[0]
-        permutation = torch.randperm(num_rows)
-        split_index = int(num_rows * 0.8)
-        train_idx = permutation[:split_index]
-        val_idx = permutation[split_index:]
-
-        train_df = cleaned_fit_tests.iloc[train_idx]
-        val_df = cleaned_fit_tests.iloc[val_idx]
-
-        params, prob_losses = train_prob_model(
-            train_df,
-            mask_id_index,
-            style_categories,
-            epochs=args.epochs,
-            learning_rate=args.learning_rate,
-        )
-
-        val_probs = predict_prob_model(params, val_df, mask_id_index, style_categories)
-        val_labels = normalize_qlft_pass(val_df["qlft_pass"]).to_numpy()
-        val_preds = (val_probs >= 0.5).astype(float)
-
-        try:
-            roc_auc = roc_auc_score(val_labels, val_probs)
-        except ValueError:
-            roc_auc = None
-
-        val_precision = precision_score(val_labels, val_preds, zero_division=0)
-        val_recall = recall_score(val_labels, val_preds, zero_division=0)
-        val_f1 = f1_score(val_labels, val_preds, zero_division=0)
-        saved_model_scope = 'split_train'
-        if args.retrain_with_full:
-            logging.info("Retraining probabilistic model on full dataset for artifact save.")
-            params, _ = train_prob_model(
-                cleaned_fit_tests,
-                mask_id_index,
-                style_categories,
-                epochs=args.epochs,
-                learning_rate=args.learning_rate,
-            )
-            saved_model_scope = 'full_dataset'
-
-        prefix = f"mask_recommender/models/{timestamp}"
-
-        params_path = f"/tmp/mask_recommender_prob_params_{timestamp}.pt"
-        torch.save({key: value.detach().cpu() for key, value in params.items()}, params_path)
-        params_key = f"{prefix}/prob_model_params.pt"
-        params_uri = _upload_file_to_s3(params_path, params_key)
-
-        mask_data = {}
-        for _, row in masks_df.iterrows():
-            mask_id = row.get('id')
-            if pd.isna(mask_id):
-                continue
-            mask_data[str(int(mask_id))] = {
-                'id': int(mask_id),
-                'unique_internal_model_code': row.get('unique_internal_model_code', ''),
-                'brand_model': derive_brand_model(
-                    row.get('unique_internal_model_code', ''),
-                    row.get('current_state')
-                ),
-                'perimeter_mm': row.get('perimeter_mm', None),
-                'strap_type': row.get('strap_type', ''),
-                'style': row.get('style', ''),
-                **mask_empirical_priors.get(int(mask_id), {}),
-            }
-
-        mask_data_key = f"{prefix}/prob_mask_data.json"
-        mask_data_uri = _upload_json_to_s3(mask_data, mask_data_key)
-
-        metadata = {
-            'timestamp': timestamp,
-            'environment': _env_name(),
-            'model_type': 'prob',
-            'mask_id_index': mask_id_index,
-            'style_categories': style_categories,
-            'retrain_with_full': bool(args.retrain_with_full),
-            'saved_model_training_scope': saved_model_scope,
-            'validation_metrics_source': 'split_validation',
-        }
-        metadata_key = f"{prefix}/prob_model_metadata.json"
-        metadata_uri = _upload_json_to_s3(metadata, metadata_key)
-
-        metrics = {
-            'timestamp': timestamp,
-            'environment': _env_name(),
-            'roc_auc': roc_auc,
-            'val_f1': val_f1,
-            'val_precision': val_precision,
-            'val_recall': val_recall,
-            'train_samples': int(train_df.shape[0]),
-            'val_samples': int(val_df.shape[0]),
-            'losses': prob_losses,
-            'retrain_with_full': bool(args.retrain_with_full),
-            'saved_model_training_scope': saved_model_scope,
-            'validation_metrics_source': 'split_validation',
-        }
-        metrics_key = f"{prefix}/prob_metrics.json"
-        metrics_uri = _upload_json_to_s3(metrics, metrics_key)
-
-        latest_payload = {
-            'timestamp': timestamp,
-            'model_type': 'prob',
-            'params_key': params_key,
-            'params_uri': params_uri,
-            'metadata_key': metadata_key,
-            'metadata_uri': metadata_uri,
-            'mask_data_key': mask_data_key,
-            'mask_data_uri': mask_data_uri,
-            'metrics_key': metrics_key,
-            'metrics_uri': metrics_uri,
-        }
-        latest_key = "mask_recommender/models/prob_latest.json"
-        latest_uri = _upload_json_to_s3(latest_payload, latest_key)
-
-        logging.info("Uploaded prob model params to %s", params_uri)
-        logging.info("Uploaded prob metadata to %s", metadata_uri)
-        logging.info("Uploaded prob metrics to %s", metrics_uri)
-        logging.info("Updated prob latest pointer at %s", latest_uri)
-
-        return latest_payload
-
-    categorical_columns = ['strap_type', 'style']
-    if not args.exclude_brand_model:
-        categorical_columns.append('brand_model')
-    if not args.exclude_mask_code:
-        categorical_columns.append('unique_internal_model_code')
-
-    features, target = build_feature_matrix(cleaned_fit_tests, categorical_columns)
-
-    num_rows = features.shape[0]
+    timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
+    category_metadata = _custom_lr_category_metadata(cleaned_fit_tests)
+    num_rows = cleaned_fit_tests.shape[0]
     permutation = torch.randperm(num_rows)
     split_index = int(num_rows * 0.8)
     train_idx = permutation[:split_index]
     val_idx = permutation[split_index:]
 
-    split_zscore_stats = fit_zscore_stats(features, train_idx) if args.zscore else {}
-    features_for_eval = apply_zscore(features, split_zscore_stats) if args.zscore else features
-
-    model, train_losses, val_losses, x_train, y_train, x_val, y_val, train_idx, val_idx = train_predictor_with_split(
-        features_for_eval,
-        target,
-        train_idx,
-        val_idx,
-        outer_dim=model_config.outer_dim,
+    custom_result = train_custom_lr_with_split(
+        cleaned_fit_tests,
+        train_idx=train_idx,
+        val_idx=val_idx,
+        category_metadata=category_metadata,
         epochs=args.epochs,
         learning_rate=args.learning_rate,
-        loss_type=args.loss_type,
-        focal_alpha=args.focal_alpha,
-        focal_gamma=args.focal_gamma,
         class_weighting=args.class_reweight,
     )
 
-    zscore_stats_for_saved_model = split_zscore_stats
-    features_for_saved_model = features_for_eval
-
-    logging.info("Model training complete. Feature count: %s", features_for_eval.shape[1])
-    feature_columns = list(features_for_eval.columns)
-    images_dir = _images_output_dir()
-    os.makedirs(images_dir, exist_ok=True)
-    timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
-
-    model.eval()
-    with torch.no_grad():
-        train_probs = model(x_train).squeeze().cpu().numpy()
-        train_labels = y_train.squeeze().cpu().numpy()
-        val_probs = model(x_val).squeeze().cpu().numpy()
-        val_labels = y_val.squeeze().cpu().numpy()
-
-    if val_probs.size:
-        logging.info(
-            "Validation probabilities: min=%.4f mean=%.4f max=%.4f",
-            float(np.min(val_probs)),
-            float(np.mean(val_probs)),
-            float(np.max(val_probs))
-        )
+    params = custom_result['params']
+    train_losses = custom_result['train_losses']
+    val_losses = custom_result['val_losses']
+    train_probs = custom_result['train_probs']
+    val_probs = custom_result['val_probs']
+    train_labels = custom_result['y_train']
+    val_labels = custom_result['y_val']
 
     best_threshold = 0.5
     best_f1 = 0.0
@@ -2514,223 +2064,38 @@ def main(argv=None):
                 best_f1 = candidate_f1
                 best_threshold = float(candidate)
     logging.info("Selected threshold=%.2f with val_f1=%.3f", best_threshold, best_f1)
+
     saved_model_scope = 'split_train'
     if args.retrain_with_full:
-        logging.info("Retraining NN model on full dataset for artifact save.")
-        if args.zscore:
-            zscore_stats_for_saved_model = fit_zscore_stats(features, np.arange(features.shape[0]))
-            features_for_saved_model = apply_zscore(features, zscore_stats_for_saved_model)
-        full_idx = torch.arange(features_for_saved_model.shape[0])
-        model, _, _, _, _, _, _, _, _ = train_predictor_with_split(
-            features_for_saved_model,
-            target,
-            full_idx,
-            full_idx,
-            outer_dim=model_config.outer_dim,
+        logging.info("Retraining custom_lr model on full dataset for artifact save.")
+        full_idx = torch.arange(cleaned_fit_tests.shape[0])
+        full_result = train_custom_lr_with_split(
+            cleaned_fit_tests,
+            train_idx=full_idx,
+            val_idx=full_idx,
+            category_metadata=category_metadata,
             epochs=args.epochs,
             learning_rate=args.learning_rate,
-            loss_type=args.loss_type,
-            focal_alpha=args.focal_alpha,
-            focal_gamma=args.focal_gamma,
             class_weighting=args.class_reweight,
         )
+        params = full_result['params']
         saved_model_scope = 'full_dataset'
 
-    recommendations_path = os.path.join(
-        images_dir,
-        f"recommendations_{timestamp}.json"
-    )
-
-    def predict_nn(inference_rows):
-       encoded = build_feature_frame(
-           inference_rows,
-           feature_columns=feature_columns,
-           categorical_columns=categorical_columns,
-           use_facial_perimeter=args.use_facial_perimeter,
-           use_diff_perimeter_bins=args.use_diff_perimeter_bins,
-           use_diff_perimeter_mask_bins=args.use_diff_perimeter_mask_bins
-       )
-       if args.zscore and zscore_stats_for_saved_model:
-           encoded = apply_zscore(encoded, zscore_stats_for_saved_model)
-       x_infer = torch.tensor(encoded.to_numpy(), dtype=torch.float32)
-       model.eval()
-       with torch.no_grad():
-           return model(x_infer).squeeze().cpu().numpy()
-
-    recommendation_preview = build_recommendation_preview(
-        user_ids=[99, 101],
-        fit_tests_df=fit_tests_with_imputed_arkit_via_traditional_facial_measurements,
-        mask_candidates=mask_candidates,
-        predict_fn=predict_nn,
-        output_path=None if _should_upload_visual_artifacts_to_s3() else recommendations_path,
-        threshold=best_threshold,
-    )
-    recommendations_artifact = recommendations_path
-    if _should_upload_visual_artifacts_to_s3():
-        recommendations_key = f"mask_recommender/models/{timestamp}/recommendations_{timestamp}.json"
-        recommendations_uri = _best_effort_visual_upload(
-            lambda: _upload_json_to_s3(recommendation_preview, recommendations_key),
-            "recommendation preview",
-            fallback_artifact=None,
-        )
-        recommendations_artifact = recommendations_uri
-        if recommendations_uri:
-            logging.info("Saved recommendation preview to %s", recommendations_uri)
-    else:
-        logging.info("Saved recommendation preview to %s", recommendations_path)
-    probe_diagnostics = _build_probe_diagnostics(
-        model=model,
-        mask_candidates=mask_candidates,
-        feature_columns=feature_columns,
-        categorical_columns=categorical_columns,
-        args=args,
-        zscore_stats=zscore_stats_for_saved_model,
-        mask_empirical_priors=mask_empirical_priors,
-    )
-    probe_diagnostics_path = os.path.join(images_dir, f"{timestamp}_probe_diagnostics.json")
-    probe_diagnostics_artifact = probe_diagnostics_path
-    if _should_upload_visual_artifacts_to_s3():
-        probe_diagnostics_key = f"mask_recommender/models/{timestamp}/{timestamp}_probe_diagnostics.json"
-        probe_diagnostics_uri = _best_effort_visual_upload(
-            lambda: _upload_json_to_s3(probe_diagnostics, probe_diagnostics_key),
-            "probe diagnostics",
-            fallback_artifact=None,
-        )
-        probe_diagnostics_artifact = probe_diagnostics_uri
-        if probe_diagnostics_uri:
-            logging.info("Saved probe diagnostics to %s", probe_diagnostics_uri)
-    else:
-        with open(probe_diagnostics_path, 'w', encoding='utf-8') as handle:
-            json.dump(probe_diagnostics, handle, indent=2)
-        logging.info("Saved probe diagnostics to %s", probe_diagnostics_path)
-    loss_plot_artifact = None
-    if train_losses:
-        loss_plot_path = os.path.join(images_dir, f"{timestamp}_training_loss.png")
-        plt.figure(figsize=(8, 4))
-        epochs = range(1, len(train_losses) + 1)
-        plt.plot(epochs, train_losses, label='train loss')
-        if val_losses:
-            plt.plot(epochs, val_losses, label='val loss')
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss')
-        plt.title('Training Loss')
-        plt.grid(True, linestyle='--', alpha=0.4)
-        plt.legend()
-        plt.tight_layout()
-        loss_plot_artifact = loss_plot_path
-        if _should_upload_visual_artifacts_to_s3():
-            loss_buf = io.BytesIO()
-            plt.savefig(loss_buf, format='png')
-            loss_buf.seek(0)
-            loss_plot_key = f"mask_recommender/models/{timestamp}/{timestamp}_training_loss.png"
-            loss_plot_uri = _best_effort_visual_upload(
-                lambda: _upload_png_bytes_to_s3(loss_buf.getvalue(), loss_plot_key),
-                "training loss plot",
-                fallback_artifact=None,
-            )
-            loss_plot_artifact = loss_plot_uri
-            if loss_plot_uri:
-                logging.info("Saved training loss plot to %s", loss_plot_uri)
-        else:
-            plt.savefig(loss_plot_path)
-            logging.info("Saved training loss plot to %s", loss_plot_path)
-        plt.close()
-
-    roc_plot_path = os.path.join(images_dir, f"{timestamp}_roc_auc.png")
-    plt.figure(figsize=(8, 4))
-    train_auc = None
-    val_auc = None
-    try:
-        train_fpr, train_tpr, _ = roc_curve(train_labels, train_probs)
-        train_auc = auc(train_fpr, train_tpr)
-        plt.plot(train_fpr, train_tpr, label=f'train (AUC={train_auc:.3f})', linewidth=2)
-    except ValueError:
-        logging.warning("Skipping train ROC curve due to missing class labels.")
-    try:
-        val_fpr, val_tpr, _ = roc_curve(val_labels, val_probs)
-        val_auc = auc(val_fpr, val_tpr)
-        plt.plot(val_fpr, val_tpr, label=f'validation (AUC={val_auc:.3f})', linewidth=2)
-    except ValueError:
-        logging.warning("Skipping validation ROC curve due to missing class labels.")
-    plt.plot([0, 1], [0, 1], linestyle='--', color='gray')
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('ROC-AUC Curves')
-    plt.grid(True, linestyle='--', alpha=0.4)
-    plt.legend()
-    plt.tight_layout()
-    roc_plot_artifact = roc_plot_path
-    if _should_upload_visual_artifacts_to_s3():
-        roc_buf = io.BytesIO()
-        plt.savefig(roc_buf, format='png')
-        roc_buf.seek(0)
-        roc_plot_key = f"mask_recommender/models/{timestamp}/{timestamp}_roc_auc.png"
-        roc_plot_uri = _best_effort_visual_upload(
-            lambda: _upload_png_bytes_to_s3(roc_buf.getvalue(), roc_plot_key),
-            "ROC plot",
-            fallback_artifact=None,
-        )
-        roc_plot_artifact = roc_plot_uri
-        if roc_plot_uri:
-            logging.info("Saved ROC-AUC plot to %s", roc_plot_uri)
-    else:
-        plt.savefig(roc_plot_path)
-        logging.info("Saved ROC-AUC plot to %s", roc_plot_path)
-    plt.close()
-
-    val_results_path = os.path.join(images_dir, f"{timestamp}_validation_results.json")
-    val_frame = features_for_eval.iloc[val_idx].copy()
-    val_frame["probability_of_fit"] = val_probs
-    val_frame["ground_truth"] = val_labels
-    val_frame["prediction"] = (val_probs >= best_threshold).astype(int)
-    val_frame["correct"] = val_frame["prediction"] == val_frame["ground_truth"]
-    val_frame["confidence"] = np.maximum(val_probs, 1 - val_probs)
-    val_frame = val_frame.sort_values(by="confidence", ascending=False)
-    val_results = val_frame.to_dict(orient="records")
-    val_results_artifact = val_results_path
-    if _should_upload_visual_artifacts_to_s3():
-        val_results_key = f"mask_recommender/models/{timestamp}/{timestamp}_validation_results.json"
-        val_results_uri = _best_effort_visual_upload(
-            lambda: _upload_json_to_s3(val_results, val_results_key),
-            "validation results",
-            fallback_artifact=None,
-        )
-        val_results_artifact = val_results_uri
-        if val_results_uri:
-            logging.info("Saved validation results to %s", val_results_uri)
-    else:
-        with open(val_results_path, "w", encoding="utf-8") as handle:
-            json.dump(val_results, handle, indent=2)
-        logging.info("Saved validation results to %s", val_results_path)
-
-    logging.info(f"masks with fit tests that are missing perimeter_mm: {tested_missing_perimeter_mm}")
-
-    logging.info(f"Total # fit tests missing parameter_mm: {total_fit_tests_missing_parameter_mm}")
-
-    threshold = best_threshold
-    val_preds = (val_probs >= threshold).astype(float)
-    try:
-        roc_auc = roc_auc_score(val_labels, val_probs)
-    except ValueError:
-        roc_auc = None
-
-    val_precision = precision_score(val_labels, val_preds, zero_division=0)
-    val_recall = recall_score(val_labels, val_preds, zero_division=0)
-
     prefix = f"mask_recommender/models/{timestamp}"
-
-    model_path = f"/tmp/mask_recommender_model_{timestamp}.pt"
-    torch.save(model.state_dict(), model_path)
-    model_key = f"{prefix}/model_state_dict.pt"
-    model_uri = _upload_file_to_s3(model_path, model_key)
+    params_path = f"/tmp/mask_recommender_custom_params_{timestamp}.pt"
+    torch.save(params, params_path)
+    params_key = f"{prefix}/custom_model_params.pt"
+    params_uri = _upload_file_to_s3(params_path, params_key)
 
     mask_data = {}
     for _, row in masks_df.iterrows():
         mask_id = row.get('id')
         if pd.isna(mask_id):
             continue
+        fit_family_id = pd.to_numeric(row.get('fit_family_id'), errors='coerce')
         mask_data[str(int(mask_id))] = {
             'id': int(mask_id),
+            'fit_family_id': int(fit_family_id) if pd.notna(fit_family_id) else None,
             'unique_internal_model_code': row.get('unique_internal_model_code', ''),
             'brand_model': derive_brand_model(
                 row.get('unique_internal_model_code', ''),
@@ -2742,99 +2107,188 @@ def main(argv=None):
             **mask_empirical_priors.get(int(mask_id), {}),
         }
 
-    mask_data_key = f"{prefix}/mask_data.json"
+    mask_data_key = f"{prefix}/custom_mask_data.json"
     mask_data_uri = _upload_json_to_s3(mask_data, mask_data_key)
 
-    actual_series = fit_tests_with_imputed_arkit_via_traditional_facial_measurements.get('actual')
-    if actual_series is None:
-        actual_series = pd.Series([None] * total_num_fit_tests)
-    actual_series = actual_series.fillna(False).astype(bool)
-    actual_count = int(actual_series.sum())
-    predicted_count = int(total_num_fit_tests - actual_count)
+    def predict_custom(inference_rows):
+        return _predict_custom_lr_probabilities(
+            inference_rows,
+            parameters=params,
+            category_metadata=category_metadata,
+        )
 
-    training_actual_count = 0
-    training_predicted_count = 0
-    if 'actual' in filtered_fit_tests.columns:
-        training_actual_count = int(filtered_fit_tests['actual'].fillna(False).astype(bool).sum())
-        training_predicted_count = int(filtered_fit_tests.shape[0] - training_actual_count)
+    images_dir = _images_output_dir()
+    os.makedirs(images_dir, exist_ok=True)
+    recommendations_path = os.path.join(images_dir, f"custom_recommendations_{timestamp}.json")
+    recommendation_preview = build_recommendation_preview(
+        user_ids=[99, 101],
+        fit_tests_df=fit_tests_with_imputed_arkit_via_traditional_facial_measurements,
+        mask_candidates=mask_candidates,
+        predict_fn=predict_custom,
+        output_path=None if _should_upload_visual_artifacts_to_s3() else recommendations_path,
+        threshold=best_threshold,
+    )
+    recommendations_artifact = recommendations_path
+    if _should_upload_visual_artifacts_to_s3():
+        recommendations_key = f"mask_recommender/models/{timestamp}/custom_recommendations_{timestamp}.json"
+        recommendations_uri = _best_effort_visual_upload(
+            lambda: _upload_json_to_s3(recommendation_preview, recommendations_key),
+            "custom recommendation preview",
+            fallback_artifact=None,
+        )
+        recommendations_artifact = recommendations_uri
+    else:
+        logging.info("Saved recommendation preview to %s", recommendations_path)
+
+    loss_plot_artifact = None
+    if train_losses:
+        loss_plot_path = os.path.join(images_dir, f"{timestamp}_custom_training_loss.png")
+        plt.figure(figsize=(8, 4))
+        epochs_range = range(1, len(train_losses) + 1)
+        plt.plot(epochs_range, train_losses, label='train loss')
+        if val_losses:
+            plt.plot(epochs_range, val_losses, label='val loss')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.title('Custom LR Training Loss')
+        plt.grid(True, linestyle='--', alpha=0.4)
+        plt.legend()
+        plt.tight_layout()
+        loss_plot_artifact = loss_plot_path
+        if _should_upload_visual_artifacts_to_s3():
+            loss_buf = io.BytesIO()
+            plt.savefig(loss_buf, format='png')
+            loss_buf.seek(0)
+            loss_plot_key = f"mask_recommender/models/{timestamp}/{timestamp}_custom_training_loss.png"
+            loss_plot_uri = _best_effort_visual_upload(
+                lambda: _upload_png_bytes_to_s3(loss_buf.getvalue(), loss_plot_key),
+                "custom training loss plot",
+                fallback_artifact=None,
+            )
+            loss_plot_artifact = loss_plot_uri
+        else:
+            plt.savefig(loss_plot_path)
+            logging.info("Saved training loss plot to %s", loss_plot_path)
+        plt.close()
+
+    perimeter_diff_diagnostics_artifacts = _build_custom_lr_perimeter_diff_diagnostics(
+        cleaned_fit_tests=cleaned_fit_tests,
+        parameters=params,
+        category_metadata=category_metadata,
+        timestamp=timestamp,
+        mask_data=mask_data,
+        base_url=base_url,
+    )
+
+    roc_plot_path = os.path.join(images_dir, f"{timestamp}_custom_roc_auc.png")
+    plt.figure(figsize=(8, 4))
+    try:
+        train_fpr, train_tpr, _ = roc_curve(train_labels, train_probs)
+        train_auc = auc(train_fpr, train_tpr)
+        plt.plot(train_fpr, train_tpr, label=f'train (AUC={train_auc:.3f})', linewidth=2)
+    except ValueError:
+        train_auc = None
+        logging.warning("Skipping custom train ROC curve due to missing class labels.")
+    try:
+        val_fpr, val_tpr, _ = roc_curve(val_labels, val_probs)
+        val_auc = auc(val_fpr, val_tpr)
+        plt.plot(val_fpr, val_tpr, label=f'validation (AUC={val_auc:.3f})', linewidth=2)
+    except ValueError:
+        val_auc = None
+        logging.warning("Skipping custom validation ROC curve due to missing class labels.")
+    plt.plot([0, 1], [0, 1], linestyle='--', color='gray')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Custom LR ROC-AUC Curves')
+    plt.grid(True, linestyle='--', alpha=0.4)
+    plt.legend()
+    plt.tight_layout()
+    roc_plot_artifact = roc_plot_path
+    if _should_upload_visual_artifacts_to_s3():
+        roc_buf = io.BytesIO()
+        plt.savefig(roc_buf, format='png')
+        roc_buf.seek(0)
+        roc_plot_key = f"mask_recommender/models/{timestamp}/{timestamp}_custom_roc_auc.png"
+        roc_plot_uri = _best_effort_visual_upload(
+            lambda: _upload_png_bytes_to_s3(roc_buf.getvalue(), roc_plot_key),
+            "custom ROC plot",
+            fallback_artifact=None,
+        )
+        roc_plot_artifact = roc_plot_uri
+    else:
+        plt.savefig(roc_plot_path)
+        logging.info("Saved ROC-AUC plot to %s", roc_plot_path)
+    plt.close()
+
+    try:
+        roc_auc = roc_auc_score(val_labels, val_probs)
+    except ValueError:
+        roc_auc = None
+    val_preds = (val_probs >= best_threshold).astype(float)
+    val_precision = precision_score(val_labels, val_preds, zero_division=0)
+    val_recall = recall_score(val_labels, val_preds, zero_division=0)
 
     metrics = {
         'timestamp': timestamp,
         'environment': _env_name(),
-        'threshold': threshold,
-        'val_loss': val_losses[-1] if val_losses else None,
+        'model_type': 'custom_lr',
+        'threshold': best_threshold,
         'roc_auc': roc_auc,
         'val_f1': best_f1,
         'val_precision': val_precision,
         'val_recall': val_recall,
-        'train_samples': int(features.shape[0]),
-        'val_samples': int(y_val.shape[0]),
-        'fit_tests_total': int(total_num_fit_tests),
-        'fit_tests_total_actual_arkit': actual_count,
-        'fit_tests_total_predicted_arkit': predicted_count,
-        'fit_tests_training_total': int(filtered_fit_tests.shape[0]),
-        'fit_tests_training_actual_arkit': training_actual_count,
-        'fit_tests_training_predicted_arkit': training_predicted_count,
+        'train_samples': int(len(train_labels)),
+        'val_samples': int(len(val_labels)),
+        'losses': train_losses,
+        'val_losses': val_losses,
         'recommendations_artifact': recommendations_artifact,
         'training_loss_artifact': loss_plot_artifact,
         'roc_auc_artifact': roc_plot_artifact,
-        'validation_results_artifact': val_results_artifact,
-        'probe_diagnostics_artifact': probe_diagnostics_artifact,
+        'perimeter_diff_diagnostics_artifacts': perimeter_diff_diagnostics_artifacts,
         'retrain_with_full': bool(args.retrain_with_full),
         'saved_model_training_scope': saved_model_scope,
         'validation_metrics_source': 'split_validation',
-        'exclude_mask_code': bool(args.exclude_mask_code),
-        'exclude_brand_model': bool(args.exclude_brand_model),
-        'zscore': bool(args.zscore),
-        'zscore_features_count': len(zscore_stats_for_saved_model),
     }
-    metrics_key = f"{prefix}/metrics.json"
+    metrics_key = f"{prefix}/custom_metrics.json"
     metrics_uri = _upload_json_to_s3(metrics, metrics_key)
 
     metadata = {
         'timestamp': timestamp,
         'environment': _env_name(),
-        'feature_columns': feature_columns,
-        'categorical_columns': categorical_columns,
-        'hidden_sizes': _extract_hidden_sizes(model),
-        'outer_dim': model_config.outer_dim,
-        'threshold': threshold,
-        'model_class': 'torch.nn.Sequential',
-        'use_facial_perimeter': args.use_facial_perimeter,
-        'use_diff_perimeter_bins': args.use_diff_perimeter_bins,
-        'use_diff_perimeter_mask_bins': args.use_diff_perimeter_mask_bins,
-        'exclude_mask_code': args.exclude_mask_code,
-        'exclude_brand_model': args.exclude_brand_model,
+        'model_type': 'custom_lr',
+        'threshold': best_threshold,
         'retrain_with_full': bool(args.retrain_with_full),
         'saved_model_training_scope': saved_model_scope,
         'validation_metrics_source': 'split_validation',
-        'zscore': bool(args.zscore),
-        'zscore_stats': zscore_stats_for_saved_model,
+        **category_metadata,
     }
-    metadata_key = f"{prefix}/model_metadata.json"
+    metadata_key = f"{prefix}/custom_model_metadata.json"
     metadata_uri = _upload_json_to_s3(metadata, metadata_key)
+    local_artifact_dir = _save_local_custom_artifacts(
+        timestamp=timestamp,
+        params=params,
+        metadata=metadata,
+        mask_data=mask_data,
+    )
 
     latest_payload = {
         'timestamp': timestamp,
-        'model_key': model_key,
-        'model_uri': model_uri,
-        'metrics_key': metrics_key,
-        'metrics_uri': metrics_uri,
+        'model_type': 'custom_lr',
+        'params_key': params_key,
+        'params_uri': params_uri,
         'metadata_key': metadata_key,
         'metadata_uri': metadata_uri,
         'mask_data_key': mask_data_key,
         'mask_data_uri': mask_data_uri,
+        'metrics_key': metrics_key,
+        'metrics_uri': metrics_uri,
+        'local_artifact_dir': str(local_artifact_dir),
     }
-    latest_key = "mask_recommender/models/latest.json"
+    latest_key = "mask_recommender/models/custom_latest.json"
     latest_uri = _upload_json_to_s3(latest_payload, latest_key)
-
-    logging.info("Uploaded model to %s", model_uri)
-    logging.info("Uploaded metadata to %s", metadata_uri)
-    logging.info("Uploaded metrics to %s", metrics_uri)
-    logging.info("Updated latest pointer at %s", latest_uri)
-
+    logging.info("Uploaded custom model params to %s", params_uri)
+    logging.info("Uploaded custom metadata to %s", metadata_uri)
+    logging.info("Uploaded custom metrics to %s", metrics_uri)
+    logging.info("Updated custom latest pointer at %s", latest_uri)
     return latest_payload
 
-
-if __name__ == '__main__':
-    main()

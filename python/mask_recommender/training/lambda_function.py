@@ -36,24 +36,9 @@ def _build_train_argv(event):
         argv.extend(['--epochs', str(event['epochs'])])
     if event.get('learning_rate') is not None:
         argv.extend(['--learning-rate', str(event['learning_rate'])])
-    if event.get('model_type'):
-        argv.extend(['--model-type', str(event['model_type'])])
-    if event.get('loss_type'):
-        argv.extend(['--loss-type', str(event['loss_type'])])
+    argv.extend(['--model-type', 'custom_lr'])
     if event.get('class_reweight'):
         argv.append('--class-reweight')
-    if event.get('zscore'):
-        argv.append('--zscore')
-    if event.get('use_facial_perimeter'):
-        argv.append('--use-facial-perimeter')
-    if event.get('use_diff_perimeter_bins'):
-        argv.append('--use-diff-perimeter-bins')
-    if event.get('use_diff_perimeter_mask_bins'):
-        argv.append('--use-diff-perimeter-mask-bins')
-    if event.get('exclude_mask_code'):
-        argv.append('--exclude-mask-code')
-    if event.get('exclude_brand_model'):
-        argv.append('--exclude-brand-model')
     if event.get('retrain_with_full'):
         argv.append('--retrain-with-full')
     return argv

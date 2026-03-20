@@ -15,10 +15,8 @@ sys.path.insert(0, str(REPO_ROOT))
 from mask_recommender.feature_builder import (  # noqa: E402
     FACIAL_FEATURE_COLUMNS,
     MASK_EMPIRICAL_FEATURE_COLUMNS,
-    build_feature_frame,
     derive_brand_model,
 )
-from mask_recommender.prob_model import predict_prob_model  # noqa: E402
 from mask_recommender.train import (  # noqa: E402
     calc_preds,
     prep_data_in_torch_with_categories,
@@ -72,46 +70,6 @@ def _custom_model_root() -> Path:
     return _model_root()
 
 
-def _download_latest_from_s3() -> Path:
-    s3 = boto3.client("s3", region_name=_s3_region())
-    bucket = _s3_bucket()
-    latest_key = "mask_recommender/models/latest.json"
-    payload = json.loads(
-        s3.get_object(Bucket=bucket, Key=latest_key)["Body"].read().decode("utf-8")
-    )
-    timestamp = payload.get("timestamp") or "latest"
-    output_dir = _model_root() / str(timestamp)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    for key_name in ("model_key", "metadata_key", "mask_data_key"):
-        key = payload[key_name]
-        filename = Path(key).name
-        target = output_dir / filename
-        s3.download_file(bucket, key, str(target))
-
-    return output_dir
-
-
-def _download_latest_prob_from_s3() -> Path:
-    s3 = boto3.client("s3", region_name=_s3_region())
-    bucket = _s3_bucket()
-    latest_key = "mask_recommender/models/prob_latest.json"
-    payload = json.loads(
-        s3.get_object(Bucket=bucket, Key=latest_key)["Body"].read().decode("utf-8")
-    )
-    timestamp = payload.get("timestamp") or "latest"
-    output_dir = _model_root() / f"prob_{timestamp}"
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    for key_name in ("params_key", "metadata_key", "mask_data_key"):
-        key = payload[key_name]
-        filename = Path(key).name
-        target = output_dir / filename
-        s3.download_file(bucket, key, str(target))
-
-    return output_dir
-
-
 def _download_latest_custom_from_s3() -> Path:
     s3 = boto3.client("s3", region_name=_s3_region())
     bucket = _s3_bucket()
@@ -130,32 +88,6 @@ def _download_latest_custom_from_s3() -> Path:
         s3.download_file(bucket, key, str(target))
 
     return output_dir
-
-
-def _default_model_dir() -> Path:
-    return _model_root()
-
-
-def _find_latest_model_dir(base_dir: Path) -> Path:
-    if base_dir.is_file():
-        return base_dir.parent
-
-    if (base_dir / "model_state_dict.pt").exists():
-        return base_dir
-
-    if not base_dir.exists():
-        raise FileNotFoundError(f"Model directory not found: {base_dir}")
-
-    candidates = [
-        entry for entry in base_dir.iterdir()
-        if entry.is_dir() and (entry / "model_state_dict.pt").exists()
-    ]
-    if not candidates:
-        raise FileNotFoundError(
-            f"No model artifacts found in {base_dir}. Expected model_state_dict.pt"
-        )
-
-    return sorted(candidates)[-1]
 
 
 def _artifact_timestamp(directory: Path, metadata_filename: str) -> str:
@@ -195,70 +127,6 @@ def _find_latest_custom_model_dir(base_dir: Path) -> Path:
         candidates,
         key=lambda candidate: _artifact_timestamp(candidate, "custom_model_metadata.json"),
     )
-
-
-def _load_artifacts(model_dir: Path):
-    model_path = model_dir / "model_state_dict.pt"
-    metadata_path = model_dir / "model_metadata.json"
-    mask_data_path = model_dir / "mask_data.json"
-
-    with metadata_path.open("r", encoding="utf-8") as handle:
-        metadata = json.load(handle)
-    with mask_data_path.open("r", encoding="utf-8") as handle:
-        mask_data = json.load(handle)
-
-    feature_columns = metadata["feature_columns"]
-    categorical_columns = metadata["categorical_columns"]
-    state_dict = torch.load(model_path, map_location="cpu")
-    linear_specs = []
-    for key, value in state_dict.items():
-        if not key.endswith(".weight"):
-            continue
-        if value.ndim != 2:
-            continue
-        layer_idx = int(key.split(".")[0])
-        out_features, in_features = int(value.shape[0]), int(value.shape[1])
-        linear_specs.append((layer_idx, in_features, out_features))
-    linear_specs = sorted(linear_specs, key=lambda x: x[0])
-    if not linear_specs:
-        raise RuntimeError(f"No linear layers found in model state dict: {model_path}")
-
-    layers = []
-    for idx, (_, in_features, out_features) in enumerate(linear_specs):
-        layers.append(torch.nn.Linear(in_features, out_features))
-        if idx < len(linear_specs) - 1:
-            layers.append(torch.nn.ReLU())
-    model = torch.nn.Sequential(*layers)
-
-    model.load_state_dict(state_dict)
-    model.eval()
-
-    return {
-        "model": model,
-        "feature_columns": feature_columns,
-        "categorical_columns": categorical_columns,
-        "mask_data": mask_data,
-        "metadata": metadata,
-    }
-
-
-def _load_prob_artifacts(model_dir: Path):
-    params_path = model_dir / "prob_model_params.pt"
-    metadata_path = model_dir / "prob_model_metadata.json"
-    mask_data_path = model_dir / "prob_mask_data.json"
-
-    with metadata_path.open("r", encoding="utf-8") as handle:
-        metadata = json.load(handle)
-    with mask_data_path.open("r", encoding="utf-8") as handle:
-        mask_data = json.load(handle)
-
-    params = torch.load(params_path, map_location="cpu")
-
-    return {
-        "params": params,
-        "metadata": metadata,
-        "mask_data": mask_data,
-    }
 
 
 def _load_custom_artifacts(model_dir: Path):
@@ -345,103 +213,6 @@ def _build_inference_rows(mask_data, facial_features):
     return pd.DataFrame(rows)
 
 
-def _infer(payload, artifacts):
-    facial_features = _extract_facial_measurements(payload)
-    inference_rows = _build_inference_rows(artifacts["mask_data"], facial_features)
-
-    numeric_columns = FACIAL_FEATURE_COLUMNS + ["perimeter_mm"]
-    numeric_frame = pd.DataFrame(
-        {
-            col: pd.to_numeric(inference_rows.get(col), errors="coerce")
-            for col in numeric_columns
-        }
-    )
-    numeric_frame = numeric_frame.replace([float("inf"), float("-inf")], float("nan")).fillna(0)
-    inference_rows[numeric_columns] = numeric_frame
-
-    encoded = build_feature_frame(
-        inference_rows,
-        feature_columns=artifacts["feature_columns"],
-        categorical_columns=artifacts["categorical_columns"],
-        use_facial_perimeter=artifacts["metadata"].get("use_facial_perimeter", False),
-        use_diff_perimeter_bins=artifacts["metadata"].get("use_diff_perimeter_bins", False),
-        use_diff_perimeter_mask_bins=artifacts["metadata"].get("use_diff_perimeter_mask_bins", False),
-    )
-    if artifacts["metadata"].get("zscore") and artifacts["metadata"].get("zscore_stats"):
-        for column, values in artifacts["metadata"]["zscore_stats"].items():
-            if column not in encoded.columns:
-                continue
-            mean_value = float(values.get("mean", 0.0))
-            std_value = float(values.get("std", 1.0))
-            if std_value == 0:
-                std_value = 1.0
-            encoded[column] = (
-                pd.to_numeric(encoded[column], errors="coerce").fillna(0) - mean_value
-            ) / std_value
-
-    inputs = torch.tensor(encoded.to_numpy(), dtype=torch.float32)
-    with torch.no_grad():
-        logits = artifacts["model"](inputs).squeeze(1)
-        probs = torch.sigmoid(logits).cpu().tolist()
-
-    recommendations = []
-    for idx, (mask_id, mask_info) in enumerate(artifacts["mask_data"].items()):
-        recommendations.append({
-            "mask_id": int(mask_id),
-            "proba_fit": float(probs[idx]),
-            "mask_info": mask_info,
-        })
-
-    recommendations.sort(key=lambda item: item["proba_fit"], reverse=True)
-    mask_id_map = {str(idx): rec["mask_id"] for idx, rec in enumerate(recommendations)}
-    proba_map = {str(idx): rec["proba_fit"] for idx, rec in enumerate(recommendations)}
-    empirical_debug_map = {
-        str(idx): {
-            "mask_fit_test_count": float(rec["mask_info"].get("mask_fit_test_count", 0) or 0),
-            "mask_pass_count": float(rec["mask_info"].get("mask_pass_count", 0) or 0),
-            "mask_smoothed_pass_rate": float(rec["mask_info"].get("mask_smoothed_pass_rate", 0.5) or 0.5),
-        }
-        for idx, rec in enumerate(recommendations)
-    }
-    return {
-        "mask_id": mask_id_map,
-        "proba_fit": proba_map,
-        "model": {
-            "timestamp": artifacts["metadata"].get("timestamp"),
-            "environment": artifacts["metadata"].get("environment"),
-            "empirical_debug": empirical_debug_map,
-        }
-    }
-
-
-def _infer_prob(payload, artifacts):
-    facial_features = _extract_facial_measurements(payload)
-    inference_rows = _build_inference_rows(artifacts["mask_data"], facial_features)
-    probs = predict_prob_model(
-        artifacts["params"],
-        inference_rows,
-        artifacts["metadata"]["mask_id_index"],
-        artifacts["metadata"]["style_categories"],
-    )
-
-    recommendations = []
-    for idx, (mask_id, mask_info) in enumerate(artifacts["mask_data"].items()):
-        recommendations.append({
-            "mask_id": int(mask_id),
-            "proba_fit": float(probs[idx]),
-            "mask_info": mask_info,
-        })
-
-    recommendations.sort(key=lambda item: item["proba_fit"], reverse=True)
-    mask_id_map = {str(idx): rec["mask_id"] for idx, rec in enumerate(recommendations)}
-    proba_map = {str(idx): rec["proba_fit"] for idx, rec in enumerate(recommendations)}
-    return {
-        "mask_id": mask_id_map,
-        "proba_fit": proba_map,
-        "model": artifacts["metadata"],
-    }
-
-
 def _infer_custom(payload, artifacts):
     facial_features = _extract_facial_measurements(payload)
     inference_rows = _build_inference_rows(artifacts["mask_data"], facial_features)
@@ -502,22 +273,8 @@ def _train(payload):
     if (payload or {}).get("learning_rate") is not None:
         train_argv.extend(["--learning-rate", str(payload["learning_rate"])])
     train_argv.extend(["--model-type", _normalize_model_type((payload or {}).get("model_type"))])
-    if (payload or {}).get("loss_type"):
-        train_argv.extend(["--loss-type", str(payload["loss_type"])])
     if (payload or {}).get("class_reweight"):
         train_argv.append("--class-reweight")
-    if (payload or {}).get("zscore"):
-        train_argv.append("--zscore")
-    if (payload or {}).get("use_facial_perimeter"):
-        train_argv.append("--use-facial-perimeter")
-    if (payload or {}).get("use_diff_perimeter_bins"):
-        train_argv.append("--use-diff-perimeter-bins")
-    if (payload or {}).get("use_diff_perimeter_mask_bins"):
-        train_argv.append("--use-diff-perimeter-mask-bins")
-    if (payload or {}).get("exclude_mask_code"):
-        train_argv.append("--exclude-mask-code")
-    if (payload or {}).get("exclude_brand_model"):
-        train_argv.append("--exclude-brand-model")
     if (payload or {}).get("retrain_with_full"):
         train_argv.append("--retrain-with-full")
 
@@ -576,40 +333,11 @@ def health():
     return jsonify({"status": "ok"})
 
 
-@APP.route("/reload", methods=["POST"])
-def reload_model():
-    try:
-        s3_dir = _download_latest_from_s3()
-        resolved_dir = _find_latest_model_dir(s3_dir)
-        artifacts = _load_artifacts(resolved_dir)
-        APP.config["artifacts"] = artifacts
-
-        timestamp = artifacts["metadata"].get("timestamp")
-        environment = artifacts["metadata"].get("environment")
-    except Exception as exc:
-        return jsonify({"status": "error", "error": str(exc)}), 500
-    return jsonify({
-        "status": "reloaded",
-        "model_dir": str(resolved_dir),
-        "timestamp": timestamp,
-        "environment": environment,
-    })
-
-
 def main():
-    model_dir_env = os.environ.get("MASK_RECOMMENDER_LOCAL_MODEL_DIR")
-    if model_dir_env:
-        model_dir = Path(model_dir_env).expanduser()
-    else:
-        model_dir = _default_model_dir()
-
-    resolved_dir = _find_latest_model_dir(model_dir)
-    artifacts = _load_artifacts(resolved_dir)
-    APP.config["artifacts"] = artifacts
-
+    artifacts = _ensure_custom_artifacts()
     timestamp = artifacts["metadata"].get("timestamp")
     environment = artifacts["metadata"].get("environment")
-    print(f"Loaded local model from: {resolved_dir}")
+    print("Loaded local custom model")
     print(f"Model timestamp: {timestamp} (env={environment})")
 
     host = os.environ.get("MASK_RECOMMENDER_LOCAL_HOST", "127.0.0.1")

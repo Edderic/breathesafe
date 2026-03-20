@@ -8,18 +8,14 @@ import boto3
 import pandas as pd
 import torch
 try:
-    from feature_builder import (FACIAL_FEATURE_COLUMNS, MASK_EMPIRICAL_FEATURE_COLUMNS, build_feature_frame,
-                                 derive_brand_model)
-    from prob_model import predict_prob_model
+    from feature_builder import FACIAL_FEATURE_COLUMNS, MASK_EMPIRICAL_FEATURE_COLUMNS, derive_brand_model
     from train import calc_preds, prep_data_in_torch_with_categories, _custom_lr_mask_categories
 except ModuleNotFoundError:
     from mask_recommender.feature_builder import (  # type: ignore
         FACIAL_FEATURE_COLUMNS,
         MASK_EMPIRICAL_FEATURE_COLUMNS,
-        build_feature_frame,
         derive_brand_model,
     )
-    from mask_recommender.prob_model import predict_prob_model  # type: ignore
     from mask_recommender.train import (  # type: ignore
         calc_preds,
         prep_data_in_torch_with_categories,
@@ -42,27 +38,10 @@ class MaskRecommenderInference:
     def __init__(self):
         self.s3_client = boto3.client('s3', region_name=self._s3_region())
         self.bucket = self._bucket_name()
-        self.model = None
-        self.mask_data = None
-        self.feature_columns = None
-        self.categorical_columns = None
-        self.threshold = 0.5
-        self.model_input_dim = None
-        self.use_facial_perimeter = False
-        self.use_diff_perimeter_bins = False
-        self.use_diff_perimeter_mask_bins = False
-        self.zscore = False
-        self.zscore_stats = {}
-        self.prob_params = None
-        self.prob_metadata = None
-        self.prob_mask_data = None
-        self.prob_last_loaded_at = None
         self.custom_params = None
         self.custom_metadata = None
         self.custom_mask_data = None
         self.custom_last_loaded_at = None
-        self.last_loaded_at = None
-        self.latest_payload = None
         self.refresh_seconds = int(os.environ.get('MODEL_REFRESH_SECONDS', '300'))
         logger.info(
             "Lambda init: function=%s version=%s image_tag=%s",
@@ -74,7 +53,7 @@ class MaskRecommenderInference:
             "Lambda init: image_digest=%s",
             os.environ.get("IMAGE_DIGEST"),
         )
-        self.load_model(force=True)
+        self.load_custom_model(force=True)
 
     def _env_name(self) -> str:
         env = os.environ.get('RAILS_ENV') or os.environ.get('ENVIRONMENT')
@@ -113,149 +92,12 @@ class MaskRecommenderInference:
             raise RuntimeError("Unexpected model format; unable to infer linear layers.")
         return specs
 
-    def _maybe_refresh(self) -> None:
-        if self.last_loaded_at is None:
-            self.load_model(force=True)
-            return
-        if (time.time() - self.last_loaded_at) > self.refresh_seconds:
-            self.load_model(force=True)
-
-    def _maybe_refresh_prob(self) -> None:
-        if self.prob_last_loaded_at is None:
-            self.load_prob_model(force=True)
-            return
-        if (time.time() - self.prob_last_loaded_at) > self.refresh_seconds:
-            self.load_prob_model(force=True)
-
     def _maybe_refresh_custom(self) -> None:
         if self.custom_last_loaded_at is None:
             self.load_custom_model(force=True)
             return
         if (time.time() - self.custom_last_loaded_at) > self.refresh_seconds:
             self.load_custom_model(force=True)
-
-    def load_model(self, force: bool = False) -> None:
-        if not force and self.model is not None:
-            return
-
-        latest_key = 'mask_recommender/models/latest.json'
-        latest_path = '/tmp/mask_recommender_latest.json'
-        self._download_file(latest_key, latest_path)
-        with open(latest_path, 'r') as f:
-            latest_payload = json.load(f)
-
-        model_key = latest_payload['model_key']
-        metadata_key = latest_payload['metadata_key']
-        mask_data_key = latest_payload['mask_data_key']
-
-        model_path = '/tmp/mask_recommender_model.pt'
-        metadata_path = '/tmp/mask_recommender_metadata.json'
-        mask_data_path = '/tmp/mask_recommender_mask_data.json'
-
-        self._download_file(model_key, model_path)
-        self._download_file(metadata_key, metadata_path)
-        self._download_file(mask_data_key, mask_data_path)
-
-        with open(metadata_path, 'r') as f:
-            metadata = json.load(f)
-
-        with open(mask_data_path, 'r') as f:
-            self.mask_data = json.load(f)
-
-        self.feature_columns = metadata['feature_columns']
-        self.categorical_columns = metadata['categorical_columns']
-        self.threshold = metadata.get('threshold', 0.5)
-        self.use_facial_perimeter = metadata.get('use_facial_perimeter', False)
-        self.use_diff_perimeter_bins = metadata.get('use_diff_perimeter_bins', False)
-        self.use_diff_perimeter_mask_bins = metadata.get('use_diff_perimeter_mask_bins', False)
-        self.zscore = bool(metadata.get('zscore', False))
-        self.zscore_stats = metadata.get('zscore_stats', {}) or {}
-
-        state_dict = torch.load(model_path, map_location='cpu')
-        linear_specs = self._infer_linear_specs(state_dict)
-        input_dim = len(self.feature_columns)
-        expected_input_dim = linear_specs[0][1]
-        if expected_input_dim != input_dim:
-            logger.warning(
-                "Feature column count (%s) does not match model input dim (%s).",
-                input_dim,
-                expected_input_dim,
-            )
-            input_dim = expected_input_dim
-        self.model_input_dim = input_dim
-        layers = []
-        for idx, (_, in_features, out_features) in enumerate(linear_specs):
-            layers.append(torch.nn.Linear(in_features, out_features))
-            if idx < len(linear_specs) - 1:
-                layers.append(torch.nn.ReLU())
-        model = torch.nn.Sequential(*layers)
-        model.load_state_dict(state_dict)
-        model.eval()
-
-        self.model = model
-        self.last_loaded_at = time.time()
-        self.latest_payload = latest_payload
-
-        logger.info(
-            "Loaded model %s from s3://%s/%s",
-            latest_payload.get('timestamp'),
-            self.bucket,
-            model_key
-        )
-
-    def _apply_zscore(self, encoded: pd.DataFrame) -> pd.DataFrame:
-        if not self.zscore or not self.zscore_stats:
-            return encoded
-
-        transformed = encoded.copy()
-        for column, values in self.zscore_stats.items():
-            if column not in transformed.columns:
-                continue
-            mean_value = float(values.get('mean', 0.0))
-            std_value = float(values.get('std', 1.0))
-            if std_value == 0:
-                std_value = 1.0
-            transformed[column] = (
-                pd.to_numeric(transformed[column], errors="coerce").fillna(0) - mean_value
-            ) / std_value
-        return transformed
-
-    def load_prob_model(self, force: bool = False) -> None:
-        if not force and self.prob_params is not None:
-            return
-
-        latest_key = 'mask_recommender/models/prob_latest.json'
-        latest_path = '/tmp/mask_recommender_prob_latest.json'
-        self._download_file(latest_key, latest_path)
-        with open(latest_path, 'r') as f:
-            latest_payload = json.load(f)
-
-        params_key = latest_payload['params_key']
-        metadata_key = latest_payload['metadata_key']
-        mask_data_key = latest_payload['mask_data_key']
-
-        params_path = '/tmp/mask_recommender_prob_params.pt'
-        metadata_path = '/tmp/mask_recommender_prob_metadata.json'
-        mask_data_path = '/tmp/mask_recommender_prob_mask_data.json'
-
-        self._download_file(params_key, params_path)
-        self._download_file(metadata_key, metadata_path)
-        self._download_file(mask_data_key, mask_data_path)
-
-        with open(metadata_path, 'r') as f:
-            self.prob_metadata = json.load(f)
-
-        with open(mask_data_path, 'r') as f:
-            self.prob_mask_data = json.load(f)
-
-        self.prob_params = torch.load(params_path, map_location='cpu')
-        self.prob_last_loaded_at = time.time()
-        logger.info(
-            "Loaded prob model %s from s3://%s/%s",
-            latest_payload.get('timestamp'),
-            self.bucket,
-            params_key
-        )
 
     def load_custom_model(self, force: bool = False) -> None:
         if not force and self.custom_params is not None:
@@ -320,81 +162,6 @@ class MaskRecommenderInference:
             rows.append(row)
         return pd.DataFrame(rows)
 
-    def recommend_masks(self, facial_features: Dict) -> List[Dict]:
-        self._maybe_refresh()
-
-        if not self.model or not self.mask_data:
-            logger.error('Model or mask data not loaded; returning empty recommendations.')
-            return []
-
-        inference_rows = self._build_inference_rows(self.mask_data, facial_features)
-        numeric_columns = FACIAL_FEATURE_COLUMNS + ["perimeter_mm"]
-        numeric_frame = pd.DataFrame(
-            {
-                col: pd.to_numeric(inference_rows.get(col), errors="coerce")
-                for col in numeric_columns
-            }
-        )
-        non_finite_mask = ~numeric_frame.replace(
-            [float("inf"), float("-inf")],
-            float("nan")
-        ).notna()
-        if non_finite_mask.any().any():
-            bad_cols = non_finite_mask.any().loc[lambda s: s].index.tolist()
-            logger.warning("Non-finite values detected in columns: %s", ", ".join(bad_cols))
-        inference_rows[numeric_columns] = (
-            numeric_frame.replace([float("inf"), float("-inf")], float("nan")).fillna(0)
-        )
-
-        encoded = build_feature_frame(
-            inference_rows,
-            feature_columns=self.feature_columns,
-            categorical_columns=self.categorical_columns,
-            use_facial_perimeter=self.use_facial_perimeter,
-            use_diff_perimeter_bins=self.use_diff_perimeter_bins,
-            use_diff_perimeter_mask_bins=self.use_diff_perimeter_mask_bins
-        )
-        encoded = self._apply_zscore(encoded)
-        inputs = torch.tensor(encoded.to_numpy(), dtype=torch.float32)
-        with torch.no_grad():
-            logits = self.model(inputs).squeeze(1)
-            probs = torch.sigmoid(logits).cpu().tolist()
-
-        recommendations = []
-        for idx, (mask_id, mask_info) in enumerate(self.mask_data.items()):
-            recommendations.append({
-                'mask_id': int(mask_id),
-                'proba_fit': float(probs[idx]),
-                'mask_info': mask_info,
-            })
-
-        recommendations.sort(key=lambda x: x['proba_fit'], reverse=True)
-        return recommendations
-
-    def recommend_masks_prob(self, facial_features: Dict) -> List[Dict]:
-        self._maybe_refresh_prob()
-        if not self.prob_params or not self.prob_metadata or not self.prob_mask_data:
-            logger.error('Prob model or mask data not loaded; returning empty recommendations.')
-            return []
-
-        inference_rows = self._build_inference_rows(self.prob_mask_data, facial_features)
-        probs = predict_prob_model(
-            self.prob_params,
-            inference_rows,
-            self.prob_metadata['mask_id_index'],
-            self.prob_metadata['style_categories'],
-        )
-
-        recommendations = []
-        for idx, (mask_id, mask_info) in enumerate(self.prob_mask_data.items()):
-            recommendations.append({
-                'mask_id': int(mask_id),
-                'proba_fit': float(probs[idx]),
-                'mask_info': mask_info,
-            })
-
-        recommendations.sort(key=lambda x: x['proba_fit'], reverse=True)
-        return recommendations
 
     def recommend_masks_custom(self, facial_features: Dict) -> List[Dict]:
         self._maybe_refresh_custom()

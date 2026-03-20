@@ -29,69 +29,34 @@ def test_lambda_recommendations_with_facial_inputs(monkeypatch):
         "facial_hair_beard_length_mm": 0,
     }
 
-    inference_rows = pd.DataFrame(
-        [
-            {
-                "mask_id": 1,
-                "perimeter_mm": 300,
-                "strap_type": "Earloop",
-                "style": "Cup",
-                "brand_model": "MASK A",
-                "unique_internal_model_code": "MASK-A",
-                "facial_hair_beard_length_mm": 0,
-                "nose_mm": facial_features["nose_mm"],
-                "chin_mm": facial_features["chin_mm"],
-                "top_cheek_mm": facial_features["top_cheek_mm"],
-                "mid_cheek_mm": facial_features["mid_cheek_mm"],
-                "strap_mm": facial_features["strap_mm"],
-            },
-            {
-                "mask_id": 2,
-                "perimeter_mm": 320,
-                "strap_type": "Headstrap",
-                "style": "Bifold",
-                "brand_model": "MASK B",
-                "unique_internal_model_code": "MASK-B",
-                "facial_hair_beard_length_mm": 0,
-                "nose_mm": facial_features["nose_mm"],
-                "chin_mm": facial_features["chin_mm"],
-                "top_cheek_mm": facial_features["top_cheek_mm"],
-                "mid_cheek_mm": facial_features["mid_cheek_mm"],
-                "strap_mm": facial_features["strap_mm"],
-            },
-        ]
-    )
-
-    categorical_columns = ["strap_type", "style", "brand_model", "unique_internal_model_code"]
-    expected = pd.get_dummies(inference_rows, columns=categorical_columns, dummy_na=True)
-    feature_columns = list(expected.columns)
-
-    def fake_load_model(self, force=False):
-        self.model = torch.nn.Sequential(torch.nn.Linear(len(feature_columns), 1))
-        torch.nn.init.zeros_(self.model[0].weight)
-        torch.nn.init.zeros_(self.model[0].bias)
-        column_index = {name: idx for idx, name in enumerate(feature_columns)}
-        for code, weight in (("unique_internal_model_code_MASK-A", 1.0),
-                             ("unique_internal_model_code_MASK-B", -1.0)):
-            idx = column_index.get(code)
-            if idx is not None:
-                self.model[0].weight.data[0, idx] = weight
-        self.mask_data = mask_data
-        self.feature_columns = feature_columns
-        self.categorical_columns = categorical_columns
-        self.model_input_dim = len(feature_columns)
-        self.use_facial_perimeter = False
-        self.use_diff_perimeter_bins = False
-        self.use_diff_perimeter_mask_bins = False
+    def fake_load_custom_model(self, force=False):
+        self.custom_mask_data = {
+            "1": {**mask_data["1"], "fit_family_id": 1},
+            "2": {**mask_data["2"], "fit_family_id": 2},
+        }
+        self.custom_metadata = {
+            "timestamp": "test-custom",
+            "fit_family_categories": ["1", "2"],
+            "style_categories": ["Bifold", "Cup"],
+            "strap_type_categories": ["Earloop", "Headstrap"],
+        }
+        self.custom_params = {
+            "mask_specific_parameters": torch.tensor(
+                [[0.0, 0.0, 1.0], [0.0, 0.0, -1.0]],
+                dtype=torch.float32,
+            ),
+            "style_specific_parameters": torch.zeros((2, 3), dtype=torch.float32),
+            "strap_specific_parameters": torch.zeros((2, 1), dtype=torch.float32),
+        }
 
     monkeypatch.setattr(
         lambda_function.MaskRecommenderInference,
-        "load_model",
-        fake_load_model,
+        "load_custom_model",
+        fake_load_custom_model,
     )
 
     recommender = lambda_function.MaskRecommenderInference()
-    recommendations = recommender.recommend_masks(facial_features)
+    recommendations = recommender.recommend_masks_custom(facial_features)
 
     assert len(recommendations) == 2
     assert {rec["mask_id"] for rec in recommendations} == {1, 2}

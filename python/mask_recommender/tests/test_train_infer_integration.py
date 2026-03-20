@@ -155,15 +155,21 @@ def test_training_and_inference_alignment(monkeypatch, tmp_path):
         for _, row in masks_df.iterrows()
     }
 
-    def fake_load_model(self, force=False):
-        self.model = model
-        self.mask_data = mask_data
-        self.feature_columns = feature_columns
-        self.categorical_columns = categorical_columns
-        self.model_input_dim = len(feature_columns)
-        self.use_facial_perimeter = False
-        self.use_diff_perimeter_bins = False
-        self.use_diff_perimeter_mask_bins = False
+    category_metadata = train_module._custom_lr_category_metadata(cleaned)
+    custom_result = train_module.train_custom_lr_with_split(
+        cleaned,
+        train_idx=torch.arange(cleaned.shape[0]),
+        val_idx=torch.arange(cleaned.shape[0]),
+        category_metadata=category_metadata,
+        epochs=2,
+        learning_rate=0.01,
+        class_weighting=False,
+    )
+
+    def fake_load_custom_model(self, force=False):
+        self.custom_params = custom_result["params"]
+        self.custom_metadata = {"timestamp": "test-custom", **category_metadata}
+        self.custom_mask_data = mask_data
 
     def fake_boto3_client(*args, **kwargs):
         return object()
@@ -172,8 +178,8 @@ def test_training_and_inference_alignment(monkeypatch, tmp_path):
 
     monkeypatch.setattr(
         lambda_function.MaskRecommenderInference,
-        "load_model",
-        fake_load_model,
+        "load_custom_model",
+        fake_load_custom_model,
     )
 
     recommender = lambda_function.MaskRecommenderInference()
@@ -185,24 +191,25 @@ def test_training_and_inference_alignment(monkeypatch, tmp_path):
         "strap_mm": 120,
         "facial_hair_beard_length_mm": 0,
     }
-    recommendations = recommender.recommend_masks(facial_features)
+    recommendations = recommender.recommend_masks_custom(facial_features)
 
     assert len(recommendations) == 2
     assert {rec["mask_id"] for rec in recommendations} == {1, 2}
 
 
-def test_training_lambda_builds_exclude_brand_model_flag():
+def test_training_lambda_builds_custom_lr_argv():
     argv = _build_train_argv(
         {
             "epochs": 100,
-            "exclude_mask_code": True,
-            "exclude_brand_model": True,
+            "model_type": "prob",
+            "retrain_with_full": True,
         }
     )
 
     assert "--epochs" in argv
-    assert "--exclude-mask-code" in argv
-    assert "--exclude-brand-model" in argv
+    assert "--model-type" in argv
+    assert "custom_lr" in argv
+    assert "--retrain-with-full" in argv
 
 
 def test_fit_zscore_stats_skips_perimeter_geometry_columns():
@@ -248,13 +255,22 @@ def test_compute_mask_empirical_priors_and_attach_to_masks():
 
 def test_local_infer_exposes_empirical_debug_payload():
     artifacts = {
-        "model": torch.nn.Sequential(torch.nn.Linear(2, 1)),
-        "feature_columns": ["nose_mm", "chin_mm"],
-        "categorical_columns": [],
-        "metadata": {"timestamp": "2026-03-10", "environment": "development"},
+        "params": {
+            "mask_specific_parameters": torch.tensor([[0.0, 0.0, 0.5]], dtype=torch.float32),
+            "style_specific_parameters": torch.tensor([[0.0, 0.0, 0.0]], dtype=torch.float32),
+            "strap_specific_parameters": torch.tensor([[0.0]], dtype=torch.float32),
+        },
+        "metadata": {
+            "timestamp": "2026-03-10",
+            "environment": "development",
+            "fit_family_categories": ["1"],
+            "style_categories": ["Cup"],
+            "strap_type_categories": ["Headstrap"],
+        },
         "mask_data": {
             "1": {
                 "id": 1,
+                "fit_family_id": 1,
                 "unique_internal_model_code": "MASK-A",
                 "perimeter_mm": 300,
                 "strap_type": "Headstrap",
@@ -266,7 +282,7 @@ def test_local_infer_exposes_empirical_debug_payload():
         },
     }
 
-    result = local_recommender_server._infer(
+    result = local_recommender_server._infer_custom(
         {
             "facial_measurements": {
                 "nose_mm": 40,
