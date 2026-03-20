@@ -22,8 +22,8 @@ RSpec.describe Admin::FitFamiliesController, type: :controller do
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
       expect(body['fit_families'].first['name']).to eq('Trident Family')
-      expect(body['fit_families'].first.dig('mismatch_summary', 'perimeter_mm', 'mismatch')).to eq(true)
-      expect(body['fit_families'].first.dig('mismatch_summary', 'style', 'mismatch')).to eq(false)
+      expect(body['fit_families'].first.dig('mismatch_summary', 'perimeter_mm', 'mismatch')).to be(true)
+      expect(body['fit_families'].first.dig('mismatch_summary', 'style', 'mismatch')).to be(false)
     end
   end
 
