@@ -1,4 +1,4 @@
-name: Train Mask Recommender
+name: Train Mask Recommender v2
 
 on:
   schedule:
