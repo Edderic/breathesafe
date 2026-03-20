@@ -25,6 +25,8 @@ class Mask < ApplicationRecord
   validate :cannot_be_duplicate_of_self
   validate :cannot_create_circular_reference
 
+  before_validation :assign_default_fit_family, on: :create
+
   # Create initial mask state snapshot after creation
   after_create :create_initial_state
 
@@ -37,6 +39,17 @@ class Mask < ApplicationRecord
   def fit_identity
     fit_family_id
   end
+
+  def assign_default_fit_family
+    return if fit_family.present?
+    return if unique_internal_model_code.blank?
+
+    fit_family_slug = unique_internal_model_code.to_s.parameterize
+    self.fit_family = FitFamily.create_or_find_by!(slug: fit_family_slug) do |family|
+      family.name = unique_internal_model_code
+    end
+  end
+  private :assign_default_fit_family
 
   def self.find_targeted_but_untested_masks(manager_id)
     results = Mask.connection.exec_query(
