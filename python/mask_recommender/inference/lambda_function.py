@@ -30,6 +30,14 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 DEFAULT_MODEL_TYPE = "custom_lr"
 
+
+def _normalize_model_type(model_type):
+    normalized = str(model_type or DEFAULT_MODEL_TYPE).strip()
+    if not normalized or normalized == DEFAULT_MODEL_TYPE:
+        return DEFAULT_MODEL_TYPE
+    logger.info("Coercing unsupported model_type=%s to %s", normalized, DEFAULT_MODEL_TYPE)
+    return DEFAULT_MODEL_TYPE
+
 class MaskRecommenderInference:
     def __init__(self):
         self.s3_client = boto3.client('s3', region_name=self._s3_region())
@@ -420,18 +428,11 @@ def handler(event, context):
         payload = event or {}
         method = payload.get("method")
         facial_features = payload.get('facial_measurements', {})
-        model_type = payload.get('model_type') or DEFAULT_MODEL_TYPE
+        model_type = _normalize_model_type(payload.get('model_type'))
         recommender = MaskRecommenderInference()
         if method == "warmup":
-            if model_type == "prob":
-                recommender.load_prob_model(force=True)
-                warmed_model = recommender.prob_metadata
-            elif model_type == "custom_lr":
-                recommender.load_custom_model(force=True)
-                warmed_model = recommender.custom_metadata
-            else:
-                recommender.load_model(force=True)
-                warmed_model = recommender.latest_payload
+            recommender.load_custom_model(force=True)
+            warmed_model = recommender.custom_metadata
             return {
                 'statusCode': 200,
                 'body': json.dumps({
@@ -440,15 +441,8 @@ def handler(event, context):
                     'model': warmed_model,
                 })
             }
-        if model_type == 'prob':
-            recommendations = recommender.recommend_masks_prob(facial_features)
-            model_payload = recommender.prob_metadata
-        elif model_type == 'custom_lr':
-            recommendations = recommender.recommend_masks_custom(facial_features)
-            model_payload = recommender.custom_metadata
-        else:
-            recommendations = recommender.recommend_masks(facial_features)
-            model_payload = recommender.latest_payload
+        recommendations = recommender.recommend_masks_custom(facial_features)
+        model_payload = recommender.custom_metadata
         mask_id_map = {str(idx): rec['mask_id'] for idx, rec in enumerate(recommendations)}
         proba_map = {str(idx): rec['proba_fit'] for idx, rec in enumerate(recommendations)}
         return {

@@ -10,7 +10,7 @@ class MaskRecommender
         facial_measurements,
         mask_ids: canonical_mask_ids,
         function_base: function_base,
-        model_type: model_type
+        model_type: normalize_model_type(model_type)
       )
       body = parse_lambda_body(response)
       collection = build_mask_collection(body, mask_ids: canonical_mask_ids)
@@ -65,7 +65,7 @@ class MaskRecommender
         function_name: function_name,
         payload: {
           method: 'warmup',
-          model_type: model_type.presence || DEFAULT_MODEL_TYPE
+          model_type: normalize_model_type(model_type)
         }.compact
       )
       parse_lambda_body(response)
@@ -79,7 +79,7 @@ class MaskRecommender
       payload = {
         method: 'infer',
         facial_measurements: facial_measurements,
-        model_type: model_type.presence || DEFAULT_MODEL_TYPE
+        model_type: normalize_model_type(model_type)
       }
       payload[:mask_ids] = mask_ids if mask_ids.present?
       function_name = "#{function_base}-#{heroku_env}"
@@ -175,6 +175,20 @@ class MaskRecommender
     def root_mask_row?(mask)
       duplicate_of = mask['duplicate_of'] || mask[:duplicate_of]
       duplicate_of.blank?
+    end
+
+    def normalize_model_type(model_type)
+      return DEFAULT_MODEL_TYPE if model_type.blank?
+
+      normalized = model_type.to_s.strip
+      return normalized if normalized == DEFAULT_MODEL_TYPE
+
+      Rails.logger.info(
+        'MaskRecommender coerced unsupported model_type=%s to %s',
+        normalized,
+        DEFAULT_MODEL_TYPE
+      )
+      DEFAULT_MODEL_TYPE
     end
 
     def lambda_environment

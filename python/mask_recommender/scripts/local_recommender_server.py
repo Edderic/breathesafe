@@ -30,6 +30,14 @@ APP.logger.setLevel("INFO")
 DEFAULT_MODEL_TYPE = "custom_lr"
 
 
+def _normalize_model_type(model_type):
+    normalized = str(model_type or DEFAULT_MODEL_TYPE).strip()
+    if not normalized or normalized == DEFAULT_MODEL_TYPE:
+        return DEFAULT_MODEL_TYPE
+    APP.logger.info("Coercing unsupported model_type=%s to %s", normalized, DEFAULT_MODEL_TYPE)
+    return DEFAULT_MODEL_TYPE
+
+
 def _env_name() -> str:
     env = os.environ.get("RAILS_ENV", "").strip().lower()
     if env in ("production", "staging", "development"):
@@ -493,8 +501,7 @@ def _train(payload):
         train_argv.extend(["--epochs", str(payload["epochs"])])
     if (payload or {}).get("learning_rate") is not None:
         train_argv.extend(["--learning-rate", str(payload["learning_rate"])])
-    if (payload or {}).get("model_type"):
-        train_argv.extend(["--model-type", str(payload["model_type"])])
+    train_argv.extend(["--model-type", _normalize_model_type((payload or {}).get("model_type"))])
     if (payload or {}).get("loss_type"):
         train_argv.extend(["--loss-type", str(payload["loss_type"])])
     if (payload or {}).get("class_reweight"):
@@ -516,26 +523,13 @@ def _train(payload):
 
     result = train_main(train_argv)
 
-    if (payload or {}).get("model_type") == "custom_lr":
-        custom_artifacts = _ensure_custom_artifacts(force_reload=True)
-        reload_status = {
-            "status": "reloaded",
-            "model_type": "custom_lr",
-            "timestamp": custom_artifacts["metadata"].get("timestamp"),
-            "environment": custom_artifacts["metadata"].get("environment"),
-        }
-    elif (payload or {}).get("model_type") == "prob":
-        APP.config.pop("prob_artifacts", None)
-        prob_dir = _download_latest_prob_from_s3()
-        APP.config["prob_artifacts"] = _load_prob_artifacts(prob_dir)
-        reload_status = {
-            "status": "reloaded",
-            "model_type": "prob",
-            "timestamp": APP.config["prob_artifacts"]["metadata"].get("timestamp"),
-            "environment": APP.config["prob_artifacts"]["metadata"].get("environment"),
-        }
-    else:
-        reload_status = reload_model().get_json()
+    custom_artifacts = _ensure_custom_artifacts(force_reload=True)
+    reload_status = {
+        "status": "reloaded",
+        "model_type": "custom_lr",
+        "timestamp": custom_artifacts["metadata"].get("timestamp"),
+        "environment": custom_artifacts["metadata"].get("environment"),
+    }
     return {
         "statusCode": 200,
         "body": json.dumps({
@@ -553,41 +547,7 @@ def recommend_masks():
     if payload.get("method") == "train":
         return jsonify(_train(payload))
     if payload.get("method") == "warmup":
-        model_type = payload.get("model_type") or DEFAULT_MODEL_TYPE
-        if model_type == "prob":
-            if "prob_artifacts" not in APP.config:
-                prob_dir = _download_latest_prob_from_s3()
-                APP.config["prob_artifacts"] = _load_prob_artifacts(prob_dir)
-            return jsonify({
-                "status": "warmed",
-                "model_type": "prob",
-                "model": APP.config["prob_artifacts"]["metadata"],
-            })
-        if model_type == "custom_lr":
-            try:
-                custom_artifacts = _ensure_custom_artifacts()
-            except (ClientError, FileNotFoundError) as exc:
-                return jsonify({
-                    "error": "Custom LR artifacts are not available locally or in S3.",
-                    "details": str(exc),
-                }), 503
-            return jsonify({
-                "status": "warmed",
-                "model_type": "custom_lr",
-                "model": custom_artifacts["metadata"],
-            })
-        return jsonify({
-            "status": "warmed",
-            "model_type": "nn",
-            "model": APP.config["artifacts"]["metadata"],
-        })
-    model_type = payload.get("model_type") or DEFAULT_MODEL_TYPE
-    if model_type == "prob":
-        if "prob_artifacts" not in APP.config:
-            prob_dir = _download_latest_prob_from_s3()
-            APP.config["prob_artifacts"] = _load_prob_artifacts(prob_dir)
-        return jsonify(_infer_prob(payload, APP.config["prob_artifacts"]))
-    if model_type == "custom_lr":
+        _normalize_model_type(payload.get("model_type"))
         try:
             custom_artifacts = _ensure_custom_artifacts()
         except (ClientError, FileNotFoundError) as exc:
@@ -595,8 +555,20 @@ def recommend_masks():
                 "error": "Custom LR artifacts are not available locally or in S3.",
                 "details": str(exc),
             }), 503
-        return jsonify(_infer_custom(payload, custom_artifacts))
-    return jsonify(_infer(payload, APP.config["artifacts"]))
+        return jsonify({
+            "status": "warmed",
+            "model_type": "custom_lr",
+            "model": custom_artifacts["metadata"],
+        })
+    _normalize_model_type(payload.get("model_type"))
+    try:
+        custom_artifacts = _ensure_custom_artifacts()
+    except (ClientError, FileNotFoundError) as exc:
+        return jsonify({
+            "error": "Custom LR artifacts are not available locally or in S3.",
+            "details": str(exc),
+        }), 503
+    return jsonify(_infer_custom(payload, custom_artifacts))
 
 
 @APP.route("/health", methods=["GET"])

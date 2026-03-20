@@ -40,7 +40,7 @@ RSpec.describe MaskRecommenderController, type: :controller do
       expect(MaskRecommender).to have_received(:infer_with_meta).with(
         facial_payload.stringify_keys,
         function_base: 'mask-recommender-rf',
-        model_type: nil
+        model_type: 'custom_lr'
       )
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
@@ -72,7 +72,7 @@ RSpec.describe MaskRecommenderController, type: :controller do
       expect(MaskRecommender).to have_received(:infer_with_meta).with(
         facial_payload.stringify_keys,
         function_base: 'mask-recommender',
-        model_type: nil
+        model_type: 'custom_lr'
       )
       expect(response).to have_http_status(:ok)
     end
@@ -121,7 +121,7 @@ RSpec.describe MaskRecommenderController, type: :controller do
       expect(MaskRecommender).to have_received(:infer_with_meta).with(
         resolved_measurements,
         function_base: 'mask-recommender',
-        model_type: nil
+        model_type: 'custom_lr'
       )
 
       body = JSON.parse(response.body)
@@ -170,7 +170,7 @@ RSpec.describe MaskRecommenderController, type: :controller do
 
       post :warmup, params: {}, as: :json
 
-      expect(MaskRecommender).to have_received(:warmup).with(function_base: 'mask-recommender', model_type: nil)
+      expect(MaskRecommender).to have_received(:warmup).with(function_base: 'mask-recommender', model_type: 'custom_lr')
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
       expect(body['status']).to eq('ok')
@@ -194,7 +194,7 @@ RSpec.describe MaskRecommenderController, type: :controller do
 
       post :warmup, params: { function_base: 'mask-recommender-rf' }, as: :json
 
-      expect(MaskRecommender).to have_received(:warmup).with(function_base: 'mask-recommender-rf', model_type: nil)
+      expect(MaskRecommender).to have_received(:warmup).with(function_base: 'mask-recommender-rf', model_type: 'custom_lr')
       expect(response).to have_http_status(:ok)
     end
   end

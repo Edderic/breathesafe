@@ -523,27 +523,20 @@ export default {
     },
     routeModelType() {
       const value = this.$route.query.model_type
-      return value ? String(value).trim() : null
+      if (!value) {
+        return null
+      }
+      const normalized = String(value).trim()
+      return normalized === 'custom_lr' ? normalized : 'custom_lr'
     },
     effectiveModelType() {
       return this.routeModelType || 'custom_lr'
     },
     defaultTrainingParams() {
-      const defaultsByModelType = {
-        custom_lr: {
-          epochs: '200',
-          learning_rate: '0.01',
-        },
-        nn: {
-          epochs: '100',
-          learning_rate: '0.0001',
-        },
-        prob: {
-          epochs: '100',
-          learning_rate: '0.0001',
-        },
+      return {
+        epochs: '200',
+        learning_rate: '0.01',
       }
-      return defaultsByModelType[this.effectiveModelType] || defaultsByModelType.custom_lr
     },
     routeEpochsInput() {
       const value = this.$route.query.epochs
@@ -570,8 +563,6 @@ export default {
     modelTypeOptions() {
       return [
         { value: 'custom_lr', label: 'Custom LR' },
-        { value: 'nn', label: 'NN' },
-        { value: 'prob', label: 'Prob' },
       ]
     },
     recommenderWarmupKey() {
@@ -1533,7 +1524,7 @@ export default {
       if (!nextValue || nextValue === 'custom_lr') {
         delete query.model_type
       } else {
-        query.model_type = nextValue
+        query.model_type = 'custom_lr'
       }
       this.$router.push({ name: 'Masks', query })
     },

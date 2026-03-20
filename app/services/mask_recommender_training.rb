@@ -12,6 +12,7 @@
 #   MaskRecommenderTraining.call(payload: { some: "data" })
 # Returns the parsed JSON response from the Lambda.
 class MaskRecommenderTraining
+  DEFAULT_MODEL_TYPE = 'custom_lr'
   DEFAULT_CONFIG_BY_MODEL_TYPE = {
     'custom_lr' => {
       model_type: 'custom_lr',
@@ -19,35 +20,32 @@ class MaskRecommenderTraining
       learning_rate: 0.01,
       retrain_with_full: true,
       class_reweight: false
-    },
-    'nn' => {
-      model_type: 'nn',
-      epochs: 100,
-      learning_rate: 0.0001,
-      retrain_with_full: true,
-      class_reweight: true,
-      zscore: true,
-      exclude_brand_model: true
-    },
-    'prob' => {
-      model_type: 'prob',
-      epochs: 100,
-      learning_rate: 0.0001,
-      retrain_with_full: true
     }
   }.freeze
 
   class << self
     def call(payload: {}, region: AwsLambdaInvokeService::DEFAULT_REGION)
       function_name = build_function_name(resolve_environment)
-      model_type = (payload[:model_type] || payload['model_type'] || 'custom_lr').to_s
-      defaults = DEFAULT_CONFIG_BY_MODEL_TYPE.fetch(model_type, DEFAULT_CONFIG_BY_MODEL_TYPE['custom_lr'])
+      model_type = normalize_model_type(payload[:model_type] || payload['model_type'] || DEFAULT_MODEL_TYPE)
+      defaults = DEFAULT_CONFIG_BY_MODEL_TYPE.fetch(model_type, DEFAULT_CONFIG_BY_MODEL_TYPE[DEFAULT_MODEL_TYPE])
       payload = defaults.merge(payload).merge(model_type: model_type)
       payload = payload.merge(method: 'train') unless payload.key?(:method)
       AwsLambdaInvokeService.call(function_name: function_name, payload: payload, region: region)
     end
 
     private
+
+    def normalize_model_type(model_type)
+      normalized = model_type.to_s.strip
+      return DEFAULT_MODEL_TYPE if normalized.blank? || normalized == DEFAULT_MODEL_TYPE
+
+      Rails.logger.info(
+        'MaskRecommenderTraining coerced unsupported model_type=%s to %s',
+        normalized,
+        DEFAULT_MODEL_TYPE
+      )
+      DEFAULT_MODEL_TYPE
+    end
 
     def resolve_environment
       raw_env = ENV.fetch('HEROKU_ENVIRONMENT', '').to_s.strip.downcase

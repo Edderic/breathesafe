@@ -15,7 +15,7 @@ class MaskRecommenderController < ApplicationController
 
   def create_async
     function_base = params[:function_base] || params.dig(:mask_recommender, :function_base) || 'mask-recommender'
-    model_type = params[:model_type].presence || params.dig(:mask_recommender, :model_type).presence
+    model_type = normalized_model_type
     resolved_facial_measurements = resolved_facial_measurements_payload
     if resolved_facial_measurements.is_a?(Hash) && resolved_facial_measurements[:error]
       render json: { error: resolved_facial_measurements[:error] }, status: resolved_facial_measurements[:status]
@@ -55,7 +55,7 @@ class MaskRecommenderController < ApplicationController
     end
 
     job_id = SecureRandom.uuid
-    model_type = params[:model_type].presence || params.dig(:mask_recommender, :model_type).presence
+    model_type = normalized_model_type
     epochs = params[:epochs].presence || params.dig(:mask_recommender, :epochs).presence
     learning_rate = params[:learning_rate].presence || params.dig(:mask_recommender, :learning_rate).presence
     payload = {
@@ -80,7 +80,7 @@ class MaskRecommenderController < ApplicationController
 
   def warmup
     function_base = params[:function_base] || params.dig(:mask_recommender, :function_base) || 'mask-recommender'
-    model_type = params[:model_type].presence || params.dig(:mask_recommender, :model_type).presence
+    model_type = normalized_model_type
     result = MaskRecommender.warmup(function_base: function_base, model_type: model_type)
     render json: { status: 'ok', result: result }, status: :ok
   rescue StandardError => e
@@ -165,7 +165,7 @@ class MaskRecommenderController < ApplicationController
 
   def build_recommendation_response
     function_base = params[:function_base] || params.dig(:mask_recommender, :function_base) || 'mask-recommender'
-    model_type = params[:model_type].presence || params.dig(:mask_recommender, :model_type).presence
+    model_type = normalized_model_type
     resolved_facial_measurements = resolved_facial_measurements_payload
     if resolved_facial_measurements.is_a?(Hash) && resolved_facial_measurements[:error]
       return [resolved_facial_measurements[:status],
@@ -219,5 +219,20 @@ class MaskRecommenderController < ApplicationController
     { error: e.message, status: :unprocessable_entity }
   rescue StandardError => e
     { error: e.message, status: :unprocessable_entity }
+  end
+
+  def normalized_model_type
+    requested_model_type = params[:model_type].presence || params.dig(:mask_recommender, :model_type).presence
+    return MaskRecommender::DEFAULT_MODEL_TYPE if requested_model_type.blank?
+
+    normalized = requested_model_type.to_s.strip
+    return normalized if normalized == MaskRecommender::DEFAULT_MODEL_TYPE
+
+    Rails.logger.info(
+      'MaskRecommenderController coerced unsupported model_type=%s to %s',
+      normalized,
+      MaskRecommender::DEFAULT_MODEL_TYPE
+    )
+    MaskRecommender::DEFAULT_MODEL_TYPE
   end
 end
