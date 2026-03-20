@@ -999,6 +999,64 @@ def _best_effort_visual_upload(upload_fn, artifact_name, fallback_artifact=None)
         return fallback_artifact
 
 
+def _probe_payloads(base_url=None):
+    probe_user_ids_raw = os.environ.get('MASK_RECOMMENDER_PROBE_USER_IDS')
+    if probe_user_ids_raw:
+        email = os.getenv('BREATHESAFE_SERVICE_EMAIL')
+        password = os.getenv('BREATHESAFE_SERVICE_PASSWORD')
+        if not email or not password:
+            raise ValueError(
+                "MASK_RECOMMENDER_PROBE_USER_IDS requires BREATHESAFE_SERVICE_EMAIL and "
+                "BREATHESAFE_SERVICE_PASSWORD."
+            )
+        probe_user_ids = [
+            int(value.strip())
+            for value in probe_user_ids_raw.split(',')
+            if value.strip()
+        ]
+        resolved_base_url = (base_url or os.environ.get('BREATHESAFE_BASE_URL') or 'http://localhost:3000').rstrip('/')
+        session = build_session(None)
+        login_with_credentials(session, resolved_base_url, email, password)
+        try:
+            probes = []
+            for user_id in probe_user_ids:
+                payload = fetch_json(
+                    session,
+                    f"{resolved_base_url}/mask_recommender/recommender_user_measurements.json"
+                    f"?recommender_user_id={user_id}"
+                )
+                facial_measurements = payload.get('facial_measurements') or {}
+                if not facial_measurements:
+                    continue
+                probes.append({
+                    'label': f"user_{user_id}",
+                    'facial_measurements': {
+                        column: float(facial_measurements.get(column, 0) or 0)
+                        for column in TARGET_COLUMNS
+                    } | {
+                        'facial_hair_beard_length_mm': float(
+                            facial_measurements.get('facial_hair_beard_length_mm', 0) or 0
+                        )
+                    },
+                    'user_id': user_id,
+                })
+        finally:
+            logout(session, resolved_base_url)
+        if probes:
+            return probes
+
+    raw = os.environ.get('MASK_RECOMMENDER_PROBES_JSON')
+    if not raw:
+        return DEFAULT_PROBE_PAYLOADS
+
+    payload = json.loads(raw)
+    if isinstance(payload, dict):
+        payload = [payload]
+    if not isinstance(payload, list):
+        raise ValueError("MASK_RECOMMENDER_PROBES_JSON must decode to a list or object.")
+    return payload
+
+
 def calc_preds(data, params):
     resolved_params = _resolve_custom_lr_parameter_views(params)
     fit_tests_by_mask_specific_parameters = data['fit_tests_by_masks'] @ resolved_params['mask_specific_parameters']
@@ -2000,4 +2058,3 @@ def main(argv=None):
     logging.info("Uploaded custom metrics to %s", metrics_uri)
     logging.info("Updated custom latest pointer at %s", latest_uri)
     return latest_payload
-
