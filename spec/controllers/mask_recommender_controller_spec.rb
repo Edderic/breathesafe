@@ -26,7 +26,8 @@ RSpec.describe MaskRecommenderController, type: :controller do
     let(:context) { { 'perimeter_min' => 100, 'perimeter_max' => 200 } }
 
     before do
-      allow(MaskRecommender).to receive(:infer_with_meta).and_return({ masks: inferred_masks, model: model_meta })
+      allow(MaskRecommender)
+        .to receive(:infer_with_meta).and_return({ masks: inferred_masks, model: model_meta })
       allow(MasksDataContextualizer).to receive(:call).and_return(context)
       create(:managed_user, manager: manager, managed: managed_user)
     end
@@ -109,7 +110,8 @@ RSpec.describe MaskRecommenderController, type: :controller do
         }
       }
 
-      allow(LatestRecommenderFacialMeasurementsService).to receive(:call).and_return(resolved_measurements)
+      allow(LatestRecommenderFacialMeasurementsService)
+        .to receive(:call).and_return(resolved_measurements)
       allow(MaskFitTestSummaryService).to receive(:call).and_return(summary_map)
 
       post :create, params: { recommender_user_id: managed_user.id }, as: :json
@@ -142,7 +144,8 @@ RSpec.describe MaskRecommenderController, type: :controller do
         }
       }
 
-      allow(LatestRecommenderFacialMeasurementsService).to receive(:call).and_return(resolved_measurements)
+      allow(LatestRecommenderFacialMeasurementsService)
+        .to receive(:call).and_return(resolved_measurements)
       allow(MaskFitTestSummaryService).to receive(:call).and_return(summary_map)
 
       post :create, params: { recommender_user_id: managed_user.id }, as: :json
@@ -170,7 +173,8 @@ RSpec.describe MaskRecommenderController, type: :controller do
 
       post :warmup, params: {}, as: :json
 
-      expect(MaskRecommender).to have_received(:warmup).with(function_base: 'mask-recommender', model_type: 'custom_lr')
+      expect(MaskRecommender).to have_received(:warmup)
+        .with(function_base: 'mask-recommender', model_type: 'custom_lr')
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
       expect(body['status']).to eq('ok')
@@ -194,7 +198,8 @@ RSpec.describe MaskRecommenderController, type: :controller do
 
       post :warmup, params: { function_base: 'mask-recommender-rf' }, as: :json
 
-      expect(MaskRecommender).to have_received(:warmup).with(function_base: 'mask-recommender-rf', model_type: 'custom_lr')
+      expect(MaskRecommender).to have_received(:warmup)
+        .with(function_base: 'mask-recommender-rf', model_type: 'custom_lr')
       expect(response).to have_http_status(:ok)
     end
   end
@@ -271,7 +276,9 @@ RSpec.describe MaskRecommenderController, type: :controller do
       allow(controller).to receive(:current_user).and_return(admin)
       allow(MaskRecommenderTraining).to receive(:call).and_return({ 'status' => 'started' })
 
-      post :train, params: { model_type: 'custom_lr', epochs: 200, learning_rate: 0.01 }, as: :json
+      post :train, params: {
+        model_type: 'custom_lr', epochs: 200, learning_rate: 0.01
+      }, as: :json
 
       expect(MaskRecommenderTraining).to have_received(:call).with(
         payload: hash_including(
@@ -302,7 +309,8 @@ RSpec.describe MaskRecommenderController, type: :controller do
 
     it 'returns eligible recommender users for the current viewer' do
       allow(controller).to receive(:current_user).and_return(manager)
-      allow(EligibleRecommenderUsersService).to receive(:call).with(viewer: manager).and_return(
+      allow(EligibleRecommenderUsersService)
+        .to receive(:call).with(viewer: manager).and_return(
         [
           { managed_id: 99, full_name: 'Jane Doe' }
         ]
