@@ -9,9 +9,10 @@ RSpec.describe Admin::FitFamiliesController, type: :controller do
   let(:non_admin) { create(:user) }
 
   describe 'GET #index' do
-    let!(:fit_family) { create(:fit_family, name: 'Trident Family') }
-
-    before { sign_in admin }
+    before do
+      create(:fit_family, name: 'Trident Family')
+      sign_in admin
+    end
 
     it 'returns fit families for admins' do
       get :index, format: :json
