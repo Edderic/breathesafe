@@ -424,6 +424,8 @@ def prepare_training_data(
         else:
             feature_cols += FACIAL_FEATURE_COLUMNS
     feature_cols += [
+        'mask_id',
+        'fit_family_id',
         'user_id',
         'strap_is_earloop_like',
         'strap_is_headstrap_like',
@@ -442,6 +444,7 @@ def prepare_training_data(
 def build_feature_matrix(filtered_df, categorical_cols=None):
     if categorical_cols is None:
         categorical_cols = ['strap_type', 'style', 'brand_model', 'unique_internal_model_code']
+    filtered_df = filtered_df.drop(columns=['mask_id', 'fit_family_id'], errors='ignore')
     features = pd.get_dummies(filtered_df, columns=categorical_cols, dummy_na=True)
     target = features.pop('qlft_pass_normalized')
     features = features.apply(pd.to_numeric, errors='coerce').fillna(0)
