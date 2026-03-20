@@ -10,7 +10,9 @@ RSpec.describe Admin::FitFamiliesController, type: :controller do
 
   describe 'GET #index' do
     before do
-      create(:fit_family, name: 'Trident Family')
+      family = create(:fit_family, name: 'Trident Family')
+      create(:mask, fit_family: family, perimeter_mm: '140', style: 'Boat', strap_type: 'Headstrap')
+      create(:mask, fit_family: family, perimeter_mm: '150', style: 'Boat', strap_type: 'Headstrap')
       sign_in admin
     end
 
@@ -20,6 +22,8 @@ RSpec.describe Admin::FitFamiliesController, type: :controller do
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
       expect(body['fit_families'].first['name']).to eq('Trident Family')
+      expect(body['fit_families'].first.dig('mismatch_summary', 'perimeter_mm', 'mismatch')).to eq(true)
+      expect(body['fit_families'].first.dig('mismatch_summary', 'style', 'mismatch')).to eq(false)
     end
   end
 

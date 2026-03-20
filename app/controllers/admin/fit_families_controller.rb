@@ -14,7 +14,8 @@ module Admin
             id: fit_family.id,
             name: fit_family.name,
             slug: fit_family.slug,
-            mask_count: fit_family.masks.size
+            mask_count: fit_family.masks.size,
+            mismatch_summary: mismatch_summary_for(fit_family)
           }
         end
       }, status: :ok
@@ -61,6 +62,28 @@ module Admin
       return if current_user&.admin?
 
       render json: { error: 'Unauthorized' }, status: :forbidden
+    end
+
+    def mismatch_summary_for(fit_family)
+      {
+        perimeter_mm: distinct_values_for(fit_family, :perimeter_mm),
+        style: distinct_values_for(fit_family, :style),
+        strap_type: distinct_values_for(fit_family, :strap_type)
+      }.transform_values do |values|
+        {
+          mismatch: values.size > 1,
+          values: values
+        }
+      end
+    end
+
+    def distinct_values_for(fit_family, attribute)
+      fit_family.masks.filter_map do |mask|
+        value = mask.public_send(attribute)
+        next if value.blank?
+
+        value
+      end.uniq.sort_by(&:to_s)
     end
   end
 end

@@ -66,6 +66,23 @@
       {{ message }}
     </div>
 
+    <div
+      v-if="selectedFamilySummary && selectedFamilyMismatchBadges.length"
+      class="alert alert-warning d-flex flex-wrap gap-2 align-items-center"
+    >
+      <strong class="me-2">
+        {{ selectedFamilySummary.name }} (#{{ selectedFamilySummary.id }}) has custom_lr-relevant mismatches:
+      </strong>
+      <span
+        v-for="badge in selectedFamilyMismatchBadges"
+        :key="badge.field"
+        class="badge text-bg-warning"
+        :title="badge.title"
+      >
+        {{ badge.label }}
+      </span>
+    </div>
+
     <div v-if="loading" class="text-center py-5">
       <div class="spinner-border" role="status"></div>
       <p class="mt-2 mb-0">Loading masks...</p>
@@ -80,6 +97,10 @@
                 <th>ID</th>
                 <th>Model Code</th>
                 <th>Current Fit Family</th>
+                <th>Perimeter</th>
+                <th>Style</th>
+                <th>Strap</th>
+                <th>Family Warnings</th>
                 <th style="min-width: 240px;">Assign To Fit Family</th>
                 <th>Actions</th>
               </tr>
@@ -94,6 +115,22 @@
                     <span class="text-muted">#{{ mask.fit_family_id }}</span>
                   </span>
                   <span v-else class="text-muted">Unknown</span>
+                </td>
+                <td>{{ displayValue(mask.perimeter_mm) }}</td>
+                <td>{{ displayValue(mask.style) }}</td>
+                <td>{{ displayValue(mask.strap_type) }}</td>
+                <td>
+                  <div v-if="familyMismatchBadges(mask).length" class="d-flex flex-wrap gap-1">
+                    <span
+                      v-for="badge in familyMismatchBadges(mask)"
+                      :key="`${mask.id}-${badge.field}`"
+                      class="badge text-bg-warning"
+                      :title="badge.title"
+                    >
+                      {{ badge.label }}
+                    </span>
+                  </div>
+                  <span v-else class="text-muted">None</span>
                 </td>
                 <td>
                   <select
@@ -125,7 +162,7 @@
                 </td>
               </tr>
               <tr v-if="filteredMasks.length === 0">
-                <td colspan="5" class="text-center py-4 text-muted">No masks found for current filters.</td>
+                <td colspan="9" class="text-center py-4 text-muted">No masks found for current filters.</td>
               </tr>
             </tbody>
           </table>
@@ -184,6 +221,15 @@ export default {
         lookup[family.id] = family
         return lookup
       }, {})
+    },
+    selectedFamilySummary() {
+      if (!this.familyFilter) return null
+      return this.fitFamilyLookup[this.familyFilter] || null
+    },
+    selectedFamilyMismatchBadges() {
+      const family = this.selectedFamilySummary
+      if (!family || !family.mismatch_summary) return []
+      return this.mismatchBadgesForFamily(family)
     }
   },
   async mounted() {
@@ -203,6 +249,30 @@ export default {
     clearMessages() {
       this.error = ''
       this.message = ''
+    },
+    displayValue(value) {
+      if (value === null || value === undefined || value === '') return 'Missing'
+      return value
+    },
+    familyMismatchBadges(mask) {
+      const family = this.fitFamilyLookup[mask.fit_family_id]
+      return this.mismatchBadgesForFamily(family)
+    },
+    mismatchBadgesForFamily(family) {
+      if (!family || !family.mismatch_summary) return []
+
+      const fields = [
+        { field: 'perimeter_mm', label: 'Perimeter mismatch' },
+        { field: 'style', label: 'Style mismatch' },
+        { field: 'strap_type', label: 'Strap mismatch' }
+      ]
+      return fields
+        .filter(({ field }) => family.mismatch_summary[field]?.mismatch)
+        .map(({ field, label }) => ({
+          field,
+          label,
+          title: `${label}: ${family.mismatch_summary[field].values.join(', ')}`
+        }))
     },
     async loadFitFamilies() {
       const response = await axios.get('/admin/fit_families.json')
