@@ -21,9 +21,8 @@ import pandas as pd
 import torch
 from botocore.exceptions import ClientError
 from matplotlib.lines import Line2D
-from breathesafe_network import (build_session,
-                                 fetch_facial_measurements_fit_tests,
-                                 fetch_json)
+from breathesafe_network import (build_session, fetch_facial_measurements_fit_tests,
+                                 fetch_json, login_with_credentials, logout)
 from feature_builder import (ABS_PERIMETER_DIFF_STYLE_PREFIX,
                              FACE_SHAPE_FEATURE_COLUMNS,
                              FACE_STYLE_INTERACTION_PREFIX,
@@ -46,7 +45,8 @@ from feature_builder import (ABS_PERIMETER_DIFF_STYLE_PREFIX,
                              build_feature_frame, derive_brand_model,
                              diff_bin_edges, diff_bin_index, diff_bin_labels,
                              scale_perimeter_diff_features)
-from predict_arkit_from_traditional import predict_arkit_from_traditional
+from predict_arkit_from_traditional import (TARGET_COLUMNS,
+                                            predict_arkit_from_traditional)
 from prob_model import (normalize_qlft_pass, predict_prob_model,
                         train_prob_model)
 from qa import build_mask_candidates, build_recommendation_preview
@@ -1024,7 +1024,59 @@ def _load_previous_latest_nn_artifacts():
     }
 
 
-def _probe_payloads():
+def _probe_payloads(base_url=None):
+    probe_user_ids_raw = os.environ.get('MASK_RECOMMENDER_PROBE_USER_IDS')
+    if probe_user_ids_raw:
+        email = os.getenv('BREATHESAFE_SERVICE_EMAIL')
+        password = os.getenv('BREATHESAFE_SERVICE_PASSWORD')
+        if not email or not password:
+            raise ValueError(
+                "MASK_RECOMMENDER_PROBE_USER_IDS requires BREATHESAFE_SERVICE_EMAIL and "
+                "BREATHESAFE_SERVICE_PASSWORD."
+            )
+        resolved_base_url = (base_url or os.environ.get('BREATHESAFE_BASE_URL') or 'http://localhost:3000').rstrip('/')
+        session = build_session(None)
+        login_with_credentials(session, resolved_base_url, email, password)
+        try:
+            summary_payload = fetch_json(session, f"{resolved_base_url}/facial_measurements/summary.json").get(
+                'facial_measurements', []
+            )
+        finally:
+            logout(session, resolved_base_url)
+
+        summary_df = pd.DataFrame(summary_payload)
+        if summary_df.empty:
+            return []
+
+        probe_user_ids = [
+            int(value.strip())
+            for value in probe_user_ids_raw.split(',')
+            if value.strip()
+        ]
+        probes = []
+        for user_id in probe_user_ids:
+            user_rows = summary_df[pd.to_numeric(summary_df.get('user_id'), errors='coerce') == user_id].copy()
+            if user_rows.empty:
+                continue
+            if 'created_at' in user_rows.columns:
+                user_rows['created_at_parsed'] = pd.to_datetime(user_rows['created_at'], errors='coerce')
+                user_rows = user_rows.sort_values('created_at_parsed', ascending=False)
+            selected = user_rows.iloc[0]
+            facial_measurements = {
+                column: float(selected.get(column, 0) or 0)
+                for column in TARGET_COLUMNS
+            }
+            facial_measurements['facial_hair_beard_length_mm'] = float(
+                selected.get('facial_hair_beard_length_mm', 0) or 0
+            )
+            probes.append({
+                'label': f"user_{user_id}",
+                'facial_measurements': facial_measurements,
+                'user_id': user_id,
+            })
+        if probes:
+            return probes
+
     raw = os.environ.get('MASK_RECOMMENDER_PROBES_JSON')
     if not raw:
         return DEFAULT_PROBE_PAYLOADS
@@ -1463,6 +1515,8 @@ def _build_custom_lr_perimeter_diff_diagnostics(
     parameters,
     category_metadata,
     timestamp,
+    mask_data=None,
+    base_url=None,
 ):
     if cleaned_fit_tests.empty:
         return []
@@ -1493,7 +1547,7 @@ def _build_custom_lr_perimeter_diff_diagnostics(
     probe_point_rows = []
     per_page = 16
     num_pages = int(np.ceil(len(mask_codes) / per_page))
-    probes = _probe_payloads()
+    probes = _probe_payloads(base_url=base_url)
     probe_colors = ['#111111', '#7a3cff', '#118ab2', '#ef476f', '#2a9d8f', '#bc6c25']
 
     for page_idx in range(num_pages):
@@ -1505,10 +1559,19 @@ def _build_custom_lr_perimeter_diff_diagnostics(
             ax = axes[ax_idx]
             rows = grouped.get_group(mask_code).copy()
             representative = rows.iloc[-1]
-            style = representative['style']
-            strap_type = representative['strap_type']
+            live_mask = None
+            representative_mask_id = pd.to_numeric(representative.get('mask_id'), errors='coerce')
+            if mask_data and pd.notna(representative_mask_id):
+                live_mask = mask_data.get(str(int(representative_mask_id)))
+
+            style = (live_mask or {}).get('style') or representative['style']
+            strap_type = (live_mask or {}).get('strap_type') or representative['strap_type']
             fit_family_key = _fit_family_key_series(pd.DataFrame([representative])).iloc[0]
-            mask_perimeter_mm = _mask_perimeter_mm_from_training_row(representative)
+            live_perimeter_mm = pd.to_numeric((live_mask or {}).get('perimeter_mm'), errors='coerce')
+            if pd.notna(live_perimeter_mm):
+                mask_perimeter_mm = float(live_perimeter_mm)
+            else:
+                mask_perimeter_mm = _mask_perimeter_mm_from_training_row(representative)
             probe_positions = []
             for probe in probes:
                 facial_measurements = probe.get('facial_measurements') or {}
@@ -1530,7 +1593,7 @@ def _build_custom_lr_perimeter_diff_diagnostics(
 
             curve_frame = pd.DataFrame({
                 'unique_internal_model_code': [mask_code] * len(diff_values),
-                'fit_family_id': [representative.get('fit_family_id')] * len(diff_values),
+                'fit_family_id': [(live_mask or {}).get('fit_family_id', representative.get('fit_family_id'))] * len(diff_values),
                 'style': [style] * len(diff_values),
                 'strap_type': [strap_type] * len(diff_values),
                 'perimeter_diff': diff_values,
@@ -1602,7 +1665,7 @@ def _build_custom_lr_perimeter_diff_diagnostics(
                 )
                 probe_frame = pd.DataFrame({
                     'unique_internal_model_code': [mask_code],
-                    'fit_family_id': [representative.get('fit_family_id')],
+                    'fit_family_id': [(live_mask or {}).get('fit_family_id', representative.get('fit_family_id'))],
                     'style': [style_value],
                     'strap_type': [strap_type_value],
                     'perimeter_mm': [mask_perimeter_mm],
@@ -2145,6 +2208,8 @@ def main(argv=None):
             parameters=params,
             category_metadata=category_metadata,
             timestamp=timestamp,
+            mask_data=mask_data,
+            base_url=base_url,
         )
 
         roc_plot_path = os.path.join(images_dir, f"{timestamp}_custom_roc_auc.png")
