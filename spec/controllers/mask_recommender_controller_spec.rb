@@ -199,6 +199,38 @@ RSpec.describe MaskRecommenderController, type: :controller do
     end
   end
 
+  describe 'GET #recommender_user_measurements' do
+    let(:manager) { create(:user) }
+    let(:managed_user) { create(:user) }
+
+    before do
+      create(:managed_user, manager: manager, managed: managed_user)
+    end
+
+    it 'returns resolved recommender measurements for a managed user' do
+      allow(controller).to receive(:current_user).and_return(manager)
+      allow(LatestRecommenderFacialMeasurementsService).to receive(:call).and_return(
+        {
+          'nose_mm' => 44,
+          'chin_mm' => 55,
+          'top_cheek_mm' => 66,
+          'mid_cheek_mm' => 77,
+          'strap_mm' => 120
+        }
+      )
+
+      get :recommender_user_measurements, params: { recommender_user_id: managed_user.id }, as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(LatestRecommenderFacialMeasurementsService).to have_received(:call).with(
+        viewer: manager,
+        recommender_user_id: managed_user.id.to_s
+      )
+      body = JSON.parse(response.body)
+      expect(body['facial_measurements']['nose_mm']).to eq(44)
+    end
+  end
+
   describe 'POST #train' do
     let(:admin) { create(:user, admin: true) }
 

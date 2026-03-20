@@ -141,6 +141,26 @@ class MaskRecommenderController < ApplicationController
     render json: { users: users }, status: :ok
   end
 
+  def recommender_user_measurements
+    user_id = params[:recommender_user_id].presence
+    if user_id.blank?
+      render json: { error: 'recommender_user_id is required' }, status: :unprocessable_entity
+      return
+    end
+
+    measurements = LatestRecommenderFacialMeasurementsService.call(
+      viewer: current_user,
+      recommender_user_id: user_id
+    )
+    render json: { facial_measurements: measurements }, status: :ok
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'user not found' }, status: :not_found
+  rescue LatestRecommenderFacialMeasurementsService::ForbiddenError => e
+    render json: { error: e.message }, status: :forbidden
+  rescue LatestRecommenderFacialMeasurementsService::MissingMeasurementsError => e
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
+
   private
 
   def build_recommendation_response

@@ -1034,46 +1034,39 @@ def _probe_payloads(base_url=None):
                 "MASK_RECOMMENDER_PROBE_USER_IDS requires BREATHESAFE_SERVICE_EMAIL and "
                 "BREATHESAFE_SERVICE_PASSWORD."
             )
-        resolved_base_url = (base_url or os.environ.get('BREATHESAFE_BASE_URL') or 'http://localhost:3000').rstrip('/')
-        session = build_session(None)
-        login_with_credentials(session, resolved_base_url, email, password)
-        try:
-            summary_payload = fetch_json(session, f"{resolved_base_url}/facial_measurements/summary.json").get(
-                'facial_measurements', []
-            )
-        finally:
-            logout(session, resolved_base_url)
-
-        summary_df = pd.DataFrame(summary_payload)
-        if summary_df.empty:
-            return []
-
         probe_user_ids = [
             int(value.strip())
             for value in probe_user_ids_raw.split(',')
             if value.strip()
         ]
-        probes = []
-        for user_id in probe_user_ids:
-            user_rows = summary_df[pd.to_numeric(summary_df.get('user_id'), errors='coerce') == user_id].copy()
-            if user_rows.empty:
-                continue
-            if 'created_at' in user_rows.columns:
-                user_rows['created_at_parsed'] = pd.to_datetime(user_rows['created_at'], errors='coerce')
-                user_rows = user_rows.sort_values('created_at_parsed', ascending=False)
-            selected = user_rows.iloc[0]
-            facial_measurements = {
-                column: float(selected.get(column, 0) or 0)
-                for column in TARGET_COLUMNS
-            }
-            facial_measurements['facial_hair_beard_length_mm'] = float(
-                selected.get('facial_hair_beard_length_mm', 0) or 0
-            )
-            probes.append({
-                'label': f"user_{user_id}",
-                'facial_measurements': facial_measurements,
-                'user_id': user_id,
-            })
+        resolved_base_url = (base_url or os.environ.get('BREATHESAFE_BASE_URL') or 'http://localhost:3000').rstrip('/')
+        session = build_session(None)
+        login_with_credentials(session, resolved_base_url, email, password)
+        try:
+            probes = []
+            for user_id in probe_user_ids:
+                payload = fetch_json(
+                    session,
+                    f"{resolved_base_url}/mask_recommender/recommender_user_measurements.json"
+                    f"?recommender_user_id={user_id}"
+                )
+                facial_measurements = payload.get('facial_measurements') or {}
+                if not facial_measurements:
+                    continue
+                probes.append({
+                    'label': f"user_{user_id}",
+                    'facial_measurements': {
+                        column: float(facial_measurements.get(column, 0) or 0)
+                        for column in TARGET_COLUMNS
+                    } | {
+                        'facial_hair_beard_length_mm': float(
+                            facial_measurements.get('facial_hair_beard_length_mm', 0) or 0
+                        )
+                    },
+                    'user_id': user_id,
+                })
+        finally:
+            logout(session, resolved_base_url)
         if probes:
             return probes
 

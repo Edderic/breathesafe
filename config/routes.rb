@@ -92,6 +92,8 @@ Rails.application.routes.draw do
   get 'mask_recommender/async/:id', to: 'mask_recommender#status'
   get 'mask_recommender/recommender_columns', to: 'mask_recommender#recommender_columns'
   get 'mask_recommender/eligible_users', to: 'mask_recommender#eligible_users'
+  get 'mask_recommender/recommender_user_measurements',
+      to: 'mask_recommender#recommender_user_measurements'
 
   controller :pages do
     get :qr_code_generator
