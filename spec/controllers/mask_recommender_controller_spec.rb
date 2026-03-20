@@ -311,10 +311,10 @@ RSpec.describe MaskRecommenderController, type: :controller do
       allow(controller).to receive(:current_user).and_return(manager)
       allow(EligibleRecommenderUsersService)
         .to receive(:call).with(viewer: manager).and_return(
-        [
-          { managed_id: 99, full_name: 'Jane Doe' }
-        ]
-      )
+          [
+            { managed_id: 99, full_name: 'Jane Doe' }
+          ]
+        )
 
       get :eligible_users, format: :json
 
