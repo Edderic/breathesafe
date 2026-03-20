@@ -18,11 +18,19 @@
         <router-link class='desktop clickable side-padding' :to='{ name: "FitTests"}' @click='toggleShowSubNavBar("FitTests")'>Fit Tests</router-link>
         <a
           class="desktop clickable side-padding"
-          v-if="isAdmin"
+          v-if="isAdmin && !adminModeEnabled"
           href="#admin_nav"
           @click.prevent="toggleShowSubNavBar('Admin')"
         >
           Admin
+        </a>
+        <a
+          class="desktop clickable side-padding"
+          v-if="isAdmin && adminModeEnabled"
+          href="#exit_admin_mode"
+          @click.prevent="disableAdminMode"
+        >
+          Exit Admin Mode
         </a>
         <router-link class='desktop clickable side-padding' to='/signin' v-if=!signedIn @click='showSubNavBar = null'>Sign up/Sign in</router-link>
         <a class='desktop clickable side-padding' href="#sign_out" @click="signOut" v-if="signedIn"  >Sign out</a>
@@ -31,7 +39,7 @@
       </div>
     </div>
 
-    <div class='row fixed-nav-bar-bottom admin-subnav desktop' v-if="isAdmin && showSubNavBar == 'Admin'">
+    <div class='row fixed-nav-bar-bottom admin-subnav desktop' v-if="isAdmin && !adminModeEnabled && showSubNavBar == 'Admin'">
       <label class="admin-mode-toggle">
         <input type="checkbox" :checked="adminModeEnabled" @change="toggleAdminMode">
         <span>Admin Mode</span>
@@ -48,14 +56,15 @@
       <router-link class='mobile-row clickable side-padding' :to='{ name: "RespiratorUsers"}' @click='toggleShowSubNavBar("RespiratorRecommender")'>Users</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "Masks"}' @click='toggleShowSubNavBar("Masks")'>Masks</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "FitTests"}' @click='toggleShowSubNavBar("FitTests")'>Fit Tests</router-link>
-      <a class="mobile-row clickable side-padding" v-if="isAdmin" href="#admin_nav_mobile" @click.prevent="toggleShowSubNavBar('Admin')">Admin</a>
-      <label class="mobile-row clickable side-padding mobile-admin-link admin-mode-toggle mobile-admin-toggle" v-if="isAdmin && showSubNavBar == 'Admin'">
+      <a class="mobile-row clickable side-padding" v-if="isAdmin && !adminModeEnabled" href="#admin_nav_mobile" @click.prevent="toggleShowSubNavBar('Admin')">Admin</a>
+      <a class="mobile-row clickable side-padding" v-if="isAdmin && adminModeEnabled" href="#exit_admin_mode_mobile" @click.prevent="disableAdminMode">Exit Admin Mode</a>
+      <label class="mobile-row clickable side-padding mobile-admin-link admin-mode-toggle mobile-admin-toggle" v-if="isAdmin && !adminModeEnabled && showSubNavBar == 'Admin'">
         <input type="checkbox" :checked="adminModeEnabled" @change="toggleAdminMode">
         <span>Admin Mode</span>
       </label>
-      <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'AdminStudyParticipants'}" @click="showSubNavBar = null" v-if="isAdmin && showSubNavBar == 'Admin'">Study Participants</router-link>
-      <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'MaskBreakdown'}" @click="showSubNavBar = null" v-if="isAdmin && showSubNavBar == 'Admin'">Mask Breakdown</router-link>
-      <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'AdminMaskDuplicates'}" @click="showSubNavBar = null" v-if="isAdmin && showSubNavBar == 'Admin'">Mask Duplicates</router-link>
+      <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'AdminStudyParticipants'}" @click="showSubNavBar = null" v-if="isAdmin && !adminModeEnabled && showSubNavBar == 'Admin'">Study Participants</router-link>
+      <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'MaskBreakdown'}" @click="showSubNavBar = null" v-if="isAdmin && !adminModeEnabled && showSubNavBar == 'Admin'">Mask Breakdown</router-link>
+      <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'AdminMaskDuplicates'}" @click="showSubNavBar = null" v-if="isAdmin && !adminModeEnabled && showSubNavBar == 'Admin'">Mask Duplicates</router-link>
       <h2 class='vertical-centered'>Misc</h2>
 
       <router-link class='mobile-row clickable side-padding' to='/signin' v-if=!signedIn>Sign up/Sign in</router-link>
@@ -95,6 +104,13 @@ export default {
     ...mapActions(useEventStores, [ 'load']),
     toggleAdminMode(event) {
       this.setAdminModeEnabled(!!event.target.checked)
+      if (event.target.checked) {
+        this.showSubNavBar = null
+      }
+    },
+    disableAdminMode() {
+      this.setAdminModeEnabled(false)
+      this.showSubNavBar = null
     },
     toggleShowSubNavBar(string) {
       if (string == this.showSubNavBar) {
