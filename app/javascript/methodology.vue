@@ -1,5 +1,5 @@
 <template>
-  <router-link to="/methodology#toc-mobile">
+  <router-link to="/introduction#toc-mobile">
     <CircularButton text="TOC" class='toc-button'/>
   </router-link>
 
@@ -7,47 +7,47 @@
     <div class='toc toc-mobile margined' id='toc-mobile'>
       <h2><strong>Table of Contents</strong></h2>
 
-      <router-link to="/methodology#top">
-        Methodology
+      <router-link to="/introduction#top">
+        Introduction
       </router-link>
 
-      <router-link to="/methodology#why-this-matters">
+      <router-link to="/introduction#why-this-matters">
         Why This Matters
       </router-link>
 
-      <router-link to="/methodology#what-came-before">
+      <router-link to="/introduction#what-came-before">
         What Came Before
       </router-link>
 
-      <router-link to="/methodology#what-we-do-differently">
+      <router-link to="/introduction#what-we-do-differently">
         What We Do Differently
       </router-link>
 
-      <router-link to="/methodology#how-it-works">
+      <router-link to="/introduction#how-it-works">
         How It Works
       </router-link>
 
-      <router-link to="/methodology#why-failed-results-matter">
+      <router-link to="/introduction#why-failed-results-matter">
         Why Failed Results Matter
       </router-link>
 
-      <router-link to="/methodology#quality-and-accessibility">
+      <router-link to="/introduction#quality-and-accessibility">
         Quality and Accessibility
       </router-link>
 
-      <router-link to="/methodology#contribute">
+      <router-link to="/introduction#contribute">
         Contribute
       </router-link>
 
-      <router-link to="/methodology#deep-dives">
+      <router-link to="/introduction#deep-dives">
         Deep Dives
       </router-link>
 
-      <router-link to="/methodology#current-limitations">
+      <router-link to="/introduction#current-limitations">
         Current Limitations
       </router-link>
 
-      <router-link to="/methodology#references">
+      <router-link to="/introduction#references">
         References
       </router-link>
     </div>
@@ -59,54 +59,54 @@
         <br>
         <div><br></div><h2><strong>Table of Contents</strong></h2><div><br></div>
 
-        <router-link to="/methodology#top">
-          Methodology
+        <router-link to="/introduction#top">
+          Introduction
         </router-link>
 
-        <router-link to="/methodology#why-this-matters">
+        <router-link to="/introduction#why-this-matters">
           Why This Matters
         </router-link>
 
-        <router-link to="/methodology#what-came-before">
+        <router-link to="/introduction#what-came-before">
           What Came Before
         </router-link>
 
-        <router-link to="/methodology#what-we-do-differently">
+        <router-link to="/introduction#what-we-do-differently">
           What We Do Differently
         </router-link>
 
-        <router-link to="/methodology#how-it-works">
+        <router-link to="/introduction#how-it-works">
           How It Works
         </router-link>
 
-        <router-link to="/methodology#why-failed-results-matter">
+        <router-link to="/introduction#why-failed-results-matter">
           Why Failed Results Matter
         </router-link>
 
-        <router-link to="/methodology#quality-and-accessibility">
+        <router-link to="/introduction#quality-and-accessibility">
           Quality and Accessibility
         </router-link>
 
-        <router-link to="/methodology#contribute">
+        <router-link to="/introduction#contribute">
           Contribute
         </router-link>
 
-        <router-link to="/methodology#deep-dives">
+        <router-link to="/introduction#deep-dives">
           Deep Dives
         </router-link>
 
-        <router-link to="/methodology#current-limitations">
+        <router-link to="/introduction#current-limitations">
           Current Limitations
         </router-link>
 
-        <router-link to="/methodology#references">
+        <router-link to="/introduction#references">
           References
         </router-link>
       </div>
 
       <div class='main margined'>
         <div id='top'>
-          <h1>Methodology: Balancing Quality and Accessibility</h1>
+          <h1>Introduction: Balancing Quality and Accessibility</h1>
           <p><strong>Last updated:</strong> March 24, 2026</p>
           <p>
             Breathesafe and MasqFit are designed around a simple public-interest idea:
@@ -407,7 +407,7 @@
 import CircularButton from './circular_button.vue'
 
 export default {
-  name: 'Methodology',
+  name: 'Introduction',
   components: {
     CircularButton
   }

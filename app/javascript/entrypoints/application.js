@@ -56,7 +56,7 @@ import BulkFitTestsImportsList from '../bulk_fit_tests_imports_list.vue'
 import MaskRecommenderOnboarding from '../mask_recommender_onboarding.vue'
 import MeasurementDevices from '../measurement_devices.vue'
 import MeasurementDevice from '../measurement_device.vue'
-import Methodology from '../methodology.vue'
+import Introduction from '../methodology.vue'
 import Masks from '../masks.vue'
 import Profile from '../profile.vue'
 import PrivacyPolicy from '../privacy_policy.vue'
@@ -117,7 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/register', component: Registration, name: 'Registration' },
     { path: '/faqs', component: FAQs, name: 'FAQs' },
     { path: '/disclaimer', component: Disclaimer, name: 'Disclaimer' },
-    { path: '/methodology', component: Methodology, name: 'Methodology' },
+    { path: '/introduction', component: Introduction, name: 'Introduction' },
+    { path: '/methodology', component: Introduction, name: 'Methodology' },
     { path: '/terms_of_service', component: TermsOfService, name: 'TermsOfService' },
     { path: '/consent_form', component: ConsentForm, name: 'ConsentForm' },
     { path: '/privacy', component: PrivacyPolicy, name: 'PrivacyPolicy' },
