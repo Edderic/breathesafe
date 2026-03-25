@@ -11,6 +11,10 @@
         Introduction
       </router-link>
 
+      <router-link to="/introduction#preview">
+        Preview
+      </router-link>
+
       <router-link to="/introduction#launch-story">
         Launch Story
       </router-link>
@@ -73,6 +77,10 @@
 
         <router-link to="/introduction#top">
           Introduction
+        </router-link>
+
+        <router-link to="/introduction#preview">
+          Preview
         </router-link>
 
         <router-link to="/introduction#launch-story">
@@ -166,11 +174,27 @@
             </div>
 
             <div class='hero-visual'>
-              <img :src="masqfitLaunchHero" alt="MasqFit App Store launch graphic showing the app interface and app availability announcement.">
+              <img :src="masqfitHomeScreen" alt="MasqFit home screen showing the app branding and primary actions.">
             </div>
           </div>
 
           <p><strong>Last updated:</strong> March 24, 2026</p>
+        </div>
+
+        <hr>
+
+        <div id='preview'>
+          <br>
+          <br>
+          <h2>Preview</h2>
+          <p>
+            Here is the core call to action in one screen: use an iPhone with Face ID
+            capability, scan your face, get mask recommendations, and contribute data to
+            improve the project over time.
+          </p>
+          <figure class='story-figure wide-figure'>
+            <img :src="threadSupport" alt="MasqFit support-the-project image from the launch thread.">
+          </figure>
         </div>
 
         <hr>
@@ -281,12 +305,6 @@
                 plots show how passing fit tests cluster in the stronger-fit regions.
               </figcaption>
           </figure>
-          <div class='process-grid'>
-            <figure class='story-figure'>
-              <img :src="threadSupport" alt="MasqFit support-the-project image from the launch thread.">
-              <figcaption>The project improves as more people contribute failed user seal checks and fit testing data.</figcaption>
-            </figure>
-          </div>
         </div>
 
         <hr>
@@ -555,7 +573,7 @@
 
 <script>
 import CircularButton from './circular_button.vue'
-import masqfitLaunchHero from '../assets/images/masqfit-launch-hero.jpg'
+import masqfitHomeScreen from '../assets/images/masqfit-home-screen.png'
 import threadAccessOne from '../assets/images/masqfit-thread-access-1.jpg'
 import threadAccessTwo from '../assets/images/masqfit-thread-access-2.jpg'
 import threadTestThePlanet from '../assets/images/masqfit-thread-test-the-planet.jpg'
@@ -576,7 +594,7 @@ export default {
   },
   data() {
     return {
-      masqfitLaunchHero
+      masqfitHomeScreen
       ,threadAccessOne
       ,threadAccessTwo
       ,threadTestThePlanet
