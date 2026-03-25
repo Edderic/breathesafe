@@ -166,7 +166,7 @@
           <p>
             Here is the core call to action in one screen: use an iPhone with Face ID
             capability, scan your face, get mask recommendations, and contribute data to
-            improve the project over time.
+            improve the project over time. Learn more about why fit matters in the "About" section.
           </p>
           <figure class='story-figure wide-figure'>
             <img :src="threadSupport" alt="MasqFit support-the-project image from the launch thread.">
