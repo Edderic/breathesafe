@@ -217,7 +217,7 @@
       <div class="styles-documentPreviewer-881656"><div><span class="document-previewer-logo-d16635"></span><div class="document-previewer-wrapper-a717db">      <div data-custom-class="body">
       <div><strong><span style="font-size: 26px;"><span data-custom-class="title">Privacy Policy (Breathesafe &amp; MasqFit)</span></span></strong></div>
       <div><br></div>
-      <div><span style="color: rgb(127, 127, 127);"><strong><span style="font-size: 15px;"><span data-custom-class="subtitle">Last updated December 13, 2025</span></span></strong></span></div>
+      <div><span style="color: rgb(127, 127, 127);"><strong><span style="font-size: 15px;"><span data-custom-class="subtitle">Last updated March 25, 2026</span></span></strong></span></div>
       <div><br></div>
       <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">This Privacy Policy explains how <strong>Breathesafe LLC</strong> ("Breathesafe," "we," "us," "our") collects, uses, shares, and protects information when you use <strong>MasqFit</strong> and related services (the "Services").</span></span></span></div>
       <div><br></div>
@@ -405,6 +405,8 @@
           <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Breathesafe invokes an <strong>AWS Lambda</strong> function running Python ML code to compute fit predictions.</span></span></span></li>
           <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Predictions are returned and displayed to you.</span></span></span></li>
         </ol>
+        <div><br></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">As part of this processing flow, operational logs may capture limited request-related information, which can include derived facial measurements sent for recommendations. Recommender-related <strong>AWS CloudWatch Logs</strong> are retained for up to <strong>30 days</strong>. <strong>Heroku</strong> application logs are short-term operational logs; for our current Cedar-generation app stack, Heroku retains recent log history for up to <strong>1 week</strong>.</span></span></span></div>
       </div>
 
       <!-- Section 6: Legal bases -->
@@ -492,6 +494,15 @@
 
         <div><strong><span style="font-size: 14px;"><span data-custom-class="body_text">Model training retention</span></span></strong></div>
         <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Training data is retained <strong>until you choose to delete your data</strong>.</span></span></span></div>
+        <div><br></div>
+
+        <div><strong><span style="font-size: 14px;"><span data-custom-class="body_text">Operational log retention</span></span></strong></div>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">When facial measurements are processed to generate recommendations, limited request-related data may appear in operational logs.</span></span></span></div>
+        <ul>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Recommender-related <strong>AWS CloudWatch Logs</strong> are retained for up to <strong>30 days</strong>.</span></span></span></li>
+          <li style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><strong>Heroku</strong> application logs are retained as short-term operational logs; for our current Cedar-generation app stack, Heroku retains recent log history for up to <strong>1 week</strong>.</span></span></span></li>
+        </ul>
+        <div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">These log-retention periods apply to operational logging and do <strong>not</strong> replace the primary retention rules for stored account data, derived facial measurements, or research data described above.</span></span></span></div>
         <div><br></div>
 
         <div><strong><span style="font-size: 14px;"><span data-custom-class="body_text">After account deletion</span></span></strong></div>
