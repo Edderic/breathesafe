@@ -12,8 +12,8 @@
       </div>
 
       <div class='vertical-centered'>
-        <router-link class='desktop clickable side-padding' :to='{ name: "MaskRecommenderOnboarding"}' @click='toggleShowSubNavBar("MaskRecommenderOnboarding")'>Onboarding</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "Introduction"}' @click='showSubNavBar = null'>Introduction</router-link>
+        <router-link class='desktop clickable side-padding' :to='{ name: "MaskRecommenderOnboarding"}' @click='toggleShowSubNavBar("MaskRecommenderOnboarding")'>Onboarding</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "RespiratorUsers"}' @click='toggleShowSubNavBar("RespiratorRecommender")'>Users</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "Masks"}' @click='toggleShowSubNavBar("Masks")'>Masks</router-link>
         <router-link class='desktop clickable side-padding' :to='{ name: "FitTests"}' @click='toggleShowSubNavBar("FitTests")'>Fit Tests</router-link>
@@ -54,8 +54,8 @@
     <div class='mobile-col' v-if="showMobile()">
       <h2 class='vertical-centered'>Respirator</h2>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "ConsentForm"}' @click='toggleShowSubNavBar("ConsentForm")'>Consent Form</router-link>
-      <router-link class='mobile-row clickable side-padding' :to='{ name: "MaskRecommenderOnboarding"}' @click='toggleShowSubNavBar("MaskRecommenderOnboarding")'>Onboarding</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "Introduction"}' @click='showSubNavBar = null'>Introduction</router-link>
+      <router-link class='mobile-row clickable side-padding' :to='{ name: "MaskRecommenderOnboarding"}' @click='toggleShowSubNavBar("MaskRecommenderOnboarding")'>Onboarding</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "RespiratorUsers"}' @click='toggleShowSubNavBar("RespiratorRecommender")'>Users</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "Masks"}' @click='toggleShowSubNavBar("Masks")'>Masks</router-link>
       <router-link class='mobile-row clickable side-padding' :to='{ name: "FitTests"}' @click='toggleShowSubNavBar("FitTests")'>Fit Tests</router-link>
