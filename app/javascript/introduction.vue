@@ -31,10 +31,6 @@
         Why This Matters
       </router-link>
 
-      <router-link to="/introduction#what-came-before">
-        What Came Before
-      </router-link>
-
       <router-link to="/introduction#what-we-do-differently">
         What We Do Differently
       </router-link>
@@ -97,10 +93,6 @@
 
         <router-link to="/introduction#why-this-matters">
           Why This Matters
-        </router-link>
-
-        <router-link to="/introduction#what-came-before">
-          What Came Before
         </router-link>
 
         <router-link to="/introduction#what-we-do-differently">
@@ -327,40 +319,6 @@
             Breathesafe and MasqFit try to narrow that gap: more accessible than formal fit
             testing for everyone, but more evidence-based and more transparent than closed,
             black-box matching tools.
-          </p>
-        </div>
-
-        <hr>
-
-        <div id='what-came-before'>
-          <br>
-          <br>
-          <h2>What Came Before</h2>
-          <p>
-            Earlier work helped move the field forward, but each approach comes with limits.
-          </p>
-          <p>
-            <strong>Fit Mask</strong> and <strong>MaskFit AR</strong> both pushed toward a
-            more accessible experience by using face scans or facial matching. That direction
-            matters. But those apps are closed systems: the code is not publicly auditable,
-            the data collection and update processes are not fully transparent, and the public
-            cannot easily inspect how their recommendations improve over time.
-          </p>
-          <p>
-            <strong>Fit Test the Planet</strong> has done valuable public-interest work by
-            surfacing adversarial quantitative fit test results and showing which masks have
-            worked for many adults. That helps people discover strong candidates. But it does
-            not primarily solve the personalization problem of estimating which masks are more
-            likely to fit one specific face.
-          </p>
-          <p>
-            Existing literature on respirator anthropometry is also important. It shows that
-            facial dimensions matter, but it also shows why static panels and limited study
-            populations are not enough for everyone. The 2007 National Academies review noted
-            weaknesses in older respirator panel development strategies and called for better
-            representation and stronger methods. More recent work continues to show that facial
-            dimensions are relevant to respirator fit while also highlighting the limits of
-            small or uneven datasets.
           </p>
         </div>
 
