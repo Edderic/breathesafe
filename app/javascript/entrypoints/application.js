@@ -88,7 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Each route should map to a component.
   // We'll talk about nested routes later.
   const routes = [
-    { path: '/', component: Landing, name: 'Landing' },
+    { path: '/', component: Introduction, name: 'Landing' },
+    { path: '/clean_air', component: Landing, name: 'CleanAirLanding' },
     { path: '/dashboard', component: Dashboard, name: 'Dashboard' },
     { path: '/respirator_users', component: RespiratorUsers, name: 'RespiratorUsers' },
     { path: '/masks', component: Masks, name: 'Masks' },
