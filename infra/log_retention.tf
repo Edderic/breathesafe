@@ -15,7 +15,7 @@ resource "aws_cloudwatch_log_group" "mask_recommender" {
     for name, region in local.mask_recommender_log_groups : name => region if region == "us-east-1"
   }
 
-  provider          = aws
+  provider          = aws.use1
   name              = each.key
   retention_in_days = 30
 }
@@ -25,7 +25,7 @@ resource "aws_cloudwatch_log_group" "mask_recommender_use2" {
     for name, region in local.mask_recommender_log_groups : name => region if region == "us-east-2"
   }
 
-  provider          = aws.use2
+  provider          = aws
   name              = each.key
   retention_in_days = 30
 }

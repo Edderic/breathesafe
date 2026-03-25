@@ -1,9 +1,9 @@
 locals {
   # Map buckets to their regions; adjust as needed
   bucket_regions = {
-    "breathesafe-production"  = "us-east-1"
-    "breathesafe-staging"     = "us-east-1"
-    "breathesafe-development" = "us-east-1"
+    "breathesafe-production"  = "us-east-2"
+    "breathesafe-staging"     = "us-east-2"
+    "breathesafe-development" = "us-east-2"
   }
 }
 
@@ -57,7 +57,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "mask_recommender_use2" {
   for_each = {
     for name, region in local.bucket_regions : name => region if region == "us-east-2"
   }
-  provider = aws.use2
+  provider = aws
   bucket   = each.key
 
   rule {

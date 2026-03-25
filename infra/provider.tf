@@ -14,11 +14,11 @@ provider "aws" {
 variable "aws_region" {
   description = "AWS region to use for resources"
   type        = string
-  default     = "us-east-1"
+  default     = "us-east-2"
 }
 
-# Additional provider for resources hosted in us-east-2 when needed.
+# Additional provider for resources hosted in us-east-1 when needed.
 provider "aws" {
-  alias  = "use2"
-  region = "us-east-2"
+  alias  = "use1"
+  region = "us-east-1"
 }
