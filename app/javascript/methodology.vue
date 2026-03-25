@@ -11,6 +11,18 @@
         Introduction
       </router-link>
 
+      <router-link to="/introduction#launch-story">
+        Launch Story
+      </router-link>
+
+      <router-link to="/introduction#existing-solutions">
+        Existing Solutions
+      </router-link>
+
+      <router-link to="/introduction#fit-logic">
+        Fit Logic
+      </router-link>
+
       <router-link to="/introduction#why-this-matters">
         Why This Matters
       </router-link>
@@ -61,6 +73,18 @@
 
         <router-link to="/introduction#top">
           Introduction
+        </router-link>
+
+        <router-link to="/introduction#launch-story">
+          Launch Story
+        </router-link>
+
+        <router-link to="/introduction#existing-solutions">
+          Existing Solutions
+        </router-link>
+
+        <router-link to="/introduction#fit-logic">
+          Fit Logic
         </router-link>
 
         <router-link to="/introduction#why-this-matters">
@@ -147,6 +171,123 @@
           </div>
 
           <p><strong>Last updated:</strong> March 24, 2026</p>
+        </div>
+
+        <hr>
+
+        <div id='launch-story'>
+          <br>
+          <br>
+          <h2>Launch Story</h2>
+          <p>
+            MasqFit makes better mask fit accessible. Using a quick facial scan,
+            it recommends masks that are most likely to fit your face based on
+            real fit data and mask performance, not guesswork.
+          </p>
+          <p>
+            The point is to strike a balance between accuracy and accessibility.
+            Better fit means better protection for you and for the people around you.
+          </p>
+          <div class='two-up'>
+            <figure class='story-figure'>
+              <img :src="threadAccessOne" alt="MasqFit launch thread image describing accessible mask-fit recommendations.">
+            </figure>
+            <figure class='story-figure'>
+              <img :src="threadAccessTwo" alt="MasqFit launch thread image describing the balance between accuracy and accessibility.">
+            </figure>
+          </div>
+          <p>
+            The project is also the product of a community effort. Volunteers have
+            contributed facial measurements, fit testing results, thought partnership,
+            and practical support for quantitative fit testing so the application could exist.
+          </p>
+        </div>
+
+        <hr>
+
+        <div id='existing-solutions'>
+          <br>
+          <br>
+          <h2>Existing Solutions</h2>
+          <p>
+            This project builds on earlier work, but it is trying to answer a more
+            personal question: not only which masks often do well overall, but
+            which masks are more likely to fit <strong>you</strong>.
+          </p>
+          <div class='comparison-grid'>
+            <article class='comparison-card'>
+              <img :src="threadTestThePlanet" alt="Fit Test the Planet comparison image from the launch thread.">
+              <h3>Fit Test the Planet</h3>
+              <p>It surfaced masks with strong pass rates, but did not directly answer: “Will this fit me?”</p>
+            </article>
+            <article class='comparison-card'>
+              <img :src="threadMaskfitAr" alt="MaskFit AR comparison image from the launch thread.">
+              <h3>MaskFit AR</h3>
+              <p>It guesses fit for CPAP masks, not filtering facepiece respirators.</p>
+            </article>
+            <article class='comparison-card'>
+              <img :src="threadFitmask" alt="FitMask comparison image from the launch thread.">
+              <h3>FitMask</h3>
+              <p>It estimates fit from face width and face length using the NIOSH bivariate panel.</p>
+            </article>
+            <article class='comparison-card'>
+              <img :src="threadFitmaskRatings" alt="FitMask ratings comparison image from the launch thread.">
+              <h3>Limits of older app approaches</h3>
+              <p>Some users reported too much variability in the estimates, which points to the limits of simpler sizing proxies.</p>
+            </article>
+          </div>
+        </div>
+
+        <hr>
+
+        <div id='fit-logic'>
+          <br>
+          <br>
+          <h2>Fit Logic</h2>
+          <p>
+            Some newer research suggests that filtering-facepiece-specific measurements
+            can outperform simpler face-width and face-length approaches. That is the
+            direction this work follows.
+          </p>
+          <div class='two-up'>
+            <figure class='story-figure'>
+              <img :src="threadLiteratureOne" alt="Research excerpt image about filtering-facepiece-specific measurements.">
+            </figure>
+            <figure class='story-figure'>
+              <img :src="threadLiteratureTwo" alt="Research excerpt image about better respirator-fit measurement features.">
+            </figure>
+          </div>
+          <p>
+            The current approach handpicks a set of points around the nose, cheeks,
+            and chin to approximate a facial perimeter. Each mask also gets a mask
+            perimeter representing the distance around the section that seals to the face.
+          </p>
+          <div class='process-grid'>
+            <figure class='story-figure'>
+              <img :src="threadFacialPerimeter" alt="Diagram showing how facial perimeter is approximated from selected facial points.">
+              <figcaption>Selected facial points are summed to approximate a facial perimeter.</figcaption>
+            </figure>
+            <figure class='story-figure'>
+              <img :src="threadMaskPerimeter" alt="Diagram showing how mask perimeter is measured.">
+              <figcaption>Each mask gets a comparable perimeter around the sealing surface.</figcaption>
+            </figure>
+            <figure class='story-figure'>
+              <img :src="threadPerimeterDiff" alt="Graphic showing perimeter difference and parabolic fit logic.">
+              <figcaption>The difference between those two becomes the `perimeter_diff` feature.</figcaption>
+            </figure>
+            <figure class='story-figure'>
+              <img :src="threadBowlShape" alt="Probability-of-fit curve image from the launch thread.">
+              <figcaption>The probability-of-fit relationship is often bowl-shaped rather than linear.</figcaption>
+            </figure>
+            <figure class='story-figure'>
+              <img :src="threadPassPoints" alt="Diagnostic plot showing passing fit tests as green points.">
+              <figcaption>Green points represent passing fit tests.</figcaption>
+            </figure>
+            <figure class='story-figure'>
+              <img :src="threadSupport" alt="MasqFit support-the-project image from the launch thread.">
+              <figcaption>The project improves as more people contribute failed user seal checks and fit testing data.</figcaption>
+            </figure>
+          </div>
         </div>
 
         <hr>
@@ -416,6 +557,20 @@
 <script>
 import CircularButton from './circular_button.vue'
 import masqfitLaunchHero from '../assets/images/masqfit-launch-hero.jpg'
+import threadAccessOne from '../assets/images/masqfit-thread-access-1.jpg'
+import threadAccessTwo from '../assets/images/masqfit-thread-access-2.jpg'
+import threadTestThePlanet from '../assets/images/masqfit-thread-test-the-planet.jpg'
+import threadMaskfitAr from '../assets/images/masqfit-thread-maskfit-ar.jpg'
+import threadFitmask from '../assets/images/masqfit-thread-fitmask.jpg'
+import threadFitmaskRatings from '../assets/images/masqfit-thread-fitmask-ratings.jpg'
+import threadLiteratureOne from '../assets/images/masqfit-thread-literature-1.jpg'
+import threadLiteratureTwo from '../assets/images/masqfit-thread-literature-2.jpg'
+import threadFacialPerimeter from '../assets/images/masqfit-thread-facial-perimeter.jpg'
+import threadMaskPerimeter from '../assets/images/masqfit-thread-mask-perimeter.jpg'
+import threadPerimeterDiff from '../assets/images/masqfit-thread-perimeter-diff.jpg'
+import threadBowlShape from '../assets/images/masqfit-thread-bowl-shape.jpg'
+import threadPassPoints from '../assets/images/masqfit-thread-pass-points.jpg'
+import threadSupport from '../assets/images/masqfit-thread-support.jpg'
 
 export default {
   name: 'Introduction',
@@ -425,6 +580,20 @@ export default {
   data() {
     return {
       masqfitLaunchHero
+      ,threadAccessOne
+      ,threadAccessTwo
+      ,threadTestThePlanet
+      ,threadMaskfitAr
+      ,threadFitmask
+      ,threadFitmaskRatings
+      ,threadLiteratureOne
+      ,threadLiteratureTwo
+      ,threadFacialPerimeter
+      ,threadMaskPerimeter
+      ,threadPerimeterDiff
+      ,threadBowlShape
+      ,threadPassPoints
+      ,threadSupport
     }
   },
 }
@@ -483,6 +652,68 @@ export default {
     display: block;
     border-radius: 0.75em;
     box-shadow: 0 18px 45px rgba(0, 0, 0, 0.16);
+  }
+
+  .two-up {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1em;
+    margin: 1.2em 0;
+  }
+
+  .story-figure {
+    margin: 0;
+  }
+
+  .story-figure img {
+    width: 100%;
+    display: block;
+    border-radius: 0.75em;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.12);
+  }
+
+  .story-figure figcaption {
+    margin-top: 0.6em;
+    color: #555;
+    font-size: 0.95em;
+    line-height: 1.45;
+  }
+
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.2em;
+    margin-top: 1.2em;
+  }
+
+  .comparison-card {
+    border: 1px solid #e5e5e5;
+    border-radius: 0.9em;
+    padding: 0.9em;
+    background: #fafafa;
+  }
+
+  .comparison-card img {
+    width: 100%;
+    display: block;
+    border-radius: 0.6em;
+    margin-bottom: 0.8em;
+  }
+
+  .comparison-card h3 {
+    margin: 0 0 0.35em 0;
+  }
+
+  .comparison-card p {
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .process-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.2em;
+    margin-top: 1.2em;
   }
 
   .overflow {
@@ -569,6 +800,12 @@ export default {
     }
 
     .hero-grid {
+      grid-template-columns: 100%;
+    }
+
+    .two-up,
+    .comparison-grid,
+    .process-grid {
       grid-template-columns: 100%;
     }
 
