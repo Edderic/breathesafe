@@ -373,6 +373,9 @@
             onboarding flow.
           </p>
           <div class='cta-row'>
+            <router-link class='cta secondary' to="/consent_form">
+              Go To Consent Form
+            </router-link>
             <router-link class='cta secondary' to="/onboarding">
               Go To Onboarding
             </router-link>
