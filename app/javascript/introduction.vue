@@ -35,14 +35,6 @@
         What We Do Differently
       </router-link>
 
-      <router-link to="/introduction#how-it-works">
-        How It Works
-      </router-link>
-
-      <router-link to="/introduction#why-failed-results-matter">
-        Why Failed Results Matter
-      </router-link>
-
       <router-link to="/introduction#quality-and-accessibility">
         Quality and Accessibility
       </router-link>
@@ -97,14 +89,6 @@
 
         <router-link to="/introduction#what-we-do-differently">
           What We Do Differently
-        </router-link>
-
-        <router-link to="/introduction#how-it-works">
-          How It Works
-        </router-link>
-
-        <router-link to="/introduction#why-failed-results-matter">
-          Why Failed Results Matter
         </router-link>
 
         <router-link to="/introduction#quality-and-accessibility">
@@ -342,50 +326,6 @@
           <p>
             That matters because personalized recommendations should not depend on a private,
             unaccountable black box if the goal is public trust and long-term improvement.
-          </p>
-        </div>
-
-        <hr>
-
-        <div id='how-it-works'>
-          <br>
-          <br>
-          <h2>How It Works</h2>
-          <p>
-            At a high level, the workflow is:
-          </p>
-          <ol>
-            <li>MasqFit captures facial measurements using an iPhone-compatible workflow.</li>
-            <li>Breathesafe stores mask information and fit-related outcomes.</li>
-            <li>Contributed outcomes can include quantitative fit tests, qualitative fit tests, and failed user seal check data.</li>
-            <li>The system uses those inputs to estimate which masks are more likely to fit a given face.</li>
-          </ol>
-          <p>
-            These recommendations are <strong>probabilistic</strong>. They are meant to help
-            people narrow the field and make better choices about what to try next, not to
-            guarantee that a mask will seal correctly.
-          </p>
-        </div>
-
-        <hr>
-
-        <div id='why-failed-results-matter'>
-          <br>
-          <br>
-          <h2>Why Failed Results Matter</h2>
-          <p>
-            Negative outcomes are not throwaway data. They are part of the methodology.
-          </p>
-          <p>
-            If a user seal check fails, that is evidence that a particular mask-face pairing
-            may be a poor match. If a fit test fails, that is even stronger evidence. A living
-            recommendation system improves not only by learning what worked, but also by
-            learning what did <strong>not</strong> work.
-          </p>
-          <p>
-            This is why failed user seal check data is treated as a first-class contribution
-            alongside fit-test data. A mask that looks promising from geometry alone may still
-            fail in real use. Capturing that failure helps prevent false confidence.
           </p>
         </div>
 
