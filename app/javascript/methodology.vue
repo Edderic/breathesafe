@@ -106,37 +106,47 @@
 
       <div class='main margined'>
         <div id='top'>
-          <h1>Introduction: Balancing Quality and Accessibility</h1>
-          <p><strong>Last updated:</strong> March 24, 2026</p>
-          <p>
-            Breathesafe and MasqFit are designed around a simple public-interest idea:
-            high-quality mask fit information should not be limited to people who already
-            have easy access to formal fit testing.
-          </p>
-          <p>
-            <strong>MasqFit</strong> makes it easier to capture facial measurements using
-            an iPhone. <strong>Breathesafe</strong> connects those measurements with mask
-            data and contributed outcomes, including fit tests and failed user seal checks,
-            to estimate which masks are more likely to fit a particular face.
-          </p>
-          <p>
-            The goal is not to replace fit testing. The goal is to make better starting
-            points, better transparency, and better public knowledge available to more people.
-          </p>
+          <div class='hero-grid'>
+            <div class='hero-copy'>
+              <p class='eyebrow'>Introduction</p>
+              <h1>MasqFit is now available in the iOS App Store.</h1>
+              <p class='hero-lede'>
+                Breathesafe and MasqFit are designed around a simple public-interest idea:
+                high-quality mask fit information should not be limited to people who already
+                have easy access to formal fit testing.
+              </p>
+              <p>
+                <strong>MasqFit</strong> makes it easier to capture facial measurements using
+                an iPhone. <strong>Breathesafe</strong> connects those measurements with mask
+                data and contributed outcomes, including fit tests and failed user seal checks,
+                to estimate which masks are more likely to fit a particular face.
+              </p>
+              <p>
+                The goal is not to replace fit testing. The goal is to make better starting
+                points, better transparency, and better public knowledge available to more people.
+              </p>
 
-          <div class='cta-row'>
-            <a
-              class='cta primary'
-              href="https://apps.apple.com/ca/app/masqfit/id6756614276"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Download MasqFit
-            </a>
-            <router-link class='cta secondary' to="/onboarding">
-              Contribute Your Results
-            </router-link>
+              <div class='cta-row'>
+                <a
+                  class='cta primary'
+                  href="https://apps.apple.com/ca/app/masqfit/id6756614276"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Download MasqFit
+                </a>
+                <router-link class='cta secondary' to="/onboarding">
+                  Contribute Your Results
+                </router-link>
+              </div>
+            </div>
+
+            <div class='hero-visual'>
+              <img :src="masqfitLaunchHero" alt="MasqFit App Store launch graphic showing the app interface and app availability announcement.">
+            </div>
           </div>
+
+          <p><strong>Last updated:</strong> March 24, 2026</p>
         </div>
 
         <hr>
@@ -405,12 +415,18 @@
 
 <script>
 import CircularButton from './circular_button.vue'
+import masqfitLaunchHero from '../assets/images/masqfit-launch-hero.jpg'
 
 export default {
   name: 'Introduction',
   components: {
     CircularButton
-  }
+  },
+  data() {
+    return {
+      masqfitLaunchHero
+    }
+  },
 }
 </script>
 
@@ -432,6 +448,41 @@ export default {
 
   .main {
     max-width: 52em;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(18em, 0.95fr);
+    gap: 1.5em;
+    align-items: center;
+    margin-bottom: 1.5em;
+  }
+
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.8em;
+    font-weight: 700;
+    color: #666;
+    margin-bottom: 0.4em;
+  }
+
+  .hero-copy h1 {
+    font-size: 2.4em;
+    line-height: 1.05;
+    margin: 0 0 0.4em 0;
+  }
+
+  .hero-lede {
+    font-size: 1.15em;
+    line-height: 1.5;
+  }
+
+  .hero-visual img {
+    width: 100%;
+    display: block;
+    border-radius: 0.75em;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.16);
   }
 
   .overflow {
@@ -515,6 +566,14 @@ export default {
   @media(max-width: 700px) {
     .grid {
       grid-template-columns: 100%;
+    }
+
+    .hero-grid {
+      grid-template-columns: 100%;
+    }
+
+    .hero-copy h1 {
+      font-size: 1.9em;
     }
 
     .toc-desktop {
