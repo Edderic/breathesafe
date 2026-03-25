@@ -271,18 +271,17 @@
               <img :src="threadMaskPerimeter" alt="Diagram showing how mask perimeter is measured.">
               <figcaption>Each mask gets a comparable perimeter around the sealing surface.</figcaption>
             </figure>
-            <figure class='story-figure'>
+          </div>
+          <figure class='story-figure wide-figure'>
               <img :src="threadPerimeterDiff" alt="Graphic showing perimeter difference and parabolic fit logic.">
-              <figcaption>The difference between those two becomes the `perimeter_diff` feature.</figcaption>
-            </figure>
-            <figure class='story-figure'>
-              <img :src="threadBowlShape" alt="Probability-of-fit curve image from the launch thread.">
-              <figcaption>The probability-of-fit relationship is often bowl-shaped rather than linear.</figcaption>
-            </figure>
-            <figure class='story-figure'>
-              <img :src="threadPassPoints" alt="Diagnostic plot showing passing fit tests as green points.">
-              <figcaption>Green points represent passing fit tests.</figcaption>
-            </figure>
+              <figcaption>
+                The difference between face perimeter and mask perimeter becomes the
+                <code>perimeter_diff</code> feature. The resulting probability-of-fit
+                relationship is often bowl-shaped rather than linear, and the diagnostic
+                plots show how passing fit tests cluster in the stronger-fit regions.
+              </figcaption>
+          </figure>
+          <div class='process-grid'>
             <figure class='story-figure'>
               <img :src="threadSupport" alt="MasqFit support-the-project image from the launch thread.">
               <figcaption>The project improves as more people contribute failed user seal checks and fit testing data.</figcaption>
@@ -568,8 +567,6 @@ import threadLiteratureTwo from '../assets/images/masqfit-thread-literature-2.jp
 import threadFacialPerimeter from '../assets/images/masqfit-thread-facial-perimeter.jpg'
 import threadMaskPerimeter from '../assets/images/masqfit-thread-mask-perimeter.jpg'
 import threadPerimeterDiff from '../assets/images/masqfit-thread-perimeter-diff.jpg'
-import threadBowlShape from '../assets/images/masqfit-thread-bowl-shape.jpg'
-import threadPassPoints from '../assets/images/masqfit-thread-pass-points.jpg'
 import threadSupport from '../assets/images/masqfit-thread-support.jpg'
 
 export default {
@@ -591,8 +588,6 @@ export default {
       ,threadFacialPerimeter
       ,threadMaskPerimeter
       ,threadPerimeterDiff
-      ,threadBowlShape
-      ,threadPassPoints
       ,threadSupport
     }
   },
@@ -677,6 +672,10 @@ export default {
     color: #555;
     font-size: 0.95em;
     line-height: 1.45;
+  }
+
+  .wide-figure {
+    margin: 1.2em 0;
   }
 
   .comparison-grid {
