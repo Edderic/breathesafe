@@ -9,16 +9,32 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 os.environ.setdefault("MPLBACKEND", "Agg")
+_CACHE_ROOT = os.environ.setdefault("MASK_RECOMMENDER_CACHE_DIR", "/tmp/mask_recommender")
+os.environ.setdefault("MPLCONFIGDIR", os.path.join(_CACHE_ROOT, "matplotlib"))
+os.environ.setdefault("XDG_CACHE_HOME", os.path.join(_CACHE_ROOT, "cache"))
+
+_DEBUG_IMPORTS = __name__ == "__main__" or os.environ.get("MASK_RECOMMENDER_DEBUG_IMPORTS") == "1"
+
+if _DEBUG_IMPORTS:
+    print("[train.py] importing boto3", flush=True)
 
 REPO_ROOT = Path(__file__).resolve().parents[0]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import boto3
+if _DEBUG_IMPORTS:
+    print("[train.py] importing matplotlib", flush=True)
 import matplotlib.pyplot as plt
+if _DEBUG_IMPORTS:
+    print("[train.py] importing numpy/pandas", flush=True)
 import numpy as np
 import pandas as pd
+if _DEBUG_IMPORTS:
+    print("[train.py] importing torch", flush=True)
 import torch
+if _DEBUG_IMPORTS:
+    print("[train.py] imported torch", flush=True)
 from botocore.exceptions import ClientError
 from matplotlib.lines import Line2D
 from breathesafe_network import (build_session, fetch_facial_measurements_fit_tests,
@@ -1724,18 +1740,35 @@ def main(argv=None):
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(message)s",
+        force=True,
+        stream=sys.stdout,
+    )
+
+    print(
+        f"[train.py] starting model_type={args.model_type} epochs={args.epochs} "
+        f"learning_rate={args.learning_rate} retrain_with_full={args.retrain_with_full}",
+        flush=True,
+    )
+    logging.info(
+        "Output targets: images_dir=%s local_model_root=%s rails_env=%s base_url=%s",
+        _images_output_dir(),
+        _local_model_root(),
+        _env_name(),
+        os.environ.get('BREATHESAFE_BASE_URL', 'http://localhost:3000'),
     )
 
     base_url = os.environ.get('BREATHESAFE_BASE_URL', 'http://localhost:3000')
     masks_url = f"{base_url}/masks.json?per_page=1000"
 
     session = build_session(None)
+    logging.info("Fetching fit test payload from Breathesafe.")
     fit_tests_payload = fetch_facial_measurements_fit_tests(
         base_url=base_url,
         session=session,
     )
     fit_tests_df = pd.DataFrame(fit_tests_payload)
 
+    logging.info("Fetching masks payload from %s", masks_url)
     masks_df = get_masks(session, masks_url)
     mask_candidates = build_mask_candidates(masks_df)
     model_config = TrainModelConfig(
@@ -1752,6 +1785,11 @@ def main(argv=None):
         base_url=base_url,
         email=email,
         password=password
+    )
+    logging.info(
+        "Fetched/imputed fit tests rows=%s raw_fit_tests_rows=%s",
+        fit_tests_with_imputed_arkit_via_traditional_facial_measurements.shape[0],
+        fit_tests_df.shape[0],
     )
 
     missing_facial_measurement_id = fit_tests_with_imputed_arkit_via_traditional_facial_measurements['facial_measurement_id'].isna().sum()
@@ -2059,3 +2097,7 @@ def main(argv=None):
     logging.info("Uploaded custom metrics to %s", metrics_uri)
     logging.info("Updated custom latest pointer at %s", latest_uri)
     return latest_payload
+
+
+if __name__ == "__main__":
+    main()
