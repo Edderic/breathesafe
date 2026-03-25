@@ -1519,6 +1519,7 @@ def _build_custom_lr_perimeter_diff_diagnostics(
             ax.set_xlim(subplot_min, subplot_max)
             ax.set_ylim(-0.05, 1.05)
             ax.grid(True, linestyle='--', alpha=0.25)
+            ax.tick_params(axis='x', labelrotation=35, labelsize=7, pad=2)
 
         for unused_ax in axes[len(page_codes):]:
             unused_ax.axis('off')
@@ -1551,13 +1552,13 @@ def _build_custom_lr_perimeter_diff_diagnostics(
                 ncol=min(4, len(legend_handles)),
                 frameon=False,
             )
-        fig.supxlabel('perimeter_diff')
+        fig.supxlabel('perimeter_diff', y=0.02)
         fig.supylabel('probability / actual qlft pass')
         fig.suptitle(
             f'Custom LR perimeter_diff diagnostics (page {page_idx + 1}/{num_pages})',
             y=0.992
         )
-        fig.tight_layout(rect=[0, 0, 1, 0.88])
+        fig.tight_layout(rect=[0, 0.07, 1, 0.88])
 
         output_path = os.path.join(
             images_dir,
