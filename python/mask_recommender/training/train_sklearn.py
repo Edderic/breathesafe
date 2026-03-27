@@ -16,13 +16,28 @@ if PKG_ROOT not in sys.path:
 
 from mask_recommender.sklearn_pipeline import build_sklearn_pipeline
 
+INTERNAL_EXPORT_PATH = '/internal/facial_measurements_fit_tests.json'
+INTERNAL_EXPORT_TOKEN_HEADER = 'X-Breathesafe-Internal-Token'
+
 
 def is_test_env() -> bool:
     return os.environ.get('ENVIRONMENT', '').strip().lower() == 'test'
 
 
-def fetch_dataset(url: str) -> pd.DataFrame:
-    resp = requests.get(url, timeout=30)
+def training_export_url(base_url: str | None = None) -> str:
+    resolved_base_url = (base_url or os.environ.get('BREATHESAFE_BASE_URL') or 'https://www.breathesafe.xyz').rstrip('/')
+    return f"{resolved_base_url}{INTERNAL_EXPORT_PATH}"
+
+
+def training_export_headers(token: str | None = None) -> dict[str, str]:
+    resolved_token = token if token is not None else os.environ.get('MASK_RECOMMENDER_INTERNAL_API_TOKEN')
+    if not resolved_token:
+        return {}
+    return {INTERNAL_EXPORT_TOKEN_HEADER: resolved_token}
+
+
+def fetch_dataset(url: str, headers: dict[str, str] | None = None) -> pd.DataFrame:
+    resp = requests.get(url, headers=headers or {}, timeout=30)
     resp.raise_for_status()
     data = resp.json()
     if isinstance(data, dict) and 'fit_tests_with_facial_measurements' in data:
@@ -115,8 +130,8 @@ def train_and_save(df: pd.DataFrame) -> dict:
 
 
 def main():
-    url = 'https://www.breathesafe.xyz/facial_measurements_fit_tests.json'
-    df = fetch_dataset(url)
+    url = training_export_url()
+    df = fetch_dataset(url, headers=training_export_headers())
     info = train_and_save(df)
     print(json.dumps(info, indent=2))
 

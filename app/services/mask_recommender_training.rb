@@ -30,6 +30,10 @@ class MaskRecommenderTraining
       defaults = DEFAULT_CONFIG_BY_MODEL_TYPE.fetch(model_type, DEFAULT_CONFIG_BY_MODEL_TYPE[DEFAULT_MODEL_TYPE])
       payload = defaults.merge(payload).merge(model_type: model_type)
       payload = payload.merge(method: 'train') unless payload.key?(:method)
+      if ENV['MASK_RECOMMENDER_INTERNAL_API_TOKEN'].present?
+        payload[:internal_api_token] ||= ENV['MASK_RECOMMENDER_INTERNAL_API_TOKEN']
+      end
+      payload[:base_url] ||= ENV['BREATHESAFE_BASE_URL'] if ENV['BREATHESAFE_BASE_URL'].present?
       AwsLambdaInvokeService.call(function_name: function_name, payload: payload, region: region)
     end
 

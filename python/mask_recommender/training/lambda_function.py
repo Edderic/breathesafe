@@ -62,6 +62,7 @@ def handler(event, context):
         bucket = (event or {}).get('s3_bucket') or os.environ.get('S3_BUCKET_NAME')
         region = (event or {}).get('s3_bucket_region') or os.environ.get('S3_BUCKET_REGION')
         base_url = (event or {}).get('base_url') or os.environ.get('BREATHESAFE_BASE_URL')
+        internal_api_token = (event or {}).get('internal_api_token') or os.environ.get('MASK_RECOMMENDER_INTERNAL_API_TOKEN')
         if env:
             os.environ['ENVIRONMENT'] = str(env)
             os.environ['RAILS_ENV'] = str(env)
@@ -69,6 +70,8 @@ def handler(event, context):
             os.environ['S3_BUCKET_NAME'] = str(bucket)
         if region:
             os.environ['S3_BUCKET_REGION'] = str(region)
+        if internal_api_token:
+            os.environ['MASK_RECOMMENDER_INTERNAL_API_TOKEN'] = str(internal_api_token)
         resolved_base_url = str(base_url) if base_url else _default_base_url_for_env(env)
         os.environ['BREATHESAFE_BASE_URL'] = resolved_base_url
         logger.info("Training env=%s base_url=%s", env, resolved_base_url)

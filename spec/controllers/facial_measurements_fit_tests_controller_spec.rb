@@ -7,6 +7,7 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
 
   let(:user) { create(:user) }
   let(:manager) { create(:user) }
+  let(:admin) { create(:user, admin: true) }
 
   let(:profile) do
     create(:profile, user: user)
@@ -125,73 +126,96 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
   end
 
   describe 'GET #index' do
-    context 'when user is authenticated' do
+    let(:n95_fit_test) do
+      create(:fit_test,
+             :with_just_right_mask,
+             user: user,
+             quantitative_fit_testing_device: measurement_device,
+             facial_measurement: facial_measurement,
+             results: {
+               'quantitative' => {
+                 'testing_mode' => 'N95',
+                 'exercises' => [
+                   {
+                     'name' => 'Normal breathing',
+                     'fit_factor' => '200'
+                   }
+                 ]
+               }
+             })
+    end
+
+    let!(:n99_fit_test) do
+      create(:fit_test,
+             :with_just_right_mask,
+             user: user,
+             quantitative_fit_testing_device: measurement_device,
+             facial_measurement: facial_measurement,
+             results: {
+               'quantitative' => {
+                 'testing_mode' => 'N99',
+                 'exercises' => [
+                   {
+                     'name' => 'Normal breathing',
+                     'fit_factor' => '200'
+                   },
+                   {
+                     'name' => 'Normal breathing (SEALED)',
+                     'fit_factor' => '200'
+                   }
+                 ]
+               }
+             })
+    end
+
+    let!(:qlft_fit_test) do
+      create(:fit_test,
+             :with_just_right_mask,
+             user: user,
+             quantitative_fit_testing_device: measurement_device,
+             facial_measurement: facial_measurement,
+             results: {
+               'qualitative' => {
+                 'exercises' => [
+                   {
+                     'name' => 'Normal breathing',
+                     'result' => 'Pass'
+                   }
+                 ]
+               }
+             })
+    end
+
+    before do
+      n95_fit_test
+      n99_fit_test
+      qlft_fit_test
+    end
+
+    context 'when user is not authenticated' do
+      it 'returns unauthorized' do
+        get :index, format: :json
+
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    context 'when user is authenticated but not admin' do
       before do
         sign_in manager
-
-        n95_fit_test
-        n99_fit_test
-        qlft_fit_test
       end
 
-      let(:n95_fit_test) do
-        create(:fit_test,
-               :with_just_right_mask,
-               user: user,
-               quantitative_fit_testing_device: measurement_device,
-               facial_measurement: facial_measurement,
-               results: {
-                 'quantitative' => {
-                   'testing_mode' => 'N95',
-                   'exercises' => [
-                     {
-                       'name' => 'Normal breathing',
-                       'fit_factor' => '200'
-                     }
-                   ]
-                 }
-               })
-      end
+      it 'returns forbidden' do
+        get :index, format: :json
 
-      let!(:n99_fit_test) do
-        create(:fit_test,
-               :with_just_right_mask,
-               user: user,
-               quantitative_fit_testing_device: measurement_device,
-               facial_measurement: facial_measurement,
-               results: {
-                 'quantitative' => {
-                   'testing_mode' => 'N99',
-                   'exercises' => [
-                     {
-                       'name' => 'Normal breathing',
-                       'fit_factor' => '200'
-                     },
-                     {
-                       'name' => 'Normal breathing (SEALED)',
-                       'fit_factor' => '200'
-                     }
-                   ]
-                 }
-               })
+        expect(response).to have_http_status(:forbidden)
+        expect(JSON.parse(response.body)['messages']).to include('Unauthorized. Admin access required.')
       end
+    end
 
-      let!(:qlft_fit_test) do
-        create(:fit_test,
-               :with_just_right_mask,
-               user: user,
-               quantitative_fit_testing_device: measurement_device,
-               facial_measurement: facial_measurement,
-               results: {
-                 'qualitative' => {
-                   'exercises' => [
-                     {
-                       'name' => 'Normal breathing',
-                       'result' => 'Pass'
-                     }
-                   ]
-                 }
-               })
+    context 'when user is admin' do
+      before do
+        sign_in admin
       end
 
       it 'returns all fit tests with facial measurements' do
@@ -223,6 +247,20 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
         end
       end
     end
+
+    context 'when internal export token is valid' do
+      before do
+        request.headers['X-Breathesafe-Internal-Token'] = 'secret-token'
+        allow(controller).to receive(:internal_export_token).and_return('secret-token')
+      end
+
+      it 'returns the dataset without a signed in user' do
+        get :index, params: { internal_export: true }, format: :json
+
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)['fit_tests_with_facial_measurements']).not_to be_empty
+      end
+    end
   end
 
   describe 'GET #show' do
@@ -247,78 +285,9 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
                })
       end
 
-      it 'returns fit tests for the specified mask' do
+      it 'returns unauthorized' do
         get :show, params: { mask_id: mask.id }, format: :json
-        expect(response).to have_http_status(:ok)
-
-        json_response = JSON.parse(response.body)
-        expect(json_response['fit_tests_with_facial_measurements']).to be_an(Array)
-        expect(json_response['fit_tests_with_facial_measurements'].length).to eq(1)
-
-        results = json_response['fit_tests_with_facial_measurements']
-        expect(results.map { |row| row['mask_id'] }.uniq).to eq([mask.id])
-        expect(results.map { |row| row['raw_mask_id'] }.uniq).to eq([mask.id])
-        expect(results.map { |row| row['id'] }).to include(n95_fit_test.id)
-      end
-
-      it 'returns canonical mask_id and original raw_mask_id for duplicate masks' do
-        canonical_mask = create(:mask)
-        duplicate_mask = create(:mask, duplicate_of: canonical_mask.id)
-        duplicate_fit_test = create(
-          :fit_test,
-          :with_just_right_mask,
-          mask: duplicate_mask,
-          user: user,
-          quantitative_fit_testing_device: measurement_device,
-          facial_measurement: facial_measurement,
-          results: {
-            'quantitative' => {
-              'testing_mode' => 'N95',
-              'exercises' => [
-                {
-                  'name' => 'Normal breathing',
-                  'fit_factor' => '200'
-                }
-              ]
-            }
-          }
-        )
-
-        get :show, params: { mask_id: duplicate_mask.id }, format: :json
-        expect(response).to have_http_status(:ok)
-
-        json_response = JSON.parse(response.body)
-        results = json_response['fit_tests_with_facial_measurements']
-        expect(results).not_to be_empty
-        expect(results.map { |row| row['raw_mask_id'] }.uniq).to eq([duplicate_mask.id])
-        expect(results.map { |row| row['mask_id'] }.uniq).to eq([canonical_mask.id])
-        expect(results.map { |row| row['id'] }).to include(duplicate_fit_test.id)
-      end
-
-      it 'returns empty array when mask has no fit tests' do
-        other_mask = create(:mask)
-        get :show, params: { mask_id: other_mask.id }, format: :json
-
-        expect(response).to have_http_status(:ok)
-        json_response = JSON.parse(response.body)
-        expect(json_response['fit_tests_with_facial_measurements']).to be_empty
-      end
-
-      it 'handles invalid mask_id gracefully' do
-        get :show, params: { mask_id: 'invalid_id' }, format: :json
-        expect(response).to have_http_status(:ok)
-
-        json_response = JSON.parse(response.body)
-        expect(json_response['fit_tests_with_facial_measurements']).to be_empty
-      end
-
-      it 'sanitizes the mask_id parameter' do
-        malicious_mask_id = '1; DROP TABLE users; --'
-        expect do
-          get :show, params: { mask_id: malicious_mask_id }, format: :json
-        end.not_to raise_error
-
-        expect(response).to have_http_status(:ok)
+        expect(response).to have_http_status(:unauthorized)
       end
     end
 
@@ -343,8 +312,37 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
                })
       end
 
-      before do
+      it 'returns forbidden for non-admin users' do
         sign_in user
+        get :show, params: { mask_id: mask.id }, format: :json
+
+        expect(response).to have_http_status(:forbidden)
+      end
+    end
+
+    context 'when user is admin' do
+      let!(:n95_fit_test) do
+        create(:fit_test,
+               :with_just_right_mask,
+               user: user,
+               mask: mask,
+               quantitative_fit_testing_device: measurement_device,
+               facial_measurement: facial_measurement,
+               results: {
+                 'quantitative' => {
+                   'testing_mode' => 'N95',
+                   'exercises' => [
+                     {
+                       'name' => 'Normal breathing',
+                       'fit_factor' => '200'
+                     }
+                   ]
+                 }
+               })
+      end
+
+      before do
+        sign_in admin
       end
 
       it 'returns fit tests for the specified mask' do

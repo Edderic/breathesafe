@@ -3,6 +3,7 @@
 # Controller featuring CRUD operations for Facial Measurements and Fit Tests
 class FacialMeasurementsFitTestsController < ApplicationController
   before_action :authenticate_user!, only: [:create]
+  before_action :authorize_dataset_access!, only: %i[index show]
 
   def create
     # TODO: what happens when the facial measurement id is invalid?
@@ -52,7 +53,21 @@ class FacialMeasurementsFitTestsController < ApplicationController
     with_demographics = params[:with_demographics] == 'true'
 
     # If demographics are requested, verify admin access
-    if with_demographics && (unauthorized? || !current_user.admin)
+    if with_demographics && internal_export_request?
+      to_render = {
+        fit_tests_with_facial_measurements: [],
+        messages: ['Unauthorized. Internal export does not allow demographics.']
+      }
+
+      respond_to do |format|
+        format.json do
+          render json: to_render.to_json, status: :forbidden
+        end
+      end
+      return
+    end
+
+    if with_demographics && !current_user.admin
       to_render = {
         fit_tests_with_facial_measurements: [],
         messages: ['Unauthorized. Admin access required to view demographics.']
@@ -91,7 +106,21 @@ class FacialMeasurementsFitTestsController < ApplicationController
     with_demographics = params[:with_demographics] == 'true'
 
     # If demographics are requested, verify admin access
-    if with_demographics && (unauthorized? || !current_user.admin)
+    if with_demographics && internal_export_request?
+      to_render = {
+        fit_tests_with_facial_measurements: [],
+        messages: ['Unauthorized. Internal export does not allow demographics.']
+      }
+
+      respond_to do |format|
+        format.json do
+          render json: to_render.to_json, status: :forbidden
+        end
+      end
+      return
+    end
+
+    if with_demographics && !current_user.admin
       to_render = {
         fit_tests_with_facial_measurements: [],
         messages: ['Unauthorized. Admin access required to view demographics.']
@@ -135,5 +164,39 @@ class FacialMeasurementsFitTestsController < ApplicationController
 
   def mask_id
     params[:mask_id]
+  end
+
+  def authorize_dataset_access!
+    return if internal_export_authorized?
+
+    if unauthorized?
+      render json: { fit_tests_with_facial_measurements: [], messages: ['Unauthorized.'] }, status: :unauthorized
+      return
+    end
+
+    return if current_user.admin
+
+    render json: {
+      fit_tests_with_facial_measurements: [],
+      messages: ['Unauthorized. Admin access required.']
+    }, status: :forbidden
+  end
+
+  def internal_export_request?
+    ActiveModel::Type::Boolean.new.cast(params[:internal_export])
+  end
+
+  def internal_export_authorized?
+    return false unless internal_export_request?
+
+    token = internal_export_token
+    provided_token = request.headers['X-Breathesafe-Internal-Token'].to_s
+    return false if token.blank? || provided_token.blank?
+
+    ActiveSupport::SecurityUtils.secure_compare(provided_token, token)
+  end
+
+  def internal_export_token
+    ENV['MASK_RECOMMENDER_INTERNAL_API_TOKEN'].to_s
   end
 end

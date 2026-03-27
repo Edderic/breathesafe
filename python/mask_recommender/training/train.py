@@ -14,17 +14,32 @@ from botocore.exceptions import ClientError
 print(pm.__version__)
 os.environ["PYMC_EXPERIMENTAL_JAX"] = "1"
 
+INTERNAL_EXPORT_PATH = '/internal/facial_measurements_fit_tests.json'
+INTERNAL_EXPORT_TOKEN_HEADER = 'X-Breathesafe-Internal-Token'
+
 
 def _is_test_env():
     return os.environ.get('ENVIRONMENT', '').strip().lower() == 'test'
 
 
-def get_facial_measurements_with_fit_tests(endpoint):
+def training_export_url(base_url=None):
+    resolved_base_url = (base_url or os.environ.get('BREATHESAFE_BASE_URL') or 'https://www.breathesafe.xyz').rstrip('/')
+    return f"{resolved_base_url}{INTERNAL_EXPORT_PATH}"
+
+
+def training_export_headers(token=None):
+    resolved_token = token if token is not None else os.environ.get('MASK_RECOMMENDER_INTERNAL_API_TOKEN')
+    if not resolved_token:
+        return {}
+    return {INTERNAL_EXPORT_TOKEN_HEADER: resolved_token}
+
+
+def get_facial_measurements_with_fit_tests(endpoint, headers=None):
     """
     1. Data loading function (unchanged)
     """
     try:
-        response = requests.get(endpoint, timeout=30)
+        response = requests.get(endpoint, headers=headers or {}, timeout=30)
         response.raise_for_status()
         data = response.json()
         if 'fit_tests_with_facial_measurements' in data:
@@ -400,8 +415,8 @@ def save_scaler_for_inference(scaler, filename='scaler.json'):
 
 # 2. Main training script
 def main():
-    endpoint = 'https://www.breathesafe.xyz/facial_measurements_fit_tests.json'
-    data = get_facial_measurements_with_fit_tests(endpoint)
+    endpoint = training_export_url()
+    data = get_facial_measurements_with_fit_tests(endpoint, headers=training_export_headers())
     df = pd.DataFrame(data)
     outcome_variable = 'qlft_pass'
 
