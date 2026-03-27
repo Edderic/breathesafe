@@ -37,12 +37,14 @@ jobs:
           BREATHESAFE_BASE_URL: ${{ github.event.inputs.target_env == 'staging' && 'https://staging.breathesafe.xyz' || 'https://www.breathesafe.xyz' }}
           BREATHESAFE_SERVICE_EMAIL: ${{ secrets.BREATHESAFE_SERVICE_EMAIL }}
           BREATHESAFE_SERVICE_PASSWORD: ${{ secrets.BREATHESAFE_SERVICE_PASSWORD }}
+          MASK_RECOMMENDER_INTERNAL_API_TOKEN: ${{ secrets.MASK_RECOMMENDER_INTERNAL_API_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
           echo "BREATHESAFE_SERVICE_EMAIL set? $([[ -n \"${BREATHESAFE_SERVICE_EMAIL}\" ]] && echo yes || echo no)"
           echo "BREATHESAFE_SERVICE_PASSWORD set? $([[ -n \"${BREATHESAFE_SERVICE_PASSWORD}\" ]] && echo yes || echo no)"
+          echo "MASK_RECOMMENDER_INTERNAL_API_TOKEN set? $([[ -n \"${MASK_RECOMMENDER_INTERNAL_API_TOKEN}\" ]] && echo yes || echo no)"
           python python/mask_recommender/train.py \
             --model-type custom_lr \
             --epochs 200 \

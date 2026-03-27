@@ -5,9 +5,12 @@ Shared network helpers for interacting with the Breathesafe Rails app.
 from __future__ import annotations
 
 import logging
+import os
 from typing import Dict
 
 import requests
+
+INTERNAL_EXPORT_TOKEN_HEADER = "X-Breathesafe-Internal-Token"
 
 
 def build_session(cookie: str | None) -> requests.Session:
@@ -45,9 +48,9 @@ def logout(session: requests.Session, base_url: str) -> None:
     logging.info("Logout successful.")
 
 
-def fetch_json(session: requests.Session, url: str) -> Dict:
+def fetch_json(session: requests.Session, url: str, headers: Dict | None = None) -> Dict:
   logging.info("Fetching %s", url)
-  response = session.get(url, timeout=60)
+  response = session.get(url, headers=headers, timeout=60)
   response.raise_for_status()
   return response.json()
 
@@ -58,14 +61,20 @@ def fetch_facial_measurements_fit_tests(
   include_without_facial_measurements=False,
 ):
   base = base_url.rstrip('/')
+  internal_api_token = os.getenv("MASK_RECOMMENDER_INTERNAL_API_TOKEN")
   params = ""
   if include_without_facial_measurements:
     params = "?include_without_facial_measurements=true"
-  fit_tests_url = f"{base}/facial_measurements_fit_tests.json{params}"
+  if internal_api_token:
+    fit_tests_url = f"{base}/internal/facial_measurements_fit_tests.json{params}"
+    headers = {INTERNAL_EXPORT_TOKEN_HEADER: internal_api_token}
+  else:
+    fit_tests_url = f"{base}/facial_measurements_fit_tests.json{params}"
+    headers = None
   if session is None:
     session = build_session(None)
 
-  return fetch_json(session, fit_tests_url)[
+  return fetch_json(session, fit_tests_url, headers=headers)[
     "fit_tests_with_facial_measurements"
   ]
 
@@ -77,4 +86,3 @@ def fetch_dashboard_stats(base_url='http://localhost:3000', session=None):
     session = build_session(None)
 
   return fetch_json(session, url)
-
