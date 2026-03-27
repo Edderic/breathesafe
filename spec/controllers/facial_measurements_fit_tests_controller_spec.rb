@@ -265,26 +265,6 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
 
   describe 'GET #show' do
     context 'when user is not authenticated' do
-      let!(:n95_fit_test) do
-        create(:fit_test,
-               :with_just_right_mask,
-               mask: mask,
-               user: user,
-               quantitative_fit_testing_device: measurement_device,
-               facial_measurement: facial_measurement,
-               results: {
-                 'quantitative' => {
-                   'testing_mode' => 'N95',
-                   'exercises' => [
-                     {
-                       'name' => 'Normal breathing',
-                       'fit_factor' => '200'
-                     }
-                   ]
-                 }
-               })
-      end
-
       it 'returns unauthorized' do
         get :show, params: { mask_id: mask.id }, format: :json
         expect(response).to have_http_status(:unauthorized)
@@ -292,26 +272,6 @@ RSpec.describe FacialMeasurementsFitTestsController, type: :controller do
     end
 
     context 'when user is authenticated' do
-      let!(:n95_fit_test) do
-        create(:fit_test,
-               :with_just_right_mask,
-               user: user,
-               mask: mask,
-               quantitative_fit_testing_device: measurement_device,
-               facial_measurement: facial_measurement,
-               results: {
-                 'quantitative' => {
-                   'testing_mode' => 'N95',
-                   'exercises' => [
-                     {
-                       'name' => 'Normal breathing',
-                       'fit_factor' => '200'
-                     }
-                   ]
-                 }
-               })
-      end
-
       it 'returns forbidden for non-admin users' do
         sign_in user
         get :show, params: { mask_id: mask.id }, format: :json
