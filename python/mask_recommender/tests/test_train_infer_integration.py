@@ -1,6 +1,7 @@
 import os
 
 import boto3
+import numpy as np
 import pandas as pd
 import torch
 
@@ -445,3 +446,72 @@ def test_local_infer_custom_shares_scores_for_same_fit_family():
         for index, mask_id in result["mask_id"].items()
     }
     assert probabilities_by_mask[1] == probabilities_by_mask[3]
+
+
+def test_group_train_val_indices_by_user_prevents_user_leakage():
+    cleaned = train_module.prepare_training_data(_fit_tests_df())
+
+    torch.manual_seed(0)
+    train_idx, val_idx = train_module._group_train_val_indices_by_user(cleaned, train_fraction=0.5)
+
+    train_users = set(cleaned.iloc[train_idx.tolist()]["user_id"].tolist())
+    val_users = set(cleaned.iloc[val_idx.tolist()]["user_id"].tolist())
+
+    assert train_users
+    assert val_users
+    assert train_users.isdisjoint(val_users)
+
+
+def test_dedupe_prediction_rows_collapses_clone_like_validation_duplicates():
+    fit_tests_df = pd.DataFrame(
+        [
+            {
+                "id": 1,
+                "user_id": 100,
+                "mask_id": 1,
+                "fit_family_id": 101,
+                "unique_internal_model_code": "MASK-A",
+                "perimeter_mm": 300,
+                "strap_type": "Earloop",
+                "style": "Cup",
+                "nose_mm": 40,
+                "chin_mm": 50,
+                "top_cheek_mm": 60,
+                "mid_cheek_mm": 55,
+                "strap_mm": 120,
+                "facial_hair_beard_length_mm": 0,
+                "qlft_pass": "pass",
+                "created_at": "2026-01-01T00:00:00Z",
+            },
+            {
+                "id": 2,
+                "user_id": 100,
+                "mask_id": 1,
+                "fit_family_id": 101,
+                "unique_internal_model_code": "MASK-A",
+                "perimeter_mm": 300,
+                "strap_type": "Earloop",
+                "style": "Cup",
+                "nose_mm": 40,
+                "chin_mm": 50,
+                "top_cheek_mm": 60,
+                "mid_cheek_mm": 55,
+                "strap_mm": 120,
+                "facial_hair_beard_length_mm": 0,
+                "qlft_pass": "pass",
+                "created_at": "2026-01-02T00:00:00Z",
+            },
+        ]
+    )
+    cleaned = train_module.prepare_training_data(fit_tests_df)
+
+    deduped_frame, deduped_probs, deduped_labels = train_module._dedupe_prediction_rows(
+        cleaned,
+        probabilities=np.array([0.8, 0.8]),
+        labels=np.array([1.0, 1.0]),
+    )
+
+    assert cleaned.shape[0] == 2
+    assert deduped_frame.shape[0] == 1
+    assert deduped_probs.tolist() == [0.8]
+    assert deduped_labels.tolist() == [1.0]

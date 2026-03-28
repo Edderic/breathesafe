@@ -129,6 +129,11 @@ STYLE_TYPES = [
     'Elastomeric'
 ]
 
+EVALUATION_ONLY_COLUMNS = [
+    'id',
+    'created_at',
+]
+
 DEFAULT_PROBE_PAYLOADS = [
     {
         'label': 'edderic_probe_20260310',
@@ -451,7 +456,11 @@ def prepare_training_data(
         'brand_model',
         'unique_internal_model_code'
     ]
-    filtered = filtered[feature_cols + ['qlft_pass_normalized']]
+    passthrough_cols = [
+        column for column in EVALUATION_ONLY_COLUMNS
+        if column in filtered.columns and column not in feature_cols
+    ]
+    filtered = filtered[feature_cols + ['qlft_pass_normalized'] + passthrough_cols]
     return filtered
 
 
@@ -1193,6 +1202,57 @@ def _custom_lr_category_metadata(cleaned_fit_tests):
     }
 
 
+def _group_train_val_indices_by_user(frame, train_fraction=0.8):
+    if frame.empty:
+        empty = torch.tensor([], dtype=torch.long)
+        return empty, empty
+
+    user_ids = pd.to_numeric(frame['user_id'], errors='coerce')
+    if user_ids.isna().any():
+        raise ValueError("Grouped split requires non-null user_id values.")
+
+    unique_users = pd.Index(user_ids.astype(int).unique())
+    if unique_users.empty:
+        empty = torch.tensor([], dtype=torch.long)
+        return empty, empty
+
+    user_permutation = torch.randperm(len(unique_users)).tolist()
+    shuffled_users = unique_users.take(user_permutation)
+
+    if len(shuffled_users) == 1:
+        train_users = set(shuffled_users.tolist())
+        val_users = set()
+    else:
+        split_count = int(np.floor(len(shuffled_users) * train_fraction))
+        split_count = min(max(split_count, 1), len(shuffled_users) - 1)
+        train_users = set(shuffled_users[:split_count].tolist())
+        val_users = set(shuffled_users[split_count:].tolist())
+
+    train_mask = user_ids.astype(int).isin(train_users).to_numpy()
+    val_mask = user_ids.astype(int).isin(val_users).to_numpy()
+
+    train_idx = torch.from_numpy(np.flatnonzero(train_mask)).long()
+    val_idx = torch.from_numpy(np.flatnonzero(val_mask)).long()
+    return train_idx, val_idx
+
+
+def _dedupe_prediction_rows(frame, probabilities, labels):
+    if frame.empty:
+        return frame.copy(), np.asarray(probabilities), np.asarray(labels)
+
+    working = frame.copy().reset_index(drop=True)
+    working['predicted_probability'] = np.asarray(probabilities, dtype=float)
+    working['target_label'] = np.asarray(labels, dtype=float)
+    dedupe_columns = [
+        column for column in working.columns
+        if column not in EVALUATION_ONLY_COLUMNS
+    ]
+    deduped = working.drop_duplicates(subset=dedupe_columns, keep='first').reset_index(drop=True)
+    deduped_probs = deduped.pop('predicted_probability').to_numpy(dtype=float)
+    deduped_labels = deduped.pop('target_label').to_numpy(dtype=float)
+    return deduped, deduped_probs, deduped_labels
+
+
 def _subset_custom_lr_data(data, row_indices):
     if isinstance(row_indices, torch.Tensor):
         row_indices = row_indices.detach().cpu().long()
@@ -1835,11 +1895,29 @@ def main(argv=None):
 
     timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
     category_metadata = _custom_lr_category_metadata(cleaned_fit_tests)
-    num_rows = cleaned_fit_tests.shape[0]
-    permutation = torch.randperm(num_rows)
-    split_index = int(num_rows * 0.8)
-    train_idx = permutation[:split_index]
-    val_idx = permutation[split_index:]
+    train_idx, val_idx = _group_train_val_indices_by_user(cleaned_fit_tests, train_fraction=0.8)
+    train_user_ids = set(
+        pd.to_numeric(cleaned_fit_tests.iloc[train_idx.tolist()]['user_id'], errors='coerce')
+        .dropna()
+        .astype(int)
+        .tolist()
+    )
+    val_user_ids = set(
+        pd.to_numeric(cleaned_fit_tests.iloc[val_idx.tolist()]['user_id'], errors='coerce')
+        .dropna()
+        .astype(int)
+        .tolist()
+    )
+    overlapping_user_ids = train_user_ids & val_user_ids
+    if overlapping_user_ids:
+        raise RuntimeError(f"Grouped split leaked user_ids across train/validation: {sorted(overlapping_user_ids)}")
+    logging.info(
+        "Grouped split complete: train_users=%s val_users=%s train_rows=%s val_rows=%s",
+        len(train_user_ids),
+        len(val_user_ids),
+        int(train_idx.numel()),
+        int(val_idx.numel()),
+    )
 
     custom_result = train_custom_lr_with_split(
         cleaned_fit_tests,
@@ -1858,14 +1936,25 @@ def main(argv=None):
     val_probs = custom_result['val_probs']
     train_labels = custom_result['y_train']
     val_labels = custom_result['y_val']
+    val_frame = cleaned_fit_tests.iloc[val_idx.tolist()].reset_index(drop=True)
+    deduped_val_frame, deduped_val_probs, deduped_val_labels = _dedupe_prediction_rows(
+        val_frame,
+        val_probs,
+        val_labels,
+    )
+    logging.info(
+        "Validation dedupe: raw_rows=%s deduped_rows=%s",
+        len(val_frame),
+        len(deduped_val_frame),
+    )
 
     best_threshold = 0.5
     best_f1 = 0.0
-    if val_probs.size:
+    if deduped_val_probs.size:
         threshold_grid = np.arange(0.05, 0.96, 0.01)
         for candidate in threshold_grid:
-            candidate_preds = (val_probs >= candidate).astype(float)
-            candidate_f1 = f1_score(val_labels, candidate_preds, zero_division=0)
+            candidate_preds = (deduped_val_probs >= candidate).astype(float)
+            candidate_f1 = f1_score(deduped_val_labels, candidate_preds, zero_division=0)
             if candidate_f1 > best_f1:
                 best_f1 = candidate_f1
                 best_threshold = float(candidate)
@@ -1996,7 +2085,7 @@ def main(argv=None):
         train_auc = None
         logging.warning("Skipping custom train ROC curve due to missing class labels.")
     try:
-        val_fpr, val_tpr, _ = roc_curve(val_labels, val_probs)
+        val_fpr, val_tpr, _ = roc_curve(deduped_val_labels, deduped_val_probs)
         val_auc = auc(val_fpr, val_tpr)
         plt.plot(val_fpr, val_tpr, label=f'validation (AUC={val_auc:.3f})', linewidth=2)
     except ValueError:
@@ -2027,12 +2116,12 @@ def main(argv=None):
     plt.close()
 
     try:
-        roc_auc = roc_auc_score(val_labels, val_probs)
+        roc_auc = roc_auc_score(deduped_val_labels, deduped_val_probs)
     except ValueError:
         roc_auc = None
-    val_preds = (val_probs >= best_threshold).astype(float)
-    val_precision = precision_score(val_labels, val_preds, zero_division=0)
-    val_recall = recall_score(val_labels, val_preds, zero_division=0)
+    val_preds = (deduped_val_probs >= best_threshold).astype(float)
+    val_precision = precision_score(deduped_val_labels, val_preds, zero_division=0)
+    val_recall = recall_score(deduped_val_labels, val_preds, zero_division=0)
 
     metrics = {
         'timestamp': timestamp,
@@ -2045,6 +2134,9 @@ def main(argv=None):
         'val_recall': val_recall,
         'train_samples': int(len(train_labels)),
         'val_samples': int(len(val_labels)),
+        'deduped_val_samples': int(len(deduped_val_labels)),
+        'train_users': int(len(train_user_ids)),
+        'val_users': int(len(val_user_ids)),
         'losses': train_losses,
         'val_losses': val_losses,
         'recommendations_artifact': recommendations_artifact,
@@ -2053,7 +2145,9 @@ def main(argv=None):
         'perimeter_diff_diagnostics_artifacts': perimeter_diff_diagnostics_artifacts,
         'retrain_with_full': bool(args.retrain_with_full),
         'saved_model_training_scope': saved_model_scope,
-        'validation_metrics_source': 'split_validation',
+        'validation_metrics_source': 'grouped_user_split_deduped_validation',
+        'split_strategy': 'grouped_by_user_id',
+        'validation_deduping': 'drop_exact_duplicates_excluding_id_and_created_at',
     }
     metrics_key = f"{prefix}/custom_metrics.json"
     metrics_uri = _upload_json_to_s3(metrics, metrics_key)
@@ -2065,7 +2159,9 @@ def main(argv=None):
         'threshold': best_threshold,
         'retrain_with_full': bool(args.retrain_with_full),
         'saved_model_training_scope': saved_model_scope,
-        'validation_metrics_source': 'split_validation',
+        'validation_metrics_source': 'grouped_user_split_deduped_validation',
+        'split_strategy': 'grouped_by_user_id',
+        'validation_deduping': 'drop_exact_duplicates_excluding_id_and_created_at',
         **category_metadata,
     }
     metadata_key = f"{prefix}/custom_model_metadata.json"
