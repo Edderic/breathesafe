@@ -1207,7 +1207,7 @@ def _custom_lr_category_metadata(cleaned_fit_tests):
     }
 
 
-def _group_train_val_indices_by_user(frame, train_fraction=0.8):
+def _group_train_val_indices_by_user(frame, train_fraction=0.8, random_seed=42):
     if frame.empty:
         empty = torch.tensor([], dtype=torch.long)
         return empty, empty
@@ -1221,8 +1221,8 @@ def _group_train_val_indices_by_user(frame, train_fraction=0.8):
         empty = torch.tensor([], dtype=torch.long)
         return empty, empty
 
-    user_permutation = torch.randperm(len(unique_users)).tolist()
-    shuffled_users = unique_users.take(user_permutation)
+    rng = np.random.default_rng(random_seed)
+    shuffled_users = unique_users.take(rng.permutation(len(unique_users)))
 
     if len(shuffled_users) == 1:
         train_users = set(shuffled_users.tolist())
@@ -1271,15 +1271,15 @@ def _dedupe_prediction_rows(frame, probabilities, labels):
 
 def _group_k_fold_indices_by_user(frame, num_folds=5):
     if frame.empty:
-      return []
+        return []
 
     user_ids = pd.to_numeric(frame['user_id'], errors='coerce')
     if user_ids.isna().any():
-      raise ValueError("Grouped CV requires non-null user_id values.")
+        raise ValueError("Grouped CV requires non-null user_id values.")
 
     unique_user_count = int(user_ids.astype(int).nunique())
     if unique_user_count < 2:
-      return []
+        return []
 
     effective_folds = min(num_folds, unique_user_count)
     splitter = GroupKFold(n_splits=effective_folds)
@@ -1331,6 +1331,35 @@ def _compute_binary_metrics(labels, probabilities, threshold, sample_weights=Non
     }
 
 
+def _compute_top_k_hit_rates(frame, labels, probabilities, ks=(1, 3, 5)):
+    if frame.empty:
+        return {
+            'eligible_users': 0,
+            'top_k_hit_rate': {str(k): None for k in ks},
+        }
+
+    working = frame.copy().reset_index(drop=True)
+    working['target_label'] = np.asarray(labels, dtype=float)
+    working['predicted_probability'] = np.asarray(probabilities, dtype=float)
+
+    eligible_user_hits = {k: [] for k in ks}
+    for _user_id, user_rows in working.groupby('user_id', sort=False):
+        user_rows = user_rows.sort_values('predicted_probability', ascending=False)
+        if not (user_rows['target_label'] == 1).any():
+            continue
+        for k in ks:
+            top_rows = user_rows.head(k)
+            eligible_user_hits[k].append(float((top_rows['target_label'] == 1).any()))
+
+    return {
+        'eligible_users': len(next(iter(eligible_user_hits.values()), [])),
+        'top_k_hit_rate': {
+            str(k): (float(np.mean(values)) if values else None)
+            for k, values in eligible_user_hits.items()
+        },
+    }
+
+
 def _summarize_cross_validation_metrics(fold_metrics):
     if not fold_metrics:
         return {
@@ -1356,14 +1385,24 @@ def _summarize_cross_validation_metrics(fold_metrics):
         if user_values:
             summary[f'user_level_mean_{metric_name}'] = float(np.mean(user_values))
             summary[f'user_level_std_{metric_name}'] = float(np.std(user_values))
+    for k in ['1', '3', '5']:
+        top_k_values = [
+            fold['top_k']['top_k_hit_rate'][k]
+            for fold in fold_metrics
+            if fold['top_k']['top_k_hit_rate'][k] is not None
+        ]
+        if top_k_values:
+            summary[f'top_{k}_hit_rate_mean'] = float(np.mean(top_k_values))
+            summary[f'top_{k}_hit_rate_std'] = float(np.std(top_k_values))
     return summary
 
 
-def _cross_validate_custom_lr(cleaned_fit_tests, category_metadata, epochs, learning_rate, class_weighting, num_folds=5):
+def _cross_validate_custom_lr(cleaned_fit_tests, category_metadata, epochs, learning_rate, class_weighting, num_folds=5, random_seed=42):
     fold_indices = _group_k_fold_indices_by_user(cleaned_fit_tests, num_folds=num_folds)
     fold_metrics = []
 
     for fold_number, (train_idx, val_idx) in enumerate(fold_indices, start=1):
+        torch.manual_seed(random_seed + fold_number)
         fold_result = train_custom_lr_with_split(
             cleaned_fit_tests,
             train_idx=train_idx,
@@ -1404,6 +1443,11 @@ def _cross_validate_custom_lr(cleaned_fit_tests, category_metadata, epochs, lear
             threshold=threshold,
             sample_weights=_user_equal_weights(deduped_val_frame),
         )
+        top_k_metrics = _compute_top_k_hit_rates(
+            deduped_val_frame,
+            deduped_val_labels,
+            deduped_val_probs,
+        )
 
         train_users = set(pd.to_numeric(cleaned_fit_tests.iloc[train_idx.tolist()]['user_id'], errors='coerce').dropna().astype(int).tolist())
         val_users = set(pd.to_numeric(cleaned_fit_tests.iloc[val_idx.tolist()]['user_id'], errors='coerce').dropna().astype(int).tolist())
@@ -1417,6 +1461,7 @@ def _cross_validate_custom_lr(cleaned_fit_tests, category_metadata, epochs, lear
             'deduped_val_rows': int(deduped_val_frame.shape[0]),
             'row_level': row_level_metrics,
             'user_level': user_level_metrics,
+            'top_k': top_k_metrics,
         })
 
     return _summarize_cross_validation_metrics(fold_metrics)
@@ -1950,6 +1995,7 @@ def main(argv=None):
     parser.add_argument('--loss-plot', default='python/mask_recommender/training_loss.png', help='Path to save training loss plot.')
     parser.add_argument('--class-reweight', action='store_true', help='Reweight loss by class balance.')
     parser.add_argument('--cv-folds', type=int, default=5, help='Number of grouped user cross-validation folds for reporting.')
+    parser.add_argument('--random-seed', type=int, default=42, help='Random seed for grouped holdout assignment and model initialization.')
     parser.add_argument(
         '--retrain-with-full',
         action='store_true',
@@ -1976,15 +2022,18 @@ def main(argv=None):
 
     print(
         f"[train.py] starting model_type={args.model_type} epochs={args.epochs} "
-        f"learning_rate={args.learning_rate} retrain_with_full={args.retrain_with_full}",
+        f"learning_rate={args.learning_rate} retrain_with_full={args.retrain_with_full} "
+        f"random_seed={args.random_seed}",
         flush=True,
     )
+    torch.manual_seed(args.random_seed)
     logging.info(
-        "Output targets: images_dir=%s local_model_root=%s rails_env=%s base_url=%s",
+        "Output targets: images_dir=%s local_model_root=%s rails_env=%s base_url=%s random_seed=%s",
         _images_output_dir(),
         _local_model_root(),
         _env_name(),
         os.environ.get('BREATHESAFE_BASE_URL', 'http://localhost:3000'),
+        args.random_seed,
     )
 
     base_url = os.environ.get('BREATHESAFE_BASE_URL', 'http://localhost:3000')
@@ -2072,8 +2121,13 @@ def main(argv=None):
         learning_rate=args.learning_rate,
         class_weighting=args.class_reweight,
         num_folds=args.cv_folds,
+        random_seed=args.random_seed,
     )
-    train_idx, val_idx = _group_train_val_indices_by_user(cleaned_fit_tests, train_fraction=0.8)
+    train_idx, val_idx = _group_train_val_indices_by_user(
+        cleaned_fit_tests,
+        train_fraction=0.8,
+        random_seed=args.random_seed,
+    )
     train_user_ids = set(
         pd.to_numeric(cleaned_fit_tests.iloc[train_idx.tolist()]['user_id'], errors='coerce')
         .dropna()
@@ -2097,6 +2151,7 @@ def main(argv=None):
         int(val_idx.numel()),
     )
 
+    torch.manual_seed(args.random_seed)
     custom_result = train_custom_lr_with_split(
         cleaned_fit_tests,
         train_idx=train_idx,
@@ -2137,11 +2192,17 @@ def main(argv=None):
                 best_f1 = candidate_f1
                 best_threshold = float(candidate)
     logging.info("Selected threshold=%.2f with val_f1=%.3f", best_threshold, best_f1)
+    holdout_top_k_metrics = _compute_top_k_hit_rates(
+        deduped_val_frame,
+        deduped_val_labels,
+        deduped_val_probs,
+    )
 
     saved_model_scope = 'split_train'
     if args.retrain_with_full:
         logging.info("Retraining custom_lr model on full dataset for artifact save.")
         full_idx = torch.arange(cleaned_fit_tests.shape[0])
+        torch.manual_seed(args.random_seed + 10_000)
         full_result = train_custom_lr_with_split(
             cleaned_fit_tests,
             train_idx=full_idx,
@@ -2315,7 +2376,9 @@ def main(argv=None):
         'deduped_val_samples': int(len(deduped_val_labels)),
         'train_users': int(len(train_user_ids)),
         'val_users': int(len(val_user_ids)),
+        'random_seed': int(args.random_seed),
         'cross_validation': cross_validation_metrics,
+        'holdout_top_k': holdout_top_k_metrics,
         'losses': train_losses,
         'val_losses': val_losses,
         'recommendations_artifact': recommendations_artifact,
@@ -2328,6 +2391,7 @@ def main(argv=None):
         'split_strategy': 'grouped_by_user_id',
         'validation_deduping': 'drop_exact_duplicates_excluding_id_and_created_at',
         'cross_validation_strategy': 'group_k_fold_by_user_id',
+        'top_k_metric_definition': 'per-user hit rate among users with at least one positive held-out fit test',
     }
     metrics_key = f"{prefix}/custom_metrics.json"
     metrics_uri = _upload_json_to_s3(metrics, metrics_key)
@@ -2339,6 +2403,7 @@ def main(argv=None):
         'threshold': best_threshold,
         'retrain_with_full': bool(args.retrain_with_full),
         'saved_model_training_scope': saved_model_scope,
+        'random_seed': int(args.random_seed),
         'validation_metrics_source': 'grouped_user_split_deduped_validation',
         'split_strategy': 'grouped_by_user_id',
         'validation_deduping': 'drop_exact_duplicates_excluding_id_and_created_at',

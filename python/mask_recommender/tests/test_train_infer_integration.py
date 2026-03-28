@@ -463,6 +463,33 @@ def test_group_train_val_indices_by_user_prevents_user_leakage():
     assert train_users.isdisjoint(val_users)
 
 
+def test_group_train_val_indices_by_user_is_seeded_and_repeatable():
+    cleaned = train_module.prepare_training_data(_fit_tests_df())
+
+    first_train_idx, first_val_idx = train_module._group_train_val_indices_by_user(
+        cleaned,
+        train_fraction=0.5,
+        random_seed=42,
+    )
+    second_train_idx, second_val_idx = train_module._group_train_val_indices_by_user(
+        cleaned,
+        train_fraction=0.5,
+        random_seed=42,
+    )
+    third_train_idx, third_val_idx = train_module._group_train_val_indices_by_user(
+        cleaned,
+        train_fraction=0.5,
+        random_seed=7,
+    )
+
+    assert first_train_idx.tolist() == second_train_idx.tolist()
+    assert first_val_idx.tolist() == second_val_idx.tolist()
+    assert (
+        first_train_idx.tolist() != third_train_idx.tolist()
+        or first_val_idx.tolist() != third_val_idx.tolist()
+    )
+
+
 def test_dedupe_prediction_rows_collapses_clone_like_validation_duplicates():
     fit_tests_df = pd.DataFrame(
         [
@@ -609,6 +636,28 @@ def test_compute_binary_metrics_supports_equal_user_weighting():
 
     assert unweighted["precision"] != user_weighted["precision"]
     assert user_weighted["sample_count"] == 3
+
+
+def test_compute_top_k_hit_rates_reports_per_user_hit_rate():
+    frame = pd.DataFrame(
+        {
+            "user_id": [100, 100, 101, 101, 102],
+        }
+    )
+    labels = np.array([0.0, 1.0, 0.0, 1.0, 0.0])
+    probabilities = np.array([0.9, 0.8, 0.7, 0.95, 0.99])
+
+    top_k = train_module._compute_top_k_hit_rates(
+        frame,
+        labels=labels,
+        probabilities=probabilities,
+        ks=(1, 2, 3),
+    )
+
+    assert top_k["eligible_users"] == 2
+    assert top_k["top_k_hit_rate"]["1"] == 0.5
+    assert top_k["top_k_hit_rate"]["2"] == 1.0
+    assert top_k["top_k_hit_rate"]["3"] == 1.0
 
 
 def test_save_local_custom_artifacts_persists_metrics(tmp_path, monkeypatch):
