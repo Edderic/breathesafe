@@ -571,3 +571,40 @@ def test_dedupe_prediction_rows_prefers_source_fit_test_lineage():
     assert deduped_frame.shape[0] == 1
     assert deduped_probs.tolist() == [0.8]
     assert deduped_labels.tolist() == [1.0]
+
+
+def test_group_k_fold_indices_by_user_prevents_overlap_across_folds():
+    fit_tests_df = pd.DataFrame(
+        [
+            {**_fit_tests_df().iloc[0].to_dict(), "id": 1, "user_id": 100},
+            {**_fit_tests_df().iloc[1].to_dict(), "id": 2, "user_id": 101},
+            {**_fit_tests_df().iloc[2].to_dict(), "id": 3, "user_id": 102},
+            {**_fit_tests_df().iloc[3].to_dict(), "id": 4, "user_id": 103},
+        ]
+    )
+    cleaned = train_module.prepare_training_data(fit_tests_df)
+
+    folds = train_module._group_k_fold_indices_by_user(cleaned, num_folds=3)
+
+    assert len(folds) == 3
+    for train_idx, val_idx in folds:
+        train_users = set(cleaned.iloc[train_idx.tolist()]["user_id"].tolist())
+        val_users = set(cleaned.iloc[val_idx.tolist()]["user_id"].tolist())
+        assert train_users.isdisjoint(val_users)
+
+
+def test_compute_binary_metrics_supports_equal_user_weighting():
+    labels = np.array([1.0, 0.0, 0.0])
+    probabilities = np.array([0.9, 0.8, 0.7])
+    frame = pd.DataFrame({"user_id": [100, 100, 101]})
+
+    unweighted = train_module._compute_binary_metrics(labels, probabilities, threshold=0.5)
+    user_weighted = train_module._compute_binary_metrics(
+        labels,
+        probabilities,
+        threshold=0.5,
+        sample_weights=train_module._user_equal_weights(frame),
+    )
+
+    assert unweighted["precision"] != user_weighted["precision"]
+    assert user_weighted["sample_count"] == 3

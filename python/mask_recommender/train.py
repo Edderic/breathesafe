@@ -66,6 +66,7 @@ from predict_arkit_from_traditional import (TARGET_COLUMNS,
 from qa import build_mask_candidates, build_recommendation_preview
 from sklearn.metrics import (auc, f1_score, precision_score, recall_score,
                              roc_auc_score, roc_curve)
+from sklearn.model_selection import GroupKFold
 from utils import display_percentage
 
 """
@@ -1265,6 +1266,159 @@ def _dedupe_prediction_rows(frame, probabilities, labels):
     return deduped, deduped_probs, deduped_labels
 
 
+def _group_k_fold_indices_by_user(frame, num_folds=5):
+    if frame.empty:
+      return []
+
+    user_ids = pd.to_numeric(frame['user_id'], errors='coerce')
+    if user_ids.isna().any():
+      raise ValueError("Grouped CV requires non-null user_id values.")
+
+    unique_user_count = int(user_ids.astype(int).nunique())
+    if unique_user_count < 2:
+      return []
+
+    effective_folds = min(num_folds, unique_user_count)
+    splitter = GroupKFold(n_splits=effective_folds)
+    row_indices = np.arange(frame.shape[0])
+    return [
+        (
+            torch.from_numpy(train_index).long(),
+            torch.from_numpy(val_index).long(),
+        )
+        for train_index, val_index in splitter.split(row_indices, groups=user_ids.astype(int).to_numpy())
+    ]
+
+
+def _user_equal_weights(frame):
+    if frame.empty:
+        return np.array([], dtype=float)
+
+    user_ids = pd.to_numeric(frame['user_id'], errors='coerce')
+    counts = user_ids.value_counts(dropna=False)
+    return user_ids.map(lambda value: 1.0 / counts[value]).to_numpy(dtype=float)
+
+
+def _compute_binary_metrics(labels, probabilities, threshold, sample_weights=None):
+    labels = np.asarray(labels, dtype=float)
+    probabilities = np.asarray(probabilities, dtype=float)
+    if labels.size == 0:
+        return {
+            'threshold': float(threshold),
+            'sample_count': 0,
+            'roc_auc': None,
+            'precision': 0.0,
+            'recall': 0.0,
+            'f1': 0.0,
+        }
+
+    predictions = (probabilities >= threshold).astype(float)
+    try:
+        roc_auc = roc_auc_score(labels, probabilities, sample_weight=sample_weights)
+    except ValueError:
+        roc_auc = None
+
+    return {
+        'threshold': float(threshold),
+        'sample_count': int(labels.size),
+        'roc_auc': roc_auc,
+        'precision': precision_score(labels, predictions, zero_division=0, sample_weight=sample_weights),
+        'recall': recall_score(labels, predictions, zero_division=0, sample_weight=sample_weights),
+        'f1': f1_score(labels, predictions, zero_division=0, sample_weight=sample_weights),
+    }
+
+
+def _summarize_cross_validation_metrics(fold_metrics):
+    if not fold_metrics:
+        return {
+            'num_folds': 0,
+            'folds': [],
+        }
+
+    summary = {'num_folds': len(fold_metrics), 'folds': fold_metrics}
+    for metric_name in ['roc_auc', 'precision', 'recall', 'f1']:
+        values = [
+            fold['row_level'][metric_name]
+            for fold in fold_metrics
+            if fold['row_level'][metric_name] is not None
+        ]
+        if values:
+            summary[f'row_level_mean_{metric_name}'] = float(np.mean(values))
+            summary[f'row_level_std_{metric_name}'] = float(np.std(values))
+        user_values = [
+            fold['user_level'][metric_name]
+            for fold in fold_metrics
+            if fold['user_level'][metric_name] is not None
+        ]
+        if user_values:
+            summary[f'user_level_mean_{metric_name}'] = float(np.mean(user_values))
+            summary[f'user_level_std_{metric_name}'] = float(np.std(user_values))
+    return summary
+
+
+def _cross_validate_custom_lr(cleaned_fit_tests, category_metadata, epochs, learning_rate, class_weighting, num_folds=5):
+    fold_indices = _group_k_fold_indices_by_user(cleaned_fit_tests, num_folds=num_folds)
+    fold_metrics = []
+
+    for fold_number, (train_idx, val_idx) in enumerate(fold_indices, start=1):
+        fold_result = train_custom_lr_with_split(
+            cleaned_fit_tests,
+            train_idx=train_idx,
+            val_idx=val_idx,
+            category_metadata=category_metadata,
+            epochs=epochs,
+            learning_rate=learning_rate,
+            class_weighting=class_weighting,
+        )
+        val_frame = cleaned_fit_tests.iloc[val_idx.tolist()].reset_index(drop=True)
+        deduped_val_frame, deduped_val_probs, deduped_val_labels = _dedupe_prediction_rows(
+            val_frame,
+            fold_result['val_probs'],
+            fold_result['y_val'],
+        )
+
+        threshold = 0.5
+        best_f1 = -1.0
+        if deduped_val_probs.size:
+            for candidate in np.arange(0.05, 0.96, 0.01):
+                candidate_f1 = f1_score(
+                    deduped_val_labels,
+                    (deduped_val_probs >= candidate).astype(float),
+                    zero_division=0,
+                )
+                if candidate_f1 > best_f1:
+                    best_f1 = candidate_f1
+                    threshold = float(candidate)
+
+        row_level_metrics = _compute_binary_metrics(
+            deduped_val_labels,
+            deduped_val_probs,
+            threshold=threshold,
+        )
+        user_level_metrics = _compute_binary_metrics(
+            deduped_val_labels,
+            deduped_val_probs,
+            threshold=threshold,
+            sample_weights=_user_equal_weights(deduped_val_frame),
+        )
+
+        train_users = set(pd.to_numeric(cleaned_fit_tests.iloc[train_idx.tolist()]['user_id'], errors='coerce').dropna().astype(int).tolist())
+        val_users = set(pd.to_numeric(cleaned_fit_tests.iloc[val_idx.tolist()]['user_id'], errors='coerce').dropna().astype(int).tolist())
+
+        fold_metrics.append({
+            'fold': fold_number,
+            'train_users': len(train_users),
+            'val_users': len(val_users),
+            'train_rows': int(train_idx.numel()),
+            'val_rows': int(val_idx.numel()),
+            'deduped_val_rows': int(deduped_val_frame.shape[0]),
+            'row_level': row_level_metrics,
+            'user_level': user_level_metrics,
+        })
+
+    return _summarize_cross_validation_metrics(fold_metrics)
+
+
 def _subset_custom_lr_data(data, row_indices):
     if isinstance(row_indices, torch.Tensor):
         row_indices = row_indices.detach().cpu().long()
@@ -1792,6 +1946,7 @@ def main(argv=None):
     parser.add_argument('--model-type', default='custom_lr', choices=['custom_lr'], help='Model type to train.')
     parser.add_argument('--loss-plot', default='python/mask_recommender/training_loss.png', help='Path to save training loss plot.')
     parser.add_argument('--class-reweight', action='store_true', help='Reweight loss by class balance.')
+    parser.add_argument('--cv-folds', type=int, default=5, help='Number of grouped user cross-validation folds for reporting.')
     parser.add_argument(
         '--retrain-with-full',
         action='store_true',
@@ -1907,6 +2062,14 @@ def main(argv=None):
 
     timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
     category_metadata = _custom_lr_category_metadata(cleaned_fit_tests)
+    cross_validation_metrics = _cross_validate_custom_lr(
+        cleaned_fit_tests,
+        category_metadata=category_metadata,
+        epochs=args.epochs,
+        learning_rate=args.learning_rate,
+        class_weighting=args.class_reweight,
+        num_folds=args.cv_folds,
+    )
     train_idx, val_idx = _group_train_val_indices_by_user(cleaned_fit_tests, train_fraction=0.8)
     train_user_ids = set(
         pd.to_numeric(cleaned_fit_tests.iloc[train_idx.tolist()]['user_id'], errors='coerce')
@@ -2149,6 +2312,7 @@ def main(argv=None):
         'deduped_val_samples': int(len(deduped_val_labels)),
         'train_users': int(len(train_user_ids)),
         'val_users': int(len(val_user_ids)),
+        'cross_validation': cross_validation_metrics,
         'losses': train_losses,
         'val_losses': val_losses,
         'recommendations_artifact': recommendations_artifact,
@@ -2160,6 +2324,7 @@ def main(argv=None):
         'validation_metrics_source': 'grouped_user_split_deduped_validation',
         'split_strategy': 'grouped_by_user_id',
         'validation_deduping': 'drop_exact_duplicates_excluding_id_and_created_at',
+        'cross_validation_strategy': 'group_k_fold_by_user_id',
     }
     metrics_key = f"{prefix}/custom_metrics.json"
     metrics_uri = _upload_json_to_s3(metrics, metrics_key)
@@ -2174,6 +2339,8 @@ def main(argv=None):
         'validation_metrics_source': 'grouped_user_split_deduped_validation',
         'split_strategy': 'grouped_by_user_id',
         'validation_deduping': 'drop_exact_duplicates_excluding_id_and_created_at',
+        'cross_validation_strategy': 'group_k_fold_by_user_id',
+        'cross_validation_folds': cross_validation_metrics.get('num_folds', 0),
         **category_metadata,
     }
     metadata_key = f"{prefix}/custom_model_metadata.json"
