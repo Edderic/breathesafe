@@ -1,4 +1,5 @@
 import os
+import json
 
 import boto3
 import numpy as np
@@ -608,3 +609,19 @@ def test_compute_binary_metrics_supports_equal_user_weighting():
 
     assert unweighted["precision"] != user_weighted["precision"]
     assert user_weighted["sample_count"] == 3
+
+
+def test_save_local_custom_artifacts_persists_metrics(tmp_path, monkeypatch):
+    monkeypatch.setenv("MASK_RECOMMENDER_LOCAL_MODEL_DIR", str(tmp_path))
+
+    artifact_dir = train_module._save_local_custom_artifacts(
+        timestamp="20260328030000",
+        params={"weights": torch.tensor([1.0])},
+        metadata={"timestamp": "20260328030000"},
+        mask_data={"1": {"id": 1}},
+        metrics={"threshold": 0.42, "val_f1": 0.73},
+    )
+
+    metrics_path = artifact_dir / "custom_metrics.json"
+    assert metrics_path.exists()
+    assert json.loads(metrics_path.read_text(encoding="utf-8"))["val_f1"] == 0.73

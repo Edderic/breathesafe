@@ -937,17 +937,20 @@ def _local_model_root():
     return "python/mask_recommender/local_models"
 
 
-def _save_local_custom_artifacts(timestamp, params, metadata, mask_data):
+def _save_local_custom_artifacts(timestamp, params, metadata, mask_data, metrics=None):
     local_dir = Path(_local_model_root()) / str(timestamp)
     local_dir.mkdir(parents=True, exist_ok=True)
 
     params_path = local_dir / "custom_model_params.pt"
     metadata_path = local_dir / "custom_model_metadata.json"
     mask_data_path = local_dir / "custom_mask_data.json"
+    metrics_path = local_dir / "custom_metrics.json"
 
     torch.save(params, params_path)
     metadata_path.write_text(json.dumps(metadata, indent=2), encoding='utf-8')
     mask_data_path.write_text(json.dumps(mask_data, indent=2), encoding='utf-8')
+    if metrics is not None:
+        metrics_path.write_text(json.dumps(metrics, indent=2), encoding='utf-8')
 
     logging.info("Saved local custom artifacts to %s", local_dir)
     return local_dir
@@ -2350,6 +2353,7 @@ def main(argv=None):
         params=params,
         metadata=metadata,
         mask_data=mask_data,
+        metrics=metrics,
     )
 
     latest_payload = {
