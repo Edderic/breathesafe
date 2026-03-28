@@ -132,6 +132,7 @@ STYLE_TYPES = [
 EVALUATION_ONLY_COLUMNS = [
     'id',
     'created_at',
+    'source_fit_test_id',
 ]
 
 DEFAULT_PROBE_PAYLOADS = [
@@ -1243,6 +1244,17 @@ def _dedupe_prediction_rows(frame, probabilities, labels):
     working = frame.copy().reset_index(drop=True)
     working['predicted_probability'] = np.asarray(probabilities, dtype=float)
     working['target_label'] = np.asarray(labels, dtype=float)
+    if 'source_fit_test_id' in working.columns:
+        source_ids = pd.to_numeric(working['source_fit_test_id'], errors='coerce')
+        row_ids = pd.to_numeric(working.get('id'), errors='coerce')
+        evaluation_keys = source_ids.fillna(row_ids)
+        if evaluation_keys.notna().any():
+            working['evaluation_observation_key'] = evaluation_keys
+            deduped = working.drop_duplicates(subset=['evaluation_observation_key'], keep='first').reset_index(drop=True)
+            deduped = deduped.drop(columns=['evaluation_observation_key'])
+            deduped_probs = deduped.pop('predicted_probability').to_numpy(dtype=float)
+            deduped_labels = deduped.pop('target_label').to_numpy(dtype=float)
+            return deduped, deduped_probs, deduped_labels
     dedupe_columns = [
         column for column in working.columns
         if column not in EVALUATION_ONLY_COLUMNS

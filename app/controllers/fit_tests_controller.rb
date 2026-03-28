@@ -244,6 +244,7 @@ class FitTestsController < ApplicationController
     cloned_attributes = original_fit_test.attributes.except('id', 'created_at', 'updated_at')
     cloned_attributes['facial_measurement_id'] = fm_id
     cloned_attributes['user_id'] = user.id
+    cloned_attributes['source_fit_test_id'] = original_fit_test.source_fit_test_id || original_fit_test.id
 
     # Remove any nil values that might cause issues
     cloned_attributes = cloned_attributes.compact

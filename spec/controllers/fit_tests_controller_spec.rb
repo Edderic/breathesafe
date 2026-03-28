@@ -178,6 +178,7 @@ RSpec.describe FitTestsController, type: :controller do
       body = JSON.parse(response.body)
       expect(body['count']).to eq(1)
       expect(body['fit_tests'].length).to eq(1)
+      expect(FitTest.order(:id).last.source_fit_test_id).to eq(fit_test.id)
     end
 
     it 'clones multiple times when count is provided' do
@@ -191,6 +192,7 @@ RSpec.describe FitTestsController, type: :controller do
       body = JSON.parse(response.body)
       expect(body['count']).to eq(3)
       expect(body['fit_tests'].length).to eq(3)
+      expect(FitTest.order(:id).last(3).map(&:source_fit_test_id).uniq).to eq([fit_test.id])
     end
 
     it 'returns 422 for invalid clone count' do

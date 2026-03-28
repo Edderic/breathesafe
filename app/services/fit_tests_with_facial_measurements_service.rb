@@ -17,6 +17,7 @@ class FitTestsWithFacialMeasurementsService
       results = results.reject { |r| r['qlft_pass'].nil? } if exclude_nil_pass
       results = results.select { |r| r['facial_measurement_id'].present? } unless include_without_facial_measurements
       results = exclude_testing_manager_results(results)
+      results = attach_fit_test_lineage(results)
       results = attach_facial_measurements(results)
 
       # Add demographics if requested
@@ -95,6 +96,17 @@ class FitTestsWithFacialMeasurementsService
         end
 
         result.merge(measurement_data)
+      end
+    end
+
+    def attach_fit_test_lineage(results)
+      fit_test_ids = results.map { |r| r['id'] }.compact.uniq
+      return results if fit_test_ids.empty?
+
+      fit_tests_by_id = FitTest.where(id: fit_test_ids).pluck(:id, :source_fit_test_id).to_h
+      results.map do |result|
+        source_fit_test_id = fit_tests_by_id[result['id']]
+        result.merge('source_fit_test_id' => source_fit_test_id)
       end
     end
 

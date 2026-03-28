@@ -515,3 +515,59 @@ def test_dedupe_prediction_rows_collapses_clone_like_validation_duplicates():
     assert deduped_frame.shape[0] == 1
     assert deduped_probs.tolist() == [0.8]
     assert deduped_labels.tolist() == [1.0]
+
+
+def test_dedupe_prediction_rows_prefers_source_fit_test_lineage():
+    fit_tests_df = pd.DataFrame(
+        [
+            {
+                "id": 10,
+                "source_fit_test_id": None,
+                "user_id": 100,
+                "mask_id": 1,
+                "fit_family_id": 101,
+                "unique_internal_model_code": "MASK-A",
+                "perimeter_mm": 300,
+                "strap_type": "Earloop",
+                "style": "Cup",
+                "nose_mm": 40,
+                "chin_mm": 50,
+                "top_cheek_mm": 60,
+                "mid_cheek_mm": 55,
+                "strap_mm": 120,
+                "facial_hair_beard_length_mm": 0,
+                "qlft_pass": "pass",
+                "created_at": "2026-01-01T00:00:00Z",
+            },
+            {
+                "id": 11,
+                "source_fit_test_id": 10,
+                "user_id": 100,
+                "mask_id": 1,
+                "fit_family_id": 101,
+                "unique_internal_model_code": "MASK-A",
+                "perimeter_mm": 300,
+                "strap_type": "Earloop",
+                "style": "Cup",
+                "nose_mm": 40,
+                "chin_mm": 50,
+                "top_cheek_mm": 60,
+                "mid_cheek_mm": 55,
+                "strap_mm": 120,
+                "facial_hair_beard_length_mm": 0,
+                "qlft_pass": "pass",
+                "created_at": "2026-01-02T00:00:00Z",
+            },
+        ]
+    )
+    cleaned = train_module.prepare_training_data(fit_tests_df)
+
+    deduped_frame, deduped_probs, deduped_labels = train_module._dedupe_prediction_rows(
+        cleaned,
+        probabilities=np.array([0.8, 0.8]),
+        labels=np.array([1.0, 1.0]),
+    )
+
+    assert deduped_frame.shape[0] == 1
+    assert deduped_probs.tolist() == [0.8]
+    assert deduped_labels.tolist() == [1.0]

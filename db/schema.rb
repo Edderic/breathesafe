@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_260_319_120_000) do
+ActiveRecord::Schema[7.0].define(version: 20_260_327_193_000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -171,10 +171,12 @@ ActiveRecord::Schema[7.0].define(version: 20_260_319_120_000) do
     t.boolean 'mask_modded', default: false, null: false
     t.text 'notes'
     t.string 'procedure'
+    t.bigint 'source_fit_test_id'
     t.index ['bulk_fit_tests_import_id'], name: 'index_fit_tests_on_bulk_fit_tests_import_id'
     t.index ['facial_measurement_id'], name: 'index_fit_tests_on_facial_measurement_id'
     t.index ['mask_id'], name: 'index_fit_tests_on_mask_id'
     t.index ['quantitative_fit_testing_device_id'], name: 'index_fit_tests_on_quantitative_fit_testing_device_id'
+    t.index ['source_fit_test_id'], name: 'index_fit_tests_on_source_fit_test_id'
     t.index ['user_id'], name: 'index_fit_tests_on_user_id'
     t.check_constraint 'length(notes) <= 10000', name: 'notes_length_check'
   end
@@ -582,6 +584,7 @@ ActiveRecord::Schema[7.0].define(version: 20_260_319_120_000) do
   add_foreign_key 'facial_measurements', 'users'
   add_foreign_key 'fit_tests', 'bulk_fit_tests_imports'
   add_foreign_key 'fit_tests', 'facial_measurements'
+  add_foreign_key 'fit_tests', 'fit_tests', column: 'source_fit_test_id'
   add_foreign_key 'fit_tests', 'masks'
   add_foreign_key 'fit_tests', 'measurement_devices', column: 'quantitative_fit_testing_device_id'
   add_foreign_key 'fit_tests', 'users'
