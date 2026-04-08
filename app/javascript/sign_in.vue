@@ -35,6 +35,11 @@
       <Button shadow='true' @click="signIn" text='Sign In'/>
     </div>
 
+    <div class='container centered auth-help' v-if='!registered'>
+      <span>Forgot your password?</span>
+      <a href="/users/password/new">Reset it by email</a>
+    </div>
+
     <div class='container checkbox-container' v-if='!registered'>
       <input
         v-model='agreeTOSMedicalDisclaimerPrivacyPolicy'
@@ -245,6 +250,14 @@ export default {
     padding: 1em 3em;
   }
 
+  .auth-help {
+    gap: 0.4em;
+  }
+
+  .auth-help a {
+    text-decoration: underline;
+  }
+
   @media(max-width: 700px) {
     .container {
       display: flex;
@@ -287,6 +300,11 @@ export default {
       padding: 0;
       margin-left: 0.5em;
       flex: 1;
+    }
+
+    .auth-help {
+      align-items: center;
+      text-align: center;
     }
   }
 </style>
