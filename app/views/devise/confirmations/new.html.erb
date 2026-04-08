@@ -1,16 +1,31 @@
-<h2>Resend confirmation instructions</h2>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-header">
+      <p class="auth-eyebrow">Email confirmation</p>
+      <h1 class="auth-title">Resend confirmation instructions</h1>
+      <p class="auth-subtitle">
+        Enter your email address and we'll send a fresh confirmation link.
+      </p>
+    </div>
 
-<%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+    <%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post, class: "auth-form" }) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
 
-  <div class="field">
-    <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true, autocomplete: "email", value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email) %>
+      <div class="auth-field">
+        <%= f.label :email %>
+        <%= f.email_field :email,
+                          autofocus: true,
+                          autocomplete: "email",
+                          class: "auth-input",
+                          placeholder: "name@example.com",
+                          value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email) %>
+      </div>
+
+      <div class="auth-actions">
+        <%= f.submit "Resend confirmation instructions", class: "auth-submit" %>
+      </div>
+    <% end %>
+
+    <%= render "devise/shared/links" %>
   </div>
-
-  <div class="actions">
-    <%= f.submit "Resend confirmation instructions" %>
-  </div>
-<% end %>
-
-<%= render "devise/shared/links" %>
+</div>
