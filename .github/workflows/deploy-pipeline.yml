@@ -35,9 +35,6 @@ jobs:
         # Install Heroku CLI
         curl https://cli-assets.heroku.com/install.sh | sh
 
-        # Login to Heroku
-        echo $HEROKU_API_KEY | heroku auth:token --stdin
-
         # Deploy to staging
         git push -f https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP.git HEAD:main
 
@@ -139,9 +136,6 @@ jobs:
       run: |
         # Install Heroku CLI
         curl https://cli-assets.heroku.com/install.sh | sh
-
-        # Login to Heroku
-        echo $HEROKU_API_KEY | heroku auth:token --stdin
 
         # Deploy to production
         git push -f https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP.git HEAD:main
