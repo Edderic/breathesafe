@@ -1,63 +1,84 @@
 <template>
-  <form class='top-container wide border-showing' action="">
-    <br>
-    <br>
-    <br>
-
-    <div class='container centered'>
-      <h2>Sign up/Sign in</h2>
-    </div>
-
-    <div class='container centered'>
-      <h3>{{ message }}</h3>
-    </div>
-
-    <div class='container' v-if='!registered'>
-      <label>Email</label>
-
-      <input
-        :value="email"
-        @change="setEmail">
-    </div>
-
-    <div class='container' v-if='!registered'>
-      <label>Password</label>
-
-      <input
-        :value="password"
-        type="password"
-        @change="setPassword"
-        @keyup.enter.stop="signIn"
-      >
-    </div>
-
-    <div class='container row' v-if='!registered'>
-      <Button shadow='true' @click="signIn" text='Sign In'/>
-    </div>
-
-    <div class='container centered auth-help' v-if='!registered'>
-      <span>Forgot your password?</span>
-      <a href="/users/password/new">Reset it by email</a>
-    </div>
-
-    <div class='container checkbox-container' v-if='!registered'>
-      <input
-        v-model='agreeTOSMedicalDisclaimerPrivacyPolicy'
-        type="checkbox"
-        id='agreePolicies'
-      >
-
-      <label for="agreePolicies">
-        By signing up, you agree to our <router-link :to="{'name': 'TermsOfService'}">Terms of Service</router-link>, <router-link :to="{'name': 'ConsentForm'}">Consent form</router-link>, <router-link :to="{'name': 'Disclaimer'}">Disclaimer</router-link>, and <router-link :to="{'name': 'PrivacyPolicy'}">Privacy Policy</router-link>.
-        </label>
+  <div class="auth-page">
+    <form class="auth-card auth-card--wide" action="">
+      <div class="auth-header">
+        <p class="auth-eyebrow">Breathesafe account</p>
+        <h1 class="auth-title">Sign up or sign in</h1>
+        <p class="auth-subtitle" v-if="!registered">
+          Use your account email and password to sign in, or create a new account below.
+        </p>
+        <p class="auth-subtitle" v-else>
+          {{ message }}
+        </p>
       </div>
 
+      <div class="auth-message" v-if="message && !registered">
+        {{ message }}
+      </div>
 
-    <div class='container row' v-if='!registered'>
-      <Button shadow='true' @click="signUp" text='Sign up' :disabled='!agreeTOSMedicalDisclaimerPrivacyPolicy'/>
+      <template v-if="!registered">
+        <div class="auth-form">
+          <div class="auth-field">
+            <label for="sign-in-email">Email</label>
+            <input
+              id="sign-in-email"
+              class="auth-input"
+              :value="email"
+              autocomplete="email"
+              placeholder="name@example.com"
+              @change="setEmail"
+            >
+          </div>
 
-    </div>
-  </form>
+          <div class="auth-field">
+            <label for="sign-in-password">Password</label>
+            <input
+              id="sign-in-password"
+              class="auth-input"
+              :value="password"
+              type="password"
+              autocomplete="current-password"
+              @change="setPassword"
+              @keyup.enter.stop="signIn"
+            >
+          </div>
+
+          <div class="auth-actions auth-actions--stacked">
+            <button class="auth-submit" type="button" @click="signIn">Sign in</button>
+            <button
+              class="auth-submit auth-submit--secondary"
+              type="button"
+              @click="signUp"
+              :disabled="!agreeTOSMedicalDisclaimerPrivacyPolicy"
+            >
+              Sign up
+            </button>
+          </div>
+        </div>
+
+        <div class="auth-links auth-links--inline auth-links--no-border auth-help">
+          <p>Forgot your password? <a href="/users/password/new">Reset it by email</a></p>
+        </div>
+
+        <div class="auth-checkbox">
+          <input
+            v-model="agreeTOSMedicalDisclaimerPrivacyPolicy"
+            type="checkbox"
+            id="agreePolicies"
+          >
+
+          <label for="agreePolicies">
+            By signing up, you agree to our <router-link :to="{ name: 'TermsOfService' }">Terms of Service</router-link>, <router-link :to="{ name: 'ConsentForm' }">Consent form</router-link>, <router-link :to="{ name: 'Disclaimer' }">Disclaimer</router-link>, and <router-link :to="{ name: 'PrivacyPolicy' }">Privacy Policy</router-link>.
+          </label>
+        </div>
+      </template>
+
+      <div class="auth-links" v-if="!registered">
+        <p><a href="/users/confirmation/new">Need a new confirmation email?</a></p>
+        <p><a href="/users/unlock/new">Need unlock instructions?</a></p>
+      </div>
+    </form>
+  </div>
 </template>
 
 <script>
@@ -66,14 +87,10 @@ import { useProfileStore } from './stores/profile_store';
 import { useMainStore } from './stores/main_store';
 import { mapActions, mapWritableState } from 'pinia';
 import { setupCSRF } from './misc.js';
-import Button from './button.vue';
 import axios from 'axios';
 
 export default {
   name: 'SignIn',
-  components: {
-    Button
-  },
   computed: {
     ...mapWritableState(useMainStore, ['message', 'currentUser'])
   },
@@ -220,91 +237,225 @@ export default {
 </script>
 
 <style scoped>
-  .main {
+  .auth-page {
+    min-height: 100vh;
     display: flex;
-    flex-direction: row;
-  }
-  .container {
-    margin: 1em;
-  }
-  label {
-    padding: 1em;
-  }
-  .subsection {
-    font-weight: bold;
-  }
-  .wide {
-    flex-direction: column;
-  }
-
-  .border-showing {
-    border: 1px solid grey;
-  }
-
-  .centered {
-    display: flex;
+    align-items: center;
     justify-content: center;
+    padding: 32px 16px;
+    background:
+      radial-gradient(circle at top left, rgba(232, 241, 250, 0.95), transparent 38%),
+      linear-gradient(180deg, #f7fafc 0%, #eef2f7 100%);
   }
 
-  button {
-    padding: 1em 3em;
+  .auth-card {
+    box-sizing: border-box;
+    width: min(100%, 460px);
+    padding: 36px 32px;
+    border: 1px solid rgba(25, 38, 56, 0.1);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 22px 60px rgba(31, 41, 55, 0.14);
   }
 
-  .auth-help {
-    gap: 0.4em;
+  .auth-card--wide {
+    width: min(100%, 520px);
   }
 
-  .auth-help a {
-    text-decoration: underline;
+  .auth-header {
+    margin-bottom: 28px;
+  }
+
+  .auth-eyebrow {
+    margin: 0 0 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #4b6b8a;
+  }
+
+  .auth-title {
+    margin: 0;
+    font-size: clamp(1.9rem, 4vw, 2.4rem);
+    line-height: 1.1;
+    color: #162132;
+  }
+
+  .auth-subtitle {
+    margin: 12px 0 0;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #546375;
+  }
+
+  .auth-message {
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    border: 1px solid #bfd3ec;
+    border-radius: 14px;
+    background: #eef5ff;
+    color: #1f3d66;
+    line-height: 1.5;
+  }
+
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .auth-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.96rem;
+    font-weight: 600;
+    color: #223249;
+  }
+
+  .auth-input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #c8d2de;
+    border-radius: 14px;
+    background: #fbfdff;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #162132;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+
+  .auth-input:focus {
+    outline: none;
+    border-color: #2f6fed;
+    box-shadow: 0 0 0 4px rgba(47, 111, 237, 0.16);
+    background: #fff;
+  }
+
+  .auth-actions {
+    margin-top: 6px;
+  }
+
+  .auth-actions--stacked {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .auth-submit {
+    width: 100%;
+    padding: 15px 18px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #1e5bd7 0%, #3c7af2 100%);
+    color: #fff;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    box-shadow: 0 12px 24px rgba(47, 111, 237, 0.22);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease, opacity 0.15s ease;
+  }
+
+  .auth-submit:hover,
+  .auth-submit:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 28px rgba(47, 111, 237, 0.28);
+    filter: brightness(1.02);
+  }
+
+  .auth-submit:focus {
+    outline: 3px solid rgba(47, 111, 237, 0.18);
+    outline-offset: 2px;
+  }
+
+  .auth-submit:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+    box-shadow: none;
+    filter: none;
+  }
+
+  .auth-submit--secondary {
+    background: linear-gradient(135deg, #5b6778 0%, #7d8b9f 100%);
+    box-shadow: 0 12px 24px rgba(86, 98, 116, 0.2);
+  }
+
+  .auth-links {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(34, 50, 73, 0.1);
+  }
+
+  .auth-links p {
+    margin: 0;
+  }
+
+  .auth-links p + p {
+    margin-top: 10px;
+  }
+
+  .auth-links a {
+    color: #1e5bd7;
+    font-weight: 600;
+  }
+
+  .auth-links a:hover,
+  .auth-links a:focus {
+    color: #1748ab;
+  }
+
+  .auth-links--inline p {
+    color: #546375;
+  }
+
+  .auth-links--no-border {
+    margin-top: 18px;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .auth-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 22px;
+    padding: 16px;
+    border-radius: 16px;
+    background: #f7f9fc;
+    color: #4c5b6e;
+    line-height: 1.6;
+  }
+
+  .auth-checkbox input[type='checkbox'] {
+    width: 1.15em;
+    height: 1.15em;
+    min-width: 1.15em;
+    margin-top: 0.2em;
+  }
+
+  .auth-checkbox label {
+    font-size: 0.94rem;
+  }
+
+  .auth-checkbox a {
+    color: #1e5bd7;
+    font-weight: 600;
   }
 
   @media(max-width: 700px) {
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .auth-page {
+      padding: 18px 12px;
+      align-items: flex-start;
     }
 
-    input {
-      width: 95vw;
-      font-size: 2em;
-    }
-
-    .button {
-      width: 93vw;
-    }
-
-    .top-container {
-      margin-bottom: 4em;
-    }
-
-    input[type='checkbox'] {
-      width: 1.2em;
-      height: 1.2em;
-      min-width: 1.2em;
-      min-height: 1.2em;
-      -webkit-appearance: checkbox;
-      appearance: checkbox;
-      margin-right: 0.5em;
-      vertical-align: middle;
-      flex-shrink: 0;
-    }
-
-    .checkbox-container {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-    }
-
-    .checkbox-container label {
-      padding: 0;
-      margin-left: 0.5em;
-      flex: 1;
-    }
-
-    .auth-help {
-      align-items: center;
-      text-align: center;
+    .auth-card {
+      width: 100%;
+      padding: 28px 20px;
+      border-radius: 18px;
     }
   }
 </style>
