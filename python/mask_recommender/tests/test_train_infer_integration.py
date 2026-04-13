@@ -4,6 +4,7 @@ import json
 import boto3
 import numpy as np
 import pandas as pd
+import pytest
 import torch
 
 from mask_recommender import train as train_module
@@ -658,6 +659,41 @@ def test_compute_top_k_hit_rates_reports_per_user_hit_rate():
     assert top_k["top_k_hit_rate"]["1"] == 0.5
     assert top_k["top_k_hit_rate"]["2"] == 1.0
     assert top_k["top_k_hit_rate"]["3"] == 1.0
+
+
+def test_compute_top_k_any_fit_probability_metrics_uses_top_three_predictions():
+    frame = pd.DataFrame(
+        {
+            "user_id": [100, 100, 100, 101, 101, 101, 102, 102],
+        }
+    )
+    labels = np.array([0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0])
+    probabilities = np.array([0.9, 0.4, 0.2, 0.8, 0.3, 0.1, 0.7, 0.2])
+
+    result = train_module._compute_top_k_any_fit_probability_metrics(
+        frame,
+        labels=labels,
+        probabilities=probabilities,
+        k=3,
+    )
+
+    expected_user_100 = 1.0 - ((1.0 - 0.9) * (1.0 - 0.4) * (1.0 - 0.2))
+    expected_user_101 = 1.0 - ((1.0 - 0.8) * (1.0 - 0.3) * (1.0 - 0.1))
+
+    assert result["eligible_users"] == 2
+    assert result["excluded_users_with_fewer_than_k_rows"] == 1
+    assert result["independence"]["sample_count"] == 2
+    assert result["independence"]["positive_rate"] == 0.5
+    assert result["independence"]["roc_auc"] == 1.0
+    assert result["max_baseline"]["roc_auc"] == 1.0
+    assert result["independence"]["mean_predicted_probability"] == pytest.approx(
+        np.mean([expected_user_100, expected_user_101])
+    )
+    assert result["max_baseline"]["mean_predicted_probability"] == pytest.approx(
+        np.mean([0.9, 0.8])
+    )
+    assert result["independence_calibration_bins"]
+    assert result["max_baseline_calibration_bins"]
 
 
 def test_save_local_custom_artifacts_persists_metrics(tmp_path, monkeypatch):

@@ -64,8 +64,9 @@ from feature_builder import (ABS_PERIMETER_DIFF_STYLE_PREFIX,
 from predict_arkit_from_traditional import (TARGET_COLUMNS,
                                             predict_arkit_from_traditional)
 from qa import build_mask_candidates, build_recommendation_preview
-from sklearn.metrics import (auc, f1_score, precision_score, recall_score,
-                             roc_auc_score, roc_curve)
+from sklearn.metrics import (auc, brier_score_loss, f1_score, log_loss,
+                             precision_score, recall_score, roc_auc_score,
+                             roc_curve)
 from sklearn.model_selection import GroupKFold
 from utils import display_percentage
 
@@ -1331,6 +1332,69 @@ def _compute_binary_metrics(labels, probabilities, threshold, sample_weights=Non
     }
 
 
+def _compute_probability_quality_metrics(labels, probabilities):
+    labels = np.asarray(labels, dtype=float)
+    probabilities = np.asarray(probabilities, dtype=float)
+    if labels.size == 0:
+        return {
+            'sample_count': 0,
+            'positive_rate': None,
+            'mean_predicted_probability': None,
+            'roc_auc': None,
+            'brier_score': None,
+            'log_loss': None,
+        }
+
+    clipped_probabilities = np.clip(probabilities, 1e-6, 1.0 - 1e-6)
+    try:
+        roc_auc = roc_auc_score(labels, clipped_probabilities)
+    except ValueError:
+        roc_auc = None
+    try:
+        negative_log_likelihood = log_loss(labels, clipped_probabilities, labels=[0, 1])
+    except ValueError:
+        negative_log_likelihood = None
+
+    return {
+        'sample_count': int(labels.size),
+        'positive_rate': float(np.mean(labels)),
+        'mean_predicted_probability': float(np.mean(clipped_probabilities)),
+        'roc_auc': roc_auc,
+        'brier_score': float(brier_score_loss(labels, clipped_probabilities)),
+        'log_loss': negative_log_likelihood,
+    }
+
+
+def _compute_calibration_bins(labels, probabilities, num_bins=5):
+    labels = np.asarray(labels, dtype=float)
+    probabilities = np.asarray(probabilities, dtype=float)
+    if labels.size == 0:
+        return []
+
+    clipped_probabilities = np.clip(probabilities, 1e-6, 1.0 - 1e-6)
+    bin_edges = np.linspace(0.0, 1.0, num_bins + 1)
+    bins = []
+    for index in range(num_bins):
+        lower = float(bin_edges[index])
+        upper = float(bin_edges[index + 1])
+        if index == num_bins - 1:
+            mask = (clipped_probabilities >= lower) & (clipped_probabilities <= upper)
+        else:
+            mask = (clipped_probabilities >= lower) & (clipped_probabilities < upper)
+        if not mask.any():
+            continue
+        bin_probabilities = clipped_probabilities[mask]
+        bin_labels = labels[mask]
+        bins.append({
+            'bin_start': lower,
+            'bin_end': upper,
+            'sample_count': int(mask.sum()),
+            'mean_predicted_probability': float(np.mean(bin_probabilities)),
+            'observed_positive_rate': float(np.mean(bin_labels)),
+        })
+    return bins
+
+
 def _compute_top_k_hit_rates(frame, labels, probabilities, ks=(1, 3, 5)):
     if frame.empty:
         return {
@@ -1357,6 +1421,66 @@ def _compute_top_k_hit_rates(frame, labels, probabilities, ks=(1, 3, 5)):
             str(k): (float(np.mean(values)) if values else None)
             for k, values in eligible_user_hits.items()
         },
+    }
+
+
+def _compute_top_k_any_fit_probability_metrics(frame, labels, probabilities, k=3):
+    if frame.empty:
+        return {
+            'k': int(k),
+            'eligible_users': 0,
+            'excluded_users_with_fewer_than_k_rows': 0,
+            'independence': _compute_probability_quality_metrics([], []),
+            'max_baseline': _compute_probability_quality_metrics([], []),
+            'independence_calibration_bins': [],
+            'max_baseline_calibration_bins': [],
+        }
+
+    working = frame.copy().reset_index(drop=True)
+    working['target_label'] = np.asarray(labels, dtype=float)
+    working['predicted_probability'] = np.asarray(probabilities, dtype=float)
+
+    observed_any_fit = []
+    independence_probabilities = []
+    max_probabilities = []
+    excluded_users = 0
+
+    for _user_id, user_rows in working.groupby('user_id', sort=False):
+        ordered_rows = user_rows.sort_values('predicted_probability', ascending=False)
+        if ordered_rows.shape[0] < k:
+            excluded_users += 1
+            continue
+
+        top_rows = ordered_rows.head(k)
+        top_probabilities = np.clip(
+            top_rows['predicted_probability'].to_numpy(dtype=float),
+            1e-6,
+            1.0 - 1e-6,
+        )
+        observed_any_fit.append(float((top_rows['target_label'] == 1).any()))
+        independence_probabilities.append(float(1.0 - np.prod(1.0 - top_probabilities)))
+        max_probabilities.append(float(np.max(top_probabilities)))
+
+    return {
+        'k': int(k),
+        'eligible_users': int(len(observed_any_fit)),
+        'excluded_users_with_fewer_than_k_rows': int(excluded_users),
+        'independence': _compute_probability_quality_metrics(
+            observed_any_fit,
+            independence_probabilities,
+        ),
+        'max_baseline': _compute_probability_quality_metrics(
+            observed_any_fit,
+            max_probabilities,
+        ),
+        'independence_calibration_bins': _compute_calibration_bins(
+            observed_any_fit,
+            independence_probabilities,
+        ),
+        'max_baseline_calibration_bins': _compute_calibration_bins(
+            observed_any_fit,
+            max_probabilities,
+        ),
     }
 
 
@@ -1394,6 +1518,16 @@ def _summarize_cross_validation_metrics(fold_metrics):
         if top_k_values:
             summary[f'top_{k}_hit_rate_mean'] = float(np.mean(top_k_values))
             summary[f'top_{k}_hit_rate_std'] = float(np.std(top_k_values))
+    for metric_family in ['independence', 'max_baseline']:
+        for metric_name in ['roc_auc', 'brier_score', 'log_loss', 'positive_rate', 'mean_predicted_probability']:
+            values = [
+                fold['top_3_any_fit'][metric_family][metric_name]
+                for fold in fold_metrics
+                if fold['top_3_any_fit'][metric_family][metric_name] is not None
+            ]
+            if values:
+                summary[f'top_3_any_fit_{metric_family}_mean_{metric_name}'] = float(np.mean(values))
+                summary[f'top_3_any_fit_{metric_family}_std_{metric_name}'] = float(np.std(values))
     return summary
 
 
@@ -1448,6 +1582,12 @@ def _cross_validate_custom_lr(cleaned_fit_tests, category_metadata, epochs, lear
             deduped_val_labels,
             deduped_val_probs,
         )
+        top_3_any_fit_metrics = _compute_top_k_any_fit_probability_metrics(
+            deduped_val_frame,
+            deduped_val_labels,
+            deduped_val_probs,
+            k=3,
+        )
 
         train_users = set(pd.to_numeric(cleaned_fit_tests.iloc[train_idx.tolist()]['user_id'], errors='coerce').dropna().astype(int).tolist())
         val_users = set(pd.to_numeric(cleaned_fit_tests.iloc[val_idx.tolist()]['user_id'], errors='coerce').dropna().astype(int).tolist())
@@ -1462,6 +1602,7 @@ def _cross_validate_custom_lr(cleaned_fit_tests, category_metadata, epochs, lear
             'row_level': row_level_metrics,
             'user_level': user_level_metrics,
             'top_k': top_k_metrics,
+            'top_3_any_fit': top_3_any_fit_metrics,
         })
 
     return _summarize_cross_validation_metrics(fold_metrics)
@@ -2197,6 +2338,12 @@ def main(argv=None):
         deduped_val_labels,
         deduped_val_probs,
     )
+    holdout_top_3_any_fit_metrics = _compute_top_k_any_fit_probability_metrics(
+        deduped_val_frame,
+        deduped_val_labels,
+        deduped_val_probs,
+        k=3,
+    )
 
     saved_model_scope = 'split_train'
     if args.retrain_with_full:
@@ -2379,6 +2526,7 @@ def main(argv=None):
         'random_seed': int(args.random_seed),
         'cross_validation': cross_validation_metrics,
         'holdout_top_k': holdout_top_k_metrics,
+        'holdout_top_3_any_fit': holdout_top_3_any_fit_metrics,
         'losses': train_losses,
         'val_losses': val_losses,
         'recommendations_artifact': recommendations_artifact,
@@ -2392,6 +2540,7 @@ def main(argv=None):
         'validation_deduping': 'drop_exact_duplicates_excluding_id_and_created_at',
         'cross_validation_strategy': 'group_k_fold_by_user_id',
         'top_k_metric_definition': 'per-user hit rate among users with at least one positive held-out fit test',
+        'top_3_any_fit_metric_definition': 'per-user probability that at least one of the top 3 tested recommendations fits; evaluated on users with at least 3 held-out tested masks',
     }
     metrics_key = f"{prefix}/custom_metrics.json"
     metrics_uri = _upload_json_to_s3(metrics, metrics_key)
