@@ -1030,6 +1030,56 @@ def _best_effort_visual_upload(upload_fn, artifact_name, fallback_artifact=None)
         return fallback_artifact
 
 
+def _build_cross_validation_top_k_hit_rate_plot(cross_validation_metrics, timestamp):
+    metric_keys = ['top_1_hit_rate_mean', 'top_3_hit_rate_mean', 'top_5_hit_rate_mean']
+    metric_values = [
+        cross_validation_metrics.get(metric_key)
+        for metric_key in metric_keys
+    ]
+    if any(value is None for value in metric_values):
+        return None
+
+    labels = ['Top 1', 'Top 3', 'Top 5']
+    plot_path = os.path.join(
+        _images_output_dir(),
+        f"{timestamp}_custom_cross_validation_top_k_hit_rates.png",
+    )
+
+    plt.figure(figsize=(7, 4))
+    bars = plt.bar(labels, metric_values, color=['#1f77b4', '#2ca02c', '#ff7f0e'])
+    plt.ylim(0.0, 1.0)
+    plt.ylabel('Mean Hit Rate')
+    plt.title('Cross-Validation Top-K Hit Rates')
+    plt.grid(True, axis='y', linestyle='--', alpha=0.4)
+    for bar, value in zip(bars, metric_values):
+        plt.text(
+            bar.get_x() + (bar.get_width() / 2.0),
+            min(value + 0.03, 0.98),
+            f"{value:.3f}",
+            ha='center',
+            va='bottom',
+            fontsize=10,
+        )
+    plt.tight_layout()
+
+    artifact = plot_path
+    if _should_upload_visual_artifacts_to_s3():
+        plot_buf = io.BytesIO()
+        plt.savefig(plot_buf, format='png')
+        plot_buf.seek(0)
+        plot_key = f"mask_recommender/models/{timestamp}/{timestamp}_custom_cross_validation_top_k_hit_rates.png"
+        artifact = _best_effort_visual_upload(
+            lambda: _upload_png_bytes_to_s3(plot_buf.getvalue(), plot_key),
+            "cross-validation top-k hit rate plot",
+            fallback_artifact=None,
+        )
+    else:
+        plt.savefig(plot_path)
+        logging.info("Saved cross-validation top-k hit rate plot to %s", plot_path)
+    plt.close()
+    return artifact
+
+
 def _probe_payloads(base_url=None):
     probe_user_ids_raw = os.environ.get('MASK_RECOMMENDER_PROBE_USER_IDS')
     if probe_user_ids_raw:
@@ -2452,6 +2502,11 @@ def main(argv=None):
             logging.info("Saved training loss plot to %s", loss_plot_path)
         plt.close()
 
+    cross_validation_top_k_hit_rate_artifact = _build_cross_validation_top_k_hit_rate_plot(
+        cross_validation_metrics,
+        timestamp,
+    )
+
     perimeter_diff_diagnostics_artifacts = _build_custom_lr_perimeter_diff_diagnostics(
         cleaned_fit_tests=cleaned_fit_tests,
         parameters=params,
@@ -2531,6 +2586,7 @@ def main(argv=None):
         'val_losses': val_losses,
         'recommendations_artifact': recommendations_artifact,
         'training_loss_artifact': loss_plot_artifact,
+        'cross_validation_top_k_hit_rate_artifact': cross_validation_top_k_hit_rate_artifact,
         'roc_auc_artifact': roc_plot_artifact,
         'perimeter_diff_diagnostics_artifacts': perimeter_diff_diagnostics_artifacts,
         'retrain_with_full': bool(args.retrain_with_full),

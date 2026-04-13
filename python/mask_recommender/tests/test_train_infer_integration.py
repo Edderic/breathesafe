@@ -1,5 +1,6 @@
 import os
 import json
+from pathlib import Path
 
 import boto3
 import numpy as np
@@ -694,6 +695,25 @@ def test_compute_top_k_any_fit_probability_metrics_uses_top_three_predictions():
     )
     assert result["independence_calibration_bins"]
     assert result["max_baseline_calibration_bins"]
+
+
+def test_build_cross_validation_top_k_hit_rate_plot_saves_png(tmp_path, monkeypatch):
+    monkeypatch.setenv("MASK_RECOMMENDER_IMAGES_DIR", str(tmp_path))
+    monkeypatch.setenv("RAILS_ENV", "development")
+
+    artifact = train_module._build_cross_validation_top_k_hit_rate_plot(
+        {
+            "top_1_hit_rate_mean": 0.76,
+            "top_3_hit_rate_mean": 0.92,
+            "top_5_hit_rate_mean": 0.95,
+        },
+        timestamp="20260413210000",
+    )
+
+    assert artifact is not None
+    artifact_path = Path(artifact)
+    assert artifact_path.exists()
+    assert artifact_path.suffix == ".png"
 
 
 def test_save_local_custom_artifacts_persists_metrics(tmp_path, monkeypatch):
