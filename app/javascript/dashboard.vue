@@ -1510,7 +1510,7 @@ export default {
               max: 1,
               ticks: {
                 callback: function(value) {
-                  return `${(value * 100).toFixed(0)}%`;
+                  return `${(value * 100).toFixed(2)}%`;
                 }
               }
             }
@@ -1521,17 +1521,31 @@ export default {
             },
             tooltip: {
               callbacks: {
-                label: (context) => `Mean Hit Rate: ${this.formatPercentage(context.parsed.y)}`
+                label: (context) => `Mean Hit Rate: ${this.formatPercentage(context.parsed.y, 2)}`
               }
             }
           }
         },
-        plugins: [this.createDataLabelsPlugin(
-          chartData.map((value, index) => ({
-            label: ['Top 1', 'Top 3', 'Top 5'][index],
-            total: value
-          }))
-        )]
+        plugins: [{
+          id: 'recommenderPerformanceLabels',
+          afterDatasetsDraw: (chart) => {
+            const chartContext = chart.ctx;
+            const meta = chart.getDatasetMeta(0);
+
+            meta.data.forEach((bar, index) => {
+              const value = chartData[index];
+              chartContext.font = 'bold 11px Arial';
+              chartContext.fillStyle = '#555';
+              chartContext.textAlign = 'center';
+              chartContext.textBaseline = 'bottom';
+              chartContext.fillText(
+                this.formatPercentage(value, 2),
+                bar.x,
+                bar.y - 6
+              );
+            });
+          }
+        }]
       });
     },
     onMaskPageChange(page) {
@@ -1553,9 +1567,9 @@ export default {
       if (!label) return 'Unknown';
       return label.length > maxLength ? label.substring(0, maxLength) + '...' : label;
     },
-    formatPercentage(value) {
+    formatPercentage(value, decimals = 1) {
       const numericValue = Number(value || 0);
-      return `${(numericValue * 100).toFixed(1)}%`;
+      return `${(numericValue * 100).toFixed(decimals)}%`;
     },
     formatMetric(value) {
       if (value === null || value === undefined || Number.isNaN(Number(value))) return 'N/A';
