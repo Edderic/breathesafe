@@ -212,7 +212,10 @@
         </div>
 
         <div v-else class="measurement-explanation">
-          No training metrics available yet for the mask recommender.
+          <div>No training metrics available yet for the mask recommender.</div>
+          <div v-if="stats.recommender_performance && stats.recommender_performance.error" class="dashboard-inline-error">
+            Latest metrics load error: {{ stats.recommender_performance.error }}
+          </div>
         </div>
       </section>
 
@@ -1988,6 +1991,12 @@ export default {
 
 .measurement-explanation strong {
   color: #1976D2;
+}
+
+.dashboard-inline-error {
+  margin-top: 0.75rem;
+  color: #a12622;
+  font-weight: 600;
 }
 
 .sort-controls {

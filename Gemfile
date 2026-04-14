@@ -51,6 +51,7 @@ gem 'bootsnap', require: false
 #
 gem 'activerecord-postgis-adapter', '~> 8.0.0'
 gem 'aws-sdk-lambda'
+gem 'aws-sdk-s3'
 gem 'capybara'
 gem 'devise'
 gem 'geocoder'
