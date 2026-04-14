@@ -13,26 +13,52 @@ class DashboardService
     private
 
     def mask_stats
-      total_masks = Mask.count
+      masks = Mask.select(
+        :id,
+        :unique_internal_model_code,
+        :strap_type,
+        :style,
+        :perimeter_mm,
+        :breathability
+      ).to_a
+      total_masks = masks.count
+      fit_test_counts_by_mask_id = mask_fit_test_counts_by_mask_id
+      masks_with_fit_test_results = fit_test_counts_by_mask_id.count { |_mask_id, count| count.positive? }
 
       # Masks with filtration efficiency data OR N99 mode fit test
-      masks_with_fe_or_n99 = masks_with_filtration_data
+      mask_ids_with_filtration_data = masks_with_filtration_data_ids
+      masks_with_fe_or_n99 = mask_ids_with_filtration_data.count
       masks_missing_fe_and_n99 = total_masks - masks_with_fe_or_n99
 
       # Masks with breathability scores
-      masks_with_breathability = count_masks_with_breathability
+      masks_with_breathability = masks.count { |mask| mask_has_breathability?(mask) }
       masks_without_breathability = total_masks - masks_with_breathability
+      missing_field_summary = calculate_missing_mask_field_summary(
+        masks,
+        fit_test_counts_by_mask_id,
+        mask_ids_with_filtration_data
+      )
+      missing_metadata_by_mask = calculate_missing_metadata_by_mask(
+        masks,
+        fit_test_counts_by_mask_id,
+        mask_ids_with_filtration_data
+      )
 
       {
         total: total_masks,
+        with_fit_test_results: masks_with_fit_test_results,
+        without_fit_test_results: total_masks - masks_with_fit_test_results,
+        with_fit_test_results_proportion: ratio_or_zero(masks_with_fit_test_results, total_masks),
         with_filtration_data: masks_with_fe_or_n99,
         missing_filtration_data: masks_missing_fe_and_n99,
         with_breathability: masks_with_breathability,
-        without_breathability: masks_without_breathability
+        without_breathability: masks_without_breathability,
+        missing_field_summary: missing_field_summary,
+        missing_metadata_by_mask: missing_metadata_by_mask
       }
     end
 
-    def masks_with_filtration_data
+    def masks_with_filtration_data_ids
       # Use avg_sealed_ff from N99ModeToN95ModeConverterService as the source of truth
       # This includes masks with:
       # 1. Aaron Collins filtration efficiency data, OR
@@ -41,31 +67,91 @@ class DashboardService
       avg_sealed_ffs = N99ModeToN95ModeConverterService.avg_sealed_ffs.to_a
 
       # Get unique mask IDs that have avg_sealed_ff
-      mask_ids_with_filtration_data = avg_sealed_ffs.map { |row| row['mask_id'] }.compact.uniq
-
-      mask_ids_with_filtration_data.count
+      avg_sealed_ffs.map { |row| row['mask_id'] }.compact.uniq.map(&:to_i)
     end
 
-    def count_masks_with_breathability
-      # Count masks where breathability has at least one entry with breathability_pascals
-      # that can be interpreted as a float
-      Mask.all.count do |mask|
-        next false if mask.breathability.blank?
-        next false unless mask.breathability.is_a?(Array)
+    def mask_fit_test_counts_by_mask_id
+      fit_tests_data = FitTestsWithFacialMeasurementsService.call(include_without_facial_measurements: true)
+      fit_tests_data.each_with_object(Hash.new(0)) do |fit_test, counts|
+        mask_id = fit_test['mask_id']
+        next if mask_id.blank?
 
-        mask.breathability.any? do |entry|
-          next false unless entry.is_a?(Hash)
-          next false if entry['breathability_pascals'].blank?
+        counts[mask_id.to_i] += 1
+      end
+    end
 
-          # Check if it can be interpreted as a float
-          begin
-            Float(entry['breathability_pascals'])
-            true
-          rescue ArgumentError, TypeError
-            false
-          end
+    def mask_has_breathability?(mask)
+      return false if mask.breathability.blank?
+      return false unless mask.breathability.is_a?(Array)
+
+      mask.breathability.any? do |entry|
+        next false unless entry.is_a?(Hash)
+        next false if entry['breathability_pascals'].blank?
+
+        begin
+          Float(entry['breathability_pascals'])
+          true
+        rescue ArgumentError, TypeError
+          false
         end
       end
+    end
+
+    def mask_missing_fields(mask, mask_ids_with_filtration_data)
+      missing_fields = []
+      missing_fields << 'strap_type' if mask.strap_type.blank?
+      missing_fields << 'style' if mask.style.blank?
+      missing_fields << 'perimeter_mm' if mask.perimeter_mm.blank?
+      missing_fields << 'breathability' unless mask_has_breathability?(mask)
+      missing_fields << 'avg_sealed_ff' unless mask_ids_with_filtration_data.include?(mask.id)
+      missing_fields
+    end
+
+    def calculate_missing_mask_field_summary(masks, fit_test_counts_by_mask_id, mask_ids_with_filtration_data)
+      fields = %w[strap_type style perimeter_mm breathability avg_sealed_ff]
+
+      summary = fields.map do |field|
+        masks_missing_field = masks.select do |mask|
+          mask_missing_fields(mask, mask_ids_with_filtration_data).include?(field)
+        end
+
+        fit_tests_affected = masks_missing_field.sum do |mask|
+          fit_test_counts_by_mask_id[mask.id] || 0
+        end
+
+        {
+          field: field,
+          masks_missing: masks_missing_field.count,
+          proportion_missing: ratio_or_zero(masks_missing_field.count, masks.count),
+          fit_tests_affected: fit_tests_affected
+        }
+      end
+
+      summary.sort_by { |row| [-row[:fit_tests_affected], -row[:masks_missing], row[:field]] }
+    end
+
+    def calculate_missing_metadata_by_mask(masks, fit_test_counts_by_mask_id, mask_ids_with_filtration_data)
+      missing_metadata = masks.filter_map do |mask|
+        missing_fields = mask_missing_fields(mask, mask_ids_with_filtration_data)
+        next if missing_fields.empty?
+
+        {
+          id: mask.id,
+          unique_internal_model_code: mask.unique_internal_model_code,
+          fit_test_count: fit_test_counts_by_mask_id[mask.id] || 0,
+          missing_fields: missing_fields
+        }
+      end
+
+      missing_metadata.sort_by do |row|
+        [-row[:fit_test_count], row[:unique_internal_model_code].to_s.downcase]
+      end
+    end
+
+    def ratio_or_zero(numerator, denominator)
+      return 0.0 if denominator.to_i <= 0
+
+      numerator.to_f / denominator
     end
 
     def fit_test_stats

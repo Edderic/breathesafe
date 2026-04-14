@@ -20,6 +20,18 @@
             <div class="stat-value">{{ stats.masks.total }}</div>
             <div class="stat-label">Total Masks</div>
           </div>
+          <div class="stat-card">
+            <div class="stat-value">{{ stats.masks.with_fit_test_results }}</div>
+            <div class="stat-label">Masks With Fit Test Results</div>
+            <div class="stat-help">
+              {{ formatPercentage(stats.masks.with_fit_test_results_proportion) }} of the mask catalog has at least one associated fit test result.
+            </div>
+          </div>
+        </div>
+
+        <div class="measurement-explanation">
+          <strong>Fit test coverage</strong> counts masks that have at least one associated fit test result in the dashboard's canonicalized fit test dataset.
+          Missing metadata is prioritized by how many fit test results are attached to the affected masks.
         </div>
 
         <div class="charts-row">
@@ -68,6 +80,58 @@
                 <span>Without Scores: {{ stats.masks.without_breathability }}</span>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div class="chart-container-full">
+          <h3>Missing Mask Metadata Summary</h3>
+          <div class="sample-size-note">
+            Rows are ordered by the number of fit test results attached to masks missing each field.
+          </div>
+          <div class="table-wrapper">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Masks Missing</th>
+                  <th>Percent of Masks</th>
+                  <th>Fit Tests Affected</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in stats.masks.missing_field_summary" :key="row.field">
+                  <td>{{ humanizeField(row.field) }}</td>
+                  <td>{{ row.masks_missing }}</td>
+                  <td>{{ formatPercentage(row.proportion_missing) }}</td>
+                  <td>{{ row.fit_tests_affected }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="chart-container-full">
+          <h3>Highest-Priority Missing Metadata</h3>
+          <div class="sample-size-note">
+            Showing masks missing at least one tracked field, ordered by associated fit test results, descending.
+          </div>
+          <div class="table-wrapper">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Mask</th>
+                  <th>Fit Tests</th>
+                  <th>Missing Fields</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="mask in topMissingMetadataMasks" :key="mask.id">
+                  <td>{{ mask.unique_internal_model_code }}</td>
+                  <td>{{ mask.fit_test_count }}</td>
+                  <td>{{ formatMissingFields(mask.missing_fields) }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>
@@ -374,6 +438,9 @@ export default {
     },
     totalMasks() {
       return this.sortedMasks.length;
+    },
+    topMissingMetadataMasks() {
+      return this.stats?.masks?.missing_metadata_by_mask?.slice(0, 25) || [];
     }
   },
   mounted() {
@@ -1343,6 +1410,23 @@ export default {
       if (!label) return 'Unknown';
       return label.length > maxLength ? label.substring(0, maxLength) + '...' : label;
     },
+    formatPercentage(value) {
+      const numericValue = Number(value || 0);
+      return `${(numericValue * 100).toFixed(1)}%`;
+    },
+    humanizeField(field) {
+      const labels = {
+        strap_type: 'Strap Type',
+        style: 'Style',
+        perimeter_mm: 'Perimeter (mm)',
+        breathability: 'Breathability',
+        avg_sealed_ff: 'Avg Sealed FF'
+      };
+      return labels[field] || field;
+    },
+    formatMissingFields(fields) {
+      return (fields || []).map(field => this.humanizeField(field)).join(', ');
+    },
     getColorBySampleSize(sampleSize, baseColor) {
       // Use lighter colors for smaller sample sizes
       // Thresholds: n < 10 (very light), n < 30 (light), n < 50 (medium), n >= 50 (full color)
@@ -1674,6 +1758,41 @@ export default {
 
 .chart-stats p {
   margin: 0.5rem 0;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dashboard-table th,
+.dashboard-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #e5edf5;
+  text-align: left;
+  vertical-align: top;
+}
+
+.dashboard-table th {
+  background: #eef6ff;
+  color: #1c5fa8;
+  font-weight: 700;
+}
+
+.dashboard-table tbody tr:nth-child(even) {
+  background: #fafcff;
+}
+
+.dashboard-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .sample-size-note {
