@@ -3,6 +3,7 @@
 This directory manages:
 - S3 lifecycle rules for mask recommender artifacts and models
 - CloudWatch log retention for mask recommender Lambda log groups
+- IAM user policies that allow the dashboard web apps to read latest mask recommender metrics artifacts
 
 ## Prerequisites
 - Terraform >= 1.3
@@ -25,6 +26,9 @@ This directory manages:
   - `/aws/lambda/mask-recommender-inference-staging`
   - `/aws/lambda/mask-recommender-training-production`
   - `/aws/lambda/mask-recommender-training-staging`
+- Attaches inline IAM user policies so the production and staging Rails apps can read:
+  - `s3://breathesafe/mask_recommender/models/*`
+  - `s3://breathesafe-staging/mask_recommender/models/*`
 
 ## Usage
 
@@ -64,5 +68,6 @@ terraform import 'aws_cloudwatch_log_group.mask_recommender["/aws/lambda/mask-re
 
 ## Notes
 - This configuration targets existing buckets. It does not create buckets.
+- This configuration also targets existing IAM users (`breathesafe-production` and `breathesafe-staging`). It does not create them.
 - The CloudWatch retention policy is set to 30 days.
 - Adjust prefixes, log groups, or retention values as needed.
