@@ -75,25 +75,56 @@
       <!-- Fit Tests Section -->
       <section class="dashboard-section">
         <h2 class="section-title">Fit Tests</h2>
+        <div class="measurement-explanation fit-test-stats-explanation">
+          These four counts mix <strong>raw database totals</strong> and <strong>filtered dashboard totals</strong>.
+          The filtered dashboard dataset removes some records without usable pass/fail data, excludes fit tests without linked
+          facial measurements, and consolidates duplicate representations of the same fit test.
+        </div>
 
         <div class="stats-grid">
-          <div class="stat-card">
+          <div class="stat-card" title="All fit test records in the database, including records that may later be excluded from dashboard analysis.">
+            <div class="stat-card-header">
+              <div class="stat-badge stat-badge-raw">Raw database count</div>
+            </div>
             <div class="stat-value">{{ stats.fit_tests.total }}</div>
             <div class="stat-label">Total Fit Tests</div>
+            <div class="stat-help">Every fit test row stored in Breathesafe.</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" title="Unique fit tests in the filtered dashboard dataset after filtering, canonicalization, and deduplication.">
+            <div class="stat-card-header">
+              <div class="stat-badge stat-badge-filtered">Filtered dashboard count</div>
+            </div>
             <div class="stat-value">{{ stats.fit_tests.total_unique }}</div>
-            <div class="stat-label">Total Unique Fit Tests</div>
+            <div class="stat-label">Filtered Unique Fit Tests</div>
+            <div class="stat-help">Unique analyzable fit tests used by dashboard statistics.</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" title="Distinct user and canonical mask combinations in the filtered dashboard dataset. Multiple tests of the same mask by the same user count once.">
+            <div class="stat-card-header">
+              <div class="stat-badge stat-badge-filtered">Filtered dashboard count</div>
+            </div>
             <div class="stat-value">{{ stats.fit_tests.unique_user_mask_pairs }}</div>
             <div class="stat-label">Unique User-Mask Pairs</div>
+            <div class="stat-help">Each user + canonical mask combination counted once.</div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card" title="Fit test records in the database that do not have a linked facial measurement.">
+            <div class="stat-card-header">
+              <div class="stat-badge stat-badge-raw">Raw database count</div>
+            </div>
             <div class="stat-value">{{ stats.fit_tests.missing_facial_measurements }}</div>
             <div class="stat-label">Missing Facial Measurements</div>
+            <div class="stat-help">Fit test rows with no linked facial measurement record.</div>
           </div>
         </div>
+
+        <details class="calculation-details">
+          <summary>How These Counts Are Calculated</summary>
+          <div class="calculation-details-content">
+            <p><strong>Total Fit Tests</strong> counts all rows in the <code>fit_tests</code> table.</p>
+            <p><strong>Filtered Unique Fit Tests</strong> counts unique fit test IDs in the dashboard dataset after filtering out rows without usable pass/fail data, filtering out rows without linked facial measurements, excluding testing-manager rows, canonicalizing masks, and consolidating duplicate service rows for the same fit test.</p>
+            <p><strong>Unique User-Mask Pairs</strong> counts distinct user and canonical mask pairs in that same filtered dashboard dataset.</p>
+            <p><strong>Missing Facial Measurements</strong> counts raw fit test rows where <code>facial_measurement_id</code> is blank.</p>
+          </div>
+        </details>
 
         <div class="charts-row">
           <div class="chart-container">
@@ -1484,17 +1515,83 @@ export default {
   border-radius: 8px;
   text-align: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stat-card-header {
+  display: flex;
+  justify-content: center;
+}
+
+.stat-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.stat-badge-raw {
+  background: rgba(255, 255, 255, 0.22);
+  color: #f5f9ff;
+}
+
+.stat-badge-filtered {
+  background: rgba(255, 244, 200, 0.22);
+  color: #fff7d1;
 }
 
 .stat-value {
   font-size: 3rem;
   font-weight: bold;
-  margin-bottom: 0.5rem;
 }
 
 .stat-label {
   font-size: 1rem;
   opacity: 0.9;
+}
+
+.stat-help {
+  font-size: 0.85rem;
+  line-height: 1.35;
+  opacity: 0.92;
+}
+
+.fit-test-stats-explanation {
+  margin-bottom: 1.5rem;
+}
+
+.calculation-details {
+  margin-bottom: 2rem;
+  background: #f8fbff;
+  border: 1px solid #d7e9fb;
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+}
+
+.calculation-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #1c5fa8;
+}
+
+.calculation-details-content {
+  margin-top: 0.85rem;
+  color: #444;
+  line-height: 1.55;
+}
+
+.calculation-details-content p {
+  margin: 0 0 0.75rem;
+}
+
+.calculation-details-content p:last-child {
+  margin-bottom: 0;
 }
 
 .charts-row {
