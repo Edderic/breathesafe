@@ -6,7 +6,8 @@ class DashboardService
     def call
       {
         masks: mask_stats,
-        fit_tests: fit_test_stats
+        fit_tests: fit_test_stats,
+        recommender_performance: recommender_performance_stats
       }
     end
 
@@ -188,6 +189,10 @@ class DashboardService
         demographics: demographics,
         pass_rates: pass_rates
       }
+    end
+
+    def recommender_performance_stats
+      LatestMaskRecommenderMetricsService.call
     end
 
     def calculate_fit_test_types(fit_tests_data)

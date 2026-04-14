@@ -136,6 +136,86 @@
         </div>
       </section>
 
+      <section class="dashboard-section">
+        <h2 class="section-title">Mask Recommender Performance</h2>
+
+        <div v-if="stats.recommender_performance && stats.recommender_performance.available">
+          <div class="measurement-explanation">
+            <strong>Validation ROC-AUC</strong> comes from the grouped holdout validation split from the latest training run.
+            <strong>Top-1 / Top-3 / Top-5 Hit Rates</strong> are averages across grouped user k-fold cross-validation folds and measure
+            whether at least one recommended mask in the top k had a passing fit test.
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value">{{ formatMetric(stats.recommender_performance.validation_roc_auc) }}</div>
+              <div class="stat-label">Validation ROC-AUC</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">{{ formatPercentage(stats.recommender_performance.cross_validation_top_1_hit_rate_mean) }}</div>
+              <div class="stat-label">CV Top-1 Hit Rate</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">{{ formatPercentage(stats.recommender_performance.cross_validation_top_3_hit_rate_mean) }}</div>
+              <div class="stat-label">CV Top-3 Hit Rate</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">{{ formatPercentage(stats.recommender_performance.cross_validation_top_5_hit_rate_mean) }}</div>
+              <div class="stat-label">CV Top-5 Hit Rate</div>
+            </div>
+          </div>
+
+          <div class="chart-container-full">
+            <h3>Cross-Validation Recommendation Hit Rates</h3>
+            <div class="sample-size-note">
+              Latest training run: {{ stats.recommender_performance.timestamp || 'unknown' }}.
+              {{ stats.recommender_performance.cross_validation_folds || 'Unknown' }} grouped folds.
+            </div>
+            <div class="chart-wrapper chart-wrapper-short">
+              <canvas ref="recommenderPerformanceChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-container-full">
+            <h3>Model Metadata</h3>
+            <div class="table-wrapper">
+              <table class="dashboard-table">
+                <tbody>
+                  <tr>
+                    <th>Model Type</th>
+                    <td>{{ stats.recommender_performance.model_type || 'Unknown' }}</td>
+                  </tr>
+                  <tr>
+                    <th>Training Timestamp</th>
+                    <td>{{ stats.recommender_performance.timestamp || 'Unknown' }}</td>
+                  </tr>
+                  <tr>
+                    <th>Random Seed</th>
+                    <td>{{ displayValue(stats.recommender_performance.random_seed) }}</td>
+                  </tr>
+                  <tr>
+                    <th>CV Folds</th>
+                    <td>{{ displayValue(stats.recommender_performance.cross_validation_folds) }}</td>
+                  </tr>
+                  <tr>
+                    <th>CV User-Level Mean ROC-AUC</th>
+                    <td>{{ formatMetric(stats.recommender_performance.cross_validation_user_level_mean_roc_auc) }}</td>
+                  </tr>
+                  <tr>
+                    <th>Saved Model Scope</th>
+                    <td>{{ stats.recommender_performance.saved_model_training_scope || 'Unknown' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="measurement-explanation">
+          No training metrics available yet for the mask recommender.
+        </div>
+      </section>
+
       <!-- Fit Tests Section -->
       <section class="dashboard-section">
         <h2 class="section-title">Fit Tests</h2>
@@ -518,6 +598,7 @@ export default {
       this.renderPassRateByMaskChart();
       this.renderPassRateByStrapChart();
       this.renderPassRateByStyleChart();
+      this.renderRecommenderPerformanceChart();
     },
     renderFiltrationChart() {
       const ctx = this.$refs.filtrationChart;
@@ -1391,6 +1472,68 @@ export default {
 
       console.log('Pass rate by style chart rendered successfully');
     },
+    renderRecommenderPerformanceChart() {
+      const ctx = this.$refs.recommenderPerformanceChart;
+      if (!ctx || !this.stats?.recommender_performance?.available) return;
+
+      const performance = this.stats.recommender_performance;
+      const chartData = [
+        performance.cross_validation_top_1_hit_rate_mean,
+        performance.cross_validation_top_3_hit_rate_mean,
+        performance.cross_validation_top_5_hit_rate_mean
+      ];
+
+      if (chartData.some(value => value === null || value === undefined)) return;
+
+      if (this.charts.recommenderPerformance) {
+        this.charts.recommenderPerformance.destroy();
+      }
+
+      this.charts.recommenderPerformance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Top 1', 'Top 3', 'Top 5'],
+          datasets: [{
+            label: 'Mean Hit Rate',
+            data: chartData,
+            backgroundColor: ['#1f77b4', '#2ca02c', '#ff7f0e'],
+            borderColor: ['#1f77b4', '#2ca02c', '#ff7f0e'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 1,
+              ticks: {
+                callback: function(value) {
+                  return `${(value * 100).toFixed(0)}%`;
+                }
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: (context) => `Mean Hit Rate: ${this.formatPercentage(context.parsed.y)}`
+              }
+            }
+          }
+        },
+        plugins: [this.createDataLabelsPlugin(
+          chartData.map((value, index) => ({
+            label: ['Top 1', 'Top 3', 'Top 5'][index],
+            total: value
+          }))
+        )]
+      });
+    },
     onMaskPageChange(page) {
       this.maskCurrentPage = page;
       // Re-render the mask chart with new page data
@@ -1413,6 +1556,13 @@ export default {
     formatPercentage(value) {
       const numericValue = Number(value || 0);
       return `${(numericValue * 100).toFixed(1)}%`;
+    },
+    formatMetric(value) {
+      if (value === null || value === undefined || Number.isNaN(Number(value))) return 'N/A';
+      return Number(value).toFixed(3);
+    },
+    displayValue(value) {
+      return value === null || value === undefined || value === '' ? 'Unknown' : value;
     },
     humanizeField(field) {
       const labels = {
@@ -1716,6 +1866,14 @@ export default {
 
 .chart-wrapper canvas {
   max-height: 400px;
+}
+
+.chart-wrapper-short {
+  height: 260px;
+}
+
+.chart-wrapper-short canvas {
+  max-height: 260px;
 }
 
 .stacked-bar-wrapper {
