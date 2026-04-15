@@ -2,13 +2,13 @@
 
 ## Overview
 
-MasqFit and Breathesafe are an open-source mask recommendation and fit-data platform designed to help more people identify respirators that fit their faces well. The practical public-health problem is straightforward: a high-filtration mask only delivers strong protection if it fits the specific user, yet most people do not know which mask model and size are likely to fit them. Formal fit testing is highly valuable, but it is not broadly accessible at the population scale. The opportunity for MasqFit is therefore not to replace fit testing, but to make fit guidance far more scalable, more data-driven, and easier to improve over time.
+MasqFit and Breathesafe are an open-source mask recommendation and fit-data platform designed to help more people identify respirators that fit their faces well. The public-health problem is straightforward: a high-filtration mask only delivers strong protection if it fits the specific user, yet most people do not know which mask model and size are likely to fit them. Formal fit testing is valuable, but it is not broadly accessible at population scale. The opportunity for MasqFit is therefore not to replace fit testing, but to make fit guidance far more scalable, more data-driven, and easier to improve over time.
 
 I propose a two-year next phase focused on scale, validation, and model quality. The core goal is to increase the number of people who end up with a well-fitting respirator by giving them better mask recommendations, making those recommendations available on more devices, and improving the system as more fit outcomes are contributed. PHAN’s value as a partner would be to help move this from a promising technical platform into a measurable public-health intervention.
 
 ## Why This Matters
 
-For environmental interventions, PHAN often looks for direct building-level metrics such as clean air delivery or illness reduction. MasqFit is different, but it can still be evaluated using credible proxy metrics tied to protection. We already know that respirator fit materially affects inward leakage and therefore affects protection. For this project, the most appropriate impact metrics are likely to be adoption and fit-success metrics rather than direct illness outcomes in the short term.
+For environmental interventions, PHAN often looks for direct building-level metrics such as clean air delivery or illness reduction. MasqFit is different, but it can still be evaluated using credible proxy metrics tied to protection. We already know that respirator fit materially affects inward leakage and therefore affects protection. For this project, the most appropriate impact metrics are adoption and fit-success metrics rather than direct illness outcomes in the short term.
 
 The key proxy logic is:
 
@@ -22,16 +22,7 @@ That is why scalability matters so much here. A modest improvement in mask-selec
 
 ### 1. Improve Fit Prediction Accuracy
 
-The first line of work is to improve recommendation quality by collecting more data and building better models.
-
-This includes:
-
-- building partnerships with mask manufacturers, mask blocs, and community fit testers to collect more facial measurements paired with fit-testing results;
-- reaching out to manufacturers for fit testing data, breathability data, and, where possible, facial-measurement-linked fit data;
-- cleaning and ingesting external data sources such as Fit Test the Planet;
-- incorporating strap tension into predictions by estimating strap length, force or pressure, and qualitative tightness;
-- experimenting with mask-style-specific facial measurements so that the model can better account for differences among bifold, duckbill, boat, and other styles;
-- supporting fit-test-only contribution pathways so users can contribute useful outcome data even if they do not want to share facial measurements.
+The first line of work is to improve recommendation quality by collecting more data and building better models. This includes partnerships with mask manufacturers, mask blocs, and community fit testers to collect facial measurements paired with fit-testing results; cleaning and ingesting external datasets such as Fit Test the Planet; incorporating strap tension into predictions; experimenting with mask-style-specific facial measurements; and supporting fit-test-only contribution pathways for users who do not want to share facial measurements.
 
 This work should make the model more accurate, more sample efficient, and more privacy-compatible.
 
@@ -50,10 +41,7 @@ These studies would test whether app-guided recommendations outperform unguided 
 
 The third line of work is platform expansion. Today, MasqFit is strongest on iOS because Apple’s TrueDepth hardware provides a good facial measurement pipeline. Android is the largest scale opportunity and the largest technical gap.
 
-The Android work has two parts:
-
-- building an Android app that is stylistically and functionally consistent with the iOS version;
-- developing a camera-only computer vision pipeline that can extract a facial mesh comparable enough to ARKit output that downstream modeling can remain similar across platforms.
+The Android work has two parts: building an Android app that is stylistically and functionally consistent with the iOS version, and developing a camera-only computer vision pipeline that can extract a facial mesh comparable enough to ARKit output that downstream modeling can remain similar across platforms.
 
 If this is successful, MasqFit can move from an iOS-limited tool to a much more scalable cross-platform system.
 
@@ -70,17 +58,39 @@ Potential collaboration opportunities include:
 
 These collaborations reduce technical risk and improve scientific credibility.
 
-## Staffing Needed
+## Timeline and Deliverables
 
-To execute this next phase well, I expect the project will need:
+| Period | Main focus | Deliverables |
+| --- | --- | --- |
+| Year 1 | Android R&D, partnership building, first major data collection push, internal validation setup | Android prototype, initial manufacturer and community partnerships, first new datasets ingested, fit-test-only contribution workflow, internal validation study launch |
+| Year 2 | Android refinement, larger validation effort, NPPTL-supported study design, broader deployment | Pilot-ready cross-platform system, stronger model performance, prospective validation results, expanded partner network, clearer evidence for public-health deployment |
 
-- a machine learning / computer vision engineer to develop Android camera-only face-mesh extraction comparable to ARKit;
-- a machine learning engineer to improve the existing prediction approach using fit-testing and facial-measurement data;
-- a software engineer to build the Android app and maintain cross-platform product features;
-- a data collection manager to coordinate partnerships, participant scheduling, and data acquisition;
-- a fit tester to run field data collection and structured validation studies.
+## Staffing and Budget
 
-This combination supports both technical progress and the operational work needed to create the dataset that the models depend on.
+To execute this next phase well, I propose the following staffing model over two years:
+
+- **Edderic Ugaddan, ML Engineer / PI (`0.4 FTE` both years):** improve the prediction models, design experiments around strap tension and style-specific features, supervise technical direction, and participate in key relationship-building meetings with manufacturers, mask blocs, and community fit testers. Proposed budget: `$60,000/year`, or `$120,000` over two years.
+- **Machine Learning / Computer Vision Engineer (`1.0 FTE` Year 1, `0.5 FTE` Year 2):** develop Android camera-only face-mesh extraction, benchmark measurement quality, and make the output comparable enough to ARKit for downstream modeling. Proposed budget: `$155,000` in Year 1 and `$80,000` in Year 2, or `$235,000` total.
+- **Software Engineer (`1.0 FTE` Year 1, `0.5 FTE` Year 2):** build the Android application, keep it aligned with iOS in look and functionality, and ship cross-platform product improvements that do not depend on modeling. Proposed budget: `$145,000` in Year 1 and `$75,000` in Year 2, or `$220,000` total.
+- **Data Collection Manager (`0.5 FTE` both years):** manage outreach to mask manufacturers, mask blocs, and community fit testers; coordinate schedules, data use terms, and logistics; and keep the field-data pipeline moving. Proposed budget: `$55,000/year`, or `$110,000` total.
+- **Fit Tester (`0.3 FTE` Year 1, `0.5 FTE` Year 2):** run fit testing for validation studies and field collection, travel as needed, and collect outcome data consistently. Proposed budget: `$25,000` in Year 1 and `$40,000` in Year 2, or `$65,000` total.
+
+Personnel subtotal: `$750,000` over two years.
+
+Non-personnel costs support the validation and data-collection work:
+
+- **Fit testing equipment and supplies:** `$35,000` over two years
+- **Masks, elastomerics, and testing inventory:** `$27,000`
+- **Participant incentives:** `$35,000`
+- **Travel and partnership development:** `$22,000`
+- **Cloud, devices, and software:** `$16,000`
+- **Publication / study administration / IRB support:** `$5,000`
+
+Non-personnel subtotal: `$140,000` over two years.
+
+This produces a direct project cost of `$890,000` over two years. I recommend adding a `10%` contingency to account for uncertainty in Android computer-vision work, data collection pace, travel, and equipment needs, which brings the recommended ask to approximately **`$980,000` over two years**.
+
+If PHAN prefers a smaller first commitment, a leaner version of the same plan could likely be executed for roughly **`$750,000` over two years**, mainly by reducing engineering depth and lowering travel and incentive budgets.
 
 ## Proposed KPIs and Outcomes
 
@@ -99,6 +109,6 @@ The most important outcome is a higher share of users ending up in well-fitting 
 
 ## What Funding Would Enable
 
-PHAN funding would support a focused two-year implementation and validation phase: building Android support, collecting substantially more fit data, improving the recommender, and running the studies needed to show that MasqFit improves mask selection in practice. In short, the funding would not just support software development. It would support a full public-health intervention pipeline: product, data, validation, and deployment.
+PHAN funding would support a focused two-year implementation and validation phase: building Android support, collecting substantially more fit data, improving the recommender, and running the studies needed to show that MasqFit improves mask selection in practice. This would not just fund software development. It would fund a full public-health intervention pipeline: product, data, validation, and deployment.
 
 If successful, this next phase would produce a cross-platform, open-source fit-guidance system with stronger evidence, broader coverage, and a realistic pathway to large-scale adoption.
