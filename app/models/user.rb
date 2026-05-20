@@ -58,9 +58,12 @@ class User < ApplicationRecord
   end
 
   has_one :profile, dependent: :destroy, inverse_of: :user
-  has_many :masks, foreign_key: 'author_id', inverse_of: :user # rubocop:disable Rails/HasManyOrHasOneDependent
+  has_many :masks, foreign_key: 'author_id', inverse_of: :author # rubocop:disable Rails/HasManyOrHasOneDependent
   has_many :facial_measurements, dependent: :destroy, inverse_of: :user
   has_many :bulk_fit_tests_imports, dependent: :destroy
+  has_many :fit_tests, dependent: :destroy
+  has_many :measurement_devices, foreign_key: 'owner_id', dependent: :destroy, inverse_of: :owner
+  has_many :user_carbon_dioxide_monitors, dependent: :destroy
 
   def carbon_dioxide_monitors
     CarbonDioxideMonitor.find_by_sql(
@@ -150,29 +153,51 @@ class User < ApplicationRecord
 
       # Anonymize email and unconfirmed_email, then mark as deleted
       anonymized_email = "deleted_user_#{SecureRandom.uuid}@example.invalid"
-      update!(
+      # Bypass Devise reconfirmation so the stored email is actually anonymized.
+      # rubocop:disable Rails/SkipsModelValidations
+      update_columns(
         email: anonymized_email,
         unconfirmed_email: nil,
-        deleted_at: Time.current
+        deleted_at: Time.current,
+        updated_at: Time.current
       )
+      # rubocop:enable Rails/SkipsModelValidations
     end
   end
 
   # Helper method to delete user data (used by soft_delete! for both manager and managed users)
   def soft_delete_user_data!
+    facial_measurement_ids = facial_measurements.pluck(:id)
+    fit_test_ids = FitTest.where(user_id: id)
+                          .or(FitTest.where(facial_measurement_id: facial_measurement_ids))
+                          .pluck(:id)
+    measurement_device_ids = measurement_devices.pluck(:id)
+
+    # rubocop:disable Rails/SkipsModelValidations
+    FitTest.where(source_fit_test_id: fit_test_ids).update_all(source_fit_test_id: nil) if fit_test_ids.any?
+    if measurement_device_ids.any?
+      FitTest.where(quantitative_fit_testing_device_id: measurement_device_ids)
+             .update_all(quantitative_fit_testing_device_id: nil)
+    end
+    # rubocop:enable Rails/SkipsModelValidations
+
+    FitTest.where(id: fit_test_ids).destroy_all if fit_test_ids.any?
+
     # Delete profile
     profile&.destroy
 
-    # Delete facial measurements and related fit tests
-    facial_measurements.each do |fm|
-      FitTest.where(facial_measurement_id: fm.id).destroy_all
-      fm.destroy
-    end
+    # Delete facial measurements
+    facial_measurements.destroy_all
 
     # Delete bulk fit test imports
     bulk_fit_tests_imports.destroy_all
 
+    Address.where(user_id: id).destroy_all
+    measurement_devices.destroy_all
+    user_carbon_dioxide_monitors.destroy_all
+
     # Delete managed user relationships
+    ManagedUser.where(manager_id: id).destroy_all
     ManagedUser.where(managed_id: id).destroy_all
   end
 end
