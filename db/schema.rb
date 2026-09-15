@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_260_327_193_000) do
+ActiveRecord::Schema[7.0].define(version: 20_260_915_010_000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -65,6 +65,28 @@ ActiveRecord::Schema[7.0].define(version: 20_260_327_193_000) do
     t.datetime 'created_at', null: false
     t.datetime 'updated_at', null: false
     t.index ['name'], name: 'index_brands_on_name', unique: true
+  end
+
+  create_table 'anonymous_contributions', force: :cascade do |t|
+    t.bigint 'anonymous_participant_id', null: false
+    t.uuid 'contribution_id', null: false
+    t.integer 'measurement_version', null: false
+    t.jsonb 'measurements', null: false
+    t.jsonb 'fit_tests', default: [], null: false
+    t.string 'consent_version', null: false
+    t.datetime 'consent_accepted_at', null: false
+    t.string 'payload_digest', null: false
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.index ['anonymous_participant_id'], name: 'index_anonymous_contributions_on_anonymous_participant_id'
+    t.index ['contribution_id'], name: 'index_anonymous_contributions_on_contribution_id', unique: true
+  end
+
+  create_table 'anonymous_participants', force: :cascade do |t|
+    t.string 'credential_digest', null: false
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.index ['credential_digest'], name: 'index_anonymous_participants_on_credential_digest', unique: true
   end
 
   create_table 'bulk_fit_tests_imports', force: :cascade do |t|
@@ -579,6 +601,7 @@ ActiveRecord::Schema[7.0].define(version: 20_260_327_193_000) do
     t.index ['author_id'], name: 'index_ventilation_records_on_author_id'
   end
 
+  add_foreign_key 'anonymous_contributions', 'anonymous_participants'
   add_foreign_key 'addresses', 'users'
   add_foreign_key 'bulk_fit_tests_imports', 'users'
   add_foreign_key 'facial_measurements', 'users'
