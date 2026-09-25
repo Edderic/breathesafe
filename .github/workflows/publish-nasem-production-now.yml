@@ -1,0 +1,26 @@
+name: Publish NASEM presentation to production now
+on:
+  push:
+    branches: [publish-nasem-production-now]
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e69f7344c09f6ef5f176ba75de77bc49f8a3d649
+          fetch-depth: 0
+      - name: Deploy reviewed presentation commit
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_APP: ${{ secrets.HEROKU_PRODUCTION_APP }}
+        run: |
+          set -euo pipefail
+          test -n "$HEROKU_API_KEY"
+          test -n "$HEROKU_APP"
+          test "$(git rev-parse HEAD)" = e69f7344c09f6ef5f176ba75de77bc49f8a3d649
+          git push "https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP.git" HEAD:main
