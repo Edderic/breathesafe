@@ -48,6 +48,7 @@
       <router-link class="clickable side-padding" :to="{ name: 'AdminStudyParticipants'}" @click="showSubNavBar = null">Study Participants</router-link>
       <router-link class="clickable side-padding" :to="{ name: 'MaskBreakdown'}" @click="showSubNavBar = null">Mask Breakdown</router-link>
       <router-link class="clickable side-padding" :to="{ name: 'AdminMaskDuplicates'}" @click="showSubNavBar = null">Mask Duplicates</router-link>
+      <router-link class="clickable side-padding" :to="{ name: 'AdminMaskProposals'}" @click="showSubNavBar = null">Mask Proposals</router-link>
       <router-link class="clickable side-padding" :to="{ name: 'AdminMaskFitFamilies'}" @click="showSubNavBar = null">Fit Families</router-link>
     </div>
 
@@ -68,6 +69,7 @@
       <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'AdminStudyParticipants'}" @click="showSubNavBar = null" v-if="isAdmin && !adminModeEnabled && showSubNavBar == 'Admin'">Study Participants</router-link>
       <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'MaskBreakdown'}" @click="showSubNavBar = null" v-if="isAdmin && !adminModeEnabled && showSubNavBar == 'Admin'">Mask Breakdown</router-link>
       <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'AdminMaskDuplicates'}" @click="showSubNavBar = null" v-if="isAdmin && !adminModeEnabled && showSubNavBar == 'Admin'">Mask Duplicates</router-link>
+      <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'AdminMaskProposals'}" @click="showSubNavBar = null" v-if="isAdmin && !adminModeEnabled && showSubNavBar == 'Admin'">Mask Proposals</router-link>
       <router-link class="mobile-row clickable side-padding mobile-admin-link" :to="{ name: 'AdminMaskFitFamilies'}" @click="showSubNavBar = null" v-if="isAdmin && !adminModeEnabled && showSubNavBar == 'Admin'">Fit Families</router-link>
       <h2 class='vertical-centered'>Misc</h2>
 
