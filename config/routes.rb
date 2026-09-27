@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  post 'anonymous_contributions', to: 'anonymous_contributions#create'
+  get 'anonymous_contributions/mask_suggestions', to: 'anonymous_contributions#mask_suggestions'
+  get 'anonymous_contributions/masks', to: 'anonymous_contributions#masks'
+  get 'anonymous_contributions/export', to: 'anonymous_contribution_exports#index'
+
   devise_for :users, controllers: {
     registrations: 'registrations',
     sessions: 'users/sessions',
@@ -123,6 +128,7 @@ Rails.application.routes.draw do
 
   # Admin routes
   namespace :admin do
+    resources :mask_proposals, only: %i[index update]
     resources :users, only: [:index]
     resources :fit_families, only: %i[index create]
 

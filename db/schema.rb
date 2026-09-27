@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_260_327_193_000) do
+ActiveRecord::Schema[7.0].define(version: 20_260_917_010_000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -65,6 +65,28 @@ ActiveRecord::Schema[7.0].define(version: 20_260_327_193_000) do
     t.datetime 'created_at', null: false
     t.datetime 'updated_at', null: false
     t.index ['name'], name: 'index_brands_on_name', unique: true
+  end
+
+  create_table 'anonymous_contributions', force: :cascade do |t|
+    t.bigint 'anonymous_participant_id', null: false
+    t.uuid 'contribution_id', null: false
+    t.integer 'measurement_version', null: false
+    t.jsonb 'measurements', null: false
+    t.jsonb 'fit_tests', default: [], null: false
+    t.string 'consent_version', null: false
+    t.datetime 'consent_accepted_at', null: false
+    t.string 'payload_digest', null: false
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.index ['anonymous_participant_id'], name: 'index_anonymous_contributions_on_anonymous_participant_id'
+    t.index ['contribution_id'], name: 'index_anonymous_contributions_on_contribution_id', unique: true
+  end
+
+  create_table 'anonymous_participants', force: :cascade do |t|
+    t.string 'credential_digest', null: false
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.index ['credential_digest'], name: 'index_anonymous_participants_on_credential_digest', unique: true
   end
 
   create_table 'bulk_fit_tests_imports', force: :cascade do |t|
@@ -239,6 +261,31 @@ ActiveRecord::Schema[7.0].define(version: 20_260_327_193_000) do
     t.index ['mask_a_id'], name: 'index_mask_pairs_on_mask_a_id'
     t.index ['mask_b_id'], name: 'index_mask_pairs_on_mask_b_id'
     t.check_constraint 'mask_a_id <> mask_b_id', name: 'check_mask_pair_not_self_reference'
+  end
+
+  create_table 'mask_proposal_links', force: :cascade do |t|
+    t.bigint 'mask_proposal_id', null: false
+    t.bigint 'anonymous_contribution_id', null: false
+    t.integer 'test_index', null: false
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.index %w[anonymous_contribution_id test_index], name: 'index_mask_proposal_links_on_contribution_and_test',
+                                                      unique: true
+    t.index ['mask_proposal_id'], name: 'index_mask_proposal_links_on_mask_proposal_id'
+  end
+
+  create_table 'mask_proposals', force: :cascade do |t|
+    t.string 'name', null: false
+    t.string 'normalized_name', null: false
+    t.bigint 'mask_id'
+    t.bigint 'reviewer_id'
+    t.datetime 'resolved_at'
+    t.datetime 'notified_at'
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.index ['mask_id'], name: 'index_mask_proposals_on_mask_id'
+    t.index ['normalized_name'], name: 'index_mask_proposals_on_normalized_name', unique: true
+    t.index ['reviewer_id'], name: 'index_mask_proposals_on_reviewer_id'
   end
 
   create_table 'mask_states', force: :cascade do |t|
@@ -579,6 +626,7 @@ ActiveRecord::Schema[7.0].define(version: 20_260_327_193_000) do
     t.index ['author_id'], name: 'index_ventilation_records_on_author_id'
   end
 
+  add_foreign_key 'anonymous_contributions', 'anonymous_participants'
   add_foreign_key 'addresses', 'users'
   add_foreign_key 'bulk_fit_tests_imports', 'users'
   add_foreign_key 'facial_measurements', 'users'
@@ -594,6 +642,10 @@ ActiveRecord::Schema[7.0].define(version: 20_260_327_193_000) do
   add_foreign_key 'mask_events', 'users'
   add_foreign_key 'mask_pairs', 'masks', column: 'mask_a_id', on_delete: :restrict
   add_foreign_key 'mask_pairs', 'masks', column: 'mask_b_id', on_delete: :restrict
+  add_foreign_key 'mask_proposal_links', 'anonymous_contributions'
+  add_foreign_key 'mask_proposal_links', 'mask_proposals'
+  add_foreign_key 'mask_proposals', 'masks'
+  add_foreign_key 'mask_proposals', 'users', column: 'reviewer_id'
   add_foreign_key 'mask_states', 'brands'
   add_foreign_key 'mask_states', 'bulk_fit_tests_imports'
   add_foreign_key 'mask_states', 'masks'
