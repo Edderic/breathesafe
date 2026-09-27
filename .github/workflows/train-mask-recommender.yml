@@ -1,8 +1,7 @@
 name: Train Mask Recommender v2
 
 on:
-  schedule:
-    - cron: '0 2 * * 0'
+  # Weekly retraining is managed by EventBridge in infra/training_schedule.tf.
   push:
     tags:
       - 'deploy-ml-*'
