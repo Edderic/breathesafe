@@ -95,6 +95,9 @@ def handler(event, context):
 
     except Exception as e:
         logger.error(f"Training failed: {str(e)}")
+        # Async invocations need an exception for Lambda to record a failure.
+        if (event or {}).get('raise_on_error'):
+            raise
         return {
             'statusCode': 500,
             'body': json.dumps({
