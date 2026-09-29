@@ -51,6 +51,9 @@ jobs:
       run: |
         bin/vite build --clear --mode=test
 
+    - name: Test admin submission controls
+      run: node --test scripts/tests/admin_anonymous_contributions.test.cjs
+
     - name: Install system dependencies
       run: |
         sudo apt-get update
