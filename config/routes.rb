@@ -129,6 +129,12 @@ Rails.application.routes.draw do
 
   # Admin routes
   namespace :admin do
+    resources :anonymous_contributions, only: [:index] do
+      collection do
+        post :deletion_preview
+        delete :destroy_selected
+      end
+    end
     resources :mask_proposals, only: %i[index update]
     resources :users, only: [:index]
     resources :fit_families, only: %i[index create]

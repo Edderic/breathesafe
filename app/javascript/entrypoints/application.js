@@ -67,6 +67,7 @@ import SignIn from '../sign_in.vue'
 import TermsOfService from '../terms_of_service.vue'
 import AdminStudyParticipants from '../admin_study_participants.vue'
 import AdminMaskProposals from '../admin_mask_proposals.vue'
+import AdminAnonymousContributions from '../admin_anonymous_contributions.vue'
 import AdminMaskDuplicates from '../admin_mask_duplicates.vue'
 import AdminMaskFitFamilies from '../admin_mask_fit_families.vue'
 import { useEventStore } from '../stores/event_store.js';
@@ -128,6 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { path: '/admin/masks/breakdowns', component: MaskBreakdown, name: 'MaskBreakdownV2' },
     { path: '/admin/masks/unique_internal_model_code_breakdown', component: MaskBreakdown, name: 'MaskBreakdown' },
     { path: '/admin/masks/proposals', component: AdminMaskProposals, name: 'AdminMaskProposals' },
+    { path: '/admin/anonymous-contributions', component: AdminAnonymousContributions, name: 'AdminAnonymousContributions' },
     { path: '/admin/masks/duplicates', component: AdminMaskDuplicates, name: 'AdminMaskDuplicates' },
     { path: '/admin/masks/fit_families', component: AdminMaskFitFamilies, name: 'AdminMaskFitFamilies' },
   ]
