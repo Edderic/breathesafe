@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  get 'anonymous_contributions/previous_measurements', to: 'anonymous_contributions#previous_measurements'
   post 'anonymous_contributions', to: 'anonymous_contributions#create'
   get 'anonymous_contributions/mask_suggestions', to: 'anonymous_contributions#mask_suggestions'
   get 'anonymous_contributions/masks', to: 'anonymous_contributions#masks'

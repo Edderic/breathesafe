@@ -15,7 +15,13 @@ class AnonymousContributionPayload
   end
 
   def call(payload)
-    exact_keys!(payload, KEYS)
+    invalid! unless payload.is_a?(Hash)
+    exact_keys!(payload.except('measurement_source_contribution_id'), KEYS)
+    if payload.key?('measurement_source_contribution_id')
+      source = payload['measurement_source_contribution_id']
+      invalid! unless source.is_a?(String) && source.match?(/\A[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\z/i)
+      payload = payload.merge('measurement_source_contribution_id' => source.downcase)
+    end
     invalid! unless payload['contribution_id'].is_a?(String) &&
                     payload['contribution_id'].match?(/\A[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\z/i)
     invalid! unless payload['measurement_version'] == 1 && payload['measurement_version'].is_a?(Integer)

@@ -2,7 +2,7 @@
 
 require 'digest'
 
-# No account session, cookies, or identity lookup is used by this endpoint.
+# Participant codes authenticate requests independently of account sessions and cookies.
 class AnonymousContributionsController < ActionController::API
   wrap_parameters false
 
@@ -20,6 +20,7 @@ class AnonymousContributionsController < ActionController::API
     payload_digest = Digest::SHA256.hexdigest(canonical_json(payload))
     participant = AnonymousParticipant.create_or_find_by!(credential_digest: digest)
     records = participant.anonymous_contributions
+    validate_measurement_source!(records, payload)
     record = records.create_or_find_by!(contribution_id: payload['contribution_id']) do |row|
       row.assign_attributes(payload.except('contribution_id'))
       row.payload_digest = payload_digest
@@ -35,6 +36,25 @@ class AnonymousContributionsController < ActionController::API
   rescue ActiveRecord::RecordNotFound, ActiveRecord::RecordNotUnique
     # A contribution UUID belonging to a different participant is never disclosed.
     render json: { error: 'Receipt conflicts with an existing submission' }, status: :conflict
+  end
+
+  # Never creates a participant or returns fit-test history. The code is a bearer secret.
+  def previous_measurements
+    response.headers['Cache-Control'] = 'no-store'
+    credential = request.authorization.to_s.delete_prefix('Bearer ')
+    unless credential.match?(/\A[0-9a-f]{64}\z/)
+      return render json: { error: 'Invalid participant code' }, status: :unauthorized
+    end
+
+    participant = AnonymousParticipant.find_by(credential_digest: Digest::SHA256.hexdigest(credential))
+    # Reused submissions must not make an older scan look newer. Consent time is
+    # the original submission time, not a claim about the exact time of capture.
+    source = participant&.anonymous_contributions
+                        &.where(measurement_source_contribution_id: nil, measurement_version: 1)
+                        &.order(consent_accepted_at: :desc, id: :desc)&.first
+    render json: { previous_measurements: source&.attributes&.slice(
+      'contribution_id', 'measurement_version', 'measurements', 'consent_accepted_at'
+    ) }
   end
 
   # Deliberately avoids the expensive fit-test aggregation used by the main catalog.
@@ -57,6 +77,17 @@ class AnonymousContributionsController < ActionController::API
   end
 
   private
+
+  def validate_measurement_source!(records, payload)
+    return unless payload.key?('measurement_source_contribution_id')
+
+    source = records.find_by(contribution_id: payload['measurement_source_contribution_id'],
+                             measurement_source_contribution_id: nil)
+    return if source && source.measurement_version == payload['measurement_version'] &&
+              source.measurements == payload['measurements']
+
+    raise AnonymousContributionPayload::Invalid
+  end
 
   def canonical_json(value)
     case value
