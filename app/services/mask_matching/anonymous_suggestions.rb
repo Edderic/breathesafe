@@ -1,17 +1,24 @@
 # frozen_string_literal: true
 
 module MaskMatching
-  # Reuse the import scorer without exposing predictor infrastructure to a public
-  # endpoint. Token comparisons handle spelling differences and size conflicts;
-  # suggestions always require a person's confirmation, including exact names.
   class AnonymousSuggestions
     def self.call(name)
-      source = components(name)
-      scores = Mask.where(duplicate_of: nil).pluck(:id, :unique_internal_model_code).filter_map do |id, label|
-        score = Scorer.score(source, components(label))[:score]
+      masks = Mask.where(duplicate_of: nil)
+                  .select(:id, :unique_internal_model_code, :current_state, :filter_type, :strap_type, :style).to_a
+      catalog = CatalogComponents.call(masks)
+      source = PredictionCache.predict(name)
+      scores = masks.filter_map do |mask|
+        target = catalog[mask.id]
+        comparison = if PredictionCache.usable?(source) && PredictionCache.usable?(target)
+                       # Exclude color from both weighting and size/age detection.
+                       Scorer.score(source.except(:color), target.except(:color))
+                     else
+                       Scorer.score(components(name), components(mask.unique_internal_model_code))
+                     end
+        score = comparison[:score]
         next if score < 0.25
 
-        { id: id, name: label, score: score.round(4) }
+        { id: mask.id, name: mask.unique_internal_model_code, score: score.round(4) }
       end
       scores.sort_by { |row| [-row[:score], row[:id]] }.first(5)
     end

@@ -9,6 +9,29 @@ class MaskComponentPredictorInlineService
   PYTHON_SCRIPT_PATH = Rails.root.join('python/mask_component_predictor/predict_inline.py')
 
   class << self
+    # Called within the service deadline. Always reap the subprocess, including
+    # when Timeout unwinds a blocked read; capture3 alone waits for it on exit.
+    def predict_bounded(mask_name)
+      result = nil
+      Open3.popen3('python3', PYTHON_SCRIPT_PATH.to_s, mask_name, pgroup: true) do |stdin, stdout, stderr, wait|
+        stdin.close
+        readers = [Thread.new { stdout.read }, Thread.new { stderr.read }]
+        begin
+          output = readers.first.value
+          readers.last.value
+          result = format_result(JSON.parse(output)) if wait.value.success?
+        ensure
+          begin
+            Process.kill('KILL', -wait.pid) if wait.alive?
+          rescue Errno::ESRCH
+            # The child exited between checking and terminating it.
+          end
+          readers.each(&:join)
+        end
+      end
+      result
+    end
+
     # Predict components for a single mask name
     # @param mask_name [String] The mask name to predict
     # @return [Hash] Prediction result with tokens, breakdown, and components
