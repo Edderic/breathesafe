@@ -52,7 +52,7 @@ jobs:
         bin/vite build --clear --mode=test
 
     - name: Test admin submission controls
-      run: node --test scripts/tests/admin_anonymous_contributions.test.cjs
+      run: node --test scripts/tests/admin_anonymous_contributions.test.cjs scripts/tests/admin_mask_proposals.test.cjs
 
     - name: Install system dependencies
       run: |
