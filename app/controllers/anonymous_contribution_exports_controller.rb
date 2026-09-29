@@ -10,7 +10,8 @@ class AnonymousContributionExportsController < ApplicationController
     render json: {
       contributions: rows.map do |row|
         row.attributes.slice('id', 'contribution_id', 'anonymous_participant_id', 'measurement_version',
-                             'measurements', 'fit_tests', 'consent_version', 'consent_accepted_at')
+                             'measurement_source_contribution_id', 'measurements', 'fit_tests',
+                             'consent_version', 'consent_accepted_at')
       end,
       next_after_id: rows.size == 500 ? rows.last.id : nil
     }

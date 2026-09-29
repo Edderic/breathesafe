@@ -163,4 +163,96 @@ RSpec.describe 'Anonymous contributions', type: :request do
     expect(row.keys).not_to include('credential_digest', 'payload_digest')
     expect(response.headers['Cache-Control']).to eq('no-store')
   end
+
+  describe 'previous measurements' do
+    def lookup(request_headers = headers)
+      get '/anonymous_contributions/previous_measurements', headers: request_headers
+    end
+
+    it 'requires a valid code and does not create participants during lookup' do
+      lookup({})
+      expect(response).to have_http_status(:unauthorized)
+      expect { lookup }.not_to change(AnonymousParticipant, :count)
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body).to eq('previous_measurements' => nil)
+      expect(response.headers['Cache-Control']).to eq('no-store')
+    end
+
+    it 'returns only this participant’s aggregates and source metadata' do
+      submit
+      lookup('Authorization' => "Bearer #{'b' * 64}")
+      expect(response.parsed_body['previous_measurements']).to be_nil
+      lookup
+      source = response.parsed_body['previous_measurements']
+      expect(source.keys).to match_array(%w[contribution_id measurement_version measurements consent_accepted_at])
+      expect(source['contribution_id']).to eq(payload[:contribution_id])
+      expect(source['measurements']).to eq(payload[:measurements].stringify_keys)
+      expect(response.headers['Cache-Control']).to eq('no-store')
+    end
+
+    it 'keeps reuse tied to the original scan across retries and newer scans' do
+      submit
+      reused = payload.merge(contribution_id: SecureRandom.uuid,
+                             measurement_source_contribution_id: payload[:contribution_id])
+      submit(reused)
+      expect(response).to have_http_status(:ok)
+      expect(AnonymousContribution.last.measurement_source_contribution_id).to eq(payload[:contribution_id])
+      lookup
+      expect(response.parsed_body['previous_measurements']['contribution_id']).to eq(payload[:contribution_id])
+      newer = payload.merge(contribution_id: SecureRandom.uuid, consent_accepted_at: 1.hour.from_now.iso8601,
+                            measurements: payload[:measurements].merge(nose_mm: 85))
+      submit(newer)
+      expect(response).to have_http_status(:ok)
+      expect { submit(reused) }.not_to change(AnonymousContribution, :count)
+      expect(response).to have_http_status(:ok)
+      lookup
+      expect(response.parsed_body['previous_measurements']['contribution_id']).to eq(newer[:contribution_id])
+    end
+
+    it 'does not replace the latest scan with an older offline scan delivered later' do
+      submit
+      older = payload.merge(contribution_id: SecureRandom.uuid, consent_accepted_at: 2.days.ago.iso8601)
+      submit(older)
+      lookup
+      expect(response.parsed_body['previous_measurements']['contribution_id']).to eq(payload[:contribution_id])
+    end
+
+    it 'rejects another participant’s source, unknown sources, malformed sources, and altered measurements' do
+      submit
+      reused = payload.merge(contribution_id: SecureRandom.uuid,
+                             measurement_source_contribution_id: payload[:contribution_id])
+      submit(reused, 'Authorization' => "Bearer #{'b' * 64}")
+      expect(response).to have_http_status(:unprocessable_entity)
+      [nil, 'invalid', SecureRandom.uuid].each do |source|
+        submit(reused.merge(measurement_source_contribution_id: source))
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+      submit(reused.merge(measurements: payload[:measurements].merge(nose_mm: 81)))
+      expect(response).to have_http_status(:unprocessable_entity)
+      submit(reused.merge(measurement_version: 2))
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(AnonymousContribution.count).to eq(1)
+    end
+
+    it 'requires an original source and exports provenance without changing legacy payloads' do
+      submit
+      original = AnonymousContribution.last
+      digest = original.payload_digest
+      submit
+      expect(original.reload.payload_digest).to eq(digest)
+      reused = payload.merge(contribution_id: SecureRandom.uuid,
+                             measurement_source_contribution_id: payload[:contribution_id].upcase)
+      submit(reused)
+      expect(response).to have_http_status(:ok)
+      submit(reused.merge(contribution_id: SecureRandom.uuid,
+                          measurement_source_contribution_id: reused[:contribution_id]))
+      expect(response).to have_http_status(:unprocessable_entity)
+      sign_in User.create!(email: 'reuse-export-admin@example.test', password: 'test-password-123',
+                           confirmed_at: Time.current, admin: true)
+      get '/anonymous_contributions/export'
+      rows = response.parsed_body['contributions']
+      expect(rows.first['measurement_source_contribution_id']).to be_nil
+      expect(rows.last['measurement_source_contribution_id']).to eq(payload[:contribution_id])
+    end
+  end
 end

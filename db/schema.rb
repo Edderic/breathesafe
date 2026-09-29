@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 20_260_917_010_000) do
+ActiveRecord::Schema[7.0].define(version: 20_260_929_010_000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension 'pg_stat_statements'
   enable_extension 'plpgsql'
@@ -78,6 +78,8 @@ ActiveRecord::Schema[7.0].define(version: 20_260_917_010_000) do
     t.string 'payload_digest', null: false
     t.datetime 'created_at', null: false
     t.datetime 'updated_at', null: false
+    t.uuid 'measurement_source_contribution_id'
+    t.index ['measurement_source_contribution_id'], name: 'index_anonymous_measurement_source'
     t.index ['anonymous_participant_id'], name: 'index_anonymous_contributions_on_anonymous_participant_id'
     t.index ['contribution_id'], name: 'index_anonymous_contributions_on_contribution_id', unique: true
   end
@@ -626,6 +628,8 @@ ActiveRecord::Schema[7.0].define(version: 20_260_917_010_000) do
     t.index ['author_id'], name: 'index_ventilation_records_on_author_id'
   end
 
+  add_foreign_key 'anonymous_contributions', 'anonymous_contributions',
+                  column: 'measurement_source_contribution_id', primary_key: 'contribution_id'
   add_foreign_key 'anonymous_contributions', 'anonymous_participants'
   add_foreign_key 'addresses', 'users'
   add_foreign_key 'bulk_fit_tests_imports', 'users'
