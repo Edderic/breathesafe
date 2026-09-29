@@ -194,4 +194,17 @@ RSpec.describe 'Anonymous mask proposals', type: :request do
     expect(message.body.decoded).not_to include('nose_mm', 'strap_mm', payload[:contribution_id])
     expect(proposal.reload.notified_at).to be_present
   end
+
+  it 'shows grouped review counts and does not match or classify masks while listing the queue' do
+    submit(payload.merge(fit_tests: [test_data, test_data.merge(mask: ' zimi   b95-xl-01 white ')]))
+    submit(payload.merge(contribution_id: SecureRandom.uuid))
+    sign_in admin
+    get '/admin/mask_proposals.json'
+    expect(response).to have_http_status(:ok)
+    proposal = response.parsed_body['proposals'].sole
+    expect(proposal['test_count']).to eq(3)
+    expect(proposal['mask_id']).to be_nil
+    expect(MaskComponentPredictorService).not_to have_received(:predict_with_timeout)
+    expect(AnonymousContribution.all.flat_map(&:fit_tests).pluck('mask_id')).to eq([nil, nil, nil])
+  end
 end

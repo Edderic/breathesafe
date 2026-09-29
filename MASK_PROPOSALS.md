@@ -24,3 +24,19 @@ Successful predictions are cached for 24 hours; failures for 30 seconds. Inline 
 Missing catalog classifications are queued for `WarmMaskMatchingCatalogJob`, with scheduling throttled to once per five minutes per model version. The worker skips annotated masks and uses the same versioned prediction cache. Existing names are never reclassified across the whole catalog synchronously in a request. Queue errors log a warning and leave fallback results available; subsequent requests can retry after the scheduling gate expires.
 
 Before shipping the updated app, deploy the backend and run `bundle exec rake mask_matching:warm_catalog` with Sidekiq running. This enqueues cache preparation only; it does not edit catalog annotations or send emails. No new migrations or API response fields are required. Verify the Zimi B95-XL-01 White query and watch predictor-unavailable / catalog-scheduling warnings and job retries. Missing mask classifications can temporarily produce less accurate fallback suggestions until prepared.
+
+## Community-event batch review
+
+MasqFit now sends all nonblank reviewed imported mask names through the existing `propose_mask: true` path. Organizers select participant tests and review each distinct mask/protocol label pair once, without catalog matching on the phone. Blank names remain unspecified. Older payloads and explicitly confirmed catalog IDs retain their existing behavior.
+
+Admin mask matching automatically loads ranked suggestions for unresolved names, with two concurrent automatic requests. Delayed responses cannot replace a newer manual search or a refreshed queue. A failed suggestion leaves other rows usable and offers retry/search. Suggestions never apply a match without explicit admin confirmation.
+
+The admin list and update responses include `test_count`, the number of linked tests affected by a decision. The existing normalized-name grouping, reviewed-match reuse, transactional updates, and one notification per distinct proposal remain unchanged. No new migration or backfill is needed for this change.
+
+Validation commands:
+
+- `bundle exec rspec spec/requests/mask_proposals_spec.rb spec/requests/anonymous_contributions_spec.rb`
+- `node --test scripts/tests/admin_mask_proposals.test.cjs`
+- `node_modules/.bin/vite build`
+
+Deploy the admin API/frontend before the companion app release. Device checks should cover mixed-participant imports, whole-group selection, privacy edits, canceling review, blank names, and offline delivery. Existing measurement-reuse migration requirements still apply.
