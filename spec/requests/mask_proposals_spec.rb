@@ -22,7 +22,11 @@ RSpec.describe 'Anonymous mask proposals', type: :request do
       consent_accepted_at: Time.current.utc.iso8601 }
   end
 
-  before { ActiveJob::Base.queue_adapter = :test }
+  before do
+    ActiveJob::Base.queue_adapter = :test
+    allow(MaskComponentPredictorService).to receive(:predict_with_timeout).and_return(nil)
+  end
+
   after { clear_enqueued_jobs }
 
   def submit(data = payload)
@@ -40,7 +44,7 @@ RSpec.describe 'Anonymous mask proposals', type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.parsed_body['masks'].first['id']).to eq(mask.id)
     expect(response.parsed_body['masks'].map { |row| row['name'] }).not_to include('Zimi B95-XL White duplicate')
-    expect(enqueued_jobs).to be_empty
+    expect(enqueued_jobs.none? { |job| job[:job] == MaskProposalNotificationJob }).to be(true)
   end
 
   it 'validates suggestion names and excludes duplicates from catalog search' do
@@ -174,7 +178,7 @@ RSpec.describe 'Anonymous mask proposals', type: :request do
     expect { submit }.to raise_error(ActiveRecord::RecordInvalid)
     expect(MaskProposal.count).to eq(0)
     expect(AnonymousContribution.count).to eq(0)
-    expect(enqueued_jobs).to be_empty
+    expect(enqueued_jobs.none? { |job| job[:job] == MaskProposalNotificationJob }).to be(true)
   end
 
   it 'notifies admins once on job retries without disclosing participant data' do

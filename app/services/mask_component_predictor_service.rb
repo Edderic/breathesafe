@@ -2,6 +2,7 @@
 
 require 'net/http'
 require 'json'
+require 'timeout'
 
 class MaskComponentPredictorService
   # Allow configurable port via environment variable
@@ -13,7 +14,24 @@ class MaskComponentPredictorService
                          "http://localhost:#{port}"
                        end
 
+  # Existing predictor adapters rescue StandardError. The deadline must unwind
+  # those handlers so they cannot swallow it and continue beyond the deadline.
+  class PredictionDeadline < Exception; end # rubocop:disable Lint/InheritException
+
   class << self
+    def predict_with_timeout(mask_name, seconds: 5)
+      Timeout.timeout(seconds, PredictionDeadline) do
+        if use_lambda? || use_flask?
+          predict(mask_name)
+        else
+          MaskComponentPredictorInlineService.predict_bounded(mask_name)
+        end
+      end
+    rescue PredictionDeadline, StandardError
+      Rails.logger.warn('Mask component prediction unavailable; using name matching')
+      nil
+    end
+
     # Delegate to appropriate predictor based on configuration
     # Priority: Lambda > Flask > Inline (default)
     def predict(mask_name)
