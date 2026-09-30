@@ -7,6 +7,13 @@
   <div class='grid'>
     <div class='toc margined overflow' id='toc'>
       <div  ><br></div><h2 ><strong>TABLE OF CONTENTS</strong></h2><div  ><br></div>
+      <router-link :to="tocPath('anonymous-fit-tests')">Contribute anonymously</router-link>
+      <div style="margin-left: 2em;">
+        <router-link :to="tocPath('anonymous-mftc-import')">Import MFTC results</router-link><br>
+        <router-link :to="tocPath('anonymous-privacy-review')">Review labels and consent</router-link><br>
+        <router-link :to="tocPath('anonymous-submission-queue')">Check delivery</router-link>
+      </div>
+      <br>
       <router-link :to="tocPath('timeline')">
         Timeline
       </router-link>
@@ -227,12 +234,19 @@
       <h2>Onboarding for Mask Recommender Based on Facial Features</h2>
 
       <div>
-        <p>Last updated: Dec. 19, 2025</p>
+        <p>Last updated: September 29, 2026</p>
       </div>
 
       <div class='row'>
         <p>Welcome! This page is intended for people who have volunteered to become fit testing participants to assist in creating a mask recommender based on facial features.</p>
       </div>
+
+      <div class="contribution-options">
+        <h3>Choose how to contribute</h3>
+        <p><router-link :to="tocPath('anonymous-fit-tests')">Contribute anonymously with MasqFit and MFTC</router-link> to share measurements and fit tests without an account.</p>
+        <p><router-link :to="tocPath('account-creation')">Use a Breathesafe account</router-link> for the account-based instructions below, including manual fit-test entry and CSV imports.</p>
+      </div>
+      <AnonymousContributionGuide />
 
         <div id='timeline'>
           <br>
@@ -246,6 +260,7 @@
           <br>
           <br>
           <h4>Time Commitment</h4>
+          <p>The registration and respirator-user steps below apply to account-based contributions. Anonymous contributors can follow the walkthrough above.</p>
         </div>
 
         <h5>
@@ -400,7 +415,7 @@
         <div id='account-creation'>
           <br>
           <br>
-          <h4>Account Creation</h4>
+          <h4>Account Creation (optional)</h4>
         </div>
 
         <p>
@@ -1889,11 +1904,13 @@
 <script>
 
 import CircularButton from './circular_button.vue';
+import AnonymousContributionGuide from './anonymous_contribution_guide.vue';
 
 export default {
   name: 'ConsentForm',
   components: {
     CircularButton,
+    AnonymousContributionGuide,
   },
   data() { return {} },
   props: { },
@@ -1907,6 +1924,7 @@ export default {
 }
 </script>
 <style scoped>
+  .contribution-options { padding: 1.25rem; border-left: 4px solid #087f79; background: #f0f7f7; margin: 1.5rem 0; }
   .margined {
     margin: 2em;
   }
