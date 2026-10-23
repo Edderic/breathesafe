@@ -51,8 +51,8 @@ jobs:
       run: |
         bin/vite build --clear --mode=test
 
-    - name: Test admin submission controls
-      run: node --test scripts/tests/admin_anonymous_contributions.test.cjs scripts/tests/admin_mask_proposals.test.cjs
+    - name: Test browser controls and fixture geometry
+      run: node --test scripts/tests/admin_anonymous_contributions.test.cjs scripts/tests/admin_mask_proposals.test.cjs scripts/tests/dimension_fixture_geometry.test.cjs
 
     - name: Install system dependencies
       run: |
@@ -110,6 +110,9 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
+
+    - name: Test dimension geometry fixtures
+      run: PYTHONPATH=python python -m unittest discover -s python/dimension_pipeline/tests -v
 
     - name: Install dependencies
       run: |

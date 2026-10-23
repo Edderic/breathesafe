@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0.0",
+  "topology_id": "apple-arkit-face-legacy-unverified-version",
+  "source_files": [
+    "python/mask_recommender/arkit/preprocessing.py",
+    "app/models/facial_measurement.rb"
+  ],
+  "scoring_paths": [
+    "nose",
+    "top_cheek",
+    "mid_cheek",
+    "chin"
+  ],
+  "separate_legacy_paths": [
+    "strap"
+  ],
+  "units": "mm in Rails output contract; verify capture units independently",
+  "cross_topology_mapping_status": "blocked; requires anatomical registration and measured surface correspondence",
+  "segments": {
+    "nose": [
+      "160-371",
+      "371-367",
+      "367-387",
+      "387-14",
+      "609-802",
+      "802-798",
+      "798-14",
+      "14-818"
+    ],
+    "strap": [
+      "967-464",
+      "464-456",
+      "456-451",
+      "451-455",
+      "999-1027",
+      "1027-884",
+      "884-883",
+      "883-879"
+    ],
+    "top_cheek": [
+      "879-600",
+      "600-756",
+      "756-862",
+      "862-753",
+      "753-594",
+      "594-582",
+      "582-609",
+      "451-151",
+      "151-321",
+      "321-434",
+      "434-318",
+      "318-145",
+      "145-133",
+      "133-160"
+    ],
+    "mid_cheek": [
+      "509-893",
+      "893-894",
+      "894-881",
+      "881-880",
+      "880-879",
+      "60-478",
+      "478-479",
+      "479-453",
+      "453-452",
+      "452-451"
+    ],
+    "chin": [
+      "1049-983",
+      "983-982",
+      "982-1050",
+      "1050-1051",
+      "1051-1052",
+      "1052-1053",
+      "1053-509",
+      "1049-984",
+      "984-985",
+      "985-986",
+      "986-987",
+      "987-988",
+      "988-989",
+      "989-60"
+    ]
+  }
+}

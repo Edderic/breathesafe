@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0.0",
+  "review": {
+    "status": "pending",
+    "reviewer": null
+  },
+  "sources": {
+    "proposal_url": "https://www.breathesafe.xyz/reviews/masqfit-kanro-2026-10-981030707f76ec2a.html",
+    "proposal_html_sha256": "0c8de909bec6ed8dda00a650eccbf564833c198eee0fe3894dff87883aa409ca",
+    "yu2024": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/",
+    "supplement_url": "https://pmc.ncbi.nlm.nih.gov/articles/instance/10941723/bin/wxae005_suppl_supplementary_appendix.pdf",
+    "retrieval_status": "2026-10-22: PMC lists S1/S2 definitions, but PDF fetch returned HTTP 403 in browser tool and HTML browser challenge via curl. Definitions not inspected."
+  },
+  "pilot_candidates": [
+    {
+      "id": "pilot_pronasale_subnasale_chord",
+      "kind": "straight_distance",
+      "unit": "mm",
+      "landmarks": [
+        "pronasale",
+        "subnasale"
+      ],
+      "role": "target",
+      "status": "pending_anatomical_review",
+      "definition": "Straight 3D Euclidean distance from anterior nasal tip to subnasale, the midline junction of the underside of the nose and upper lip. Locally proposed nasal chord, not claimed equivalent to either published nose protrusion or bridge height."
+    },
+    {
+      "id": "pilot_sellion_menton_chord",
+      "kind": "straight_distance",
+      "unit": "mm",
+      "landmarks": [
+        "sellion",
+        "menton"
+      ],
+      "role": "target",
+      "status": "pending_anatomical_review",
+      "definition": "Straight 3D distance from deepest nasal-root depression to inferior midline chin point. Independent target, not the scale anchor. Yu 2024 Table 1 describes this face-length span; practical annotation protocol remains unreviewed."
+    }
+  ],
+  "compact_candidates": [
+    {
+      "id": "yu2024_mid_nose_slope",
+      "name": "Mid-nose slope",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/",
+      "status": "blocked_definition",
+      "kind": null,
+      "unit": null,
+      "blocker": "Need supplementary endpoints, reference construction, and units; name/figure cannot establish an angle or ratio.",
+      "visibility": "local nasal surface; multiple views may be needed"
+    },
+    {
+      "id": "yu2024_nose_protrusion",
+      "name": "Nose protrusion",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/",
+      "status": "blocked_definition",
+      "kind": null,
+      "unit": null,
+      "blocker": "Need supplementary endpoints/reference construction; do not equate to pilot chord or subjective bridge category.",
+      "visibility": "profile geometry required"
+    },
+    {
+      "id": "yu2024_lateral_zygomatic_gonion_length",
+      "name": "Lateral zygomatic–gonion length",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/",
+      "status": "blocked_definition",
+      "kind": null,
+      "unit": null,
+      "blocker": "Need supplementary side convention, landmarks and surface-versus-straight definition.",
+      "visibility": "lateral face/jaw coverage required"
+    },
+    {
+      "id": "yu2024_gonion_menton_length",
+      "name": "Gonion–menton length",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/",
+      "status": "blocked_definition",
+      "kind": null,
+      "unit": null,
+      "blocker": "Need supplementary side convention and surface-versus-straight definition.",
+      "visibility": "jaw and under-chin coverage required"
+    },
+    {
+      "id": "yu2024_ear_height_top",
+      "name": "Ear height–top",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/",
+      "status": "blocked_definition",
+      "kind": null,
+      "unit": null,
+      "blocker": "Need supplementary reference level, endpoints and distance definition.",
+      "visibility": "ear coverage missing from standard frontal-only face meshes"
+    }
+  ],
+  "other_candidates": [
+    {
+      "id": "yu2026_lateral_nose_slope",
+      "status": "blocked_definition",
+      "source": "https://doi.org/10.1016/j.apergo.2025.104667",
+      "kind": null,
+      "unit": null,
+      "blocker": "Full geometric definition not retrieved; distinct from Yu 2024 mid-nose slope."
+    },
+    {
+      "id": "objective_bridge_height",
+      "status": "blocked_definition",
+      "kind": null,
+      "unit": null,
+      "blocker": "Must specify local reference plane and landmark/surface patch. Not the subjective Abbott category or ARKit nose-path sum."
+    }
+  ],
+  "physical_scale_anchor": {
+    "id": "bitragion_subnasale_surface_arc",
+    "kind": "surface_arc",
+    "unit": "mm",
+    "role": "scale_anchor",
+    "status": "pending_protocol_and_coverage_validation",
+    "route": [
+      "tragion_left",
+      "subnasale",
+      "tragion_right"
+    ],
+    "definition": "Tape follows the facial surface from one tragion through subnasale to the opposite tragion; matched reconstruction must follow the same contact route. Endpoints alone do not define intermediate tape contact. Not a chord or automatically the shortest mesh geodesic.",
+    "required_protocol": "Mark tragion/subnasale consistently; guided side views and full ear-adjacent surface coverage; light consistent tape contact, repeated mm readings, self-versus-assisted comparison. Human review and repeatability still pending.",
+    "alternative_anchor_status": "No validated physical alternative selected. Analytic fixture ridge is only a mathematical smoke-test anchor."
+  }
+}
