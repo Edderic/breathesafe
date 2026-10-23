@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "domain": "analytic",
+  "seed": 0,
+  "sampling": "none; deterministic hand-authored geometry",
+  "split_policy": "All variants share one source identity and must remain in the same partition. Not an estimator train/test set.",
+  "variants": [
+    {
+      "path": "base_mm.json",
+      "identity_id": "analytic-source-001",
+      "global_scale_vs_base": 1,
+      "local_tip_height_before_scale_mm": 4,
+      "expected_mm": {
+        "pilot_tip_to_base_midpoint": 4,
+        "pilot_lower_span": 12,
+        "analytic_ridge_polyline": 10.0,
+        "analytic_ridge_chord": 6
+      }
+    },
+    {
+      "path": "larger_m.json",
+      "identity_id": "analytic-source-001",
+      "global_scale_vs_base": 1.5,
+      "local_tip_height_before_scale_mm": 4,
+      "expected_mm": {
+        "pilot_tip_to_base_midpoint": 6.0,
+        "pilot_lower_span": 18.0,
+        "analytic_ridge_polyline": 15.0,
+        "analytic_ridge_chord": 9.0
+      }
+    },
+    {
+      "path": "local_nose_mm.json",
+      "identity_id": "analytic-source-001",
+      "global_scale_vs_base": 1,
+      "local_tip_height_before_scale_mm": 6,
+      "expected_mm": {
+        "pilot_tip_to_base_midpoint": 6,
+        "pilot_lower_span": 12,
+        "analytic_ridge_polyline": 13.416407864998739,
+        "analytic_ridge_chord": 6
+      }
+    }
+  ]
+}

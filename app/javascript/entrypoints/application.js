@@ -90,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Each route should map to a component.
   // We'll talk about nested routes later.
   const routes = [
+    { path: '/research/dimension-fixtures', component: () => import('../dimension_fixtures.vue'), name: 'DimensionFixtures' },
     { path: '/', component: Introduction, name: 'Landing' },
     { path: '/clean_air', component: Landing, name: 'CleanAirLanding' },
     { path: '/dashboard', component: Dashboard, name: 'Dashboard' },

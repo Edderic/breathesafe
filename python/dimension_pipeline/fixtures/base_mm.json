@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0.0",
+  "record_id": "analytic-base-mm-v1",
+  "topology_id": "analytic-tent-v1",
+  "units": "mm",
+  "coordinate_frame": {
+    "handedness": "right",
+    "x": "subject_left",
+    "y": "superior",
+    "z": "anterior"
+  },
+  "source": {
+    "identity_id": "analytic-source-001",
+    "asset_id": "project-owned-tent-v1",
+    "license": "project-owned; repository license",
+    "provenance": "Authored analytically for BRE-6; not sampled from a person or a licensed face model.",
+    "domain": "analytic",
+    "parent_record_ids": []
+  },
+  "mesh": {
+    "vertices": [
+      [
+        -3.0,
+        0.0,
+        0.0
+      ],
+      [
+        3.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        4.0
+      ],
+      [
+        -6.0,
+        -4.0,
+        0.0
+      ],
+      [
+        6.0,
+        -4.0,
+        0.0
+      ]
+    ],
+    "triangles": [
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        0,
+        3,
+        4
+      ],
+      [
+        0,
+        4,
+        1
+      ]
+    ]
+  },
+  "landmarks": {
+    "ridge_left": {
+      "kind": "vertex",
+      "vertex_index": 0
+    },
+    "ridge_right": {
+      "kind": "vertex",
+      "vertex_index": 1
+    },
+    "tip": {
+      "kind": "vertex",
+      "vertex_index": 2
+    },
+    "span_left": {
+      "kind": "vertex",
+      "vertex_index": 3
+    },
+    "span_right": {
+      "kind": "vertex",
+      "vertex_index": 4
+    },
+    "ridge_base_midpoint": {
+      "kind": "barycentric",
+      "triangle_index": 0,
+      "weights": [
+        0.5,
+        0.5,
+        0
+      ]
+    }
+  },
+  "measurements": [
+    {
+      "id": "pilot_tip_to_base_midpoint",
+      "kind": "straight_distance",
+      "landmarks": [
+        "tip",
+        "ridge_base_midpoint"
+      ],
+      "role": "target",
+      "definition_status": "analytic_only",
+      "definition": "Euclidean tip-to-midpoint length on the analytic tent; not Yu nose protrusion or anatomical bridge height."
+    },
+    {
+      "id": "pilot_lower_span",
+      "kind": "straight_distance",
+      "landmarks": [
+        "span_left",
+        "span_right"
+      ],
+      "role": "target",
+      "definition_status": "analytic_only",
+      "definition": "Euclidean distance between the independent lower span endpoints; not anatomical face width."
+    },
+    {
+      "id": "analytic_ridge_polyline",
+      "kind": "surface_polyline",
+      "landmarks": [
+        "ridge_left",
+        "tip",
+        "ridge_right"
+      ],
+      "role": "scale_anchor",
+      "definition_status": "analytic_only",
+      "definition": "Specified two-edge tent ridge route; mathematical anchor only, not a validated tape route or bitragion-subnasale arc."
+    },
+    {
+      "id": "analytic_ridge_chord",
+      "kind": "straight_distance",
+      "landmarks": [
+        "ridge_left",
+        "ridge_right"
+      ],
+      "role": "diagnostic",
+      "definition_status": "analytic_only",
+      "definition": "Straight chord across the base of the ridge, distinct from the two-edge surface route."
+    },
+    {
+      "id": "analytic_tip_angle",
+      "kind": "angle",
+      "landmarks": [
+        "ridge_left",
+        "tip",
+        "ridge_right"
+      ],
+      "role": "diagnostic",
+      "definition_status": "analytic_only",
+      "definition": "Unsigned interior 3D angle at tip, in degrees; not a reproduction of any published slope."
+    }
+  ],
+  "camera": null,
+  "review": {
+    "status": "pending",
+    "reviewer": null,
+    "reason": "Mathematical fixture only. Anatomical atlas and physical protocols have not been reviewed."
+  }
+}
