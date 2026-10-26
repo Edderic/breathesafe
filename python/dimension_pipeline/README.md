@@ -56,6 +56,10 @@ node --test scripts/tests/dimension_fixture_geometry.test.cjs
 
 ## Generate heads, capture views, and annotate landmarks
 
+For the next candidate generator, see [FLAME 2023 Open](FLAME_OPEN.md). Its local
+adapter produces meshes that can be opened by the same labeling page; the
+official model asset is required for actual FLAME evaluation.
+
 Generate five head variants, OBJ/JSON meshes, 35 fixed-view SVG images, a
 camera/source manifest, and an HTML contact sheet with no network or GPU:
 
@@ -81,6 +85,8 @@ fixture viewer. For a standalone preview without Rails or a database:
 Open `http://127.0.0.1:5178/scripts/face_landmarks_preview.html`.
 
 1. Choose a head and enter your name. Use fixed views or drag in **Rotate** mode.
+   **Open generated heads** can load up to ten compatible surface JSON files
+   (including local FLAME adapter outputs) without uploading them.
 2. Choose a landmark, enter an optional placement note, and select **Place
    landmark**. Click its visible surface; switch views to inspect the same point.
 3. Use **Undo last edit**, **Remove point**, or place again to correct it.

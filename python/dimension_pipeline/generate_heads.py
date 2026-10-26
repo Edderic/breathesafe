@@ -70,28 +70,23 @@ def render_svg(record, camera):
     return '\n'.join(parts)
 
 
-def generate(out):
+def write_head_run(out, records, manifest, frame):
     # Refuse overwriting an existing run, including annotation files.
     out.mkdir(parents=True, exist_ok=False)
-    base = load("makehuman_head.json")
-    template_hash = hashlib.sha256((ASSETS / "makehuman_head.json").read_bytes()).hexdigest()
-    manifest = {"version": "1.0.0", "seed": 0, "source_identity": base["source"]["identity_id"],
-                "template_sha256": template_hash, "evidence": "synthetic_geometry_preview",
-                "anatomical_review": "pending", "variants": []}
-    for variant in load("head_variants.json"):
-        record = variant_record(base, variant)
-        mesh_file = variant["id"] + '.json'
+    for file_id, record in records:
+        record['preview_camera'] = frame
+        mesh_file = file_id + '.json'
         content = json.dumps(record, separators=(',', ':')) + '\n'
         (out / mesh_file).write_text(content)
         # OBJ makes the same surface available to other 3D tools.
         obj = ['v ' + ' '.join(map(str, p)) for p in record["mesh"]["vertices"]]
         obj += ['f ' + ' '.join(str(i+1) for i in f) for f in record["mesh"]["triangles"]]
-        (out / (variant["id"] + '.obj')).write_text('\n'.join(obj) + '\n')
+        (out / (file_id + '.obj')).write_text('\n'.join(obj) + '\n')
         item = {"id": record["record_id"], "mesh": mesh_file,
                 "sha256": hashlib.sha256(content.encode()).hexdigest(), "views": []}
         for view in load("head_views.json"):
-            camera = {**view_frame(base), **view}
-            filename = variant["id"] + '-' + view["id"] + '.svg'
+            camera = {**frame, **view}
+            filename = file_id + '-' + view["id"] + '.svg'
             (out / filename).write_text(render_svg(record, camera))
             item["views"].append({"image": filename, "camera": camera})
         manifest["variants"].append(item)
@@ -100,9 +95,19 @@ def generate(out):
                     for item in manifest["variants"] for view in item["views"])
     (out / 'index.html').write_text('<!doctype html><html lang="en"><meta charset="utf-8"><title>Head review</title>'
                                   '<h1>Synthetic head previews — anatomical review pending</h1>'
-                                  '<p>Five derivatives of one identity; nominal model millimeters.</p>'
+                                  '<p>Model millimeters; preview geometry is not physical measurement validation.</p>'
                                   '<main style="display:flex;flex-wrap:wrap">' + cards + '</main></html>')
     return manifest
+
+
+def generate(out):
+    base = load("makehuman_head.json")
+    template_hash = hashlib.sha256((ASSETS / "makehuman_head.json").read_bytes()).hexdigest()
+    manifest = {"version": "1.0.0", "seed": 0, "source_identity": base["source"]["identity_id"],
+                "template_sha256": template_hash, "evidence": "synthetic_geometry_preview",
+                "anatomical_review": "pending", "variants": []}
+    records = [(variant['id'], variant_record(base, variant)) for variant in load('head_variants.json')]
+    return write_head_run(out, records, manifest, view_frame(base))
 
 
 if __name__ == "__main__":

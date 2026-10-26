@@ -16,6 +16,19 @@ const { pickSurface, attachmentPoint, makeHead, meshFingerprint, validateAnnotat
 const base = JSON.parse(fs.readFileSync(path.join(root, 'python/dimension_pipeline/assets/makehuman_head.json')));
 const controls = JSON.parse(fs.readFileSync(path.join(root, 'python/dimension_pipeline/assets/head_variants.json')));
 
+test('generated surfaces load without invented anatomical labels and reject invalid geometry', () => {
+  const loaded = context.readSurfaceRecord(base);
+  assert.equal(loaded.record_id, base.record_id);
+  assert.equal(loaded.landmarks, undefined);
+  for (const mutate of [r => { r.units = 'm'; }, r => { r.mesh.vertices[0][0] = Infinity; },
+    r => { r.mesh.triangles[0][0] = -1; }, r => { r.mesh.triangles[0] = [0, 0, 1]; },
+    r => { r.coordinate_frame.x = 'subject_right'; }, r => { r.source.license = ''; },
+    r => { r.preview_camera = { center_mm: [0, 0, 0], pixels_per_mm: 0 }; }]) {
+    const record = structuredClone(base); mutate(record);
+    assert.throws(() => context.readSurfaceRecord(record));
+  }
+});
+
 test('overlapping triangles pick the visible surface independent of face order', () => {
   const record = { mesh: { vertices: [[0, 0, 0], [2, 0, 0], [0, 2, 0], [0, 0, 5], [2, 0, 5], [0, 2, 5]],
     triangles: [[3, 4, 5], [0, 1, 2]] } };

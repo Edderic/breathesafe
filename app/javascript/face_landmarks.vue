@@ -2,15 +2,17 @@
   <main class="face-review">
     <p class="eyebrow">MasqFit research</p>
     <h1>Face landmark labeling</h1>
-    <p>Explore five synthetic head variants, capture consistent views, and mark points on the surface.</p>
-    <p class="notice">Draft annotations · one template identity · nominal model millimeters. Anatomical placement and realism await review.</p>
+    <p>Explore synthetic heads, capture consistent views, and mark points on the surface.</p>
+    <p class="notice">Draft annotations · model millimeters. Anatomical placement, scale, and realism await review.</p>
     <div class="toolbar">
       <label>Head variant<select v-model="variantId" @change="changeHead">
         <option v-for="v in variants" :key="v.id" :value="v.id">{{ v.label }}</option>
       </select></label>
+      <label>Open generated heads<input type="file" multiple accept=".json,application/json" @change="openHeads" /></label>
       <label>Your name<input v-model="annotator" maxlength="100" placeholder="Required to place a point" /></label>
       <label>Interaction<select v-model="mode"><option value="rotate">Rotate</option><option value="label">Place landmark</option></select></label>
     </div>
+    <p><strong>Source:</strong> {{ record.source.asset_id }} · {{ record.source.license }}. Files stay in this browser.</p>
     <p v-if="error" role="alert" class="error">{{ error }}</p>
     <p v-if="message" role="status">{{ message }}</p>
     <div class="layout">
@@ -72,7 +74,7 @@ import variants from '../../python/dimension_pipeline/assets/head_variants.json'
 import views from '../../python/dimension_pipeline/assets/head_views.json';
 import { projectPoint } from './dimension_fixture_geometry';
 import { makeHead, headCenter, projectMesh, shadedFaces, pickSurface, attachmentPoint,
-  meshFingerprint, validateAnnotations } from './face_annotation_geometry';
+  meshFingerprint, validateAnnotations, readSurfaceRecord } from './face_annotation_geometry';
 
 const labelOptions = [
   ['pronasale', 'Pronasale', 'Anterior nasal tip on the midline.'],
@@ -97,7 +99,8 @@ function download(blob, name) {
 export default {
   name: 'FaceLandmarks',
   data() {
-    return { variants, views, labelOptions, variantId: 'base', record: makeHead(base, variants[0]), center: headCenter(base),
+    return { variants: [...variants], localHeads: {}, views, labelOptions, variantId: 'base', record: makeHead(base, variants[0]), center: headCenter(base),
+      captureScale: 1.45,
       drafts: {}, histories: {}, landmark: 'pronasale', annotator: '', note: '', reviewStatus: 'draft', mode: 'rotate',
       yaw: -45, pitch: 0, scale: 1.45, showNames: true, error: '', message: '', drag: null, savedDrafts: {} };
   },
@@ -133,12 +136,38 @@ export default {
   methods: {
     beforeUnload(event) { if (this.dirty) { event.preventDefault(); event.returnValue = ''; } },
     changeHead() {
-      this.record = makeHead(base, variants.find(v => v.id === this.variantId));
+      this.record = this.localHeads[this.variantId] || makeHead(base, variants.find(v => v.id === this.variantId));
+      const camera = this.record.preview_camera;
+      this.center = camera?.center_mm || headCenter(this.localHeads[this.variantId] ? this.record : base);
+      this.captureScale = camera?.pixels_per_mm || (this.localHeads[this.variantId] ? 330/Math.hypot(...[0, 1, 2].map(i => {
+        const values = this.record.mesh.vertices.map(p => p[i]); return Math.max(...values)-Math.min(...values);
+      })) : 1.45);
+      this.scale = this.captureScale;
       this.reviewStatus = this.drafts[this.variantId]?.review_status || 'draft';
       this.note = this.current[this.landmark]?.note || ''; this.error = ''; this.message = '';
     },
+    async openHeads(event) {
+      const files = Array.from(event.target.files || []); if (!files.length) return;
+      try {
+        if (files.length > 10 || files.reduce((sum, f) => sum+f.size, 0) > 20*1024*1024) {
+          throw new Error('Choose up to 10 generated head JSON files totaling at most 20 MB.');
+        }
+        const records = [];
+        for (const file of files) {
+          const record = readSurfaceRecord(JSON.parse(await file.text()));
+          records.push({ record, id: `local:${record.record_id}:${await meshFingerprint(record)}` });
+        }
+        for (const { id, record } of records) {
+          if (!this.localHeads[id]) this.variants.push({ id, label: record.record_id });
+          this.localHeads[id] = record;
+        }
+        this.variantId = records[0].id; this.changeHead();
+        this.message = `Opened ${records.length} generated heads. Each mesh has its own annotations.`;
+      } catch (error) { this.error = `Could not open heads: ${error.message}`; }
+      finally { event.target.value = ''; }
+    },
     setView(view) { this.yaw = view.yaw; this.pitch = view.pitch; },
-    resetView() { this.yaw = -45; this.pitch = 0; this.scale = 1.45; },
+    resetView() { this.yaw = -45; this.pitch = 0; this.scale = this.captureScale; },
     startPointer(event) {
       if (event.button !== 0) return;
       this.drag = { x: event.clientX, y: event.clientY, yaw: this.yaw, pitch: this.pitch };
@@ -192,7 +221,7 @@ export default {
       this.pitch = Math.max(-90, Math.min(90, this.pitch+steps[event.key][1]));
     },
     camera(view = null) { return { projection: 'orthographic', width: 720, height: 480, center_mm: this.center,
-      pixels_per_mm: view ? 1.45 : this.scale, yaw: view ? view.yaw : this.yaw, pitch: view ? view.pitch : this.pitch,
+      pixels_per_mm: view ? this.captureScale : this.scale, yaw: view ? view.yaw : this.yaw, pitch: view ? view.pitch : this.pitch,
       mirrored: false, distortion: 'none', version: '1.0.0' }; },
     async exportAnnotations() {
       const record = this.record, variantId = this.variantId, landmarks = JSON.parse(JSON.stringify(this.current)), reviewStatus = this.reviewStatus;
@@ -229,7 +258,7 @@ export default {
       const ctx = canvas.getContext('2d'); ctx.fillStyle = '#edf2f5'; ctx.fillRect(0, 0, canvas.width, canvas.height);
       views.forEach((view, i) => {
         const x = (i%3)*720, y = Math.floor(i/3)*510;
-        const points = projectMesh(this.record, this.center, view.yaw, view.pitch, 1.45);
+        const points = projectMesh(this.record, this.center, view.yaw, view.pitch, this.captureScale);
         ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.rect(0, 0, 720, 480); ctx.clip();
         for (const face of shadedFaces(this.record, points)) {
           const vertices = this.record.mesh.triangles[face.index].map(i => points[i]);

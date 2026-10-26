@@ -21,6 +21,44 @@ export function headCenter(base) {
   });
 }
 
+// Unlabeled generated surfaces use a separate contract from measurement fixtures.
+export function readSurfaceRecord(record) {
+  const require = (ok, message) => { if (!ok) throw new Error(message); };
+  require(record?.surface_record_version === '1.0.0', 'Expected surface_record_version 1.0.0.');
+  for (const field of ['record_id', 'topology_id']) require(typeof record[field] === 'string' &&
+    /^[A-Za-z0-9._:-]{1,180}$/.test(record[field]), `Invalid ${field}.`);
+  require(record.units === 'mm', 'Generated surfaces must use millimeters.');
+  const frame = record.coordinate_frame;
+  require(frame?.handedness === 'right' && frame.x === 'subject_left' && frame.y === 'superior' && frame.z === 'anterior',
+    'Expected right-handed subject-left / superior / anterior coordinates.');
+  const source = record.source;
+  for (const field of ['identity_id', 'asset_id', 'license', 'provenance']) require(typeof source?.[field] === 'string' &&
+    source[field].trim().length > 0, `Missing source.${field}.`);
+  require(source.domain === 'synthetic', 'Expected a synthetic source surface.');
+  require(record.review?.status === 'pending', 'Imported surfaces must enter anatomical review as pending.');
+  const vertices = record.mesh?.vertices, faces = record.mesh?.triangles;
+  require(Array.isArray(vertices) && vertices.length >= 3 && vertices.length <= 20000 && vertices.every(p =>
+    Array.isArray(p) && p.length === 3 && p.every(Number.isFinite)), 'Expected 3–20,000 finite vertices.');
+  require(Array.isArray(faces) && faces.length > 0 && faces.length <= 40000, 'Expected 1–40,000 triangles.');
+  for (const face of faces) {
+    require(Array.isArray(face) && face.length === 3 && new Set(face).size === 3 && face.every(i =>
+      Number.isInteger(i) && i >= 0 && i < vertices.length), 'Invalid triangle indices.');
+    const [a, b, c] = face.map(i => vertices[i]);
+    const u = b.map((v, i) => v-a[i]), v = c.map((v, i) => v-a[i]);
+    require(Math.hypot(u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0]) > 0,
+      'Degenerate triangle.');
+  }
+  const diameter = Math.hypot(...[0, 1, 2].map(i => Math.max(...vertices.map(p => p[i]))-Math.min(...vertices.map(p => p[i]))));
+  require(Number.isFinite(diameter) && diameter > 0 && diameter < 10000, 'Invalid model extent in millimeters.');
+  if (record.preview_camera) {
+    const camera = record.preview_camera;
+    require(Array.isArray(camera.center_mm) && camera.center_mm.length === 3 && camera.center_mm.every(Number.isFinite) &&
+      Number.isFinite(camera.pixels_per_mm) && camera.pixels_per_mm > 0 && camera.pixels_per_mm <= 40,
+      'Invalid preview framing.');
+  }
+  return JSON.parse(JSON.stringify(record));
+}
+
 export function projectMesh(record, center, yaw, pitch, scale) {
   return record.mesh.vertices.map(point => projectPoint(point, center, yaw, pitch, scale));
 }
