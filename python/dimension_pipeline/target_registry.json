@@ -9,7 +9,11 @@
     "proposal_html_sha256": "0c8de909bec6ed8dda00a650eccbf564833c198eee0fe3894dff87883aa409ca",
     "yu2024": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/",
     "supplement_url": "https://pmc.ncbi.nlm.nih.gov/articles/instance/10941723/bin/wxae005_suppl_supplementary_appendix.pdf",
-    "retrieval_status": "2026-10-22: PMC lists S1/S2 definitions, but PDF fetch returned HTTP 403 in browser tool and HTML browser challenge via curl. Definitions not inspected."
+    "retrieval_status": "2026-10-24: User supplied wxae005_suppl_supplementary_appendix.pdf; S1/S2 text extracted and PDF pages 2/3 visually inspected. Access blocker resolved; anatomical review remains pending.",
+    "supplement_filename": "wxae005_suppl_supplementary_appendix.pdf",
+    "supplement_sha256": "f2418d004eefe05e8726647268adc275eb39cc7eec665f96669ec5436b8ff60f",
+    "unit_basis": "Registry length outputs use mm. Main article Results explicitly interprets mid-nose slope and ear height-top per 1 mm; S1 defines all five compact candidates as lengths, and S3 groups four as surface measurements and ear height-top as linear. S1/S3 do not print a unit column.",
+    "definition_notes": "Definitions below paraphrase the supplied supplement. Semantic kinds are not executable geometry operators: surface_distance requires a reviewed surface_polyline route; vertical_distance_to_plane requires a reviewed anatomical frame and a future operator. No anatomical implementation is approved."
   },
   "pilot_candidates": [
     {
@@ -22,7 +26,8 @@
       ],
       "role": "target",
       "status": "pending_anatomical_review",
-      "definition": "Straight 3D Euclidean distance from anterior nasal tip to subnasale, the midline junction of the underside of the nose and upper lip. Locally proposed nasal chord, not claimed equivalent to either published nose protrusion or bridge height."
+      "definition": "Straight 3D Euclidean distance between pronasale (nasal tip) and subnasale (nose/upper-lip junction). Same endpoint/chord construct as traditional nose protrusion in S2 row 15; distinct from FFR-specific surface nose protrusion in S1 row 11. Anatomical placement remains unreviewed.",
+      "source_location": "S2 row 15, PDF page 3"
     },
     {
       "id": "pilot_sellion_menton_chord",
@@ -34,7 +39,8 @@
       ],
       "role": "target",
       "status": "pending_anatomical_review",
-      "definition": "Straight 3D distance from deepest nasal-root depression to inferior midline chin point. Independent target, not the scale anchor. Yu 2024 Table 1 describes this face-length span; practical annotation protocol remains unreviewed."
+      "definition": "Locally proposed straight 3D sellion-to-menton chord. S2 row 13 describes menton-sellion distance in the midsagittal plane; confirm midline placement and equivalence before claiming reproduction of that published measure.",
+      "source_location": "S2 row 13, PDF page 3"
     }
   ],
   "compact_candidates": [
@@ -42,51 +48,86 @@
       "id": "yu2024_mid_nose_slope",
       "name": "Mid-nose slope",
       "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/",
-      "status": "blocked_definition",
-      "kind": null,
-      "unit": null,
-      "blocker": "Need supplementary endpoints, reference construction, and units; name/figure cannot establish an angle or ratio.",
-      "visibility": "local nasal surface; multiple views may be needed"
+      "status": "definition_retrieved_pending_anatomical_review",
+      "kind": "surface_distance",
+      "unit": "mm",
+      "blocker": "Define reproducible nasal midpoint/root placement and the surface route; do not substitute sellion or a shortest geodesic without review.",
+      "visibility": "local nasal surface; multiple views may be needed",
+      "landmarks": [
+        "midpoint_of_nose",
+        "mid_nose_root"
+      ],
+      "source_location": "S1 row 9, PDF page 2; S3, PDF page 4",
+      "definition": "Nasal midpoint and mid-nose root delimit a surface length; the published name does not imply an angle or dimensionless gradient.",
+      "implementation_status": "not_implemented"
     },
     {
       "id": "yu2024_nose_protrusion",
       "name": "Nose protrusion",
       "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/",
-      "status": "blocked_definition",
-      "kind": null,
-      "unit": null,
-      "blocker": "Need supplementary endpoints/reference construction; do not equate to pilot chord or subjective bridge category.",
-      "visibility": "profile geometry required"
+      "status": "definition_retrieved_pending_anatomical_review",
+      "kind": "surface_distance",
+      "unit": "mm",
+      "blocker": "Approve anatomical endpoints and intermediate surface route; the pilot chord cannot substitute for this surface measure.",
+      "visibility": "profile geometry required",
+      "landmarks": [
+        "pronasale",
+        "subnasale"
+      ],
+      "source_location": "S1 row 11, PDF page 2; S3, PDF page 4",
+      "definition": "FFR-specific nasal protrusion follows the surface between nasal tip and subnasale. The traditional S2 row 15 measure uses the same endpoints with a straight chord.",
+      "implementation_status": "not_implemented"
     },
     {
       "id": "yu2024_lateral_zygomatic_gonion_length",
       "name": "Lateral zygomatic–gonion length",
       "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/",
-      "status": "blocked_definition",
-      "kind": null,
-      "unit": null,
-      "blocker": "Need supplementary side convention, landmarks and surface-versus-straight definition.",
-      "visibility": "lateral face/jaw coverage required"
+      "status": "definition_retrieved_pending_anatomical_review",
+      "kind": "surface_distance",
+      "unit": "mm",
+      "blocker": "Approve landmark placement, intermediate route, and whether left, right, or a bilateral summary is used; S1 does not specify side handling.",
+      "visibility": "lateral face/jaw coverage required",
+      "landmarks": [
+        "lateral_zygomatic_edge",
+        "gonion"
+      ],
+      "source_location": "S1 row 14, PDF page 2; S3, PDF page 4",
+      "definition": "Surface length linking the lateral zygomatic boundary with the jaw angle.",
+      "implementation_status": "not_implemented"
     },
     {
       "id": "yu2024_gonion_menton_length",
       "name": "Gonion–menton length",
       "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/",
-      "status": "blocked_definition",
-      "kind": null,
-      "unit": null,
-      "blocker": "Need supplementary side convention and surface-versus-straight definition.",
-      "visibility": "jaw and under-chin coverage required"
+      "status": "definition_retrieved_pending_anatomical_review",
+      "kind": "surface_distance",
+      "unit": "mm",
+      "blocker": "Approve gonion/menton placement, intermediate route, and side handling; S1 does not specify left, right, or bilateral aggregation.",
+      "visibility": "jaw and under-chin coverage required",
+      "landmarks": [
+        "gonion",
+        "menton"
+      ],
+      "source_location": "S1 row 16, PDF page 2; S3, PDF page 4",
+      "definition": "Surface length linking the jaw angle with the midline inferior chin landmark.",
+      "implementation_status": "not_implemented"
     },
     {
       "id": "yu2024_ear_height_top",
       "name": "Ear height–top",
       "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/",
-      "status": "blocked_definition",
-      "kind": null,
-      "unit": null,
-      "blocker": "Need supplementary reference level, endpoints and distance definition.",
-      "visibility": "ear coverage missing from standard frontal-only face meshes"
+      "status": "definition_retrieved_pending_anatomical_review",
+      "kind": "vertical_distance_to_plane",
+      "unit": "mm",
+      "blocker": "Approve upper-ear placement, side handling, and anatomical head orientation defining vertical/horizontal; implement a point-to-plane height operator. Do not use camera-image vertical or invent an orientation protocol.",
+      "visibility": "ear coverage missing from standard frontal-only face meshes",
+      "landmarks": [
+        "ear_top_edge",
+        "menton"
+      ],
+      "source_location": "S1 row 7, PDF page 2; S3, PDF page 4",
+      "definition": "Vertical separation of the upper ear boundary from a horizontal plane passing through menton; this is not the ear-to-menton 3D chord.",
+      "implementation_status": "not_implemented"
     }
   ],
   "other_candidates": [
@@ -119,6 +160,8 @@
     ],
     "definition": "Tape follows the facial surface from one tragion through subnasale to the opposite tragion; matched reconstruction must follow the same contact route. Endpoints alone do not define intermediate tape contact. Not a chord or automatically the shortest mesh geodesic.",
     "required_protocol": "Mark tragion/subnasale consistently; guided side views and full ear-adjacent surface coverage; light consistent tape contact, repeated mm readings, self-versus-assisted comparison. Human review and repeatability still pending.",
-    "alternative_anchor_status": "No validated physical alternative selected. Analytic fixture ridge is only a mathematical smoke-test anchor."
+    "alternative_anchor_status": "No validated physical alternative selected. Analytic fixture ridge is only a mathematical smoke-test anchor.",
+    "source_location": "S2 row 18, PDF page 3",
+    "source_definition_status": "retrieved_pending_protocol_review"
   }
 }

@@ -1,0 +1,9 @@
+[
+  {"id":"front","label":"Front","yaw":0,"pitch":0},
+  {"id":"left-oblique","label":"Subject left three-quarter","yaw":-45,"pitch":0},
+  {"id":"left-profile","label":"Subject left profile","yaw":-90,"pitch":0},
+  {"id":"right-oblique","label":"Subject right three-quarter","yaw":45,"pitch":0},
+  {"id":"right-profile","label":"Subject right profile","yaw":90,"pitch":0},
+  {"id":"underside","label":"Underside","yaw":0,"pitch":-40},
+  {"id":"top","label":"Above","yaw":0,"pitch":35}
+]

@@ -1,8 +1,9 @@
 # Camera dimension pipeline: measurement foundation (BRE-6)
 
 This isolated experiment implements a versioned reference-geometry contract,
-surface attachments, measurement extraction, and analytic fixtures. It does not
-yet render faces, train an estimator, or establish camera accuracy. No production
+surface attachments, measurement extraction, analytic fixtures, and a small
+synthetic head generation/rendering/annotation workflow. It does not train an
+estimator or establish camera accuracy. No production
 fit scoring or training code imports this package.
 
 The [production proposal](https://www.breathesafe.xyz/reviews/masqfit-kanro-2026-10-981030707f76ec2a.html)
@@ -51,6 +52,66 @@ Browser geometry checks:
 
 ```sh
 node --test scripts/tests/dimension_fixture_geometry.test.cjs
+```
+
+## Generate heads, capture views, and annotate landmarks
+
+Generate five head variants, OBJ/JSON meshes, 35 fixed-view SVG images, a
+camera/source manifest, and an HTML contact sheet with no network or GPU:
+
+```sh
+PYTHONPATH=python python3 -m dimension_pipeline.generate_heads --out /tmp/masqfit-heads
+```
+
+Choose a new output directory for each run; existing runs are never overwritten.
+Keep run outputs outside Git. All five variants derive from one CC0 MakeHuman
+template, with ears/jaw coverage and stable topology. See
+[`assets/README.md`](assets/README.md) for the pinned source, asset license,
+crop/nominal scale, control definitions, and known limitations. This is a bounded
+pilot generator for annotation review; full BRE-7 realism/self-intersection gates
+and BRE-8 perspective rendering/dataset validation remain subsequent work.
+
+With Rails/Vite running, open `/#/research/face-landmarks`, also linked from the
+fixture viewer. For a standalone preview without Rails or a database:
+
+```sh
+./node_modules/.bin/vite --config scripts/face_landmarks.vite.config.mjs
+```
+
+Open `http://127.0.0.1:5178/scripts/face_landmarks_preview.html`.
+
+1. Choose a head and enter your name. Use fixed views or drag in **Rotate** mode.
+2. Choose a landmark, enter an optional placement note, and select **Place
+   landmark**. Click its visible surface; switch views to inspect the same point.
+3. Use **Undo last edit**, **Remove point**, or place again to correct it.
+   **Save note** updates a note without moving the point.
+4. **Download annotations** for each edited head. **Resume annotations** loads
+   a saved sidecar for the currently selected exact mesh. Drafts remain in memory
+   between variant switches; export before leaving. Navigation warns about edits
+   that have not been exported. There is no server upload or browser persistence.
+5. **Download view sheet** exports seven fixed views in one PNG; camera metadata
+   is available separately. Offline generation provides individual SVG captures.
+
+Annotations store triangle indices/barycentric weights, annotator, timestamp,
+placement view, notes, topology, source identity, nominal units, definition
+version, and a SHA-256 fingerprint of the actual mesh/frame. Import rejects
+different variants/geometry, unknown landmark names, invalid attachments, and
+unsupported versions. Left/right always means the subject's side. Hidden markers
+are suppressed using surface-depth checks; clicks attach to the nearest surface.
+
+The nasal midpoint, lateral mid-nose root, zygomatic edge, and ear-top orientation
+remain provisional and are identified as such in the UI. Initial sidecars have
+their own `annotation_version`, rather than pretending to be complete reference
+records: no surface measurement route or approved anatomical labels are invented.
+`ready_for_review` is a workflow status, not anatomical sign-off. Each derivative
+is labeled independently in this first workflow; cross-variant propagation and
+multi-reviewer adjudication remain future work.
+
+Geometry/annotation checks:
+
+```sh
+node --test scripts/tests/dimension_fixture_geometry.test.cjs scripts/tests/face_annotation_geometry.test.cjs
+PYTHONPATH=python python3 -m unittest discover -s python/dimension_pipeline/tests -v
 ```
 
 ## Reference schema 1.0.0
@@ -118,19 +179,43 @@ validated alternative for physical calibration.
 `target_registry.json` records two provisional physical pilot targets (a locally
 defined pronasale–subnasale chord and a sellion–menton chord), all five Yu 2024
 compact candidates, the distinct Yu/Griffin 2026 lateral nose slope, objective
-bridge height, and the proposed bitragion–subnasale tape arc. No pilot label is
-claimed to reproduce a published nasal construct.
+bridge height, and the proposed bitragion–subnasale tape arc. The pilot nasal
+chord has the endpoint/operator construct of traditional nose protrusion (S2
+row 15); anatomical equivalence still requires reviewed landmark placement.
 
 [Yu et al. (2024)](https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/)
-points to supplementary S1/S2 for measurement definitions. The supplementary PDF
-was located, but on October 22 the browser fetch returned HTTP 403 and curl
-returned an HTML challenge instead of a PDF. Consequently the five published
-features remain blocked by definition. Their units/operators are unset rather
-than guessed from a name or figure. Visibility requirements are recorded per
-feature; ear/jaw landmarks cannot be assumed available on frontal-only meshes.
+points to supplementary S1/S2 for measurement definitions. On October 24, 2026,
+the user supplied `wxae005_suppl_supplementary_appendix.pdf`, resolving the earlier
+download blocker. Its SHA-256 is
+`f2418d004eefe05e8726647268adc275eb39cc7eec665f96669ec5436b8ff60f`.
+S1/S2 were text-extracted and visually checked on PDF pages 2/3. The registry
+records source rows and paraphrased definitions; the publisher PDF is not copied
+into the repository.
 
-The proposed tape arc runs from left tragion via subnasale to right tragion along
-the face. Its intermediate contact route, side-view acquisition, ear coverage,
+| Compact candidate | Retrieved construction (S1, PDF page 2) |
+| --- | --- |
+| Mid-nose slope, row 9 | Surface length joining nasal midpoint and mid-nose root; not an angle or ratio. |
+| Nose protrusion, row 11 | Surface length between pronasale and subnasale; distinct from the traditional straight chord in S2 row 15. |
+| Lateral zygomatic–gonion length, row 14 | Surface length joining the lateral zygomatic boundary to gonion. |
+| Gonion–menton length, row 16 | Surface length joining gonion to menton. |
+| Ear height–top, row 7 | Vertical separation of the upper ear boundary from a horizontal plane through menton; not an ear-to-chin chord. |
+
+All five are lengths, represented in mm in the registry. S3 groups the first
+four as surface measures and ear height as linear; the main article explicitly
+discusses mid-nose slope and ear height-top increments in mm. S1/S3 themselves
+have no unit column. These semantic kinds are not new executable operators:
+surface lengths need reviewed routes for the existing `surface_polyline`
+operator; ear height needs an anatomical frame and a future height operator.
+The supplement does not supply a complete annotation atlas, side/aggregation
+convention, intermediate surface route, or operational head-orientation protocol.
+In particular, nasal midpoint/root must not silently be replaced by sellion or
+other familiar landmarks. Visibility requirements remain recorded per feature;
+ear/jaw coverage cannot be assumed on frontal-only meshes. The 2026 lateral
+nose slope and objective bridge-height definitions remain separately blocked.
+
+S2 row 18 (PDF page 3) confirms the proposed tape arc's surface construction
+from left tragion via subnasale to right tragion. Its intermediate contact route,
+side-view acquisition, ear coverage,
 annotation rules, and repeated/self-versus-assisted measurement protocol still
 need review and validation. No physical alternative anchor has been validated.
 Scaling a reconstruction to match the entered arc cannot validate that same arc;
@@ -138,7 +223,7 @@ assess independently measured dimensions and independently scaled references.
 
 Before annotating or rendering anatomical faces, a human reviewer must sign off
 the target definitions, landmark placements, and tape contact route. Keep BRE-6
-open until that review and the definition blockers are resolved. The mathematical
+open until that review and remaining operational definition blockers are resolved. The mathematical
 fixture work can proceed without pretending that review has occurred.
 
 ## Legacy ARKit comparison
@@ -165,6 +250,6 @@ renumbering another mesh to match ARKit. Compatibility accuracy remains untested
 | Evaluation partitioning | Root identity and lineage metadata for separation; never estimator features. |
 
 Keep analytic, rendered, printed and human evidence separate. No synthetic shape
-or derivative inherits a person's respirator fit outcome. Next work is source
-definition review and anatomical target approval, followed by BRE-7/BRE-8 assets
+or derivative inherits a person's respirator fit outcome. Next work is operational
+landmark/route review and anatomical target approval, followed by BRE-7/BRE-8 assets
 and labeled rendering, and BRE-9's small end-to-end experiment.

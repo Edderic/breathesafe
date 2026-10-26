@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Face landmark preview</title></head>
+  <body style="margin:0;font-family:system-ui,sans-serif"><div id="app"></div>
+    <script type="module">
+      import { createApp } from '/node_modules/vue/dist/vue.esm-bundler.js';
+      import { createRouter, createWebHashHistory } from 'vue-router';
+      import FaceLandmarks from '/app/javascript/face_landmarks.vue';
+      import DimensionFixtures from '/app/javascript/dimension_fixtures.vue';
+      const router = createRouter({ history: createWebHashHistory(), routes: [
+        { path: '/', component: FaceLandmarks, name: 'FaceLandmarks' },
+        { path: '/fixtures', component: DimensionFixtures, name: 'DimensionFixtures' },
+      ] });
+      createApp({ template: '<router-view />' }).use(router).mount('#app');
+    </script>
+  </body>
+</html>

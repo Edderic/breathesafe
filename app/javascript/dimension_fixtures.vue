@@ -4,6 +4,7 @@
       <p class="eyebrow">MasqFit research</p>
       <h1>Dimension fixture viewer</h1>
       <p>Explore the reference geometry, landmarks, and measurement paths. These starter fixtures are analytic shapes, not face scans.</p>
+      <router-link :to="{ name: 'FaceLandmarks' }">Generate head previews and label facial landmarks</router-link>
     </header>
 
     <div class="toolbar">
