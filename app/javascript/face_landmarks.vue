@@ -155,10 +155,11 @@ export default {
         const records = [];
         for (const file of files) {
           const record = readSurfaceRecord(JSON.parse(await file.text()));
-          records.push({ record, id: `local:${record.record_id}:${await meshFingerprint(record)}` });
+          records.push({ record, id: `local:${record.record_id}:${await meshFingerprint(record)}`,
+            label: `${record.source.asset_id} · ${file.name.replace(/\.json$/i, '')}` });
         }
-        for (const { id, record } of records) {
-          if (!this.localHeads[id]) this.variants.push({ id, label: record.record_id });
+        for (const { id, record, label } of records) {
+          if (!this.localHeads[id]) this.variants.push({ id, label });
           this.localHeads[id] = record;
         }
         this.variantId = records[0].id; this.changeHead();
@@ -281,6 +282,8 @@ export default {
 .layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 1.5rem; }
 section, aside { min-width: 0; border: 1px solid #ccd9e0; padding: 1rem; border-radius: 8px; }
 label { display: flex; flex-direction: column; gap: .4rem; padding: 0; }
+.toolbar > label { min-width: 0; max-width: 100%; }
+select { min-width: 0; width: 100%; }
 input, select, button, textarea { font: inherit; max-width: 100%; box-sizing: border-box; }
 button, select, input, textarea { border: 1px solid #a9bbc5; border-radius: 5px; padding: .5rem; background: white; color: inherit; }
 button { cursor: pointer; } button:disabled { opacity: .5; cursor: default; }

@@ -1,11 +1,62 @@
 # FLAME 2023 Open evaluation and viewer adapter
 
-Status, October 25, 2026: the official model download requires login. The model
-was not found locally when implementation started. The importer and viewer
-connection can be tested using owned geometry, but anatomical coverage, actual
-FLAME shape quality, and comparison with the complete model runtime remain
-pending until the official asset is supplied. No substitute model is presented
-as FLAME evidence.
+Status, October 25, 2026: the supplied official ZIP was inspected and its actual
+model was loaded, rendered, and exercised in the existing viewer. The bounded
+pilot can proceed to manual landmark review. Anatomical sign-off, physical
+metric validation and comparison with the complete articulated runtime remain
+pending. The separate toy-geometry tests are not counted as FLAME evidence.
+
+## First actual model evaluation
+
+Archive SHA-256:
+`a6b4c3dc15d569d98136a1e548b6fe532eb2830ca12a4f0d4b3a5dba8ee87a91`.
+
+`flame2023_Open.pkl` SHA-256:
+`e75a0990728ba038c7da2a420ae4396f7ddd7781366c13026066c5b24f127623`.
+
+The archive's `FLAME2023_Open Readme.pdf` identifies an attribution 4.0 license
+and refers to the official terms. It does not document units or axes. The run
+explicitly assumes source meters and y-up/z-anterior/x-subject-left. Extents
+are plausible and front/profile orientation looks correct; these observations
+are not independent unit/side verification or physical calibration.
+
+The model contains 5,023 vertices and 9,976 triangles: a 3,931-vertex head/neck
+component and two 546-vertex eye components. There are 62 boundary edges and
+zero nonmanifold edges; it is not a watertight print-ready solid. Five-joint
+skinning weights sum to one within 2.3e-16, consistent with the neutral-pose
+shape equation, but the independent runtime comparison remains open.
+
+| Pilot shape | RMS vertex change from neutral | Degenerate triangles | Normal reversal flags |
+| --- | --- | --- | --- |
+| Neutral | 0 mm | 0 | 0 |
+| PC1 -0.5 / +0.5 | 1.908 mm each | 0 | 0 |
+| PC2 -0.5 / +0.5 | 1.053 mm each | 0 | 0 |
+
+At magnitude 1, PC1 -1, PC1 +1 and PC2 +1 each trigger one normal reversal flag
+near an ear. PC2 -1 has none. The pattern persists at 0.75; at 0.5 and 0.25 all
+four pass. A normal turning over 90 degrees relative to neutral is a conservative
+review flag, not proof of self-intersection or topological inversion. The report
+key `flipped_triangles_vs_neutral` counts those flags. Flagged runs remain
+rejected; the accepted pilot records magnitude 0.5 explicitly.
+
+Inspection of all seven neutral views and front/profile views of the variants
+finds nose, ears, jaw, chin and under-chin surfaces available for exploratory
+annotation. Exact tragion/gonion placement and extra nasal points still need
+review. Ear and jaw regions have relatively coarse facets. PC1/PC2 change broad
+shape, not isolated nasal geometry at fixed perimeter.
+
+Actual FLAME browser checks passed: five imports, shared framing, surface
+placement, annotation round trip, cross-shape rejection, seven-view PNG export
+and mobile layout. Local run artifacts are in Git-ignored `tmp/flame-open-pilot/`,
+with a separate `review.json` recording this inspection. Automated click-test
+annotations are not anatomical labels and are not included in that directory.
+Original weights and generated meshes are not committed or bundled in the app.
+
+With the standalone Vite preview running, open this local link to load all five
+saved pilot heads automatically:
+`http://127.0.0.1:5178/scripts/face_landmarks_preview.html?heads=/tmp/flame-open-pilot/manifest.json`.
+This preview-only option reads explicitly requested local run files, without
+uploading them or embedding weights in the application.
 
 ## Source and scope
 
@@ -49,6 +100,7 @@ repository. Use a new output directory:
 PYTHONPATH=python /tmp/masqfit-flame-env/bin/python -m dimension_pipeline.flame_open \
   --model ~/Downloads/FLAME2023Open.zip \
   --source-units m \
+  --coefficient 0.5 \
   --out /tmp/masqfit-flame-open-pilot
 ```
 
@@ -71,8 +123,10 @@ fallback to other model assets occurs.
 
 For neutral expression and zero joint/global pose, compute
 `vertices = template + sum(shape_direction[i] * coefficient[i])` using the first
-300 shape directions. The five outputs are neutral, coefficient 1 at -1/+1,
-and coefficient 2 at -1/+1. These are **coefficient settings**, not named nose,
+300 shape directions. The five outputs are neutral, coefficient 1 at
+-magnitude/+magnitude, and coefficient 2 at -magnitude/+magnitude. The CLI
+defaults to magnitude 1; the inspected real pilot uses `--coefficient 0.5`.
+These are **coefficient settings**, not named nose,
 jaw or ear controls. No expression directions, pose correctives, skinning under
 articulation, texture fitting, or automatic anatomical landmarks are evaluated.
 
@@ -114,7 +168,8 @@ and reopen the same mesh before resuming its annotations.
    Test fixed-perimeter nasal controls separately; PCA variation alone does not
    enforce that constraint.
 
-Until those checks use the actual release, the decision stays
-`pending_visual_and_anatomical_review`. Owned tetrahedron tests check array
+The generator initially records `pending_visual_and_anatomical_review`; the
+separate first inspection supports proceeding to manual landmark review while
+the remaining checks above stay open. Owned tetrahedron tests check array
 loading, neutral shape math, explicit unit conversion, reflected winding,
 provenance and file output only.

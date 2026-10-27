@@ -58,6 +58,25 @@ class FlameOpenTest(unittest.TestCase):
             self.assertEqual(neutral['mesh']['vertices'][1], [-100., 0., 0.])
             self.assertEqual(neutral['mesh']['triangles'][0], [0, 1, 2])
 
+    def test_coefficient_magnitude_is_explicit_and_degenerate_variants_are_rejected(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            model = root/'flame2023_Open.pkl'
+            data = toy_model()
+            data['shapedirs'][1, 0, 0] = -.1
+            model.write_bytes(pickle.dumps(data))
+            # A full coefficient collapses vertex 1 onto vertex 0.
+            with self.assertRaisesRegex(ValueError, 'degenerate triangles'):
+                generate(model, root/'collapsed', 'm')
+            self.assertFalse((root/'collapsed').exists())
+            generate(model, root/'bounded', 'm', coefficient=.5)
+            plus = json.loads((root/'bounded/pc1-plus.json').read_text())
+            self.assertEqual(plus['mesh']['vertices'][1], [50., 0., 0.])
+            self.assertEqual(plus['generation']['coefficient_magnitude'], .5)
+            for invalid in [0, -1, float('nan'), 3]:
+                with self.assertRaisesRegex(ValueError, 'coefficient magnitude'):
+                    generate(model, root/'invalid', 'm', coefficient=invalid)
+
     def test_invalid_models_and_non_open_archives_fail_before_output(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

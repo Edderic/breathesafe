@@ -115,7 +115,9 @@ def geometry_report(vertices, faces, neutral):
     }
 
 
-def generate(path, out, source_units, source_x='subject_left'):
+def generate(path, out, source_units, source_x='subject_left', coefficient=1.):
+    if not np.isfinite(coefficient) or not 0 < coefficient <= 2:
+        raise ValueError('Shape coefficient magnitude must be finite, greater than zero and at most 2')
     template, basis, faces, provenance = load_model(path)
     factor = {'m': 1000., 'mm': 1.}[source_units]
     axes = np.array([-1., 1., 1.]) if source_x == 'subject_right' else np.ones(3)
@@ -127,8 +129,8 @@ def generate(path, out, source_units, source_x='subject_left'):
         raise ValueError(f'Head extent is {diagonal:.3f} mm: check --source-units and the supplied asset')
     topology_hash = hashlib.sha256(faces.astype('<i8').tobytes()).hexdigest()[:16]
     identity = 'flame-open-pilot-' + provenance['model_sha256'][:16]
-    choices = [('neutral', None, 0.), ('pc1-minus', 0, -1.), ('pc1-plus', 0, 1.),
-               ('pc2-minus', 1, -1.), ('pc2-plus', 1, 1.)]
+    choices = [('neutral', None, 0.), ('pc1-minus', 0, -coefficient), ('pc1-plus', 0, coefficient),
+               ('pc2-minus', 1, -coefficient), ('pc2-plus', 1, coefficient)]
     records, reports = [], []
     for slug, component, coefficient in choices:
         beta = np.zeros(300)
@@ -138,7 +140,9 @@ def generate(path, out, source_units, source_x='subject_left'):
         vertices = np.round((template + np.einsum('vci,i->vc', basis, beta))*factor*axes, 6)
         report = geometry_report(vertices, faces, np.round(neutral, 6))
         if report['degenerate_triangles'] or report['flipped_triangles_vs_neutral']:
-            raise ValueError(f'{slug} has degenerate/flipped triangles; inspect before rendering')
+            raise ValueError(f'{slug} has {report["degenerate_triangles"]} degenerate triangles and '
+                             f'{report["flipped_triangles_vs_neutral"]} triangle normal reversals relative to neutral; '
+                             'inspect the region or choose a smaller --coefficient')
         record_id = identity + '-' + slug
         record = {
             'surface_record_version': '1.0.0', 'record_id': record_id,
@@ -149,6 +153,7 @@ def generate(path, out, source_units, source_x='subject_left'):
                        'provenance': 'Local Open-release model; neutral pose/expression, first 300 shape directions only. Source units converted explicitly; no average-head size normalization. Source axes require visual confirmation.',
                        'parent_record_ids': [] if component is None else [identity+'-neutral'], **provenance},
             'generation': {'version': '1.0.0', 'method': 'neutral_linear_shape_basis', 'shape_coefficients': beta.tolist(),
+                           'coefficient_magnitude': coefficient,
                            'expression': 'zero', 'pose': 'zero', 'source_units': source_units,
                            'source_axes': {'x': source_x, 'y': 'superior', 'z': 'anterior'}},
             'mesh': {'vertices': vertices.tolist(), 'triangles': faces.tolist()},
@@ -167,6 +172,7 @@ def generate(path, out, source_units, source_x='subject_left'):
                 'anatomical_review': 'pending', 'source': provenance, 'variants': []}
     write_head_run(Path(out), records, manifest, frame)
     evaluation = {'release': 'FLAME-2023-Open', 'source': provenance, 'numpy_version': np.__version__,
+                  'coefficient_magnitude': coefficient,
                   'decision': 'pending_visual_and_anatomical_review', 'meshes': reports,
                   'not_evaluated': ['Anatomical ear/nose/jaw landmark coverage', 'Population representativeness',
                                     'Self-intersections', 'Physical metric accuracy', 'Fixed-perimeter nasal controls',
@@ -181,9 +187,10 @@ if __name__ == '__main__':
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--source-units', choices=['m', 'mm'], required=True)
     parser.add_argument('--source-x', choices=['subject_left', 'subject_right'], default='subject_left')
+    parser.add_argument('--coefficient', type=float, default=1., help='Magnitude for the PC1/PC2 pilot; default 1, maximum 2')
     args = parser.parse_args()
     try:
-        report = generate(args.model, args.out, args.source_units, args.source_x)
+        report = generate(args.model, args.out, args.source_units, args.source_x, args.coefficient)
     except (ValueError, OSError, pickle.UnpicklingError, zipfile.BadZipFile) as exc:
         parser.exit(1, f'FLAME import failed: {exc}\n')
     print(f'Generated {len(report["meshes"])} neutral-pose pilot meshes and 35 views in {args.out}')
