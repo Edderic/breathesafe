@@ -10,9 +10,12 @@
       </select></label>
       <label>Open generated heads<input type="file" multiple accept=".json,application/json" @change="openHeads" /></label>
       <label>Your name<input v-model="annotator" maxlength="100" placeholder="Required to place a point" /></label>
-      <label>Interaction<select v-model="mode"><option value="rotate">Rotate</option><option value="label">Place landmark</option></select></label>
+      <label>Interaction<select v-model="mode" aria-keyshortcuts="R L"><option value="rotate">Rotate</option><option value="label">Place landmark</option></select></label>
     </div>
     <p><strong>Source:</strong> {{ record.source.asset_id }} · {{ record.source.license }}. Files stay in this browser.</p>
+    <p class="shortcut-hint"><strong>Shortcuts:</strong> <kbd>R</kbd> rotate · <kbd>L</kbd> place landmark ·
+      <kbd>[</kbd> previous landmark · <kbd>]</kbd> next landmark.
+      Shortcuts pause while editing a field or using a form control.</p>
     <p v-if="error" role="alert" class="error">{{ error }}</p>
     <p v-if="message" role="status">{{ message }}</p>
     <div class="layout">
@@ -46,7 +49,7 @@
       <aside>
         <h2>Landmarks</h2>
         <p>{{ Object.keys(current).length }} / {{ labelOptions.length }} marked on this head</p>
-        <label>Point to place<select v-model="landmark">
+        <label>Point to place<select v-model="landmark" aria-keyshortcuts="[ ]">
           <option v-for="label in labelOptions" :key="label.id" :value="label.id">{{ current[label.id] ? '✓ ' : '' }}{{ label.name }}</option>
         </select></label>
         <p>{{ selectedLabel.description }}</p>
@@ -128,8 +131,14 @@ export default {
       }
     },
   },
-  mounted() { window.addEventListener('beforeunload', this.beforeUnload); },
-  beforeUnmount() { window.removeEventListener('beforeunload', this.beforeUnload); },
+  mounted() {
+    window.addEventListener('beforeunload', this.beforeUnload);
+    window.addEventListener('keydown', this.annotationKey);
+  },
+  beforeUnmount() {
+    window.removeEventListener('beforeunload', this.beforeUnload);
+    window.removeEventListener('keydown', this.annotationKey);
+  },
   beforeRouteLeave() {
     if (this.dirty) return window.confirm('Some head annotations have not been exported. Leave this page and discard those edits?');
   },
@@ -215,7 +224,25 @@ export default {
       this.note = this.current[this.landmark]?.note || '';
     },
     zoom(event) { this.scale = Math.max(.5, Math.min(5, this.scale*Math.exp(-Math.sign(event.deltaY)*.1))); },
+    annotationKey(event) {
+      if (event.defaultPrevented || event.isComposing || event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
+      const target = event.target;
+      if (target?.isContentEditable || target?.closest?.('input, textarea, select, [role="textbox"], [role="combobox"]')) return;
+      const key = event.key.toLowerCase();
+      if (!['r', 'l', '[', ']'].includes(key)) return;
+      event.preventDefault();
+      // A mode/landmark change during a pointer gesture must not place a point
+      // under the newly selected tool or name when the pointer is released.
+      this.drag = null;
+      if (key === 'r' || key === 'l') this.mode = key === 'r' ? 'rotate' : 'label';
+      else {
+        const index = labelOptions.findIndex(label => label.id === this.landmark);
+        const next = (index + (key === ']' ? 1 : -1) + labelOptions.length) % labelOptions.length;
+        this.landmark = labelOptions[next].id;
+      }
+    },
     rotateKey(event) {
+      if (event.defaultPrevented || event.isComposing || event.ctrlKey || event.metaKey || event.altKey) return;
       const steps = { ArrowLeft: [-5, 0], ArrowRight: [5, 0], ArrowUp: [0, 5], ArrowDown: [0, -5] };
       if (!steps[event.key]) return;
       event.preventDefault(); this.yaw = ((this.yaw+steps[event.key][0]+540)%360)-180;
@@ -278,6 +305,8 @@ export default {
 .face-review { max-width: 1400px; margin: 2rem auto; padding: 0 1.25rem; color: #193648; }
 .eyebrow { text-transform: uppercase; letter-spacing: .1em; font-size: .8rem; }
 .notice { background: #fff4df; padding: .8rem; border-radius: 6px; }
+.shortcut-hint { font-size: .9rem; }
+kbd { border: 1px solid #b9c8d0; border-radius: 3px; padding: .05rem .3rem; background: #f3f6f8; font: inherit; }
 .toolbar, .views { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0; align-items: center; }
 .layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 1.5rem; }
 section, aside { min-width: 0; border: 1px solid #ccd9e0; padding: 1rem; border-radius: 8px; }

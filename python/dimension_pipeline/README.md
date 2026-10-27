@@ -89,6 +89,11 @@ Open `http://127.0.0.1:5178/scripts/face_landmarks_preview.html`.
    (including local FLAME adapter outputs) without uploading them.
 2. Choose a landmark, enter an optional placement note, and select **Place
    landmark**. Click its visible surface; switch views to inspect the same point.
+   Keyboard shortcuts: **R** selects Rotate, **L** selects Place landmark,
+   **[** selects the previous landmark, and **]** selects the next (wrapping
+   through the list). They work across the page except while a form control or
+   editable field has focus. Browser modifier shortcuts and held-key repeats
+   are left alone. Arrow keys rotate when the geometry viewport has focus.
 3. Use **Undo last edit**, **Remove point**, or place again to correct it.
    **Save note** updates a note without moving the point.
 4. **Download annotations** for each edited head. **Resume annotations** loads
