@@ -33,8 +33,8 @@ def validate_payload(payload):
     ):
         raise ValueError('Expected valid indexed triangles')
     queries = payload.get('queries')
-    if not isinstance(queries, list) or not 1 <= len(queries) <= 2:
-        raise ValueError('Expected 1–2 path queries')
+    if not isinstance(queries, list) or not 1 <= len(queries) <= 8:
+        raise ValueError('Expected 1–8 path queries')
     ids = set()
     for query in queries:
         if not isinstance(query, dict) or not isinstance(query.get('id'), str) or not 1 <= len(query['id']) <= 100 or query['id'] in ids:

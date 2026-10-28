@@ -1,7 +1,7 @@
 # Continuous shortest paths on the annotated mesh
 
-The default path method in the landmark viewer is now **Continuous surface
-shortest path**, provided by a local CGAL service. It crosses triangle interiors
+The default method for the four surface-distance types in the landmark viewer
+is **Continuous surface shortest path**, provided by a local CGAL service. It crosses triangle interiors
 and retains the exact barycentric endpoints. **Mesh-edge approximation** remains
 available as an explicit comparison. An unavailable solver is shown as an error;
 an edge route is never silently labeled as a continuous result.
@@ -25,7 +25,7 @@ library and CGAL's imported library targets.
 
 The bridge uses only Python's standard library and binds to `127.0.0.1:5180`.
 Only local browser origins are accepted. Mesh requests are limited to 20,000
-vertices, 40,000 faces, two endpoint pairs, and 10 MB. At most two solves run
+vertices, 40,000 faces, eight endpoint pairs, and 10 MB. At most two solves run
 concurrently; each subprocess has a 25-second timeout. There are no network
 downloads or external uploads in the solver. The browser waits 180 ms after an
 endpoint edit, aborts superseded requests, and ignores stale replies.
@@ -42,6 +42,13 @@ Re-import the saved annotations for that mesh. Existing annotations need no
 migration, and derived paths are recalculated. The browser calls the loopback
 solver directly; remote production pages do not attempt this local service.
 Native solver deployment to production is outside this local research change.
+
+The five measurement choices are nose protrusion, mid-nose slope, lateral
+zygomatic–gonion length, ear height; top, and gonion–menton surface length.
+Seven surface pairs (one midline and three bilateral pairs) share one native
+request. Ear heights use a separate provisional model-Y point-to-plane
+construction and never enter the geodesic solver. That operator records the
+frame and refuses an ear point below the menton plane.
 
 ## Algorithm and verifiable output
 

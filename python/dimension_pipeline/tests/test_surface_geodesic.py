@@ -72,6 +72,19 @@ class ContinuousSurfaceGeodesicTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'manifold'):
             solve_payload(query(mesh, endpoint(0, [.2, .3, .5]), endpoint(1, [.2, .3, .5])))
 
+    def test_seven_measurement_queries_can_be_solved_in_one_request(self):
+        mesh = {'vertices': [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]], 'triangles': [[0, 1, 2], [0, 2, 3]]}
+        payload = query(mesh, endpoint(0, [0, 1, 0]), endpoint(1, [0, 0, 1]))
+        payload['queries'] = [{**payload['queries'][0], 'id': f'measurement-{i}'} for i in range(7)]
+        result = solve_payload(payload)
+        self.assertEqual(len(result['results']), 7)
+        for i, path in enumerate(result['results']):
+            self.assertEqual(path['id'], f'measurement-{i}')
+            self.assertAlmostEqual(path['length_mm'], math.sqrt(2), places=12)
+        payload['queries'] = payload['queries']*2
+        with self.assertRaises(ValueError):
+            validate_payload(payload)
+
 
 if __name__ == '__main__':
     unittest.main()

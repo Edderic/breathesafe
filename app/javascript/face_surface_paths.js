@@ -90,11 +90,44 @@ export function surfacePath(record, graph, start, end) {
 }
 
 export function zygionGonionPaths(record, graph, landmarks) {
-  return ['left', 'right'].map(side => {
-    const endpoints = [`zygion_${side}`, `gonion_${side}`];
-    const entry = { id: `project_zygion_gonion_surface_${side}`, side, endpoints,
+  return facialSurfacePaths(record, graph, landmarks).filter(path => path.measurement === 'lateral_zygomatic_gonion');
+}
+
+export function surfaceMeasurementDefinitions() {
+  const bilateral = (measurement, id, a, b) => ['left', 'right'].map(side => ({
+    measurement, id: `${id}_${side}`, side,
+    endpoints: [a.includes('{side}') ? a.replace('{side}', side) : a, b.includes('{side}') ? b.replace('{side}', side) : b],
+  }));
+  return [
+    ...bilateral('lateral_zygomatic_gonion', 'project_zygion_gonion_surface', 'zygion_{side}', 'gonion_{side}'),
+    { measurement: 'nose_protrusion', id: 'project_nose_protrusion_surface', side: 'midline', endpoints: ['pronasale', 'subnasale'] },
+    ...bilateral('mid_nose_slope', 'project_mid_nose_slope_surface', 'midpoint_of_nose', 'mid_nose_root_{side}'),
+    ...bilateral('gonion_menton', 'project_gonion_menton_surface', 'gonion_{side}', 'menton'),
+  ];
+}
+
+export function facialSurfacePaths(record, graph, landmarks) {
+  return surfaceMeasurementDefinitions().map(definition => {
+    const { endpoints } = definition;
+    const entry = { ...definition, kind: 'surface_distance',
       definition_status: 'project_candidate_published_equivalence_unverified' };
     if (endpoints.some(name => !landmarks[name])) return { ...entry, status: 'missing_landmarks' };
     return { ...entry, ...surfacePath(record, graph, ...endpoints.map(name => landmarks[name].attachment)) };
+  });
+}
+
+export function earTopHeights(record, landmarks) {
+  return ['left', 'right'].map(side => {
+    const endpoints = [`ear_top_edge_${side}`, 'menton'];
+    const entry = { id: `project_ear_height_top_${side}`, measurement: 'ear_height_top', side, endpoints,
+      kind: 'vertical_distance_to_plane', method: 'model_y_height_v1', unit: 'mm',
+      definition_status: 'project_candidate_anatomical_frame_unreviewed',
+      reference_frame: { up: [0, 1, 0], plane_through: 'menton', alignment_status: 'model_alignment_unreviewed' } };
+    if (endpoints.some(name => !landmarks[name])) return { ...entry, status: 'missing_landmarks' };
+    const [ear, menton] = endpoints.map(name => attachmentPoint(record, landmarks[name].attachment));
+    const height = ear[1]-menton[1], foot = [ear[0], menton[1], ear[2]];
+    if (height < 0) return { ...entry, status: 'invalid_reference', length_mm: null, points: [] };
+    return { ...entry, status: 'ok', length_mm: height, projected_point_mm: foot,
+      points: [ear, foot], plane_point_mm: menton };
   });
 }

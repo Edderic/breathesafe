@@ -80,3 +80,37 @@ test('invalid barycentric attachments are rejected before searching', () => {
     assert.throws(() => surfacePath(record, graph, bad, end));
   }
 });
+
+test('all four surface measurement types use explicit pairs and retain bilateral results', () => {
+  const record = folded(), graph = buildSurfaceGraph(record);
+  const landmarks = {
+    pronasale: { attachment: start }, subnasale: { attachment: end },
+    midpoint_of_nose: { attachment: start }, mid_nose_root_left: { attachment: end },
+    mid_nose_root_right: { attachment: end }, zygion_left: { attachment: start }, zygion_right: { attachment: start },
+    gonion_left: { attachment: end }, gonion_right: { attachment: end }, menton: { attachment: start },
+  };
+  const paths = context.facialSurfacePaths(record, graph, landmarks);
+  assert.equal(paths.length, 7);
+  assert.equal(paths.filter(p => p.measurement === 'nose_protrusion').length, 1);
+  for (const kind of ['mid_nose_slope', 'lateral_zygomatic_gonion', 'gonion_menton']) {
+    assert.equal(paths.filter(p => p.measurement === kind).length, 2);
+  }
+  for (const path of paths) {
+    assert.equal(path.kind, 'surface_distance'); assert.equal(path.unit, 'mm');
+    assert.equal(path.status, 'ok'); assert.equal(path.length_mm, 4);
+  }
+});
+
+test('ear height projects vertically onto the menton plane rather than measuring a chord', () => {
+  const record = { mesh: { vertices: [[10, 30, 5], [0, 5, 0], [0, 0, 0]], triangles: [[0, 1, 2]] } };
+  const landmarks = { ear_top_edge_left: { attachment: attach(0, [1, 0, 0]) }, menton: { attachment: attach(0, [0, 1, 0]) } };
+  const height = context.earTopHeights(record, landmarks)[0];
+  assert.equal(height.length_mm, 25);
+  assert.equal(height.method, 'model_y_height_v1');
+  assert.deepEqual(Array.from(height.projected_point_mm), [10, 5, 5]);
+  assert.equal(context.earTopHeights(record, landmarks)[1].status, 'missing_landmarks');
+  record.mesh.vertices = record.mesh.vertices.map(([x, y, z]) => [2*x+7, 2*y-11, 2*z+8]);
+  assert.equal(context.earTopHeights(record, landmarks)[0].length_mm, 50);
+  record.mesh.vertices[0][1] = -100;
+  assert.equal(context.earTopHeights(record, landmarks)[0].status, 'invalid_reference');
+});

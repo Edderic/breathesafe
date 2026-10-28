@@ -98,10 +98,10 @@ Open `http://127.0.0.1:5178/scripts/face_landmarks_preview.html`.
    are left alone. Arrow keys rotate when the geometry viewport has focus.
 3. Use **Undo last edit**, **Remove point**, or place again to correct it.
    **Save note** updates a note without moving the point.
-   Mark **Zygion** and **Gonion** on the same side to derive a surface distance
-   automatically. The left/right results stay separate. Select a result to show
-   its path; hidden portions are suppressed behind the mesh. A straight chord
-   is displayed separately for comparison.
+   Choose one of the five **Measurements** to see its computed value and
+   highlighted geometry. Mark its required points to calculate it automatically.
+   Left/right results stay separate. Surface paths have a separate chord
+   comparison; ear height shows a vertical drop and menton reference plane.
 4. **Download annotations** for each edited head. **Resume annotations** loads
    a saved sidecar for the currently selected exact mesh. Drafts remain in memory
    between variant switches; export before leaving. Navigation warns about edits
@@ -116,15 +116,16 @@ different variants/geometry, unknown landmark names, invalid attachments, and
 unsupported versions. Left/right always means the subject's side. Hidden markers
 are suppressed using surface-depth checks; clicks attach to the nearest surface.
 
-The nasal midpoint, lateral mid-nose root, zygomatic edge, and ear-top orientation
+The nasal midpoint, lateral mid-nose root, zygion mapping, and ear-top orientation
 remain provisional and are identified as such in the UI. Initial sidecars have
 their own `annotation_version`, rather than pretending to be complete reference
-records: no surface measurement route or approved anatomical labels are invented.
+records: candidate routes are computed explicitly, and anatomical approval is
+not inferred from a successful calculation.
 `ready_for_review` is a workflow status, not anatomical sign-off. Each derivative
 is labeled independently in this first workflow; cross-variant propagation and
 multi-reviewer adjudication remain future work.
 
-The default zygion–gonion method is now `cgal_continuous_v1`, which crosses
+The four surface measurement types use `cgal_continuous_v1`, which crosses
 triangle interiors through the local solver. See [SURFACE_GEODESICS.md](SURFACE_GEODESICS.md)
 for build/start commands, validation and the comparison on saved annotations.
 The viewer retains `mesh_edge_dijkstra_v1` as an explicit comparison: a shortest path
@@ -135,8 +136,25 @@ the chosen route is not automatically a physical tape route. Missing endpoints
 or disconnected components produce no distance. Model units do not establish
 independent physical millimeter accuracy.
 
-Annotation exports include `derived_measurements` with endpoint names, method,
-length, chord and reconstructable vertex/barycentric path attachments. Import
+| Measurement | Annotated endpoints / construction |
+| --- | --- |
+| Nose protrusion | Pronasale–subnasale continuous surface length; the FFR-specific candidate, distinct from the traditional chord. |
+| Mid-nose slope | Nasal midpoint–mid-nose root on each side, as a surface length in mm; both endpoint placement and route equivalence remain provisional. |
+| Lateral zygomatic–gonion | Candidate zygion–gonion surface route on each side. |
+| Ear height; top | Model +Y height from each upper-ear point to the plane through menton. The dashed drop and plane are constructions in space, not surface paths. |
+| Gonion–menton | Continuous surface length from each gonion to midline menton. |
+
+All seven surface pairs can be solved together. The two ear heights are computed
+locally using `model_y_height_v1`; each export retains the up vector, plane
+anchor, projected foot point and unreviewed alignment status. View rotation
+changes only the display. Negative heights are rejected as invalid references
+rather than silently taking their absolute values. Confirm anatomical head
+alignment before treating model-Y ear heights as the published measure.
+
+Annotation exports include all nine `derived_measurements` (including missing
+statuses), with endpoint names, methods, surface paths or height constructions.
+Surface results retain length, chord and reconstructable vertex/barycentric
+path attachments. Import
 recalculates these values from the landmarks and mesh rather than trusting
 previously exported numbers. Published equivalence remains unverified: S1 row
 14 describes a lateral cheekbone endpoint without explicitly naming zygion.
@@ -243,7 +261,8 @@ four as surface measures and ear height as linear; the main article explicitly
 discusses mid-nose slope and ear height-top increments in mm. S1/S3 themselves
 have no unit column. These semantic kinds are not new executable operators:
 surface lengths need reviewed routes for the existing `surface_polyline`
-operator; ear height needs an anatomical frame and a future height operator.
+operator; ear height has a provisional model-Y operator and still needs an
+approved anatomical frame.
 The supplement does not supply a complete annotation atlas, side/aggregation
 convention, intermediate surface route, or operational head-orientation protocol.
 In particular, nasal midpoint/root must not silently be replaced by sellion or

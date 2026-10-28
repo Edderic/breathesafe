@@ -13,7 +13,7 @@
     "supplement_filename": "wxae005_suppl_supplementary_appendix.pdf",
     "supplement_sha256": "f2418d004eefe05e8726647268adc275eb39cc7eec665f96669ec5436b8ff60f",
     "unit_basis": "Registry length outputs use mm. Main article Results explicitly interprets mid-nose slope and ear height-top per 1 mm; S1 defines all five compact candidates as lengths, and S3 groups four as surface measurements and ear height-top as linear. S1/S3 do not print a unit column.",
-    "definition_notes": "Definitions below paraphrase the supplied supplement. Semantic kinds are not executable geometry operators: surface_distance requires a reviewed surface_polyline route; vertical_distance_to_plane requires a reviewed anatomical frame and a future operator. No anatomical implementation is approved."
+    "definition_notes": "Definitions below paraphrase the supplied supplement. The viewer now offers project candidate surface operators and provisional model-Y ear heights; semantic/published equivalence and anatomical frame review remain pending."
   },
   "pilot_candidates": [
     {
@@ -59,7 +59,8 @@
       ],
       "source_location": "S1 row 9, PDF page 2; S3, PDF page 4",
       "definition": "Nasal midpoint and mid-nose root delimit a surface length; the published name does not imply an angle or dimensionless gradient.",
-      "implementation_status": "not_implemented"
+      "implementation_status": "project_candidate_available",
+      "project_candidate_id": "project_mid_nose_slope_surface"
     },
     {
       "id": "yu2024_nose_protrusion",
@@ -76,7 +77,8 @@
       ],
       "source_location": "S1 row 11, PDF page 2; S3, PDF page 4",
       "definition": "FFR-specific nasal protrusion follows the surface between nasal tip and subnasale. The traditional S2 row 15 measure uses the same endpoints with a straight chord.",
-      "implementation_status": "not_implemented"
+      "implementation_status": "project_candidate_available",
+      "project_candidate_id": "project_nose_protrusion_surface"
     },
     {
       "id": "yu2024_lateral_zygomatic_gonion_length",
@@ -93,7 +95,8 @@
       ],
       "source_location": "S1 row 14, PDF page 2; S3, PDF page 4",
       "definition": "Surface length linking the lateral zygomatic boundary with the jaw angle.",
-      "implementation_status": "not_implemented"
+      "implementation_status": "project_candidate_available",
+      "project_candidate_id": "project_zygion_gonion_surface"
     },
     {
       "id": "yu2024_gonion_menton_length",
@@ -110,7 +113,8 @@
       ],
       "source_location": "S1 row 16, PDF page 2; S3, PDF page 4",
       "definition": "Surface length linking the jaw angle with the midline inferior chin landmark.",
-      "implementation_status": "not_implemented"
+      "implementation_status": "project_candidate_available",
+      "project_candidate_id": "project_gonion_menton_surface"
     },
     {
       "id": "yu2024_ear_height_top",
@@ -119,7 +123,7 @@
       "status": "definition_retrieved_pending_anatomical_review",
       "kind": "vertical_distance_to_plane",
       "unit": "mm",
-      "blocker": "Approve upper-ear placement, side handling, and anatomical head orientation defining vertical/horizontal; implement a point-to-plane height operator. Do not use camera-image vertical or invent an orientation protocol.",
+      "blocker": "Approve upper-ear placement, side handling and anatomical head orientation defining vertical/horizontal. The implemented model-Y height operator is provisional, not camera-image vertical or an approved anatomical orientation protocol.",
       "visibility": "ear coverage missing from standard frontal-only face meshes",
       "landmarks": [
         "ear_top_edge",
@@ -127,7 +131,8 @@
       ],
       "source_location": "S1 row 7, PDF page 2; S3, PDF page 4",
       "definition": "Vertical separation of the upper ear boundary from a horizontal plane passing through menton; this is not the ear-to-menton 3D chord.",
-      "implementation_status": "not_implemented"
+      "implementation_status": "project_candidate_available",
+      "project_candidate_id": "project_ear_height_top"
     }
   ],
   "other_candidates": [
@@ -191,6 +196,114 @@
         "Legacy lateral_zygomatic_edge annotations are preserved separately and never treated as zygion automatically."
       ],
       "comparison_method": "mesh_edge_dijkstra_v1"
+    },
+    {
+      "id": "project_nose_protrusion_surface",
+      "landmark_pairs": {
+        "midline": [
+          "pronasale",
+          "subnasale"
+        ]
+      },
+      "kind": "surface_path",
+      "unit": "mm",
+      "method": "cgal_continuous_v1",
+      "definition_status": "project_candidate_published_equivalence_unverified",
+      "definition": "Continuous mesh surface path from pronasale to subnasale; candidate implementation of the FFR-specific surface construction, distinct from the traditional chord.",
+      "source_relation": "Candidate operationalization of Yu 2024 S1; landmark, route and anatomical review remain pending.",
+      "review_status": "pending",
+      "limitations": [
+        "Continuous solver accuracy is limited by supplied mesh geometry and floating-point constructions; mesh-edge comparison can overestimate length.",
+        "A shortest mesh route need not reproduce a physical tape route.",
+        "No bilateral averaging; absent endpoints and disconnected surfaces have no distance."
+      ],
+      "comparison_method": "mesh_edge_dijkstra_v1"
+    },
+    {
+      "id": "project_mid_nose_slope_surface",
+      "landmark_pairs": {
+        "left": [
+          "midpoint_of_nose",
+          "mid_nose_root_left"
+        ],
+        "right": [
+          "midpoint_of_nose",
+          "mid_nose_root_right"
+        ]
+      },
+      "kind": "surface_path",
+      "unit": "mm",
+      "method": "cgal_continuous_v1",
+      "definition_status": "project_candidate_published_equivalence_unverified",
+      "definition": "Continuous mesh surface length from the annotated nasal midpoint to each annotated lateral mid-nose root; endpoint definitions and path correspondence remain provisional.",
+      "source_relation": "Candidate operationalization of Yu 2024 S1; landmark, route and anatomical review remain pending.",
+      "review_status": "pending",
+      "limitations": [
+        "Continuous solver accuracy is limited by supplied mesh geometry and floating-point constructions; mesh-edge comparison can overestimate length.",
+        "A shortest mesh route need not reproduce a physical tape route.",
+        "No bilateral averaging; absent endpoints and disconnected surfaces have no distance."
+      ],
+      "comparison_method": "mesh_edge_dijkstra_v1"
+    },
+    {
+      "id": "project_gonion_menton_surface",
+      "landmark_pairs": {
+        "left": [
+          "gonion_left",
+          "menton"
+        ],
+        "right": [
+          "gonion_right",
+          "menton"
+        ]
+      },
+      "kind": "surface_path",
+      "unit": "mm",
+      "method": "cgal_continuous_v1",
+      "definition_status": "project_candidate_published_equivalence_unverified",
+      "definition": "Continuous mesh surface path from gonion on each side to menton; no bilateral averaging and no substitution of a straight chord.",
+      "source_relation": "Candidate operationalization of Yu 2024 S1; landmark, route and anatomical review remain pending.",
+      "review_status": "pending",
+      "limitations": [
+        "Continuous solver accuracy is limited by supplied mesh geometry and floating-point constructions; mesh-edge comparison can overestimate length.",
+        "A shortest mesh route need not reproduce a physical tape route.",
+        "No bilateral averaging; absent endpoints and disconnected surfaces have no distance."
+      ],
+      "comparison_method": "mesh_edge_dijkstra_v1"
+    }
+  ],
+  "project_linear_candidates": [
+    {
+      "id": "project_ear_height_top",
+      "landmark_pairs": {
+        "left": [
+          "ear_top_edge_left",
+          "menton"
+        ],
+        "right": [
+          "ear_top_edge_right",
+          "menton"
+        ]
+      },
+      "kind": "vertical_distance_to_plane",
+      "unit": "mm",
+      "method": "model_y_height_v1",
+      "reference_frame": {
+        "up": [
+          0,
+          1,
+          0
+        ],
+        "plane_through": "menton",
+        "alignment_status": "model_alignment_unreviewed"
+      },
+      "definition": "Vertical model +Y separation of the upper ear point from a plane through menton. Not the ear-to-menton chord. View rotation changes only the display.",
+      "review_status": "pending",
+      "limitations": [
+        "Model axes must be anatomically aligned before claiming a reviewed ear-height measurement.",
+        "Ear points below the menton plane produce invalid_reference, not an absolute value.",
+        "Independent physical millimeter accuracy is not established."
+      ]
     }
   ]
 }

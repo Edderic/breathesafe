@@ -30,7 +30,12 @@
           <title>{{ record.record_id }} — draft landmark placement</title>
           <rect width="720" height="480" fill="#edf2f5" />
           <polygon v-for="face in faces" :key="face.index" :points="face.points" :fill="face.fill" />
-          <g stroke="#c74d15" stroke-width="3" stroke-linecap="round" pointer-events="none">
+          <g v-if="heightConstruction" pointer-events="none">
+            <polygon :points="heightConstruction.plane" fill="#36a4bb" fill-opacity="0.12" stroke="#126477" stroke-dasharray="5 4" />
+            <circle :cx="heightConstruction.foot.x" :cy="heightConstruction.foot.y" r="4" fill="white" stroke="#c74d15" />
+          </g>
+          <g stroke="#c74d15" stroke-width="3" stroke-linecap="round" pointer-events="none"
+            :stroke-dasharray="measurementKind === 'ear_height_top' ? '6 3' : null">
             <line v-for="(segment, index) in visiblePathSegments" :key="index"
               :x1="segment.a.x" :y1="segment.a.y" :x2="segment.b.x" :y2="segment.b.y" />
           </g>
@@ -63,31 +68,36 @@
         <button @click="saveNote" :disabled="!current[landmark]">Save note</button>
         <p v-if="current[landmark]">Placed by {{ current[landmark].annotator }}. Coordinates: {{ pointReadout }} mm.</p>
         <div class="views"><button @click="removePoint" :disabled="!current[landmark]">Remove point</button><button @click="undo" :disabled="!history.length">Undo last edit</button></div>
-        <h2>Zygion–gonion surface distance</h2>
-        <p>Mark both endpoints on the same side to calculate a route automatically. Select a side to inspect its highlighted path.</p>
-        <label>Path method<select v-model="pathMethod">
+        <h2>Measurements</h2>
+        <label>Measurement<select v-model="measurementKind">
+          <option v-for="item in measurementOptions" :key="item.id" :value="item.id">{{ item.label }}</option>
+        </select></label>
+        <p>{{ measurementOptions.find(item => item.id === measurementKind).description }}</p>
+        <label v-if="measurementKind !== 'ear_height_top'">Path method<select v-model="pathMethod">
           <option value="continuous">Continuous surface shortest path</option>
           <option value="edges">Mesh-edge approximation</option>
         </select></label>
-        <p v-if="pathError" class="error" role="alert">{{ pathError }}
+        <p v-if="pathError && measurementKind !== 'ear_height_top'" class="error" role="alert">{{ pathError }}
           <button @click="scheduleContinuous">Retry continuous solve</button>
           <a href="/python/dimension_pipeline/SURFACE_GEODESICS.md" target="_blank" rel="noopener">Local solver setup</a>
         </p>
-        <div v-for="path in surfacePaths" :key="path.id" class="surface-measurement">
-          <button @click="pathSide = path.side" :aria-pressed="pathSide === path.side">
-            {{ path.side === 'left' ? 'Left' : 'Right' }}:
+        <div v-for="path in displayedMeasurements" :key="path.id" class="surface-measurement">
+          <button @click="activeMeasurementId = path.id" :aria-pressed="selectedMeasurement?.id === path.id">
+            {{ path.side === 'midline' ? 'Midline' : path.side === 'left' ? 'Left' : 'Right' }}:
             <strong v-if="path.status === 'ok'">≈ {{ path.length_mm.toFixed(2) }} mm</strong>
             <span v-else-if="path.status === 'pending'">Calculating continuous path…</span>
             <span v-else-if="path.status === 'unavailable'">Continuous solver unavailable</span>
             <span v-else-if="path.status === 'disconnected'">No connected surface route</span>
-            <span v-else>Mark zygion and gonion</span>
+            <span v-else-if="path.status === 'invalid_reference'">Ear top is below menton in this frame</span>
+            <span v-else>Mark {{ path.endpoints.filter(name => !current[name]).map(landmarkName).join(' and ') }}</span>
           </button>
-          <p v-if="path.status === 'ok'">Straight chord: {{ path.chord_mm.toFixed(2) }} mm</p>
+          <p v-if="path.status === 'ok' && path.kind === 'surface_distance'">Straight chord: {{ path.chord_mm.toFixed(2) }} mm</p>
           <p v-if="path.status === 'ok' && path.method === 'cgal_continuous_v1'">
             Edge baseline: {{ path.mesh_edge_length_mm.toFixed(2) }} mm · Saved {{ (path.mesh_edge_length_mm-path.length_mm).toFixed(2) }} mm of detour
           </p>
         </div>
-        <p class="shortcut-hint">{{ pathMethod === 'continuous' ? 'Shortest path across triangle interiors, computed with floating-point coordinates.' : 'Mesh-edge approximation; depends on mesh detail.' }} Confirm the route visually. Equivalence to the paper’s measurement remains unverified.</p>
+        <p v-if="measurementKind === 'ear_height_top'" class="shortcut-hint">Uses model +Y as vertical and a horizontal plane through menton. View rotation does not change the measurement. Anatomical head alignment remains unreviewed.</p>
+        <p v-else class="shortcut-hint">{{ pathMethod === 'continuous' ? 'Shortest path across triangle interiors, computed with floating-point coordinates.' : 'Mesh-edge approximation; depends on mesh detail.' }} Confirm the route visually. Equivalence to the paper’s measurement remains unverified.</p>
         <h2>Save and resume</h2>
         <p>Edits stay in memory until downloaded. Export each head before leaving. Files are processed locally.</p>
         <label>Review status<select v-model="reviewStatus"><option value="draft">Draft</option><option value="ready_for_review">Ready for review</option></select></label>
@@ -107,7 +117,7 @@ import views from '../../python/dimension_pipeline/assets/head_views.json';
 import { projectPoint } from './dimension_fixture_geometry';
 import { makeHead, headCenter, projectMesh, shadedFaces, pickSurface, attachmentPoint,
   meshFingerprint, validateAnnotations, readSurfaceRecord } from './face_annotation_geometry';
-import { buildSurfaceGraph, zygionGonionPaths } from './face_surface_paths';
+import { buildSurfaceGraph, facialSurfacePaths, surfaceMeasurementDefinitions, earTopHeights } from './face_surface_paths';
 import { requestContinuousPaths } from './face_continuous_paths';
 
 const labelOptions = [
@@ -129,6 +139,14 @@ const legacyLabels = ['left', 'right'].map(side => ({ id: `lateral_zygomatic_edg
   name: `Legacy cheekbone point · ${side} (review)`, provisional: true,
   description: 'Preserved from an older export. This point has not been confirmed as zygion; place zygion explicitly to derive the new surface distance.' }));
 
+const measurementOptions = [
+  { id: 'nose_protrusion', label: 'Nose protrusion', description: 'Surface length from pronasale to subnasale (FFR-specific construction). The straight chord is displayed separately.' },
+  { id: 'mid_nose_slope', label: 'Mid-nose slope', description: 'Surface length from nasal midpoint to the mid-nose root on each side, in millimeters. Landmark placement remains provisional.' },
+  { id: 'lateral_zygomatic_gonion', label: 'Lateral zygomatic–gonion length', description: 'Candidate surface route from zygion to gonion on the same side. Correspondence to the paper’s lateral cheekbone endpoint remains unverified.' },
+  { id: 'ear_height_top', label: 'Ear height; top', description: 'Vertical height from the upper ear landmark down to a horizontal plane through menton. The dashed line and plane show the construction.' },
+  { id: 'gonion_menton', label: 'Gonion–menton length (surface)', description: 'Surface length from gonion on each side to the midline menton landmark.' },
+];
+
 function download(blob, name) {
   const url = URL.createObjectURL(blob), a = document.createElement('a');
   a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 10000);
@@ -138,7 +156,7 @@ export default {
   name: 'FaceLandmarks',
   data() {
     return { variants: [...variants], localHeads: {}, views, variantId: 'base', record: makeHead(base, variants[0]), center: headCenter(base),
-      pathSide: 'left',
+      measurementOptions, measurementKind: 'nose_protrusion', activeMeasurementId: null,
       pathMethod: 'continuous', continuousResults: null, pathError: '', solverTimer: null, solverController: null, solverRevision: 0,
       captureScale: 1.45,
       drafts: {}, histories: {}, landmark: 'pronasale', annotator: '', note: '', reviewStatus: 'draft', mode: 'rotate',
@@ -151,10 +169,26 @@ export default {
     history() { return this.histories[this.variantId] || []; },
     selectedLabel() { return this.labelOptions.find(l => l.id === this.landmark) || labelOptions[0]; },
     surfaceGraph() { return buildSurfaceGraph(this.record); },
-    edgePaths() { return zygionGonionPaths(this.record, this.surfaceGraph, this.current); },
+    edgePaths() { return facialSurfacePaths(this.record, this.surfaceGraph, this.current); },
+    earHeights() { return earTopHeights(this.record, this.current); },
+    measurements() { return [...this.surfacePaths, ...this.earHeights]; },
+    displayedMeasurements() { return this.measurements.filter(item => item.measurement === this.measurementKind); },
+    selectedMeasurement() { return this.displayedMeasurements.find(item => item.id === this.activeMeasurementId) || this.displayedMeasurements[0]; },
+    heightConstruction() {
+      const item = this.selectedMeasurement;
+      if (item?.kind !== 'vertical_distance_to_plane' || item.status !== 'ok') return null;
+      const bounds = [0, 2].map(axis => {
+        const values = this.record.mesh.vertices.map(p => p[axis]);
+        return [Math.min(...values)-15, Math.max(...values)+15];
+      });
+      const [x, z] = bounds, y = item.plane_point_mm[1];
+      const project = p => projectPoint(p, this.center, this.yaw, this.pitch, this.scale);
+      return { plane: [[x[0], y, z[0]], [x[1], y, z[0]], [x[1], y, z[1]], [x[0], y, z[1]]]
+        .map(p => { const q = project(p); return `${q.x},${q.y}`; }).join(' '), foot: project(item.projected_point_mm) };
+    },
     continuousKey() {
       return JSON.stringify({ variant: this.variantId, method: this.pathMethod,
-        endpoints: ['zygion_left', 'gonion_left', 'zygion_right', 'gonion_right'].map(name => this.current[name]?.attachment || null) });
+        endpoints: [...new Set(surfaceMeasurementDefinitions().flatMap(item => item.endpoints))].map(name => this.current[name]?.attachment || null) });
     },
     surfacePaths() {
       if (this.pathMethod === 'edges') return this.edgePaths;
@@ -164,12 +198,13 @@ export default {
       });
     },
     visiblePathSegments() {
-      const points = this.surfacePaths.find(path => path.side === this.pathSide)?.points || [];
+      const measurement = this.selectedMeasurement, points = measurement?.points || [];
       return points.slice(1).flatMap((b, i) => {
         const a = points[i], middle = a.map((v, axis) => (v+b[axis])/2);
         const project = point => projectPoint(point, this.center, this.yaw, this.pitch, this.scale);
         const p = project(middle), hit = pickSurface(this.record, this.points, p.x, p.y);
-        return hit && Math.abs(hit.depth-p.depth) < .1 ? [{ a: project(a), b: project(b) }] : [];
+        return measurement.kind === 'vertical_distance_to_plane' || (hit && Math.abs(hit.depth-p.depth) < .1)
+          ? [{ a: project(a), b: project(b) }] : [];
       });
     },
     points() { return projectMesh(this.record, this.center, this.yaw, this.pitch, this.scale); },
@@ -205,12 +240,13 @@ export default {
     if (this.dirty) return window.confirm('Some head annotations have not been exported. Leave this page and discard those edits?');
   },
   methods: {
+    landmarkName(id) { return this.labelOptions.find(label => label.id === id)?.name || id.replaceAll('_', ' '); },
     scheduleContinuous() {
       clearTimeout(this.solverTimer); this.solverController?.abort(); this.solverRevision++;
       this.continuousResults = null; this.pathError = '';
       // Do not consult edgePaths in this synchronous watcher: Vue may still be
       // invalidating that separate computed value after a landmark/undo edit.
-      const complete = ['left', 'right'].some(side => this.current[`zygion_${side}`] && this.current[`gonion_${side}`]);
+      const complete = surfaceMeasurementDefinitions().some(item => item.endpoints.every(name => this.current[name]));
       if (this.pathMethod !== 'continuous' || !complete) return;
       const revision = this.solverRevision;
       this.solverTimer = setTimeout(() => this.solveContinuous(revision), 180);
@@ -368,7 +404,7 @@ export default {
       mirrored: false, distortion: 'none', version: '1.0.0' }; },
     async exportAnnotations() {
       const record = this.record, variantId = this.variantId, landmarks = JSON.parse(JSON.stringify(this.current)), reviewStatus = this.reviewStatus;
-      const derived = this.surfacePaths.map(({ points, ...path }) => path);
+      const derived = this.measurements.map(({ points, ...path }) => path);
       try {
         const bundle = { annotation_version: '1.0.0', record_id: record.record_id, topology_id: record.topology_id,
           mesh_sha256: await meshFingerprint(record), units: 'mm', source: record.source,

@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
   }
   try {
     int n, m, q;
-    if (!(std::cin >> n >> m >> q) || n < 3 || n > 20000 || m < 1 || m > 40000 || q < 1 || q > 2)
+    if (!(std::cin >> n >> m >> q) || n < 3 || n > 20000 || m < 1 || m > 40000 || q < 1 || q > 8)
       throw std::runtime_error("invalid_counts");
     Mesh mesh;
     for (int i = 0; i < n; ++i) {

@@ -137,10 +137,13 @@ class GeometryTest(unittest.TestCase):
         self.assertEqual(nasal_surface["kind"], "surface_distance")
         self.assertEqual(nasal_chord["kind"], "straight_distance")
         self.assertEqual(candidates["yu2024_ear_height_top"]["kind"], "vertical_distance_to_plane")
+        project_ids = {entry["id"] for group in ["project_surface_candidates", "project_linear_candidates"]
+                       for entry in registry[group]}
         for feature in candidates.values():
             self.assertEqual(feature["unit"], "mm")
             self.assertEqual(feature["status"], "definition_retrieved_pending_anatomical_review")
-            self.assertEqual(feature["implementation_status"], "not_implemented")
+            self.assertEqual(feature["implementation_status"], "project_candidate_available")
+            self.assertIn(feature["project_candidate_id"], project_ids)
             self.assertTrue(feature["blocker"])
         self.assertEqual(registry["review"]["status"], "pending")
         for feature in registry["other_candidates"]:
