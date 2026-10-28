@@ -163,5 +163,34 @@
     "alternative_anchor_status": "No validated physical alternative selected. Analytic fixture ridge is only a mathematical smoke-test anchor.",
     "source_location": "S2 row 18, PDF page 3",
     "source_definition_status": "retrieved_pending_protocol_review"
-  }
+  },
+  "project_surface_candidates": [
+    {
+      "id": "project_zygion_gonion_surface",
+      "landmark_pairs": {
+        "left": [
+          "zygion_left",
+          "gonion_left"
+        ],
+        "right": [
+          "zygion_right",
+          "gonion_right"
+        ]
+      },
+      "kind": "surface_path",
+      "unit": "mm",
+      "method": "cgal_continuous_v1",
+      "definition_status": "project_candidate_published_equivalence_unverified",
+      "definition": "Continuous shortest path on the unchanged triangular mesh between exact surface-attached zygion and gonion on the same side, using CGAL with exact predicates and double coordinate constructions. Not a validated physical tape route.",
+      "source_relation": "Candidate operationalization of Yu 2024 S1 row 14; that source describes a lateral cheekbone endpoint without explicitly naming zygion. Equivalence remains unverified.",
+      "review_status": "pending",
+      "limitations": [
+        "Continuous solver accuracy is limited by supplied mesh geometry and floating-point constructions; mesh-edge comparison can overestimate length.",
+        "A shortest mesh route need not reproduce a physical tape route.",
+        "No bilateral averaging; absent endpoints and disconnected surfaces have no distance.",
+        "Legacy lateral_zygomatic_edge annotations are preserved separately and never treated as zygion automatically."
+      ],
+      "comparison_method": "mesh_edge_dijkstra_v1"
+    }
+  ]
 }

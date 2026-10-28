@@ -85,8 +85,10 @@ fixture viewer. For a standalone preview without Rails or a database:
 Open `http://127.0.0.1:5178/scripts/face_landmarks_preview.html`.
 
 1. Choose a head and enter your name. Use fixed views or drag in **Rotate** mode.
-   **Open generated heads** can load up to ten compatible surface JSON files
-   (including local FLAME adapter outputs) without uploading them.
+   **Open heads or annotations** can load up to ten compatible surface JSON files
+   (including local FLAME adapter outputs) without external uploads. Selecting a
+   single annotation export there automatically finds its exact matching loaded
+   head and resumes it. Load the head first if it is not already available.
 2. Choose a landmark, enter an optional placement note, and select **Place
    landmark**. Click its visible surface; switch views to inspect the same point.
    Keyboard shortcuts: **R** selects Rotate, **L** selects Place landmark,
@@ -96,6 +98,10 @@ Open `http://127.0.0.1:5178/scripts/face_landmarks_preview.html`.
    are left alone. Arrow keys rotate when the geometry viewport has focus.
 3. Use **Undo last edit**, **Remove point**, or place again to correct it.
    **Save note** updates a note without moving the point.
+   Mark **Zygion** and **Gonion** on the same side to derive a surface distance
+   automatically. The left/right results stay separate. Select a result to show
+   its path; hidden portions are suppressed behind the mesh. A straight chord
+   is displayed separately for comparison.
 4. **Download annotations** for each edited head. **Resume annotations** loads
    a saved sidecar for the currently selected exact mesh. Drafts remain in memory
    between variant switches; export before leaving. Navigation warns about edits
@@ -118,10 +124,31 @@ records: no surface measurement route or approved anatomical labels are invented
 is labeled independently in this first workflow; cross-variant propagation and
 multi-reviewer adjudication remain future work.
 
+The default zygion–gonion method is now `cgal_continuous_v1`, which crosses
+triangle interiors through the local solver. See [SURFACE_GEODESICS.md](SURFACE_GEODESICS.md)
+for build/start commands, validation and the comparison on saved annotations.
+The viewer retains `mesh_edge_dijkstra_v1` as an explicit comparison: a shortest path
+along the triangle edge graph, connecting exact barycentric endpoints to their
+own triangle vertices. Endpoints within one triangle use the direct on-surface
+segment. Edge directions/resolution can overestimate the continuous geodesic;
+the chosen route is not automatically a physical tape route. Missing endpoints
+or disconnected components produce no distance. Model units do not establish
+independent physical millimeter accuracy.
+
+Annotation exports include `derived_measurements` with endpoint names, method,
+length, chord and reconstructable vertex/barycentric path attachments. Import
+recalculates these values from the landmarks and mesh rather than trusting
+previously exported numbers. Published equivalence remains unverified: S1 row
+14 describes a lateral cheekbone endpoint without explicitly naming zygion.
+The candidate mapping is recorded in `target_registry.json` separately from the
+source definition. Older `lateral_zygomatic_edge_left/right` labels are retained
+as optional **Legacy cheekbone point** entries for review; they are never
+silently renamed or used as zygion in the calculation.
+
 Geometry/annotation checks:
 
 ```sh
-node --test scripts/tests/dimension_fixture_geometry.test.cjs scripts/tests/face_annotation_geometry.test.cjs
+node --test scripts/tests/dimension_fixture_geometry.test.cjs scripts/tests/face_annotation_geometry.test.cjs scripts/tests/face_surface_paths.test.cjs scripts/tests/face_continuous_paths.test.cjs
 PYTHONPATH=python python3 -m unittest discover -s python/dimension_pipeline/tests -v
 ```
 

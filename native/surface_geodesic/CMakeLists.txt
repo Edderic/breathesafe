@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.16)
+project(masqfit_surface_geodesic LANGUAGES CXX)
+find_package(CGAL REQUIRED)
+add_executable(surface_geodesic main.cpp)
+target_compile_features(surface_geodesic PRIVATE cxx_std_17)
+target_link_libraries(surface_geodesic PRIVATE CGAL::CGAL)

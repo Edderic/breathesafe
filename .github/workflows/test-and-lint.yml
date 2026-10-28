@@ -52,7 +52,7 @@ jobs:
         bin/vite build --clear --mode=test
 
     - name: Test browser controls and fixture geometry
-      run: node --test scripts/tests/admin_anonymous_contributions.test.cjs scripts/tests/admin_mask_proposals.test.cjs scripts/tests/dimension_fixture_geometry.test.cjs
+      run: node --test scripts/tests/admin_anonymous_contributions.test.cjs scripts/tests/admin_mask_proposals.test.cjs scripts/tests/dimension_fixture_geometry.test.cjs scripts/tests/face_annotation_geometry.test.cjs scripts/tests/face_surface_paths.test.cjs scripts/tests/face_continuous_paths.test.cjs
 
     - name: Install system dependencies
       run: |
@@ -113,6 +113,13 @@ jobs:
 
     - name: Install dimension pipeline dependency
       run: python -m pip install -r python/dimension_pipeline/requirements-flame.txt
+
+    - name: Build continuous surface solver
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libcgal-dev
+        cmake -S native/surface_geodesic -B tmp/surface-geodesic-build -DCMAKE_BUILD_TYPE=Release
+        cmake --build tmp/surface-geodesic-build -j 2
 
     - name: Test dimension geometry fixtures
       run: PYTHONPATH=python python -m unittest discover -s python/dimension_pipeline/tests -v
