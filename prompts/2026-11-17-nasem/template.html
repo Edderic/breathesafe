@@ -23,13 +23,11 @@ figcaption{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.3}
 @media print{.demo-phone{height:425px}.capture-demo{gap:26px}.reference-image{height:300px}}
 
 .capture-demo{max-width:none;grid-template-columns:auto auto minmax(0,1fr);gap:24px}.capture-demo .demo-phone{height:420px}
-.recommendation-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.recommendation-heading h2{font-size:22px;margin:0}.recommendation-heading button{font-size:13px;white-space:nowrap;padding:7px 9px}
-.personal-recommendations{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:15px 0}.personal-recommendations article{padding:14px;background:white;border-top:3px solid var(--teal)}.personal-recommendations h3{font-size:18px;line-height:1.3;margin:0 0 8px}.personal-recommendations .personal-score{font-size:29px;color:var(--teal);font-weight:bold;margin:0}.personal-score span{font-size:14px;font-weight:normal}.capture-demo .personal-caption{font-size:15px;line-height:1.4;margin:10px 0}.personal-recommendations .observed-result{font-size:14px;margin:7px 0 0;color:var(--muted)}
-@media(max-width:760px){.capture-demo{grid-template-columns:1fr}.recommendation-heading{flex-wrap:wrap}.personal-recommendations{grid-template-columns:1fr 1fr}}
-@media print{.capture-demo .demo-phone{height:405px}.personal-recommendations h3{font-size:17px}.recommendation-heading button{display:none}}
+.capture-demo{max-width:none;grid-template-columns:auto auto minmax(0,1fr);gap:24px}.capture-demo .demo-phone{height:420px}
+.recommendation-shot{min-width:0}.recommendations-image{display:block;width:100%;height:auto;max-height:440px;object-fit:contain}
+@media(max-width:760px){.capture-demo{grid-template-columns:1fr}.recommendations-image{max-height:none}}
+@media print{.capture-demo .demo-phone{height:405px}.recommendations-image{max-height:425px}}
 </style></head><body><nav class="toolbar" aria-label="Presentation controls"><span class="brand">MASQFIT / NASEM · NOV 17</span><div class="controls"><button id="prev" aria-label="Previous slide">←</button><span id="counter" aria-live="polite"></span><button id="next" aria-label="Next slide">→</button><button id="overview" aria-pressed="false">All slides</button><button id="print">Print / PDF</button></div></nav><main><!-- SLIDES --></main><script>
-const observedToggle=document.getElementById('toggle-observed');
-if(observedToggle)observedToggle.addEventListener('click',()=>{const expanded=observedToggle.getAttribute('aria-expanded')!=='true';document.querySelectorAll('.observed-result').forEach(row=>row.hidden=!expanded);observedToggle.setAttribute('aria-expanded',String(expanded));observedToggle.textContent=expanded?'Hide observed fit':'Show observed fit';});
 const slides=[...document.querySelectorAll('.slide')];let current=0;
 const prev=document.getElementById('prev'),next=document.getElementById('next'),counter=document.getElementById('counter'),overview=document.getElementById('overview');
 function show(index,update=true){current=Math.max(0,Math.min(slides.length-1,index));slides.forEach((s,i)=>{s.classList.toggle('active',i===current);});counter.textContent=`${current+1} / ${slides.length}`;prev.disabled=current===0;next.disabled=current===slides.length-1;if(update)history.replaceState(null,'',`#slide-${current+1}`);if(document.body.classList.contains('all'))slides[current].scrollIntoView({block:'start'});else window.scrollTo(0,0);}

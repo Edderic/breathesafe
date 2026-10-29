@@ -26,13 +26,12 @@ their evaluation population. The quadratic perimeter-difference slide explains
 the learned optimum using a schematic with invented coefficients. The 45-second processing figure is presenter-reported,
 not a controlled benchmark. The Android pipeline is work in progress.
 Technical references are linked on the relevant slides and in the source backup.
-Slide 2 also includes four personal recommendation cards transcribed from the
-presenter’s October 29 screenshot (October 25 model). Observed Fit is hidden
-initially; use Show observed fit to reveal it, or Hide observed fit before
-printing. This presentation toggle does not change the live application.
-The live recommendation link requires the appropriate account access.
+Slide 2 uses the presenter’s October 29 screenshot of the live Breathesafe
+recommendations page. Observed Fit is hidden in the captured page, leaving
+model scores and mask details visible. The model timestamp shown is October 25.
+The percentages are model outputs and are not presented as calibrated probabilities.
 
-Four presenter-supplied images show the current MasqFit capture and five aggregates,
+Five presenter-supplied images show the current MasqFit capture and five aggregates,
 Apple face geometry, and a MediaPipe mesh. Originals are preserved in assets/
 and embedded in the HTML for offline use. Occluded-point accuracy from one
 viewing angle is identified as an open project validation question.

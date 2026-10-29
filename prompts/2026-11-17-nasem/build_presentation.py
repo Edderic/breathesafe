@@ -47,15 +47,6 @@ def screenshot(name, alt, cls='reference-image'):
     return f'<img class="{cls}" src="data:image/png;base64,{encoded}" alt="{escape(alt)}">'
 
 
-personal = json.loads((ROOT / 'data/personal-recommendations-2026-10-29.json').read_text())
-recommendation_cards = '<div class="personal-recommendations">' + ''.join(
-    '<article><h3>' + escape(item['name']) + '</h3>'
-    '<p class="personal-score">' + str(item['predicted_fit_percent']) + '% <span>predicted fit</span></p>'
-    '<p class="observed-result" hidden>Observed Fit: ' + escape(item['observed_fit']) + '</p></article>'
-    for item in personal['recommendations']
-) + '</div>'
-
-
 def add(tag, title, body, note, seconds=0, source='', cls=''):
     index = len(slides) + 1
     seconds = budgets.get(tag, seconds)
@@ -83,20 +74,18 @@ add('01 / THE APPLICATION', 'From my facial measurements to recommendations.',
     screenshot('masqfit-capture.png', 'MasqFit app showing selected measurement points overlaid on a face.', 'demo-phone') +
     '<figcaption>ARKit in the current app</figcaption></figure><figure>' +
     screenshot('masqfit-measurements.png', 'MasqFit five aggregate measurements: nose 45.1 mm, strap 129.0 mm, top cheek 99.1 mm, mid cheek 94.0 mm, chin 128.8 mm.', 'demo-phone') +
-    '<figcaption>Five paths in millimeters</figcaption></figure><div><div class="recommendation-heading">'
-    '<h2>Recommendations for Edderic</h2><button id="toggle-observed" aria-expanded="false" aria-controls="sample-recommendations">Show observed fit</button></div>'
-    '<div id="sample-recommendations">' + recommendation_cards + '</div>'
-    '<p class="personal-caption"><a href="' + escape(personal['source_url'], quote=True) + '">Open live recommendations</a>'
-    ' · Oct 29 screenshot<br>Model: custom_lr · Oct 25, 2026</p>'
-    '<p class="personal-caption">Nose + top cheek + mid cheek + chin → perimeter proxy. Strap path collected separately.</p></div></div>',
+    '<figcaption>Five paths in millimeters</figcaption></figure><figure class="recommendation-shot">' +
+    screenshot('personal-recommendations-hidden-observed-fit.png',
+               'Breathesafe recommendations for Edderic, sorted by predicted fit, with Observed Fit hidden. The first four listed respirators each show a 98 percent model fit score.',
+               'recommendations-image') +
+    '<figcaption>My recommendations · October 29 screenshot · Observed Fit hidden</figcaption></figure></div>',
     'Here is ARKit in the current MasqFit app. The dots mark selected facial measurement paths. '
     'The next screen shows five aggregates in millimeters: nose, strap, top cheek, mid cheek, and chin. '
     'Four paths form the perimeter proxy used for ranking masks. The strap path is collected but does not directly enter this model. '
-    'The cards at right show four recommendations for me from the October 29 screenshot, using the October 25 model. '
-    'Observed Fit starts hidden; the slide button can reveal the values from the screenshot. '
+    'At right are my recommendations in Breathesafe, sorted by the fit model’s score. This is an October 29 screenshot of the October 25 model, with Observed Fit hidden. '
     'The displayed predicted percentages are model outputs, not calibrated individual success probabilities or independent validation. '
     'This personal example is separate from the held-out ranking results on slide 4.',
-    30, 'Presenter screenshots and personal example · Predicted percentages are model outputs; calibration is not established.')
+    30, 'Presenter screenshots and personal example · The screenshot shows model outputs; calibration is not established.')
 
 add('02 / GEOMETRY → FIT SCORE', 'A preferred perimeter difference, learned from outcomes.',
     '<div class="equation compact-equation">Δ = (P<sub>face, mm</sub> − P<sub>mask, mm</sub>) / 10 &nbsp; [cm]<br>'
