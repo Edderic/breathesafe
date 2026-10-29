@@ -32,9 +32,9 @@ budgets = {
     '04 / WHAT DID NOT TRANSFER DIRECTLY': 40,
     '05 / WHY PHOTOGRAMMETRY': 60,
     '06 / ANDROID DEVELOPMENT': 70,
-    '07 / LESSONS FOR NPPTL APPS': 50,
+    '07 / LESSONS FOR NPPTL APPS': 40,
     '08 / TAKEAWAY': 30,
-    '09 / ACKNOWLEDGEMENTS': 20,
+    '09 / ACKNOWLEDGEMENTS': 30,
 }
 
 
@@ -263,10 +263,13 @@ add('09 / ACKNOWLEDGEMENTS', 'Acknowledgements.',
         f'<article><strong>{name}</strong><span>{contribution}</span></article>'
         for name, contribution in acknowledgements
     ) + '</div>' +
-    '<div class="ack-support"><strong>With thanks to Kanro</strong> for early support, and to Aaron Collins / OpenAeros, research participants, and anonymous contributors.</div>',
+    '<div class="ack-support"><strong>With thanks to Kanro</strong> for early support, and to Aaron Collins / OpenAeros, research participants, and anonymous contributors.</div>' +
+    '<div class="ack-contact"><strong>Seeking funding to continue this research · Open to work and consulting</strong>' +
+    '<span><a href="mailto:info@breathesafe.xyz">info@breathesafe.xyz</a> · <a href="https://www.linkedin.com/in/edderic/">LinkedIn: Edderic Ugaddan</a></span></div>',
     'Thank you to Wayne, Mish, Lisa Foreman, Gerard Hughes, and Amanda Abbott for their community fit-testing, mask-selection, and data contributions. '
-    'Thank you to Nukit for fit-testing probes, Kanro for early support, and Aaron Collins, OpenAeros, research participants, and anonymous contributors.',
-    20, 'Community contributor descriptions: October 2026 Kanro proposal · Nukit probe credit: presenter.')
+    'Thank you to Nukit for fit-testing probes, Kanro for early support, and Aaron Collins, OpenAeros, research participants, and anonymous contributors. '
+    'I am seeking funding to continue this research and am open to work and consulting. You can reach me at info@breathesafe.xyz or on LinkedIn.',
+    30, 'Community contributor descriptions: October 2026 Kanro proposal · Nukit probe credit: presenter.')
 
 add('BACKUP / SCALE & PROJECTION', 'The camera-only path needs a scale anchor.',
     '<div class="two-col"><div><h2>Absolute scale</h2><p>Use an independently known dimension or calibrated capture system.</p>'

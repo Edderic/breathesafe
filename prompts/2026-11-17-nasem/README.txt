@@ -55,8 +55,11 @@ The slide's CNN icon marks a planned detector for local facial features in 2D
 views; the screenshots do not show a trained detector or its accuracy.
 Slide 13 is the acknowledgements page. Community contributor names and roles
 come from prompts/kanro/2026-10-camera-only-masqfit-proposal.html; the Nukit
-fit-testing probe credit is supplied by the presenter. The Android and lessons
-segments each give ten seconds to acknowledgements, keeping the talk at 10:00.
+fit-testing probe credit is supplied by the presenter. The Android segment gives
+ten seconds and the lessons segment gives twenty seconds to acknowledgements,
+keeping the talk at 10:00.
+The final slide also invites research funding and work or consulting inquiries,
+with the presenter's email and LinkedIn link.
 
 Validation:
 Checked all 15 slides at 1366x768 for viewport fit, mobile width at 390px for
