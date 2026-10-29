@@ -103,7 +103,7 @@
               </div>
             </td>
           </tr>
-          <tr v-if="hasObservedFitContext">
+          <tr v-if="showObservedFit && hasObservedFitContext">
             <th>Observed Fit</th>
             <td :style="observedFitCellStyle(m)">{{ observedFitLabel(m) }}</td>
           </tr>
@@ -259,6 +259,10 @@ export default {
     }
   },
   props: {
+    showObservedFit: {
+      type: Boolean,
+      default: true
+    },
     facialMeasurements: {
       default: {}
     },

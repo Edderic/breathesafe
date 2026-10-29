@@ -108,6 +108,16 @@
           <span class="recommender-version-value">{{ recommenderVersionText }}</span>
         </label>
 
+        <button
+          v-if="hasObservedFitContext"
+          type="button"
+          class="observed-fit-toggle control"
+          :aria-pressed="!showObservedFit"
+          @click="toggleObservedFit"
+        >
+          {{ showObservedFit ? 'Hide observed fit' : 'Show observed fit' }}
+        </button>
+
 
         <Pagination
           v-if="!hasRecommenderPayload"
@@ -211,6 +221,7 @@
       :showUniqueNumFitTesters='true'
       :viewMaskOnClick='true'
       :facialMeasurements='facialMeasurements'
+      :showObservedFit='showObservedFit'
     />
 
     <div v-else class="mask-metrics-table-wrapper">
@@ -508,6 +519,9 @@ export default {
     hasObservedFitContext() {
       return !!this.$route.query.recommender_user_id
     },
+    showObservedFit() {
+      return this.hasObservedFitContext && this.$route.query.hideObservedFit !== 'true'
+    },
     routeRecommenderUserId() {
       const value = this.$route.query.recommender_user_id
       return value ? String(value) : ''
@@ -598,7 +612,7 @@ export default {
           { key: 'breathability', label: 'Breath' },
           { key: 'affordability', label: 'Cost' },
         ]
-        if (this.hasObservedFitContext) {
+        if (this.showObservedFit) {
           rows.splice(1, 0, { key: 'observed_fit', label: 'Observed Fit' })
         }
         if (this.showColorColumn) {
@@ -616,7 +630,7 @@ export default {
         { key: 'breathability', label: 'Breathability (pa)' },
         { key: 'affordability', label: 'Initial Cost (USD)' },
       ]
-      if (this.hasObservedFitContext) {
+      if (this.showObservedFit) {
         rows.splice(1, 0, { key: 'observed_fit', label: 'Observed Fit' })
       }
       if (this.showColorColumn) {
@@ -1539,6 +1553,15 @@ export default {
       })
       this.$router.push({ name: 'Masks', query })
     },
+    toggleObservedFit() {
+      const query = Object.assign({}, this.$route.query)
+      if (this.showObservedFit) {
+        query.hideObservedFit = 'true'
+      } else {
+        delete query.hideObservedFit
+      }
+      this.$router.replace({ name: 'Masks', query })
+    },
     updateTrainingQueryParam(key, event) {
       const rawValue = String(event?.target?.value || '').trim()
       const query = Object.assign({}, this.$route.query, { page: 1 })
@@ -1839,6 +1862,17 @@ export default {
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .observed-fit-toggle {
+    margin: 0.35em;
+    padding: 0.55em 0.8em;
+    border: 1px solid #888;
+    border-radius: 0.35em;
+    background: #fff;
+    white-space: nowrap;
+    cursor: pointer;
   }
 
   .active-filter-pills {
