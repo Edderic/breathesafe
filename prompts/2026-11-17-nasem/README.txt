@@ -27,8 +27,8 @@ the learned optimum using a schematic with invented coefficients. The 45-second 
 not a controlled benchmark. The Android pipeline is work in progress.
 Technical references are linked on the relevant slides and in the source backup.
 Slide 2 enlarges the MasqFit capture and measurement screenshots. Slide 3
-shows an enlarged top section of the presenter’s October 29 screenshot
-of the live Breathesafe recommendations page. The original complete screenshot
+shows the presenter’s complete October 29 screenshot of the live Breathesafe
+recommendations page, scaled to the available presentation height. The original
 is preserved in assets/personal-recommendations-hidden-observed-fit.png. Observed Fit is hidden in the captured page, leaving
 model scores and mask details visible. The model timestamp shown is October 25.
 The percentages are model outputs and are not presented as calibrated probabilities.

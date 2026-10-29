@@ -87,11 +87,11 @@ add('02 / PERSONAL RECOMMENDATIONS', 'What the model recommends for my face.',
     screenshot('personal-recommendations-hidden-observed-fit.png',
                'Breathesafe recommendations for Edderic, sorted by predicted fit, with Observed Fit hidden. The first four listed respirators each show a 98 percent model fit score.',
                'recommendations-image') +
-    '</div><figcaption>Top recommendations enlarged from the October 29 screenshot · October 25 custom_lr model · Observed Fit hidden</figcaption></figure>',
+    '</div><figcaption>October 29 screenshot · October 25 custom_lr model · Observed Fit hidden</figcaption></figure>',
     'These are my recommendations in Breathesafe, sorted by the model’s fit score. This is an October 29 screenshot of the October 25 model, with Observed Fit hidden. '
     'The displayed predicted percentages are model outputs, not calibrated individual success probabilities or independent validation. '
     'This personal example is separate from the held-out ranking results that follow.',
-    30, 'Presenter screenshot · Individual scores are model outputs; calibration is not established.', 'visual-slide')
+    30, 'Presenter screenshot · Individual scores are model outputs; calibration is not established.', 'visual-slide recommendation-slide')
 
 add('02 / GEOMETRY → FIT SCORE', 'A preferred perimeter difference, learned from outcomes.',
     '<div class="equation compact-equation">Δ = (P<sub>face, mm</sub> − P<sub>mask, mm</sub>) / 10 &nbsp; [cm]<br>'
