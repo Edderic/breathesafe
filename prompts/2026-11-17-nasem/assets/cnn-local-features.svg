@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 72" role="img" aria-label="Face features passed through a convolution grid">
+  <rect width="110" height="72" rx="10" fill="#f7faf7"/>
+  <path d="M25 8c-14 0-19 12-18 27 1 15 9 27 18 27s17-12 18-27C44 20 39 8 25 8Z" fill="#e4ece4" stroke="#087f79" stroke-width="2"/>
+  <circle cx="16" cy="30" r="3" fill="#d68038"/><circle cx="34" cy="30" r="3" fill="#d68038"/>
+  <circle cx="25" cy="40" r="3" fill="#d68038"/><circle cx="7" cy="35" r="2.5" fill="#d68038"/><circle cx="43" cy="35" r="2.5" fill="#d68038"/>
+  <path d="M49 36h11m-5-5 5 5-5 5" fill="none" stroke="#087f79" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#e4ece4" stroke="#087f79" stroke-width="1.5">
+    <rect x="69" y="12" width="26" height="26" rx="2" opacity=".55"/>
+    <rect x="75" y="21" width="26" height="26" rx="2" opacity=".75"/>
+    <rect x="81" y="30" width="26" height="26" rx="2"/>
+  </g>
+  <path d="M89.7 30v26M98.3 30v26M81 38.7h26M81 47.3h26" stroke="#087f79" stroke-width="1.2"/>
+  <rect x="89.7" y="38.7" width="8.6" height="8.6" fill="#d68038"/>
+</svg>
