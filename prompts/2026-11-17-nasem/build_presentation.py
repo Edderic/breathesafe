@@ -83,11 +83,11 @@ add('01 / THE APPLICATION', 'ARKit in MasqFit: five facial paths.',
     30, 'Presenter-supplied MasqFit screenshots · These images illustrate the workflow, not measurement accuracy.', 'visual-slide')
 
 add('02 / PERSONAL RECOMMENDATIONS', 'What the model recommends for my face.',
-    '<figure class="full-recommendations">' +
+    '<figure class="full-recommendations"><div class="recommendations-window">' +
     screenshot('personal-recommendations-hidden-observed-fit.png',
                'Breathesafe recommendations for Edderic, sorted by predicted fit, with Observed Fit hidden. The first four listed respirators each show a 98 percent model fit score.',
                'recommendations-image') +
-    '<figcaption>October 29 screenshot · October 25 custom_lr model · Observed Fit hidden</figcaption></figure>',
+    '</div><figcaption>Top recommendations enlarged from the October 29 screenshot · October 25 custom_lr model · Observed Fit hidden</figcaption></figure>',
     'These are my recommendations in Breathesafe, sorted by the model’s fit score. This is an October 29 screenshot of the October 25 model, with Observed Fit hidden. '
     'The displayed predicted percentages are model outputs, not calibrated individual success probabilities or independent validation. '
     'This personal example is separate from the held-out ranking results that follow.',
