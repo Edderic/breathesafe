@@ -111,8 +111,9 @@ add('02 / GEOMETRY → FIT SCORE', 'A preferred perimeter difference, learned fr
     'A limitation is geometry compression: for the same mask, two faces with the same summed perimeter get the same score. '
     'A future improvement is to retain the nose path as its own feature and measure a corresponding nose perimeter on each mask. '
     'We could model their difference separately from the whole-face perimeter and test whether it improves held-out predictions. '
-    'This is a proposal, not a measured improvement. Griffin and Yu’s 2021 study examined more detailed nose and chin measurements, which motivates closer attention to nose geometry.',
-    75, 'Source: custom_lr calc_preds · Schematic curve uses invented coefficients · <a href="https://proc.3dbody.tech/papers/2021/2145griffin-abs.pdf">Griffin &amp; Yu et al. (2021): detailed nose and chin measurements</a>.', 'geometry-slide')
+    'This is a proposal, not a measured improvement. Yu and Griffin’s 2024 study used respirator-specific face measurements, including the nose and chin, to examine associations with fit. '
+    'Their study does not validate the particular face-to-mask nose perimeter feature proposed here.',
+    75, 'Source: custom_lr calc_preds · Schematic curve uses invented coefficients · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/">Yu &amp; Griffin et al. (2024): FFR-specific face anthropometry and fit</a>.', 'geometry-slide')
 
 performance = json.loads((ROOT / 'data/dashboard-2026-09-24.json').read_text())['recommender_performance']
 rates = [performance[f'cross_validation_top_{k}_hit_rate_mean'] for k in (1, 3, 5)]
