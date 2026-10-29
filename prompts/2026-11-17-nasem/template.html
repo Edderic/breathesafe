@@ -22,11 +22,14 @@ figcaption{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.3}
 @media(max-width:760px){.capture-demo,.reference-layout{grid-template-columns:1fr;gap:20px}.demo-phone{height:440px;max-width:100%;object-fit:contain;margin:auto}.reference-image{height:auto}figcaption{text-align:center}}
 @media print{.demo-phone{height:425px}.capture-demo{gap:26px}.reference-image{height:300px}}
 
-.capture-demo{max-width:none;grid-template-columns:auto auto minmax(0,1fr);gap:24px}.capture-demo .demo-phone{height:420px}
-.capture-demo{max-width:none;grid-template-columns:auto auto minmax(0,1fr);gap:24px}.capture-demo .demo-phone{height:420px}
-.recommendation-shot{min-width:0}.recommendations-image{display:block;width:100%;height:auto;max-height:440px;object-fit:contain}
-@media(max-width:760px){.capture-demo{grid-template-columns:1fr}.recommendations-image{max-height:none}}
-@media print{.capture-demo .demo-phone{height:405px}.recommendations-image{max-height:425px}}
+.capture-demo{max-width:1150px;grid-template-columns:auto auto minmax(0,1fr);gap:42px;align-items:center}.capture-demo .demo-phone{height:510px}
+.measurement-summary h2{font-size:29px}.measurement-summary p{font-size:24px}.measurement-summary .muted{font-size:20px}
+.full-recommendations{display:flex;flex-direction:column;align-items:center}.full-recommendations .recommendations-image{display:block;width:auto;max-width:100%;height:auto;max-height:509px;object-fit:contain}.full-recommendations figcaption{align-self:center}
+@media(max-width:760px){.capture-demo{grid-template-columns:1fr}.capture-demo .demo-phone{height:510px}.full-recommendations .recommendations-image{max-height:none;width:100%}}
+@media print{.capture-demo .demo-phone{height:490px}.full-recommendations .recommendations-image{max-height:475px}}
+.slide.visual-slide{padding-top:18px}.visual-slide .eyebrow{margin-bottom:8px}.visual-slide h1{font-size:42px;margin-bottom:12px}
+@media(max-width:760px){.slide.visual-slide{padding-top:25px}.visual-slide h1{font-size:33px}}
+@media print{.slide.visual-slide{padding-top:24px}.visual-slide h1{font-size:39px}}
 </style></head><body><nav class="toolbar" aria-label="Presentation controls"><span class="brand">MASQFIT / NASEM · NOV 17</span><div class="controls"><button id="prev" aria-label="Previous slide">←</button><span id="counter" aria-live="polite"></span><button id="next" aria-label="Next slide">→</button><button id="overview" aria-pressed="false">All slides</button><button id="print">Print / PDF</button></div></nav><main><!-- SLIDES --></main><script>
 const slides=[...document.querySelectorAll('.slide')];let current=0;
 const prev=document.getElementById('prev'),next=document.getElementById('next'),counter=document.getElementById('counter'),overview=document.getElementById('overview');

@@ -32,7 +32,7 @@ budgets = {
     '04 / WHAT DID NOT TRANSFER DIRECTLY': 40,
     '05 / WHY PHOTOGRAMMETRY': 60,
     '06 / ANDROID DEVELOPMENT': 80,
-    '07 / LESSONS FOR NPPTL APPS': 90,
+    '07 / LESSONS FOR NPPTL APPS': 60,
     '08 / TAKEAWAY': 30,
 }
 
@@ -69,23 +69,29 @@ add('NASEM / NOVEMBER 17, 2026', 'From face capture<br>to useful measurements.',
     'I will connect capture choices to our perimeter-based fit model, show the ranking results, and outline the Android pipeline.',
     30, '10-minute presentation · Local review draft', 'cover')
 
-add('01 / THE APPLICATION', 'From my facial measurements to recommendations.',
+add('01 / THE APPLICATION', 'ARKit in MasqFit: five facial paths.',
     '<div class="capture-demo"><figure>' +
     screenshot('masqfit-capture.png', 'MasqFit app showing selected measurement points overlaid on a face.', 'demo-phone') +
     '<figcaption>ARKit in the current app</figcaption></figure><figure>' +
     screenshot('masqfit-measurements.png', 'MasqFit five aggregate measurements: nose 45.1 mm, strap 129.0 mm, top cheek 99.1 mm, mid cheek 94.0 mm, chin 128.8 mm.', 'demo-phone') +
-    '<figcaption>Five paths in millimeters</figcaption></figure><figure class="recommendation-shot">' +
+    '<figcaption>Five paths in millimeters</figcaption></figure><div class="measurement-summary">'
+    '<h2>Five measured paths</h2><p>Nose · Strap · Top cheek<br>Mid cheek · Chin</p>'
+    '<p class="muted">Nose, top cheek, mid cheek, and chin form the perimeter proxy used for ranking.</p></div></div>',
+    'Here is ARKit in the current MasqFit app. The dots mark selected facial measurement paths. '
+    'The next screen shows five aggregates in millimeters: nose, strap, top cheek, mid cheek, and chin. '
+    'Four paths form the perimeter proxy used for ranking masks. The strap path is collected but does not directly enter this model.',
+    30, 'Presenter-supplied MasqFit screenshots · These images illustrate the workflow, not measurement accuracy.', 'visual-slide')
+
+add('02 / PERSONAL RECOMMENDATIONS', 'What the model recommends for my face.',
+    '<figure class="full-recommendations">' +
     screenshot('personal-recommendations-hidden-observed-fit.png',
                'Breathesafe recommendations for Edderic, sorted by predicted fit, with Observed Fit hidden. The first four listed respirators each show a 98 percent model fit score.',
                'recommendations-image') +
-    '<figcaption>My recommendations · October 29 screenshot · Observed Fit hidden</figcaption></figure></div>',
-    'Here is ARKit in the current MasqFit app. The dots mark selected facial measurement paths. '
-    'The next screen shows five aggregates in millimeters: nose, strap, top cheek, mid cheek, and chin. '
-    'Four paths form the perimeter proxy used for ranking masks. The strap path is collected but does not directly enter this model. '
-    'At right are my recommendations in Breathesafe, sorted by the fit model’s score. This is an October 29 screenshot of the October 25 model, with Observed Fit hidden. '
+    '<figcaption>October 29 screenshot · October 25 custom_lr model · Observed Fit hidden</figcaption></figure>',
+    'These are my recommendations in Breathesafe, sorted by the model’s fit score. This is an October 29 screenshot of the October 25 model, with Observed Fit hidden. '
     'The displayed predicted percentages are model outputs, not calibrated individual success probabilities or independent validation. '
-    'This personal example is separate from the held-out ranking results on slide 4.',
-    30, 'Presenter screenshots and personal example · The screenshot shows model outputs; calibration is not established.')
+    'This personal example is separate from the held-out ranking results that follow.',
+    30, 'Presenter screenshot · Individual scores are model outputs; calibration is not established.', 'visual-slide')
 
 add('02 / GEOMETRY → FIT SCORE', 'A preferred perimeter difference, learned from outcomes.',
     '<div class="equation compact-equation">Δ = (P<sub>face, mm</sub> − P<sub>mask, mm</sub>) / 10 &nbsp; [cm]<br>'

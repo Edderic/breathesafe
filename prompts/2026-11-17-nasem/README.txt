@@ -1,7 +1,7 @@
 NASEM presentation — November 17, 2026
 
 Local review draft for NPPTL researchers building iOS and Android apps.
-Eleven main slides with a 10-minute speaking budget, followed by two backups.
+Twelve main slides with a 10-minute speaking budget, followed by two backups.
 
 Preview:
   http://127.0.0.1:8765/presentation.html
@@ -26,7 +26,8 @@ their evaluation population. The quadratic perimeter-difference slide explains
 the learned optimum using a schematic with invented coefficients. The 45-second processing figure is presenter-reported,
 not a controlled benchmark. The Android pipeline is work in progress.
 Technical references are linked on the relevant slides and in the source backup.
-Slide 2 uses the presenter’s October 29 screenshot of the live Breathesafe
+Slide 2 enlarges the MasqFit capture and measurement screenshots. Slide 3
+shows the presenter’s October 29 screenshot of the live Breathesafe
 recommendations page. Observed Fit is hidden in the captured page, leaving
 model scores and mask details visible. The model timestamp shown is October 25.
 The percentages are model outputs and are not presented as calibrated probabilities.
@@ -37,9 +38,10 @@ and embedded in the HTML for offline use. Occluded-point accuracy from one
 viewing angle is identified as an open project validation question.
 
 Validation:
-Checked all 13 slides at 1366x768 for viewport fit, mobile width at 390px for
+Checked all 14 slides at 1366x768 for viewport fit, mobile width at 390px for
 horizontal overflow, next-slide navigation, all-slides mode, and print layout.
-All print slides fit their 16:9 pages. Visually inspected comparison and pipeline.
+All print slides fit their 16:9 pages. Visually inspected the enlarged MasqFit
+and full recommendation slides.
 
 Publication:
 No production files, public/ copies, routes, or existing September artifacts changed.
