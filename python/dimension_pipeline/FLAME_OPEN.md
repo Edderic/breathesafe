@@ -1,5 +1,59 @@
 # FLAME 2023 Open evaluation and viewer adapter
 
+## Interactive shape generator
+
+Run the local preview server and generator service in separate terminals from
+the repository root (NumPy is required; see `requirements-flame.txt`):
+
+```sh
+./node_modules/.bin/vite --config scripts/face_landmarks.vite.config.mjs
+PYTHONPATH=python python3 -m dimension_pipeline.flame_playground \
+  --model ~/Downloads/FLAME2023Open.zip --source-units m
+```
+
+Open <http://127.0.0.1:5178/scripts/flame_face_generator.html>. All 300 identity
+shape coefficients can be combined using sliders or numeric fields, in pages
+of 20. The coefficient range is −2 to +2, not a guarantee of plausible shape
+or population coverage. Expression and all articulated poses remain zero.
+Previews are debounced, superseded replies cannot replace newer settings, and
+the camera stays fixed as shape changes. Drag/arrow keys rotate and scroll
+zooms. Invalid values leave the last successful preview visible and disable
+saving; reset individual components or all components to return toward neutral.
+
+Give the face a name and choose **Save face to library**. Saved runs live in
+`tmp/flame-face-library/<record_id>/` and contain:
+
+- `face.json`: millimeter mesh, all 300 coefficients, model/archive hashes,
+  source-unit and axis choices, friendly name, and pending review status.
+- `manifest.json`: a single-head run accepted by `face_landmarks_preview.html`.
+- `metadata.json`: library entry, parameters, geometry report and viewer link.
+
+**Open for annotation** loads the saved mesh directly into the existing viewer.
+**Download face JSON** also allows manual import through its top file picker.
+The generator's **Edit parameters** and file restore controls regenerate the
+shape from the local model. A changed vector saves a new record with a new
+identity; an identical vector reuses the existing saved face without overwriting
+its name, geometry or annotation compatibility. Saving the same settings after
+a service restart is deterministic. The saved manifests remain usable while the
+generator service is stopped, provided the Vite preview server is running.
+
+The API binds only to `127.0.0.1:5181`; writes require JSON and the exact local
+preview origin. It accepts parameter vectors, never uploaded pickle files or
+output paths. `--model`, `--source-units`, optional `--source-x`, and `--library`
+are explicit service-start settings. Libraries must live under the repository's
+`tmp/` directory with URL-safe names. Model weights are not sent to the browser
+or copied into saved runs. Library files are local and Git-ignored; keep a copy
+elsewhere before clearing `tmp/`.
+
+Degenerate triangles reject a preview. Normal reversals relative to neutral are
+shown as conservative review flags. The playground permits saving flagged
+faces for review, retaining the report in both the mesh record and library
+metadata with review status pending. The batch pilot still rejects flagged
+runs. These flags do not establish intersections; self-intersections and
+anatomical quality still require review. Full poses,
+semantic nose/jaw controls, demographic/child labels and population sampling are
+not implemented by this shape-only playground.
+
 Status, October 25, 2026: the supplied official ZIP was inspected and its actual
 model was loaded, rendered, and exercised in the existing viewer. The bounded
 pilot can proceed to manual landmark review. Anatomical sign-off, physical

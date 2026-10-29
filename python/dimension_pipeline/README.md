@@ -58,7 +58,10 @@ node --test scripts/tests/dimension_fixture_geometry.test.cjs
 
 For the next candidate generator, see [FLAME 2023 Open](FLAME_OPEN.md). Its local
 adapter produces meshes that can be opened by the same labeling page; the
-official model asset is required for actual FLAME evaluation.
+official model asset is required for actual FLAME evaluation. The
+[interactive shape generator](FLAME_OPEN.md#interactive-shape-generator) lets
+you combine all 300 shape parameters, save faces locally and open them directly
+for annotation. Its page is `scripts/flame_face_generator.html`.
 
 Generate five head variants, OBJ/JSON meshes, 35 fixed-view SVG images, a
 camera/source manifest, and an HTML contact sheet with no network or GPU:
@@ -84,18 +87,23 @@ fixture viewer. For a standalone preview without Rails or a database:
 
 Open `http://127.0.0.1:5178/scripts/face_landmarks_preview.html`.
 
-1. Choose a head and enter your name. Use fixed views or drag in **Rotate** mode.
+1. Choose a head and enter your name. Use fixed views or drag without Ctrl to rotate.
    **Open heads or annotations** can load up to ten compatible surface JSON files
    (including local FLAME adapter outputs) without external uploads. Selecting a
    single annotation export there automatically finds its exact matching loaded
    head and resumes it. Load the head first if it is not already available.
-2. Choose a landmark, enter an optional placement note, and select **Place
-   landmark**. Click its visible surface; switch views to inspect the same point.
-   Keyboard shortcuts: **R** selects Rotate, **L** selects Place landmark,
+2. Choose a landmark, enter an optional placement note, and **Ctrl-click** its
+   visible surface; switch views to inspect the same point. Unmodified clicks
+   do not place points. Unmodified drags always rotate, with no mode switching.
+   Ctrl-drags and gestures whose modifier changes mid-drag do not place points.
+   The viewport suppresses macOS's Ctrl-click context menu while preserving the
+   ordinary right-click menu. Enable **Tap to place (touch/pen)** for touch or
+   pen taps; dragging still rotates. This checkbox does not affect mouse clicks.
    **[** selects the previous landmark, and **]** selects the next (wrapping
    through the list). They work across the page except while a form control or
    editable field has focus. Browser modifier shortcuts and held-key repeats
    are left alone. Arrow keys rotate when the geometry viewport has focus.
+   The previous R/L mode shortcuts are superseded by modifier-based interaction.
 3. Use **Undo last edit**, **Remove point**, or place again to correct it.
    **Save note** updates a note without moving the point.
    Choose one of the five **Measurements** to see its computed value and
@@ -163,10 +171,35 @@ source definition. Older `lateral_zygomatic_edge_left/right` labels are retained
 as optional **Legacy cheekbone point** entries for review; they are never
 silently renamed or used as zygion in the calculation.
 
+To review repeated placements, load the matching head, then use **Compare
+annotation sets → Load comparison files** to select the original and repeat
+exports together. Up to 10 sets (5 MB per file, 20 MB per batch) are supported.
+Selecting multiple annotation exports in the top **Open heads or annotations**
+picker opens the same comparison overlay on the selected head. Selecting one
+annotation export there resumes the editable draft. Load head meshes separately
+from annotation exports.
+Every file must match the selected head's record, topology, scale and exact mesh
+fingerprint. An invalid batch adds no sets; duplicate landmark bundles are
+skipped. Sets remain in memory per head until cleared or the page is closed.
+
+The numbered colors identify each set. Choose a landmark with the selector or
+`[` / `]`, toggle sets, and switch **Selected landmark only** off for context.
+**Use placement view** restores a set's recorded yaw, tilt and zoom. Occluded
+points are hidden by default; **Show points through the head** reveals them.
+Dashed connectors and the pairwise table report straight-line 3D displacement,
+not surface distance. Median and maximum use all pairs of checked sets that
+contain the landmark, including placements currently hidden by the surface.
+They measure agreement rather than anatomical correctness.
+
+While the overlay is enabled, draft markers and measurement routes are hidden
+and placement is disabled. Turn **Show comparison overlay** off to resume
+editing the existing draft. Loading, toggling and removing comparison sets
+never imports them into the draft, its undo history or annotation exports.
+
 Geometry/annotation checks:
 
 ```sh
-node --test scripts/tests/dimension_fixture_geometry.test.cjs scripts/tests/face_annotation_geometry.test.cjs scripts/tests/face_surface_paths.test.cjs scripts/tests/face_continuous_paths.test.cjs
+node --test scripts/tests/dimension_fixture_geometry.test.cjs scripts/tests/face_annotation_geometry.test.cjs scripts/tests/face_surface_paths.test.cjs scripts/tests/face_continuous_paths.test.cjs scripts/tests/face_annotation_comparison.test.cjs
 PYTHONPATH=python python3 -m unittest discover -s python/dimension_pipeline/tests -v
 ```
 

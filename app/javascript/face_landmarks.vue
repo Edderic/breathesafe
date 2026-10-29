@@ -10,10 +10,13 @@
       </select></label>
       <label>Open heads or annotations<input type="file" multiple accept=".json,application/json" @change="openHeads" /></label>
       <label>Your name<input v-model="annotator" maxlength="100" placeholder="Required to place a point" /></label>
-      <label>Interaction<select v-model="mode" aria-keyshortcuts="R L"><option value="rotate">Rotate</option><option value="label">Place landmark</option></select></label>
+      <label class="touch-control"><input type="checkbox" v-model="touchPlacement" :disabled="comparisonActive" /> Tap to place (touch/pen)</label>
     </div>
+    <p class="shortcut-hint">One annotation file resumes editing; multiple annotation files open a read-only comparison on the selected head.</p>
     <p><strong>Source:</strong> {{ record.source.asset_id }} · {{ record.source.license }}. Files stay on this computer.</p>
-    <p class="shortcut-hint"><strong>Shortcuts:</strong> <kbd>R</kbd> rotate · <kbd>L</kbd> place landmark ·
+    <p class="shortcut-hint"><strong>Controls:</strong> drag to rotate ·
+      <template v-if="!comparisonActive"><kbd>Ctrl</kbd> + click to place landmark · </template>
+      <template v-else>read-only comparison · </template>
       <kbd>[</kbd> previous landmark · <kbd>]</kbd> next landmark.
       Shortcuts pause while editing a field or using a form control.</p>
     <p v-if="error" role="alert" class="error">{{ error }}</p>
@@ -24,17 +27,18 @@
           <button v-for="view in views" :key="view.id" @click="setView(view)">{{ view.label }}</button>
         </div>
         <svg ref="viewport" viewBox="0 0 720 480" tabindex="0" role="img"
-          :aria-label="`${record.record_id}: ${mode === 'label' ? 'click to place ' + selectedLabel.name : 'drag to rotate'}`"
+          :aria-label="comparisonActive ? `${record.record_id}: comparing ${selectedLabel.name}; drag to rotate` : `${record.record_id}: drag to rotate; Control-click to place ${selectedLabel.name}`"
           @pointerdown="startPointer" @pointermove="movePointer" @pointerup="finishPointer"
-          @pointercancel="drag = null" @lostpointercapture="drag = null" @keydown="rotateKey" @wheel.prevent="zoom">
+          @pointercancel="drag = null" @lostpointercapture="drag = null" @contextmenu="controlContextMenu"
+          @keydown="rotateKey" @wheel.prevent="zoom">
           <title>{{ record.record_id }} — draft landmark placement</title>
           <rect width="720" height="480" fill="#edf2f5" />
           <polygon v-for="face in faces" :key="face.index" :points="face.points" :fill="face.fill" />
-          <g v-if="heightConstruction" pointer-events="none">
+          <g v-if="!comparisonActive && heightConstruction" pointer-events="none">
             <polygon :points="heightConstruction.plane" fill="#36a4bb" fill-opacity="0.12" stroke="#126477" stroke-dasharray="5 4" />
             <circle :cx="heightConstruction.foot.x" :cy="heightConstruction.foot.y" r="4" fill="white" stroke="#c74d15" />
           </g>
-          <g stroke="#c74d15" stroke-width="3" stroke-linecap="round" pointer-events="none"
+          <g v-if="!comparisonActive" stroke="#c74d15" stroke-width="3" stroke-linecap="round" pointer-events="none"
             :stroke-dasharray="measurementKind === 'ear_height_top' ? '6 3' : null">
             <line v-for="(segment, index) in visiblePathSegments" :key="index"
               :x1="segment.a.x" :y1="segment.a.y" :x2="segment.b.x" :y2="segment.b.y" />
@@ -43,8 +47,20 @@
             <circle :cx="mark.x" :cy="mark.y" r="5" :fill="mark.name === landmark ? '#e95d21' : '#126477'" stroke="white" stroke-width="1.5" />
             <text v-if="showNames" :x="mark.x + 8" :y="mark.y - 7">{{ mark.name.replaceAll('_', ' ') }}</text>
           </g>
+          <g v-if="comparisonActive" pointer-events="none" class="comparison-overlay">
+            <g v-if="comparisonConnect" stroke="#364c5b" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.65">
+              <line v-for="line in comparisonLines" :key="line.id" :x1="line.a.x" :y1="line.a.y" :x2="line.b.x" :y2="line.b.y" />
+            </g>
+            <g v-for="mark in comparisonMarks" :key="mark.id">
+              <circle :cx="mark.x" :cy="mark.y" :r="mark.name === landmark ? 6 : 3" :fill="mark.color" stroke="white" stroke-width="1.5" :opacity="mark.name === landmark ? 1 : .55">
+                <title>{{ mark.number }} · {{ mark.label }} · {{ landmarkName(mark.name) }}</title>
+              </circle>
+              <text v-if="showNames && mark.name === landmark" :x="mark.x + 8" :y="mark.y - 7">{{ mark.number }}</text>
+            </g>
+          </g>
         </svg>
-        <p>{{ mode === 'label' ? 'Click the visible surface to place or replace the selected landmark.' : 'Drag or use arrow keys to rotate. Scroll to zoom.' }} Hidden points disappear behind the surface.</p>
+        <p v-if="comparisonActive">Read-only comparison. Drag or use arrow keys to rotate; scroll to zoom. Numbers match the annotation sets. Turn off the overlay to edit your draft.</p>
+        <p v-else>Drag without Ctrl to rotate. Ctrl-click the surface to place or replace the selected landmark. Arrow keys rotate; scroll to zoom. Hidden points disappear behind the surface.</p>
         <div class="toolbar">
           <label>Yaw {{ Math.round(yaw) }}°<input v-model.number="yaw" type="range" min="-180" max="180" /></label>
           <label>Tilt {{ Math.round(pitch) }}°<input v-model.number="pitch" type="range" min="-90" max="90" /></label>
@@ -57,12 +73,55 @@
       </section>
       <aside>
         <h2>Landmarks</h2>
-        <p>{{ Object.keys(current).length }} / {{ labelOptions.length }} marked on this head</p>
-        <label>Point to place<select v-model="landmark" aria-keyshortcuts="[ ]">
-          <option v-for="label in labelOptions" :key="label.id" :value="label.id">{{ current[label.id] ? '✓ ' : '' }}{{ label.name }}</option>
+        <p v-if="!comparisonActive">{{ Object.keys(current).length }} / {{ labelOptions.length }} marked on this head</p>
+        <label>{{ comparisonActive ? 'Landmark to inspect' : 'Point to place' }}<select v-model="landmark" aria-keyshortcuts="[ ]">
+          <option v-for="label in labelOptions" :key="label.id" :value="label.id">{{ !comparisonActive && current[label.id] ? '✓ ' : '' }}{{ label.name }}</option>
         </select></label>
         <p>{{ selectedLabel.description }}</p>
         <p v-if="selectedLabel.provisional" class="notice">Provisional placement definition. Mark your interpretation and explain it in the note.</p>
+        <template v-if="comparisonActive">
+          <p v-if="selectedComparison.pairs.length">Median pairwise displacement: <strong>{{ selectedComparison.median_mm.toFixed(2) }} mm</strong><br />
+            Maximum: <strong>{{ selectedComparison.maximum_mm.toFixed(2) }} mm</strong></p>
+          <p v-else>Show at least two sets containing this landmark to compare distances.</p>
+        </template>
+        <h2>Compare annotation sets</h2>
+        <label>Load comparison files<input type="file" multiple accept=".json,application/json" @change="loadComparisons" /></label>
+        <p class="shortcut-hint">Load up to 10 exports for this exact head. Comparison sets are read-only and stay separate from your editable draft.</p>
+        <p v-if="comparisonError" role="alert" class="error">{{ comparisonError }}</p>
+        <p v-if="comparisonMessage" role="status">{{ comparisonMessage }}</p>
+        <template v-if="comparisonSets.length">
+          <label class="check-label"><input type="checkbox" v-model="comparisonVisible" /> Show comparison overlay</label>
+          <div v-for="set in comparisonSets" :key="set.id" class="comparison-set">
+            <label class="check-label"><input type="checkbox" v-model="set.visible" />
+              <span class="set-color" :style="{ background: set.color }">{{ set.number }}</span>
+              <span class="set-name" :title="set.filename">{{ set.label }}<small>{{ Object.keys(set.landmarks).length }} landmarks</small></span>
+            </label>
+            <button @click="removeComparison(set.id)" :aria-label="`Remove comparison ${set.label}`">Remove</button>
+          </div>
+          <label class="check-label"><input type="checkbox" v-model="comparisonSelectedOnly" /> Selected landmark only</label>
+          <label class="check-label"><input type="checkbox" v-model="comparisonConnect" /> Connect selected placements</label>
+          <label class="check-label"><input type="checkbox" v-model="comparisonThrough" /> Show points through the head</label>
+          <p v-if="comparisonThrough" class="notice">Points behind the surface are shown too.</p>
+          <button @click="clearComparisons">Clear comparison sets</button>
+        </template>
+        <div v-if="comparisonActive" class="comparison-detail">
+          <p class="shortcut-hint">Straight-line 3D distances between placements, not surface lengths. Statistics include hidden points in the checked sets.</p>
+          <div v-for="set in comparisonSets.filter(item => item.visible)" :key="set.id" class="comparison-placement">
+            <strong :style="{ color: set.color }" :title="set.filename">{{ set.number }} · {{ set.label }}</strong>
+            <template v-if="set.landmarks[landmark]">
+              <p>{{ set.landmarks[landmark].annotator }} · {{ comparisonPointReadout(set) }} mm</p>
+              <p v-if="set.landmarks[landmark].note" class="placement-note">{{ set.landmarks[landmark].note }}</p>
+              <button @click="comparisonView(set)" :disabled="!validComparisonCamera(set)">Use placement view</button>
+            </template>
+            <p v-else>Landmark missing in this set.</p>
+          </div>
+          <table v-if="selectedComparison.pairs.length" class="comparison-distances">
+            <caption>Selected landmark displacement</caption>
+            <thead><tr><th scope="col">Sets</th><th scope="col">3D distance (mm)</th></tr></thead>
+            <tbody><tr v-for="pair in selectedComparison.pairs" :key="`${pair.a.id}:${pair.b.id}`"><td>{{ pair.a.number }} ↔ {{ pair.b.number }}</td><td>{{ pair.distance_mm.toFixed(2) }}</td></tr></tbody>
+          </table>
+        </div>
+        <template v-else>
         <label>Placement note<textarea v-model="note" rows="3" maxlength="2000" placeholder="How you identified this point" /></label>
         <p>Notes are saved when placing a point, or with Save note.</p>
         <button @click="saveNote" :disabled="!current[landmark]">Save note</button>
@@ -104,6 +163,7 @@
         <div class="views"><button @click="exportAnnotations">Download annotations</button></div>
         <label>Resume annotations<input type="file" accept=".json,application/json" @change="importAnnotations" /></label>
         <p>Import requires the same variant and exact mesh fingerprint. Each point retains its annotator, surface attachment, view, and note.</p>
+        </template>
         <router-link :to="{ name: 'DimensionFixtures' }">Open analytic fixture viewer</router-link>
       </aside>
     </div>
@@ -119,6 +179,9 @@ import { makeHead, headCenter, projectMesh, shadedFaces, pickSurface, attachment
   meshFingerprint, validateAnnotations, readSurfaceRecord } from './face_annotation_geometry';
 import { buildSurfaceGraph, facialSurfacePaths, surfaceMeasurementDefinitions, earTopHeights } from './face_surface_paths';
 import { requestContinuousPaths } from './face_continuous_paths';
+import { landmarkComparison } from './face_annotation_comparison';
+
+const comparisonColors = ['#0072b2', '#c04400', '#007b58', '#a23a91', '#756100', '#3446b8', '#a32f3d', '#15696e', '#6c4b21', '#604181'];
 
 const labelOptions = [
   ['pronasale', 'Pronasale', 'Anterior nasal tip on the midline.'],
@@ -159,11 +222,30 @@ export default {
       measurementOptions, measurementKind: 'nose_protrusion', activeMeasurementId: null,
       pathMethod: 'continuous', continuousResults: null, pathError: '', solverTimer: null, solverController: null, solverRevision: 0,
       captureScale: 1.45,
-      drafts: {}, histories: {}, landmark: 'pronasale', annotator: '', note: '', reviewStatus: 'draft', mode: 'rotate',
+      comparisons: {}, comparisonVisible: true, comparisonSelectedOnly: true, comparisonConnect: true, comparisonThrough: false,
+      comparisonError: '', comparisonMessage: '', comparisonLoadRevision: 0,
+      drafts: {}, histories: {}, landmark: 'pronasale', annotator: '', note: '', reviewStatus: 'draft', touchPlacement: false,
       yaw: -45, pitch: 0, scale: 1.45, showNames: true, error: '', message: '', drag: null, savedDrafts: {} };
   },
   computed: {
-    labelOptions() { return [...labelOptions, ...legacyLabels.filter(label => this.current[label.id])]; },
+    labelOptions() { return [...labelOptions, ...legacyLabels.filter(label => this.current[label.id] || this.comparisonSets.some(set => set.landmarks[label.id]))]; },
+    comparisonSets() { return this.comparisons[this.variantId] || []; },
+    comparisonActive() { return this.comparisonVisible && this.comparisonSets.length > 0; },
+    selectedComparison() { return landmarkComparison(this.record, this.comparisonSets, this.landmark); },
+    comparisonMarks() {
+      if (!this.comparisonActive) return [];
+      return this.comparisonSets.filter(set => set.visible).flatMap(set => Object.entries(set.landmarks).flatMap(([name, annotation]) => {
+        if (this.comparisonSelectedOnly && name !== this.landmark) return [];
+        const p = projectPoint(attachmentPoint(this.record, annotation.attachment), this.center, this.yaw, this.pitch, this.scale);
+        const hit = this.comparisonThrough ? null : pickSurface(this.record, this.points, p.x, p.y);
+        return this.comparisonThrough || (hit && Math.abs(hit.depth-p.depth) < .1)
+          ? [{ ...p, id: `${set.id}:${name}`, setId: set.id, name, color: set.color, number: set.number, label: set.label }] : [];
+      }));
+    },
+    comparisonLines() {
+      const marks = this.comparisonMarks.filter(mark => mark.name === this.landmark);
+      return marks.flatMap((a, i) => marks.slice(i+1).map(b => ({ id: `${a.id}:${b.id}`, a, b })));
+    },
     dirty() { return Object.entries(this.drafts).some(([id, draft]) => JSON.stringify(draft) !== this.savedDrafts[id]); },
     current() { return this.drafts[this.variantId]?.landmarks || {}; },
     history() { return this.histories[this.variantId] || []; },
@@ -210,6 +292,7 @@ export default {
     points() { return projectMesh(this.record, this.center, this.yaw, this.pitch, this.scale); },
     faces() { return shadedFaces(this.record, this.points); },
     visibleMarks() {
+      if (this.comparisonActive) return [];
       return Object.entries(this.current).flatMap(([name, a]) => {
         const p = projectPoint(attachmentPoint(this.record, a.attachment), this.center, this.yaw, this.pitch, this.scale);
         const hit = pickSurface(this.record, this.points, p.x, p.y);
@@ -268,6 +351,7 @@ export default {
     },
     beforeUnload(event) { if (this.dirty) { event.preventDefault(); event.returnValue = ''; } },
     changeHead() {
+      this.drag = null; this.comparisonLoadRevision++; this.comparisonError = ''; this.comparisonMessage = '';
       this.record = this.localHeads[this.variantId] || makeHead(base, variants.find(v => v.id === this.variantId));
       const camera = this.record.preview_camera;
       this.center = camera?.center_mm || headCenter(this.localHeads[this.variantId] ? this.record : base);
@@ -286,11 +370,19 @@ export default {
         if (files.length > 10 || files.reduce((sum, f) => sum+f.size, 0) > 20*1024*1024) {
           throw new Error('Choose up to 10 JSON files totaling at most 20 MB.');
         }
+        const contents = await Promise.all(files.map(async file => JSON.parse(await file.text())));
+        const isAnnotation = content => content && Object.hasOwn(content, 'annotation_version');
+        if (files.length > 1 && contents.some(isAnnotation)) {
+          if (!contents.every(isAnnotation)) throw new Error('Open head meshes separately from annotation exports. Select only annotation exports to compare them.');
+          await this.loadComparisons({ target: { files, value: '' } });
+          this.error = this.comparisonError;
+          this.message = this.comparisonError ? '' : this.comparisonMessage;
+          return;
+        }
         const records = [];
-        for (const file of files) {
-          const content = JSON.parse(await file.text());
+        for (const [index, file] of files.entries()) {
+          const content = contents[index];
           if (content && Object.hasOwn(content, 'annotation_version')) {
-            if (files.length !== 1) throw new Error('Open one annotation export at a time, after loading its head meshes.');
             if (file.size > 5*1024*1024) throw new Error('Choose an annotation file smaller than 5 MB.');
             // An annotation file contains points, not a mesh. Locate the exact
             // loaded head first; never infer compatibility from its filename.
@@ -311,8 +403,9 @@ export default {
             throw new Error('Choose a generated head JSON or saved annotations JSON. Run manifests and camera files cannot be opened here.');
           }
           const record = readSurfaceRecord(content);
+          const displayName = typeof record.generation?.display_name === 'string' ? record.generation.display_name.slice(0, 80) : file.name.replace(/\.json$/i, '');
           records.push({ record, id: `local:${record.record_id}:${await meshFingerprint(record)}`,
-            label: `${record.source.asset_id} · ${file.name.replace(/\.json$/i, '')}` });
+            label: `${record.source.asset_id} · ${displayName}` });
         }
         for (const { id, record, label } of records) {
           if (!this.localHeads[id]) this.variants.push({ id, label });
@@ -324,20 +417,83 @@ export default {
       finally { event.target.value = ''; }
     },
     setView(view) { this.yaw = view.yaw; this.pitch = view.pitch; },
+    async loadComparisons(event) {
+      const files = Array.from(event.target.files || []); if (!files.length) return;
+      const record = this.record, variantId = this.variantId, revision = ++this.comparisonLoadRevision;
+      this.comparisonError = ''; this.comparisonMessage = '';
+      try {
+        if (files.length > 10 || files.some(file => file.size > 5*1024*1024) || files.reduce((sum, file) => sum+file.size, 0) > 20*1024*1024) {
+          throw new Error('Choose up to 10 annotation files, at most 5 MB each and 20 MB total.');
+        }
+        const fingerprint = await meshFingerprint(record), additions = [], existing = this.comparisonSets;
+        for (const file of files) {
+          try {
+            const bundle = JSON.parse(await file.text());
+            const landmarks = validateAnnotations(bundle, record, fingerprint, [...labelOptions, ...legacyLabels].map(l => l.id));
+            const signature = JSON.stringify(landmarks);
+            if ([...existing, ...additions].some(set => set.signature === signature)) continue;
+            if (existing.length+additions.length >= 10) throw new Error('Remove a comparison set before adding more than 10.');
+            const number = comparisonColors.findIndex((color, i) => ![...existing, ...additions].some(set => set.number === i+1))+1;
+            const suffix = file.name.startsWith(`${record.record_id}-annotations`) ? file.name.slice(`${record.record_id}-annotations`.length) : null;
+            const label = suffix === '.json' ? 'Original' : /^-repeat-\d+\.json$/i.test(suffix || '')
+              ? `Repeat ${suffix.match(/\d+/)[0]}` : file.name;
+            additions.push({ id: number, number, color: comparisonColors[number-1], label, filename: file.name, visible: true, landmarks, signature });
+          } catch (error) { throw new Error(`${file.name}: ${error.message}`); }
+        }
+        if (revision !== this.comparisonLoadRevision || this.record !== record || this.variantId !== variantId) return;
+        this.comparisons[variantId] = [...existing, ...additions]; this.comparisonVisible = true; this.drag = null;
+        this.comparisonMessage = `Added ${additions.length} comparison sets; ${files.length-additions.length} duplicates skipped. Your editable draft is unchanged.`;
+      } catch (error) {
+        if (revision === this.comparisonLoadRevision) this.comparisonError = `Could not load comparisons: ${error.message}`;
+      } finally { event.target.value = ''; }
+    },
+    removeComparison(id) {
+      this.comparisonLoadRevision++; this.comparisonMessage = '';
+      this.comparisons[this.variantId] = this.comparisonSets.filter(set => set.id !== id);
+      if (!this.labelOptions.some(label => label.id === this.landmark)) this.landmark = 'pronasale';
+    },
+    clearComparisons() {
+      this.comparisonLoadRevision++; this.comparisons[this.variantId] = []; this.comparisonError = ''; this.comparisonMessage = '';
+      if (!this.labelOptions.some(label => label.id === this.landmark)) this.landmark = 'pronasale';
+    },
+    comparisonPointReadout(set) { return attachmentPoint(this.record, set.landmarks[this.landmark].attachment).map(v => v.toFixed(2)).join(', '); },
+    validComparisonCamera(set) {
+      const camera = set.landmarks[this.landmark]?.camera;
+      return camera?.projection === 'orthographic' && camera.mirrored === false &&
+        [camera.yaw, camera.pitch, camera.pixels_per_mm].every(Number.isFinite) &&
+        Math.abs(camera.yaw) <= 180 && Math.abs(camera.pitch) <= 90 && camera.pixels_per_mm >= .5 && camera.pixels_per_mm <= 5;
+    },
+    comparisonView(set) {
+      if (!this.validComparisonCamera(set)) return;
+      const camera = set.landmarks[this.landmark].camera;
+      this.drag = null; this.yaw = camera.yaw; this.pitch = camera.pitch; this.scale = camera.pixels_per_mm;
+    },
     resetView() { this.yaw = -45; this.pitch = 0; this.scale = this.captureScale; },
     startPointer(event) {
-      if (event.button !== 0) return;
-      this.drag = { x: event.clientX, y: event.clientY, yaw: this.yaw, pitch: this.pitch };
+      if (event.isPrimary === false || event.metaKey || event.altKey) return;
+      // macOS may report Control-click as the secondary button.
+      if (event.button !== 0 && !(event.ctrlKey && event.button === 2)) return;
+      event.currentTarget.focus({ preventScroll: true });
+      if (event.ctrlKey) event.preventDefault();
+      this.drag = { id: event.pointerId, x: event.clientX, y: event.clientY, yaw: this.yaw, pitch: this.pitch,
+        control: event.ctrlKey, tap: this.touchPlacement && ['touch', 'pen'].includes(event.pointerType), moved: false, cancelled: false };
       event.currentTarget.setPointerCapture(event.pointerId);
     },
     movePointer(event) {
-      if (!this.drag || this.mode !== 'rotate') return;
+      if (!this.drag || this.drag.id !== event.pointerId) return;
+      if (Math.hypot(event.clientX-this.drag.x, event.clientY-this.drag.y) > 5) this.drag.moved = true;
+      if (event.ctrlKey !== this.drag.control || event.metaKey || event.altKey) this.drag.cancelled = true;
+      if (this.drag.cancelled || this.drag.control || !this.drag.moved) return;
       this.yaw = ((this.drag.yaw + (event.clientX-this.drag.x)*.4+540)%360)-180;
       this.pitch = Math.max(-90, Math.min(90, this.drag.pitch+(event.clientY-this.drag.y)*.4));
     },
     finishPointer(event) {
-      const drag = this.drag; this.drag = null;
-      if (this.mode !== 'label' || !drag || Math.hypot(event.clientX-drag.x, event.clientY-drag.y) > 5) return;
+      const drag = this.drag;
+      if (!drag || drag.id !== event.pointerId) return;
+      this.drag = null;
+      if (this.comparisonActive) return;
+      if (drag.cancelled || drag.moved || Math.hypot(event.clientX-drag.x, event.clientY-drag.y) > 5 ||
+        event.ctrlKey !== drag.control || event.metaKey || event.altKey || !(drag.control || drag.tap)) return;
       this.error = ''; this.message = '';
       if (!this.annotator.trim()) { this.error = 'Enter your name before placing a point.'; return; }
       const point = this.$refs.viewport.createSVGPoint(); point.x = event.clientX; point.y = event.clientY;
@@ -351,6 +507,7 @@ export default {
       this.drafts[this.variantId].review_status = 'draft'; this.reviewStatus = 'draft';
       this.message = `${this.selectedLabel.name} placed. Switch views to inspect its position.`;
     },
+    controlContextMenu(event) { if (event.ctrlKey) event.preventDefault(); },
     remember() {
       if (!this.drafts[this.variantId]) this.drafts[this.variantId] = { landmarks: {}, review_status: 'draft' };
       if (!this.histories[this.variantId]) this.histories[this.variantId] = [];
@@ -380,17 +537,13 @@ export default {
       const target = event.target;
       if (target?.isContentEditable || target?.closest?.('input, textarea, select, [role="textbox"], [role="combobox"]')) return;
       const key = event.key.toLowerCase();
-      if (!['r', 'l', '[', ']'].includes(key)) return;
+      if (!['[', ']'].includes(key)) return;
       event.preventDefault();
-      // A mode/landmark change during a pointer gesture must not place a point
-      // under the newly selected tool or name when the pointer is released.
+      // A landmark change cancels any pending placement gesture.
       this.drag = null;
-      if (key === 'r' || key === 'l') this.mode = key === 'r' ? 'rotate' : 'label';
-      else {
-        const index = this.labelOptions.findIndex(label => label.id === this.landmark);
-        const next = (index + (key === ']' ? 1 : -1) + this.labelOptions.length) % this.labelOptions.length;
-        this.landmark = this.labelOptions[next].id;
-      }
+      const index = this.labelOptions.findIndex(label => label.id === this.landmark);
+      const next = (index + (key === ']' ? 1 : -1) + this.labelOptions.length) % this.labelOptions.length;
+      this.landmark = this.labelOptions[next].id;
     },
     rotateKey(event) {
       if (event.defaultPrevented || event.isComposing || event.ctrlKey || event.metaKey || event.altKey) return;
@@ -467,8 +620,10 @@ kbd { border: 1px solid #b9c8d0; border-radius: 3px; padding: .05rem .3rem; back
 .toolbar, .views { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0; align-items: center; }
 .layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 1.5rem; }
 section, aside { min-width: 0; border: 1px solid #ccd9e0; padding: 1rem; border-radius: 8px; }
+.layout > section { position: sticky; top: 1rem; align-self: start; max-height: calc(100vh - 2rem); overflow-y: auto; box-sizing: border-box; }
 label { display: flex; flex-direction: column; gap: .4rem; padding: 0; }
 .toolbar > label { min-width: 0; max-width: 100%; }
+.toolbar > .touch-control { flex-direction: row; align-items: center; }
 select { min-width: 0; width: 100%; }
 input, select, button, textarea { font: inherit; max-width: 100%; box-sizing: border-box; }
 button, select, input, textarea { border: 1px solid #a9bbc5; border-radius: 5px; padding: .5rem; background: white; color: inherit; }
@@ -482,5 +637,20 @@ h2 { font-size: 1.2rem; margin-top: 1.5rem; }
 .surface-measurement button { width: 100%; text-align: left; }
 .surface-measurement button[aria-pressed="true"] { border-color: #c74d15; background: #fff4e9; }
 .surface-measurement p { margin: .3rem 0; font-size: .9rem; }
-@media(max-width: 850px) { .layout { grid-template-columns: 1fr; } }
+.check-label { flex-direction: row; align-items: center; gap: .5rem; }
+.comparison-set { display: flex; align-items: center; gap: .5rem; margin: .7rem 0; }
+.comparison-set label { flex: 1; min-width: 0; margin: 0; }
+.set-color { flex: 0 0 1.5rem; text-align: center; border-radius: 50%; color: white; font-weight: bold; }
+.set-name, .comparison-placement strong { overflow-wrap: anywhere; }
+.set-name small { display: block; margin-top: .2rem; }
+.comparison-placement { border-top: 1px solid #ccd9e0; padding: .75rem 0; }
+.comparison-placement p { margin: .4rem 0; font-size: .9rem; }
+.placement-note { white-space: pre-wrap; overflow-wrap: anywhere; }
+.comparison-distances { width: 100%; border-collapse: collapse; margin: 1rem 0; font-variant-numeric: tabular-nums; }
+.comparison-distances caption { text-align: left; font-weight: bold; margin-bottom: .5rem; }
+.comparison-distances th, .comparison-distances td { text-align: left; padding: .4rem; border-bottom: 1px solid #ccd9e0; }
+@media(max-width: 850px) {
+  .layout { grid-template-columns: 1fr; }
+  .layout > section { position: static; max-height: none; overflow: visible; }
+}
 </style>

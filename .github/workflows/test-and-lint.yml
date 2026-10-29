@@ -52,7 +52,10 @@ jobs:
         bin/vite build --clear --mode=test
 
     - name: Test browser controls and fixture geometry
-      run: node --test scripts/tests/admin_anonymous_contributions.test.cjs scripts/tests/admin_mask_proposals.test.cjs scripts/tests/dimension_fixture_geometry.test.cjs scripts/tests/face_annotation_geometry.test.cjs scripts/tests/face_surface_paths.test.cjs scripts/tests/face_continuous_paths.test.cjs
+      run: node --test scripts/tests/admin_anonymous_contributions.test.cjs scripts/tests/admin_mask_proposals.test.cjs scripts/tests/dimension_fixture_geometry.test.cjs scripts/tests/face_annotation_geometry.test.cjs scripts/tests/face_surface_paths.test.cjs scripts/tests/face_continuous_paths.test.cjs scripts/tests/face_annotation_comparison.test.cjs
+
+    - name: Build local face generator and landmark preview
+      run: ./node_modules/.bin/vite build --config scripts/face_landmarks.vite.config.mjs
 
     - name: Install system dependencies
       run: |
