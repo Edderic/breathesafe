@@ -32,8 +32,8 @@ budgets = {
     '04 / WHAT DID NOT TRANSFER DIRECTLY': 40,
     '05 / WHY PHOTOGRAMMETRY': 60,
     '06 / ANDROID DEVELOPMENT': 70,
-    '07 / LESSONS FOR NPPTL APPS': 40,
-    '08 / TAKEAWAY': 30,
+    '07 / OBSERVED FIT': 40,
+    '08 / WHO IS REPRESENTED': 30,
     '09 / ACKNOWLEDGEMENTS': 30,
 }
 
@@ -51,6 +51,23 @@ def screenshot(name, alt, cls='reference-image'):
 def svg_icon(name, alt, cls):
     encoded = base64.b64encode((ROOT / 'assets' / name).read_bytes()).decode()
     return f'<img class="{cls}" src="data:image/svg+xml;base64,{encoded}" alt="{escape(alt)}">'
+
+
+def rate_rows(rows):
+    return ''.join(
+        f'<div class="dashboard-row"><div class="dashboard-row-head"><strong>{escape(row["name"])}</strong>'
+        f'<span>{row["pass_rate"]:.1f}% <small>({row["passed"]}/{row["total"]})</small></span></div>'
+        f'<div class="dashboard-track"><span style="width:{row["pass_rate"]:.2f}%"></span></div></div>'
+        for row in rows if row['total'] >= 10
+    )
+
+
+def demographic_card(title, rows):
+    assert sum(row['unique_users'] for row in rows) == 55
+    return f'<article><h2>{escape(title)}</h2>' + ''.join(
+        f'<div class="demographic-row"><span>{escape(row["name"])}</span><strong>{row["unique_users"]}</strong></div>'
+        for row in rows
+    ) + '</article>'
 
 
 def add(tag, title, body, note, seconds=0, source='', cls=''):
@@ -121,25 +138,29 @@ add('02 / GEOMETRY → FIT SCORE', 'A preferred perimeter difference, learned fr
     'Their study does not validate the particular face-to-mask nose perimeter feature proposed here.',
     75, 'Source: custom_lr calc_preds · Schematic curve uses invented coefficients · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/">Yu &amp; Griffin et al. (2024): FFR-specific face anthropometry and fit</a>.', 'geometry-slide')
 
-performance = json.loads((ROOT / 'data/dashboard-2026-09-24.json').read_text())['recommender_performance']
+dashboard = json.loads((ROOT / 'data/dashboard-2026-10-29.json').read_text())
+performance = dashboard['recommender_performance']
 rates = [performance[f'cross_validation_top_{k}_hit_rate_mean'] for k in (1, 3, 5)]
 assert all(0 <= rate <= 1 for rate in rates) and rates == sorted(rates)
 add('03 / RECOMMENDER RELEVANCE', 'How often was a fitting result near the top?',
-    chart('current-top-k.svg', 'Five-fold conditional mean hit rates: top one 64.2 percent, top three 90.3 percent, top five 92.8 percent.') +
+    '<div class="topk-bars">' + ''.join(
+        f'<div class="topk-row"><strong>Top {k}</strong><div class="topk-track"><span style="width:{rate:.2%}"></span></div><b>{rate:.1%}</b></div>'
+        for k, rate in zip((1, 3, 5), rates)
+    ) + '</div>' +
     '<div class="callout">Top 1: '+f'{rates[0]:.1%}'+ ' &nbsp; · &nbsp; Top 3: '+f'{rates[1]:.1%}'+
     ' &nbsp; · &nbsp; Top 5: '+f'{rates[2]:.1%}'+'</div>' +
     '<p class="takeaway">Held-out users with ≥1 positive fit label; ranks previously tested observations.<br>'
     'Retrospective relevance evidence. Prospective success with newly recommended masks remains to be tested.</p>',
-    'These are the saved September dashboard results: top one 64.2 percent, top three 90.3 percent, and top five 92.8 percent. '
+    f'These are the October 29 dashboard results for the October 25 model: top one {rates[0]:.1%}, top three {rates[1]:.1%}, and top five {rates[2]:.1%}. '
     'The question is whether at least one positive fit label appears among the first k ranked held-out test observations. '
     'The reported percentages are unweighted means across five user-grouped folds. Only users with a positive held-out result contribute. '
     'The candidate set is their observed test rows, not the entire catalog, and repeated observations can remain. '
     'For example, top three is a hit if one of the first three ranked observations has a positive label. '
-    'It is not a claim that sending three new masks to an arbitrary new user will yield a 90.3 percent chance of a fit. '
+    'It is not a claim that sending three new masks to an arbitrary new user will yield the displayed top-three rate of fit. '
     'The labels combine formal test sources and constructed outcomes, so this is internal relevance evidence rather than a formal-test-only prospective trial. '
     'Fold counts and uncertainty were not exposed by this snapshot. The transferable lesson is to evaluate ranking relevance explicitly, '
     'then test the user decision prospectively.',
-    75, 'Frozen dashboard retrieved Sept 24, 2026 · Model Sept 20, 2026 · Five-fold means · Fold denominators / uncertainty unavailable.')
+    75, 'Dashboard snapshot Oct 29, 2026 · Model Oct 25, 2026 · Five-fold means · Fold denominators / uncertainty unavailable.')
 
 add('02 / THREE APPROACHES', 'The tradeoff: metric scale, speed, and reach.',
     '''<table class="method-table capture-table"><thead><tr><th>Approach</th><th>Geometry & scale</th><th>Experience</th><th>Main constraint</th></tr></thead><tbody>
@@ -227,28 +248,38 @@ add('06 / ANDROID DEVELOPMENT', 'Building the Android path: faces and landmarks.
     'The difficult transfer is from synthetic rendering to real cameras and faces, which needs independent evaluation.',
     90, 'Presenter screenshots of research tools · Synthetic geometry and landmarks need anatomical, scale, and real-camera validation.', 'android-slide')
 
-add('07 / LESSONS FOR NPPTL APPS', 'Validate the handoffs, not only the final score.',
-    cards([('Capture → geometry', 'Measure scale error, repeatability, failed scans, and variation across devices.'),
-           ('Geometry → dimensions', 'Compare defined landmarks and distances with an independent reference.'),
-           ('Dimensions → fit', 'Use held-out people and formal fit-test outcomes; evaluate practical selection benefit.')]) +
-    callout('Use one measurement definition across platforms.<br>Track units, landmark definitions, capture method, and version with every result.'),
-    'For your iOS and Android apps, I would start with a common measurement contract. Specify the landmarks, units, and distance definitions '
-    'independently of the camera library. Record the capture method and version so that a change in reconstruction is traceable. '
-    'Then validate the handoffs. At capture, count failures and repeated-scan variability across devices and conditions. '
-    'At measurement, compare each dimension to an independent reference and report bias and repeatability, not just correlation. '
-    'At prediction, hold out people and use fit-test outcomes to evaluate whether the measurements improve selection. '
-    'Keep synthetic, printed-face, and real-human evidence separate. If the camera route changes a feature’s meaning or distribution, '
-    'do not assume a model trained on the old route will transfer unchanged. The useful collaboration is agreeing on definitions and reference measurements before optimizing the interface.',
-    90, 'Proposed evaluation priorities; not completed validation results.')
+fit_stats = dashboard['fit_tests']
+pass_rates = fit_stats['pass_rates']
+assert pass_rates['overall']['total'] == fit_stats['total_unique'] == 1145
+assert pass_rates['overall']['passed'] == 296
+add('07 / OBSERVED FIT', 'Observed pass rates vary by strap and style.',
+    '<div class="dashboard-overall"><strong>296 of 1,145 tests passed</strong><span>25.9% overall in the dashboard’s filtered dataset</span></div>'
+    '<div class="dashboard-panels"><article><h2>Strap type</h2>' + rate_rows(pass_rates['by_strap_type']) +
+    '</article><article><h2>Mask style</h2>' + rate_rows(pass_rates['by_style']) + '</article></div>' +
+    '<p class="dashboard-note">Descriptive test-level rates; multiple tests can come from one person. Groups with fewer than 10 tests omitted.</p>',
+    'The dashboard currently includes 1,145 distinct test records with usable pass outcomes and linked facial measurements; 296 pass. '
+    'The adjustable headstrap group has 120 passes in 283 tests, or 42.4 percent. Headstraps have 162 in 477, or 34.0 percent. '
+    'Earloop groups are much lower in this dataset. By style, bifold and gasket has 91 in 265, boat 136 in 510, and bifold 30 in 206. '
+    'These are observed associations across different products and participants, not randomized comparisons or estimates of what changing a strap would do. '
+    'Test counts vary substantially, and participants can contribute repeated tests. Groups with fewer than ten tests are left off the chart: '
+    'strapless 0 of 2, elastomeric 5 of 7, and adhesive 0 of 2. For an app, display denominators with every rate.',
+    40, '<a href="https://www.breathesafe.xyz/#/dashboard">Breathesafe dashboard</a> snapshot Oct 29, 2026 · Filtered fit tests · Descriptive only.', 'dashboard-slide')
 
-add('08 / TAKEAWAY', 'Choose the capture route.<br>Keep the measurement contract.',
-    '<p class="lead">ARKit reduced calibration friction.<br>MediaPipe helped with real-time landmarks.<br>'
-    'Photogrammetry offers a path to broader camera access.</p>' +
-    callout('Shared research question: which landmarks and reference protocol should both apps use?'),
-    'My main lesson is to separate the capture technology from the scientific definition of the measurement. '
-    'ARKit simplified the first iOS experience. Moving toward Android means making scale, landmark placement, and reconstruction explicit. '
-    'I would welcome discussion about a shared set of anatomical definitions and an independent reference protocol that could help both projects.',
-    30, 'MasqFit · Breathesafe · Acknowledgements follow')
+demographics = fit_stats['demographics']
+add('08 / WHO IS REPRESENTED', 'Who contributed the 1,145 fit tests?',
+    '<p class="dashboard-subtitle">55 unique participants · counts below are people, not tests</p>' +
+    '<div class="demographic-grid">' +
+    demographic_card('Gender / sex', demographics['gender_and_sex']) +
+    demographic_card('Race / ethnicity', demographics['race_ethnicity']) +
+    demographic_card('Age', demographics['age']) + '</div>' +
+    '<div class="demographic-takeaway">Representation and repeat testing matter when interpreting a dashboard rate.</div>',
+    'This is the composition of the same filtered dashboard dataset. It contains 55 unique participants and 1,145 tests. '
+    'The columns show unique users within each demographic field, so a participant is counted once per column. '
+    'For example, 41 participants are in the White or Caucasian category, and 29 are in the age category labeled Prefer not to say. '
+    'The dashboard pools some small demographic groups into that label for privacy, so the label must not be read as all explicit nonresponse. '
+    'These counts describe who is represented; they are not demographic-specific pass rates. Repeated tests and uneven coverage make subgroup comparisons especially sensitive. '
+    'For app evaluation, track participant counts as well as test counts and assess performance across groups with suitable privacy safeguards.',
+    30, '<a href="https://www.breathesafe.xyz/#/dashboard">Breathesafe dashboard</a> snapshot Oct 29, 2026 · Small groups may be pooled into “Prefer not to say.”', 'dashboard-slide')
 
 acknowledgements = [
     ('Wayne', 'Community fit testing and training'),
@@ -288,8 +319,8 @@ add('BACKUP / SOURCES', 'Sources and boundaries of the claims.',
     f'<div><h2>Photogrammetry evidence</h2><p><a href="{PHOTO}">Aldridge et al. (2005), Digital three-dimensional photogrammetry: evaluation of anthropometric precision and accuracy using a Genex 3D camera system</a></p>'
     '<p>Evidence concerns the tested system and protocol; it does not validate our camera-only pipeline.</p></div></div>' +
     '<p class="muted">Real-time usability, seamlessness, and ~45-second processing are presenter-reported experience. No controlled speed comparison or new measurement-accuracy result is claimed.</p>',
-    'Technical references checked October 29, 2026. Recommender results come from the frozen September 24 dashboard, '
-    'model timestamp September 20, 2026. They are historical internal ranking results, not a fresh evaluation. '
+    'Technical references checked October 29, 2026. Recommender results come from the October 29 dashboard snapshot, '
+    'model timestamp October 25, 2026. They are internal retrospective ranking results, not a prospective evaluation. '
     'Model architecture is traced to python/mask_recommender/train.py, especially calc_preds and _resolve_custom_lr_parameter_views. '
     'For fixed family, style, and strap type, A = a_family + a_style < 0, B = b_family + b_style, '
     'C = c_family + c_style + s_strap. The centered equation uses kappa = -A, delta_star = -B/(2A), '

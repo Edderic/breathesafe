@@ -1,0 +1,172 @@
+{
+  "retrieved_at_utc": "2026-10-29T17:34:02.413512+00:00",
+  "source_url": "https://www.breathesafe.xyz/dashboard/stats",
+  "fit_tests": {
+    "total_unique": 1145,
+    "pass_rates": {
+      "overall": {
+        "total": 1145,
+        "passed": 296,
+        "pass_rate": 25.85
+      },
+      "by_strap_type": [
+        {
+          "name": "Adjustable Headstrap",
+          "total": 283,
+          "passed": 120,
+          "pass_rate": 42.4
+        },
+        {
+          "name": "Headstrap",
+          "total": 477,
+          "passed": 162,
+          "pass_rate": 33.96
+        },
+        {
+          "name": "Adjustable Earloop",
+          "total": 114,
+          "passed": 9,
+          "pass_rate": 7.89
+        },
+        {
+          "name": "Earloop",
+          "total": 267,
+          "passed": 3,
+          "pass_rate": 1.12
+        },
+        {
+          "name": "Strapless",
+          "total": 2,
+          "passed": 0,
+          "pass_rate": 0.0
+        }
+      ],
+      "by_style": [
+        {
+          "name": "Elastomeric",
+          "total": 7,
+          "passed": 5,
+          "pass_rate": 71.43
+        },
+        {
+          "name": "Bifold & Gasket",
+          "total": 265,
+          "passed": 91,
+          "pass_rate": 34.34
+        },
+        {
+          "name": "Duckbill",
+          "total": 33,
+          "passed": 10,
+          "pass_rate": 30.3
+        },
+        {
+          "name": "Boat",
+          "total": 510,
+          "passed": 136,
+          "pass_rate": 26.67
+        },
+        {
+          "name": "Cup",
+          "total": 120,
+          "passed": 22,
+          "pass_rate": 18.33
+        },
+        {
+          "name": "Bifold",
+          "total": 206,
+          "passed": 30,
+          "pass_rate": 14.56
+        },
+        {
+          "name": "Adhesive",
+          "total": 2,
+          "passed": 0,
+          "pass_rate": 0.0
+        }
+      ]
+    },
+    "demographics": {
+      "gender_and_sex": [
+        {
+          "name": "Cisgender male",
+          "fit_tests": 514,
+          "unique_users": 22
+        },
+        {
+          "name": "Cisgender female",
+          "fit_tests": 361,
+          "unique_users": 26
+        },
+        {
+          "name": "Prefer not to say",
+          "fit_tests": 270,
+          "unique_users": 7
+        }
+      ],
+      "race_ethnicity": [
+        {
+          "name": "White / Caucasian",
+          "fit_tests": 697,
+          "unique_users": 41
+        },
+        {
+          "name": "Asian / Pacific Islander",
+          "fit_tests": 211,
+          "unique_users": 6
+        },
+        {
+          "name": "Multiple ethnicity / Other",
+          "fit_tests": 201,
+          "unique_users": 5
+        },
+        {
+          "name": "Prefer not to say",
+          "fit_tests": 36,
+          "unique_users": 3
+        }
+      ],
+      "age": [
+        {
+          "name": "26-35",
+          "fit_tests": 156,
+          "unique_users": 6
+        },
+        {
+          "name": "36-45",
+          "fit_tests": 258,
+          "unique_users": 9
+        },
+        {
+          "name": "46-55",
+          "fit_tests": 57,
+          "unique_users": 6
+        },
+        {
+          "name": "56-65",
+          "fit_tests": 104,
+          "unique_users": 5
+        },
+        {
+          "name": "Prefer not to say",
+          "fit_tests": 570,
+          "unique_users": 29
+        }
+      ]
+    }
+  },
+  "recommender_performance": {
+    "available": true,
+    "timestamp": "20261025020012",
+    "model_type": "custom_lr",
+    "random_seed": 42,
+    "validation_roc_auc": 0.7656730408698913,
+    "cross_validation_folds": 5,
+    "cross_validation_top_1_hit_rate_mean": 0.5172222222222222,
+    "cross_validation_top_3_hit_rate_mean": 0.8222222222222223,
+    "cross_validation_top_5_hit_rate_mean": 0.8222222222222223,
+    "cross_validation_user_level_mean_roc_auc": 0.6975541578834921,
+    "saved_model_training_scope": "full_dataset",
+    "top_k_chart_artifact": "s3://breathesafe/mask_recommender/models/20261025020012/20261025020012_custom_cross_validation_top_k_hit_rates.png"
+  }
+}

@@ -21,7 +21,7 @@ Use background graphics, the CSS landscape page size, and no browser headers/foo
 
 Scope:
 This draft replaces the September planning-meeting narrative with practical capture,
-scale, landmarking, and cross-platform development lessons. Historical September top-1/3/5 conditional hit rates are included with
+scale, landmarking, and cross-platform development lessons. October 29 top-1/3/5 conditional hit rates are included with
 their evaluation population. The quadratic perimeter-difference slide explains
 the learned optimum using a schematic with invented coefficients. The 45-second processing figure is presenter-reported,
 not a controlled benchmark. The Android pipeline is work in progress.
@@ -53,6 +53,14 @@ assets/android-flame-generator.png and assets/android-landmark-labeling.png.
 These are development tools for the Android pipeline, not Android app screens.
 The slide's CNN icon marks a planned detector for local facial features in 2D
 views; the screenshots do not show a trained detector or its accuracy.
+Slides 11 and 12 show the October 29 Breathesafe dashboard snapshot in
+data/dashboard-2026-10-29.json: observed fit-test pass rates by strap type and
+mask style, plus unique participant counts by demographic category. Rates are
+descriptive and test-level; participants may contribute multiple tests.
+Small demographic groups may be pooled into "Prefer not to say". Groups with
+fewer than 10 tests are omitted from the pass-rate chart. The current October
+25 recommender model's top-k figures are also shown on slide 5. These results
+are a point-in-time dashboard snapshot, not a prospective validation study.
 Slide 13 is the acknowledgements page. Community contributor names and roles
 come from prompts/kanro/2026-10-camera-only-masqfit-proposal.html; the Nukit
 fit-testing probe credit is supplied by the presenter. The Android segment gives
@@ -64,8 +72,8 @@ with the presenter's email and LinkedIn link.
 Validation:
 Checked all 15 slides at 1366x768 for viewport fit, mobile width at 390px for
 horizontal overflow, next-slide navigation, all-slides mode, and print layout.
-All print slides fit their 16:9 pages. Visually inspected the enlarged MasqFit
-and full recommendation slides, plus the acknowledgements page.
+All print slides fit their 16:9 pages. Visually inspected the two dashboard
+slides.
 
 Publication:
 No production files, public/ copies, routes, or existing September artifacts changed.
