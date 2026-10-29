@@ -41,10 +41,12 @@ is preserved in assets/personal-recommendations-hidden-observed-fit.png. Observe
 model scores and mask details visible. The model timestamp shown is October 25.
 The percentages are model outputs and are not presented as calibrated probabilities.
 
-Five presenter-supplied images show the current MasqFit capture and five aggregates,
-Apple face geometry, and a MediaPipe mesh. Originals are preserved in assets/
+Presenter-supplied images show the current MasqFit capture, five aggregates,
+recommendations, and a MediaPipe mesh. Originals are preserved in assets/
 and embedded in the HTML for offline use. Occluded-point accuracy from one
 viewing angle is identified as an open project validation question.
+Slide 8 uses the newer MasqFit MediaPipe screenshot in assets/mediapipe-masqfit-demo.png;
+the earlier reference image remains in assets/mediapipe-reference.png.
 
 Validation:
 Checked all 14 slides at 1366x768 for viewport fit, mobile width at 390px for

@@ -174,18 +174,18 @@ add('03 / WHAT WORKED', 'ARKit vs. caliper: an exploratory self-check.',
     60, 'Presenter self-measurement: ARKit vs. digital caliper · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10181530/">ARKit eye-to-phone study (2023)</a> tests a different distance.')
 
 add('04 / WHAT DID NOT TRANSFER DIRECTLY', 'A mesh vertex is not an anatomical definition.',
-    '<div class="reference-layout"><figure>' +
-    screenshot('mediapipe-reference.png', 'Presenter-supplied MediaPipe example showing a face with and without a landmark mesh overlay.') +
-    '<figcaption>MediaPipe example supplied by presenter</figcaption></figure><div>'
+    '<div class="reference-layout"><figure><div class="mediapipe-frame">' +
+    screenshot('mediapipe-masqfit-demo.png', 'MasqFit web app showing a Google MediaPipe face mesh over the presenter’s face.', 'reference-image mediapipe-image') +
+    '</div><figcaption>MediaPipe mesh in a MasqFit prototype</figcaption></figure><div>'
     '<h2>Anatomical correspondence</h2><p>Mesh vertices may not coincide with the traditional landmarks used by NIOSH.</p>'
-    '<h2>Occluded points</h2><p>Face models can infer hidden points. An estimated coordinate is not a direct observation.</p></div></div>' +
-    callout('Open question for ARKit and MediaPipe: how accurate are occluded-point estimates from one viewing angle?'),
-    'A mesh vertex is not automatically the anatomical point we want. Both systems fit or predict facial geometry, '
+    '<h2>Occluded points</h2><p>Face models can infer hidden points. An estimated coordinate is not a direct observation.</p>' +
+    callout('Open question: how accurate are hidden points inferred from one viewing angle?') + '</div></div>',
+    'This screenshot shows the MediaPipe mesh running in a MasqFit web prototype. A mesh vertex is not automatically the anatomical point we want. Both systems fit or predict facial geometry, '
     'so a returned coordinate may be inferred even where the surface is not visible from that angle. '
     'That is useful for tracking, but I have not established the accuracy of these hidden points from a single view. '
     'We should compare visible and occluded landmarks against an independent reference, across head angles and single-view versus multi-view capture. '
     'More frames from one angle do not necessarily reveal the hidden surface. Multi-view capture adds observations, but its benefit still needs testing.',
-    40, f'<a href="{GOOGLE}">Google: predicted mesh</a> · <a href="{APPLE}">Apple: fitted face geometry</a> · Single-angle accuracy: not yet established by this project.')
+    40, f'<a href="{GOOGLE}">Google: predicted mesh</a> · <a href="{APPLE}">Apple: fitted face geometry</a> · Single-angle accuracy: not yet established by this project.', 'mediapipe-slide')
 
 add('05 / WHY PHOTOGRAMMETRY', 'Broader camera support adds new work.',
     cards([('Why pursue it', 'Reconstruct a 3D surface from standard-camera images; a plausible common capture route across platforms.'),
