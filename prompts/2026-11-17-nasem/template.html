@@ -34,6 +34,9 @@ figcaption{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.3}
 @media print{.slide.visual-slide{padding-top:24px}.visual-slide h1{font-size:39px}}
 @media(min-width:1500px){.slide.recommendation-slide{width:100vw;margin-left:calc((1440px - 100vw)/2)}}
 @media print{.slide.recommendation-slide{width:13.333in;margin-left:0}}
+.accuracy-intro{font-size:20px;margin:0 0 16px}.accuracy-table{font-size:21px}.accuracy-table th,.accuracy-table td{padding:12px 17px}.accuracy-table td:first-child{width:31%}.accuracy-table th:not(:first-child),.accuracy-table td:not(:first-child){text-align:right}.accuracy-table tbody tr:nth-child(even){background:#f0f4f0}.accuracy-note{font-size:17px;color:var(--muted);margin:16px 0 0}
+@media(max-width:760px){.accuracy-table{font-size:12px}.accuracy-table th,.accuracy-table td{padding:6px 4px}.accuracy-intro{font-size:17px}.accuracy-note{font-size:14px}}
+@media print{.accuracy-table{font-size:19px}.accuracy-table th,.accuracy-table td{padding:9px 15px}.accuracy-note{font-size:15px}}
 </style></head><body><nav class="toolbar" aria-label="Presentation controls"><span class="brand">MASQFIT / NASEM · NOV 17</span><div class="controls"><button id="prev" aria-label="Previous slide">←</button><span id="counter" aria-live="polite"></span><button id="next" aria-label="Next slide">→</button><button id="overview" aria-pressed="false">All slides</button><button id="print">Print / PDF</button></div></nav><main><!-- SLIDES --></main><script>
 const slides=[...document.querySelectorAll('.slide')];let current=0;
 const prev=document.getElementById('prev'),next=document.getElementById('next'),counter=document.getElementById('counter'),overview=document.getElementById('overview');

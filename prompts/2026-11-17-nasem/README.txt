@@ -28,8 +28,11 @@ not a controlled benchmark. The Android pipeline is work in progress.
 Slide 4 proposes a separate face-to-mask nose perimeter feature for future
 held-out evaluation, motivated by Yu and Griffin's 2024 FFR-specific face
 anthropometry study. That study does not validate this particular feature.
-Slide 7 cites a 2023 ARKit/TrueDepth study of eye-to-phone distance at different
-angles. It does not establish accuracy for MasqFit's facial landmark paths.
+Slide 7 shows the presenter's six ARKit-versus-digital-caliper measurements,
+rounded from the supplied notebook screenshot. The original comparison image
+is preserved in assets/arkit-caliper-self-check.png. This one-person check is
+exploratory. A cited 2023 ARKit/TrueDepth study measured eye-to-phone distance
+at different angles; it does not establish accuracy for MasqFit's facial paths.
 Technical references are linked on the relevant slides and in the source backup.
 Slide 2 enlarges the MasqFit capture and measurement screenshots. Slide 3
 shows the presenter’s complete October 29 screenshot of the live Breathesafe

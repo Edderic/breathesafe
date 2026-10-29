@@ -149,22 +149,29 @@ add('02 / THREE APPROACHES', 'The tradeoff: metric scale, speed, and reach.',
     'The roughly 45 seconds here is my reported processing experience, not a benchmark across implementations, devices, capture time, or uploads.',
     90, f'<a href="{APPLE}">Apple geometry</a> · <a href="{GOOGLE}">Google coordinate conventions</a> · Timing: presenter report, not a controlled comparison.')
 
-add('03 / WHAT WORKED', 'ARKit made the measurement experience simpler.',
-    '<div class="reference-layout"><figure>' +
-    screenshot('arkit-reference.png', 'Apple Developer video screenshot illustrating the ARFaceAnchor triangular face mesh.') +
-    '<figcaption>Apple Developer: ARFaceAnchor mesh</figcaption></figure><div>'
-    '<h2>Metric face geometry</h2><p>Our TrueDepth path uses infrared depth sensing and a fitted face mesh.</p>'
-    '<h2>Real-time feedback</h2><p>No separate pixel-to-millimeter step in this workflow.</p>'
-    '<p class="muted">Published ARKit study: eye-to-phone distance errors varied from 0.88% to 9.07% across tested conditions. Facial-path accuracy still needs validation.</p></div></div>',
-    'ARKit felt more seamless because I did not need to ask the user to supply a conversion between pixels and physical size. '
-    'On the TrueDepth devices used by this workflow, Apple combines its camera system and infrared depth sensing with a face model. '
-    'The mesh supports real-time distance calculations, which helps make the capture interaction immediate. '
-    'That is an implementation advantage rather than a measurement validation result. A 2023 ARKit and TrueDepth study measured eye-to-phone distance at different angles. '
-    'Its reported errors ranged from 0.88 to 9.07 percent across tested conditions, with variation by position and head size. '
-    'It did not test distances between facial landmarks or MasqFit’s nose, cheek, and chin paths. A model can report millimeters and still be biased at a particular facial region. '
-    'Also, ARKit face tracking availability is broader than TrueDepth on some newer devices; I am describing our TrueDepth measurement path, '
-    'not asserting that every ARKit-compatible device has the same depth hardware or metrology performance.',
-    60, f'<a href="{APPLE}">ARFaceGeometry</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10181530/">ARKit eye-to-phone distance study (2023)</a> · Study did not validate facial-path distances.')
+accuracy_rows = [
+    ('Face width', '142', '137.0', '5.0', '3.6%'),
+    ('Face length', '125', '112.0', '13.0', '11.6%'),
+    ('Nose breadth', '36', '30.0', '6.0', '20.0%'),
+    ('Lower face length', '74', '64.7', '9.3', '14.4%'),
+    ('Nose protrusion', '16', '14.0', '2.0', '14.3%'),
+    ('Lip width', '47', '52.0', '5.0', '9.6%'),
+]
+accuracy_table = '<table class="method-table accuracy-table"><thead><tr><th>Measurement</th><th>ARKit (mm)</th><th>Caliper (mm)</th><th>|Difference| (mm)</th><th>Relative difference*</th></tr></thead><tbody>' + ''.join(
+    '<tr><td>' + '</td><td>'.join(row) + '</td></tr>' for row in accuracy_rows
+) + '</tbody></table>'
+add('03 / WHAT WORKED', 'ARKit vs. caliper: an exploratory self-check.',
+    '<p class="accuracy-intro">Real-time metric output made capture easy. Agreement varied across six measurements on my face.</p>' +
+    accuracy_table +
+    '<p class="accuracy-note">* Absolute difference ÷ caliper value. One person, one comparison; causes of the differences have not been isolated.</p>',
+    'ARKit simplified capture because it gave me metric coordinates in real time, without a separate pixel-to-millimeter conversion. '
+    'I also compared six ARKit-derived dimensions of my own face with digital caliper measurements. '
+    'The absolute differences ranged from 2 to 13 millimeters, or 3.6 to 20 percent of the caliper values. '
+    'Nose breadth had the largest relative difference, 20 percent. This is an exploratory one-person comparison, not an accuracy study or a reference standard. '
+    'Landmark definitions, caliper technique, device behavior, and repeated-capture variability still need to be evaluated. '
+    'The published 2023 ARKit study measured eye-to-phone distance at different angles and reported errors from 0.88 to 9.07 percent under its tested conditions. '
+    'It did not test distances between facial landmarks or validate MasqFit’s nose, cheek, and chin paths.',
+    60, 'Presenter self-measurement: ARKit vs. digital caliper · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10181530/">ARKit eye-to-phone study (2023)</a> tests a different distance.')
 
 add('04 / WHAT DID NOT TRANSFER DIRECTLY', 'A mesh vertex is not an anatomical definition.',
     '<div class="reference-layout"><figure>' +
