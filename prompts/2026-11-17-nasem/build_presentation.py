@@ -98,7 +98,8 @@ add('02 / GEOMETRY → FIT SCORE', 'A preferred perimeter difference, learned fr
     'Fit score = sigmoid[c − κ(Δ − Δ*)²], &nbsp; κ &gt; 0</div>' +
     chart('model-response.svg', 'Schematic curves with invented coefficients peak at perimeter differences of zero and minus two centimeters, then decline on either side.') +
     '<p class="takeaway">Δ* is the learned optimum; it need not be zero. Moving away lowers the modeled fit score.<br>'
-    'Facial perimeter proxy = nose + upper cheek + mid-cheek + chin paths, measured in mm.</p>',
+    'Facial perimeter proxy = nose + upper cheek + mid-cheek + chin paths, measured in mm.</p>' +
+    '<div class="next-feature"><strong>Next feature to test:</strong> compare the face’s nose path with a matching mask nose perimeter, then evaluate whether it improves held-out fit prediction.</div>',
     'The face measurement enters the recommender as a perimeter proxy: four selected facial paths added together. '
     'Subtract the mask perimeter and convert millimeters to centimeters. This is a signed difference of lengths, not a physical gap between the face and mask. '
     'A quadratic in that difference feeds a logistic function. In this centered form, delta star is the preferred difference, '
@@ -107,8 +108,11 @@ add('02 / GEOMETRY → FIT SCORE', 'A preferred perimeter difference, learned fr
     'Family and style supply the quadratic coefficients; strap type supplies an offset. New training constrains curvature to be negative. '
     'The plotted curves use invented coefficients to explain the shape; they are not measured mask response curves. '
     'The sigmoid gives a probability-like fit score for ranking, but calibration needs separate evaluation. '
-    'A limitation is geometry compression: for the same mask, two faces with the same summed perimeter get the same score.',
-    75, 'Source: custom_lr calc_preds and parameterization · Curve is schematic; invented coefficients, not fitted probabilities.')
+    'A limitation is geometry compression: for the same mask, two faces with the same summed perimeter get the same score. '
+    'A future improvement is to retain the nose path as its own feature and measure a corresponding nose perimeter on each mask. '
+    'We could model their difference separately from the whole-face perimeter and test whether it improves held-out predictions. '
+    'This is a proposal, not a measured improvement. Griffin and Yu’s 2021 study examined more detailed nose and chin measurements, which motivates closer attention to nose geometry.',
+    75, 'Source: custom_lr calc_preds · Schematic curve uses invented coefficients · <a href="https://proc.3dbody.tech/papers/2021/2145griffin-abs.pdf">Griffin &amp; Yu et al. (2021): detailed nose and chin measurements</a>.', 'geometry-slide')
 
 performance = json.loads((ROOT / 'data/dashboard-2026-09-24.json').read_text())['recommender_performance']
 rates = [performance[f'cross_validation_top_{k}_hit_rate_mean'] for k in (1, 3, 5)]

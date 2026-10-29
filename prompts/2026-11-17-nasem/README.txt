@@ -25,6 +25,8 @@ scale, landmarking, and cross-platform development lessons. Historical September
 their evaluation population. The quadratic perimeter-difference slide explains
 the learned optimum using a schematic with invented coefficients. The 45-second processing figure is presenter-reported,
 not a controlled benchmark. The Android pipeline is work in progress.
+Slide 4 proposes a separate face-to-mask nose perimeter feature for future
+held-out evaluation, motivated by Griffin and Yu's 2021 nose and chin work.
 Technical references are linked on the relevant slides and in the source backup.
 Slide 2 enlarges the MasqFit capture and measurement screenshots. Slide 3
 shows the presenter’s complete October 29 screenshot of the live Breathesafe
