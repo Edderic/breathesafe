@@ -155,14 +155,16 @@ add('03 / WHAT WORKED', 'ARKit made the measurement experience simpler.',
     '<figcaption>Apple Developer: ARFaceAnchor mesh</figcaption></figure><div>'
     '<h2>Metric face geometry</h2><p>Our TrueDepth path uses infrared depth sensing and a fitted face mesh.</p>'
     '<h2>Real-time feedback</h2><p>No separate pixel-to-millimeter step in this workflow.</p>'
-    '<p class="muted">Millimeter units do not establish millimeter accuracy.</p></div></div>',
+    '<p class="muted">Published ARKit study: eye-to-phone distance errors varied from 0.88% to 9.07% across tested conditions. Facial-path accuracy still needs validation.</p></div></div>',
     'ARKit felt more seamless because I did not need to ask the user to supply a conversion between pixels and physical size. '
     'On the TrueDepth devices used by this workflow, Apple combines its camera system and infrared depth sensing with a face model. '
     'The mesh supports real-time distance calculations, which helps make the capture interaction immediate. '
-    'That is an implementation advantage rather than a measurement validation result. A model can report millimeters and still be biased at a particular facial region. '
+    'That is an implementation advantage rather than a measurement validation result. A 2023 ARKit and TrueDepth study measured eye-to-phone distance at different angles. '
+    'Its reported errors ranged from 0.88 to 9.07 percent across tested conditions, with variation by position and head size. '
+    'It did not test distances between facial landmarks or MasqFit’s nose, cheek, and chin paths. A model can report millimeters and still be biased at a particular facial region. '
     'Also, ARKit face tracking availability is broader than TrueDepth on some newer devices; I am describing our TrueDepth measurement path, '
     'not asserting that every ARKit-compatible device has the same depth hardware or metrology performance.',
-    60, f'<a href="{APPLE}">ARFaceGeometry</a> · <a href="https://developer.apple.com/documentation/arkit/arfacetrackingconfiguration">Apple device support</a> · Experience: presenter report.')
+    60, f'<a href="{APPLE}">ARFaceGeometry</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10181530/">ARKit eye-to-phone distance study (2023)</a> · Study did not validate facial-path distances.')
 
 add('04 / WHAT DID NOT TRANSFER DIRECTLY', 'A mesh vertex is not an anatomical definition.',
     '<div class="reference-layout"><figure>' +
