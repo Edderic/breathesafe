@@ -47,6 +47,10 @@ and embedded in the HTML for offline use. Occluded-point accuracy from one
 viewing angle is identified as an open project validation question.
 Slide 8 uses the newer MasqFit MediaPipe screenshot in assets/mediapipe-masqfit-demo.png;
 the earlier reference image remains in assets/mediapipe-reference.png.
+Slide 10 shows focused views of the current FLAME face generator and 3D landmark
+labeling research tools, with the full October 29 screenshots preserved in
+assets/android-flame-generator.png and assets/android-landmark-labeling.png.
+These are development tools for the Android pipeline, not Android app screens.
 
 Validation:
 Checked all 14 slides at 1366x768 for viewport fit, mobile width at 390px for

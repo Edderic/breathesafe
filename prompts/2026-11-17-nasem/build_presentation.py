@@ -200,21 +200,22 @@ add('05 / WHY PHOTOGRAMMETRY', 'Broader camera support adds new work.',
     'Reconstruction itself does not provide the anatomical labels I need. Scale and landmark detection remain separate engineering and validation steps.',
     90, f'<a href="{PHOTO}">Aldridge et al., 2005: facial photogrammetry vs. direct anthropometry</a> · ~45 s: presenter-reported processing time.')
 
-add('06 / ANDROID DEVELOPMENT', 'Separate reconstruction from landmarking.',
-    '''<div class="pipeline"><article><b>1</b><h2>3D face</h2><p>Synthetic geometry<br>or a captured human face</p></article>
-    <span>→</span><article><b>2</b><h2>2D landmarks</h2><p>Detect target points in rendered or captured views</p></article>
-    <span>→</span><article><b>3</b><h2>3D projection</h2><p>Map detections onto the matching surface</p></article>
-    <span>→</span><article><b>4</b><h2>Dimensions</h2><p>Establish physical scale; calculate defined distances</p></article>
-    <span>→</span><article><b>5</b><h2>Predict fit</h2><p>Evaluate the measured features in the ranking pipeline</p></article></div>''' +
-    callout('Current development direction for Android; synthetic faces provide geometry labels, not fit outcomes.'),
+add('06 / ANDROID DEVELOPMENT', 'Building the Android path: faces and landmarks.',
+    '<div class="android-gallery"><figure><div class="android-shot generator">' +
+    screenshot('android-flame-generator.png', 'MasqFit research tool generating a synthetic FLAME face with adjustable shape parameters.', 'android-screen') +
+    '</div><figcaption>Generate controlled 3D faces</figcaption></figure><figure><div class="android-shot landmarks">' +
+    screenshot('android-landmark-labeling.png', 'MasqFit research tool showing labeled facial landmarks on a synthetic FLAME face.', 'android-screen') +
+    '</div><figcaption>Label anatomical points on the 3D surface</figcaption></figure></div>' +
+    '<div class="android-flow">3D face → 2D landmarks → 3D projection → metric dimensions → fit prediction</div>',
     'This is the pipeline I am working toward. Begin with a 3D face, either synthetic or from an actual captured person. '
     'Use rendered or captured 2D views to detect the target landmarks, then project those detections back onto the matching 3D surface. '
     'Projection requires the camera-to-surface relationship: for a rendered view it is known; for a captured view it must be recovered or calibrated. '
     'A point on the image does not select the correct surface point without that relationship and visibility checks. '
     'Once the landmarks are on a scaled surface, calculate the defined dimensions and pass them into the fit-prediction pipeline. '
+    'These screenshots show the current FLAME synthetic-face generator and anatomical landmark labeling tool. They are research tools for the Android path, not Android app screens. '
     'Synthetic models let us generate known geometry labels and controlled views. They do not tell us whether a respirator fits a real person. '
     'The difficult transfer is from synthetic rendering to real cameras and faces, which needs independent evaluation.',
-    90, 'Development direction described by presenter · Pipeline is not presented as a validated Android release.')
+    90, 'Presenter screenshots of research tools · Synthetic geometry and landmarks need anatomical, scale, and real-camera validation.', 'android-slide')
 
 add('07 / LESSONS FOR NPPTL APPS', 'Validate the handoffs, not only the final score.',
     cards([('Capture → geometry', 'Measure scale error, repeatability, failed scans, and variation across devices.'),
