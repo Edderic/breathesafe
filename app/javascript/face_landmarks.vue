@@ -1,0 +1,656 @@
+<template>
+  <main class="face-review">
+    <p class="eyebrow">MasqFit research</p>
+    <h1>Face landmark labeling</h1>
+    <p>Explore synthetic heads, capture consistent views, and mark points on the surface.</p>
+    <p class="notice">Draft annotations · model millimeters. Anatomical placement, scale, and realism await review.</p>
+    <div class="toolbar">
+      <label>Head variant<select v-model="variantId" @change="changeHead">
+        <option v-for="v in variants" :key="v.id" :value="v.id">{{ v.label }}</option>
+      </select></label>
+      <label>Open heads or annotations<input type="file" multiple accept=".json,application/json" @change="openHeads" /></label>
+      <label>Your name<input v-model="annotator" maxlength="100" placeholder="Required to place a point" /></label>
+      <label class="touch-control"><input type="checkbox" v-model="touchPlacement" :disabled="comparisonActive" /> Tap to place (touch/pen)</label>
+    </div>
+    <p class="shortcut-hint">One annotation file resumes editing; multiple annotation files open a read-only comparison on the selected head.</p>
+    <p><strong>Source:</strong> {{ record.source.asset_id }} · {{ record.source.license }}. Files stay on this computer.</p>
+    <p class="shortcut-hint"><strong>Controls:</strong> drag to rotate ·
+      <template v-if="!comparisonActive"><kbd>Ctrl</kbd> + click to place landmark · </template>
+      <template v-else>read-only comparison · </template>
+      <kbd>[</kbd> previous landmark · <kbd>]</kbd> next landmark.
+      Shortcuts pause while editing a field or using a form control.</p>
+    <p v-if="error" role="alert" class="error">{{ error }}</p>
+    <p v-if="message" role="status">{{ message }}</p>
+    <div class="layout">
+      <section>
+        <div class="views">
+          <button v-for="view in views" :key="view.id" @click="setView(view)">{{ view.label }}</button>
+        </div>
+        <svg ref="viewport" viewBox="0 0 720 480" tabindex="0" role="img"
+          :aria-label="comparisonActive ? `${record.record_id}: comparing ${selectedLabel.name}; drag to rotate` : `${record.record_id}: drag to rotate; Control-click to place ${selectedLabel.name}`"
+          @pointerdown="startPointer" @pointermove="movePointer" @pointerup="finishPointer"
+          @pointercancel="drag = null" @lostpointercapture="drag = null" @contextmenu="controlContextMenu"
+          @keydown="rotateKey" @wheel.prevent="zoom">
+          <title>{{ record.record_id }} — draft landmark placement</title>
+          <rect width="720" height="480" fill="#edf2f5" />
+          <polygon v-for="face in faces" :key="face.index" :points="face.points" :fill="face.fill" />
+          <g v-if="!comparisonActive && heightConstruction" pointer-events="none">
+            <polygon :points="heightConstruction.plane" fill="#36a4bb" fill-opacity="0.12" stroke="#126477" stroke-dasharray="5 4" />
+            <circle :cx="heightConstruction.foot.x" :cy="heightConstruction.foot.y" r="4" fill="white" stroke="#c74d15" />
+          </g>
+          <g v-if="!comparisonActive" stroke="#c74d15" stroke-width="3" stroke-linecap="round" pointer-events="none"
+            :stroke-dasharray="measurementKind === 'ear_height_top' ? '6 3' : null">
+            <line v-for="(segment, index) in visiblePathSegments" :key="index"
+              :x1="segment.a.x" :y1="segment.a.y" :x2="segment.b.x" :y2="segment.b.y" />
+          </g>
+          <g v-for="mark in visibleMarks" :key="mark.name" pointer-events="none">
+            <circle :cx="mark.x" :cy="mark.y" r="5" :fill="mark.name === landmark ? '#e95d21' : '#126477'" stroke="white" stroke-width="1.5" />
+            <text v-if="showNames" :x="mark.x + 8" :y="mark.y - 7">{{ mark.name.replaceAll('_', ' ') }}</text>
+          </g>
+          <g v-if="comparisonActive" pointer-events="none" class="comparison-overlay">
+            <g v-if="comparisonConnect" stroke="#364c5b" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.65">
+              <line v-for="line in comparisonLines" :key="line.id" :x1="line.a.x" :y1="line.a.y" :x2="line.b.x" :y2="line.b.y" />
+            </g>
+            <g v-for="mark in comparisonMarks" :key="mark.id">
+              <circle :cx="mark.x" :cy="mark.y" :r="mark.name === landmark ? 6 : 3" :fill="mark.color" stroke="white" stroke-width="1.5" :opacity="mark.name === landmark ? 1 : .55">
+                <title>{{ mark.number }} · {{ mark.label }} · {{ landmarkName(mark.name) }}</title>
+              </circle>
+              <text v-if="showNames && mark.name === landmark" :x="mark.x + 8" :y="mark.y - 7">{{ mark.number }}</text>
+            </g>
+          </g>
+        </svg>
+        <p v-if="comparisonActive">Read-only comparison. Drag or use arrow keys to rotate; scroll to zoom. Numbers match the annotation sets. Turn off the overlay to edit your draft.</p>
+        <p v-else>Drag without Ctrl to rotate. Ctrl-click the surface to place or replace the selected landmark. Arrow keys rotate; scroll to zoom. Hidden points disappear behind the surface.</p>
+        <div class="toolbar">
+          <label>Yaw {{ Math.round(yaw) }}°<input v-model.number="yaw" type="range" min="-180" max="180" /></label>
+          <label>Tilt {{ Math.round(pitch) }}°<input v-model.number="pitch" type="range" min="-90" max="90" /></label>
+          <label><input type="checkbox" v-model="showNames" /> Show names</label>
+          <button @click="resetView">Reset view</button>
+        </div>
+        <h2>Automatic views</h2>
+        <p>Download a seven-view PNG sheet of the current head, with a shared scale and framing. Captures contain geometry without annotation overlays.</p>
+        <div class="views"><button @click="downloadViews">Download view sheet</button><button @click="downloadCameras">Download camera metadata</button></div>
+      </section>
+      <aside>
+        <h2>Landmarks</h2>
+        <p v-if="!comparisonActive">{{ Object.keys(current).length }} / {{ labelOptions.length }} marked on this head</p>
+        <label>{{ comparisonActive ? 'Landmark to inspect' : 'Point to place' }}<select v-model="landmark" aria-keyshortcuts="[ ]">
+          <option v-for="label in labelOptions" :key="label.id" :value="label.id">{{ !comparisonActive && current[label.id] ? '✓ ' : '' }}{{ label.name }}</option>
+        </select></label>
+        <p>{{ selectedLabel.description }}</p>
+        <p v-if="selectedLabel.provisional" class="notice">Provisional placement definition. Mark your interpretation and explain it in the note.</p>
+        <template v-if="comparisonActive">
+          <p v-if="selectedComparison.pairs.length">Median pairwise displacement: <strong>{{ selectedComparison.median_mm.toFixed(2) }} mm</strong><br />
+            Maximum: <strong>{{ selectedComparison.maximum_mm.toFixed(2) }} mm</strong></p>
+          <p v-else>Show at least two sets containing this landmark to compare distances.</p>
+        </template>
+        <h2>Compare annotation sets</h2>
+        <label>Load comparison files<input type="file" multiple accept=".json,application/json" @change="loadComparisons" /></label>
+        <p class="shortcut-hint">Load up to 10 exports for this exact head. Comparison sets are read-only and stay separate from your editable draft.</p>
+        <p v-if="comparisonError" role="alert" class="error">{{ comparisonError }}</p>
+        <p v-if="comparisonMessage" role="status">{{ comparisonMessage }}</p>
+        <template v-if="comparisonSets.length">
+          <label class="check-label"><input type="checkbox" v-model="comparisonVisible" /> Show comparison overlay</label>
+          <div v-for="set in comparisonSets" :key="set.id" class="comparison-set">
+            <label class="check-label"><input type="checkbox" v-model="set.visible" />
+              <span class="set-color" :style="{ background: set.color }">{{ set.number }}</span>
+              <span class="set-name" :title="set.filename">{{ set.label }}<small>{{ Object.keys(set.landmarks).length }} landmarks</small></span>
+            </label>
+            <button @click="removeComparison(set.id)" :aria-label="`Remove comparison ${set.label}`">Remove</button>
+          </div>
+          <label class="check-label"><input type="checkbox" v-model="comparisonSelectedOnly" /> Selected landmark only</label>
+          <label class="check-label"><input type="checkbox" v-model="comparisonConnect" /> Connect selected placements</label>
+          <label class="check-label"><input type="checkbox" v-model="comparisonThrough" /> Show points through the head</label>
+          <p v-if="comparisonThrough" class="notice">Points behind the surface are shown too.</p>
+          <button @click="clearComparisons">Clear comparison sets</button>
+        </template>
+        <div v-if="comparisonActive" class="comparison-detail">
+          <p class="shortcut-hint">Straight-line 3D distances between placements, not surface lengths. Statistics include hidden points in the checked sets.</p>
+          <div v-for="set in comparisonSets.filter(item => item.visible)" :key="set.id" class="comparison-placement">
+            <strong :style="{ color: set.color }" :title="set.filename">{{ set.number }} · {{ set.label }}</strong>
+            <template v-if="set.landmarks[landmark]">
+              <p>{{ set.landmarks[landmark].annotator }} · {{ comparisonPointReadout(set) }} mm</p>
+              <p v-if="set.landmarks[landmark].note" class="placement-note">{{ set.landmarks[landmark].note }}</p>
+              <button @click="comparisonView(set)" :disabled="!validComparisonCamera(set)">Use placement view</button>
+            </template>
+            <p v-else>Landmark missing in this set.</p>
+          </div>
+          <table v-if="selectedComparison.pairs.length" class="comparison-distances">
+            <caption>Selected landmark displacement</caption>
+            <thead><tr><th scope="col">Sets</th><th scope="col">3D distance (mm)</th></tr></thead>
+            <tbody><tr v-for="pair in selectedComparison.pairs" :key="`${pair.a.id}:${pair.b.id}`"><td>{{ pair.a.number }} ↔ {{ pair.b.number }}</td><td>{{ pair.distance_mm.toFixed(2) }}</td></tr></tbody>
+          </table>
+        </div>
+        <template v-else>
+        <label>Placement note<textarea v-model="note" rows="3" maxlength="2000" placeholder="How you identified this point" /></label>
+        <p>Notes are saved when placing a point, or with Save note.</p>
+        <button @click="saveNote" :disabled="!current[landmark]">Save note</button>
+        <p v-if="current[landmark]">Placed by {{ current[landmark].annotator }}. Coordinates: {{ pointReadout }} mm.</p>
+        <div class="views"><button @click="removePoint" :disabled="!current[landmark]">Remove point</button><button @click="undo" :disabled="!history.length">Undo last edit</button></div>
+        <h2>Measurements</h2>
+        <label>Measurement<select v-model="measurementKind">
+          <option v-for="item in measurementOptions" :key="item.id" :value="item.id">{{ item.label }}</option>
+        </select></label>
+        <p>{{ measurementOptions.find(item => item.id === measurementKind).description }}</p>
+        <label v-if="measurementKind !== 'ear_height_top'">Path method<select v-model="pathMethod">
+          <option value="continuous">Continuous surface shortest path</option>
+          <option value="edges">Mesh-edge approximation</option>
+        </select></label>
+        <p v-if="pathError && measurementKind !== 'ear_height_top'" class="error" role="alert">{{ pathError }}
+          <button @click="scheduleContinuous">Retry continuous solve</button>
+          <a href="/python/dimension_pipeline/SURFACE_GEODESICS.md" target="_blank" rel="noopener">Local solver setup</a>
+        </p>
+        <div v-for="path in displayedMeasurements" :key="path.id" class="surface-measurement">
+          <button @click="activeMeasurementId = path.id" :aria-pressed="selectedMeasurement?.id === path.id">
+            {{ path.side === 'midline' ? 'Midline' : path.side === 'left' ? 'Left' : 'Right' }}:
+            <strong v-if="path.status === 'ok'">≈ {{ path.length_mm.toFixed(2) }} mm</strong>
+            <span v-else-if="path.status === 'pending'">Calculating continuous path…</span>
+            <span v-else-if="path.status === 'unavailable'">Continuous solver unavailable</span>
+            <span v-else-if="path.status === 'disconnected'">No connected surface route</span>
+            <span v-else-if="path.status === 'invalid_reference'">Ear top is below menton in this frame</span>
+            <span v-else>Mark {{ path.endpoints.filter(name => !current[name]).map(landmarkName).join(' and ') }}</span>
+          </button>
+          <p v-if="path.status === 'ok' && path.kind === 'surface_distance'">Straight chord: {{ path.chord_mm.toFixed(2) }} mm</p>
+          <p v-if="path.status === 'ok' && path.method === 'cgal_continuous_v1'">
+            Edge baseline: {{ path.mesh_edge_length_mm.toFixed(2) }} mm · Saved {{ (path.mesh_edge_length_mm-path.length_mm).toFixed(2) }} mm of detour
+          </p>
+        </div>
+        <p v-if="measurementKind === 'ear_height_top'" class="shortcut-hint">Uses model +Y as vertical and a horizontal plane through menton. View rotation does not change the measurement. Anatomical head alignment remains unreviewed.</p>
+        <p v-else class="shortcut-hint">{{ pathMethod === 'continuous' ? 'Shortest path across triangle interiors, computed with floating-point coordinates.' : 'Mesh-edge approximation; depends on mesh detail.' }} Confirm the route visually. Equivalence to the paper’s measurement remains unverified.</p>
+        <h2>Save and resume</h2>
+        <p>Edits stay in memory until downloaded. Export each head before leaving. Files are processed locally.</p>
+        <label>Review status<select v-model="reviewStatus"><option value="draft">Draft</option><option value="ready_for_review">Ready for review</option></select></label>
+        <div class="views"><button @click="exportAnnotations">Download annotations</button></div>
+        <label>Resume annotations<input type="file" accept=".json,application/json" @change="importAnnotations" /></label>
+        <p>Import requires the same variant and exact mesh fingerprint. Each point retains its annotator, surface attachment, view, and note.</p>
+        </template>
+        <router-link :to="{ name: 'DimensionFixtures' }">Open analytic fixture viewer</router-link>
+      </aside>
+    </div>
+  </main>
+</template>
+
+<script>
+import base from '../../python/dimension_pipeline/assets/makehuman_head.json';
+import variants from '../../python/dimension_pipeline/assets/head_variants.json';
+import views from '../../python/dimension_pipeline/assets/head_views.json';
+import { projectPoint } from './dimension_fixture_geometry';
+import { makeHead, headCenter, projectMesh, shadedFaces, pickSurface, attachmentPoint,
+  meshFingerprint, validateAnnotations, readSurfaceRecord } from './face_annotation_geometry';
+import { buildSurfaceGraph, facialSurfacePaths, surfaceMeasurementDefinitions, earTopHeights } from './face_surface_paths';
+import { requestContinuousPaths } from './face_continuous_paths';
+import { landmarkComparison } from './face_annotation_comparison';
+
+const comparisonColors = ['#0072b2', '#c04400', '#007b58', '#a23a91', '#756100', '#3446b8', '#a32f3d', '#15696e', '#6c4b21', '#604181'];
+
+const labelOptions = [
+  ['pronasale', 'Pronasale', 'Anterior nasal tip on the midline.'],
+  ['subnasale', 'Subnasale', 'Midline junction of the underside of the nose and upper lip.'],
+  ['sellion', 'Sellion', 'Deepest nasal-root depression on the midline.'],
+  ['menton', 'Menton', 'Inferior chin point on the midline of the external surface.'],
+  ['midpoint_of_nose', 'Nasal midpoint', 'Proposed: halfway along the midline surface route from the chosen nasal root to pronasale. Record your root and route interpretation.', true],
+  ...['left', 'right'].flatMap(side => [
+    [`mid_nose_root_${side}`, `Mid-nose root · ${side}`, 'Proposed lateral transition between the nose and cheek near the nasal midpoint. Exact placement remains unresolved.', true],
+    [`zygion_${side}`, `Zygion · ${side}`, 'Most lateral point over the zygomatic arch on this side. Annotate the external facial surface.'],
+    [`gonion_${side}`, `Gonion · ${side}`, 'Jaw-angle landmark: lateral, inferior, posterior region of the mandibular angle. Review the external-surface placement.'],
+    [`tragion_${side}`, `Tragion · ${side}`, 'Upper junction of the tragus (cartilaginous ear flap) with the head.'],
+    [`ear_top_edge_${side}`, `Upper ear · ${side}`, 'Uppermost ear point in the agreed anatomical head orientation.', true],
+  ]),
+].map(([id, name, description, provisional]) => ({ id, name, description, provisional }));
+
+const legacyLabels = ['left', 'right'].map(side => ({ id: `lateral_zygomatic_edge_${side}`,
+  name: `Legacy cheekbone point · ${side} (review)`, provisional: true,
+  description: 'Preserved from an older export. This point has not been confirmed as zygion; place zygion explicitly to derive the new surface distance.' }));
+
+const measurementOptions = [
+  { id: 'nose_protrusion', label: 'Nose protrusion', description: 'Surface length from pronasale to subnasale (FFR-specific construction). The straight chord is displayed separately.' },
+  { id: 'mid_nose_slope', label: 'Mid-nose slope', description: 'Surface length from nasal midpoint to the mid-nose root on each side, in millimeters. Landmark placement remains provisional.' },
+  { id: 'lateral_zygomatic_gonion', label: 'Lateral zygomatic–gonion length', description: 'Candidate surface route from zygion to gonion on the same side. Correspondence to the paper’s lateral cheekbone endpoint remains unverified.' },
+  { id: 'ear_height_top', label: 'Ear height; top', description: 'Vertical height from the upper ear landmark down to a horizontal plane through menton. The dashed line and plane show the construction.' },
+  { id: 'gonion_menton', label: 'Gonion–menton length (surface)', description: 'Surface length from gonion on each side to the midline menton landmark.' },
+];
+
+function download(blob, name) {
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+export default {
+  name: 'FaceLandmarks',
+  data() {
+    return { variants: [...variants], localHeads: {}, views, variantId: 'base', record: makeHead(base, variants[0]), center: headCenter(base),
+      measurementOptions, measurementKind: 'nose_protrusion', activeMeasurementId: null,
+      pathMethod: 'continuous', continuousResults: null, pathError: '', solverTimer: null, solverController: null, solverRevision: 0,
+      captureScale: 1.45,
+      comparisons: {}, comparisonVisible: true, comparisonSelectedOnly: true, comparisonConnect: true, comparisonThrough: false,
+      comparisonError: '', comparisonMessage: '', comparisonLoadRevision: 0,
+      drafts: {}, histories: {}, landmark: 'pronasale', annotator: '', note: '', reviewStatus: 'draft', touchPlacement: false,
+      yaw: -45, pitch: 0, scale: 1.45, showNames: true, error: '', message: '', drag: null, savedDrafts: {} };
+  },
+  computed: {
+    labelOptions() { return [...labelOptions, ...legacyLabels.filter(label => this.current[label.id] || this.comparisonSets.some(set => set.landmarks[label.id]))]; },
+    comparisonSets() { return this.comparisons[this.variantId] || []; },
+    comparisonActive() { return this.comparisonVisible && this.comparisonSets.length > 0; },
+    selectedComparison() { return landmarkComparison(this.record, this.comparisonSets, this.landmark); },
+    comparisonMarks() {
+      if (!this.comparisonActive) return [];
+      return this.comparisonSets.filter(set => set.visible).flatMap(set => Object.entries(set.landmarks).flatMap(([name, annotation]) => {
+        if (this.comparisonSelectedOnly && name !== this.landmark) return [];
+        const p = projectPoint(attachmentPoint(this.record, annotation.attachment), this.center, this.yaw, this.pitch, this.scale);
+        const hit = this.comparisonThrough ? null : pickSurface(this.record, this.points, p.x, p.y);
+        return this.comparisonThrough || (hit && Math.abs(hit.depth-p.depth) < .1)
+          ? [{ ...p, id: `${set.id}:${name}`, setId: set.id, name, color: set.color, number: set.number, label: set.label }] : [];
+      }));
+    },
+    comparisonLines() {
+      const marks = this.comparisonMarks.filter(mark => mark.name === this.landmark);
+      return marks.flatMap((a, i) => marks.slice(i+1).map(b => ({ id: `${a.id}:${b.id}`, a, b })));
+    },
+    dirty() { return Object.entries(this.drafts).some(([id, draft]) => JSON.stringify(draft) !== this.savedDrafts[id]); },
+    current() { return this.drafts[this.variantId]?.landmarks || {}; },
+    history() { return this.histories[this.variantId] || []; },
+    selectedLabel() { return this.labelOptions.find(l => l.id === this.landmark) || labelOptions[0]; },
+    surfaceGraph() { return buildSurfaceGraph(this.record); },
+    edgePaths() { return facialSurfacePaths(this.record, this.surfaceGraph, this.current); },
+    earHeights() { return earTopHeights(this.record, this.current); },
+    measurements() { return [...this.surfacePaths, ...this.earHeights]; },
+    displayedMeasurements() { return this.measurements.filter(item => item.measurement === this.measurementKind); },
+    selectedMeasurement() { return this.displayedMeasurements.find(item => item.id === this.activeMeasurementId) || this.displayedMeasurements[0]; },
+    heightConstruction() {
+      const item = this.selectedMeasurement;
+      if (item?.kind !== 'vertical_distance_to_plane' || item.status !== 'ok') return null;
+      const bounds = [0, 2].map(axis => {
+        const values = this.record.mesh.vertices.map(p => p[axis]);
+        return [Math.min(...values)-15, Math.max(...values)+15];
+      });
+      const [x, z] = bounds, y = item.plane_point_mm[1];
+      const project = p => projectPoint(p, this.center, this.yaw, this.pitch, this.scale);
+      return { plane: [[x[0], y, z[0]], [x[1], y, z[0]], [x[1], y, z[1]], [x[0], y, z[1]]]
+        .map(p => { const q = project(p); return `${q.x},${q.y}`; }).join(' '), foot: project(item.projected_point_mm) };
+    },
+    continuousKey() {
+      return JSON.stringify({ variant: this.variantId, method: this.pathMethod,
+        endpoints: [...new Set(surfaceMeasurementDefinitions().flatMap(item => item.endpoints))].map(name => this.current[name]?.attachment || null) });
+    },
+    surfacePaths() {
+      if (this.pathMethod === 'edges') return this.edgePaths;
+      if (this.continuousResults) return this.continuousResults;
+      return this.edgePaths.map(path => path.status === 'missing_landmarks' ? path : {
+        ...path, method: 'cgal_continuous_v1', status: this.pathError ? 'unavailable' : 'pending', length_mm: null, points: [], path: [],
+      });
+    },
+    visiblePathSegments() {
+      const measurement = this.selectedMeasurement, points = measurement?.points || [];
+      return points.slice(1).flatMap((b, i) => {
+        const a = points[i], middle = a.map((v, axis) => (v+b[axis])/2);
+        const project = point => projectPoint(point, this.center, this.yaw, this.pitch, this.scale);
+        const p = project(middle), hit = pickSurface(this.record, this.points, p.x, p.y);
+        return measurement.kind === 'vertical_distance_to_plane' || (hit && Math.abs(hit.depth-p.depth) < .1)
+          ? [{ a: project(a), b: project(b) }] : [];
+      });
+    },
+    points() { return projectMesh(this.record, this.center, this.yaw, this.pitch, this.scale); },
+    faces() { return shadedFaces(this.record, this.points); },
+    visibleMarks() {
+      if (this.comparisonActive) return [];
+      return Object.entries(this.current).flatMap(([name, a]) => {
+        const p = projectPoint(attachmentPoint(this.record, a.attachment), this.center, this.yaw, this.pitch, this.scale);
+        const hit = pickSurface(this.record, this.points, p.x, p.y);
+        return hit && Math.abs(hit.depth-p.depth) < .1 ? [{ name, ...p }] : [];
+      });
+    },
+    pointReadout() { return attachmentPoint(this.record, this.current[this.landmark].attachment).map(v => v.toFixed(2)).join(', '); },
+  },
+  watch: {
+    continuousKey: { handler: 'scheduleContinuous', immediate: true, flush: 'sync' },
+    landmark() { this.note = this.current[this.landmark]?.note || ''; },
+    reviewStatus(value) {
+      if (this.drafts[this.variantId] && this.drafts[this.variantId].review_status !== value) {
+        this.drafts[this.variantId].review_status = value;
+      }
+    },
+  },
+  mounted() {
+    window.addEventListener('beforeunload', this.beforeUnload);
+    window.addEventListener('keydown', this.annotationKey);
+  },
+  beforeUnmount() {
+    clearTimeout(this.solverTimer); this.solverController?.abort(); this.solverRevision++;
+    window.removeEventListener('beforeunload', this.beforeUnload);
+    window.removeEventListener('keydown', this.annotationKey);
+  },
+  beforeRouteLeave() {
+    if (this.dirty) return window.confirm('Some head annotations have not been exported. Leave this page and discard those edits?');
+  },
+  methods: {
+    landmarkName(id) { return this.labelOptions.find(label => label.id === id)?.name || id.replaceAll('_', ' '); },
+    scheduleContinuous() {
+      clearTimeout(this.solverTimer); this.solverController?.abort(); this.solverRevision++;
+      this.continuousResults = null; this.pathError = '';
+      // Do not consult edgePaths in this synchronous watcher: Vue may still be
+      // invalidating that separate computed value after a landmark/undo edit.
+      const complete = surfaceMeasurementDefinitions().some(item => item.endpoints.every(name => this.current[name]));
+      if (this.pathMethod !== 'continuous' || !complete) return;
+      const revision = this.solverRevision;
+      this.solverTimer = setTimeout(() => this.solveContinuous(revision), 180);
+    },
+    async solveContinuous(revision) {
+      if (revision !== this.solverRevision || this.pathMethod !== 'continuous') return;
+      const record = this.record, baselines = this.edgePaths, landmarks = this.current;
+      if (baselines.every(path => path.status === 'missing_landmarks')) return;
+      const controller = new AbortController(); this.solverController = controller;
+      const timeout = setTimeout(() => controller.abort(), 30000);
+      try {
+        const result = await requestContinuousPaths(record, baselines, landmarks, controller.signal);
+        if (revision === this.solverRevision) this.continuousResults = result;
+      } catch (error) {
+        if (revision === this.solverRevision) this.pathError = error.name === 'AbortError'
+          ? 'Continuous solve timed out. Retry or select the mesh-edge comparison.'
+          : `Continuous solve unavailable: ${error.message}. Start the local solver or select the mesh-edge comparison.`;
+      } finally { clearTimeout(timeout); }
+    },
+    beforeUnload(event) { if (this.dirty) { event.preventDefault(); event.returnValue = ''; } },
+    changeHead() {
+      this.drag = null; this.comparisonLoadRevision++; this.comparisonError = ''; this.comparisonMessage = '';
+      this.record = this.localHeads[this.variantId] || makeHead(base, variants.find(v => v.id === this.variantId));
+      const camera = this.record.preview_camera;
+      this.center = camera?.center_mm || headCenter(this.localHeads[this.variantId] ? this.record : base);
+      this.captureScale = camera?.pixels_per_mm || (this.localHeads[this.variantId] ? 330/Math.hypot(...[0, 1, 2].map(i => {
+        const values = this.record.mesh.vertices.map(p => p[i]); return Math.max(...values)-Math.min(...values);
+      })) : 1.45);
+      this.scale = this.captureScale;
+      this.reviewStatus = this.drafts[this.variantId]?.review_status || 'draft';
+      if (!this.labelOptions.some(label => label.id === this.landmark)) this.landmark = 'pronasale';
+      this.note = this.current[this.landmark]?.note || ''; this.error = ''; this.message = '';
+    },
+    async openHeads(event) {
+      const files = Array.from(event.target.files || []); if (!files.length) return;
+      this.error = ''; this.message = '';
+      try {
+        if (files.length > 10 || files.reduce((sum, f) => sum+f.size, 0) > 20*1024*1024) {
+          throw new Error('Choose up to 10 JSON files totaling at most 20 MB.');
+        }
+        const contents = await Promise.all(files.map(async file => JSON.parse(await file.text())));
+        const isAnnotation = content => content && Object.hasOwn(content, 'annotation_version');
+        if (files.length > 1 && contents.some(isAnnotation)) {
+          if (!contents.every(isAnnotation)) throw new Error('Open head meshes separately from annotation exports. Select only annotation exports to compare them.');
+          await this.loadComparisons({ target: { files, value: '' } });
+          this.error = this.comparisonError;
+          this.message = this.comparisonError ? '' : this.comparisonMessage;
+          return;
+        }
+        const records = [];
+        for (const [index, file] of files.entries()) {
+          const content = contents[index];
+          if (content && Object.hasOwn(content, 'annotation_version')) {
+            if (file.size > 5*1024*1024) throw new Error('Choose an annotation file smaller than 5 MB.');
+            // An annotation file contains points, not a mesh. Locate the exact
+            // loaded head first; never infer compatibility from its filename.
+            let matching = null;
+            for (const variant of this.variants) {
+              const candidate = this.localHeads[variant.id] || makeHead(base, variants.find(v => v.id === variant.id));
+              if (candidate.record_id === content.record_id && candidate.topology_id === content.topology_id &&
+                await meshFingerprint(candidate) === content.mesh_sha256) { matching = variant; break; }
+            }
+            if (!matching) throw new Error('Load the matching generated head first, then open this annotation export again.');
+            const candidate = this.localHeads[matching.id] || makeHead(base, variants.find(v => v.id === matching.id));
+            validateAnnotations(content, candidate, content.mesh_sha256, [...labelOptions, ...legacyLabels].map(l => l.id));
+            this.variantId = matching.id; this.changeHead();
+            await this.importAnnotations({ target: { files: [file], value: '' } });
+            return;
+          }
+          if (!content?.surface_record_version) {
+            throw new Error('Choose a generated head JSON or saved annotations JSON. Run manifests and camera files cannot be opened here.');
+          }
+          const record = readSurfaceRecord(content);
+          const displayName = typeof record.generation?.display_name === 'string' ? record.generation.display_name.slice(0, 80) : file.name.replace(/\.json$/i, '');
+          records.push({ record, id: `local:${record.record_id}:${await meshFingerprint(record)}`,
+            label: `${record.source.asset_id} · ${displayName}` });
+        }
+        for (const { id, record, label } of records) {
+          if (!this.localHeads[id]) this.variants.push({ id, label });
+          this.localHeads[id] = record;
+        }
+        this.variantId = records[0].id; this.changeHead();
+        this.message = `Opened ${records.length} generated heads. Each mesh has its own annotations.`;
+      } catch (error) { this.message = ''; this.error = `Could not open file: ${error.message}`; }
+      finally { event.target.value = ''; }
+    },
+    setView(view) { this.yaw = view.yaw; this.pitch = view.pitch; },
+    async loadComparisons(event) {
+      const files = Array.from(event.target.files || []); if (!files.length) return;
+      const record = this.record, variantId = this.variantId, revision = ++this.comparisonLoadRevision;
+      this.comparisonError = ''; this.comparisonMessage = '';
+      try {
+        if (files.length > 10 || files.some(file => file.size > 5*1024*1024) || files.reduce((sum, file) => sum+file.size, 0) > 20*1024*1024) {
+          throw new Error('Choose up to 10 annotation files, at most 5 MB each and 20 MB total.');
+        }
+        const fingerprint = await meshFingerprint(record), additions = [], existing = this.comparisonSets;
+        for (const file of files) {
+          try {
+            const bundle = JSON.parse(await file.text());
+            const landmarks = validateAnnotations(bundle, record, fingerprint, [...labelOptions, ...legacyLabels].map(l => l.id));
+            const signature = JSON.stringify(landmarks);
+            if ([...existing, ...additions].some(set => set.signature === signature)) continue;
+            if (existing.length+additions.length >= 10) throw new Error('Remove a comparison set before adding more than 10.');
+            const number = comparisonColors.findIndex((color, i) => ![...existing, ...additions].some(set => set.number === i+1))+1;
+            const suffix = file.name.startsWith(`${record.record_id}-annotations`) ? file.name.slice(`${record.record_id}-annotations`.length) : null;
+            const label = suffix === '.json' ? 'Original' : /^-repeat-\d+\.json$/i.test(suffix || '')
+              ? `Repeat ${suffix.match(/\d+/)[0]}` : file.name;
+            additions.push({ id: number, number, color: comparisonColors[number-1], label, filename: file.name, visible: true, landmarks, signature });
+          } catch (error) { throw new Error(`${file.name}: ${error.message}`); }
+        }
+        if (revision !== this.comparisonLoadRevision || this.record !== record || this.variantId !== variantId) return;
+        this.comparisons[variantId] = [...existing, ...additions]; this.comparisonVisible = true; this.drag = null;
+        this.comparisonMessage = `Added ${additions.length} comparison sets; ${files.length-additions.length} duplicates skipped. Your editable draft is unchanged.`;
+      } catch (error) {
+        if (revision === this.comparisonLoadRevision) this.comparisonError = `Could not load comparisons: ${error.message}`;
+      } finally { event.target.value = ''; }
+    },
+    removeComparison(id) {
+      this.comparisonLoadRevision++; this.comparisonMessage = '';
+      this.comparisons[this.variantId] = this.comparisonSets.filter(set => set.id !== id);
+      if (!this.labelOptions.some(label => label.id === this.landmark)) this.landmark = 'pronasale';
+    },
+    clearComparisons() {
+      this.comparisonLoadRevision++; this.comparisons[this.variantId] = []; this.comparisonError = ''; this.comparisonMessage = '';
+      if (!this.labelOptions.some(label => label.id === this.landmark)) this.landmark = 'pronasale';
+    },
+    comparisonPointReadout(set) { return attachmentPoint(this.record, set.landmarks[this.landmark].attachment).map(v => v.toFixed(2)).join(', '); },
+    validComparisonCamera(set) {
+      const camera = set.landmarks[this.landmark]?.camera;
+      return camera?.projection === 'orthographic' && camera.mirrored === false &&
+        [camera.yaw, camera.pitch, camera.pixels_per_mm].every(Number.isFinite) &&
+        Math.abs(camera.yaw) <= 180 && Math.abs(camera.pitch) <= 90 && camera.pixels_per_mm >= .5 && camera.pixels_per_mm <= 5;
+    },
+    comparisonView(set) {
+      if (!this.validComparisonCamera(set)) return;
+      const camera = set.landmarks[this.landmark].camera;
+      this.drag = null; this.yaw = camera.yaw; this.pitch = camera.pitch; this.scale = camera.pixels_per_mm;
+    },
+    resetView() { this.yaw = -45; this.pitch = 0; this.scale = this.captureScale; },
+    startPointer(event) {
+      if (event.isPrimary === false || event.metaKey || event.altKey) return;
+      // macOS may report Control-click as the secondary button.
+      if (event.button !== 0 && !(event.ctrlKey && event.button === 2)) return;
+      event.currentTarget.focus({ preventScroll: true });
+      if (event.ctrlKey) event.preventDefault();
+      this.drag = { id: event.pointerId, x: event.clientX, y: event.clientY, yaw: this.yaw, pitch: this.pitch,
+        control: event.ctrlKey, tap: this.touchPlacement && ['touch', 'pen'].includes(event.pointerType), moved: false, cancelled: false };
+      event.currentTarget.setPointerCapture(event.pointerId);
+    },
+    movePointer(event) {
+      if (!this.drag || this.drag.id !== event.pointerId) return;
+      if (Math.hypot(event.clientX-this.drag.x, event.clientY-this.drag.y) > 5) this.drag.moved = true;
+      if (event.ctrlKey !== this.drag.control || event.metaKey || event.altKey) this.drag.cancelled = true;
+      if (this.drag.cancelled || this.drag.control || !this.drag.moved) return;
+      this.yaw = ((this.drag.yaw + (event.clientX-this.drag.x)*.4+540)%360)-180;
+      this.pitch = Math.max(-90, Math.min(90, this.drag.pitch+(event.clientY-this.drag.y)*.4));
+    },
+    finishPointer(event) {
+      const drag = this.drag;
+      if (!drag || drag.id !== event.pointerId) return;
+      this.drag = null;
+      if (this.comparisonActive) return;
+      if (drag.cancelled || drag.moved || Math.hypot(event.clientX-drag.x, event.clientY-drag.y) > 5 ||
+        event.ctrlKey !== drag.control || event.metaKey || event.altKey || !(drag.control || drag.tap)) return;
+      this.error = ''; this.message = '';
+      if (!this.annotator.trim()) { this.error = 'Enter your name before placing a point.'; return; }
+      const point = this.$refs.viewport.createSVGPoint(); point.x = event.clientX; point.y = event.clientY;
+      const local = point.matrixTransform(this.$refs.viewport.getScreenCTM().inverse());
+      const hit = pickSurface(this.record, this.points, local.x, local.y);
+      if (!hit) { this.error = 'Click a visible part of the head surface.'; return; }
+      this.remember();
+      const { depth, ...attachment } = hit;
+      this.drafts[this.variantId].landmarks[this.landmark] = { attachment, annotator: this.annotator.trim(),
+        note: this.note, placed_at: new Date().toISOString(), camera: this.camera() };
+      this.drafts[this.variantId].review_status = 'draft'; this.reviewStatus = 'draft';
+      this.message = `${this.selectedLabel.name} placed. Switch views to inspect its position.`;
+    },
+    controlContextMenu(event) { if (event.ctrlKey) event.preventDefault(); },
+    remember() {
+      if (!this.drafts[this.variantId]) this.drafts[this.variantId] = { landmarks: {}, review_status: 'draft' };
+      if (!this.histories[this.variantId]) this.histories[this.variantId] = [];
+      this.histories[this.variantId].push(JSON.parse(JSON.stringify(this.drafts[this.variantId])));
+      if (this.histories[this.variantId].length > 100) this.histories[this.variantId].shift();
+    },
+    removePoint() {
+      this.remember(); delete this.drafts[this.variantId].landmarks[this.landmark];
+      this.reviewStatus = 'draft'; this.note = '';
+      if (!this.labelOptions.some(label => label.id === this.landmark)) this.landmark = 'pronasale';
+    },
+    saveNote() {
+      if (!this.annotator.trim()) { this.error = 'Enter your name before editing a note.'; return; }
+      this.remember(); Object.assign(this.current[this.landmark], { note: this.note,
+        note_edited_by: this.annotator.trim(), note_edited_at: new Date().toISOString() });
+      this.reviewStatus = 'draft'; this.message = 'Placement note saved to this draft.';
+    },
+    undo() {
+      if (!this.history.length) return;
+      this.drafts[this.variantId] = this.histories[this.variantId].pop();
+      this.reviewStatus = this.drafts[this.variantId].review_status;
+      this.note = this.current[this.landmark]?.note || '';
+    },
+    zoom(event) { this.scale = Math.max(.5, Math.min(5, this.scale*Math.exp(-Math.sign(event.deltaY)*.1))); },
+    annotationKey(event) {
+      if (event.defaultPrevented || event.isComposing || event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
+      const target = event.target;
+      if (target?.isContentEditable || target?.closest?.('input, textarea, select, [role="textbox"], [role="combobox"]')) return;
+      const key = event.key.toLowerCase();
+      if (!['[', ']'].includes(key)) return;
+      event.preventDefault();
+      // A landmark change cancels any pending placement gesture.
+      this.drag = null;
+      const index = this.labelOptions.findIndex(label => label.id === this.landmark);
+      const next = (index + (key === ']' ? 1 : -1) + this.labelOptions.length) % this.labelOptions.length;
+      this.landmark = this.labelOptions[next].id;
+    },
+    rotateKey(event) {
+      if (event.defaultPrevented || event.isComposing || event.ctrlKey || event.metaKey || event.altKey) return;
+      const steps = { ArrowLeft: [-5, 0], ArrowRight: [5, 0], ArrowUp: [0, 5], ArrowDown: [0, -5] };
+      if (!steps[event.key]) return;
+      event.preventDefault(); this.yaw = ((this.yaw+steps[event.key][0]+540)%360)-180;
+      this.pitch = Math.max(-90, Math.min(90, this.pitch+steps[event.key][1]));
+    },
+    camera(view = null) { return { projection: 'orthographic', width: 720, height: 480, center_mm: this.center,
+      pixels_per_mm: view ? this.captureScale : this.scale, yaw: view ? view.yaw : this.yaw, pitch: view ? view.pitch : this.pitch,
+      mirrored: false, distortion: 'none', version: '1.0.0' }; },
+    async exportAnnotations() {
+      const record = this.record, variantId = this.variantId, landmarks = JSON.parse(JSON.stringify(this.current)), reviewStatus = this.reviewStatus;
+      const derived = this.measurements.map(({ points, ...path }) => path);
+      try {
+        const bundle = { annotation_version: '1.0.0', record_id: record.record_id, topology_id: record.topology_id,
+          mesh_sha256: await meshFingerprint(record), units: 'mm', source: record.source,
+          definition_version: 'pilot-placement-2026-10-27', review_status: reviewStatus, landmarks,
+          derived_measurements: derived };
+        download(new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' }), `${record.record_id}-annotations.json`);
+        this.savedDrafts[variantId] = JSON.stringify({ landmarks, review_status: reviewStatus });
+        this.message = 'Annotation download requested. Keep exports for all edited heads before leaving.';
+      } catch (error) { this.error = error.message; }
+    },
+    async importAnnotations(event) {
+      const file = event.target.files[0]; if (!file) return;
+      this.error = ''; this.message = '';
+      const record = this.record, variantId = this.variantId;
+      try {
+        if (file.size > 5*1024*1024) throw new Error('Choose an annotation file smaller than 5 MB.');
+        const bundle = JSON.parse(await file.text());
+        const landmarks = validateAnnotations(bundle, record, await meshFingerprint(record), [...labelOptions, ...legacyLabels].map(l => l.id));
+        if (this.variantId !== variantId) throw new Error('Head changed during import. Select it and import again.');
+        this.remember(); this.drafts[variantId] = { landmarks, review_status: bundle.review_status };
+        this.reviewStatus = bundle.review_status; this.note = this.current[this.landmark]?.note || '';
+        if (!this.labelOptions.some(label => label.id === this.landmark)) this.landmark = 'pronasale';
+        this.savedDrafts[variantId] = JSON.stringify(this.drafts[variantId]);
+        this.error = ''; this.message = legacyLabels.some(label => landmarks[label.id])
+          ? 'Imported. Legacy cheekbone points are preserved separately; mark zygion explicitly to calculate surface distance.'
+          : 'Annotations imported. Surface distances are recalculated from the landmarks. Undo restores the previous draft.';
+      } catch (error) { this.error = `Could not import: ${error.message}`; }
+      finally { event.target.value = ''; }
+    },
+    downloadCameras() {
+      download(new Blob([JSON.stringify({ record_id: this.record.record_id, views: views.map(view =>
+        ({ id: view.id, camera: this.camera(view) })) }, null, 2)], { type: 'application/json' }), `${this.record.record_id}-cameras.json`);
+    },
+    downloadViews() {
+      const canvas = document.createElement('canvas'); canvas.width = 2160; canvas.height = 1530;
+      const ctx = canvas.getContext('2d'); ctx.fillStyle = '#edf2f5'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      views.forEach((view, i) => {
+        const x = (i%3)*720, y = Math.floor(i/3)*510;
+        const points = projectMesh(this.record, this.center, view.yaw, view.pitch, this.captureScale);
+        ctx.save(); ctx.translate(x, y); ctx.beginPath(); ctx.rect(0, 0, 720, 480); ctx.clip();
+        for (const face of shadedFaces(this.record, points)) {
+          const vertices = this.record.mesh.triangles[face.index].map(i => points[i]);
+          ctx.fillStyle = face.fill; ctx.beginPath(); ctx.moveTo(vertices[0].x, vertices[0].y);
+          ctx.lineTo(vertices[1].x, vertices[1].y); ctx.lineTo(vertices[2].x, vertices[2].y); ctx.closePath(); ctx.fill();
+        }
+        ctx.restore(); ctx.fillStyle = '#193648'; ctx.font = '18px sans-serif'; ctx.fillText(view.label, x+20, y+500);
+      });
+      canvas.toBlob(blob => { if (blob) download(blob, `${this.record.record_id}-views.png`); }, 'image/png');
+    },
+  },
+};
+</script>
+
+<style scoped>
+.face-review { max-width: 1400px; margin: 2rem auto; padding: 0 1.25rem; color: #193648; }
+.eyebrow { text-transform: uppercase; letter-spacing: .1em; font-size: .8rem; }
+.notice { background: #fff4df; padding: .8rem; border-radius: 6px; }
+.shortcut-hint { font-size: .9rem; }
+kbd { border: 1px solid #b9c8d0; border-radius: 3px; padding: .05rem .3rem; background: #f3f6f8; font: inherit; }
+.toolbar, .views { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0; align-items: center; }
+.layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 1.5rem; }
+section, aside { min-width: 0; border: 1px solid #ccd9e0; padding: 1rem; border-radius: 8px; }
+.layout > section { position: sticky; top: 1rem; align-self: start; max-height: calc(100vh - 2rem); overflow-y: auto; box-sizing: border-box; }
+label { display: flex; flex-direction: column; gap: .4rem; padding: 0; }
+.toolbar > label { min-width: 0; max-width: 100%; }
+.toolbar > .touch-control { flex-direction: row; align-items: center; }
+select { min-width: 0; width: 100%; }
+input, select, button, textarea { font: inherit; max-width: 100%; box-sizing: border-box; }
+button, select, input, textarea { border: 1px solid #a9bbc5; border-radius: 5px; padding: .5rem; background: white; color: inherit; }
+button { cursor: pointer; } button:disabled { opacity: .5; cursor: default; }
+svg { width: 100%; display: block; touch-action: none; border-radius: 6px; }
+svg text { font: 11px sans-serif; fill: #173e56; paint-order: stroke; stroke: white; stroke-width: 3px; }
+svg:focus-visible, button:focus-visible { outline: 3px solid #2078b0; }
+aside label { margin: 1rem 0; } .error { color: #8b2418; background: #fff0ed; padding: .75rem; }
+h2 { font-size: 1.2rem; margin-top: 1.5rem; }
+.surface-measurement { margin: .6rem 0; }
+.surface-measurement button { width: 100%; text-align: left; }
+.surface-measurement button[aria-pressed="true"] { border-color: #c74d15; background: #fff4e9; }
+.surface-measurement p { margin: .3rem 0; font-size: .9rem; }
+.check-label { flex-direction: row; align-items: center; gap: .5rem; }
+.comparison-set { display: flex; align-items: center; gap: .5rem; margin: .7rem 0; }
+.comparison-set label { flex: 1; min-width: 0; margin: 0; }
+.set-color { flex: 0 0 1.5rem; text-align: center; border-radius: 50%; color: white; font-weight: bold; }
+.set-name, .comparison-placement strong { overflow-wrap: anywhere; }
+.set-name small { display: block; margin-top: .2rem; }
+.comparison-placement { border-top: 1px solid #ccd9e0; padding: .75rem 0; }
+.comparison-placement p { margin: .4rem 0; font-size: .9rem; }
+.placement-note { white-space: pre-wrap; overflow-wrap: anywhere; }
+.comparison-distances { width: 100%; border-collapse: collapse; margin: 1rem 0; font-variant-numeric: tabular-nums; }
+.comparison-distances caption { text-align: left; font-weight: bold; margin-bottom: .5rem; }
+.comparison-distances th, .comparison-distances td { text-align: left; padding: .4rem; border-bottom: 1px solid #ccd9e0; }
+@media(max-width: 850px) {
+  .layout { grid-template-columns: 1fr; }
+  .layout > section { position: static; max-height: none; overflow: visible; }
+}
+</style>

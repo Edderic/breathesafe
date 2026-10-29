@@ -1,0 +1,7 @@
+[
+  {"id":"base","label":"Base head","scale":1,"nose_mm":0,"width":1,"jaw":1},
+  {"id":"smaller","label":"Smaller · 0.92×","scale":0.92,"nose_mm":0,"width":1,"jaw":1},
+  {"id":"larger","label":"Larger · 1.08×","scale":1.08,"nose_mm":0,"width":1,"jaw":1},
+  {"id":"nasal","label":"Local nasal projection · +5 mm control","scale":1,"nose_mm":5,"width":1,"jaw":1},
+  {"id":"wider","label":"Wider face and jaw","scale":1,"nose_mm":0,"width":1.06,"jaw":1.05}
+]

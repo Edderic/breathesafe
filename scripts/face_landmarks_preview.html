@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Face landmark preview</title></head>
+  <body style="margin:0;font-family:system-ui,sans-serif"><nav style="margin:1rem 1.25rem"><a href="/scripts/flame_face_generator.html" target="_blank" rel="noopener">Generate a FLAME face</a></nav><div id="app"></div>
+    <script type="module">
+      import { createApp } from '/node_modules/vue/dist/vue.esm-bundler.js';
+      import { createRouter, createWebHashHistory } from 'vue-router';
+      import FaceLandmarks from '/app/javascript/face_landmarks.vue';
+      import DimensionFixtures from '/app/javascript/dimension_fixtures.vue';
+      const HeadPreview = {
+        components: { FaceLandmarks },
+        template: '<FaceLandmarks ref="review" />',
+        async mounted() {
+          const manifestPath = new URLSearchParams(location.search).get('heads');
+          if (!manifestPath) return;
+          try {
+            // Only explicitly requested, local run artifacts in the ignored tmp
+            // directory. Never fetch models or participant assets off-site.
+            if (!/^\/tmp\/[A-Za-z0-9_/-]+\/manifest\.json$/.test(manifestPath)) {
+              throw new Error('Preview runs must use /tmp/<run>/manifest.json.');
+            }
+            const manifestResponse = await fetch(manifestPath);
+            if (!manifestResponse.ok) throw new Error('Could not open the local run manifest.');
+            const manifest = await manifestResponse.json();
+            if (!Array.isArray(manifest.variants) || manifest.variants.length < 1 || manifest.variants.length > 10) {
+              throw new Error('Expected a run with 1–10 head variants.');
+            }
+            const directory = manifestPath.slice(0, manifestPath.lastIndexOf('/') + 1), files = [];
+            for (const variant of manifest.variants) {
+              if (typeof variant.mesh !== 'string' || !/^[A-Za-z0-9_-]+\.json$/.test(variant.mesh)) {
+                throw new Error('Invalid mesh filename in the local manifest.');
+              }
+              const response = await fetch(directory + variant.mesh);
+              if (!response.ok) throw new Error(`Could not open ${variant.mesh}.`);
+              files.push(new File([await response.text()], variant.mesh, { type: 'application/json' }));
+            }
+            await this.$refs.review.openHeads({ target: { files, value: '' } });
+          } catch (error) { this.$refs.review.error = error.message; }
+        },
+      };
+      const router = createRouter({ history: createWebHashHistory(), routes: [
+        { path: '/', component: HeadPreview, name: 'FaceLandmarks' },
+        { path: '/fixtures', component: DimensionFixtures, name: 'DimensionFixtures' },
+      ] });
+      createApp({ template: '<router-view />' }).use(router).mount('#app');
+    </script>
+  </body>
+</html>

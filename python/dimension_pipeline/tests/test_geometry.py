@@ -126,13 +126,29 @@ class GeometryTest(unittest.TestCase):
         self.assertEqual(len(segments), 46)
         self.assertEqual(len({v for segment in segments for v in segment.split("-")}), 46)
 
-    def test_published_candidates_remain_blocked_without_definitions(self):
+    def test_retrieved_definitions_preserve_surface_chord_and_height_distinctions(self):
         registry = json.loads((FIXTURES.parent / "target_registry.json").read_text())
-        self.assertEqual(len(registry["compact_candidates"]), 5)
-        for feature in registry["compact_candidates"]:
+        candidates = {feature["id"]: feature for feature in registry["compact_candidates"]}
+        self.assertEqual(len(candidates), 5)
+        self.assertEqual(candidates["yu2024_mid_nose_slope"]["kind"], "surface_distance")
+        nasal_surface = candidates["yu2024_nose_protrusion"]
+        nasal_chord = registry["pilot_candidates"][0]
+        self.assertEqual(nasal_surface["landmarks"], nasal_chord["landmarks"])
+        self.assertEqual(nasal_surface["kind"], "surface_distance")
+        self.assertEqual(nasal_chord["kind"], "straight_distance")
+        self.assertEqual(candidates["yu2024_ear_height_top"]["kind"], "vertical_distance_to_plane")
+        project_ids = {entry["id"] for group in ["project_surface_candidates", "project_linear_candidates"]
+                       for entry in registry[group]}
+        for feature in candidates.values():
+            self.assertEqual(feature["unit"], "mm")
+            self.assertEqual(feature["status"], "definition_retrieved_pending_anatomical_review")
+            self.assertEqual(feature["implementation_status"], "project_candidate_available")
+            self.assertIn(feature["project_candidate_id"], project_ids)
+            self.assertTrue(feature["blocker"])
+        self.assertEqual(registry["review"]["status"], "pending")
+        for feature in registry["other_candidates"]:
             self.assertEqual(feature["status"], "blocked_definition")
             self.assertIsNone(feature["kind"])
-            self.assertIsNone(feature["unit"])
 
 
 if __name__ == "__main__":
