@@ -1,7 +1,7 @@
 NASEM presentation — November 17, 2026
 
 Local review draft for NPPTL researchers building iOS and Android apps.
-Thirteen main slides with a 10-minute speaking budget, followed by two backups.
+Fourteen main slides with a 10-minute speaking budget, followed by two backups.
 
 Preview:
   http://127.0.0.1:8765/presentation.html
@@ -61,19 +61,24 @@ Small demographic groups may be pooled into "Prefer not to say". Groups with
 fewer than 10 tests are omitted from the pass-rate chart. The current October
 25 recommender model's top-k figures are also shown on slide 5. These results
 are a point-in-time dashboard snapshot, not a prospective validation study.
-Slide 13 is the acknowledgements page. Community contributor names and roles
+Slide 13 explains how the project complements NIOSH's facial-measurement work:
+KN95 and FFP2/FFP3 options alongside NIOSH-approved respirators, contributed
+data that include children and child-sized masks, and GPLv3 code for inspectable
+methods. Pediatric prediction accuracy is unvalidated, and this is a scope
+comparison rather than a claim about the final features of NIOSH's apps.
+Slide 14 is the acknowledgements page. Community contributor names and roles
 come from prompts/kanro/2026-10-camera-only-masqfit-proposal.html; the Nukit
-fit-testing probe credit is supplied by the presenter. The Android segment gives
-ten seconds and the lessons segment gives twenty seconds to acknowledgements,
-keeping the talk at 10:00.
+fit-testing probe credit is supplied by the presenter. Ten seconds each were
+reallocated from the geometry, recommender, and Android segments to keep the
+talk at 10:00.
 The final slide also invites research funding and work or consulting inquiries,
 with the presenter's email and LinkedIn link.
 
 Validation:
-Checked all 15 slides at 1366x768 for viewport fit, mobile width at 390px for
+Checked all 16 slides at 1366x768 for viewport fit, mobile width at 390px for
 horizontal overflow, next-slide navigation, all-slides mode, and print layout.
-All print slides fit their 16:9 pages. Visually inspected the two dashboard
-slides.
+All print slides fit their 16:9 pages. Visually inspected the dashboard and
+complementary-scope slides.
 
 Publication:
 No production files, public/ copies, routes, or existing September artifacts changed.

@@ -31,9 +31,10 @@ budgets = {
     '03 / WHAT WORKED': 40,
     '04 / WHAT DID NOT TRANSFER DIRECTLY': 40,
     '05 / WHY PHOTOGRAMMETRY': 60,
-    '06 / ANDROID DEVELOPMENT': 70,
+    '06 / ANDROID DEVELOPMENT': 60,
     '07 / OBSERVED FIT': 40,
     '08 / WHO IS REPRESENTED': 30,
+    '08 / COMPLEMENTARY SCOPE': 30,
     '09 / ACKNOWLEDGEMENTS': 30,
 }
 
@@ -136,7 +137,7 @@ add('02 / GEOMETRY → FIT SCORE', 'A preferred perimeter difference, learned fr
     'We could model their difference separately from the whole-face perimeter and test whether it improves held-out predictions. '
     'This is a proposal, not a measured improvement. Yu and Griffin’s 2024 study used respirator-specific face measurements, including the nose and chin, to examine associations with fit. '
     'Their study does not validate the particular face-to-mask nose perimeter feature proposed here.',
-    75, 'Source: custom_lr calc_preds · Schematic curve uses invented coefficients · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/">Yu &amp; Griffin et al. (2024): FFR-specific face anthropometry and fit</a>.', 'geometry-slide')
+    65, 'Source: custom_lr calc_preds · Schematic curve uses invented coefficients · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/">Yu &amp; Griffin et al. (2024): FFR-specific face anthropometry and fit</a>.', 'geometry-slide')
 
 dashboard = json.loads((ROOT / 'data/dashboard-2026-10-29.json').read_text())
 performance = dashboard['recommender_performance']
@@ -160,7 +161,7 @@ add('03 / RECOMMENDER RELEVANCE', 'How often was a fitting result near the top?'
     'The labels combine formal test sources and constructed outcomes, so this is internal relevance evidence rather than a formal-test-only prospective trial. '
     'Fold counts and uncertainty were not exposed by this snapshot. The transferable lesson is to evaluate ranking relevance explicitly, '
     'then test the user decision prospectively.',
-    75, 'Dashboard snapshot Oct 29, 2026 · Model Oct 25, 2026 · Five-fold means · Fold denominators / uncertainty unavailable.')
+    65, 'Dashboard snapshot Oct 29, 2026 · Model Oct 25, 2026 · Five-fold means · Fold denominators / uncertainty unavailable.')
 
 add('02 / THREE APPROACHES', 'The tradeoff: metric scale, speed, and reach.',
     '''<table class="method-table capture-table"><thead><tr><th>Approach</th><th>Geometry & scale</th><th>Experience</th><th>Main constraint</th></tr></thead><tbody>
@@ -280,6 +281,24 @@ add('08 / WHO IS REPRESENTED', 'Who contributed the 1,145 fit tests?',
     'These counts describe who is represented; they are not demographic-specific pass rates. Repeated tests and uneven coverage make subgroup comparisons especially sensitive. '
     'For app evaluation, track participant counts as well as test counts and assess performance across groups with suitable privacy safeguards.',
     30, '<a href="https://www.breathesafe.xyz/#/dashboard">Breathesafe dashboard</a> snapshot Oct 29, 2026 · Small groups may be pooled into “Prefer not to say.”', 'dashboard-slide')
+
+add('08 / COMPLEMENTARY SCOPE', 'A complementary scope for respirator research.',
+    '<p class="complement-intro">MasqFit and Breathesafe add community-use questions alongside NIOSH’s facial-measurement work.</p>'
+    '<div class="complement-grid">'
+    '<article><span class="complement-number">01</span><h2>More mask standards</h2>'
+    '<p>Catalog options include KN95 and FFP2/FFP3, alongside NIOSH-approved respirators.</p></article>'
+    '<article><span class="complement-number">02</span><h2>Children included</h2>'
+    '<p>Contributed data include children and child-sized masks. Pediatric prediction accuracy still needs evaluation.</p></article>'
+    '<article><span class="complement-number">03</span><h2>Open methods</h2>'
+    '<p>GPLv3 code lets researchers inspect, run, and extend methods—supporting reproducible science.</p></article></div>'
+    '<div class="complement-close">Shared opportunity: comparable measurements and fit outcomes across platforms and populations.</div>',
+    'NIOSH’s published face-measuring app description focuses on facial dimensions and fit-panel classification. '
+    'MasqFit and Breathesafe can complement that work through a broader mask catalog, child-inclusive contributed data, and open GPLv3 code. '
+    'Our catalog includes KN95 and FFP2 or FFP3 options as well as NIOSH-approved respirators. '
+    'The dataset includes children and child-sized masks, but pediatric prediction accuracy has not yet been established. '
+    'Open code allows method inspection and reproduction where data access permits; participant data require appropriate consent and privacy controls. '
+    'These are scope differences, not a head-to-head accuracy claim or a statement about the final features of NIOSH’s apps.',
+    30, '<a href="https://www.cdc.gov/niosh/docket/archive/pdfs/niosh-278/2_DirectorsTalkingPointsApril2023_508.pdf">NIOSH face-measuring app description</a> · <a href="https://www.cdc.gov/wildfires/safety/how-to-safely-stay-safe-during-a-wildfire.html">CDC on child-sized respirators</a> · <a href="https://github.com/Edderic/breathesafe">Breathesafe GPLv3 source</a>.', 'complement-slide')
 
 acknowledgements = [
     ('Wayne', 'Community fit testing and training'),
