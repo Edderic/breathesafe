@@ -31,9 +31,10 @@ budgets = {
     '03 / WHAT WORKED': 40,
     '04 / WHAT DID NOT TRANSFER DIRECTLY': 40,
     '05 / WHY PHOTOGRAMMETRY': 60,
-    '06 / ANDROID DEVELOPMENT': 80,
-    '07 / LESSONS FOR NPPTL APPS': 60,
+    '06 / ANDROID DEVELOPMENT': 70,
+    '07 / LESSONS FOR NPPTL APPS': 50,
     '08 / TAKEAWAY': 30,
+    '09 / ACKNOWLEDGEMENTS': 20,
 }
 
 
@@ -243,12 +244,29 @@ add('07 / LESSONS FOR NPPTL APPS', 'Validate the handoffs, not only the final sc
 add('08 / TAKEAWAY', 'Choose the capture route.<br>Keep the measurement contract.',
     '<p class="lead">ARKit reduced calibration friction.<br>MediaPipe helped with real-time landmarks.<br>'
     'Photogrammetry offers a path to broader camera access.</p>' +
-    callout('Shared research question: which landmarks and reference protocol should both apps use?') +
-    '<p class="muted credits">Thank you: Kanro · Aaron Collins / OpenAeros · Gerard Hughes · Nukit · anonymous contributors</p>',
+    callout('Shared research question: which landmarks and reference protocol should both apps use?'),
     'My main lesson is to separate the capture technology from the scientific definition of the measurement. '
     'ARKit simplified the first iOS experience. Moving toward Android means making scale, landmark placement, and reconstruction explicit. '
-    'I would welcome discussion about a shared set of anatomical definitions and an independent reference protocol that could help both projects. Thank you.',
-    30, 'MasqFit · Breathesafe · Main talk ends at 10:00')
+    'I would welcome discussion about a shared set of anatomical definitions and an independent reference protocol that could help both projects.',
+    30, 'MasqFit · Breathesafe · Acknowledgements follow')
+
+acknowledgements = [
+    ('Wayne', 'Community fit testing and training'),
+    ('Mish', 'Initial mask recommendations and Masks for Kids'),
+    ('Lisa Foreman', 'Community fit testing and the Readimask Dental Nose Hack'),
+    ('Gerard Hughes', 'Breathability and fit-testing data'),
+    ('Amanda Abbott', 'PDX Respirator Repository'),
+    ('Nukit', 'Fit-testing probes'),
+]
+add('09 / ACKNOWLEDGEMENTS', 'Acknowledgements.',
+    '<div class="ack-grid">' + ''.join(
+        f'<article><strong>{name}</strong><span>{contribution}</span></article>'
+        for name, contribution in acknowledgements
+    ) + '</div>' +
+    '<div class="ack-support"><strong>With thanks to Kanro</strong> for early support, and to Aaron Collins / OpenAeros, research participants, and anonymous contributors.</div>',
+    'Thank you to Wayne, Mish, Lisa Foreman, Gerard Hughes, and Amanda Abbott for their community fit-testing, mask-selection, and data contributions. '
+    'Thank you to Nukit for fit-testing probes, Kanro for early support, and Aaron Collins, OpenAeros, research participants, and anonymous contributors.',
+    20, 'Community contributor descriptions: October 2026 Kanro proposal · Nukit probe credit: presenter.')
 
 add('BACKUP / SCALE & PROJECTION', 'The camera-only path needs a scale anchor.',
     '<div class="two-col"><div><h2>Absolute scale</h2><p>Use an independently known dimension or calibrated capture system.</p>'

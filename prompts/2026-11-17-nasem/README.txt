@@ -1,7 +1,7 @@
 NASEM presentation — November 17, 2026
 
 Local review draft for NPPTL researchers building iOS and Android apps.
-Twelve main slides with a 10-minute speaking budget, followed by two backups.
+Thirteen main slides with a 10-minute speaking budget, followed by two backups.
 
 Preview:
   http://127.0.0.1:8765/presentation.html
@@ -53,12 +53,16 @@ assets/android-flame-generator.png and assets/android-landmark-labeling.png.
 These are development tools for the Android pipeline, not Android app screens.
 The slide's CNN icon marks a planned detector for local facial features in 2D
 views; the screenshots do not show a trained detector or its accuracy.
+Slide 13 is the acknowledgements page. Community contributor names and roles
+come from prompts/kanro/2026-10-camera-only-masqfit-proposal.html; the Nukit
+fit-testing probe credit is supplied by the presenter. The Android and lessons
+segments each give ten seconds to acknowledgements, keeping the talk at 10:00.
 
 Validation:
-Checked all 14 slides at 1366x768 for viewport fit, mobile width at 390px for
+Checked all 15 slides at 1366x768 for viewport fit, mobile width at 390px for
 horizontal overflow, next-slide navigation, all-slides mode, and print layout.
 All print slides fit their 16:9 pages. Visually inspected the enlarged MasqFit
-and full recommendation slides.
+and full recommendation slides, plus the acknowledgements page.
 
 Publication:
 No production files, public/ copies, routes, or existing September artifacts changed.
