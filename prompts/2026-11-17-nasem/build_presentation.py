@@ -213,11 +213,11 @@ add('06 / ANDROID DEVELOPMENT', 'Building the Android path: faces and landmarks.
     '</div><figcaption>Label anatomical points on the 3D surface</figcaption></figure></div>' +
     '<div class="android-flow"><span>3D face → 2D views</span><span class="android-arrow">→</span>' +
     '<span class="cnn-step">' + svg_icon('cnn-local-features.svg', 'CNN diagram: local facial features pass through a convolution grid.', 'cnn-icon') +
-    '<span><strong>CNN detector · planned</strong><small>eyes · nose · ears</small></span></span>' +
+    '<span><strong>CNN detector · planned</strong><small>eyes · nose · ears · other landmarks</small></span></span>' +
     '<span class="android-arrow">→</span><span>3D projection → dimensions → fit</span></div>',
     'This is the pipeline I am working toward. Begin with a 3D face, either synthetic or from an actual captured person. '
     'Use rendered or captured 2D views to detect the target landmarks, then project those detections back onto the matching 3D surface. '
-    'A planned CNN detector would learn local visual patterns around features such as eyes, nose, and ears in those 2D views. The screenshot shows hand-labeled landmarks that can support training and evaluation; it does not show a trained CNN result. '
+    'A planned CNN detector would learn local visual patterns around features such as eyes, nose, ears, and other landmarks in those 2D views. The screenshot shows hand-labeled landmarks that can support training and evaluation; it does not show a trained CNN result. '
     'Projection requires the camera-to-surface relationship: for a rendered view it is known; for a captured view it must be recovered or calibrated. '
     'A point on the image does not select the correct surface point without that relationship and visibility checks. '
     'Once the landmarks are on a scaled surface, calculate the defined dimensions and pass them into the fit-prediction pipeline. '
