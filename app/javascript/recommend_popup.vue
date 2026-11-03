@@ -27,6 +27,7 @@
       </table>
 
       <div v-if="tabToShow === 'video'" class='video-wrapper'>
+        <p><a href="/#/research/webcam-3d" target="_blank" rel="noopener">3D webcam pilot</a> · Local research workspace</p>
         <p class='instructions'>{{ videoInstruction }}</p>
         <div class='video-container' v-show="!capturedPhotoReady">
           <video ref="videoEl" autoplay playsinline muted class='video' />

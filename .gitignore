@@ -91,3 +91,7 @@ data
 
 # Downloaded MediaPipe experiment model and matching runtime cache
 /public/mediapipe/experiment/
+
+# Private participant captures; never served by Vite or Rails.
+/.private-webcam-runs/
+/public/mediapipe/segmentation/

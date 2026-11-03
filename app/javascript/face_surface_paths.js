@@ -52,10 +52,14 @@ export function surfacePath(record, graph, start, end) {
     }
   }
   const a = attachmentPoint(record, start), b = attachmentPoint(record, end);
-  const common = { method: 'mesh_edge_dijkstra_v1', unit: 'mm', chord_mm: distance(a, b) };
+  const unit = record.units || 'mm';
+  if (!['mm', 'reconstruction_unit'].includes(unit)) throw Error('Unsupported surface units.');
+  const common = { method: 'mesh_edge_dijkstra_v1', unit, chord: distance(a, b),
+    ...(unit === 'mm' ? { chord_mm: distance(a, b) } : {}) };
   const finish = attachments => {
     const points = attachments.map(p => p.kind === 'vertex' ? record.mesh.vertices[p.vertex_index] : attachmentPoint(record, p));
-    return { ...common, status: 'ok', length_mm: points.slice(1).reduce((sum, p, i) => sum+distance(points[i], p), 0),
+    const length = points.slice(1).reduce((sum, p, i) => sum+distance(points[i], p), 0);
+    return { ...common, status: 'ok', length, ...(unit === 'mm' ? { length_mm: length } : {}),
       path: attachments, points };
   };
   if (start.triangle_index === end.triangle_index) return finish([start, end]);
@@ -82,7 +86,7 @@ export function surfacePath(record, graph, start, end) {
       }
     }
   }
-  if (last === -1) return { ...common, status: 'disconnected', length_mm: null, path: [], points: [] };
+  if (last === -1) return { ...common, status: 'disconnected', length: null, ...(unit === 'mm' ? { length_mm: null } : {}), path: [], points: [] };
   const route = [];
   for (let vertex = last; vertex !== -1; vertex = previous[vertex]) route.push({ kind: 'vertex', vertex_index: vertex });
   route.reverse();

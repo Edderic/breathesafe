@@ -470,3 +470,9 @@ Keep analytic, rendered, printed and human evidence separate. No synthetic shape
 or derivative inherits a person's respirator fit outcome. Next work is operational
 landmark/route review and anatomical target approval, followed by BRE-7/BRE-8 assets
 and labeled rendering, and BRE-9's small end-to-end experiment.
+
+## Local webcam reconstruction pilot
+
+See [WEBCAM_PILOT.md](WEBCAM_PILOT.md) for the private capture workspace, pinned
+CPU reconstruction tools, tape-arc calibration, frontal projection and validation
+limits. This workflow does not populate recommender measurements or ARKit records.

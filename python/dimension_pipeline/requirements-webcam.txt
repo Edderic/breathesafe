@@ -1,0 +1,8 @@
+# Python 3.12, native macOS arm64. Native SfM/MVS binaries are diagnosed separately.
+numpy==2.2.6
+Pillow==11.2.1
+scipy==1.15.3
+trimesh==4.6.8
+fast-simplification==0.1.10
+rtree==1.4.0
+mediapipe==0.10.32

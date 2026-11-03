@@ -92,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const routes = [
     { path: '/research/dimension-fixtures', component: () => import('../dimension_fixtures.vue'), name: 'DimensionFixtures' },
     { path: '/research/face-landmarks', component: () => import('../face_landmarks.vue'), name: 'FaceLandmarks' },
+    { path: '/research/webcam-3d', component: () => import('../webcam_pilot.vue'), name: 'WebcamPilot' },
     { path: '/', component: Introduction, name: 'Landing' },
     { path: '/clean_air', component: Landing, name: 'CleanAirLanding' },
     { path: '/dashboard', component: Dashboard, name: 'Dashboard' },
