@@ -10,18 +10,22 @@
       </select></label>
       <label>Open heads or annotations<input type="file" multiple accept=".json,application/json" @change="openHeads" /></label>
       <label>Your name<input v-model="annotator" maxlength="100" placeholder="Required to place a point" /></label>
-      <label class="touch-control"><input type="checkbox" v-model="touchPlacement" :disabled="comparisonActive" /> Tap to place (touch/pen)</label>
+      <label class="touch-control"><input type="checkbox" v-model="touchPlacement" :disabled="comparisonActive || experimentOpen" /> Tap to place (touch/pen)</label>
+      <button @click="openExperiment">MediaPipe experiment</button>
     </div>
     <p class="shortcut-hint">One annotation file resumes editing; multiple annotation files open a read-only comparison on the selected head.</p>
     <p><strong>Source:</strong> {{ record.source.asset_id }} · {{ record.source.license }}. Files stay on this computer.</p>
-    <p class="shortcut-hint"><strong>Controls:</strong> drag to rotate ·
+    <p v-if="experimentOpen" class="shortcut-hint">Read-only MediaPipe experiment. Use its image points and comparison controls; your annotation draft is preserved.</p>
+    <p v-else class="shortcut-hint"><strong>Controls:</strong> drag to rotate ·
       <template v-if="!comparisonActive"><kbd>Ctrl</kbd> + click to place landmark · </template>
       <template v-else>read-only comparison · </template>
       <kbd>[</kbd> previous landmark · <kbd>]</kbd> next landmark.
       Shortcuts pause while editing a field or using a form control.</p>
     <p v-if="error" role="alert" class="error">{{ error }}</p>
     <p v-if="message" role="status">{{ message }}</p>
-    <div class="layout">
+    <FaceMediapipeExperiment v-if="experimentOpened" v-show="experimentOpen" ref="experiment" :record="record" :references="experimentReferences" :labels="labelOptions"
+      :frame="camera(views[0])" @close="experimentOpen = false" />
+    <div v-show="!experimentOpen" class="layout">
       <section>
         <div class="views">
           <button v-for="view in views" :key="view.id" @click="setView(view)">{{ view.label }}</button>
@@ -180,6 +184,7 @@ import { makeHead, headCenter, projectMesh, shadedFaces, pickSurface, attachment
 import { buildSurfaceGraph, facialSurfacePaths, surfaceMeasurementDefinitions, earTopHeights } from './face_surface_paths';
 import { requestContinuousPaths } from './face_continuous_paths';
 import { landmarkComparison } from './face_annotation_comparison';
+import FaceMediapipeExperiment from './face_mediapipe_experiment.vue';
 
 const comparisonColors = ['#0072b2', '#c04400', '#007b58', '#a23a91', '#756100', '#3446b8', '#a32f3d', '#15696e', '#6c4b21', '#604181'];
 
@@ -217,17 +222,24 @@ function download(blob, name) {
 
 export default {
   name: 'FaceLandmarks',
+  components: { FaceMediapipeExperiment },
   data() {
     return { variants: [...variants], localHeads: {}, views, variantId: 'base', record: makeHead(base, variants[0]), center: headCenter(base),
       measurementOptions, measurementKind: 'nose_protrusion', activeMeasurementId: null,
       pathMethod: 'continuous', continuousResults: null, pathError: '', solverTimer: null, solverController: null, solverRevision: 0,
       captureScale: 1.45,
+      experimentOpened: false, experimentOpen: false,
       comparisons: {}, comparisonVisible: true, comparisonSelectedOnly: true, comparisonConnect: true, comparisonThrough: false,
       comparisonError: '', comparisonMessage: '', comparisonLoadRevision: 0,
       drafts: {}, histories: {}, landmark: 'pronasale', annotator: '', note: '', reviewStatus: 'draft', touchPlacement: false,
       yaw: -45, pitch: 0, scale: 1.45, showNames: true, error: '', message: '', drag: null, savedDrafts: {} };
   },
   computed: {
+    experimentReferences() {
+      const references = this.comparisonSets.map(set => ({ id: 'comparison:'+set.id, label: set.label, enabled: true, landmarks: JSON.parse(JSON.stringify(set.landmarks)) }));
+      if (Object.keys(this.current).length) references.unshift({ id: 'draft', label: 'Current draft', enabled: true, landmarks: JSON.parse(JSON.stringify(this.current)) });
+      return references;
+    },
     labelOptions() { return [...labelOptions, ...legacyLabels.filter(label => this.current[label.id] || this.comparisonSets.some(set => set.landmarks[label.id]))]; },
     comparisonSets() { return this.comparisons[this.variantId] || []; },
     comparisonActive() { return this.comparisonVisible && this.comparisonSets.length > 0; },
@@ -323,6 +335,7 @@ export default {
     if (this.dirty) return window.confirm('Some head annotations have not been exported. Leave this page and discard those edits?');
   },
   methods: {
+    openExperiment() { this.drag = null; this.experimentOpened = true; this.experimentOpen = true; },
     landmarkName(id) { return this.labelOptions.find(label => label.id === id)?.name || id.replaceAll('_', ' '); },
     scheduleContinuous() {
       clearTimeout(this.solverTimer); this.solverController?.abort(); this.solverRevision++;
@@ -533,6 +546,7 @@ export default {
     },
     zoom(event) { this.scale = Math.max(.5, Math.min(5, this.scale*Math.exp(-Math.sign(event.deltaY)*.1))); },
     annotationKey(event) {
+      if (this.experimentOpen) return;
       if (event.defaultPrevented || event.isComposing || event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
       const target = event.target;
       if (target?.isContentEditable || target?.closest?.('input, textarea, select, [role="textbox"], [role="combobox"]')) return;

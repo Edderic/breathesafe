@@ -203,6 +203,83 @@ node --test scripts/tests/dimension_fixture_geometry.test.cjs scripts/tests/face
 PYTHONPATH=python python3 -m unittest discover -s python/dimension_pipeline/tests -v
 ```
 
+## MediaPipe image-to-surface pilot
+
+Install the local experiment assets once (requires internet for the versioned
+Google model; subsequent inference stays local):
+
+```sh
+node scripts/setup_face_landmarker.cjs
+./node_modules/.bin/vite --config scripts/face_landmarks.vite.config.mjs
+```
+
+Open `scripts/face_landmarks_preview.html` with the desired head, then select
+**MediaPipe experiment**. The workspace preserves your editable draft and has
+no annotation-writing actions. It uses the same untextured, faceted shading,
+720 × 480 orthographic image geometry, and seven presets as the viewer. Choose
+**Run selected view** or **Run all seven views**. Capture framing is shared
+across that head's views; rotating/zooming the inspection pane does not change
+inference images or calculated distances. All seven attempts remain visible,
+including no-detection, failed, and cancelled captures. A new run replaces the
+previous run; download results before starting another run you want to retain.
+
+The pinned model is Google's float16 Face Landmarker bundle, version 1:
+<https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task>.
+Its SHA-256 is
+`64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff`.
+Setup checks that digest and copies the installed SDK (currently 0.10.18) and
+matching WASM files into Git-ignored `public/mediapipe/experiment/`. The worker
+checks every asset against its manifest before initialization. Existing webcam
+recommendation flows and their model URL are unchanged.
+
+Inference uses CPU delegation in IMAGE mode, one face, detection/presence
+thresholds 0.5, no blendshapes or transformation matrices, and a classic worker
+because this SDK loads WASM glue through `importScripts`. WebGL 2 is still
+required for MediaPipe's image preprocessing, even with CPU inference. Missing
+assets and unavailable WebGL produce explicit setup errors. Initialization and
+per-image requests time out, Cancel terminates the worker, and changing heads
+invalidates stale work. The experiment records SDK/model/runtime hashes,
+configuration, browser user agent, camera, renderer version and capture checksum.
+
+Click a dot in the 2D image or enter its MediaPipe index to highlight the same
+point in 3D. Each normalized `(x, y)` is converted to capture coordinates and
+intersected with the nearest visible triangle, retaining its barycentric
+attachment. MediaPipe `z` is retained for inspection but never interpreted as
+model millimeters. Invalid/out-of-image coordinates and missed rays remain
+statuses; there is no snapping fallback. Successful ray hits do not establish
+anatomical correspondence: far-side inferred features can intersect the wrong
+visible facial surface.
+
+Candidate correspondences start empty. Select a named research landmark and
+assign an index only after inspecting it. Unmap unsupported landmarks rather
+than substituting nearby points, especially for ears. Mapping files can be
+exported and reused across faces. Load exact-mesh annotation exports as manual
+references; the current draft and existing comparison sets are also available.
+References stay separate, can be toggled, and are never averaged or declared
+ground truth. The selected reference is purple in the 3D pane. Per-view comparison
+rows show Euclidean model-mm displacement only when the manual reference is
+visible in that capture; otherwise they explicitly report occlusion, missing
+reference, detection failure, or projection failure. Summary statistics describe
+pairwise displacement across successful views of each raw index, not anatomical
+accuracy or independent repeats. Repeated inference of identical images is not
+used to estimate variation.
+
+**Download experiment JSON** retains mesh fingerprint, all raw predictions,
+projection statuses/attachments, candidate mappings, reference snapshots,
+per-index coverage/dispersion summaries and per-reference comparisons. Its
+`experiment_version` is `1.0.0`, separate from annotation exports. Reload rejects
+other meshes/unsupported cameras, recomputes projections and errors, and does
+not trust exported derived points or distances. Individual original PNGs can be
+downloaded for every captured view. Reload regenerates only images whose PNG
+checksum matches the original; when rasterization differs, **Restore original
+PNG** accepts the previously exported capture only after verifying its checksum
+and dimensions. Keep PNGs with the experiment JSON for reproducible inspection.
+
+The pilot deliberately adds no photorealistic textures, automated head batches,
+view fusion, consensus ground truth or anatomical measurement-error estimates.
+A poor detection rate on current shading is an experiment result, not a reason
+to invent landmarks. Rendering improvements can be assessed in a later protocol.
+
 ## Reference schema 1.0.0
 
 `geometry.validate_reference` is the executable validator. JSON fixtures are

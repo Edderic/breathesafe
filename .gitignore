@@ -88,3 +88,6 @@ data
 /python/mask_recommender/recommendations_*.json
 /python/mask_recommender/bayesian_metrics_*.json
 /python/mask_recommender/training_loss.png
+
+# Downloaded MediaPipe experiment model and matching runtime cache
+/public/mediapipe/experiment/
