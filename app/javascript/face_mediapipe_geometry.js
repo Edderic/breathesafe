@@ -44,6 +44,7 @@ export function comparisonRows(record, results, mappings, references) {
       const annotation = reference.landmarks[name], detection = result.detections.find(item => item.index === index);
       if (!annotation) return { ...row, status: 'missing_reference' };
       if (result.status !== 'ok') return { ...row, status: result.status };
+      if (detection?.observation_status === 'rejected') return { ...row, status: 'filtered_out', reason: detection.rejection_reason };
       if (!referenceVisible(record, points, result.camera, annotation)) return { ...row, status: 'reference_occluded' };
       if (!detection || detection.status !== 'ok') return { ...row, status: detection?.status || 'missing_detection' };
       const manual = attachmentPoint(record, annotation.attachment);
@@ -59,7 +60,8 @@ export function validateMappings(mappings, names) {
   return { ...mappings };
 }
 export function validateExperiment(bundle, record, fingerprint, names) {
-  if (bundle?.experiment_version !== '1.0.0' || bundle.record_id !== record.record_id || bundle.mesh_sha256 !== fingerprint || bundle.topology_id !== record.topology_id || bundle.units !== 'mm') throw Error('Experiment belongs to a different mesh or unsupported version.');
+  if (!['1.0.0', '1.1.0'].includes(bundle?.experiment_version) || bundle.record_id !== record.record_id || bundle.mesh_sha256 !== fingerprint || bundle.topology_id !== record.topology_id || bundle.units !== 'mm') throw Error('Experiment belongs to a different mesh or unsupported version.');
+  if (bundle.experiment_version === '1.1.0' && !bundle.view_filter) throw Error('Missing view-filter policy in this experiment version.');
   validateMappings(bundle.mappings, names);
   if (!Array.isArray(bundle.results) || bundle.results.length > 7 || new Set(bundle.results.map(r => r.view_id)).size !== bundle.results.length) throw Error('Invalid experiment views.');
   const allowed = ['ok', 'no_detection', 'error', 'cancelled'];

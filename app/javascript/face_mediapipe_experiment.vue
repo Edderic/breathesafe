@@ -12,13 +12,16 @@
     </div>
     <p role="status">{{ progress }} {{ results.length }} captured views · {{ results.filter(r => r.status === 'ok').length }} detections · {{ results.filter(r => !['ok', 'pending'].includes(r.status)).length }} failed/cancelled views.</p>
     <p v-if="provenance" class="hint">MediaPipe {{ provenance.sdk_version }} · CPU · IMAGE mode · model SHA-256 <code>{{ provenance.model_sha256 }}</code></p>
+    <div class="actions"><label>Observation filter<select v-model="filterMode"><option value="conservative">Conservative view filter</option><option value="raw">Raw baseline (no filtering)</option></select></label>
+      <label class="check"><input type="checkbox" v-model="showRejected" /> Show excluded predictions in gray</label></div>
+    <p class="hint">Experimental heuristic: frontal yaw ≤15° retains both sides; yaw 15–60° retains the subject's near side and excludes the central band. Tilt over 20° and yaw over 60° are excluded. Regions come from a fixed canonical index map, not your manual labels. Passing this rule does not prove visibility or accuracy.</p>
     <div class="actions"><button v-for="result in results" :key="result.view_id" @click="selectedView = result.view_id">{{ result.view_id }}: {{ result.status }}</button></div>
     <div class="panes">
       <section>
         <h3>Captured image and 2D detections</h3>
         <svg v-if="selected" ref="imageViewport" viewBox="0 0 720 480" role="img" aria-label="Captured image with numbered MediaPipe detections" @click="pickImagePoint">
           <image v-if="imageUrl" :href="imageUrl" width="720" height="480" />
-          <g v-for="mark in imageMarks" :key="mark.index" pointer-events="none"><circle :cx="mark.x" :cy="mark.y" :r="mark.index === selectedIndex ? 5 : 1.6" :fill="mark.index === selectedIndex ? '#e95d21' : '#0072b2'" />
+          <g v-for="mark in imageMarks" :key="mark.index" pointer-events="none"><circle :cx="mark.x" :cy="mark.y" :r="mark.index === selectedIndex ? 5 : 1.6" :fill="mark.excluded ? '#7b858d' : mark.index === selectedIndex ? '#e95d21' : '#0072b2'" :opacity="mark.excluded ? .5 : 1" />
             <text v-if="showNumbers || mark.index === selectedIndex" :x="mark.x+4" :y="mark.y-4">{{ mark.index }}</text></g>
         </svg>
         <p v-else>Choose a preset and run detection.</p>
@@ -26,7 +29,8 @@
           <button @click="downloadImage" :disabled="!selected">Download captured PNG</button>
           <label v-if="selected">Restore original PNG<input type="file" accept="image/png" @change="restoreImage" /></label></div>
         <p v-if="selected && !imageUrl" class="hint">The original image is unavailable. Restore its exported PNG; the checksum must match this view.</p>
-        <p v-if="selected">{{ selected.detections.filter(d => d.status === 'ok').length }} surface hits / {{ selected.detections.length }} detections. {{ selected.error || '' }}</p>
+        <p v-if="selected">{{ selected.detections.filter(d => d.status === 'ok').length }} raw surface hits · {{ selected.detections.filter(d => d.observation_status === 'accepted').length }} accepted observations / {{ selected.detections.length }} detections. {{ selected.error || '' }}</p>
+        <p v-if="selectedDetection">Selected #{{ selectedIndex }} · canonical {{ selectedDetection.region }} region · {{ selectedDetection.observation_status }}<span v-if="selectedDetection.rejection_reason">: {{ selectedDetection.rejection_reason }}</span>.</p>
         <p class="hint">Click near a detected dot to select its index. Blue points can be inferred or occluded features; a ray hit alone does not establish anatomical correspondence.</p>
       </section>
       <section>
@@ -34,13 +38,13 @@
         <svg ref="meshViewport" viewBox="0 0 720 480" tabindex="0" role="img" aria-label="Projected detections and manual reference on the mesh; drag or arrow keys rotate, scroll zooms"
           @pointerdown="startDrag" @pointermove="moveDrag" @pointerup="drag = null" @pointercancel="drag = null" @lostpointercapture="drag = null" @keydown="rotateKey" @wheel.prevent="zoom">
           <rect width="720" height="480" fill="#edf2f5" /><polygon v-for="face in meshFaces" :key="face.index" :points="face.points" :fill="face.fill" />
-          <g v-for="mark in meshMarks" :key="mark.id" pointer-events="none"><circle :cx="mark.x" :cy="mark.y" :r="mark.selected ? 5 : 1.8" :fill="mark.color" stroke="white" :stroke-width="mark.selected ? 1 : .3" />
+          <g v-for="mark in meshMarks" :key="mark.id" pointer-events="none"><circle :cx="mark.x" :cy="mark.y" :r="mark.selected ? 5 : 1.8" :fill="mark.color" :opacity="mark.excluded ? .4 : 1" stroke="white" :stroke-width="mark.selected ? 1 : .3" />
             <text v-if="mark.selected" :x="mark.x+6" :y="mark.y-5">{{ mark.label }}</text></g>
         </svg>
         <div class="actions"><button @click="useCaptureView" :disabled="!selected">Use capture view</button>
           <label class="check"><input type="checkbox" v-model="through" /> Show points through head</label>
           <label class="check"><input type="checkbox" v-model="allViews" /> Selected index across all views</label></div>
-        <p class="hint">Blue: projected detections. Orange: selected index. Purple: selected manual reference. Viewing rotation does not change captured results.</p>
+        <p class="hint">Blue: accepted observations. Orange: selected accepted index. Gray: excluded predictions (when enabled). Purple: selected manual reference. Filtering uses the original capture camera, not this inspection rotation.</p>
       </section>
     </div>
     <div class="panes">
@@ -52,9 +56,10 @@
           <button @click="exportMappings">Download mappings</button><label>Load mappings<input type="file" accept=".json" @change="importMappings" /></label></div>
         <p>Current match: {{ mappings[namedLandmark] === undefined ? 'unmapped' : `MediaPipe #${mappings[namedLandmark]}` }}. No anatomical matches are assumed. Ear and other unsupported landmarks can stay unmapped.</p>
         <ul><li v-for="(index, name) in mappings" :key="name"><button @click="namedLandmark = name; selectedIndex = index">{{ name }} ↔ #{{ index }}</button></li></ul>
-        <p v-if="indexSummary">Index #{{ selectedIndex }}: {{ indexSummary.valid }} valid surface hits / {{ results.length }} attempted views.<br />
-          Across-view 3D pairwise median: {{ mm(indexSummary.median_mm) }} · maximum: {{ mm(indexSummary.maximum_mm) }}.</p>
-        <p class="hint">Across-view agreement measures consistency, not anatomical accuracy. Identical-image reruns are not independent samples.</p>
+        <p v-if="indexSummary">Index #{{ selectedIndex }}: {{ indexSummary.surface_hits }} raw surface hits · {{ indexSummary.valid }} accepted / {{ results.length }} attempted views.<br />
+          Accepted-view 3D pairwise median: {{ mm(indexSummary.median_mm) }} · maximum: {{ mm(indexSummary.maximum_mm) }}.<br />
+          Raw baseline pairwise median: {{ mm(indexSummary.raw_dispersion.median_mm) }} · maximum: {{ mm(indexSummary.raw_dispersion.maximum_mm) }}.</p>
+        <p class="hint">Fewer accepted observations can reduce dispersion without improving accuracy. One accepted view gives no pairwise estimate. Across-view agreement is not anatomical accuracy.</p>
       </section>
       <section>
         <h3>Manual references</h3>
@@ -64,7 +69,7 @@
         <p v-if="!localReferences.length">Load annotations for this exact mesh to compare mapped landmarks.</p>
         <p class="hint">Errors below are straight-line 3D distances in model mm. Each annotation set stays separate; none is averaged or declared ground truth. Occluded reference points and failed detections remain explicit statuses.</p>
         <div class="scroll-table"><table><caption>{{ namedLandmark }} · candidate #{{ mappings[namedLandmark] ?? 'unmapped' }}</caption>
-          <thead><tr><th>View</th><th>Reference</th><th>Result</th></tr></thead><tbody><tr v-for="row in selectedRows" :key="`${row.view_id}:${row.reference_id}`"><td>{{ row.view_id }}</td><td>{{ row.reference_label }}</td><td>{{ row.status === 'ok' ? mm(row.distance_mm) : row.status }}</td></tr></tbody></table></div>
+          <thead><tr><th>View</th><th>Reference</th><th>Filtered result</th><th>Raw baseline</th></tr></thead><tbody><tr v-for="row in selectedRows" :key="`${row.view_id}:${row.reference_id}`"><td>{{ row.view_id }}</td><td>{{ row.reference_label }}</td><td>{{ row.status === 'ok' ? mm(row.distance_mm) : row.status === 'filtered_out' ? 'filtered: '+row.reason : row.status }}</td><td>{{ row.raw_status === 'ok' ? mm(row.raw_distance_mm) : row.raw_status }}</td></tr></tbody></table></div>
       </section>
     </div>
   </section>
@@ -75,6 +80,7 @@ import views from '../../python/dimension_pipeline/assets/head_views.json';
 import { projectPoint } from './dimension_fixture_geometry';
 import { projectMesh, shadedFaces, pickSurface, attachmentPoint, meshFingerprint, validateAnnotations } from './face_annotation_geometry';
 import { captureFace, captureVersion, projectDetection, comparisonRows, distanceSummary, validateMappings, validateExperiment } from './face_mediapipe_geometry';
+import { filterResults, viewFilterPolicy, validateViewFilter } from './face_mediapipe_filter';
 
 const clone = value => JSON.parse(JSON.stringify(value));
 const download = (blob, name) => { const url = URL.createObjectURL(blob), a = document.createElement('a'); a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 10000); };
@@ -83,31 +89,44 @@ const sha256 = async bytes => Array.from(new Uint8Array(await crypto.subtle.dige
 export default {
   name: 'FaceMediapipeExperiment', props: ['record', 'references', 'labels', 'frame'], emits: ['close'],
   data() { return { views, results: [], provenance: null, preset: 'front', selectedView: '', selectedIndex: 1, namedLandmark: 'pronasale', mappings: {},
+    filterMode: 'conservative', showRejected: false,
     localReferences: clone(this.references), primaryReference: this.references[0]?.id || '', busy: false, progress: '', error: '', showNumbers: false,
     through: false, allViews: false, yaw: -45, pitch: 0, scale: this.frame.pixels_per_mm, drag: null,
     worker: null, sequence: 0, waiter: null, revision: 0, images: {}, imageUrl: '', urls: {}, fingerprint: '' }; },
   computed: {
-    selected() { return this.results.find(r => r.view_id === this.selectedView); },
+    filteredResults() { return filterResults(this.results, this.filterMode); },
+    selected() { return this.filteredResults.find(r => r.view_id === this.selectedView); },
+    selectedDetection() { return this.selected?.detections.find(d => d.index === this.selectedIndex); },
     validIndex() { return Number.isInteger(this.selectedIndex) && this.selectedIndex >= 0 && this.selectedIndex < 478; },
     enabledReferences() { return this.localReferences.filter(r => r.enabled); },
-    imageMarks() { return (this.selected?.raw_landmarks || []).flatMap((p, index) => Number.isFinite(p.x) && Number.isFinite(p.y) && p.x >= 0 && p.x <= 1 && p.y >= 0 && p.y <= 1 ? [{ x: p.x*720, y: p.y*480, index }] : []); },
+    imageMarks() { return (this.selected?.raw_landmarks || []).flatMap((p, index) => {
+      const excluded = this.selected.detections[index]?.observation_status !== 'accepted';
+      return (this.showRejected || !excluded) && Number.isFinite(p.x) && Number.isFinite(p.y) && p.x >= 0 && p.x <= 1 && p.y >= 0 && p.y <= 1 ? [{ x: p.x*720, y: p.y*480, index, excluded }] : [];
+    }); },
     meshPoints() { return projectMesh(this.record, this.frame.center_mm, this.yaw, this.pitch, this.scale); },
     meshFaces() { return shadedFaces(this.record, this.meshPoints); },
     meshMarks() {
-      const marks = (this.allViews ? this.results : this.selected ? [this.selected] : []).flatMap(result => result.detections.filter(d => d.status === 'ok' && (!this.allViews || d.index === this.selectedIndex)).map(d => ({ id: result.view_id+':'+d.index, point: d.point_mm,
-        color: d.index === this.selectedIndex ? '#e95d21' : '#0072b2', selected: d.index === this.selectedIndex, label: '#'+d.index+(this.allViews ? ' '+result.view_id : '') })));
+      const marks = (this.allViews ? this.filteredResults : this.selected ? [this.selected] : []).flatMap(result => result.detections.filter(d => d.status === 'ok' && (this.showRejected || d.observation_status === 'accepted') && (!this.allViews || d.index === this.selectedIndex)).map(d => ({ id: result.view_id+':'+d.index, point: d.point_mm,
+        color: d.observation_status !== 'accepted' ? '#7b858d' : d.index === this.selectedIndex ? '#e95d21' : '#0072b2', excluded: d.observation_status !== 'accepted', selected: d.index === this.selectedIndex, label: '#'+d.index+(this.allViews ? ' '+result.view_id : '') })));
       const reference = this.enabledReferences.find(r => r.id === this.primaryReference), annotation = reference?.landmarks[this.namedLandmark];
       if (annotation) marks.push({ id: 'manual', point: attachmentPoint(this.record, annotation.attachment), color: '#a23a91', selected: true, label: reference.label });
       return marks.flatMap(mark => { const p = projectPoint(mark.point, this.frame.center_mm, this.yaw, this.pitch, this.scale);
         const hit = this.through ? null : pickSurface(this.record, this.meshPoints, p.x, p.y);
         return this.through || (hit && Math.abs(hit.depth-p.depth) < .1) ? [{ ...mark, ...p }] : []; });
     },
-    rows() { return comparisonRows(this.record, this.results, this.mappings, this.enabledReferences); },
-    selectedRows() { return this.rows.filter(row => row.landmark === this.namedLandmark); },
+    rows() { return comparisonRows(this.record, this.filteredResults, this.mappings, this.enabledReferences); },
+    rawRows() { return comparisonRows(this.record, this.results, this.mappings, this.enabledReferences); },
+    selectedRows() { return this.rows.flatMap((row, index) => row.landmark === this.namedLandmark ? [{ ...row, raw_status: this.rawRows[index].status, raw_distance_mm: this.rawRows[index].distance_mm }] : []); },
     summaries() { return Array.from({ length: 478 }, (_, index) => {
-      const points = [], statuses = {};
-      for (const result of this.results) { const detection = result.detections[index], status = result.status !== 'ok' ? result.status : detection?.status || 'missing_detection'; statuses[status] = (statuses[status] || 0)+1; if (status === 'ok') points.push(detection.point_mm); }
-      return { index, attempted_views: this.results.length, valid: points.length, statuses, ...distanceSummary(points) };
+      const points = [], rawPoints = [], statuses = {};
+      for (const result of this.filteredResults) {
+        const detection = result.detections[index], status = result.status !== 'ok' ? result.status : !detection || detection.status !== 'ok' ? detection?.status || 'missing_detection' : detection.observation_status === 'accepted' ? 'accepted' : detection.rejection_reason;
+        statuses[status] = (statuses[status] || 0)+1;
+        if (result.status === 'ok' && detection?.status === 'ok') rawPoints.push(detection.point_mm);
+        if (status === 'accepted') points.push(detection.point_mm);
+      }
+      return { index, attempted_views: this.results.length, surface_hits: rawPoints.length, accepted_views: points.length, rejected_views: rawPoints.length-points.length,
+        valid: points.length, statuses, raw_dispersion: distanceSummary(rawPoints), ...distanceSummary(points) };
     }); },
     indexSummary() { return this.summaries[this.selectedIndex]; },
   },
@@ -205,14 +224,17 @@ export default {
     async exportReport() {
       const record = this.record;
       try { const fingerprint = await this.hash(); if (record !== this.record) return;
-        jsonDownload({ experiment_version: '1.0.0', record_id: record.record_id, topology_id: record.topology_id, mesh_sha256: fingerprint, units: 'mm',
+        jsonDownload({ experiment_version: '1.1.0', record_id: record.record_id, topology_id: record.topology_id, mesh_sha256: fingerprint, units: 'mm',
         created_at: new Date().toISOString(), provenance: this.provenance, renderer: captureVersion, mappings: this.mappings,
-        references: this.localReferences, results: this.results, summaries: this.summaries, comparisons: this.rows, interpretation: 'Candidate correspondences; manual sets are separate references, not averaged ground truth. Distances are Euclidean model mm.' }, record.record_id+'-mediapipe-experiment.json'); } catch (error) { this.error = error.message; }
+        view_filter: { ...viewFilterPolicy, mode: this.filterMode },
+        references: this.localReferences, results: this.filteredResults, summaries: this.summaries, comparisons: this.rows, raw_comparisons: this.rawRows,
+        interpretation: 'Candidate correspondences; acceptance is a view heuristic, not proven visibility. Manual references never determine acceptance. Distances are Euclidean model mm.' }, record.record_id+'-mediapipe-experiment.json'); } catch (error) { this.error = error.message; }
     },
     async importReport(event) {
       if (this.busy) return; const record = this.record, revision = this.revision;
       try { const file = event.target.files[0]; if (!file) return; if (file.size > 10*1024*1024) throw Error('Experiment exceeds 10 MB'); const fingerprint = await meshFingerprint(record);
         const bundle = validateExperiment(JSON.parse(await file.text()), record, fingerprint, this.labels.map(l => l.id));
+        const filterMode = validateViewFilter(bundle.view_filter);
         const refs = (bundle.references || []).map(reference => ({ id: reference.id, label: reference.label, enabled: !!reference.enabled,
           landmarks: validateAnnotations({ annotation_version: '1.0.0', record_id: record.record_id, topology_id: record.topology_id, mesh_sha256: fingerprint, units: 'mm', review_status: 'draft', landmarks: reference.landmarks }, record, fingerprint, this.labels.map(l => l.id)) }));
         if (refs.length > 11 || new Set(refs.map(r => r.id)).size !== refs.length || refs.some(r => typeof r.id !== 'string' || typeof r.label !== 'string')) throw Error('Invalid reference identities');
@@ -223,7 +245,7 @@ export default {
           if (item.capture_version === captureVersion) { const png = await new Promise(resolve => canvas.toBlob(resolve, 'image/png')); if (png && await sha256(await png.arrayBuffer()) === item.image_sha256) images[item.view_id] = png; }
         }
         if (revision !== this.revision || record !== this.record) return;
-        this.cancel(); this.clearImages(); this.fingerprint = fingerprint; this.results = results; this.localReferences = refs; this.primaryReference = refs[0]?.id || ''; this.mappings = { ...bundle.mappings }; this.provenance = bundle.provenance;
+        this.cancel(); this.clearImages(); this.fingerprint = fingerprint; this.results = results; this.localReferences = refs; this.primaryReference = refs[0]?.id || ''; this.mappings = { ...bundle.mappings }; this.provenance = bundle.provenance; this.filterMode = filterMode;
         this.images = images; this.urls = Object.fromEntries(Object.entries(images).map(([id, image]) => [id, URL.createObjectURL(image)]));
         this.selectedView = results[0]?.view_id || ''; this.updateImage(); this.error = ''; this.progress = 'Reloaded results; projections and comparisons recalculated. '+Object.keys(images).length+' of '+results.length+' PNGs reproduced with matching checksums; unmatched images need their original PNG.';
       } catch (error) { this.error = error.message; } finally { event.target.value = ''; }

@@ -267,13 +267,63 @@ used to estimate variation.
 **Download experiment JSON** retains mesh fingerprint, all raw predictions,
 projection statuses/attachments, candidate mappings, reference snapshots,
 per-index coverage/dispersion summaries and per-reference comparisons. Its
-`experiment_version` is `1.0.0`, separate from annotation exports. Reload rejects
+`experiment_version` is `1.1.0`, separate from annotation exports; the loader also accepts earlier `1.0.0` raw pilot reports. Reload rejects
 other meshes/unsupported cameras, recomputes projections and errors, and does
 not trust exported derived points or distances. Individual original PNGs can be
 downloaded for every captured view. Reload regenerates only images whose PNG
 checksum matches the original; when rasterization differs, **Restore original
 PNG** accepts the previously exported capture only after verifying its checksum
 and dimensions. Keep PNGs with the experiment JSON for reproducible inspection.
+
+### Experimental view-dependent filtering
+
+The workspace defaults to **Conservative view filter**. It keeps a raw ray-hit
+status separate from an observation-acceptance status. A ray can hit the mesh
+while the associated observation is rejected. Select **Raw baseline (no
+filtering)** to compare the identical predictions with the filter disabled;
+changing this selection never reruns MediaPipe or alters raw coordinates or
+attachments. **Show excluded predictions in gray** reveals removed predictions
+in both panes, independently of **Show points through head**, which remains a
+display-only depth toggle.
+
+The fixed v1 policy uses capture cameras (not the rotatable inspection pane):
+
+- Absolute yaw at most 15 degrees and tilt at most 20 degrees: keep successful
+  projections on both sides and the central region.
+- Absolute yaw greater than 15 and at most 60 degrees, with tilt at most 20:
+  keep only the subject's near-side region. Negative yaw exposes subject left;
+  positive yaw exposes subject right. Exclude opposite-side observations as
+  `far_side` and central observations as `central_requires_frontal`.
+- Tilt over 20 degrees or yaw over 60 degrees: exclude as `tilt_outside_policy`
+  or `yaw_outside_policy`. Unknown indices are excluded. Invalid coordinates
+  and missed rays remain geometry failures, never accepted observations.
+
+Index regions are derived from the MediaPipe v0.10.18 canonical face model,
+with a central band of 6% of its maximum absolute X coordinate. The bundled
+`assets/mediapipe_regions.json` records its pinned source URL, SHA-256,
+Apache-2.0 attribution, side convention, and the iris-region extension. Eye
+indices 33 (right) and 263 (left) anchor the convention. The rule never reads
+manual placements, predicted image X, MediaPipe depth or the projected point's
+position to infer side. This is a region/view heuristic, not an occlusion mask.
+For example, index 423 belongs to the left region and remains accepted in a
+left-oblique view even if that particular prediction is inaccurate.
+
+The selected-index summary reports accepted coverage and dispersion beside the
+raw baseline. Rejected observations do not contribute to accepted summaries,
+and one accepted view yields no pairwise estimate. Reducing the number of
+observations can reduce dispersion without improving anatomical accuracy. The
+manual comparison table likewise shows filtered status/error and raw-baseline
+status/error together. Manual-reference visibility still determines evaluation
+eligibility only; it never determines which predictions the filter accepts.
+No predictions are averaged, moved, triangulated or fused by this policy.
+
+Exports retain the filter configuration/canonical-source hash, raw detections,
+geometry attachments, per-observation region/status/rejection reason, both
+summary baselines and both manual comparison tables. Reload recomputes these
+from raw detections and rejects modified or unknown filter policies. Earlier
+reports without filter metadata reopen in raw-baseline mode so filtering is
+not silently applied to old results. Select the conservative mode explicitly
+to experiment on those same captures.
 
 The pilot deliberately adds no photorealistic textures, automated head batches,
 view fusion, consensus ground truth or anatomical measurement-error estimates.

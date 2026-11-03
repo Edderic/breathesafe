@@ -57,5 +57,16 @@ test('candidate maps and experiment reload reject wrong meshes and invalid camer
   const bundle={experiment_version:'1.0.0',record_id:'face',topology_id:'topology',mesh_sha256:'hash',units:'mm',mappings:{},results:[{view_id:'front',camera,status:'no_detection',raw_landmarks:[]}]};
   assert.equal(context.validateExperiment(bundle,record,'hash',[]),bundle);
   assert.throws(()=>context.validateExperiment(bundle,record,'other',[]));
+  assert.throws(()=>context.validateExperiment({...bundle,experiment_version:'1.1.0'},record,'hash',[]));
   assert.throws(()=>context.validateExperiment({...bundle,results:[{...bundle.results[0],camera:{...camera,mirrored:true}}]},record,'hash',[]));
+});
+
+test('rejected observations remain geometry hits but do not produce reference error samples', () => {
+  const detection={...context.projectDetection(mesh,points,{x:.5,y:.5,z:0},1),observation_status:'rejected',rejection_reason:'far_side'};
+  const result={view_id:'front',camera,status:'ok',detections:[detection]};
+  const refs=[{id:'manual',label:'Manual',landmarks:{tip:attach(1)}}];
+  const row=context.comparisonRows(mesh,[result],{tip:1},refs)[0];
+  assert.equal(detection.status,'ok');assert.equal(row.status,'filtered_out');assert.equal(row.reason,'far_side');assert.equal(row.distance_mm,undefined);
+  const accepted={...detection,observation_status:'accepted',rejection_reason:null};
+  assert.equal(context.comparisonRows(mesh,[{...result,detections:[accepted]}],{tip:1},refs)[0].distance_mm,0);
 });
