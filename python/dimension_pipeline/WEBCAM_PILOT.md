@@ -55,22 +55,52 @@ fail explicitly. Model setup downloads assets; processing uses cached assets onl
 
 ## Capture and review
 
+See [capture-quality checks and the BRE-15 comparison protocol](WEBCAM_CAPTURE_QUALITY.md)
+for advisory sharpness/framing checks, verified camera controls and the private
+10/20/30-second comparison report. The 10-second default is unchanged.
+
 1. Connect, create a session, give local-storage consent and enable the camera.
    The preview is mirrored; captured PNG pixels are unmirrored. The request prefers
    1920×1080; actual video dimensions are used without resizing or upscaling.
 2. Capture the designated frontal image with a three-second countdown. Maintain
    a neutral expression and closed mouth. Keep the camera and torso fixed under
    diffuse light with a plain background.
-3. Select `turn_00`, capture the first 30-frame pass, following the slow head-turn
-   guidance. Select `turn_30` for the second pass with a slight chin lift. Frames
-   are spaced 1.4 seconds apart. Stop a sequence at any time; individual frames
-   can also be captured or retaken with a countdown.
+3. Choose **Capture all 60 frames**. Start at your right profile during the
+   three-second preparation countdown, then make one smooth right-to-left sweep
+   during the ten-second capture countdown. At five seconds, face directly toward
+   the camera; finish at your left profile when the countdown reaches zero. Keep
+   your chin level. The designated frontal photo remains a separate capture.
+   **Sweep duration** defaults to 10 seconds, with 20- and 30-second options; face
+   the camera halfway through whichever duration you select.
+   Use **Test audio** first. Speech announces seconds, says **Face camera** at the
+   midpoint, and **Left profile. Done.** at completion. Individual frame numbers
+   appear on screen; six frames per second are too fast to speak each number.
+   The 60 frame deadlines span the full sweep, including the first and last poses.
+   Capture timestamps, intended/actual elapsed time, sequence ID and protocol are
+   saved with approved frames. If the browser falls behind, capture fails explicitly
+   rather than collecting a burst of late frames; retry with a longer duration.
+   Stop a sweep at any time. Individual frames can also be captured or retaken
+   with their own three-second countdown and spoken frame number (1–60).
+   Audio uses a local English system voice; missing voices are reported. The
+   audio toggle mutes cues, and stopping capture or leaving cancels speech.
 4. Review all 61 images individually. Generate the starting segmentation, paint
    include/exclude corrections, include both ears, and remove neck, shoulders and
    background. Approve each mask. Only approved image/mask pairs are uploaded to
    the processor. Unsaved frames remain in browser memory and are lost on reload.
    Saved approvals persist; resuming a session can reload and correct their masks.
    A retake replaces its own slot after approval and preserves all other slots.
+   Use **← / →** to review the previous/next frame, or the adjacent navigation
+   buttons. Switching frames loads or generates its mask automatically. Press
+   **A** to approve, save and advance. Shortcuts pause in input fields and dropdowns,
+   during capture/loading/saving, and while painting; held keys do not repeat approvals.
+   **Accept all frames** saves every pending captured frame with its current mask,
+   generating masks where needed, without individual review. Brush edits are
+   preserved, saved slots are skipped, and missing captures are not invented.
+   Progress and **Stop accepting** are available; an in-flight save may complete
+   after stopping. A failure stops at the affected frame and retains earlier saves;
+   correct that mask and run acceptance again to continue. Bulk acceptance is
+   recorded separately from individual acceptance in mask provenance. It does not
+   establish that automatic masks include the ears or exclude the neck correctly.
 5. Submit reconstruction. Capture roles, timestamps, dimensions, actual camera
    settings, SHA-256 hashes and segmentation provenance accompany the PNGs.
 
@@ -80,14 +110,18 @@ surface is substituted. A failed session retains images and logs for inspection.
 
 ## Reconstruction and camera conventions
 
-The adapter runs masked CPU SIFT extraction, explicit temporal/cross-pass overlap
+The adapter runs masked CPU SIFT extraction, explicit temporal overlap
 matching, shared `SIMPLE_RADIAL` incremental mapping, undistortion, OpenMVS dense
 reconstruction and meshing. Background pixels are also masked out for dense
 processing. Approved masks are also warped into each dense camera with binary
 nearest-neighbor sampling and supplied to OpenMVS with background label 0 ignored.
 Tower/cylinder augmentation, coordinate normalization and automatic ROI cropping
-are disabled. A single connected sparse model must register at least 90% of the 60
-turn frames. Multiple models and inadequate registration fail explicitly.
+are disabled. A connected sparse model must register at least 90% of the 60 turn
+frames. Smaller initialization candidates are ignored only when their image sets
+are strict subsets of that selected model; selection and discarded candidate counts
+are recorded in diagnostics. Disconnected image sets, equal-coverage competing
+models and inadequate registration fail explicitly. Geometry is never merged across
+independent coordinate systems.
 
 The designated frontal is excluded from surface reconstruction. After meshing it
 is matched against the fixed sparse model and registered with the shared camera
@@ -138,6 +172,15 @@ experimental review only and are separate from the original predictions. A ray h
 does not establish anatomical correctness. Recalibration recomputes projections
 and resets their review decisions.
 
+The surface viewer uses directional lighting calculated in consistent model units.
+Adjust **Light direction**, toggle **Smooth lighting** (averaged normals for display)
+or **Show mesh edges**, and use the quarter-view buttons to inspect contours.
+**Reset view / fit surface** restores the frontal view and fits the entire surface;
+zoom has a separate slider and Shift-scroll gesture, so ordinary page scrolling
+does not enlarge the mesh accidentally. Display lighting does not modify vertex
+coordinates, triangle indices, ray attachments or route lengths. Roughness and
+missing geometry in the reconstruction still require review.
+
 Session ZIP exports use `webcam-session-1.0.0` and a per-file SHA-256 manifest.
 They contain approved images/masks, segmentation provenance, native tool logs and
 text camera models, unscaled full geometry, bounded geometry, calibration drafts
@@ -171,6 +214,10 @@ For the browser smoke test, start both services, install Playwright under ignore
 webcam, performs local mask inference/painting/approval, retakes a frame, verifies
 Vite private-path denial, and exports/deletes/reloads its synthetic capture session.
 It does not access a participant camera or validate reconstruction accuracy.
+
+`node scripts/tests/webcam_bulk_accept_smoke.cjs` checks bulk acceptance using a
+fake webcam and deterministic test masks, including brush preservation, partial
+saves, cancellation and retry after a simulated save failure.
 
 Implementation verification on this Mac: pinned native binaries install and pass
 version/architecture diagnostics; the CPU detector initializes and returns an

@@ -1,0 +1,11 @@
+{
+  "version": "webcam_capture_quality_v1",
+  "method": "masked_head_bilinear_laplacian_variance_v1",
+  "max_sample_side": 256,
+  "minimum_interior_samples": 64,
+  "sharpness_warning_below": 40,
+  "head_height_warning_below": 0.55,
+  "border_warning_below": 0.02,
+  "threshold_status": "provisional_development_screening",
+  "automatic_exclusion": false
+}

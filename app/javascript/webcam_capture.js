@@ -12,7 +12,30 @@ export const nativeCameraConstraints = { video: { facingMode: 'user', width: { i
 
 export function captureGuidance(index) {
   if (index === 0) return 'Designated frontal: look straight ahead with a neutral expression and closed mouth.';
-  const frame = index-1, pass = Math.floor(frame/30)+1, position = frame%30;
-  const angle = position < 15 ? -70+position*10 : 70-(position-15)*10;
-  return `Pass ${pass}, frame ${position+1}/30: ${pass === 2 ? 'slightly lift your chin; ' : ''}slowly turn toward ${angle < 0 ? 'your left' : 'your right'} (${Math.abs(angle)}°). Keep your torso still, expression neutral and mouth closed. Aim for overlapping views; avoid blur.`;
+  const angle = 90-180*(index-1)/59;
+  const pose = Math.abs(angle) < 2 ? 'face directly toward the camera' : `turn toward your ${angle > 0 ? 'right' : 'left'} (about ${Math.round(Math.abs(angle))}°)`;
+  return `Frame ${index}/60: ${pose}. Sweep smoothly from right profile through frontal to left profile. Keep your torso still, expression neutral and mouth closed.`;
+}
+
+export function sweepSchedule(durationSeconds) {
+  if (![10, 20, 30].includes(durationSeconds)) throw Error('Choose a 10, 20 or 30 second sweep.');
+  const events = Array.from({length: durationSeconds+1}, (_, second) => ({ at_ms: second*1000, remaining: durationSeconds-second }));
+  for (let index=1; index<=60; index++) events.push({ at_ms: (index-1)*durationSeconds*1000/59, index });
+  return events.sort((a,b)=>a.at_ms-b.at_ms || (a.remaining===0 ? 1 : b.remaining===0 ? -1 : 0));
+}
+
+// Absolute deadlines keep frame processing time from lengthening the sweep.
+export async function runCaptureSweep({ durationSeconds, capture, countdown, cancelled,
+  now = () => performance.now(), wait = ms => new Promise(resolve=>setTimeout(resolve,ms)) }) {
+  const started = now(), maximumDelay = durationSeconds*1000/59*1.5;
+  for (const event of sweepSchedule(durationSeconds)) {
+    if (cancelled()) return false;
+    const delay = started+event.at_ms-now();
+    if (delay > 0) await wait(delay);
+    if (cancelled()) return false;
+    if (now()-started-event.at_ms > maximumDelay) throw Error('Capture fell behind the sweep timer. Keep this tab visible and try a longer sweep.');
+    if (event.index === undefined) countdown(event.remaining);
+    else capture(event.index, { intended_elapsed_ms: event.at_ms, elapsed_ms: now()-started });
+  }
+  return true;
 }

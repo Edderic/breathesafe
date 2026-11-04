@@ -20,6 +20,7 @@ from pathlib import Path
 
 from .webcam_geometry import calibrate, project
 from .webcam_reconstruction import REPO, diagnostics, reconstruct
+from .capture_quality import capture_quality, capture_context
 
 ROOT = REPO/'.private-webcam-runs'
 ORIGINS = {f'http://{host}:{port}' for host in ('localhost', '127.0.0.1') for port in (3000, 5173, 5178)}
@@ -89,10 +90,12 @@ class Store:
     def save(self, state):
         write_json(self.folder(state['id'])/'session.json', state)
 
-    def create(self):
+    def create(self, payload=None):
+        context = capture_context((payload or {}).get('capture_context'))
         identity = uuid.uuid4().hex; (self.root/identity).mkdir(mode=0o700)
         state = {'version': VERSION, 'id': identity, 'created_at': datetime.now(timezone.utc).isoformat(),
-                 'status': 'capturing', 'captures': [], 'stage': None, 'error': None, 'result': None}
+                 'status': 'capturing', 'captures': [], 'stage': None, 'error': None, 'result': None,
+                 'capture_context': context}
         self.save(state); return state
 
     def capture(self, identity, payload):
@@ -116,8 +119,9 @@ class Store:
         if not isinstance(stamp, str) or len(stamp) > 80:
             raise ValueError('Missing timestamp.')
         metadata = {'slot': slot, 'role': 'frontal' if slot == 'front' else 'reconstruction',
-                    'pass': None if slot == 'front' else int(slot[-2:])//30+1, 'width': image.width, 'height': image.height,
+                    'capture_sequence': payload.get('capture_sequence'), 'width': image.width, 'height': image.height,
                     'timestamp': stamp, 'camera_settings': payload.get('camera_settings', {}), 'mirrored': False,
+                    'camera_controls': payload.get('camera_controls'), 'capture_quality': capture_quality(image, mask),
                     'sha256': digest(data), 'mask_sha256': digest(mask_data), 'mask_approved': True,
                     'mask_provenance': payload.get('mask_provenance'), 'image': slot+'.png', 'mask': slot+'-mask.png'}
         folder = self.folder(identity)
@@ -326,7 +330,8 @@ class Handler(BaseHTTPRequestHandler):
             with self.store.lock:
                 if self.path == '/sessions':
                     rows = [self.store.load(p.name) for p in self.store.root.iterdir() if p.is_dir() and re.fullmatch(r'[a-f0-9]{32}', p.name)]
-                    self.reply(200, [{'id': s['id'], 'created_at': s['created_at'], 'status': s['status']} for s in rows]); return
+                    self.reply(200, [{'id': s['id'], 'created_at': s['created_at'], 'status': s['status'],
+                                      'capture_context': s.get('capture_context'), 'capture_count': len(s['captures'])} for s in rows]); return
                 capture = re.fullmatch(r'/sessions/([a-f0-9]{32})/captures/(front|turn_(?:0[0-9]|[1-5][0-9]))/(image|mask)', self.path)
                 if capture:
                     identity, slot, kind = capture.groups()
@@ -374,7 +379,7 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError('Expected a JSON object.')
             with self.store.lock:
                 if self.path == '/sessions':
-                    result = self.store.create()
+                    result = self.store.create(payload)
                 elif self.path == '/restore':
                     result = self.store.restore(payload['archive'])
                 else:

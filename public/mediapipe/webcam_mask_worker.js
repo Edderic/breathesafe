@@ -25,7 +25,7 @@ self.onmessage = async ({ data: { id, image } }) => {
       const mask = result.categoryMask, categories = mask.getAsUint8Array();
       const values = Uint8ClampedArray.from(categories, v => v === 1 || v === 3 ? 255 : 0);
       self.postMessage({ id, width: mask.width, height: mask.height, values, provenance: {
-        sdk_version: '0.10.18', model_sha256: modelHash, selected_categories: [1, 3], delegate: 'CPU', correction: 'manual_head_only_review',
+        sdk_version: '0.10.18', model_sha256: modelHash, selected_categories: [1, 3], delegate: 'CPU', correction: 'none', review_status: 'unreviewed_generated_mask',
       } }, [values.buffer]);
     });
   } catch (error) { self.postMessage({ id, error: error.message }); }

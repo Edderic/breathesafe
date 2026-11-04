@@ -76,6 +76,31 @@ def read_model(folder):
     return images
 
 
+def select_sparse_model(models, image_names):
+    """Ignore contained initialization attempts, never join disconnected geometry."""
+    allowed = set(image_names)
+    if not models:
+        raise ValueError('No sparse reconstruction was produced. Inspect the feature/matching logs.')
+    if any(not set(cameras).issubset(allowed) for _, cameras in models):
+        raise ValueError('Sparse reconstruction contains unexpected images, including a possible held-out frontal.')
+    ranked = sorted(models, key=lambda item: len(item[1]), reverse=True)
+    model, cameras = ranked[0]
+    sizes = ', '.join(str(len(c)) for _, c in ranked)
+    if len(cameras) < math.ceil(.9*len(allowed)):
+        raise ValueError(f'Insufficient reconstruction: largest connected model registered {len(cameras)}/{len(allowed)} turn frames; require >=90%. Candidate sizes: {sizes}.')
+    discarded = []
+    for path, candidate in ranked[1:]:
+        # Equal coverage could represent competing solutions; do not pick one arbitrarily.
+        if not set(candidate) < set(cameras):
+            raise ValueError(f'Partial/disconnected or competing sparse reconstructions. Candidate sizes: {sizes}; additional candidates are not strict subsets of the largest model.')
+        discarded.append({'model': path.name, 'registered_images': len(candidate),
+                          'reason': 'image_set_strictly_contained_in_selected_model'})
+    report = {'method': 'dominant_connected_model_with_contained_candidates_v1',
+              'selected_model': model.name, 'registered_images': len(cameras),
+              'submitted_images': len(allowed), 'discarded_candidates': discarded}
+    return model, cameras, report
+
+
 def detect(image_path):
     import mediapipe as mp
     if mp.__version__ != '0.10.32':
@@ -125,11 +150,8 @@ def reconstruct(folder, state, run, update, cancelled):
            '--image_list_path', work/'reconstruction.txt', '--ImageReader.mask_path', masks,
            '--ImageReader.single_camera', '1', '--ImageReader.camera_model', 'SIMPLE_RADIAL',
            '--FeatureExtraction.use_gpu', '0', '--FeatureExtraction.max_image_size', '4096')
-    # Explicit overlapping temporal pairs plus cross-pass pairs at matching head positions.
+    # Temporal neighbors cover one continuous right-profile -> left-profile sweep.
     pairs = {(a, b) for i, a in enumerate(names) for b in names[i+1:i+7]}
-    for i in range(30):
-        for j in range(max(0, i-2), min(30, i+3)):
-            pairs.add((names[i], names[30+j]))
     (work/'pairs.txt').write_text('\n'.join(a+' '+b for a, b in sorted(pairs))+'\n')
     colmap('overlap_matching', 'matches_importer', '--database_path', db, '--match_list_path', work/'pairs.txt',
            '--match_type', 'pairs', '--FeatureMatching.use_gpu', '0')
@@ -139,12 +161,11 @@ def reconstruct(folder, state, run, update, cancelled):
     for candidate in sorted(sparse.iterdir()):
         if candidate.is_dir():
             colmap('inspect_sparse', 'model_converter', '--input_path', candidate, '--output_path', candidate, '--output_type', 'TXT')
-            models.append((len(read_model(candidate)), candidate))
-    if len(models) != 1:
-        raise ValueError('Partial/disconnected reconstruction: expected one connected sparse model.')
-    count, model = models[0]; before = read_model(model)
-    if count < math.ceil(.9*len(names)) or frontal['slot']+'.png' in before or len({c['camera_id'] for c in before.values()}) != 1:
-        raise ValueError('Insufficient reconstruction: require >=90% registered turn frames with one shared camera and no designated frontal.')
+            models.append((candidate, read_model(candidate)))
+    model, before, sparse_selection = select_sparse_model(models, names)
+    count = len(before)
+    if len({c['camera_id'] for c in before.values()}) != 1:
+        raise ValueError('Sparse reconstruction must use one shared camera.')
     dense = work/'dense'
     colmap('undistort_surface_images', 'image_undistorter', '--image_path', images, '--input_path', model,
            '--output_path', dense, '--output_type', 'COLMAP')
@@ -252,7 +273,7 @@ def reconstruct(folder, state, run, update, cancelled):
     result = {'surface': surface, 'cameras': cameras, 'frontal_camera_key': camera_key,
               'frontal_undistorted': image_path.relative_to(folder).as_posix(), 'full_mesh': (work/'full.ply').relative_to(folder).as_posix(),
               'detector': provenance, 'raw_predictions': raw, 'projected_points': projected,
-              'diagnostics': {'tools': diag, 'processing_seconds': time.monotonic()-started,
+              'diagnostics': {'tools': diag, 'sparse_model_selection': sparse_selection, 'processing_seconds': time.monotonic()-started,
                               'registered_images': count, 'submitted_turn_images': len(names), 'registered_fraction': count/len(names),
                               'sparse_point_error_mean_px': statistics_mean(errors),
                               'frontal_observations': camera['observations'], 'mesh': mesh_report,

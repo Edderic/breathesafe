@@ -16,7 +16,7 @@ from unittest.mock import patch
 
 from dimension_pipeline.webcam_geometry import attachment, calibrate, camera_pixel, project, ray, readings, route_length
 from dimension_pipeline.webcam_pilot import Handler, Store, digest
-from dimension_pipeline.webcam_reconstruction import reconstruct, undistort_mask
+from dimension_pipeline.webcam_reconstruction import reconstruct, undistort_mask, select_sparse_model
 
 
 def mesh():
@@ -39,6 +39,27 @@ def route(via):
 
 
 class GeometryTests(unittest.TestCase):
+    def test_sparse_selection_ignores_contained_initialization_candidates(self):
+        names = [f'turn_{i:02}.png' for i in range(60)]
+        full = dict.fromkeys(names, {'camera_id': 1})
+        tiny = dict.fromkeys(names[7:9], {'camera_id': 1})
+        path, cameras, report = select_sparse_model([(Path('0'), tiny), (Path('1'), full)], names)
+        self.assertEqual(path, Path('1')); self.assertEqual(len(cameras), 60)
+        self.assertEqual(report['discarded_candidates'][0]['registered_images'], 2)
+
+    def test_sparse_selection_still_rejects_disconnected_competing_and_inadequate_models(self):
+        names = [f'turn_{i:02}.png' for i in range(60)]
+        def model(folder, images):
+            return Path(folder), dict.fromkeys(images, {'camera_id': 1})
+        for models, message in [
+            ([model('0', names[:58]), model('1', names[58:])], 'disconnected'),
+            ([model('0', names), model('1', names)], 'competing'),
+            ([model('0', names[:20])], 'Insufficient'),
+            ([model('0', names+['front.png'])], 'held-out'),
+            ([], 'No sparse'),
+        ]:
+            with self.subTest(message=message), self.assertRaisesRegex(ValueError, message):
+                select_sparse_model(models, names)
     def test_binary_mask_undistortion_preserves_identity_and_pixel_centers(self):
         import numpy as np
         mask = np.zeros((64, 64), dtype=np.uint8); mask[8:50, 10:40] = 255
@@ -127,6 +148,22 @@ class SessionTests(unittest.TestCase):
                 self.store.load(bad)
         with self.assertRaises(ValueError):
             self.store.start(first['id'])
+
+    def test_sweep_metadata_survives_capture_save(self):
+        context = {'group': 'desk-light-a', 'conditions': 'Same camera and diffuse light', 'repeat': 1}
+        state = self.store.create({'capture_context': context})
+        sequence = {'id': 'test-sweep', 'protocol': 'right_to_left_sweep_v1', 'frame_index': 1,
+                    'duration_ms': 10000, 'intended_elapsed_ms': 0, 'elapsed_ms': 2.5}
+        controls = {'version': 'webcam_camera_controls_v1', 'controls': [], 'attempts': []}
+        result = self.store.capture(state['id'], {**self.payload('turn_00'), 'capture_sequence': sequence, 'camera_controls': controls})
+        self.assertEqual(result['captures'][0]['capture_sequence'], sequence)
+        self.assertNotIn('pass', result['captures'][0])
+        self.assertEqual(result['capture_context'], context)
+        self.assertEqual(result['captures'][0]['camera_controls'], controls)
+        self.assertEqual(result['captures'][0]['capture_quality']['policy']['version'], 'webcam_capture_quality_v1')
+        restored = self.store.restore(self.store.export(state['id']))
+        self.assertEqual(restored['captures'][0]['capture_quality'], result['captures'][0]['capture_quality'])
+        self.assertEqual(restored['capture_context'], context)
 
     def test_export_reload_hashes_and_archive_traversal(self):
         state = self.store.create(); self.store.capture(state['id'], self.payload())
@@ -222,11 +259,16 @@ class SessionTests(unittest.TestCase):
                 self.assertEqual(len(names), 60); self.assertNotIn('front.png', names)
                 self.assertIn('--ImageReader.mask_path', command); self.assertIn('--FeatureExtraction.use_gpu', command)
                 self.assertEqual(Image.open(work/'images/turn_00.png').getpixel((0, 0)), (0, 0, 0))
+            if stage == 'overlap_matching':
+                pairs = set((work/'pairs.txt').read_text().splitlines())
+                self.assertIn('turn_00.png turn_06.png', pairs)
+                self.assertIn('turn_29.png turn_30.png', pairs)
+                self.assertNotIn('turn_00.png turn_30.png', pairs)
             if stage == 'sparse_reconstruction':
                 (work/'sparse/0').mkdir()
         # An intentionally insufficient analytic test model must fail before meshing/detection.
         with patch('dimension_pipeline.webcam_reconstruction.diagnostics', return_value={'ready': True}), patch(
-            'dimension_pipeline.webcam_reconstruction.read_model', return_value={str(i): {'camera_id': 1} for i in range(10)}
+            'dimension_pipeline.webcam_reconstruction.read_model', return_value={f'turn_{i:02}.png': {'camera_id': 1} for i in range(10)}
         ):
             with self.assertRaisesRegex(ValueError, 'Insufficient reconstruction'):
                 reconstruct(folder, state, run, lambda stage: None, lambda: False)

@@ -14,13 +14,37 @@ test('native webcam pixels never mirror or upscale; metadata records actual dime
   assert.deepEqual(calls[0],[video,0,0,1280,720]);
   assert.throws(()=>context.captureNativeFrame({videoWidth:0,videoHeight:0},{}));
 });
-test('both capture passes preserve frame roles and provide chin-lift guidance', () => {
+test('one sweep runs from right profile through frontal to left profile', () => {
   const context={};
   vm.runInNewContext(fs.readFileSync(path.join(root,'app/javascript/webcam_capture.js'),'utf8').replaceAll('export ',''),context);
   assert.match(context.captureGuidance(0),/Designated frontal/);
-  assert.match(context.captureGuidance(1),/Pass 1, frame 1/);
-  assert.match(context.captureGuidance(31),/Pass 2, frame 1.*lift your chin/);
-  assert.match(context.captureGuidance(60),/frame 30\/30/);
+  assert.match(context.captureGuidance(1),/Frame 1\/60:.*right.*90/);
+  assert.match(context.captureGuidance(30),/face directly toward the camera/);
+  assert.match(context.captureGuidance(31),/face directly toward the camera/);
+  assert.match(context.captureGuidance(60),/Frame 60\/60:.*left.*90/);
+});
+test('60 frames span ten seconds without accumulating capture work; midpoint is at five seconds',async()=>{
+  const context={};
+  vm.runInNewContext(fs.readFileSync(path.join(root,'app/javascript/webcam_capture.js'),'utf8').replaceAll('export ',''),context);
+  let clock=0;const captures=[],cues=[];
+  const complete=await context.runCaptureSweep({durationSeconds:10,now:()=>clock,wait:async ms=>{clock+=ms;},cancelled:()=>false,
+    capture:(index,timing)=>{captures.push({index,...timing});clock+=7;},countdown:remaining=>cues.push([remaining,clock])});
+  assert.equal(complete,true);assert.equal(captures.length,60);
+  assert.equal(captures[0].elapsed_ms,0);assert.equal(captures[59].elapsed_ms,10000);
+  assert.ok(captures[29].elapsed_ms<5000 && captures[30].elapsed_ms>5000);
+  assert.deepEqual(cues.find(([remaining])=>remaining===5),[5,5000]);
+  assert.equal(cues.at(-1)[0],0);
+  assert.throws(()=>context.sweepSchedule(5));
+});
+test('sweep cancellation stops frames and missed deadlines fail instead of bursting late captures',async()=>{
+  const context={};
+  vm.runInNewContext(fs.readFileSync(path.join(root,'app/javascript/webcam_capture.js'),'utf8').replaceAll('export ',''),context);
+  let clock=0,frames=0;
+  const complete=await context.runCaptureSweep({durationSeconds:10,now:()=>clock,wait:async ms=>{clock+=ms;},cancelled:()=>frames===3,capture:()=>frames++,countdown:()=>{}});
+  assert.equal(complete,false);assert.equal(frames,3);
+  clock=0;frames=0;
+  await assert.rejects(context.runCaptureSweep({durationSeconds:10,now:()=>clock,wait:async ms=>{clock+=ms+1000;},cancelled:()=>false,capture:()=>frames++,countdown:()=>{}}),/fell behind/);
+  assert.equal(frames,1);
 });
 test('unscaled routes never publish millimeter fields', () => {
   const geometry={}; vm.runInNewContext(fs.readFileSync(path.join(root,'app/javascript/face_annotation_geometry.js'),'utf8').replace(/^import .*;\n/gm,'').replace(/export (async )?function /g,'$1function '),geometry);
