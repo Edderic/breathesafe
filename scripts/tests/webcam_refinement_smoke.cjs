@@ -29,6 +29,20 @@ const active=JSON.parse(fs.readFileSync(process.env.WEBCAM_REFINEMENT_RUN || pat
    assert.equal(projection.surface.topology_id,row.analysis_mesh_id);assert.equal(projection.calibration,null);assert.deepEqual(projection.routes,[]);assert.ok(projection.projected_points.every(p=>p.acceptance==='pending'));
    console.log(row.profile_id+' raw/variant full-resolution comparison + shared orientation: PASS');
   }
+  if(run.suite==='iterations'){
+   const eight=run.variants.find(v=>v.profile_id==='iterations08'),twentyFour=run.variants.find(v=>v.profile_id==='iterations24');
+   const responsePromise=page.waitForResponse(response=>response.url().includes('/mesh-comparison?') && response.url().includes('reference='+eight.id));
+   await comparison.getByLabel('Reference mesh',{exact:true}).selectOption(eight.id);
+   const report=await (await responsePromise).json();assert.equal(report.comparison_source_id,twentyFour.id);assert.equal(report.comparison_reference_id,eight.id);assert.equal(report.units,'reconstruction_unit');
+   await page.getByRole('img',{name:eight.label+' inspection',exact:true}).waitFor({state:'visible'});
+   await page.getByRole('img',{name:twentyFour.label+' inspection',exact:true}).waitFor({state:'visible'});
+   fs.writeFileSync(path.join(privateRoot,'capture-comparisons',`bre18-${active.session_id.slice(0,6)}-iterations-direct-report.json`),JSON.stringify(report,null,2));
+   for(const [angle,name] of [[0,'front'],[-35,'left'],[35,'right']]){
+    await page.getByLabel('Yaw',{exact:true}).evaluate((input,value)=>{input.value=String(value);input.dispatchEvent(new Event('input',{bubbles:true}));},angle);
+    await comparison.screenshot({path:path.join(privateRoot,'capture-comparisons',`bre18-${active.session_id.slice(0,6)}-iterations-direct-${name}.png`)});
+   }
+   console.log('Direct 8 vs 24 full mesh inspection and sampled disagreement: PASS');
+  }
   await page.getByRole('checkbox',{name:'Tap to place route controls',exact:true}).check();
   await page.getByRole('img',{name:run.variants.at(-1).label+' inspection',exact:true}).click({modifiers:['Control']});
   await page.getByText('No controls placed',{exact:true}).waitFor();

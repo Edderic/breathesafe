@@ -19,9 +19,9 @@
     </div>
     <template v-if="report">
       <label v-if="candidates.length>1">Comparison variant<select aria-label="Comparison variant" v-model="variantId" :disabled="loading" @change="changeVariant"><option v-for="v in candidates" :key="v.id" :value="v.id">{{ v.label }} · {{ v.kind }}</option></select></label>
-      <label v-if="candidates.length>1">Reference mesh<select aria-label="Reference mesh" v-model="referenceId" :disabled="loading" @change="load"><option value="analysis">Bounded analysis mesh</option><option value="raw">Original full reconstruction</option></select></label>
+      <label v-if="candidates.length>1">Reference mesh<select aria-label="Reference mesh" v-model="referenceId" :disabled="loading" @change="load"><option v-for="v in report.variants" :key="v.id" :value="v.id">{{ v.label }}</option></select></label>
       <p v-if="selectedVariants[1]?.coverage_status === 'inadequate_coverage'" role="alert">Filtering flagged inadequate coverage. Inspect the missing regions before considering this setting.</p>
-      <p v-if="selectedVariants[1]?.kind==='image_refined'">Refined geometry is uncalibrated. Original tape routes, scale and acceptance decisions do not transfer. Fresh per-variant frontal intersections are stored in the session export; they require anatomical review.</p>
+      <p v-if="selectedVariants.some(v=>v.kind==='image_refined')">Refined geometry is uncalibrated. Original tape routes, scale and acceptance decisions do not transfer. Fresh per-variant frontal intersections are stored in the session export; they require anatomical review.</p>
       <h4>Sampled surface disagreement</h4>
       <p>Area-weighted triangle-surface samples to nearest triangle surfaces, in shared original coordinates. No alignment fit. Values describe mesh disagreement; they do not measure anatomical accuracy or provide an exact Hausdorff bound.</p>
       <table><thead><tr><th>Direction</th><th>Samples / seed</th><th>RMS</th><th>95th percentile</th><th>Sampled maximum</th></tr></thead>
@@ -85,7 +85,8 @@ async function load(){
     const response=await fetch(`${props.apiBase}/sessions/${props.sessionId}/mesh-comparison?variant=${encodeURIComponent(variantId.value)}&reference=${referenceId.value}`,{signal});
     const metadata=await response.json();if(!response.ok)throw Error(metadata.error || 'Comparison metadata unavailable.');
     if(revision!==generation)return;
-    if(metadata.variants.find(v=>v.id===variantId.value)?.kind!=='image_refined' && (metadata.units!==props.units || metadata.display_scale!==props.scaleFactor))throw Error('Session scale changed during comparison loading. Retry.');
+    const refined=metadata.variants.some(v=>[metadata.comparison_source_id,metadata.comparison_reference_id].includes(v.id) && v.kind==='image_refined');
+    if(refined ? metadata.units!=='reconstruction_unit' || metadata.display_scale!==1 || metadata.display_camera?.units!=='reconstruction_unit' : metadata.units!==props.units || metadata.display_scale!==props.scaleFactor)throw Error('Session scale changed during comparison loading. Retry.');
     report.value=metadata;if(!candidates.value.some(v=>v.id===variantId.value))variantId.value=candidates.value[0]?.id;
     const variant=candidates.value.find(v=>v.id===variantId.value);if(!variant)throw Error('No inspection variant is available.');
     if(metadata.comparison_source_id!==variant.id)throw Error('Deviation report does not identify the selected comparison variant.');

@@ -3,7 +3,7 @@ import re
 from pathlib import PurePosixPath
 
 from .depth_quality import POLICY
-from .refinement_experiments import POLICY as REFINEMENT_POLICY
+from .refinement_experiments import POLICY as REFINEMENT_POLICY, POLICIES as REFINEMENT_POLICIES
 
 
 def _artifacts(state, key, version, policy, prefix, directory):
@@ -15,7 +15,8 @@ def _artifacts(state, key, version, policy, prefix, directory):
     for run in experiments['runs']:
         if not re.fullmatch(r'[a-f0-9]{32}', run.get('id', '')): raise ValueError('Invalid experiment run ID.')
         for row in run.get('variants', []):
-            if row.get('profile_id') not in policy['profiles'] or row.get('id') != prefix+run['id'][:16]+'-'+row['profile_id'] or row['id'] in ids:
+            row_policy = REFINEMENT_POLICIES.get(row.get('version')) if prefix=='r' else policy
+            if row_policy is None or row.get('profile_id') not in row_policy['profiles'] or row.get('id') != prefix+run['id'][:16]+'-'+row['profile_id'] or row['id'] in ids:
                 raise ValueError('Invalid or duplicate experiment variant ID.')
             ids.add(row['id'])
             for artifact in row.get('artifacts', []):

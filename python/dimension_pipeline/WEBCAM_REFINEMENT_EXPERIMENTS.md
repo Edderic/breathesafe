@@ -149,3 +149,93 @@ The temporary reload copy was removed afterward; no extra session was added to
 the user's processor. Private run manifests, execution reports, numerical review,
 front/side screenshots, original snapshots and the archive remain under
 `.private-webcam-runs/`. Source captures are not committed.
+
+## Iteration-budget comparison
+
+**Run 8 vs 24 iterations · weight 0.20** selects the separate versioned suite
+`webcam_image_refinement_iterations_v1` in `refinement_iterations_policy.json`.
+The API accepts `{"suite":"iterations"}`; arbitrary numeric overrides are rejected.
+The original regularity suite and historical records remain unchanged/loadable.
+Both suites share existing progress, cancellation, recovery, comparison,
+uncalibrated variant projection and artifact export/reload behavior.
+
+Both iteration trials start independently from the original full mesh. The
+native CLI differs only in `--gradient-step 8.05` versus `24.05`, encoding eight
+or 24 iterations with initial step 0.5. Regularity weight remains 0.20; step decay
+0.98, one scale, four neighboring views, four CPU threads, image/mask/camera
+inputs and geometry-operation flags are held fixed. Input manifests, profile
+versions and effective optimization settings are recorded per variant.
+
+The pinned optimizer switches rigidity/elasticity to 1 after its integer
+70-percent-of-budget cutoff: after iteration index 5 for eight iterations,
+after index 16 for 24. Consequently, the first eight vertex updates need not
+match. This compares two native iteration budgets, not a continuation of an
+eight-iteration trajectory or proof of convergence. Evaluate detail, coverage
+and displacement alongside roughness. A smoother appearance alone does not
+justify promotion.
+
+The first two captures in the subsequent
+[lighting comparison](WEBCAM_LIGHTING_COMPARISON.md) supply two saved input sets
+for this test. No additional captures or calibration transfer are required.
+
+### November 5 iteration results
+
+Both saved room-lighting captures completed the two budgets with 60/60 registered
+turn inputs and identical per-capture input-manifest hashes. Native command logs
+record the actual iteration counts. Both start mesh copies match their raw PLY
+hashes. Source captures, camera/measurement fields and unrelated sessions remain
+unchanged. Both variants receive fresh held-out registration/detection and
+analysis-topology-specific projections with pending decisions and no calibration.
+
+| Capture | Iterations | Roughness change vs raw | Raw proximity | Raw → refined RMS (reconstruction units) | Fresh hits / 478 | Seconds |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 8 | −13.68% | 96.90% | 0.020851 | 469 | 68.9 |
+| 1 | 24 | −26.15% | 95.04% | 0.035675 | 469 | 119.2 |
+| 2 | 8 | −12.02% | 99.02% | 0.005965 | 470 | 71.0 |
+| 2 | 24 | −24.49% | 98.34% | 0.008091 | 470 | 127.6 |
+
+Relative to eight iterations, 24 lowers the plane-residual roughness metric by
+14.45% and 14.17%, at 1.73× and 1.80× observed elapsed time. Timings include native
+import/refinement and geometry/registration/detection/analysis/projection, not
+original reconstruction or shared input freezing. Development checks ran during
+processing, so these are observed timings rather than controlled CPU benchmarks.
+
+The direct comparison now supports any artifact-validated completed variant as
+the reference. Select **24 iterations · regularity 0.20** as comparison variant
+and **8 iterations · regularity 0.20** as reference. Both full meshes use one
+shared frame and rendering controls, with no alignment fit. Any comparison
+containing a refined source **or reference** uses unscaled reconstruction units
+and the original unscaled camera, even when the base session was calibrated.
+
+At 5,000 area-weighted samples per direction, direct 24→8 RMS is 0.002064 / 0.002225
+and 8→24 RMS is 0.008330 / 0.003130 for captures 1 / 2. These arbitrary units
+cannot be compared as physical errors across captures. The first capture's
+8→24 sampled maximum is 0.2576, showing localized movement outliers despite low
+typical disagreement; sampled maxima are not exact bounds. Geometry movement and
+raw proximity both warrant inspection rather than inferring accuracy from lower
+roughness. Full-mesh face/component/boundary counts remain those of each raw mesh;
+that does not establish complete anatomy.
+
+Direct front/±35° full-mesh inspection shows a modest reduction of grain at 24,
+with substantial facial grain, uncertain fine eye/lip/ear detail, crown gaps and
+boundary debris still present. Nose/lip and lateral outlines remain recognizable;
+their anatomical fidelity is not independently established. The raw jaw sheet in
+capture 2 persists rather than being repaired. Both budgets have identical fixed
+frontal camera poses/intrinsics within each capture; sparse reprojection RMS is
+3.596 px and 2.638 px respectively, unchanged by the budget. Unchanged hit counts
+do not imply unchanged landmark positions: matched analysis-ray point disagreement
+RMS is 0.009852 / 0.006759 reconstruction units, including both geometry change and
+fresh QEM topology effects. None of these values measures anatomical accuracy.
+
+Retain eight iterations as an experimental screening control. Keep 24 as
+**adjust / further test**, not an automatic default or calibrated measurement
+surface. The consistent numerical benefit justifies considering 24 in the later
+direct-light comparison; additional iterations alone have not resolved the noise.
+Independent tape checks and a paired reference remain unavailable.
+
+Validation passed: 76 Python tests, 63 JS tests, preview build, viewer error/scale
+regressions, all four live variant inspections and both direct budget comparisons.
+Both actual iteration-session ZIPs reloaded into temporary private Stores with
+matching raw/capture fields, new-profile provenance, fresh projections and direct
+comparison support. Private execution reports, archives, review notes and screenshots
+remain under the lighting study's `iterations-study/` and private comparison folder.

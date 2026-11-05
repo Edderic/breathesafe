@@ -1,0 +1,10 @@
+{
+  "version": "webcam_image_refinement_iterations_v1",
+  "tool": "OpenMVS 2.4.0 RefineMesh CPU",
+  "fixed": {"resolution-level": 0, "min-resolution": 640, "max-views": 4, "decimate": 1, "close-holes": 0, "ensure-edge-size": 0, "max-face-area": 0, "scales": 1, "scale-step": 0.5, "alternate-pair": 0, "rigidity-elasticity-ratio": 0.9, "planar-vertex-ratio": 0, "reduce-memory": 1, "max-threads": 4},
+  "optimization": {"initial_gradient_step": 0.5, "step_decay": 0.98, "independent_raw_starts": true, "native_budget_dependent_rigidity_phase": true, "description": "Native iteration-budget comparison, not a warm-start continuation or convergence proof. OpenMVS switches rigidity/elasticity to 1 after its budget-dependent 70-percent cutoff."},
+  "profiles": {
+    "iterations08": {"label": "8 iterations · regularity 0.20", "regularity-weight": 0.2, "gradient-step": 8.05},
+    "iterations24": {"label": "24 iterations · regularity 0.20", "regularity-weight": 0.2, "gradient-step": 24.05}
+  }
+}

@@ -73,8 +73,6 @@ def compare_session(folder, state, count=5000, variant='raw', reference='analysi
     from .depth_variants import experiment_variants
     if type(count) is not int or not 1 <= count <= 10000:
         raise ValueError('Invalid deviation sample count.')
-    if reference not in ('analysis', 'raw'):
-        raise ValueError('Unknown comparison reference.')
     result = state.get('result')
     if not result:
         raise ValueError('Reconstruct a surface before comparing meshes.')
@@ -114,6 +112,8 @@ def compare_session(folder, state, count=5000, variant='raw', reference='analysi
                         'experiment_metrics': row['metrics'], 'recommendation': row['recommendation'], 'coverage_status': row['coverage_status']})
     selected = next((v for v in catalog if v['id'] == variant and v['id'] != 'analysis'), None)
     if selected is None: raise ValueError('Unknown inspection variant.')
+    selected_reference = next((v for v in catalog if v['id']==reference),None)
+    if selected_reference is None: raise ValueError('Unknown comparison reference.')
     source = original
     if variant != 'raw':
         row = next(r for r in rows if r['id'] == variant)
@@ -121,17 +121,21 @@ def compare_session(folder, state, count=5000, variant='raw', reference='analysi
         if actual_hash != selected['sha256']:
             raise ValueError('Experiment artifact hash changed.')
     target = analysis if reference == 'analysis' else original
+    if reference not in ('analysis','raw'):
+        row = next(r for r in rows if r['id']==reference)
+        target, actual_hash, _ = read_inspection_mesh(artifact(row['full_mesh']))
+        if actual_hash != selected_reference['sha256']: raise ValueError('Reference artifact hash changed.')
     # Refinement moves geometry: the original tape route and scale are not a
     # calibration of this variant. Compare both meshes in original world units.
-    calibration = state.get('calibrated') if selected['kind'] != 'image_refined' else None
+    calibration = state.get('calibrated') if not any(v['kind']=='image_refined' for v in (selected,selected_reference)) else None
     scale = calibration['report']['mm_per_reconstruction_unit'] if calibration else 1.
     if not np.isfinite(scale) or scale <= 0: raise ValueError('Invalid calibration scale.')
     units = 'mm' if calibration else result['surface']['units']
     if units not in ('mm', 'reconstruction_unit'): raise ValueError('Unknown mesh units.')
     # Reuse identical raw reference samples across variants and the experiment
     # metrics. Keep the original full/analysis seed convention for compatibility.
-    forward = sampled_deviation(source, target, count, 1 if reference == 'raw' else 0, scale)
-    reverse = sampled_deviation(target, source, count, 0 if reference == 'raw' else 1, scale)
+    forward = sampled_deviation(source, target, count, 0 if reference == 'analysis' else 1, scale)
+    reverse = sampled_deviation(target, source, count, 1 if reference == 'analysis' else 0, scale)
     deviation = {'method': 'area_weighted_uniform_triangle_surface_samples_to_nearest_triangle_surface', 'units': units,
                  'alignment': 'none', 'is_hausdorff_bound': False, 'source_to_reference': forward, 'reference_to_source': reverse,
                  'limitations': 'Sampled values can miss local defects. These are geometry disagreements, not anatomical errors.'}

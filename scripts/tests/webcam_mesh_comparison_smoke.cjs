@@ -56,11 +56,11 @@ if(!realId)report.variants.push({...report.variants.at(-1),id:'refined',kind:'im
    metadataRequests++;data=JSON.parse(JSON.stringify(report));
    if(!realId){
     data.version='webcam_mesh_comparison_v2';data.comparison_source_id=url.searchParams.get('variant') || 'raw';data.comparison_reference_id=url.searchParams.get('reference') || 'analysis';
-    let distance=(['filtered','refined'].includes(data.comparison_source_id)?7:6)-(data.comparison_reference_id==='raw'?6:5);if(calibrated && data.comparison_source_id!=='refined')distance*=10;
+    let distance=Math.abs((['filtered','refined'].includes(data.comparison_source_id)?7:6)-(['filtered','refined'].includes(data.comparison_reference_id)?7:data.comparison_reference_id==='raw'?6:5));if(calibrated && ![data.comparison_source_id,data.comparison_reference_id].includes('refined'))distance*=10;
     data.deviation={source_to_reference:{...stats,rms:distance,p95:distance,sampled_max:distance},reference_to_source:{...stats,seed:1,rms:distance,p95:distance,sampled_max:distance}};
    }
-   if(calibrated && data.comparison_source_id!=='refined'){data.units='mm';data.display_scale=10;}
-   if(data.comparison_source_id==='refined'){data.display_camera=camera;data.units='reconstruction_unit';data.display_scale=1;}
+   if(calibrated && ![data.comparison_source_id,data.comparison_reference_id].includes('refined')){data.units='mm';data.display_scale=10;}
+   if([data.comparison_source_id,data.comparison_reference_id].includes('refined')){data.display_camera=camera;data.units='reconstruction_unit';data.display_scale=1;}
    if(failure==='hash')data.variants[0].sha256='0'.repeat(64);
    if(failure==='limit')data.variants[0].byte_length=65*1024*1024;
    if(failure==='delay'){await new Promise(resolve=>setTimeout(resolve,300));}
@@ -127,6 +127,12 @@ if(!realId)report.variants.push({...report.variants.at(-1),id:'refined',kind:'im
   await comparison.getByRole('cell',{name:'1.000 reconstruction units',exact:true}).first().waitFor();
   assert.equal(await comparison.getByRole('cell',{name:/ mm$/}).count(),0);
   console.log('refined variant uses fresh unscaled camera/frame despite calibrated parent: PASS');
+  await comparison.getByLabel('Comparison variant',{exact:true}).selectOption('raw');await fullCanvas.waitFor({state:'visible'});
+  await comparison.getByLabel('Reference mesh',{exact:true}).selectOption('refined');
+  await page.getByRole('img',{name:'Refined analytic fixture inspection',exact:true}).waitFor({state:'visible'});
+  await comparison.getByRole('cell',{name:'1.000 reconstruction units',exact:true}).first().waitFor();
+  assert.equal(await comparison.getByRole('cell',{name:/ mm$/}).count(),0);
+  console.log('refined reference also invalidates parent calibration: PASS');
  }
  await page.getByRole('checkbox',{name:'Show mesh edges',exact:true}).uncheck();await page.getByRole('checkbox',{name:'Smooth lighting',exact:true}).check();
  await page.getByRole('button',{name:'Reset view / fit surface',exact:true}).click();

@@ -16,10 +16,23 @@ from .webcam_geometry import project, camera_pixel
 from .webcam_reconstruction import diagnostics, executable, read_model, detect
 
 POLICY = json.loads(Path(__file__).with_name('refinement_policy.json').read_text())
+ITERATION_POLICY = json.loads(Path(__file__).with_name('refinement_iterations_policy.json').read_text())
+SUITES = {'regularity': POLICY, 'iterations': ITERATION_POLICY}
+POLICIES = {policy['version']:policy for policy in SUITES.values()}
 
 
-def options(profile):
-    return [s for k, v in {**POLICY['fixed'], 'regularity-weight': POLICY['profiles'][profile]['regularity-weight']}.items()
+def settings(profile, suite='regularity'):
+    if suite not in SUITES or profile not in SUITES[suite]['profiles']:
+        raise ValueError('Unknown versioned refinement suite/profile.')
+    policy = SUITES[suite]; parameters = policy['profiles'][profile]
+    fixed = {**policy['fixed'], **({'gradient-step':parameters['gradient-step']} if 'gradient-step' in parameters else {})}
+    optimization = {**policy['optimization'], 'iterations':int(fixed['gradient-step'])}
+    return fixed, optimization
+
+
+def options(profile, suite='regularity'):
+    fixed, _ = settings(profile,suite)
+    return [s for k, v in {**fixed, 'regularity-weight': SUITES[suite]['profiles'][profile]['regularity-weight']}.items()
             for s in ('--'+k, str(v))]
 
 
@@ -131,7 +144,9 @@ def fresh_analysis(candidate, state, camera, predictions, variant_id):
             'accuracy_status':'not_independently_validated'}
 
 
-def run_refinement_experiments(folder, state, run_id, run, update, publish, cancelled):
+def run_refinement_experiments(folder, state, run_id, run, update, publish, cancelled, suite='regularity'):
+    if suite not in SUITES: raise ValueError('Unknown versioned refinement suite.')
+    policy = SUITES[suite]
     folder = Path(folder).resolve(); diag = diagnostics(include_refinement=True)
     if not diag['ready']: raise ValueError('Pinned macOS arm64 RefineMesh 2.4.0 CPU tools unavailable. Run setup_webcam_native.py.')
     update('freeze_refinement_inputs')
@@ -152,12 +167,13 @@ def run_refinement_experiments(folder, state, run_id, run, update, publish, canc
     raw = checked_mesh(trimesh.load(contained(folder, state['result']['full_mesh']), force='mesh', process=False))
     raw_sha = digest(contained(folder, state['result']['full_mesh']))
     camera = state['result']['cameras'][state['result']['frontal_camera_key']]
-    for profile, parameters in POLICY['profiles'].items():
+    for profile, parameters in policy['profiles'].items():
         if cancelled(): raise InterruptedError('Cancelled between refinement trials.')
         started = time.monotonic(); work = root/profile; work.mkdir()
-        row = {'id':'r'+run_id[:16]+'-'+profile, 'profile_id':profile, 'kind':'image_refined',
-            'label':parameters['label'], 'version':POLICY['version'], 'status':'processing', 'quality':parameters,
-            'fixed_options':POLICY['fixed'], 'optimization':POLICY['optimization'], 'tools':diag,
+        fixed, optimization = settings(profile,suite)
+        row = {'id':'r'+run_id[:16]+'-'+profile, 'profile_id':profile, 'kind':'image_refined', 'suite':suite,
+            'label':parameters['label'], 'version':policy['version'], 'status':'processing', 'quality':parameters,
+            'fixed_options':fixed, 'optimization':optimization, 'tools':diag,
             'tool_sha256':{k:digest(v['path']) for k,v in diag['tools'].items()},
             'coordinate_transform':'identity', 'units':'reconstruction_unit', 'source_full_mesh_sha256':raw_sha,
             'input_manifest':manifest_path.relative_to(folder).as_posix(), 'input_manifest_sha256':digest(manifest_path),
@@ -172,7 +188,7 @@ def run_refinement_experiments(folder, state, run_id, run, update, publish, canc
             clone_private(contained(folder,state['result']['full_mesh']),work/'input.ply')
             (work/'cli.cfg').write_text('# Versioned explicit CPU refinement options.\n')
             command = [executable('RefineMesh'),'-i',str(work/'scene.mvs'),'-m',str(work/'input.ply'),'-o',str(work/'full.mvs'),
-                       '--config-file',str(work/'cli.cfg'), *options(profile)]
+                       '--config-file',str(work/'cli.cfg'), *options(profile,suite)]
             row['refine_command'] = command
             run(profile+':image_refinement', command, work)
             candidate = checked_mesh(trimesh.load(work/'full.ply',force='mesh',process=False))
@@ -193,7 +209,8 @@ def run_refinement_experiments(folder, state, run_id, run, update, publish, canc
                 '--output_path',str(front/'sparse'),'--output_type','TXT'], work)
             new_camera = read_model(front/'sparse')['front.png']
             image = front/'images/front.png'
-            if Image.open(image).size != (new_camera['width'],new_camera['height']): raise ValueError('Held-out camera/image size mismatch.')
+            with Image.open(image) as heldout_image:
+                if heldout_image.size != (new_camera['width'],new_camera['height']): raise ValueError('Held-out camera/image size mismatch.')
             update(profile+':fresh_detection_and_projection')
             predictions, provenance = detect(image)
             if cancelled(): raise InterruptedError('Cancelled before projection.')

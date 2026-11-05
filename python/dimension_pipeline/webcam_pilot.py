@@ -23,7 +23,7 @@ from .webcam_reconstruction import REPO, diagnostics, reconstruct
 from .capture_quality import capture_quality, capture_context
 from .mesh_comparison import compare_session
 from .depth_experiments import run_depth_experiments
-from .refinement_experiments import run_refinement_experiments, POLICY as REFINEMENT_POLICY
+from .refinement_experiments import run_refinement_experiments, SUITES as REFINEMENT_SUITES
 from .depth_variants import experiment_artifacts, experiment_variants
 from .depth_quality import POLICY as DEPTH_POLICY
 
@@ -211,7 +211,9 @@ class Store:
         state = self.load(identity)
         if state['status'] not in ('surface_ready', 'calibrated') or not state.get('result') or len(state['captures']) != 61:
             raise ValueError('Depth experiments require a completed raw reconstruction and 61 approved captures.')
-        if set(payload)-(set() if refinement else {'resume_run_id'}): raise ValueError('Depth experiments use the versioned fixed profiles; arbitrary parameters are not accepted.')
+        if set(payload)-({'suite'} if refinement else {'resume_run_id'}): raise ValueError('Experiments use versioned fixed profiles; arbitrary parameters are not accepted.')
+        suite = payload.get('suite','regularity') if refinement else None
+        if refinement and suite not in ('regularity','iterations'): raise ValueError('Unknown versioned refinement suite.')
         experiments = state.setdefault(key, {'version': 'webcam_refinement_experiments_v1' if refinement else 'webcam_depth_experiments_v1', 'runs': []})
         resume = None
         if payload.get('resume_run_id'):
@@ -219,7 +221,8 @@ class Store:
             if resume is None: raise ValueError('Unknown completed/interrupted experiment run to resume.')
         if len(experiments['runs']) >= 20: raise ValueError('Experiment run limit reached for this session.')
         run = {'id': uuid.uuid4().hex, 'status': 'processing', 'stage': 'queued', 'started_at': datetime.now(timezone.utc).isoformat(),
-               'quality_version': (REFINEMENT_POLICY if refinement else DEPTH_POLICY)['version'], 'variants': [], 'resume_from_run': resume['id'] if resume else None}
+               'quality_version': (REFINEMENT_SUITES[suite] if refinement else DEPTH_POLICY)['version'], 'variants': [], 'resume_from_run': resume['id'] if resume else None}
+        if refinement: run['suite'] = suite
         experiments['runs'].append(run); self.save(state); self.job = identity; self.cancel_event.clear()
         threading.Thread(target=self.depth_work, args=(identity, run['id'], refinement), daemon=True).start()
         return state
@@ -240,7 +243,8 @@ class Store:
             resume = next((r for r in snapshot[key]['runs'] if r['id']==current.get('resume_from_run')), None)
             arguments = (self.folder(identity), snapshot, run_id,
                          lambda stage, command, cwd: self.native_command(update, stage, command, cwd), update, publish, self.cancel_event.is_set)
-            if refinement: run_refinement_experiments(*arguments)
+            if refinement and current.get('suite','regularity')!='regularity': run_refinement_experiments(*arguments,suite=current['suite'])
+            elif refinement: run_refinement_experiments(*arguments)
             elif resume: run_depth_experiments(*arguments, resume_record=resume)
             else: run_depth_experiments(*arguments)
             with self.lock:
@@ -419,7 +423,7 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(200, diagnostics()); return
             if self.path == '/diagnostics/refinement':
                 self.reply(200, diagnostics(include_refinement=True)); return
-            comparison = re.fullmatch(r'/sessions/([a-f0-9]{32})/mesh-comparison(?:\?variant=([a-z0-9_-]{1,40})(?:&reference=(analysis|raw))?)?', self.path)
+            comparison = re.fullmatch(r'/sessions/([a-f0-9]{32})/mesh-comparison(?:\?variant=([a-z0-9_-]{1,40})(?:&reference=([a-z0-9_-]{1,40}))?)?', self.path)
             if comparison:
                 # Snapshot under the lock; do not block cancellation or session reads
                 # while the read-only nearest-surface queries run.
