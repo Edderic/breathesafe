@@ -1,6 +1,6 @@
 <template>
   <section class="comparison" aria-label="Full and analysis mesh comparison">
-    <h3>{{ selectedVariants[1]?.label || 'Full surface' }} versus analysis mesh</h3>
+    <h3>{{ selectedVariants[1]?.label || 'Full surface' }} versus {{ selectedVariants[0]?.label || 'analysis mesh' }}</h3>
     <p>Read-only inspection · {{ unitsLabel }} · shared orientation, framing, zoom and lighting. Drag either view to rotate; Shift + scroll to zoom. Use the controls above for lighting and mesh edges.</p>
     <p>Landmarks and tape controls remain attached to the original analysis topology. Clicking these inspection views never places or transfers annotations.</p>
     <div class="tools"><button @click="load">{{ status === 'ready' ? 'Reload comparison' : 'Retry comparison' }}</button>
@@ -18,12 +18,14 @@
       </section>
     </div>
     <template v-if="report">
-      <label v-if="candidates.length>1">Comparison variant<select aria-label="Comparison variant" v-model="variantId" :disabled="loading" @change="load"><option v-for="v in candidates" :key="v.id" :value="v.id">{{ v.label }} · {{ v.kind }}</option></select></label>
+      <label v-if="candidates.length>1">Comparison variant<select aria-label="Comparison variant" v-model="variantId" :disabled="loading" @change="changeVariant"><option v-for="v in candidates" :key="v.id" :value="v.id">{{ v.label }} · {{ v.kind }}</option></select></label>
+      <label v-if="candidates.length>1">Reference mesh<select aria-label="Reference mesh" v-model="referenceId" :disabled="loading" @change="load"><option value="analysis">Bounded analysis mesh</option><option value="raw">Original full reconstruction</option></select></label>
+      <p v-if="selectedVariants[1]?.coverage_status === 'inadequate_coverage'" role="alert">Filtering flagged inadequate coverage. Inspect the missing regions before considering this setting.</p>
       <h4>Sampled surface disagreement</h4>
       <p>Area-weighted triangle-surface samples to nearest triangle surfaces, in shared original coordinates. No alignment fit. Values describe mesh disagreement; they do not measure anatomical accuracy or provide an exact Hausdorff bound.</p>
       <table><thead><tr><th>Direction</th><th>Samples / seed</th><th>RMS</th><th>95th percentile</th><th>Sampled maximum</th></tr></thead>
-        <tbody><tr v-for="direction in ['full_to_analysis','analysis_to_full']" :key="direction"><td>{{ direction==='full_to_analysis' ? selectedVariants[1].label+' → analysis' : 'Analysis → '+selectedVariants[1].label }}</td><td>{{ report.deviation[direction].sample_count }} / {{ report.deviation[direction].seed }}</td>
-          <td>{{ statistic(report.deviation[direction].rms) }}</td><td>{{ statistic(report.deviation[direction].p95) }}</td><td>{{ statistic(report.deviation[direction].sampled_max) }}</td></tr></tbody></table>
+        <tbody><tr v-for="(data,index) in deviationDirections" :key="index"><td>{{ index===0 ? selectedVariants[1].label+' → '+selectedVariants[0].label : selectedVariants[0].label+' → '+selectedVariants[1].label }}</td><td>{{ data.sample_count }} / {{ data.seed }}</td>
+          <td>{{ statistic(data.rms) }}</td><td>{{ statistic(data.p95) }}</td><td>{{ statistic(data.sampled_max) }}</td></tr></tbody></table>
       <p>Sampling can miss localized defects. Full-mesh bytes and all annotation attachments remain unchanged. Complete ear/chin coverage still requires inspection.</p>
     </template>
   </section>
@@ -37,12 +39,13 @@ import {createMeshRenderer} from './webcam_mesh_gl';
 const props=defineProps({apiBase:String,sessionId:String,sourceKey:String,analysisMesh:Object,camera:Object,scaleFactor:Number,
   units:String,yaw:Number,pitch:Number,zoom:Number,lightAzimuth:Number,smoothLighting:Boolean,surfaceEdges:Boolean});
 const emit=defineEmits(['rotate','zoom','frame']);
-const status=ref('idle'),statusText=ref(''),report=ref(null),variantId=ref('raw'),canvasKey=ref(0);
+const status=ref('idle'),statusText=ref(''),report=ref(null),variantId=ref('raw'),referenceId=ref('analysis'),canvasKey=ref(0);
 const canvases=[];
 const downloaded=ref(0),downloadTotal=ref(0),frame=ref(null);
 const loading=computed(()=>['metadata','downloading','preparing'].includes(status.value));
 const candidates=computed(()=>report.value?.variants.filter(v=>v.id!=='analysis') || []);
-const selectedVariants=computed(()=>report.value ? [report.value.variants.find(v=>v.id==='analysis'),report.value.variants.find(v=>v.id===variantId.value)].filter(Boolean) : []);
+const selectedVariants=computed(()=>report.value ? [report.value.variants.find(v=>v.id===(report.value.comparison_reference_id || 'analysis')),report.value.variants.find(v=>v.id===variantId.value)].filter(Boolean) : []);
+const deviationDirections=computed(()=>report.value ? [report.value.deviation.source_to_reference || report.value.deviation.full_to_analysis,report.value.deviation.reference_to_source || report.value.deviation.analysis_to_full] : []);
 const unitsLabel=computed(()=>props.units==='mm'?'tape-calibrated mm':'unscaled reconstruction units');
 let generation=0,controller,workers=[],renderers=[],resizeObserver,animation,drag=null,closed=false;
 
@@ -78,18 +81,21 @@ async function load(){
   const revision=++generation;release();report.value=null;frame.value=null;emit('frame',null);downloaded.value=0;downloadTotal.value=0;
   status.value='metadata';statusText.value='Sampling mesh disagreement and reading provenance…';controller=new AbortController();const signal=controller.signal;
   try {
-    const response=await fetch(`${props.apiBase}/sessions/${props.sessionId}/mesh-comparison?variant=${encodeURIComponent(variantId.value)}`,{signal});
+    const response=await fetch(`${props.apiBase}/sessions/${props.sessionId}/mesh-comparison?variant=${encodeURIComponent(variantId.value)}&reference=${referenceId.value}`,{signal});
     const metadata=await response.json();if(!response.ok)throw Error(metadata.error || 'Comparison metadata unavailable.');
     if(revision!==generation)return;
     if(metadata.units!==props.units || metadata.display_scale!==props.scaleFactor)throw Error('Session scale changed during comparison loading. Retry.');
     report.value=metadata;if(!candidates.value.some(v=>v.id===variantId.value))variantId.value=candidates.value[0]?.id;
     const variant=candidates.value.find(v=>v.id===variantId.value);if(!variant)throw Error('No inspection variant is available.');
     if(metadata.comparison_source_id!==variant.id)throw Error('Deviation report does not identify the selected comparison variant.');
+    if(metadata.comparison_reference_id && metadata.comparison_reference_id!==referenceId.value)throw Error('Deviation report does not identify the selected reference mesh.');
     status.value='downloading';statusText.value='Downloading and verifying the original full mesh…';
+    const reference=selectedVariants.value[0];
     const buffer=await fetchMesh(variant,signal);if(revision!==generation)return;
+    const referenceBuffer=reference.id==='analysis' ? null : await fetchMesh(reference,signal);if(revision!==generation)return;
     status.value='preparing';statusText.value='Preparing full and analysis GPU buffers in local workers…';
     const [analysis,full]=await Promise.all([
-      prepare({mesh:toRaw(props.analysisMesh),camera:toRaw(props.camera),scale:props.scaleFactor},revision),
+      prepare(referenceBuffer ? {buffer:referenceBuffer,camera:toRaw(props.camera),scale:props.scaleFactor} : {mesh:toRaw(props.analysisMesh),camera:toRaw(props.camera),scale:props.scaleFactor},revision),
       prepare({buffer,camera:toRaw(props.camera),scale:props.scaleFactor},revision)]);
     if(revision!==generation)return;
     for(const [mesh,variant] of [[analysis,selectedVariants.value[0]],[full,selectedVariants.value[1]]]) {
@@ -104,6 +110,7 @@ async function load(){
   }catch(error){if(revision===generation && !closed && error.name!=='AbortError')fail(error);}
 }
 function draw(){if(status.value!=='ready' || !frame.value)return;try{for(const renderer of renderers)renderer.draw({...props,frame:frame.value});}catch(error){fail(error);}}
+function changeVariant(){referenceId.value=variantId.value==='raw'?'analysis':'raw';load();}
 function scheduleDraw(){cancelAnimationFrame(animation);animation=requestAnimationFrame(draw);}
 function pointerDown(event){if(event.ctrlKey || event.metaKey)return;drag={x:event.clientX,y:event.clientY,yaw:props.yaw,pitch:props.pitch};event.currentTarget.setPointerCapture(event.pointerId);}
 function pointerMove(event){if(drag)emit('rotate',{yaw:Math.max(-180,Math.min(180,drag.yaw+(event.clientX-drag.x)*.4)),pitch:Math.max(-90,Math.min(90,drag.pitch+(event.clientY-drag.y)*.4))});}

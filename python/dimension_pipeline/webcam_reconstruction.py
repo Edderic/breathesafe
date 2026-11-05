@@ -11,6 +11,7 @@ import time
 from pathlib import Path
 
 from .webcam_geometry import camera_pixel, project
+from .depth_quality import POLICY as DEPTH_QUALITY, dense_options, mesh_options
 
 REPO = Path(__file__).resolve().parents[2]
 TOOLS = {'colmap': '4.2.1', 'InterfaceCOLMAP': '2.4.0', 'DensifyPointCloud': '2.4.0', 'ReconstructMesh': '2.4.0'}
@@ -180,11 +181,9 @@ def reconstruct(folder, state, run, update, cancelled):
     run('openmvs_import', [executable('InterfaceCOLMAP'), '-i', str(dense), '-o', str(work/'scene.mvs'), '--image-folder', str(dense/'images')], work)
     # Native arm64 build has CUDA disabled. No patch_match_stereo GPU dependency.
     run('dense_reconstruction', [executable('DensifyPointCloud'), '-i', str(work/'scene.mvs'), '-o', str(work/'dense.mvs'),
-                                 '--resolution-level', '0', '--max-resolution', '4096', '--min-resolution', '64',
-                                 '--mask-path', str(dense_masks), '--ignore-mask-label', '0', '--tower-mode', '0',
-                                 '--normalize-coordinates', '0', '--estimate-roi', '0', '--crop-to-roi', '0'], work)
+                                 '--mask-path', str(dense_masks), *dense_options()], work)
     run('meshing', [executable('ReconstructMesh'), '-i', str(work/'dense.mvs'), '-o', str(work/'full.mvs'),
-                    '--close-holes', '0', '--smooth', '0', '--remove-spurious', '0', '--remove-spikes', '0', '--decimate', '1', '--crop-to-roi', '0'], work)
+                    *mesh_options()], work)
     full = trimesh.load(work/'full.ply', force='mesh', process=False)
     if not len(full.faces) or not np.isfinite(full.vertices).all():
         raise ValueError('Meshing produced no finite surface.')
@@ -273,7 +272,8 @@ def reconstruct(folder, state, run, update, cancelled):
     result = {'surface': surface, 'cameras': cameras, 'frontal_camera_key': camera_key,
               'frontal_undistorted': image_path.relative_to(folder).as_posix(), 'full_mesh': (work/'full.ply').relative_to(folder).as_posix(),
               'detector': provenance, 'raw_predictions': raw, 'projected_points': projected,
-              'diagnostics': {'tools': diag, 'sparse_model_selection': sparse_selection, 'processing_seconds': time.monotonic()-started,
+              'diagnostics': {'tools': diag, 'depth_quality': {'version': DEPTH_QUALITY['version'], 'fixed': DEPTH_QUALITY['fixed'], 'profile': DEPTH_QUALITY['baseline']},
+                              'sparse_model_selection': sparse_selection, 'processing_seconds': time.monotonic()-started,
                               'registered_images': count, 'submitted_turn_images': len(names), 'registered_fraction': count/len(names),
                               'sparse_point_error_mean_px': statistics_mean(errors),
                               'frontal_observations': camera['observations'], 'mesh': mesh_report,

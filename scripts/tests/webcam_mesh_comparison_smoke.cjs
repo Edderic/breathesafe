@@ -53,8 +53,12 @@ if(!realId)report.variants.push({...report.variants[0],id:'filtered',kind:'depth
   else if(pathname==='/sessions')data=[fixture];
   else if(pathname.endsWith('/mesh-comparison')){
    metadataRequests++;data=JSON.parse(JSON.stringify(report));
-   if(url.searchParams.get('variant')==='filtered'){data.comparison_source_id='filtered';data.deviation={full_to_analysis:{...stats,rms:2,p95:2,sampled_max:2},analysis_to_full:{...stats,seed:1,rms:2,p95:2,sampled_max:2}};}
-   if(calibrated){data.units='mm';data.display_scale=10;for(const direction of ['full_to_analysis','analysis_to_full'])for(const key of ['rms','p95','sampled_max'])data.deviation[direction][key]*=10;}
+   if(!realId){
+    data.version='webcam_mesh_comparison_v2';data.comparison_source_id=url.searchParams.get('variant') || 'raw';data.comparison_reference_id=url.searchParams.get('reference') || 'analysis';
+    let distance=(data.comparison_source_id==='filtered'?7:6)-(data.comparison_reference_id==='raw'?6:5);if(calibrated)distance*=10;
+    data.deviation={source_to_reference:{...stats,rms:distance,p95:distance,sampled_max:distance},reference_to_source:{...stats,seed:1,rms:distance,p95:distance,sampled_max:distance}};
+   }
+   if(calibrated){data.units='mm';data.display_scale=10;}
    if(failure==='hash')data.variants[0].sha256='0'.repeat(64);
    if(failure==='limit')data.variants[0].byte_length=65*1024*1024;
    if(failure==='delay'){await new Promise(resolve=>setTimeout(resolve,300));}
@@ -92,6 +96,9 @@ if(!realId)report.variants.push({...report.variants[0],id:'filtered',kind:'depth
  if(!realId){
   await comparison.getByLabel('Comparison variant',{exact:true}).selectOption('filtered');
   await page.getByRole('img',{name:'Filtered analytic fixture inspection',exact:true}).waitFor({state:'visible'});
+  assert.equal(await comparison.getByLabel('Reference mesh',{exact:true}).inputValue(),'raw');
+  await comparison.getByRole('cell',{name:'1.000 reconstruction units',exact:true}).first().waitFor();
+  await comparison.getByLabel('Reference mesh',{exact:true}).selectOption('analysis');
   await comparison.getByRole('cell',{name:'2.000 reconstruction units',exact:true}).first().waitFor();
   await comparison.getByLabel('Comparison variant',{exact:true}).selectOption('raw');await fullCanvas.waitFor({state:'visible'});
   for(const mode of ['hash','truncated','limit','worker','allocation','unsupported']){

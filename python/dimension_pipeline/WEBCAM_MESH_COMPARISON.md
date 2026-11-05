@@ -35,7 +35,7 @@ saved session metadata and remain contained in that session. Sampling runs outsi
 the store lock, keeping cancellation and session reads available. No session,
 capture, attachment or mesh files are written.
 
-The versioned `webcam_mesh_comparison_v1` report records units, scale, camera/frame
+The versioned report records units, scale, camera/frame
 provenance, identities, counts and two directions of surface disagreement:
 
 - Full → analysis: 5,000 uniform area-weighted triangle-surface samples, seed 0.
@@ -50,9 +50,16 @@ not measure reconstruction or anatomical error. **Download comparison report**
 retains the sampling details. Session exports retain the source geometry and scale
 needed to regenerate it; display buffers are disposable.
 
+BRE-17 extends the report to `webcam_mesh_comparison_v2`, adding explicit source/
+reference identities and both sampled directions. The default raw/analysis report
+retains its v1 directional aliases. Raw-reference comparisons use raw seed 0 and
+variant seed 1, shared with the experiment metrics. The reference can be the
+original full mesh or bounded analysis mesh. Source annotations stay unchanged.
+
 The presentation takes named variants with explicit kind, hash, identity, counts,
 units and provenance. A selected variant must have a report identifying that same
-source. Production currently registers the raw full mesh; unknown variants fail.
+source. Production registers the raw full mesh and completed, hash-checked depth
+experiment variants; unknown/incomplete variants fail.
 The analytic browser fixture also tests a separate `depth_filtered` provider and
 its own statistics. Future raw/filtered/refined providers can reuse this display
 without changing annotation topology. No filtering/refinement is performed here.

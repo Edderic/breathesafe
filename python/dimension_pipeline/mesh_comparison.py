@@ -45,19 +45,7 @@ def sampled_deviation(source, target, count, seed, scale):
             'p95': float(np.quantile(values, .95)), 'sampled_max': float(values.max())}
 
 
-def compare_session(folder, state, count=5000, variant='raw'):
-    # Future filtered/refined providers must register artifacts and provenance here;
-    # a requested variant is never interpreted as a filesystem path.
-    if variant != 'raw':
-        raise ValueError('Unknown inspection variant.')
-    if type(count) is not int or not 1 <= count <= 10000:
-        raise ValueError('Invalid deviation sample count.')
-    result = state.get('result')
-    if not result:
-        raise ValueError('Reconstruct a surface before comparing meshes.')
-    folder = Path(folder).resolve()
-    path = (folder / result['full_mesh']).resolve()
-    path.relative_to(folder)
+def read_inspection_mesh(path):
     if path.stat().st_size > MAX_FILE_BYTES:
         raise ValueError('Full mesh exceeds the 64 MiB inspection limit. Original file is retained for download.')
     full_bytes = path.read_bytes()
@@ -78,42 +66,74 @@ def compare_session(folder, state, count=5000, variant='raw'):
     full = checked_mesh(trimesh.load(io.BytesIO(full_bytes), file_type='ply', force='mesh', process=False))
     if len(full.vertices) != counts['vertex'] or len(full.faces) != counts['face']:
         raise ValueError('Full PLY is not an unchanged triangular mesh; inspection will not triangulate or repair it.')
+    return full, full_hash, len(full_bytes)
+
+
+def compare_session(folder, state, count=5000, variant='raw', reference='analysis'):
+    from .depth_variants import experiment_variants
+    if type(count) is not int or not 1 <= count <= 10000:
+        raise ValueError('Invalid deviation sample count.')
+    if reference not in ('analysis', 'raw'):
+        raise ValueError('Unknown comparison reference.')
+    result = state.get('result')
+    if not result:
+        raise ValueError('Reconstruct a surface before comparing meshes.')
+    folder = Path(folder).resolve()
+    def artifact(name):
+        path = (folder/name).resolve(); path.relative_to(folder); return path
+    original, original_hash, original_bytes = read_inspection_mesh(artifact(result['full_mesh']))
     raw = result['surface']['mesh']
     if not np.issubdtype(np.asarray(raw['triangles']).dtype, np.integer):
         raise ValueError('Analysis triangle indices must be integers.')
     analysis = checked_mesh(trimesh.Trimesh(vertices=raw['vertices'], faces=raw['triangles'], process=False))
+    analysis_id = mesh_identity(raw)
+    settings = result.get('diagnostics', {}).get('mesh', {})
+    catalog = [
+        {'id': 'raw', 'kind': 'raw', 'label': 'Full reconstruction', 'mesh_id': 'sha256:'+original_hash,
+         'sha256': original_hash, 'byte_length': original_bytes, 'vertices': len(original.vertices), 'triangles': len(original.faces),
+         'mesh_url': f"/sessions/{state['id']}/mesh", 'storage_units': result['surface']['units'], 'read_only': True,
+         'provenance': {'source': result['full_mesh'], 'operation': 'original_reconstruction', 'smoothing': settings.get('smoothing'), 'hole_filling': settings.get('hole_filling')}},
+        {'id': 'analysis', 'kind': 'analysis', 'label': 'Bounded analysis mesh', 'mesh_id': analysis_id,
+         'vertices': len(analysis.vertices), 'triangles': len(analysis.faces), 'storage_units': result['surface']['units'], 'read_only': True,
+         'provenance': {'source': 'result.surface.mesh', 'parent_mesh_id': 'sha256:'+original_hash, 'method': settings.get('method', 'unknown'),
+                        'target_faces': settings.get('target_faces'), 'smoothing': settings.get('smoothing'), 'hole_filling': settings.get('hole_filling')}}]
+    rows = experiment_variants(state)
+    for row in rows:
+        path = artifact(row['full_mesh'])
+        catalog.append({'id': row['id'], 'kind': row['kind'], 'label': row['label'], 'mesh_id': 'sha256:'+row['sha256'],
+                        'sha256': row['sha256'], 'byte_length': path.stat().st_size, 'vertices': row['metrics']['vertices'], 'triangles': row['metrics']['faces'],
+                        'mesh_url': f"/sessions/{state['id']}/mesh-variant/{row['id']}", 'storage_units': row['units'], 'read_only': True,
+                        'provenance': {'source': row['full_mesh'], 'parent_mesh_id': 'sha256:'+row['source_full_mesh_sha256'],
+                                       'quality': row['quality'], 'quality_version': row['version'], 'input_manifest_sha256': row['input_manifest_sha256'],
+                                       'coordinate_transform': row['coordinate_transform'], 'hole_filling': False, 'smoothing': False,
+                                       'attachment_status': row['attachment_status']},
+                        'experiment_metrics': row['metrics'], 'recommendation': row['recommendation'], 'coverage_status': row['coverage_status']})
+    selected = next((v for v in catalog if v['id'] == variant and v['id'] != 'analysis'), None)
+    if selected is None: raise ValueError('Unknown inspection variant.')
+    source = original
+    if variant != 'raw':
+        row = next(r for r in rows if r['id'] == variant)
+        source, actual_hash, _ = read_inspection_mesh(artifact(row['full_mesh']))
+        if actual_hash != selected['sha256']:
+            raise ValueError('Experiment artifact hash changed.')
+    target = analysis if reference == 'analysis' else original
     calibration = state.get('calibrated')
     scale = calibration['report']['mm_per_reconstruction_unit'] if calibration else 1.
-    if not np.isfinite(scale) or scale <= 0:
-        raise ValueError('Invalid calibration scale.')
+    if not np.isfinite(scale) or scale <= 0: raise ValueError('Invalid calibration scale.')
     units = 'mm' if calibration else result['surface']['units']
-    if units not in ('mm', 'reconstruction_unit'):
-        raise ValueError('Unknown mesh units.')
-    settings = result.get('diagnostics', {}).get('mesh', {})
-    analysis_id = mesh_identity(raw)
-    return {
-        'version': 'webcam_mesh_comparison_v1', 'session_id': state['id'], 'comparison_source_id': variant,
-        'units': units, 'display_scale': scale, 'coordinate_alignment': 'shared_original_coordinates_no_registration_or_fit',
-        'coordinate_frame': result['surface'].get('coordinate_frame'),
-        'display_camera_key': result.get('frontal_camera_key'),
-        'display_camera': (calibration or result).get('cameras', {}).get(result.get('frontal_camera_key')),
-        'annotation_mesh_id': analysis_id, 'accuracy_status': 'not_independently_validated',
-        'variants': [
-            {'id': 'raw', 'kind': 'raw', 'label': 'Full reconstruction', 'mesh_id': 'sha256:' + full_hash,
-             'sha256': full_hash, 'byte_length': len(full_bytes), 'vertices': len(full.vertices), 'triangles': len(full.faces),
-             'mesh_url': f"/sessions/{state['id']}/mesh", 'storage_units': result['surface']['units'],
-             'read_only': True, 'provenance': {'source': result['full_mesh'], 'operation': 'original_reconstruction',
-                                             'smoothing': settings.get('smoothing'), 'hole_filling': settings.get('hole_filling')}},
-            {'id': 'analysis', 'kind': 'analysis', 'label': 'Bounded analysis mesh', 'mesh_id': analysis_id,
-             'vertices': len(analysis.vertices), 'triangles': len(analysis.faces),
-             'storage_units': result['surface']['units'], 'read_only': True,
-             'provenance': {'source': 'result.surface.mesh', 'parent_mesh_id': 'sha256:' + full_hash,
-                            'method': settings.get('method', 'unknown'), 'target_faces': settings.get('target_faces'),
-                            'smoothing': settings.get('smoothing'), 'hole_filling': settings.get('hole_filling')}}],
-        'deviation': {
-            'method': 'area_weighted_uniform_triangle_surface_samples_to_nearest_triangle_surface',
-            'units': units, 'alignment': 'none', 'is_hausdorff_bound': False,
-            'full_to_analysis': sampled_deviation(full, analysis, count, 0, scale),
-            'analysis_to_full': sampled_deviation(analysis, full, count, 1, scale),
-            'limitations': 'Sampled values can miss localized defects. Distances are simplification disagreement, not reconstruction or anatomical error.'},
-    }
+    if units not in ('mm', 'reconstruction_unit'): raise ValueError('Unknown mesh units.')
+    # Reuse identical raw reference samples across variants and the experiment
+    # metrics. Keep the original full/analysis seed convention for compatibility.
+    forward = sampled_deviation(source, target, count, 1 if reference == 'raw' else 0, scale)
+    reverse = sampled_deviation(target, source, count, 0 if reference == 'raw' else 1, scale)
+    deviation = {'method': 'area_weighted_uniform_triangle_surface_samples_to_nearest_triangle_surface', 'units': units,
+                 'alignment': 'none', 'is_hausdorff_bound': False, 'source_to_reference': forward, 'reference_to_source': reverse,
+                 'limitations': 'Sampled values can miss local defects. These are geometry disagreements, not anatomical errors.'}
+    if reference == 'analysis':
+        deviation.update(full_to_analysis=forward, analysis_to_full=reverse)
+    return {'version': 'webcam_mesh_comparison_v2', 'session_id': state['id'], 'comparison_source_id': variant,
+            'comparison_reference_id': reference, 'units': units, 'display_scale': scale,
+            'coordinate_alignment': 'shared_original_coordinates_no_registration_or_fit',
+            'coordinate_frame': result['surface'].get('coordinate_frame'), 'display_camera_key': result.get('frontal_camera_key'),
+            'display_camera': (calibration or result).get('cameras', {}).get(result.get('frontal_camera_key')),
+            'annotation_mesh_id': analysis_id, 'accuracy_status': 'not_independently_validated', 'variants': catalog, 'deviation': deviation}

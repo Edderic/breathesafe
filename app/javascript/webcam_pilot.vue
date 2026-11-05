@@ -20,6 +20,21 @@
     <p v-else>Start the loopback processor and research preview using <code>python/dimension_pipeline/WEBCAM_PILOT.md</code>.</p>
     <template v-if="session">
       <p>Session {{ session.id }} · {{ session.status }} <span v-if="session.stage">· {{ session.stage }}</span> · {{ session.captures.length }}/61 approved images saved locally</p>
+      <section v-if="session.result" class="camera-settings">
+        <h3>Depth filtering experiments</h3>
+        <p>Compare 2/3/4-view fusion agreement, speckle removal and two added geometric-consistency passes on frozen depth maps. Raw geometry, captures and annotations stay intact. Variants are read-only and require coverage/detail review.</p>
+        <button @click="guard(()=>action('depth-experiments'))" :disabled="processing || busy || session.captures.length!==61">Run depth filtering experiments</button>
+        <button v-if="depthRun && ['failed','cancelled','interrupted','completed_with_failures'].includes(depthRun.status) && depthRun.variants.some(v=>v.artifacts?.some(a=>a.path.endsWith('/dense.ply')))" @click="guard(()=>action('depth-experiments',{resume_run_id:depthRun.id}))" :disabled="processing || busy">Resume saved point-cloud checkpoints</button>
+        <p v-if="depthRun">Experiment {{ depthRun.status }} · {{ depthRun.stage }} <span v-if="depthRun.error">· {{ depthRun.error }}</span></p>
+        <table v-if="depthRun?.variants.length"><thead><tr><th>Variant</th><th>Status / coverage</th><th>Points / faces</th><th>Plane residual / raw mesh height</th><th>Raw proximity</th><th>Seconds (cached depths)</th><th>Recommendation</th></tr></thead><tbody>
+          <tr v-for="row in depthRun.variants" :key="row.id"><td>{{ row.label }}</td><td>{{ row.status }} · {{ row.coverage_status || row.error || 'pending' }}</td><td>{{ row.retained_points ?? '—' }} / {{ row.metrics?.faces ?? '—' }}</td>
+            <td>{{ row.metrics?.roughness.plane_rms_fraction_of_raw_head_height.rms === undefined ? '—' : (row.metrics.roughness.plane_rms_fraction_of_raw_head_height.rms*100).toFixed(4)+'%' }}</td>
+            <td>{{ row.metrics?.coverage.global_retention_within_tolerance === undefined ? '—' : (row.metrics.coverage.global_retention_within_tolerance*100).toFixed(2)+'%' }}</td>
+            <td>{{ row.processing_seconds?.toFixed(1) ?? '—' }}</td><td>{{ row.recommendation?.decision || 'pending' }}<details v-if="row.recommendation?.reason"><summary>Review notes</summary>{{ row.recommendation.reason }}</details></td></tr>
+        </tbody></table>
+        <p v-if="depthRun?.variants.length">Local-plane residual screens roughness; lower values can also remove real detail. Raw proximity measures agreement with the raw surface, not independently validated coverage or accuracy. Timings include saved fusion checkpoints and meshing/metrics; source depth estimation is reused.</p>
+        <p v-if="depthRows.some(v=>v.status==='completed')">Open mesh comparison below to select a filtered variant against the original full mesh. Existing tape/landmark triangle indices do not apply to a variant.</p>
+      </section>
       <p v-if="session.error" role="alert" class="error">{{ session.error }}</p>
       <details v-if="savedQuality.length"><summary>Capture quality · {{ savedQuality.filter(c=>c.capture_quality.flags.length).length }} / {{ savedQuality.length }} frames flagged for review</summary>
         <p>Advisory screening only. Sharpness depends on visible texture and lighting; a high score does not validate reconstruction accuracy. Frames are retained.</p>
@@ -126,7 +141,7 @@
           </section>
         </div>
         <button @click="comparisonOpen=!comparisonOpen">{{ comparisonOpen ? 'Close mesh comparison' : 'Compare full and analysis meshes' }}</button>
-        <WebcamMeshComparison v-if="comparisonOpen" :api-base="API" :session-id="session.id" :source-key="session.result.full_mesh"
+        <WebcamMeshComparison v-if="comparisonOpen" :api-base="API" :session-id="session.id" :source-key="session.result.full_mesh+'|'+depthRows.filter(v=>v.status==='completed').map(v=>v.id).join('|')"
           :analysis-mesh="session.result.surface.mesh" :camera="frontCamera" :scale-factor="session.calibrated?.report.mm_per_reconstruction_unit || 1" :units="surface.units"
           :yaw="yaw" :pitch="pitch" :zoom="zoom" :light-azimuth="lightAzimuth" :smooth-lighting="smoothLighting" :surface-edges="surfaceEdges"
           @rotate="yaw=$event.yaw;pitch=$event.pitch" @zoom="zoom=$event" @frame="comparisonFrame=$event" />
@@ -135,13 +150,13 @@
         <div class="toolbar"><label>Route<select v-model="routeKind"><option value="scale">Scale via subnasale</option><option value="check">Independent check via menton</option></select></label>
           <label>Next point<select v-model="routeLabel"><option value="left_tragion">Left tragion (start)</option><option value="control">Intermediate control</option><option value="subnasale">Subnasale</option><option value="menton">Menton</option><option value="right_tragion">Right tragion (end)</option></select></label>
           <button @click="routes[routeKind].pop(); coverageReviewed=false">Undo last route point</button><button @click="routes[routeKind]=[]; coverageReviewed=false">Clear route</button>
-          <button @click="guard(saveDraft)">Save route draft locally</button></div>
+          <button @click="guard(saveDraft)" :disabled="processing">Save route draft locally</button></div>
         <p>{{ routes[routeKind].map((p,i) => `${i+1}: ${p.label}`).join(' → ') || 'No controls placed' }}</p>
         <p v-if="routePreview.length">Mesh-edge route: {{ routePreview.some(p => p.status !== 'ok') ? 'Disconnected surface — cannot calibrate' : routePreview.reduce((sum,p) => sum+p.length, 0).toFixed(3)+' '+surface.units }}. Dashed route overlays include hidden segments; rotate to inspect the full contact route.</p>
         <div class="toolbar"><label v-for="i in 3" :key="'s'+i">Scale reading {{ i }} (mm)<input v-model.number="scaleReadings[i-1]" type="number" min="1" step="0.1" /></label></div>
         <div class="toolbar"><label v-for="i in 3" :key="'c'+i">Independent check {{ i }} (mm)<input v-model.number="checkReadings[i-1]" type="number" min="1" step="0.1" /></label></div>
         <label><input type="checkbox" v-model="coverageReviewed" /> I inspected both complete tape routes, including ears, nose and chin, and found no missing coverage or bridged holes.</label>
-        <button @click="guard(calibrate)" :disabled="!coverageReviewed || busy">Calibrate and report independent check</button>
+        <button @click="guard(calibrate)" :disabled="!coverageReviewed || busy || processing">Calibrate and report independent check</button>
         <pre v-if="session.calibrated">{{ JSON.stringify(session.calibrated.report, null, 2) }}</pre>
         <details><summary>Reconstruction and camera diagnostics</summary><pre>{{ JSON.stringify(session.result.diagnostics, null, 2) }}</pre></details>
       </section>
@@ -198,7 +213,9 @@ const hasUnapprovedFrames = computed(() => Object.values(frames.value).some(f =>
 const captureSettingsFrozen=computed(()=>!!session.value?.captures.length || Object.keys(frames.value).length>0);
 const savedQuality=computed(()=>session.value?.captures.filter(c=>c.capture_quality).sort((a,b)=>a.slot.localeCompare(b.slot)) || []);
 const bulkCandidates = computed(() => Object.keys(frames.value).map(Number).filter(index => !approved(index)).sort((a,b)=>a-b));
-const processing = computed(() => session.value?.status === 'processing');
+const depthRun=computed(()=>session.value?.depth_experiments?.runs.at(-1));
+const depthRows=computed(()=>session.value?.depth_experiments?.runs.flatMap(run=>run.variants) || []);
+const processing = computed(() => session.value?.status === 'processing' || depthRun.value?.status==='processing');
 async function guard(fn) { error.value=''; try { await fn(); } catch (e) { error.value=e.message; } }
 async function api(path, payload) {
   const response = await fetch(API+path, payload === undefined ? {} : { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
