@@ -21,6 +21,7 @@
       <label v-if="candidates.length>1">Comparison variant<select aria-label="Comparison variant" v-model="variantId" :disabled="loading" @change="changeVariant"><option v-for="v in candidates" :key="v.id" :value="v.id">{{ v.label }} · {{ v.kind }}</option></select></label>
       <label v-if="candidates.length>1">Reference mesh<select aria-label="Reference mesh" v-model="referenceId" :disabled="loading" @change="load"><option value="analysis">Bounded analysis mesh</option><option value="raw">Original full reconstruction</option></select></label>
       <p v-if="selectedVariants[1]?.coverage_status === 'inadequate_coverage'" role="alert">Filtering flagged inadequate coverage. Inspect the missing regions before considering this setting.</p>
+      <p v-if="selectedVariants[1]?.kind==='image_refined'">Refined geometry is uncalibrated. Original tape routes, scale and acceptance decisions do not transfer. Fresh per-variant frontal intersections are stored in the session export; they require anatomical review.</p>
       <h4>Sampled surface disagreement</h4>
       <p>Area-weighted triangle-surface samples to nearest triangle surfaces, in shared original coordinates. No alignment fit. Values describe mesh disagreement; they do not measure anatomical accuracy or provide an exact Hausdorff bound.</p>
       <table><thead><tr><th>Direction</th><th>Samples / seed</th><th>RMS</th><th>95th percentile</th><th>Sampled maximum</th></tr></thead>
@@ -46,7 +47,7 @@ const loading=computed(()=>['metadata','downloading','preparing'].includes(statu
 const candidates=computed(()=>report.value?.variants.filter(v=>v.id!=='analysis') || []);
 const selectedVariants=computed(()=>report.value ? [report.value.variants.find(v=>v.id===(report.value.comparison_reference_id || 'analysis')),report.value.variants.find(v=>v.id===variantId.value)].filter(Boolean) : []);
 const deviationDirections=computed(()=>report.value ? [report.value.deviation.source_to_reference || report.value.deviation.full_to_analysis,report.value.deviation.reference_to_source || report.value.deviation.analysis_to_full] : []);
-const unitsLabel=computed(()=>props.units==='mm'?'tape-calibrated mm':'unscaled reconstruction units');
+const unitsLabel=computed(()=>(report.value?.units || props.units)==='mm'?'tape-calibrated mm':'unscaled reconstruction units');
 let generation=0,controller,workers=[],renderers=[],resizeObserver,animation,drag=null,closed=false;
 
 function release(){controller?.abort();workers.forEach(w=>{w.cancelWork?.();w.terminate();});workers=[];renderers.forEach(r=>r.dispose());renderers=[];resizeObserver?.disconnect();cancelAnimationFrame(animation);}
@@ -84,7 +85,7 @@ async function load(){
     const response=await fetch(`${props.apiBase}/sessions/${props.sessionId}/mesh-comparison?variant=${encodeURIComponent(variantId.value)}&reference=${referenceId.value}`,{signal});
     const metadata=await response.json();if(!response.ok)throw Error(metadata.error || 'Comparison metadata unavailable.');
     if(revision!==generation)return;
-    if(metadata.units!==props.units || metadata.display_scale!==props.scaleFactor)throw Error('Session scale changed during comparison loading. Retry.');
+    if(metadata.variants.find(v=>v.id===variantId.value)?.kind!=='image_refined' && (metadata.units!==props.units || metadata.display_scale!==props.scaleFactor))throw Error('Session scale changed during comparison loading. Retry.');
     report.value=metadata;if(!candidates.value.some(v=>v.id===variantId.value))variantId.value=candidates.value[0]?.id;
     const variant=candidates.value.find(v=>v.id===variantId.value);if(!variant)throw Error('No inspection variant is available.');
     if(metadata.comparison_source_id!==variant.id)throw Error('Deviation report does not identify the selected comparison variant.');
@@ -95,8 +96,8 @@ async function load(){
     const referenceBuffer=reference.id==='analysis' ? null : await fetchMesh(reference,signal);if(revision!==generation)return;
     status.value='preparing';statusText.value='Preparing full and analysis GPU buffers in local workers…';
     const [analysis,full]=await Promise.all([
-      prepare(referenceBuffer ? {buffer:referenceBuffer,camera:toRaw(props.camera),scale:props.scaleFactor} : {mesh:toRaw(props.analysisMesh),camera:toRaw(props.camera),scale:props.scaleFactor},revision),
-      prepare({buffer,camera:toRaw(props.camera),scale:props.scaleFactor},revision)]);
+      prepare(referenceBuffer ? {buffer:referenceBuffer,camera:toRaw(metadata.display_camera || props.camera),scale:metadata.display_scale} : {mesh:toRaw(props.analysisMesh),camera:toRaw(metadata.display_camera || props.camera),scale:metadata.display_scale},revision),
+      prepare({buffer,camera:toRaw(metadata.display_camera || props.camera),scale:metadata.display_scale},revision)]);
     if(revision!==generation)return;
     for(const [mesh,variant] of [[analysis,selectedVariants.value[0]],[full,selectedVariants.value[1]]]) {
       if(mesh.positions.length/3!==variant.vertices || mesh.indices.length/3!==variant.triangles)throw Error('Mesh counts do not match the comparison provenance.');
@@ -105,7 +106,7 @@ async function load(){
     if(revision!==generation || closed)return;
     for(const canvas of canvases)renderers.push(createMeshRenderer(canvas,message=>{if(revision===generation)fail(Error(message));}));
     renderers[0].upload(analysis);renderers[1].upload(full);
-    status.value='ready';emit('frame',frame.value);await nextTick();draw();
+    status.value='ready';emit('frame',metadata.units===props.units ? frame.value : null);await nextTick();draw();
     resizeObserver=new ResizeObserver(scheduleDraw);canvases.forEach(canvas=>resizeObserver.observe(canvas));
   }catch(error){if(revision===generation && !closed && error.name!=='AbortError')fail(error);}
 }
@@ -115,7 +116,7 @@ function scheduleDraw(){cancelAnimationFrame(animation);animation=requestAnimati
 function pointerDown(event){if(event.ctrlKey || event.metaKey)return;drag={x:event.clientX,y:event.clientY,yaw:props.yaw,pitch:props.pitch};event.currentTarget.setPointerCapture(event.pointerId);}
 function pointerMove(event){if(drag)emit('rotate',{yaw:Math.max(-180,Math.min(180,drag.yaw+(event.clientX-drag.x)*.4)),pitch:Math.max(-90,Math.min(90,drag.pitch+(event.clientY-drag.y)*.4))});}
 function wheel(event){if(!event.shiftKey)return;event.preventDefault();emit('zoom',Math.max(.5,Math.min(3,props.zoom*(event.deltaY>0?.95:1.05))));}
-function statistic(value){return `${value.toPrecision(4)} ${props.units==='mm'?'mm':'reconstruction units'}`;}
+function statistic(value){return `${value.toPrecision(4)} ${(report.value?.units || props.units)==='mm'?'mm':'reconstruction units'}`;}
 function exportReport(){const url=URL.createObjectURL(new Blob([JSON.stringify(report.value,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`mesh-comparison-${props.sessionId}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 watch(()=>JSON.stringify([props.sessionId,props.sourceKey,props.scaleFactor,props.camera]),load,{immediate:true});
 watch(()=>[props.yaw,props.pitch,props.zoom,props.lightAzimuth,props.smoothLighting,props.surfaceEdges],scheduleDraw);

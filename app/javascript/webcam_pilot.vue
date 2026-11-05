@@ -35,6 +35,17 @@
         <p v-if="depthRun?.variants.length">Local-plane residual screens roughness; lower values can also remove real detail. Raw proximity measures agreement with the raw surface, not independently validated coverage or accuracy. Timings include saved fusion checkpoints and meshing/metrics; source depth estimation is reused.</p>
         <p v-if="depthRows.some(v=>v.status==='completed')">Open mesh comparison below to select a filtered variant against the original full mesh. Existing tape/landmark triangle indices do not apply to a variant.</p>
       </section>
+      <section v-if="session.result" class="camera-settings">
+        <h3>Image-guided refinement experiments</h3>
+        <p>Run three bounded CPU trials with regularity weights 0.05, 0.20 and 0.50 on the original full mesh. Only approved, masked turn images guide geometry. The frontal photo is held out for registration and fresh projections after refinement.</p>
+        <p>No hole filling or automatic simplification. Regularization can remove anatomical detail. Refined variants remain uncalibrated and require new tape routes, calibration and point review.</p>
+        <button @click="guard(()=>action('refinement-experiments'))" :disabled="processing || busy || session.captures.length!==61">Run image refinement experiments</button>
+        <p v-if="refinementRun">Refinement {{ refinementRun.status }} · {{ refinementRun.stage }} <span v-if="refinementRun.error">· {{ refinementRun.error }}</span></p>
+        <table v-if="refinementRun?.variants.length"><thead><tr><th>Variant</th><th>Status / coverage</th><th>Faces</th><th>Seconds</th><th>Fresh ray hits</th><th>Recommendation</th></tr></thead><tbody>
+          <tr v-for="row in refinementRun.variants" :key="row.id"><td>{{ row.label }}</td><td>{{ row.status }} · {{ row.coverage_status || row.error || 'pending' }}</td><td>{{ row.metrics?.faces ?? '—' }}</td><td>{{ row.processing_seconds?.toFixed(1) ?? '—' }}</td><td>{{ row.projection_hits ?? '—' }} <button v-if="row.status==='completed'" @click="guard(()=>download('refinement-projection/'+row.id,'refinement-'+row.id+'.json'))">Download fresh projections</button></td><td>{{ row.recommendation?.decision }}<details v-if="row.recommendation?.reason"><summary>Review notes</summary>{{ row.recommendation.reason }}</details></td></tr>
+        </tbody></table>
+        <p>Use mesh comparison below to inspect refinement against the raw surface with shared lighting and framing. Exports include each variant, its fresh analysis topology, detector output, camera, projection attachments and provenance. Cancel retains completed variants; after interruption, start a fresh isolated run.</p>
+      </section>
       <p v-if="session.error" role="alert" class="error">{{ session.error }}</p>
       <details v-if="savedQuality.length"><summary>Capture quality · {{ savedQuality.filter(c=>c.capture_quality.flags.length).length }} / {{ savedQuality.length }} frames flagged for review</summary>
         <p>Advisory screening only. Sharpness depends on visible texture and lighting; a high score does not validate reconstruction accuracy. Frames are retained.</p>
@@ -141,7 +152,7 @@
           </section>
         </div>
         <button @click="comparisonOpen=!comparisonOpen">{{ comparisonOpen ? 'Close mesh comparison' : 'Compare full and analysis meshes' }}</button>
-        <WebcamMeshComparison v-if="comparisonOpen" :api-base="API" :session-id="session.id" :source-key="session.result.full_mesh+'|'+depthRows.filter(v=>v.status==='completed').map(v=>v.id).join('|')"
+        <WebcamMeshComparison v-if="comparisonOpen" :api-base="API" :session-id="session.id" :source-key="session.result.full_mesh+'|'+[...depthRows,...refinementRows].filter(v=>v.status==='completed').map(v=>v.id).join('|')"
           :analysis-mesh="session.result.surface.mesh" :camera="frontCamera" :scale-factor="session.calibrated?.report.mm_per_reconstruction_unit || 1" :units="surface.units"
           :yaw="yaw" :pitch="pitch" :zoom="zoom" :light-azimuth="lightAzimuth" :smooth-lighting="smoothLighting" :surface-edges="surfaceEdges"
           @rotate="yaw=$event.yaw;pitch=$event.pitch" @zoom="zoom=$event" @frame="comparisonFrame=$event" />
@@ -215,7 +226,9 @@ const savedQuality=computed(()=>session.value?.captures.filter(c=>c.capture_qual
 const bulkCandidates = computed(() => Object.keys(frames.value).map(Number).filter(index => !approved(index)).sort((a,b)=>a-b));
 const depthRun=computed(()=>session.value?.depth_experiments?.runs.at(-1));
 const depthRows=computed(()=>session.value?.depth_experiments?.runs.flatMap(run=>run.variants) || []);
-const processing = computed(() => session.value?.status === 'processing' || depthRun.value?.status==='processing');
+const refinementRun=computed(()=>session.value?.refinement_experiments?.runs.at(-1));
+const refinementRows=computed(()=>session.value?.refinement_experiments?.runs.flatMap(run=>run.variants) || []);
+const processing = computed(() => session.value?.status === 'processing' || depthRun.value?.status==='processing' || refinementRun.value?.status==='processing');
 async function guard(fn) { error.value=''; try { await fn(); } catch (e) { error.value=e.message; } }
 async function api(path, payload) {
   const response = await fetch(API+path, payload === undefined ? {} : { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });

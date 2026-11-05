@@ -105,7 +105,11 @@ def compare_session(folder, state, count=5000, variant='raw', reference='analysi
                         'mesh_url': f"/sessions/{state['id']}/mesh-variant/{row['id']}", 'storage_units': row['units'], 'read_only': True,
                         'provenance': {'source': row['full_mesh'], 'parent_mesh_id': 'sha256:'+row['source_full_mesh_sha256'],
                                        'quality': row['quality'], 'quality_version': row['version'], 'input_manifest_sha256': row['input_manifest_sha256'],
-                                       'coordinate_transform': row['coordinate_transform'], 'hole_filling': False, 'smoothing': False,
+                                       'coordinate_transform': row['coordinate_transform'], 'hole_filling': False,
+                                       'smoothing': 'recorded_image_guided_regularization' if row['kind']=='image_refined' else False,
+                                       'cosmetic_post_smoothing': False,
+                                       'regularization': row.get('fixed_options') if row['kind']=='image_refined' else None,
+                                       'scale_check': row.get('scale_check'), 'analysis_mesh_id': row.get('analysis_mesh_id'),
                                        'attachment_status': row['attachment_status']},
                         'experiment_metrics': row['metrics'], 'recommendation': row['recommendation'], 'coverage_status': row['coverage_status']})
     selected = next((v for v in catalog if v['id'] == variant and v['id'] != 'analysis'), None)
@@ -117,7 +121,9 @@ def compare_session(folder, state, count=5000, variant='raw', reference='analysi
         if actual_hash != selected['sha256']:
             raise ValueError('Experiment artifact hash changed.')
     target = analysis if reference == 'analysis' else original
-    calibration = state.get('calibrated')
+    # Refinement moves geometry: the original tape route and scale are not a
+    # calibration of this variant. Compare both meshes in original world units.
+    calibration = state.get('calibrated') if selected['kind'] != 'image_refined' else None
     scale = calibration['report']['mm_per_reconstruction_unit'] if calibration else 1.
     if not np.isfinite(scale) or scale <= 0: raise ValueError('Invalid calibration scale.')
     units = 'mm' if calibration else result['surface']['units']

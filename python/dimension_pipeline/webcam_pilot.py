@@ -23,6 +23,7 @@ from .webcam_reconstruction import REPO, diagnostics, reconstruct
 from .capture_quality import capture_quality, capture_context
 from .mesh_comparison import compare_session
 from .depth_experiments import run_depth_experiments
+from .refinement_experiments import run_refinement_experiments, POLICY as REFINEMENT_POLICY
 from .depth_variants import experiment_artifacts, experiment_variants
 from .depth_quality import POLICY as DEPTH_POLICY
 
@@ -80,7 +81,7 @@ class Store:
                     state.update(status='interrupted', error='Processor stopped. Captures retained; explicitly restart the reconstruction.')
                     self.save(state)
                 recovered = False
-                for run in state.get('depth_experiments', {}).get('runs', []):
+                for run in state.get('depth_experiments', {}).get('runs', []) + state.get('refinement_experiments', {}).get('runs', []):
                     if run['status'] == 'processing':
                         run.update(status='interrupted', error='Processor stopped. Raw baseline and completed variants retained; explicitly start a new experiment run.')
                         for row in run.get('variants', []):
@@ -204,26 +205,28 @@ class Store:
                     self.process = None
                     (self.root/'active-process.json').unlink(missing_ok=True)
 
-    def start_depth_experiments(self, identity, payload):
+    def start_depth_experiments(self, identity, payload, refinement=False):
+        key = 'refinement_experiments' if refinement else 'depth_experiments'
         if self.job: raise ValueError('One reconstruction/experiment job at a time.')
         state = self.load(identity)
         if state['status'] not in ('surface_ready', 'calibrated') or not state.get('result') or len(state['captures']) != 61:
             raise ValueError('Depth experiments require a completed raw reconstruction and 61 approved captures.')
-        if set(payload)-{'resume_run_id'}: raise ValueError('Depth experiments use the versioned fixed profiles; arbitrary parameters are not accepted.')
-        experiments = state.setdefault('depth_experiments', {'version': 'webcam_depth_experiments_v1', 'runs': []})
+        if set(payload)-(set() if refinement else {'resume_run_id'}): raise ValueError('Depth experiments use the versioned fixed profiles; arbitrary parameters are not accepted.')
+        experiments = state.setdefault(key, {'version': 'webcam_refinement_experiments_v1' if refinement else 'webcam_depth_experiments_v1', 'runs': []})
         resume = None
         if payload.get('resume_run_id'):
             resume = next((r for r in experiments['runs'] if r['id']==payload['resume_run_id'] and r['status']!='processing'), None)
             if resume is None: raise ValueError('Unknown completed/interrupted experiment run to resume.')
         if len(experiments['runs']) >= 20: raise ValueError('Experiment run limit reached for this session.')
         run = {'id': uuid.uuid4().hex, 'status': 'processing', 'stage': 'queued', 'started_at': datetime.now(timezone.utc).isoformat(),
-               'quality_version': DEPTH_POLICY['version'], 'variants': [], 'resume_from_run': resume['id'] if resume else None}
+               'quality_version': (REFINEMENT_POLICY if refinement else DEPTH_POLICY)['version'], 'variants': [], 'resume_from_run': resume['id'] if resume else None}
         experiments['runs'].append(run); self.save(state); self.job = identity; self.cancel_event.clear()
-        threading.Thread(target=self.depth_work, args=(identity, run['id']), daemon=True).start()
+        threading.Thread(target=self.depth_work, args=(identity, run['id'], refinement), daemon=True).start()
         return state
 
-    def depth_work(self, identity, run_id):
-        def record(state): return next(r for r in state['depth_experiments']['runs'] if r['id'] == run_id)
+    def depth_work(self, identity, run_id, refinement=False):
+        key = 'refinement_experiments' if refinement else 'depth_experiments'
+        def record(state): return next(r for r in state[key]['runs'] if r['id'] == run_id)
         def update(stage):
             with self.lock:
                 state = self.load(identity); record(state)['stage'] = stage; self.save(state)
@@ -234,10 +237,11 @@ class Store:
                 run['variants'] = [v for v in run['variants'] if v['id'] != row['id']]+[row]; self.save(state)
         try:
             snapshot = self.load(identity); current = record(snapshot)
-            resume = next((r for r in snapshot['depth_experiments']['runs'] if r['id']==current.get('resume_from_run')), None)
+            resume = next((r for r in snapshot[key]['runs'] if r['id']==current.get('resume_from_run')), None)
             arguments = (self.folder(identity), snapshot, run_id,
                          lambda stage, command, cwd: self.native_command(update, stage, command, cwd), update, publish, self.cancel_event.is_set)
-            if resume: run_depth_experiments(*arguments, resume_record=resume)
+            if refinement: run_refinement_experiments(*arguments)
+            elif resume: run_depth_experiments(*arguments, resume_record=resume)
             else: run_depth_experiments(*arguments)
             with self.lock:
                 state = self.load(identity); run = record(state)
@@ -343,6 +347,7 @@ class Store:
 
     def restore(self, encoded):
         data = encoded if isinstance(encoded, bytes) else base64.b64decode(encoded, validate=True)
+        if len(data) > 2_000_000_000: raise ValueError('Session archive exceeds the 2 GB upload limit.')
         archive = zipfile.ZipFile(io.BytesIO(data)); infos = archive.infolist()
         if len(infos) > 20000 or sum(i.file_size for i in infos) > 8_000_000_000 or len({i.filename for i in infos}) != len(infos):
             raise ValueError('Archive too large or contains duplicate files.')
@@ -355,6 +360,8 @@ class Store:
         state = json.loads(archive.read('session.json'))
         if state.get('version') != VERSION or state.get('status') == 'processing':
             raise ValueError('Unsupported or active session.')
+        if any(run.get('status')=='processing' for key in ('depth_experiments','refinement_experiments') for run in state.get(key,{}).get('runs',[])):
+            raise ValueError('Cannot reload an active experiment bundle.')
         # Never trust manifest-provided file references, even with matching hashes.
         refs = [c[k] for c in state['captures'] for k in ('image', 'mask')]
         if state.get('result'):
@@ -410,6 +417,8 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if self.path == '/diagnostics':
                 self.reply(200, diagnostics()); return
+            if self.path == '/diagnostics/refinement':
+                self.reply(200, diagnostics(include_refinement=True)); return
             comparison = re.fullmatch(r'/sessions/([a-f0-9]{32})/mesh-comparison(?:\?variant=([a-z0-9_-]{1,40})(?:&reference=(analysis|raw))?)?', self.path)
             if comparison:
                 # Snapshot under the lock; do not block cancellation or session reads
@@ -418,6 +427,19 @@ class Handler(BaseHTTPRequestHandler):
                 with self.store.lock:
                     folder = self.store.folder(identity); state = self.store.load(identity)
                 self.reply(200, compare_session(folder, state, variant=comparison.group(2) or 'raw', reference=comparison.group(3) or 'analysis')); return
+            projection = re.fullmatch(r'/sessions/([a-f0-9]{32})/refinement-projection/([a-z0-9_-]{1,40})', self.path)
+            if projection:
+                identity, variant_id = projection.groups()
+                with self.store.lock:
+                    state = self.store.load(identity)
+                    row = next((v for v in experiment_variants(state) if v['id']==variant_id and v['kind']=='image_refined'), None)
+                    if row is None: raise ValueError('Unknown completed refinement.')
+                    artifact = next((a for a in row['artifacts'] if a['path']==row.get('projection')), None)
+                    if artifact is None: raise ValueError('Missing projection provenance.')
+                    path = (self.store.folder(identity)/artifact['path']).resolve(); path.relative_to(self.store.folder(identity))
+                    data = path.read_bytes()
+                if digest(data)!=artifact['sha256']: raise ValueError('Refinement projection hash changed.')
+                self.reply(200, data, 'application/octet-stream'); return
             variant = re.fullmatch(r'/sessions/([a-f0-9]{32})/mesh-variant/([a-z0-9_-]{1,40})', self.path)
             if variant:
                 identity, variant_id = variant.groups()
@@ -468,7 +490,7 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(403, {'error': 'JSON from an exact local origin and Host required.'}); return
         try:
             size = int(self.headers.get('Content-Length', 0))
-            limit = 1_000_000_000 if self.path == '/restore' else 45_000_000
+            limit = 2_000_000_000 if self.path == '/restore' else 45_000_000
             if not 0 < size <= limit:
                 self.reply(413, {'error': 'Request exceeds size limit.'}); return
             if archive_upload:
@@ -485,7 +507,7 @@ class Handler(BaseHTTPRequestHandler):
                 elif self.path == '/restore':
                     result = self.store.restore(payload['archive'])
                 else:
-                    match = re.fullmatch(r'/sessions/([a-f0-9]{32})/(capture|start|cancel|calibrate|decisions|draft|delete|depth-experiments|depth-review)', self.path)
+                    match = re.fullmatch(r'/sessions/([a-f0-9]{32})/(capture|start|cancel|calibrate|decisions|draft|delete|depth-experiments|depth-review|refinement-experiments|refinement-review)', self.path)
                     if not match:
                         self.reply(404, {'error': 'Unknown endpoint.'}); return
                     identity, action = match.groups()
@@ -498,7 +520,8 @@ class Handler(BaseHTTPRequestHandler):
                     elif action in ('start', 'cancel'):
                         result = getattr(self.store, action)(identity)
                     elif action == 'depth-experiments': result = self.store.start_depth_experiments(identity, payload)
-                    elif action == 'depth-review': result = self.store.depth_review(identity, payload)
+                    elif action == 'refinement-experiments': result = self.store.start_depth_experiments(identity, payload, refinement=True)
+                    elif action in ('depth-review', 'refinement-review'): result = self.store.depth_review(identity, payload)
                     else:
                         method = {'capture': 'capture', 'calibrate': 'calibration', 'decisions': 'decisions', 'draft': 'draft'}[action]
                         result = getattr(self.store, method)(identity, payload)

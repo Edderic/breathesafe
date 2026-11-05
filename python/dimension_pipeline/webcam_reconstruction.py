@@ -23,11 +23,12 @@ def executable(tool):
     return str(local) if local.is_file() else shutil.which(tool)
 
 
-def diagnostics():
+def diagnostics(include_refinement=False):
     rows = {}
     diagnostic_folder = REPO/'tmp/webcam-tool-diagnostics'
     diagnostic_folder.mkdir(parents=True, exist_ok=True)
-    for tool, version in TOOLS.items():
+    required = {**TOOLS, **({'RefineMesh': '2.4.0'} if include_refinement else {})}
+    for tool, version in required.items():
         path = executable(tool)
         output = ''
         if path:

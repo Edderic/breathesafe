@@ -9,6 +9,8 @@ For read-only full-resolution versus analysis inspection, see
 [mesh comparison and pilot findings](WEBCAM_MESH_COMPARISON.md).
 For the frozen-depth filtering workflow and bounded results, see
 [depth experiments](WEBCAM_DEPTH_EXPERIMENTS.md).
+For optional CPU image-guided refinement and the two-capture screening results,
+see [refinement experiments](WEBCAM_REFINEMENT_EXPERIMENTS.md).
 
 ## Setup on this Mac
 
