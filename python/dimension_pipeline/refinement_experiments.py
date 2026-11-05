@@ -21,6 +21,14 @@ SUITES = {'regularity': POLICY, 'iterations': ITERATION_POLICY}
 POLICIES = {policy['version']:policy for policy in SUITES.values()}
 
 
+def selected_profiles(suite='regularity', profiles=None):
+    if suite not in SUITES: raise ValueError('Unknown versioned refinement suite.')
+    if profiles is None: return list(SUITES[suite]['profiles'])
+    if not isinstance(profiles,list) or not profiles or any(not isinstance(p,str) or p not in SUITES[suite]['profiles'] for p in profiles) or len(set(profiles))!=len(profiles):
+        raise ValueError('Choose a nonempty, unique list of versioned refinement profiles.')
+    return [p for p in SUITES[suite]['profiles'] if p in profiles]
+
+
 def settings(profile, suite='regularity'):
     if suite not in SUITES or profile not in SUITES[suite]['profiles']:
         raise ValueError('Unknown versioned refinement suite/profile.')
@@ -144,9 +152,10 @@ def fresh_analysis(candidate, state, camera, predictions, variant_id):
             'accuracy_status':'not_independently_validated'}
 
 
-def run_refinement_experiments(folder, state, run_id, run, update, publish, cancelled, suite='regularity'):
+def run_refinement_experiments(folder, state, run_id, run, update, publish, cancelled, suite='regularity', profiles=None):
     if suite not in SUITES: raise ValueError('Unknown versioned refinement suite.')
     policy = SUITES[suite]
+    chosen_profiles = selected_profiles(suite,profiles)
     folder = Path(folder).resolve(); diag = diagnostics(include_refinement=True)
     if not diag['ready']: raise ValueError('Pinned macOS arm64 RefineMesh 2.4.0 CPU tools unavailable. Run setup_webcam_native.py.')
     update('freeze_refinement_inputs')
@@ -167,7 +176,8 @@ def run_refinement_experiments(folder, state, run_id, run, update, publish, canc
     raw = checked_mesh(trimesh.load(contained(folder, state['result']['full_mesh']), force='mesh', process=False))
     raw_sha = digest(contained(folder, state['result']['full_mesh']))
     camera = state['result']['cameras'][state['result']['frontal_camera_key']]
-    for profile, parameters in policy['profiles'].items():
+    for profile in chosen_profiles:
+        parameters = policy['profiles'][profile]
         if cancelled(): raise InterruptedError('Cancelled between refinement trials.')
         started = time.monotonic(); work = root/profile; work.mkdir()
         fixed, optimization = settings(profile,suite)

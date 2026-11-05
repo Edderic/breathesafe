@@ -29,7 +29,7 @@ const active=JSON.parse(fs.readFileSync(process.env.WEBCAM_REFINEMENT_RUN || pat
    assert.equal(projection.surface.topology_id,row.analysis_mesh_id);assert.equal(projection.calibration,null);assert.deepEqual(projection.routes,[]);assert.ok(projection.projected_points.every(p=>p.acceptance==='pending'));
    console.log(row.profile_id+' raw/variant full-resolution comparison + shared orientation: PASS');
   }
-  if(run.suite==='iterations'){
+  if(run.suite==='iterations' && run.variants.some(v=>v.profile_id==='iterations08') && run.variants.some(v=>v.profile_id==='iterations24')){
    const eight=run.variants.find(v=>v.profile_id==='iterations08'),twentyFour=run.variants.find(v=>v.profile_id==='iterations24');
    const responsePromise=page.waitForResponse(response=>response.url().includes('/mesh-comparison?') && response.url().includes('reference='+eight.id));
    await comparison.getByLabel('Reference mesh',{exact:true}).selectOption(eight.id);

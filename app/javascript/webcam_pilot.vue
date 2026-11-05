@@ -41,6 +41,7 @@
         <p>No hole filling or automatic simplification. Regularization can remove anatomical detail. Refined variants remain uncalibrated and require new tape routes, calibration and point review.</p>
         <button @click="guard(()=>action('refinement-experiments'))" :disabled="processing || busy || session.captures.length!==61">Run image refinement experiments</button>
         <button @click="guard(()=>action('refinement-experiments',{suite:'iterations'}))" :disabled="processing || busy || session.captures.length!==61">Run 8 vs 24 iterations · weight 0.20</button>
+        <button @click="guard(()=>action('refinement-experiments',{suite:'iterations',profiles:['iterations24']}))" :disabled="processing || busy || session.captures.length!==61">Run 24 iterations · weight 0.20</button>
         <p>The iteration comparison starts both trials independently from the raw mesh. The native optimizer also changes its final rigidity phase with the iteration budget; 24 iterations is not a continuation of the 8-iteration output.</p>
         <p v-if="refinementRun">Refinement {{ refinementRun.status }} · {{ refinementRun.stage }} <span v-if="refinementRun.error">· {{ refinementRun.error }}</span></p>
         <table v-if="refinementRun?.variants.length"><thead><tr><th>Variant</th><th>Status / coverage</th><th>Faces</th><th>Seconds</th><th>Fresh ray hits</th><th>Recommendation</th></tr></thead><tbody>

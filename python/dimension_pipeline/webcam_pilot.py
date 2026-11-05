@@ -23,7 +23,7 @@ from .webcam_reconstruction import REPO, diagnostics, reconstruct
 from .capture_quality import capture_quality, capture_context
 from .mesh_comparison import compare_session
 from .depth_experiments import run_depth_experiments
-from .refinement_experiments import run_refinement_experiments, SUITES as REFINEMENT_SUITES
+from .refinement_experiments import run_refinement_experiments, selected_profiles, SUITES as REFINEMENT_SUITES
 from .depth_variants import experiment_artifacts, experiment_variants
 from .depth_quality import POLICY as DEPTH_POLICY
 
@@ -211,9 +211,12 @@ class Store:
         state = self.load(identity)
         if state['status'] not in ('surface_ready', 'calibrated') or not state.get('result') or len(state['captures']) != 61:
             raise ValueError('Depth experiments require a completed raw reconstruction and 61 approved captures.')
-        if set(payload)-({'suite'} if refinement else {'resume_run_id'}): raise ValueError('Experiments use versioned fixed profiles; arbitrary parameters are not accepted.')
+        if set(payload)-({'suite','profiles'} if refinement else {'resume_run_id'}): raise ValueError('Experiments use versioned fixed profiles; arbitrary parameters are not accepted.')
         suite = payload.get('suite','regularity') if refinement else None
         if refinement and suite not in ('regularity','iterations'): raise ValueError('Unknown versioned refinement suite.')
+        if refinement and 'profiles' in payload:
+            if payload['profiles'] is None: raise ValueError('Provide a list of versioned refinement profiles.')
+            selected_profiles(suite,payload['profiles'])
         experiments = state.setdefault(key, {'version': 'webcam_refinement_experiments_v1' if refinement else 'webcam_depth_experiments_v1', 'runs': []})
         resume = None
         if payload.get('resume_run_id'):
@@ -223,6 +226,7 @@ class Store:
         run = {'id': uuid.uuid4().hex, 'status': 'processing', 'stage': 'queued', 'started_at': datetime.now(timezone.utc).isoformat(),
                'quality_version': (REFINEMENT_SUITES[suite] if refinement else DEPTH_POLICY)['version'], 'variants': [], 'resume_from_run': resume['id'] if resume else None}
         if refinement: run['suite'] = suite
+        if refinement and 'profiles' in payload: run['selected_profiles'] = selected_profiles(suite,payload['profiles'])
         experiments['runs'].append(run); self.save(state); self.job = identity; self.cancel_event.clear()
         threading.Thread(target=self.depth_work, args=(identity, run['id'], refinement), daemon=True).start()
         return state
@@ -243,7 +247,8 @@ class Store:
             resume = next((r for r in snapshot[key]['runs'] if r['id']==current.get('resume_from_run')), None)
             arguments = (self.folder(identity), snapshot, run_id,
                          lambda stage, command, cwd: self.native_command(update, stage, command, cwd), update, publish, self.cancel_event.is_set)
-            if refinement and current.get('suite','regularity')!='regularity': run_refinement_experiments(*arguments,suite=current['suite'])
+            if refinement and 'selected_profiles' in current: run_refinement_experiments(*arguments,suite=current['suite'],profiles=current['selected_profiles'])
+            elif refinement and current.get('suite','regularity')!='regularity': run_refinement_experiments(*arguments,suite=current['suite'])
             elif refinement: run_refinement_experiments(*arguments)
             elif resume: run_depth_experiments(*arguments, resume_record=resume)
             else: run_depth_experiments(*arguments)

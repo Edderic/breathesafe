@@ -12,7 +12,7 @@ import numpy as np
 import trimesh
 from PIL import Image
 
-from dimension_pipeline.refinement_experiments import POLICY, ITERATION_POLICY, settings, options, frozen_inputs, fresh_analysis, run_refinement_experiments, fixed_registration, save_masked_turn, registration_diagnostics
+from dimension_pipeline.refinement_experiments import POLICY, ITERATION_POLICY, selected_profiles, settings, options, frozen_inputs, fresh_analysis, run_refinement_experiments, fixed_registration, save_masked_turn, registration_diagnostics
 from dimension_pipeline.depth_experiments import digest
 from dimension_pipeline.depth_metrics import geometry_metrics
 from dimension_pipeline.depth_variants import experiment_artifacts
@@ -54,7 +54,10 @@ class RefinementTests(unittest.TestCase):
     def test_iteration_suite_selection_rejects_overrides_and_dispatches_fixed_suite(self):
         with tempfile.TemporaryDirectory() as temp:
             store,state,_,_=self.fixture(temp);state['captures']=[{}]*61;store.save(state)
-            for payload in [{'suite':'custom'},{'suite':'iterations','gradient-step':500},{'suite':None}]:
+            for payload in [{'suite':'custom'},{'suite':'iterations','gradient-step':500},{'suite':None},
+                            {'suite':'iterations','profiles':None},{'suite':'iterations','profiles':[]},
+                            {'suite':'iterations','profiles':['iterations24','iterations24']},
+                            {'suite':'iterations','profiles':['regularity020']},{'suite':'iterations','profiles':[{'iterations':24}]}]:
                 with self.assertRaises(ValueError):store.start_depth_experiments(state['id'],payload,refinement=True)
             with patch('dimension_pipeline.webcam_pilot.run_refinement_experiments') as native:
                 store.start_depth_experiments(state['id'],{'suite':'iterations'},refinement=True)
@@ -63,6 +66,13 @@ class RefinementTests(unittest.TestCase):
                 self.assertIsNone(store.job);self.assertEqual(native.call_args.kwargs,{'suite':'iterations'})
             run=store.load(state['id'])['refinement_experiments']['runs'][-1]
             self.assertEqual(run['suite'],'iterations');self.assertEqual(run['quality_version'],ITERATION_POLICY['version'])
+            self.assertEqual(selected_profiles('iterations',['iterations24','iterations08']),['iterations08','iterations24'])
+            with patch('dimension_pipeline.webcam_pilot.run_refinement_experiments') as native:
+                store.start_depth_experiments(state['id'],{'suite':'iterations','profiles':['iterations24']},refinement=True)
+                deadline=time.monotonic()+2
+                while store.job and time.monotonic()<deadline:time.sleep(.01)
+                self.assertIsNone(store.job);self.assertEqual(native.call_args.kwargs,{'suite':'iterations','profiles':['iterations24']})
+            self.assertEqual(store.load(state['id'])['refinement_experiments']['runs'][-1]['selected_profiles'],['iterations24'])
 
     def test_mask_compositing_preserves_pixels_and_native_dimensions(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -236,10 +246,14 @@ class RefinementTests(unittest.TestCase):
                  patch('dimension_pipeline.refinement_experiments.read_model',return_value={'front.png':camera}), \
                  patch('dimension_pipeline.refinement_experiments.detect',return_value=([{'x':.5,'y':.5,'z':0}],{'fixture':True})):
                 run_refinement_experiments(folder,state,'f'*32,native,lambda _:None,lambda row:published.append(copy.deepcopy(row)),lambda:False,suite='iterations')
+                selected=[];commands_before=len(commands)
+                run_refinement_experiments(folder,state,'0'*32,native,lambda _:None,lambda row:selected.append(copy.deepcopy(row)),lambda:False,suite='iterations',profiles=['iterations24'])
+                self.assertEqual(len(commands)-commands_before,1)
+                self.assertEqual(selected[-1]['status'],'completed');self.assertEqual(selected[-1]['optimization']['iterations'],24)
             rows=[row for row in published if row['status']!='processing']
             self.assertEqual([row['status'] for row in rows],['completed','completed'])
             self.assertEqual([row['optimization']['iterations'] for row in rows],[8,24])
-            self.assertEqual([cmd[cmd.index('--gradient-step')+1] for cmd in commands],['8.05','24.05'])
+            self.assertEqual([cmd[cmd.index('--gradient-step')+1] for cmd in commands[:2]],['8.05','24.05'])
             self.assertEqual(len({row['input_manifest_sha256'] for row in rows}),1)
             self.assertTrue(all(row['quality']['regularity-weight']==.2 and row['projection_hits']==1 for row in rows))
             state['refinement_experiments']={'version':'webcam_refinement_experiments_v1','runs':[{'id':'f'*32,'status':'completed','variants':rows}]}

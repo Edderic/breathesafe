@@ -207,6 +207,14 @@ shared frame and rendering controls, with no alignment fit. Any comparison
 containing a refined source **or reference** uses unscaled reconstruction units
 and the original unscaled camera, even when the base session was calibrated.
 
+For matched processing of a lighting study, **Run 24 iterations · weight 0.20**
+selects only the existing `iterations24` profile. The API accepts
+`{"suite":"iterations","profiles":["iterations24"]}` and records `selected_profiles`
+on the run. Profile subsets must be nonempty, unique, known IDs from the selected
+suite; execution follows policy order. Numeric overrides remain prohibited. An
+omitted subset retains the original full-suite behavior. Settings/provenance and
+historical export/reload compatibility are unchanged.
+
 At 5,000 area-weighted samples per direction, direct 24→8 RMS is 0.002064 / 0.002225
 and 8→24 RMS is 0.008330 / 0.003130 for captures 1 / 2. These arbitrary units
 cannot be compared as physical errors across captures. The first capture's
