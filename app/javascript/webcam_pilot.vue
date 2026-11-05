@@ -125,6 +125,11 @@
             <label><input type="checkbox" v-model="tapPlacement" /> Tap to place route controls</label>
           </section>
         </div>
+        <button @click="comparisonOpen=!comparisonOpen">{{ comparisonOpen ? 'Close mesh comparison' : 'Compare full and analysis meshes' }}</button>
+        <WebcamMeshComparison v-if="comparisonOpen" :api-base="API" :session-id="session.id" :source-key="session.result.full_mesh"
+          :analysis-mesh="session.result.surface.mesh" :camera="frontCamera" :scale-factor="session.calibrated?.report.mm_per_reconstruction_unit || 1" :units="surface.units"
+          :yaw="yaw" :pitch="pitch" :zoom="zoom" :light-azimuth="lightAzimuth" :smooth-lighting="smoothLighting" :surface-edges="surfaceEdges"
+          @rotate="yaw=$event.yaw;pitch=$event.pitch" @zoom="zoom=$event" @frame="comparisonFrame=$event" />
         <h3>Tape calibration and independent check</h3>
         <p>Trace left tragion → subnasale → right tragion for scale, including intermediate tape-contact points. Separately trace left tragion → menton → right tragion for the independent check. Routes use mesh edges between controls and may overestimate a smooth tape arc.</p>
         <div class="toolbar"><label>Route<select v-model="routeKind"><option value="scale">Scale via subnasale</option><option value="check">Independent check via menton</option></select></label>
@@ -154,6 +159,7 @@ import { attachmentPoint, projectMesh, pickSurface } from './face_annotation_geo
 import { surfaceFraming, surfaceVertexNormals, shadedSurfaceFaces } from './webcam_surface_view';
 import { projectPoint } from './dimension_fixture_geometry';
 import { buildSurfaceGraph, surfacePath } from './face_surface_paths';
+import WebcamMeshComparison from './webcam_mesh_comparison.vue';
 
 const API = 'http://127.0.0.1:5182';
 const session = ref(null), sessions = ref([]), diagnostics = ref(null), resumeId = ref('');
@@ -175,6 +181,7 @@ const bulkProgress = ref(null), bulkCancelled = ref(false);
 let reviewRevision = 0;
 const frontUrl = ref(''), pointIndex = ref(0), showWire = ref(false), yaw = ref(0), pitch = ref(0), zoom = ref(1), viewport = ref(null);
 const lightAzimuth = ref(-40), surfaceEdges = ref(false), smoothLighting = ref(true);
+const comparisonOpen=ref(false),comparisonFrame=ref(null);
 function resetSurfaceView() { yaw.value=0; pitch.value=0; zoom.value=1; }
 function surfaceWheel(event) {
   if (!event.shiftKey) return;
@@ -199,6 +206,7 @@ async function api(path, payload) {
 }
 async function connect() { diagnostics.value=await api('/diagnostics'); sessions.value=await api('/sessions'); message.value='Connected to private local processor.'; }
 async function adopt(state) {
+  comparisonOpen.value=false;comparisonFrame.value=null;
   resetSurfaceView();
   reviewRevision++; reviewLoading.value=false;
   stopCamera(); frames.value={}; reviewFrame.value=null; routes.value={scale:[],check:[]}; coverageReviewed.value=false;
@@ -437,7 +445,7 @@ const detections=computed(()=>session.value?.calibrated?.projected_points || ses
 const point=computed(()=>detections.value[pointIndex.value]);
 function displayPoint(point) { const c=frontCamera.value; const p=c.R.map((r,i)=>r.reduce((s,v,j)=>s+v*point[j],c.t[i])); return [p[0],-p[1],-p[2]]; }
 const displayRecord=computed(()=>surface.value ? {...surface.value,mesh:{...surface.value.mesh,vertices:surface.value.mesh.vertices.map(displayPoint)}} : null);
-const framing=computed(()=>displayRecord.value ? surfaceFraming(displayRecord.value.mesh) : {center:[0,0,0],scale:1});
+const framing=computed(()=>comparisonOpen.value && comparisonFrame.value ? comparisonFrame.value : displayRecord.value ? surfaceFraming(displayRecord.value.mesh) : {center:[0,0,0],scale:1});
 const displayProjection=p=>projectPoint(p,framing.value.center,yaw.value,pitch.value,framing.value.scale*zoom.value);
 const projected=computed(()=>displayRecord.value ? projectMesh(displayRecord.value,framing.value.center,yaw.value,pitch.value,framing.value.scale*zoom.value) : []);
 const lightingNormals=computed(()=>displayRecord.value ? surfaceVertexNormals(displayRecord.value.mesh) : null);

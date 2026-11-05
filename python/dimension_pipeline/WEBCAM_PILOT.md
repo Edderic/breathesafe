@@ -5,6 +5,9 @@ records, and synthetic-head annotation. Open it from **3D webcam pilot** in the
 existing webcam panel or use the standalone preview below. No captures are sent
 to Rails or a remote reconstruction service.
 
+For read-only full-resolution versus analysis inspection, see
+[mesh comparison and pilot findings](WEBCAM_MESH_COMPARISON.md).
+
 ## Setup on this Mac
 
 Use native macOS arm64 and Python 3.12. From the repository root:

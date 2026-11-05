@@ -21,6 +21,7 @@ from pathlib import Path
 from .webcam_geometry import calibrate, project
 from .webcam_reconstruction import REPO, diagnostics, reconstruct
 from .capture_quality import capture_quality, capture_context
+from .mesh_comparison import compare_session
 
 ROOT = REPO/'.private-webcam-runs'
 ORIGINS = {f'http://{host}:{port}' for host in ('localhost', '127.0.0.1') for port in (3000, 5173, 5178)}
@@ -327,6 +328,14 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if self.path == '/diagnostics':
                 self.reply(200, diagnostics()); return
+            comparison = re.fullmatch(r'/sessions/([a-f0-9]{32})/mesh-comparison(?:\?variant=([a-z0-9_-]{1,40}))?', self.path)
+            if comparison:
+                # Snapshot under the lock; do not block cancellation or session reads
+                # while the read-only nearest-surface queries run.
+                identity = comparison.group(1)
+                with self.store.lock:
+                    folder = self.store.folder(identity); state = self.store.load(identity)
+                self.reply(200, compare_session(folder, state, variant=comparison.group(2) or 'raw')); return
             with self.store.lock:
                 if self.path == '/sessions':
                     rows = [self.store.load(p.name) for p in self.store.root.iterdir() if p.is_dir() and re.fullmatch(r'[a-f0-9]{32}', p.name)]
@@ -356,7 +365,7 @@ class Handler(BaseHTTPRequestHandler):
                     self.reply(200, path.read_bytes(), 'image/png' if artifact == 'frontal' else 'application/octet-stream')
                 else:
                     self.reply(200, state)
-        except (ValueError, KeyError, OSError, TypeError) as error:
+        except (ValueError, KeyError, OSError, TypeError, MemoryError) as error:
             self.reply(422, {'error': str(error)})
 
     def do_POST(self):
