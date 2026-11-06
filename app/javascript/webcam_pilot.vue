@@ -20,7 +20,7 @@
       <select v-model="resumeId" aria-label="Saved session">
         <option value="">Select a saved session (newest first in each group)</option>
         <optgroup v-for="group in savedSessionGroups" :key="group.label" :label="group.label">
-          <option v-for="s in group.sessions" :key="s.id" :value="s.id">{{ s.capture_context?.group ? s.capture_context.group+' · repeat '+s.capture_context.repeat+' · ' : '' }}{{ s.created_at }} · {{ s.status }}</option>
+          <option v-for="s in group.sessions" :key="s.id" :value="s.id">{{ s.capture_context?.group ? s.capture_context.group+' · repeat '+s.capture_context.repeat+' · ' : '' }}{{ s.created_at }} · {{ s.status }} · {{ s.id }}</option>
         </optgroup>
       </select>
       <button @click="guard(resume)" :disabled="!resumeId || busy">Resume</button>
@@ -174,6 +174,8 @@
           :yaw="yaw" :pitch="pitch" :zoom="zoom" :light-azimuth="lightAzimuth" :smooth-lighting="smoothLighting" :surface-edges="surfaceEdges"
           @rotate="yaw=$event.yaw;pitch=$event.pitch" @zoom="zoom=$event" @frame="comparisonFrame=$event" />
         <button @click="regionalOpen=!regionalOpen">{{ regionalOpen ? 'Close regional inspection' : 'Inspect nose and mask-contact regions' }}</button>
+        <button @click="nosePhotosOpen=!nosePhotosOpen">{{ nosePhotosOpen ? 'Close nose source photos' : 'Inspect nose on source photos' }}</button>
+        <WebcamNosePhotos v-if="nosePhotosOpen" :api-base="API" :session-id="session.id" :source-key="session.result.full_mesh+'|'+refinementRows.filter(v=>v.status==='completed').map(v=>v.id).join('|')" :variants="refinementRows.filter(v=>v.status==='completed')" />
         <button @click="landmarkOpen=!landmarkOpen">{{ landmarkOpen ? 'Close landmark review' : 'Review anatomical landmarks' }}</button>
         <WebcamLandmarkReview v-if="landmarkOpen" :api-base="API" :session-id="session.id" :variants="refinementRows.filter(v=>v.status==='completed')" :frontal-url="frontUrl" />
         <WebcamRegionalInspection v-if="regionalOpen" :api-base="API" :session-id="session.id" :source-key="session.result.full_mesh+'|'+refinementRows.filter(v=>v.status==='completed').map(v=>v.id).join('|')"
@@ -210,6 +212,7 @@ import { buildSurfaceGraph, surfacePath } from './face_surface_paths';
 import WebcamMeshComparison from './webcam_mesh_comparison.vue';
 import WebcamRegionalInspection from './webcam_regional_inspection.vue';
 import WebcamLandmarkReview from './webcam_landmark_review.vue';
+import WebcamNosePhotos from './webcam_nose_photos.vue';
 
 const API = 'http://127.0.0.1:5182';
 const session = ref(null), sessions = ref([]), diagnostics = ref(null), resumeId = ref('');
@@ -250,6 +253,7 @@ const lightAzimuth = ref(-40), surfaceEdges = ref(false), smoothLighting = ref(t
 const comparisonOpen=ref(false),comparisonFrame=ref(null);
 const regionalOpen=ref(false);
 const landmarkOpen=ref(false);
+const nosePhotosOpen=ref(false);
 function resetSurfaceView() { yaw.value=0; pitch.value=0; zoom.value=1; }
 function surfaceWheel(event) {
   if (!event.shiftKey) return;
@@ -281,6 +285,7 @@ async function adopt(state) {
   comparisonOpen.value=false;comparisonFrame.value=null;
   regionalOpen.value=false;
   landmarkOpen.value=false;
+  nosePhotosOpen.value=false;
   resetSurfaceView();
   reviewRevision++; reviewLoading.value=false;
   stopCamera(); frames.value={}; reviewFrame.value=null; routes.value={scale:[],check:[]}; coverageReviewed.value=false;

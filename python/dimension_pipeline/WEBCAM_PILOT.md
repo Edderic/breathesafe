@@ -7,6 +7,8 @@ to Rails or a remote reconstruction service.
 
 For read-only full-resolution versus analysis inspection, see
 [mesh comparison and pilot findings](WEBCAM_MESH_COMPARISON.md).
+For separate FLAME Open fits to the bounded analysis mesh, see
+[FLAME analysis-mesh fitting](WEBCAM_FLAME_FIT.md).
 For the frozen-depth filtering workflow and bounded results, see
 [depth experiments](WEBCAM_DEPTH_EXPERIMENTS.md).
 For optional CPU image-guided refinement and the two-capture screening results,
@@ -15,6 +17,8 @@ For fixed nose/cheek/chin close-ups and measurement diagnostics on saved capture
 see [regional inspection and initial findings](WEBCAM_REGIONAL_INSPECTION.md).
 For manual nose landmark placement on full surfaces, see
 [anatomical landmark review](WEBCAM_LANDMARK_REVIEW.md).
+For raw/refined nose close-ups projected on several registered capture photos,
+see [source-photo nose overlays](WEBCAM_NOSE_PHOTOS.md).
 
 ## Setup on this Mac
 

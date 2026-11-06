@@ -28,6 +28,8 @@ from .depth_variants import experiment_artifacts, experiment_variants
 from .depth_quality import POLICY as DEPTH_POLICY
 from .regional_inspection import regional_report
 from .landmark_review import metadata as landmark_metadata, operate as landmark_operation
+from .nose_overlays import catalog as nose_catalog, photo_overlay
+from .nose_probe import probe_metadata, inspect_point
 
 ROOT = REPO/'.private-webcam-runs'
 ORIGINS = {f'http://{host}:{port}' for host in ('localhost', '127.0.0.1') for port in (3000, 5173, 5178)}
@@ -430,6 +432,18 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(200, diagnostics()); return
             if self.path == '/diagnostics/refinement':
                 self.reply(200, diagnostics(include_refinement=True)); return
+            probe = re.fullmatch(r'/sessions/([a-f0-9]{32})/nose-probe(?:\?variant=([a-z0-9_-]{1,40}))?',self.path)
+            if probe:
+                identity,variant=probe.groups()
+                with self.store.lock:
+                    folder=self.store.folder(identity);state=self.store.load(identity)
+                self.reply(200,probe_metadata(folder,state,variant or 'raw'));return
+            nose = re.fullmatch(r'/sessions/([a-f0-9]{32})/(nose-views|nose-overlay/(turn_(?:0[0-9]|[1-5][0-9])))(?:\?variant=([a-z0-9_-]{1,40}))?',self.path)
+            if nose:
+                identity,_,slot,variant=nose.groups()
+                with self.store.lock:
+                    folder=self.store.folder(identity);state=self.store.load(identity)
+                self.reply(200,photo_overlay(folder,state,slot,variant or 'raw') if slot else nose_catalog(folder,state,variant or 'raw'));return
             landmarks = re.fullmatch(r'/sessions/([a-f0-9]{32})/landmark-review(?:\?variant=([a-z0-9_-]{1,40}))?', self.path)
             if landmarks:
                 identity, variant = landmarks.groups()
@@ -524,6 +538,12 @@ class Handler(BaseHTTPRequestHandler):
             payload = json.loads(self.rfile.read(size))
             if not isinstance(payload, dict):
                 raise ValueError('Expected a JSON object.')
+            probe = re.fullmatch(r'/sessions/([a-f0-9]{32})/nose-probe',self.path)
+            if probe:
+                identity=probe.group(1)
+                with self.store.lock:
+                    folder=self.store.folder(identity);state=self.store.load(identity)
+                self.reply(200,inspect_point(folder,state,payload));return
             with self.store.lock:
                 if self.path == '/sessions':
                     result = self.store.create(payload)
