@@ -13,6 +13,8 @@ For optional CPU image-guided refinement and the two-capture screening results,
 see [refinement experiments](WEBCAM_REFINEMENT_EXPERIMENTS.md).
 For fixed nose/cheek/chin close-ups and measurement diagnostics on saved captures,
 see [regional inspection and initial findings](WEBCAM_REGIONAL_INSPECTION.md).
+For manual nose landmark placement on full surfaces, see
+[anatomical landmark review](WEBCAM_LANDMARK_REVIEW.md).
 
 ## Setup on this Mac
 

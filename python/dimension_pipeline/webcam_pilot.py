@@ -27,6 +27,7 @@ from .refinement_experiments import run_refinement_experiments, selected_profile
 from .depth_variants import experiment_artifacts, experiment_variants
 from .depth_quality import POLICY as DEPTH_POLICY
 from .regional_inspection import regional_report
+from .landmark_review import metadata as landmark_metadata, operate as landmark_operation
 
 ROOT = REPO/'.private-webcam-runs'
 ORIGINS = {f'http://{host}:{port}' for host in ('localhost', '127.0.0.1') for port in (3000, 5173, 5178)}
@@ -429,6 +430,12 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(200, diagnostics()); return
             if self.path == '/diagnostics/refinement':
                 self.reply(200, diagnostics(include_refinement=True)); return
+            landmarks = re.fullmatch(r'/sessions/([a-f0-9]{32})/landmark-review(?:\?variant=([a-z0-9_-]{1,40}))?', self.path)
+            if landmarks:
+                identity, variant = landmarks.groups()
+                with self.store.lock:
+                    self.reply(200, landmark_metadata(self.store.folder(identity), self.store.load(identity), variant or 'raw'))
+                return
             regional = re.fullmatch(r'/sessions/([a-f0-9]{32})/regional-report(?:\?variant=([a-z0-9_-]{1,40}))?',self.path)
             if regional:
                 identity,variant=regional.groups()
@@ -523,13 +530,18 @@ class Handler(BaseHTTPRequestHandler):
                 elif self.path == '/restore':
                     result = self.store.restore(payload['archive'])
                 else:
-                    match = re.fullmatch(r'/sessions/([a-f0-9]{32})/(capture|start|cancel|calibrate|decisions|draft|delete|depth-experiments|depth-review|refinement-experiments|refinement-review)', self.path)
+                    match = re.fullmatch(r'/sessions/([a-f0-9]{32})/(capture|start|cancel|calibrate|decisions|draft|delete|depth-experiments|depth-review|refinement-experiments|refinement-review|landmark-review)', self.path)
                     if not match:
                         self.reply(404, {'error': 'Unknown endpoint.'}); return
                     identity, action = match.groups()
                     if self.store.job == identity and action in ('capture', 'calibrate', 'decisions', 'draft'):
                         raise ValueError('Wait for processing to finish before modifying this session.')
-                    if action == 'delete':
+                    if action == 'landmark-review':
+                        if self.store.job == identity: raise ValueError('Wait for processing before landmark review.')
+                        state = self.store.load(identity)
+                        result, changed = landmark_operation(self.store.folder(identity), state, payload)
+                        if changed: self.store.save(state)
+                    elif action == 'delete':
                         if self.store.job == identity:
                             raise ValueError('Cancel and wait for the job to stop before deletion.')
                         shutil.rmtree(self.store.folder(identity)); result = {'deleted': identity}

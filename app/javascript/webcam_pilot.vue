@@ -12,7 +12,12 @@
     </details>
     <div class="toolbar">
       <button @click="guard(connect)">Connect processor</button><button @click="guard(createSession)" :disabled="busy">New session</button>
-      <select v-model="resumeId" aria-label="Saved session"><option value="">Select a saved session</option><option v-for="s in sessions" :key="s.id" :value="s.id">{{ s.capture_context?.group ? s.capture_context.group+' · repeat '+s.capture_context.repeat+' · ' : '' }}{{ s.created_at }} · {{ s.status }}</option></select>
+      <select v-model="resumeId" aria-label="Saved session">
+        <option value="">Select a saved session (newest first in each group)</option>
+        <optgroup v-for="group in savedSessionGroups" :key="group.label" :label="group.label">
+          <option v-for="s in group.sessions" :key="s.id" :value="s.id">{{ s.capture_context?.group ? s.capture_context.group+' · repeat '+s.capture_context.repeat+' · ' : '' }}{{ s.created_at }} · {{ s.status }}</option>
+        </optgroup>
+      </select>
       <button @click="guard(resume)" :disabled="!resumeId || busy">Resume</button>
       <label>Reload exported session<input type="file" accept=".zip" @change="restore" :disabled="busy" /></label>
     </div>
@@ -160,6 +165,8 @@
           :yaw="yaw" :pitch="pitch" :zoom="zoom" :light-azimuth="lightAzimuth" :smooth-lighting="smoothLighting" :surface-edges="surfaceEdges"
           @rotate="yaw=$event.yaw;pitch=$event.pitch" @zoom="zoom=$event" @frame="comparisonFrame=$event" />
         <button @click="regionalOpen=!regionalOpen">{{ regionalOpen ? 'Close regional inspection' : 'Inspect nose and mask-contact regions' }}</button>
+        <button @click="landmarkOpen=!landmarkOpen">{{ landmarkOpen ? 'Close landmark review' : 'Review anatomical landmarks' }}</button>
+        <WebcamLandmarkReview v-if="landmarkOpen" :api-base="API" :session-id="session.id" :variants="refinementRows.filter(v=>v.status==='completed')" :frontal-url="frontUrl" />
         <WebcamRegionalInspection v-if="regionalOpen" :api-base="API" :session-id="session.id" :source-key="session.result.full_mesh+'|'+refinementRows.filter(v=>v.status==='completed').map(v=>v.id).join('|')"
           :variants="refinementRows.filter(v=>v.status==='completed')" :frontal-url="frontUrl" />
         <h3>Tape calibration and independent check</h3>
@@ -193,9 +200,21 @@ import { projectPoint } from './dimension_fixture_geometry';
 import { buildSurfaceGraph, surfacePath } from './face_surface_paths';
 import WebcamMeshComparison from './webcam_mesh_comparison.vue';
 import WebcamRegionalInspection from './webcam_regional_inspection.vue';
+import WebcamLandmarkReview from './webcam_landmark_review.vue';
 
 const API = 'http://127.0.0.1:5182';
 const session = ref(null), sessions = ref([]), diagnostics = ref(null), resumeId = ref('');
+const savedSessionGroups = computed(() => {
+  const sorted = [...sessions.value].sort((a,b) => {
+    const time = s => Date.parse(s.created_at) || 0;
+    return time(b)-time(a) || a.id.localeCompare(b.id);
+  });
+  const ready = s => ['surface_ready','calibrated'].includes(s.status);
+  return [
+    {label:'Surfaces ready · newest first',sessions:sorted.filter(ready)},
+    {label:'Other sessions · newest first',sessions:sorted.filter(s => !ready(s))},
+  ].filter(group => group.sessions.length);
+});
 const error = ref(''), message = ref(''), busy = ref(false), consent = ref(false);
 const comparisonGroup=ref(''),comparisonConditions=ref(''),comparisonRepeat=ref(1);
 const cameraControls=ref([]),selectedLocks=ref([]),cameraAttempts=ref([]),cameraControlMessage=ref('');
@@ -216,6 +235,7 @@ const frontUrl = ref(''), pointIndex = ref(0), showWire = ref(false), yaw = ref(
 const lightAzimuth = ref(-40), surfaceEdges = ref(false), smoothLighting = ref(true);
 const comparisonOpen=ref(false),comparisonFrame=ref(null);
 const regionalOpen=ref(false);
+const landmarkOpen=ref(false);
 function resetSurfaceView() { yaw.value=0; pitch.value=0; zoom.value=1; }
 function surfaceWheel(event) {
   if (!event.shiftKey) return;
@@ -246,6 +266,7 @@ async function connect() { diagnostics.value=await api('/diagnostics'); sessions
 async function adopt(state) {
   comparisonOpen.value=false;comparisonFrame.value=null;
   regionalOpen.value=false;
+  landmarkOpen.value=false;
   resetSurfaceView();
   reviewRevision++; reviewLoading.value=false;
   stopCamera(); frames.value={}; reviewFrame.value=null; routes.value={scale:[],check:[]}; coverageReviewed.value=false;
