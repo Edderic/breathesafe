@@ -16,7 +16,7 @@ from unittest.mock import patch
 
 from dimension_pipeline.webcam_geometry import attachment, calibrate, camera_pixel, project, ray, readings, route_length
 from dimension_pipeline.webcam_pilot import Handler, Store, digest
-from dimension_pipeline.webcam_reconstruction import reconstruct, undistort_mask, select_sparse_model
+from dimension_pipeline.webcam_reconstruction import reconstruct, undistort_mask, select_sparse_model, reconstruction_pairs
 
 
 def mesh():
@@ -39,6 +39,21 @@ def route(via):
 
 
 class GeometryTests(unittest.TestCase):
+    def test_two_pass_matching_connects_corresponding_views_without_frontal(self):
+        frames=[{'slot':f'turn_{i:02}'} for i in range(60)]
+        ordinary,base=reconstruction_pairs(frames)
+        self.assertEqual(len(ordinary),339)
+        pairs,policy=reconstruction_pairs(frames,'moving_camera_two_pass')
+        self.assertTrue(ordinary.issubset(pairs));self.assertEqual(policy['additional_cross_pass_pairs'],879)
+        for i in range(30):self.assertIn((f'turn_{i:02}.png',f'turn_{59-i:02}.png'),pairs)
+        self.assertIn(('turn_15.png','turn_43.png'),pairs)
+        self.assertIn(('turn_00.png','turn_30.png'),pairs)
+        self.assertEqual(sum((f'turn_{i:02}.png',f'turn_{j:02}.png') in pairs for i in range(30) for j in range(30,60)),900)
+        self.assertFalse(any('front.png' in p for p in pairs))
+        self.assertTrue(all(a<b for a,b in pairs));self.assertEqual(policy['total_pairs'],len(pairs))
+        self.assertEqual(reconstruction_pairs(frames,'moving_camera')[0],ordinary)
+        with self.assertRaises(ValueError):reconstruction_pairs(frames[:30],'moving_camera_two_pass')
+
     def test_sparse_selection_ignores_contained_initialization_candidates(self):
         names = [f'turn_{i:02}.png' for i in range(60)]
         full = dict.fromkeys(names, {'camera_id': 1})

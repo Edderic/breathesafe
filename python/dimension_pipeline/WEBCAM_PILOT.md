@@ -158,6 +158,31 @@ midpoint. Stop works during capture, preparation and the repositioning pause.
 The designated frontal remains a separate eye-level photo. All 60 reconstruction
 frames share one session and camera model.
 
+Two-pass reconstruction matches each frame against its next six temporal
+neighbors, plus all 900 cross-pass candidates between the two sets of 30 frames.
+Capture timing is guidance rather than a measured camera angle, so matching does
+not assume that the two arcs progressed at the same speed. These are candidates for
+COLMAP's geometric verification; disconnected surfaces are never forcibly joined.
+There are 1,218 distinct pairs overall, compared with 339 for a single pass.
+Single-pass sessions retain the temporal-only matching policy. Each attempt saves
+`matching-policy.json`, and successful results include matching counts/provenance.
+
+The first real two-pass capture initially split into exactly 30 eye-level and
+30 lower images under temporal-only matching. A reverse-index ±3 cross-pass
+window also failed: intended sweep timing did not identify enough corresponding
+views. Testing all cross-pass pairs increased verified cross-pass pairs with at
+least 15 inliers from 3 to 65 (strongest 48), and registered all 60 images in one
+connected sparse model. No component merging or relaxed registration threshold
+was used. The real-capture retry retains the original failed attempts and input
+images/masks. This establishes sparse connectivity, not anatomical surface accuracy.
+The full retry finished in 202 seconds with all 60 registered images, a
+375,251-triangle raw mesh and frontal registration RMS 3.52 pixels. Original image
+and mask hashes verified unchanged. The raw detector-proxy nose region reported
+zero original boundary/nonmanifold edges and normalized plane RMS 0.005050,
+compared with 0.005068 in the prior eye-level moving-camera trial. These close
+roughness values and region topology do not establish anatomical improvement or
+physical accuracy. The local session is now surface-ready for direct review.
+
 This mode stores `capture_mode: moving_camera_two_pass`, protocol
 `stationary_head_two_height_camera_arcs_v1`, pass index/frame/height/direction and
 per-pass timing. `duration_ms` and `intended_elapsed_ms` describe active capture
