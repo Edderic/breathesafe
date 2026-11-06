@@ -1,0 +1,23 @@
+{
+  "version": "webcam_regional_inspection_v1",
+  "region_basis": "fixed_3d_capsules_around_raw_full_mesh_frontal_detector_ray_hits",
+  "normalizer_indices": [33, 263],
+  "normalizer": "raw_surface_eye_corner_proxy_span_not_anatomical_calibration",
+  "samples": 384,
+  "cloud_samples": 3072,
+  "seed": 37,
+  "cloud_seed": 38,
+  "minimum_samples": 30,
+  "minimum_neighbors": 10,
+  "roughness_radius_fraction": 0.04,
+  "proximity_tolerance_fraction": 0.02,
+  "maximum_display_faces": 200000,
+  "regions": {
+    "nose": {"label": "Nose", "chains": [[168, 4, 2]], "radius_fraction": 0.20},
+    "top_cheek": {"label": "Top cheeks", "chains": [[50, 101], [280, 330]], "radius_fraction": 0.16},
+    "mid_cheek": {"label": "Mid cheeks", "chains": [[205, 187], [425, 411]], "radius_fraction": 0.16},
+    "chin": {"label": "Chin", "chains": [[148, 152, 377]], "radius_fraction": 0.20}
+  },
+  "anatomical_status": "unreviewed_detector_proxies_not_arkit_correspondences_or_verified_seal_paths",
+  "units": "reconstruction_unit"
+}

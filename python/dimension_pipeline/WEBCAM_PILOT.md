@@ -11,6 +11,8 @@ For the frozen-depth filtering workflow and bounded results, see
 [depth experiments](WEBCAM_DEPTH_EXPERIMENTS.md).
 For optional CPU image-guided refinement and the two-capture screening results,
 see [refinement experiments](WEBCAM_REFINEMENT_EXPERIMENTS.md).
+For fixed nose/cheek/chin close-ups and measurement diagnostics on saved captures,
+see [regional inspection and initial findings](WEBCAM_REGIONAL_INSPECTION.md).
 
 ## Setup on this Mac
 

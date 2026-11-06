@@ -26,6 +26,7 @@ from .depth_experiments import run_depth_experiments
 from .refinement_experiments import run_refinement_experiments, selected_profiles, SUITES as REFINEMENT_SUITES
 from .depth_variants import experiment_artifacts, experiment_variants
 from .depth_quality import POLICY as DEPTH_POLICY
+from .regional_inspection import regional_report
 
 ROOT = REPO/'.private-webcam-runs'
 ORIGINS = {f'http://{host}:{port}' for host in ('localhost', '127.0.0.1') for port in (3000, 5173, 5178)}
@@ -428,6 +429,12 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(200, diagnostics()); return
             if self.path == '/diagnostics/refinement':
                 self.reply(200, diagnostics(include_refinement=True)); return
+            regional = re.fullmatch(r'/sessions/([a-f0-9]{32})/regional-report(?:\?variant=([a-z0-9_-]{1,40}))?',self.path)
+            if regional:
+                identity,variant=regional.groups()
+                with self.store.lock:
+                    folder=self.store.folder(identity);state=self.store.load(identity)
+                self.reply(200,regional_report(folder,state,variant or 'raw'));return
             comparison = re.fullmatch(r'/sessions/([a-f0-9]{32})/mesh-comparison(?:\?variant=([a-z0-9_-]{1,40})(?:&reference=([a-z0-9_-]{1,40}))?)?', self.path)
             if comparison:
                 # Snapshot under the lock; do not block cancellation or session reads

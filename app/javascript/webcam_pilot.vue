@@ -159,6 +159,9 @@
           :analysis-mesh="session.result.surface.mesh" :camera="frontCamera" :scale-factor="session.calibrated?.report.mm_per_reconstruction_unit || 1" :units="surface.units"
           :yaw="yaw" :pitch="pitch" :zoom="zoom" :light-azimuth="lightAzimuth" :smooth-lighting="smoothLighting" :surface-edges="surfaceEdges"
           @rotate="yaw=$event.yaw;pitch=$event.pitch" @zoom="zoom=$event" @frame="comparisonFrame=$event" />
+        <button @click="regionalOpen=!regionalOpen">{{ regionalOpen ? 'Close regional inspection' : 'Inspect nose and mask-contact regions' }}</button>
+        <WebcamRegionalInspection v-if="regionalOpen" :api-base="API" :session-id="session.id" :source-key="session.result.full_mesh+'|'+refinementRows.filter(v=>v.status==='completed').map(v=>v.id).join('|')"
+          :variants="refinementRows.filter(v=>v.status==='completed')" :frontal-url="frontUrl" />
         <h3>Tape calibration and independent check</h3>
         <p>Trace left tragion → subnasale → right tragion for scale, including intermediate tape-contact points. Separately trace left tragion → menton → right tragion for the independent check. Routes use mesh edges between controls and may overestimate a smooth tape arc.</p>
         <div class="toolbar"><label>Route<select v-model="routeKind"><option value="scale">Scale via subnasale</option><option value="check">Independent check via menton</option></select></label>
@@ -189,6 +192,7 @@ import { surfaceFraming, surfaceVertexNormals, shadedSurfaceFaces } from './webc
 import { projectPoint } from './dimension_fixture_geometry';
 import { buildSurfaceGraph, surfacePath } from './face_surface_paths';
 import WebcamMeshComparison from './webcam_mesh_comparison.vue';
+import WebcamRegionalInspection from './webcam_regional_inspection.vue';
 
 const API = 'http://127.0.0.1:5182';
 const session = ref(null), sessions = ref([]), diagnostics = ref(null), resumeId = ref('');
@@ -211,6 +215,7 @@ let reviewRevision = 0;
 const frontUrl = ref(''), pointIndex = ref(0), showWire = ref(false), yaw = ref(0), pitch = ref(0), zoom = ref(1), viewport = ref(null);
 const lightAzimuth = ref(-40), surfaceEdges = ref(false), smoothLighting = ref(true);
 const comparisonOpen=ref(false),comparisonFrame=ref(null);
+const regionalOpen=ref(false);
 function resetSurfaceView() { yaw.value=0; pitch.value=0; zoom.value=1; }
 function surfaceWheel(event) {
   if (!event.shiftKey) return;
@@ -240,6 +245,7 @@ async function api(path, payload) {
 async function connect() { diagnostics.value=await api('/diagnostics'); sessions.value=await api('/sessions'); message.value='Connected to private local processor.'; }
 async function adopt(state) {
   comparisonOpen.value=false;comparisonFrame.value=null;
+  regionalOpen.value=false;
   resetSurfaceView();
   reviewRevision++; reviewLoading.value=false;
   stopCamera(); frames.value={}; reviewFrame.value=null; routes.value={scale:[],check:[]}; coverageReviewed.value=false;
