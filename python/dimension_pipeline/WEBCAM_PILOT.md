@@ -119,6 +119,65 @@ Movement, specular skin, weak texture, motion blur, insufficient overlap and
 expression changes may prevent reconstruction. No estimated FLAME head or missing
 surface is substituted. A failed session retains images and logs for inspection.
 
+## Stationary-head / moving-camera comparison
+
+Choose **Head still · move camera** in **Capture mode for new session**, then
+create a new session. This mode defaults to 20 seconds and uses the same 60-frame
+schedule, native camera pixels, masks and reconstruction settings. A session's
+mode is immutable in the UI; older sessions retain head-turn guidance.
+
+For the first comparison, use the same camera/lens and stationary lights as the
+head-turn baseline. A helper moves the camera at eye level, approximately constant
+distance, from the subject's left profile through frontal at ten seconds to the
+subject's right profile at twenty seconds. Keep the full face centered and ears
+and chin in frame. The subject looks at a fixed point ahead and keeps head, torso
+and expression still rather than tracking the camera. Capture the designated
+frontal separately with the camera in front. Speech cues refer to camera position,
+not head turning. These side labels refer to the subject, not the mirrored preview.
+
+Use comparison group `bre18-camera-motion-20261106`; record camera, lighting,
+distance, capture mode and repeat in the conditions. Session context stores
+`capture_mode`; sweep frames also store mode and protocol
+`stationary_head_left_to_right_camera_arc_v1`, along with the existing timing data.
+Review masks and reconstruct normally. Inspect raw full nose geometry and dense
+support before refinement. Do not use hole filling to declare missing anatomy
+recovered. If the defect remains, plan a separately labelled lower-angle coverage
+experiment; this initial mode performs one eye-level arc, not a second lower pass.
+A new-day comparison against old captures has lighting/time confounds; take a
+contemporary head-turn baseline for a stronger comparison and repeat both modes.
+
+For the follow-up lower-angle coverage experiment, choose **Head still · eye-level
++ lower camera passes** before **New session**. The default is 30 active seconds:
+30 eye-level frames over 15 seconds, subject's left to right, then a manual pause
+to lower the camera on the subject's right. Click **Start lower pass** to begin a
+three-second countdown, then capture 30 lower frames over 15 seconds, right to
+left. Aim gently upward from about 10–15° below eye level. Keep the subject's head
+level and still, and keep camera distance, lens and lights unchanged. Cross
+frontal at 7.5 seconds in each default pass; audio includes the fractional-time
+midpoint. Stop works during capture, preparation and the repositioning pause.
+The designated frontal remains a separate eye-level photo. All 60 reconstruction
+frames share one session and camera model.
+
+This mode stores `capture_mode: moving_camera_two_pass`, protocol
+`stationary_head_two_height_camera_arcs_v1`, pass index/frame/height/direction and
+per-pass timing. `duration_ms` and `intended_elapsed_ms` describe active capture
+only; `elapsed_ms` starts at the first pass and includes the intervening pause and
+second preparation countdown. Actual exposure timestamps remain separate. The
+10/20-second alternatives split into two 5/10-second passes. Use the default first.
+Saved session mode is shown beside the session ID to make labelling mistakes
+easier to spot. These labels describe intended camera height, not measured pose.
+
+The first confirmed moving-camera trial (`94c33a27992e43e5903178427f96eb7b`)
+registered all 60 frames in about 254 seconds. The participant confirmed a still
+head and moving camera despite the original head-turn metadata; that correction
+is recorded separately in the ignored private findings without rewriting captures.
+Its raw nose-region plane residual was 6–16% below four previous captures, with
+different room/lighting/framing and no causal accuracy conclusion. Eight small
+boundary edges in the nose region project about 60 pixels to image-left of the
+detector tip proxy; no boundary was found at that proxy itself, which has local
+dense support. The next experiment tests coverage and shape rather than treating
+the visible tip defect as a proven open hole.
+
 ## Reconstruction and camera conventions
 
 The adapter runs masked CPU SIFT extraction, explicit temporal overlap

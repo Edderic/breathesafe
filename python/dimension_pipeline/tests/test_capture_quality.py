@@ -17,6 +17,16 @@ REPO = Path(__file__).resolve().parents[3]
 
 
 class CaptureQualityTests(unittest.TestCase):
+    def test_capture_mode_labels_validate_and_persist(self):
+        self.assertNotIn('capture_mode',capture_context({'group':'legacy'}))
+        with self.assertRaises(ValueError):capture_context({'capture_mode':'unknown'})
+        with tempfile.TemporaryDirectory() as temp:
+            from dimension_pipeline.webcam_pilot import Store
+            store=Store(temp);state=store.create({'capture_context':{'group':'camera-motion','capture_mode':'moving_camera'}})
+            self.assertEqual(store.load(state['id'])['capture_context']['capture_mode'],'moving_camera')
+            two=store.create({'capture_context':{'capture_mode':'moving_camera_two_pass'}})
+            self.assertEqual(store.load(two['id'])['capture_context']['capture_mode'],'moving_camera_two_pass')
+
     def fixture(self):
         y, x = np.mgrid[:96, :120]
         pattern = np.where((x//3+y//3) % 2, 220, 40).astype('uint8')

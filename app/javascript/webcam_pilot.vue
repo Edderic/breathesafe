@@ -4,6 +4,11 @@
     <p>Capture a neutral face, reconstruct a surface, calibrate with a tape arc, and inspect projected frontal landmarks.</p>
     <p class="notice">Experimental surface and points. Tape calibration sets scale; it does not validate 3D accuracy or ARKit equivalence. Reconstruction, camera alignment, and landmark agreement require separate review.</p>
     <p v-if="error" role="alert" class="error">{{ error }}</p><p v-if="message" role="status">{{ message }}</p>
+    <label>Capture mode for new session<select aria-label="Capture mode for new session" v-model="newCaptureMode" :disabled="busy" @change="prepareCaptureMode">
+      <option value="head_turn">Head turns · fixed camera</option><option value="moving_camera">Head still · move camera</option>
+      <option value="moving_camera_two_pass">Head still · eye-level + lower camera passes</option>
+    </select></label>
+    <p>Choose the mode before New session. Existing sessions retain their saved capture mode.</p>
     <details><summary>Optional capture-comparison labels</summary>
       <p>Set these before New session. Use the same group and conditions for repeated 10/20/30-second captures. Describe lighting, camera position and any changes; avoid participant names.</p>
       <label>Comparison group<input v-model="comparisonGroup" maxlength="80" /></label>
@@ -24,7 +29,7 @@
     <details v-if="diagnostics"><summary>Setup diagnostics · {{ diagnostics.ready ? 'tools ready' : 'setup required' }}</summary><pre>{{ JSON.stringify(diagnostics, null, 2) }}</pre></details>
     <p v-else>Start the loopback processor and research preview using <code>python/dimension_pipeline/WEBCAM_PILOT.md</code>.</p>
     <template v-if="session">
-      <p>Session {{ session.id }} · {{ session.status }} <span v-if="session.stage">· {{ session.stage }}</span> · {{ session.captures.length }}/61 approved images saved locally</p>
+      <p>Session {{ session.id }} · {{ session.status }} <span v-if="session.stage">· {{ session.stage }}</span> · {{ session.captures.length }}/61 approved images saved locally · Capture mode: {{ session.capture_context?.capture_mode || 'head_turn (legacy)' }}</p>
       <section v-if="session.result" class="camera-settings">
         <h3>Depth filtering experiments</h3>
         <p>Compare 2/3/4-view fusion agreement, speckle removal and two added geometric-consistency passes on frozen depth maps. Raw geometry, captures and annotations stay intact. Variants are read-only and require coverage/detail review.</p>
@@ -83,17 +88,21 @@
           <p v-if="cameraControlMessage" role="status">{{ cameraControlMessage }}</p>
         </section>
         <div class="columns">
-          <section><div class="camera-preview"><video ref="video" autoplay playsinline muted class="preview" /><div class="framing-guide" aria-hidden="true"></div></div><p>Mirrored preview · stored photos are unmirrored. Keep ears and chin inside the guide throughout the turn; move closer if your head looks small.</p>
+          <section><div class="camera-preview"><video ref="video" autoplay playsinline muted class="preview" /><div class="framing-guide" aria-hidden="true"></div></div><p>Mirrored preview · stored photos are unmirrored. Keep ears and chin inside the guide throughout the sweep; move closer if your head looks small.</p>
             <p>{{ guidance }}</p><p aria-live="polite">{{ countdown || '' }}</p>
             <div class="toolbar"><label><input type="checkbox" v-model="audioEnabled" @change="updateAudio" /> Speak countdown and capture cues</label>
-              <label>Sweep duration<select v-model.number="sweepDuration" :disabled="busy">
+              <label>{{ captureMode==='moving_camera_two_pass' ? 'Active capture time (pause excluded)' : 'Sweep duration' }}<select aria-label="Sweep duration" v-model.number="sweepDuration" :disabled="busy">
                 <option :value="10">10 seconds · 60 frames</option>
                 <option :value="20">20 seconds · 60 frames</option>
                 <option :value="30">30 seconds · 60 frames</option>
               </select></label>
               <button @click="testAudio" :disabled="busy || !audioEnabled">Test audio</button></div>
-            <p><strong>One continuous 60-frame sweep:</strong> start at your right profile, look directly at the camera halfway through ({{ sweepDuration/2 }} seconds), and finish at your left profile. Keep your chin level and turn smoothly. A three-second preparation countdown comes before the {{ sweepDuration }}-second capture countdown. Capture the designated frontal photo separately.</p>
-            <p v-if="sweeping" role="status">{{ captureRemaining }} seconds remaining · {{ selected }}/60 frames captured</p>
+            <p v-if="captureMode==='moving_camera_two_pass'"><strong>Two camera passes · 30 + 30 frames:</strong> pass 1 moves at eye level from your left profile through frontal to your right profile in {{ sweepDuration/2 }} seconds. Then capture pauses: lower the camera slightly (about 10–15° below eye level, aiming gently upward), keeping it on your right side. Click Start lower pass when ready. Pass 2 returns from your right profile through frontal to your left profile in {{ sweepDuration/2 }} seconds. Each pass crosses frontal halfway through, at {{ sweepDuration/4 }} seconds. Keep head, torso, expression, lights, lens and approximate camera distance fixed. Look straight ahead rather than tracking the camera. Left/right mean the subject’s sides. Capture a separate eye-level frontal photo first. Each pass has a three-second preparation countdown; repositioning is not captured.</p>
+            <p v-else-if="captureMode==='moving_camera'"><strong>Head still · move camera · 60 frames:</strong> a helper starts with the camera at your left profile, moves it along an eye-level arc to directly in front at {{ sweepDuration/2 }} seconds, and finishes at your right profile at {{ sweepDuration }} seconds. Left/right mean the subject’s sides. Keep the same camera, lens, lighting and approximate face-to-camera distance. Keep lights stationary. Keep your head and torso still, look at a fixed point ahead, and do not follow the camera. Move the camera’s position around the head, rather than swiveling it from one spot. Capture a separate frontal photo with the camera directly in front. Three preparation seconds come before the sweep.</p>
+            <p v-else><strong>One continuous 60-frame sweep:</strong> start at your right profile, look directly at the camera halfway through ({{ sweepDuration/2 }} seconds), and finish at your left profile. Keep your chin level and turn smoothly. A three-second preparation countdown comes before the {{ sweepDuration }}-second capture countdown. Capture the designated frontal photo separately.</p>
+            <p v-if="sweeping" role="status">{{ capturePass ? 'Pass '+capturePass+' · ' : '' }}{{ captureRemaining }} seconds remaining in sweep · {{ selected }}/60 frames captured</p>
+            <p v-if="lowerPassReady" role="status">30 eye-level frames captured. Keep your head still. Reposition the camera slightly lower on your right side, then start pass 2. No frames are captured during this pause.</p>
+            <button v-if="lowerPassReady" @click="continueLowerPass">Start lower pass</button>
             <p v-if="audioMessage" role="status">{{ audioMessage }}</p>
             <div class="toolbar"><button @click="guard(() => takePhoto(selected))" :disabled="!stream || !consent || busy">{{ selected === 0 ? 'Capture frontal' : 'Capture / retake selected frame' }}</button>
               <button @click="guard(startSweep)" :disabled="!stream || !consent || busy">Capture all 60 frames</button>
@@ -190,7 +199,7 @@
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
-import { captureNativeFrame, nativeCameraConstraints, captureGuidance, runCaptureSweep } from './webcam_capture';
+import { captureNativeFrame, nativeCameraConstraints, captureGuidance, runCaptureSweep, sweepCues } from './webcam_capture';
 import { createCaptureAudio, capturedFrameCue } from './webcam_capture_audio';
 import { captureQuality, qualityMessages } from './webcam_capture_quality';
 import { inspectCameraControls, applyCameraControl, cameraControlSnapshot } from './webcam_camera_controls';
@@ -217,16 +226,21 @@ const savedSessionGroups = computed(() => {
 });
 const error = ref(''), message = ref(''), busy = ref(false), consent = ref(false);
 const comparisonGroup=ref(''),comparisonConditions=ref(''),comparisonRepeat=ref(1);
+const newCaptureMode=ref('head_turn');
+const captureMode=computed(()=>session.value?.capture_context?.capture_mode || 'head_turn');
+function prepareCaptureMode(){if(newCaptureMode.value==='moving_camera')sweepDuration.value=20;else if(newCaptureMode.value==='moving_camera_two_pass')sweepDuration.value=30;}
 const cameraControls=ref([]),selectedLocks=ref([]),cameraAttempts=ref([]),cameraControlMessage=ref('');
 let initialCameraControls=[];
 const video = ref(null), stream = ref(null), countdown = ref(0), selected = ref(0), frames = ref({}), captureCancelled = ref(false);
 const audioEnabled = ref(true), audioMessage = ref('');
 const sweepDuration = ref(10), sweeping = ref(false), captureRemaining = ref(0);
+const capturePass=ref(0),lowerPassReady=ref(false);let lowerPassResolve;
+function continueLowerPass(){lowerPassReady.value=false;lowerPassResolve?.(true);lowerPassResolve=null;}
 const captureAudio = createCaptureAudio(window, text => { audioMessage.value=text; });
 function cue(text) { if (audioEnabled.value) captureAudio.speak(text, 1.8); }
 function updateAudio() { captureAudio.cancel(); audioMessage.value=''; }
 function testAudio() { audioMessage.value='You should hear “Frame one.”'; cue('Frame one.'); }
-function stopCapture() { captureCancelled.value=true; captureAudio.cancel(); }
+function stopCapture() { captureCancelled.value=true; captureAudio.cancel(); lowerPassResolve?.(false);lowerPassResolve=null;lowerPassReady.value=false; }
 const maskCanvas = ref(null), reviewFrame = ref(null), includeBrush = ref(false), brushSize = ref(30);
 const reviewLoading = ref(false);
 const bulkProgress = ref(null), bulkCancelled = ref(false);
@@ -246,7 +260,7 @@ const scaleReadings = ref(['','','']), checkReadings = ref(['','','']), coverage
 let pollTimer, maskWorker, workerCounter = 0, maskPixels, painting = false, drag = null, disposed = false;
 const pending = new Map();
 const slot = i => i === 0 ? 'front' : 'turn_'+String(i-1).padStart(2, '0');
-const guidance = computed(() => captureGuidance(selected.value));
+const guidance = computed(() => captureGuidance(selected.value,captureMode.value));
 const approved = i => !frames.value[i]?.pending && session.value?.captures.some(c => c.slot === slot(i));
 const hasUnapprovedFrames = computed(() => Object.values(frames.value).some(f => f.pending));
 const captureSettingsFrozen=computed(()=>!!session.value?.captures.length || Object.keys(frames.value).length>0);
@@ -272,6 +286,8 @@ async function adopt(state) {
   stopCamera(); frames.value={}; reviewFrame.value=null; routes.value={scale:[],check:[]}; coverageReviewed.value=false;
   session.value=state; selected.value=0; schedulePoll();
   comparisonGroup.value=state.capture_context?.group || '';comparisonConditions.value=state.capture_context?.conditions || '';comparisonRepeat.value=state.capture_context?.repeat || 1;
+  newCaptureMode.value=state.capture_context?.capture_mode || 'head_turn';
+  prepareCaptureMode();
   if (frontUrl.value) URL.revokeObjectURL(frontUrl.value); frontUrl.value='';
   if (state.calibrated) {
     const report=state.calibrated.report;
@@ -284,7 +300,7 @@ async function adopt(state) {
   }
   if (state.result) await loadFrontal();
 }
-async function createSession() { await adopt(await api('/sessions', {capture_context:{group:comparisonGroup.value,conditions:comparisonConditions.value,repeat:comparisonRepeat.value}})); await connect(); }
+async function createSession() { await adopt(await api('/sessions', {capture_context:{group:comparisonGroup.value,conditions:comparisonConditions.value,repeat:comparisonRepeat.value,capture_mode:newCaptureMode.value}})); await connect(); }
 async function resume() { await adopt(await api('/sessions/'+resumeId.value)); }
 function schedulePoll() { clearTimeout(pollTimer); if (!disposed && processing.value) pollTimer=setTimeout(() => guard(refresh), 1500); }
 async function refresh() {
@@ -350,20 +366,42 @@ function snap(index, sequence=null) {
 async function takePhoto(index) { busy.value=true; captureCancelled.value=false; try { await countIn(); if (captureCancelled.value) return; snap(index); await reviewSelected(); } finally { busy.value=false; countdown.value=0; } }
 async function startSweep() {
   busy.value=true; captureCancelled.value=false;
-  const duration=sweepDuration.value, sequenceId=crypto.randomUUID();
+  const duration=sweepDuration.value, mode=captureMode.value, sequenceId=crypto.randomUUID();
   try {
-    await countIn('Right profile.');
+    if(mode==='moving_camera_two_pass') {
+      let started;
+      for(let pass=1;pass<=2;pass++) {
+        capturePass.value=pass;
+        if(pass===2) {
+          sweeping.value=false;lowerPassReady.value=true;
+          cue('Pass one complete. Keep head still. Lower camera on subject’s right. Click Start lower pass when ready.');
+          const proceed=await new Promise(resolve=>{lowerPassResolve=resolve;});
+          if(!proceed || captureCancelled.value || disposed)return;
+        }
+        await countIn(pass===1 ? 'Eye level. Camera at subject’s left. Head still.' : 'Lower camera at subject’s right. Head still.');
+        if(captureCancelled.value || disposed)return;
+        if(pass===1)started=performance.now();
+        const passStarted=performance.now();sweeping.value=true;
+        const complete=await runCaptureSweep({durationSeconds:duration/2,frameCount:30,cancelled:()=>captureCancelled.value||disposed,
+          capture:(index,timing)=>{const global=(pass-1)*30+index;selected.value=global;snap(global,{id:sequenceId,protocol:'stationary_head_two_height_camera_arcs_v1',capture_mode:mode,frame_index:global,duration_ms:duration*1000,pass_index:pass,pass_frame_index:index,pass_height:pass===1?'eye_level':'lower',direction:pass===1?'left_to_right':'right_to_left',pass_duration_ms:duration*500,pass_intended_elapsed_ms:timing.intended_elapsed_ms,pass_elapsed_ms:timing.elapsed_ms,intended_elapsed_ms:(pass-1)*duration*500+timing.intended_elapsed_ms,elapsed_ms:performance.now()-started,pass_started_elapsed_ms:passStarted-started,timing_basis:'elapsed_includes_repositioning_and_second_countdown; intended_is_active_capture_only'});},
+          countdown:remaining=>{captureRemaining.value=remaining;if(remaining!==0 || pass===2)cue(sweepCues(mode,remaining,duration/2));},
+        });
+        if(!complete)return;
+      }
+      selected.value=1;if(!disposed)await reviewSelected();return;
+    }
+    await countIn(mode==='moving_camera' ? 'Camera at subject’s left. Keep head still.' : 'Right profile.');
     if (captureCancelled.value || disposed) return;
     sweeping.value=true;
     const complete=await runCaptureSweep({ durationSeconds:duration,
       cancelled:()=>captureCancelled.value || disposed,
-      capture:(index,timing)=>{ selected.value=index; snap(index,{id:sequenceId,protocol:'right_to_left_sweep_v1',frame_index:index,duration_ms:duration*1000,...timing}); },
-      countdown:remaining=>{ captureRemaining.value=remaining; cue(remaining===0 ? 'Left profile. Done.' : remaining===duration/2 ? 'Face camera.' : String(remaining)); },
+      capture:(index,timing)=>{ selected.value=index; snap(index,{id:sequenceId,protocol:mode==='moving_camera' ? 'stationary_head_left_to_right_camera_arc_v1' : 'right_to_left_sweep_v1',capture_mode:mode,frame_index:index,duration_ms:duration*1000,...timing}); },
+      countdown:remaining=>{ captureRemaining.value=remaining; cue(sweepCues(mode,remaining,duration)); },
     });
     if (complete) { selected.value=1; message.value='Sweep complete. Review and approve all 60 masks.'; }
     if (!disposed) await reviewSelected();
   } catch (error) { captureAudio.cancel(); throw error;
-  } finally { busy.value=false; countdown.value=0; sweeping.value=false; }
+  } finally { busy.value=false; countdown.value=0; sweeping.value=false;capturePass.value=0;lowerPassReady.value=false;lowerPassResolve=null; }
 }
 function workerSegment(canvas) {
   if (!maskWorker) {
