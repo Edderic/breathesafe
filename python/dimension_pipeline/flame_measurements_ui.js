@@ -16,7 +16,7 @@ const FlameMeasurements=(()=>{
   function queue(){const heap=[];return {push(value){heap.push(value);let i=heap.length-1;while(i){const p=(i-1)>>1;if(heap[p][0]<=value[0])break;heap[i]=heap[p];i=p;}heap[i]=value;},pop(){const first=heap[0],last=heap.pop();if(heap.length){let i=0;while(i*2+1<heap.length){let c=i*2+1;if(c+1<heap.length&&heap[c+1][0]<heap[c][0])c++;if(heap[c][0]>=last[0])break;heap[i]=heap[c];i=c;}heap[i]=last;}return first;},get length(){return heap.length;}};}
   function segment(mesh,edges,start,end){
     const a=location(mesh,start),b=location(mesh,end);
-    if((a.face!==null&&a.face===b.face)||(a.face!==null&&b.seeds.every(i=>a.seeds.includes(i)))||(b.face!==null&&a.seeds.every(i=>b.seeds.includes(i))))return {length:distance(a.point,b.point),points:[a.point,b.point]};
+    if((a.face!==null&&a.face===b.face)||(a.face!==null&&b.seeds.every(i=>a.seeds.includes(i)))||(b.face!==null&&a.seeds.every(i=>b.seeds.includes(i))))return {length:distance(a.point,b.point),points:[a.point,b.point],attachments:[start,end]};
     const dist=mesh.vertices.map(()=>Infinity),previous=new Map(),pending=queue(),goals=new Map(b.seeds.map(i=>[i,distance(mesh.vertices[i],b.point)]));
     for(const i of a.seeds){dist[i]=distance(a.point,mesh.vertices[i]);pending.push([dist[i],i]);}
     let best=Infinity,finish=null;
@@ -27,17 +27,18 @@ const FlameMeasurements=(()=>{
     }
     if(finish===null)throw Error('Route crosses disconnected surface components.');
     const ids=[finish];while(previous.has(ids[ids.length-1]))ids.push(previous.get(ids[ids.length-1]));ids.reverse();
-    return {length:best,points:[a.point,...ids.map(i=>mesh.vertices[i]),b.point]};
+    return {length:best,points:[a.point,...ids.map(i=>mesh.vertices[i]),b.point],attachments:[start,...ids.map(vertex_index=>({kind:'vertex',vertex_index})),end]};
   }
-  function route(mesh,edges,points,names){
+  function route(mesh,edges,points,names,method='edges'){
+    if(!['edges','surface'].includes(method))throw Error('Unknown surface route method.');
     if(!Array.isArray(names)||names.length<2||names.length>200)throw Error('Choose at least two route controls (maximum 200).');
-    let length=0,path=[];
+    let length=0,path=[],surfaceSegments=0,fallbacks=0;
     for(let i=0;i<names.length-1;i++){
       const a=points.find(p=>p.name===names[i]),b=points.find(p=>p.name===names[i+1]);
       if(!a?.attachment||!b?.attachment||a.status==='unavailable'||b.status==='unavailable')throw Error('Place every available route control: '+names[i]+' → '+names[i+1]);
-      const part=segment(mesh,edges,a.attachment,b.attachment);length+=part.length;path.push(...part.points);
+      const part=method==='surface'?smoothRouteSegment(mesh,edges,a.attachment,b.attachment):segment(mesh,edges,a.attachment,b.attachment);length+=part.length;path.push(...part.points);surfaceSegments+=part.surface_segments??0;fallbacks+=part.edge_fallback_segments??0;
     }
-    if(!(length>0))throw Error('Route has zero length.');return {length,points:path,method:'piecewise_mesh_edge_dijkstra_with_barycentric_endpoint_links'};
+    if(!(length>0))throw Error('Route has zero length.');return {length,points:path,surface_segments:surfaceSegments,edge_fallback_segments:fallbacks,method:method==='surface'?'anchored_local_unfolded_triangle_strip_shortcuts_v1':'piecewise_mesh_edge_dijkstra_with_barycentric_endpoint_links'};
   }
   function readings(values){
     if(!Array.isArray(values)||values.length!==3||values.some(v=>!Number.isFinite(v)||v<=0))throw Error('Enter three positive tape readings in millimeters.');
@@ -86,22 +87,38 @@ const FlameMeasurements=(()=>{
     const direct=stripSegment(mesh,edges,start,end);if(direct)return direct;
     return {...segment(mesh,edges,start,end),method:'mesh_edges_fallback',fallback:true};
   }
+  function smoothRouteSegment(mesh,edges,start,end){
+    const raw=segment(mesh,edges,start,end),anchors=[];
+    for(const a of raw.attachments)if(!anchors.length||distance(location(mesh,anchors.at(-1)).point,location(mesh,a).point)>1e-12)anchors.push(a);
+    const cumulative=[0];for(let i=1;i<anchors.length;i++)cumulative.push(cumulative.at(-1)+distance(location(mesh,anchors[i-1]).point,location(mesh,anchors[i]).point));
+    let points=[location(mesh,start).point],surface_segments=0,edge_fallback_segments=0;
+    for(let i=0;i<anchors.length-1;){
+      let chosen=null,next=i+1;
+      // Keep the original edge route as a corridor guide. Shortcut bounded
+      // local windows across actual triangles, preserving every named control.
+      for(let j=Math.min(i+12,anchors.length-1);j>i;j--){const candidate=stripSegment(mesh,edges,anchors[i],anchors[j]);if(candidate&&candidate.length<=cumulative[j]-cumulative[i]+1e-10){chosen=candidate;next=j;break;}}
+      if(chosen){surface_segments++;points.push(...chosen.points.slice(1));}
+      else{edge_fallback_segments++;points.push(location(mesh,anchors[next]).point);}
+      i=next;
+    }
+    const length=points.slice(1).reduce((s,p,i)=>s+distance(points[i],p),0);return {length,points,surface_segments,edge_fallback_segments};
+  }
   function calibration(mesh,edges,draft){
     const names=draft.routes.scale;
     if(names[0]!=='left_tragion'||names.at(-1)!=='right_tragion'||names.filter(n=>n==='subnasale').length!==1)throw Error('Scale route must run left_tragion → subnasale → right_tragion, with intermediate controls.');
     if(names.some(n=>draft.points.find(p=>p.name===n)?.status!=='reviewed'))throw Error('Review every control on the scale route before calibration.');
-    const arc=route(mesh,edges,draft.points,names),tape=readings(draft.scale_readings_mm),scale=tape.median_mm/arc.length;
+    const arc=route(mesh,edges,draft.points,names,draft.route_methods?.scale??'edges'),tape=readings(draft.scale_readings_mm),scale=tape.median_mm/arc.length;
     let check={status:'not_measured'};
     if(draft.check_readings_mm.some(v=>v!==null&&v!=='')){
       try{
         const order=draft.routes.check;
         if(order[0]!=='left_tragion'||order.at(-1)!=='right_tragion'||order.filter(n=>n==='menton').length!==1)throw Error('Check route must pass left_tragion → menton → right_tragion.');
         if(order.some(n=>draft.points.find(p=>p.name===n)?.status!=='reviewed'))throw Error('Review every independent-check control.');
-        const arcCheck=route(mesh,edges,draft.points,order),tapeCheck=readings(draft.check_readings_mm),mm=arcCheck.length*scale;
-        check={status:'ok',...tapeCheck,mesh_length_mm:mm,discrepancy_mm:mm-tapeCheck.median_mm,discrepancy_percent:100*(mm/tapeCheck.median_mm-1)};
+        const arcCheck=route(mesh,edges,draft.points,order,draft.route_methods?.check??'edges'),tapeCheck=readings(draft.check_readings_mm),mm=arcCheck.length*scale;
+        check={status:'ok',...tapeCheck,route_method:arcCheck.method,mesh_length_mm:mm,discrepancy_mm:mm-tapeCheck.median_mm,discrepancy_percent:100*(mm/tapeCheck.median_mm-1)};
       }catch(error){check={status:'incomplete',error:error.message};}
     }
-    return {method:'uniform_tape_arc_median_v1',mm_per_reconstruction_unit:scale,scale:{...tape,route_length_reconstruction_units:arc.length},independent_check:check};
+    return {method:'uniform_tape_arc_median_v1',mm_per_reconstruction_unit:scale,scale:{...tape,route_method:arc.method,route_length_reconstruction_units:arc.length},independent_check:check};
   }
   function validate(draft,identity,mesh){
     if(draft?.version!==VERSION||Object.keys(identity).some(k=>draft[k]!==identity[k]))throw Error('Measurements belong to a different fitted mesh, model or session.');
@@ -109,6 +126,7 @@ const FlameMeasurements=(()=>{
     const seen=new Set();
     for(const p of draft.points){if(typeof p.name!=='string'||! /^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(p.name)||seen.has(p.name)||!['pending','reviewed','uncertain','unavailable'].includes(p.status)||typeof p.notes!=='string'||p.notes.length>4000)throw Error('Invalid or duplicate direct point.');seen.add(p.name);if(p.attachment)location(mesh,p.attachment);else if(p.status==='reviewed')throw Error('Reviewed point needs a placement.');}
     for(const key of ['scale','check','custom'])if(!Array.isArray(draft.routes?.[key])||draft.routes[key].length>200||draft.routes[key].some(n=>typeof n!=='string'||!seen.has(n)))throw Error('Invalid route controls.');
+    if(draft.route_methods!==undefined&&(!draft.route_methods||typeof draft.route_methods!=='object'||Array.isArray(draft.route_methods)||Object.entries(draft.route_methods).some(([key,value])=>!['scale','check','custom'].includes(key)||!['edges','surface'].includes(value))))throw Error('Invalid named-route smoothing settings.');
     for(const key of ['scale_readings_mm','check_readings_mm'])if(!Array.isArray(draft[key])||draft[key].length!==3||draft[key].some(x=>x!==null&&(!Number.isFinite(x)||x<=0)))throw Error('Invalid tape readings.');
     if(!Array.isArray(draft.line)||draft.line.length!==2||draft.line.some(n=>!seen.has(n)))throw Error('Invalid straight-line endpoints.');
     validatePerimeters(draft.perimeters??[],mesh);
@@ -159,8 +177,12 @@ const FlameMeasurements=(()=>{
     if(!Number.isFinite(span)||span<=0||!Array.isArray(plane?.origin)||!Array.isArray(plane?.normal)||plane.origin.length!==3||plane.normal.length!==3||[...plane.origin,...plane.normal].some(v=>!Number.isFinite(v)))throw Error('Invalid FLAME mirror plane.');
     const norm=Math.hypot(...plane.normal);if(norm<1e-12)throw Error('Invalid FLAME mirror plane.');const normal=plane.normal.map(x=>x/norm),side=p=>subtract(p,plane.origin).reduce((s,x,i)=>s+x*normal[i],0);
     const controls=source.strokes.flat();if(source.closed||controls.length<2)throw Error('Draw an open half arc before mirroring.');
-    const sides=controls.map(a=>side(location(mesh,a).point));if(sides.some(x=>x>span*.03)&&sides.some(x=>x< -span*.03))throw Error('Use a half arc on one side of the FLAME midline.');
-    if(full&&(source.strokes.length!==1||controls.length<3||Math.abs(sides[0])>span*.05||Math.abs(sides.at(-1))>span*.05))throw Error('For a full perimeter, use one continuous half arc with both endpoints near the FLAME midline (within 0.05 eye spans).');
+    // Small near-midline overshoots are normal when tracing in screen space.
+    // Classify the cheek-side extent outside this band, not an endpoint alone.
+    const sides=controls.map(a=>side(location(mesh,a).point)),midlineBand=span*.08;
+    if(sides.some(x=>x>midlineBand)&&sides.some(x=>x< -midlineBand))throw Error('Use a half arc on one side of the FLAME midline; near-midline controls may cross slightly.');
+    if(!sides.some(x=>Math.abs(x)>midlineBand))throw Error('The arc stays near the midline, so its mirror would overlap. Trace outward along one side of the face.');
+    if(full&&(source.strokes.length!==1||controls.length<3||Math.abs(sides[0])>midlineBand||Math.abs(sides.at(-1))>midlineBand))throw Error('For a full perimeter, use one continuous half arc with both endpoints near the FLAME midline (within 0.08 eye spans).');
     const labels=new Int32Array(mesh.vertices.length);labels.fill(-1);let component=0;for(let i=0;i<labels.length;i++){if(labels[i]>=0)continue;const pending=[i];labels[i]=component;while(pending.length){const v=pending.pop();for(const n of edges[v].keys())if(labels[n]<0){labels[n]=component;pending.push(n);}}component++;}
     const distances=[];
     const mirrored=source.strokes.map(stroke=>stroke.map(a=>{const info=location(mesh,a),d=side(info.point),target=info.point.map((x,i)=>x-2*d*normal[i]),component=labels[info.seeds[0]];let best=null;
@@ -169,7 +191,7 @@ const FlameMeasurements=(()=>{
     }));
     const result=structuredClone(source);result.status='pending';result.closed=full;result.strokes=mirrored;
     if(full){const combined=[...source.strokes[0]],back=[...mirrored[0]].reverse();for(const a of back)if(distance(location(mesh,combined.at(-1)).point,location(mesh,a).point)>span*1e-7)combined.push(a);if(combined.length>2&&distance(location(mesh,combined[0]).point,location(mesh,combined.at(-1)).point)<span*1e-7)combined.pop();result.strokes=[combined];}
-    result.mirror_provenance={method:'FLAME_model_X_plane_reflection_then_same_component_opposite_surface_projection_v1',source_perimeter_id:source.id,source_name:source.name,full_perimeter:full,plane:{origin:[...plane.origin],normal},projection_max_reconstruction_units:Math.max(...distances),projection_mean_reconstruction_units:distances.reduce((s,x)=>s+x,0)/distances.length,endpoint_midline_tolerance_fraction_eye_span:.05,projection_limit_fraction_eye_span:.08,anatomical_symmetry:'assumed_for_draft_not_validated'};
+    result.mirror_provenance={method:'FLAME_model_X_plane_reflection_then_same_component_opposite_surface_projection_v2',source_perimeter_id:source.id,source_name:source.name,full_perimeter:full,plane:{origin:[...plane.origin],normal},projection_max_reconstruction_units:Math.max(...distances),projection_mean_reconstruction_units:distances.reduce((s,x)=>s+x,0)/distances.length,endpoint_midline_tolerance_fraction_eye_span:.08,half_classification_midline_band_fraction_eye_span:.08,projection_limit_fraction_eye_span:.08,anatomical_symmetry:'assumed_for_draft_not_validated'};
     validatePerimeters([result],mesh);return result;
   }
   return {VERSION,distance,location,graph,route,readings,calibration,validate,perimeterStyles,validatePerimeters,addPerimeterStroke,measurePerimeter,surfaceSegment,mirrorPerimeter};

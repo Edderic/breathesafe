@@ -164,6 +164,16 @@ class SessionTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.store.start(first['id'])
 
+    def test_start_rejects_stored_unapproved_mask_proposals(self):
+        state=self.store.create()
+        for slot in ['front']+['turn_'+str(i).zfill(2) for i in range(60)]:
+            state=self.store.capture(state['id'],self.payload(slot))
+        state['captures'][0]['mask_approved']=False
+        self.store.save(state)
+        with self.assertRaisesRegex(ValueError,'Review and approve'):
+            self.store.start(state['id'])
+        self.assertEqual(self.store.load(state['id'])['status'],'capturing')
+
     def test_sweep_metadata_survives_capture_save(self):
         context = {'group': 'desk-light-a', 'conditions': 'Same camera and diffuse light', 'repeat': 1}
         state = self.store.create({'capture_context': context})

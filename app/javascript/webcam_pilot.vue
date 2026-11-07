@@ -29,7 +29,7 @@
     <details v-if="diagnostics"><summary>Setup diagnostics · {{ diagnostics.ready ? 'tools ready' : 'setup required' }}</summary><pre>{{ JSON.stringify(diagnostics, null, 2) }}</pre></details>
     <p v-else>Start the loopback processor and research preview using <code>python/dimension_pipeline/WEBCAM_PILOT.md</code>.</p>
     <template v-if="session">
-      <p>Session {{ session.id }} · {{ session.status }} <span v-if="session.stage">· {{ session.stage }}</span> · {{ session.captures.length }}/61 approved images saved locally · Capture mode: {{ session.capture_context?.capture_mode || 'head_turn (legacy)' }}</p>
+      <p>Session {{ session.id }} · {{ session.status }} <span v-if="session.stage">· {{ session.stage }}</span> · {{ approvedCaptureCount }}/61 approved images saved locally · Capture mode: {{ session.capture_context?.capture_mode || 'head_turn (legacy)' }}</p>
       <section v-if="session.result" class="camera-settings">
         <h3>Depth filtering experiments</h3>
         <p>Compare 2/3/4-view fusion agreement, speckle removal and two added geometric-consistency passes on frozen depth maps. Raw geometry, captures and annotations stay intact. Variants are read-only and require coverage/detail review.</p>
@@ -121,14 +121,15 @@
               <p v-else>No screening flags. Check ears, chin and mask boundaries visually.</p>
               <small>Provisional screening threshold: sharpness {{ reviewFrame.capture_quality.policy.sharpness_warning_below }}. Low texture can also lower the score. Retake flagged frames if needed; acceptance keeps them.</small>
             </section>
-            <p>Paint <strong>include</strong> to restore ears; paint <strong>exclude</strong> to remove neck, shoulders and background. The green overlay shows included pixels. Check mask coverage before relying on the reconstruction.</p>
+            <p v-if="session.mask_experiment"><strong>Upper-neck mask experiment:</strong> {{ session.mask_experiment.instructions }} Original photos are reused; these proposed masks have not been approved. Use A to approve and advance.</p>
+            <p>Paint <strong>include</strong> to restore ears, chin and intended upper-neck coverage; paint <strong>exclude</strong> to remove shoulders, clothing and background. The green overlay shows included pixels. Check mask coverage before relying on the reconstruction.</p>
             <div class="toolbar"><button @click="guard(reviewSelected)" :disabled="busy || reviewLoading">Load / generate mask</button><label><input type="checkbox" v-model="includeBrush" /> Include brush</label>
               <label>Brush size<input type="range" v-model.number="brushSize" min="3" max="120" /></label></div>
             <canvas ref="maskCanvas" class="mask-editor" @pointerdown="brushStart" @pointermove="brushMove" @pointerup="brushEnd" @pointercancel="brushEnd" />
-            <button @click="guard(approveMask)" :disabled="!reviewFrame || busy || reviewLoading" aria-keyshortcuts="a">Approve and save this head-only mask</button>
-            <div class="toolbar"><button @click="guard(acceptAllFrames)" :disabled="busy || reviewLoading || painting || !bulkCandidates.length">Accept all frames</button>
+            <button @click="guard(approveMask)" :disabled="!reviewFrame || busy || reviewLoading" aria-keyshortcuts="a">{{ session.mask_experiment ? 'Approve and save this mask' : 'Approve and save this head-only mask' }}</button>
+            <div class="toolbar"><button @click="guard(acceptAllFrames)" :disabled="busy || reviewLoading || painting || !bulkCandidates.length || !!session.mask_experiment">Accept all frames</button>
               <button v-if="bulkProgress" @click="bulkCancelled=true">Stop accepting</button></div>
-            <p>Accept all saves the current masks for every pending captured frame, including the frontal photo, and generates missing masks automatically. This skips individual mask review.</p>
+            <p v-if="!session.mask_experiment">Accept all saves the current masks for every pending captured frame, including the frontal photo, and generates missing masks automatically. This skips individual mask review.</p>
             <p v-if="bulkProgress" role="status">Accepted {{ bulkProgress.completed }} / {{ bulkProgress.total }} frames · {{ slot(selected) }}</p>
           </section>
         </div>
@@ -265,8 +266,9 @@ let pollTimer, maskWorker, workerCounter = 0, maskPixels, painting = false, drag
 const pending = new Map();
 const slot = i => i === 0 ? 'front' : 'turn_'+String(i-1).padStart(2, '0');
 const guidance = computed(() => captureGuidance(selected.value,captureMode.value));
-const approved = i => !frames.value[i]?.pending && session.value?.captures.some(c => c.slot === slot(i));
-const hasUnapprovedFrames = computed(() => Object.values(frames.value).some(f => f.pending));
+const approved = i => !frames.value[i]?.pending && session.value?.captures.some(c => c.slot === slot(i) && c.mask_approved === true);
+const approvedCaptureCount=computed(()=>session.value?.captures.filter(c=>c.mask_approved===true).length || 0);
+const hasUnapprovedFrames = computed(() => Object.values(frames.value).some(f => f.pending) || session.value?.captures.some(c=>c.mask_approved!==true));
 const captureSettingsFrozen=computed(()=>!!session.value?.captures.length || Object.keys(frames.value).length>0);
 const savedQuality=computed(()=>session.value?.captures.filter(c=>c.capture_quality).sort((a,b)=>a.slot.localeCompare(b.slot)) || []);
 const bulkCandidates = computed(() => Object.keys(frames.value).map(Number).filter(index => !approved(index)).sort((a,b)=>a-b));
@@ -438,14 +440,14 @@ async function reviewSelected() {
   if (maskCanvas.value) maskCanvas.value.getContext('2d').clearRect(0,0,maskCanvas.value.width,maskCanvas.value.height);
   try {
   let frame=frames.value[index];
-  if (!frame && approved(index)) {
+  if (!frame && session.value?.captures.some(c=>c.slot===slot(index))) {
     const c=session.value.captures.find(c=>c.slot===slot(index));
     const [imgResponse,maskResponse]=await Promise.all(['image','mask'].map(kind=>fetch(`${API}/sessions/${session.value.id}/captures/${slot(index)}/${kind}`)));
     if (!imgResponse.ok || !maskResponse.ok) throw Error('Could not reload saved capture.');
     const [image,mask]=await Promise.all([createImageBitmap(await imgResponse.blob()),createImageBitmap(await maskResponse.blob())]);
     const canvas=document.createElement('canvas'); canvas.width=image.width; canvas.height=image.height; canvas.getContext('2d').drawImage(image,0,0); image.close();
     const maskC=document.createElement('canvas'); maskC.width=mask.width; maskC.height=mask.height; maskC.getContext('2d').drawImage(mask,0,0); mask.close();
-    frame={...c,canvas,mask:maskC,provenance:c.mask_provenance};
+    frame={...c,canvas,mask:maskC,provenance:c.mask_provenance,pending:c.mask_approved!==true};
     if (revision !== reviewRevision || disposed) return;
     frames.value[index]=frame;
   }
@@ -516,7 +518,7 @@ async function saveAcceptedFrame(index, frame, method) {
   frame.pending=false; frame.provenance=provenance;
 }
 async function acceptAllFrames() {
-  if (busy.value || reviewLoading.value || painting || session.value?.status !== 'capturing') return;
+  if (busy.value || reviewLoading.value || painting || session.value?.status !== 'capturing' || session.value?.mask_experiment) return;
   const indices=[...bulkCandidates.value];
   if (!indices.length) return;
   busy.value=true; bulkCancelled.value=false;

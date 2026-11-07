@@ -153,6 +153,8 @@ class Store:
         if state['status'] not in ('capturing', 'failed', 'cancelled', 'interrupted') or len(state['captures']) != 61 or {c['slot'] for c in state['captures']} != {'front', *('turn_'+str(i).zfill(2) for i in range(60))}:
             raise ValueError('Submit one frontal and 60 reviewed overlapping turn captures.')
         for c in state['captures']:
+            if c.get('mask_approved') is not True:
+                raise ValueError('Review and approve every proposed mask before reconstruction.')
             for key, hash_key in (('image', 'sha256'), ('mask', 'mask_sha256')):
                 if digest((self.folder(identity)/c[key]).read_bytes()) != c[hash_key]:
                     raise ValueError('Stored capture hash mismatch.')

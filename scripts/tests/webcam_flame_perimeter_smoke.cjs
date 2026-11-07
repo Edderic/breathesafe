@@ -12,6 +12,9 @@ const {chromium}=require(path.resolve('tmp/webcam-browser/node_modules/playwrigh
     const snapshot=()=>page.evaluate(()=>structuredClone(directDraft().perimeters));
     const trace=async(x1,y1,x2,y2)=>{const canvas=page.locator('#fit');await canvas.scrollIntoViewIfNeeded();const b=await canvas.boundingBox();await page.mouse.move(b.x+b.width*x1,b.y+b.height*y1);await page.mouse.down();await page.mouse.move(b.x+b.width*x2,b.y+b.height*y2,{steps:30});await page.mouse.up();};
     await page.getByLabel('Mask style',{exact:true}).selectOption('bifold');await page.getByLabel('Perimeter name',{exact:true}).fill('Automated bifold fixture');await page.getByRole('button',{name:'Add perimeter',exact:true}).click();
+    await page.getByRole('button',{name:'Mirror half to opposite side',exact:true}).click();
+    await page.locator('#mirrorFeedback').filter({hasText:'Could not mirror:'}).waitFor();assert.equal((await snapshot()).length,1);
+    let feedbackBox=await page.locator('#mirrorFeedback').boundingBox();assert.ok(feedbackBox.y>=0&&feedbackBox.y+feedbackBox.height<=1100,'mirror failure is on screen beside the buttons');
     assert.equal(await page.getByLabel('Drag to trace active perimeter',{exact:true}).isChecked(),true);assert.equal(await page.getByLabel('Click to place direct FLAME point',{exact:true}).isChecked(),false);
     const view=await page.evaluate(()=>({yaw,pitch}));await trace(.32,.58,.4,.63);
     let before=await snapshot();assert.ok(before[0].strokes.flat().length>=3);assert.deepEqual(await page.evaluate(()=>({yaw,pitch})),view);
@@ -51,11 +54,19 @@ const {chromium}=require(path.resolve('tmp/webcam-browser/node_modules/playwrigh
     const sourceHalf=(await snapshot()).at(-1);assert.equal(sourceHalf.strokes.length,1);
     await page.getByRole('button',{name:'Mirror half to opposite side',exact:true}).click();
     await page.waitForFunction(()=>directDraft().perimeters.length===4);const copy=(await snapshot()).at(-1);assert.equal(copy.status,'pending');assert.equal(copy.mirror_provenance.source_perimeter_id,sourceHalf.id);assert.deepEqual((await snapshot())[2],sourceHalf);
+    await page.locator('#mirrorFeedback').filter({hasText:'Created and selected'}).waitFor();
     await page.getByLabel('Active perimeter',{exact:true}).selectOption(sourceHalf.id);await page.getByRole('button',{name:'Build mirrored full perimeter',exact:true}).click();
     await page.waitForFunction(()=>directDraft().perimeters.length===5);const full=(await snapshot()).at(-1);assert.equal(full.closed,true);assert.equal(full.status,'pending');assert.equal(full.mirror_provenance.full_perimeter,true);assert.deepEqual((await snapshot())[2],sourceHalf);
     const mirrorDownload=page.waitForEvent('download');await page.getByRole('button',{name:'Download direct measurements',exact:true}).click();const mirroredDraft=JSON.parse(fs.readFileSync(await(await mirrorDownload).path()));assert.equal(mirroredDraft.perimeters.at(-1).mirror_provenance.source_perimeter_id,sourceHalf.id);
     await page.getByLabel('Show all perimeter drafts',{exact:true}).uncheck();
     await page.getByRole('button',{name:'Fit displayed FLAME head',exact:true}).click();await page.locator('#workspace').evaluate(e=>e.scrollIntoView({block:'start'}));await page.screenshot({path:path.join(folder,'perimeter-workspace-test.png')});assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
+    if(process.argv[3]){
+      const regression=JSON.parse(fs.readFileSync(process.argv[3])),source=regression.perimeters[0];
+      await page.getByLabel('Reload direct measurements',{exact:true}).setInputFiles(process.argv[3]);await page.waitForFunction(id=>activePerimeter()?.id===id,source.id);
+      await page.getByRole('button',{name:'Mirror half to opposite side',exact:true}).click();await page.waitForFunction(count=>directDraft().perimeters.length===count,regression.perimeters.length+1);await page.locator('#mirrorFeedback').filter({hasText:'Created and selected'}).waitFor();
+      assert.deepEqual((await snapshot())[0],source);await page.getByLabel('Active perimeter',{exact:true}).selectOption(source.id);await page.getByRole('button',{name:'Build mirrored full perimeter',exact:true}).click();await page.waitForFunction(count=>directDraft().perimeters.length===count,regression.perimeters.length+2);assert.equal((await snapshot()).at(-1).closed,true);
+      console.log('Provided half-arc regression: mirrored half and full perimeter created; original unchanged PASS');
+    }
     console.log('Perimeters: drag sampling, stable camera, Alt rotation, styles, undo, gaps, export/reload, fit isolation and no network PASS');
   }finally{await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

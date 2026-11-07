@@ -51,7 +51,8 @@ def nearest(mesh, points):
 
 
 def fit(template, basis, faces, vertex_ids, target, initial, span, exclusions,
-        components=50, iterations=25, regularity=0.0001, progress=None, importance=None):
+        components=50, iterations=25, regularity=0.0001, progress=None, importance=None,
+        arc_constraints=None, arc_weight=0.):
     """Alternating trimmed robust surface ICP and bounded linear shape fitting.
 
     Fixed source vertex quadrature is weighted by neutral incident face area.
@@ -63,6 +64,8 @@ def fit(template, basis, faces, vertex_ids, target, initial, span, exclusions,
         raise ValueError('Choose 50, 100 or 300 available shape components.')
     if not np.isfinite(span) or span <= 0 or not 1 <= iterations <= 100 or not 0 < regularity <= 1:
         raise ValueError('Invalid fit settings.')
+    if not np.isfinite(arc_weight) or not 0<=arc_weight<=1:
+        raise ValueError('Arc loss weight must be between zero and one.')
     # Normalize the optimizer, not the stored geometry, so fixed numerical
     # tolerances and nearest-triangle queries behave across arbitrary SfM units.
     unit = span
@@ -70,6 +73,20 @@ def fit(template, basis, faces, vertex_ids, target, initial, span, exclusions,
     exclusions = [{**p, 'center': (np.asarray(p['center'])/unit).tolist(), 'radius': p['radius']/unit} for p in exclusions]
     initial = (initial[0]/unit, initial[1], np.asarray(initial[2])/unit)
     span = 1.
+    constraints=[]
+    for c in (arc_constraints or []):
+        points=np.asarray(c['template'],dtype=float);modes=np.asarray(c['basis'],dtype=float)
+        edges=np.asarray(c['edges'])
+        if (points.ndim!=2 or points.shape[1]!=3 or modes.shape[:2]!=points.shape or
+            modes.ndim!=3 or modes.shape[2]<components or not np.isfinite(points).all() or
+            not np.isfinite(modes).all() or edges.ndim!=2 or edges.shape[1]!=2 or not len(edges) or
+            not np.issubdtype(edges.dtype,np.integer) or np.any(edges<0) or np.any(edges>=len(points)) or
+            not np.isfinite(c['target_length']) or c['target_length']<=0):
+            raise ValueError('Invalid fixed arc geometry or target length.')
+        constraints.append({**c,'template':points,'basis':modes,'edges':edges,'target_length':c['target_length']/unit})
+    if arc_weight and not constraints: raise ValueError('Arc loss needs covered reconstruction-derived targets.')
+    if constraints:
+        from .flame_arc_loss import length_jacobian
     v = np.asarray(template)[vertex_ids]; b = np.asarray(basis)[vertex_ids, :, :components]
     neutral = trimesh.Trimesh(template, faces, process=False)
     areas = np.zeros(len(template))
@@ -97,6 +114,17 @@ def fit(template, basis, faces, vertex_ids, target, initial, span, exclusions,
         base_weight = area[valid]/(1+(distance[valid]/(span*.025))**2)
         weight = base_weight*importance[valid]
         scale, rotation, translation = similarity(shaped[valid], closest[valid], weight)
+        if arc_weight:
+            # Optimize global scale under the same surface and arc objective;
+            # translation remains the weighted centroid alignment at that scale.
+            w=weight/weight.sum();a=w@shaped[valid];center=w@closest[valid]
+            x=(shaped[valid]-a)@rotation.T;y=closest[valid]-center
+            numerator=float(np.sum(weight[:,None]*x*y));denominator=float(np.sum(weight[:,None]*x*x))
+            strength=arc_weight*base_weight.sum()/len(constraints)
+            for c in constraints:
+                length,_=length_jacobian(c['template'],c['basis'],c['edges'],beta,1.)
+                numerator+=strength*length/c['target_length'];denominator+=strength*(length/c['target_length'])**2
+            scale=numerator/denominator;translation=center-scale*(rotation@a)
         if not 0.5*initial[0] < scale < 2*initial[0]:
             raise ValueError('Alignment scale diverged from eye-based initialization.')
         transformed_basis = scale*np.einsum('ij,vjk->vik', rotation, b[valid])
@@ -105,6 +133,13 @@ def fit(template, basis, faces, vertex_ids, target, initial, span, exclusions,
         design = (transformed_basis*root[:, None, None]).reshape(-1, components)
         residual = (rhs*root[:, None]).ravel()
         penalty = np.sqrt(regularity*base_weight.sum())*span
+        if arc_weight:
+            extra=[];targets=[]
+            for c in constraints:
+                length,gradient=length_jacobian(c['template'],c['basis'],c['edges'],beta,scale)
+                strength=np.sqrt(arc_weight*base_weight.sum()/len(constraints))/c['target_length']
+                extra.append(strength*gradient);targets.append(strength*(c['target_length']-length+gradient@beta))
+            design=np.vstack([design,extra]);residual=np.r_[residual,targets]
         solution = lsq_linear(np.vstack([design, penalty*np.eye(components)]),
                               np.r_[residual, np.zeros(components)], bounds=(-3., 3.),
                               method='bvls', tol=1e-7, max_iter=100)

@@ -48,12 +48,18 @@ const {chromium}=require(path.resolve('tmp/webcam-browser/node_modules/playwrigh
       await page.getByLabel('Direct review',{exact:true}).selectOption('reviewed');
     }
     await page.getByText('Routes, distances and tape calibration',{exact:true}).click();
+    assert.equal(await page.getByLabel('Smooth selected measurement arc',{exact:true}).isChecked(),true);
     await page.getByLabel('Scale tape readings (mm, three comma-separated values)',{exact:true}).fill('300, 301, 299');
     await page.getByLabel('Independent check readings (mm, three comma-separated values)',{exact:true}).fill('320, 321, 319');
     assert.equal(await page.getByRole('button',{name:'Download calibrated FLAME mesh',exact:true}).isDisabled(),true);
     assert.equal(await page.getByRole('button',{name:'Download direct measurements',exact:true}).isDisabled(),true);
     await page.getByRole('button',{name:'Apply tape readings',exact:true}).click();
     await page.locator('#directResults').filter({hasText:'mm per reconstruction unit'}).waitFor();
+    const smoothScale=await page.evaluate(()=>directComputed.calibration.mm_per_reconstruction_unit);
+    await page.getByLabel('Smooth selected measurement arc',{exact:true}).uncheck();
+    assert.equal(await page.evaluate(()=>directDraft().route_methods.scale),'edges');
+    await page.getByLabel('Smooth selected measurement arc',{exact:true}).check();
+    assert.ok(Math.abs(await page.evaluate(()=>directComputed.calibration.mm_per_reconstruction_unit)-smoothScale)<1e-10);
     assert.equal(await page.getByRole('button',{name:'Download calibrated FLAME mesh',exact:true}).isEnabled(),true);
     const downloaded=page.waitForEvent('download');await page.getByRole('button',{name:'Download direct measurements',exact:true}).click();
     const draft=JSON.parse(fs.readFileSync(await(await downloaded).path()));assert.equal(draft.version,'flame-direct-measurements-v1');assert.ok(draft.measurements.calibration.mm_per_reconstruction_unit>0);assert.equal(draft.measurements.calibration.scale.median_mm,300);
@@ -75,6 +81,18 @@ const {chromium}=require(path.resolve('tmp/webcam-browser/node_modules/playwrigh
     await page.getByRole('button',{name:'Apply tape readings',exact:true}).click();assert.equal(await page.getByRole('button',{name:'Download calibrated FLAME mesh',exact:true}).isDisabled(),true);
     await page.getByLabel('Reload direct measurements',{exact:true}).setInputFiles({name:'measurements.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(draft))});
     await page.getByRole('button',{name:'Left profile',exact:true}).click();await canvas.screenshot({path:path.join(folder,'full-head-direct-test.png')});
+    if(process.argv[3]){
+      await page.getByLabel('Reload direct measurements',{exact:true}).setInputFiles(process.argv[3]);
+      await page.getByLabel('Route to edit',{exact:true}).selectOption('scale');
+      assert.equal(await page.getByLabel('Smooth selected measurement arc',{exact:true}).isChecked(),false);
+      const previous=await page.evaluate(()=>({points:structuredClone(directDraft().points),length:directComputed.paths.scale.length}));
+      await page.getByLabel('Smooth selected measurement arc',{exact:true}).check();
+      const actual=await page.evaluate(()=>({points:structuredClone(directDraft().points),length:directComputed.paths.scale.length,method:directComputed.paths.scale.method}));
+      assert.deepEqual(actual.points,previous.points);assert.ok(actual.length<previous.length);assert.ok(actual.method.includes('unfolded'));
+      await page.getByLabel('Route to edit',{exact:true}).selectOption('check');await page.getByLabel('Smooth selected measurement arc',{exact:true}).check();
+      await page.getByLabel('Route to edit',{exact:true}).selectOption('scale');await page.evaluate(()=>{yaw=.5;pitch=0;update();});await canvas.screenshot({path:path.join(folder,'named-arc-smooth-regression.png')});
+      console.log('Provided named-arc regression: surface shortening with unchanged anatomical controls PASS');
+    }
     assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
     console.log('Direct FLAME: full original topology, point placement, routes, chords, calibration/check, mesh/camera scaling, reload, per-variant isolation, invalid inputs and no network PASS');
   }finally{await browser.close();}

@@ -32,3 +32,11 @@ test('reload binds points and calibration readings to the exact fitted mesh',()=
   const invalid=structuredClone(d);invalid.points.push(point('menton',0));assert.throws(()=>M.validate(invalid,identity,mesh),/duplicate/);
   const bad=structuredClone(d);bad.points[0].attachment={kind:'vertex',vertex_index:999};assert.throws(()=>M.validate(bad,identity,mesh),/Invalid/);
 });
+test('named arc smoothing preserves controls and recalibrates using the displayed route length',()=>{
+  const d=draft();d.points.find(p=>p.name==='subnasale').attachment={kind:'vertex',vertex_index:3};d.points.find(p=>p.name==='right_tragion').attachment={kind:'vertex',vertex_index:2};
+  const original=JSON.stringify(d.points),edges=M.graph(mesh),raw=M.route(mesh,edges,d.points,d.routes.scale),smooth=M.route(mesh,edges,d.points,d.routes.scale,'surface');
+  assert.equal(raw.length,3);assert.ok(Math.abs(smooth.length-(Math.sqrt(2)+1))<1e-12);assert.ok(smooth.points.some(p=>M.distance(p,mesh.vertices[3])<1e-12));assert.equal(JSON.stringify(d.points),original);
+  d.route_methods={scale:'surface',check:'edges'};const calibrated=M.calibration(mesh,edges,d);
+  assert.equal(calibrated.scale.route_length_reconstruction_units,smooth.length);assert.equal(calibrated.mm_per_reconstruction_unit,200/smooth.length);assert.equal(calibrated.scale.route_method,smooth.method);
+  d.route_methods.scale='invalid';assert.throws(()=>M.validate(d,identity,mesh),/smoothing/);
+});

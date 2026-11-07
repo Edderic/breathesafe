@@ -340,8 +340,7 @@ If a valid straight crossing of a local strip cannot be found, that pair retains
 its mesh-edge path. The number of fallback pairs is displayed and exported,
 along with the method and smoothing setting. Surface length is computed from
 exactly the same polyline shown in the viewer. Gap and component checks still
-apply; smoothing never joins separate strokes. Calibration's named-point routes
-continue to use their existing mesh-edge method.
+apply; smoothing never joins separate strokes. Calibration's named-point routes have an independent smoothing setting, described below.
 
 Older imported perimeter drafts without a smoothing field retain edge routing.
 Enable the checkbox to recalculate them with triangle-interior routing. Changing
@@ -367,7 +366,7 @@ without clearing the source half.
 Draw an open half entirely on one side, starting near the model midline at the
 nose and ending near the midline at the chin or neck. Full-loop generation
 requires exactly one continuous stroke with at least three controls and both
-endpoints within 0.05 of the recorded eye proxy span from the mirror plane.
+endpoints within 0.08 of the recorded eye proxy span from the mirror plane.
 A half that significantly spans both sides, has gaps, or exceeds existing
 control limits fails explicitly instead of generating a purported complete loop.
 Use the open-copy action when the endpoints are intentionally away from midline.
@@ -396,3 +395,168 @@ model frames, source preservation, explicit failures for wrong-side/midline or
 projection coverage, and generation/export using an automated half arc drawn on
 the actual saved fitted surface. These interaction fixtures are not participant
 perimeter reviews.
+
+
+Mirror operation v2 ignores an 0.08-eye-span band when classifying a stroke as
+one-sided. Small endpoint overshoots across the nominal model midline therefore
+do not invalidate a cheek-side half arc. Controls extending substantially beyond
+that band on both sides are still rejected, as are centerline-only arcs whose
+mirror would overlap. Full-loop endpoint tolerance uses the same 0.08-span band;
+the existing surface-gap and projection-distance checks remain in place.
+
+Mirror feedback is displayed immediately beside the two action buttons, with a
+visible busy message before computation and a success or error message afterward.
+The buttons are disabled during computation; changing fit/perimeter selection
+before it starts aborts without changing the source. Successful feedback names
+the newly selected draft. Failure scrolls the nearby message into view rather
+than placing it below the perimeter notes. An optional private draft path passed
+as the browser smoke test's second argument reproduces a participant-specific
+half arc without committing its coordinates to the repository.
+
+
+### Smooth bitragion calibration and named-point arcs
+
+Expand **Routes, distances and tape calibration**, select the scale/check/custom
+route, and enable **Smooth selected measurement arc**. New measurement drafts
+start with smoothing enabled for all three routes. Older imported drafts retain
+edge routing until explicitly changed, preserving their previous calibration.
+Each route's choice is stored in optional `route_methods` settings and exported.
+
+The original named controls, including subnasale or menton, are preserved exactly.
+The algorithm starts with the original edge route as a surface corridor and
+shortcuts bounded local windows by unfolding triangle strips. Only valid
+triangle-interior crossings no longer than the replaced edge path are accepted;
+remaining edges are explicit fallbacks. This removes edge zigzags on long arcs
+without drawing an off-surface spline or altering the head. The displayed
+polyline and measured polyline are identical, including fallback segments.
+
+Changing the scale route method recalculates the tape scale from its new length.
+The independent check uses its own selected method and never adjusts that scale.
+All derived millimeter lengths and calibrated camera translations still receive
+the same uniform factor. Exports record the route method in the scale/check
+reports and include surface-shortcut and fallback counts. Smoothing does not
+change anatomical point placements or their review status.
+
+Tests cover planar shortening through a fixed named intermediate control,
+calibration using the displayed route length, invalid method rejection, method
+switching/reload and an optional private named-arc browser regression. No private
+control coordinates are committed to tests.
+
+### Style-specific arc fitting experiment
+
+`python -m dimension_pipeline.flame_arc_experiments` accepts `--session`,
+`--model`, `--seed` (the original fit directory), `--annotations` (an exported
+direct-measurements draft), `--exclude-probe`, and a fresh `--out` directory.
+It validates session, analysis mesh, model, topology and exact annotated seed
+mesh identities. The saved FLAME lengths are never treated as measured truth.
+Named tape-calibration arcs are not targets without independent tape readings.
+
+Only complete closed style perimeters are used, avoiding duplicate evidence
+from their source and mirrored halves. Pending perimeter definitions remain
+explicitly exploratory. The original local JavaScript routing implementation
+evaluates each guide, then fixed barycentric samples preserve its locations
+across fitted FLAME meshes. No point review or calibration transfers.
+
+Reconstruction targets use frozen nearest-triangle projections of the seed
+samples onto the cropped analysis surface outside the unchanged nose exclusion.
+Distance, normal compatibility, adjacent projection-length ratios and minimum
+contiguous-run checks reject unsupported samples and gaps. At least 20% of
+edges must survive to use a partial length target; only 98% support is labeled
+full. The report retains edge indices and coverage, never extrapolating a
+partial target into a full perimeter measurement. Samples use 0.025 eye-span
+spacing and the reported lengths sum sample chords, not exact geodesics.
+
+Four trials share initialization, 100 components, 40 iterations, coefficient
+bounds and shape prior: baseline, up to 4× importance near supported arc samples,
+and the same importance plus relative squared arc-length penalties of 0.01 or
+0.05. Arc gradients affect shape coefficients and similarity scale. Region
+weights remain fixed from the seed. Loss normalization and policy thresholds
+are recorded in the report, along with hashes and geometric checks.
+
+The private comparison shows read-only guide overlays, per-style coverage,
+supported length errors, regional surface residuals and overall surface metrics.
+These measure agreement with the fitting reconstruction, not independent anatomy.
+Inspect global tradeoffs and the excluded nose before selecting a candidate.
+Unsupported lower jaw, neck and ears remain dominated by the FLAME prior.
+
+### Diagnose arc coverage before expanding the fitting target
+
+Run `python -m dimension_pipeline.flame_arc_coverage --fit <arc-trial-directory>
+--seed <annotated-original-fit-directory> --session <source-session-directory>
+--out <fresh-private-directory>` to create `coverage.html` and `report.json`.
+This reuses the exact annotated seed mesh and fixed barycentric guide samples;
+it does not rerun fitting, change measurements or loosen support thresholds.
+Session/analysis and seed identities are checked, and cropped support must match
+the original experiment (at most one edge may change at a float32 PLY boundary).
+
+The comparison uses the original cropped target and the broader bounded analysis
+mesh after the same conservative nose-triangle exclusion. The latter removes
+the face-oval/frontal-visibility filters, not the original capture segmentation.
+It is not the full dense reconstruction and may still lack neck geometry.
+
+Each edge retains all failed checks: exclusion, endpoint distance, endpoint
+normal compatibility, negligible source step, projected-step shrink/stretch,
+and minimum contiguous-run support. Exclusive primary colors follow that order;
+the JSON records overlapping flags, distances, normals and projected locations.
+The unchanged `supported_edges` implementation determines accepted edges.
+
+Shared rotation, zoom and view presets show reasons on both the original FLAME
+and the selected target. Hover reports individual edge flags. A second color
+mode distinguishes recovered, lost, supported-on-both and rejected-on-both
+edges. Overlays are not depth-tested and retain the original FLAME positions.
+Coverage counts sampled edges, not surface area or anatomical accuracy. Changes
+in nearest surfaces can lose support even when the target mesh is expanded.
+
+Tests verify rejection precedence without dropping overlapping flags, exact
+agreement with the fitting support policy, short-run and exclusion behavior,
+conservative triangle removal, output isolation, view controls, hover details,
+report downloads and absence of browser network requests.
+
+### Isolated upper-neck mask trial
+
+`python -m dimension_pipeline.webcam_neck_masks --source <approved-session>
+--root <private-session-root> --model <cached-selfie-multiclass-model>` prepares
+new capture masks from the same 61 source PNGs. It verifies the pinned model
+and source image/mask hashes, copies images (no hard links), preserves every
+original approved foreground pixel, and adds only category-2 body-skin within
+the original head bounding-box width, from 40% of its height down to 15% below
+its bottom. Added components must connect to the original mask. This is a
+bounded proposal, not a semantic neck guarantee; hands, collars and boundaries
+still require review. A green/orange contact sheet shows original/added pixels.
+
+The fresh session has no reconstruction, calibration, annotations or inherited
+mask approvals. Its provenance records source hashes, ROI, policy and added
+pixel counts. Resume it in the existing webcam pilot, review/correct every mask,
+and use A to approve and advance. Bulk acceptance is disabled for this trial.
+The UI counts only explicitly approved captures, reloads stored proposals for
+editing, and blocks reconstruction until all are saved. The processor also
+rejects submission if any stored mask is unapproved. Native MediaPipe image
+preprocessing may require macOS graphics access even with the CPU delegate.
+
+After review, reconstruct the separate session and compare under-jaw/neck
+coverage using the broader analysis target. Reconstruction coordinates can
+change between runs; comparisons need explicit registration, and FLAME points,
+tape scale and acceptance decisions must be reviewed afresh.
+
+### Compare a completed neck-mask reconstruction
+
+`python -m dimension_pipeline.webcam_neck_compare --original <original-session>
+--trial <reviewed-neck-session> --coverage <original-coverage-directory>
+--seed <annotated-FLAME-ply> --fit <original-arc-experiment-directory>
+--out <fresh-directory>` creates a read-only before/after `coverage.html`.
+It verifies all 61 RGB images match pixel-for-pixel after PNG decoding and that
+all trial masks are approved. The original seed and guide report hashes must
+match the frozen coverage diagnostic.
+
+A proper similarity fitted to all common registered turn-camera centers maps
+the trial into original reconstruction units. At least 54 common views are
+required; camera-center RMS above the arc-distance threshold rejects comparison.
+Center residuals and orientation differences are reported. This alignment uses
+neither surfaces nor arcs, but its uncertainty still affects coverage thresholds.
+Both targets are broader bounded analysis meshes with the same original-world
+nose exclusion. FLAME samples/normals and all support thresholds stay fixed.
+
+Recovered/lost sections describe support against the fixed original FLAME fit,
+not anatomical improvement or a new FLAME fit. Mesh decimation, reconstruction
+changes and registration error can reduce support on an expanded-mask run.
+Original captures, reconstructions, annotations and calibration remain separate.

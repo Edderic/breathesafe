@@ -62,3 +62,9 @@ test('mirroring fails explicitly for non-half arcs, off-midline closure and exce
   const off=draft();off.strokes=[[a(0),a(2),a(4)]];assert.throws(()=>M.mirrorPerimeter(off,head,edges,plane,1,true),/endpoints/);
   const unequal={...head,vertices:head.vertices.map((p,i)=>i===1?[-3,0,0]:p)},p=draft();p.strokes=[[a(2),a(0),a(3)]];assert.throws(()=>M.mirrorPerimeter(p,unequal,M.graph(unequal),plane,1),/too far/);
 });
+test('near-midline endpoint overshoot does not invalidate an otherwise one-sided half arc',()=>{
+  const head={vertices:[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]],triangles:[[2,0,4],[2,4,1],[2,1,5],[2,5,0],[3,4,0],[3,1,4],[3,5,1],[3,0,5]]},plane={origin:[0,0,0],normal:[1,0,0]},edges=M.graph(head);
+  const p=draft();p.strokes=[[a(2),a(1),{kind:'barycentric',triangle_index:4,weights:[.945,0,.055]}]];
+  const full=M.mirrorPerimeter(p,head,edges,plane,1,true);assert.equal(full.closed,true);assert.equal(full.status,'pending');assert.equal(full.mirror_provenance.half_classification_midline_band_fraction_eye_span,.08);
+  const center=draft();center.strokes=[[a(2),a(3)]];assert.throws(()=>M.mirrorPerimeter(center,head,edges,plane,1),/overlap/);
+});
