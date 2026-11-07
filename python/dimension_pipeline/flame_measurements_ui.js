@@ -145,6 +145,33 @@ const FlameMeasurements=(()=>{
     return {length:total,paths,control_count:perimeter.strokes.reduce((s,c)=>s+c.length,0),stroke_count:perimeter.strokes.length,closed:perimeter.closed,surface_segments:surfaceSegments,edge_fallback_segments:fallbacks,
             status:perimeter.strokes.length>1?'separate_strokes_partial_length':perimeter.closed?'closed_perimeter':paths.length?'open_arc':'insufficient_controls',method:smooth?'sampled_surface_drag_with_unfolded_triangle_strips_and_explicit_edge_fallback':'sampled_surface_drag_with_piecewise_mesh_edge_paths'};
   }
-  return {VERSION,distance,location,graph,route,readings,calibration,validate,perimeterStyles,validatePerimeters,addPerimeterStroke,measurePerimeter,surfaceSegment};
+  function closestTriangle(p,a,b,c){
+    const dot=(u,v)=>u.reduce((s,x,i)=>s+x*v[i],0),ab=subtract(b,a),ac=subtract(c,a),ap=subtract(p,a),d1=dot(ab,ap),d2=dot(ac,ap);
+    if(d1<=0&&d2<=0)return [1,0,0];const bp=subtract(p,b),d3=dot(ab,bp),d4=dot(ac,bp);if(d3>=0&&d4<=d3)return [0,1,0];
+    const vc=d1*d4-d3*d2;if(vc<=0&&d1>=0&&d3<=0){const v=d1/(d1-d3);return [1-v,v,0];}
+    const cp=subtract(p,c),d5=dot(ab,cp),d6=dot(ac,cp);if(d6>=0&&d5<=d6)return [0,0,1];
+    const vb=d5*d2-d1*d6;if(vb<=0&&d2>=0&&d6<=0){const w=d2/(d2-d6);return [1-w,0,w];}
+    const va=d3*d6-d5*d4;if(va<=0&&d4-d3>=0&&d5-d6>=0){const w=(d4-d3)/(d4-d3+d5-d6);return [0,1-w,w];}
+    const denominator=va+vb+vc;if(Math.abs(denominator)<1e-20)throw Error('Degenerate triangle during mirror projection.');const v=vb/denominator,w=vc/denominator;return [1-v-w,v,w];
+  }
+  function mirrorPerimeter(source,mesh,edges,plane,span,full=false){
+    validatePerimeters([source],mesh);
+    if(!Number.isFinite(span)||span<=0||!Array.isArray(plane?.origin)||!Array.isArray(plane?.normal)||plane.origin.length!==3||plane.normal.length!==3||[...plane.origin,...plane.normal].some(v=>!Number.isFinite(v)))throw Error('Invalid FLAME mirror plane.');
+    const norm=Math.hypot(...plane.normal);if(norm<1e-12)throw Error('Invalid FLAME mirror plane.');const normal=plane.normal.map(x=>x/norm),side=p=>subtract(p,plane.origin).reduce((s,x,i)=>s+x*normal[i],0);
+    const controls=source.strokes.flat();if(source.closed||controls.length<2)throw Error('Draw an open half arc before mirroring.');
+    const sides=controls.map(a=>side(location(mesh,a).point));if(sides.some(x=>x>span*.03)&&sides.some(x=>x< -span*.03))throw Error('Use a half arc on one side of the FLAME midline.');
+    if(full&&(source.strokes.length!==1||controls.length<3||Math.abs(sides[0])>span*.05||Math.abs(sides.at(-1))>span*.05))throw Error('For a full perimeter, use one continuous half arc with both endpoints near the FLAME midline (within 0.05 eye spans).');
+    const labels=new Int32Array(mesh.vertices.length);labels.fill(-1);let component=0;for(let i=0;i<labels.length;i++){if(labels[i]>=0)continue;const pending=[i];labels[i]=component;while(pending.length){const v=pending.pop();for(const n of edges[v].keys())if(labels[n]<0){labels[n]=component;pending.push(n);}}component++;}
+    const distances=[];
+    const mirrored=source.strokes.map(stroke=>stroke.map(a=>{const info=location(mesh,a),d=side(info.point),target=info.point.map((x,i)=>x-2*d*normal[i]),component=labels[info.seeds[0]];let best=null;
+      mesh.triangles.forEach((face,i)=>{if(labels[face[0]]!==component)return;const weights=closestTriangle(target,...face.map(v=>mesh.vertices[v])),point=[0,1,2].map(j=>face.reduce((s,v,k)=>s+mesh.vertices[v][j]*weights[k],0));if(Math.abs(d)>span*.005&&Math.sign(d)*side(point)>span*.005)return;const residual=distance(target,point);if(!best||residual<best.residual)best={residual,attachment:{kind:'barycentric',triangle_index:i,weights:weights.map(w=>Math.max(0,Math.min(1,w)))}};});
+      if(!best||best.residual>span*.08)throw Error('Opposite-side surface is too far from the reflected arc; place that section manually.');distances.push(best.residual);return best.attachment;
+    }));
+    const result=structuredClone(source);result.status='pending';result.closed=full;result.strokes=mirrored;
+    if(full){const combined=[...source.strokes[0]],back=[...mirrored[0]].reverse();for(const a of back)if(distance(location(mesh,combined.at(-1)).point,location(mesh,a).point)>span*1e-7)combined.push(a);if(combined.length>2&&distance(location(mesh,combined[0]).point,location(mesh,combined.at(-1)).point)<span*1e-7)combined.pop();result.strokes=[combined];}
+    result.mirror_provenance={method:'FLAME_model_X_plane_reflection_then_same_component_opposite_surface_projection_v1',source_perimeter_id:source.id,source_name:source.name,full_perimeter:full,plane:{origin:[...plane.origin],normal},projection_max_reconstruction_units:Math.max(...distances),projection_mean_reconstruction_units:distances.reduce((s,x)=>s+x,0)/distances.length,endpoint_midline_tolerance_fraction_eye_span:.05,projection_limit_fraction_eye_span:.08,anatomical_symmetry:'assumed_for_draft_not_validated'};
+    validatePerimeters([result],mesh);return result;
+  }
+  return {VERSION,distance,location,graph,route,readings,calibration,validate,perimeterStyles,validatePerimeters,addPerimeterStroke,measurePerimeter,surfaceSegment,mirrorPerimeter};
 })();
 if(typeof module!=='undefined')module.exports=FlameMeasurements;

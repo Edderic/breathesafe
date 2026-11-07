@@ -353,3 +353,46 @@ Analytic tests cover planar shortcuts and folded triangles where the correct
 surface length differs from the 3D chord. Browser tests exercise Cmd+Z, Ctrl+Z,
 native text undo, mid-drag cancellation, smoothing toggle undo, surface shortening
 on the actual fitted mesh, and persistence of the routing setting.
+
+### Mirror a half arc
+
+**Mirror half to opposite side** creates a new open perimeter draft containing
+the reflected half. **Build mirrored full perimeter** creates another new draft
+joining the original half and the reversed reflected half as one closed loop.
+The original source draft remains unchanged. The generated copy starts Pending,
+retains the source style and route method, can be trimmed or extended, and has
+its own undo history. Cmd+Z immediately after generation clears the copy's trace
+without clearing the source half.
+
+Draw an open half entirely on one side, starting near the model midline at the
+nose and ending near the midline at the chin or neck. Full-loop generation
+requires exactly one continuous stroke with at least three controls and both
+endpoints within 0.05 of the recorded eye proxy span from the mirror plane.
+A half that significantly spans both sides, has gaps, or exceeds existing
+control limits fails explicitly instead of generating a purported complete loop.
+Use the open-copy action when the endpoints are intentionally away from midline.
+
+The plane is model X=0 transformed by the selected fit's recorded FLAME rotation
+and translation. It is the model's nominal symmetry plane, not the viewer's
+screen center or a separately reviewed anatomical midsagittal plane. Reflected
+world points are projected to nearest triangle surfaces on the opposite side
+and within the original connected mesh component. This prevents an off-surface
+reflection or a jump to an eyeball component. Projection offsets exceeding 0.08
+eye proxy spans fail. Off-midline controls require an opposite-side projection with a 0.005-span
+plane tolerance. Controls initially within that tolerance use the nearest
+surface in their component. The full loop retains both halves' actual endpoint attachments;
+small joins near midline use the same checked surface routing as other controls.
+
+Each derived draft records source perimeter ID/name, reflection plane, method,
+projection maximum/mean distances and symmetry-assumption status under
+`mirror_provenance`. Those records and the generated surface attachments persist
+through the direct-measurement export/reload. Lengths are calculated on the
+projected fitted surface; they are not assumed to equal twice the original
+half's length on an asymmetric fit. Inspect both sides before marking the draft
+Reviewed. Inferred symmetry is an editing aid, not an independent measurement.
+
+Tests cover exact symmetric reflection, closed-loop joining, rotated/translated
+model frames, source preservation, explicit failures for wrong-side/midline or
+projection coverage, and generation/export using an automated half arc drawn on
+the actual saved fitted surface. These interaction fixtures are not participant
+perimeter reviews.

@@ -46,3 +46,19 @@ test('folded-face smoothing measures the surface crossing, not a chord through t
   assert.deepEqual(path.points[1],[.5,.5,0]);
   assert.throws(()=>M.validatePerimeters([{...draft(),smoothing:'unknown'}],mesh));
 });
+test('half-arc reflection creates surface attachments and joins a full loop without changing the source',()=>{
+  const head={vertices:[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]],triangles:[[2,0,4],[2,4,1],[2,1,5],[2,5,0],[3,4,0],[3,1,4],[3,5,1],[3,0,5]]};
+  const p=draft();p.strokes=[[a(2),a(0),a(3)]];const before=JSON.stringify(p),edges=M.graph(head),plane={origin:[0,0,0],normal:[1,0,0]};
+  const mirrored=M.mirrorPerimeter(p,head,edges,plane,10,false);
+  assert.ok(M.distance(M.location(head,mirrored.strokes[0][1]).point,[-1,0,0])<1e-12);assert.equal(mirrored.status,'pending');assert.equal(mirrored.closed,false);
+  const full=M.mirrorPerimeter(p,head,edges,plane,10,true);assert.equal(full.closed,true);assert.equal(full.strokes[0].length,4);assert.ok(Math.abs(M.measurePerimeter(full,head,edges,2).length-4*Math.sqrt(2))<1e-12);assert.equal(JSON.stringify(p),before);
+  assert.equal(full.mirror_provenance.source_perimeter_id,p.id);
+  const offset={...plane,origin:[5,4,3],normal:[0,1,0]},rotated={vertices:head.vertices.map(([x,y,z])=>[5-y,4+x,3+z]),triangles:head.triangles};
+  const transformed=M.mirrorPerimeter(p,rotated,M.graph(rotated),offset,10,false);assert.ok(M.distance(M.location(rotated,transformed.strokes[0][1]).point,[5,3,3])<1e-12);
+});
+test('mirroring fails explicitly for non-half arcs, off-midline closure and excessive surface discrepancy',()=>{
+  const head={vertices:[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]],triangles:[[2,0,4],[2,4,1],[2,1,5],[2,5,0],[3,4,0],[3,1,4],[3,5,1],[3,0,5]]},plane={origin:[0,0,0],normal:[1,0,0]},edges=M.graph(head);
+  const both=draft();both.strokes=[[a(0),a(1)]];assert.throws(()=>M.mirrorPerimeter(both,head,edges,plane,1),/one side/);
+  const off=draft();off.strokes=[[a(0),a(2),a(4)]];assert.throws(()=>M.mirrorPerimeter(off,head,edges,plane,1,true),/endpoints/);
+  const unequal={...head,vertices:head.vertices.map((p,i)=>i===1?[-3,0,0]:p)},p=draft();p.strokes=[[a(2),a(0),a(3)]];assert.throws(()=>M.mirrorPerimeter(p,unequal,M.graph(unequal),plane,1),/too far/);
+});
