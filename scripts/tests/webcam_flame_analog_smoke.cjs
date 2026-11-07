@@ -45,6 +45,7 @@ const {chromium}=require(path.resolve('tmp/webcam-browser/node_modules/playwrigh
     await canvas.click({position:{x:click.x,y:click.y}});
     await page.locator('#mappingStatus').filter({hasText:'Original FLAME triangle'}).waitFor();
     assert.equal(await page.getByLabel('Review status',{exact:true}).inputValue(),'pending');
+    await page.getByLabel('Show analysis / comparison mesh',{exact:true}).check();
     await page.getByLabel('Left comparison',{exact:true}).selectOption('100');
     await page.getByRole('heading',{name:'FLAME · 100 components · ordinary',exact:true}).waitFor();
     await page.getByRole('button',{name:'Left profile',exact:true}).click();

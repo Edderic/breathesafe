@@ -186,6 +186,13 @@ Browser placements are automated interaction fixtures, not participant reviews.
 ## Direct FLAME measurements and the expanded head
 
 **Direct FLAME points, routes and tape calibration** is now the primary workflow.
+On desktop, the point editor occupies the left half of the workspace and the
+FLAME viewer stays visible on the right while the controls scroll. Analysis
+geometry is hidden by default; **Show analysis / comparison mesh** restores it
+below the editor. View presets, zoom and lighting remain beside the FLAME surface.
+Enter a new point name and press Enter (or click **Add named point**); placement
+is enabled automatically, ready for a click on the right. Routes/calibration and
+the landmark guide expand separately, keeping repeated point placement compact.
 No ARKit correspondence is required. The prior mapping editor remains optional
 in a collapsed section. **Show full FLAME head, ears and lower chin** defaults
 on and displays all 5,023 original vertices and 9,976 original triangles, rather
@@ -249,3 +256,100 @@ not participant measurements:
 node --test scripts/tests/webcam_flame_measurements.test.cjs
 node scripts/tests/webcam_flame_direct_smoke.cjs PRIVATE_COMPARISON_DIRECTORY
 ```
+
+## Drag-traced mask perimeters
+
+Create separate named drafts under **Mask-style perimeter drafts** for bifold,
+bifold with gasket, cup, trifold, duckbill, or custom styles. These style labels
+provide starting guides from the participant's proposed contact patterns; they
+do not generate anatomical routes or establish a seal. Several drafts can use
+the same style for different mask models. Each stores its own name, notes,
+review status, open/closed state and original FLAME barycentric controls.
+
+Click **Add perimeter**, then drag over the FLAME surface. The tool samples the
+nearest visible triangles at the chosen pixel spacing without rotating the head.
+Hold Alt at the start of a drag to rotate instead, or use the view presets. To
+continue around a side, rotate and begin the next stroke near its existing final
+endpoint. Direct-point placement, legacy mapping and perimeter tracing modes are
+mutually exclusive. Use the expanded head for under-jaw and possible neck contact;
+those locations can be prior-dominated rather than constrained by the scan fit.
+
+After release, nearby sampled controls are connected by mesh-edge surface paths
+using heap-based Dijkstra. During drawing, the overlay is a preview through picked
+surface points. Endpoint proximity joins successive drags only within 0.06 eye
+proxy spans. A miss, a sample jump exceeding 0.12 spans, or a switch to another
+connected mesh component splits the trace; separate strokes are not silently
+bridged. Measuring any segment with a gap exceeding 0.15 spans fails explicitly.
+Separate strokes report **partial length**, never a closed perimeter. All these
+spans use the fitted experiment's recorded reconstruction eye proxy span.
+
+**Undo last drag** restores the previous trace edit; **Remove last control**
+trims its endpoint; **Clear active perimeter** clears that draft only. Geometry
+edits reset review to Pending. **Close perimeter loop** explicitly adds the
+closing surface path only when one continuous stroke has at least three controls
+and its endpoints pass the gap check. The same button reopens a closed loop.
+Review open arcs or completed loops after inspecting several views. Invalid
+surface paths cannot be marked reviewed. Routes are visual overlays, not
+depth-tested contact simulations. Several colors distinguish the mask styles;
+**Show all perimeter drafts** compares them against the same fitted head.
+
+Up to 20 drafts are retained per fit, with at most 20 strokes, 200 controls per
+stroke and 500 controls per draft. Increase pixel spacing for longer traces.
+These bounds keep interactive picking, rendering and surface routing manageable.
+Pointer cancellation discards only the unfinished drag. Trace edits have a
+20-step in-tab undo history; importing a saved draft resets that history.
+
+Perimeters are included in **Download direct measurements** and in the calibrated
+mesh's annotations. The measurements export includes per-draft surface lengths,
+method, style, review status, stroke count and closure state; calibrated lengths
+are added only when the existing tape calibration is valid. Perimeters never
+change tape calibration. Reload validates their styles, control attachments,
+resource limits and exact parent fit identity. Old direct-measurement files
+without perimeter drafts remain supported. Drafts and calibration remain
+isolated between component-count variants.
+
+Verification uses analytic open/closed edge routes, gaps, disconnected surfaces,
+review reset, transactional control limits and browser traces with explicit test
+names. Browser checks cover fixed-view sampling, Alt rotation, style isolation,
+undo, deliberately missed surfaces, export/reload, and fit isolation:
+
+```sh
+node --test scripts/tests/webcam_flame_perimeters.test.cjs
+node scripts/tests/webcam_flame_perimeter_smoke.cjs PRIVATE_COMPARISON_DIRECTORY
+```
+
+### Undo shortcuts and smoother surface routes
+
+Cmd+Z (or Ctrl+Z) invokes the same active-perimeter undo history as **Undo last
+drag**. It also undoes trimming, closure, clearing and smoothing changes. During
+an unfinished drag it cancels only the current preview; further pointer movement
+is suppressed until release, preventing accidental rotation or commitment. Text
+inputs, selects and editable text retain their native undo behavior. Shift+Z is
+not handled as redo.
+
+New perimeter drafts enable **Smooth surface route** by default. Instead of
+forcing each sampled-control pair through mesh vertices, the algorithm finds a
+local connected triangle strip, unfolds adjacent triangles across their shared
+edges into a plane, and intersects the straight route with those edges in order.
+Each resulting 3D segment lies within an actual triangle. This removes many of
+the mesh-edge zigzags while preserving the original picked controls and keeping
+length calculation on the surface. It does not change or cosmetically smooth the
+FLAME head, fit a free-space spline, or smooth away intentional anatomical turns.
+
+If a valid straight crossing of a local strip cannot be found, that pair retains
+its mesh-edge path. The number of fallback pairs is displayed and exported,
+along with the method and smoothing setting. Surface length is computed from
+exactly the same polyline shown in the viewer. Gap and component checks still
+apply; smoothing never joins separate strokes. Calibration's named-point routes
+continue to use their existing mesh-edge method.
+
+Older imported perimeter drafts without a smoothing field retain edge routing.
+Enable the checkbox to recalculate them with triangle-interior routing. Changing
+the route method resets review to Pending and is undoable. Existing raw control
+attachments are preserved. Exports distinguish the routing methods so lengths
+from different methods are not silently treated as identical measurements.
+
+Analytic tests cover planar shortcuts and folded triangles where the correct
+surface length differs from the 3D chord. Browser tests exercise Cmd+Z, Ctrl+Z,
+native text undo, mid-drag cancellation, smoothing toggle undo, surface shortening
+on the actual fitted mesh, and persistence of the routing setting.

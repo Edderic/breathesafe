@@ -13,6 +13,31 @@ const {chromium}=require(path.resolve('tmp/webcam-browser/node_modules/playwrigh
     assert.equal(await page.getByLabel('Show full FLAME head, ears and lower chin',{exact:true}).isChecked(),true);
     const visible=await page.locator('#fit').evaluate(c=>({count:c.pickFrame.mesh.vertices.length,ids:c.pickFrame.mesh.original_vertex_ids}));
     assert.equal(visible.count,5023);assert.equal(visible.ids[5022],5022);
+    assert.equal(await page.locator('#analysisPanel').isVisible(),false);
+    await page.setViewportSize({width:1440,height:900});
+    await page.locator('#workspace').evaluate(e=>e.scrollIntoView({block:'start'}));
+    for(const name of ['layout_point_1','layout_point_2']){
+      await page.getByLabel('New point name',{exact:true}).fill(name);
+      await page.getByLabel('New point name',{exact:true}).press('Enter');
+      assert.equal(await page.getByLabel('Direct point',{exact:true}).inputValue(),name);
+      assert.equal(await page.getByLabel('Click to place direct FLAME point',{exact:true}).isChecked(),true);
+      const input=await page.getByLabel('New point name',{exact:true}).boundingBox(),surface=await page.locator('#fit').boundingBox();
+      assert.ok(input.x+input.width<surface.x,'point naming stays left of the surface');
+      assert.ok(input.y>=0&&input.y+input.height<900,'point naming is on screen');
+      assert.ok(surface.y+surface.height*.5>0&&surface.y+surface.height*.5<900,'surface center is on screen');
+      const before=await page.evaluate(()=>window.scrollY);
+      await page.mouse.click(surface.x+surface.width*.5,surface.y+surface.height*.5);
+      await page.locator('#directStatus').filter({hasText:'Original FLAME triangle'}).waitFor();
+      assert.equal(await page.evaluate(()=>window.scrollY),before,'placing the point requires no scrolling');
+    }
+    await page.getByLabel('Show analysis / comparison mesh',{exact:true}).check();
+    await page.locator('#analysisPanel').waitFor({state:'visible'});
+    await page.getByLabel('Show analysis / comparison mesh',{exact:true}).uncheck();
+    await page.locator('#analysisPanel').waitFor({state:'hidden'});
+    assert.equal(await page.getByLabel('Direct point',{exact:true}).inputValue(),'layout_point_2');
+    await page.locator('#workspace').evaluate(e=>e.scrollIntoView({block:'start'}));
+    await page.screenshot({path:path.join(folder,'point-workspace-layout.png')});
+    await page.setViewportSize({width:1500,height:1300});
     await page.getByLabel('Click to place direct FLAME point',{exact:true}).check();
     const canvas=page.locator('#fit');
     for(const [name,x,y]of[['left_tragion',.36,.5],['subnasale',.5,.55],['right_tragion',.64,.5],['menton',.5,.68],['pronasale',.5,.49]]){
@@ -22,6 +47,7 @@ const {chromium}=require(path.resolve('tmp/webcam-browser/node_modules/playwrigh
       await page.getByLabel('Point notes',{exact:true}).fill('AUTOMATED FIXTURE ONLY, not anatomical review.');
       await page.getByLabel('Direct review',{exact:true}).selectOption('reviewed');
     }
+    await page.getByText('Routes, distances and tape calibration',{exact:true}).click();
     await page.getByLabel('Scale tape readings (mm, three comma-separated values)',{exact:true}).fill('300, 301, 299');
     await page.getByLabel('Independent check readings (mm, three comma-separated values)',{exact:true}).fill('320, 321, 319');
     assert.equal(await page.getByRole('button',{name:'Download calibrated FLAME mesh',exact:true}).isDisabled(),true);

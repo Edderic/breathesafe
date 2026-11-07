@@ -23,6 +23,7 @@ const {chromium} = require(path.resolve('tmp/webcam-browser/node_modules/playwri
     await page.screenshot({path:path.join(folder,'profile.png')});
     await page.getByRole('combobox',{name:'Shape components'}).selectOption('300');
     await page.getByRole('heading',{name:'FLAME · 300 shape components'}).waitFor();
+    await page.getByLabel('Show analysis / comparison mesh',{exact:true}).check();
     await page.getByRole('checkbox',{name:'Show only fitting target on left'}).uncheck();
     await page.getByRole('heading',{name:'Analysis mesh · original bounded surface'}).waitFor();
     const downloaded = page.waitForEvent('download');
