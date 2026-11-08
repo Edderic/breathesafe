@@ -1,5 +1,8 @@
 # RealDenseFace neural predictions on CPU and Apple Silicon
 
+Update: [Local FLAME surface fitting and measurement comparison](REALDENSEFACE_FIT.md)
+now provides a CPU optimizer for the predicted priors, separate from the CUDA solver.
+
 Local evaluation, 2026-11-08, Apple M3 Pro. **No EC2 instance or photo upload.**
 The official ViT-S prediction network runs on both PyTorch CPU and MPS (Metal).
 The stock end-to-end program does not: its inference wrapper unconditionally
