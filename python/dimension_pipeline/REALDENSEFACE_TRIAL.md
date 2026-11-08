@@ -1,5 +1,8 @@
 # RealDenseFace EC2 trial proposal
 
+Update 2026-11-08: [CPU and Apple Silicon neural inference now runs locally](REALDENSEFACE_LOCAL.md).
+The stock FLAME fitting and visibility stages still require CUDA.
+
 Prepared 2026-11-07. **No instance launched and no face photos uploaded.**
 
 Use one Linux `g6.2xlarge` in `us-east-1`: 1 NVIDIA L4 (24 GB), 8 vCPU,
