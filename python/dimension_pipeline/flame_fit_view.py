@@ -33,7 +33,7 @@ def write_view(out, report, source, target, camera):
                 raise ValueError('Face crop lost its original FLAME triangle correspondence.')
             whole=payload(full)
             whole.update(original_vertex_ids=list(range(len(full.vertices))),original_triangle_ids=list(range(len(full.faces))),
-                         world_vertices=np.asarray(full.vertices).tolist(),fitted_vertex_ids=topology['original_vertex_ids'],
+                         world_vertices=np.asarray(full.vertices).tolist(),fitted_vertex_ids=row.get('fitted_vertex_ids',topology['original_vertex_ids']),
                          mesh_sha256=row['full_mesh_sha256'])
             data['full_variants'][row.get('id',str(row['components']))]=whole
             # Build the display directly from original indices, so it cannot

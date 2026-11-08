@@ -1,5 +1,8 @@
 # FLAME Open fitting to the analysis mesh
 
+For the newer experiment that fits FLAME directly to photos without a reconstructed target,
+see [Direct multi-photo FLAME baseline](FLAME_DIRECT_PHOTOS.md).
+
 This offline CPU experiment fits neutral FLAME 2023 Open identity directions to
 `result.surface.mesh`. It uses no Pixel3DMM code or weights. The original full
 reconstruction is only hashed to validate an optional diagnostic point export;
@@ -560,3 +563,74 @@ Recovered/lost sections describe support against the fixed original FLAME fit,
 not anatomical improvement or a new FLAME fit. Mesh decimation, reconstruction
 changes and registration error can reduce support on an expanded-mask run.
 Original captures, reconstructions, annotations and calibration remain separate.
+
+### Supported jaw and upper-neck fitting trial
+
+`python -m dimension_pipeline.flame_neck_fit --original <original-session>
+--trial <completed-neck-session> --seed <original-fit-directory>
+--arc <original-arc-experiment-directory> --coverage <neck-comparison-directory>
+--model <FLAME2023Open.zip> --probe <original-nose-point.json>
+--out <fresh-private-directory>` runs two matched 100-component, 40-iteration
+fits on the expanded-mask reconstruction in the original camera-aligned frame.
+The existing completed mask comparison must still match the trial session.
+
+Both targets exclude original open-boundary incident triangles, edges longer
+than 0.12 eye spans, longest-edge/altitude ratios above 12, and the original
+nose sphere. The baseline retains the original face-oval/frontal-visibility
+crop. The expanded target uses a fixed original-seed face/jaw/neck envelope
+within 0.15 eye spans and does not impose frontal visibility on the under-jaw.
+No vertices are moved or surfaces filled during target filtering.
+
+The neutral FLAME display crop extends down to -2.05 model eye spans and back
+to eye-z minus 0.55 spans. New fitting candidates must be below eye-y minus
+0.75 spans; original facial vertices remain included. Only added vertices
+within 0.10 reconstruction eye spans of the target, with absolute normal dot
+at least 0.5 and outside exclusions, enter the expanded fit. At least 30 are
+required. The support set is frozen from the original seed and rechecked after
+envelope filtering. Geometric cuts are not anatomical labels.
+
+The trials share initialization, shape prior and coefficient bounds, and use
+no arc-region importance or scalar length loss. The comparison separately
+reports RMS for common facial vertices and the common supported added vertices;
+the main optimizer RMS uses each fit's own population and cannot alone rank the
+trials. Arc lengths are evaluated read-only against a fixed supported target.
+Original point review and tape calibration are not transferred. Per-variant
+fitted vertex IDs determine whether new direct points are within the constrained
+region; displayed unsupported portions remain prior dominated. Self-intersection
+checks are not performed. Inspect the shared profiles and underside views before
+choosing a fit; improved reconstruction agreement is not anatomical validation.
+
+### Nasal bridge weight sensitivity
+
+`python -m dimension_pipeline.flame_bridge_fit --parent <supported-neck-fit>
+--original <original-session> --seed <annotated-original-fit-directory>
+--annotations <direct-measurements.json> --model <FLAME2023Open.zip>
+--probe <original-nose-point.json> --out <fresh-private-directory>` compares
+bridge multipliers 1, 2, 4 and 8 with unchanged target geometry, eye-based neutral
+initialization, supported face/jaw/neck vertex population, 100 shape components,
+40 iterations, coefficient bounds and shape prior. No photo or positional
+landmark loss is applied. The defective tip exclusion overrides bridge weights.
+
+The original named sellion/pronasale FLAME attachments define a fixed capsule
+on the supported-neck baseline, radius 0.12 eye spans. Target distance at most
+0.15 spans, absolute normal dot at least 0.5 and exclusion checks gate the
+weights. Falloff is `(1-(d/r)^2)^2`; vertices above 0.25 falloff define the common
+bridge evaluation set. Pending point statuses stay pending: these names define
+an exploratory region and measurement proxies, not anatomical ground truth.
+
+Reports separate bridge RMS, signed forward offset from closest target
+triangles, common facial/neck RMS, subnasale–pronasale anchor distance and forward
+tip projection. The latter uses `-R_frontal[2]`, so vertical displacement is not
+mistaken for protrusion. Lengths use original reconstruction units. Evaluation
+vertex sets are frozen; points entering the excluded sphere are counted and
+flagged instead of silently disappearing from residual averages. Fitting still
+rejects queries and target matches inside the exclusion.
+
+The private viewer highlights evaluated bridge vertices in purple, retains
+shared baseline/candidate orientation, and displays the separate measurements.
+Changing bridge weights can alter global similarity and surrounding shape;
+inspect those tradeoffs, rather than interpreting reduced residual as anatomical
+accuracy. The excluded tip still relies on the shape prior. Several manually
+reviewed registered source-photo points are the next source of additional
+constraints when bridge weighting leaves tip projection unresolved. These photos
+also contributed to reconstruction and do not provide independent validation.
