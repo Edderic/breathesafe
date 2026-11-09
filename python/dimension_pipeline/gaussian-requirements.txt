@@ -1,0 +1,2 @@
+# Optional marching-cubes dependency for the existing webcam experiment venv.
+scikit-image==0.25.2

@@ -1,0 +1,16 @@
+<!doctype html><meta charset="utf-8"><title>Neck-inclusive all-photo coverage</title>
+<style>body{font:17px system-ui;max-width:1400px;margin:25px auto;color:#243b46}table{border-collapse:collapse;width:100%;margin:20px 0}th,td{border-bottom:1px solid #ccd7dd;padding:10px;text-align:left}section{display:grid;grid-template-columns:1fr 1fr;gap:20px}img{width:100%}.note{background:#fff2d1;padding:12px}a{color:#126d91}pre{white-space:pre-wrap}@media(max-width:850px){section{display:block}}</style>
+<h1>Neck-inclusive reconstruction and all-photo landmark coverage</h1>
+<p class="note">Model-derived candidates remain unreviewed. A point must be inside the network crop and the approved neck mask, agree across registered photos, and attach to a visible supported surface. A full photograph showing neck skin does not guarantee that the network's crop includes it.</p>
+<p><a id="neck">Open raw versus sigma 0.03 head-and-neck surfaces</a> · <a href="report.json">Download coverage report</a></p>
+<p id="count"></p><h2>Nine-photo versus all-photo support</h2><table><thead><tr><th>Photo set</th><th>Candidate group</th><th>Total candidates</th><th>Raw supported</th><th>Smoothed supported</th></tr></thead><tbody id="summary"></tbody></table>
+<p>The below-menton group uses neutral-template y &lt; -0.089, z &gt; -0.045 as a geometric sampling region, not validated anatomical labels. Counts are candidate coverage diagnostics, not accuracy percentages. Both photo sets use the same crop/mask gates and geometric thresholds.</p>
+<h2>Named candidate status with all photos</h2><table><thead><tr><th>Candidate</th><th>Raw status</th><th>Smoothed status</th><th>Raw visible views</th><th>Smoothed visible views</th></tr></thead><tbody id="named"></tbody></table>
+<h2>Photo inputs and neck predictions</h2><p>Blue rectangle: actual refined network crop. Green: supported smoothed candidate visible in this photo. Orange: other model prediction, not supported here. Gray: outside the source-image/crop/mask gate. Predictions are displayed for inspection; unsupported predictions are not promoted to measurements.</p><section id="photos"></section>
+<script id="data" type="application/json">__DATA__</script><script>
+const data=JSON.parse(document.getElementById('data').textContent),r=data.report,$=id=>document.getElementById(id);$('neck').href=data.neck_viewer;$('count').textContent=`Evaluated ${r.image_count} registered photos from ${r.capture_count} approved captures. The selected Gaussian surface retains the upper-neck reconstruction.`;
+function row(id,values){const tr=document.createElement('tr');for(const v of values){const td=document.createElement('td');td.textContent=v;tr.append(td)}$(id).append(tr)}
+for(const [name,run]of Object.entries(r.runs))for(const [kind,summary]of Object.entries(run.summary))row('summary',[`${run.slots.length} photos`,kind,summary.count,summary.raw.supported??0,summary.smoothed.supported??0]);
+for(const [name,p]of Object.entries(r.runs.all_views.named))row('named',[name,p.raw,p.smoothed,p.raw_visible_views,p.smoothed_visible_views]);
+for(const card of r.photos){const article=document.createElement('article'),h=document.createElement('h3'),image=document.createElement('img');h.textContent=card.slot;image.src=card.file;image.alt=card.slot;article.append(h,image);$('photos').append(article)}
+</script>

@@ -39,6 +39,17 @@ def check_asset(path, expected):
         raise ValueError('Asset differs from the published RealDenseFace checksum: '+str(path))
 
 
+def initial_bbox(record, width, height):
+    if 'initial_bbox_pixels' in record:
+        bbox = np.asarray(record['initial_bbox_pixels'], dtype=float)
+    else:
+        points = np.array([[p['x']*width, p['y']*height] for p in record['landmarks'][:468]])
+        bbox = np.r_[points.min(axis=0), points.max(axis=0)]
+    if bbox.shape != (4,) or not np.isfinite(bbox).all() or not (bbox[2]>bbox[0] and bbox[3]>bbox[1]):
+        raise ValueError('Invalid initial face crop')
+    return bbox
+
+
 def infer(args):
     import torch
     import torch.nn.functional as functional
@@ -84,8 +95,9 @@ def infer(args):
               'source_commit': SOURCE_COMMIT, 'weights_sha256': sha(args.weights), 'assets_sha256': sha(args.assets),
               'model_load_seconds': load_seconds, 'flame_fitting': 'not_run; upstream solver requires CUDA',
               'visibility': 'unfiltered; CUDA rasterization not reproduced',
-              'initial_crop': 'cached MediaPipe face bounds; refined once using official network', 'views': []}
-    for slot in args.slots.split(','):
+              'initial_crop': 'cached MediaPipe bounds or explicit approved head-mask fallback; refined once using official network', 'views': []}
+    slots = [v['slot'] for v in baseline['views']] if args.slots == 'all' else args.slots.split(',')
+    for slot in slots:
         if not slot or Path(slot).name != slot:
             raise ValueError('Photo slots must be simple names')
         record = next(v for v in baseline['views'] if v['slot'] == slot)
@@ -94,8 +106,7 @@ def infer(args):
             raise ValueError('Capture/cache hash changed')
         image = np.asarray(Image.open(path).convert('RGB'))
         height, width = image.shape[:2]
-        landmarks = np.array([[p['x']*width, p['y']*height] for p in cached[slot]['landmarks'][:468]])
-        bbox = np.r_[landmarks.min(axis=0), landmarks.max(axis=0)]
+        bbox = initial_bbox(cached[slot], width, height)
         passes = []
         for step in range(2):
             bbox[[0, 2]] = np.clip(bbox[[0, 2]], 0, width)
@@ -127,7 +138,8 @@ def infer(args):
         preview.thumbnail((960, 540))
         preview.save(out/(slot+'-prediction.jpg'))
         report['views'].append({'slot': slot, 'image_sha256': record['sha256'], 'seconds_per_forward': passes,
-                                'vertex_count': len(xy), 'finite': True, 'crop': square.tolist()})
+                                'vertex_count': len(xy), 'finite': True, 'crop': square.tolist(),
+                                'initial_crop_source': cached[slot].get('crop_source', 'cached_mediapipe')})
         (out/'report.json').write_text(json.dumps(report, indent=2))
         print(slot, args.device, passes, flush=True)
     cards = ''.join('<article><h2>'+html.escape(v['slot'])+'</h2><img src="'+
