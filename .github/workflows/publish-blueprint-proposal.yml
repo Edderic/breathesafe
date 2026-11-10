@@ -1,0 +1,53 @@
+name: Publish reviewed Blueprint proposal
+on:
+  push:
+    branches: [publish-blueprint-proposal]
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    environment: production
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Publish documents on the current production code
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_APP: ${{ secrets.HEROKU_PRODUCTION_APP }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$HEROKU_API_KEY"
+          test -n "$HEROKU_APP"
+          mkdir /tmp/blueprint-documents
+          cp public/reviews/masqfit-blueprint-{concept-note,detailed-proposal}.{html,pdf} /tmp/blueprint-documents/
+          sha256sum /tmp/blueprint-documents/* > /tmp/blueprint-source-hashes.txt
+          HEROKU_GIT_URL="https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP.git"
+          git fetch --no-tags "$HEROKU_GIT_URL" refs/heads/main
+          PRODUCTION_BASE=$(git rev-parse FETCH_HEAD)
+          git switch --detach "$PRODUCTION_BASE"
+          mkdir -p public/reviews
+          cp /tmp/blueprint-documents/* public/reviews/
+          git add public/reviews/masqfit-blueprint-{concept-note,detailed-proposal}.{html,pdf}
+          python3 - <<'PYVALIDATE'
+          import subprocess
+          expected = {f"public/reviews/masqfit-blueprint-{name}.{ext}" for name in ("concept-note", "detailed-proposal") for ext in ("html", "pdf")}
+          changed = set(subprocess.check_output(["git", "diff", "--cached", "--name-only"], text=True).splitlines())
+          assert changed == expected, changed
+          PYVALIDATE
+          git -c user.name='Edderic Ugaddan' -c user.email='edderic@gmail.com' commit -m "publish Blueprint Biosecurity MasqFit proposal"
+          PUBLISHED_COMMIT=$(git rev-parse HEAD)
+          git diff --check "$PRODUCTION_BASE" HEAD
+          git push "$HEROKU_GIT_URL" HEAD:main
+          printf 'Production base: %s\nPublished commit: %s\n' "$PRODUCTION_BASE" "$PUBLISHED_COMMIT" > /tmp/blueprint-publication.txt
+          git diff --stat "$PRODUCTION_BASE" HEAD >> /tmp/blueprint-publication.txt
+          cat /tmp/blueprint-source-hashes.txt >> /tmp/blueprint-publication.txt
+          cat /tmp/blueprint-publication.txt >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blueprint-publication-manifest
+          path: /tmp/blueprint-publication.txt
