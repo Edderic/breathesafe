@@ -1,6 +1,8 @@
 Latent nose-distance experiment
 
-Run normal training with --nose-model latent_nose_v1 (default: none).
+Normal training now defaults to --nose-model latent_nose_v1.
+Rails, training Lambda events and CLI use the same default. Explicit
+--nose-model none (or event nose_model: none) retains the perimeter-only baseline.
 Use --local-only for research runs that must not replace deployed artifacts.
 
 The existing fit-family/style quadratic total-perimeter model stays in place.
@@ -54,7 +56,8 @@ Measured-only training, 615 held-out tests / 18 people:
   plus latent nose:        log loss 1.255, precision 64.6%, recall 56.6%, F1 .604
 The gain does not reproduce in measured-only training. Some final mixed-model
 preferred distances reach about 4.4 mm; they are not plausible physical mask nose
-perimeters. Keep this opt-in pending stronger data and identification constraints.
+perimeters. The user selected this variant as the training default after reviewing
+these limitations. It has not been deployed by this local research work.
 
 Style sensitivity experiment (opt-in --nose-model style_nose_v2)
 
@@ -88,3 +91,17 @@ style-specific mean .542. Log loss means: 1.224, 1.234, 1.233 respectively.
 Mixed-input F1 means: .572, .615, .619; log loss: 1.108, .931, .938.
 Style-specific curvature adds little on mixed inputs and worsens measured-only
 F1 versus both alternatives. Keep opt-in and do not deploy from this trial.
+
+Top-k comparison, mixed inputs, mean of five CV fold rates averaged across
+initializations 42/43/44 (same folds, not independent replications):
+                  Perimeter-only   Shared nose default   Change (percentage points)
+  Top-1             54.17%              53.00%               -1.17
+  Top-3             79.50%              81.33%               +1.83
+  Top-5             82.00%              85.17%               +3.17
+Default seed 42 alone: Top-1 55.5% -> 53.5%, Top-3 79.5% -> 80.0%,
+Top-5 82.0% -> 84.5%. These rank held-out tested observations per eligible
+person (at least one positive label); they are not full-catalog prospective fit
+rates. Repeated user/mask tests may remain. Rates are macro means of fold rates.
+Measured-only training does not show an improvement: averaged Top-1 91.67% ->
+87.50%, Top-3 95.83% -> 93.06%, Top-5 unchanged at 95.83%. Different population,
+so do not compare its absolute rates with the mixed cohort.

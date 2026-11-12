@@ -872,3 +872,14 @@ def test_style_nose_strength_penalizes_same_mismatch_differently():
         frame, metadata['fit_family_categories'], metadata['style_categories'], metadata['strap_type_categories'])
     expected = torch.nn.functional.softplus(params['nose_strength_raw'])
     assert torch.allclose(train_module._nose_strength(unknown_data, params), expected.expand(2, 1))
+
+
+def test_training_defaults_to_shared_nose_model_and_allows_baseline_override():
+    assert train_module._parse_train_args([]).nose_model == 'latent_nose_v1'
+    default_argv = _build_train_argv({})
+    assert train_module._parse_train_args(default_argv).nose_model == 'latent_nose_v1'
+    for variant in ['none', 'latent_nose_v1', 'style_nose_v2']:
+        argv = _build_train_argv({'nose_model': variant})
+        assert train_module._parse_train_args(argv).nose_model == variant
+    with pytest.raises(ValueError, match='Unsupported nose_model'):
+        _build_train_argv({'nose_model': 'invalid'})

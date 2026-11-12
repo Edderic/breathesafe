@@ -37,6 +37,10 @@ def _build_train_argv(event):
     if event.get('learning_rate') is not None:
         argv.extend(['--learning-rate', str(event['learning_rate'])])
     argv.extend(['--model-type', 'custom_lr'])
+    nose_model = event.get('nose_model', 'latent_nose_v1')
+    if nose_model not in ['none', 'latent_nose_v1', 'style_nose_v2']:
+        raise ValueError(f'Unsupported nose_model: {nose_model}')
+    argv.extend(['--nose-model', nose_model])
     if event.get('class_reweight'):
         argv.append('--class-reweight')
     if event.get('retrain_with_full'):

@@ -2328,10 +2328,10 @@ def train_custom_lr_with_split(
         'y_val': y_val.squeeze(1).cpu().numpy(),
     }
 
-def main(argv=None):
+def _parse_train_args(argv=None):
     parser = argparse.ArgumentParser(description='Train fit predictor model.')
     parser.add_argument('--facial-summary-json', help='Optional read-only facial-measurement summary snapshot for an authenticated internal-export run.')
-    parser.add_argument('--nose-model', choices=['none', 'latent_nose_v1', 'style_nose_v2'], default='none', help='Add a learned mask/style preferred nose-distance mismatch term.')
+    parser.add_argument('--nose-model', choices=['none', 'latent_nose_v1', 'style_nose_v2'], default='latent_nose_v1', help='Add a learned mask/style preferred nose-distance mismatch term.')
     parser.add_argument('--local-only', action='store_true', help='Write all artifacts locally; never upload to S3 or replace the deployed latest model.')
     parser.add_argument('--epochs', type=int, default=600, help='Number of training epochs.')
     parser.add_argument('--learning-rate', type=float, default=0.00005, help='Learning rate for optimizer.')
@@ -2353,7 +2353,11 @@ def main(argv=None):
         help='Disable full-dataset retraining before artifact save.',
     )
     parser.set_defaults(retrain_with_full=True)
-    args = parser.parse_args(argv)
+    return parser.parse_args(argv)
+
+
+def main(argv=None):
+    args = _parse_train_args(argv)
     if args.local_only:
         os.environ['MASK_RECOMMENDER_LOCAL_ONLY'] = '1'
     # [ ] Get a table of users and facial features
