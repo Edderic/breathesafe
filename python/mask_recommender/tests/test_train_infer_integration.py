@@ -730,3 +730,65 @@ def test_save_local_custom_artifacts_persists_metrics(tmp_path, monkeypatch):
     metrics_path = artifact_dir / "custom_metrics.json"
     assert metrics_path.exists()
     assert json.loads(metrics_path.read_text(encoding="utf-8"))["val_f1"] == 0.73
+
+
+def test_cross_validation_exports_only_held_out_test_predictions(monkeypatch):
+    frame=pd.DataFrame([{'id':u*10+m,'user_id':u,'mask_id':m,'qlft_pass_normalized':m%2}
+                        for u in (1,2,3) for m in range(4)])
+    def fit(data,train_idx,val_idx,**kwargs):
+        train_users=set(data.iloc[train_idx.tolist()]['user_id'])
+        assert train_users.isdisjoint(set(data.iloc[val_idx.tolist()]['user_id']))
+        labels=data.iloc[val_idx.tolist()]['qlft_pass_normalized'].to_numpy()
+        return {'val_probs':np.where(labels,.8,.2),'y_val':labels,
+                'y_train':data.iloc[train_idx.tolist()]['qlft_pass_normalized'].to_numpy()}
+    monkeypatch.setattr(train_module,'train_custom_lr_with_split',fit)
+    rows=[]
+    result=train_module._cross_validate_custom_lr(frame,{},epochs=1,learning_rate=.01,class_weighting=False,num_folds=3,prediction_sink=rows)
+    evaluation=result['probability_evaluation']
+    assert evaluation['sample_count']==12 and evaluation['user_count']==3
+    assert evaluation['at_0_5']['precision']==evaluation['at_0_5']['recall']==1
+    assert evaluation['quality']['log_loss']==pytest.approx(-np.log(.8))
+    assert len(rows)==12
+    assert len({r['fit_test_id'] for r in rows})==12
+    assert all('user_id' in r and 'mask_id' in r for r in rows)
+    assert 'rows' not in evaluation
+
+
+def test_local_only_artifacts_never_create_an_s3_client(monkeypatch,tmp_path):
+    monkeypatch.setenv('MASK_RECOMMENDER_LOCAL_ONLY','1')
+    monkeypatch.setenv('MASK_RECOMMENDER_LOCAL_MODEL_DIR',str(tmp_path/'models'))
+    monkeypatch.setenv('RAILS_ENV','production')
+    def forbidden(*args,**kwargs):raise AssertionError('Local-only mode attempted S3 access')
+    monkeypatch.setattr(train_module.boto3,'client',forbidden)
+    original=tmp_path/'params.pt';original.write_bytes(b'local test')
+    path=train_module._upload_file_to_s3(original,'mask_recommender/models/123/custom_model_params.pt')
+    assert Path(path).read_bytes()==b'local test'
+    path=train_module._upload_json_to_s3({'available':True},'mask_recommender/models/123/custom_metrics.json')
+    assert json.loads(Path(path).read_text())=={'available':True}
+    path=train_module._upload_png_bytes_to_s3(b'png','mask_recommender/models/123/chart.png')
+    assert Path(path).read_bytes()==b'png'
+    assert not train_module._should_upload_visual_artifacts_to_s3()
+
+
+def test_missing_metadata_serializes_as_json_null(monkeypatch,tmp_path):
+    monkeypatch.setenv('MASK_RECOMMENDER_LOCAL_ONLY','1')
+    monkeypatch.setenv('MASK_RECOMMENDER_LOCAL_MODEL_DIR',str(tmp_path))
+    path=train_module._upload_json_to_s3({'missing':float('nan'),'nested':[np.float32('inf'),np.float32(.5)]},
+                                      'mask_recommender/models/123/custom_mask_data.json')
+    result=json.loads(Path(path).read_text())
+    assert result=={'missing':None,'nested':[None,.5]}
+
+
+def test_supplied_imputation_snapshots_do_not_require_network_login(monkeypatch):
+    from mask_recommender import predict_arkit_from_traditional as imputation
+    class Predictor:
+        def predict(self,frame):return np.ones((len(frame),len(imputation.TARGET_COLUMNS)))*20
+    monkeypatch.setattr(imputation,'train_model',lambda frame:Predictor())
+    def forbidden(*args,**kwargs):raise AssertionError('Snapshots unexpectedly requested network data')
+    monkeypatch.setattr(imputation,'fetch_json',forbidden)
+    monkeypatch.setattr(imputation,'login_with_credentials',forbidden)
+    summary=[{'user_id':1,**{c:100 for c in imputation.FEATURE_COLUMNS},**{c:20 for c in imputation.TARGET_COLUMNS}},
+             {'user_id':2,**{c:100 for c in imputation.FEATURE_COLUMNS}}]
+    tests=[{'id':5,'user_id':2,'qlft_pass':'pass',**{c:100 for c in imputation.FEATURE_COLUMNS}}]
+    result=imputation.predict_arkit_from_traditional('https://example.invalid',summary_payload=summary,fit_tests_payload=tests)
+    assert len(result)==1 and result['nose_mm'].iloc[0]==20

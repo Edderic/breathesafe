@@ -1,0 +1,70 @@
+Held-out probability metrics
+===========================
+
+Every custom_lr training run now stores cross_validation.probability_evaluation
+in custom_metrics.json. Scores come from grouped-user cross-validation before
+full-data retraining; the final model's training-set predictions are not used.
+All labeled, deduplicated held-out observations are included, including people
+with no positive test result. Repeated user-mask tests can remain. This differs
+from the existing conditional top-k population.
+
+Reported values:
+- Binary log loss and Brier score, independent of the classification cutoff.
+  Log-loss probabilities are bounded to [1e-15, 1-1e-15] for finite arithmetic.
+- A baseline scored with each fold's training-label prevalence.
+- Precision, recall, F1, specificity and confusion counts at the fixed 0.50 cutoff.
+- A threshold sweep from 0.00 to 1.00 in 0.01 increments, using score >= cutoff.
+- The maximum-F1 candidate on that sweep. It is exploratory because the same
+  evaluation observations select and score it; it is not independently validated.
+- Pass/fail score means, medians, 10th/90th percentiles, normalized histograms,
+  and bins comparing average scores with observed positive-label rates.
+- Equal-person-weighted log loss and fixed-cutoff metrics, alongside per-test
+  metrics, to expose the influence of participants with many observations.
+
+Unknown outcomes are excluded upstream. Positive labels mix evidence sources
+and constructed outcomes; they are not exclusively direct formal fit tests.
+Preprocessing and traditional-to-ARKit imputation remain inherited from the
+existing pipeline, rather than newly nested inside the cross-validation split.
+These metrics do not establish prospective performance or complete-pipeline
+independence. Tune a deployed threshold on separate data, then test it on new users.
+
+Private audit:
+Each local model directory also contains out_of_fold_predictions.json, with
+fold, user ID, fit-test ID, mask ID, observed label and held-out probability.
+It contains participant-level records and must not be served by the public dashboard.
+The Rails metrics service exposes an allowlist of aggregate report fields only.
+The older per-fold precision/recall fields keep their historical validation-tuned
+threshold definition; the new dashboard uses the separate fixed-cutoff report.
+
+Local-only review:
+  python -m mask_recommender.train --local-only --epochs 200 --learning-rate 0.01
+
+The 200 / 0.01 settings match MaskRecommenderTraining's app defaults. Configure
+BREATHESAFE_BASE_URL and the existing authorized training credentials. An optional
+--facial-summary-json FILE accepts a previously authorized measurement-summary
+snapshot with a facial_measurements array, reusing the normal imputation logic.
+Set MASK_RECOMMENDER_LOCAL_MODEL_DIR and MASK_RECOMMENDER_IMAGES_DIR to an ignored
+local review directory. --local-only disables every S3 artifact upload and leaves
+the deployed latest-model pointer untouched. Missing numeric metadata is saved as
+JSON null rather than nonstandard NaN.
+
+Dashboard review:
+The new Vue panel includes precision/recall curves, a cutoff slider, outcome-score
+summaries, calibration bins and confusion counts. Older models show that this report
+is unavailable until a new training artifact is generated. Updating the code alone
+does not backfill old artifacts. No inference classification cutoff is changed.
+
+Verification:
+  pytest python/mask_recommender/tests/test_probability_evaluation.py
+  pytest python/mask_recommender/tests/test_train_infer_integration.py
+  bundle exec rspec spec/services/latest_mask_recommender_metrics_service_spec.rb
+  node --test scripts/tests/recommender_probability_metrics.test.cjs
+
+scripts/tests/recommender_probability_dashboard_smoke.cjs builds a local review
+from the completed artifacts in tmp/recommender-metrics-review/models. It uses
+the existing local Vue/Playwright tools; BREATHESAFE_DEPENDENCY_ROOT can specify
+the workspace containing node_modules and tmp/webcam-browser. An optional public
+stats snapshot lets it also render the complete Dashboard component offline.
+
+Threshold reference:
+https://scikit-learn.org/stable/modules/classification_threshold.html

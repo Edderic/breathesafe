@@ -3,6 +3,7 @@ import io
 import json
 import logging
 import os
+import shutil
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -64,6 +65,7 @@ from feature_builder import (ABS_PERIMETER_DIFF_STYLE_PREFIX,
 from predict_arkit_from_traditional import (TARGET_COLUMNS,
                                             predict_arkit_from_traditional)
 from qa import build_mask_candidates, build_recommendation_preview
+from probability_evaluation import evaluate_probabilities, probability_quality
 from sklearn.metrics import (auc, brier_score_loss, f1_score, log_loss,
                              precision_score, recall_score, roc_auc_score,
                              roc_curve)
@@ -948,17 +950,17 @@ def _save_local_custom_artifacts(timestamp, params, metadata, mask_data, metrics
     metrics_path = local_dir / "custom_metrics.json"
 
     torch.save(params, params_path)
-    metadata_path.write_text(json.dumps(metadata, indent=2), encoding='utf-8')
-    mask_data_path.write_text(json.dumps(mask_data, indent=2), encoding='utf-8')
+    metadata_path.write_text(json.dumps(_json_finite(metadata), indent=2, allow_nan=False), encoding='utf-8')
+    mask_data_path.write_text(json.dumps(_json_finite(mask_data), indent=2, allow_nan=False), encoding='utf-8')
     if metrics is not None:
-        metrics_path.write_text(json.dumps(metrics, indent=2), encoding='utf-8')
+        metrics_path.write_text(json.dumps(_json_finite(metrics), indent=2, allow_nan=False), encoding='utf-8')
 
     logging.info("Saved local custom artifacts to %s", local_dir)
     return local_dir
 
 
 def _should_upload_visual_artifacts_to_s3():
-    return _env_name() in ("staging", "production")
+    return os.environ.get("MASK_RECOMMENDER_LOCAL_ONLY") != "1" and _env_name() in ("staging", "production")
 
 
 def _upload_visual_artifact(local_path, timestamp):
@@ -966,7 +968,33 @@ def _upload_visual_artifact(local_path, timestamp):
     return _upload_file_to_s3(local_path, key)
 
 
+def _json_finite(value):
+    if isinstance(value, np.generic):
+        value = value.item()
+    if isinstance(value, float) and not np.isfinite(value):
+        return None
+    if isinstance(value, dict):
+        return {key: _json_finite(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_finite(item) for item in value]
+    return value
+
+
+def _local_only_artifact_path(key):
+    relative = Path(key).relative_to('mask_recommender/models')
+    if '..' in relative.parts:
+        raise ValueError('Local artifact key cannot escape the model directory')
+    target = Path(_local_model_root()) / relative
+    target.parent.mkdir(parents=True, exist_ok=True)
+    return target
+
+
 def _upload_file_to_s3(local_path, key):
+    if os.environ.get('MASK_RECOMMENDER_LOCAL_ONLY') == '1':
+        target = _local_only_artifact_path(key)
+        if Path(local_path).resolve() != target.resolve():
+            shutil.copy2(local_path, target)
+        return str(target)
     bucket = _s3_bucket()
     s3 = boto3.client('s3', region_name=_s3_region())
     profile = os.environ.get('AWS_PROFILE')
@@ -981,6 +1009,10 @@ def _upload_file_to_s3(local_path, key):
 
 
 def _upload_json_to_s3(payload, key):
+    if os.environ.get('MASK_RECOMMENDER_LOCAL_ONLY') == '1':
+        target = _local_only_artifact_path(key)
+        target.write_text(json.dumps(_json_finite(payload), indent=2, allow_nan=False))
+        return str(target)
     bucket = _s3_bucket()
     s3 = boto3.client('s3', region_name=_s3_region())
     profile = os.environ.get('AWS_PROFILE')
@@ -993,13 +1025,17 @@ def _upload_json_to_s3(payload, key):
     s3.put_object(
         Bucket=bucket,
         Key=key,
-        Body=json.dumps(payload, indent=2).encode('utf-8'),
+        Body=json.dumps(_json_finite(payload), indent=2, allow_nan=False).encode('utf-8'),
         ContentType='application/json'
     )
     return f"s3://{bucket}/{key}"
 
 
 def _upload_png_bytes_to_s3(png_bytes, key):
+    if os.environ.get('MASK_RECOMMENDER_LOCAL_ONLY') == '1':
+        target = _local_only_artifact_path(key)
+        target.write_bytes(png_bytes)
+        return str(target)
     bucket = _s3_bucket()
     s3 = boto3.client('s3', region_name=_s3_region())
     profile = os.environ.get('AWS_PROFILE')
@@ -1581,9 +1617,10 @@ def _summarize_cross_validation_metrics(fold_metrics):
     return summary
 
 
-def _cross_validate_custom_lr(cleaned_fit_tests, category_metadata, epochs, learning_rate, class_weighting, num_folds=5, random_seed=42):
+def _cross_validate_custom_lr(cleaned_fit_tests, category_metadata, epochs, learning_rate, class_weighting, num_folds=5, random_seed=42, prediction_sink=None):
     fold_indices = _group_k_fold_indices_by_user(cleaned_fit_tests, num_folds=num_folds)
     fold_metrics = []
+    held_out_rows = []
 
     for fold_number, (train_idx, val_idx) in enumerate(fold_indices, start=1):
         torch.manual_seed(random_seed + fold_number)
@@ -1642,6 +1679,27 @@ def _cross_validate_custom_lr(cleaned_fit_tests, category_metadata, epochs, lear
         train_users = set(pd.to_numeric(cleaned_fit_tests.iloc[train_idx.tolist()]['user_id'], errors='coerce').dropna().astype(int).tolist())
         val_users = set(pd.to_numeric(cleaned_fit_tests.iloc[val_idx.tolist()]['user_id'], errors='coerce').dropna().astype(int).tolist())
 
+        if train_users & val_users:
+            raise ValueError('Cross-validation user groups overlap')
+        fold_quality = evaluate_probabilities(
+            deduped_val_labels, deduped_val_probs,
+            user_ids=deduped_val_frame['user_id'].tolist(),
+            baseline_probabilities=[float(np.mean(fold_result['y_train']))] * len(deduped_val_labels),
+        )
+        for position, (_, row) in enumerate(deduped_val_frame.iterrows()):
+            fit_test_id = row.get('source_fit_test_id', row.get('id'))
+            if pd.isna(fit_test_id):
+                fit_test_id = row.get('id')
+            mask_id = row.get('mask_id')
+            held_out_rows.append({
+                'fold': fold_number, 'user_id': int(row['user_id']),
+                'fit_test_id': int(fit_test_id) if pd.notna(fit_test_id) else None,
+                'mask_id': int(mask_id) if pd.notna(mask_id) else None,
+                'label': int(deduped_val_labels[position]),
+                'probability': float(deduped_val_probs[position]),
+                'training_positive_rate': float(np.mean(fold_result['y_train'])),
+            })
+
         fold_metrics.append({
             'fold': fold_number,
             'train_users': len(train_users),
@@ -1649,13 +1707,22 @@ def _cross_validate_custom_lr(cleaned_fit_tests, category_metadata, epochs, lear
             'train_rows': int(train_idx.numel()),
             'val_rows': int(val_idx.numel()),
             'deduped_val_rows': int(deduped_val_frame.shape[0]),
+            'probability_evaluation': fold_quality,
             'row_level': row_level_metrics,
             'user_level': user_level_metrics,
             'top_k': top_k_metrics,
             'top_3_any_fit': top_3_any_fit_metrics,
         })
 
-    return _summarize_cross_validation_metrics(fold_metrics)
+    summary = _summarize_cross_validation_metrics(fold_metrics)
+    summary['probability_evaluation'] = evaluate_probabilities(
+        [r['label'] for r in held_out_rows], [r['probability'] for r in held_out_rows],
+        user_ids=[r['user_id'] for r in held_out_rows],
+        baseline_probabilities=[r['training_positive_rate'] for r in held_out_rows],
+    )
+    if prediction_sink is not None:
+        prediction_sink.extend(held_out_rows)
+    return summary
 
 
 def _subset_custom_lr_data(data, row_indices):
@@ -2180,6 +2247,8 @@ def train_custom_lr_with_split(
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Train fit predictor model.')
+    parser.add_argument('--facial-summary-json', help='Optional read-only facial-measurement summary snapshot for an authenticated internal-export run.')
+    parser.add_argument('--local-only', action='store_true', help='Write all artifacts locally; never upload to S3 or replace the deployed latest model.')
     parser.add_argument('--epochs', type=int, default=600, help='Number of training epochs.')
     parser.add_argument('--learning-rate', type=float, default=0.00005, help='Learning rate for optimizer.')
     parser.add_argument('--model-type', default='custom_lr', choices=['custom_lr'], help='Model type to train.')
@@ -2201,6 +2270,8 @@ def main(argv=None):
     )
     parser.set_defaults(retrain_with_full=True)
     args = parser.parse_args(argv)
+    if args.local_only:
+        os.environ['MASK_RECOMMENDER_LOCAL_ONLY'] = '1'
     # [ ] Get a table of users and facial features
     # [ ] Get a table of masks and perimeters
 
@@ -2251,10 +2322,13 @@ def main(argv=None):
     email = os.getenv('BREATHESAFE_SERVICE_EMAIL')
     password = os.getenv('BREATHESAFE_SERVICE_PASSWORD')
 
+    summary_snapshot = json.loads(Path(args.facial_summary_json).read_text())['facial_measurements'] if args.facial_summary_json else None
     fit_tests_with_imputed_arkit_via_traditional_facial_measurements = predict_arkit_from_traditional(
         base_url=base_url,
         email=email,
-        password=password
+        password=password,
+        summary_payload=summary_snapshot,
+        fit_tests_payload=fit_tests_payload if summary_snapshot is not None else None,
     )
     logging.info(
         "Fetched/imputed fit tests rows=%s raw_fit_tests_rows=%s",
@@ -2305,6 +2379,7 @@ def main(argv=None):
 
     timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
     category_metadata = _custom_lr_category_metadata(cleaned_fit_tests)
+    evaluation_prediction_rows = []
     cross_validation_metrics = _cross_validate_custom_lr(
         cleaned_fit_tests,
         category_metadata=category_metadata,
@@ -2313,6 +2388,7 @@ def main(argv=None):
         class_weighting=args.class_reweight,
         num_folds=args.cv_folds,
         random_seed=args.random_seed,
+        prediction_sink=evaluation_prediction_rows,
     )
     train_idx, val_idx = _group_train_val_indices_by_user(
         cleaned_fit_tests,
@@ -2573,6 +2649,7 @@ def main(argv=None):
         'val_f1': best_f1,
         'val_precision': val_precision,
         'val_recall': val_recall,
+        'holdout_probability_quality': probability_quality(deduped_val_labels, deduped_val_probs),
         'train_samples': int(len(train_labels)),
         'val_samples': int(len(val_labels)),
         'deduped_val_samples': int(len(deduped_val_labels)),
@@ -2591,6 +2668,9 @@ def main(argv=None):
         'perimeter_diff_diagnostics_artifacts': perimeter_diff_diagnostics_artifacts,
         'retrain_with_full': bool(args.retrain_with_full),
         'saved_model_training_scope': saved_model_scope,
+        'epochs': int(args.epochs),
+        'learning_rate': float(args.learning_rate),
+        'class_reweight': bool(args.class_reweight),
         'validation_metrics_source': 'grouped_user_split_deduped_validation',
         'split_strategy': 'grouped_by_user_id',
         'validation_deduping': 'drop_exact_duplicates_excluding_id_and_created_at',
@@ -2625,6 +2705,13 @@ def main(argv=None):
         mask_data=mask_data,
         metrics=metrics,
     )
+
+    # Private audit rows: keep individual user/mask scores separate from the
+    # aggregate metrics exposed by the public dashboard.
+    (local_artifact_dir / 'out_of_fold_predictions.json').write_text(json.dumps({
+        'timestamp': timestamp, 'prediction_source': 'grouped_user_cross_validation',
+        'observation_unit': 'deduplicated tested observation', 'rows': evaluation_prediction_rows,
+    }, indent=2, allow_nan=False))
 
     latest_payload = {
         'timestamp': timestamp,
