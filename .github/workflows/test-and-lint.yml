@@ -10,7 +10,8 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Ruby 3.3.9 is unavailable on ubuntu-26.04 (ubuntu-latest).
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
@@ -86,7 +87,8 @@ jobs:
         xvfb-run -a bundle exec rspec spec
 
   lint:
-    runs-on: ubuntu-latest
+    # Match the app's pinned Ruby 3.3.9 runtime.
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout code
