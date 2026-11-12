@@ -116,8 +116,8 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Install dimension pipeline dependency
-      run: python -m pip install -r python/dimension_pipeline/requirements-flame.txt
+    - name: Install dimension pipeline test dependencies
+      run: python -m pip install -r python/dimension_pipeline/requirements-flame.txt Pillow==11.2.1
 
     - name: Build continuous surface solver
       run: |
