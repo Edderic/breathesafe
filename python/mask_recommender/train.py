@@ -465,6 +465,8 @@ def prepare_training_data(
         column for column in EVALUATION_ONLY_COLUMNS
         if column in filtered.columns and column not in feature_cols
     ]
+    if 'nose_mm_observed' in filtered.columns:
+        passthrough_cols.append('nose_mm_observed')
     filtered = filtered[feature_cols + ['qlft_pass_normalized'] + passthrough_cols]
     return filtered
 
@@ -1185,7 +1187,28 @@ def calc_preds(data, params):
 
     logits = fit_tests_by_strap_specific_parameters + fit_tests_by_facial_feature_fit.sum(axis=1).reshape(-1, 1)
 
+    if 'nose_center_log_cm' in resolved_params:
+        center = _nose_center_cm(data, resolved_params)
+        strength = torch.nn.functional.softplus(resolved_params['nose_strength_raw'])
+        logits = logits - strength * (data['nose_cm'] - center).square()
+
     return torch.sigmoid(logits)
+
+
+def _nose_center_cm(data, params):
+    return torch.exp(
+        params['nose_center_log_cm']
+        + data['fit_tests_by_styles'] @ params['nose_style_offset']
+        + data['fit_tests_by_masks'] @ params['nose_mask_offset']
+    )
+
+
+def _nose_regularization(params):
+    if 'nose_center_log_cm' not in params:
+        return torch.tensor(0.0)
+    # Shrink sparse fit-family offsets to their style; shrink styles to the global center.
+    return 0.01 * (params['nose_mask_offset'].square().mean()
+                   + params['nose_style_offset'].square().mean())
 
 
 def _fit_family_key_series(frame):
@@ -1281,6 +1304,7 @@ def prep_data_in_torch_with_categories(
         'fit_tests_by_strap_types': fit_tests_by_strap_types,
         'perimeter_diffs': perimeter_diffs,
         'facial_perimeter_cm': facial_perimeter_cm_t,
+        'nose_cm': torch.from_numpy(frame['nose_mm'].to_numpy(dtype=np.float32)).reshape(-1, 1) / 10.0,
     }
 
     return data
@@ -1698,6 +1722,7 @@ def _cross_validate_custom_lr(cleaned_fit_tests, category_metadata, epochs, lear
                 'label': int(deduped_val_labels[position]),
                 'probability': float(deduped_val_probs[position]),
                 'training_positive_rate': float(np.mean(fold_result['y_train'])),
+                'nose_mm_observed': bool(row.get('nose_mm_observed', False)),
             })
 
         fold_metrics.append({
@@ -1741,13 +1766,22 @@ def _initialize_custom_lr_parameters(category_metadata):
     style_count = len(category_metadata['style_categories'])
     strap_count = len(category_metadata['strap_type_categories'])
 
-    return {
+    params = {
         'alpha_mask_raw': torch.full((mask_count, 1), -5.0, dtype=torch.float32, requires_grad=True),
         'beta_gamma_mask': torch.rand((mask_count, 2), dtype=torch.float32, requires_grad=True),
         'alpha_style_raw': torch.zeros((style_count, 1), dtype=torch.float32, requires_grad=True),
         'beta_gamma_style': torch.rand((style_count, 2), dtype=torch.float32, requires_grad=True),
         'strap_specific_parameters': (torch.rand((strap_count, 1), dtype=torch.float32) - 0.5).requires_grad_(),
     }
+
+    if category_metadata.get('nose_model') == 'latent_nose_v1':
+        params.update({
+            'nose_center_log_cm': torch.tensor([[np.log(4.5)]], dtype=torch.float32, requires_grad=True),
+            'nose_mask_offset': torch.zeros((mask_count, 1), requires_grad=True),
+            'nose_style_offset': torch.zeros((style_count, 1), requires_grad=True),
+            'nose_strength_raw': torch.tensor([[-2.0]], requires_grad=True),
+        })
+    return params
 
 
 def _detach_custom_lr_parameters(parameters):
@@ -1776,6 +1810,7 @@ def _resolve_custom_lr_parameter_views(params):
         axis=1
     )
     return {
+        **{key: value for key, value in params.items() if key.startswith('nose_')},
         'mask_specific_parameters': mask_specific_parameters,
         'style_specific_parameters': style_specific_parameters,
         'strap_specific_parameters': params['strap_specific_parameters'],
@@ -1803,7 +1838,36 @@ def _custom_lr_params_with_zeroed_mask(parameters, mask_identity, category_metad
     except ValueError:
         return cloned
     cloned['mask_specific_parameters'][mask_idx] = torch.zeros_like(cloned['mask_specific_parameters'][mask_idx])
+    if 'nose_mask_offset' in cloned:
+        cloned['nose_mask_offset'][mask_idx] = 0
     return cloned
+
+
+def _nose_parameter_report(params, category_metadata, frame):
+    if 'nose_center_log_cm' not in params:
+        return None
+    data = prep_data_in_torch_with_categories(
+        frame, _custom_lr_mask_categories(category_metadata),
+        category_metadata['style_categories'], category_metadata['strap_type_categories'])
+    with torch.no_grad():
+        centers = _nose_center_cm(data, params).squeeze(1).numpy() * 10
+    working = frame.copy()
+    working['effective_nose_mm'] = centers
+    working['fit_family_key'] = _fit_family_key_series(working)
+    rows = []
+    for (family, style), group in working.groupby(['fit_family_key', 'style']):
+        rows.append({
+            'fit_family': family, 'style': style,
+            'effective_preferred_nose_mm': float(group['effective_nose_mm'].iloc[0]),
+            'training_rows': len(group), 'training_people': int(group['user_id'].nunique()),
+            'positive_rows': int(group['qlft_pass_normalized'].sum()),
+        })
+    return {
+        'interpretation': 'Effective preferred ARKit nose distance, not a measured physical mask perimeter. Weakly identified by sparse fit labels.',
+        'mismatch_strength_per_cm_squared': float(torch.nn.functional.softplus(params['nose_strength_raw']).item()),
+        'initial_global_center_mm': 45.0, 'offset_l2_weight': 0.01,
+        'saved_model_scope': 'see saved_model_training_scope', 'families': rows,
+    }
 
 
 def _mask_perimeter_mm_from_training_row(row):
@@ -1912,6 +1976,8 @@ def _build_custom_lr_perimeter_diff_diagnostics(
             })
             for column in FACIAL_MEASUREMENTS:
                 curve_frame[column] = np.zeros(len(diff_values), dtype=np.float32)
+            if 'nose_center_log_cm' in parameters:
+                curve_frame['nose_mm'] = float(rows['nose_mm'].median())
 
             specific_probs = _predict_custom_lr_probabilities(
                 curve_frame,
@@ -2200,7 +2266,7 @@ def train_custom_lr_with_split(
             class_weights = torch.where(y_train == 1, pos_weight_tensor, torch.tensor(1.0, dtype=torch.float32))
         else:
             class_weights = torch.ones_like(y_train)
-        loss = (loss_fn(train_probs, y_train) * class_weights).mean()
+        loss = (loss_fn(train_probs, y_train) * class_weights).mean() + _nose_regularization(params)
         loss.backward()
         optimizer.step()
         train_losses.append(float(loss.item()))
@@ -2248,6 +2314,7 @@ def train_custom_lr_with_split(
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Train fit predictor model.')
     parser.add_argument('--facial-summary-json', help='Optional read-only facial-measurement summary snapshot for an authenticated internal-export run.')
+    parser.add_argument('--nose-model', choices=['none', 'latent_nose_v1'], default='none', help='Add a learned mask/style preferred nose-distance mismatch term.')
     parser.add_argument('--local-only', action='store_true', help='Write all artifacts locally; never upload to S3 or replace the deployed latest model.')
     parser.add_argument('--epochs', type=int, default=600, help='Number of training epochs.')
     parser.add_argument('--learning-rate', type=float, default=0.00005, help='Learning rate for optimizer.')
@@ -2379,6 +2446,10 @@ def main(argv=None):
 
     timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
     category_metadata = _custom_lr_category_metadata(cleaned_fit_tests)
+    category_metadata['nose_model'] = args.nose_model
+    private_run_dir = Path(_local_model_root()) / timestamp
+    private_run_dir.mkdir(parents=True, exist_ok=True)
+    cleaned_fit_tests.to_json(private_run_dir / 'training_frame.json', orient='table', double_precision=15)
     evaluation_prediction_rows = []
     cross_validation_metrics = _cross_validate_custom_lr(
         cleaned_fit_tests,
@@ -2649,6 +2720,12 @@ def main(argv=None):
         'val_f1': best_f1,
         'val_precision': val_precision,
         'val_recall': val_recall,
+        'nose_model': args.nose_model,
+        'nose_parameters': _nose_parameter_report(params, category_metadata, cleaned_fit_tests),
+        'nose_input_counts': {
+            'observed_rows': int(cleaned_fit_tests.get('nose_mm_observed', pd.Series(False, index=cleaned_fit_tests.index)).sum()),
+            'total_rows': int(len(cleaned_fit_tests)),
+        },
         'holdout_probability_quality': probability_quality(deduped_val_labels, deduped_val_probs),
         'train_samples': int(len(train_labels)),
         'val_samples': int(len(val_labels)),

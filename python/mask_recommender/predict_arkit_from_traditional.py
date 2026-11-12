@@ -287,6 +287,10 @@ def predict_arkit_from_traditional(
 
     fit_tests_enhanced_with_traditional_to_arkit_model = with_present_qlft_pass.merge(user_table_df, on='user_id', how='left', suffixes=('', '_imputation'))
 
+    fit_tests_enhanced_with_traditional_to_arkit_model['nose_mm_observed'] = (
+        fit_tests_enhanced_with_traditional_to_arkit_model['nose_mm'].notna()
+        | fit_tests_enhanced_with_traditional_to_arkit_model['actual'].fillna(False).astype(bool)
+    )
     for col in TARGET_COLUMNS:
         imputed_col = f"{col}_imputation"
         if imputed_col not in fit_tests_enhanced_with_traditional_to_arkit_model.columns:

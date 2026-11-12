@@ -1,0 +1,57 @@
+Latent nose-distance experiment
+
+Run normal training with --nose-model latent_nose_v1 (default: none).
+Use --local-only for research runs that must not replace deployed artifacts.
+
+The existing fit-family/style quadratic total-perimeter model stays in place.
+The extra term is:
+  logit -= softplus(strength_raw) * (observed_nose_cm - preferred_nose_cm)^2
+  preferred_nose_cm = exp(global_log_center + style_offset + fit_family_offset)
+
+nose_mm is the existing aggregated ARKit nose path measurement. It is passed
+separately rather than being visible only as a component of total face perimeter.
+The preferred mask nose distance is latent; no physical mask-nose measurements
+are supplied. This assumes symmetric mismatch penalties around a preferred nose
+size. It cannot distinguish insufficient nose space from other correlated causes
+of failure, and is not a mechanical model of seal/contact.
+
+Initialize the global center to 45 mm, family/style log offsets to zero and
+strength_raw to -2. Shrink family/style offsets with L2 weight 0.01. Unseen fit
+families fall back to style + global center. These are explicit modeling choices,
+not measured mask geometry. Extreme centers, especially for sparse/all-fail
+families, indicate weak identification. Do not treat fitted millimeter values as
+validated physical nose perimeters. Saved artifacts include family support counts.
+
+The legacy preprocessing imputes missing ARKit measurements from traditional
+measurements using a regression fitted before CV. nose_mm_observed records
+whether the source was directly available or came from a measured user aggregate;
+this provenance is retained but never enters the predictive feature vector.
+
+Every run saves a PRIVATE training_frame.json alongside local artifacts for
+reproducible paired comparisons. Never expose that snapshot or individual OOF
+predictions through the public dashboard. Aggregate probability reports keep the
+same dashboard schema and inference can load both old and new parameter files.
+
+Paired local evaluation (no uploads or network calls):
+  PYTHONPATH=python python -m mask_recommender.scripts.compare_nose_model \
+    /private/local/model/training_frame.json --output /private/local/nose-comparison
+
+This fits both models on identical prepared rows, five user-grouped folds, seed
+42, 200 Adam epochs, learning rate 0.01 and no class reweighting. It also runs a
+separate pair trained only on observed nose data, plus reports the observed subset
+of mixed-input training. Final full-data parameters are saved separately from
+held-out scores. Comparison JSON includes fixed-50% and exploratory cutoff metrics,
+log loss, Brier score, score histograms, calibration and equal-person weighting.
+Selection of model/cutoff on these results remains exploratory; test on independent
+people before claiming a reliable improvement or calibrated fit probabilities.
+
+Local trial, 2026-11-12 (single seed; fixed 50% cutoff):
+Mixed measured/imputed inputs, 1,086 held-out tests / 49 people:
+  total-perimeter baseline: log loss 1.101, precision 58.1%, recall 61.3%, F1 .597
+  plus latent nose:        log loss  .952, precision 65.3%, recall 63.1%, F1 .642
+Measured-only training, 615 held-out tests / 18 people:
+  total-perimeter baseline: log loss 1.231, precision 64.3%, recall 65.5%, F1 .649
+  plus latent nose:        log loss 1.255, precision 64.6%, recall 56.6%, F1 .604
+The gain does not reproduce in measured-only training. Some final mixed-model
+preferred distances reach about 4.4 mm; they are not plausible physical mask nose
+perimeters. Keep this opt-in pending stronger data and identification constraints.

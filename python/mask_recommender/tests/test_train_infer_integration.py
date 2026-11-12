@@ -118,7 +118,8 @@ def _masks_df():
     )
 
 
-def test_training_and_inference_alignment(monkeypatch, tmp_path):
+@pytest.mark.parametrize('nose_model', ['none', 'latent_nose_v1'])
+def test_training_and_inference_alignment(monkeypatch, tmp_path, nose_model):
     monkeypatch.setenv("AWS_PROFILE", "breathesafe")
     fit_tests_df = _fit_tests_df()
     masks_df = _masks_df()
@@ -160,6 +161,7 @@ def test_training_and_inference_alignment(monkeypatch, tmp_path):
     }
 
     category_metadata = train_module._custom_lr_category_metadata(cleaned)
+    category_metadata['nose_model'] = nose_model
     custom_result = train_module.train_custom_lr_with_split(
         cleaned,
         train_idx=torch.arange(cleaned.shape[0]),
@@ -170,8 +172,11 @@ def test_training_and_inference_alignment(monkeypatch, tmp_path):
         class_weighting=False,
     )
 
+    params_file = tmp_path / "params.pt"
+    torch.save(custom_result["params"], params_file)
+
     def fake_load_custom_model(self, force=False):
-        self.custom_params = custom_result["params"]
+        self.custom_params = torch.load(params_file, weights_only=True)
         self.custom_metadata = {"timestamp": "test-custom", **category_metadata}
         self.custom_mask_data = mask_data
 
@@ -199,6 +204,11 @@ def test_training_and_inference_alignment(monkeypatch, tmp_path):
 
     assert len(recommendations) == 2
     assert {rec["mask_id"] for rec in recommendations} == {1, 2}
+    expected = train_module._predict_custom_lr_probabilities(
+        recommender._build_inference_rows(mask_data, facial_features), custom_result['params'], category_metadata)
+    expected_by_id = dict(zip([1, 2], expected))
+    for rec in recommendations:
+        assert rec['proba_fit'] == pytest.approx(expected_by_id[rec['mask_id']])
 
 
 def test_training_lambda_builds_custom_lr_argv():
@@ -792,3 +802,47 @@ def test_supplied_imputation_snapshots_do_not_require_network_login(monkeypatch)
     tests=[{'id':5,'user_id':2,'qlft_pass':'pass',**{c:100 for c in imputation.FEATURE_COLUMNS}}]
     result=imputation.predict_arkit_from_traditional('https://example.invalid',summary_payload=summary,fit_tests_payload=tests)
     assert len(result)==1 and result['nose_mm'].iloc[0]==20
+
+
+def test_latent_nose_penalizes_mismatch_at_constant_total_perimeter():
+    frame = _fit_tests_df().iloc[[0, 0, 0]].copy().reset_index(drop=True)
+    frame['nose_mm'] = [35., 45., 55.]
+    frame['chin_mm'] = [55., 45., 35.]
+    frame['perimeter_mm'] = 205.
+    metadata = train_module._custom_lr_category_metadata(frame)
+    metadata['nose_model'] = 'latent_nose_v1'
+    params = train_module._initialize_custom_lr_parameters(metadata)
+    data = train_module.prep_data_in_torch_with_categories(
+        frame, metadata['fit_family_categories'], metadata['style_categories'], metadata['strap_type_categories'])
+    probs = train_module.calc_preds(data, params)
+    assert probs[1] > probs[0]
+    assert probs[1] > probs[2]
+    assert torch.allclose(probs[0], probs[2], atol=1e-6)
+    probs.sum().backward()
+    assert all(params[key].grad is not None for key in params if key.startswith('nose_'))
+    resolved = train_module._resolve_custom_lr_parameter_views(params)
+    assert torch.allclose(probs, train_module.calc_preds(data, resolved))
+
+
+def test_latent_nose_unknown_family_uses_style_and_global_center():
+    frame = _fit_tests_df()
+    metadata = train_module._custom_lr_category_metadata(frame)
+    metadata['nose_model'] = 'latent_nose_v1'
+    params = train_module._initialize_custom_lr_parameters(metadata)
+    frame = frame.iloc[[0]].copy()
+    frame['fit_family_id'] = 999999
+    data = train_module.prep_data_in_torch_with_categories(
+        frame, metadata['fit_family_categories'], metadata['style_categories'], metadata['strap_type_categories'])
+    assert torch.allclose(train_module._nose_center_cm(data, params), torch.tensor([[4.5]]))
+    assert torch.isfinite(train_module.calc_preds(data, params)).all()
+
+
+def test_legacy_params_ignore_nose_at_fixed_perimeter():
+    frame = _fit_tests_df().iloc[[0, 0]].copy().reset_index(drop=True)
+    frame['nose_mm'] = [35., 55.]
+    frame['chin_mm'] = [55., 35.]
+    frame['perimeter_mm'] = 205.
+    metadata = train_module._custom_lr_category_metadata(frame)
+    params = train_module._initialize_custom_lr_parameters(metadata)
+    probs = train_module._predict_custom_lr_probabilities(frame, params, metadata)
+    assert probs[0] == pytest.approx(probs[1])
