@@ -1,0 +1,4 @@
+# Dependencies for unittest discovery in dimension_pipeline/tests.
+-r requirements-flame.txt
+Pillow==11.2.1
+trimesh==4.6.8
