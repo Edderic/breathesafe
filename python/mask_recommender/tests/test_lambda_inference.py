@@ -55,6 +55,7 @@ def test_lambda_recommendations_with_facial_inputs(monkeypatch):
         fake_load_custom_model,
     )
 
+    monkeypatch.setattr(lambda_function.boto3, "client", lambda *args, **kwargs: object())
     recommender = lambda_function.MaskRecommenderInference()
     recommendations = recommender.recommend_masks_custom(facial_features)
 

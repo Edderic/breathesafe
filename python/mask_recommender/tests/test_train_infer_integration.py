@@ -118,7 +118,8 @@ def _masks_df():
     )
 
 
-def test_training_and_inference_alignment(monkeypatch, tmp_path):
+@pytest.mark.parametrize('nose_model', ['none', 'latent_nose_v1', 'style_nose_v2'])
+def test_training_and_inference_alignment(monkeypatch, tmp_path, nose_model):
     monkeypatch.setenv("AWS_PROFILE", "breathesafe")
     fit_tests_df = _fit_tests_df()
     masks_df = _masks_df()
@@ -160,6 +161,7 @@ def test_training_and_inference_alignment(monkeypatch, tmp_path):
     }
 
     category_metadata = train_module._custom_lr_category_metadata(cleaned)
+    category_metadata['nose_model'] = nose_model
     custom_result = train_module.train_custom_lr_with_split(
         cleaned,
         train_idx=torch.arange(cleaned.shape[0]),
@@ -170,8 +172,11 @@ def test_training_and_inference_alignment(monkeypatch, tmp_path):
         class_weighting=False,
     )
 
+    params_file = tmp_path / "params.pt"
+    torch.save(custom_result["params"], params_file)
+
     def fake_load_custom_model(self, force=False):
-        self.custom_params = custom_result["params"]
+        self.custom_params = torch.load(params_file, weights_only=True)
         self.custom_metadata = {"timestamp": "test-custom", **category_metadata}
         self.custom_mask_data = mask_data
 
@@ -199,6 +204,11 @@ def test_training_and_inference_alignment(monkeypatch, tmp_path):
 
     assert len(recommendations) == 2
     assert {rec["mask_id"] for rec in recommendations} == {1, 2}
+    expected = train_module._predict_custom_lr_probabilities(
+        recommender._build_inference_rows(mask_data, facial_features), custom_result['params'], category_metadata)
+    expected_by_id = dict(zip([1, 2], expected))
+    for rec in recommendations:
+        assert rec['proba_fit'] == pytest.approx(expected_by_id[rec['mask_id']])
 
 
 def test_training_lambda_builds_custom_lr_argv():
@@ -730,3 +740,146 @@ def test_save_local_custom_artifacts_persists_metrics(tmp_path, monkeypatch):
     metrics_path = artifact_dir / "custom_metrics.json"
     assert metrics_path.exists()
     assert json.loads(metrics_path.read_text(encoding="utf-8"))["val_f1"] == 0.73
+
+
+def test_cross_validation_exports_only_held_out_test_predictions(monkeypatch):
+    frame=pd.DataFrame([{'id':u*10+m,'user_id':u,'mask_id':m,'qlft_pass_normalized':m%2}
+                        for u in (1,2,3) for m in range(4)])
+    def fit(data,train_idx,val_idx,**kwargs):
+        train_users=set(data.iloc[train_idx.tolist()]['user_id'])
+        assert train_users.isdisjoint(set(data.iloc[val_idx.tolist()]['user_id']))
+        labels=data.iloc[val_idx.tolist()]['qlft_pass_normalized'].to_numpy()
+        return {'val_probs':np.where(labels,.8,.2),'y_val':labels,
+                'y_train':data.iloc[train_idx.tolist()]['qlft_pass_normalized'].to_numpy()}
+    monkeypatch.setattr(train_module,'train_custom_lr_with_split',fit)
+    rows=[]
+    result=train_module._cross_validate_custom_lr(frame,{},epochs=1,learning_rate=.01,class_weighting=False,num_folds=3,prediction_sink=rows)
+    evaluation=result['probability_evaluation']
+    assert evaluation['sample_count']==12 and evaluation['user_count']==3
+    assert evaluation['at_0_5']['precision']==evaluation['at_0_5']['recall']==1
+    assert evaluation['quality']['log_loss']==pytest.approx(-np.log(.8))
+    assert len(rows)==12
+    assert len({r['fit_test_id'] for r in rows})==12
+    assert all('user_id' in r and 'mask_id' in r for r in rows)
+    assert 'rows' not in evaluation
+
+
+def test_local_only_artifacts_never_create_an_s3_client(monkeypatch,tmp_path):
+    monkeypatch.setenv('MASK_RECOMMENDER_LOCAL_ONLY','1')
+    monkeypatch.setenv('MASK_RECOMMENDER_LOCAL_MODEL_DIR',str(tmp_path/'models'))
+    monkeypatch.setenv('RAILS_ENV','production')
+    def forbidden(*args,**kwargs):raise AssertionError('Local-only mode attempted S3 access')
+    monkeypatch.setattr(train_module.boto3,'client',forbidden)
+    original=tmp_path/'params.pt';original.write_bytes(b'local test')
+    path=train_module._upload_file_to_s3(original,'mask_recommender/models/123/custom_model_params.pt')
+    assert Path(path).read_bytes()==b'local test'
+    path=train_module._upload_json_to_s3({'available':True},'mask_recommender/models/123/custom_metrics.json')
+    assert json.loads(Path(path).read_text())=={'available':True}
+    path=train_module._upload_png_bytes_to_s3(b'png','mask_recommender/models/123/chart.png')
+    assert Path(path).read_bytes()==b'png'
+    assert not train_module._should_upload_visual_artifacts_to_s3()
+
+
+def test_missing_metadata_serializes_as_json_null(monkeypatch,tmp_path):
+    monkeypatch.setenv('MASK_RECOMMENDER_LOCAL_ONLY','1')
+    monkeypatch.setenv('MASK_RECOMMENDER_LOCAL_MODEL_DIR',str(tmp_path))
+    path=train_module._upload_json_to_s3({'missing':float('nan'),'nested':[np.float32('inf'),np.float32(.5)]},
+                                      'mask_recommender/models/123/custom_mask_data.json')
+    result=json.loads(Path(path).read_text())
+    assert result=={'missing':None,'nested':[None,.5]}
+
+
+def test_supplied_imputation_snapshots_do_not_require_network_login(monkeypatch):
+    from mask_recommender import predict_arkit_from_traditional as imputation
+    class Predictor:
+        def predict(self,frame):return np.ones((len(frame),len(imputation.TARGET_COLUMNS)))*20
+    monkeypatch.setattr(imputation,'train_model',lambda frame:Predictor())
+    def forbidden(*args,**kwargs):raise AssertionError('Snapshots unexpectedly requested network data')
+    monkeypatch.setattr(imputation,'fetch_json',forbidden)
+    monkeypatch.setattr(imputation,'login_with_credentials',forbidden)
+    summary=[{'user_id':1,**{c:100 for c in imputation.FEATURE_COLUMNS},**{c:20 for c in imputation.TARGET_COLUMNS}},
+             {'user_id':2,**{c:100 for c in imputation.FEATURE_COLUMNS}}]
+    tests=[{'id':5,'user_id':2,'qlft_pass':'pass',**{c:100 for c in imputation.FEATURE_COLUMNS}}]
+    result=imputation.predict_arkit_from_traditional('https://example.invalid',summary_payload=summary,fit_tests_payload=tests)
+    assert len(result)==1 and result['nose_mm'].iloc[0]==20
+
+
+def test_latent_nose_penalizes_mismatch_at_constant_total_perimeter():
+    frame = _fit_tests_df().iloc[[0, 0, 0]].copy().reset_index(drop=True)
+    frame['nose_mm'] = [35., 45., 55.]
+    frame['chin_mm'] = [55., 45., 35.]
+    frame['perimeter_mm'] = 205.
+    metadata = train_module._custom_lr_category_metadata(frame)
+    metadata['nose_model'] = 'latent_nose_v1'
+    params = train_module._initialize_custom_lr_parameters(metadata)
+    data = train_module.prep_data_in_torch_with_categories(
+        frame, metadata['fit_family_categories'], metadata['style_categories'], metadata['strap_type_categories'])
+    probs = train_module.calc_preds(data, params)
+    assert probs[1] > probs[0]
+    assert probs[1] > probs[2]
+    assert torch.allclose(probs[0], probs[2], atol=1e-6)
+    probs.sum().backward()
+    assert all(params[key].grad is not None for key in params if key.startswith('nose_'))
+    resolved = train_module._resolve_custom_lr_parameter_views(params)
+    assert torch.allclose(probs, train_module.calc_preds(data, resolved))
+
+
+def test_latent_nose_unknown_family_uses_style_and_global_center():
+    frame = _fit_tests_df()
+    metadata = train_module._custom_lr_category_metadata(frame)
+    metadata['nose_model'] = 'latent_nose_v1'
+    params = train_module._initialize_custom_lr_parameters(metadata)
+    frame = frame.iloc[[0]].copy()
+    frame['fit_family_id'] = 999999
+    data = train_module.prep_data_in_torch_with_categories(
+        frame, metadata['fit_family_categories'], metadata['style_categories'], metadata['strap_type_categories'])
+    assert torch.allclose(train_module._nose_center_cm(data, params), torch.tensor([[4.5]]))
+    assert torch.isfinite(train_module.calc_preds(data, params)).all()
+
+
+def test_legacy_params_ignore_nose_at_fixed_perimeter():
+    frame = _fit_tests_df().iloc[[0, 0]].copy().reset_index(drop=True)
+    frame['nose_mm'] = [35., 55.]
+    frame['chin_mm'] = [55., 35.]
+    frame['perimeter_mm'] = 205.
+    metadata = train_module._custom_lr_category_metadata(frame)
+    params = train_module._initialize_custom_lr_parameters(metadata)
+    probs = train_module._predict_custom_lr_probabilities(frame, params, metadata)
+    assert probs[0] == pytest.approx(probs[1])
+
+
+def test_style_nose_strength_penalizes_same_mismatch_differently():
+    frame = _fit_tests_df().iloc[[0, 0]].copy().reset_index(drop=True)
+    frame['style'] = ['Bifold', 'Boat']
+    frame['nose_mm'] = 55.
+    frame['chin_mm'] = 35.
+    frame['perimeter_mm'] = 205.
+    metadata = train_module._custom_lr_category_metadata(frame)
+    metadata['nose_model'] = 'style_nose_v2'
+    params = train_module._initialize_custom_lr_parameters(metadata)
+    with torch.no_grad():
+        # Neutralize other style effects so this isolates nose sensitivity.
+        params['beta_gamma_style'].zero_()
+        params['nose_strength_style_offset'][0] = 2.
+    data = train_module.prep_data_in_torch_with_categories(
+        frame, metadata['fit_family_categories'], metadata['style_categories'], metadata['strap_type_categories'])
+    probs = train_module.calc_preds(data, params)
+    assert probs[0] < probs[1]
+    probs.sum().backward()
+    assert params['nose_strength_style_offset'].grad.abs().sum() > 0
+    frame['style'] = ['unseen', 'unseen']
+    unknown_data = train_module.prep_data_in_torch_with_categories(
+        frame, metadata['fit_family_categories'], metadata['style_categories'], metadata['strap_type_categories'])
+    expected = torch.nn.functional.softplus(params['nose_strength_raw'])
+    assert torch.allclose(train_module._nose_strength(unknown_data, params), expected.expand(2, 1))
+
+
+def test_training_defaults_to_shared_nose_model_and_allows_baseline_override():
+    assert train_module._parse_train_args([]).nose_model == 'latent_nose_v1'
+    default_argv = _build_train_argv({})
+    assert train_module._parse_train_args(default_argv).nose_model == 'latent_nose_v1'
+    for variant in ['none', 'latent_nose_v1', 'style_nose_v2']:
+        argv = _build_train_argv({'nose_model': variant})
+        assert train_module._parse_train_args(argv).nose_model == variant
+    with pytest.raises(ValueError, match='Unsupported nose_model'):
+        _build_train_argv({'nose_model': 'invalid'})

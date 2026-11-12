@@ -4,6 +4,7 @@ from pathlib import Path
 import base64
 import json
 import re
+from prototype_slides import add_slides as add_prototype_slides
 
 ROOT = Path(__file__).resolve().parent
 APPLE = 'https://developer.apple.com/documentation/arkit/arfacegeometry'
@@ -30,8 +31,6 @@ budgets = {
     '02 / THREE APPROACHES': 60,
     '03 / WHAT WORKED': 40,
     '04 / WHAT DID NOT TRANSFER DIRECTLY': 40,
-    '05 / WHY PHOTOGRAMMETRY': 60,
-    '06 / ANDROID DEVELOPMENT': 60,
     '07 / OBSERVED FIT': 40,
     '08 / WHO IS REPRESENTED': 30,
     '08 / COMPLEMENTARY SCOPE': 30,
@@ -46,7 +45,8 @@ def chart(name, alt):
 
 def screenshot(name, alt, cls='reference-image'):
     encoded = base64.b64encode((ROOT / 'assets' / name).read_bytes()).decode()
-    return f'<img class="{cls}" src="data:image/png;base64,{encoded}" alt="{escape(alt)}">'
+    mime = 'image/jpeg' if Path(name).suffix.lower() in ('.jpg', '.jpeg') else 'image/png'
+    return f'<img class="{cls}" src="data:{mime};base64,{encoded}" alt="{escape(alt)}">'
 
 
 def svg_icon(name, alt, cls):
@@ -117,64 +117,74 @@ add('02 / PERSONAL RECOMMENDATIONS', 'What the model recommends for my face.',
     'This personal example is separate from the held-out ranking results that follow.',
     30, 'Presenter screenshot · Individual scores are model outputs; calibration is not established.', 'visual-slide recommendation-slide')
 
-add('02 / GEOMETRY → FIT SCORE', 'A preferred perimeter difference, learned from outcomes.',
-    '<div class="equation compact-equation">Δ = (P<sub>face, mm</sub> − P<sub>mask, mm</sub>) / 10 &nbsp; [cm]<br>'
-    'Fit score = sigmoid[c − κ(Δ − Δ*)²], &nbsp; κ &gt; 0</div>' +
-    chart('model-response.svg', 'Schematic curves with invented coefficients peak at perimeter differences of zero and minus two centimeters, then decline on either side.') +
-    '<p class="takeaway">Δ* is the learned optimum; it need not be zero. Moving away lowers the modeled fit score.<br>'
-    'Facial perimeter proxy = nose + upper cheek + mid-cheek + chin paths, measured in mm.</p>' +
-    '<div class="next-feature"><strong>Next feature to test:</strong> compare the face’s nose path with a matching mask nose perimeter, then evaluate whether it improves held-out fit prediction.</div>',
-    'The face measurement enters the recommender as a perimeter proxy: four selected facial paths added together. '
-    'Subtract the mask perimeter and convert millimeters to centimeters. This is a signed difference of lengths, not a physical gap between the face and mask. '
-    'A quadratic in that difference feeds a logistic function. In this centered form, delta star is the preferred difference, '
-    'kappa controls how quickly the score falls away, and c sets the peak logit. '
-    'The optimum need not be zero: the model can learn that a family and style work best at a nonzero difference. '
-    'Family and style supply the quadratic coefficients; strap type supplies an offset. New training constrains curvature to be negative. '
-    'The plotted curves use invented coefficients to explain the shape; they are not measured mask response curves. '
-    'The sigmoid gives a probability-like fit score for ranking, but calibration needs separate evaluation. '
-    'A limitation is geometry compression: for the same mask, two faces with the same summed perimeter get the same score. '
-    'A future improvement is to retain the nose path as its own feature and measure a corresponding nose perimeter on each mask. '
-    'We could model their difference separately from the whole-face perimeter and test whether it improves held-out predictions. '
-    'This is a proposal, not a measured improvement. Yu and Griffin’s 2024 study used respirator-specific face measurements, including the nose and chin, to examine associations with fit. '
-    'Their study does not validate the particular face-to-mask nose perimeter feature proposed here.',
-    65, 'Source: custom_lr calc_preds · Schematic curve uses invented coefficients · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10941723/">Yu &amp; Griffin et al. (2024): FFR-specific face anthropometry and fit</a>.', 'geometry-slide')
+evidence = json.loads((ROOT / 'recommender-evidence.json').read_text())
+base = evidence['variants']['none']
+nose = evidence['variants']['latent_nose_v1']
+classification_rows = ''.join(
+    f'<tr><td>{label}</td><td>{format(base[key], fmt)}</td><td class="metric-gain">{format(nose[key], fmt)}</td></tr>'
+    for label, key, fmt in [('Log loss ↓', 'log_loss', '.3f'), ('Precision ↑', 'precision', '.1%'),
+                            ('Recall ↑', 'recall', '.1%'), ('F1 ↑', 'f1', '.3f')]
+)
+add('02 / GEOMETRY → FIT SCORE', 'Keep the nose path separate from total perimeter.',
+    '<div class="equation compact-equation">New logit = perimeter-model logit − λ × [(N<sub>face</sub> − μ<sub>mask/style</sub>) / 10]²</div>' +
+    '<p class="metric-context">Observed face nose path + learned mask nose preference · λ &gt; 0 · lengths in mm</p>' +
+    '<table class="method-table metric-comparison"><thead><tr><th>Held-out metric</th><th>Perimeter deviation</th><th>+ Nose deviation</th></tr></thead><tbody>' +
+    classification_rows + '</tbody></table>' +
+    '<p class="metric-context">1,086 tests · 49 people · fixed 50% cutoff · 5 user-grouped folds · mean of 3 initializations</p>' +
+    callout('Improved on mixed measured/imputed inputs; the gain did not reproduce with measured-only training.'),
+    'Previously, nose, upper cheek, mid-cheek and chin paths were summed into a single perimeter proxy. '
+    'Two people with the same total could receive the same score despite different nose shapes. '
+    'The new model retains the total-perimeter term and adds a separate squared nose mismatch. The face nose path is an input; '
+    'the mask and style preferred nose distance is inferred from fit labels, not measured mask geometry. '
+    f"Across three initializations on the same five user-grouped folds, precision rose from {base['precision']:.1%} to {nose['precision']:.1%}, "
+    f"recall rose from {base['recall']:.1%} to {nose['recall']:.1%}, and log loss fell from {base['log_loss']:.3f} to {nose['log_loss']:.3f}. "
+    'Precision asks: among tests called fitting, how many had positive labels? Recall asks: among positive labels, how many were found? '
+    'Log loss penalizes confident mistakes; lower is better. All classification metrics use the fixed 50 percent cutoff except log loss, which uses the scores directly. '
+    'These are averages of pooled held-out metrics from each initialization, not training scores or independent replicated datasets. '
+    'The mixed cohort contains measured and imputed ARKit paths. The regression used for imputation was fitted before CV, so full-pipeline generalization is not independently established. '
+    'Measured-only training on 615 tests from 18 people did not reproduce the gain: average F1 fell from .620 to .578. '
+    'Calibration remains poor: even the new log loss is worse than the prevalence-only baseline of approximately .588. '
+    'Labels mix evidence sources and repeated user-mask tests can remain. This is exploratory internal evidence. '
+    'Shared nose sensitivity is now the training default in code; style-specific sensitivity remains experimental.',
+    65, 'Nov 12 local trial · Fixed 50% cutoff · Same folds, seeds 42/43/44 · Frozen aggregate evidence: recommender-evidence.json.', 'metrics-slide')
 
 dashboard = json.loads((ROOT / 'data/dashboard-2026-10-29.json').read_text())
-performance = dashboard['recommender_performance']
-rates = [performance[f'cross_validation_top_{k}_hit_rate_mean'] for k in (1, 3, 5)]
-assert all(0 <= rate <= 1 for rate in rates) and rates == sorted(rates)
-add('03 / RECOMMENDER RELEVANCE', 'How often was a fitting result near the top?',
-    '<div class="topk-bars">' + ''.join(
-        f'<div class="topk-row"><strong>Top {k}</strong><div class="topk-track"><span style="width:{rate:.2%}"></span></div><b>{rate:.1%}</b></div>'
-        for k, rate in zip((1, 3, 5), rates)
-    ) + '</div>' +
-    '<div class="callout">Top 1: '+f'{rates[0]:.1%}'+ ' &nbsp; · &nbsp; Top 3: '+f'{rates[1]:.1%}'+
-    ' &nbsp; · &nbsp; Top 5: '+f'{rates[2]:.1%}'+'</div>' +
-    '<p class="takeaway">Held-out users with ≥1 positive fit label; ranks previously tested observations.<br>'
-    'Retrospective relevance evidence. Prospective success with newly recommended masks remains to be tested.</p>',
-    f'These are the October 29 dashboard results for the October 25 model: top one {rates[0]:.1%}, top three {rates[1]:.1%}, and top five {rates[2]:.1%}. '
-    'The question is whether at least one positive fit label appears among the first k ranked held-out test observations. '
-    'The reported percentages are unweighted means across five user-grouped folds. Only users with a positive held-out result contribute. '
-    'The candidate set is their observed test rows, not the entire catalog, and repeated observations can remain. '
-    'For example, top three is a hit if one of the first three ranked observations has a positive label. '
-    'It is not a claim that sending three new masks to an arbitrary new user will yield the displayed top-three rate of fit. '
-    'The labels combine formal test sources and constructed outcomes, so this is internal relevance evidence rather than a formal-test-only prospective trial. '
-    'Fold counts and uncertainty were not exposed by this snapshot. The transferable lesson is to evaluate ranking relevance explicitly, '
-    'then test the user decision prospectively.',
-    65, 'Dashboard snapshot Oct 29, 2026 · Model Oct 25, 2026 · Five-fold means · Fold denominators / uncertainty unavailable.')
+ranking_rows = ''.join(
+    f'<tr><td>Top-{k}</td><td>{base[f"top_{k}"]:.1%}</td><td>{nose[f"top_{k}"]:.1%}</td>'
+    f'<td class="{("metric-gain" if nose[f"top_{k}"] >= base[f"top_{k}"] else "metric-drop")}">{100 * (nose[f"top_{k}"] - base[f"top_{k}"]):+.1f} pp</td></tr>'
+    for k in [1, 3, 5]
+)
+add('03 / RECOMMENDER RELEVANCE', 'A stronger shortlist, with a Top-1 tradeoff.',
+    '<table class="method-table metric-comparison ranking-comparison"><thead><tr><th>CV hit rate</th><th>Perimeter deviation</th><th>+ Nose deviation</th><th>Change</th></tr></thead><tbody>' +
+    ranking_rows + '</tbody></table>' +
+    callout('Top-3 and Top-5 improve; the first-ranked result is slightly worse.') +
+    '<p class="takeaway">Ranks previously tested observations for the 32 people with ≥1 positive fit label.<br>'
+    'Retrospective relevance; prospective success with newly recommended masks remains untested.</p>',
+    'This compares the same two models and the same mixed-input dataset as the preceding slide. '
+    'Each rate is the unweighted mean across five user-grouped folds, then averaged across three initializations. '
+    f"Top one changes from {base['top_1']:.1%} to {nose['top_1']:.1%}, top three from {base['top_3']:.1%} to {nose['top_3']:.1%}, "
+    f"and top five from {base['top_5']:.1%} to {nose['top_5']:.1%}. "
+    'Top three means at least one of the first three ranked held-out observations had a positive fit label. '
+    'The denominator includes 32 people with at least one positive held-out label; eligible fold counts were 5, 4, 5, 8 and 10. '
+    'Candidates are their existing test observations, not the entire catalog; repeated user-mask tests can remain. '
+    'These rates are conditional ranking relevance, not the chance that sending three new masks to any new person succeeds. '
+    'The three initializations share the same folds and are not confidence intervals. '
+    'Measured-only training does not show the same gains: top one fell from 91.7 to 87.5 percent, top three from 95.8 to 93.1 percent, and top five remained 95.8 percent. '
+    'That smaller cohort has a different population and test mix, so its absolute rates should not be compared with the mixed cohort.',
+    65, 'Nov 12 local trial · Means across 5 folds × 3 initializations · Positive-label users only · Full-catalog prospective fit remains unvalidated.')
 
 add('02 / THREE APPROACHES', 'The tradeoff: metric scale, speed, and reach.',
     '''<table class="method-table capture-table"><thead><tr><th>Approach</th><th>Geometry & scale</th><th>Experience</th><th>Main constraint</th></tr></thead><tbody>
     <tr><td>ARKit + TrueDepth<br><small>Our iOS path</small></td><td>Metric 3D mesh;<br>meters → millimeters</td><td>Real-time</td><td>Apple hardware path; anatomical mapping still needed</td></tr>
     <tr><td>Google MediaPipe</td><td>Normalized image coordinates + relative depth;<br>physical scale needs calibration</td><td>Real-time</td><td>A landmark mesh is not a subject-specific metric measurement</td></tr>
-    <tr><td>Photogrammetry</td><td>Multi-view 3D surface;<br>physical scale must be established</td><td>~45 s processing<br><small>Developer-reported workflow</small></td><td>Slower reconstruction; anatomical landmarking is a separate step</td></tr>
+    <tr><td>Photogrammetry</td><td>Multi-view 3D surface;<br>physical scale must be established</td><td>~45 s raw reconstruction<br><small>Earlier developer report</small></td><td>Slower reconstruction; anatomical landmarking is a separate step</td></tr>
     </tbody></table>''' + callout('Standard-camera capture offers a path toward iOS, Android, and webcams.'),
     'These are three different starting points. In our TrueDepth-based ARKit workflow, the mesh has metric coordinates, '
     'so I can calculate a distance in meters and convert to millimeters. MediaPipe is very useful for real-time landmark detection across camera platforms, '
     'but its standard output is normalized image coordinates and relative depth. Converting normalized coordinates to pixels does not tell me the physical size of the face. '
     'Google also offers a Face Geometry representation with canonical metric units; that is not an independent measurement of the particular person’s absolute size. '
     'Photogrammetry reconstructs a surface from multiple images. It supports ordinary cameras, but still needs physical scale and anatomical landmarks. '
-    'The roughly 45 seconds here is my reported processing experience, not a benchmark across implementations, devices, capture time, or uploads.',
+    'The roughly 45 seconds here is an earlier report for raw reconstruction, not a benchmark of the updated capture, reconstruction, smoothing and landmarking workflow.',
     90, f'<a href="{APPLE}">Apple geometry</a> · <a href="{GOOGLE}">Google coordinate conventions</a> · Timing: presenter report, not a controlled comparison.')
 
 accuracy_rows = [
@@ -215,39 +225,7 @@ add('04 / WHAT DID NOT TRANSFER DIRECTLY', 'A mesh vertex is not an anatomical d
     'More frames from one angle do not necessarily reveal the hidden surface. Multi-view capture adds observations, but its benefit still needs testing.',
     40, f'<a href="{GOOGLE}">Google: predicted mesh</a> · <a href="{APPLE}">Apple: fitted face geometry</a> · Single-angle accuracy: not yet established by this project.', 'mediapipe-slide')
 
-add('05 / WHY PHOTOGRAMMETRY', 'Broader camera support adds new work.',
-    cards([('Why pursue it', 'Reconstruct a 3D surface from standard-camera images; a plausible common capture route across platforms.'),
-           ('What it costs', 'Multi-view capture and a processing wait; motion, coverage, and lighting need attention.'),
-           ('What to add', 'Physical scale, automatic anatomical landmark detection, and capture-quality checks.')]) +
-    callout('Published facial photogrammetry studies support its potential.<br>Our camera-only pipeline still needs its own accuracy and repeatability study.'),
-    'Photogrammetry is attractive because it can use ordinary cameras rather than relying on a particular depth sensor. '
-    'Published work has shown good facial anthropometric performance for specific photogrammetric systems. '
-    'That is motivation to investigate, not evidence that all smartphone or webcam implementations achieve the same accuracy. '
-    'The cost is a slower experience: multiple views and reconstruction rather than an immediate mesh. In my workflow, processing has been around 45 seconds. '
-    'That changes the interface: users need capture instructions, a clear waiting state, and a useful way to recover from failure. '
-    'Reconstruction itself does not provide the anatomical labels I need. Scale and landmark detection remain separate engineering and validation steps.',
-    90, f'<a href="{PHOTO}">Aldridge et al., 2005: facial photogrammetry vs. direct anthropometry</a> · ~45 s: presenter-reported processing time.')
-
-add('06 / ANDROID DEVELOPMENT', 'Building the Android path: faces and landmarks.',
-    '<div class="android-gallery"><figure><div class="android-shot generator">' +
-    screenshot('android-flame-generator.png', 'MasqFit research tool generating a synthetic FLAME face with adjustable shape parameters.', 'android-screen') +
-    '</div><figcaption>Generate controlled 3D faces</figcaption></figure><figure><div class="android-shot landmarks">' +
-    screenshot('android-landmark-labeling.png', 'MasqFit research tool showing labeled facial landmarks on a synthetic FLAME face.', 'android-screen') +
-    '</div><figcaption>Label anatomical points on the 3D surface</figcaption></figure></div>' +
-    '<div class="android-flow"><span>3D face → 2D views</span><span class="android-arrow">→</span>' +
-    '<span class="cnn-step">' + svg_icon('cnn-local-features.svg', 'CNN diagram: local facial features pass through a convolution grid.', 'cnn-icon') +
-    '<span><strong>CNN detector · planned</strong><small>eyes · nose · ears · other landmarks</small></span></span>' +
-    '<span class="android-arrow">→</span><span>3D projection → dimensions → fit</span></div>',
-    'This is the pipeline I am working toward. Begin with a 3D face, either synthetic or from an actual captured person. '
-    'Use rendered or captured 2D views to detect the target landmarks, then project those detections back onto the matching 3D surface. '
-    'A planned CNN detector would learn local visual patterns around features such as eyes, nose, ears, and other landmarks in those 2D views. The screenshot shows hand-labeled landmarks that can support training and evaluation; it does not show a trained CNN result. '
-    'Projection requires the camera-to-surface relationship: for a rendered view it is known; for a captured view it must be recovered or calibrated. '
-    'A point on the image does not select the correct surface point without that relationship and visibility checks. '
-    'Once the landmarks are on a scaled surface, calculate the defined dimensions and pass them into the fit-prediction pipeline. '
-    'These screenshots show the current FLAME synthetic-face generator and anatomical landmark labeling tool. They are research tools for the Android path, not Android app screens. '
-    'Synthetic models let us generate known geometry labels and controlled views. They do not tell us whether a respirator fits a real person. '
-    'The difficult transfer is from synthetic rendering to real cameras and faces, which needs independent evaluation.',
-    90, 'Presenter screenshots of research tools · Synthetic geometry and landmarks need anatomical, scale, and real-camera validation.', 'android-slide')
+add_prototype_slides(add, screenshot)
 
 fit_stats = dashboard['fit_tests']
 pass_rates = fit_stats['pass_rates']
@@ -321,15 +299,36 @@ add('09 / ACKNOWLEDGEMENTS', 'Acknowledgements.',
     'I am seeking funding to continue this research and am open to work and consulting. You can reach me at info@breathesafe.xyz or on LinkedIn.',
     30, 'Community contributor descriptions: October 2026 Kanro proposal · Nukit probe credit: presenter.')
 
-add('BACKUP / SCALE & PROJECTION', 'The camera-only path needs a scale anchor.',
-    '<div class="two-col"><div><h2>Absolute scale</h2><p>Use an independently known dimension or calibrated capture system.</p>'
+add('BACKUP / SYNTHETIC LANDMARKING', 'Synthetic faces remain a complementary research path.',
+    '<div class="android-gallery"><figure><div class="android-shot generator">' +
+    screenshot('android-flame-generator.png', 'MasqFit research tool generating a synthetic FLAME face with adjustable shape parameters.', 'android-screen') +
+    '</div><figcaption>Generate controlled 3D faces</figcaption></figure><figure><div class="android-shot landmarks">' +
+    screenshot('android-landmark-labeling.png', 'MasqFit research tool showing labeled facial landmarks on a synthetic FLAME face.', 'android-screen') +
+    '</div><figcaption>Label anatomical points on the 3D surface</figcaption></figure></div>' +
+    '<div class="android-flow"><span>3D face → 2D views</span><span class="android-arrow">→</span>' +
+    '<span class="cnn-step">' + svg_icon('cnn-local-features.svg', 'CNN diagram: local facial features pass through a convolution grid.', 'cnn-icon') +
+    '<span><strong>CNN detector · planned</strong><small>eyes · nose · ears · other landmarks</small></span></span>' +
+    '<span class="android-arrow">→</span><span>3D projection → dimensions → fit</span></div>',
+    'This is complementary research, separate from the working multi-photo correspondence prototype shown in the main talk. Begin with a 3D face, either synthetic or from an actual captured person. '
+    'Use rendered or captured 2D views to detect the target landmarks, then project those detections back onto the matching 3D surface. '
+    'A planned CNN detector would learn local visual patterns around features such as eyes, nose, ears, and other landmarks in those 2D views. The screenshot shows hand-labeled landmarks that can support training and evaluation; it does not show a trained CNN result. '
+    'Projection requires the camera-to-surface relationship: for a rendered view it is known; for a captured view it must be recovered or calibrated. '
+    'A point on the image does not select the correct surface point without that relationship and visibility checks. '
+    'Once the landmarks are on a scaled surface, calculate the defined dimensions and pass them into the fit-prediction pipeline. '
+    'These screenshots show the current FLAME synthetic-face generator and anatomical landmark labeling tool. They are research tools for the Android path, not Android app screens. '
+    'Synthetic models let us generate known geometry labels and controlled views. They do not tell us whether a respirator fits a real person. '
+    'The difficult transfer is from synthetic rendering to real cameras and faces, which needs independent evaluation.',
+    source='October research-tool screenshots · Complementary synthetic-landmark work; not the current prototype output or Android app screens.', cls='android-slide')
+
+add('BACKUP / SCALE & PROJECTION', 'The prototype uses one physical scale anchor.',
+    '<div class="two-col"><div><h2>Absolute scale</h2><p>The prototype uses a 284 mm bitragion–subnasale tape arc to establish scale.</p>'
     '<p>A canonical average face is a model prior, not an independent ruler for this person.</p></div>'
     '<div><h2>Surface correspondence</h2><p>Use the matching camera intrinsics and pose to project a 2D detection onto the mesh.</p>'
     '<p>Check occlusion, multiple intersections, missing surface regions, and agreement across views.</p></div></div>' +
     callout('Evaluate absolute millimeter errors without fitting scale to the reference target.'),
     'Use this only if asked about implementation. Rendered geometry provides known cameras for development. Captured geometry requires estimated or calibrated cameras. '
     'A known reference dimension must be independent of the target used for accuracy evaluation; otherwise calibration can conceal the error being tested.',
-    source='Design considerations for the proposed pipeline.')
+    source='Working prototype scale: 284 mm / 4.28220 reconstruction units ≈ 66.3211 mm per unit. Caliper checks do not change scale.')
 
 add('BACKUP / SOURCES', 'Sources and boundaries of the claims.',
     f'<div class="two-col sources"><div><h2>Technical references</h2><p><a href="{APPLE}">Apple: ARFaceGeometry</a></p>'
@@ -337,16 +336,16 @@ add('BACKUP / SOURCES', 'Sources and boundaries of the claims.',
     f'<p><a href="{GOOGLE}">Google: Face Mesh coordinate systems and canonical model</a></p></div>'
     f'<div><h2>Photogrammetry evidence</h2><p><a href="{PHOTO}">Aldridge et al. (2005), Digital three-dimensional photogrammetry: evaluation of anthropometric precision and accuracy using a Genex 3D camera system</a></p>'
     '<p>Evidence concerns the tested system and protocol; it does not validate our camera-only pipeline.</p></div></div>' +
-    '<p class="muted">Real-time usability, seamlessness, and ~45-second processing are presenter-reported experience. No controlled speed comparison or new measurement-accuracy result is claimed.</p>',
-    'Technical references checked October 29, 2026. Recommender results come from the October 29 dashboard snapshot, '
-    'model timestamp October 25, 2026. They are internal retrospective ranking results, not a prospective evaluation. '
+    '<p class="muted">Earlier ~45-second raw reconstruction is presenter-reported, not a full-workflow benchmark. The new one-capture caliper checks are not a blinded or multi-person accuracy study.</p>',
+    'Prototype evidence updated November 11, 2026; source hashes retained in the frozen pilot summary. Technical references checked October 29, 2026. Recommender comparison results come from the November 12 paired local experiment, '
+    'with frozen aggregates and source hashes in recommender-evidence.json. The personal recommendation screenshot remains the October 25 model. They are internal retrospective ranking results, not a prospective evaluation. '
     'Model architecture is traced to python/mask_recommender/train.py, especially calc_preds and _resolve_custom_lr_parameter_views. '
     'For fixed family, style, and strap type, A = a_family + a_style < 0, B = b_family + b_style, '
     'C = c_family + c_style + s_strap. The centered equation uses kappa = -A, delta_star = -B/(2A), '
     'and c = C - B²/(4A). Legacy parameter files can bypass the newer negative-curvature parameterization; '
     'the historical dashboard snapshot does not independently establish its saved parameter constraints. '
     'Mixed labels and preprocessing/imputation also need an end-to-end validation audit.',
-    source='Technical sources reviewed October 29, 2026; presentation date November 17, 2026.')
+    source='Technical sources reviewed October 29; prototype evidence updated November 11; presentation date November 17, 2026.')
 
 # Retain the established deck design and controls, frozen into a local template.
 template = (ROOT / 'template.html').read_text()

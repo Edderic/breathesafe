@@ -138,12 +138,17 @@
 
       <section class="dashboard-section">
         <h2 class="section-title">Mask Recommender Performance</h2>
+        <RecommenderProbabilityMetrics
+          :evaluation="stats.recommender_performance?.probability_evaluation"
+          :timestamp="stats.recommender_performance?.timestamp"
+        />
 
         <div v-if="stats.recommender_performance && stats.recommender_performance.available">
           <div class="measurement-explanation">
             <strong>Validation ROC-AUC</strong> comes from the grouped holdout validation split from the latest training run.
             <strong>Top-1 / Top-3 / Top-5 Hit Rates</strong> are averages across grouped user k-fold cross-validation folds and measure
-            whether at least one recommended mask in the top k had a passing fit test.
+            whether at least one of the top k ranked held-out test observations had a positive fit label,
+            among users with at least one positive held-out label. This does not evaluate sending k new masks to a new user.
           </div>
 
           <div class="stats-grid">
@@ -453,13 +458,15 @@
 <script>
 import { Chart, registerables } from 'chart.js';
 import Pagination from './pagination.vue';
+import RecommenderProbabilityMetrics from './recommender_probability_metrics.vue';
 
 Chart.register(...registerables);
 
 export default {
   name: 'Dashboard',
   components: {
-    Pagination
+    Pagination,
+    RecommenderProbabilityMetrics
   },
   data() {
     return {

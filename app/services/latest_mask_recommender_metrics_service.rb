@@ -28,7 +28,8 @@ class LatestMaskRecommenderMetricsService
       cross_validation_top_5_hit_rate_mean: metrics.dig('cross_validation', 'top_5_hit_rate_mean'),
       cross_validation_user_level_mean_roc_auc: metrics.dig('cross_validation', 'user_level_mean_roc_auc'),
       saved_model_training_scope: metrics['saved_model_training_scope'],
-      top_k_chart_artifact: metrics['cross_validation_top_k_hit_rate_artifact']
+      top_k_chart_artifact: metrics['cross_validation_top_k_hit_rate_artifact'],
+      probability_evaluation: public_probability_evaluation(metrics)
     }
   rescue StandardError => e
     Rails.logger.warn("LatestMaskRecommenderMetricsService unavailable: #{e.class}: #{e.message}")
@@ -51,8 +52,23 @@ class LatestMaskRecommenderMetricsService
       cross_validation_top_5_hit_rate_mean: nil,
       cross_validation_user_level_mean_roc_auc: nil,
       saved_model_training_scope: nil,
-      top_k_chart_artifact: nil
+      top_k_chart_artifact: nil,
+      probability_evaluation: nil
     }
+  end
+
+  def public_probability_evaluation(metrics)
+    evaluation = metrics.dig('cross_validation', 'probability_evaluation')
+    return nil unless evaluation.is_a?(Hash) && evaluation['version'] == 'held_out_probability_evaluation_v1'
+
+    # Individual user/mask predictions belong in the private audit artifact.
+    public_fields = %w[
+      version available sample_count user_count positive_count negative_count
+      observation_unit prediction_source quality training_prevalence_baseline
+      at_0_5 threshold_curve exploratory_f1 threshold_selection outcome_scores
+      score_histogram calibration_bins user_equal limitations
+    ]
+    evaluation.slice(*public_fields)
   end
 
   def load_metrics

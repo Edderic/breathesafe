@@ -1,0 +1,107 @@
+Latent nose-distance experiment
+
+Normal training now defaults to --nose-model latent_nose_v1.
+Rails, training Lambda events and CLI use the same default. Explicit
+--nose-model none (or event nose_model: none) retains the perimeter-only baseline.
+Use --local-only for research runs that must not replace deployed artifacts.
+
+The existing fit-family/style quadratic total-perimeter model stays in place.
+The extra term is:
+  logit -= softplus(strength_raw) * (observed_nose_cm - preferred_nose_cm)^2
+  preferred_nose_cm = exp(global_log_center + style_offset + fit_family_offset)
+
+nose_mm is the existing aggregated ARKit nose path measurement. It is passed
+separately rather than being visible only as a component of total face perimeter.
+The preferred mask nose distance is latent; no physical mask-nose measurements
+are supplied. This assumes symmetric mismatch penalties around a preferred nose
+size. It cannot distinguish insufficient nose space from other correlated causes
+of failure, and is not a mechanical model of seal/contact.
+
+Initialize the global center to 45 mm, family/style log offsets to zero and
+strength_raw to -2. Shrink family/style offsets with L2 weight 0.01. Unseen fit
+families fall back to style + global center. These are explicit modeling choices,
+not measured mask geometry. Extreme centers, especially for sparse/all-fail
+families, indicate weak identification. Do not treat fitted millimeter values as
+validated physical nose perimeters. Saved artifacts include family support counts.
+
+The legacy preprocessing imputes missing ARKit measurements from traditional
+measurements using a regression fitted before CV. nose_mm_observed records
+whether the source was directly available or came from a measured user aggregate;
+this provenance is retained but never enters the predictive feature vector.
+
+Every run saves a PRIVATE training_frame.json alongside local artifacts for
+reproducible paired comparisons. Never expose that snapshot or individual OOF
+predictions through the public dashboard. Aggregate probability reports keep the
+same dashboard schema and inference can load both old and new parameter files.
+
+Paired local evaluation (no uploads or network calls):
+  PYTHONPATH=python python -m mask_recommender.scripts.compare_nose_model \
+    /private/local/model/training_frame.json --output /private/local/nose-comparison
+
+This fits both models on identical prepared rows, five user-grouped folds, seed
+42, 200 Adam epochs, learning rate 0.01 and no class reweighting. It also runs a
+separate pair trained only on observed nose data, plus reports the observed subset
+of mixed-input training. Final full-data parameters are saved separately from
+held-out scores. Comparison JSON includes fixed-50% and exploratory cutoff metrics,
+log loss, Brier score, score histograms, calibration and equal-person weighting.
+Selection of model/cutoff on these results remains exploratory; test on independent
+people before claiming a reliable improvement or calibrated fit probabilities.
+
+Local trial, 2026-11-12 (single seed; fixed 50% cutoff):
+Mixed measured/imputed inputs, 1,086 held-out tests / 49 people:
+  total-perimeter baseline: log loss 1.101, precision 58.1%, recall 61.3%, F1 .597
+  plus latent nose:        log loss  .952, precision 65.3%, recall 63.1%, F1 .642
+Measured-only training, 615 held-out tests / 18 people:
+  total-perimeter baseline: log loss 1.231, precision 64.3%, recall 65.5%, F1 .649
+  plus latent nose:        log loss 1.255, precision 64.6%, recall 56.6%, F1 .604
+The gain does not reproduce in measured-only training. Some final mixed-model
+preferred distances reach about 4.4 mm; they are not plausible physical mask nose
+perimeters. The user selected this variant as the training default after reviewing
+these limitations. It has not been deployed by this local research work.
+
+Style sensitivity experiment (opt-in --nose-model style_nose_v2)
+
+Keep the same latent centers, but replace shared mismatch strength with:
+  k_style = softplus(strength_raw + strength_style_offset)
+  logit -= k_style * (observed_nose_cm - preferred_nose_cm)^2
+Initialize every style offset to zero and add its mean squared offset to the
+existing L2 penalty (weight .01). This learns the sensitivity without assigning
+Bifold or Bifold & Gasket a higher penalty in advance. Unknown styles use the
+global reference strength. Legacy none/v1 models and saved inference remain valid.
+
+compare_nose_model now compares all three variants and includes per-style held-out
+metrics, positive-label support and final fitted sensitivities. --seed controls
+initialization; user folds remain fixed. Compare seeds 42/43/44 for initialization
+sensitivity; these are not three independent test sets. Report both mixed-input
+and measured-only training results. Nose centers, total-perimeter coefficients
+and nose sensitivity can compensate for each other; learned curvature alone
+cannot establish a causal mask-style effect. Very sparse styles (e.g. Adhesive)
+cannot support a useful sensitivity conclusion.
+
+Style trial, 2026-11-12, initializations 42/43/44 on identical user folds:
+Measured-only fitted strengths (mean; initialization range), logit / cm^2:
+  Bifold:          .654 (.569-.722),  69 held-out tests / 7 people
+  Bifold & Gasket: 1.270 (1.108-1.424), 182 tests / 14 people
+  Boat:            .939 (.783-1.066), 286 tests / 17 people
+  Cup:             .746 (.686-.781), 61 tests / 9 people
+The gasket variant has greater fitted sensitivity than Boat in all three runs;
+plain Bifold does not. This is a tentative coefficient pattern, not causal proof.
+Measured-only F1 at 50%: baseline mean .620, shared-nose mean .578,
+style-specific mean .542. Log loss means: 1.224, 1.234, 1.233 respectively.
+Mixed-input F1 means: .572, .615, .619; log loss: 1.108, .931, .938.
+Style-specific curvature adds little on mixed inputs and worsens measured-only
+F1 versus both alternatives. Keep opt-in and do not deploy from this trial.
+
+Top-k comparison, mixed inputs, mean of five CV fold rates averaged across
+initializations 42/43/44 (same folds, not independent replications):
+                  Perimeter-only   Shared nose default   Change (percentage points)
+  Top-1             54.17%              53.00%               -1.17
+  Top-3             79.50%              81.33%               +1.83
+  Top-5             82.00%              85.17%               +3.17
+Default seed 42 alone: Top-1 55.5% -> 53.5%, Top-3 79.5% -> 80.0%,
+Top-5 82.0% -> 84.5%. These rank held-out tested observations per eligible
+person (at least one positive label); they are not full-catalog prospective fit
+rates. Repeated user/mask tests may remain. Rates are macro means of fold rates.
+Measured-only training does not show an improvement: averaged Top-1 91.67% ->
+87.50%, Top-3 95.83% -> 93.06%, Top-5 unchanged at 95.83%. Different population,
+so do not compare its absolute rates with the mixed cohort.

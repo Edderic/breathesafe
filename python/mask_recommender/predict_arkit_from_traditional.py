@@ -229,13 +229,17 @@ def predict_arkit_from_traditional(
     password=None,
     model_path=None,
     users_output_file=None,
-    output_file=None
+    output_file=None,
+    summary_payload=None,
+    fit_tests_payload=None,
 ):
     base_url = base_url.rstrip("/")
     session = build_session(cookie)
 
     logged_in = False
-    if cookie:
+    if summary_payload is not None and fit_tests_payload is not None:
+        logging.info("Using supplied measurement and test snapshots for imputation.")
+    elif cookie:
         logging.info("Using provided cookie for authentication.")
     elif email and password:
         login_with_credentials(session, base_url, email, password)
@@ -248,7 +252,8 @@ def predict_arkit_from_traditional(
     summary_url = f"{base_url}/facial_measurements/summary.json"
     fit_tests_url = f"{base_url}/facial_measurements_fit_tests.json"
 
-    summary_payload = fetch_json(session, summary_url)["facial_measurements"]
+    if summary_payload is None:
+        summary_payload = fetch_json(session, summary_url)["facial_measurements"]
     summary_df = prepare_dataframe(summary_payload, FEATURE_COLUMNS, TARGET_COLUMNS)
 
     model = train_model(summary_df)
@@ -268,9 +273,10 @@ def predict_arkit_from_traditional(
 
         logging.info("Wrote user-level ARKit aggregates to %s", users_output_file)
 
-    fit_tests_payload = fetch_json(session, fit_tests_url)[
-        "fit_tests_with_facial_measurements"
-    ]
+    if fit_tests_payload is None:
+        fit_tests_payload = fetch_json(session, fit_tests_url)[
+            "fit_tests_with_facial_measurements"
+        ]
 
     if logged_in:
         logout(session, base_url)
@@ -281,6 +287,10 @@ def predict_arkit_from_traditional(
 
     fit_tests_enhanced_with_traditional_to_arkit_model = with_present_qlft_pass.merge(user_table_df, on='user_id', how='left', suffixes=('', '_imputation'))
 
+    fit_tests_enhanced_with_traditional_to_arkit_model['nose_mm_observed'] = (
+        fit_tests_enhanced_with_traditional_to_arkit_model['nose_mm'].notna()
+        | fit_tests_enhanced_with_traditional_to_arkit_model['actual'].fillna(False).astype(bool)
+    )
     for col in TARGET_COLUMNS:
         imputed_col = f"{col}_imputation"
         if imputed_col not in fit_tests_enhanced_with_traditional_to_arkit_model.columns:

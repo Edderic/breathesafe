@@ -16,6 +16,7 @@ class MaskRecommenderTraining
   DEFAULT_CONFIG_BY_MODEL_TYPE = {
     'custom_lr' => {
       model_type: 'custom_lr',
+      nose_model: 'latent_nose_v1',
       epochs: 200,
       learning_rate: 0.01,
       retrain_with_full: true,

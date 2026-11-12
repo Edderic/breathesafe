@@ -1,0 +1,81 @@
+{
+  "updated_at": "2026-11-11",
+  "participants": 1,
+  "reconstruction_captures": 1,
+  "source_images": 61,
+  "calibration": {
+    "name": "Bitragion\u2013subnasale surface arc",
+    "readings_mm": [
+      288,
+      280,
+      284
+    ],
+    "median_mm": 284,
+    "mm_per_reconstruction_unit": 66.3210555581587
+  },
+  "linear_checks": [
+    {
+      "name": "Nose width",
+      "readings_mm": [
+        35.0,
+        36.0,
+        35.0
+      ],
+      "median_mm": 35.0,
+      "estimated_mm": 35.16109986781346,
+      "signed_difference_mm": 0.16109986781346208,
+      "relative_difference": 0.004602853366098891
+    },
+    {
+      "name": "Face length",
+      "readings_mm": [
+        115.5,
+        114.6,
+        113.9
+      ],
+      "median_mm": 114.6,
+      "estimated_mm": 112.32711516971106,
+      "signed_difference_mm": -2.2728848302889304,
+      "relative_difference": -0.019833200962381614
+    },
+    {
+      "name": "Face width",
+      "readings_mm": [
+        151.5,
+        150.9,
+        150.7
+      ],
+      "median_mm": 150.9,
+      "estimated_mm": 152.97052188099207,
+      "signed_difference_mm": 2.070521880992061,
+      "relative_difference": 0.013721152292856642
+    }
+  ],
+  "bifold": {
+    "calibration_median_mm": 284.0,
+    "check_median_mm": 380.0,
+    "provisional_mm_per_reconstruction_unit": 66.3210555581587,
+    "estimated_perimeter_mm": 436.9584389412272,
+    "signed_difference_mm": 56.9584389412272,
+    "relative_difference": 0.1498906287927031,
+    "calibration_reading_sensitivity_mm": [
+      430.80409473078737,
+      443.112783151667
+    ],
+    "accepted_measurement_mm": null,
+    "interpretation": "single-capture provisional comparison; reading sensitivity is not a confidence interval; tape and surface routes may differ"
+  },
+  "limitations": [
+    "Single participant and one capture; not a population accuracy or scan-repeatability study.",
+    "Endpoint and smoothing choices were inspected during development; not a blinded benchmark.",
+    "Three readings per caliper check do not represent three independent captures.",
+    "Routes remain approximate surface paths, not a physical tape or pressure simulation.",
+    "Under-chin reference has approximate endpoints and is not a complete-perimeter check.",
+    "Headform is digital; no fabricated-headform validation or watertightness claim."
+  ],
+  "source_report_sha256": {
+    "widths": "aa6c09b79aebec3ee76664d72c585a352d535b36d27a9651c8d61b7f64458a0b",
+    "length": "580b20d92515da5f6bbf28f2fde3e19383a8152c581c81668af5e0a7569ccb16",
+    "calibration": "284125b0b7177be25a77024139748bfc2cc6597acd9e6bb66148257b08f5b783"
+  }
+}
