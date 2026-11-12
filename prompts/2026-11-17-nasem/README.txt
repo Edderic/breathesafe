@@ -1,7 +1,7 @@
 NASEM presentation — November 17, 2026
 
 Local review draft for NPPTL researchers building iOS and Android apps.
-Fourteen main slides with a 10-minute speaking budget, followed by two backups.
+Updated November 12: fifteen main slides with the same 10-minute speaking budget, followed by three backups.
 
 Preview:
   http://127.0.0.1:8765/presentation.html
@@ -21,13 +21,23 @@ Use background graphics, the CSS landscape page size, and no browser headers/foo
 
 Scope:
 This draft replaces the September planning-meeting narrative with practical capture,
-scale, landmarking, and cross-platform development lessons. October 29 top-1/3/5 conditional hit rates are included with
-their evaluation population. The quadratic perimeter-difference slide explains
-the learned optimum using a schematic with invented coefficients. The 45-second processing figure is presenter-reported,
-not a controlled benchmark. The Android pipeline is work in progress.
-Slide 4 proposes a separate face-to-mask nose perimeter feature for future
-held-out evaluation, motivated by Yu and Griffin's 2024 FFR-specific face
-anthropometry study. That study does not validate this particular feature.
+scale, landmarking, and cross-platform development lessons. Slides 4 and 5 now
+compare perimeter-only vs. shared-strength nose-deviation models using the November
+12 paired local experiment. Slide 4 shows log loss, precision, recall and F1 at a
+fixed 50% cutoff; slide 5 shows the Top-1 decrease and Top-3/Top-5 gains. Results
+average three initializations on identical five user-grouped folds. There are
+1,086 held-out tests from 49 people in mixed measured/imputed training, and 32
+positive-label people eligible for the conditional top-k rates. The smaller
+measured-only training experiment did not reproduce the gain. Calibration remains
+poor; these are exploratory internal results, not prospective validation. No
+individual scores or participant IDs are included in recommender-evidence.json;
+it retains aggregate numbers, limitations and hashes of the private source reports.
+The nose mismatch compares the input face path with a learned effective mask/style
+preference, not a physically measured mask nose perimeter. Shared sensitivity is
+the new training default; the style-specific variant remains experimental.
+The earlier 45-second raw-reconstruction figure is presenter-reported,
+not a benchmark of the updated pipeline. The local ordinary-camera prototype works;
+the Android experience still needs validation.
 Slide 7 shows the presenter's six ARKit-versus-digital-caliper measurements,
 rounded from the supplied notebook screenshot. The original comparison image
 is preserved in assets/arkit-caliper-self-check.png. This one-person check is
@@ -47,38 +57,35 @@ and embedded in the HTML for offline use. Occluded-point accuracy from one
 viewing angle is identified as an open project validation question.
 Slide 8 uses the newer MasqFit MediaPipe screenshot in assets/mediapipe-masqfit-demo.png;
 the earlier reference image remains in assets/mediapipe-reference.png.
-Slide 10 shows focused views of the current FLAME face generator and 3D landmark
-labeling research tools, with the full October 29 screenshots preserved in
-assets/android-flame-generator.png and assets/android-landmark-labeling.png.
-These are development tools for the Android pipeline, not Android app screens.
-The slide's CNN icon marks a planned detector for local facial features in 2D
-views; the screenshots do not show a trained detector or its accuracy.
-Slides 11 and 12 show the October 29 Breathesafe dashboard snapshot in
+Slides 9–11 now show the working camera prototype: actual raw and Gaussian-smoothed digital headforms with upper-neck coverage, surface-attached landmarks and chord/arc calculations, and three initial caliper comparisons at fixed tape-derived scale. One person, one capture; three physical readings per dimension. Endpoint/method choices were inspected during development, so these are not blinded accuracy or capture-repeatability results. The exploratory bifold-perimeter difference is omitted for now. A worn-mask capture and contact-arc tracing experiment remains future work in the speaker notes.
+
+The former Android synthetic-face/CNN development slide is retained as backup slide 16. It is complementary research rather than the current prototype implementation. Existing pretrained multi-photo correspondences supply the current point proposals. No trained custom detector or Android app validation is claimed. Actual headform views are in assets/prototype/, and the frozen metrics and private-report hashes are in prototype-evidence.json.
+
+Slides 12 and 13 show the October 29 Breathesafe dashboard snapshot in
 data/dashboard-2026-10-29.json: observed fit-test pass rates by strap type and
 mask style, plus unique participant counts by demographic category. Rates are
 descriptive and test-level; participants may contribute multiple tests.
 Small demographic groups may be pooled into "Prefer not to say". Groups with
-fewer than 10 tests are omitted from the pass-rate chart. The current October
-25 recommender model's top-k figures are also shown on slide 5. These results
-are a point-in-time dashboard snapshot, not a prospective validation study.
-Slide 13 explains how the project complements NIOSH's facial-measurement work:
+fewer than 10 tests are omitted from the pass-rate chart. Those charts remain an October 29 descriptive snapshot, separate from the new
+November 12 recommender experiment on slides 4 and 5. Neither is a prospective validation study.
+Slide 14 explains how the project complements NIOSH's facial-measurement work:
 KN95 and FFP2/FFP3 options alongside NIOSH-approved respirators, contributed
 data that include children and child-sized masks, and GPLv3 code for inspectable
 methods. Pediatric prediction accuracy is unvalidated, and this is a scope
 comparison rather than a claim about the final features of NIOSH's apps.
-Slide 14 is the acknowledgements page. Community contributor names and roles
+Slide 15 is the acknowledgements page. Community contributor names and roles
 come from prompts/kanro/2026-10-camera-only-masqfit-proposal.html; the Nukit
 fit-testing probe credit is supplied by the presenter. Ten seconds each were
 reallocated from the geometry, recommender, and Android segments to keep the
 talk at 10:00.
-The final slide also invites research funding and work or consulting inquiries,
+The acknowledgements slide also invites research funding and work or consulting inquiries,
 with the presenter's email and LinkedIn link.
 
 Validation:
-Checked all 16 slides at 1366x768 for viewport fit, mobile width at 390px for
+Checked all 18 slides at 1366x768 for viewport fit, mobile width at 390px for
 horizontal overflow, next-slide navigation, all-slides mode, and print layout.
-All print slides fit their 16:9 pages. Visually inspected the dashboard and
-complementary-scope slides.
+All print slides fit their 16:9 pages. Visually inspected the new prototype and caliper slides as well as the existing dashboard and scope content.
+Render/export helper: node scripts/presentations/render_nasem_prototype.cjs (run from the repository root).
 
 Publication:
 No production files, public/ copies, routes, or existing September artifacts changed.

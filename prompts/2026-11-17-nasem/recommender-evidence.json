@@ -1,0 +1,98 @@
+{
+  "date": "2026-11-12",
+  "model": "latent_nose_v1",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "folds": 5,
+  "method": "Mean over three initializations on identical grouped-user folds. Classification metrics pool held-out observations within each initialization. Top-k metrics average the five fold hit rates within each initialization.",
+  "population": {
+    "tests": 1086,
+    "people": 49,
+    "positive_labels": 274,
+    "positive_label_people": 32,
+    "eligible_users_per_fold": [
+      5,
+      4,
+      5,
+      8,
+      10
+    ]
+  },
+  "source_report_hashes": [
+    {
+      "seed": 42,
+      "sha256": "70f8be30df050a7321848d322e3935aa2d4a08d0385f2ca86f91bb89cd49c82a"
+    },
+    {
+      "seed": 43,
+      "sha256": "cf7d24dd44ded36854b14ff301edd2ec32b9bde9925344be64bac2871add7c05"
+    },
+    {
+      "seed": 44,
+      "sha256": "5378df13f3829d7b77f3037ec7744f0ede27194e71d09ee715b69f6d0bbbfb20"
+    }
+  ],
+  "variants": {
+    "none": {
+      "log_loss": 1.1081713336318928,
+      "baseline_log_loss": 0.5884311129459802,
+      "precision": 0.563609089660221,
+      "recall": 0.5802919708029197,
+      "f1": 0.5717841727518443,
+      "sample_count": 1086,
+      "user_count": 49,
+      "top_1": 0.5416666666666666,
+      "top_3": 0.7949999999999999,
+      "top_5": 0.82
+    },
+    "latent_nose_v1": {
+      "log_loss": 0.9308306794667487,
+      "baseline_log_loss": 0.5884311129459802,
+      "precision": 0.6393082477491613,
+      "recall": 0.5936739659367396,
+      "f1": 0.6150154924789532,
+      "sample_count": 1086,
+      "user_count": 49,
+      "top_1": 0.5299999999999999,
+      "top_3": 0.8133333333333334,
+      "top_5": 0.8516666666666667
+    }
+  },
+  "observed_only_variants": {
+    "none": {
+      "log_loss": 1.2236165418005533,
+      "baseline_log_loss": 0.7129134975682435,
+      "precision": 0.6207662523878248,
+      "recall": 0.6194690265486725,
+      "f1": 0.6199206498448052,
+      "sample_count": 615,
+      "user_count": 18,
+      "top_1": 0.9166666666666666,
+      "top_3": 0.9583333333333334,
+      "top_5": 0.9583333333333334
+    },
+    "latent_nose_v1": {
+      "log_loss": 1.2337222181410767,
+      "baseline_log_loss": 0.7129134975682435,
+      "precision": 0.6276930708257612,
+      "recall": 0.5353982300884956,
+      "f1": 0.5777873731161879,
+      "sample_count": 615,
+      "user_count": 18,
+      "top_1": 0.875,
+      "top_3": 0.9305555555555556,
+      "top_5": 0.9583333333333334
+    }
+  },
+  "limitations": [
+    "Mixed measured and globally imputed ARKit inputs; imputation is not refit within CV folds.",
+    "Repeated user/mask tests may remain; labels mix evidence sources.",
+    "Three initializations are not three independent datasets or confidence intervals.",
+    "Measured-only training did not reproduce the improvement.",
+    "Fit scores remain poorly calibrated; the nose model log loss remains worse than the prevalence-only baseline.",
+    "Learned mask nose preferences are effective fit parameters, not measured physical mask perimeters."
+  ]
+}

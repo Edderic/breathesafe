@@ -47,5 +47,5 @@ def test_scheduled_success(trainer):
     assert response["statusCode"] == 200
     trainer.assert_called_once_with([
         "--epochs", "200", "--learning-rate", "0.01",
-        "--model-type", "custom_lr", "--retrain-with-full",
+        "--model-type", "custom_lr", "--nose-model", "latent_nose_v1", "--retrain-with-full",
     ])
