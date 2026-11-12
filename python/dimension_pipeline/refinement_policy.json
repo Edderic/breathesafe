@@ -1,0 +1,11 @@
+{
+  "version": "webcam_image_refinement_v1",
+  "tool": "OpenMVS 2.4.0 RefineMesh CPU",
+  "fixed": {"resolution-level": 0, "min-resolution": 640, "max-views": 4, "decimate": 1, "close-holes": 0, "ensure-edge-size": 0, "max-face-area": 0, "scales": 1, "scale-step": 0.5, "alternate-pair": 0, "rigidity-elasticity-ratio": 0.9, "gradient-step": 8.05, "planar-vertex-ratio": 0, "reduce-memory": 1, "max-threads": 4},
+  "optimization": {"iterations": 8, "initial_gradient_step": 0.5, "step_decay": 0.98, "description": "Bounded screening trial; not a convergence study. Integer part of gradient-step encodes iteration count in pinned source."},
+  "profiles": {
+    "regularity005": {"label": "Image refinement · regularity 0.05", "regularity-weight": 0.05},
+    "regularity020": {"label": "Image refinement · regularity 0.20", "regularity-weight": 0.2},
+    "regularity050": {"label": "Image refinement · regularity 0.50", "regularity-weight": 0.5}
+  }
+}

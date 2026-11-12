@@ -66,7 +66,7 @@ def main():
         extract(archive, folder)
     (ROOT/'bin').mkdir(exist_ok=True)
     for name, source in [('colmap', ROOT/'colmap/COLMAP.app/Contents/MacOS/colmap'),
-                         *[(n, ROOT/'openmvs'/n) for n in ('InterfaceCOLMAP', 'DensifyPointCloud', 'ReconstructMesh')]]:
+                         *[(n, ROOT/'openmvs'/n) for n in ('InterfaceCOLMAP', 'DensifyPointCloud', 'ReconstructMesh', 'RefineMesh')]]:
         source.chmod(source.stat().st_mode | 0o111)
         link = ROOT/'bin'/name
         if not link.exists():

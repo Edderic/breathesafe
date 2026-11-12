@@ -1,0 +1,16 @@
+{
+  "version": "webcam_depth_quality_v1",
+  "native_tool": "OpenMVS 2.4.0 CPU",
+  "fixed": {"resolution-level": 0, "max-resolution": 4096, "min-resolution": 64, "sub-resolution-levels": 2, "number-views": 5, "iters": 3, "fusion-filter": 2, "fusion-depth-diff-threshold": 0.01, "fusion-reprojection-threshold": 1.2, "ignore-mask-label": 0, "tower-mode": 0, "normalize-coordinates": 0, "estimate-roi": 0, "crop-to-roi": 0},
+  "baseline": {"number-views-fuse": 2, "postprocess-dmaps": 0, "geometric-iters": 2},
+  "profiles": {
+    "fusion2": {"label": "Frozen depth control · 2 views", "number-views-fuse": 2, "postprocess-dmaps": 0, "geometric-iters": 0},
+    "fusion3": {"label": "Fusion agreement · 3 views", "number-views-fuse": 3, "postprocess-dmaps": 0, "geometric-iters": 0},
+    "fusion4": {"label": "Fusion agreement · 4 views", "number-views-fuse": 4, "postprocess-dmaps": 0, "geometric-iters": 0},
+    "speckles": {"label": "Depth speckles removed · 100 pixels", "number-views-fuse": 2, "postprocess-dmaps": 1, "geometric-iters": 0},
+    "extra_geom2": {"label": "Two added geometric-consistency passes", "number-views-fuse": 2, "postprocess-dmaps": 0, "geometric-iters": 2}
+  },
+  "meshing": {"close-holes": 0, "smooth": 0, "remove-spurious": 0, "remove-spikes": 0, "decimate": 1, "crop-to-roi": 0},
+  "roughness": {"version": "area_sample_local_plane_v1", "samples": 2000, "cloud_samples": 30000, "seed": 17, "cloud_seed": 18, "radius_fraction_of_raw_head_height": 0.015, "minimum_neighbors": 10},
+  "coverage": {"status": "provisional_screening", "samples": 5000, "seed": 0, "distance_tolerance_fraction_of_raw_head_height": 0.01, "minimum_global_retention": 0.85, "minimum_region_retention": 0.75}
+}

@@ -11,6 +11,7 @@ import time
 from pathlib import Path
 
 from .webcam_geometry import camera_pixel, project
+from .depth_quality import POLICY as DEPTH_QUALITY, dense_options, mesh_options
 
 REPO = Path(__file__).resolve().parents[2]
 TOOLS = {'colmap': '4.2.1', 'InterfaceCOLMAP': '2.4.0', 'DensifyPointCloud': '2.4.0', 'ReconstructMesh': '2.4.0'}
@@ -22,11 +23,12 @@ def executable(tool):
     return str(local) if local.is_file() else shutil.which(tool)
 
 
-def diagnostics():
+def diagnostics(include_refinement=False):
     rows = {}
     diagnostic_folder = REPO/'tmp/webcam-tool-diagnostics'
     diagnostic_folder.mkdir(parents=True, exist_ok=True)
-    for tool, version in TOOLS.items():
+    required = {**TOOLS, **({'RefineMesh': '2.4.0'} if include_refinement else {})}
+    for tool, version in required.items():
         path = executable(tool)
         output = ''
         if path:
@@ -74,6 +76,24 @@ def read_model(folder):
         images[fields[9]] = {**cameras[int(fields[8])], 'camera_id': int(fields[8]), 'image_id': i,
                             'R': R, 't': list(map(float, fields[5:8])), 'observations': len(obs)//3}
     return images
+
+
+def reconstruction_pairs(frames, capture_mode=None):
+    """Temporal overlap plus bounded all-to-all matching between height passes."""
+    names = [c['slot']+'.png' for c in frames]
+    pairs = {(a,b) for i,a in enumerate(names) for b in names[i+1:i+7]}
+    temporal_count = len(pairs)
+    if capture_mode == 'moving_camera_two_pass':
+        if names != [f'turn_{i:02}.png' for i in range(60)]:
+            raise ValueError('Two-pass matching requires all 60 ordered reconstruction frames.')
+        # Capture timing is guidance, not a measured camera angle. Test all 900
+        # cross-height candidates rather than assuming synchronized arc speeds.
+        # COLMAP must still establish geometrically verified correspondences.
+        for i in range(30):
+            for j in range(30,60):
+                pairs.add((names[i],names[j]))
+    return pairs, {'method':'temporal6_cross_pass_all_v1' if capture_mode=='moving_camera_two_pass' else 'temporal6_v1',
+                   'temporal_pairs':temporal_count,'additional_cross_pass_pairs':len(pairs)-temporal_count,'total_pairs':len(pairs)}
 
 
 def select_sparse_model(models, image_names):
@@ -150,8 +170,8 @@ def reconstruct(folder, state, run, update, cancelled):
            '--image_list_path', work/'reconstruction.txt', '--ImageReader.mask_path', masks,
            '--ImageReader.single_camera', '1', '--ImageReader.camera_model', 'SIMPLE_RADIAL',
            '--FeatureExtraction.use_gpu', '0', '--FeatureExtraction.max_image_size', '4096')
-    # Temporal neighbors cover one continuous right-profile -> left-profile sweep.
-    pairs = {(a, b) for i, a in enumerate(names) for b in names[i+1:i+7]}
+    pairs, matching_policy = reconstruction_pairs(reconstruction, (state.get('capture_context') or {}).get('capture_mode'))
+    (work/'matching-policy.json').write_text(json.dumps(matching_policy,indent=2)+'\n')
     (work/'pairs.txt').write_text('\n'.join(a+' '+b for a, b in sorted(pairs))+'\n')
     colmap('overlap_matching', 'matches_importer', '--database_path', db, '--match_list_path', work/'pairs.txt',
            '--match_type', 'pairs', '--FeatureMatching.use_gpu', '0')
@@ -180,11 +200,9 @@ def reconstruct(folder, state, run, update, cancelled):
     run('openmvs_import', [executable('InterfaceCOLMAP'), '-i', str(dense), '-o', str(work/'scene.mvs'), '--image-folder', str(dense/'images')], work)
     # Native arm64 build has CUDA disabled. No patch_match_stereo GPU dependency.
     run('dense_reconstruction', [executable('DensifyPointCloud'), '-i', str(work/'scene.mvs'), '-o', str(work/'dense.mvs'),
-                                 '--resolution-level', '0', '--max-resolution', '4096', '--min-resolution', '64',
-                                 '--mask-path', str(dense_masks), '--ignore-mask-label', '0', '--tower-mode', '0',
-                                 '--normalize-coordinates', '0', '--estimate-roi', '0', '--crop-to-roi', '0'], work)
+                                 '--mask-path', str(dense_masks), *dense_options()], work)
     run('meshing', [executable('ReconstructMesh'), '-i', str(work/'dense.mvs'), '-o', str(work/'full.mvs'),
-                    '--close-holes', '0', '--smooth', '0', '--remove-spurious', '0', '--remove-spikes', '0', '--decimate', '1', '--crop-to-roi', '0'], work)
+                    *mesh_options()], work)
     full = trimesh.load(work/'full.ply', force='mesh', process=False)
     if not len(full.faces) or not np.isfinite(full.vertices).all():
         raise ValueError('Meshing produced no finite surface.')
@@ -273,7 +291,8 @@ def reconstruct(folder, state, run, update, cancelled):
     result = {'surface': surface, 'cameras': cameras, 'frontal_camera_key': camera_key,
               'frontal_undistorted': image_path.relative_to(folder).as_posix(), 'full_mesh': (work/'full.ply').relative_to(folder).as_posix(),
               'detector': provenance, 'raw_predictions': raw, 'projected_points': projected,
-              'diagnostics': {'tools': diag, 'sparse_model_selection': sparse_selection, 'processing_seconds': time.monotonic()-started,
+              'diagnostics': {'tools': diag, 'depth_quality': {'version': DEPTH_QUALITY['version'], 'fixed': DEPTH_QUALITY['fixed'], 'profile': DEPTH_QUALITY['baseline']},
+                              'sparse_model_selection': sparse_selection, 'matching_policy': matching_policy, 'processing_seconds': time.monotonic()-started,
                               'registered_images': count, 'submitted_turn_images': len(names), 'registered_fraction': count/len(names),
                               'sparse_point_error_mean_px': statistics_mean(errors),
                               'frontal_observations': camera['observations'], 'mesh': mesh_report,

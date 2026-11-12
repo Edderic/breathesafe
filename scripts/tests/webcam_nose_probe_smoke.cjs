@@ -1,0 +1,25 @@
+// Existing consented capture; cached contour responses were verified separately.
+// The selected-point endpoints, full mesh, cameras and original photos are live.
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const {chromium}=require(path.resolve('tmp/webcam-browser/node_modules/playwright'));
+const sid=process.env.WEBCAM_NOSE_SESSION || 'c79e26de178a434aa3f20682fdb087ed';
+(async()=>{const before=fs.readFileSync(`.private-webcam-runs/${sid}/session.json`),snap=JSON.parse(fs.readFileSync(`.private-webcam-runs/capture-comparisons/nose-photo-overlays/${sid}.json`));
+ const browser=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true,args:['--enable-unsafe-swiftshader']});
+ try{const page=await browser.newPage({viewport:{width:1600,height:1100},acceptDownloads:true});page.setDefaultTimeout(90000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.route('**/nose-overlay/turn_*',async route=>{const u=new URL(route.request().url()),slot=u.pathname.split('/').at(-1),report=snap.overlays.find(r=>r.view.slot===slot&&r.variant_id===u.searchParams.get('variant'));if(!report)return route.continue();await route.fulfill({contentType:'application/json',body:JSON.stringify(report)});});
+ await page.goto('http://127.0.0.1:5178/scripts/webcam_pilot.html');await page.getByRole('button',{name:'Connect processor',exact:true}).click();await page.getByLabel('Saved session',{exact:true}).selectOption(sid);await page.getByRole('button',{name:'Resume',exact:true}).click();await page.getByRole('button',{name:'Inspect nose on source photos',exact:true}).click();
+ const photos=page.getByRole('region',{name:'Nose source-photo overlays',exact:true});await photos.getByRole('status').filter({hasText:/Loaded \d+\/\d+ registered/}).waitFor();assert.equal(await photos.getByRole('alert').count(),0);
+ await photos.getByRole('checkbox',{name:'Select suspected dent on 3D surface',exact:true}).check();const probe=page.getByRole('region',{name:'Selected nose point inspection',exact:true});await probe.getByRole('status').filter({hasText:'Diagnostic point ready.'}).waitFor();
+ const canvas=probe.getByRole('img',{name:'Diagnostic shaded nose surface',exact:true});await canvas.waitFor({state:'visible'});const box=await canvas.boundingBox();
+ const picked=page.waitForResponse(r=>r.url().endsWith('/nose-probe')&&r.request().method()==='POST');await canvas.click({position:{x:box.width*.53,y:box.height*.52}});const result=await (await picked).json();assert.equal(result.status,'ok');assert.equal(result.source_id,'raw_full');assert.equal(Object.keys(result.projections).length,snap.overlays.length);assert.equal(result.sections.length,2);
+ await probe.getByText(/Manual diagnostic surface pick/).waitFor();assert.equal(await photos.locator('[data-probe-status]').count(),Object.values(result.projections).filter(p=>p.pixel).length);
+ const sectionChanged=page.waitForResponse(r=>r.url().endsWith('/nose-probe')&&r.request().method()==='POST');await probe.getByLabel('Diagnostic section plane',{exact:true}).selectOption('horizontal');assert.equal((await (await sectionChanged).json()).axis,'horizontal');
+ await probe.getByRole('button',{name:'Center selected point',exact:true}).click();await probe.getByRole('button',{name:'Profile right',exact:true}).click();
+ const downloaded=page.waitForEvent('download');await probe.getByRole('button',{name:'Download point inspection',exact:true}).click();const report=JSON.parse(fs.readFileSync(await (await downloaded).path()));assert.equal(report.axis,'horizontal');assert.deepEqual(report.point,result.point);assert.equal(report.calibration_applied,false);
+ const out='.private-webcam-runs/capture-comparisons/nose-photo-overlays';fs.writeFileSync(`${out}/${sid}-point.json`,JSON.stringify(report));await probe.screenshot({path:`${out}/${sid}-point.png`});
+ await probe.getByRole('button',{name:'Clear diagnostic point',exact:true}).click();assert.equal(await photos.locator('[data-probe-status]').count(),0);
+ const refreshed=page.waitForResponse(r=>r.url().includes('/nose-probe?'));await probe.getByLabel('Diagnostic mesh',{exact:true}).selectOption('refined_full');await refreshed;await probe.getByRole('status').filter({hasText:'Diagnostic point ready.'}).waitFor();
+ const downloadRefined=page.waitForEvent('download');await probe.getByRole('button',{name:'Download point inspection',exact:true}).click();const refined=JSON.parse(fs.readFileSync(await (await downloadRefined).path()));assert.equal(refined.source_id,'refined_full');assert.notEqual(refined.source_sha256,result.source_sha256);
+ assert.deepEqual(errors,[]);assert.deepEqual(fs.readFileSync(`.private-webcam-runs/${sid}/session.json`),before);console.log('Linked point: pick, photo visibility, local sections, controls, exports, clear, raw/refined source switch and unchanged session PASS');
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

@@ -23,6 +23,32 @@ test('one sweep runs from right profile through frontal to left profile', () => 
   assert.match(context.captureGuidance(31),/face directly toward the camera/);
   assert.match(context.captureGuidance(60),/Frame 60\/60:.*left.*90/);
 });
+test('moving-camera guidance keeps the subject still and reverses the relative camera arc', () => {
+  const context={};
+  vm.runInNewContext(fs.readFileSync(path.join(root,'app/javascript/webcam_capture.js'),'utf8').replaceAll('export ',''),context);
+  assert.match(context.captureGuidance(1,'moving_camera'),/subject’s left.*90/);
+  assert.match(context.captureGuidance(30,'moving_camera'),/directly in front/);
+  assert.match(context.captureGuidance(60,'moving_camera'),/subject’s right.*90/);
+  assert.match(context.captureGuidance(30,'moving_camera'),/Do not follow the camera/);
+  assert.equal(context.sweepCues('moving_camera',10,20),'Camera in front. Keep head still.');
+  assert.equal(context.sweepCues('moving_camera',0,20),'Camera at subject’s right. Done. Keep head still.');
+  assert.equal(context.sweepCues('head_turn',10,20),'Face camera.');
+  assert.equal(context.sweepCues('head_turn',0,20),'Left profile. Done.');
+});
+test('two-height passes have 30 frames each, reverse direction and cue fractional midpoints',async()=>{
+  const context={};vm.runInNewContext(fs.readFileSync(path.join(root,'app/javascript/webcam_capture.js'),'utf8').replaceAll('export ',''),context);
+  assert.match(context.captureGuidance(1,'moving_camera_two_pass'),/subject’s left.*Pass 1, frame 1\/30/);
+  assert.match(context.captureGuidance(30,'moving_camera_two_pass'),/subject’s right.*Pass 1, frame 30\/30/);
+  assert.match(context.captureGuidance(31,'moving_camera_two_pass'),/subject’s right.*Pass 2, frame 1\/30/);
+  assert.match(context.captureGuidance(60,'moving_camera_two_pass'),/subject’s left.*Pass 2, frame 30\/30/);
+  for(const duration of [5,10,15]){
+    let time=0;const frames=[],cues=[];
+    await context.runCaptureSweep({durationSeconds:duration,frameCount:30,now:()=>time,wait:async ms=>{time+=ms;},cancelled:()=>false,capture:(i,t)=>frames.push([i,t.elapsed_ms]),countdown:r=>cues.push([r,time])});
+    assert.equal(frames.length,30);assert.deepEqual(frames[0],[1,0]);assert.deepEqual(frames.at(-1),[30,duration*1000]);assert.deepEqual(cues.find(([r])=>r===duration/2),[duration/2,duration*500]);
+    assert.equal(context.sweepCues('moving_camera_two_pass',duration/2,duration),'Camera in front. Keep head still.');
+  }
+  assert.throws(()=>context.sweepSchedule(20,30));
+});
 test('60 frames span ten seconds without accumulating capture work; midpoint is at five seconds',async()=>{
   const context={};
   vm.runInNewContext(fs.readFileSync(path.join(root,'app/javascript/webcam_capture.js'),'utf8').replaceAll('export ',''),context);

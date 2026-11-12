@@ -60,4 +60,9 @@ def capture_context(payload):
     group, conditions, repeat = payload.get('group', ''), payload.get('conditions', ''), payload.get('repeat', 1)
     if not isinstance(group, str) or len(group) > 80 or not isinstance(conditions, str) or len(conditions) > 1000 or type(repeat) is not int or not 1 <= repeat <= 10:
         raise ValueError('Provide a comparison group (up to 80 characters), conditions (up to 1000), and repeat 1–10.')
-    return {'group': group.strip(), 'conditions': conditions.strip(), 'repeat': repeat}
+    result = {'group': group.strip(), 'conditions': conditions.strip(), 'repeat': repeat}
+    if 'capture_mode' in payload:
+        if payload['capture_mode'] not in ('head_turn', 'moving_camera', 'moving_camera_two_pass'):
+            raise ValueError('Unknown capture mode.')
+        result['capture_mode'] = payload['capture_mode']
+    return result
