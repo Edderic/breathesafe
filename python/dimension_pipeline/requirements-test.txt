@@ -2,3 +2,10 @@
 -r requirements-flame.txt
 Pillow==11.2.1
 trimesh==4.6.8
+
+# Multi-view reconstruction, Gaussian volumes and surface attachment tests.
+scipy==1.15.3
+scikit-image==0.25.2
+opencv-python-headless==4.11.0.86
+rtree==1.4.0
+fast-simplification==0.1.10
