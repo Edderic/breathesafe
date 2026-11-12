@@ -1,5 +1,30 @@
 # Deployment Guide
 
+## Heroku Stack
+
+The staging (`breathesafe-staging`) and production (`breathesafe`) apps target
+`heroku-26`. Both use these buildpacks, in order:
+
+1. `heroku/python`
+2. `heroku/nodejs`
+3. `heroku/ruby`
+
+The root `.python-version` selects the latest available Python 3.11 patch.
+Keep this runtime installed: Rails invokes the mask component predictor through
+`python3`. Python 3.11 is retained for compatibility with the existing model and
+dependencies; migrating to a newer Python series is a separate follow-up.
+Remove the legacy root `runtime.txt` when applying this setting to older branches.
+
+Changing an existing app's stack requires `heroku stack:set heroku-26 --app APP`
+followed by a new build and successful release. Test staging before production.
+Verify the active stack with `heroku stack --app APP`, check the release status
+and dynos, and smoke-test HTTP pages, database access, and a real Python model
+prediction. If a release causes problems, use `heroku releases:rollback vVERSION
+--app APP` with the recorded previous successful release. This restores its slug
+and stack, but does not reverse database migrations.
+
+See [Heroku's stack upgrade guide](https://devcenter.heroku.com/articles/upgrading-to-the-latest-stack).
+
 ## Development Branch Deployment Pipeline
 
 The main deployment pipeline automatically deploys from the `development` branch to staging and production environments.
@@ -106,10 +131,10 @@ Both staging and production models are automatically retrained weekly with:
 - **Production**: Heroku app + Lambda functions + migrations
 
 #### Weekly Automatic Retraining (Saturday 12:00 AM ET)
-- **Staging**: 
+- **Staging**:
   - Model retraining and upload to staging S3 bucket
   - Lambda function update with new model
-- **Production**: 
+- **Production**:
   - Model retraining and upload to production S3 bucket
   - Lambda function update with new model
 
@@ -166,4 +191,4 @@ git push origin production-recommender-v0.1.3
 - **Automatic Updates**: Models retrained weekly
 - **Manual Control**: Version tags for immediate deployments
 - **Clear separation**: Staging and production are independent
-- **Rollback capability**: Easy to revert to previous versions 
+- **Rollback capability**: Easy to revert to previous versions
