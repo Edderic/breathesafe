@@ -219,7 +219,9 @@ def run(args):
         if path['points']:display_paths.append({'color':color,'points':transform(path['points'])})
     data={'report':report,'mesh':display,'paths':display_paths,'source_guide':transform(np.vstack([mapped,mapped[0]])),
           'controls':transform(q),'neck_viewer':os.path.relpath(neck/'comparison.html',out)}
-    (out/'review.html').write_text(Path(__file__).with_suffix('.html').read_text().replace('__DATA__',json.dumps(data).replace('</','<\\/')))
+    template=Path(__file__).with_suffix('.html').read_text()
+    if args.style=='bifold':template=template.replace('Trifold / duckbill','Bifold')
+    (out/'review.html').write_text(template.replace('__DATA__',json.dumps(data).replace('</','<\\/')))
     print(json.dumps(report['summary'],indent=2),flush=True)
     print(out/'review.html',flush=True)
 
