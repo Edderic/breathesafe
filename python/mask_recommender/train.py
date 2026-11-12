@@ -1189,10 +1189,17 @@ def calc_preds(data, params):
 
     if 'nose_center_log_cm' in resolved_params:
         center = _nose_center_cm(data, resolved_params)
-        strength = torch.nn.functional.softplus(resolved_params['nose_strength_raw'])
+        strength = _nose_strength(data, resolved_params)
         logits = logits - strength * (data['nose_cm'] - center).square()
 
     return torch.sigmoid(logits)
+
+
+def _nose_strength(data, params):
+    raw = params['nose_strength_raw']
+    if 'nose_strength_style_offset' in params:
+        raw = raw + data['fit_tests_by_styles'] @ params['nose_strength_style_offset']
+    return torch.nn.functional.softplus(raw)
 
 
 def _nose_center_cm(data, params):
@@ -1207,8 +1214,10 @@ def _nose_regularization(params):
     if 'nose_center_log_cm' not in params:
         return torch.tensor(0.0)
     # Shrink sparse fit-family offsets to their style; shrink styles to the global center.
-    return 0.01 * (params['nose_mask_offset'].square().mean()
-                   + params['nose_style_offset'].square().mean())
+    penalty = params['nose_mask_offset'].square().mean() + params['nose_style_offset'].square().mean()
+    if 'nose_strength_style_offset' in params:
+        penalty = penalty + params['nose_strength_style_offset'].square().mean()
+    return 0.01 * penalty
 
 
 def _fit_family_key_series(frame):
@@ -1720,6 +1729,7 @@ def _cross_validate_custom_lr(cleaned_fit_tests, category_metadata, epochs, lear
                 'fit_test_id': int(fit_test_id) if pd.notna(fit_test_id) else None,
                 'mask_id': int(mask_id) if pd.notna(mask_id) else None,
                 'label': int(deduped_val_labels[position]),
+                'style': str(row.get('style', 'unknown')),
                 'probability': float(deduped_val_probs[position]),
                 'training_positive_rate': float(np.mean(fold_result['y_train'])),
                 'nose_mm_observed': bool(row.get('nose_mm_observed', False)),
@@ -1774,13 +1784,15 @@ def _initialize_custom_lr_parameters(category_metadata):
         'strap_specific_parameters': (torch.rand((strap_count, 1), dtype=torch.float32) - 0.5).requires_grad_(),
     }
 
-    if category_metadata.get('nose_model') == 'latent_nose_v1':
+    if category_metadata.get('nose_model') in ['latent_nose_v1', 'style_nose_v2']:
         params.update({
             'nose_center_log_cm': torch.tensor([[np.log(4.5)]], dtype=torch.float32, requires_grad=True),
             'nose_mask_offset': torch.zeros((mask_count, 1), requires_grad=True),
             'nose_style_offset': torch.zeros((style_count, 1), requires_grad=True),
             'nose_strength_raw': torch.tensor([[-2.0]], requires_grad=True),
         })
+    if category_metadata.get('nose_model') == 'style_nose_v2':
+        params['nose_strength_style_offset'] = torch.zeros((style_count, 1), requires_grad=True)
     return params
 
 
@@ -1865,6 +1877,11 @@ def _nose_parameter_report(params, category_metadata, frame):
     return {
         'interpretation': 'Effective preferred ARKit nose distance, not a measured physical mask perimeter. Weakly identified by sparse fit labels.',
         'mismatch_strength_per_cm_squared': float(torch.nn.functional.softplus(params['nose_strength_raw']).item()),
+        'style_mismatch_strengths': {
+            style: float(torch.nn.functional.softplus(
+                params['nose_strength_raw'] + params.get('nose_strength_style_offset', torch.zeros((len(category_metadata['style_categories']), 1)))[i]
+            ).item()) for i, style in enumerate(category_metadata['style_categories'])
+        },
         'initial_global_center_mm': 45.0, 'offset_l2_weight': 0.01,
         'saved_model_scope': 'see saved_model_training_scope', 'families': rows,
     }
@@ -2314,7 +2331,7 @@ def train_custom_lr_with_split(
 def main(argv=None):
     parser = argparse.ArgumentParser(description='Train fit predictor model.')
     parser.add_argument('--facial-summary-json', help='Optional read-only facial-measurement summary snapshot for an authenticated internal-export run.')
-    parser.add_argument('--nose-model', choices=['none', 'latent_nose_v1'], default='none', help='Add a learned mask/style preferred nose-distance mismatch term.')
+    parser.add_argument('--nose-model', choices=['none', 'latent_nose_v1', 'style_nose_v2'], default='none', help='Add a learned mask/style preferred nose-distance mismatch term.')
     parser.add_argument('--local-only', action='store_true', help='Write all artifacts locally; never upload to S3 or replace the deployed latest model.')
     parser.add_argument('--epochs', type=int, default=600, help='Number of training epochs.')
     parser.add_argument('--learning-rate', type=float, default=0.00005, help='Learning rate for optimizer.')

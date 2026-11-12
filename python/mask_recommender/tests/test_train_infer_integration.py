@@ -118,7 +118,7 @@ def _masks_df():
     )
 
 
-@pytest.mark.parametrize('nose_model', ['none', 'latent_nose_v1'])
+@pytest.mark.parametrize('nose_model', ['none', 'latent_nose_v1', 'style_nose_v2'])
 def test_training_and_inference_alignment(monkeypatch, tmp_path, nose_model):
     monkeypatch.setenv("AWS_PROFILE", "breathesafe")
     fit_tests_df = _fit_tests_df()
@@ -846,3 +846,29 @@ def test_legacy_params_ignore_nose_at_fixed_perimeter():
     params = train_module._initialize_custom_lr_parameters(metadata)
     probs = train_module._predict_custom_lr_probabilities(frame, params, metadata)
     assert probs[0] == pytest.approx(probs[1])
+
+
+def test_style_nose_strength_penalizes_same_mismatch_differently():
+    frame = _fit_tests_df().iloc[[0, 0]].copy().reset_index(drop=True)
+    frame['style'] = ['Bifold', 'Boat']
+    frame['nose_mm'] = 55.
+    frame['chin_mm'] = 35.
+    frame['perimeter_mm'] = 205.
+    metadata = train_module._custom_lr_category_metadata(frame)
+    metadata['nose_model'] = 'style_nose_v2'
+    params = train_module._initialize_custom_lr_parameters(metadata)
+    with torch.no_grad():
+        # Neutralize other style effects so this isolates nose sensitivity.
+        params['beta_gamma_style'].zero_()
+        params['nose_strength_style_offset'][0] = 2.
+    data = train_module.prep_data_in_torch_with_categories(
+        frame, metadata['fit_family_categories'], metadata['style_categories'], metadata['strap_type_categories'])
+    probs = train_module.calc_preds(data, params)
+    assert probs[0] < probs[1]
+    probs.sum().backward()
+    assert params['nose_strength_style_offset'].grad.abs().sum() > 0
+    frame['style'] = ['unseen', 'unseen']
+    unknown_data = train_module.prep_data_in_torch_with_categories(
+        frame, metadata['fit_family_categories'], metadata['style_categories'], metadata['strap_type_categories'])
+    expected = torch.nn.functional.softplus(params['nose_strength_raw'])
+    assert torch.allclose(train_module._nose_strength(unknown_data, params), expected.expand(2, 1))

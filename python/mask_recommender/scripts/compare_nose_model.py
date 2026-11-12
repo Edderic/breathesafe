@@ -14,7 +14,7 @@ from mask_recommender.probability_evaluation import evaluate_probabilities
 def compare(frame, epochs=200, learning_rate=0.01, seed=42):
     results = {}
     predictions = {}
-    for variant in ['none', 'latent_nose_v1']:
+    for variant in ['none', 'latent_nose_v1', 'style_nose_v2']:
         metadata = train._custom_lr_category_metadata(frame)
         metadata['nose_model'] = variant
         rows = []
@@ -31,13 +31,21 @@ def compare(frame, epochs=200, learning_rate=0.01, seed=42):
         indices = torch.arange(len(frame))
         fit = train.train_custom_lr_with_split(
             frame, indices, indices, metadata, epochs=epochs, learning_rate=learning_rate)
+        per_style = {}
+        for style in sorted(frame['style'].unique()):
+            style_rows = [r for r in rows if r['style'] == style]
+            per_style[style] = evaluate_probabilities(
+                [r['label'] for r in style_rows], [r['probability'] for r in style_rows],
+                user_ids=[r['user_id'] for r in style_rows],
+                baseline_probabilities=[r['training_positive_rate'] for r in style_rows])
         results[variant] = {
+            'per_style': per_style,
             'cross_validation': cv, 'measured_nose_subset': measured_quality,
             'nose_parameters': train._nose_parameter_report(fit['params'], metadata, frame),
         }
         predictions[variant] = {'rows': rows, 'params': fit['params'], 'metadata': metadata}
     keys = lambda rows: [(r['fold'], r['user_id'], r['fit_test_id'], r['mask_id'], r['label']) for r in rows]
-    if keys(predictions['none']['rows']) != keys(predictions['latent_nose_v1']['rows']):
+    if any(keys(predictions['none']['rows']) != keys(a['rows']) for a in predictions.values()):
         raise RuntimeError('Paired evaluation observations differ')
     return results, predictions
 
@@ -55,7 +63,22 @@ def write_review(report, output):
                         f"<td>{m['recall']:.1%}</td><td>{m['f1']:.3f}</td></tr>")
         sections.append(f"<h2>{title}</h2><table><tr><th>Model</th><th>Tests / people</th>"
                         "<th>Log loss ↓</th><th>Precision</th><th>Recall</th><th>F1</th></tr>" + ''.join(rows) + '</table>')
-    nose = report['variants']['latent_nose_v1']['nose_parameters']
+    for title, key in [('Mixed inputs', 'variants'), ('Measured-only training', 'observed_only_training_variants')]:
+        rows = []
+        for variant, result in report[key].items():
+            strengths = (result['nose_parameters'] or {}).get('style_mismatch_strengths', {})
+            for style, evaluation in result.get('per_style', {}).items():
+                m = evaluation['at_0_5']
+                fmt = lambda value: f'{value:.3f}' if value is not None else 'N/A'
+                rows.append(f"<tr><td>{escape(variant)}</td><td>{escape(style)}</td>"
+                            f"<td>{evaluation['sample_count']} / {evaluation['user_count']}</td>"
+                            f"<td>{fmt(evaluation['quality']['log_loss'])}</td><td>{fmt(m['precision'])}</td>"
+                            f"<td>{fmt(m['recall'])}</td><td>{fmt(m['f1'])}</td><td>{fmt(strengths.get(style))}</td></tr>")
+        sections.append(f'<h2>{title}: by mask style</h2><p>Strengths are from the final full-data fit; scores are held out. '
+                        'Larger strength means a steeper penalty for equal nose mismatch. It is not an independent effect estimate.</p>'
+                        '<table><tr><th>Model</th><th>Style</th><th>Tests / people</th><th>Log loss</th>'
+                        '<th>Precision</th><th>Recall</th><th>F1</th><th>Nose strength / cm²</th></tr>' + ''.join(rows) + '</table>')
+    nose = report['variants']['style_nose_v2']['nose_parameters']
     families = sorted(nose['families'], key=lambda r: -r['training_rows'])
     rows = ''.join(f"<tr><td>{escape(str(r['fit_family']))}</td><td>{escape(str(r['style']))}</td>"
                    f"<td>{r['effective_preferred_nose_mm']:.1f}</td><td>{r['training_rows']}</td>"
@@ -66,11 +89,11 @@ def write_review(report, output):
             "aside{padding:16px;background:#fff2d5}p{line-height:1.5}</style><h1>Observed nose distance + latent mask nose preference</h1>"
             "<p>Local research comparison. Fixed 50% cutoff throughout these tables. Live model unchanged.</p>"
             f"<p>{escape(report['method'])}</p>" + ''.join(sections) +
-            "<aside>The gain on mixed inputs did not reproduce in measured-only training. Both models still have poor log loss. "
+            "<aside>Compare measured-only results and each style alongside the mixed-input aggregate. Learned centers and strengths can compensate for one another. "
             "These are exploratory results, not independent validation.</aside>"
             f"<p>{escape(report['limitations'])}</p><h2>Final full-data effective mask preferences</h2>"
             "<p>These values are learned from fit labels, not measured mask dimensions. Extreme values and sparse/all-fail families "
-            "indicate weak identification. This table comes from the final mixed-input model, not held-out predictions.</p>"
+            "indicate weak identification. This table comes from the final style-sensitive mixed-input model, not held-out predictions.</p>"
             "<table><tr><th>Fit family</th><th>Style</th><th>Effective nose mm</th><th>Training tests</th>"
             "<th>People</th><th>Positive labels</th></tr>" + rows +
             "</table><p><a href='comparison.json'>Download full aggregate comparison JSON</a></p></html>")
@@ -80,15 +103,16 @@ def write_review(report, output):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('frame', type=Path, help='Private training_frame.json from local training')
+    parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--output', required=True, type=Path)
     args = parser.parse_args()
     frame = pd.read_json(args.frame, orient='table')
-    results, predictions = compare(frame)
+    results, predictions = compare(frame, seed=args.seed)
     measured_frame = frame.loc[frame['nose_mm_observed']].reset_index(drop=True)
-    measured_results, measured_predictions = compare(measured_frame) if measured_frame['user_id'].nunique() >= 2 else ({}, {})
+    measured_results, measured_predictions = compare(measured_frame, seed=args.seed) if measured_frame['user_id'].nunique() >= 2 else ({}, {})
     args.output.mkdir(parents=True, exist_ok=True)
     report = {
-        'method': 'Same prepared rows, five grouped-user folds, seed 42, Adam, 200 epochs, learning rate 0.01, no class reweighting.',
+        'method': f'Same prepared rows, five grouped-user folds, seed {args.seed}, Adam, 200 epochs, learning rate 0.01, no class reweighting.',
         'limitations': 'Exploratory single-seed comparison. Inherited global ARKit imputation is not refit inside folds. Observed-only scores are a subgroup of mixed-input training. Learned centers are effective fit parameters, not physical measurements.',
         'variants': results,
         'observed_only_training_variants': measured_results,

@@ -55,3 +55,36 @@ Measured-only training, 615 held-out tests / 18 people:
 The gain does not reproduce in measured-only training. Some final mixed-model
 preferred distances reach about 4.4 mm; they are not plausible physical mask nose
 perimeters. Keep this opt-in pending stronger data and identification constraints.
+
+Style sensitivity experiment (opt-in --nose-model style_nose_v2)
+
+Keep the same latent centers, but replace shared mismatch strength with:
+  k_style = softplus(strength_raw + strength_style_offset)
+  logit -= k_style * (observed_nose_cm - preferred_nose_cm)^2
+Initialize every style offset to zero and add its mean squared offset to the
+existing L2 penalty (weight .01). This learns the sensitivity without assigning
+Bifold or Bifold & Gasket a higher penalty in advance. Unknown styles use the
+global reference strength. Legacy none/v1 models and saved inference remain valid.
+
+compare_nose_model now compares all three variants and includes per-style held-out
+metrics, positive-label support and final fitted sensitivities. --seed controls
+initialization; user folds remain fixed. Compare seeds 42/43/44 for initialization
+sensitivity; these are not three independent test sets. Report both mixed-input
+and measured-only training results. Nose centers, total-perimeter coefficients
+and nose sensitivity can compensate for each other; learned curvature alone
+cannot establish a causal mask-style effect. Very sparse styles (e.g. Adhesive)
+cannot support a useful sensitivity conclusion.
+
+Style trial, 2026-11-12, initializations 42/43/44 on identical user folds:
+Measured-only fitted strengths (mean; initialization range), logit / cm^2:
+  Bifold:          .654 (.569-.722),  69 held-out tests / 7 people
+  Bifold & Gasket: 1.270 (1.108-1.424), 182 tests / 14 people
+  Boat:            .939 (.783-1.066), 286 tests / 17 people
+  Cup:             .746 (.686-.781), 61 tests / 9 people
+The gasket variant has greater fitted sensitivity than Boat in all three runs;
+plain Bifold does not. This is a tentative coefficient pattern, not causal proof.
+Measured-only F1 at 50%: baseline mean .620, shared-nose mean .578,
+style-specific mean .542. Log loss means: 1.224, 1.234, 1.233 respectively.
+Mixed-input F1 means: .572, .615, .619; log loss: 1.108, .931, .938.
+Style-specific curvature adds little on mixed inputs and worsens measured-only
+F1 versus both alternatives. Keep opt-in and do not deploy from this trial.
