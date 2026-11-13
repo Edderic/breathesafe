@@ -68,3 +68,18 @@ stats snapshot lets it also render the complete Dashboard component offline.
 
 Threshold reference:
 https://scikit-learn.org/stable/modules/classification_threshold.html
+
+Negative predictive value (NPV) is TN/(TN+FN): among predicted negative fit
+observations, the fraction with negative fit labels. It is different from
+specificity, whose denominator is TN+FP. It is undefined (JSON null / UI N/A)
+when no negatives are predicted. Cutoff equality counts as positive. NPV is
+recorded in each threshold row, fixed-.5 metrics, equal-person metrics, exploratory
+threshold metrics and fold metrics; selected holdout NPV is stored separately as
+val_negative_predictive_value. Training/CV summaries use the same held-out data
+and weights as the other classification metrics.
+
+The dashboard shows NPV at the selected cutoff and at fixed .5 in the equal-person
+detail. Older evaluator-v1 reports can derive NPV from their stored TN/FN counts,
+without raw observations or a new model fit. This does not require schema-version
+changes or alter serving predictions. Historical slide NPV averages each
+initialization's ratio; it is not the ratio of averaged confusion counts.

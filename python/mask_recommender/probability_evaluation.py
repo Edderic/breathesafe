@@ -44,6 +44,7 @@ def threshold_metrics(labels, probabilities, threshold=0.5, weights=None):
     return {'threshold': float(threshold), 'sample_count': len(labels),
             'true_positive': tp, 'false_positive': fp, 'true_negative': tn, 'false_negative': fn,
             'precision': _ratio(tp, tp + fp), 'recall': _ratio(tp, tp + fn),
+            'negative_predictive_value': _ratio(tn, tn + fn),
             'specificity': _ratio(tn, tn + fp), 'f1': _ratio(2 * tp, 2 * tp + fp + fn),
             'predicted_positive_count': tp + fp}
 

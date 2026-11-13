@@ -65,7 +65,7 @@ from feature_builder import (ABS_PERIMETER_DIFF_STYLE_PREFIX,
 from predict_arkit_from_traditional import (TARGET_COLUMNS,
                                             predict_arkit_from_traditional)
 from qa import build_mask_candidates, build_recommendation_preview
-from probability_evaluation import evaluate_probabilities, probability_quality
+from probability_evaluation import evaluate_probabilities, probability_quality, threshold_metrics
 from sklearn.metrics import (auc, brier_score_loss, f1_score, log_loss,
                              precision_score, recall_score, roc_auc_score,
                              roc_curve)
@@ -1433,6 +1433,7 @@ def _compute_binary_metrics(labels, probabilities, threshold, sample_weights=Non
             'precision': 0.0,
             'recall': 0.0,
             'f1': 0.0,
+            'negative_predictive_value': None,
         }
 
     predictions = (probabilities >= threshold).astype(float)
@@ -1448,6 +1449,7 @@ def _compute_binary_metrics(labels, probabilities, threshold, sample_weights=Non
         'precision': precision_score(labels, predictions, zero_division=0, sample_weight=sample_weights),
         'recall': recall_score(labels, predictions, zero_division=0, sample_weight=sample_weights),
         'f1': f1_score(labels, predictions, zero_division=0, sample_weight=sample_weights),
+        'negative_predictive_value': threshold_metrics(labels, probabilities, threshold, weights=sample_weights)['negative_predictive_value'],
     }
 
 
@@ -1611,19 +1613,19 @@ def _summarize_cross_validation_metrics(fold_metrics):
         }
 
     summary = {'num_folds': len(fold_metrics), 'folds': fold_metrics}
-    for metric_name in ['roc_auc', 'precision', 'recall', 'f1']:
+    for metric_name in ['roc_auc', 'precision', 'recall', 'f1', 'negative_predictive_value']:
         values = [
-            fold['row_level'][metric_name]
+            fold['row_level'].get(metric_name)
             for fold in fold_metrics
-            if fold['row_level'][metric_name] is not None
+            if fold['row_level'].get(metric_name) is not None
         ]
         if values:
             summary[f'row_level_mean_{metric_name}'] = float(np.mean(values))
             summary[f'row_level_std_{metric_name}'] = float(np.std(values))
         user_values = [
-            fold['user_level'][metric_name]
+            fold['user_level'].get(metric_name)
             for fold in fold_metrics
-            if fold['user_level'][metric_name] is not None
+            if fold['user_level'].get(metric_name) is not None
         ]
         if user_values:
             summary[f'user_level_mean_{metric_name}'] = float(np.mean(user_values))
@@ -2741,6 +2743,7 @@ def main(argv=None):
         'val_f1': best_f1,
         'val_precision': val_precision,
         'val_recall': val_recall,
+        'val_negative_predictive_value': threshold_metrics(deduped_val_labels, deduped_val_probs, best_threshold)['negative_predictive_value'],
         'nose_model': args.nose_model,
         'nose_parameters': _nose_parameter_report(params, category_metadata, cleaned_fit_tests),
         'nose_input_counts': {

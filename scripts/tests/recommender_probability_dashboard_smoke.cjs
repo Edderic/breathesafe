@@ -1,6 +1,6 @@
 // Compile and inspect the real Vue dashboard panel using a local model artifact.
 const fs=require('fs'),path=require('path'),assert=require('assert');
-const root=path.resolve(__dirname,'../..'),workspace=process.env.BREATHESAFE_DEPENDENCY_ROOT||path.resolve(root,'../..');
+const root=path.resolve(__dirname,'../..'),workspace=process.env.BREATHESAFE_DEPENDENCY_ROOT||root;
 const {parse,compileScript,compileTemplate}=require(path.join(workspace,'node_modules/@vue/compiler-sfc'));
 const esbuild=require(path.join(workspace,'node_modules/esbuild'));
 const {chromium}=require(path.join(workspace,'tmp/webcam-browser/node_modules/playwright'));
@@ -35,9 +35,13 @@ const {chromium}=require(path.join(workspace,'tmp/webcam-browser/node_modules/pl
   const page=await browser.newPage({viewport:{width:1440,height:1100}}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>assert(!/^https?:/.test(r.url())));
   await page.goto('file://'+file);await page.waitForSelector('#fit-score-threshold');
   assert((await page.locator('body').innerText()).includes(String(evaluation.sample_count)));
-  assert.equal(await page.locator('.metric-cards article').count(),4);assert.equal(await page.locator('svg').count(),2);
+  assert.equal(await page.locator('.metric-cards article').count(),5);assert.equal(await page.locator('svg').count(),2);
+  const npv=page.getByTestId('negative-predictive-value');
+  assert((await npv.innerText()).includes((evaluation.at_0_5.negative_predictive_value*100).toFixed(1)+'%'));
   const input=page.locator('#fit-score-threshold');await input.fill('0.8');await input.dispatchEvent('input');
   assert((await page.locator('.metric-cards').innerText()).includes('80.0%'));
+  const at80=evaluation.threshold_curve.find(r=>Math.abs(r.threshold-.8)<1e-8);
+  assert((await npv.innerText()).includes((at80.negative_predictive_value*100).toFixed(1)+'%'));
   await page.getByRole('button',{name:/Explore maximum-F1/}).click();assert.equal(Number(await input.inputValue()),evaluation.exploratory_f1.threshold);
   await page.screenshot({path:path.join(folder,'dashboard-desktop.png'),fullPage:true});
   await page.setViewportSize({width:390,height:844});assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await page.screenshot({path:path.join(folder,'dashboard-mobile.png'),fullPage:true});

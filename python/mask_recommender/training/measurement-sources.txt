@@ -1,0 +1,39 @@
+Paired measurement-source evaluation (local-only research)
+
+python -m mask_recommender.scripts.compare_measurement_sources \
+  --frame PRIVATE_TRAINING_FRAME_JSON --summary PRIVATE_FACIAL_SUMMARY_JSON \
+  --output PRIVATE_COMPARISON_FOLDER
+
+Inputs are the local prepared training_frame.json and a facial-summary JSON with
+facial_measurements records. No network, S3 writes or production model updates.
+Keep input snapshots and private_audit.json private. comparison.json/html expose
+aggregate results only. Source hashes identify the exact snapshots used.
+
+The current traditional-input route uses six tape/caliper measurements to infer
+five ARKit-style paths with standardized multi-output linear regression. It does
+not fit a recommender directly to the six traditional measurements.
+
+Select people with complete paired measurements and observed-ARKit test rows.
+For each paired person, exclude them from both conversion fitting and fit-model
+fitting. Train the same shared-nose fit model on all other observed-ARKit people;
+score their identical test observations twice, changing only the input source.
+Recompute total-perimeter mismatch from each source while preserving mask geometry.
+Never tune a threshold on held-out labels. Fixed cutoff .5; Adam 200 epochs,
+learning rate .01; three initializations, seeds42/43/44. Deduplication and top-k
+definitions match the existing training helpers. Symmetrically exclude a person
+from both arms if conversion gives nonfinite/nonpositive paths, reporting coverage.
+
+2026-11-12 cached snapshot: 7 paired people; 421 tests, 115 positive labels.
+18 observed-ARKit people available for fit-model training before each exclusion.
+All 7 conversions were available. Each conversion trains on only 6 people with
+6 predictors plus intercept. This is underdetermined and prone to extrapolation.
+Two people supply 296/421 observations. Equal-person metrics are essential.
+Only 6 positive-label people qualify for top-k; no full-catalog evaluation occurs.
+Latest paired measurements and fit tests may differ in collection date.
+
+This is a comparison of two input pipelines, not a demonstration that ARKit is
+more anatomically accurate than tape/calipers. A direct traditional-feature model
+could perform differently. Results are exploratory and cannot establish general
+superiority from 7 paired people. Mean metrics across three initializations are
+not independent replications or confidence intervals. They are also not directly
+comparable to prior mixed-input 49-person CV results.

@@ -1,0 +1,154 @@
+{
+  "date": "2026-11-12",
+  "population": {
+    "people": 7,
+    "test_observations": 421,
+    "positive_labels": 115,
+    "top_k_positive_label_people": 6,
+    "two_most_active_people_test_observations": 296,
+    "two_most_active_people_fraction": 0.7030878859857482
+  },
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "folds": 7,
+  "training_people_per_fold": 6,
+  "threshold": 0.5,
+  "production_arkit_architecture": "custom_lr + latent_nose_v1: total-perimeter quadratic and shared-strength squared nose mismatch",
+  "traditional_models": "Direct six traditional measurements or three PCA components; separate L2 logistic classifiers, C=1.",
+  "evaluation": "Identical held-out test observations; no imputation, conversion, outside training people or test-label threshold tuning.",
+  "training_weighting": {
+    "production_arkit": "original test-row-weighted BCE; Adam 200 epochs, learning rate .01",
+    "traditional_direct": "equal-person sample weights; L2 logistic, C=1",
+    "traditional_pca3": "equal-person sample weights; L2 logistic, C=1; scaling and PCA fit on six training people"
+  },
+  "metrics": [
+    {
+      "arm": "production_arkit",
+      "weighting": "equal_person",
+      "tests": 421,
+      "people": 7,
+      "log_loss": 0.8994699329960911,
+      "precision": 0.4975184162121378,
+      "recall": 0.4749498201474593,
+      "f1": 0.48595790117762844,
+      "top_1": 0.8333333333333334,
+      "top_3": 1.0,
+      "top_5": 1.0,
+      "top_k_eligible_people": 6,
+      "negative_predictive_value": 0.7572097523694264
+    },
+    {
+      "arm": "production_arkit",
+      "weighting": "test_weighted",
+      "tests": 421,
+      "people": 7,
+      "log_loss": 0.9482029544736952,
+      "precision": 0.559282339524275,
+      "recall": 0.4666666666666667,
+      "f1": 0.5087122076812912,
+      "top_1": 0.8333333333333334,
+      "top_3": 1.0,
+      "top_5": 1.0,
+      "top_k_eligible_people": 6,
+      "negative_predictive_value": 0.8112807694249901
+    },
+    {
+      "arm": "traditional_direct",
+      "weighting": "equal_person",
+      "tests": 421,
+      "people": 7,
+      "log_loss": 1.6584211496886332,
+      "precision": 0.5032258064516131,
+      "recall": 0.3265963155070649,
+      "f1": 0.3961130702739986,
+      "top_1": 0.6666666666666666,
+      "top_3": 1.0,
+      "top_5": 1.0,
+      "top_k_eligible_people": 6,
+      "negative_predictive_value": 0.7272017909726798
+    },
+    {
+      "arm": "traditional_direct",
+      "weighting": "test_weighted",
+      "tests": 421,
+      "people": 7,
+      "log_loss": 3.0736392025931485,
+      "precision": 0.20930232558139536,
+      "recall": 0.1565217391304348,
+      "f1": 0.1791044776119403,
+      "top_1": 0.6666666666666666,
+      "top_3": 1.0,
+      "top_5": 1.0,
+      "top_k_eligible_people": 6,
+      "negative_predictive_value": 0.7104477611940299
+    },
+    {
+      "arm": "traditional_pca3",
+      "weighting": "equal_person",
+      "tests": 421,
+      "people": 7,
+      "log_loss": 2.2977376771646396,
+      "precision": 0.5441860465116278,
+      "recall": 0.5121624038633517,
+      "f1": 0.5276888201641282,
+      "top_1": 0.8333333333333334,
+      "top_3": 1.0,
+      "top_5": 1.0,
+      "top_k_eligible_people": 6,
+      "negative_predictive_value": 0.7758467187508227
+    },
+    {
+      "arm": "traditional_pca3",
+      "weighting": "test_weighted",
+      "tests": 421,
+      "people": 7,
+      "log_loss": 4.319456986802692,
+      "precision": 0.26262626262626265,
+      "recall": 0.22608695652173913,
+      "f1": 0.24299065420560748,
+      "top_1": 0.8333333333333334,
+      "top_3": 1.0,
+      "top_5": 1.0,
+      "top_k_eligible_people": 6,
+      "negative_predictive_value": 0.7236024844720497
+    }
+  ],
+  "limitations": [
+    "Only seven independent people and six positive-label people eligible for top-k. Two people contribute about 70% of test rows.",
+    "This compares different architectures and training recipes: production ARKit uses row-weighted BCE; traditional/PCA retains the prior equal-person training weights. It is not an isolated causal effect of measurement modality.",
+    "Production architecture is retrained on the six training people in each fold; deployed full-data weights are not used because they could include the evaluation people.",
+    "All three arms use identical held-out observations. No traditional-to-ARKit conversion, no imputation, no outside training people, no held-out tuning. Scaling/PCA use training people only.",
+    "Traditional/PCA hyperparameters remain fixed from the previous experiment. Three initializations share the same folds and are not confidence intervals or independent participants.",
+    "Latest paired measurements and fit-test dates may differ. Labels mix evidence sources; repeated user-mask tests may remain. Top-k is not full-catalog prospective fit success.",
+    "Calibration, measurement accuracy and population generalization remain unvalidated. No production model or slide deck was changed by this local experiment."
+  ],
+  "source_report_sha256": "4af8597bd05469d68c905040a2caa608808e147a2b5848cbd442a131b7f2441b",
+  "evaluation_code_sha256": "e88dff08dcf3e90a74d8cbd86a75d795a134fcf34ec58c454065073fe17c85d5",
+  "traditional_predictors_mm": [
+    "face_width",
+    "face_length",
+    "bitragion_subnasale_arc",
+    "nose_protrusion",
+    "nasal_root_breadth",
+    "nose_bridge_height"
+  ],
+  "traditional_pca": {
+    "input_columns": [
+      "face_width",
+      "face_length",
+      "bitragion_subnasale_arc",
+      "nose_protrusion",
+      "nasal_root_breadth",
+      "nose_bridge_height"
+    ],
+    "n_components": 3,
+    "standardize": true,
+    "whiten": false,
+    "fit_population": "unique training people within each fold",
+    "not_niosh_pca_panel": true
+  },
+  "negative_predictive_value_definition": "TN/(TN+FN), using the same evaluation weights and fixed 50% cutoff. Mean of per-initialization ratios; undefined if no predicted negatives."
+}

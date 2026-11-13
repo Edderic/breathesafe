@@ -20,3 +20,17 @@ test('curves omit undefined precision rather than plotting a fabricated zero',()
  const panel=component({threshold_curve:[{threshold:0,precision:.2},{threshold:1,precision:null}]});
  assert.equal(panel.metricPoints('precision'),'40,156');
 });
+test('NPV supports new fields and legacy confusion counts without fabricating a denominator',()=>{
+ const panel=component();
+ assert.equal(panel.negativePredictiveValue({negative_predictive_value:.8}),.8);
+ assert.equal(panel.negativePredictiveValue({true_negative:3,false_negative:1}),.75);
+ assert.equal(panel.negativePredictiveValue({true_negative:0,false_negative:2}),0);
+ assert.equal(panel.negativePredictiveValue({true_negative:0,false_negative:0}),null);
+ assert.equal(panel.negativePredictiveValue({}),null);
+ assert.equal(panel.negativePredictiveValue(null),null);
+});
+test('NPV follows the selected cutoff and handles fractional person-weighted counts',()=>{
+ const panel=component({threshold_curve:[{threshold:.5,true_negative:.75,false_negative:.25},{threshold:.8,true_negative:1,false_negative:1}]});
+ assert.equal(panel.negativePredictiveValue(panel.selectedMetrics),.75);
+ panel.threshold=.8;assert.equal(panel.negativePredictiveValue(panel.selectedMetrics),.5);
+});

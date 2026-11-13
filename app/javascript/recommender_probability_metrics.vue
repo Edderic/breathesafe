@@ -16,6 +16,7 @@
         <article><strong>{{ number(evaluation.quality.log_loss) }}</strong><span>Held-out log loss</span><small>Lower is better; confident wrong scores cost more.</small></article>
         <article><strong>{{ percent(selectedMetrics?.precision) }}</strong><span>Precision at {{ percent(threshold) }}</span><small>Of tests scored above the cutoff, how many have positive labels?</small></article>
         <article><strong>{{ percent(selectedMetrics?.recall) }}</strong><span>Recall at {{ percent(threshold) }}</span><small>Of positive tests, how many score above the cutoff?</small></article>
+        <article data-testid="negative-predictive-value"><strong>{{ percent(negativePredictiveValue(selectedMetrics)) }}</strong><span>Negative predictive value (NPV) at {{ percent(threshold) }}</span><small>Of tests scored below the cutoff, how many have negative fit labels?</small></article>
         <article><strong>{{ number(selectedMetrics?.f1) }}</strong><span>F1 at {{ percent(threshold) }}</span><small>Harmonic mean of precision and recall.</small></article>
       </div>
       <p v-if="evaluation.training_prevalence_baseline" class="metric-note">
@@ -98,8 +99,9 @@
       <details v-if="evaluation.user_equal">
         <summary>Give each person equal weight</summary>
         <p>Equal-person-weighted log loss: {{ number(evaluation.user_equal.quality.log_loss) }}.
-          At the fixed 50% cutoff, precision is {{ percent(evaluation.user_equal.at_0_5.precision) }}
-          and recall is {{ percent(evaluation.user_equal.at_0_5.recall) }}.
+          At the fixed 50% cutoff, precision is {{ percent(evaluation.user_equal.at_0_5.precision) }},
+          recall is {{ percent(evaluation.user_equal.at_0_5.recall) }},
+          and NPV is {{ percent(negativePredictiveValue(evaluation.user_equal.at_0_5)) }}.
           These reduce the influence of people with many test records.</p>
       </details>
       <p class="metric-note">
@@ -123,6 +125,12 @@ export default {
     }
   },
   methods: {
+    negativePredictiveValue(metrics) {
+      if (!metrics) return null;
+      if (Object.prototype.hasOwnProperty.call(metrics, 'negative_predictive_value')) return metrics.negative_predictive_value;
+      const tn = metrics.true_negative, fn = metrics.false_negative;
+      return Number.isFinite(tn) && Number.isFinite(fn) && tn >= 0 && fn >= 0 && tn + fn > 0 ? tn / (tn + fn) : null;
+    },
     percent(value) { return typeof value === 'number' && Number.isFinite(value) ? `${(value * 100).toFixed(1)}%` : 'N/A'; },
     number(value) { return typeof value === 'number' && Number.isFinite(value) ? value.toFixed(3) : 'N/A'; },
     useExploratoryThreshold() { if (this.evaluation?.exploratory_f1) this.threshold = this.evaluation.exploratory_f1.threshold; },
@@ -136,8 +144,9 @@ export default {
 
 <style scoped>
 .probability-metrics{margin:1.5rem 0;padding:1.5rem;background:#f5f8f7;border:1px solid #d3dfdc;border-radius:8px;color:#243b46}
-.metric-note{line-height:1.5;color:#52616b}.metric-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem;margin:1.2rem 0}.metric-cards article{background:white;padding:1rem;border-top:4px solid #087f79}.metric-cards strong,.metric-cards span,.metric-cards small{display:block}.metric-cards strong{font-size:2rem;color:#087f79}.metric-cards small{margin-top:.6rem;line-height:1.4;color:#52616b}
+.metric-note{line-height:1.5;color:#52616b}.metric-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1rem;margin:1.2rem 0}.metric-cards article{background:white;padding:1rem;border-top:4px solid #087f79}.metric-cards strong,.metric-cards span,.metric-cards small{display:block}.metric-cards strong{font-size:2rem;color:#087f79}.metric-cards small{margin-top:.6rem;line-height:1.4;color:#52616b}
 .threshold-controls{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}.threshold-controls button{padding:.6rem;border:1px solid #9bb6af;border-radius:5px;background:white;color:#243b46;cursor:pointer}.metric-charts{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:1.5rem 0}.metric-charts figure{margin:0;padding:1rem;background:white;min-width:0}.metric-charts figcaption{font-weight:bold}.metric-charts svg{width:100%;font-size:13px}.metric-legend{font-size:.85rem;line-height:1.4}.precision-color{color:#087f79;font-weight:bold}.recall-color{color:#9b5223;font-weight:bold}
 .table-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;background:white;margin:1rem 0}th,td{text-align:left;padding:.7rem;border-bottom:1px solid #d3dfdc}caption{text-align:left;font-weight:bold;margin-bottom:.6rem}.confusion-counts{display:grid;grid-template-columns:1fr 1fr;gap:0 1rem}details{margin:1rem 0}summary{cursor:pointer;font-weight:bold}
+@media(max-width:1100px){.metric-cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){.probability-metrics{padding:1rem}.metric-cards{grid-template-columns:1fr 1fr}.metric-charts,.confusion-counts{grid-template-columns:1fr}.metric-cards strong{font-size:1.6rem}}
 </style>

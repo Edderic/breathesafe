@@ -1,0 +1,60 @@
+Production ARKit architecture vs direct traditional and PCA models
+
+PYTHONPATH=python python -m mask_recommender.scripts.compare_production_measurements \
+  --frame PRIVATE_TRAINING_FRAME --summary PRIVATE_MEASUREMENT_SUMMARY \
+  --output PRIVATE_OUTPUT_FOLDER
+
+This is the corrected three-way comparison requested by the user. It replaces the
+matched five-ARKit-input logistic arm in compare_direct_measurements with the actual
+production custom_lr + latent_nose_v1 code. It does not use already-deployed weights.
+Each production model trains only on the other six paired people; using deployed
+weights could leak evaluation participants' fit outcomes.
+
+All three models train on the same six people and score identical test observations
+for the seventh. Seven leave-person-out folds; 421 observations / 7 people in the
+November 12 snapshot. Latest per-person paired measurements supply the face inputs.
+The original observed mask perimeter is preserved and face-minus-mask total-perimeter
+mismatch is recomputed when using the paired ARKit summary. The independent nose
+path is compared with a latent preferred mask/style nose distance in centimeters.
+
+Production ARKit calls train_custom_lr_with_split and _predict_custom_lr_probabilities
+without modifying their optimization or inference math: Adam, 200 epochs, lr .01,
+class_reweight=False, original row-weighted BCE and nose-offset regularization.
+Both the perimeter quadratic and shared-strength squared nose mismatch are active.
+Three initializations: seeds 42/43/44, with fold offset. No held-out threshold tuning.
+
+Traditional and PCA fits are unchanged from the preceding direct-model experiment:
+L2 logistic regression, C=1, deterministic lbfgs, original mask features/interactions,
+equal-person training weights, six direct traditional predictors or PCA-3. Scaling
+and PCA fit on unique training people only. Their private observation keys and
+probabilities were verified identical to the earlier experiment in all three runs.
+
+Different architectures and training-weight recipes are intentional here. Results
+compare these pipelines; they do not isolate measurement modality as a causal factor.
+No conversion into ARKit, no imputation, no outside training people, no uploads.
+
+Equal-person-weighted metrics at fixed 50% cutoff, mean across initializations:
+                            Precision  Recall    F1    Log loss  Top-1
+Production ARKit               49.8%    47.5%    .486     .899     5/6
+Traditional direct             50.3%    32.7%    .396    1.658     4/6
+Traditional PCA-3              54.4%    51.2%    .528    2.298     5/6
+Top-3 and Top-5 are 6/6 for all three arms. Rates apply only to six people with a
+positive fit label and rank existing tested observations, not the whole catalog.
+Repeated user-mask tests may remain. This is a tiny conditional denominator.
+
+Test-weighted metrics, dominated by two prolific testers (296/421 rows):
+                            Precision  Recall    F1    Log loss
+Production ARKit               55.9%    46.7%    .509     .948
+Traditional direct             20.9%    15.7%    .179    3.074
+Traditional PCA-3              26.3%    22.6%    .243    4.319
+
+PCA has slightly better equal-person threshold metrics; production ARKit has lower
+log loss and ties PCA on Top-1. Seven independent people, dates of measurements vs
+tests, mixed label sources and model choices limit interpretation. All results are
+exploratory. Three initializations are not independent datasets or confidence
+intervals. Neither anatomical measurement accuracy nor calibrated population fit
+probabilities are established by this experiment.
+
+comparison.html/json retain aggregates, full methods, fold model configurations
+and snapshot hashes. Individual prediction rows are in private_predictions.json
+only. No production model, default training configuration or slides are changed.

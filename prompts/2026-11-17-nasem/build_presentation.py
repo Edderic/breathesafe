@@ -93,6 +93,25 @@ add('NASEM / NOVEMBER 17, 2026', 'From face capture<br>to useful measurements.',
     'I will connect capture choices to our perimeter-based fit model, show the ranking results, and outline the Android pipeline.',
     30, '10-minute presentation · Local review draft', 'cover')
 
+add('01 / THE PUBLIC GOAL', 'Better-fitting respirators for the <em>general public</em>.',
+    '<div class="goal-layout"><div class="goal-copy">'
+    '<article class="goal-scope"><h2>NIOSH app direction</h2><p>NIOSH-approved respirators<br>Adult-worker fit panels</p></article>'
+    '<article class="goal-scope our-goal"><h2>Our project goal</h2><p><strong>Adults + kids</strong><br>N95 · KN95 · FFP2 / FFP3</p></article>'
+    '<p class="goal-validation">Broader intended reach; pediatric fit prediction still needs validation.</p></div>'
+    '<figure class="goal-figure">' +
+    screenshot('public-fit-goal-illustration.png', 'Conceptual illustration of a person with a loose blue surgical mask and visible face-seal gaps, beside the same person in a closer-fitting white respirator.', 'goal-illustration') +
+    '<div class="goal-image-labels"><span>Loose surgical mask<br><small>Air can bypass the filter</small></span>'
+    '<span>Closer-fitting respirator<br><small>Fit matters alongside filtration</small></span></div>'
+    '<figcaption>AI illustration of fit; not measured leakage or fit-test evidence.</figcaption></figure></div>',
+    'The goal is to help the general public find better-fitting respirators. '
+    'A loose surgical mask leaves gaps where air can bypass the filter; both filtration and fit matter. '
+    'NIOSH’s published app direction focuses on NIOSH-approved respirators and worker fit panels. '
+    'Our intended reach includes adults and children, with N95, KN95 and FFP2 or FFP3 options. '
+    'This is complementary scope, not a claim of validated pediatric predictions or a guarantee of fit.',
+    30, '<a href="https://www.cdc.gov/niosh/docs/2024-107/pdfs/2024-107.pdf">NIOSH app targets</a> · '
+    '<a href="https://www.cdc.gov/niosh/bulletin/2021/astm-rfc-standard.html">Worker fit panels</a> · '
+    '<a href="https://www.cdc.gov/niosh/ppe/php/community-respirators-masks/">CDC: fit and protection</a>.', 'goal-slide')
+
 add('01 / THE APPLICATION', 'ARKit in MasqFit: five facial paths.',
     '<div class="capture-demo"><figure>' +
     screenshot('masqfit-capture.png', 'MasqFit app showing selected measurement points overlaid on a face.', 'demo-phone') +
@@ -123,7 +142,7 @@ nose = evidence['variants']['latent_nose_v1']
 classification_rows = ''.join(
     f'<tr><td>{label}</td><td>{format(base[key], fmt)}</td><td class="metric-gain">{format(nose[key], fmt)}</td></tr>'
     for label, key, fmt in [('Log loss ↓', 'log_loss', '.3f'), ('Precision ↑', 'precision', '.1%'),
-                            ('Recall ↑', 'recall', '.1%'), ('F1 ↑', 'f1', '.3f')]
+                            ('Recall ↑', 'recall', '.1%'), ('Negative predictive value ↑', 'negative_predictive_value', '.1%'), ('F1 ↑', 'f1', '.3f')]
 )
 add('02 / GEOMETRY → FIT SCORE', 'Keep the nose path separate from total perimeter.',
     '<div class="equation compact-equation">New logit = perimeter-model logit − λ × [(N<sub>face</sub> − μ<sub>mask/style</sub>) / 10]²</div>' +
@@ -139,6 +158,8 @@ add('02 / GEOMETRY → FIT SCORE', 'Keep the nose path separate from total perim
     f"Across three initializations on the same five user-grouped folds, precision rose from {base['precision']:.1%} to {nose['precision']:.1%}, "
     f"recall rose from {base['recall']:.1%} to {nose['recall']:.1%}, and log loss fell from {base['log_loss']:.3f} to {nose['log_loss']:.3f}. "
     'Precision asks: among tests called fitting, how many had positive labels? Recall asks: among positive labels, how many were found? '
+    f"NPV asks: among observations predicted not to fit, how many have negative labels? It rises from {base['negative_predictive_value']:.1%} to {nose['negative_predictive_value']:.1%} at the fixed 50 percent cutoff. "
+    'It is true negatives divided by true negatives plus false negatives; no predicted negatives makes it undefined. '
     'Log loss penalizes confident mistakes; lower is better. All classification metrics use the fixed 50 percent cutoff except log loss, which uses the scores directly. '
     'These are averages of pooled held-out metrics from each initialization, not training scores or independent replicated datasets. '
     'The mixed cohort contains measured and imputed ARKit paths. The regression used for imputation was fitted before CV, so full-pipeline generalization is not independently established. '
@@ -146,7 +167,7 @@ add('02 / GEOMETRY → FIT SCORE', 'Keep the nose path separate from total perim
     'Calibration remains poor: even the new log loss is worse than the prevalence-only baseline of approximately .588. '
     'Labels mix evidence sources and repeated user-mask tests can remain. This is exploratory internal evidence. '
     'Shared nose sensitivity is now the training default in code; style-specific sensitivity remains experimental.',
-    65, 'Nov 12 local trial · Fixed 50% cutoff · Same folds, seeds 42/43/44 · Frozen aggregate evidence: recommender-evidence.json.', 'metrics-slide')
+    80, 'Nov 12 local trial · Fixed 50% cutoff · Same folds, seeds 42/43/44 · Frozen aggregate evidence: recommender-evidence.json.', 'metrics-slide')
 
 dashboard = json.loads((ROOT / 'data/dashboard-2026-10-29.json').read_text())
 ranking_rows = ''.join(
@@ -154,24 +175,37 @@ ranking_rows = ''.join(
     f'<td class="{("metric-gain" if nose[f"top_{k}"] >= base[f"top_{k}"] else "metric-drop")}">{100 * (nose[f"top_{k}"] - base[f"top_{k}"]):+.1f} pp</td></tr>'
     for k in [1, 3, 5]
 )
-add('03 / RECOMMENDER RELEVANCE', 'A stronger shortlist, with a Top-1 tradeoff.',
-    '<table class="method-table metric-comparison ranking-comparison"><thead><tr><th>CV hit rate</th><th>Perimeter deviation</th><th>+ Nose deviation</th><th>Change</th></tr></thead><tbody>' +
-    ranking_rows + '</tbody></table>' +
-    callout('Top-3 and Top-5 improve; the first-ranked result is slightly worse.') +
-    '<p class="takeaway">Ranks previously tested observations for the 32 people with ≥1 positive fit label.<br>'
-    'Retrospective relevance; prospective success with newly recommended masks remains untested.</p>',
-    'This compares the same two models and the same mixed-input dataset as the preceding slide. '
-    'Each rate is the unweighted mean across five user-grouped folds, then averaged across three initializations. '
-    f"Top one changes from {base['top_1']:.1%} to {nose['top_1']:.1%}, top three from {base['top_3']:.1%} to {nose['top_3']:.1%}, "
-    f"and top five from {base['top_5']:.1%} to {nose['top_5']:.1%}. "
-    'Top three means at least one of the first three ranked held-out observations had a positive fit label. '
-    'The denominator includes 32 people with at least one positive held-out label; eligible fold counts were 5, 4, 5, 8 and 10. '
-    'Candidates are their existing test observations, not the entire catalog; repeated user-mask tests can remain. '
-    'These rates are conditional ranking relevance, not the chance that sending three new masks to any new person succeeds. '
-    'The three initializations share the same folds and are not confidence intervals. '
-    'Measured-only training does not show the same gains: top one fell from 91.7 to 87.5 percent, top three from 95.8 to 93.1 percent, and top five remained 95.8 percent. '
-    'That smaller cohort has a different population and test mix, so its absolute rates should not be compared with the mixed cohort.',
-    65, 'Nov 12 local trial · Means across 5 folds × 3 initializations · Positive-label users only · Full-catalog prospective fit remains unvalidated.')
+paired = json.loads((ROOT / 'paired-measurement-evidence.json').read_text())
+assert paired['population']['people'] == 7 and paired['population']['test_observations'] == 421
+model_labels = {'production_arkit': 'ARKit: perimeter + nose',
+                'traditional_direct': 'Traditional dimensions', 'traditional_pca3': 'Traditional → PCA-3'}
+
+
+def paired_table(weighting):
+    rows = [row for row in paired['metrics'] if row['weighting'] == weighting]
+    best = {key: (min if key == 'log_loss' else max)(row[key] for row in rows)
+            for key in ['precision', 'recall', 'negative_predictive_value', 'f1', 'log_loss']}
+    cells = []
+    for row in rows:
+        metrics = ''.join(
+            f'<td class="{("metric-gain" if row[key] == best[key] else "")}">{format(row[key], fmt)}</td>'
+            for key, fmt in [('precision', '.1%'), ('recall', '.1%'), ('negative_predictive_value', '.1%'), ('f1', '.3f'), ('log_loss', '.3f')])
+        cells.append(f'<tr><td>{model_labels[row["arm"]]}</td>{metrics}</tr>')
+    return '<table class="method-table paired-metrics"><thead><tr><th>Model</th><th>Precision ↑</th><th>Recall ↑</th><th>NPV ↑</th><th>F1 ↑</th><th>Log loss ↓</th></tr></thead><tbody>' + ''.join(cells) + '</tbody></table>'
+
+
+add('PAIRED / TEST-WEIGHTED', 'Same seven people: give every test equal weight.',
+    '<p class="paired-context">421 held-out observations · 7 people · train on 6, test on the 7th · fixed 50% cutoff</p>' +
+    paired_table('test_weighted') +
+    '<div class="paired-definition"><strong>Test-weighted:</strong> a person with 100 tests contributes 100 times as much as a person with one.</div>' +
+    callout('ARKit’s geometry constraints penalize departures from learned preferred perimeter and nose differences.') +
+    '<p class="paired-note">Two people contributed 296 of 421 observations (70.3%). This evaluates the collected test mix.</p>',
+    'Now a separate comparison: seven people with both measurement types, training on six and testing the seventh. '
+    'The ARKit arm uses our actual perimeter-plus-nose architecture; the other models use traditional dimensions directly or through PCA. '
+    'Here each test counts equally. ARKit reaches 55.9 percent precision and 46.7 percent recall, but two people supplied 70 percent of the tests. '
+    'NPV is the negative-label fraction among observations predicted not to fit, using the same test weighting and fixed cutoff. '
+    'Geometry constraints are useful; repeated tests still do not add independent faces.',
+    50, 'Paired 7-person experiment · Production ARKit vs separate direct/PCA models · Architecture and training weights differ.', 'paired-slide')
 
 add('02 / THREE APPROACHES', 'The tradeoff: metric scale, speed, and reach.',
     '''<table class="method-table capture-table"><thead><tr><th>Approach</th><th>Geometry & scale</th><th>Experience</th><th>Main constraint</th></tr></thead><tbody>
@@ -260,24 +294,6 @@ add('08 / WHO IS REPRESENTED', 'Who contributed the 1,145 fit tests?',
     'For app evaluation, track participant counts as well as test counts and assess performance across groups with suitable privacy safeguards.',
     30, '<a href="https://www.breathesafe.xyz/#/dashboard">Breathesafe dashboard</a> snapshot Oct 29, 2026 · Small groups may be pooled into “Prefer not to say.”', 'dashboard-slide')
 
-add('08 / COMPLEMENTARY SCOPE', 'A complementary scope for respirator research.',
-    '<p class="complement-intro">MasqFit and Breathesafe add community-use questions alongside NIOSH’s facial-measurement work.</p>'
-    '<div class="complement-grid">'
-    '<article><span class="complement-number">01</span><h2>More mask standards</h2>'
-    '<p>Catalog options include KN95 and FFP2/FFP3, alongside NIOSH-approved respirators.</p></article>'
-    '<article><span class="complement-number">02</span><h2>Children included</h2>'
-    '<p>Contributed data include children and child-sized masks. Pediatric prediction accuracy still needs evaluation.</p></article>'
-    '<article><span class="complement-number">03</span><h2>Open methods</h2>'
-    '<p>GPLv3 code lets researchers inspect, run, and extend methods—supporting reproducible science.</p></article></div>'
-    '<div class="complement-close">Shared opportunity: comparable measurements and fit outcomes across platforms and populations.</div>',
-    'NIOSH’s published face-measuring app description focuses on facial dimensions and fit-panel classification. '
-    'MasqFit and Breathesafe can complement that work through a broader mask catalog, child-inclusive contributed data, and open GPLv3 code. '
-    'Our catalog includes KN95 and FFP2 or FFP3 options as well as NIOSH-approved respirators. '
-    'The dataset includes children and child-sized masks, but pediatric prediction accuracy has not yet been established. '
-    'Open code allows method inspection and reproduction where data access permits; participant data require appropriate consent and privacy controls. '
-    'These are scope differences, not a head-to-head accuracy claim or a statement about the final features of NIOSH’s apps.',
-    30, '<a href="https://www.cdc.gov/niosh/docket/archive/pdfs/niosh-278/2_DirectorsTalkingPointsApril2023_508.pdf">NIOSH face-measuring app description</a> · <a href="https://www.cdc.gov/wildfires/safety/how-to-safely-stay-safe-during-a-wildfire.html">CDC on child-sized respirators</a> · <a href="https://github.com/Edderic/breathesafe">Breathesafe GPLv3 source</a>.', 'complement-slide')
-
 acknowledgements = [
     ('Wayne', 'Community fit testing and training'),
     ('Mish', 'Initial mask recommendations and Masks for Kids'),
@@ -298,6 +314,24 @@ add('09 / ACKNOWLEDGEMENTS', 'Acknowledgements.',
     'Thank you to Nukit for fit-testing probes, Kanro for early support, and Aaron Collins, OpenAeros, research participants, and anonymous contributors. '
     'I am seeking funding to continue this research and am open to work and consulting. You can reach me at info@breathesafe.xyz or on LinkedIn.',
     30, 'Community contributor descriptions: October 2026 Kanro proposal · Nukit probe credit: presenter.')
+
+add('BACKUP / COMPLEMENTARY SCOPE', 'A complementary scope for respirator research.',
+    '<p class="complement-intro">MasqFit and Breathesafe add community-use questions alongside NIOSH’s facial-measurement work.</p>'
+    '<div class="complement-grid">'
+    '<article><span class="complement-number">01</span><h2>More mask standards</h2>'
+    '<p>Catalog options include KN95 and FFP2/FFP3, alongside NIOSH-approved respirators.</p></article>'
+    '<article><span class="complement-number">02</span><h2>Children included</h2>'
+    '<p>Contributed data include children and child-sized masks. Pediatric prediction accuracy still needs evaluation.</p></article>'
+    '<article><span class="complement-number">03</span><h2>Open methods</h2>'
+    '<p>GPLv3 code lets researchers inspect, run, and extend methods—supporting reproducible science.</p></article></div>'
+    '<div class="complement-close">Shared opportunity: comparable measurements and fit outcomes across platforms and populations.</div>',
+    'NIOSH’s published face-measuring app description focuses on facial dimensions and fit-panel classification. '
+    'MasqFit and Breathesafe can complement that work through a broader mask catalog, child-inclusive contributed data, and open GPLv3 code. '
+    'Our catalog includes KN95 and FFP2 or FFP3 options as well as NIOSH-approved respirators. '
+    'The dataset includes children and child-sized masks, but pediatric prediction accuracy has not yet been established. '
+    'Open code allows method inspection and reproduction where data access permits; participant data require appropriate consent and privacy controls. '
+    'These are scope differences, not a head-to-head accuracy claim or a statement about the final features of NIOSH’s apps.',
+    0, '<a href="https://www.cdc.gov/niosh/docket/archive/pdfs/niosh-278/2_DirectorsTalkingPointsApril2023_508.pdf">NIOSH face-measuring app description</a> · <a href="https://www.cdc.gov/wildfires/safety/how-to-safely-stay-safe-during-a-wildfire.html">CDC on child-sized respirators</a> · <a href="https://github.com/Edderic/breathesafe">Breathesafe GPLv3 source</a>.', 'complement-slide')
 
 add('BACKUP / SYNTHETIC LANDMARKING', 'Synthetic faces remain a complementary research path.',
     '<div class="android-gallery"><figure><div class="android-shot generator">' +
@@ -330,6 +364,62 @@ add('BACKUP / SCALE & PROJECTION', 'The prototype uses one physical scale anchor
     'A known reference dimension must be independent of the target used for accuracy evaluation; otherwise calibration can conceal the error being tested.',
     source='Working prototype scale: 284 mm / 4.28220 reconstruction units ≈ 66.3211 mm per unit. Caliper checks do not change scale.')
 
+add('BACKUP / 49-PERSON RANKING', 'A stronger shortlist, with a Top-1 tradeoff.',
+    '<table class="method-table metric-comparison ranking-comparison"><thead><tr><th>CV hit rate</th><th>Perimeter deviation</th><th>+ Nose deviation</th><th>Change</th></tr></thead><tbody>' +
+    ranking_rows + '</tbody></table>' +
+    callout('Top-3 and Top-5 improve; the first-ranked result is slightly worse.') +
+    '<p class="takeaway">Ranks previously tested observations for the 32 people with ≥1 positive fit label.<br>'
+    'Retrospective relevance; prospective success with newly recommended masks remains untested.</p>',
+    'This compares the same two models and the same mixed-input dataset as the preceding slide. '
+    'Each rate is the unweighted mean across five user-grouped folds, then averaged across three initializations. '
+    f"Top one changes from {base['top_1']:.1%} to {nose['top_1']:.1%}, top three from {base['top_3']:.1%} to {nose['top_3']:.1%}, "
+    f"and top five from {base['top_5']:.1%} to {nose['top_5']:.1%}. "
+    'Top three means at least one of the first three ranked held-out observations had a positive fit label. '
+    'The denominator includes 32 people with at least one positive held-out label; eligible fold counts were 5, 4, 5, 8 and 10. '
+    'Candidates are their existing test observations, not the entire catalog; repeated user-mask tests can remain. '
+    'These rates are conditional ranking relevance, not the chance that sending three new masks to any new person succeeds. '
+    'The three initializations share the same folds and are not confidence intervals. '
+    'Measured-only training does not show the same gains: top one fell from 91.7 to 87.5 percent, top three from 95.8 to 93.1 percent, and top five remained 95.8 percent. '
+    'That smaller cohort has a different population and test mix, so its absolute rates should not be compared with the mixed cohort.',
+    0, 'Nov 12 local trial · Means across 5 folds × 3 initializations · Positive-label users only · Full-catalog prospective fit remains unvalidated.')
+
+traditional_labels = {
+    'face_width': 'Face width', 'face_length': 'Face length',
+    'bitragion_subnasale_arc': 'Bitragion–subnasale arc',
+    'nose_protrusion': 'Nose protrusion', 'nasal_root_breadth': 'Nasal root breadth',
+    'nose_bridge_height': 'Nose bridge height',
+}
+assert len(paired['traditional_predictors_mm']) == 6
+add('BACKUP / TRADITIONAL PREDICTORS', 'Which predictors enter the traditional models?',
+    '<div class="predictor-layout"><article><h2>Six facial dimensions · mm</h2><ul class="predictor-list">' +
+    ''.join(f'<li data-predictor="{key}">{traditional_labels[key]}</li>' for key in paired['traditional_predictors_mm']) +
+    '</ul></article><article><h2>Mask predictors in both models</h2>'
+    '<p>Fit family · style · strap type<br>Observed mask perimeter</p>'
+    '<h2>Direct vs. PCA inputs</h2><p><strong>Direct:</strong> all six standardized dimensions.<br>'
+    '<strong>PCA-3:</strong> first three components of those same six standardized dimensions.</p>'
+    '<p class="predictor-small">Our PCA transformation—not the NIOSH PCA fit panel.</p></article></div>' +
+    '<div class="predictor-method"><strong>Fit model:</strong> L2 logistic regression (C = 1), linear + squared geometry terms, '
+    'and geometry × mask-category / perimeter interactions.</div>' +
+    '<p class="predictor-small">Scaling and PCA fit only on the 6 training people in each fold. No conversion into ARKit paths.</p>',
+    'This is the input list used by both traditional comparison arms: face width, face length, bitragion-subnasale arc, '
+    'nose protrusion, nasal root breadth, and nose bridge height, entered in millimeters. '
+    'No age, sex, ethnicity or inferred ARKit measurements enter these classifiers. '
+    'The direct model uses all six standardized dimensions. The PCA model uses the first three components of the same six standardized dimensions, '
+    'without whitening. Three components were selected before outcome evaluation, not by choosing the best held-out score. '
+    'This is a project-specific PCA, not the NIOSH PCA panel. The three components retained about 83.6 to 98.5 percent of training-person variance across folds. '
+    'Both traditional models also receive mask fit-family, style, strap type and observed perimeter. Categories are one-hot encoded. '
+    'The mask-perimeter scaler fits the distinct training mask/perimeter combinations; the perimeter and its square are included. '
+    'The classifier includes shared linear and squared face or PC terms, those geometry terms interacting with each mask-category indicator, '
+    'and geometry terms interacting with mask perimeter. Interactions allow mask rankings to vary with the face. '
+    'These are not merely six dimensions entered into an otherwise face-independent mask ranking. '
+    'L2 logistic regression uses C=1, deterministic lbfgs and at most 2,000 iterations. Each training person has equal total weight. '
+    'Face scaling and PCA fit once per unique training person; repeated fit rows do not overweight the PCA. '
+    'All preprocessing excludes the held-out person. In each fold only six paired people train the model. '
+    'Feature counts and training recipes differ from production ARKit, so this compares pipelines rather than isolating a causal measurement-modality effect. '
+    'Precise anatomical endpoint definitions and collection procedures still need harmonization for a formal measurement-accuracy comparison.',
+    source='Implementation: compare_direct_measurements.py · Production comparison: compare_production_measurements.py · Frozen predictor list: paired-measurement-evidence.json.',
+    cls='predictor-slide')
+
 add('BACKUP / SOURCES', 'Sources and boundaries of the claims.',
     f'<div class="two-col sources"><div><h2>Technical references</h2><p><a href="{APPLE}">Apple: ARFaceGeometry</a></p>'
     f'<p><a href="https://developer.apple.com/documentation/arkit/arfacetrackingconfiguration">Apple: face tracking configuration and device support</a></p>'
@@ -338,13 +428,25 @@ add('BACKUP / SOURCES', 'Sources and boundaries of the claims.',
     '<p>Evidence concerns the tested system and protocol; it does not validate our camera-only pipeline.</p></div></div>' +
     '<p class="muted">Earlier ~45-second raw reconstruction is presenter-reported, not a full-workflow benchmark. The new one-capture caliper checks are not a blinded or multi-person accuracy study.</p>',
     'Prototype evidence updated November 11, 2026; source hashes retained in the frozen pilot summary. Technical references checked October 29, 2026. Recommender comparison results come from the November 12 paired local experiment, '
-    'with frozen aggregates and source hashes in recommender-evidence.json. The personal recommendation screenshot remains the October 25 model. They are internal retrospective ranking results, not a prospective evaluation. '
+    'with frozen aggregates and source hashes in recommender-evidence.json and paired-measurement-evidence.json. The seven-person pipeline comparison is separate from the 49-person nose-feature experiment. The personal recommendation screenshot remains the October 25 model. They are internal retrospective ranking results, not a prospective evaluation. '
     'Model architecture is traced to python/mask_recommender/train.py, especially calc_preds and _resolve_custom_lr_parameter_views. '
     'For fixed family, style, and strap type, A = a_family + a_style < 0, B = b_family + b_style, '
     'C = c_family + c_style + s_strap. The centered equation uses kappa = -A, delta_star = -B/(2A), '
     'and c = C - B²/(4A). Legacy parameter files can bypass the newer negative-curvature parameterization; '
     'the historical dashboard snapshot does not independently establish its saved parameter constraints. '
-    'Mixed labels and preprocessing/imputation also need an end-to-end validation audit.',
+    'Mixed labels and preprocessing/imputation also need an end-to-end validation audit. '
+    'For the separate paired experiment, each of seven folds excludes the held-out person from all fitting. '
+    'Traditional inputs are face width, face length, bitragion-subnasale arc, nose protrusion, nasal root breadth and nose bridge height. '
+    'Traditional/PCA classifiers predict fit directly with L2 logistic regression, C=1, and equal-person training weights; scalers/PCA fit only on six training people. '
+    'Production ARKit uses Adam 200 epochs, learning rate .01, original row-weighted BCE, the total-perimeter quadratic and shared latent nose mismatch. '
+    'It is retrained per fold, never evaluated using already-deployed weights that could include these people. '
+    'All arms score the same 421 observations at fixed 50 percent cutoff, without imputation or conversion into ARKit. '
+    'The ARKit metrics average seeds 42/43/44 on the same folds; traditional/PCA are deterministic. '
+    'Only six people have positive labels for top-k. Two people supply 296/421 tests. '
+    'Equal-person evaluation weights each observation by 1/n for that person; it changes confusion counts, not model predictions or top-k. '
+    'Different model architectures and training weights mean this does not isolate measurement modality causally. '
+    'Perimeter constraints are an inductive bias, not a guarantee against overfitting or a proof of new-person generalization. '
+    'Latest measurements and test dates can differ, labels mix sources, repeated user-mask tests can remain, and prospective full-catalog fit is untested.',
     source='Technical sources reviewed October 29; prototype evidence updated November 11; presentation date November 17, 2026.')
 
 # Retain the established deck design and controls, frozen into a local template.

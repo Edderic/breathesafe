@@ -57,3 +57,24 @@ def test_threshold_choice_is_marked_exploratory_and_no_private_rows_are_exported
 @pytest.mark.parametrize('labels,scores', [([1],[float('nan')]),([1],[1.1]),([None],[.5]),([1,0],[.5])])
 def test_invalid_inputs_fail_instead_of_silently_changing_denominators(labels,scores):
     with pytest.raises(ValueError):evaluate_probabilities(labels,scores)
+
+
+def test_negative_predictive_value_uses_predicted_negatives_not_all_negatives():
+    # TN=2, FN=1; specificity is 2/3 here only coincidentally, so add an FP.
+    row=threshold_metrics([0,0,1,0,0,1],[.1,.2,.3,.9,.8,.9],.5)
+    assert row['negative_predictive_value']==pytest.approx(2/3)
+    assert row['specificity']==pytest.approx(.5)
+    assert row['negative_predictive_value']!=row['precision']
+    assert threshold_metrics([0,1],[.8,.9],.5)['negative_predictive_value'] is None
+    assert threshold_metrics([0,0],[.1,.2],.5)['negative_predictive_value']==1
+    assert threshold_metrics([1,1],[.1,.2],.5)['negative_predictive_value']==0
+    assert threshold_metrics([],[],.5)['negative_predictive_value'] is None
+
+
+def test_negative_predictive_value_respects_person_weights_and_cutoff_boundary():
+    report=evaluate_probabilities([0,0,0,1],[.1,.1,.1,.1],user_ids=[1,1,1,2])
+    assert report['at_0_5']['negative_predictive_value']==pytest.approx(.75)
+    assert report['user_equal']['at_0_5']['negative_predictive_value']==pytest.approx(.5)
+    assert all('negative_predictive_value' in row for row in report['threshold_curve'])
+    assert report['threshold_curve'][0]['negative_predictive_value'] is None
+    assert threshold_metrics([1,0],[.5,.4],.5)['negative_predictive_value']==1
