@@ -31,8 +31,8 @@ budgets = {
     '02 / THREE APPROACHES': 60,
     '03 / WHAT WORKED': 40,
     '04 / WHAT DID NOT TRANSFER DIRECTLY': 40,
-    '07 / OBSERVED FIT': 40,
-    '08 / WHO IS REPRESENTED': 30,
+    '07 / OBSERVED FIT': 30,
+    '08 / WHO IS REPRESENTED': 20,
     '08 / COMPLEMENTARY SCOPE': 30,
     '09 / ACKNOWLEDGEMENTS': 30,
 }
@@ -134,7 +134,7 @@ add('02 / PERSONAL RECOMMENDATIONS', 'What the model recommends for my face.',
     'These are my recommendations in Breathesafe, sorted by the model’s fit score. This is an October 29 screenshot of the October 25 model, with Observed Fit hidden. '
     'The displayed predicted percentages are model outputs, not calibrated individual success probabilities or independent validation. '
     'This personal example is separate from the held-out ranking results that follow.',
-    30, 'Presenter screenshot · Individual scores are model outputs; calibration is not established.', 'visual-slide recommendation-slide')
+    20, 'Presenter screenshot · Individual scores are model outputs; calibration is not established.', 'visual-slide recommendation-slide')
 
 evidence = json.loads((ROOT / 'recommender-evidence.json').read_text())
 base = evidence['variants']['none']
@@ -277,6 +277,22 @@ add('07 / OBSERVED FIT', 'Observed pass rates vary by strap and style.',
     'Test counts vary substantially, and participants can contribute repeated tests. Groups with fewer than ten tests are left off the chart: '
     'strapless 0 of 2, elastomeric 5 of 7, and adhesive 0 of 2. For an app, display denominators with every rate.',
     40, '<a href="https://www.breathesafe.xyz/#/dashboard">Breathesafe dashboard</a> snapshot Oct 29, 2026 · Filtered fit tests · Descriptive only.', 'dashboard-slide')
+
+add('08 / COMMUNITY CONTEXT', 'A convenience sample seeking protection.',
+    '<p class="sample-intro">Members of the general public trying to protect themselves and others.</p>'
+    '<div class="sample-grid">'
+    '<article><h2>Immunocompromised or disabled people</h2><p>Seeking protection from respiratory infections.</p></article>'
+    '<article><h2>People who cannot afford to get sick</h2><p>Health issues and the personal costs of illness make protection a priority.</p></article>'
+    '<article><h2>Disability justice advocates</h2><p>Seeking to avoid infection and transmission to help keep public spaces accessible to others.</p></article>'
+    '<article><h2>Family members</h2><p>Seeking to protect relatives with these concerns.</p></article>'
+    '</div><p class="sample-caveat">Convenience sample · Overlapping groups · Not population-representative</p>',
+    'This is the presenter’s description of the contributor community, not a survey of diagnoses or motivations. '
+    'These overlapping groups include immunocompromised or disabled people, people with health issues who cannot afford to get sick, '
+    'disability justice advocates seeking to keep public spaces accessible, and family members. '
+    'Health status and motivations were not quantified in this analysis, and no category proportions are implied. '
+    'This community context should not be interpreted as a classification of every person in the seven-person or 49-person modeling cohorts. '
+    'A motivated convenience sample may differ from the wider general public.',
+    30, 'Presenter’s description of the contributor community · Health status and motivations were not quantified.', 'sample-slide')
 
 demographics = fit_stats['demographics']
 add('08 / WHO IS REPRESENTED', 'Who contributed the 1,145 fit tests?',

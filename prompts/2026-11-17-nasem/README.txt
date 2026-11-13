@@ -1,7 +1,7 @@
 NASEM presentation — November 17, 2026
 
 Review draft for NPPTL researchers building iOS and Android apps.
-Updated November 12: 21 slides, comprising 15 main slides within the same
+Updated November 12: 22 slides, comprising 16 main slides within the same
 10-minute speaking budget and six optional backups.
 
 Open presentation.html directly for offline use, or start a local preview:
@@ -54,7 +54,7 @@ inspected during development. These are not blinded or repeatability results.
 The unresolved bifold-perimeter discrepancy remains omitted. A worn-mask capture
 and contact-arc tracing experiment remains future work in the speaker notes.
 13–14: October 29 descriptive dashboard pass rates and participant demographics.
-15: Acknowledgements and research funding/work/consulting contact information.
+16: Acknowledgements and research funding/work/consulting contact information.
 
 The former slide 7 (equal-person comparison) was removed at the presenter's
 request. Its aggregate data remain in paired-measurement-evidence.json for audit,
@@ -62,19 +62,19 @@ but the slide and its timed speaker notes are not included. Freed time is alloca
 to explaining NPV on slide 5 and the test-weighted comparison on slide 6.
 
 Backups:
-16: Detailed complementary scope alongside NIOSH's facial-measurement work.
+17: Detailed complementary scope alongside NIOSH's facial-measurement work.
 Moved out of the main talk because slide 2 now establishes the project goal.
-17: Complementary synthetic-face/CNN development tools, not the working Android
+18: Complementary synthetic-face/CNN development tools, not the working Android
 app or a trained custom detector.
-18: Scale and camera projection details.
-19: The separate 49-person Top-1/3/5 perimeter vs nose-deviation comparison,
+19: Scale and camera projection details.
+20: The separate 49-person Top-1/3/5 perimeter vs nose-deviation comparison,
 including the Top-1 decrease. It remains separate from the seven-person result.
-20: Q&A predictor details: all six traditional dimensions, shared mask inputs,
+21: Q&A predictor details: all six traditional dimensions, shared mask inputs,
 direct standardized vs. PCA-3 inputs, regularization, nonlinear interactions,
 training-person-only preprocessing and equal-person training weights. This is
 project-specific PCA, not the NIOSH PCA panel. The feature list is frozen from
 the actual FEATURE_COLUMNS used by the comparison implementation.
-21: Sources and boundaries of the claims.
+22: Sources and boundaries of the claims.
 
 Paired model comparison provenance:
 paired-measurement-evidence.json contains only frozen aggregates, model/training
@@ -108,7 +108,7 @@ use. Frozen single-capture numbers and source hashes are in prototype-evidence.j
 No private source captures or individual prediction audit files are copied here.
 
 Validation:
-21 slides checked at 1366x768; mobile width 390px; paired table values and traditional predictor keys checked
+22 slides checked at 1366x768; mobile width 390px; paired table values and traditional predictor keys checked
 against frozen evidence; next/end/home/all-slides navigation; offline assets;
 NPV values checked against the frozen evidence; 16:9 print bounds and PDF
 export. Main talk remains 600 seconds.
@@ -116,3 +116,5 @@ export. Main talk remains 600 seconds.
 Publication:
 This change edits the November review deck. No production routes, public/ copies,
 existing September artifacts or deployed models are changed by the deck build.
+
+Community context update: 22 slides, 16 main slides and 6 backups. The new convenience-sample slide precedes the demographic counts. Its groups overlap and are presenter-described, not quantified health-status categories. Main talk remains 600 seconds.
