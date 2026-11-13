@@ -46,7 +46,8 @@
       "user_count": 49,
       "top_1": 0.5416666666666666,
       "top_3": 0.7949999999999999,
-      "top_5": 0.82
+      "top_5": 0.82,
+      "negative_predictive_value": 0.8570088919448726
     },
     "latent_nose_v1": {
       "log_loss": 0.9308306794667487,
@@ -58,7 +59,8 @@
       "user_count": 49,
       "top_1": 0.5299999999999999,
       "top_3": 0.8133333333333334,
-      "top_5": 0.8516666666666667
+      "top_5": 0.8516666666666667,
+      "negative_predictive_value": 0.8664741989749534
     }
   },
   "observed_only_variants": {
@@ -72,7 +74,8 @@
       "user_count": 18,
       "top_1": 0.9166666666666666,
       "top_3": 0.9583333333333334,
-      "top_5": 0.9583333333333334
+      "top_5": 0.9583333333333334,
+      "negative_predictive_value": 0.7796381177536644
     },
     "latent_nose_v1": {
       "log_loss": 1.2337222181410767,
@@ -84,7 +87,8 @@
       "user_count": 18,
       "top_1": 0.875,
       "top_3": 0.9305555555555556,
-      "top_5": 0.9583333333333334
+      "top_5": 0.9583333333333334,
+      "negative_predictive_value": 0.7515031909160311
     }
   },
   "limitations": [
@@ -94,5 +98,6 @@
     "Measured-only training did not reproduce the improvement.",
     "Fit scores remain poorly calibrated; the nose model log loss remains worse than the prevalence-only baseline.",
     "Learned mask nose preferences are effective fit parameters, not measured physical mask perimeters."
-  ]
+  ],
+  "negative_predictive_value_definition": "TN/(TN+FN) at fixed 50% cutoff, averaged across the same three initializations. Source report confusion counts are unchanged."
 }

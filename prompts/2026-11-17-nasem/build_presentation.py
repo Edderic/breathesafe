@@ -123,22 +123,30 @@ nose = evidence['variants']['latent_nose_v1']
 classification_rows = ''.join(
     f'<tr><td>{label}</td><td>{format(base[key], fmt)}</td><td class="metric-gain">{format(nose[key], fmt)}</td></tr>'
     for label, key, fmt in [('Log loss ↓', 'log_loss', '.3f'), ('Precision ↑', 'precision', '.1%'),
-                            ('Recall ↑', 'recall', '.1%'), ('F1 ↑', 'f1', '.3f')]
+                            ('Recall ↑', 'recall', '.1%'), ('Negative predictive value ↑', 'negative_predictive_value', '.1%'), ('F1 ↑', 'f1', '.3f')]
 )
 add('02 / GEOMETRY → FIT SCORE', 'Keep the nose path separate from total perimeter.',
-    '<div class="equation compact-equation">New logit = perimeter-model logit − λ × [(N<sub>face</sub> − μ<sub>mask/style</sub>) / 10]²</div>' +
-    '<p class="metric-context">Observed face nose path + learned mask nose preference · λ &gt; 0 · lengths in mm</p>' +
+    '<div class="equation compact-equation defined-logit">'
+    '<div>L<sub>perimeter</sub> = aΔP² + bΔP + c + s<sub>strap</sub>, &nbsp; ΔP = (P<sub>face</sub> − P<sub>mask</sub>) / 10</div>'
+    '<div>L<sub>new</sub> = L<sub>perimeter</sub> − λ[(N<sub>face</sub> − μ<sub>mask/style</sub>) / 10]²; &nbsp; fit score = sigmoid(L<sub>new</sub>)</div></div>' +
+    '<p class="logit-definition">a, b, c: learned fit-family + style coefficients (a &lt; 0); s<sub>strap</sub>: strap offset; μ: learned nose preference; λ &gt; 0.<br>'
+    'P<sub>face</sub> = nose + upper-cheek + mid-cheek + chin paths. All input lengths in mm; division by 10 gives cm.</p>' +
     '<table class="method-table metric-comparison"><thead><tr><th>Held-out metric</th><th>Perimeter deviation</th><th>+ Nose deviation</th></tr></thead><tbody>' +
     classification_rows + '</tbody></table>' +
     '<p class="metric-context">1,086 tests · 49 people · fixed 50% cutoff · 5 user-grouped folds · mean of 3 initializations</p>' +
     callout('Improved on mixed measured/imputed inputs; the gain did not reproduce with measured-only training.'),
     'Previously, nose, upper cheek, mid-cheek and chin paths were summed into a single perimeter proxy. '
     'Two people with the same total could receive the same score despite different nose shapes. '
+    'The perimeter-model logit is a times the squared signed perimeter difference, plus b times the difference, plus c and a strap-type offset. '
+    'The signed difference is face perimeter minus mask perimeter, divided by ten to convert millimeters to centimeters. '
+    'Face perimeter sums the nose, upper-cheek, mid-cheek and chin paths. Coefficients a, b and c combine learned fit-family and style terms; a is constrained negative. '
+    'A logit is the model score before the sigmoid transformation; the displayed fit score is sigmoid of the new logit, not an independently calibrated probability. '
     'The new model retains the total-perimeter term and adds a separate squared nose mismatch. The face nose path is an input; '
     'the mask and style preferred nose distance is inferred from fit labels, not measured mask geometry. '
     f"Across three initializations on the same five user-grouped folds, precision rose from {base['precision']:.1%} to {nose['precision']:.1%}, "
     f"recall rose from {base['recall']:.1%} to {nose['recall']:.1%}, and log loss fell from {base['log_loss']:.3f} to {nose['log_loss']:.3f}. "
     'Precision asks: among tests called fitting, how many had positive labels? Recall asks: among positive labels, how many were found? '
+    f"Negative predictive value is TN/(TN+FN): among observations predicted not to fit, the fraction with negative fit labels. At the fixed cutoff it changes from {base['negative_predictive_value']:.1%} to {nose['negative_predictive_value']:.1%}. "
     'Log loss penalizes confident mistakes; lower is better. All classification metrics use the fixed 50 percent cutoff except log loss, which uses the scores directly. '
     'These are averages of pooled held-out metrics from each initialization, not training scores or independent replicated datasets. '
     'The mixed cohort contains measured and imputed ARKit paths. The regression used for imputation was fitted before CV, so full-pipeline generalization is not independently established. '

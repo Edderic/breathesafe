@@ -26,6 +26,10 @@ try{
  }
  const file=path.join(deck,'presentation.html');
  await page.setViewportSize({width:1366,height:768});await page.goto('file://'+file);await page.waitForFunction(()=>[...document.images].every(i=>i.complete&&i.naturalWidth));
+ const metrics=JSON.parse(fs.readFileSync(path.join(deck,'recommender-evidence.json'),'utf8'));
+ const npvRow=page.locator('.slide').nth(3).locator('tbody tr').filter({hasText:'Negative predictive value'});assert.equal(await npvRow.count(),1);
+ for(const key of ['none','latent_nose_v1'])assert((await npvRow.innerText()).includes((metrics.variants[key].negative_predictive_value*100).toFixed(1)+'%'));
+ const formula=await page.locator('.slide').nth(3).locator('.defined-logit').innerText();assert(formula.includes('aΔP² + bΔP + c'));assert(formula.includes('sigmoid'));
  const count=await page.locator('.slide').count();assert.equal(count,18);assert(!(await page.locator('main').innerText()).includes('Unresolved difference'));
  const overflow=[];
  for(let i=0;i<count;i++){

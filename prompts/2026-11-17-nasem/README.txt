@@ -90,3 +90,14 @@ Render/export helper: node scripts/presentations/render_nasem_prototype.cjs (run
 Publication:
 No production files, public/ copies, routes, or existing September artifacts changed.
 This folder is the review draft; publication is a separate step after review.
+
+November 13: slide 4 in this worktree copy now includes NPV (TN/(TN+FN)) at the
+fixed 50% cutoff: perimeter-only 85.7%, added nose deviation 86.6%. Values are
+averages of each initialization’s ratio from saved held-out confusion counts.
+The eighteen-slide worktree deck and its numbering are preserved; it is separate
+from the newer deck in the primary checkout. No retraining was performed.
+
+Slide 4 also defines L_perimeter = a*deltaP^2 + b*deltaP + c + s_strap,
+with deltaP = (P_face - P_mask)/10 in cm. It names the learned family/style
+coefficients and strap offset, defines the four summed face paths, and shows
+that the new logit passes through sigmoid to produce the fit score.
