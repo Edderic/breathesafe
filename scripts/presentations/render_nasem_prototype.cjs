@@ -31,13 +31,14 @@ try{
  for(const key of ['none','latent_nose_v1'])assert((await npvRow.innerText()).includes((metrics.variants[key].negative_predictive_value*100).toFixed(1)+'%'));
  const formula=await page.locator('.slide').nth(3).locator('.defined-logit').innerText();assert(formula.includes('aΔP² + bΔP + c'));assert(formula.includes('sigmoid'));
  const community=page.locator('.sample-slide');assert.equal(await community.count(),1);for(const text of ['Convenience sample','Immunocompromised or disabled people','Disability justice advocates','Family members'])assert((await community.innerText()).includes(text));
- const count=await page.locator('.slide').count();assert.equal(count,19);assert(!(await page.locator('main').innerText()).includes('Unresolved difference'));
+ const coefficients=page.locator('.coefficient-slide');assert.equal(await coefficients.count(),1);for(const text of ['a = −exp(α','b = b','c = c','ΔP* = −b / (2a)','learned jointly'])assert((await coefficients.innerText()).includes(text));
+ const count=await page.locator('.slide').count();assert.equal(count,20);assert(!(await page.locator('main').innerText()).includes('Unresolved difference'));
  const overflow=[];
  for(let i=0;i<count;i++){
   await page.goto('file://'+file+'#slide-'+(i+1));
   const info=await page.locator('.slide.active').evaluate(s=>({title:s.querySelector('h1').textContent,height:s.getBoundingClientRect().height,bottom:s.querySelector('footer').getBoundingClientRect().bottom,width:s.scrollWidth,client:s.clientWidth}));
   if(info.bottom>769||info.width>info.client+1)overflow.push({slide:i+1,...info});
-  if([3,4,8,9,10,12].includes(i))await page.screenshot({path:path.join(root,'tmp/nasem-preview/slide-'+(i+1)+'.png')});
+  if([3,4,8,9,10,12,18].includes(i))await page.screenshot({path:path.join(root,'tmp/nasem-preview/slide-'+(i+1)+'.png')});
  }
  if(overflow.length)console.log(JSON.stringify(overflow,null,2));assert.deepEqual(overflow,[],'Screen overflow');
  await page.goto('file://'+file+'#slide-1');await page.locator('#next').click();assert.equal(await page.locator('.slide.active').count(),1);assert.equal(await page.locator('#counter').textContent(),'2 / '+count);
@@ -47,7 +48,7 @@ try{
  const printOverflow=await page.locator('.slide').evaluateAll(slides=>slides.flatMap((s,i)=>s.scrollHeight>s.clientHeight+2?[{slide:i+1,height:s.clientHeight,scroll:s.scrollHeight}]:[]));if(printOverflow.length)console.log(JSON.stringify(printOverflow,null,2));assert.deepEqual(printOverflow,[],'Print overflow');
  await page.pdf({path:path.join(deck,'presentation.pdf'),preferCSSPageSize:true,printBackground:true,displayHeaderFooter:false});
  await page.emulateMedia({media:'screen'});await page.setViewportSize({width:390,height:844});
- for(const i of [3,4,8,9,10,12]){await page.goto('file://'+file+'#slide-'+(i+1));assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),'Mobile horizontal overflow on '+(i+1))}
+ for(const i of [3,4,8,9,10,12,18]){await page.goto('file://'+file+'#slide-'+(i+1));assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),'Mobile horizontal overflow on '+(i+1))}
  assert.deepEqual(errors,[]);console.log(count+' slides: offline assets, desktop/mobile layout, navigation, print bounds and PDF export passed.');
 }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)});

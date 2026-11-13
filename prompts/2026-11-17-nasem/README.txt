@@ -82,7 +82,7 @@ The acknowledgements slide also invites research funding and work or consulting 
 with the presenter's email and LinkedIn link.
 
 Validation:
-Checked all 19 slides at 1366x768 for viewport fit, mobile width at 390px for
+Checked all 20 slides at 1366x768 for viewport fit, mobile width at 390px for
 horizontal overflow, next-slide navigation, all-slides mode, and print layout.
 All print slides fit their 16:9 pages. Visually inspected the new prototype and caliper slides as well as the existing dashboard and scope content.
 Render/export helper: node scripts/presentations/render_nasem_prototype.cjs (run from the repository root).
@@ -102,4 +102,6 @@ with deltaP = (P_face - P_mask)/10 in cm. It names the learned family/style
 coefficients and strap offset, defines the four summed face paths, and shows
 that the new logit passes through sigmoid to produce the fit score.
 
-Community context update: 19 slides, 16 main slides and 3 backups. The new convenience-sample slide precedes the demographic counts. Its groups overlap and are presenter-described, not quantified health-status categories. Main talk remains 600 seconds.
+Community context update: 20 slides, 16 main slides and 4 backups. The new convenience-sample slide precedes the demographic counts. Its groups overlap and are presenter-described, not quantified health-status categories. Main talk remains 600 seconds.
+
+Appendix slide 19 defines the learned perimeter coefficients, family/style decomposition, negative-curvature transform and preferred difference −b/(2a). Sources move to slide 20. Main talk remains 600 seconds.

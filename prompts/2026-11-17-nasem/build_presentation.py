@@ -354,6 +354,29 @@ add('BACKUP / SCALE & PROJECTION', 'The prototype uses one physical scale anchor
     'A known reference dimension must be independent of the target used for accuracy evaluation; otherwise calibration can conceal the error being tested.',
     source='Working prototype scale: 284 mm / 4.28220 reconstruction units ≈ 66.3211 mm per unit. Caliper checks do not change scale.')
 
+add('BACKUP / PERIMETER COEFFICIENTS', 'Where do a, b and c come from?',
+    '<div class="coefficient-equation">L<sub>perimeter</sub> = aΔP² + bΔP + c + s<sub>strap</sub>'
+    '<span>ΔP = (P<sub>face</sub> − P<sub>mask</sub>) / 10 &nbsp; (millimeters → centimeters)</span></div>'
+    '<div class="coefficient-grid">'
+    '<article><h2>a · Curvature</h2><div class="coefficient-formula">a = −exp(α<sub>family</sub>) − exp(α<sub>style</sub>)</div>'
+    '<p>Always negative. Larger |a| means a sharper penalty away from the preferred perimeter difference.</p></article>'
+    '<article><h2>b · Preferred difference</h2><div class="coefficient-formula">b = b<sub>family</sub> + b<sub>style</sub></div>'
+    '<p>Together with a, sets the peak at ΔP* = −b / (2a). The preferred difference need not be zero.</p></article>'
+    '<article><h2>c · Baseline logit</h2><div class="coefficient-formula">c = c<sub>family</sub> + c<sub>style</sub></div>'
+    '<p>Sets the logit at zero perimeter difference, before the separate strap offset and nose penalty.</p></article></div>'
+    '<p class="coefficient-takeaway">Underlying parameters are learned jointly from fit-test outcomes. Facial measurements enter through ΔP; they do not directly determine a, b or c.</p>',
+    'The displayed coefficients combine a fit-family component and a mask-style component. '
+    'The internal names alpha_mask_raw and beta_gamma_mask refer to fit-family categories in the current training pipeline. '
+    'For the current constrained parameterization, the two raw alpha parameters are exponentiated and negated, then added, '
+    'so the effective quadratic coefficient a is negative. The linear and intercept coefficients each add family and style values. '
+    'Training learns all these underlying parameters jointly by minimizing binary cross-entropy on observed fit outcomes. '
+    'The strap category contributes a separate additive offset. The with-nose model also subtracts a separately learned nose-mismatch penalty. '
+    'The peak minus b over two a refers to the perimeter term with categories fixed; it is not a claim about the best physical mask geometry '
+    'or the optimum of the full model when the nose term changes. The coefficients are learned associations, not physical constants. '
+    'Legacy parameter files can bypass the newer negative-curvature transformation; the equation describes the current training parameterization.',
+    source='Current training implementation: python/mask_recommender/train.py · calc_preds, _initialize_custom_lr_parameters, _resolve_custom_lr_parameter_views.',
+    cls='coefficient-slide')
+
 add('BACKUP / SOURCES', 'Sources and boundaries of the claims.',
     f'<div class="two-col sources"><div><h2>Technical references</h2><p><a href="{APPLE}">Apple: ARFaceGeometry</a></p>'
     f'<p><a href="https://developer.apple.com/documentation/arkit/arfacetrackingconfiguration">Apple: face tracking configuration and device support</a></p>'
