@@ -1,8 +1,8 @@
 NASEM presentation — November 17, 2026
 
 Review draft for NPPTL researchers building iOS and Android apps.
-Updated November 12: 22 slides, comprising 16 main slides within the same
-10-minute speaking budget and six optional backups.
+Updated November 12: 23 slides, comprising 16 main slides within the same
+10-minute speaking budget and seven optional backups.
 
 Open presentation.html directly for offline use, or start a local preview:
   python3 -m http.server 8765 --bind 127.0.0.1 --directory prompts/2026-11-17-nasem
@@ -53,7 +53,9 @@ at tape-derived scale. One person/one capture; endpoint and method choices were
 inspected during development. These are not blinded or repeatability results.
 The unresolved bifold-perimeter discrepancy remains omitted. A worn-mask capture
 and contact-arc tracing experiment remains future work in the speaker notes.
-13–14: October 29 descriptive dashboard pass rates and participant demographics.
+13: October 29 descriptive dashboard pass rates.
+14: Convenience-sample community context.
+15: Participant demographics.
 16: Acknowledgements and research funding/work/consulting contact information.
 
 The former slide 7 (equal-person comparison) was removed at the presenter's
@@ -74,7 +76,8 @@ direct standardized vs. PCA-3 inputs, regularization, nonlinear interactions,
 training-person-only preprocessing and equal-person training weights. This is
 project-specific PCA, not the NIOSH PCA panel. The feature list is frozen from
 the actual FEATURE_COLUMNS used by the comparison implementation.
-22: Sources and boundaries of the claims.
+22: Learned perimeter-coefficient definitions and interpretation.
+23: Sources and boundaries of the claims.
 
 Paired model comparison provenance:
 paired-measurement-evidence.json contains only frozen aggregates, model/training
@@ -108,7 +111,7 @@ use. Frozen single-capture numbers and source hashes are in prototype-evidence.j
 No private source captures or individual prediction audit files are copied here.
 
 Validation:
-22 slides checked at 1366x768; mobile width 390px; paired table values and traditional predictor keys checked
+23 slides checked at 1366x768; mobile width 390px; paired table values and traditional predictor keys checked
 against frozen evidence; next/end/home/all-slides navigation; offline assets;
 NPV values checked against the frozen evidence; 16:9 print bounds and PDF
 export. Main talk remains 600 seconds.
@@ -117,4 +120,8 @@ Publication:
 This change edits the November review deck. No production routes, public/ copies,
 existing September artifacts or deployed models are changed by the deck build.
 
-Community context update: 22 slides, 16 main slides and 6 backups. The new convenience-sample slide precedes the demographic counts. Its groups overlap and are presenter-described, not quantified health-status categories. Main talk remains 600 seconds.
+Community context update: 23 slides, 16 main slides and 7 backups. The new convenience-sample slide precedes the demographic counts. Its groups overlap and are presenter-described, not quantified health-status categories. Main talk remains 600 seconds.
+
+Appendix slide 22 defines the learned perimeter coefficients, family/style decomposition, negative-curvature transform and preferred difference −b/(2a). Sources move to slide 23. Main talk remains 600 seconds.
+
+Canonical deck: prompts/2026-11-17-nasem on main. The nasem-prototype-update worktree is retired; edit and render this deck only. The expanded perimeter logit from its former slide 4 is retained on main slide 5.

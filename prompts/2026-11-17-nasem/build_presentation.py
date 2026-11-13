@@ -145,14 +145,21 @@ classification_rows = ''.join(
                             ('Recall ↑', 'recall', '.1%'), ('Negative predictive value ↑', 'negative_predictive_value', '.1%'), ('F1 ↑', 'f1', '.3f')]
 )
 add('02 / GEOMETRY → FIT SCORE', 'Keep the nose path separate from total perimeter.',
-    '<div class="equation compact-equation">New logit = perimeter-model logit − λ × [(N<sub>face</sub> − μ<sub>mask/style</sub>) / 10]²</div>' +
-    '<p class="metric-context">Observed face nose path + learned mask nose preference · λ &gt; 0 · lengths in mm</p>' +
+    '<div class="equation compact-equation defined-logit">'
+    '<div>L<sub>perimeter</sub> = aΔP² + bΔP + c + s<sub>strap</sub>, &nbsp; ΔP = (P<sub>face</sub> − P<sub>mask</sub>) / 10</div>'
+    '<div>L<sub>new</sub> = L<sub>perimeter</sub> − λ[(N<sub>face</sub> − μ<sub>mask/style</sub>) / 10]²; &nbsp; fit score = sigmoid(L<sub>new</sub>)</div></div>' +
+    '<p class="logit-definition">a, b, c: learned fit-family + style coefficients (a &lt; 0); s<sub>strap</sub>: strap offset; μ: learned nose preference; λ &gt; 0.<br>'
+    'P<sub>face</sub> = nose + upper-cheek + mid-cheek + chin paths. All input lengths in mm; division by 10 gives cm.</p>' +
     '<table class="method-table metric-comparison"><thead><tr><th>Held-out metric</th><th>Perimeter deviation</th><th>+ Nose deviation</th></tr></thead><tbody>' +
     classification_rows + '</tbody></table>' +
     '<p class="metric-context">1,086 tests · 49 people · fixed 50% cutoff · 5 user-grouped folds · mean of 3 initializations</p>' +
     callout('Improved on mixed measured/imputed inputs; the gain did not reproduce with measured-only training.'),
     'Previously, nose, upper cheek, mid-cheek and chin paths were summed into a single perimeter proxy. '
     'Two people with the same total could receive the same score despite different nose shapes. '
+    'The perimeter-model logit is a times the squared signed perimeter difference, plus b times the difference, plus c and a strap-type offset. '
+    'The signed difference is face perimeter minus mask perimeter, divided by ten to convert millimeters to centimeters. '
+    'Face perimeter sums the nose, upper-cheek, mid-cheek and chin paths. Coefficients a, b and c combine learned fit-family and style terms; a is constrained negative. '
+    'A logit is the model score before the sigmoid transformation; the displayed fit score is sigmoid of the new logit, not an independently calibrated probability. '
     'The new model retains the total-perimeter term and adds a separate squared nose mismatch. The face nose path is an input; '
     'the mask and style preferred nose distance is inferred from fit labels, not measured mask geometry. '
     f"Across three initializations on the same five user-grouped folds, precision rose from {base['precision']:.1%} to {nose['precision']:.1%}, "
@@ -435,6 +442,29 @@ add('BACKUP / TRADITIONAL PREDICTORS', 'Which predictors enter the traditional m
     'Precise anatomical endpoint definitions and collection procedures still need harmonization for a formal measurement-accuracy comparison.',
     source='Implementation: compare_direct_measurements.py · Production comparison: compare_production_measurements.py · Frozen predictor list: paired-measurement-evidence.json.',
     cls='predictor-slide')
+
+add('BACKUP / PERIMETER COEFFICIENTS', 'Where do a, b and c come from?',
+    '<div class="coefficient-equation">L<sub>perimeter</sub> = aΔP² + bΔP + c + s<sub>strap</sub>'
+    '<span>ΔP = (P<sub>face</sub> − P<sub>mask</sub>) / 10 &nbsp; (millimeters → centimeters)</span></div>'
+    '<div class="coefficient-grid">'
+    '<article><h2>a · Curvature</h2><div class="coefficient-formula">a = −exp(α<sub>family</sub>) − exp(α<sub>style</sub>)</div>'
+    '<p>Always negative. Larger |a| means a sharper penalty away from the preferred perimeter difference.</p></article>'
+    '<article><h2>b · Preferred difference</h2><div class="coefficient-formula">b = b<sub>family</sub> + b<sub>style</sub></div>'
+    '<p>Together with a, sets the peak at ΔP* = −b / (2a). The preferred difference need not be zero.</p></article>'
+    '<article><h2>c · Baseline logit</h2><div class="coefficient-formula">c = c<sub>family</sub> + c<sub>style</sub></div>'
+    '<p>Sets the logit at zero perimeter difference, before the separate strap offset and nose penalty.</p></article></div>'
+    '<p class="coefficient-takeaway">Underlying parameters are learned jointly from fit-test outcomes. Facial measurements enter through ΔP; they do not directly determine a, b or c.</p>',
+    'The displayed coefficients combine a fit-family component and a mask-style component. '
+    'The internal names alpha_mask_raw and beta_gamma_mask refer to fit-family categories in the current training pipeline. '
+    'For the current constrained parameterization, the two raw alpha parameters are exponentiated and negated, then added, '
+    'so the effective quadratic coefficient a is negative. The linear and intercept coefficients each add family and style values. '
+    'Training learns all these underlying parameters jointly by minimizing binary cross-entropy on observed fit outcomes. '
+    'The strap category contributes a separate additive offset. The with-nose model also subtracts a separately learned nose-mismatch penalty. '
+    'The peak minus b over two a refers to the perimeter term with categories fixed; it is not a claim about the best physical mask geometry '
+    'or the optimum of the full model when the nose term changes. The coefficients are learned associations, not physical constants. '
+    'Legacy parameter files can bypass the newer negative-curvature transformation; the equation describes the current training parameterization.',
+    source='Current training implementation: python/mask_recommender/train.py · calc_preds, _initialize_custom_lr_parameters, _resolve_custom_lr_parameter_views.',
+    cls='coefficient-slide')
 
 add('BACKUP / SOURCES', 'Sources and boundaries of the claims.',
     f'<div class="two-col sources"><div><h2>Technical references</h2><p><a href="{APPLE}">Apple: ARFaceGeometry</a></p>'

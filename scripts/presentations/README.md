@@ -1,6 +1,6 @@
 # NASEM presentation rendering
 
-The active deck is `prompts/2026-11-17-nasem/presentation.html`, built by its native `build_presentation.py`. It has 22 slides: 16 main slides within 10 minutes, plus six backups. The September public presentation is unchanged.
+The active deck is `prompts/2026-11-17-nasem/presentation.html`, built by its native `build_presentation.py`. It has 23 slides: 16 main slides within 10 minutes, plus seven backups. The September public presentation is unchanged.
 
 Run `python3 prompts/2026-11-17-nasem/build_presentation.py` to rebuild HTML and timed notes. Run `node scripts/presentations/render_nasem_prototype.cjs` to check frozen paired metrics, desktop/mobile layout, navigation and print bounds, and export the PDF. The renderer uses local Chrome and Playwright; set `NASEM_PLAYWRIGHT_ROOT` if needed. Preview screenshots go to ignored `tmp/nasem-preview/`.
 
@@ -17,3 +17,7 @@ The NPV update adds negative predictive value to slide 5 using saved held-out co
 Backup slide 21 describes the direct traditional/PCA predictors for Q&A: six recorded facial dimensions, shared mask fields, standardization, PCA-3 and the nonlinear interaction recipe. It explicitly distinguishes this project-specific PCA from the NIOSH panel. The frozen feature list is checked against the slide. Main-slide timing is unchanged.
 
 Slide 14 describes the convenience sample before slide 15’s demographic counts. The overlapping community groups are presenter-described; health status and motivations were not quantified. The main talk remains 600 seconds.
+
+Appendix slide 22 explains the perimeter coefficients and their learned family/style components; slide 23 contains sources. The renderer checks coefficient definitions and appendix layout.
+
+Use the primary checkout on main for all November deck edits. The former nasem-prototype-update worktree has been consolidated here; its expanded perimeter-logit definition is on slide 5.
