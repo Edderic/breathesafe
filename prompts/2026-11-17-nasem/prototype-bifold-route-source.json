@@ -1,0 +1,7 @@
+{
+  "source_report": ".private-webcam-runs/mask-route-review/bifold-neck-003-v1/report.json",
+  "source_report_sha256": "aa4c48d23fc87a1a6c1c514e554cddfd91794302d1b03141f44b41ac9d99b8e1",
+  "asset": "assets/prototype/bifold-cup-route.jpg",
+  "asset_sha256": "e4a9178630210450bdb175c86a0294fa30e0ded8ed295cd30ea42a32fdfec18a",
+  "display": "Original projected route on reconstructed surface; yaw 0.4 radians; route recolored orange for visibility. Proposed bifold/cup contact guide, not measured seal."
+}

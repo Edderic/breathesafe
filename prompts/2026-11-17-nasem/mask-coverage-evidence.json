@@ -1,0 +1,322 @@
+{
+  "source_url": "https://www.breathesafe.xyz/dashboard/stats",
+  "retrieved_at_utc": "2026-11-13T23:42:21.131895+00:00",
+  "response_sha256": "2182bb5af6a7bd2b884335e62ea22a310989e8ba6cdcbc5d4ac16624113f82fd",
+  "total_tests": 1157,
+  "mask_entries": 77,
+  "unique_users": 57,
+  "unique_user_mask_pairs": 769,
+  "top_n": 30,
+  "masks": [
+    {
+      "name": "Zimi ZM9233 w/ Headstraps",
+      "test_count": 54
+    },
+    {
+      "name": "Zimi 7711 w/ Headband, no Exhalation Valve",
+      "test_count": 49
+    },
+    {
+      "name": "3M Aura 9205+ N95",
+      "test_count": 46
+    },
+    {
+      "name": "Shawmut Protex SR9520S - Small",
+      "test_count": 38
+    },
+    {
+      "name": "Laianzhi HYX1002 Black KN100 - Medium",
+      "test_count": 36
+    },
+    {
+      "name": "Zimi ZM100",
+      "test_count": 30
+    },
+    {
+      "name": "Zimi ZM9541 w/Headstraps",
+      "test_count": 29
+    },
+    {
+      "name": "3M 1860s",
+      "test_count": 27
+    },
+    {
+      "name": "Drager X-plore 1950 - Small",
+      "test_count": 27
+    },
+    {
+      "name": "Vitacore CAN99e - Adult Small",
+      "test_count": 25
+    },
+    {
+      "name": "Zimi 7711 w/ Earloops, no Exhalation Valve",
+      "test_count": 25
+    },
+    {
+      "name": "BreatheTeq - Large",
+      "test_count": 24
+    },
+    {
+      "name": "BreatheTeq - Medium",
+      "test_count": 24
+    },
+    {
+      "name": "Trident S",
+      "test_count": 24
+    },
+    {
+      "name": "Wellbefore Kids KN95 Petite X-Small",
+      "test_count": 24
+    },
+    {
+      "name": "Zimi 95S Earloop",
+      "test_count": 24
+    },
+    {
+      "name": "3M 1870+ AURA\u2122",
+      "test_count": 23
+    },
+    {
+      "name": "Lutema M94K",
+      "test_count": 23
+    },
+    {
+      "name": "Makrite 801-N95 TC-84A",
+      "test_count": 23
+    },
+    {
+      "name": "Makrite 9500-N95, M/L Size, NIOSH 84A-5411, FDA 510(k) cleared as a surgical N95",
+      "test_count": 23
+    },
+    {
+      "name": "Makrite FIT+ 4803 Surgical N95 Respirator",
+      "test_count": 23
+    },
+    {
+      "name": "Wellbefore Kids KN95 Petite Small",
+      "test_count": 23
+    },
+    {
+      "name": "Innonix Respokare - Large",
+      "test_count": 22
+    },
+    {
+      "name": "Zimi 95S Headloop",
+      "test_count": 22
+    },
+    {
+      "name": "CanadaMasq Q100 Medium",
+      "test_count": 21
+    },
+    {
+      "name": "Drager X-plore 1950 - Medium / Large",
+      "test_count": 21
+    },
+    {
+      "name": "Laianzhi HYX1002 Black KN100 - Large",
+      "test_count": 21
+    },
+    {
+      "name": "Makrite 9500S Surgical NIOSH N95 Size Small headstraps",
+      "test_count": 21
+    },
+    {
+      "name": "Trident Regular",
+      "test_count": 21
+    },
+    {
+      "name": "BreatheTeq - Small",
+      "test_count": 20
+    },
+    {
+      "name": "BreatheTeq - XS",
+      "test_count": 20
+    },
+    {
+      "name": "Savewo 3D Meow 2-6 years",
+      "test_count": 20
+    },
+    {
+      "name": "O&M Halyard, Inc. N95 46727",
+      "test_count": 19
+    },
+    {
+      "name": "Innonix Respokare - Medium",
+      "test_count": 18
+    },
+    {
+      "name": "Trident Double Extra Large",
+      "test_count": 17
+    },
+    {
+      "name": "Canada Masq Q100 Large",
+      "test_count": 16
+    },
+    {
+      "name": "Canada Masq Q100 XS",
+      "test_count": 16
+    },
+    {
+      "name": "Makrite 6001B",
+      "test_count": 16
+    },
+    {
+      "name": "Zimi ZM9541 w/ Earloops",
+      "test_count": 16
+    },
+    {
+      "name": "BreatheTeq - X-Large",
+      "test_count": 15
+    },
+    {
+      "name": "Honeywell DF300 N95",
+      "test_count": 15
+    },
+    {
+      "name": "Zimi 7711 w/ Headband, Exhalation Valve",
+      "test_count": 14
+    },
+    {
+      "name": "blox N95 (part BLX-9501, medical use)",
+      "test_count": 13
+    },
+    {
+      "name": "Canada Masq Q100 Small",
+      "test_count": 12
+    },
+    {
+      "name": "Project 3 Black Trident Tri-fold S",
+      "test_count": 12
+    },
+    {
+      "name": "Trident Regular Extended Length",
+      "test_count": 12
+    },
+    {
+      "name": "Trident XS",
+      "test_count": 9
+    },
+    {
+      "name": "Vitacore CAN99 - Adult Small",
+      "test_count": 9
+    },
+    {
+      "name": "Honeywell DC365N95HC NIOSH Surgical N95 Respirator",
+      "test_count": 8
+    },
+    {
+      "name": "3M 9502+",
+      "test_count": 7
+    },
+    {
+      "name": "Project 3 Black Trident Tri-fold Headstraps- Regular Size, Regular Straps",
+      "test_count": 6
+    },
+    {
+      "name": "Project 3 Black Trident Tri-fold Headstraps- Regular/Large, Extended Straps",
+      "test_count": 5
+    },
+    {
+      "name": "Project 3 Black Trident Tri-fold XXL",
+      "test_count": 5
+    },
+    {
+      "name": "Zimi ZM9541 Head Straps Valved Regular",
+      "test_count": 5
+    },
+    {
+      "name": "Honeywell H910 Plus",
+      "test_count": 4
+    },
+    {
+      "name": "Makrite 9601-N95",
+      "test_count": 3
+    },
+    {
+      "name": "Makrite Sekura N95",
+      "test_count": 3
+    },
+    {
+      "name": "Wellbefore Kids KN95 Petite Regular",
+      "test_count": 3
+    },
+    {
+      "name": "3M Aura 9210+ (White straps)",
+      "test_count": 2
+    },
+    {
+      "name": "Flo Flo Pro Med/High for Medium nose",
+      "test_count": 2
+    },
+    {
+      "name": "Powecom - KN95 Black Protective Masks",
+      "test_count": 2
+    },
+    {
+      "name": "Readimask large",
+      "test_count": 2
+    },
+    {
+      "name": "SaveWo 3D Mask - Kids Small",
+      "test_count": 2
+    },
+    {
+      "name": "Zimi 7711 w/ Earloops, Exhalation Valve",
+      "test_count": 2
+    },
+    {
+      "name": "Zimi Small Frame with ZM9233 Filter kn100 black",
+      "test_count": 2
+    },
+    {
+      "name": "3M 6100 Small for Med/Low nose",
+      "test_count": 1
+    },
+    {
+      "name": "3M 7502 Medium for Med/High nose",
+      "test_count": 1
+    },
+    {
+      "name": "3M 7503 Large for High nose",
+      "test_count": 1
+    },
+    {
+      "name": "3M Vflex 1804",
+      "test_count": 1
+    },
+    {
+      "name": "BOTN Kids Mask",
+      "test_count": 1
+    },
+    {
+      "name": "Halyard Fluidshield 46827 Small",
+      "test_count": 1
+    },
+    {
+      "name": "Honeywell 7700 Large for Med/High nose",
+      "test_count": 1
+    },
+    {
+      "name": "Honeywell DF300",
+      "test_count": 1
+    },
+    {
+      "name": "Powecom KN95-SM",
+      "test_count": 1
+    },
+    {
+      "name": "Savewo 3D Meow 7-13 years",
+      "test_count": 1
+    },
+    {
+      "name": "Vitacore CAN99",
+      "test_count": 1
+    },
+    {
+      "name": "WellBefore WB-N-200   Regular",
+      "test_count": 1
+    }
+  ],
+  "count_definition": "Canonical analyzed fit-test records attributed to each mask entry; repeated person\u2013mask tests are retained. Entries distinguish catalog sizes/strap variants and are not necessarily different fit families.",
+  "scope": "Public dashboard analyzed subset, matching slide 7. Not the separate 49-person or seven-person CV cohorts. Per-mask unique-person counts are unavailable in this aggregate snapshot."
+}

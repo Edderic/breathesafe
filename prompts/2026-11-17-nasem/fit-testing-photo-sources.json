@@ -1,0 +1,34 @@
+{
+  "source_file": "app/javascript/mask_recommender_onboarding.vue",
+  "description": "Existing presenter-owned onboarding photos, embedded as offline illustrations of testing access and equipment. No image content altered.",
+  "images": [
+    {
+      "file": "assets/fit-testing/diy-hood.jpeg",
+      "url": "https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-fit-test-don-hood.jpeg",
+      "sha256": "3dd4461c79d04a462eacbb8ba7159aafcd7cd137cd8ec7cd4ea3b8147e4aecfd",
+      "alt": "Presenter wearing a respirator inside a clear zip-top bag used as a DIY qualitative-testing hood.",
+      "caption": "DIY hood & respirator"
+    },
+    {
+      "file": "assets/fit-testing/hood-opening.jpeg",
+      "url": "https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-11-don-hood-with-hole-side-in-front.jpeg",
+      "sha256": "a29ac15fea74711777d68a2d34c1c937516be3ce19787f6dc2b0a4d466356717",
+      "alt": "Presenter wearing a clear bag hood with the reinforced opening visible above the face.",
+      "caption": "Opening in the bag hood"
+    },
+    {
+      "file": "assets/fit-testing/nebulizer-opening.jpeg",
+      "url": "https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/qlft-neb-setup-14-insert-nebulizer-nozzle-through-hole.jpeg",
+      "sha256": "e69832e026b6131ee0e634015ade26323580fd1c93c133e7110d514254d07449",
+      "alt": "Presenter holding the nebulizer nozzle at the opening in the clear bag hood during a sensitivity check.",
+      "caption": "Nebulizer at the opening"
+    },
+    {
+      "file": "assets/fit-testing/8020a-companion.png",
+      "url": "https://breathesafe.s3.us-east-2.amazonaws.com/images/mask-recommender-onboarding/portacount-setup/portacount-8020a-with-companion-close-up.png",
+      "sha256": "357abf6499ece1184fe8528dc8066380490d3702bb5adccc435c886d9bf53159",
+      "alt": "Close-up of a TSI PortaCount 8020A stacked on an N95 Companion.",
+      "caption": "8020A + N95 Companion"
+    }
+  ]
+}

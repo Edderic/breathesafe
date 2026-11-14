@@ -9,29 +9,32 @@ def add_slides(add, screenshot):
     assert evidence['participants']==1 and evidence['reconstruction_captures']==1
     for row in evidence['linear_checks']:
         assert math.isclose(row['estimated_mm']-row['median_mm'],row['signed_difference_mm'])
+    source_photos=json.loads((Path(__file__).parent/'prototype-source-photos.json').read_text())
+    photo_row='<div class="capture-photo-row">'+''.join('<figure>'+screenshot(photo['file'].removeprefix('assets/'),photo['caption']+' captured with a MacBook Pro camera.','capture-photo')+'<figcaption>'+photo['caption']+'</figcaption></figure>' for photo in source_photos['images'])+'</div>'
     add('NEW / CAMERA PROTOTYPE', 'Photos now produce a physically scaled digital headform.',
+        '<p class="capture-photo-label">Source photos · MacBook Pro camera · 4 of 61 capture views</p>'+photo_row+
         '<div class="prototype-figures"><figure>'+screenshot('prototype/raw-headform.jpg','Actual neck-inclusive photogrammetry reconstruction.','prototype-image')+
         '<figcaption>Raw photogrammetry reconstruction</figcaption></figure><figure>'+screenshot('prototype/smoothed-headform.jpg','Same reconstructed head after Gaussian smoothing, including the jaw and upper neck.','prototype-image')+
         '<figcaption>Smoothed surface · same coordinates</figcaption></figure></div>'+
         '<p class="takeaway">61 ordinary-camera photos → registered 3D surface → supported smoothing → tape-based scale in millimeters.</p>'+
-        '<p class="muted">Head still, camera moving; eye-level and lower views retain upper-neck coverage. Laptop prototype demonstrated; Android workflow validation remains ahead.</p>',
+        '<p class="muted">MacBook Pro camera; head still, camera moving. Eye-level and lower views retain upper-neck coverage; Android validation remains ahead.</p>',
         'Since the October draft, the camera-only path has become a working local prototype. This is an actual reconstructed head, not a fitted FLAME shape. '
-        'The same 61-photo capture includes the jaw and upper neck. Gaussian volume smoothing reduces graininess while source-photo checks remain available. '
+        'The photos were taken using a MacBook Pro camera. The row shows four original source views from the same 61-photo capture, which includes the jaw and upper neck. Gaussian volume smoothing reduces graininess while source-photo checks remain available. '
         'A measured bitragion–subnasale tape arc sets physical scale; it is not inferred from an average model face. '
         'This is a digital headform, not a fabricated or uniformly validated surface. Smoothing does not establish anatomy where source coverage is missing. '
         'The complete updated workflow has not been benchmarked for speed or validated on Android.',
-        40,'November 11 prototype update · One participant, one capture · Digital headform; no fabricated-headform or population-accuracy claim.', 'prototype')
-    add('NEW / LANDMARKS & DISTANCES', 'Landmarks support chords and surface routes.',
+        40,'November 11 prototype update · One participant, one capture · Digital headform; no fabricated-headform or population-accuracy claim.', 'prototype capture-prototype')
+    add('NEW / LANDMARKS & DISTANCES', 'Automated landmark placements support chords and surface routes.',
         '<div class="prototype-figures"><figure>'+screenshot('prototype/landmark-widths.jpg','Nose-wing and cheekbone contact candidates on the actual reconstructed head, joined by straight width chords.','prototype-image')+
-        '<figcaption>Straight chords · nose and cheekbone widths</figcaption></figure><figure>'+screenshot('prototype/under-chin-route.jpg','Trifold or duckbill surface-route draft on the reconstructed head, seen from below.','prototype-image')+
+        '<figcaption>Straight chords · nose and cheekbone widths</figcaption></figure><figure>'+screenshot('prototype/bifold-cup-route.jpg','Proposed bifold or cup contact arc on the reconstructed face, highlighted in orange.','prototype-image')+'<figcaption>Proposed bifold / cup arc</figcaption></figure><figure>'+screenshot('prototype/under-chin-route.jpg','Trifold or duckbill surface-route draft on the reconstructed head, seen from below.','prototype-image')+
         '<figcaption>Surface-route draft · inspect below the jaw</figcaption></figure></div>'+
         '<p class="takeaway">Dense multi-photo correspondences propose surface-attached points. Original-photo overlays support anatomical review.</p>'+
         '<p class="muted">A chord joins two 3D endpoints. A surface arc follows the mesh through controls. Named landmarks and route controls retain their attachments.</p>',
         'The prototype now proposes points using existing dense multi-photo correspondences, triangulates them with the registered cameras, and checks support on the raw surface before attaching them to the smoothed one. '
         'Source-photo overlays let us inspect whether the coordinates match the anatomical contact intended. The presenter visually approved the proposed nasal-wing and cheekbone contacts for this capture. '
         'Straight widths use Euclidean 3D endpoint chords. Surface routes use local triangle-strip shortcuts through controls; these are not exact global geodesics or physical tape simulations. '
-        'The upper-neck coverage supports inspection of under-menton routes for trifold and duckbill styles. These points are not a direct ARKit-to-FLAME equivalence claim, and the full perimeter is still exploratory.',
-        40,'Actual prototype views · Width contacts visually approved for this capture · Route overlays may show through the mesh; no seal-pressure prediction.', 'prototype')
+        'The orange bifold/cup arc is a proposed contact route projected onto the reconstructed surface, not a measured mask seal. The upper-neck coverage supports inspection of under-menton routes for trifold and duckbill styles. These points are not a direct ARKit-to-FLAME equivalence claim, and the full perimeter is still exploratory.',
+        40,'Actual prototype views · Width contacts visually approved for this capture · Route overlays may show through the mesh; no seal-pressure prediction.', 'prototype landmark-routes')
     rows=''.join(f'<tr><td>{r["name"]}</td><td>{r["median_mm"]:.1f} mm</td><td>{r["estimated_mm"]:.1f} mm</td><td>{r["signed_difference_mm"]:+.1f} mm</td></tr>' for r in evidence['linear_checks'])
     add('NEW / INITIAL PHYSICAL CHECKS', 'Three linear checks agree within 2.3 mm in one pilot.',
         '<div class="prototype-scale"><strong>Scale reference: 284 mm</strong><span>Median bitragion–subnasale tape arc: 288, 280, 284 mm.</span></div>'+

@@ -373,9 +373,11 @@
           </div>
         </div>
 
+        <ObservedPassRateComparison :rates="stats.fit_tests.pass_rates" />
+
         <div class="charts-row">
           <div class="chart-container">
-            <h3>Overall Pass Rate</h3>
+            <h3>Overall Pass Rate (per test)</h3>
             <div class="stacked-bar-wrapper">
               <canvas ref="overallPassRateChart"></canvas>
             </div>
@@ -388,7 +390,7 @@
 
         <!-- Pass Rates by Mask -->
         <div class="chart-container-full">
-          <h3>Pass Rates by Mask</h3>
+          <h3>Pass Rates by Mask (per test)</h3>
 
           <!-- Sorting Controls -->
           <div class="sort-controls">
@@ -431,7 +433,7 @@
         <!-- Pass Rates by Strap Type -->
         <div class="charts-row">
           <div class="chart-container">
-            <h3>Pass Rates by Strap Type</h3>
+            <h3>Pass Rates by Strap Type (per test)</h3>
             <div class="sample-size-note">
               Sample sizes in parentheses. Lighter = smaller sample.
             </div>
@@ -441,7 +443,7 @@
           </div>
 
           <div class="chart-container">
-            <h3>Pass Rates by Style</h3>
+            <h3>Pass Rates by Style (per test)</h3>
             <div class="sample-size-note">
               Sample sizes in parentheses. Lighter = smaller sample.
             </div>
@@ -459,6 +461,7 @@
 import { Chart, registerables } from 'chart.js';
 import Pagination from './pagination.vue';
 import RecommenderProbabilityMetrics from './recommender_probability_metrics.vue';
+import ObservedPassRateComparison from './observed_pass_rate_comparison.vue';
 
 Chart.register(...registerables);
 
@@ -466,7 +469,8 @@ export default {
   name: 'Dashboard',
   components: {
     Pagination,
-    RecommenderProbabilityMetrics
+    RecommenderProbabilityMetrics,
+    ObservedPassRateComparison
   },
   data() {
     return {
@@ -1715,6 +1719,7 @@ export default {
 
 <style scoped>
 .dashboard-container {
+  box-sizing: border-box;
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
@@ -1860,6 +1865,7 @@ export default {
 }
 
 .chart-container {
+  min-width: 0;
   background: #f9f9f9;
   padding: 1.5rem;
   border-radius: 8px;
@@ -1872,6 +1878,10 @@ export default {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   margin-bottom: 2rem;
+}
+
+.chart-container canvas {
+  max-width: 100%;
 }
 
 .chart-container h3,
@@ -2063,8 +2073,13 @@ export default {
     font-size: 1.5rem;
   }
 
+  .dashboard-section {
+    min-width: 0;
+    padding: 1rem;
+  }
+
   .charts-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .stat-value {

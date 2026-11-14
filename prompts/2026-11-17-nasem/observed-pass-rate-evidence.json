@@ -1,0 +1,2065 @@
+{
+  "source": "Local development database: canonical labeled records from FitTestsWithFacialMeasurementsService.call",
+  "retrieved_at_utc": "2026-11-14T02:45:33Z",
+  "input_sha256": "4e515eb7f631e0c6b1c65465687f97de3ea68c3caa191529f3b02b486bfe5fff",
+  "calculator_sha256": "1413f9e0b116a1ccedc46d8fe5ed78c69bb1f84944bee5f9b593d67c7ebe9768",
+  "cohort_note": "This local snapshot is separate from the dated public dashboard snapshots on the preceding slides.",
+  "policy": "Mean outcomes per person–mask; mean pair rates per person–family; mean people per family; mean families per style.",
+  "pass_rates": {
+    "overall": {
+      "total": 1142,
+      "passed": 293,
+      "pass_rate": 25.66
+    },
+    "by_mask": [
+      {
+        "total": 1,
+        "passed": 1,
+        "pass_rate": 100.0,
+        "name": "3M 6100 Small for Med/Low nose"
+      },
+      {
+        "total": 1,
+        "passed": 1,
+        "pass_rate": 100.0,
+        "name": "3M 7503 Large for High nose"
+      },
+      {
+        "total": 2,
+        "passed": 2,
+        "pass_rate": 100.0,
+        "name": "3M Aura 9210+ (White straps)"
+      },
+      {
+        "total": 1,
+        "passed": 1,
+        "pass_rate": 100.0,
+        "name": "3M Vflex 1804"
+      },
+      {
+        "total": 2,
+        "passed": 2,
+        "pass_rate": 100.0,
+        "name": "Flo Flo Pro Med/High for Medium nose"
+      },
+      {
+        "total": 2,
+        "passed": 2,
+        "pass_rate": 100.0,
+        "name": "Powecom - KN95 Black Protective Masks"
+      },
+      {
+        "total": 1,
+        "passed": 1,
+        "pass_rate": 100.0,
+        "name": "Vitacore CAN99"
+      },
+      {
+        "total": 1,
+        "passed": 1,
+        "pass_rate": 100.0,
+        "name": "WellBefore WB-N-200   Regular"
+      },
+      {
+        "total": 5,
+        "passed": 5,
+        "pass_rate": 100.0,
+        "name": "Zimi ZM9541 Head Straps Valved Regular"
+      },
+      {
+        "total": 21,
+        "passed": 16,
+        "pass_rate": 76.19,
+        "name": "Trident Regular"
+      },
+      {
+        "total": 30,
+        "passed": 22,
+        "pass_rate": 73.33,
+        "name": "Zimi ZM100"
+      },
+      {
+        "total": 12,
+        "passed": 8,
+        "pass_rate": 66.67,
+        "name": "Trident Regular Extended Length"
+      },
+      {
+        "total": 17,
+        "passed": 10,
+        "pass_rate": 58.82,
+        "name": "Trident Double Extra Large"
+      },
+      {
+        "total": 36,
+        "passed": 21,
+        "pass_rate": 58.33,
+        "name": "Laianzhi HYX1002 Black KN100 - Medium"
+      },
+      {
+        "total": 46,
+        "passed": 24,
+        "pass_rate": 52.17,
+        "name": "3M Aura 9205+ N95"
+      },
+      {
+        "total": 22,
+        "passed": 11,
+        "pass_rate": 50.0,
+        "name": "Makrite FIT+ 4803 Surgical N95 Respirator"
+      },
+      {
+        "total": 21,
+        "passed": 10,
+        "pass_rate": 47.62,
+        "name": "Drager X-plore 1950 - Medium / Large"
+      },
+      {
+        "total": 13,
+        "passed": 6,
+        "pass_rate": 46.15,
+        "name": "blox N95 (part BLX-9501, medical use)"
+      },
+      {
+        "total": 26,
+        "passed": 11,
+        "pass_rate": 42.31,
+        "name": "Drager X-plore 1950 - Small"
+      },
+      {
+        "total": 29,
+        "passed": 12,
+        "pass_rate": 41.38,
+        "name": "Zimi ZM9541 w/Headstraps"
+      },
+      {
+        "total": 22,
+        "passed": 9,
+        "pass_rate": 40.91,
+        "name": "3M 1870+ AURA™"
+      },
+      {
+        "total": 53,
+        "passed": 21,
+        "pass_rate": 39.62,
+        "name": "Zimi ZM9233 w/ Headstraps"
+      },
+      {
+        "total": 23,
+        "passed": 9,
+        "pass_rate": 39.13,
+        "name": "Makrite 801-N95 TC-84A"
+      },
+      {
+        "total": 18,
+        "passed": 7,
+        "pass_rate": 38.89,
+        "name": "Innonix Respokare - Medium"
+      },
+      {
+        "total": 8,
+        "passed": 3,
+        "pass_rate": 37.5,
+        "name": "Honeywell DC365N95HC NIOSH Surgical N95 Respirator"
+      },
+      {
+        "total": 14,
+        "passed": 5,
+        "pass_rate": 35.71,
+        "name": "Zimi 7711 w/ Headband, Exhalation Valve"
+      },
+      {
+        "total": 3,
+        "passed": 1,
+        "pass_rate": 33.33,
+        "name": "Makrite 9601-N95"
+      },
+      {
+        "total": 49,
+        "passed": 16,
+        "pass_rate": 32.65,
+        "name": "Zimi 7711 w/ Headband, no Exhalation Valve"
+      },
+      {
+        "total": 22,
+        "passed": 7,
+        "pass_rate": 31.82,
+        "name": "Innonix Respokare - Large"
+      },
+      {
+        "total": 38,
+        "passed": 12,
+        "pass_rate": 31.58,
+        "name": "Shawmut Protex SR9520S - Small"
+      },
+      {
+        "total": 24,
+        "passed": 7,
+        "pass_rate": 29.17,
+        "name": "Zimi 7711 w/ Earloops, no Exhalation Valve"
+      },
+      {
+        "total": 21,
+        "passed": 6,
+        "pass_rate": 28.57,
+        "name": "Laianzhi HYX1002 Black KN100 - Large"
+      },
+      {
+        "total": 11,
+        "passed": 3,
+        "pass_rate": 27.27,
+        "name": "Project 3 Black Trident Tri-fold S"
+      },
+      {
+        "total": 4,
+        "passed": 1,
+        "pass_rate": 25.0,
+        "name": "Honeywell H910 Plus"
+      },
+      {
+        "total": 18,
+        "passed": 3,
+        "pass_rate": 16.67,
+        "name": "O&M Halyard, Inc. N95 46727"
+      },
+      {
+        "total": 6,
+        "passed": 1,
+        "pass_rate": 16.67,
+        "name": "Project 3 Black Trident Tri-fold Headstraps- Regular Size, Regular Straps"
+      },
+      {
+        "total": 7,
+        "passed": 1,
+        "pass_rate": 14.29,
+        "name": "3M 9502+"
+      },
+      {
+        "total": 21,
+        "passed": 3,
+        "pass_rate": 14.29,
+        "name": "Makrite 9500S Surgical NIOSH N95 Size Small headstraps"
+      },
+      {
+        "total": 8,
+        "passed": 1,
+        "pass_rate": 12.5,
+        "name": "Trident XS"
+      },
+      {
+        "total": 23,
+        "passed": 2,
+        "pass_rate": 8.7,
+        "name": "Trident S"
+      },
+      {
+        "total": 27,
+        "passed": 2,
+        "pass_rate": 7.41,
+        "name": "3M 1860s"
+      },
+      {
+        "total": 15,
+        "passed": 1,
+        "pass_rate": 6.67,
+        "name": "Honeywell DF300 N95"
+      },
+      {
+        "total": 15,
+        "passed": 1,
+        "pass_rate": 6.67,
+        "name": "Zimi ZM9541 w/ Earloops"
+      },
+      {
+        "total": 16,
+        "passed": 1,
+        "pass_rate": 6.25,
+        "name": "Makrite 6001B"
+      },
+      {
+        "total": 21,
+        "passed": 1,
+        "pass_rate": 4.76,
+        "name": "Zimi 95S Headloop"
+      },
+      {
+        "total": 23,
+        "passed": 1,
+        "pass_rate": 4.35,
+        "name": "Makrite 9500-N95, M/L Size, NIOSH 84A-5411, FDA 510(k) cleared as a surgical N95"
+      },
+      {
+        "total": 23,
+        "passed": 1,
+        "pass_rate": 4.35,
+        "name": "Zimi 95S Earloop"
+      },
+      {
+        "total": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "3M 7502 Medium for Med/High nose"
+      },
+      {
+        "total": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "BOTN Kids Mask"
+      },
+      {
+        "total": 24,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "BreatheTeq - Large"
+      },
+      {
+        "total": 24,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "BreatheTeq - Medium"
+      },
+      {
+        "total": 20,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "BreatheTeq - Small"
+      },
+      {
+        "total": 15,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "BreatheTeq - X-Large"
+      },
+      {
+        "total": 20,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "BreatheTeq - XS"
+      },
+      {
+        "total": 16,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Canada Masq Q100 Large"
+      },
+      {
+        "total": 12,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Canada Masq Q100 Small"
+      },
+      {
+        "total": 16,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Canada Masq Q100 XS"
+      },
+      {
+        "total": 21,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "CanadaMasq Q100 Medium"
+      },
+      {
+        "total": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Halyard Fluidshield 46827 Small"
+      },
+      {
+        "total": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Honeywell 7700 Large for Med/High nose"
+      },
+      {
+        "total": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Honeywell DF300"
+      },
+      {
+        "total": 23,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Lutema M94K"
+      },
+      {
+        "total": 3,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Makrite Sekura N95"
+      },
+      {
+        "total": 5,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Project 3 Black Trident Tri-fold Headstraps- Regular/Large, Extended Straps"
+      },
+      {
+        "total": 5,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Project 3 Black Trident Tri-fold XXL"
+      },
+      {
+        "total": 2,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Readimask large"
+      },
+      {
+        "total": 2,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "SaveWo 3D Mask - Kids Small"
+      },
+      {
+        "total": 20,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Savewo 3D Meow 2-6 years"
+      },
+      {
+        "total": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Savewo 3D Meow 7-13 years"
+      },
+      {
+        "total": 9,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Vitacore CAN99 - Adult Small"
+      },
+      {
+        "total": 25,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Vitacore CAN99e - Adult Small"
+      },
+      {
+        "total": 3,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Wellbefore Kids KN95 Petite Regular"
+      },
+      {
+        "total": 23,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Wellbefore Kids KN95 Petite Small"
+      },
+      {
+        "total": 24,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Wellbefore Kids KN95 Petite X-Small"
+      },
+      {
+        "total": 2,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Zimi 7711 w/ Earloops, Exhalation Valve"
+      }
+    ],
+    "by_strap_type": [
+      {
+        "total": 283,
+        "passed": 120,
+        "pass_rate": 42.4,
+        "name": "Adjustable Headstrap"
+      },
+      {
+        "total": 474,
+        "passed": 159,
+        "pass_rate": 33.54,
+        "name": "Headstrap"
+      },
+      {
+        "total": 114,
+        "passed": 9,
+        "pass_rate": 7.89,
+        "name": "Adjustable Earloop"
+      },
+      {
+        "total": 267,
+        "passed": 3,
+        "pass_rate": 1.12,
+        "name": "Earloop"
+      },
+      {
+        "total": 2,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Strapless"
+      }
+    ],
+    "by_style": [
+      {
+        "total": 6,
+        "passed": 4,
+        "pass_rate": 66.67,
+        "name": "Elastomeric"
+      },
+      {
+        "total": 265,
+        "passed": 91,
+        "pass_rate": 34.34,
+        "name": "Bifold & Gasket"
+      },
+      {
+        "total": 32,
+        "passed": 9,
+        "pass_rate": 28.13,
+        "name": "Duckbill"
+      },
+      {
+        "total": 509,
+        "passed": 135,
+        "pass_rate": 26.52,
+        "name": "Boat"
+      },
+      {
+        "total": 120,
+        "passed": 22,
+        "pass_rate": 18.33,
+        "name": "Cup"
+      },
+      {
+        "total": 206,
+        "passed": 30,
+        "pass_rate": 14.56,
+        "name": "Bifold"
+      },
+      {
+        "total": 2,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "name": "Adhesive"
+      }
+    ],
+    "equal_person_mask": {
+      "overall": {
+        "pair_count": 756,
+        "test_count": 1142,
+        "unique_users": 54,
+        "mask_count": 75,
+        "mixed_pairs": 14,
+        "pass_rate": 16.75
+      },
+      "by_mask": [
+        {
+          "pair_count": 1,
+          "test_count": 1,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 100.0,
+          "name": "3M 6100 Small for Med/Low nose",
+          "mask_id": 155
+        },
+        {
+          "pair_count": 1,
+          "test_count": 1,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 100.0,
+          "name": "3M 7503 Large for High nose",
+          "mask_id": 163
+        },
+        {
+          "pair_count": 2,
+          "test_count": 2,
+          "unique_users": 2,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 100.0,
+          "name": "3M Aura 9210+ (White straps)",
+          "mask_id": 265
+        },
+        {
+          "pair_count": 1,
+          "test_count": 1,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 100.0,
+          "name": "3M Vflex 1804",
+          "mask_id": 691
+        },
+        {
+          "pair_count": 1,
+          "test_count": 2,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 100.0,
+          "name": "Flo Flo Pro Med/High for Medium nose",
+          "mask_id": 187
+        },
+        {
+          "pair_count": 1,
+          "test_count": 2,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 100.0,
+          "name": "Powecom - KN95 Black Protective Masks",
+          "mask_id": 115
+        },
+        {
+          "pair_count": 1,
+          "test_count": 1,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 100.0,
+          "name": "Vitacore CAN99",
+          "mask_id": 682
+        },
+        {
+          "pair_count": 1,
+          "test_count": 1,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 100.0,
+          "name": "WellBefore WB-N-200   Regular",
+          "mask_id": 703
+        },
+        {
+          "pair_count": 1,
+          "test_count": 5,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 100.0,
+          "name": "Zimi ZM9541 Head Straps Valved Regular",
+          "mask_id": 707
+        },
+        {
+          "pair_count": 5,
+          "test_count": 22,
+          "unique_users": 5,
+          "mask_count": 1,
+          "mixed_pairs": 1,
+          "pass_rate": 64.44,
+          "name": "3M 1870+ AURA™",
+          "mask_id": 230
+        },
+        {
+          "pair_count": 8,
+          "test_count": 21,
+          "unique_users": 8,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 62.5,
+          "name": "Trident Regular",
+          "mask_id": 397
+        },
+        {
+          "pair_count": 22,
+          "test_count": 46,
+          "unique_users": 22,
+          "mask_count": 1,
+          "mixed_pairs": 1,
+          "pass_rate": 56.82,
+          "name": "3M Aura 9205+ N95",
+          "mask_id": 18
+        },
+        {
+          "pair_count": 2,
+          "test_count": 6,
+          "unique_users": 2,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 50.0,
+          "name": "Project 3 Black Trident Tri-fold Headstraps- Regular Size, Regular Straps",
+          "mask_id": 595
+        },
+        {
+          "pair_count": 2,
+          "test_count": 11,
+          "unique_users": 2,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 50.0,
+          "name": "Project 3 Black Trident Tri-fold S",
+          "mask_id": 597
+        },
+        {
+          "pair_count": 19,
+          "test_count": 26,
+          "unique_users": 19,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 47.37,
+          "name": "Drager X-plore 1950 - Small",
+          "mask_id": 245
+        },
+        {
+          "pair_count": 13,
+          "test_count": 13,
+          "unique_users": 13,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 46.15,
+          "name": "blox N95 (part BLX-9501, medical use)",
+          "mask_id": 244
+        },
+        {
+          "pair_count": 21,
+          "test_count": 53,
+          "unique_users": 21,
+          "mask_count": 1,
+          "mixed_pairs": 1,
+          "pass_rate": 42.18,
+          "name": "Zimi ZM9233 w/ Headstraps",
+          "mask_id": 332
+        },
+        {
+          "pair_count": 14,
+          "test_count": 18,
+          "unique_users": 14,
+          "mask_count": 1,
+          "mixed_pairs": 1,
+          "pass_rate": 39.29,
+          "name": "Innonix Respokare - Medium",
+          "mask_id": 229
+        },
+        {
+          "pair_count": 16,
+          "test_count": 49,
+          "unique_users": 16,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 37.5,
+          "name": "Zimi 7711 w/ Headband, no Exhalation Valve",
+          "mask_id": 16
+        },
+        {
+          "pair_count": 13,
+          "test_count": 23,
+          "unique_users": 13,
+          "mask_count": 1,
+          "mixed_pairs": 1,
+          "pass_rate": 35.58,
+          "name": "Makrite 801-N95 TC-84A",
+          "mask_id": 220
+        },
+        {
+          "pair_count": 12,
+          "test_count": 21,
+          "unique_users": 12,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 33.33,
+          "name": "Drager X-plore 1950 - Medium / Large",
+          "mask_id": 246
+        },
+        {
+          "pair_count": 1,
+          "test_count": 3,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 1,
+          "pass_rate": 33.33,
+          "name": "Makrite 9601-N95",
+          "mask_id": 224
+        },
+        {
+          "pair_count": 6,
+          "test_count": 12,
+          "unique_users": 6,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 33.33,
+          "name": "Trident Regular Extended Length",
+          "mask_id": 398
+        },
+        {
+          "pair_count": 3,
+          "test_count": 14,
+          "unique_users": 3,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 33.33,
+          "name": "Zimi 7711 w/ Headband, Exhalation Valve",
+          "mask_id": 15
+        },
+        {
+          "pair_count": 15,
+          "test_count": 22,
+          "unique_users": 15,
+          "mask_count": 1,
+          "mixed_pairs": 1,
+          "pass_rate": 32.5,
+          "name": "Makrite FIT+ 4803 Surgical N95 Respirator",
+          "mask_id": 221
+        },
+        {
+          "pair_count": 18,
+          "test_count": 22,
+          "unique_users": 18,
+          "mask_count": 1,
+          "mixed_pairs": 1,
+          "pass_rate": 31.48,
+          "name": "Innonix Respokare - Large",
+          "mask_id": 228
+        },
+        {
+          "pair_count": 13,
+          "test_count": 29,
+          "unique_users": 13,
+          "mask_count": 1,
+          "mixed_pairs": 1,
+          "pass_rate": 26.5,
+          "name": "Zimi ZM9541 w/Headstraps",
+          "mask_id": 336
+        },
+        {
+          "pair_count": 3,
+          "test_count": 8,
+          "unique_users": 3,
+          "mask_count": 1,
+          "mixed_pairs": 1,
+          "pass_rate": 25.0,
+          "name": "Honeywell DC365N95HC NIOSH Surgical N95 Respirator",
+          "mask_id": 219
+        },
+        {
+          "pair_count": 21,
+          "test_count": 24,
+          "unique_users": 21,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 23.81,
+          "name": "Zimi 7711 w/ Earloops, no Exhalation Valve",
+          "mask_id": 14
+        },
+        {
+          "pair_count": 9,
+          "test_count": 30,
+          "unique_users": 9,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 22.22,
+          "name": "Zimi ZM100",
+          "mask_id": 299
+        },
+        {
+          "pair_count": 14,
+          "test_count": 18,
+          "unique_users": 14,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 21.43,
+          "name": "O&M Halyard, Inc. N95 46727",
+          "mask_id": 225
+        },
+        {
+          "pair_count": 2,
+          "test_count": 4,
+          "unique_users": 2,
+          "mask_count": 1,
+          "mixed_pairs": 1,
+          "pass_rate": 16.67,
+          "name": "Honeywell H910 Plus",
+          "mask_id": 226
+        },
+        {
+          "pair_count": 16,
+          "test_count": 21,
+          "unique_users": 16,
+          "mask_count": 1,
+          "mixed_pairs": 1,
+          "pass_rate": 16.67,
+          "name": "Laianzhi HYX1002 Black KN100 - Large",
+          "mask_id": 242
+        },
+        {
+          "pair_count": 6,
+          "test_count": 23,
+          "unique_users": 6,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 16.67,
+          "name": "Trident S",
+          "mask_id": 9
+        },
+        {
+          "pair_count": 14,
+          "test_count": 27,
+          "unique_users": 14,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 14.29,
+          "name": "3M 1860s",
+          "mask_id": 1
+        },
+        {
+          "pair_count": 7,
+          "test_count": 17,
+          "unique_users": 7,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 14.29,
+          "name": "Trident Double Extra Large",
+          "mask_id": 399
+        },
+        {
+          "pair_count": 7,
+          "test_count": 8,
+          "unique_users": 7,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 14.29,
+          "name": "Trident XS",
+          "mask_id": 10
+        },
+        {
+          "pair_count": 19,
+          "test_count": 21,
+          "unique_users": 19,
+          "mask_count": 1,
+          "mixed_pairs": 1,
+          "pass_rate": 13.16,
+          "name": "Makrite 9500S Surgical NIOSH N95 Size Small headstraps",
+          "mask_id": 222
+        },
+        {
+          "pair_count": 16,
+          "test_count": 36,
+          "unique_users": 16,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 12.5,
+          "name": "Laianzhi HYX1002 Black KN100 - Medium",
+          "mask_id": 243
+        },
+        {
+          "pair_count": 24,
+          "test_count": 38,
+          "unique_users": 24,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 12.5,
+          "name": "Shawmut Protex SR9520S - Small",
+          "mask_id": 8
+        },
+        {
+          "pair_count": 12,
+          "test_count": 15,
+          "unique_users": 12,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 8.33,
+          "name": "Zimi ZM9541 w/ Earloops",
+          "mask_id": 335
+        },
+        {
+          "pair_count": 5,
+          "test_count": 7,
+          "unique_users": 5,
+          "mask_count": 1,
+          "mixed_pairs": 1,
+          "pass_rate": 6.67,
+          "name": "3M 9502+",
+          "mask_id": 227
+        },
+        {
+          "pair_count": 15,
+          "test_count": 15,
+          "unique_users": 15,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 6.67,
+          "name": "Honeywell DF300 N95",
+          "mask_id": 88
+        },
+        {
+          "pair_count": 15,
+          "test_count": 16,
+          "unique_users": 15,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 6.67,
+          "name": "Makrite 6001B",
+          "mask_id": 223
+        },
+        {
+          "pair_count": 20,
+          "test_count": 23,
+          "unique_users": 20,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 5.0,
+          "name": "Makrite 9500-N95, M/L Size, NIOSH 84A-5411, FDA 510(k) cleared as a surgical N95",
+          "mask_id": 231
+        },
+        {
+          "pair_count": 21,
+          "test_count": 21,
+          "unique_users": 21,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 4.76,
+          "name": "Zimi 95S Headloop",
+          "mask_id": 234
+        },
+        {
+          "pair_count": 23,
+          "test_count": 23,
+          "unique_users": 23,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 4.35,
+          "name": "Zimi 95S Earloop",
+          "mask_id": 235
+        },
+        {
+          "pair_count": 1,
+          "test_count": 1,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "3M 7502 Medium for Med/High nose",
+          "mask_id": 162
+        },
+        {
+          "pair_count": 1,
+          "test_count": 1,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "BOTN Kids Mask",
+          "mask_id": 47
+        },
+        {
+          "pair_count": 21,
+          "test_count": 24,
+          "unique_users": 21,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "BreatheTeq - Large",
+          "mask_id": 240
+        },
+        {
+          "pair_count": 22,
+          "test_count": 24,
+          "unique_users": 22,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "BreatheTeq - Medium",
+          "mask_id": 239
+        },
+        {
+          "pair_count": 16,
+          "test_count": 20,
+          "unique_users": 16,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "BreatheTeq - Small",
+          "mask_id": 48
+        },
+        {
+          "pair_count": 11,
+          "test_count": 15,
+          "unique_users": 11,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "BreatheTeq - X-Large",
+          "mask_id": 241
+        },
+        {
+          "pair_count": 19,
+          "test_count": 20,
+          "unique_users": 19,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "BreatheTeq - XS",
+          "mask_id": 238
+        },
+        {
+          "pair_count": 16,
+          "test_count": 16,
+          "unique_users": 16,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Canada Masq Q100 Large",
+          "mask_id": 237
+        },
+        {
+          "pair_count": 12,
+          "test_count": 12,
+          "unique_users": 12,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Canada Masq Q100 Small",
+          "mask_id": 5
+        },
+        {
+          "pair_count": 16,
+          "test_count": 16,
+          "unique_users": 16,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Canada Masq Q100 XS",
+          "mask_id": 2
+        },
+        {
+          "pair_count": 17,
+          "test_count": 21,
+          "unique_users": 17,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "CanadaMasq Q100 Medium",
+          "mask_id": 236
+        },
+        {
+          "pair_count": 1,
+          "test_count": 1,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Halyard Fluidshield 46827 Small",
+          "mask_id": 4
+        },
+        {
+          "pair_count": 1,
+          "test_count": 1,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Honeywell 7700 Large for Med/High nose",
+          "mask_id": 199
+        },
+        {
+          "pair_count": 1,
+          "test_count": 1,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Honeywell DF300",
+          "mask_id": 248
+        },
+        {
+          "pair_count": 23,
+          "test_count": 23,
+          "unique_users": 23,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Lutema M94K",
+          "mask_id": 233
+        },
+        {
+          "pair_count": 2,
+          "test_count": 3,
+          "unique_users": 2,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Makrite Sekura N95",
+          "mask_id": 562
+        },
+        {
+          "pair_count": 1,
+          "test_count": 5,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Project 3 Black Trident Tri-fold Headstraps- Regular/Large, Extended Straps",
+          "mask_id": 599
+        },
+        {
+          "pair_count": 1,
+          "test_count": 5,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Project 3 Black Trident Tri-fold XXL",
+          "mask_id": 598
+        },
+        {
+          "pair_count": 1,
+          "test_count": 2,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Readimask large",
+          "mask_id": 689
+        },
+        {
+          "pair_count": 2,
+          "test_count": 2,
+          "unique_users": 2,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "SaveWo 3D Mask - Kids Small",
+          "mask_id": 124
+        },
+        {
+          "pair_count": 20,
+          "test_count": 20,
+          "unique_users": 20,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Savewo 3D Meow 2-6 years",
+          "mask_id": 6
+        },
+        {
+          "pair_count": 1,
+          "test_count": 1,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Savewo 3D Meow 7-13 years",
+          "mask_id": 7
+        },
+        {
+          "pair_count": 7,
+          "test_count": 9,
+          "unique_users": 7,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Vitacore CAN99 - Adult Small",
+          "mask_id": 331
+        },
+        {
+          "pair_count": 18,
+          "test_count": 25,
+          "unique_users": 18,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Vitacore CAN99e - Adult Small",
+          "mask_id": 137
+        },
+        {
+          "pair_count": 2,
+          "test_count": 3,
+          "unique_users": 2,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Wellbefore Kids KN95 Petite Regular",
+          "mask_id": 144
+        },
+        {
+          "pair_count": 21,
+          "test_count": 23,
+          "unique_users": 21,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Wellbefore Kids KN95 Petite Small",
+          "mask_id": 145
+        },
+        {
+          "pair_count": 19,
+          "test_count": 24,
+          "unique_users": 19,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Wellbefore Kids KN95 Petite X-Small",
+          "mask_id": 146
+        },
+        {
+          "pair_count": 1,
+          "test_count": 2,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Zimi 7711 w/ Earloops, Exhalation Valve",
+          "mask_id": 13
+        }
+      ],
+      "by_strap_type": [
+        {
+          "pair_count": 2,
+          "test_count": 2,
+          "unique_users": 2,
+          "mask_count": 2,
+          "mixed_pairs": 0,
+          "pass_rate": 100.0,
+          "name": "Unknown",
+          "strap_type": null
+        },
+        {
+          "pair_count": 286,
+          "test_count": 474,
+          "unique_users": 44,
+          "mask_count": 36,
+          "mixed_pairs": 10,
+          "pass_rate": 28.68,
+          "name": "Headstrap",
+          "strap_type": "Headstrap"
+        },
+        {
+          "pair_count": 130,
+          "test_count": 283,
+          "unique_users": 38,
+          "mask_count": 11,
+          "mixed_pairs": 4,
+          "pass_rate": 25.84,
+          "name": "Adjustable Headstrap",
+          "strap_type": "Adjustable Headstrap"
+        },
+        {
+          "pair_count": 99,
+          "test_count": 114,
+          "unique_users": 33,
+          "mask_count": 7,
+          "mixed_pairs": 0,
+          "pass_rate": 7.07,
+          "name": "Adjustable Earloop",
+          "strap_type": "Adjustable Earloop"
+        },
+        {
+          "pair_count": 238,
+          "test_count": 267,
+          "unique_users": 35,
+          "mask_count": 18,
+          "mixed_pairs": 0,
+          "pass_rate": 0.84,
+          "name": "Earloop",
+          "strap_type": "Earloop"
+        },
+        {
+          "pair_count": 1,
+          "test_count": 2,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Strapless",
+          "strap_type": "Strapless"
+        }
+      ],
+      "by_style": [
+        {
+          "pair_count": 2,
+          "test_count": 2,
+          "unique_users": 2,
+          "mask_count": 2,
+          "mixed_pairs": 0,
+          "pass_rate": 100.0,
+          "name": "Unknown",
+          "style": null
+        },
+        {
+          "pair_count": 5,
+          "test_count": 6,
+          "unique_users": 3,
+          "mask_count": 5,
+          "mixed_pairs": 0,
+          "pass_rate": 60.0,
+          "name": "Elastomeric",
+          "style": "Elastomeric"
+        },
+        {
+          "pair_count": 28,
+          "test_count": 32,
+          "unique_users": 16,
+          "mask_count": 3,
+          "mixed_pairs": 0,
+          "pass_rate": 32.14,
+          "name": "Duckbill",
+          "style": "Duckbill"
+        },
+        {
+          "pair_count": 141,
+          "test_count": 265,
+          "unique_users": 39,
+          "mask_count": 11,
+          "mixed_pairs": 2,
+          "pass_rate": 21.49,
+          "name": "Bifold & Gasket",
+          "style": "Bifold & Gasket"
+        },
+        {
+          "pair_count": 325,
+          "test_count": 509,
+          "unique_users": 47,
+          "mask_count": 30,
+          "mixed_pairs": 4,
+          "pass_rate": 16.08,
+          "name": "Boat",
+          "style": "Boat"
+        },
+        {
+          "pair_count": 173,
+          "test_count": 206,
+          "unique_users": 32,
+          "mask_count": 17,
+          "mixed_pairs": 5,
+          "pass_rate": 11.83,
+          "name": "Bifold",
+          "style": "Bifold"
+        },
+        {
+          "pair_count": 81,
+          "test_count": 120,
+          "unique_users": 32,
+          "mask_count": 6,
+          "mixed_pairs": 3,
+          "pass_rate": 11.83,
+          "name": "Cup",
+          "style": "Cup"
+        },
+        {
+          "pair_count": 1,
+          "test_count": 2,
+          "unique_users": 1,
+          "mask_count": 1,
+          "mixed_pairs": 0,
+          "pass_rate": 0.0,
+          "name": "Adhesive",
+          "style": "Adhesive"
+        }
+      ]
+    },
+    "equal_family_by_style": [
+      {
+        "name": "Unknown",
+        "family_count": 2,
+        "unique_users": 2,
+        "pair_count": 2,
+        "test_count": 2,
+        "person_family_count": 2,
+        "pass_rate": 100.0,
+        "families": [
+          {
+            "family_key": "family:282",
+            "unique_users": 1,
+            "mask_count": 1,
+            "pair_count": 1,
+            "test_count": 1,
+            "pass_rate": 100.0
+          },
+          {
+            "family_key": "family:291",
+            "unique_users": 1,
+            "mask_count": 1,
+            "pair_count": 1,
+            "test_count": 1,
+            "pass_rate": 100.0
+          }
+        ]
+      },
+      {
+        "name": "Elastomeric",
+        "family_count": 5,
+        "unique_users": 3,
+        "pair_count": 5,
+        "test_count": 6,
+        "person_family_count": 5,
+        "pass_rate": 60.0,
+        "families": [
+          {
+            "family_key": "family:186",
+            "unique_users": 1,
+            "mask_count": 1,
+            "pair_count": 1,
+            "test_count": 2,
+            "pass_rate": 100.0
+          },
+          {
+            "family_key": "family:198",
+            "unique_users": 1,
+            "mask_count": 1,
+            "pair_count": 1,
+            "test_count": 1,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:161",
+            "unique_users": 1,
+            "mask_count": 1,
+            "pair_count": 1,
+            "test_count": 1,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:162",
+            "unique_users": 1,
+            "mask_count": 1,
+            "pair_count": 1,
+            "test_count": 1,
+            "pass_rate": 100.0
+          },
+          {
+            "family_key": "family:154",
+            "unique_users": 1,
+            "mask_count": 1,
+            "pair_count": 1,
+            "test_count": 1,
+            "pass_rate": 100.0
+          }
+        ]
+      },
+      {
+        "name": "Duckbill",
+        "family_count": 3,
+        "unique_users": 16,
+        "pair_count": 28,
+        "test_count": 32,
+        "person_family_count": 28,
+        "pass_rate": 22.53,
+        "families": [
+          {
+            "family_key": "family:224",
+            "unique_users": 14,
+            "mask_count": 1,
+            "pair_count": 14,
+            "test_count": 18,
+            "pass_rate": 21.43
+          },
+          {
+            "family_key": "family:242",
+            "unique_users": 13,
+            "mask_count": 1,
+            "pair_count": 13,
+            "test_count": 13,
+            "pass_rate": 46.15
+          },
+          {
+            "family_key": "family:4",
+            "unique_users": 1,
+            "mask_count": 1,
+            "pair_count": 1,
+            "test_count": 1,
+            "pass_rate": 0.0
+          }
+        ]
+      },
+      {
+        "name": "Bifold & Gasket",
+        "family_count": 7,
+        "unique_users": 39,
+        "pair_count": 141,
+        "test_count": 265,
+        "person_family_count": 124,
+        "pass_rate": 20.69,
+        "families": [
+          {
+            "family_key": "family:312",
+            "unique_users": 22,
+            "mask_count": 3,
+            "pair_count": 35,
+            "test_count": 87,
+            "pass_rate": 43.87
+          },
+          {
+            "family_key": "family:310",
+            "unique_users": 21,
+            "mask_count": 2,
+            "pair_count": 22,
+            "test_count": 26,
+            "pass_rate": 23.81
+          },
+          {
+            "family_key": "family:309",
+            "unique_users": 16,
+            "mask_count": 2,
+            "pair_count": 19,
+            "test_count": 63,
+            "pass_rate": 37.5
+          },
+          {
+            "family_key": "family:233",
+            "unique_users": 23,
+            "mask_count": 1,
+            "pair_count": 23,
+            "test_count": 23,
+            "pass_rate": 4.35
+          },
+          {
+            "family_key": "family:248",
+            "unique_users": 9,
+            "mask_count": 1,
+            "pair_count": 9,
+            "test_count": 30,
+            "pass_rate": 22.22
+          },
+          {
+            "family_key": "family:232",
+            "unique_users": 21,
+            "mask_count": 1,
+            "pair_count": 21,
+            "test_count": 21,
+            "pass_rate": 4.76
+          },
+          {
+            "family_key": "family:251",
+            "unique_users": 12,
+            "mask_count": 1,
+            "pair_count": 12,
+            "test_count": 15,
+            "pass_rate": 8.33
+          }
+        ]
+      },
+      {
+        "name": "Bifold",
+        "family_count": 17,
+        "unique_users": 32,
+        "pair_count": 173,
+        "test_count": 206,
+        "person_family_count": 173,
+        "pass_rate": 20.18,
+        "families": [
+          {
+            "family_key": "family:225",
+            "unique_users": 2,
+            "mask_count": 1,
+            "pair_count": 2,
+            "test_count": 4,
+            "pass_rate": 16.67
+          },
+          {
+            "family_key": "family:227",
+            "unique_users": 18,
+            "mask_count": 1,
+            "pair_count": 18,
+            "test_count": 22,
+            "pass_rate": 31.48
+          },
+          {
+            "family_key": "family:219",
+            "unique_users": 13,
+            "mask_count": 1,
+            "pair_count": 13,
+            "test_count": 23,
+            "pass_rate": 35.58
+          },
+          {
+            "family_key": "family:226",
+            "unique_users": 5,
+            "mask_count": 1,
+            "pair_count": 5,
+            "test_count": 7,
+            "pass_rate": 6.67
+          },
+          {
+            "family_key": "family:114",
+            "unique_users": 1,
+            "mask_count": 1,
+            "pair_count": 1,
+            "test_count": 2,
+            "pass_rate": 100.0
+          },
+          {
+            "family_key": "family:303",
+            "unique_users": 1,
+            "mask_count": 1,
+            "pair_count": 1,
+            "test_count": 1,
+            "pass_rate": 100.0
+          },
+          {
+            "family_key": "family:228",
+            "unique_users": 14,
+            "mask_count": 1,
+            "pair_count": 14,
+            "test_count": 18,
+            "pass_rate": 39.29
+          },
+          {
+            "family_key": "family:222",
+            "unique_users": 15,
+            "mask_count": 1,
+            "pair_count": 15,
+            "test_count": 16,
+            "pass_rate": 6.67
+          },
+          {
+            "family_key": "family:144",
+            "unique_users": 21,
+            "mask_count": 1,
+            "pair_count": 21,
+            "test_count": 23,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:263",
+            "unique_users": 2,
+            "mask_count": 1,
+            "pair_count": 2,
+            "test_count": 3,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:246",
+            "unique_users": 1,
+            "mask_count": 1,
+            "pair_count": 1,
+            "test_count": 1,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:145",
+            "unique_users": 19,
+            "mask_count": 1,
+            "pair_count": 19,
+            "test_count": 24,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:6",
+            "unique_users": 20,
+            "mask_count": 1,
+            "pair_count": 20,
+            "test_count": 20,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:231",
+            "unique_users": 23,
+            "mask_count": 1,
+            "pair_count": 23,
+            "test_count": 23,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:143",
+            "unique_users": 2,
+            "mask_count": 1,
+            "pair_count": 2,
+            "test_count": 3,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:87",
+            "unique_users": 15,
+            "mask_count": 1,
+            "pair_count": 15,
+            "test_count": 15,
+            "pass_rate": 6.67
+          },
+          {
+            "family_key": "family:7",
+            "unique_users": 1,
+            "mask_count": 1,
+            "pair_count": 1,
+            "test_count": 1,
+            "pass_rate": 0.0
+          }
+        ]
+      },
+      {
+        "name": "Cup",
+        "family_count": 6,
+        "unique_users": 32,
+        "pair_count": 81,
+        "test_count": 120,
+        "person_family_count": 81,
+        "pass_rate": 17.21,
+        "families": [
+          {
+            "family_key": "family:221",
+            "unique_users": 19,
+            "mask_count": 1,
+            "pair_count": 19,
+            "test_count": 21,
+            "pass_rate": 13.16
+          },
+          {
+            "family_key": "family:218",
+            "unique_users": 3,
+            "mask_count": 1,
+            "pair_count": 3,
+            "test_count": 8,
+            "pass_rate": 25.0
+          },
+          {
+            "family_key": "family:223",
+            "unique_users": 1,
+            "mask_count": 1,
+            "pair_count": 1,
+            "test_count": 3,
+            "pass_rate": 33.33
+          },
+          {
+            "family_key": "family:8",
+            "unique_users": 24,
+            "mask_count": 1,
+            "pair_count": 24,
+            "test_count": 38,
+            "pass_rate": 12.5
+          },
+          {
+            "family_key": "family:1",
+            "unique_users": 14,
+            "mask_count": 1,
+            "pair_count": 14,
+            "test_count": 27,
+            "pass_rate": 14.29
+          },
+          {
+            "family_key": "family:230",
+            "unique_users": 20,
+            "mask_count": 1,
+            "pair_count": 20,
+            "test_count": 23,
+            "pass_rate": 5.0
+          }
+        ]
+      },
+      {
+        "name": "Boat",
+        "family_count": 24,
+        "unique_users": 47,
+        "pair_count": 325,
+        "test_count": 509,
+        "person_family_count": 319,
+        "pass_rate": 14.27,
+        "families": [
+          {
+            "family_key": "family:255",
+            "unique_users": 7,
+            "mask_count": 2,
+            "pair_count": 7,
+            "test_count": 17,
+            "pass_rate": 28.57
+          },
+          {
+            "family_key": "family:244",
+            "unique_users": 12,
+            "mask_count": 1,
+            "pair_count": 12,
+            "test_count": 21,
+            "pass_rate": 33.33
+          },
+          {
+            "family_key": "family:241",
+            "unique_users": 16,
+            "mask_count": 1,
+            "pair_count": 16,
+            "test_count": 36,
+            "pass_rate": 12.5
+          },
+          {
+            "family_key": "family:237",
+            "unique_users": 22,
+            "mask_count": 1,
+            "pair_count": 22,
+            "test_count": 24,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:220",
+            "unique_users": 15,
+            "mask_count": 1,
+            "pair_count": 15,
+            "test_count": 22,
+            "pass_rate": 32.5
+          },
+          {
+            "family_key": "family:311",
+            "unique_users": 26,
+            "mask_count": 3,
+            "pair_count": 29,
+            "test_count": 70,
+            "pass_rate": 61.97
+          },
+          {
+            "family_key": "family:240",
+            "unique_users": 16,
+            "mask_count": 1,
+            "pair_count": 16,
+            "test_count": 21,
+            "pass_rate": 16.67
+          },
+          {
+            "family_key": "family:234",
+            "unique_users": 17,
+            "mask_count": 1,
+            "pair_count": 17,
+            "test_count": 21,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:10",
+            "unique_users": 7,
+            "mask_count": 1,
+            "pair_count": 7,
+            "test_count": 8,
+            "pass_rate": 14.29
+          },
+          {
+            "family_key": "family:243",
+            "unique_users": 19,
+            "mask_count": 1,
+            "pair_count": 19,
+            "test_count": 26,
+            "pass_rate": 47.37
+          },
+          {
+            "family_key": "family:254",
+            "unique_users": 9,
+            "mask_count": 2,
+            "pair_count": 10,
+            "test_count": 27,
+            "pass_rate": 66.67
+          },
+          {
+            "family_key": "family:238",
+            "unique_users": 21,
+            "mask_count": 1,
+            "pair_count": 21,
+            "test_count": 24,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:46",
+            "unique_users": 1,
+            "mask_count": 1,
+            "pair_count": 1,
+            "test_count": 1,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:136",
+            "unique_users": 18,
+            "mask_count": 1,
+            "pair_count": 18,
+            "test_count": 25,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:47",
+            "unique_users": 16,
+            "mask_count": 1,
+            "pair_count": 16,
+            "test_count": 20,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:2",
+            "unique_users": 16,
+            "mask_count": 1,
+            "pair_count": 16,
+            "test_count": 16,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:236",
+            "unique_users": 19,
+            "mask_count": 1,
+            "pair_count": 19,
+            "test_count": 20,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:5",
+            "unique_users": 12,
+            "mask_count": 1,
+            "pair_count": 12,
+            "test_count": 12,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:9",
+            "unique_users": 7,
+            "mask_count": 2,
+            "pair_count": 8,
+            "test_count": 34,
+            "pass_rate": 14.29
+          },
+          {
+            "family_key": "family:249",
+            "unique_users": 7,
+            "mask_count": 1,
+            "pair_count": 7,
+            "test_count": 9,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:235",
+            "unique_users": 16,
+            "mask_count": 1,
+            "pair_count": 16,
+            "test_count": 16,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:239",
+            "unique_users": 11,
+            "mask_count": 1,
+            "pair_count": 11,
+            "test_count": 15,
+            "pass_rate": 0.0
+          },
+          {
+            "family_key": "family:256",
+            "unique_users": 7,
+            "mask_count": 2,
+            "pair_count": 8,
+            "test_count": 22,
+            "pass_rate": 14.29
+          },
+          {
+            "family_key": "family:123",
+            "unique_users": 2,
+            "mask_count": 1,
+            "pair_count": 2,
+            "test_count": 2,
+            "pass_rate": 0.0
+          }
+        ]
+      },
+      {
+        "name": "Adhesive",
+        "family_count": 1,
+        "unique_users": 1,
+        "pair_count": 1,
+        "test_count": 2,
+        "person_family_count": 1,
+        "pass_rate": 0.0,
+        "families": [
+          {
+            "family_key": "family:289",
+            "unique_users": 1,
+            "mask_count": 1,
+            "pair_count": 1,
+            "test_count": 2,
+            "pass_rate": 0.0
+          }
+        ]
+      }
+    ],
+    "weighting": {
+      "pair_outcome": "Mean of the observed pass/fail outcomes within each person–mask pair.",
+      "style_family_mean": "Average pair rates within person–family; average people within family; average families within style.",
+      "missing_family": "Missing family IDs use a separate family per canonical mask; they are not pooled together.",
+      "excluded_pair_records": 0
+    }
+  }
+}

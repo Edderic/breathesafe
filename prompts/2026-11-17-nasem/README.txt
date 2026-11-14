@@ -1,127 +1,143 @@
 NASEM presentation — November 17, 2026
 
-Review draft for NPPTL researchers building iOS and Android apps.
-Updated November 12: 23 slides, comprising 16 main slides within the same
-10-minute speaking budget and seven optional backups.
+Canonical deck: prompts/2026-11-17-nasem on main. The former
+nasem-prototype-update worktree has been consolidated; edit this deck only.
+31 slides: 17 main slides (600 seconds), plus 14 optional backups.
 
-Open presentation.html directly for offline use, or start a local preview:
-  python3 -m http.server 8765 --bind 127.0.0.1 --directory prompts/2026-11-17-nasem
-  http://127.0.0.1:8765/presentation.html
+Open presentation.html directly for offline use. presentation.pdf is the PDF
+export; speaker-notes.txt contains the timed script. Arrow keys, Home/End,
+visible controls and All slides are supported.
 
-Arrow keys, Home/End, visible controls and All slides are supported.
-presentation.pdf is the PDF export; speaker-notes.txt contains the timed script.
-
-Rebuild HTML and notes:
+Build HTML and notes:
   python3 prompts/2026-11-17-nasem/build_presentation.py
-Validate layout, frozen metrics, navigation and print bounds; export PDF:
+Validate frozen metrics, offline assets, desktop/mobile layouts, navigation and
+print bounds, then export PDF:
   node scripts/presentations/render_nasem_prototype.cjs
-The renderer uses local Chrome and Playwright. Set NASEM_PLAYWRIGHT_ROOT if its
-installation lives in another repository. Screenshots go to tmp/nasem-preview/.
+Local Chrome and Playwright required; NASEM_PLAYWRIGHT_ROOT can locate another
+installation. Preview images go to ignored tmp/nasem-preview/.
 
 Main slides:
 1: Introduction.
-2: Project goal: help the general public find better-fitting respirators. Our
-intended scope includes adults and children, NIOSH-approved and international
-options (N95, KN95, FFP2/FFP3). Published NIOSH app targets emphasize NIOSH-approved
-respirators and worker fit panels. This does not assert that NIOSH excludes all
-children or describe unannounced final app features. Our pediatric prediction
-accuracy still needs validation. A generated illustration contrasts a loose blue
-surgical mask with a closer-fitting respirator; it is not measured leakage evidence.
-Sources: CDC/NIOSH 2024-107 app targets, CDC/NIOSH 2021 ASTM fit-panel description,
-and CDC Community Respirators and Masks. Links appear in the slide footer.
-3–4: MasqFit measurement capture and an October 29 personal recommendation
-screenshot. The screenshot uses the October 25 model; its scores are not presented
-as calibrated probabilities or new held-out results.
-5: The 49-person mixed-input perimeter-only vs. added nose-deviation experiment.
-Frozen aggregates and private-report hashes: recommender-evidence.json. Fixed
-50% cutoff; three initializations on identical five user-grouped folds. The
-measured-only experiment did not reproduce the gain. Global imputation was not
-refit within folds. The NPV row uses TN/(TN+FN), the negative-label fraction among predicted
-negatives; it is 85.7% vs. 86.6% averaged across the three initializations.
-This is separate from the paired comparison on slide 6.
-6: Test-weighted results for production ARKit vs direct traditional dimensions
-and PCA-3. Every held-out test counts equally. Seven complete paired people,
-421 observations, train six/test one. Two people supplied 296/421 tests (70.3%).
-NPV is included alongside precision, recall, F1 and log loss, using the same test
-weights and fixed 50% cutoff; ratios are averaged across initializations.
-7–9: Camera approach comparison, exploratory ARKit/caliper self-check, and the
-need to map mesh vertices to anatomical definitions. The self-check is one person;
-the cited ARKit eye-to-phone study does not validate these facial paths.
-10–12: Working photogrammetry prototype: raw/smoothed neck-inclusive digital
-headforms, attached landmarks and routes, and three independent caliper checks
-at tape-derived scale. One person/one capture; endpoint and method choices were
-inspected during development. These are not blinded or repeatability results.
-The unresolved bifold-perimeter discrepancy remains omitted. A worn-mask capture
-and contact-arc tracing experiment remains future work in the speaker notes.
-13: October 29 descriptive dashboard pass rates.
-14: Convenience-sample community context.
-15: Participant demographics.
-16: Acknowledgements and research funding/work/consulting contact information.
+2: General-public goal; adults and children, NIOSH-approved and international
+   options. Generated fit illustration is not measured leakage evidence.
+3–4: MasqFit ARKit capture and historical personal recommendations.
+5: Convenience-sample community context: 55 unique users in the October 29
+   demographic snapshot; overlapping, unquantified community groups.
+6: Demographic breakdown (October 29 snapshot): count and percentage of all
+   55 participants, including privacy-pooled/nonresponse groups.
+7: Fit-label definitions and varying access to tools: direct N95, N99-derived,
+   qualitative and seal checks. Nov 13 snapshot: 1,157 fit tests and 769 unique
+   user-mask pairs, with counts and
+   record shares; these do not describe participant access rates.
+8: Mask coverage: 30 most-tested entries, counts and shares; 77 entries,
+   1,157 records, 57 people and 769 user-mask pairs in the same Nov 13 public
+   snapshot as slide 7. Counts include repeat tests and mixed evidence sources.
+9: The 49-person mixed-input perimeter vs added nose-deviation experiment.
+   NPV 85.7% vs 86.6%, fixed 50% cutoff, mean of three initializations.
+   Measured-only training did not reproduce the gain; imputation predates CV.
+10: Seven paired people: production ARKit vs traditional dimensions vs PCA-3.
+    Test-weighted, 421 observations, train six/test one; two supply 70.3%.
+11–13: Neck-inclusive photogrammetry, attached landmarks/routes, caliper checks.
+14: Acknowledgements and contact.
+15–17: Capture approaches, one-person ARKit/caliper check, anatomical definitions.
 
-The former slide 7 (equal-person comparison) was removed at the presenter's
-request. Its aggregate data remain in paired-measurement-evidence.json for audit,
-but the slide and its timed speaker notes are not included. Freed time is allocated
-to explaining NPV on slide 5 and the test-weighted comparison on slide 6.
+Appendix:
+18: Complementary scope alongside NIOSH facial-measurement work.
+19: Synthetic-face/CNN development plan, not a working detector.
+20: Physical scale and projection.
+21: Separate 49-person Top-1/3/5 comparison, including Top-1 tradeoff.
+22: Six traditional predictors, mask inputs, preprocessing and fitting recipe.
+23: Learned perimeter coefficients: family/style decomposition, curvature, peak.
+24: Traditional/PCA linear and squared terms, interactions, unconstrained signs.
+25: Historical N99→N95 conversion scatter with censored Bayesian trend and
+    distinct 95% credible and predictive intervals. One wearer, 24 mask aggregates;
+    12 aggregates containing assigned values excluded. Not a recommender test.
+26: N99→N95 conversion equations, implementation adjustments and credit to
+    Aaron Collins’s MaskNerd spreadsheet for normal-breathing filtration data.
+27: Seal-check questionnaire decision rules: failures, not-a-fail, incomplete
+    answers and their asymmetric training-label mapping.
+28: Per-test vs equal person–mask-pair rates and equal-family style means.
+    Local DB snapshot: 1,142 tests, 756 pairs, 54 people; 25.7% vs 16.8%.
+29: Automated landmarking and style-curve projection walkthrough.
+30: Paired person-cluster bootstrap differences and method.
+31: Sources and limitations.
 
-Backups:
-17: Detailed complementary scope alongside NIOSH's facial-measurement work.
-Moved out of the main talk because slide 2 now establishes the project goal.
-18: Complementary synthetic-face/CNN development tools, not the working Android
-app or a trained custom detector.
-19: Scale and camera projection details.
-20: The separate 49-person Top-1/3/5 perimeter vs nose-deviation comparison,
-including the Top-1 decrease. It remains separate from the seven-person result.
-21: Q&A predictor details: all six traditional dimensions, shared mask inputs,
-direct standardized vs. PCA-3 inputs, regularization, nonlinear interactions,
-training-person-only preprocessing and equal-person training weights. This is
-project-specific PCA, not the NIOSH PCA panel. The feature list is frozen from
-the actual FEATURE_COLUMNS used by the comparison implementation.
-22: Learned perimeter-coefficient definitions and interpretation.
-23: Sources and boundaries of the claims.
+Paired comparison: paired-measurement-evidence.json freezes only aggregates,
+feature lists, training recipes, limitations and source hashes. No participant
+IDs or individual audit scores. Production ARKit retrains the actual perimeter
+quadratic plus shared latent-nose architecture (Adam, 200 epochs, lr .01,
+row-weighted BCE) in each fold. Traditional/PCA use L2 logistic regression C=1,
+equal-person training weights, six standardized dimensions or three PCs, with
+linear/squared geometry terms and mask interactions. Preprocessing fits on six
+training people only. No ARKit conversion, imputation or outside training people.
+Architectures and training weights differ: this compares pipelines, not an
+isolated causal effect of measurement modality. ARKit averages seeds 42/43/44;
+traditional/PCA fits are deterministic. All score identical held-out observations.
 
-Paired model comparison provenance:
-paired-measurement-evidence.json contains only frozen aggregates, model/training
-recipes, limitations and source hashes. No participant IDs or individual scores.
-The ARKit arm calls the actual production total-perimeter quadratic plus shared
-nose-mismatch training/inference code, retrained on six paired people per fold.
-It does not reuse deployed weights. Adam 200 epochs, lr .01, row-weighted BCE.
-Traditional/PCA classifiers predict fit directly from six traditional dimensions
-or three components, with L2 logistic regression and equal-person training weights.
-Scaling/PCA fit only on training people. No imputation or ARKit conversion is used.
-Thus architectures and training recipes differ; this is a pipeline comparison,
-not an isolated causal measurement-modality experiment. ARKit averages three
-initializations on the same folds; traditional/PCA fits are deterministic.
+Test-weighted and equal-person aggregates remain in frozen evidence; the main
+talk shows test weighting. Repeat tests inform a face's response but do not add
+independent faces. Seven people remain seven people. Precision/recall/NPV/F1 use
+50%; log loss uses scores directly. Scores are not validated calibrated
+population probabilities. Dates may differ; labels mix sources; repeated
+user-mask observations can remain. Three initializations are not confidence
+intervals. Equal-person slide remains removed as requested.
 
-Both evaluation weightings are retained in the frozen aggregate evidence; the
-main talk now displays test weighting only for the paired comparison. Test weighting describes the collected
-test mix; equal-person weighting limits prolific testers' influence. The geometry
-constraint is a useful inductive bias, and repeat tests inform a person's response,
-but additional tests on the same face do not add independent faces or prove new-
-person generalization. Seven people remain seven independent participants.
-Precision/recall/F1 use the fixed 50% cutoff; log loss uses the scores directly.
-Latest measurement/test dates may differ, labels mix evidence sources, and repeated
-user-mask observations may remain. The models' scores are not validated calibrated
-population fit probabilities. Three initializations are not confidence intervals.
+recommender-evidence.json freezes the separate 49-person experiment.
+prototype-evidence.json retains one-person/one-capture physical-scale evidence
+and hashes; assets/prototype holds the actual headform screenshots. Caliper
+checks are exploratory, not blinded or repeatability evidence. The unresolved
+bifold-perimeter discrepancy remains omitted pending a worn-mask/contact-arc
+experiment. No private captures or prediction audit files are copied here.
 
-The goal illustration is in assets/public-fit-goal-illustration.png. Its exact
-built-in image_gen prompt is in assets/public-fit-goal-prompt.txt.
+fit-outcome-methods.txt details label construction and historical plot caveats.
+n95-conversion-evidence.json freezes anonymous score pairs, source hashes,
+Bayesian priors and diagnostics. scripts/presentations/analyze_n95_conversion.py
+rebuilds the SVG/PNG and evidence from saved notebook output without DB access.
+The four-chain fit handles measured scores at 200 as right-censored. It does not
+model predictor error, filtration uncertainty, correlated tests or selection.
+The interval is conditional on this one-person dataset, not population accuracy.
 
-Prototype source views are retained in assets/prototype/ and embedded for offline
-use. Frozen single-capture numbers and source hashes are in prototype-evidence.json.
-No private source captures or individual prediction audit files are copied here.
+The AI goal illustration and its exact image-generation prompt are in assets/.
+No model, service, public/ copy, September deck or deployment is changed by this
+presentation build. The main talk remains 600 seconds after the added definition.
 
-Validation:
-23 slides checked at 1366x768; mobile width 390px; paired table values and traditional predictor keys checked
-against frozen evidence; next/end/home/all-slides navigation; offline assets;
-NPV values checked against the frozen evidence; 16:9 print bounds and PDF
-export. Main talk remains 600 seconds.
+fit-evidence-source-counts.json freezes Nov 13 source-category counts and the
+public response hash: direct N95 136 (11.8%), N99-derived 150 (13.0%), qualitative
+119 (10.3%), seal checks 752 (65.0%). Counts sum to 1,157; rounded shares sum to
+100.1%. This snapshot differs from the older, explicitly dated descriptive slides
+and from both CV cohorts. The appendix averages sealed ratios, not efficiencies;
+shows the conditional reference adjustment; and distinguishes the derived mixture
+equation from the project-specific factor 2. Source spreadsheet is linked.
 
-Publication:
-This change edits the November review deck. No production routes, public/ copies,
-existing September artifacts or deployed models are changed by the deck build.
+Ordering update: former slides 15, 16 and 14 now follow slide 4 in exactly that
+order (community context, demographics, observed pass rates). Appendix numbering
+and the 600-second main-talk budget are unchanged.
 
-Community context update: 23 slides, 16 main slides and 7 backups. The new convenience-sample slide precedes the demographic counts. Its groups overlap and are presenter-described, not quantified health-status categories. Main talk remains 600 seconds.
+Slides 7 and 8 swapped: fit is defined before observed pass rates are shown.
 
-Appendix slide 22 defines the learned perimeter coefficients, family/style decomposition, negative-curvature transform and preferred difference −b/(2a). Sources move to slide 23. Main talk remains 600 seconds.
+Slide 7 includes four existing onboarding photographs: respirator under a DIY
+bag hood, hood opening, nebulizer at the opening, and 8020A + N95 Companion.
+Images are local and embedded for offline use; original public URLs, hashes and
+captions are in fit-testing-photo-sources.json. This equipment illustration is
+not a complete procedural guide or a claim of protocol compliance.
 
-Canonical deck: prompts/2026-11-17-nasem on main. The nasem-prototype-update worktree is retired; edit and render this deck only. The expanded perimeter logit from its former slide 4 is retained on main slide 5.
+observed-pass-rate-evidence.json and observed-pass-rate-methods.txt document the
+repeat-balanced comparison. The shared DashboardPassRatesService also powers the
+new dashboard panel and retains the original per-test statistics. Mixed pair
+outcomes are averaged; families are averaged after balancing people and variants.
+
+mask-coverage-evidence.json freezes all public mask-entry counts for slide 8.
+The former main pass-rate comparison now appears only in appendix slide 28.
+Main talk remains 600 seconds.
+
+Slide 8 shows the top 30 mask entries in three columns (ranks 1–10, 11–20 and 21–30), with counts and shares from the same frozen public snapshot.
+
+Slide 11 includes four original source photos (frontal, oblique and lower camera views), captured with a MacBook Pro camera. Paths and SHA-256 hashes are in prototype-source-photos.json.
+
+Slide 12 shows width chords, the proposed bifold/cup arc (orange), and an under-chin route. Bifold route capture provenance is in prototype-bifold-route-source.json.
+
+Slide 9 reports point estimates and pointwise 95% person-cluster percentile intervals, from 10,000 paired resamples of 49 people using fixed held-out scores. Appendix slide 30 reports nose-minus-perimeter differences. No retraining; global pre-CV imputation and overlapping training sets remain limitations. Frozen aggregate evidence: recommender-bootstrap-evidence.json.
+
+Appendix slide 30 also gives strict nose-model superiority frequencies over the same 10,000 paired bootstrap samples, with win counts. Recall has 93 ties; ties count as neither wins nor losses. These are bootstrap frequencies, not posterior probabilities or p-values.
+
+Slide 9 sorts held-out metrics by descending strict-win bootstrap frequency and shows that frequency next to the estimates / confidence intervals. Interpretation: lower log loss establishes better probability scoring, not calibration alone; higher precision means a higher positive-label fraction among predicted fits. Recall improvement remains uncertain.

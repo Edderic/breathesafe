@@ -1,0 +1,51 @@
+Paired person-cluster bootstrap — November 14, 2026
+
+Inputs: six saved out_of_fold_predictions.json files for variants none and
+latent_nose_v1, seeds 42/43/44. Their comparison-report hashes match the
+previously frozen recommender-evidence.json. Private prediction files stay in
+tmp/retired-nasem-worktree-cache/recommender-style-nose-review; only aggregate
+intervals, source hashes and method metadata are included in this deck.
+
+49 people, 1,086 held-out tests. Match observations by person/test/mask/label
+across models and initializations. Require unique test identities and one
+held-out fold per person per prediction file. Reproduce all five point metrics
+in recommender-evidence.json to absolute tolerance 1e-12 before bootstrapping.
+
+Draw 49 people with replacement, 10,000 times, RNG seed 20261114 (NumPy
+multinomial participant multiplicities, equivalent to uniform person draws).
+Retain every selected person's tests, including multiplicity. Both models and
+all initializations use the same participant draw. Preserve test weighting:
+compute pooled confusion ratios and mean natural-log loss per initialization,
+then average the three metric values. Do not ensemble probabilities or treat
+initializations as independent samples. Classification threshold >=0.5;
+log-loss correct-class probability clipped to [1e-15, 1-1e-15].
+
+Pointwise percentile intervals: linear-interpolated 2.5th and 97.5th percentiles.
+Paired difference = nose minus perimeter. Positive precision/recall/NPV/F1
+and negative log-loss differences are favorable. Percentage metrics' differences
+are shown in percentage points. Undefined ratio replicates are excluded per
+metric; all 10,000 replicates were valid for every metric in this run.
+
+Conditional on existing fitted models, folds and preprocessing. No bootstrap
+retraining or fold selection. Shared training data across CV fits, global
+pre-CV imputation, convenience sampling and mixed label sources remain
+limitations. Masks are held as observed rather than a second bootstrap cluster.
+No simultaneous-coverage or multiplicity correction. This does not establish
+population generalization or fix bias in the original experiment.
+
+Reproduce (local NumPy environment; no network or model training):
+python scripts/presentations/bootstrap_recommender.py \
+  tmp/retired-nasem-worktree-cache/recommender-style-nose-review
+
+Verification:
+python scripts/tests/test_recommender_bootstrap.py
+
+Frozen output: recommender-bootstrap-evidence.json
+
+Strict superiority frequencies: count paired differences >0 for precision,
+recall, NPV and F1, or <0 for log loss; divide wins by valid paired replicates.
+Exact-zero ties remain in the denominator and count as neither wins nor losses.
+Undefined draws are reported and excluded; none occurred in this run. Counts
+and frequencies are in the superiority section of the aggregate JSON. These
+are empirical bootstrap frequencies, not Bayesian posterior probabilities of
+population superiority or calibrated hypothesis-test p-values.

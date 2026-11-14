@@ -1,0 +1,68 @@
+Repeat-balanced descriptive pass rates
+
+Shared implementation: app/services/dashboard_pass_rates_service.rb.
+DashboardService.calculate_pass_rates delegates to this calculator. Original
+per-test overall/by-mask/by-strap/by-style fields remain available. New fields:
+- equal_person_mask: overall, by_mask, by_strap_type, by_style.
+- equal_family_by_style: family-weighted style means, denominators and family rates.
+- weighting: policy descriptions and excluded-record count.
+
+Pair policy selected by the presenter:
+For each canonical (user_id, mask_id), convert observed pass/fail to 1/0 and take
+the mean. Average those pair rates, assigning every pair equal weight. One pass
+plus one fail contributes 50%; we do not choose the latest or an any-pass result.
+Within one mask this gives each person equal weight. Across all masks a person
+can contribute multiple different pairs; it is not equal total weight per person.
+Report pair/test/person counts and how many pairs contain mixed outcomes. Do not
+invent an integer number of "passed pairs" when pair outcomes are fractional.
+
+Family/style policy:
+1. Compute pair rates as above.
+2. Within a (person, fit family, style), average that person's pair rates across
+   mask variants. Repeat tests of a variant cannot give that variant extra weight.
+3. Average people within each family/style to get the family rate.
+4. Average the observed family rates equally within each style.
+These are means of unrounded rates, not means of formatted percentages. Counts
+include families, person-family combinations, pairs, tests and unique people.
+Untested families are omitted, not treated as failing. A missing family ID creates
+a separate fallback family for each mask ID; missing families are not pooled.
+A family spanning styles is evaluated separately within each style.
+
+Input boundary:
+Use the same canonical labeled records as the existing dashboard. Mask IDs and
+metadata are resolved by FitTestsWithFacialMeasurementsService. Balanced views
+exclude records with missing person/mask identity or unrecognized outcomes;
+these exclusions are counted. Empty balanced denominators return NULL/N/A, not
+zero. Existing mixed source labels and source-consolidation policy are retained.
+Source-only tests, self-selection, modifications, donning differences and
+nonindependence remain limitations. These are descriptive observed rates, not
+population estimates, randomized comparisons, predictions or fit guarantees.
+
+Appendix slide 28 data:
+Nov 13 local development DB export, restricted to canonical labeled records.
+1,142 tests, 293 positive labels (25.66% per test); 756 pairs across 54 people,
+16.75% with equal pair weighting; 14 pairs have mixed outcomes. The slide shows
+styles with at least 10 source tests; the evidence/dashboard retain smaller and
+unknown groups. Other deck snapshots retain their separately dated public counts.
+This cohort is not either recommender CV cohort. All columns here use the same
+local records. No participant IDs are included in the committed aggregate file.
+
+observed-pass-rate-evidence.json stores aggregates, input hash, calculator hash
+and source. Participant-level rows stay in ignored tmp/dashboard-pass-rate-review.
+The live production credentials were unavailable for a fresh full-record export;
+this is explicitly a local snapshot. When deployed, the dashboard recalculates
+from its own active dataset; these frozen numbers are not hard-coded into the app.
+No deployment or model training is part of this change.
+
+Rebuild from a private labeled-row export:
+ruby scripts/presentations/build_pass_rate_evidence.rb PRIVATE_ROWS.json \
+  prompts/2026-11-17-nasem/observed-pass-rate-evidence.json
+Then build_presentation.py and render_nasem_prototype.cjs regenerate HTML/PDF.
+
+Validation:
+spec/services/dashboard_pass_rates_service_spec.rb covers repeat-test imbalance,
+mixed pairs, family coverage imbalance, variant balancing, missing family/identity
+handling, empty denominators and PostgreSQL boolean strings. Frontend unit tests
+check aligned style joins and unavailable values. The actual compiled Dashboard
+browser smoke checks live-calculated local aggregates, expandable per-mask detail,
+offline loading and mobile bounds. No new test sends production writes.

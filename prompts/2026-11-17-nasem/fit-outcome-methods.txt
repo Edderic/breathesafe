@@ -1,0 +1,120 @@
+Fit-label definition and historical conversion check
+
+This presentation describes project training labels, not a claim that all evidence
+sources are equivalent completed formal fit tests. See the September companion:
+prompts/2026-09-25-nasem/outcome-methods.md (not changed by this update).
+
+Current implementation:
+- Direct N95-mode exercise ratios: harmonic aggregation, positive at >=100;
+  optional Normal breathing (SEALED) excluded. No factor-2 adjustment.
+- N99-derived: estimate leakage using sealed-reference / filtration data;
+  exclude Talking and sealed breathing; harmonic aggregation times 2; >=100
+  positive. Imported Aaron Collins/OpenAeros data and contributed sealed
+  observations supply references. The numerical reference adjustment and factor
+  2 are project choices, not instrument-standard equivalence transformations.
+- Qualitative: all recorded nonblank exercises pass, at least one explicit Pass.
+  An all-Fail record without an explicit Pass currently becomes unknown in this
+  pathway. This permissive completeness rule is not a full-protocol assertion.
+- Failed user seal checks can supply proxy negatives. Passed checks supply no
+  positive label. Negative overrides positive for conflicting sources on a test
+  record; unknown records are excluded by default.
+Incomplete exercises, zero factors and missing references need a label-quality
+audit; these slides do not change services or retroactively recompute labels.
+
+Scientific sources checked for the slides:
+TSI RFT-007: N95-Companion particle selection and filter penetration.
+https://tsi.com/getmedia/77041e3a-3cba-4dea-aad0-6831e88d0792/RFT-007_Penetration-of-N95-Filtering-Facepiece-Respirators-A4-web?ext=.pdf
+OSHA Appendix A: formal fit-testing procedures.
+https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.134AppA
+OSHA Appendix B-1: seal checks do not substitute for fit tests.
+https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.134AppB1
+
+Historical scatter plot:
+Source is the saved HTML aggregate table (cell 77) and scatter cell 80 in
+python/mask_recommender/notebooks/inferring-n95-mode-fit-factors.ipynb.
+The source uses an April 9, 2025 input snapshot and one author/wearer. It joins
+repeated N99/N95 tests by mask and facial hair, excludes selected N95 tests by
+author judgment, then harmonically aggregates exercises/test combinations by
+mask. This is neither a paired simultaneous protocol nor held-out validation.
+
+The original table has 36 mask aggregates. Exclude every aggregate containing
+assigned score-1 observations from the notebook's not_good_fit_df output:
+11 are pure assigned values, one mixes assigned and tested values. The remaining
+24 aggregates have measured N95 and N99-based converted estimates. Do not reuse
+the notebook's 0.83 sensitivity/0.89 specificity on this different subset.
+
+We preserve the saved six-decimal scores, not newly computed raw-data results.
+Exercise-level conversion estimates were capped at 200 before harmonic
+aggregation. The notebook documents a factor-2 adjustment, but exact historical
+runtime code cannot be recovered from outputs alone. Current production pools
+filtration references differently. The figure does not validate today's exact
+production converter and is unrelated to recommender fit-score predictions.
+
+Bayesian association model:
+log10(measured N95) ~ Normal(alpha + beta*log10(capped conversion estimate/100), sigma)
+alpha ~ Normal(2,1), beta ~ Normal(0,1), sigma ~ HalfNormal(.75).
+Eight measured aggregates at 200 are right-censored (likelihood P(score>=200)),
+not treated as exact 200. Predictor clipping/measurement error is not modeled;
+the capped conversion estimate is the defined predictor. Lognormal conditional
+median trend is 10**mu, not the arithmetic mean score.
+
+Four-chain random-walk Metropolis with MAP-Hessian proposal; 5,000 warmup plus
+15,000 saved draws per chain. Adaptation stops after warmup. Seed 20261113.
+Rebuild script requires split R-hat <1.01 and ESS >500 for all three parameters.
+Evidence JSON records numerical posterior summaries, diagnostics, anonymous
+pairs and SHA-256 hashes. No raw participant records are fetched.
+
+Dark band: pointwise 95% credible interval for conditional median trend.
+Light band: pointwise 95% posterior predictive interval for another mask
+aggregate under this same model. Neither is a population validation interval;
+filtration uncertainty, correlated tests, selection, predictor errors and
+between-person generalization are not modeled. Positive association is not
+proof of agreement, calibration, or accurate classification near 100.
+
+Rebuild analysis (existing local scientific environment):
+MPLCONFIGDIR=/tmp/nasem-matplotlib OPENBLAS_NUM_THREADS=1 \
+  tmp/retired-nasem-worktree-cache/recommender-evaluation-venv/bin/python \
+  scripts/presentations/analyze_n95_conversion.py
+
+Scientific checks:
+MPLCONFIGDIR=/tmp/nasem-matplotlib OPENBLAS_NUM_THREADS=1 \
+  tmp/retired-nasem-worktree-cache/recommender-evaluation-venv/bin/python \
+  -m pytest scripts/tests/test_n95_conversion_analysis.py -q
+
+Source-category proportions on main slide 7:
+Nov 13 public dashboard snapshot: 1,157 canonical analyzed records.
+Direct N95-mode: 136 / 1,157 = 11.8%.
+N99-derived: 150 / 1,157 = 13.0%.
+Qualitative: 119 / 1,157 = 10.3%.
+User seal checks: 752 / 1,157 = 65.0%.
+The rounded shares sum to 100.1%. Categories describe retained record sources,
+not numbers of participants with access to particular equipment. They are not
+the training cohort sizes. The older pass-rate/demographic slides retain the
+October 29 snapshot. Public response hash is frozen with these aggregates.
+
+Appendix slide 26 makes the implementation explicit:
+S_j = 1/(1-E_j) for imported efficiency E_j; contributed sealed ratios enter
+directly. S_bar is the arithmetic mean over pooled ratios (SQL UNION).
+Let M be the largest retained N99 exercise factor.
+S_star = S_bar when S_bar > M; otherwise S_star = M+1.
+E = 1-1/S_star; L_i = 1-(1-1/F_i)/E; Fhat_i = 1/L_i.
+Adjusted aggregate = 2*n / sum_i(1/Fhat_i); positive at >=100.
+The explicit conditional is not equivalent to max(S_bar,M+1).
+Credit Aaron Collins (MaskNerd) for providing filtration-efficiency data at
+normal breathing rates through his MaskNerd Master Mask Testing Data Set:
+https://docs.google.com/spreadsheets/d/1M0mdNLpTWEGcluK6hh5LjjcFixwmOG853Ff45d3O-L0/edit
+The linked data contribution is not endorsement of our conversion or multiplier.
+
+Appendix slide 27: exact seal-check evaluation order
+1. Missing/empty data or invalid JSON -> incomplete.
+2. Sizing Too big or Too small -> fail immediately, even with missing air answer.
+3. Missing/blank sizing OR positive-pressure air answer -> incomplete.
+4. Both present and air=A lot of air movement -> fail.
+5. Sizing=Somewhere in-between too small and too big AND air=Some air movement
+   or No air movement -> questionnaire pass.
+6. Other combinations -> incomplete.
+Training mapping: fail -> false; pass or incomplete -> NULL. No positive label
+comes from this source. Negative-pressure responses are not read by the backend
+service. An unrecognized nonblank sizing answer plus A lot of air movement still
+fails at step 4; other unrecognized combinations reach step 6. This documents
+current project classification, not a formal fit-test pass criterion.

@@ -1,0 +1,205 @@
+{
+  "method": "Paired person-cluster percentile bootstrap of fixed held-out predictions",
+  "people": 49,
+  "tests": 1086,
+  "replicates": 10000,
+  "random_seed": 20261114,
+  "confidence_level": 0.95,
+  "quantiles": [
+    0.025,
+    0.975
+  ],
+  "quantile_method": "linear",
+  "sampling": "Draw 49 people with replacement; retain every test for each selected person, including multiplicity. Same draw for both models and all initializations.",
+  "estimand": "Test-weighted pooled held-out metric per initialization, then arithmetic mean over seeds 42/43/44; no averaging probabilities first.",
+  "threshold": 0.5,
+  "log_loss_epsilon": 1e-15,
+  "initializations": [
+    42,
+    43,
+    44
+  ],
+  "source_prediction_hashes": [
+    {
+      "variant": "none",
+      "initialization": 42,
+      "sha256": "cdae24ec9abac7d2f6442420d5f1b3c1e4f74ee14d746134331bcb37d8cec08f"
+    },
+    {
+      "variant": "none",
+      "initialization": 43,
+      "sha256": "01e887339ee77753abb17e5419931d859404c47e0ee49141622e145c17d22c02"
+    },
+    {
+      "variant": "none",
+      "initialization": 44,
+      "sha256": "e7537d2fae0bd94fd711e4521a1ad65cb1cd75c4068bc8e8242a0bac20aec3bb"
+    },
+    {
+      "variant": "latent_nose_v1",
+      "initialization": 42,
+      "sha256": "f440f85abbb8551f92392db25dffa29cff6595c333bd294ff2f4f90161afd47d"
+    },
+    {
+      "variant": "latent_nose_v1",
+      "initialization": 43,
+      "sha256": "a74301781cd81f0903c8b07b1a765386e0fb2283bf07201359fcec0e5616e62e"
+    },
+    {
+      "variant": "latent_nose_v1",
+      "initialization": 44,
+      "sha256": "6543a24169adf107ee9cade3be59684e5bf3871dbd529f5754677daf3ff1ed9a"
+    }
+  ],
+  "script_sha256": "5886f74dda040ae8c7969007735cf3b07089328e88a373602b88fd5a9bb49fe5",
+  "limitations": [
+    "Conditional on saved trained models, folds and preprocessing; models are not retrained in bootstrap samples.",
+    "Cross-validation training sets overlap; intervals are not full-pipeline generalization intervals.",
+    "Global pre-CV imputation, convenience sampling and mixed outcome sources remain limitations.",
+    "Participants are the resampling unit; masks are held as observed, not resampled as a second clustering dimension.",
+    "Pointwise 95% percentile intervals, without multiplicity adjustment across metrics.",
+    "Undefined ratio replicates are excluded per metric and their valid counts reported; any nonfinite seed makes that replicate undefined."
+  ],
+  "variants": {
+    "none": {
+      "precision": {
+        "estimate": 0.563609089660221,
+        "low": 0.350366647091221,
+        "high": 0.686110070854876,
+        "valid_replicates": 10000
+      },
+      "recall": {
+        "estimate": 0.5802919708029197,
+        "low": 0.4268982641789659,
+        "high": 0.6916106142831664,
+        "valid_replicates": 10000
+      },
+      "negative_predictive_value": {
+        "estimate": 0.8570088919448726,
+        "low": 0.7687122666310552,
+        "high": 0.9339984918030412,
+        "valid_replicates": 10000
+      },
+      "f1": {
+        "estimate": 0.5717841727518443,
+        "low": 0.39958729222855605,
+        "high": 0.6564670367037613,
+        "valid_replicates": 10000
+      },
+      "log_loss": {
+        "estimate": 1.108171333631893,
+        "low": 0.7291661819819097,
+        "high": 1.5189466757293866,
+        "valid_replicates": 10000
+      }
+    },
+    "latent_nose_v1": {
+      "precision": {
+        "estimate": 0.6393082477491613,
+        "low": 0.4435577747958934,
+        "high": 0.7636608680653971,
+        "valid_replicates": 10000
+      },
+      "recall": {
+        "estimate": 0.5936739659367397,
+        "low": 0.45141269841269843,
+        "high": 0.6938883358221336,
+        "valid_replicates": 10000
+      },
+      "negative_predictive_value": {
+        "estimate": 0.8664741989749535,
+        "low": 0.7831548369202542,
+        "high": 0.9390663647944976,
+        "valid_replicates": 10000
+      },
+      "f1": {
+        "estimate": 0.6150154924789532,
+        "low": 0.4588260374585009,
+        "high": 0.6994623211744067,
+        "valid_replicates": 10000
+      },
+      "log_loss": {
+        "estimate": 0.9308306794667489,
+        "low": 0.558944400184974,
+        "high": 1.3116599540339302,
+        "valid_replicates": 10000
+      }
+    }
+  },
+  "differences": {
+    "precision": {
+      "estimate": 0.07569915808894023,
+      "low": 0.010017034555807108,
+      "high": 0.1778901458323543,
+      "valid_replicates": 10000
+    },
+    "recall": {
+      "estimate": 0.01338199513381999,
+      "low": -0.059306934374419064,
+      "high": 0.11078082655826552,
+      "valid_replicates": 10000
+    },
+    "negative_predictive_value": {
+      "estimate": 0.00946530703008086,
+      "low": -0.01324263073170431,
+      "high": 0.0392928079069196,
+      "valid_replicates": 10000
+    },
+    "f1": {
+      "estimate": 0.04323131972710881,
+      "low": -0.01572643261647607,
+      "high": 0.12982552917359827,
+      "valid_replicates": 10000
+    },
+    "log_loss": {
+      "estimate": -0.1773406541651441,
+      "low": -0.3610452165474388,
+      "high": -0.050631145128095564,
+      "valid_replicates": 10000
+    }
+  },
+  "difference_definition": "Nose model minus perimeter-only model; negative log-loss difference is favorable.",
+  "superiority_definition": "Strictly better in a paired bootstrap sample: higher precision/recall/NPV/F1 or lower log loss. Frequency = better / valid paired replicates; ties count as neither wins nor losses. Bootstrap frequency is not a Bayesian probability of population superiority or a calibrated p-value.",
+  "superiority": {
+    "precision": {
+      "better_replicates": 9924,
+      "tied_replicates": 0,
+      "worse_replicates": 76,
+      "valid_replicates": 10000,
+      "undefined_replicates": 0,
+      "better_frequency": 0.9924
+    },
+    "recall": {
+      "better_replicates": 5992,
+      "tied_replicates": 93,
+      "worse_replicates": 3915,
+      "valid_replicates": 10000,
+      "undefined_replicates": 0,
+      "better_frequency": 0.5992
+    },
+    "negative_predictive_value": {
+      "better_replicates": 7570,
+      "tied_replicates": 0,
+      "worse_replicates": 2430,
+      "valid_replicates": 10000,
+      "undefined_replicates": 0,
+      "better_frequency": 0.757
+    },
+    "f1": {
+      "better_replicates": 9022,
+      "tied_replicates": 0,
+      "worse_replicates": 978,
+      "valid_replicates": 10000,
+      "undefined_replicates": 0,
+      "better_frequency": 0.9022
+    },
+    "log_loss": {
+      "better_replicates": 9992,
+      "tied_replicates": 0,
+      "worse_replicates": 8,
+      "valid_replicates": 10000,
+      "undefined_replicates": 0,
+      "better_frequency": 0.9992
+    }
+  }
+}

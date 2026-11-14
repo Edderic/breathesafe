@@ -1,0 +1,31 @@
+{
+  "session_id": "14ff5d878cf748558e6406b4d07b639a",
+  "device": "MacBook Pro camera",
+  "device_source": "Presenter description",
+  "images": [
+    {
+      "slot": "turn_11",
+      "file": "assets/prototype/source-photos/turn_11.png",
+      "caption": "Oblique view",
+      "sha256": "8a2e13e642c7aecd3c1fec04ca18ecf0f1d90be857da03ba243802b1a1d35388"
+    },
+    {
+      "slot": "front",
+      "file": "assets/prototype/source-photos/front.png",
+      "caption": "Frontal reference",
+      "sha256": "70a6ad474d033c6878238a87c0b439e2d252f90c6766bdaac6265140512dc82e"
+    },
+    {
+      "slot": "turn_22",
+      "file": "assets/prototype/source-photos/turn_22.png",
+      "caption": "Opposite oblique view",
+      "sha256": "cd43cfb82aa9b7cb23b9732fcc7ca7f215ffa37e6cd36e7b2262c2d3504dc850"
+    },
+    {
+      "slot": "turn_48",
+      "file": "assets/prototype/source-photos/turn_48.png",
+      "caption": "Lower camera view",
+      "sha256": "8dbc465b36ff09b1feca01a6552695bc3d2306ee343a7f050be63601ef80642c"
+    }
+  ]
+}

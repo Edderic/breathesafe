@@ -1,0 +1,23 @@
+{
+  "source_url": "https://www.breathesafe.xyz/dashboard/stats",
+  "retrieved_at_utc": "2026-11-13T23:42:21.131895+00:00",
+  "response_sha256": "2182bb5af6a7bd2b884335e62ea22a310989e8ba6cdcbc5d4ac16624113f82fd",
+  "total_analyzed_records": 1157,
+  "by_type": {
+    "n95_mode": 136,
+    "n99_mode": 150,
+    "qlft": 119,
+    "user_seal_check": 752
+  },
+  "proportions": {
+    "n95_mode": 0.11754537597234227,
+    "n99_mode": 0.12964563526361278,
+    "qlft": 0.10285220397579949,
+    "user_seal_check": 0.6499567847882455
+  },
+  "definition": "Canonical analyzed fit-test records attributed to their retained source service, not participant access proportions or counts for the separate CV experiments.",
+  "source_service": "DashboardService.calculate_fit_test_types after FitTestsWithFacialMeasurementsService canonicalization",
+  "other_deck_snapshots": "October 29 pass rates and demographics retain their separate dated 1,145-record snapshot.",
+  "unique_user_mask_pairs": 769,
+  "unique_users": 57
+}

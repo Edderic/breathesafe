@@ -1,0 +1,152 @@
+{
+  "notebook": "python/mask_recommender/notebooks/inferring-n95-mode-fit-factors.ipynb",
+  "notebook_sha256": "ee650412b905ecf53a9410813f06cdd6383aa3c7846ba1dcd584be71913f61a9",
+  "saved_cell_index": 77,
+  "saved_table_sha256": "7471e62f61128dffec9bc77236b612a98a7c33d9f9c19b99d5efe837a812215c",
+  "people": 1,
+  "mask_aggregates": 24,
+  "excluded_assigned_or_mixed_mask_aggregates": 12,
+  "measured_at_ceiling": 8,
+  "conversion_at_ceiling": 9,
+  "points": [
+    {
+      "measured_n95": 15.882353,
+      "conversion_estimate": 78.890075
+    },
+    {
+      "measured_n95": 52.910246,
+      "conversion_estimate": 106.814347
+    },
+    {
+      "measured_n95": 112.058046,
+      "conversion_estimate": 200.0
+    },
+    {
+      "measured_n95": 49.754793,
+      "conversion_estimate": 79.472727
+    },
+    {
+      "measured_n95": 79.911993,
+      "conversion_estimate": 113.051194
+    },
+    {
+      "measured_n95": 130.508475,
+      "conversion_estimate": 169.79405
+    },
+    {
+      "measured_n95": 50.581575,
+      "conversion_estimate": 63.955037
+    },
+    {
+      "measured_n95": 180.478088,
+      "conversion_estimate": 200.0
+    },
+    {
+      "measured_n95": 142.930624,
+      "conversion_estimate": 144.892626
+    },
+    {
+      "measured_n95": 200.0,
+      "conversion_estimate": 200.0
+    },
+    {
+      "measured_n95": 200.0,
+      "conversion_estimate": 200.0
+    },
+    {
+      "measured_n95": 200.0,
+      "conversion_estimate": 200.0
+    },
+    {
+      "measured_n95": 200.0,
+      "conversion_estimate": 200.0
+    },
+    {
+      "measured_n95": 200.0,
+      "conversion_estimate": 200.0
+    },
+    {
+      "measured_n95": 200.0,
+      "conversion_estimate": 200.0
+    },
+    {
+      "measured_n95": 200.0,
+      "conversion_estimate": 200.0
+    },
+    {
+      "measured_n95": 181.889764,
+      "conversion_estimate": 170.141726
+    },
+    {
+      "measured_n95": 94.048998,
+      "conversion_estimate": 69.816045
+    },
+    {
+      "measured_n95": 187.376354,
+      "conversion_estimate": 118.128643
+    },
+    {
+      "measured_n95": 199.328859,
+      "conversion_estimate": 125.577384
+    },
+    {
+      "measured_n95": 200.0,
+      "conversion_estimate": 125.480081
+    },
+    {
+      "measured_n95": 102.302158,
+      "conversion_estimate": 64.134276
+    },
+    {
+      "measured_n95": 165.470852,
+      "conversion_estimate": 97.881339
+    },
+    {
+      "measured_n95": 124.974325,
+      "conversion_estimate": 63.035696
+    }
+  ],
+  "log10_slope_quantiles_2_5_50_97_5": [
+    0.6130662523064031,
+    1.2748711408306965,
+    2.002932096440676
+  ],
+  "posterior_probability_positive_slope": 0.9998333333333334,
+  "spearman_displayed_scores": 0.7629919181146484,
+  "model": "log10(measured N95) ~ Normal(alpha + beta*log10(capped conversion estimate/100), sigma); measured 200 is right-censored",
+  "priors": "alpha ~ Normal(2,1); beta ~ Normal(0,1); sigma ~ HalfNormal(.75)",
+  "sampler": "Four-chain random-walk Metropolis; MAP Hessian proposal; scale adapts only during warmup",
+  "diagnostics": {
+    "split_rhat": [
+      1.0008002729267393,
+      1.0004884382916686,
+      1.0002353051895958
+    ],
+    "ess": [
+      5203.344098618092,
+      4931.186443719102,
+      4754.136996806537
+    ],
+    "acceptance": [
+      0.2882,
+      0.27913333333333334,
+      0.2852,
+      0.2848
+    ],
+    "chains": 4,
+    "warmup_per_chain": 5000,
+    "draws_per_chain": 15000,
+    "seed": 20261113
+  },
+  "limitations": [
+    "Saved, six-decimal notebook outputs; not a rerun against raw records.",
+    "One author, selected mask aggregates; not independent people or held-out validation.",
+    "Notebook excludes selected N95 tests based on author interpretation and pools repeated tests/exercises by mask.",
+    "Twelve mask aggregates containing assigned observations are excluded (11 pure-assigned and one mixed); historical sensitivity/specificity must not be reused for this subset.",
+    "Conversion estimates were exercise-clipped at 200 before harmonic aggregation; this is a fixed, capped predictor.",
+    "Response censoring is modeled; predictor error, filtration uncertainty, correlated measurements and selection are not.",
+    "Notebook documents a factor-2 bias adjustment; exact historical runtime state cannot be reconstructed from outputs alone.",
+    "Current production conversion pools filtration references differently; this plot does not validate that exact pipeline.",
+    "Posterior intervals are conditional on this model and these data, not population accuracy guarantees."
+  ]
+}
