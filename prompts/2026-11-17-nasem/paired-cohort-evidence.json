@@ -1,0 +1,87 @@
+{
+  "people": 7,
+  "tests": 421,
+  "positive_labels": 115,
+  "negative_labels": 306,
+  "demographic_snapshot": "Local profile snapshot, November 14, 2026",
+  "age_definition": "Approximate age band in 2026 from reported birth year, not age at measurement or fit test.",
+  "identifier_definition": "Random study UUIDs, unrelated to database IDs; eight-character prefixes displayed. Identity lookup stays in ignored local tmp.",
+  "gender_definition": "Broadly grouped reported gender categories; cis/trans status is not displayed.",
+  "participant_corrections": [
+    {
+      "study_uuid": "99fbfaa4-79b8-4dee-9952-49d6c077b762",
+      "gender_group": "Male",
+      "reason": "Participant-confirmed correction, November 14, 2026; supersedes local profile export."
+    }
+  ],
+  "count_definition": "Same 421 held-out analyzed observations as slide 10, including repeat person-mask tests and mixed label sources; three model seeds do not triple counts.",
+  "participants": [
+    {
+      "study_uuid": "99fbfaa4-79b8-4dee-9952-49d6c077b762",
+      "age_band": "30\u201339",
+      "gender_group": "Male",
+      "race_ethnicity": "Asian / Pacific Islander",
+      "test_count": 166,
+      "positive_labels": 85,
+      "negative_labels": 81
+    },
+    {
+      "study_uuid": "4e4ea719-9327-4a67-8798-327aa2e9edf1",
+      "age_band": "0\u20135",
+      "gender_group": "Male",
+      "race_ethnicity": "Multiple ethnicity / Other",
+      "test_count": 130,
+      "positive_labels": 0,
+      "negative_labels": 130
+    },
+    {
+      "study_uuid": "3bb10114-9db4-4317-a60e-c00d20561702",
+      "age_band": "6\u201317",
+      "gender_group": "Male",
+      "race_ethnicity": "White / Caucasian",
+      "test_count": 36,
+      "positive_labels": 7,
+      "negative_labels": 29
+    },
+    {
+      "study_uuid": "6f0db49a-f1a3-43b8-b3d9-a91de013aa85",
+      "age_band": "50\u201364",
+      "gender_group": "Female",
+      "race_ethnicity": "White / Caucasian",
+      "test_count": 36,
+      "positive_labels": 8,
+      "negative_labels": 28
+    },
+    {
+      "study_uuid": "f17ac88f-26ea-41c0-bbf3-92da8d39a603",
+      "age_band": "50\u201364",
+      "gender_group": "Male",
+      "race_ethnicity": "White / Caucasian",
+      "test_count": 36,
+      "positive_labels": 3,
+      "negative_labels": 33
+    },
+    {
+      "study_uuid": "ae12450f-929a-424f-8f0b-76fddd182fde",
+      "age_band": "50\u201364",
+      "gender_group": "Female",
+      "race_ethnicity": "White / Caucasian",
+      "test_count": 15,
+      "positive_labels": 11,
+      "negative_labels": 4
+    },
+    {
+      "study_uuid": "597a6d25-e6a9-4b73-994b-3c6855090ccd",
+      "age_band": "30\u201339",
+      "gender_group": "Female",
+      "race_ethnicity": "White / Caucasian",
+      "test_count": 2,
+      "positive_labels": 1,
+      "negative_labels": 1
+    }
+  ],
+  "source_hashes": {
+    "predictions": "cf2ba752d10847390af9011bfc89ba3dd6e48d49a0b2ab02295f225528b013d7",
+    "demographics": "9d14cde2612f828d7bfac7a561d6ec26633ff3c3c9ed93cf8690bf7ea470d010"
+  }
+}

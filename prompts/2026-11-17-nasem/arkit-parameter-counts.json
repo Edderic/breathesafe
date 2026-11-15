@@ -1,0 +1,52 @@
+{
+  "cohort_people": 7,
+  "original_folds": 7,
+  "facial_input_measurements": [
+    "nose_mm",
+    "top_cheek_mm",
+    "mid_cheek_mm",
+    "chin_mm"
+  ],
+  "geometric_summaries": [
+    "Total facial perimeter (sum of four paths)",
+    "Nose path used separately"
+  ],
+  "parameter_formula": "4*(fit families + styles) + strap types + 2",
+  "parameter_count_min": 215,
+  "parameter_count_max": 231,
+  "category_count_combinations": [
+    {
+      "fit_families": 46,
+      "styles": 6,
+      "strap_types": 5,
+      "perimeter_parameters": 156,
+      "nose_offset_parameters": 52,
+      "total_parameters": 215,
+      "fold_count": 1
+    },
+    {
+      "fit_families": 48,
+      "styles": 5,
+      "strap_types": 4,
+      "perimeter_parameters": 159,
+      "nose_offset_parameters": 53,
+      "total_parameters": 218,
+      "fold_count": 1
+    },
+    {
+      "fit_families": 50,
+      "styles": 6,
+      "strap_types": 5,
+      "perimeter_parameters": 168,
+      "nose_offset_parameters": 56,
+      "total_parameters": 231,
+      "fold_count": 5
+    }
+  ],
+  "scope": "Seven-person original leave-one-person-out folds, not the deployed full-data model or every bootstrap resample.",
+  "source_hashes": {
+    "training_frame": "bcdf5c8b487ca5971fa9b9f9d1e1041ec9fdf56cb1b3e0ae2cfeb7a0ddbf2d3d",
+    "facial_summary": "9e1f7e9dda2eecf43919dc1f08a0ee83b3101bd024d36594950e97b2f8eb7554",
+    "trainer": "1316831c0b17bbe38293af2b5909d23fac153a01bc47d1805fa1e369c11d6df7"
+  }
+}

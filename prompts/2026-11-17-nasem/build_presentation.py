@@ -5,6 +5,8 @@ import base64
 import json
 import re
 from prototype_slides import add_slides as add_prototype_slides
+from fixed_range_slides import add_slides as add_fixed_range_slides
+from simple_feature_slide import add_slide as add_simple_feature_slide
 
 ROOT = Path(__file__).resolve().parent
 APPLE = 'https://developer.apple.com/documentation/arkit/arfacegeometry'
@@ -27,10 +29,18 @@ notes = []
 durations = []
 budgets = {
     'NASEM / NOVEMBER 17, 2026': 20,
+    '02 / GEOMETRY → FIT SCORE': 50,
+    'PAIRED / TEST-WEIGHTED': 35,
+    'PAIRED / COMPLEXITY & EXTRAPOLATION': 30,
+    'FIXED / RANGE SENSITIVITY': 35,
+    'NEW / CAMERA PROTOTYPE': 30,
+    'NEW / LANDMARKS & DISTANCES': 30,
+    'NEW / INITIAL PHYSICAL CHECKS': 35,
+    'NEXT / VALIDATION PLAN': 20,
     '01 / THE APPLICATION': 30,
-    '02 / THREE APPROACHES': 45,
-    '03 / WHAT WORKED': 40,
-    '04 / WHAT DID NOT TRANSFER DIRECTLY': 40,
+    '02 / THREE APPROACHES': 35,
+    '03 / WHAT WORKED': 30,
+    '04 / WHAT DID NOT TRANSFER DIRECTLY': 30,
     '07 / OBSERVED FIT': 30,
     '08 / WHO IS REPRESENTED': 20,
     '08 / COMPLEMENTARY SCOPE': 30,
@@ -100,14 +110,14 @@ add('01 / THE PUBLIC GOAL', 'Better-fitting respirators for the <em>general publ
     '<article class="goal-scope our-goal"><h2>Our project goal</h2><p><strong>Adults + kids</strong><br>N95 · KN95 · FFP2 / FFP3</p></article>'
     '<p class="goal-validation">Broader intended reach; pediatric fit prediction still needs validation.</p></div>'
     '<figure class="goal-figure">' +
-    screenshot('public-fit-goal-illustration.png', 'Conceptual illustration of a person with a loose blue surgical mask and visible face-seal gaps, beside the same person in a closer-fitting white respirator.', 'goal-illustration') +
-    '<div class="goal-image-labels"><span>Loose surgical mask<br><small>Air can bypass the filter</small></span>'
-    '<span>Closer-fitting respirator<br><small>Fit matters alongside filtration</small></span></div>'
-    '<figcaption>AI illustration of fit; not measured leakage or fit-test evidence.</figcaption></figure></div>',
+    screenshot('public-fit-family-flo-mask.jpg', 'A family outdoors wearing Flo Mask respirators in adult and child sizes.', 'goal-family-photo') +
+    '<figcaption>A family wearing Flo Mask respirators.<br>Photo: <strong>Flo Mask</strong>, via '
+    '<a href="https://newatlas.com/health-wellbeing/n95-flo-mask-reusable-elastomeric-respirator/">New Atlas · July 27, 2022</a>.</figcaption></figure></div>',
     'The goal is to help the general public find better-fitting respirators. '
     'A loose surgical mask leaves gaps where air can bypass the filter; both filtration and fit matter. '
     'NIOSH’s published app direction focuses on NIOSH-approved respirators and worker fit panels. '
     'Our intended reach includes adults and children, with N95, KN95 and FFP2 or FFP3 options. '
+    'The photo is the user-selected family image, sourced at original resolution from New Atlas and credited there to Flo Mask. It illustrates the public and family scope; it is not a measurement of anyone’s fit or an endorsement of one product. '
     'This is complementary scope, not a claim of validated pediatric predictions or a guarantee of fit.',
     30, '<a href="https://www.cdc.gov/niosh/docs/2024-107/pdfs/2024-107.pdf">NIOSH app targets</a> · '
     '<a href="https://www.cdc.gov/niosh/bulletin/2021/astm-rfc-standard.html">Worker fit panels</a> · '
@@ -206,6 +216,8 @@ add('FIT / OUTCOME DEFINITION', 'What does “fit” mean in this dataset?',
     f'<strong>{fit_sources["unique_user_mask_pairs"]:,} unique user–mask pairs</strong> · Nov 13 snapshot</p>'
     '<p class="fit-definition-intro">Access varies: some participants have only N99-mode or qualitative testing. '
     '<strong>Ideally, we would have direct N95-mode results.</strong></p>'
+    '<p class="fit-conversion-intuition"><strong>Intuition:</strong> if a mask scores 25 when sealed (96% filtration) and nearly 25 when worn under comparable conditions, '
+    'that suggests little leakage—and a much higher estimated N95-mode score after accounting for filter penetration.</p>'
     '<div class="fit-definition-layout"><div class="fit-definition-rules"><table class="fit-definition-table"><thead><tr><th>Evidence source</th><th>n (%)</th>'
     '<th>Project’s positive-label rule</th></tr></thead><tbody>' + fit_source_rows +
     '</tbody></table><div class="fit-definition-boundary">×2 is a project adjustment; seal-check pass ≠ fit-test pass.</div></div>' + fit_testing_gallery + '</div>'
@@ -223,6 +235,7 @@ add('FIT / OUTCOME DEFINITION', 'What does “fit” mean in this dataset?',
     'Here fit means the project’s binary training outcome, not a claim that every source is an equivalent formal fit test. '
     'Direct N95-mode exercise factors are aggregated using a harmonic mean, with 100 or above labeled positive; the optional sealed exercise is excluded. '
     'For N99-mode records, broad-particle counts can reflect filter penetration as well as leakage. '
+    'For intuition, a sealed N99-mode factor of 25 corresponds to 4 percent penetration, or 96 percent filtration. If the worn result is nearly 25 under comparable conditions, most measured penetration can be explained by the filter rather than seal leakage, yielding a higher estimated leakage-only N95-mode factor. This is a model-based inference, not a guaranteed fit pass; estimates become sensitive to reference uncertainty near the sealed limit. '
     'The project estimates leakage using filtration data, including Aaron Collins’s MaskNerd spreadsheet and contributed sealed-breathing observations. '
     'It pools sealed references per mask, adjusts an incompatible reference to the largest retained exercise factor plus one, '
     'excludes talking and sealed breathing, then multiplies the harmonic estimate by two. '
@@ -315,11 +328,14 @@ base = evidence['variants']['none']
 nose = evidence['variants']['latent_nose_v1']
 bootstrap = json.loads((ROOT / 'recommender-bootstrap-evidence.json').read_text())
 assert bootstrap['people'] == 49 and bootstrap['replicates'] == 10000
+assert bootstrap['independent_bootstrap_model_fits'] == 300000
+assert all(row['low'] <= 0 <= row['high'] for row in bootstrap['differences'].values())
 
 
 def metric_interval(variant, key, fmt):
     row = bootstrap['variants'][variant][key]
-    assert abs(row['estimate'] - evidence['variants'][variant][key]) < 1e-12
+    # Batched independent production refits can differ at float32 rounding level.
+    assert abs(row['estimate'] - evidence['variants'][variant][key]) < 1e-6
     bound_fmt = '.1f' if fmt.endswith('%') else fmt
     multiplier = 100 if fmt.endswith('%') else 1
     return (f'{format(row["estimate"], fmt)} <span class="metric-ci">'
@@ -342,11 +358,20 @@ add('02 / GEOMETRY → FIT SCORE', 'Keep the nose path separate from total perim
     '<div>L<sub>new</sub> = L<sub>perimeter</sub> − λ[(N<sub>face</sub> − μ<sub>mask/style</sub>) / 10]²; &nbsp; fit score = sigmoid(L<sub>new</sub>)</div></div>' +
     '<p class="logit-definition">a, b, c: learned fit-family + style coefficients (a &lt; 0); s<sub>strap</sub>: strap offset; μ: learned nose preference; λ &gt; 0.<br>'
     'P<sub>face</sub> = nose + upper-cheek + mid-cheek + chin paths. All input lengths in mm; division by 10 gives cm.</p>' +
-    '<table class="method-table metric-comparison"><thead><tr><th>Held-out metric</th><th>Perimeter deviation</th><th>+ Nose deviation</th><th>Nose better¹</th></tr></thead><tbody>' +
+    '<div class="model-context-grid"><aside class="inline-coefficients" aria-label="Where a, b and c come from">'
+    '<article><h2>a · Curvature</h2><div class="inline-coefficient-formula">a = −exp(α<sub>family</sub>) − exp(α<sub>style</sub>)</div>'
+    '<p>Always negative; larger |a| gives a sharper mismatch penalty.</p></article>'
+    '<article><h2>b · Preferred difference</h2><div class="inline-coefficient-formula">b = b<sub>family</sub> + b<sub>style</sub></div>'
+    '<p>With a, sets the perimeter-term peak: ΔP* = −b / (2a), not necessarily zero.</p></article>'
+    '<article><h2>c · Baseline logit</h2><div class="inline-coefficient-formula">c = c<sub>family</sub> + c<sub>style</sub></div>'
+    '<p>Logit at ΔP = 0, before the strap offset and nose penalty.</p></article>'
+    '<p class="inline-coefficient-note"><strong>Learned jointly from fit outcomes;</strong> facial measurements enter through ΔP, rather than directly determining a, b or c.</p></aside>'
+    '<div class="model-results"><table class="method-table metric-comparison"><thead><tr><th>Held-out metric</th><th>Perimeter deviation</th><th>+ Nose deviation</th><th>Nose better¹</th></tr></thead><tbody>' +
     classification_rows + '</tbody></table>' +
     '<p class="metric-context">1,086 tests · 49 people · 50% cutoff · 5 user-grouped folds · mean of 3 initializations<br>'
-    'Estimate [95% CI] · ¹Strict-win frequency in 10,000 paired person bootstraps; not a posterior probability. Fixed fits; no retraining.</p>' +
-    callout('Strongest support: lower log loss and a higher share of actual fits among predicted fits.'),
+    'Estimate [95% CI] · ¹These percentages show how often the nose model performed better when we resampled these same 49 people '
+    'and retrained both models 10,000 times.</p>' +
+    callout('With retraining, every paired 95% difference interval includes zero.') + '</div></div>',
     'Previously, nose, upper cheek, mid-cheek and chin paths were summed into a single perimeter proxy. '
     'Two people with the same total could receive the same score despite different nose shapes. '
     'The perimeter-model logit is a times the squared signed perimeter difference, plus b times the difference, plus c and a strap-type offset. '
@@ -362,7 +387,7 @@ add('02 / GEOMETRY → FIT SCORE', 'Keep the nose path separate from total perim
     'It is true negatives divided by true negatives plus false negatives; no predicted negatives makes it undefined. '
     'Log loss penalizes confident mistakes using the original continuous scores, not their binarized versions. Lower log loss means better overall probabilistic scoring but can reflect changes in discrimination or calibration; it does not establish calibration improvement alone. Higher precision at the fixed cutoff means a smaller false-positive fraction among predicted fits. It does not prove that scores fell for every nonfit, rose for every fit, or improved the absolute number of false positives or true positives; a more selective predictor can also improve precision. A recall interval including zero leaves the direction uncertain, rather than establishing equal recall. All classification metrics use the fixed 50 percent cutoff except log loss, which uses the scores directly. '
     'These are averages of pooled held-out metrics from each initialization, not training scores or independent replicated datasets. '
-    'Brackets show pointwise 95 percent percentile intervals from 10,000 paired participant-cluster bootstrap samples: sample 49 people with replacement and retain all their tests, using identical draws for models and initializations. Compute each metric per initialization then average; do not average probabilities. These are conditional on saved fits and folds, not full retraining intervals. Precision and log-loss paired difference intervals exclude zero; recall, NPV and F1 intervals include zero. '
+    'Brackets show pointwise 95 percent percentile intervals from 10,000 paired participant-cluster bootstrap samples: sample 49 people with replacement and retain all their tests, using identical draws for models and initializations. Retrain both classifiers from scratch in each original grouped-user fold with sampled participant multiplicities in the objective. Keep all copies of a person in the same fold. Compute each metric per initialization then average; do not average probabilities. These intervals include classifier training-population variation, conditional on fixed prepared inputs, category catalog, folds, hyperparameters and initialization bank. All five paired 95 percent difference intervals include zero. Log-loss strict wins are 86.41 percent and precision wins 84.71 percent, substantially less decisive than the earlier fixed-prediction bootstrap. See the appendix for paired difference intervals; separate model intervals cannot establish a difference. '
     'The mixed cohort contains measured and imputed ARKit paths. The regression used for imputation was fitted before CV, so full-pipeline generalization is not independently established. '
     'Measured-only training on 615 tests from 18 people did not reproduce the gain: average F1 fell from .620 to .578. '
     'The new log loss remains worse than the prevalence-only baseline of approximately .588; calibration needs separate reliability assessment. '
@@ -397,17 +422,21 @@ def paired_table(weighting):
 add('PAIRED / TEST-WEIGHTED', 'ARKit vs. Traditional (Tape/Caliper)',
     '<p class="paired-context">421 held-out observations · 7 people · train on 6, test on the 7th · fixed 50% cutoff</p>' +
     paired_table('test_weighted') +
-    '<div class="paired-dimensions"><strong>Traditional dimensions · mm:</strong> face width, face length, bitragion–subnasale arc, nose protrusion, nasal root breadth, and nose bridge height.'
+    '<div class="paired-detail-grid"><div class="paired-explanation"><div class="paired-dimensions"><strong>Traditional dimensions · mm:</strong> face width, face length, bitragion–subnasale arc, nose protrusion, nasal root breadth, and nose bridge height.'
     '<span><strong>PCA-3:</strong> first three components of those same six standardized dimensions.</span></div>' +
-    callout('ARKit’s geometry constraints penalize departures from learned preferred perimeter and nose differences.') +
-    '<p class="paired-note"><strong>Test-weighted:</strong> each test counts equally. Two people contributed 296 of 421 observations (70.3%); this evaluates the collected test mix.</p>',
+    callout('<strong>Highlighted child ★:</strong> traditional/PCA models extrapolated from larger training faces to a held-out child. Deviation-based ARKit made fewer false-positive predictions in that fold.') +
+    '<p class="paired-note"><strong>Test-weighted:</strong> each test counts equally. Two people contributed 296 of 421 observations (70.3%); this evaluates the collected test mix.</p></div><!-- PAIRED COHORT --></div>',
     'Now a separate comparison: seven people with both measurement types, training on six and testing the seventh. '
     'The ARKit arm uses our actual perimeter-plus-nose architecture; the other models use traditional dimensions directly or through PCA. '
     'The six traditional dimensions, all in millimeters, are face width, face length, bitragion-subnasale arc, nose protrusion, nasal root breadth and nose bridge height. PCA-3 uses the first three components of these same six standardized dimensions. '
     'Here each test counts equally. ARKit reaches 55.9 percent precision and 46.7 percent recall, but two people supplied 70 percent of the tests. '
     'NPV is the negative-label fraction among observations predicted not to fit, using the same test weighting and fixed cutoff. '
+    'The held-out child has face length 77 mm, compared with 112 to 127 mm for the six training people: 8.77 training standard deviations below the mean. The presenter confirmed this is a child with a substantially smaller face, not an identified data-entry error. '
+    'In that child’s 130 held-out tests, all labels are negative. Traditional dimensions yield 58 false positives, PCA yields 53, and production ARKit averages 5.7 over three initializations. There are no positive labels in that fold, so child-specific recall cannot be evaluated. '
+    'This illustrates an extrapolation limitation of these traditional/PCA fits and is consistent with deviation modeling providing a useful inductive bias: assess face-to-mask mismatch rather than learning unconstrained effects of absolute face dimensions. It is not proof of general robustness on unseen children. '
+    'Architecture, feature capacity and person weighting differ, and there is only one such child fold. The models were trained on the same six people, without the held-out child. More child measurements and matched-architecture validation are required. Traditional dimensions already receive training-fold z-score scaling. '
     'Geometry constraints are useful; repeated tests still do not add independent faces.',
-    50, 'Paired 7-person experiment · Production ARKit vs separate direct/PCA models · Architecture and training weights differ.', 'paired-slide')
+    50, 'One child extrapolation case · Consistent with benefit from mismatch constraints; not proof of general robustness · Architecture / training weights differ.', 'paired-slide')
 
 add('02 / THREE APPROACHES', 'The tradeoff: metric scale, speed, and reach.',
     '''<table class="method-table capture-table"><thead><tr><th>Approach</th><th>Geometry & scale</th><th>Experience</th><th>Main constraint</th></tr></thead><tbody>
@@ -589,28 +618,8 @@ add('BACKUP / TRADITIONAL PREDICTORS', 'Which predictors enter the traditional m
     source='Implementation: compare_direct_measurements.py · Production comparison: compare_production_measurements.py · Frozen predictor list: paired-measurement-evidence.json.',
     cls='predictor-slide')
 
-add('BACKUP / PERIMETER COEFFICIENTS', 'Where do a, b and c come from?',
-    '<div class="coefficient-equation">L<sub>perimeter</sub> = aΔP² + bΔP + c + s<sub>strap</sub>'
-    '<span>ΔP = (P<sub>face</sub> − P<sub>mask</sub>) / 10 &nbsp; (millimeters → centimeters)</span></div>'
-    '<div class="coefficient-grid">'
-    '<article><h2>a · Curvature</h2><div class="coefficient-formula">a = −exp(α<sub>family</sub>) − exp(α<sub>style</sub>)</div>'
-    '<p>Always negative. Larger |a| means a sharper penalty away from the preferred perimeter difference.</p></article>'
-    '<article><h2>b · Preferred difference</h2><div class="coefficient-formula">b = b<sub>family</sub> + b<sub>style</sub></div>'
-    '<p>Together with a, sets the peak at ΔP* = −b / (2a). The preferred difference need not be zero.</p></article>'
-    '<article><h2>c · Baseline logit</h2><div class="coefficient-formula">c = c<sub>family</sub> + c<sub>style</sub></div>'
-    '<p>Sets the logit at zero perimeter difference, before the separate strap offset and nose penalty.</p></article></div>'
-    '<p class="coefficient-takeaway">Underlying parameters are learned jointly from fit-test outcomes. Facial measurements enter through ΔP; they do not directly determine a, b or c.</p>',
-    'The displayed coefficients combine a fit-family component and a mask-style component. '
-    'The internal names alpha_mask_raw and beta_gamma_mask refer to fit-family categories in the current training pipeline. '
-    'For the current constrained parameterization, the two raw alpha parameters are exponentiated and negated, then added, '
-    'so the effective quadratic coefficient a is negative. The linear and intercept coefficients each add family and style values. '
-    'Training learns all these underlying parameters jointly by minimizing binary cross-entropy on observed fit outcomes. '
-    'The strap category contributes a separate additive offset. The with-nose model also subtracts a separately learned nose-mismatch penalty. '
-    'The peak minus b over two a refers to the perimeter term with categories fixed; it is not a claim about the best physical mask geometry '
-    'or the optimum of the full model when the nose term changes. The coefficients are learned associations, not physical constants. '
-    'Legacy parameter files can bypass the newer negative-curvature transformation; the equation describes the current training parameterization.',
-    source='Current training implementation: python/mask_recommender/train.py · calc_preds, _initialize_custom_lr_parameters, _resolve_custom_lr_parameter_views.',
-    cls='coefficient-slide')
+coefficient_notes = 'The displayed coefficients combine a fit-family component and a mask-style component. The internal names alpha_mask_raw and beta_gamma_mask refer to fit-family categories in the current training pipeline. For the current constrained parameterization, the two raw alpha parameters are exponentiated and negated, then added, so the effective quadratic coefficient a is negative. The linear and intercept coefficients each add family and style values. Training learns all these underlying parameters jointly by minimizing binary cross-entropy on observed fit outcomes. The strap category contributes a separate additive offset. The with-nose model also subtracts a separately learned nose-mismatch penalty. The peak minus b over two a refers to the perimeter term with categories fixed; it is not a claim about the best physical mask geometry or the optimum of the full model when the nose term changes. The coefficients are learned associations, not physical constants. Legacy parameter files can bypass the newer negative-curvature transformation; the equation describes the current training parameterization.'
+notes[8] += '\nCoefficient context: ' + coefficient_notes
 
 add('BACKUP / TRADITIONAL MODEL TERMS', 'Both traditional models include squared terms.',
     '<div class="terms-models">'
@@ -838,22 +847,39 @@ add('BACKUP / BOOTSTRAP UNCERTAINTY', 'How uncertain is the added-nose improveme
     '<table class="method-table bootstrap-differences"><thead><tr><th>Metric</th><th>Difference</th><th>95% bootstrap CI</th><th>Nose model better</th></tr></thead><tbody>' +
     bootstrap_difference_rows + '</tbody></table>'
     '<div class="bootstrap-method"><strong>10,000 samples:</strong> draw 49 people with replacement, retaining all their tests. '
-    'Use identical draws for both models and all 3 initializations; compute each metric per initialization, then average.</div>'
+    'Retrain both models in each original grouped-user fold, with copies of a person kept together. Same draws and 3 initializations; average metrics.</div>'
     '<p class="bootstrap-note">Pointwise percentile intervals (2.5th–97.5th percentiles). Precision, recall and NPV differences use percentage points; lower log loss is better. All 10,000 replicates were valid for every metric.</p>'
-    '<p class="bootstrap-note"><strong>Bootstrap frequencies, not posterior probabilities or p-values.</strong> Fixed models / folds; no retraining. Overlapping training sets, pre-CV imputation, sampling and label limitations remain. No multiplicity adjustment.</p>',
+    '<p class="bootstrap-note"><strong>300,000 classifier fits; frequencies are not posterior probabilities or p-values.</strong> Prepared inputs, category catalog and folds stay fixed; imputation is not refitted. Sampling and label limitations remain.</p>',
     'This appendix gives paired model-difference intervals, which cannot be inferred from overlap between separate model intervals. '
     'For each of 10,000 draws with RNG seed 20261114, sample 49 participant clusters with replacement. A person selected twice contributes all their tests twice. '
-    'The same cluster multiplicities apply to both models and all three initializations. Each seed retains its own fitted model and held-out predictions. '
+    'The same cluster multiplicities apply to both models and all three initializations. Each model is retrained from its prescribed seed in each original grouped-user fold, using 200 Adam epochs, learning rate .01, and row-weighted binary cross entropy. Bootstrap multiplicity weights both training and held-out evaluation. All copies of an original person stay in that persons original fold. '
     'Compute the test-weighted pooled confusion ratios and log loss per seed, average the three metrics, and subtract perimeter-only from nose. '
     'Report the 2.5 and 97.5 percentiles without normality assumptions or multiple-comparison adjustment. All 10,000 replicates have defined denominators for each metric. '
-    'Precision difference is +7.6 percentage points, interval +1.0 to +17.8. Log loss difference is -0.177, interval -0.361 to -0.051. '
-    'The strict-win frequencies are precision 9924/10000 (99.24 percent), recall 5992/10000 (59.92 percent), NPV 7570/10000 (75.70 percent), F1 9022/10000 (90.22 percent), and log loss 9992/10000 (99.92 percent). Recall has 93 exact ties, counted as neither wins nor losses; other metrics have no ties. All replicates are valid. These are empirical frequencies under the participant bootstrap, not Bayesian posterior probabilities that the nose model is truly better or calibrated hypothesis-test p-values. '
-    'Recall, NPV and F1 intervals contain zero. Excluding zero here is conditional evidence, not a guarantee of population improvement or a replacement for prospective validation. '
-    'Intervals do not capture full retraining, fold-selection or imputation variability. CV models share training data; bootstrap clusters cannot remove that dependence. '
+    'The table gives the completed refit-bootstrap differences, intervals and strict-win counts. Ties within absolute tolerance 1e-12 count as neither wins nor losses. These are empirical frequencies under the participant bootstrap, not Bayesian posterior probabilities that the nose model is truly better or calibrated hypothesis-test p-values. '
+    'All five paired 95 percent difference intervals include zero after classifier retraining. Precision difference is +7.57 percentage points with interval -7.43 to +16.86; log-loss difference is -0.1773 with interval -0.3698 to +0.1015. Strict-win frequencies are log loss 86.41 percent, precision 84.71 percent, F1 60.03 percent, NPV 50.64 percent and recall 35.66 percent. Recall has 106 ties; other metrics have no ties. This is substantially weaker evidence than the earlier fixed-prediction bootstrap. Inspect the paired intervals rather than inferring improvement from the separate model intervals; prospective validation remains necessary. '
+    'Intervals now include classifier refitting variability from different training-person multiplicities. They do not include fold-selection or imputation variability. CV models share training data; bootstrap clusters cannot remove that dependence. '
     'Masks remain as observed rather than resampled across mask families. This targets the test-weighted experiment, not equal-person accuracy or unseen-mask performance. '
-    'The three seeds are not three independent datasets. No bootstrap refits were performed. Source hashes and exact interval construction are frozen in recommender-bootstrap-evidence.json.',
-    source='49 people · 1,086 tests · 5 user-grouped folds · 3 initializations · Fixed 50% cutoff · bootstrap_recommender.py',
+    'The three seeds are not three independent datasets. The 10,000 resamples require 300,000 independent classifier fits. Computational batching keeps separate parameters, Adam states and losses for every fit; tests verify agreement with explicit production training on repeated observations. Source hashes and exact interval construction are frozen in recommender-bootstrap-evidence.json.',
+    source='49 people · 1,086 tests · 5 fixed user-grouped folds · 3 initializations · 200 epochs · bootstrap_nose_refit.py',
     cls='bootstrap-slide')
+
+cohort = json.loads((ROOT / 'paired-cohort-evidence.json').read_text())
+assert cohort['people'] == 7 and sum(row['test_count'] for row in cohort['participants']) == 421
+assert sum(row['positive_labels'] for row in cohort['participants']) == 115
+cohort_rows = ''.join(
+    f'<tr data-participant="{row["study_uuid"]}" class="{("child-case" if row["study_uuid"].startswith("4e4ea719-") else "")}"><td><code>{row["study_uuid"][:8]}</code>{(" ★" if row["study_uuid"].startswith("4e4ea719-") else "")}</td>'
+    f'<td>{escape(row["age_band"])}</td><td>{escape(row["gender_group"])}</td><td>{escape(row["race_ethnicity"])}</td>'
+    f'<td>{row["test_count"]}</td><td>{row["positive_labels"]}</td><td>{row["negative_labels"]}</td></tr>'
+    for row in cohort['participants'])
+cohort_panel = (
+    '<article class="paired-cohort-panel"><h2>Seven-person sample</h2>'
+    '<p class="cohort-summary">421 tests · 115 positive / 306 negative labels</p>'
+    '<table class="method-table cohort-table"><thead><tr><th>Study ID</th><th>Age¹</th><th>Gender²</th><th>Race / ethnicity</th><th>Tests</th><th>Positive</th><th>Negative</th></tr></thead><tbody>' +
+    cohort_rows + '</tbody></table>'
+    '<p class="cohort-footnote">¹Approximate 2026 age, not age at testing. ²Broad reported gender. UUIDs are study pseudonyms; demographics are not predictors.</p></article>')
+cohort_notes = 'This is the exact seven-person paired cohort used on slide 10, not the 49-person experiment or the broader dashboard sample. There are five adults and two people under 18 by approximate 2026 age band. Local profile demographics were read November 14; birth-year bands do not establish age at a historical measurement or fit test. Random UUIDs were generated independently of database IDs; the local identity lookup is excluded from the deck and repository. UUIDs are pseudonyms rather than a guarantee against re-identification in a small convenience sample. Reported gender categories are broadly grouped; names, database IDs, exact birth years, contact details and cis/trans status are not displayed. Test and label counts come from the same 421 held-out prediction observations across all three models; the three initializations do not triple counts. The two most active participants contribute 166 and 130 observations, respectively. The young child has 130 negative labels and no positives, so this fold measures false-positive behavior but cannot estimate child-specific recall. The traditional/PCA models fail to extrapolate adequately in this case. Production ARKit uses deviations between facial path lengths and observed/learned mask preferences. Negative-curvature mismatch penalties can lower scores as a face becomes too large or too small relative to a mask, even outside observed absolute face sizes. This describes the inductive bias, not an empirical guarantee for unseen large faces. The evidence here is primarily the smaller-child case, and model architecture and training weights differ. Neither demographics nor study UUIDs enter any compared model. More paired children and a matched architecture comparison are needed.'
+slides[9] = slides[9].replace('<!-- PAIRED COHORT -->', cohort_panel)
+notes[9] += '\nParticipant context: ' + cohort_notes
 
 add('BACKUP / SOURCES', 'Sources and boundaries of the claims.',
     f'<div class="two-col sources"><div><h2>Technical references</h2><p><a href="{APPLE}">Apple: ARFaceGeometry</a></p>'
@@ -884,8 +910,47 @@ add('BACKUP / SOURCES', 'Sources and boundaries of the claims.',
     'Latest measurements and test dates can differ, labels mix sources, repeated user-mask tests can remain, and prospective full-catalog fit is untested.',
     source='Technical sources reviewed October 29; prototype evidence updated November 11; presentation date November 17, 2026.')
 
-# Move the original slides 14–17 after slide 10, preserving their order.
-slide_order = list(range(10)) + list(range(13, 17)) + list(range(10, 13)) + list(range(17, len(slides)))
+add('NEXT / VALIDATION PLAN', 'Next: validate measurements, then recommendation usefulness.',
+    '<p class="validation-intro">Proposed staged study · Freeze the automated pipeline before independent evaluation.</p>'
+    '<div class="validation-stages"><article><span class="validation-number">1</span><h2>Protocol & repeatability</h2>'
+    '<strong class="validation-size">20-adult pilot</strong>'
+    '<p>Define landmarks, routes, tape scaling and capture rules. Repeat captures; compare with independent tape/caliper readings and reference scans where available.</p>'
+    '<p>Test raw, remeshed and Gaussian-smoothed surfaces; quantify scale and landmark uncertainty.</p></article>'
+    '<article><span class="validation-number">2</span><h2>Locked geometry benchmark</h2>'
+    '<strong class="validation-size">120 adults total</strong>'
+    '<p>60 development participants, including the pilot; <strong>60 untouched test participants</strong>. Keep every session from one person together.</p>'
+    '<p>Compare photogrammetry, direct-photo FLAME and ARKit where available. Report mm error, tail errors, repeatability and failed captures across devices.</p></article>'
+    '<article><span class="validation-number">3</span><h2>Prospective fit usefulness</h2>'
+    '<strong class="validation-size">60 separate adults</strong>'
+    '<p>If geometry passes its gate, freeze recommendations before quantitative fit testing. Compare the first camera recommendation with each person’s initial choice.</p>'
+    '<p>Also track top-three success, completion, time, staff burden and cost per usable recommendation / verified fit pass.</p></article></div>'
+    '<div class="validation-gate"><strong>Provisional measurement targets:</strong> critical spans ≤2 mm MAE and ≤5 mm 95th-percentile absolute error; aggregate paths ≤5 mm MAE.</div>'
+    '<p class="validation-boundary">Android/web research beta only within validated conditions. Adult-first proposal; pediatric validation requires separate scope. Publish negative findings and narrow or stop if gates are missed.</p>',
+    'This summary draws on the November 9 Blueprint Biosecurity detailed discussion draft, sections 5 and 6, plus the concept note. It describes proposed work; funding, recruitment and results are not established. '
+    'The immediate priority is to freeze landmark and curve definitions, independent reference procedures, capture rules and the tape-derived scale process. A 20-adult geometry pilot tests repeatability and feasibility before expanding. '
+    'The geometry cohort has 120 adults total: 60 development participants, including the 20 pilot participants, and 60 untouched test participants. All images, repeated sessions and derivatives of a participant remain in one partition. '
+    'References are separately acquired physical measurements and independent scans where available; reconstruction source-photo agreement is not the sole validation reference. Use a second rater on a prespecified subset. '
+    'Benchmark raw photogrammetry, zero-filter remeshing and smoothing, direct-photo-to-FLAME fitting, and ARKit where supported. Separately test style-specific features so capture improvements are not confounded with a new feature set. '
+    'Report signed bias, mean and 95th-percentile absolute error in millimeters, repeatability, Bland-Altman agreement, reference uncertainty and complete capture/abstention denominators. Use participant-level resampling for repeated observations. '
+    'Provisional geometry gates are at most 2 mm mean absolute error and 5 mm 95th-percentile absolute error for critical spans, and at most 5 mm mean absolute error for aggregate paths. These are engineering targets, to be finalized before opening the test set, not achieved accuracy claims. '
+    'Evaluate about six Android devices, webcams and an iPhone reference, reserving at least one device model from development; target at least 90 percent capture completion within two attempts in supported conditions. Measure turnaround and processing cost rather than assuming the existing 61-photo workflow is acceptable for end users. '
+    'If measurement validation succeeds, recruit 60 separate adults for a prospective quantitative fit-testing pilot. Freeze the recommender before outcomes, randomize testing order and blind the operator to recommendation source where practicable. '
+    'Primary outcome is the paired difference in quantitative pass rate between the first camera recommendation and initial choice; secondary outcomes include at least one top-three pass and operational burden. This is a feasibility/effect-estimation pilot, not a powered equivalence or infection-prevention trial. '
+    'The proposal begins with adults. Pediatric validation needs a separately scoped protocol; this summary does not claim that the planned adult cohort establishes child performance. '
+    'Release a research beta only within validated conditions, with supported devices and explicit failure feedback. Publish methods, aggregate results, negative findings and proceed/narrow/stop decisions.',
+    30, 'Blueprint Biosecurity discussion draft · Nov 9, 2026 · Work plan / decision gates · Proposed studies and targets; not completed validation.',
+    'validation-plan-slide')
+
+# Insert the fixed-range comparison after slide 10 and its methods before sources.
+
+validation_index = len(slides)-1
+fixed_range_index = len(slides)
+add_fixed_range_slides(add)
+simple_feature_index = len(slides)
+add_simple_feature_slide(add)
+slide_order = (list(range(10)) + [simple_feature_index, fixed_range_index] + list(range(13, 16)) +
+               [validation_index, 16] + list(range(10, 13)) +
+               list(range(17, validation_index-1)) + [fixed_range_index+1, validation_index-1])
 slides = [slides[index] for index in slide_order]
 notes = [notes[index] for index in slide_order]
 durations = [durations[index] for index in slide_order]

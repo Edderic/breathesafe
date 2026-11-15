@@ -1,0 +1,19 @@
+{
+  "negative_tests": 130,
+  "positive_tests": 0,
+  "model": "production_arkit",
+  "false_positives_by_initialization": [
+    5,
+    6,
+    6
+  ],
+  "initializations": [
+    42,
+    43,
+    44
+  ],
+  "source_sha256": "0291bf99c0631d8aac8f552f2b348cc1a5051e135bb83d92d863a28f604ec1a6",
+  "definition": "FP/(FP+TN) per initialization, then average; same held-out child as simple fixed-range comparison. Three initializations do not add independent tests.",
+  "mean_false_positives": 5.666666666666667,
+  "false_positive_rate": 0.043589743589743594
+}

@@ -1,0 +1,246 @@
+{
+  "people": 7,
+  "tests": 421,
+  "threshold": 0.5,
+  "c": 1.0,
+  "recipes": [
+    "linear_additive",
+    "quadratic_additive",
+    "shared_perimeter_interactions",
+    "full_interactions"
+  ],
+  "results": [
+    {
+      "arm": "traditional_direct",
+      "recipe": "linear_additive",
+      "predictors_min": 64,
+      "predictors_max": 68,
+      "intercept_parameters": 1,
+      "test_weighted": {
+        "log_loss": 0.8259919094135781,
+        "precision": 0.25,
+        "recall": 0.28695652173913044,
+        "negative_predictive_value": 0.7162629757785467,
+        "f1": 0.26720647773279355
+      },
+      "equal_person": {
+        "log_loss": 0.6256092561928238,
+        "precision": 0.5612871315934945,
+        "recall": 0.5750909199308413,
+        "negative_predictive_value": 0.7969775954649689,
+        "f1": 0.5681051872138052
+      },
+      "child_extrapolation_case": {
+        "tests": 130,
+        "false_positives": 78,
+        "true_negatives": 52
+      }
+    },
+    {
+      "arm": "traditional_direct",
+      "recipe": "quadratic_additive",
+      "predictors_min": 71,
+      "predictors_max": 75,
+      "intercept_parameters": 1,
+      "test_weighted": {
+        "log_loss": 0.901512287665846,
+        "precision": 0.23880597014925373,
+        "recall": 0.2782608695652174,
+        "negative_predictive_value": 0.710801393728223,
+        "f1": 0.2570281124497992
+      },
+      "equal_person": {
+        "log_loss": 0.6766636026989078,
+        "precision": 0.5378037254272392,
+        "recall": 0.5454003457938353,
+        "negative_predictive_value": 0.7838723533220974,
+        "f1": 0.541575397674747
+      },
+      "child_extrapolation_case": {
+        "tests": 130,
+        "false_positives": 80,
+        "true_negatives": 50
+      }
+    },
+    {
+      "arm": "traditional_direct",
+      "recipe": "shared_perimeter_interactions",
+      "predictors_min": 83,
+      "predictors_max": 87,
+      "intercept_parameters": 1,
+      "test_weighted": {
+        "log_loss": 0.9142849085477578,
+        "precision": 0.23880597014925373,
+        "recall": 0.2782608695652174,
+        "negative_predictive_value": 0.710801393728223,
+        "f1": 0.2570281124497992
+      },
+      "equal_person": {
+        "log_loss": 0.6869209628455145,
+        "precision": 0.5378037254272392,
+        "recall": 0.5454003457938353,
+        "negative_predictive_value": 0.7838723533220974,
+        "f1": 0.541575397674747
+      },
+      "child_extrapolation_case": {
+        "tests": 130,
+        "false_positives": 80,
+        "true_negatives": 50
+      }
+    },
+    {
+      "arm": "traditional_direct",
+      "recipe": "full_interactions",
+      "predictors_min": 767,
+      "predictors_max": 819,
+      "intercept_parameters": 1,
+      "test_weighted": {
+        "log_loss": 0.988450997816382,
+        "precision": 0.23529411764705882,
+        "recall": 0.2782608695652174,
+        "negative_predictive_value": 0.7087719298245614,
+        "f1": 0.2549800796812749
+      },
+      "equal_person": {
+        "log_loss": 0.7441506332681787,
+        "precision": 0.4302724373780388,
+        "recall": 0.352411613903297,
+        "negative_predictive_value": 0.7182520798477988,
+        "f1": 0.38746925742580507
+      },
+      "child_extrapolation_case": {
+        "tests": 130,
+        "false_positives": 83,
+        "true_negatives": 47
+      }
+    },
+    {
+      "arm": "traditional_pca3",
+      "recipe": "linear_additive",
+      "predictors_min": 61,
+      "predictors_max": 65,
+      "intercept_parameters": 1,
+      "test_weighted": {
+        "log_loss": 0.7004441846994434,
+        "precision": 0.3308270676691729,
+        "recall": 0.3826086956521739,
+        "negative_predictive_value": 0.7534722222222222,
+        "f1": 0.3548387096774194
+      },
+      "equal_person": {
+        "log_loss": 0.5443840090375691,
+        "precision": 0.6099077480693574,
+        "recall": 0.6142908245394383,
+        "negative_predictive_value": 0.8172274934043819,
+        "f1": 0.6120914397998469
+      },
+      "child_extrapolation_case": {
+        "tests": 130,
+        "false_positives": 64,
+        "true_negatives": 66
+      }
+    },
+    {
+      "arm": "traditional_pca3",
+      "recipe": "quadratic_additive",
+      "predictors_min": 65,
+      "predictors_max": 69,
+      "intercept_parameters": 1,
+      "test_weighted": {
+        "log_loss": 0.7184749296012444,
+        "precision": 0.3235294117647059,
+        "recall": 0.3826086956521739,
+        "negative_predictive_value": 0.7508771929824561,
+        "f1": 0.350597609561753
+      },
+      "equal_person": {
+        "log_loss": 0.5581723961006003,
+        "precision": 0.5933145226304272,
+        "recall": 0.6142908245394383,
+        "negative_predictive_value": 0.8147548963463521,
+        "f1": 0.603620492691643
+      },
+      "child_extrapolation_case": {
+        "tests": 130,
+        "false_positives": 65,
+        "true_negatives": 65
+      }
+    },
+    {
+      "arm": "traditional_pca3",
+      "recipe": "shared_perimeter_interactions",
+      "predictors_min": 71,
+      "predictors_max": 75,
+      "intercept_parameters": 1,
+      "test_weighted": {
+        "log_loss": 0.7231764003624804,
+        "precision": 0.3235294117647059,
+        "recall": 0.3826086956521739,
+        "negative_predictive_value": 0.7508771929824561,
+        "f1": 0.350597609561753
+      },
+      "equal_person": {
+        "log_loss": 0.5622977689239158,
+        "precision": 0.5933145226304272,
+        "recall": 0.6142908245394383,
+        "negative_predictive_value": 0.8147548963463521,
+        "f1": 0.603620492691643
+      },
+      "child_extrapolation_case": {
+        "tests": 130,
+        "false_positives": 65,
+        "true_negatives": 65
+      }
+    },
+    {
+      "arm": "traditional_pca3",
+      "recipe": "full_interactions",
+      "predictors_min": 413,
+      "predictors_max": 441,
+      "intercept_parameters": 1,
+      "test_weighted": {
+        "log_loss": 0.7680182293494329,
+        "precision": 0.3055555555555556,
+        "recall": 0.3826086956521739,
+        "negative_predictive_value": 0.7436823104693141,
+        "f1": 0.33976833976833976
+      },
+      "equal_person": {
+        "log_loss": 0.592142516129697,
+        "precision": 0.5780140160701494,
+        "recall": 0.6142908245394383,
+        "negative_predictive_value": 0.8122840575310913,
+        "f1": 0.5956005451517732
+      },
+      "child_extrapolation_case": {
+        "tests": 130,
+        "false_positives": 73,
+        "true_negatives": 57
+      }
+    }
+  ],
+  "source_hashes": {
+    "frame": "bcdf5c8b487ca5971fa9b9f9d1e1041ec9fdf56cb1b3e0ae2cfeb7a0ddbf2d3d",
+    "summary": "9e1f7e9dda2eecf43919dc1f08a0ee83b3101bd024d36594950e97b2f8eb7554",
+    "config": "ef2ab37bb248beb563bae49122510dcc52d6040b668f760f7fcbc41aca0a214f",
+    "experiment": "2819cfacb249d7e23ffadc405c9d7918f03e33978f093ab1f555ce6175895cbf",
+    "scaler": "3b33c1bf00462d546016dbcdbc6454f6290f5bd9fa0d10e85f7cea972b1f1ece",
+    "base_classifier": "02462df2b3792733e765e57e80057651640c23e0c4fdc0cc0455b143318a4a23"
+  },
+  "protocol": "Seven leave-one-person-out folds. Refit PCA and category encoding on the six training people. Same fixed physical ranges, C=1, equal-person training weights and 50% threshold. No hyperparameter or threshold tuning.",
+  "limitations": [
+    "Exploratory ablation on the same seven-person cohort; no new independent participants. Choosing the best recipe from these outer scores would be optimistic.",
+    "No new bootstrap or nested selection in this initial feature comparison. Earlier bootstrap intervals do not apply to these new recipes.",
+    "Additive logits f(face)+g(mask) have identical mask rankings for every face within one fitted model; they cannot personalize relative mask ordering.",
+    "Shared face-by-perimeter products preserve some mask-size-dependent personalization with far fewer coefficients than category-specific interactions.",
+    "Fixed C does not imply equal effective model complexity across feature sets. L2 strength and complexity should be selected within training people in a later nested comparison.",
+    "The child case has no positive labels, so child-specific recall is undefined."
+  ],
+  "production_arkit_reference": {
+    "log_loss": 0.9482029544736951,
+    "precision": 0.559282339524275,
+    "recall": 0.4666666666666666,
+    "negative_predictive_value": 0.8112807694249901,
+    "f1": 0.5087122076812912
+  }
+}

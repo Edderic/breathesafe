@@ -1,0 +1,437 @@
+{
+  "method": "Paired person-cluster bootstrap, full refit of preprocessing and all models inside leave-original-person-out evaluation.",
+  "attempted_replicates": 10000,
+  "seed": 20261115,
+  "people": 7,
+  "original_tests": 421,
+  "pca_policy": "fixed",
+  "pca_evaluable_replicates": 5588,
+  "insufficient_pca_rank_replicates": 4412,
+  "participant_support_distribution": {
+    "2": 38,
+    "3": 810,
+    "4": 3564,
+    "5": 4223,
+    "6": 1291,
+    "7": 74
+  },
+  "arkit_initializations": [
+    42,
+    43,
+    44
+  ],
+  "training_epochs": 200,
+  "learning_rate": 0.01,
+  "unique_training_sets_with_multiplicity": 1834,
+  "actual_seed_model_fits": 9170,
+  "deterministic_cache": "Identical held-person/training-multiplicity/PCA-component inputs reuse exact deterministic fits with the same initialization bank; no reuse of the original fixed OOF predictions.",
+  "folds": "All copies of the same original participant stay in one held-out group. Bootstrap multiplicities affect training rows, PCA people, equal-person weights, and evaluation contributions.",
+  "ranges": {
+    "version": "fixed_range_engineering_v1",
+    "date": "2026-11-15",
+    "units": "mm",
+    "interpretation": "Broad provisional engineering bounds for a sensitivity experiment spanning small children and large adults; not validated population limits or fitted sample extrema.",
+    "ranges": {
+      "face_width": [
+        50,
+        200
+      ],
+      "face_length": [
+        40,
+        180
+      ],
+      "bitragion_subnasale_arc": [
+        100,
+        450
+      ],
+      "nose_protrusion": [
+        0,
+        50
+      ],
+      "nasal_root_breadth": [
+        0,
+        50
+      ],
+      "nose_bridge_height": [
+        0,
+        70
+      ],
+      "mask_perimeter_mm": [
+        100,
+        800
+      ]
+    },
+    "transform": "(x - fixed_min) / (fixed_max - fixed_min)",
+    "outside_policy": "Raise an explicit error; no silent clipping or adjusting limits to held-out results.",
+    "pca": "Refit PCA without whitening on fixed-range-scaled training people. Rescale each PC using analytic extrema over the fixed input unit cube, so PC predictors also stay in [0,1] for in-range inputs.",
+    "classifier": "Original L2 logistic classifier, C=1, linear and squared geometry, mask categories, face-by-mask/perimeter interactions, fixed threshold 0.5. Traditional models retain equal-person training weights; production ARKit retains original row-weighted BCE.",
+    "range_check_note": "Initial mask bound 650 mm rejected two existing rows at 699 mm. Broadened the engineering mask limit to 800 mm before any fits; no facial ranges were changed or outcomes used to select limits."
+  },
+  "sources": {
+    "frame": "bcdf5c8b487ca5971fa9b9f9d1e1041ec9fdf56cb1b3e0ae2cfeb7a0ddbf2d3d",
+    "summary": "9e1f7e9dda2eecf43919dc1f08a0ee83b3101bd024d36594950e97b2f8eb7554",
+    "config": "ef2ab37bb248beb563bae49122510dcc52d6040b668f760f7fcbc41aca0a214f",
+    "scaler": "3b33c1bf00462d546016dbcdbc6454f6290f5bd9fa0d10e85f7cea972b1f1ece",
+    "trainer": "1316831c0b17bbe38293af2b5909d23fac153a01bc47d1805fa1e369c11d6df7",
+    "bootstrap": "026dd34eb9c4a768013c86e39c44eb3a1dfa479c547506794e53d7ecdc37cb94"
+  },
+  "elapsed_seconds": 462.8053431659937,
+  "winner_definition": "Strict best among all three models for each metric; lower log loss / higher other metrics. Ties within absolute 1e-12 are reported separately; undefined model metrics exclude that paired replicate for the metric.",
+  "limitations": [
+    "Seven original participants; resampling cannot supply missing child/large-face variation.",
+    "Fixed PCA-3 results condition on enough distinct training faces; excluded draws and metric-specific denominators are reported.",
+    "Ranges are provisional engineering assumptions, not validated anthropometric population limits; fixed C=1 is not retuned.",
+    "Full pipeline here includes scaling, PCA and classifier fitting with fixed recipe; no nested hyperparameter or threshold selection is performed.",
+    "Traditional models retain equal-person training weights; ARKit retains original row-weighted loss. This does not isolate modality causally.",
+    "Bootstrap frequencies are not Bayesian posterior probabilities or calibrated p-values.",
+    "The same cohort informed earlier exploratory work; this is not a new confirmatory cohort."
+  ],
+  "results": {
+    "test_weighted": {
+      "log_loss": {
+        "valid_paired_replicates": 5588,
+        "undefined_metric_replicates": 0,
+        "tie_count": 0,
+        "tie_patterns": {},
+        "arms": {
+          "production_arkit": {
+            "estimate": 0.9482029544736951,
+            "low": 0.4635527629324814,
+            "high": 1.8517428459323009,
+            "strict_best_count": 1021,
+            "strict_best_fraction": 0.1827129563350036,
+            "strict_best_fraction_of_attempts": 0.1021
+          },
+          "traditional_direct": {
+            "estimate": 0.9884509978163821,
+            "low": 0.4955169538204107,
+            "high": 1.543079176050683,
+            "strict_best_count": 1458,
+            "strict_best_fraction": 0.2609162491052255,
+            "strict_best_fraction_of_attempts": 0.1458
+          },
+          "traditional_pca3": {
+            "estimate": 0.7680182293494329,
+            "low": 0.48025739598852396,
+            "high": 1.1464369768847005,
+            "strict_best_count": 3109,
+            "strict_best_fraction": 0.5563707945597709,
+            "strict_best_fraction_of_attempts": 0.3109
+          }
+        }
+      },
+      "precision": {
+        "valid_paired_replicates": 5588,
+        "undefined_metric_replicates": 0,
+        "tie_count": 184,
+        "tie_patterns": {
+          "traditional_direct+traditional_pca3": 184
+        },
+        "arms": {
+          "production_arkit": {
+            "estimate": 0.559282339524275,
+            "low": 0.22178932178932179,
+            "high": 0.6528156300955043,
+            "strict_best_count": 4361,
+            "strict_best_fraction": 0.7804223335719399,
+            "strict_best_fraction_of_attempts": 0.4361
+          },
+          "traditional_direct": {
+            "estimate": 0.2352941176470588,
+            "low": 0.027624309392265192,
+            "high": 0.6583726415094334,
+            "strict_best_count": 380,
+            "strict_best_fraction": 0.06800286327845383,
+            "strict_best_fraction_of_attempts": 0.038
+          },
+          "traditional_pca3": {
+            "estimate": 0.3055555555555556,
+            "low": 0.04288949275362321,
+            "high": 0.66,
+            "strict_best_count": 663,
+            "strict_best_fraction": 0.11864710093056549,
+            "strict_best_fraction_of_attempts": 0.0663
+          }
+        }
+      },
+      "recall": {
+        "valid_paired_replicates": 5588,
+        "undefined_metric_replicates": 0,
+        "tie_count": 817,
+        "tie_patterns": {
+          "traditional_direct+traditional_pca3": 795,
+          "production_arkit+traditional_direct": 6,
+          "production_arkit+traditional_pca3": 16
+        },
+        "arms": {
+          "production_arkit": {
+            "estimate": 0.4666666666666666,
+            "low": 0.22549019607843138,
+            "high": 0.5906735751295337,
+            "strict_best_count": 3351,
+            "strict_best_fraction": 0.5996778811739442,
+            "strict_best_fraction_of_attempts": 0.3351
+          },
+          "traditional_direct": {
+            "estimate": 0.2782608695652174,
+            "low": 0.03571428571428571,
+            "high": 0.6774193548387096,
+            "strict_best_count": 643,
+            "strict_best_fraction": 0.11506800286327845,
+            "strict_best_fraction_of_attempts": 0.0643
+          },
+          "traditional_pca3": {
+            "estimate": 0.3826086956521739,
+            "low": 0.059322033898305086,
+            "high": 0.6769230769230768,
+            "strict_best_count": 777,
+            "strict_best_fraction": 0.13904795991410165,
+            "strict_best_fraction_of_attempts": 0.0777
+          }
+        }
+      },
+      "negative_predictive_value": {
+        "valid_paired_replicates": 5588,
+        "undefined_metric_replicates": 0,
+        "tie_count": 183,
+        "tie_patterns": {
+          "traditional_direct+traditional_pca3": 183
+        },
+        "arms": {
+          "production_arkit": {
+            "estimate": 0.8112807694249901,
+            "low": 0.618884908606595,
+            "high": 0.9523348145989656,
+            "strict_best_count": 4046,
+            "strict_best_fraction": 0.7240515390121689,
+            "strict_best_fraction_of_attempts": 0.4046
+          },
+          "traditional_direct": {
+            "estimate": 0.7087719298245614,
+            "low": 0.5764331210191083,
+            "high": 0.9408866995073891,
+            "strict_best_count": 465,
+            "strict_best_fraction": 0.08321403006442377,
+            "strict_best_fraction_of_attempts": 0.0465
+          },
+          "traditional_pca3": {
+            "estimate": 0.7436823104693141,
+            "low": 0.6091703056768559,
+            "high": 0.9420289855072465,
+            "strict_best_count": 894,
+            "strict_best_fraction": 0.15998568360773086,
+            "strict_best_fraction_of_attempts": 0.0894
+          }
+        }
+      },
+      "f1": {
+        "valid_paired_replicates": 5588,
+        "undefined_metric_replicates": 0,
+        "tie_count": 183,
+        "tie_patterns": {
+          "traditional_direct+traditional_pca3": 183
+        },
+        "arms": {
+          "production_arkit": {
+            "estimate": 0.5087122076812912,
+            "low": 0.24178403755868547,
+            "high": 0.6131848512512588,
+            "strict_best_count": 4353,
+            "strict_best_fraction": 0.7789906943450251,
+            "strict_best_fraction_of_attempts": 0.4353
+          },
+          "traditional_direct": {
+            "estimate": 0.2549800796812749,
+            "low": 0.031746031746031744,
+            "high": 0.6329113924050633,
+            "strict_best_count": 389,
+            "strict_best_fraction": 0.069613457408733,
+            "strict_best_fraction_of_attempts": 0.0389
+          },
+          "traditional_pca3": {
+            "estimate": 0.33976833976833976,
+            "low": 0.05387205387205387,
+            "high": 0.6333333333333333,
+            "strict_best_count": 663,
+            "strict_best_fraction": 0.11864710093056549,
+            "strict_best_fraction_of_attempts": 0.0663
+          }
+        }
+      }
+    },
+    "equal_person": {
+      "log_loss": {
+        "valid_paired_replicates": 5588,
+        "undefined_metric_replicates": 0,
+        "tie_count": 0,
+        "tie_patterns": {},
+        "arms": {
+          "production_arkit": {
+            "estimate": 0.8994699329960912,
+            "low": 0.6931759297021504,
+            "high": 1.5939279240800266,
+            "strict_best_count": 244,
+            "strict_best_fraction": 0.043664996420901936,
+            "strict_best_fraction_of_attempts": 0.0244
+          },
+          "traditional_direct": {
+            "estimate": 0.7441506332681787,
+            "low": 0.4330804367252202,
+            "high": 1.3762777822102688,
+            "strict_best_count": 664,
+            "strict_best_fraction": 0.11882605583392986,
+            "strict_best_fraction_of_attempts": 0.0664
+          },
+          "traditional_pca3": {
+            "estimate": 0.592142516129697,
+            "low": 0.4213845190006542,
+            "high": 1.0130082456091116,
+            "strict_best_count": 4680,
+            "strict_best_fraction": 0.8375089477451683,
+            "strict_best_fraction_of_attempts": 0.468
+          }
+        }
+      },
+      "precision": {
+        "valid_paired_replicates": 5588,
+        "undefined_metric_replicates": 0,
+        "tie_count": 187,
+        "tie_patterns": {
+          "traditional_direct+traditional_pca3": 187
+        },
+        "arms": {
+          "production_arkit": {
+            "estimate": 0.4975184162121378,
+            "low": 0.3292051018795903,
+            "high": 0.7563607245475582,
+            "strict_best_count": 2966,
+            "strict_best_fraction": 0.5307802433786686,
+            "strict_best_fraction_of_attempts": 0.2966
+          },
+          "traditional_direct": {
+            "estimate": 0.43027243737803883,
+            "low": 0.06638429839568692,
+            "high": 0.816305253161434,
+            "strict_best_count": 893,
+            "strict_best_fraction": 0.1598067287043665,
+            "strict_best_fraction_of_attempts": 0.0893
+          },
+          "traditional_pca3": {
+            "estimate": 0.5780140160701494,
+            "low": 0.09608007963720827,
+            "high": 0.8160333020008056,
+            "strict_best_count": 1542,
+            "strict_best_fraction": 0.27594846098783105,
+            "strict_best_fraction_of_attempts": 0.1542
+          }
+        }
+      },
+      "recall": {
+        "valid_paired_replicates": 5588,
+        "undefined_metric_replicates": 0,
+        "tie_count": 848,
+        "tie_patterns": {
+          "traditional_direct+traditional_pca3": 848
+        },
+        "arms": {
+          "production_arkit": {
+            "estimate": 0.4749498201474592,
+            "low": 0.2192192192192192,
+            "high": 0.7672319900420103,
+            "strict_best_count": 2484,
+            "strict_best_fraction": 0.44452397995705084,
+            "strict_best_fraction_of_attempts": 0.2484
+          },
+          "traditional_direct": {
+            "estimate": 0.35241161390329695,
+            "low": 0.060022834774098845,
+            "high": 0.7796545834124121,
+            "strict_best_count": 1168,
+            "strict_best_fraction": 0.20901932712956334,
+            "strict_best_fraction_of_attempts": 0.1168
+          },
+          "traditional_pca3": {
+            "estimate": 0.6142908245394383,
+            "low": 0.10233806055960142,
+            "high": 0.7945401971721955,
+            "strict_best_count": 1088,
+            "strict_best_fraction": 0.19470293486041518,
+            "strict_best_fraction_of_attempts": 0.1088
+          }
+        }
+      },
+      "negative_predictive_value": {
+        "valid_paired_replicates": 5588,
+        "undefined_metric_replicates": 0,
+        "tie_count": 158,
+        "tie_patterns": {
+          "traditional_direct+traditional_pca3": 158
+        },
+        "arms": {
+          "production_arkit": {
+            "estimate": 0.7572097523694269,
+            "low": 0.5666969149087958,
+            "high": 0.8962581060474095,
+            "strict_best_count": 2733,
+            "strict_best_fraction": 0.4890837508947745,
+            "strict_best_fraction_of_attempts": 0.2733
+          },
+          "traditional_direct": {
+            "estimate": 0.7182520798477988,
+            "low": 0.5515414371356573,
+            "high": 0.8745644599303136,
+            "strict_best_count": 999,
+            "strict_best_fraction": 0.17877594846098782,
+            "strict_best_fraction_of_attempts": 0.0999
+          },
+          "traditional_pca3": {
+            "estimate": 0.8122840575310913,
+            "low": 0.6110259291922858,
+            "high": 0.8791530383887073,
+            "strict_best_count": 1698,
+            "strict_best_fraction": 0.30386542591267,
+            "strict_best_fraction_of_attempts": 0.1698
+          }
+        }
+      },
+      "f1": {
+        "valid_paired_replicates": 5588,
+        "undefined_metric_replicates": 0,
+        "tie_count": 158,
+        "tie_patterns": {
+          "traditional_direct+traditional_pca3": 158
+        },
+        "arms": {
+          "production_arkit": {
+            "estimate": 0.4859579011776285,
+            "low": 0.27766603353560293,
+            "high": 0.6724979191699186,
+            "strict_best_count": 2696,
+            "strict_best_fraction": 0.4824624194702935,
+            "strict_best_fraction_of_attempts": 0.2696
+          },
+          "traditional_direct": {
+            "estimate": 0.3874692574258051,
+            "low": 0.07266327677841374,
+            "high": 0.7795269361601139,
+            "strict_best_count": 983,
+            "strict_best_fraction": 0.17591267000715818,
+            "strict_best_fraction_of_attempts": 0.0983
+          },
+          "traditional_pca3": {
+            "estimate": 0.5956005451517732,
+            "low": 0.10702414297030563,
+            "high": 0.7880678182981445,
+            "strict_best_count": 1751,
+            "strict_best_fraction": 0.3133500357909807,
+            "strict_best_fraction_of_attempts": 0.1751
+          }
+        }
+      }
+    }
+  },
+  "additional_implementation_hashes": {
+    "traditional_classifier": "02462df2b3792733e765e57e80057651640c23e0c4fdc0cc0455b143318a4a23",
+    "production_wrapper": "dcf613ef0aee03f7fc842e5d2ad361d7cbd38d1bdbbcb326c5103c42c920cb40"
+  }
+}

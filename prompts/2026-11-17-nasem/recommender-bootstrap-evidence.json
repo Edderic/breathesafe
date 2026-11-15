@@ -1,5 +1,5 @@
 {
-  "method": "Paired person-cluster percentile bootstrap of fixed held-out predictions",
+  "method": "Paired person-cluster percentile bootstrap with independent model retraining in every resample",
   "people": 49,
   "tests": 1086,
   "replicates": 10000,
@@ -10,118 +10,98 @@
     0.975
   ],
   "quantile_method": "linear",
-  "sampling": "Draw 49 people with replacement; retain every test for each selected person, including multiplicity. Same draw for both models and all initializations.",
-  "estimand": "Test-weighted pooled held-out metric per initialization, then arithmetic mean over seeds 42/43/44; no averaging probabilities first.",
-  "threshold": 0.5,
-  "log_loss_epsilon": 1e-15,
   "initializations": [
     42,
     43,
     44
   ],
-  "source_prediction_hashes": [
-    {
-      "variant": "none",
-      "initialization": 42,
-      "sha256": "cdae24ec9abac7d2f6442420d5f1b3c1e4f74ee14d746134331bcb37d8cec08f"
-    },
-    {
-      "variant": "none",
-      "initialization": 43,
-      "sha256": "01e887339ee77753abb17e5419931d859404c47e0ee49141622e145c17d22c02"
-    },
-    {
-      "variant": "none",
-      "initialization": 44,
-      "sha256": "e7537d2fae0bd94fd711e4521a1ad65cb1cd75c4068bc8e8242a0bac20aec3bb"
-    },
-    {
-      "variant": "latent_nose_v1",
-      "initialization": 42,
-      "sha256": "f440f85abbb8551f92392db25dffa29cff6595c333bd294ff2f4f90161afd47d"
-    },
-    {
-      "variant": "latent_nose_v1",
-      "initialization": 43,
-      "sha256": "a74301781cd81f0903c8b07b1a765386e0fb2283bf07201359fcec0e5616e62e"
-    },
-    {
-      "variant": "latent_nose_v1",
-      "initialization": 44,
-      "sha256": "6543a24169adf107ee9cade3be59684e5bf3871dbd529f5754677daf3ff1ed9a"
-    }
-  ],
-  "script_sha256": "5886f74dda040ae8c7969007735cf3b07089328e88a373602b88fd5a9bb49fe5",
+  "threshold": 0.5,
+  "log_loss_epsilon": 1e-15,
+  "epochs": 200,
+  "learning_rate": 0.01,
+  "optimizer": "Adam",
+  "class_weighting": false,
+  "independent_bootstrap_model_fits": 300000,
+  "point_model_fits": 30,
+  "sampling": "Draw 49 people with replacement. Copies of each person remain in their original held-out fold; multiplicities weight training BCE and held-out metrics. Same draws for both models and all seeds.",
+  "estimand": "Test-weighted pooled held-out metric per initialization, then mean of seeds 42/43/44; no probability ensembling.",
+  "source_hashes": {
+    "frame": "bcdf5c8b487ca5971fa9b9f9d1e1041ec9fdf56cb1b3e0ae2cfeb7a0ddbf2d3d",
+    "trainer": "1316831c0b17bbe38293af2b5909d23fac153a01bc47d1805fa1e369c11d6df7",
+    "bootstrap": "d0513ee81cb2a6c1776d0a6d707e79d6b40f8815bbd624c1a80b2378e2d2a410"
+  },
+  "elapsed_seconds": 690.7327859590296,
+  "difference_definition": "Nose model minus perimeter-only model; negative log-loss difference is favorable.",
+  "superiority_definition": "Strict paired wins, ties within absolute 1e-12 reported separately; bootstrap frequencies are not posterior probabilities or p-values.",
   "limitations": [
-    "Conditional on saved trained models, folds and preprocessing; models are not retrained in bootstrap samples.",
-    "Cross-validation training sets overlap; intervals are not full-pipeline generalization intervals.",
-    "Global pre-CV imputation, convenience sampling and mixed outcome sources remain limitations.",
-    "Participants are the resampling unit; masks are held as observed, not resampled as a second clustering dimension.",
-    "Pointwise 95% percentile intervals, without multiplicity adjustment across metrics.",
-    "Undefined ratio replicates are excluded per metric and their valid counts reported; any nonfinite seed makes that replicate undefined."
+    "Prepared mixed measured/imputed facial inputs remain frozen; the inherited pre-CV imputation regression is not refitted. This is full classifier retraining, not end-to-end imputation refitting.",
+    "Original five person-grouped fold assignments and category catalog remain fixed. Training participant multiplicities vary; fold-selection variability is not included.",
+    "Fixed architecture, epochs, learning rate, threshold and initialization bank; no hyperparameter selection.",
+    "Convenience sampling, mixed outcome sources, repeated person-mask observations and overlapping CV training sets remain limitations.",
+    "People are resampled; mask families are not independently resampled. Pointwise percentile intervals have no multiplicity adjustment."
   ],
   "variants": {
     "none": {
       "precision": {
         "estimate": 0.563609089660221,
-        "low": 0.350366647091221,
-        "high": 0.686110070854876,
+        "low": 0.2677795622308942,
+        "high": 0.6606119209198589,
         "valid_replicates": 10000
       },
       "recall": {
         "estimate": 0.5802919708029197,
-        "low": 0.4268982641789659,
-        "high": 0.6916106142831664,
+        "low": 0.23655913978494625,
+        "high": 0.677712516733601,
         "valid_replicates": 10000
       },
       "negative_predictive_value": {
         "estimate": 0.8570088919448726,
-        "low": 0.7687122666310552,
-        "high": 0.9339984918030412,
+        "low": 0.735136795473158,
+        "high": 0.916339994103123,
         "valid_replicates": 10000
       },
       "f1": {
         "estimate": 0.5717841727518443,
-        "low": 0.39958729222855605,
-        "high": 0.6564670367037613,
+        "low": 0.2514401875269077,
+        "high": 0.6604985534090295,
         "valid_replicates": 10000
       },
       "log_loss": {
-        "estimate": 1.108171333631893,
-        "low": 0.7291661819819097,
-        "high": 1.5189466757293866,
+        "estimate": 1.1081713405551132,
+        "low": 0.8507474594633284,
+        "high": 2.189002552373086,
         "valid_replicates": 10000
       }
     },
     "latent_nose_v1": {
       "precision": {
         "estimate": 0.6393082477491613,
-        "low": 0.4435577747958934,
-        "high": 0.7636608680653971,
+        "low": 0.27850240928041603,
+        "high": 0.7283405863165135,
         "valid_replicates": 10000
       },
       "recall": {
         "estimate": 0.5936739659367397,
-        "low": 0.45141269841269843,
-        "high": 0.6938883358221336,
+        "low": 0.23332329317269074,
+        "high": 0.661881706307511,
         "valid_replicates": 10000
       },
       "negative_predictive_value": {
         "estimate": 0.8664741989749535,
-        "low": 0.7831548369202542,
-        "high": 0.9390663647944976,
+        "low": 0.7326670082182778,
+        "high": 0.9172244020930876,
         "valid_replicates": 10000
       },
       "f1": {
         "estimate": 0.6150154924789532,
-        "low": 0.4588260374585009,
-        "high": 0.6994623211744067,
+        "low": 0.25688469068816566,
+        "high": 0.6800749609653048,
         "valid_replicates": 10000
       },
       "log_loss": {
-        "estimate": 0.9308306794667489,
-        "low": 0.558944400184974,
-        "high": 1.3116599540339302,
+        "estimate": 0.9308307196585902,
+        "low": 0.7718686744496851,
+        "high": 2.044955301225046,
         "valid_replicates": 10000
       }
     }
@@ -129,77 +109,95 @@
   "differences": {
     "precision": {
       "estimate": 0.07569915808894023,
-      "low": 0.010017034555807108,
-      "high": 0.1778901458323543,
+      "low": -0.07426951618463895,
+      "high": 0.16860643169637865,
       "valid_replicates": 10000
     },
     "recall": {
       "estimate": 0.01338199513381999,
-      "low": -0.059306934374419064,
-      "high": 0.11078082655826552,
+      "low": -0.13046834807213661,
+      "high": 0.14334999999999984,
       "valid_replicates": 10000
     },
     "negative_predictive_value": {
       "estimate": 0.00946530703008086,
-      "low": -0.01324263073170431,
-      "high": 0.0392928079069196,
+      "low": -0.03288487963420662,
+      "high": 0.04237851556090017,
       "valid_replicates": 10000
     },
     "f1": {
       "estimate": 0.04323131972710881,
-      "low": -0.01572643261647607,
-      "high": 0.12982552917359827,
+      "low": -0.08629036965002351,
+      "high": 0.1413411438891518,
       "valid_replicates": 10000
     },
     "log_loss": {
-      "estimate": -0.1773406541651441,
-      "low": -0.3610452165474388,
-      "high": -0.050631145128095564,
+      "estimate": -0.17734062089652303,
+      "low": -0.3698195067301794,
+      "high": 0.10151334611901852,
       "valid_replicates": 10000
     }
   },
-  "difference_definition": "Nose model minus perimeter-only model; negative log-loss difference is favorable.",
-  "superiority_definition": "Strictly better in a paired bootstrap sample: higher precision/recall/NPV/F1 or lower log loss. Frequency = better / valid paired replicates; ties count as neither wins nor losses. Bootstrap frequency is not a Bayesian probability of population superiority or a calibrated p-value.",
   "superiority": {
     "precision": {
-      "better_replicates": 9924,
+      "better_replicates": 8471,
       "tied_replicates": 0,
-      "worse_replicates": 76,
+      "worse_replicates": 1529,
       "valid_replicates": 10000,
       "undefined_replicates": 0,
-      "better_frequency": 0.9924
+      "better_frequency": 0.8471
     },
     "recall": {
-      "better_replicates": 5992,
-      "tied_replicates": 93,
-      "worse_replicates": 3915,
+      "better_replicates": 3566,
+      "tied_replicates": 106,
+      "worse_replicates": 6328,
       "valid_replicates": 10000,
       "undefined_replicates": 0,
-      "better_frequency": 0.5992
+      "better_frequency": 0.3566
     },
     "negative_predictive_value": {
-      "better_replicates": 7570,
+      "better_replicates": 5064,
       "tied_replicates": 0,
-      "worse_replicates": 2430,
+      "worse_replicates": 4936,
       "valid_replicates": 10000,
       "undefined_replicates": 0,
-      "better_frequency": 0.757
+      "better_frequency": 0.5064
     },
     "f1": {
-      "better_replicates": 9022,
+      "better_replicates": 6003,
       "tied_replicates": 0,
-      "worse_replicates": 978,
+      "worse_replicates": 3997,
       "valid_replicates": 10000,
       "undefined_replicates": 0,
-      "better_frequency": 0.9022
+      "better_frequency": 0.6003
     },
     "log_loss": {
-      "better_replicates": 9992,
+      "better_replicates": 8641,
       "tied_replicates": 0,
-      "worse_replicates": 8,
+      "worse_replicates": 1359,
       "valid_replicates": 10000,
       "undefined_replicates": 0,
-      "better_frequency": 0.9992
+      "better_frequency": 0.8641
     }
-  }
+  },
+  "reference_verification": {
+    "maximum_absolute_tolerance": 1e-06,
+    "differences_from_original_metrics": {
+      "none": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "negative_predictive_value": 0.0,
+        "f1": 0.0,
+        "log_loss": 6.923220441379385e-09
+      },
+      "latent_nose_v1": {
+        "precision": 0.0,
+        "recall": 1.1102230246251565e-16,
+        "negative_predictive_value": 1.1102230246251565e-16,
+        "f1": 0.0,
+        "log_loss": 4.019184152159738e-08
+      }
+    }
+  },
+  "archived_fixed_prediction_bootstrap_sha256": "54868bcad07a51143a6b07061d0ae171f9571265d5ab16053bc9379b1b5ea09e"
 }

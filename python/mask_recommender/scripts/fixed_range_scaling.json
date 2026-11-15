@@ -1,0 +1,41 @@
+{
+  "version": "fixed_range_engineering_v1",
+  "date": "2026-11-15",
+  "units": "mm",
+  "interpretation": "Broad provisional engineering bounds for a sensitivity experiment spanning small children and large adults; not validated population limits or fitted sample extrema.",
+  "ranges": {
+    "face_width": [
+      50,
+      200
+    ],
+    "face_length": [
+      40,
+      180
+    ],
+    "bitragion_subnasale_arc": [
+      100,
+      450
+    ],
+    "nose_protrusion": [
+      0,
+      50
+    ],
+    "nasal_root_breadth": [
+      0,
+      50
+    ],
+    "nose_bridge_height": [
+      0,
+      70
+    ],
+    "mask_perimeter_mm": [
+      100,
+      800
+    ]
+  },
+  "transform": "(x - fixed_min) / (fixed_max - fixed_min)",
+  "outside_policy": "Raise an explicit error; no silent clipping or adjusting limits to held-out results.",
+  "pca": "Refit PCA without whitening on fixed-range-scaled training people. Rescale each PC using analytic extrema over the fixed input unit cube, so PC predictors also stay in [0,1] for in-range inputs.",
+  "classifier": "Original L2 logistic classifier, C=1, linear and squared geometry, mask categories, face-by-mask/perimeter interactions, fixed threshold 0.5. Traditional models retain equal-person training weights; production ARKit retains original row-weighted BCE.",
+  "range_check_note": "Initial mask bound 650 mm rejected two existing rows at 699 mm. Broadened the engineering mask limit to 800 mm before any fits; no facial ranges were changed or outcomes used to select limits."
+}

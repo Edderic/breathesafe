@@ -1,0 +1,33 @@
+Simpler fixed-range traditional/PCA features — November 15, 2026
+
+Exploratory comparison: same 7 people, 421 tests, leave one person out. Fixed physical bounds, C=1, equal-person training weights, threshold 0.5. PCA and category encodings fit only on training people. No recipe selection using outer labels, nested tuning or new bootstrap was performed.
+
+Options
+1. Linear additive: face measurements or PCs + mask categories + mask perimeter. No squares or interactions.
+2. Quadratic additive: also add squared face/PC terms and squared mask perimeter; no interactions.
+3. Shared perimeter interactions: option 2 plus face/PC basis x mask perimeter; remove all face-by-category interactions.
+4. Full interactions: existing slide 12 baseline.
+
+Test-weighted results (predictor counts exclude the additional intercept):
+Model | Recipe | Predictors | Log loss | Precision | Recall | NPV | F1
+traditional_direct | linear_additive | 64–68 | 0.826 | 25.0% | 28.7% | 71.6% | 0.267
+traditional_direct | quadratic_additive | 71–75 | 0.902 | 23.9% | 27.8% | 71.1% | 0.257
+traditional_direct | shared_perimeter_interactions | 83–87 | 0.914 | 23.9% | 27.8% | 71.1% | 0.257
+traditional_direct | full_interactions | 767–819 | 0.988 | 23.5% | 27.8% | 70.9% | 0.255
+traditional_pca3 | linear_additive | 61–65 | 0.700 | 33.1% | 38.3% | 75.3% | 0.355
+traditional_pca3 | quadratic_additive | 65–69 | 0.718 | 32.4% | 38.3% | 75.1% | 0.351
+traditional_pca3 | shared_perimeter_interactions | 71–75 | 0.723 | 32.4% | 38.3% | 75.1% | 0.351
+traditional_pca3 | full_interactions | 413–441 | 0.768 | 30.6% | 38.3% | 74.4% | 0.340
+
+The full-interaction baseline reproduces the frozen slide 12 metrics within 1e-12. Equal-person metrics are also included in the JSON.
+
+Interpretation
+Fully additive logits f(face)+g(mask) give identical relative mask rankings to every person within one fitted model, even with squared main effects. The face contribution cancels when comparing masks. They remain useful ablations of probability prediction, but do not implement personalized mask ordering. Shared perimeter interactions permit some mask-size-dependent ordering with dramatically fewer coefficients. Category indicators still contribute dozens of parameters.
+
+Simplification improves probability loss but does not resolve child extrapolation: linear direct/PCA produce 78/64 false positives among the child case’s 130 negative tests, versus 83/73 for the full fixed-range models and 5.7 on average for production ARKit. The child fold cannot estimate recall because it has no positive labels.
+
+Next comparison: retain shared face-by-perimeter interactions as a compact personalized candidate; select its regularization inside training-person-only folds, with additive models as ablations. Use an outer person-held-out comparison to assess the complete selection procedure. Bootstrap any final chosen procedure with refitting, rather than attaching the old full-interaction intervals to these new recipes. Same-cohort exploration remains a limitation; independent additional people are needed.
+
+Code: python/mask_recommender/scripts/simple_fixed_range_comparison.py
+Evidence: simple-fixed-range-comparison.json
+The presentation is unchanged by this initial experiment.

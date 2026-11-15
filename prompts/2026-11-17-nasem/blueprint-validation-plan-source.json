@@ -1,0 +1,17 @@
+{
+  "proposal_date": "2026-11-09",
+  "status": "Discussion draft; proposed scope, not funded or completed validation",
+  "detailed_proposal_sha256": "577527b1048a019db21ae4a77586ad43496c0af90120e630f08878e9abf81333",
+  "concept_note_sha256": "21650b24f4cc479f2826ee2a00fe3128d91925a33b9f6eaccfcc3dc6f7e68be4",
+  "source_directory": "/Users/eddericugaddan/code/career/blueprint-biosecurity-2026-11",
+  "sections": [
+    "5. Work plan and deliverables",
+    "6. Milestones and funding decisions"
+  ],
+  "geometry_pilot_adults": 20,
+  "geometry_total_adults": 120,
+  "geometry_development_adults_including_pilot": 60,
+  "geometry_untouched_test_adults": 60,
+  "prospective_fit_pilot_separate_adults": 60,
+  "pediatric_validation": "Separate scope required"
+}

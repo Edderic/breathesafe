@@ -1,51 +1,96 @@
-Paired person-cluster bootstrap — November 14, 2026
+Paired person-cluster bootstrap with classifier refitting — November 15, 2026
 
-Inputs: six saved out_of_fold_predictions.json files for variants none and
-latent_nose_v1, seeds 42/43/44. Their comparison-report hashes match the
-previously frozen recommender-evidence.json. Private prediction files stay in
-tmp/retired-nasem-worktree-cache/recommender-style-nose-review; only aggregate
-intervals, source hashes and method metadata are included in this deck.
+Purpose
+Slide 9 and appendix slide 32 now include variation in the people supplying
+classifier training data. This replaces the earlier bootstrap that merely
+resampled frozen held-out predictions. The earlier evidence and methods remain
+archived as recommender-fixed-prediction-bootstrap-evidence.json and
+recommender-fixed-prediction-bootstrap-methods.txt.
 
-49 people, 1,086 held-out tests. Match observations by person/test/mask/label
-across models and initializations. Require unique test identities and one
-held-out fold per person per prediction file. Reproduce all five point metrics
-in recommender-evidence.json to absolute tolerance 1e-12 before bootstrapping.
+Data and paired resampling
+Use the same private prepared training frame: 49 people, 1,086 observations.
+Draw 49 original people with replacement 10,000 times, RNG seed 20261114.
+A selected person's complete set of tests receives that person's multiplicity.
+Apply the identical draw to perimeter-only and perimeter-plus-nose models and
+all three initializations. All copies of an original person stay together in
+that person's original held-out fold. No copy leaks from test into training.
 
-Draw 49 people with replacement, 10,000 times, RNG seed 20261114 (NumPy
-multinomial participant multiplicities, equivalent to uniform person draws).
-Retain every selected person's tests, including multiplicity. Both models and
-all initializations use the same participant draw. Preserve test weighting:
-compute pooled confusion ratios and mean natural-log loss per initialization,
-then average the three metric values. Do not ensemble probabilities or treat
-initializations as independent samples. Classification threshold >=0.5;
-log-loss correct-class probability clipped to [1e-15, 1-1e-15].
+Retain the original five GroupKFold assignments and category catalog. For each
+draw and fold, independently initialize and train both classifiers with seeds
+42/43/44 plus the one-based fold number. Use the production architecture,
+200 full-batch Adam epochs, learning rate 0.01, no class reweighting, and the
+original nose-offset regularization. Training binary cross entropy is weighted
+by participant multiplicity and divided by the total resampled training-row
+count. This equals explicitly duplicating each selected person's rows.
 
-Pointwise percentile intervals: linear-interpolated 2.5th and 97.5th percentiles.
-Paired difference = nose minus perimeter. Positive precision/recall/NPV/F1
-and negative log-loss differences are favorable. Percentage metrics' differences
-are shown in percentage points. Undefined ratio replicates are excluded per
-metric; all 10,000 replicates were valid for every metric in this run.
+There are 10,000 x 5 x 2 x 3 = 300,000 independent bootstrap classifier fits,
+plus 30 original-cohort reference fits. Computational batching gives each fit
+its own parameters, optimizer moments and loss; it does not share learned
+parameters or average gradients across fits. Seed banks and hyperparameters
+remain fixed. Private batch caches make an interrupted run resumable; they do
+not replace training with the original frozen out-of-fold predictions.
 
-Conditional on existing fitted models, folds and preprocessing. No bootstrap
-retraining or fold selection. Shared training data across CV fits, global
-pre-CV imputation, convenience sampling and mixed label sources remain
-limitations. Masks are held as observed rather than a second bootstrap cluster.
-No simultaneous-coverage or multiplicity correction. This does not establish
-population generalization or fix bias in the original experiment.
+Evaluation
+Pool weighted held-out observations from all five folds within each model and
+initialization, compute each metric, then average the three metric values.
+Do not average probabilities first or count seeds as independent datasets.
+Classification threshold: probability >=0.5. Compute natural-log loss after
+clipping the correct-class probability to [1e-15, 1-1e-15].
 
-Reproduce (local NumPy environment; no network or model training):
-python scripts/presentations/bootstrap_recommender.py \
-  tmp/retired-nasem-worktree-cache/recommender-style-nose-review
+Report linear-interpolated 2.5th/97.5th percentiles as pointwise 95% bootstrap
+intervals. Paired difference is nose minus perimeter: positive precision,
+recall, NPV and F1 or negative log loss favors the nose model. Count strict
+wins, losses and ties (absolute tolerance 1e-12, no relative tolerance).
+Exclude undefined paired metrics and report their counts and denominators.
+The completed aggregate JSON contains every metric's intervals and win counts.
+
+Verification
+Four focused pytest checks verify batched refitting against explicit production
+training on repeated rows for both architectures, independence from other
+models in a computational batch, weighted metrics, and superiority/tie rules.
+Production comparisons use 200 epochs. The unresampled reference reproduces
+the original classification metrics exactly to rounding; log-loss differences
+are below 5e-8 from float32 operation ordering. Deck validation allows 1e-6.
+
+Limitations
+This is full CLASSIFIER retraining, not end-to-end imputation refitting.
+The inherited global ARKit-imputation regression and prepared facial inputs
+remain fixed. Its pre-CV fitting remains an important generalization limitation.
+Original fold assignments and the known category catalog remain fixed too.
+These intervals capture resampled training-participant multiplicities, not
+new fold selection, independent imputation training, hyperparameter selection,
+or new random initialization draws. Three prescribed seeds are not three
+independent datasets.
+
+CV training sets overlap. Bootstrap clusters do not remove that dependence.
+Convenience sampling, mixed fit-label sources and repeated person-mask tests
+remain limitations. Masks/families are held as observed, not independently
+resampled. No simultaneous-coverage or multiplicity adjustment is applied.
+Bootstrap win frequencies are not Bayesian posterior probabilities of model
+superiority or calibrated hypothesis-test p-values. This remains exploratory
+internal evidence, not a substitute for prospective participant validation.
+
+Reproduction (local files; no network or uploads)
+env PYTHONPATH=python OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 \
+  tmp/retired-nasem-worktree-cache/recommender-evaluation-venv/bin/python \
+  -m mask_recommender.scripts.bootstrap_nose_refit \
+  --frame tmp/retired-nasem-worktree-cache/recommender-nose-review/models/20261112155020/training_frame.json \
+  --output tmp/nose-full-refit --replicates 10000 --workers 8 --batch 64
 
 Verification:
-python scripts/tests/test_recommender_bootstrap.py
+env PYTHONPATH=python \
+  tmp/retired-nasem-worktree-cache/recommender-evaluation-venv/bin/python \
+  -m pytest -q python/mask_recommender/tests/test_nose_refit_bootstrap.py
 
-Frozen output: recommender-bootstrap-evidence.json
+Copy the completed report.json to recommender-bootstrap-evidence.json only
+after verifying the attempted draw count, reference metrics and source hashes.
+Private inputs and cached scores stay in ignored local storage. Public evidence
+contains aggregate metrics and source hashes only.
 
-Strict superiority frequencies: count paired differences >0 for precision,
-recall, NPV and F1, or <0 for log loss; divide wins by valid paired replicates.
-Exact-zero ties remain in the denominator and count as neither wins nor losses.
-Undefined draws are reported and excluded; none occurred in this run. Counts
-and frequencies are in the superiority section of the aggregate JSON. These
-are empirical bootstrap frequencies, not Bayesian posterior probabilities of
-population superiority or calibrated hypothesis-test p-values.
+Completed results
+All 10,000 paired draws were evaluable for every reported metric.
+precision: nose strict wins 8471/10000 (84.71%); ties 0; difference 0.075699, 95% CI [-0.074270, 0.168606].
+recall: nose strict wins 3566/10000 (35.66%); ties 106; difference 0.013382, 95% CI [-0.130468, 0.143350].
+negative_predictive_value: nose strict wins 5064/10000 (50.64%); ties 0; difference 0.009465, 95% CI [-0.032885, 0.042379].
+f1: nose strict wins 6003/10000 (60.03%); ties 0; difference 0.043231, 95% CI [-0.086290, 0.141341].
+log_loss: nose strict wins 8641/10000 (86.41%); ties 0; difference -0.177341, 95% CI [-0.369820, 0.101513].

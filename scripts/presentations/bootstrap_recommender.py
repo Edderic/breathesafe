@@ -137,6 +137,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('source', type=Path)
     parser.add_argument('--evidence', type=Path, default=Path('prompts/2026-11-17-nasem/recommender-evidence.json'))
-    parser.add_argument('--output', type=Path, default=Path('prompts/2026-11-17-nasem/recommender-bootstrap-evidence.json'))
+    parser.add_argument('--output', type=Path, default=Path('prompts/2026-11-17-nasem/recommender-fixed-prediction-bootstrap-evidence.json'))
     args = parser.parse_args()
     run(args.source, args.evidence, args.output)
