@@ -4,6 +4,13 @@ Canonical deck: prompts/2026-11-17-nasem on main. The former
 nasem-prototype-update worktree has been consolidated; edit this deck only.
 31 slides: 19 main slides (570 seconds), plus 12 optional backups.
 
+Live HTML: https://www.breathesafe.xyz/presentations/2026-11-nasem.html
+Live PDF: https://www.breathesafe.xyz/presentations/2026-11-nasem.pdf
+
+After rebuilding and validating, refresh the published copies before deployment:
+  cp prompts/2026-11-17-nasem/presentation.html public/presentations/2026-11-nasem.html
+  cp prompts/2026-11-17-nasem/presentation.pdf public/presentations/2026-11-nasem.pdf
+
 Open presentation.html directly for offline use. presentation.pdf is the PDF
 export; speaker-notes.txt contains the timed script. Arrow keys, Home/End,
 visible controls and All slides are supported.
