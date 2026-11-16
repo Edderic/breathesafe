@@ -13,11 +13,10 @@ def add_slides(add, screenshot):
     photo_row='<div class="capture-photo-row">'+''.join('<figure>'+screenshot(photo['file'].removeprefix('assets/'),photo['caption']+' captured with a MacBook Pro camera.','capture-photo')+'<figcaption>'+photo['caption']+'</figcaption></figure>' for photo in source_photos['images'])+'</div>'
     add('NEW / CAMERA PROTOTYPE', 'Photos now produce a physically scaled digital headform.',
         '<p class="capture-photo-label">Source photos · MacBook Pro camera · 4 of 61 capture views</p>'+photo_row+
-        '<div class="prototype-figures"><figure>'+screenshot('prototype/raw-headform.jpg','Actual neck-inclusive photogrammetry reconstruction.','prototype-image')+
-        '<figcaption>Raw photogrammetry reconstruction</figcaption></figure><figure>'+screenshot('prototype/smoothed-headform.jpg','Same reconstructed head after Gaussian smoothing, including the jaw and upper neck.','prototype-image')+
+        '<div class="prototype-figures"><figure><div class="headform-frame">'+screenshot('prototype/raw-headform.jpg','Actual neck-inclusive photogrammetry reconstruction.','prototype-image')+'</div>'+
+        '<figcaption>Raw photogrammetry reconstruction</figcaption></figure><figure><div class="headform-frame">'+screenshot('prototype/smoothed-headform.jpg','Same reconstructed head after Gaussian smoothing, including the jaw and upper neck.','prototype-image')+'</div>'+
         '<figcaption>Smoothed surface · same coordinates</figcaption></figure></div>'+
-        '<p class="takeaway">61 ordinary-camera photos → registered 3D surface → supported smoothing → tape-based scale in millimeters.</p>'+
-        '<p class="muted">MacBook Pro camera; head still, camera moving. Eye-level and lower views retain upper-neck coverage; Android validation remains ahead.</p>',
+        '<p class="takeaway">Registered surface → supported smoothing → tape scale (mm). Eye-level + lower views retain jaw/upper neck; Android validation remains ahead.</p>',
         'Since the October draft, the camera-only path has become a working local prototype. This is an actual reconstructed head, not a fitted FLAME shape. '
         'The photos were taken using a MacBook Pro camera. The row shows four original source views from the same 61-photo capture, which includes the jaw and upper neck. Gaussian volume smoothing reduces graininess while source-photo checks remain available. '
         'A measured bitragion–subnasale tape arc sets physical scale; it is not inferred from an average model face. '
@@ -27,7 +26,7 @@ def add_slides(add, screenshot):
     add('NEW / LANDMARKS & DISTANCES', 'Automated landmark placements support chords and surface routes.',
         '<div class="prototype-figures"><figure>'+screenshot('prototype/landmark-widths.jpg','Nose-wing and cheekbone contact candidates on the actual reconstructed head, joined by straight width chords.','prototype-image')+
         '<figcaption>Straight chords · nose and cheekbone widths</figcaption></figure><figure>'+screenshot('prototype/bifold-cup-route.jpg','Proposed bifold or cup contact arc on the reconstructed face, highlighted in orange.','prototype-image')+'<figcaption>Proposed bifold / cup arc</figcaption></figure><figure>'+screenshot('prototype/under-chin-route.jpg','Trifold or duckbill surface-route draft on the reconstructed head, seen from below.','prototype-image')+
-        '<figcaption>Surface-route draft · inspect below the jaw</figcaption></figure></div>'+
+        '<figcaption>Proposed Trifold/Duckbill arc</figcaption></figure></div>'+
         '<p class="takeaway">Dense multi-photo correspondences propose surface-attached points. Original-photo overlays support anatomical review.</p>'+
         '<p class="muted">A chord joins two 3D endpoints. A surface arc follows the mesh through controls. Named landmarks and route controls retain their attachments.</p>',
         'The prototype now proposes points using existing dense multi-photo correspondences, triangulates them with the registered cameras, and checks support on the raw surface before attaching them to the smoothed one. '

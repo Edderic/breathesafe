@@ -1,0 +1,21 @@
+{
+  "updated": "2026-11-15",
+  "display_stroke_width_in_canvas_pixels": 8,
+  "endpoint_radius_in_canvas_pixels": 7,
+  "method": "Saved world paths reprojected with the original viewer orthographic transform, drawn on a transparent canvas for consistent stroke width. Original meshes, camera poses, path coordinates and measurements unchanged.",
+  "renderer": "scripts/presentations/render_nasem_prototype.cjs --capture-routes",
+  "assets": [
+    {
+      "file": "assets/prototype/landmark-widths.jpg",
+      "sha256": "2c7053167b32c26b0002ddcada9a41467efffc1d7b907ba63b7fb58bb4ea5156"
+    },
+    {
+      "file": "assets/prototype/bifold-cup-route.jpg",
+      "sha256": "3bcd86f8a279ea38a4c33b1b2e8bb74161c3e7d334a37716f3547ec9451bed06"
+    },
+    {
+      "file": "assets/prototype/under-chin-route.jpg",
+      "sha256": "91eff33f9f3a0ad3136781c7fa1479b91c0ada2b338eaf9aace91818a0737720"
+    }
+  ]
+}

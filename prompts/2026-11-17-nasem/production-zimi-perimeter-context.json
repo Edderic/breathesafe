@@ -1,0 +1,69 @@
+{
+  "snapshot_date": "2026-11-15",
+  "source": "Production Breathesafe PostgreSQL masks catalog, queried read-only via Heroku",
+  "field": "masks.perimeter_mm",
+  "products": [
+    {
+      "name": "Zimi 95S",
+      "mask_ids": [
+        234,
+        235
+      ],
+      "perimeter_mm": 300,
+      "variants": "Headloop and earloop"
+    },
+    {
+      "name": "Zimi 7711",
+      "mask_ids": [
+        13,
+        14,
+        15,
+        16
+      ],
+      "perimeter_mm": 350,
+      "variants": "Earloop/headband; valve/no valve"
+    },
+    {
+      "name": "Zimi ZM9233",
+      "mask_ids": [
+        332
+      ],
+      "perimeter_mm": 364,
+      "variants": "Headstraps"
+    },
+    {
+      "name": "Zimi 8210",
+      "mask_ids": [
+        706
+      ],
+      "perimeter_mm": null,
+      "variants": "Head straps, valved, regular"
+    },
+    {
+      "name": "Zimi B95-XL",
+      "mask_ids": [
+        727
+      ],
+      "perimeter_mm": null,
+      "variants": "Headstrap"
+    }
+  ],
+  "adjacent_recorded_gaps_mm": [
+    {
+      "from_product": "Zimi 95S",
+      "to_product": "Zimi 7711",
+      "gap_mm": 50
+    },
+    {
+      "from_product": "Zimi 7711",
+      "to_product": "Zimi ZM9233",
+      "gap_mm": 14
+    }
+  ],
+  "limitations": [
+    "Catalog perimeter values are not independently validated reference measurements.",
+    "The closest observed gap is context for a perimeter error budget, not a universal fit tolerance.",
+    "Width/length validation errors cannot be transferred directly to contact-perimeter error.",
+    "B95-XL has no recorded perimeter, including its sole fit-family entry."
+  ]
+}

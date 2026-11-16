@@ -1,0 +1,231 @@
+{
+  "source": "prompts/zimi-sizing.md",
+  "source_sha256": "403dea4c669d986774742151b94f4d32bc2d65012333c2a1188bcb71726529bf",
+  "units": "mm",
+  "procedure": "User confirmed November 15, 2026: repeated readings of the same physical mask/frame per size, following the same perimeter and nose paths as production measurements.",
+  "records": [
+    {
+      "size": "XS",
+      "model": "95S",
+      "perimeter": {
+        "n": 5,
+        "readings": [
+          320.0,
+          312.0,
+          314.0,
+          314.0,
+          314.0
+        ],
+        "median": 314.0,
+        "mean": 314.8,
+        "sample_sd": 3.03315017762062,
+        "minimum": 312.0,
+        "maximum": 320.0,
+        "observed_range": 8.0
+      },
+      "nose": {
+        "n": 5,
+        "readings": [
+          28.0,
+          27.0,
+          33.0,
+          30.0,
+          30.0
+        ],
+        "median": 30.0,
+        "mean": 29.6,
+        "sample_sd": 2.302172886644268,
+        "minimum": 27.0,
+        "maximum": 33.0,
+        "observed_range": 6.0
+      },
+      "production_perimeter_mm": 300,
+      "median_minus_production_mm": 14.0
+    },
+    {
+      "size": "S",
+      "model": "7711",
+      "perimeter": {
+        "n": 7,
+        "readings": [
+          360.0,
+          368.0,
+          366.0,
+          390.0,
+          380.0,
+          368.0,
+          364.0
+        ],
+        "median": 368.0,
+        "mean": 370.85714285714283,
+        "sample_sd": 10.447145885018411,
+        "minimum": 360.0,
+        "maximum": 390.0,
+        "observed_range": 30.0
+      },
+      "nose": {
+        "n": 5,
+        "readings": [
+          46.0,
+          50.0,
+          44.0,
+          50.0,
+          50.0
+        ],
+        "median": 50.0,
+        "mean": 48.0,
+        "sample_sd": 2.8284271247461903,
+        "minimum": 44.0,
+        "maximum": 50.0,
+        "observed_range": 6.0
+      },
+      "production_perimeter_mm": 350,
+      "median_minus_production_mm": 18.0
+    },
+    {
+      "size": "M",
+      "model": "9233",
+      "perimeter": {
+        "n": 5,
+        "readings": [
+          392.0,
+          388.0,
+          394.0,
+          390.0,
+          398.0
+        ],
+        "median": 392.0,
+        "mean": 392.4,
+        "sample_sd": 3.847076812334269,
+        "minimum": 388.0,
+        "maximum": 398.0,
+        "observed_range": 10.0
+      },
+      "nose": {
+        "n": 5,
+        "readings": [
+          60.0,
+          60.0,
+          60.0,
+          64.0,
+          60.0
+        ],
+        "median": 60.0,
+        "mean": 60.8,
+        "sample_sd": 1.7888543819998317,
+        "minimum": 60.0,
+        "maximum": 64.0,
+        "observed_range": 4.0
+      },
+      "production_perimeter_mm": 364,
+      "median_minus_production_mm": 28.0
+    },
+    {
+      "size": "L",
+      "model": "8210",
+      "perimeter": {
+        "n": 5,
+        "readings": [
+          410.0,
+          404.0,
+          416.0,
+          414.0,
+          420.0
+        ],
+        "median": 414.0,
+        "mean": 412.8,
+        "sample_sd": 6.099180272790762,
+        "minimum": 404.0,
+        "maximum": 420.0,
+        "observed_range": 16.0
+      },
+      "nose": {
+        "n": 5,
+        "readings": [
+          60.0,
+          60.0,
+          62.0,
+          64.0,
+          66.0
+        ],
+        "median": 62.0,
+        "mean": 62.4,
+        "sample_sd": 2.6076809620810595,
+        "minimum": 60.0,
+        "maximum": 66.0,
+        "observed_range": 6.0
+      },
+      "production_perimeter_mm": null,
+      "median_minus_production_mm": null
+    },
+    {
+      "size": "XL",
+      "model": "B95-XL",
+      "perimeter": {
+        "n": 5,
+        "readings": [
+          420.0,
+          424.0,
+          410.0,
+          410.0,
+          396.0
+        ],
+        "median": 410.0,
+        "mean": 412.0,
+        "sample_sd": 10.862780491200215,
+        "minimum": 396.0,
+        "maximum": 424.0,
+        "observed_range": 28.0
+      },
+      "nose": {
+        "n": 6,
+        "readings": [
+          44.0,
+          46.0,
+          46.0,
+          56.0,
+          50.0,
+          50.0
+        ],
+        "median": 48.0,
+        "mean": 48.666666666666664,
+        "sample_sd": 4.320493798938574,
+        "minimum": 44.0,
+        "maximum": 56.0,
+        "observed_range": 12.0
+      },
+      "production_perimeter_mm": null,
+      "median_minus_production_mm": null
+    }
+  ],
+  "adjacent_perimeter_median_gaps": [
+    {
+      "from_model": "95S",
+      "to_model": "7711",
+      "median_gap_mm": 54.0
+    },
+    {
+      "from_model": "7711",
+      "to_model": "9233",
+      "median_gap_mm": 24.0
+    },
+    {
+      "from_model": "9233",
+      "to_model": "8210",
+      "median_gap_mm": 22.0
+    },
+    {
+      "from_model": "8210",
+      "to_model": "B95-XL",
+      "median_gap_mm": -4.0
+    }
+  ],
+  "sd_definition": "Sample standard deviation with n\u22121 denominator.",
+  "limitations": [
+    "Descriptive within-specimen repeatability, not accuracy against independent ground truth or manufacturing variation.",
+    "Numbers of perimeter and nose readings differ for some models; readings are not treated as matched pairs.",
+    "No readings were discarded or edited; no confidence intervals inferred from these small repeated-reading sets.",
+    "Production values are a November 15 read-only catalog snapshot and were not changed.",
+    "Mask arc variability does not establish reconstruction accuracy or an acceptable fit tolerance."
+  ]
+}

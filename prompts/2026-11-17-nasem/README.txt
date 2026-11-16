@@ -2,7 +2,7 @@ NASEM presentation — November 17, 2026
 
 Canonical deck: prompts/2026-11-17-nasem on main. The former
 nasem-prototype-update worktree has been consolidated; edit this deck only.
-34 slides: 20 main slides (600 seconds), plus 14 optional backups.
+31 slides: 19 main slides (570 seconds), plus 12 optional backups.
 
 Open presentation.html directly for offline use. presentation.pdf is the PDF
 export; speaker-notes.txt contains the timed script. Arrow keys, Home/End,
@@ -43,28 +43,26 @@ Main slides:
 13–15: Neck-inclusive photogrammetry, attached landmarks/routes, caliper checks.
 16: Proposed pipeline validation plan, drawing on the Blueprint discussion draft.
 17: Acknowledgements and contact.
-18–20: Capture approaches, one-person ARKit/caliper check, anatomical definitions.
+18–19: Capture approaches and one-person ARKit/caliper check.
 
 Appendix:
-21: Complementary scope alongside NIOSH facial-measurement work.
-22: Synthetic-face/CNN development plan, not a working detector.
-23: Physical scale and projection.
-24: Separate 49-person Top-1/3/5 comparison, including Top-1 tradeoff.
-25: Six traditional predictors, mask inputs, preprocessing and fitting recipe.
-26: Traditional/PCA linear and squared terms, interactions, unconstrained signs.
-27: Historical N99→N95 conversion scatter with censored Bayesian trend and
+20: Physical scale and projection.
+21: Separate 49-person Top-1/3/5 comparison, including Top-1 tradeoff.
+22: Six traditional predictors, mask inputs, preprocessing and fitting recipe.
+23: Traditional/PCA linear and squared terms, interactions, unconstrained signs.
+24: N99→N95 conversion equations, implementation adjustments and credit to
+    Aaron Collins’s MaskNerd spreadsheet for normal-breathing filtration data.
+25: Historical N99→N95 conversion scatter with censored Bayesian trend and
     distinct 95% credible and predictive intervals. One wearer, 24 mask aggregates;
     12 aggregates containing assigned values excluded. Not a recommender test.
-28: N99→N95 conversion equations, implementation adjustments and credit to
-    Aaron Collins’s MaskNerd spreadsheet for normal-breathing filtration data.
-29: Seal-check questionnaire decision rules: failures, not-a-fail, incomplete
+26: Seal-check questionnaire decision rules: failures, not-a-fail, incomplete
     answers and their asymmetric training-label mapping.
-30: Per-test vs equal person–mask-pair rates and equal-family style means.
+27: Per-test vs equal person–mask-pair rates and equal-family style means.
     Local DB snapshot: 1,142 tests, 756 pairs, 54 people; 25.7% vs 16.8%.
-31: Automated landmarking and style-curve projection walkthrough.
-32: Paired person-cluster bootstrap differences and method.
-33: Fixed engineering ranges, PCA bounding and full-refit bootstrap method.
-34: Sources and limitations.
+28: Automated landmarking and style-curve projection walkthrough.
+29: Paired person-cluster bootstrap differences and method.
+30: Fixed engineering ranges, PCA bounding and full-refit bootstrap method.
+31: Sources and limitations.
 
 Paired comparison: paired-measurement-evidence.json freezes only aggregates,
 feature lists, training recipes, limitations and source hashes. No participant

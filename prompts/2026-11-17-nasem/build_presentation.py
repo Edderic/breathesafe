@@ -199,9 +199,9 @@ fit_source_rows = ''.join(
     f'<td>{rule}</td></tr>'
     for key, label, rule in [
         ('n95_mode', 'Direct N95-mode', 'Harmonic mean ≥100.'),
-        ('n99_mode', 'N99 → estimated N95', 'Filtration-adjusted estimate; harmonic mean ×2 ≥100.'),
+        ('n99_mode', '<a href="#slide-27">N99 → estimated N95 ↗</a>', 'Filtration-adjusted estimate; harmonic mean ×2 ≥100.'),
         ('qlft', 'Qualitative fit testing', 'All nonblank answers pass; ≥1 explicit pass.'),
-        ('user_seal_check', 'User seal-check reports', 'Failure → negative only; no positive fit label.'),
+        ('user_seal_check', '<a href="#slide-29">User seal-check reports</a>', 'Failure → negative only; no positive fit label.'),
     ]
 )
 fit_testing_photos = json.loads((ROOT / 'fit-testing-photo-sources.json').read_text())
@@ -506,12 +506,14 @@ add('09 / ACKNOWLEDGEMENTS', 'Acknowledgements.',
         for name, contribution in acknowledgements
     ) + '</div>' +
     '<div class="ack-support"><strong>With thanks to Kanro</strong> for early support, and to Aaron Collins / OpenAeros, research participants, and anonymous contributors.</div>' +
-    '<div class="ack-contact"><strong>Seeking funding to continue this research · Open to work and consulting</strong>' +
-    '<span><a href="mailto:info@breathesafe.xyz">info@breathesafe.xyz</a> · <a href="https://www.linkedin.com/in/edderic/">LinkedIn: Edderic Ugaddan</a></span></div>',
+    '<div class="ack-contact"><strong>Seeking funding to continue this research</strong>' +
+    '<span class="ack-opportunities">Open to work and consulting</span>' +
+    '<span class="ack-contact-links"><a href="mailto:edderic@breathesafe.xyz">edderic@breathesafe.xyz</a>'
+    '<a href="https://www.linkedin.com/in/edderic/">LinkedIn: Edderic Ugaddan</a></span></div>',
     'Thank you to Wayne, Mish, Lisa Foreman, Gerard Hughes, and Amanda Abbott for their community fit-testing, mask-selection, and data contributions. '
     'Thank you to Nukit for fit-testing probes, Kanro for early support, and Aaron Collins, OpenAeros, research participants, and anonymous contributors. '
-    'I am seeking funding to continue this research and am open to work and consulting. You can reach me at info@breathesafe.xyz or on LinkedIn.',
-    30, 'Community contributor descriptions: October 2026 Kanro proposal · Nukit probe credit: presenter.')
+    'I am seeking funding to continue this research and am open to work and consulting. You can reach me at edderic@breathesafe.xyz or on LinkedIn.',
+    30, 'Community contributor descriptions: October 2026 Kanro proposal · Nukit probe credit: presenter.', 'acknowledgements-slide')
 
 add('BACKUP / COMPLEMENTARY SCOPE', 'A complementary scope for respirator research.',
     '<p class="complement-intro">MasqFit and Breathesafe add community-use questions alongside NIOSH’s facial-measurement work.</p>'
@@ -679,7 +681,7 @@ add('BACKUP / N95 CONVERSION CHECK', 'A positive trend, with substantial scatter
     'The current production converter pools filtration references differently, so this plot must not be presented as validation of that exact implementation. '
     'Saved data hashes, anonymous paired values, priors and four-chain sampling diagnostics are retained in n95-conversion-evidence.json. '
     'The raw records were not re-fetched and the converter was not changed.',
-    source='Historical source: inferring-n95-mode-fit-factors.ipynb, saved April 2025 comparison · '
+    source='Historical source: <a href="https://github.com/Edderic/breathesafe/blob/main/python/mask_recommender/notebooks/inferring-n95-mode-fit-factors.ipynb">GitHub: inferring-n95-mode-fit-factors.ipynb</a>, saved April 2025 comparison · '
     'Reanalysis: analyze_n95_conversion.py · Censored log-linear Bayesian association; conditional uncertainty, not population validation.',
     cls='conversion-slide')
 
@@ -799,16 +801,16 @@ add('BACKUP / BALANCED PASS RATES', 'Pass rates depend on how observations are w
 
 add('BACKUP / LANDMARKS & CURVE PROJECTION', 'From photo landmarks to surface-attached curves.',
     '<div class="projection-walkthrough"><article><h2>Landmark proposals</h2>'
-    '<p><b>1 · Match across photos.</b> RealDenseFace predicts corresponding face points in each registered source photo; template regions identify nose-wing / cheekbone candidates.</p>'
-    '<p><b>2 · Recover a 3D point.</b> Triangulate camera rays from multiple views; reject inconsistent image matches and observations outside the skin mask.</p>'
-    '<p><b>3 · Attach and review.</b> Check raw-surface proximity and visibility; attach to the smoothed mesh by triangle + within-triangle weights. Review source-photo overlays.</p>' +
+    '<p><b>1 · Match across photos.</b> RealDenseFace matches points across registered photos; template regions propose nose-wing / cheekbone candidates.</p>'
+    '<p><b>2 · Recover a 3D point.</b> Triangulate camera rays; reject inconsistent matches and points outside the skin mask.</p>'
+    '<p><b>3 · Attach and review.</b> Check raw-surface support; attach to smoothed triangles using within-triangle weights, then review photo overlays.</p><div class="projection-step-frame">' +
     screenshot('prototype/landmark-widths.jpg','Automated width-endpoint proposals and chords on the reconstructed head.','projection-step-image') +
-    '</article><article><h2>Bifold / trifold / duckbill curves</h2>'
-    '<p><b>1 · Start with a saved guide.</b> Previously drawn FLAME curves define candidate contact paths: bifold/cup around the chin; trifold/duckbill extend under the jaw.</p>'
-    '<p><b>2 · Project and connect.</b> Align coordinate frames using matched camera positions. Project controls onto nearby eligible reconstructed triangles; route over the surface between controls.</p>'
-    '<p><b>3 · Audit the whole route.</b> Sample along each segment; check skin-mask views, visibility and raw-depth agreement. Keep unsupported gaps flagged rather than bridging them.</p>' +
+    '</div></article><article><h2>Bifold / trifold / duckbill curves</h2>'
+    '<p><b>1 · Start with a saved guide.</b> Previously drawn FLAME curves propose bifold/cup paths around the chin and trifold/duckbill paths under the jaw.</p>'
+    '<p><b>2 · Project and connect.</b> Align matched cameras; project controls onto eligible triangles, then route over the surface.</p>'
+    '<p><b>3 · Audit the whole route.</b> Check visibility, skin masks and raw-depth agreement; flag unsupported gaps rather than bridging them.</p><div class="projection-step-frame">' +
     screenshot('prototype/bifold-cup-route.jpg','Saved bifold guide projected and routed on the reconstructed face.','projection-step-image') +
-    '</article></div>'
+    '</div></article></div>'
     '<p class="projection-result"><strong>Measurements:</strong> straight endpoint chords or supported surface-route lengths × tape-derived mm scale.</p>'
     '<p class="projection-boundary">Automated proposals still need anatomical review. Saved curve guides are not automatically detected mask seals; source-photo agreement is not independent accuracy validation.</p>',
     'The two columns describe related but distinct procedures in the current prototype. RealDenseFace supplies dense per-photo correspondences. '
@@ -951,7 +953,18 @@ add_simple_feature_slide(add)
 slide_order = (list(range(10)) + [simple_feature_index, fixed_range_index] + list(range(13, 16)) +
                [validation_index, 16] + list(range(10, 13)) +
                list(range(17, validation_index-1)) + [fixed_range_index+1, validation_index-1])
-slides = [slides[index] for index in slide_order]
+# Explain the conversion formula before showing its historical comparison plot.
+slide_order[26], slide_order[27] = slide_order[27], slide_order[26]
+# Remove former slides 20–22 and preserve links to the remaining destinations.
+removed_slide_numbers = {20, 21, 22}
+old_to_new = {old: new for new, old in enumerate(
+    (number for number in range(1, len(slide_order) + 1)
+     if number not in removed_slide_numbers), start=1)}
+slide_order = [index for number, index in enumerate(slide_order, start=1)
+               if number not in removed_slide_numbers]
+slides = [re.sub(r'href="#slide-(\d+)"',
+                 lambda match: f'href="#slide-{old_to_new[int(match[1])]}"',
+                 slides[index]) for index in slide_order]
 notes = [notes[index] for index in slide_order]
 durations = [durations[index] for index in slide_order]
 for index in range(len(slides)):
@@ -964,7 +977,9 @@ for index in range(len(slides)):
 template = (ROOT / 'template.html').read_text()
 html = template.replace('<!-- SLIDES -->', '\n'.join(slides))
 (ROOT / 'presentation.html').write_text(html)
-assert sum(durations) == 600
+assert sum(durations) == 570
+talk_seconds = sum(durations)
+talk_time = f'{talk_seconds // 60}:{talk_seconds % 60:02d}'
 main_count = sum(seconds > 0 for seconds in durations)
 elapsed = 0
 checkpoints = []
@@ -974,6 +989,6 @@ for index, seconds in enumerate(durations):
         elapsed += seconds
 (ROOT / 'speaker-notes.txt').write_text(
     'NASEM · November 17, 2026 · NPPTL researchers\n'
-    f'Main talk: slides 1–{main_count}, 600 seconds total. Remaining slides are optional backups.\n'
-    'Slide start times: ' + ' · '.join(checkpoints) + ' · close at 10:00.\n\n' + '\n'.join(notes))
-print(f'Built {len(slides)} slides ({main_count} main + {len(slides)-main_count} backup); main talk: 10:00.')
+    f'Main talk: slides 1–{main_count}, {talk_seconds} seconds total. Remaining slides are optional backups.\n'
+    'Slide start times: ' + ' · '.join(checkpoints) + f' · close at {talk_time}.\n\n' + '\n'.join(notes))
+print(f'Built {len(slides)} slides ({main_count} main + {len(slides)-main_count} backup); main talk: {talk_time}.')
