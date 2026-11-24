@@ -105,9 +105,13 @@ def fit(template, basis, faces, vertex_ids, target, initial, span, exclusions,
         if valid.sum() < max(100, len(v)//3):
             raise ValueError('Insufficient facial overlap outside excluded patches.')
         threshold = min(float(np.quantile(distance[valid], .9)), span*.15)
+        # Retain numerical ties at the quantile boundary. Tiny rounding changes
+        # after unit normalization must not select an asymmetric set of inliers
+        # from coincident or equally distant surface points.
+        trim_tolerance = span*1e-12
         # Do not let global trimming silently discard a consistently displaced
         # high-priority bridge patch. The hard gate and Cauchy loss still apply.
-        valid &= (distance <= threshold) | ((importance > 1) & (distance <= span*.15))
+        valid &= (distance <= threshold+trim_tolerance) | ((importance > 1) & (distance <= span*.15))
         if valid.sum() < 100:
             raise ValueError('Insufficient inlier surface coverage.')
         # Cauchy weights with a fixed, eye-span-relative influence scale.

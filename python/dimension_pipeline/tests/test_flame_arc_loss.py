@@ -51,10 +51,13 @@ class FlameArcTests(unittest.TestCase):
             return fit(template,basis,mesh.faces,np.arange(len(template)),target,
                        (factor,np.eye(3),np.zeros(3)),2*factor,[],50,8,
                        arc_constraints=[{**constraint,'target_length':target_length*factor}],arc_weight=weight)
-        baseline,_=trial(1,0);weighted,row=trial(1,.5);scaled,scaled_row=trial(5,.5)
+        baseline,_=trial(1,0);weighted,row=trial(1,.5)
         self.assertGreater(np.linalg.norm(weighted,axis=1).mean(),np.linalg.norm(baseline,axis=1).mean()+.01)
-        np.testing.assert_allclose(scaled,5*weighted,atol=1e-8)
-        np.testing.assert_allclose(row['shape_coefficients'],scaled_row['shape_coefficients'],atol=1e-8)
+        for factor in (.01,3,5,7):
+            with self.subTest(factor=factor):
+                scaled,scaled_row=trial(factor,.5)
+                np.testing.assert_allclose(scaled,factor*weighted,atol=1e-8)
+                np.testing.assert_allclose(row['shape_coefficients'],scaled_row['shape_coefficients'],atol=1e-8)
 
 
 if __name__=='__main__':unittest.main()
